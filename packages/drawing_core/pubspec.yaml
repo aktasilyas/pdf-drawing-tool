@@ -1,25 +1,13 @@
 name: drawing_core
-description: Core drawing logic, models, and abstractions for the StarNote drawing library. Platform-agnostic business logic.
+description: UI-agnostic drawing engine core for Flutter
 version: 0.1.0
-homepage: https://github.com/your-org/starnote_drawing
-repository: https://github.com/your-org/starnote_drawing/tree/main/packages/drawing_core
-issue_tracker: https://github.com/your-org/starnote_drawing/issues
 
 environment:
-  sdk: ^3.6.0
+  sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
-  # Minimal dependencies - keep this package as pure as possible
-  meta: ^1.15.0
+  meta: ^1.9.0
   equatable: ^2.0.5
-  uuid: ^4.5.1
 
 dev_dependencies:
-  flutter_test:
-    sdk: flutter
   test: ^1.24.0
-  mocktail: ^1.0.4
-
-# This package intentionally has minimal Flutter dependency.
-# Only dart:ui types like Offset, Color, Rect are used.
-# No Flutter widgets or rendering here.
