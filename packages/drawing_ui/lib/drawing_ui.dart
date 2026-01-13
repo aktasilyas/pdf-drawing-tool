@@ -7,6 +7,9 @@
 /// - Tool settings panels for various tools
 library drawing_ui;
 
+// Models
+export 'src/models/tool_type.dart';
+
 // Theme
 export 'src/theme/drawing_theme.dart';
 export 'src/theme/drawing_colors.dart';
@@ -16,6 +19,11 @@ export 'src/screens/drawing_screen.dart';
 
 // Canvas
 export 'src/canvas/mock_canvas.dart';
+export 'src/canvas/drawing_canvas.dart';
+export 'src/canvas/stroke_painter.dart';
+
+// Rendering
+export 'src/rendering/flutter_stroke_renderer.dart';
 
 // Toolbar (Two-row layout)
 export 'src/toolbar/top_navigation_bar.dart';

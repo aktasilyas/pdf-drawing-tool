@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:drawing_core/drawing_core.dart';
 
+import '../models/tool_type.dart';
 import '../providers/drawing_providers.dart';
 
 /// Floating pen box that appears on the canvas.

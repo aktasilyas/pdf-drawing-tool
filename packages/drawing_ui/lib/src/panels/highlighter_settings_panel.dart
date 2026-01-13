@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-// Hide HighlighterSettings from drawing_core as we use our own UI-specific version
-import 'package:drawing_core/drawing_core.dart' hide HighlighterSettings;
 
+import '../models/tool_type.dart';
 import '../providers/drawing_providers.dart';
 import '../widgets/unified_color_picker.dart';
 import 'tool_panel.dart';

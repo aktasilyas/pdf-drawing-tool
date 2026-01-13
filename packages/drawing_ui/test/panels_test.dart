@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/drawing_ui.dart';
-import 'package:drawing_core/drawing_core.dart';
 
 void main() {
   // Set larger test surface to avoid RenderFlex overflow

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:drawing_core/drawing_core.dart';
 
+import '../models/tool_type.dart';
 import '../theme/drawing_theme.dart';
 
 /// A button for selecting a tool in the toolbar.

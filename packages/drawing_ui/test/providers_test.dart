@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/drawing_ui.dart';
-// Hide types that are redefined in drawing_ui for UI state management
-import 'package:drawing_core/drawing_core.dart' hide EraserMode, ShapeType, PenSettings, HighlighterSettings;
 
 void main() {
   group('Current Tool Provider', () {
