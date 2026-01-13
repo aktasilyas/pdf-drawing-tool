@@ -6,6 +6,7 @@ import 'package:drawing_ui/src/rendering/rendering.dart';
 import 'package:drawing_ui/src/providers/document_provider.dart';
 import 'package:drawing_ui/src/providers/history_provider.dart';
 import 'package:drawing_ui/src/providers/tool_style_provider.dart';
+import 'package:drawing_ui/src/providers/canvas_transform_provider.dart';
 
 // =============================================================================
 // DRAWING CANVAS WIDGET
@@ -71,6 +72,20 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
   /// Last recorded point position for distance filtering.
   Offset? _lastPoint;
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // ZOOM/PAN GESTURE TRACKING
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /// Number of active pointers (fingers) on the canvas.
+  /// Used to distinguish between drawing (1 finger) and zoom/pan (2 fingers).
+  int _pointerCount = 0;
+
+  /// Last focal point for scale gesture (zoom/pan center point).
+  Offset? _lastFocalPoint;
+
+  /// Last scale value for calculating zoom delta.
+  double? _lastScale;
+
   /// Exposes the drawing controller for testing.
   @visibleForTesting
   DrawingController get drawingController => _drawingController;
@@ -96,20 +111,27 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  // POINTER EVENT HANDLERS
+  // POINTER EVENT HANDLERS (Single Finger Drawing)
   // ─────────────────────────────────────────────────────────────────────────
   // NO setState here! Only DrawingController.notifyListeners() triggers repaint.
 
-  /// Handles pointer down - starts a new stroke.
+  /// Handles pointer down - starts a new stroke if single finger.
   void _handlePointerDown(PointerDownEvent event) {
+    _pointerCount++;
+
+    // Only draw with single finger
+    if (_pointerCount != 1) return;
+
     final point = _createDrawingPoint(event);
     final style = _getCurrentStyle();
     _drawingController.startStroke(point, style);
     _lastPoint = event.localPosition;
   }
 
-  /// Handles pointer move - adds points to active stroke.
+  /// Handles pointer move - adds points to active stroke if single finger.
   void _handlePointerMove(PointerMoveEvent event) {
+    // Only draw with single finger
+    if (_pointerCount != 1) return;
     if (!_drawingController.isDrawing) return;
 
     // Performance: Skip points that are too close together
@@ -125,25 +147,87 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
 
   /// Handles pointer up - finishes stroke and commits it.
   void _handlePointerUp(PointerUpEvent event) {
-    final stroke = _drawingController.endStroke();
-    if (stroke != null) {
-      // Add stroke via history provider (enables undo/redo)
-      ref.read(historyManagerProvider.notifier).addStroke(stroke);
+    _pointerCount = (_pointerCount - 1).clamp(0, 10);
+
+    // Only commit if we were drawing with single finger
+    if (_pointerCount == 0 && _drawingController.isDrawing) {
+      final stroke = _drawingController.endStroke();
+      if (stroke != null) {
+        // Add stroke via history provider (enables undo/redo)
+        ref.read(historyManagerProvider.notifier).addStroke(stroke);
+      }
     }
     _lastPoint = null;
   }
 
   /// Handles pointer cancel - cancels the current stroke.
   void _handlePointerCancel(PointerCancelEvent event) {
+    _pointerCount = (_pointerCount - 1).clamp(0, 10);
     _drawingController.cancelStroke();
     _lastPoint = null;
   }
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // SCALE GESTURE HANDLERS (Two Finger Zoom/Pan)
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /// Handles scale start - initializes zoom/pan gesture.
+  void _handleScaleStart(ScaleStartDetails details) {
+    // Only handle zoom/pan with 2+ fingers
+    if (details.pointerCount < 2) return;
+    
+    // Cancel any ongoing drawing when zoom/pan starts
+    if (_drawingController.isDrawing) {
+      _drawingController.cancelStroke();
+    }
+    _lastFocalPoint = details.focalPoint;
+    _lastScale = 1.0;
+  }
+
+  /// Handles scale update - applies zoom and pan.
+  void _handleScaleUpdate(ScaleUpdateDetails details) {
+    // Only handle zoom/pan with 2+ fingers
+    if (details.pointerCount < 2) return;
+    
+    final transformNotifier = ref.read(canvasTransformProvider.notifier);
+
+    // Apply zoom (pinch gesture)
+    if (_lastScale != null && details.scale != 1.0) {
+      final scaleDelta = details.scale / _lastScale!;
+      if ((scaleDelta - 1.0).abs() > 0.001) {
+        transformNotifier.applyZoomDelta(scaleDelta, details.focalPoint);
+      }
+    }
+
+    // Apply pan (two finger drag)
+    if (_lastFocalPoint != null) {
+      final panDelta = details.focalPoint - _lastFocalPoint!;
+      if (panDelta.distance > 0.5) {
+        transformNotifier.applyPanDelta(panDelta);
+      }
+    }
+
+    _lastFocalPoint = details.focalPoint;
+    _lastScale = details.scale;
+  }
+
+  /// Handles scale end - finalizes zoom/pan gesture.
+  void _handleScaleEnd(ScaleEndDetails details) {
+    _lastFocalPoint = null;
+    _lastScale = null;
+  }
+
   /// Creates a DrawingPoint from a pointer event.
+  /// Transforms screen coordinates to canvas coordinates based on zoom/pan.
   DrawingPoint _createDrawingPoint(PointerEvent event) {
+    final transform = ref.read(canvasTransformProvider);
+
+    // Convert screen coordinates to canvas coordinates
+    final canvasPoint = transform.screenToCanvas(event.localPosition);
+
     return DrawingPoint(
-      x: event.localPosition.dx,
-      y: event.localPosition.dy,
+      x: canvasPoint.dx,
+      y: canvasPoint.dy,
       pressure: event.pressure.clamp(0.0, 1.0),
       tilt: 0.0,
       timestamp: event.timeStamp.inMilliseconds,
@@ -164,6 +248,8 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     final strokes = ref.watch(activeLayerStrokesProvider);
     // Check if current tool is a drawing tool
     final isDrawingTool = ref.watch(isDrawingToolProvider);
+    // Watch canvas transform for zoom/pan
+    final transform = ref.watch(canvasTransformProvider);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -174,79 +260,90 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
               : widget.height,
         );
 
-        // Listener for raw pointer events (NOT GestureDetector)
-        // Only enable drawing when a drawing tool is selected
+        // Listener first for raw pointer events (drawing)
+        // GestureDetector inside for scale gesture (zoom/pan)
         return Listener(
           onPointerDown: isDrawingTool ? _handlePointerDown : null,
           onPointerMove: isDrawingTool ? _handlePointerMove : null,
           onPointerUp: isDrawingTool ? _handlePointerUp : null,
           onPointerCancel: isDrawingTool ? _handlePointerCancel : null,
-          behavior: HitTestBehavior.opaque,
-          child: ClipRect(
-            child: Stack(
-              children: [
-                // ─────────────────────────────────────────────────────────────
-                // LAYER 1: Background Grid
-                // ─────────────────────────────────────────────────────────────
-                // Never repaints - shouldRepaint always returns false
-                RepaintBoundary(
-                  child: CustomPaint(
-                    size: size,
-                    painter: const GridPainter(),
-                    isComplex: false,
-                    willChange: false,
-                  ),
-                ),
-
-                // ─────────────────────────────────────────────────────────────
-                // LAYER 2: Committed Strokes (from DocumentProvider)
-                // ─────────────────────────────────────────────────────────────
-                // Repaints when strokes are added/removed via provider
-                RepaintBoundary(
-                  child: CustomPaint(
-                    size: size,
-                    painter: CommittedStrokesPainter(
-                      strokes: strokes,
-                      renderer: _renderer,
-                    ),
-                    isComplex: true,
-                    willChange: false,
-                  ),
-                ),
-
-                // ─────────────────────────────────────────────────────────────
-                // LAYER 3: Active Stroke (Live Drawing)
-                // ─────────────────────────────────────────────────────────────
-                // Repaints on every pointer move - must be fast!
-                RepaintBoundary(
-                  child: ListenableBuilder(
-                    listenable: _drawingController,
-                    builder: (context, _) {
-                      return CustomPaint(
+          behavior: HitTestBehavior.translucent,
+          child: GestureDetector(
+            onScaleStart: _handleScaleStart,
+            onScaleUpdate: _handleScaleUpdate,
+            onScaleEnd: _handleScaleEnd,
+            behavior: HitTestBehavior.opaque,
+            child: ClipRect(
+              child: Transform(
+                // Apply zoom and pan transformation
+                transform: transform.matrix,
+                alignment: Alignment.topLeft,
+                child: Stack(
+                  children: [
+                    // ─────────────────────────────────────────────────────────
+                    // LAYER 1: Background Grid
+                    // ─────────────────────────────────────────────────────────
+                    // Never repaints - shouldRepaint always returns false
+                    RepaintBoundary(
+                      child: CustomPaint(
                         size: size,
-                        painter: ActiveStrokePainter(
-                          points: _drawingController.activePoints,
-                          style: _drawingController.activeStyle,
+                        painter: const GridPainter(),
+                        isComplex: false,
+                        willChange: false,
+                      ),
+                    ),
+
+                    // ─────────────────────────────────────────────────────────
+                    // LAYER 2: Committed Strokes (from DocumentProvider)
+                    // ─────────────────────────────────────────────────────────
+                    // Repaints when strokes are added/removed via provider
+                    RepaintBoundary(
+                      child: CustomPaint(
+                        size: size,
+                        painter: CommittedStrokesPainter(
+                          strokes: strokes,
                           renderer: _renderer,
                         ),
-                        isComplex: false,
-                        willChange: true,
-                      );
-                    },
-                  ),
-                ),
+                        isComplex: true,
+                        willChange: false,
+                      ),
+                    ),
 
-                // ─────────────────────────────────────────────────────────────
-                // LAYER 4: Selection Overlay (Phase 4)
-                // ─────────────────────────────────────────────────────────────
-                // Placeholder for future selection features
-                // RepaintBoundary(
-                //   child: CustomPaint(
-                //     size: size,
-                //     painter: SelectionOverlayPainter(),
-                //   ),
-                // ),
-              ],
+                    // ─────────────────────────────────────────────────────────
+                    // LAYER 3: Active Stroke (Live Drawing)
+                    // ─────────────────────────────────────────────────────────
+                    // Repaints on every pointer move - must be fast!
+                    RepaintBoundary(
+                      child: ListenableBuilder(
+                        listenable: _drawingController,
+                        builder: (context, _) {
+                          return CustomPaint(
+                            size: size,
+                            painter: ActiveStrokePainter(
+                              points: _drawingController.activePoints,
+                              style: _drawingController.activeStyle,
+                              renderer: _renderer,
+                            ),
+                            isComplex: false,
+                            willChange: true,
+                          );
+                        },
+                      ),
+                    ),
+
+                    // ─────────────────────────────────────────────────────────
+                    // LAYER 4: Selection Overlay (Phase 4)
+                    // ─────────────────────────────────────────────────────────
+                    // Placeholder for future selection features
+                    // RepaintBoundary(
+                    //   child: CustomPaint(
+                    //     size: size,
+                    //     painter: SelectionOverlayPainter(),
+                    //   ),
+                    // ),
+                  ],
+                ),
+              ),
             ),
           ),
         );
