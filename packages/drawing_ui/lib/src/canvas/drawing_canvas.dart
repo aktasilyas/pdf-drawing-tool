@@ -4,6 +4,7 @@ import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/canvas/stroke_painter.dart';
 import 'package:drawing_ui/src/rendering/rendering.dart';
 import 'package:drawing_ui/src/providers/document_provider.dart';
+import 'package:drawing_ui/src/providers/eraser_provider.dart';
 import 'package:drawing_ui/src/providers/history_provider.dart';
 import 'package:drawing_ui/src/providers/tool_style_provider.dart';
 import 'package:drawing_ui/src/providers/canvas_transform_provider.dart';
@@ -115,23 +116,40 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
   // ─────────────────────────────────────────────────────────────────────────
   // NO setState here! Only DrawingController.notifyListeners() triggers repaint.
 
-  /// Handles pointer down - starts a new stroke if single finger.
+  /// Handles pointer down - starts a new stroke or eraser action if single finger.
   void _handlePointerDown(PointerDownEvent event) {
     _pointerCount++;
 
-    // Only draw with single finger
+    // Only handle with single finger
     if (_pointerCount != 1) return;
 
+    // Check if eraser is active
+    final isEraser = ref.read(isEraserToolProvider);
+    if (isEraser) {
+      _handleEraserDown(event);
+      return;
+    }
+
+    // Drawing mode
     final point = _createDrawingPoint(event);
     final style = _getCurrentStyle();
     _drawingController.startStroke(point, style);
     _lastPoint = event.localPosition;
   }
 
-  /// Handles pointer move - adds points to active stroke if single finger.
+  /// Handles pointer move - adds points to active stroke or erases if single finger.
   void _handlePointerMove(PointerMoveEvent event) {
-    // Only draw with single finger
+    // Only handle with single finger
     if (_pointerCount != 1) return;
+
+    // Check if eraser is active
+    final isEraser = ref.read(isEraserToolProvider);
+    if (isEraser) {
+      _handleEraserMove(event);
+      return;
+    }
+
+    // Drawing mode
     if (!_drawingController.isDrawing) return;
 
     // Performance: Skip points that are too close together
@@ -145,11 +163,18 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     _lastPoint = event.localPosition;
   }
 
-  /// Handles pointer up - finishes stroke and commits it.
+  /// Handles pointer up - finishes stroke or eraser action and commits it.
   void _handlePointerUp(PointerUpEvent event) {
     _pointerCount = (_pointerCount - 1).clamp(0, 10);
 
-    // Only commit if we were drawing with single finger
+    // Check if eraser is active
+    final isEraser = ref.read(isEraserToolProvider);
+    if (isEraser) {
+      _handleEraserUp(event);
+      return;
+    }
+
+    // Drawing mode - commit if we were drawing with single finger
     if (_pointerCount == 0 && _drawingController.isDrawing) {
       final stroke = _drawingController.endStroke();
       if (stroke != null) {
@@ -160,11 +185,75 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     _lastPoint = null;
   }
 
-  /// Handles pointer cancel - cancels the current stroke.
+  /// Handles pointer cancel - cancels the current stroke or eraser action.
   void _handlePointerCancel(PointerCancelEvent event) {
     _pointerCount = (_pointerCount - 1).clamp(0, 10);
-    _drawingController.cancelStroke();
+
+    // Check if eraser is active
+    final isEraser = ref.read(isEraserToolProvider);
+    if (isEraser) {
+      // Cancel eraser session
+      ref.read(eraserToolProvider).endErasing();
+    } else {
+      _drawingController.cancelStroke();
+    }
     _lastPoint = null;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // ERASER EVENT HANDLERS
+  // ─────────────────────────────────────────────────────────────────────────
+  // Eraser uses command batching: single gesture = single undo command
+
+  /// Handles eraser pointer down - starts eraser session.
+  void _handleEraserDown(PointerDownEvent event) {
+    final eraserTool = ref.read(eraserToolProvider);
+    eraserTool.startErasing();
+    _eraseAtPoint(event.localPosition);
+  }
+
+  /// Handles eraser pointer move - erases strokes along the path.
+  void _handleEraserMove(PointerMoveEvent event) {
+    _eraseAtPoint(event.localPosition);
+  }
+
+  /// Handles eraser pointer up - commits all erased strokes as single command.
+  void _handleEraserUp(PointerUpEvent event) {
+    final eraserTool = ref.read(eraserToolProvider);
+    final erasedIds = eraserTool.endErasing();
+
+    if (erasedIds.isNotEmpty) {
+      // Single command for all erased strokes (batching)
+      final document = ref.read(documentProvider);
+      final command = EraseStrokesCommand(
+        layerIndex: document.activeLayerIndex,
+        strokeIds: erasedIds.toList(),
+      );
+      ref.read(historyManagerProvider.notifier).execute(command);
+    }
+  }
+
+  /// Erases strokes at the given screen point.
+  /// Transforms screen coordinates to canvas coordinates.
+  void _eraseAtPoint(Offset point) {
+    // Transform screen coordinates to canvas coordinates (zoom/pan)
+    final transform = ref.read(canvasTransformProvider);
+    final canvasPoint = transform.screenToCanvas(point);
+
+    final strokes = ref.read(activeLayerStrokesProvider);
+    final eraserTool = ref.read(eraserToolProvider);
+
+    final toErase = eraserTool.findStrokesToErase(
+      strokes,
+      canvasPoint.dx,
+      canvasPoint.dy,
+    );
+
+    for (final stroke in toErase) {
+      if (!eraserTool.isAlreadyErased(stroke.id)) {
+        eraserTool.markAsErased(stroke.id);
+      }
+    }
   }
 
   // ─────────────────────────────────────────────────────────────────────────
