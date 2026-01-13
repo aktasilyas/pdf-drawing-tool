@@ -792,12 +792,9 @@ class ToolbarConfigNotifier extends StateNotifier<ToolbarConfig> {
 // =============================================================================
 // HISTORY (UNDO/REDO)
 // =============================================================================
-
-/// Can undo provider.
-final canUndoProvider = StateProvider<bool>((ref) => false);
-
-/// Can redo provider.
-final canRedoProvider = StateProvider<bool>((ref) => false);
+// NOTE: Real HistoryProvider is now in history_provider.dart
+// The historyManagerProvider, canUndoProvider, canRedoProvider,
+// undoCountProvider, and redoCountProvider are exported from there.
 
 // =============================================================================
 // DOCUMENT PROVIDER

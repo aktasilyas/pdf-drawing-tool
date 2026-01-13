@@ -4,6 +4,7 @@ import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/canvas/stroke_painter.dart';
 import 'package:drawing_ui/src/rendering/rendering.dart';
 import 'package:drawing_ui/src/providers/document_provider.dart';
+import 'package:drawing_ui/src/providers/history_provider.dart';
 
 // =============================================================================
 // DRAWING CANVAS WIDGET
@@ -125,8 +126,8 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
   void _handlePointerUp(PointerUpEvent event) {
     final stroke = _drawingController.endStroke();
     if (stroke != null) {
-      // Add stroke to document via provider
-      ref.read(documentProvider.notifier).addStroke(stroke);
+      // Add stroke via history provider (enables undo/redo)
+      ref.read(historyManagerProvider.notifier).addStroke(stroke);
     }
     _lastPoint = null;
   }
