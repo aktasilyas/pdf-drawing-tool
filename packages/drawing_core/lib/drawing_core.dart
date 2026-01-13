@@ -49,6 +49,7 @@ export 'src/tools/drawing_tool.dart';
 export 'src/tools/eraser_tool.dart';
 export 'src/tools/highlighter_tool.dart';
 export 'src/tools/pen_tool.dart';
+export 'src/tools/selection_tool.dart';
 
 // History
 export 'src/history/add_stroke_command.dart';
