@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 
-import 'bounding_box.dart';
-import 'drawing_point.dart';
-import 'stroke_style.dart';
+import 'package:drawing_core/src/models/bounding_box.dart';
+import 'package:drawing_core/src/models/drawing_point.dart';
+import 'package:drawing_core/src/models/stroke_style.dart';
 
 /// Represents a single stroke in a drawing.
 ///

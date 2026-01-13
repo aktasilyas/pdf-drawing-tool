@@ -1,6 +1,4 @@
-import '../models/document.dart';
-import '../models/stroke.dart';
-import 'drawing_command.dart';
+import 'package:drawing_core/src/internal.dart';
 
 /// Command to add a stroke to a layer.
 ///

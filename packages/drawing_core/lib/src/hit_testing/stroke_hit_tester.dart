@@ -1,7 +1,6 @@
 import 'dart:math';
 
-import 'hit_tester.dart';
-import '../models/stroke.dart';
+import 'package:drawing_core/src/internal.dart';
 
 /// Stroke hit testing implementation.
 ///

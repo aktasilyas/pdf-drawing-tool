@@ -45,6 +45,7 @@ export 'src/models/stroke_style.dart';
 // Tools
 export 'src/tools/brush_tool.dart';
 export 'src/tools/drawing_tool.dart';
+export 'src/tools/eraser_tool.dart';
 export 'src/tools/highlighter_tool.dart';
 export 'src/tools/pen_tool.dart';
 

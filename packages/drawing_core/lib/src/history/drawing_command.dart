@@ -1,4 +1,4 @@
-import '../models/document.dart';
+import 'package:drawing_core/src/internal.dart';
 
 /// Abstract base class for all drawing commands.
 ///

@@ -1,5 +1,4 @@
-import '../models/document.dart';
-import 'drawing_command.dart';
+import 'package:drawing_core/src/internal.dart';
 
 /// Manages undo/redo history for drawing operations.
 ///

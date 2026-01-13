@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
-import 'layer.dart';
-import 'stroke.dart';
+import 'package:drawing_core/src/models/layer.dart';
+import 'package:drawing_core/src/models/stroke.dart';
 
 /// Represents a complete drawing document.
 ///

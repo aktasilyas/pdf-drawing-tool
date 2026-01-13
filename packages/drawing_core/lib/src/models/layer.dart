@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
-import 'bounding_box.dart';
-import 'stroke.dart';
+import 'package:drawing_core/src/models/bounding_box.dart';
+import 'package:drawing_core/src/models/stroke.dart';
 
 /// Represents a layer in a drawing document.
 ///

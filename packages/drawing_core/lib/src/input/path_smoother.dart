@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import '../models/drawing_point.dart';
+import 'package:drawing_core/src/internal.dart';
 
 /// Utility class for smoothing and simplifying drawing paths.
 ///

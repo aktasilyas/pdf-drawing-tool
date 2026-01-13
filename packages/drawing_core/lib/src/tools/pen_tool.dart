@@ -1,7 +1,4 @@
-import '../models/drawing_point.dart';
-import '../models/stroke.dart';
-import '../models/stroke_style.dart';
-import 'drawing_tool.dart';
+import 'package:drawing_core/src/internal.dart';
 
 /// A basic pen drawing tool.
 ///
