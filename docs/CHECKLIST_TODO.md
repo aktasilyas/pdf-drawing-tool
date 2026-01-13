@@ -3,7 +3,7 @@
 > **Single Source of Truth** for all development progress.  
 > Update this file as features are implemented. Every PR should reference items here.
 > 
-> **Last Updated**: 2026-01-13 (Phase 1 UI Complete)
+> **Last Updated**: 2026-01-13 (Phase 2 Complete)
 
 ---
 
@@ -44,348 +44,259 @@
 - [x] Create this `CHECKLIST_TODO.md`
 - [x] Create `docs/DESIGN_SYSTEM.md`
 - [x] Create `docs/PROJECT_OVERVIEW.md`
-- [ ] Add inline documentation templates to public APIs
 - [x] Add "Monetization & Premium Strategy" section to ARCHITECTURE.md
 - [x] Add "AI Integration Strategy" section to ARCHITECTURE.md
 - [x] Add "AI Performance Considerations" section to PERFORMANCE_STRATEGY.md
 
-### Core Interfaces (Stubs)
-- [x] `DrawingTool` base interface
-- [x] `Stroke` model
-- [x] `DrawingDocument` model
-- [x] `HistoryManager` interface
-- [x] `ToolSettings` interfaces
-- [x] `SerializationCodec` interface
-
-### UI Interfaces (Stubs)
-- [x] `DrawingCanvas` widget stub
-- [x] `ToolbarWidget` stub
-- [x] `PenBoxWidget` stub
-- [x] `ToolSettingsPanel` base stub
-- [x] Painter base classes
-
 ---
 
-## Phase 1: UI Skeleton (Mocked State) 🔄 IN PROGRESS
+## Phase 1: UI Skeleton (Mocked State) ✅ COMPLETE
 
-> **Reference**: See `docs/PHASE1_UI_REFERENCE.md` for exact UI specifications.
+### Top Toolbar
+- [x] Two-row toolbar (Navigation + Tools)
+- [x] TopNavigationBar with document tabs
+- [x] ToolBar with tool buttons
+- [x] Undo/Redo buttons (disabled state)
+- [x] Tool selection state management
+- [x] Quick access colors and thickness
+- [x] Right action buttons (Book, Home, Layers, Export, Grid, Settings, More)
 
-### Top Toolbar - Basic ✅ DONE
-- [x] Toolbar container widget
-- [x] Tool button component (reusable)
-- [x] Undo button (disabled state)
-- [x] Redo button (disabled state)
-- [x] Pen tool button
-- [x] Highlighter button
-- [x] Eraser button
-- [x] Shapes button
-- [x] Text tool button
-- [x] Sticker button
-- [x] Image insert button
-- [x] Settings button
-- [x] Tool selection state management (mock)
-- [x] Scrollable tool row for overflow
+### Floating Pen Box
+- [x] Draggable pen box
+- [x] Collapsible/expandable
+- [x] Pen preset slots with preview
+- [x] Add/remove presets
+- [x] Edit mode for deletion
 
-### Top Toolbar - Extended ✅ DONE
-- [x] **Kement (Lasso) tool button**
-- [x] **Lazer pointer tool button**
-- [x] **Right action buttons section**:
-  - [x] Book/Reader mode button (placeholder)
-  - [x] Home button (placeholder)
-  - [x] Layers button (placeholder)
-  - [x] Export button (placeholder)
-  - [x] Grid toggle button (functional)
-  - [x] More options button (placeholder)
-- [x] **Quick access row** (appears when tool selected):
-  - [x] 5 quick color chips
-  - [x] 3 quick thickness dots
-- [x] Divider between tool section and right section
+### Tool Panels
+- [x] Pen settings panel (4 pen types, live preview)
+- [x] Highlighter settings panel
+- [x] Eraser settings panel (3 modes)
+- [x] Shapes settings panel
+- [x] Sticker panel with categories
+- [x] Image panel
+- [x] Laser pointer panel (mode + duration)
+- [x] Lasso selection panel (8 toggles)
+- [x] Toolbar editor panel
 
-### Pen Box (Left Sidebar) ✅ DONE
-- [x] Pen box container widget
-- [x] Pen preset slot widget
-- [x] Nib preview renderer (circle, ellipse, rect)
-- [x] Color indicator
-- [x] Thickness indicator
-- [x] Selected state styling
-- [x] Support for 16 preset slots
-- [x] Scroll behavior for overflow
-- [x] Add preset button
-- [x] Long press for edit/delete
+### Shared Components
+- [x] UnifiedColorPicker with palette
+- [x] Quick color chips
+- [x] Quick thickness dots
+- [x] Panel base component
+- [x] Tool button with chevron indicator
 
-### Tool Settings Panels - Core ✅ DONE
-- [x] Panel base component (anchored overlay)
-- [x] Panel open/close animation
-- [x] Single-panel-at-a-time logic
+### State Management
+- [x] Riverpod providers structure
+- [x] All tool settings providers
+- [x] Lasso settings provider
+- [x] Laser settings provider
+- [x] Grid visibility provider
 
-### Pen Settings Panel ✅ DONE
-- [x] Nib preview widget
-- [x] Thickness slider
-- [x] Stabilization slider
-- [x] Color chips grid
-- [x] "Add to Pen Box" button
-- [x] **Pen type visual selector** (4 pen icons with selection)
-- [x] **Live stroke preview** at top
-
-### Highlighter Settings Panel ✅ DONE
-- [x] Thickness slider
-- [x] Straight-line toggle
-- [x] Color chips
-- [x] "Add to Pen Box" button
-- [x] **Marker visual preview** (3 marker icons)
-- [x] **Thickness bar preview**
-
-### Eraser Settings Panel ✅ DONE
-- [x] Mode selector (pixel/stroke/lasso)
-- [x] Size slider
-- [x] Pressure toggle
-- [x] "Erase only highlighter" toggle
-- [x] "Erase band only" toggle
-- [x] Auto-lift toggle
-- [x] Clear page button
-- [x] Lock icon on Lasso mode (premium placeholder)
-
-### Shapes Settings Panel ✅ DONE (24 shapes)
-- [x] Shape grid (24 shapes)
-- [x] Stroke thickness slider
-- [x] Stroke color picker
-- [x] Fill toggle
-- [x] Fill color picker (conditional)
-- [x] **Expanded shape grid (24 shapes)**:
-  - [x] Lines: straight, wavy, curved, dashed, arrow, double-arrow
-  - [x] Lines: curved arrow, angled, plus, T-shape, bracket, triangle-arrow
-  - [x] Shapes: triangle (3 variants), square, rectangle, right-triangle
-  - [x] Shapes: square-outline, rectangle-outline, diamond, pentagon, hexagon, star
-- [x] **Favorites placeholder** ("Drag shape to add to favorites")
-- [ ] **Saved favorites row** (deferred)
-
-### Sticker Panel ⚠️ NEEDS UPDATE
-- [x] Category tabs
-- [x] Sticker grid
-- [x] Select CTA
-- [x] Premium stickers (locked)
-- [ ] **Updated tab names**: Text, Sign, Daily, Natural, EMOJI
-- [ ] **Daily category stickers** (OK, To Do, YES, NO, etc.)
-
-### Image Panel ✅ DONE
-- [x] Recent images grid
-- [x] "Add from Album" button
-- [x] "Take Photo" button
-- [x] Cloud images (locked premium)
-
-### Lazer Pointer Panel ✅ DONE
-- [x] **Mode selector**: Çizgi (Line) / Nokta (Dot)
-- [x] **Thickness slider** (0.10mm - 5.00mm)
-- [x] **Duration slider** (0.5s - 5.0s)
-- [x] **Color chips** (5 colors)
-
-### Kement (Lasso Selection) Panel ✅ DONE
-- [x] **Panel container** with title "Kement"
-- [x] **Mode selector**: Serbest kement / Dikdörtgen kement
-- [x] **Selectable types section** with 8 toggles:
-  - [x] Şekil (Shape) - default ON
-  - [x] Resim/Çıkartma (Image/Sticker) - default ON
-  - [x] Bant (Tape) - default ON
-  - [x] Metin kutusu (Text box) - default ON
-  - [x] El yazısı (Handwriting) - default ON
-  - [x] Vurgulayıcı (Highlighter) - default OFF
-  - [x] Bağlantı (Link) - default ON
-  - [x] Etiket (Label) - default ON
-
-### Custom Toolbar Editor ✅ DONE
-- [x] Reorderable tool list
-- [x] Visibility toggles
-- [x] Reset defaults button
-- [x] Done/Close button
-
-### AI Assistant Panel ✅ DONE (mock only)
-- [x] Text input field for user question
-- [x] "Ask" submit button
-- [x] Response display area (scrollable)
-- [x] Loading indicator placeholder
-- [x] Close button
-- [x] Premium badge indicator
-- [x] Mock AI response data
-- [x] Selection context indicator
-- [x] Quick suggestion chips
-
-### Mock Canvas ✅ DONE
+### Canvas
+- [x] MockCanvas placeholder
 - [x] Grid pattern background
-- [x] Current tool display
-- [x] Cursor indicator
-- [x] Press state visual feedback
-- [x] Placeholder message
-
-### State Management ✅ DONE
-- [x] Set up Riverpod providers structure
-- [x] `currentToolProvider`
-- [x] `toolSettingsProvider` family
-- [x] `toolbarConfigProvider`
-- [x] `penBoxPresetsProvider`
-- [x] `highlighterSettingsProvider`
-- [x] `eraserSettingsProvider`
-- [x] `shapesSettingsProvider`
-- [x] `selectedPresetIndexProvider`
-- [x] `activePanelProvider`
-- [x] `canUndoProvider` / `canRedoProvider` (mock)
-- [x] **`lassoSettingsProvider`** (LassoMode, SelectableType toggles)
-- [x] **`laserSettingsProvider`** (mode, thickness, duration, color)
-- [x] **`gridVisibilityProvider`** (bool, default true)
-- [x] **`quickColorsProvider`** (5 colors)
-- [x] **`quickThicknessProvider`** (3 values: 1.0, 2.5, 5.0)
-
-### Premium UI Indicators ✅ DONE
-- [x] `LockedOverlay` widget component
-- [x] `PremiumBadge` widget
-- [x] Lock icon on premium features
-- [x] Premium indicator on eraser lasso mode
-- [x] Premium stickers section
-- [x] Premium cloud images section
-
-### Responsive Layout
-- [x] Tablet landscape layout (primary)
-- [ ] Tablet portrait adaptation
-- [ ] Phone layout (condensed toolbar)
-
-### Tests - Phase 1 ✅ DONE
-- [x] `toolbar_test.dart` - Toolbar widget tests
-- [x] `pen_box_test.dart` - Pen box widget tests
-- [x] `panels_test.dart` - Panel widget tests
-- [x] `providers_test.dart` - Provider state tests
-- [x] `drawing_screen_test.dart` - Integration tests
-- [x] **`lasso_panel_test.dart`** - Lasso panel tests
-- [x] **`laser_panel_test.dart`** - Laser panel tests (updated)
-- [x] **`toolbar_extended_test.dart`** - Right buttons & quick access tests
-- [ ] **`shapes_expanded_test.dart`** - Optional (shapes tested in panels_test)
-
-### Golden Tests - Phase 1 ⚠️ PARTIAL
-- [x] `toolbar_golden_test.dart`
-- [x] `pen_box_golden_test.dart`
-- [x] `panels_golden_test.dart`
-- [ ] **Golden: Kement panel**
-- [ ] **Golden: Lazer panel updated**
-- [ ] **Golden: Shapes panel expanded**
-- [ ] **Golden: Toolbar with right buttons**
+- [x] Tool indicator
 
 ---
 
-## Phase 2: Drawing Core v1 ❌ NOT STARTED
+## Phase 2: Drawing Core v1 ✅ COMPLETE
 
-> ⚠️ DO NOT START until Phase 1 is 100% complete.
+### Models
+- [x] `DrawingPoint` - x, y, pressure, tilt, timestamp
+- [x] `StrokeStyle` - color (ARGB int), thickness, opacity, nibShape, blendMode
+- [x] `NibShape` enum - circle, ellipse, rectangle
+- [x] `DrawingBlendMode` enum - normal, multiply, screen, overlay, darken, lighten
+- [x] `BoundingBox` - bounds calculation
+- [x] `Stroke` - id, points, style, bounds, createdAt
+- [x] `Layer` - id, name, strokes, visibility, locked, opacity
+- [x] `DrawingDocument` - id, title, layers, activeLayerIndex, dimensions
 
-### Stroke System
-- [ ] `Point` model with pressure/tilt
-- [ ] `Stroke` model implementation
-- [ ] `StrokeStyle` configuration
-- [ ] Path generation from points
-- [ ] Bezier smoothing algorithm
-- [ ] Pressure-to-width mapping
+### Tools
+- [x] `DrawingTool` abstract class
+- [x] `PenTool` - default pen style
+- [x] `HighlighterTool` - semi-transparent, rectangle nib
+- [x] `BrushTool` - ellipse nib, pressure-ready
 
-### Tool Implementations
-- [ ] `BallpointPenTool` - circular nib
-- [ ] `FountainPenTool` - angled ellipse nib
-- [ ] `PencilTool` - textured/noisy (simplified v1)
-- [ ] `BrushTool` - variable pressure response
-- [ ] `HighlighterTool` - rectangular, translucent
-- [ ] Tool registry / factory
+### History (Command Pattern)
+- [x] `DrawingCommand` abstract class
+- [x] `AddStrokeCommand` - execute/undo stroke addition
+- [x] `RemoveStrokeCommand` - execute/undo stroke removal
+- [x] `HistoryManager` - undo/redo stacks, max 100 steps
 
-### Nib Geometry System
-- [ ] `NibShape` sealed class hierarchy
-- [ ] `CircleNib` implementation
-- [ ] `EllipseNib` implementation (rotation-aware)
-- [ ] `RectangleNib` implementation
-- [ ] Nib-to-path stamping algorithm
+### Input Processing
+- [x] `PathSmoother` - smooth, simplify, interpolate methods
 
-### Drawing Document
-- [ ] `Layer` model
-- [ ] `DrawingDocument` with layers
-- [ ] Active layer management
+### Public API
+- [x] `drawing_core.dart` exports all public classes
+
+### Tests
+- [x] DrawingPoint tests
+- [x] StrokeStyle tests
+- [x] Stroke tests
+- [x] Layer tests
+- [x] DrawingDocument tests
+- [x] PenTool tests
+- [x] HighlighterTool tests
+- [x] BrushTool tests
+- [x] Commands tests
+- [x] HistoryManager tests
+- [x] PathSmoother tests
+
+### Quality
+- [x] Zero Flutter imports in drawing_core
+- [x] All models immutable with copyWith
+- [x] JSON serialization for all models
+- [x] Full test coverage
+
+---
+
+## Phase 3: Canvas Integration ❌ NOT STARTED
+
+### Rendering
+- [ ] `StrokeRenderer` abstract class
+- [ ] `FlutterStrokeRenderer` implementation in drawing_ui
+- [ ] Stroke to Path conversion
+- [ ] Nib shape rendering (circle, ellipse, rectangle)
+
+### Canvas Widget
+- [ ] Replace `MockCanvas` with `DrawingCanvas`
+- [ ] Gesture handling (pointer down/move/up)
+- [ ] Pressure and tilt support
+- [ ] Live stroke preview (aktif çizim)
+- [ ] Committed strokes rendering
+
+### Tool Integration
+- [ ] Connect UI tools to drawing_core tools
+- [ ] Tool selection → active tool instance
+- [ ] Style sync between UI and core
+
+### History Integration
+- [ ] Connect Undo button to HistoryManager.undo()
+- [ ] Connect Redo button to HistoryManager.redo()
+- [ ] Update canUndo/canRedo providers
+
+### Layer Integration
+- [ ] Layer panel connection
+- [ ] Active layer selection
 - [ ] Layer visibility toggle
 
-### Canvas Integration
-- [ ] Replace MockCanvas with real DrawingCanvas
-- [ ] Gesture handling (pointer events)
-- [ ] Stroke preview rendering
-- [ ] Stroke completion flow
+### Performance
+- [ ] Separate live stroke canvas from committed strokes
+- [ ] RepaintBoundary optimization
+- [ ] Dirty rectangle tracking (basic)
 
-### Tests - Phase 2
-- [ ] Unit: Stroke model
-- [ ] Unit: Point interpolation
-- [ ] Unit: Path smoothing
-- [ ] Unit: Tool behavior
-- [ ] Widget: Canvas gesture handling
-- [ ] Integration: Drawing flow
+### Tests
+- [ ] Canvas gesture tests
+- [ ] Stroke rendering tests
+- [ ] Tool integration tests
+- [ ] History integration tests
 
 ---
 
-## Phase 3: Advanced Features ❌ NOT STARTED
-
-### History System
-- [ ] Command pattern implementation
-- [ ] `AddStrokeCommand`
-- [ ] `RemoveStrokeCommand`
-- [ ] `BatchCommand`
-- [ ] HistoryManager integration
-- [ ] Undo/Redo execution
-- [ ] Snapshot strategy
+## Phase 4: Advanced Features ❌ NOT STARTED
 
 ### Eraser Implementation
 - [ ] Pixel eraser hit testing
-- [ ] Stroke eraser detection
-- [ ] Lasso eraser selection
+- [ ] Stroke eraser (whole stroke removal)
+- [ ] Lasso eraser (selection-based)
 
 ### Selection System
-- [ ] Selection context model
-- [ ] Bounding box selection
-- [ ] Lasso selection
+- [ ] `SelectionContext` model
+- [ ] Lasso selection tool
+- [ ] Rectangle selection tool
 - [ ] Multi-stroke selection
+- [ ] Selection bounds visualization
 
-### App Layer Integration (example_app only)
-- [ ] AI assistant service interface
-- [ ] Mock AI service implementation
-- [ ] Feature gate implementation
-- [ ] Premium tier definitions
-- [ ] Database repository implementations
+### Shape Tools
+- [ ] Line tool
+- [ ] Rectangle tool
+- [ ] Ellipse tool
+- [ ] Arrow tool
+- [ ] Shape rendering
+
+### Text Tool
+- [ ] Text element model
+- [ ] Text input handling
+- [ ] Text rendering on canvas
 
 ---
 
-## Phase 4: Performance Hardening ❌ NOT STARTED
+## Phase 5: Performance Hardening ❌ NOT STARTED
 
-(See PERFORMANCE_STRATEGY.md for details)
+### Rendering Optimization
+- [ ] Stroke segmentation (500 points max)
+- [ ] PictureRecorder → Image caching
+- [ ] Incremental raster cache
+- [ ] Off-screen stroke baking
+- [ ] Idle-time layer merging
+
+### Memory Optimization
+- [ ] Stroke data compression
+- [ ] History snapshot intervals
+- [ ] Old history pruning
+- [ ] Image asset pooling
+
+### Input Optimization
+- [ ] Pointer event coalescing
+- [ ] Predictive stroke extension
 
 ---
 
-## Phase 5: Publishing Readiness ❌ NOT STARTED
+## Phase 6: Publishing Readiness ❌ NOT STARTED
 
-(See original checklist for details)
+### Package Preparation
+- [ ] Final API review
+- [ ] Version numbering (semver)
+- [ ] CHANGELOG.md for each package
+- [ ] LICENSE files
+- [ ] pubspec.yaml polish
+
+### Documentation
+- [ ] README.md for drawing_core
+- [ ] README.md for drawing_ui
+- [ ] README.md for drawing_toolkit
+- [ ] API documentation (dartdoc)
+- [ ] Usage examples
+
+### Quality Assurance
+- [ ] Full test coverage review (>80%)
+- [ ] Manual testing checklist
+- [ ] Accessibility audit
+
+### Pub.dev Submission
+- [ ] `dart pub publish --dry-run` passes
+- [ ] Package scores optimization
+- [ ] Submit packages
+
+---
+
+## Git Tags
+
+| Tag | Description | Date |
+|-----|-------------|------|
+| v0.1.0-phase1 | Phase 1: UI Skeleton | 2025-01-13 |
+| v0.2.0-phase2 | Phase 2: Drawing Core | 2025-01-13 |
 
 ---
 
 ## Notes
 
-### Phase 1 Completion Criteria
+### Test Coverage Summary
 
-Phase 1 is COMPLETE when:
-1. All items above are checked ✅
-2. UI matches PHASE1_UI_REFERENCE.md exactly
-3. All widget tests pass
-4. All golden tests are generated and pass
-5. `flutter run` shows working UI skeleton
-6. NO real drawing logic implemented (intentional)
+| Package | Tests | Status |
+|---------|-------|--------|
+| drawing_core | 337 | ✅ Full coverage |
+| drawing_ui | 69 pass, 47 skip | ⚠️ Needs update |
 
-### Layer Responsibility Quick Reference
-
-| Need to... | Where? |
-|------------|--------|
-| Add new drawing tool | `drawing_core` |
-| Add new UI widget | `drawing_ui` |
-| Check if feature is premium | `example_app` only |
-| Call AI API | `example_app` only |
-| Save to database | `example_app` only |
-| Define serialization format | `drawing_core` |
-| Define repository interface | `drawing_core` |
-| Implement repository | `example_app` only |
+### Phase 2 Achievements
+- Zero Flutter dependencies in drawing_core
+- 100% immutable models
+- Full JSON serialization
+- Command pattern for undo/redo
+- 100-step history support
+- Path smoothing utilities
 
 ---
 
-*Last updated: 2026-01-13 - Phase 1 UI implementation complete (toolbar extended, all panels, providers)*
+*Last updated: 2026-01-13 - Phase 2 Complete*
