@@ -6,4 +6,5 @@ export 'document_provider.dart';
 export 'drawing_providers.dart';
 export 'eraser_provider.dart';
 export 'history_provider.dart';
+export 'selection_provider.dart';
 export 'tool_style_provider.dart';
