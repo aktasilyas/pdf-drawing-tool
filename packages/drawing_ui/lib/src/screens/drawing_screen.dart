@@ -60,9 +60,9 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
               Expanded(
                 child: Stack(
                   children: [
-                    // Full width canvas
+                    // Full width canvas - Real drawing canvas
                     const Positioned.fill(
-                      child: MockCanvas(),
+                      child: DrawingCanvas(),
                     ),
 
                     // Floating pen box (draggable when collapsed)
