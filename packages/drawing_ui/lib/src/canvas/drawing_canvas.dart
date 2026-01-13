@@ -61,6 +61,17 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
   /// Will be connected to DocumentProvider in Step 7.
   final List<Stroke> _committedStrokes = [];
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // GESTURE HANDLING - Performance optimizations
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /// Minimum distance between points to avoid excessive point creation.
+  /// Points closer than this are skipped for performance.
+  static const double _minPointDistance = 1.0;
+
+  /// Last recorded point position for distance filtering.
+  Offset? _lastPoint;
+
   /// Exposes the drawing controller for testing.
   @visibleForTesting
   DrawingController get drawingController => _drawingController;
@@ -68,6 +79,10 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
   /// Exposes committed strokes for testing.
   @visibleForTesting
   List<Stroke> get committedStrokes => _committedStrokes;
+
+  /// Exposes last point for testing distance filtering.
+  @visibleForTesting
+  Offset? get lastPoint => _lastPoint;
 
   @override
   void initState() {
@@ -81,6 +96,71 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     super.dispose();
   }
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // POINTER EVENT HANDLERS
+  // ─────────────────────────────────────────────────────────────────────────
+  // NO setState here! Only DrawingController.notifyListeners() triggers repaint.
+
+  /// Handles pointer down - starts a new stroke.
+  void _handlePointerDown(PointerDownEvent event) {
+    final point = _createDrawingPoint(event);
+    final style = _getCurrentStyle();
+    _drawingController.startStroke(point, style);
+    _lastPoint = event.localPosition;
+  }
+
+  /// Handles pointer move - adds points to active stroke.
+  void _handlePointerMove(PointerMoveEvent event) {
+    if (!_drawingController.isDrawing) return;
+
+    // Performance: Skip points that are too close together
+    if (_lastPoint != null) {
+      final distance = (event.localPosition - _lastPoint!).distance;
+      if (distance < _minPointDistance) return;
+    }
+
+    final point = _createDrawingPoint(event);
+    _drawingController.addPoint(point);
+    _lastPoint = event.localPosition;
+  }
+
+  /// Handles pointer up - finishes stroke and commits it.
+  void _handlePointerUp(PointerUpEvent event) {
+    final stroke = _drawingController.endStroke();
+    if (stroke != null) {
+      // Add to committed strokes (will be connected to DocumentProvider in Step 7)
+      _committedStrokes.add(stroke);
+    }
+    _lastPoint = null;
+  }
+
+  /// Handles pointer cancel - cancels the current stroke.
+  void _handlePointerCancel(PointerCancelEvent event) {
+    _drawingController.cancelStroke();
+    _lastPoint = null;
+  }
+
+  /// Creates a DrawingPoint from a pointer event.
+  DrawingPoint _createDrawingPoint(PointerEvent event) {
+    return DrawingPoint(
+      x: event.localPosition.dx,
+      y: event.localPosition.dy,
+      pressure: event.pressure.clamp(0.0, 1.0),
+      tilt: 0.0,
+      timestamp: event.timeStamp.inMilliseconds,
+    );
+  }
+
+  /// Gets the current stroke style.
+  /// Will be connected to provider in Step 9.
+  StrokeStyle _getCurrentStyle() {
+    // Default pen style - will be replaced with provider in Step 9
+    return StrokeStyle.pen(
+      color: 0xFF000000,
+      thickness: 3.0,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
@@ -92,76 +172,85 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
               : widget.height,
         );
 
-        return ClipRect(
-          child: Stack(
-            children: [
-              // ─────────────────────────────────────────────────────────────
-              // LAYER 1: Background Grid
-              // ─────────────────────────────────────────────────────────────
-              // Never repaints - shouldRepaint always returns false
-              RepaintBoundary(
-                child: CustomPaint(
-                  size: size,
-                  painter: const GridPainter(),
-                  isComplex: false,
-                  willChange: false,
+        // Listener for raw pointer events (NOT GestureDetector)
+        // This gives us direct access to pointer data for smooth drawing
+        return Listener(
+          onPointerDown: _handlePointerDown,
+          onPointerMove: _handlePointerMove,
+          onPointerUp: _handlePointerUp,
+          onPointerCancel: _handlePointerCancel,
+          behavior: HitTestBehavior.opaque,
+          child: ClipRect(
+            child: Stack(
+              children: [
+                // ─────────────────────────────────────────────────────────────
+                // LAYER 1: Background Grid
+                // ─────────────────────────────────────────────────────────────
+                // Never repaints - shouldRepaint always returns false
+                RepaintBoundary(
+                  child: CustomPaint(
+                    size: size,
+                    painter: const GridPainter(),
+                    isComplex: false,
+                    willChange: false,
+                  ),
                 ),
-              ),
 
-              // ─────────────────────────────────────────────────────────────
-              // LAYER 2: Committed Strokes
-              // ─────────────────────────────────────────────────────────────
-              // Only repaints when stroke count changes
-              RepaintBoundary(
-                child: ListenableBuilder(
-                  listenable: _drawingController,
-                  builder: (context, _) {
-                    return CustomPaint(
-                      size: size,
-                      painter: CommittedStrokesPainter(
-                        strokes: _committedStrokes,
-                        renderer: _renderer,
-                      ),
-                      isComplex: true,
-                      willChange: false,
-                    );
-                  },
+                // ─────────────────────────────────────────────────────────────
+                // LAYER 2: Committed Strokes
+                // ─────────────────────────────────────────────────────────────
+                // Only repaints when stroke count changes
+                RepaintBoundary(
+                  child: ListenableBuilder(
+                    listenable: _drawingController,
+                    builder: (context, _) {
+                      return CustomPaint(
+                        size: size,
+                        painter: CommittedStrokesPainter(
+                          strokes: _committedStrokes,
+                          renderer: _renderer,
+                        ),
+                        isComplex: true,
+                        willChange: false,
+                      );
+                    },
+                  ),
                 ),
-              ),
 
-              // ─────────────────────────────────────────────────────────────
-              // LAYER 3: Active Stroke (Live Drawing)
-              // ─────────────────────────────────────────────────────────────
-              // Repaints on every pointer move - must be fast!
-              RepaintBoundary(
-                child: ListenableBuilder(
-                  listenable: _drawingController,
-                  builder: (context, _) {
-                    return CustomPaint(
-                      size: size,
-                      painter: ActiveStrokePainter(
-                        points: _drawingController.activePoints,
-                        style: _drawingController.activeStyle,
-                        renderer: _renderer,
-                      ),
-                      isComplex: false,
-                      willChange: true,
-                    );
-                  },
+                // ─────────────────────────────────────────────────────────────
+                // LAYER 3: Active Stroke (Live Drawing)
+                // ─────────────────────────────────────────────────────────────
+                // Repaints on every pointer move - must be fast!
+                RepaintBoundary(
+                  child: ListenableBuilder(
+                    listenable: _drawingController,
+                    builder: (context, _) {
+                      return CustomPaint(
+                        size: size,
+                        painter: ActiveStrokePainter(
+                          points: _drawingController.activePoints,
+                          style: _drawingController.activeStyle,
+                          renderer: _renderer,
+                        ),
+                        isComplex: false,
+                        willChange: true,
+                      );
+                    },
+                  ),
                 ),
-              ),
 
-              // ─────────────────────────────────────────────────────────────
-              // LAYER 4: Selection Overlay (Phase 4)
-              // ─────────────────────────────────────────────────────────────
-              // Placeholder for future selection features
-              // RepaintBoundary(
-              //   child: CustomPaint(
-              //     size: size,
-              //     painter: SelectionOverlayPainter(),
-              //   ),
-              // ),
-            ],
+                // ─────────────────────────────────────────────────────────────
+                // LAYER 4: Selection Overlay (Phase 4)
+                // ─────────────────────────────────────────────────────────────
+                // Placeholder for future selection features
+                // RepaintBoundary(
+                //   child: CustomPaint(
+                //     size: size,
+                //     painter: SelectionOverlayPainter(),
+                //   ),
+                // ),
+              ],
+            ),
           ),
         );
       },

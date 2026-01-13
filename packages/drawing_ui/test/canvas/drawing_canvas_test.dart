@@ -323,6 +323,430 @@ void main() {
   });
 
   // ===========================================================================
+  // Gesture Handling Tests
+  // ===========================================================================
+
+  group('Gesture Handling', () {
+    testWidgets('has Listener widget for raw pointer events', (tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: DrawingCanvas(),
+            ),
+          ),
+        ),
+      );
+
+      // Should use Listener, not GestureDetector
+      expect(
+        find.descendant(
+          of: find.byType(DrawingCanvas),
+          matching: find.byType(Listener),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('onPointerDown starts drawing', (tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: DrawingCanvas(),
+            ),
+          ),
+        ),
+      );
+
+      final state = tester.state<DrawingCanvasState>(
+        find.byType(DrawingCanvas),
+      );
+
+      // Initially not drawing
+      expect(state.drawingController.isDrawing, isFalse);
+
+      // Simulate pointer down
+      final center = tester.getCenter(find.byType(DrawingCanvas));
+      await tester.sendEventToBinding(PointerDownEvent(
+        position: center,
+      ));
+      await tester.pump();
+
+      // Should now be drawing
+      expect(state.drawingController.isDrawing, isTrue);
+      expect(state.drawingController.pointCount, equals(1));
+    });
+
+    testWidgets('onPointerMove adds points', (tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: DrawingCanvas(),
+            ),
+          ),
+        ),
+      );
+
+      final state = tester.state<DrawingCanvasState>(
+        find.byType(DrawingCanvas),
+      );
+      final center = tester.getCenter(find.byType(DrawingCanvas));
+
+      // Start drawing
+      await tester.sendEventToBinding(PointerDownEvent(
+        position: center,
+      ));
+      await tester.pump();
+
+      expect(state.drawingController.pointCount, equals(1));
+
+      // Move pointer (large distance to pass min distance filter)
+      await tester.sendEventToBinding(PointerMoveEvent(
+        position: center + const Offset(20, 20),
+      ));
+      await tester.pump();
+
+      expect(state.drawingController.pointCount, equals(2));
+
+      // Move again
+      await tester.sendEventToBinding(PointerMoveEvent(
+        position: center + const Offset(40, 40),
+      ));
+      await tester.pump();
+
+      expect(state.drawingController.pointCount, equals(3));
+    });
+
+    testWidgets('onPointerUp creates and commits stroke', (tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: DrawingCanvas(),
+            ),
+          ),
+        ),
+      );
+
+      final state = tester.state<DrawingCanvasState>(
+        find.byType(DrawingCanvas),
+      );
+      final center = tester.getCenter(find.byType(DrawingCanvas));
+
+      // Initial state
+      expect(state.committedStrokes, isEmpty);
+
+      // Draw a stroke
+      await tester.sendEventToBinding(PointerDownEvent(
+        position: center,
+      ));
+      await tester.sendEventToBinding(PointerMoveEvent(
+        position: center + const Offset(20, 20),
+      ));
+      await tester.sendEventToBinding(PointerUpEvent(
+        position: center + const Offset(20, 20),
+      ));
+      await tester.pump();
+
+      // Stroke should be committed
+      expect(state.committedStrokes.length, equals(1));
+      expect(state.drawingController.isDrawing, isFalse);
+      expect(state.drawingController.pointCount, equals(0));
+    });
+
+    testWidgets('onPointerCancel cancels stroke', (tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: DrawingCanvas(),
+            ),
+          ),
+        ),
+      );
+
+      final state = tester.state<DrawingCanvasState>(
+        find.byType(DrawingCanvas),
+      );
+      final center = tester.getCenter(find.byType(DrawingCanvas));
+
+      // Start drawing
+      await tester.sendEventToBinding(PointerDownEvent(
+        position: center,
+      ));
+      await tester.sendEventToBinding(PointerMoveEvent(
+        position: center + const Offset(20, 20),
+      ));
+      await tester.pump();
+
+      expect(state.drawingController.isDrawing, isTrue);
+      expect(state.drawingController.pointCount, equals(2));
+
+      // Cancel
+      await tester.sendEventToBinding(PointerCancelEvent(
+        position: center + const Offset(20, 20),
+      ));
+      await tester.pump();
+
+      // Stroke should be cancelled, not committed
+      expect(state.committedStrokes, isEmpty);
+      expect(state.drawingController.isDrawing, isFalse);
+      expect(state.drawingController.pointCount, equals(0));
+    });
+
+    testWidgets('pressure is captured from pointer event', (tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: DrawingCanvas(),
+            ),
+          ),
+        ),
+      );
+
+      final state = tester.state<DrawingCanvasState>(
+        find.byType(DrawingCanvas),
+      );
+      final center = tester.getCenter(find.byType(DrawingCanvas));
+
+      // Send pointer down with pressure
+      await tester.sendEventToBinding(PointerDownEvent(
+        position: center,
+        pressure: 0.75,
+      ));
+      await tester.pump();
+
+      // Complete stroke
+      await tester.sendEventToBinding(PointerUpEvent(
+        position: center,
+      ));
+      await tester.pump();
+
+      // Check that pressure was captured
+      expect(state.committedStrokes.length, equals(1));
+      final points = state.committedStrokes.first.points;
+      expect(points.first.pressure, equals(0.75));
+    });
+
+    testWidgets('minimum distance filter skips close points', (tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: DrawingCanvas(),
+            ),
+          ),
+        ),
+      );
+
+      final state = tester.state<DrawingCanvasState>(
+        find.byType(DrawingCanvas),
+      );
+      final center = tester.getCenter(find.byType(DrawingCanvas));
+
+      // Start drawing
+      await tester.sendEventToBinding(PointerDownEvent(
+        position: center,
+      ));
+      await tester.pump();
+
+      expect(state.drawingController.pointCount, equals(1));
+
+      // Move a tiny distance (< 1.0 pixel)
+      await tester.sendEventToBinding(PointerMoveEvent(
+        position: center + const Offset(0.5, 0.5),
+      ));
+      await tester.pump();
+
+      // Point should be skipped due to minimum distance filter
+      expect(state.drawingController.pointCount, equals(1));
+
+      // Move a large distance
+      await tester.sendEventToBinding(PointerMoveEvent(
+        position: center + const Offset(10, 10),
+      ));
+      await tester.pump();
+
+      // This point should be added
+      expect(state.drawingController.pointCount, equals(2));
+    });
+
+    testWidgets('lastPoint is reset on pointer up', (tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: DrawingCanvas(),
+            ),
+          ),
+        ),
+      );
+
+      final state = tester.state<DrawingCanvasState>(
+        find.byType(DrawingCanvas),
+      );
+      final center = tester.getCenter(find.byType(DrawingCanvas));
+
+      // Start and complete a stroke
+      await tester.sendEventToBinding(PointerDownEvent(
+        position: center,
+      ));
+      await tester.pump();
+
+      // lastPoint should be set
+      expect(state.lastPoint, isNotNull);
+
+      await tester.sendEventToBinding(PointerUpEvent(
+        position: center,
+      ));
+      await tester.pump();
+
+      // lastPoint should be reset
+      expect(state.lastPoint, isNull);
+    });
+
+    testWidgets('lastPoint is reset on pointer cancel', (tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: DrawingCanvas(),
+            ),
+          ),
+        ),
+      );
+
+      final state = tester.state<DrawingCanvasState>(
+        find.byType(DrawingCanvas),
+      );
+      final center = tester.getCenter(find.byType(DrawingCanvas));
+
+      // Start drawing
+      await tester.sendEventToBinding(PointerDownEvent(
+        position: center,
+      ));
+      await tester.pump();
+
+      expect(state.lastPoint, isNotNull);
+
+      // Cancel
+      await tester.sendEventToBinding(PointerCancelEvent(
+        position: center,
+      ));
+      await tester.pump();
+
+      expect(state.lastPoint, isNull);
+    });
+
+    testWidgets('pointer move does nothing when not drawing', (tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: DrawingCanvas(),
+            ),
+          ),
+        ),
+      );
+
+      final state = tester.state<DrawingCanvasState>(
+        find.byType(DrawingCanvas),
+      );
+      final center = tester.getCenter(find.byType(DrawingCanvas));
+
+      // Try to move without starting (pointer down)
+      await tester.sendEventToBinding(PointerMoveEvent(
+        position: center + const Offset(20, 20),
+      ));
+      await tester.pump();
+
+      // Should have no effect
+      expect(state.drawingController.isDrawing, isFalse);
+      expect(state.drawingController.pointCount, equals(0));
+    });
+
+    testWidgets('multiple strokes can be drawn', (tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: DrawingCanvas(),
+            ),
+          ),
+        ),
+      );
+
+      final state = tester.state<DrawingCanvasState>(
+        find.byType(DrawingCanvas),
+      );
+      final center = tester.getCenter(find.byType(DrawingCanvas));
+
+      // Draw first stroke
+      await tester.sendEventToBinding(PointerDownEvent(
+        position: center,
+      ));
+      await tester.sendEventToBinding(PointerMoveEvent(
+        position: center + const Offset(20, 20),
+      ));
+      await tester.sendEventToBinding(PointerUpEvent(
+        position: center + const Offset(20, 20),
+      ));
+      await tester.pump();
+
+      expect(state.committedStrokes.length, equals(1));
+
+      // Draw second stroke
+      await tester.sendEventToBinding(PointerDownEvent(
+        position: center + const Offset(50, 50),
+      ));
+      await tester.sendEventToBinding(PointerMoveEvent(
+        position: center + const Offset(70, 70),
+      ));
+      await tester.sendEventToBinding(PointerUpEvent(
+        position: center + const Offset(70, 70),
+      ));
+      await tester.pump();
+
+      expect(state.committedStrokes.length, equals(2));
+    });
+
+    testWidgets('default style is black pen with 3.0 thickness',
+        (tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: DrawingCanvas(),
+            ),
+          ),
+        ),
+      );
+
+      final state = tester.state<DrawingCanvasState>(
+        find.byType(DrawingCanvas),
+      );
+      final center = tester.getCenter(find.byType(DrawingCanvas));
+
+      // Draw a stroke
+      await tester.sendEventToBinding(PointerDownEvent(
+        position: center,
+      ));
+      await tester.sendEventToBinding(PointerUpEvent(
+        position: center,
+      ));
+      await tester.pump();
+
+      // Check style
+      final style = state.committedStrokes.first.style;
+      expect(style.color, equals(0xFF000000));
+      expect(style.thickness, equals(3.0));
+    });
+  });
+
+  // ===========================================================================
   // Integration Tests
   // ===========================================================================
 
