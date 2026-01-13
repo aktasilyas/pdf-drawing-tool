@@ -10,3 +10,4 @@
 library;
 
 export 'hit_tester.dart';
+export 'stroke_hit_tester.dart';
