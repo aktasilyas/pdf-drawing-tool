@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../theme/drawing_theme.dart';
-import '../providers/drawing_providers.dart';
-import 'pen_preset_slot.dart';
+import 'package:drawing_ui/src/theme/theme.dart';
+import 'package:drawing_ui/src/providers/providers.dart';
+import 'package:drawing_ui/src/pen_box/pen_preset_slot.dart';
 
 /// The left sidebar containing pen preset slots.
 ///

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../theme/drawing_theme.dart';
+import 'package:drawing_ui/src/theme/theme.dart';
 
 /// Shape options for thickness preview.
 enum ThicknessPreviewShape {

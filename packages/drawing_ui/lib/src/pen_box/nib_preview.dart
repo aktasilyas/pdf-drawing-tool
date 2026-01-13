@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../providers/drawing_providers.dart';
+import 'package:drawing_ui/src/providers/providers.dart';
 
 /// A visual preview of a pen nib.
 ///

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:drawing_core/drawing_core.dart';
-
-import '../rendering/flutter_stroke_renderer.dart';
+import 'package:drawing_ui/src/rendering/rendering.dart';
 
 // =============================================================================
 // COMMITTED STROKES PAINTER

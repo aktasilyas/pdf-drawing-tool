@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../models/tool_type.dart';
-import '../providers/drawing_providers.dart';
-import '../widgets/unified_color_picker.dart';
-import '../widgets/floating_pen_box.dart' show RealisticPenPainter;
-import 'tool_panel.dart';
+import 'package:drawing_ui/src/models/models.dart';
+import 'package:drawing_ui/src/providers/providers.dart';
+import 'package:drawing_ui/src/widgets/unified_color_picker.dart';
+import 'package:drawing_ui/src/widgets/floating_pen_box.dart' show RealisticPenPainter;
+import 'package:drawing_ui/src/panels/tool_panel.dart';
 
 /// Settings panel for pen tools (ballpoint, fountain, pencil, brush).
 ///

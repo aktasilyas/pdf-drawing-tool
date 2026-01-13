@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
-
-import 'stroke_painter.dart';
-import '../rendering/flutter_stroke_renderer.dart';
+import 'package:drawing_ui/src/canvas/stroke_painter.dart';
+import 'package:drawing_ui/src/rendering/rendering.dart';
 
 // =============================================================================
 // DRAWING CANVAS WIDGET
@@ -87,9 +86,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final size = Size(
-          widget.width == double.infinity
-              ? constraints.maxWidth
-              : widget.width,
+          widget.width == double.infinity ? constraints.maxWidth : widget.width,
           widget.height == double.infinity
               ? constraints.maxHeight
               : widget.height,

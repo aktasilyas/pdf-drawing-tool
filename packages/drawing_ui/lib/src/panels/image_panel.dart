@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import 'tool_panel.dart';
+import 'package:drawing_ui/src/panels/tool_panel.dart';
 
 /// Settings panel for the image insertion tool.
 ///

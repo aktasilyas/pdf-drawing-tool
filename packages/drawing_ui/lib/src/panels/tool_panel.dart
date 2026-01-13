@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../theme/drawing_theme.dart';
+import 'package:drawing_ui/src/theme/theme.dart';
 
 /// Base container for tool settings panels.
 ///

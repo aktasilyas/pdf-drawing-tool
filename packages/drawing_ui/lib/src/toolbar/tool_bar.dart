@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../models/tool_type.dart';
-import '../providers/drawing_providers.dart';
-import '../theme/drawing_theme.dart';
-import 'tool_button.dart';
-import 'quick_access_row.dart';
+import 'package:drawing_ui/src/models/models.dart';
+import 'package:drawing_ui/src/providers/providers.dart';
+import 'package:drawing_ui/src/theme/theme.dart';
+import 'package:drawing_ui/src/toolbar/tool_button.dart';
+import 'package:drawing_ui/src/toolbar/quick_access_row.dart';
 
 /// Tool bar (Row 2) - Drawing tools and quick access.
 ///

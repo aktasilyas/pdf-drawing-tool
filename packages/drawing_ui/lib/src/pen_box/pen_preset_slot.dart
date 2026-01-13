@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-
-import '../theme/drawing_theme.dart';
-import '../providers/drawing_providers.dart';
-import 'nib_preview.dart';
+import 'package:drawing_ui/src/theme/theme.dart';
+import 'package:drawing_ui/src/providers/providers.dart';
+import 'package:drawing_ui/src/pen_box/nib_preview.dart';
 
 /// A single slot in the pen box for a pen preset.
 ///

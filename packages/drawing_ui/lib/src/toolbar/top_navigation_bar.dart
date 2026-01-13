@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../providers/drawing_providers.dart';
-import '../theme/drawing_theme.dart';
+import 'package:drawing_ui/src/providers/providers.dart';
+import 'package:drawing_ui/src/theme/theme.dart';
 
 /// Top navigation bar (Row 1) - Navigation and document actions.
 ///

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import 'drawing_colors.dart';
+import 'package:drawing_ui/src/theme/drawing_colors.dart';
 
 /// Theme configuration for drawing UI components.
 ///

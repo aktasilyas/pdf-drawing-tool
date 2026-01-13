@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../models/tool_type.dart';
-import '../theme/drawing_theme.dart';
-import '../providers/drawing_providers.dart';
-import '../toolbar/top_navigation_bar.dart';
-import '../toolbar/tool_bar.dart';
-import '../canvas/mock_canvas.dart';
-import '../panels/panels.dart';
-import '../widgets/floating_pen_box.dart';
+import 'package:drawing_ui/src/models/models.dart';
+import 'package:drawing_ui/src/theme/theme.dart';
+import 'package:drawing_ui/src/providers/providers.dart';
+import 'package:drawing_ui/src/toolbar/toolbar.dart';
+import 'package:drawing_ui/src/canvas/canvas.dart';
+import 'package:drawing_ui/src/panels/panels.dart';
+import 'package:drawing_ui/src/widgets/widgets.dart';
 
 /// The main drawing screen that combines all UI components.
 ///

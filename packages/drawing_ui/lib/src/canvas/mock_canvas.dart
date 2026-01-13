@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../models/tool_type.dart';
-import '../theme/drawing_theme.dart';
-import '../providers/drawing_providers.dart';
+import 'package:drawing_ui/src/models/models.dart';
+import 'package:drawing_ui/src/theme/theme.dart';
+import 'package:drawing_ui/src/providers/providers.dart';
 
 /// A mock canvas widget for Phase 1 UI development.
 ///

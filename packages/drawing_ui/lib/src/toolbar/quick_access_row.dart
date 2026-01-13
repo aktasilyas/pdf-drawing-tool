@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../models/tool_type.dart';
-import '../providers/drawing_providers.dart';
-import '../theme/drawing_theme.dart';
-import '../widgets/unified_color_picker.dart';
+import 'package:drawing_ui/src/models/models.dart';
+import 'package:drawing_ui/src/providers/providers.dart';
+import 'package:drawing_ui/src/theme/theme.dart';
+import 'package:drawing_ui/src/widgets/unified_color_picker.dart';
 
 /// Quick access row for changing color and thickness without opening panels.
 ///

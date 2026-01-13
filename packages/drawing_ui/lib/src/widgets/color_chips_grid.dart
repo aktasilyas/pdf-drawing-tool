@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
-import '../theme/drawing_theme.dart';
-import 'color_chip.dart';
+import 'package:drawing_ui/src/theme/theme.dart';
+import 'package:drawing_ui/src/widgets/color_chip.dart';
 
 /// A grid of color chips for color selection.
 ///

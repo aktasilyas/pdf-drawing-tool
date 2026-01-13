@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../models/tool_type.dart';
-import '../providers/drawing_providers.dart';
+import 'package:drawing_ui/src/models/models.dart';
+import 'package:drawing_ui/src/providers/providers.dart';
 
 /// Floating pen box that appears on the canvas.
 /// Draggable, collapsible, with edit mode for removing pens.
