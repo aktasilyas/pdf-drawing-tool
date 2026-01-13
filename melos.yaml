@@ -1,0 +1,39 @@
+name: starnote_drawing_workspace
+repository: https://github.com/your-org/starnote_drawing
+
+packages:
+  - packages/**
+  - example_app
+
+ide:
+  intellij:
+    enabled: true
+
+command:
+  bootstrap:
+    usePubspecOverrides: true
+    
+  version:
+    branch: main
+    message: "chore: release %v"
+
+scripts:
+  analyze:
+    run: melos exec -- dart analyze .
+    description: Analyze all packages
+
+  test:
+    run: melos exec -- flutter test
+    description: Run tests in all packages
+
+  format:
+    run: melos exec -- dart format .
+    description: Format all packages
+
+  clean:
+    run: melos exec -- flutter clean
+    description: Clean all packages
+
+  build:runner:
+    run: melos exec -- dart run build_runner build --delete-conflicting-outputs
+    description: Run build_runner in all packages

@@ -1,0 +1,54 @@
+/// Flutter UI components for the StarNote drawing library.
+///
+/// This package provides ready-to-use widgets for building drawing applications:
+/// - [DrawingScreen] - The main drawing screen widget
+/// - [TopNavigationBar] - Row 1: Navigation and document actions
+/// - [ToolBar] - Row 2: Drawing tools and quick access
+/// - Tool settings panels for various tools
+library drawing_ui;
+
+// Theme
+export 'src/theme/drawing_theme.dart';
+export 'src/theme/drawing_colors.dart';
+
+// Screens
+export 'src/screens/drawing_screen.dart';
+
+// Canvas
+export 'src/canvas/mock_canvas.dart';
+
+// Toolbar (Two-row layout)
+export 'src/toolbar/top_navigation_bar.dart';
+export 'src/toolbar/tool_bar.dart';
+export 'src/toolbar/tool_button.dart';
+export 'src/toolbar/quick_access_row.dart';
+
+// Note: drawing_toolbar.dart and right_action_buttons.dart deprecated
+// Actions moved to TopNavigationBar
+
+// Note: PenBox sidebar removed - pen presets managed via panel "Add to Pen Box" button
+// Keeping pen_box files for potential future use, but not exported in public API
+
+// Panels
+export 'src/panels/tool_panel.dart';
+export 'src/panels/pen_settings_panel.dart';
+export 'src/panels/highlighter_settings_panel.dart';
+export 'src/panels/eraser_settings_panel.dart';
+export 'src/panels/shapes_settings_panel.dart';
+export 'src/panels/sticker_panel.dart';
+export 'src/panels/image_panel.dart';
+export 'src/panels/ai_assistant_panel.dart';
+export 'src/panels/toolbar_editor_panel.dart';
+export 'src/panels/lasso_selection_panel.dart';
+export 'src/panels/laser_pointer_panel.dart';
+
+// Common Widgets
+export 'src/widgets/color_chip.dart';
+export 'src/widgets/color_chips_grid.dart';
+export 'src/widgets/thickness_slider.dart';
+export 'src/widgets/panel_overlay.dart';
+export 'src/widgets/unified_color_picker.dart';
+export 'src/widgets/floating_pen_box.dart';
+
+// State Management
+export 'src/providers/drawing_providers.dart';

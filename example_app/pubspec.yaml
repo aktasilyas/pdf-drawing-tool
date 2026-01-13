@@ -1,0 +1,29 @@
+name: example_app
+description: StarNote-like drawing application demonstrating the drawing_toolkit library.
+version: 0.1.0
+publish_to: 'none'
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: '>=3.10.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.4.0
+  drawing_ui:
+    path: ../packages/drawing_ui
+  drawing_core:
+    path: ../packages/drawing_core
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/icons/
+    - assets/stickers/

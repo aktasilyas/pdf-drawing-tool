@@ -1,0 +1,25 @@
+name: drawing_ui
+description: Flutter UI widgets for the StarNote drawing library. Includes toolbar, pen box, tool panels, and canvas components.
+version: 0.1.0
+publish_to: 'none' # Remove this when ready for pub.dev
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: '>=3.10.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  drawing_core:
+    path: ../drawing_core
+  flutter_riverpod: ^2.4.0
+  equatable: ^2.0.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+  mocktail: ^1.0.0
+
+flutter:
+  uses-material-design: true
