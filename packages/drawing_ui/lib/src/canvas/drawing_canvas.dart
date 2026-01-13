@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/canvas/stroke_painter.dart';
 import 'package:drawing_ui/src/rendering/rendering.dart';
+import 'package:drawing_ui/src/providers/document_provider.dart';
 
 // =============================================================================
 // DRAWING CANVAS WIDGET
@@ -57,10 +58,6 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
   /// Cached renderer instance - shared across all painters.
   final FlutterStrokeRenderer _renderer = FlutterStrokeRenderer();
 
-  /// Committed strokes list.
-  /// Will be connected to DocumentProvider in Step 7.
-  final List<Stroke> _committedStrokes = [];
-
   // ─────────────────────────────────────────────────────────────────────────
   // GESTURE HANDLING - Performance optimizations
   // ─────────────────────────────────────────────────────────────────────────
@@ -76,9 +73,9 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
   @visibleForTesting
   DrawingController get drawingController => _drawingController;
 
-  /// Exposes committed strokes for testing.
+  /// Exposes committed strokes from provider for testing.
   @visibleForTesting
-  List<Stroke> get committedStrokes => _committedStrokes;
+  List<Stroke> get committedStrokes => ref.read(activeLayerStrokesProvider);
 
   /// Exposes last point for testing distance filtering.
   @visibleForTesting
@@ -128,8 +125,8 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
   void _handlePointerUp(PointerUpEvent event) {
     final stroke = _drawingController.endStroke();
     if (stroke != null) {
-      // Add to committed strokes (will be connected to DocumentProvider in Step 7)
-      _committedStrokes.add(stroke);
+      // Add stroke to document via provider
+      ref.read(documentProvider.notifier).addStroke(stroke);
     }
     _lastPoint = null;
   }
@@ -163,6 +160,9 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
 
   @override
   Widget build(BuildContext context) {
+    // Watch provider for committed strokes
+    final strokes = ref.watch(activeLayerStrokesProvider);
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final size = Size(
@@ -197,23 +197,18 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
                 ),
 
                 // ─────────────────────────────────────────────────────────────
-                // LAYER 2: Committed Strokes
+                // LAYER 2: Committed Strokes (from DocumentProvider)
                 // ─────────────────────────────────────────────────────────────
-                // Only repaints when stroke count changes
+                // Repaints when strokes are added/removed via provider
                 RepaintBoundary(
-                  child: ListenableBuilder(
-                    listenable: _drawingController,
-                    builder: (context, _) {
-                      return CustomPaint(
-                        size: size,
-                        painter: CommittedStrokesPainter(
-                          strokes: _committedStrokes,
-                          renderer: _renderer,
-                        ),
-                        isComplex: true,
-                        willChange: false,
-                      );
-                    },
+                  child: CustomPaint(
+                    size: size,
+                    painter: CommittedStrokesPainter(
+                      strokes: strokes,
+                      renderer: _renderer,
+                    ),
+                    isComplex: true,
+                    willChange: false,
                   ),
                 ),
 

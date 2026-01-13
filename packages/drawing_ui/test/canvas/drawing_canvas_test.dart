@@ -142,7 +142,7 @@ void main() {
         );
       });
 
-      testWidgets('uses ListenableBuilder for stroke layers', (tester) async {
+      testWidgets('uses ListenableBuilder for active stroke layer', (tester) async {
         await tester.pumpWidget(
           const ProviderScope(
             child: MaterialApp(
@@ -153,13 +153,13 @@ void main() {
           ),
         );
 
-        // Committed + Active = 2 ListenableBuilder (inside DrawingCanvas)
+        // Active stroke uses ListenableBuilder (Committed strokes use provider)
         expect(
           find.descendant(
             of: find.byType(DrawingCanvas),
             matching: find.byType(ListenableBuilder),
           ),
-          findsNWidgets(2),
+          findsOneWidget,
         );
       });
     });
@@ -258,14 +258,14 @@ void main() {
           ),
         );
 
-        // If we got here without error, ListenableBuilder is being used
+        // ListenableBuilder used for active stroke (committed uses provider)
         // The existence of ListenableBuilder proves no setState pattern
         expect(
           find.descendant(
             of: find.byType(DrawingCanvas),
             matching: find.byType(ListenableBuilder),
           ),
-          findsNWidgets(2),
+          findsOneWidget,
         );
       });
 

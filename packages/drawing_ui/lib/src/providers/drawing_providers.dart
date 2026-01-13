@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/models/models.dart';
 
 // =============================================================================
@@ -801,11 +800,8 @@ final canUndoProvider = StateProvider<bool>((ref) => false);
 final canRedoProvider = StateProvider<bool>((ref) => false);
 
 // =============================================================================
-// DOCUMENT PROVIDER (Mock for Phase 1)
+// DOCUMENT PROVIDER
 // =============================================================================
-
-/// Mock document provider for Phase 1 UI development.
-final documentProvider = StateProvider<DrawingDocument?>((ref) {
-  // Returns null for now, will be implemented in Phase 2
-  return null;
-});
+// NOTE: Real DocumentProvider is now in document_provider.dart
+// The documentProvider, activeLayerStrokesProvider, strokeCountProvider,
+// and isDocumentEmptyProvider are exported from there.
