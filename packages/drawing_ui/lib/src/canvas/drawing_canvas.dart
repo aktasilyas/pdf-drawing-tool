@@ -5,6 +5,7 @@ import 'package:drawing_ui/src/canvas/stroke_painter.dart';
 import 'package:drawing_ui/src/rendering/rendering.dart';
 import 'package:drawing_ui/src/providers/document_provider.dart';
 import 'package:drawing_ui/src/providers/history_provider.dart';
+import 'package:drawing_ui/src/providers/tool_style_provider.dart';
 
 // =============================================================================
 // DRAWING CANVAS WIDGET
@@ -151,18 +152,18 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
 
   /// Gets the current stroke style.
   /// Will be connected to provider in Step 9.
+  /// Gets the current stroke style from provider.
   StrokeStyle _getCurrentStyle() {
-    // Default pen style - will be replaced with provider in Step 9
-    return StrokeStyle.pen(
-      color: 0xFF000000,
-      thickness: 3.0,
-    );
+    // Get style from active tool provider
+    return ref.read(activeStrokeStyleProvider);
   }
 
   @override
   Widget build(BuildContext context) {
     // Watch provider for committed strokes
     final strokes = ref.watch(activeLayerStrokesProvider);
+    // Check if current tool is a drawing tool
+    final isDrawingTool = ref.watch(isDrawingToolProvider);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -174,12 +175,12 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
         );
 
         // Listener for raw pointer events (NOT GestureDetector)
-        // This gives us direct access to pointer data for smooth drawing
+        // Only enable drawing when a drawing tool is selected
         return Listener(
-          onPointerDown: _handlePointerDown,
-          onPointerMove: _handlePointerMove,
-          onPointerUp: _handlePointerUp,
-          onPointerCancel: _handlePointerCancel,
+          onPointerDown: isDrawingTool ? _handlePointerDown : null,
+          onPointerMove: isDrawingTool ? _handlePointerMove : null,
+          onPointerUp: isDrawingTool ? _handlePointerUp : null,
+          onPointerCancel: isDrawingTool ? _handlePointerCancel : null,
           behavior: HitTestBehavior.opaque,
           child: ClipRect(
             child: Stack(

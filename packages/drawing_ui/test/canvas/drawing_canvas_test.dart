@@ -713,7 +713,7 @@ void main() {
       expect(state.committedStrokes.length, equals(2));
     });
 
-    testWidgets('default style is black pen with 3.0 thickness',
+    testWidgets('default style uses ballpointPen settings from provider',
         (tester) async {
       await tester.pumpWidget(
         const ProviderScope(
@@ -739,10 +739,11 @@ void main() {
       ));
       await tester.pump();
 
-      // Check style
+      // Check style - should use default ballpointPen settings
       final style = state.committedStrokes.first.style;
-      expect(style.color, equals(0xFF000000));
-      expect(style.thickness, equals(3.0));
+      expect(style.color, equals(0xFF000000)); // Black
+      expect(style.thickness, equals(2.0)); // ballpointPen default
+      expect(style.nibShape, equals(NibShape.circle)); // ballpointPen nib
     });
   });
 

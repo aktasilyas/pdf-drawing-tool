@@ -166,23 +166,11 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
   }
 
   void _onUndoPressed() {
-    // MOCK: Would trigger undo
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('MOCK: Undo (will be implemented in Phase 2)'),
-        duration: Duration(seconds: 1),
-      ),
-    );
+    ref.read(historyManagerProvider.notifier).undo();
   }
 
   void _onRedoPressed() {
-    // MOCK: Would trigger redo
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('MOCK: Redo (will be implemented in Phase 2)'),
-        duration: Duration(seconds: 1),
-      ),
-    );
+    ref.read(historyManagerProvider.notifier).redo();
   }
 
   void _onSettingsPressed() {
