@@ -60,3 +60,7 @@ export 'src/widgets/floating_pen_box.dart';
 
 // State Management
 export 'src/providers/drawing_providers.dart';
+export 'src/providers/document_provider.dart';
+export 'src/providers/history_provider.dart';
+export 'src/providers/tool_style_provider.dart';
+export 'src/providers/canvas_transform_provider.dart';

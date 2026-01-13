@@ -3,198 +3,139 @@
 > **Single Source of Truth** for all development progress.  
 > Update this file as features are implemented.
 > 
-> **Last Updated**: 2026-01-13 (Phase 3 Complete!)
+> **Last Updated**: 2025-01-13 (Phase 3 Complete, Phase 4 Ready)
 
 ---
 
 ## Phase Status Overview
 
-| Phase | Status | Branch | Completion |
-|-------|--------|--------|------------|
-| Phase 0 | ✅ COMPLETE | main | 100% |
-| Phase 1 | ✅ COMPLETE | main | 100% |
-| Phase 2 | ✅ COMPLETE | main | 100% |
-| Phase 3 | ✅ COMPLETE | feature/phase3-canvas-integration | 100% |
-| Phase 4 | ❌ NOT STARTED | - | 0% |
+| Phase | Status | Branch | Tag | Completion |
+|-------|--------|--------|-----|------------|
+| Phase 0 | ✅ COMPLETE | main | - | 100% |
+| Phase 1 | ✅ COMPLETE | main | v0.1.0-phase1 | 100% |
+| Phase 2 | ✅ COMPLETE | main | v0.2.0-phase2 | 100% |
+| Phase 3 | ✅ COMPLETE | main | v0.3.0-phase3 | 100% |
+| Phase 4 | ❌ NOT STARTED | - | - | 0% |
+| Phase 5 | ❌ NOT STARTED | - | - | 0% |
 
 ---
 
-## Phase 0: Scaffolding & Architecture ✅ COMPLETE
+## Phase 0: Scaffolding ✅ COMPLETE
 
 - [x] Melos workspace configuration
-- [x] Package skeletons (drawing_core, drawing_ui, drawing_toolkit)
+- [x] Package skeletons
 - [x] Example app skeleton
-- [x] Documentation (ARCHITECTURE.md, PERFORMANCE_STRATEGY.md, etc.)
+- [x] Documentation
 
 ---
 
 ## Phase 1: UI Skeleton ✅ COMPLETE
 
-- [x] Two-row toolbar (Navigation + Tools)
-- [x] Floating pen box (draggable, collapsible)
-- [x] All tool panels (pen, highlighter, eraser, shapes, etc.)
-- [x] Quick access colors and thickness
-- [x] State management with Riverpod
+- [x] Two-row toolbar
+- [x] Floating pen box
+- [x] All tool panels
+- [x] Quick access colors
+- [x] State management (Riverpod)
 - [x] Turkish localization
+- [x] 69 tests
 
 ---
 
 ## Phase 2: Drawing Core ✅ COMPLETE
 
-### Models
-- [x] DrawingPoint (x, y, pressure, tilt, timestamp)
-- [x] StrokeStyle (color, thickness, opacity, nibShape, blendMode)
-- [x] Stroke (id, points, style, bounds)
-- [x] Layer (id, name, strokes, visibility, locked)
-- [x] DrawingDocument (layers, activeLayerIndex, dimensions)
-- [x] BoundingBox (bounds calculation)
-
-### Tools
-- [x] DrawingTool (abstract)
-- [x] PenTool
-- [x] HighlighterTool
-- [x] BrushTool
-
-### History
-- [x] DrawingCommand (abstract)
-- [x] AddStrokeCommand
-- [x] RemoveStrokeCommand
+- [x] DrawingPoint, Stroke, StrokeStyle models
+- [x] Layer, DrawingDocument models
+- [x] PenTool, HighlighterTool, BrushTool
 - [x] HistoryManager (100-step undo/redo)
-
-### Utilities
-- [x] PathSmoother (smooth, simplify, interpolate)
-
-### Quality
+- [x] PathSmoother
 - [x] Zero Flutter imports
-- [x] All models immutable
-- [x] JSON serialization
-- [x] Full test coverage (~150 tests)
+- [x] ~150 tests
 
 ---
 
 ## Phase 3: Canvas Integration ✅ COMPLETE
 
-### Documentation
-- [x] PHASE3_MASTER_PLAN.md
-- [x] PHASE3_CURSOR_INSTRUCTIONS.md
-- [x] PHASE3_PERFORMANCE_RULES.md
-- [x] PHASE3_QUALITY_STANDARDS.md
-
-### Rendering Layer
-- [x] FlutterStrokeRenderer (Stroke → Canvas bridge)
-  - [x] renderStroke / renderStrokes
-  - [x] renderActiveStroke
-  - [x] NibShape → StrokeCap mapping
-  - [x] BlendMode mapping
-  - [x] 26 tests
-
-### Painters
-- [x] CommittedStrokesPainter (rare repaint)
-- [x] ActiveStrokePainter (per-frame repaint)
-- [x] DrawingController (ChangeNotifier, no setState)
-- [x] Optimized shouldRepaint
-
-### Canvas Widget
-- [x] DrawingCanvas basic structure
-- [x] RepaintBoundary layers (3 layers)
-- [x] Grid background painter
-- [x] ListenableBuilder integration
-
-### Gesture Handling
-- [x] Pointer event handling (Listener widget)
-- [x] onPointerDown → startStroke
-- [x] onPointerMove → addPoint
-- [x] onPointerUp → endStroke
-- [x] onPointerCancel → cancelStroke
-- [x] Pressure support
-
-### Live Drawing
-- [x] Active stroke preview
-- [x] 60 FPS verified
-- [x] Performance optimized
-
-### State Management
-- [x] DocumentProvider (DrawingDocument state)
-- [x] HistoryProvider (HistoryManager wrapper)
-- [x] canUndo/canRedo providers
-- [x] activeLayerStrokes provider
-
-### Tool Integration
-- [x] activeStrokeStyleProvider
-- [x] UI tool → Core style mapping
-- [x] Style sync (color, thickness)
-- [x] isDrawingToolProvider
-
-### Undo/Redo
-- [x] Undo button activation
-- [x] Redo button activation
-- [x] Connected to HistoryProvider
-
-### Zoom/Pan
-- [x] CanvasTransformProvider
-- [x] Pinch-to-zoom gesture
-- [x] Two-finger pan gesture
-- [x] Zoom limits (25% - 500%)
-- [x] Coordinate transformation
-- [x] Vector rendering (sharp at all zoom levels)
-
-### Final Integration
-- [x] Replace MockCanvas with DrawingCanvas
-- [x] Full draw flow tested
-- [x] Undo/redo cycle tested
-- [x] Manual performance verified
-
-### Tests
-- [x] FlutterStrokeRenderer tests (26)
-- [x] StrokePainter tests (36)
-- [x] DrawingCanvas tests (25+)
-- [x] DocumentProvider tests (26)
-- [x] HistoryProvider tests (21)
-- [x] ToolStyleProvider tests (29)
-- [x] CanvasTransformProvider tests (25)
+- [x] FlutterStrokeRenderer
+- [x] CommittedStrokesPainter + ActiveStrokePainter
+- [x] DrawingCanvas widget
+- [x] Gesture handling (Listener)
+- [x] DocumentProvider
+- [x] HistoryProvider
+- [x] Tool Integration
+- [x] Undo/Redo buttons
+- [x] Zoom/Pan support
+- [x] Barrel exports pattern
+- [x] ~220 tests
 
 ---
 
 ## Phase 4: Advanced Features ❌ NOT STARTED
 
-### Eraser
-- [ ] Pixel eraser (hit testing)
-- [ ] Stroke eraser (whole stroke)
-- [ ] Lasso eraser (selection-based)
+### Phase 4A: Eraser System (7 steps)
 
-### Selection
-- [ ] SelectionContext model
-- [ ] Lasso selection tool
-- [ ] Rectangle selection
-- [ ] Multi-stroke selection
-- [ ] Selection bounds visualization
+#### drawing_core
+- [ ] Hit testing infrastructure (hit_tester.dart)
+- [ ] StrokeHitTester implementation
+- [ ] EraserTool (stroke mode)
+- [ ] EraseStrokesCommand
 
-### Shapes
-- [ ] Line tool
-- [ ] Rectangle tool
-- [ ] Ellipse tool
-- [ ] Arrow tool
+#### drawing_ui
+- [ ] Eraser providers
+- [ ] DrawingCanvas eraser integration
+- [ ] Eraser cursor indicator (optional)
+- [ ] Manual testing & polish
 
-### Text
-- [ ] Text element model
-- [ ] Text input handling
-- [ ] Text rendering
+### Phase 4B: Selection System (9 steps)
+
+#### drawing_core
+- [ ] Selection model
+- [ ] SelectionTool abstract class
+- [ ] LassoSelectionTool (point-in-polygon)
+- [ ] RectSelectionTool
+- [ ] MoveSelectionCommand
+- [ ] DeleteSelectionCommand
+
+#### drawing_ui
+- [ ] SelectionProvider
+- [ ] SelectionPainter
+- [ ] SelectionHandles widget
+- [ ] DrawingCanvas selection integration
+
+### Phase 4C: Shape Tools (6 steps)
+
+#### drawing_core
+- [ ] Shape model
+- [ ] ShapeType enum
+- [ ] Layer model update (shapes list)
+- [ ] ShapeTool abstract class
+- [ ] LineTool
+- [ ] RectangleTool
+- [ ] EllipseTool
+- [ ] ArrowTool
+- [ ] AddShapeCommand
+- [ ] RemoveShapeCommand
+
+#### drawing_ui
+- [ ] ShapePainter
+- [ ] Shape providers
+- [ ] DrawingCanvas shape integration
+
+### Phase 4D: Text Tool (OPTIONAL)
+- [ ] TextElement model
+- [ ] TextTool
+- [ ] TextInputOverlay widget
+- [ ] TextPainter
 
 ---
 
 ## Phase 5: Multi-Page & PDF ❌ NOT STARTED
 
-### Page Management
 - [ ] Page model
 - [ ] PageManager (lazy loading)
-- [ ] LRU cache implementation
-- [ ] Prefetch strategy
-
-### PDF Support
+- [ ] LRU cache
 - [ ] PDF loading
 - [ ] Zoom-aware DPI rendering
 - [ ] Page navigation
-- [ ] Annotation overlay
 
 ---
 
@@ -203,7 +144,7 @@
 - [ ] API review
 - [ ] Version numbering
 - [ ] CHANGELOG.md
-- [ ] README.md for packages
+- [ ] README.md
 - [ ] pub.dev submission
 
 ---
@@ -212,30 +153,45 @@
 
 | Tag | Description | Date |
 |-----|-------------|------|
-| v0.1.0-phase1 | Phase 1: UI Skeleton | 2025-01-13 |
-| v0.2.0-phase2 | Phase 2: Drawing Core | 2025-01-13 |
-| v0.3.0-phase3 | Phase 3: Canvas Integration | 2026-01-13 |
+| v0.1.0-phase1 | UI Skeleton | 2025-01-13 |
+| v0.2.0-phase2 | Drawing Core | 2025-01-13 |
+| v0.3.0-phase3 | Canvas Integration | 2025-01-13 |
+| v0.4.0-phase4a | Eraser System | TBD |
+| v0.4.0-phase4b | Selection System | TBD |
+| v0.4.0-phase4c | Shape Tools | TBD |
+| v0.4.0-phase4 | Advanced Features | TBD |
 
 ---
 
-## Performance Targets
-
-| Metric | Target | Current |
-|--------|--------|---------|
-| Frame time | <8ms | ✅ Achieved |
-| Input latency | <16ms | ✅ Achieved |
-| FPS | 60 | ✅ Achieved |
-| Smooth drawing | Yes | ✅ Achieved |
-
----
-
-## Test Coverage Summary
+## Test Coverage
 
 | Package | Tests | Status |
 |---------|-------|--------|
 | drawing_core | ~150 | ✅ Full |
-| drawing_ui | ~260 | ✅ Full |
+| drawing_ui | ~70 | ✅ Good |
 
 ---
 
-*Last updated: 2026-01-13 - Phase 3 Complete! 🎉*
+## Performance Metrics
+
+| Metric | Target | Phase 3 Status |
+|--------|--------|----------------|
+| Frame time | <16ms | ✅ Achieved |
+| Input latency | <16ms | ✅ Achieved |
+| FPS | 60 | ✅ Achieved |
+| Hit test (Phase 4) | <5ms | TBD |
+
+---
+
+## Architecture Achievements
+
+- ✅ Zero relative imports (barrel pattern)
+- ✅ Clean package separation
+- ✅ Two-layer rendering
+- ✅ No setState for drawing
+- ✅ Full undo/redo support
+- ✅ Vector rendering (zoom quality)
+
+---
+
+*Last updated: 2025-01-13 - Phase 3 Complete*

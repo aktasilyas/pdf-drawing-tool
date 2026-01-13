@@ -1,135 +1,228 @@
-# Phase 2 Başlangıç - Cursor'a İlk Komut
-
-Aşağıdaki metni Cursor'a kopyala-yapıştır:
+# Phase 4 Başlangıç - Cursor'a Verilecek Komutlar
 
 ---
 
-## 🚀 BAŞLANGIÇ KOMUTU
+## 🚀 Phase 4'e Başlamadan Önce
+
+### 1. Branch Oluştur
 
 ```
-Phase 2'ye başlıyoruz: Drawing Core
+Yeni branch oluştur:
 
-ADIM 0: Proje hazırlığı
-
-1. Feature branch oluştur:
-   git checkout -b feature/phase2-drawing-core
-
-2. packages/drawing_core klasör yapısını oluştur:
-   packages/drawing_core/
-   ├── lib/
-   │   ├── drawing_core.dart
-   │   └── src/
-   │       ├── models/
-   │       ├── tools/
-   │       ├── history/
-   │       ├── input/
-   │       └── rendering/
-   ├── test/
-   │   ├── models/
-   │   ├── tools/
-   │   ├── history/
-   │   └── input/
-   └── pubspec.yaml
-
-3. pubspec.yaml içeriği:
-   name: drawing_core
-   description: UI-agnostic drawing engine core for Flutter
-   version: 0.1.0
-   
-   environment:
-     sdk: '>=3.0.0 <4.0.0'
-   
-   dependencies:
-     meta: ^1.9.0
-     equatable: ^2.0.5
-   
-   dev_dependencies:
-     test: ^1.24.0
-
-4. lib/drawing_core.dart boş placeholder:
-   library drawing_core;
-   // Exports will be added as we implement
-
-Sadece yapıyı oluştur, kod YAZMA.
-Tamamladığında bana bildir.
+git checkout main
+git pull origin main
+git checkout -b feature/phase4-advanced-features
+git push -u origin feature/phase4-advanced-features
 ```
 
 ---
 
-## 📋 ADIM 1 KOMUTU (Yapı oluştuktan sonra)
+### 2. Dökümanları Oku
 
 ```
-GÖREV: DrawingPoint model oluştur
+Phase 4 dökümanları hazır. SIRAYLA oku:
 
-Dosya: packages/drawing_core/lib/src/models/drawing_point.dart
+1. docs/PHASE4_MASTER_PLAN.md - Genel plan ve modüller
+2. docs/PHASE4_CURSOR_INSTRUCTIONS.md - Adım adım görevler
+3. docs/PHASE4_ERASER_SPEC.md - Eraser detaylı spec
+4. docs/PHASE4_SELECTION_SPEC.md - Selection detaylı spec
+5. docs/PHASE4_SHAPES_SPEC.md - Shapes detaylı spec
+6. docs/PHASE4_PERFORMANCE_RULES.md - Performans kuralları
 
-Gereksinimler:
-- x: double (zorunlu)
-- y: double (zorunlu)  
-- pressure: double (0.0-1.0, varsayılan 1.0)
-- tilt: double (radyan, varsayılan 0.0)
-- timestamp: int (milliseconds, varsayılan 0)
+.cursorrules dosyası da güncellendi.
 
-- Equatable extend et
-- copyWith metodu ekle
-- toJson / fromJson factory ekle
-- Pressure 0.0-1.0 arasında clamp edilmeli
+Her dökümanı oku ve bana şunları özetle:
+1. Phase 4'ün 3 ana modülü nelerdir?
+2. İlk modül (4A) kaç adımdan oluşuyor?
+3. Hit testing için kritik performans kuralı nedir?
 
-❌ FLUTTER IMPORT KULLANMA
-✅ Sadece equatable ve dart:core
-
-Test dosyası: test/models/drawing_point_test.dart
-- Constructor testleri
-- copyWith testleri
-- Equality testleri
-- JSON serialization testleri
-- Pressure bounds testleri
-
-Bittiğinde:
-1. flutter analyze çalıştır
-2. flutter test çalıştır
-3. Sonuçları bana göster
-4. Commit mesajı öner
+Dökümanları okumadan kod YAZMA.
 ```
 
 ---
 
-## 🔄 HER ADIM SONRASI CURSOR'DAN BEKLENTİ
+## 📋 Phase 4A İlk Adım Komutu
 
-Cursor her görev sonunda şu formatı kullanmalı:
+Cursor dökümanları okuduktan sonra:
 
 ```
-📁 Oluşturulan/Değiştirilen Dosyalar:
-- packages/drawing_core/lib/src/models/drawing_point.dart (oluşturuldu)
-- packages/drawing_core/test/models/drawing_point_test.dart (oluşturuldu)
+Tamam, Phase 4A-1'e başlayalım.
 
-🧪 Test Sonuçları:
-flutter analyze: ✅ 0 hata, 0 uyarı
-flutter test: ✅ 8 test geçti
+PHASE4_CURSOR_INSTRUCTIONS.md dosyasındaki ADIM 4A-1 görevini uygula.
 
-📝 Önerilen Commit:
-feat(core): add DrawingPoint model with full test coverage
+📖 Referans: PHASE4_ERASER_SPEC.md - Hit Testing bölümü
 
-- Immutable DrawingPoint class with x, y, pressure, tilt, timestamp
-- Equatable for equality comparison
-- JSON serialization support
-- Comprehensive test coverage
+⚠️ KURALLAR:
+- Yeni klasör: packages/drawing_core/lib/src/hit_testing/
+- Abstract class oluştur
+- Barrel export ekle
 
-Commit yapılsın mı? (y/n)
+Başla!
 ```
 
 ---
 
-## ⚠️ CURSOR'A HATIRLATMALAR
-
-Her yeni görevde şunu ekle:
+## 🔄 Her Adım Sonrası Cursor'dan Beklenti
 
 ```
-KURALLAR:
-1. Flutter import KULLANMA
-2. Renkleri int olarak tut (0xFFRRGGBB)
-3. Tüm modeller immutable olmalı
-4. Her dosya için test YAZILMALI
-5. 300 satırı geçme
-6. Commit öncesi ONAY bekle
+📁 Dosyalar:
+- packages/drawing_core/lib/src/hit_testing/hit_tester.dart (created)
+- packages/drawing_core/lib/src/hit_testing/hit_testing.dart (created)
+
+🧪 Testler:
+- flutter analyze: ✅/❌
+- flutter test: ✅ X test geçti
+
+⚡ Performans Kontrolü (Phase 4 için):
+- Bounds check kullanıldı: ✅/❌
+- Path cached: ✅/❌
+- Command batched: ✅/❌
+
+📝 Commit önerisi:
+feat(core): add hit testing infrastructure
+
+Onay bekle.
 ```
+
+---
+
+## ⚠️ Phase 4 Kritik Hatırlatmalar
+
+Her görevde Cursor'a ekle:
+
+```
+⚠️ PHASE 4 KURALLARI:
+
+1. HIT TESTING: Mutlaka bounding box pre-filter kullan
+2. SELECTION: Ayrı RepaintBoundary layer'da
+3. SHAPES: Path'leri cache'le
+4. COMMANDS: Gesture başına tek command (batching)
+
+📖 Detaylar için: docs/PHASE4_PERFORMANCE_RULES.md
+```
+
+---
+
+## 📊 Phase 4 İlerleme Takibi
+
+### Phase 4A: Eraser (7 adım)
+```
+4A-1: ❌ Hit Testing Infrastructure
+4A-2: ❌ StrokeHitTester
+4A-3: ❌ EraserTool
+4A-4: ❌ EraseStrokesCommand
+4A-5: ❌ Eraser Provider
+4A-6: ❌ Canvas Integration
+4A-7: ❌ Test & Polish
+```
+
+### Phase 4B: Selection (9 adım)
+```
+4B-1: ❌ Selection Model
+4B-2: ❌ SelectionTool Abstract
+4B-3: ❌ LassoSelectionTool
+4B-4: ❌ RectSelectionTool
+4B-5: ❌ Selection Commands
+4B-6: ❌ SelectionProvider
+4B-7: ❌ SelectionPainter
+4B-8: ❌ SelectionHandles
+4B-9: ❌ Canvas Integration
+```
+
+### Phase 4C: Shapes (6 adım)
+```
+4C-1: ❌ Shape Model
+4C-2: ❌ Layer Update
+4C-3: ❌ Shape Tools
+4C-4: ❌ Shape Commands
+4C-5: ❌ ShapePainter
+4C-6: ❌ Integration
+```
+
+---
+
+## 🎯 Phase 4 Sonunda Hedefler
+
+### Fonksiyonellik
+- ✅ Silgi ile çizgi silme
+- ✅ Lasso ile seçim yapma
+- ✅ Dikdörtgen ile seçim yapma
+- ✅ Seçimi taşıma/silme
+- ✅ Düz çizgi çizme
+- ✅ Dikdörtgen çizme
+- ✅ Elips çizme
+- ✅ Ok çizme
+
+### Performans
+- ✅ Hit test <5ms
+- ✅ Selection 60 FPS
+- ✅ Shape preview 60 FPS
+
+### Kalite
+- ✅ Full undo/redo support
+- ✅ Clean architecture
+- ✅ Comprehensive tests
+
+---
+
+## 📁 Dosya Yerleşimi
+
+```
+starnote_drawing_workspace/
+├── .cursorrules                         ← DEĞİŞTİR
+├── docs/
+│   ├── CHECKLIST_TODO.md                ← DEĞİŞTİR
+│   ├── PHASE4_MASTER_PLAN.md            ← YENİ
+│   ├── PHASE4_CURSOR_INSTRUCTIONS.md    ← YENİ
+│   ├── PHASE4_ERASER_SPEC.md            ← YENİ
+│   ├── PHASE4_SELECTION_SPEC.md         ← YENİ
+│   ├── PHASE4_SHAPES_SPEC.md            ← YENİ
+│   ├── PHASE4_PERFORMANCE_RULES.md      ← YENİ
+│   └── ... (mevcut dökümanlar)
+└── packages/
+```
+
+---
+
+## 🔧 Kopyalama Komutları
+
+```bash
+cd starnote_drawing_workspace
+
+# .cursorrules güncelle
+cp ~/Downloads/phase4/_cursorrules ./.cursorrules
+
+# docs klasörüne kopyala
+cp ~/Downloads/phase4/PHASE4_MASTER_PLAN.md ./docs/
+cp ~/Downloads/phase4/PHASE4_CURSOR_INSTRUCTIONS.md ./docs/
+cp ~/Downloads/phase4/PHASE4_ERASER_SPEC.md ./docs/
+cp ~/Downloads/phase4/PHASE4_SELECTION_SPEC.md ./docs/
+cp ~/Downloads/phase4/PHASE4_SHAPES_SPEC.md ./docs/
+cp ~/Downloads/phase4/PHASE4_PERFORMANCE_RULES.md ./docs/
+cp ~/Downloads/phase4/CHECKLIST_TODO.md ./docs/
+```
+
+---
+
+## 💡 Tavsiyeler
+
+### Modül Sırası (DEĞİŞTİRME!)
+```
+1. Phase 4A: Eraser    ← Hit testing altyapısı burada
+2. Phase 4B: Selection ← Hit testing'i kullanır
+3. Phase 4C: Shapes    ← En bağımsız modül
+```
+
+### Commit Stratejisi
+- Her adım sonrası commit
+- Her modül sonrası tag
+- Modül tamamlanmadan merge YAPMA
+
+### Test Stratejisi
+- Her yeni class için test yaz
+- Hit testing için benchmark test
+- Selection için integration test
+
+---
+
+*İyi çalışmalar! Phase 4 başarıyla tamamlanacak! 🚀*

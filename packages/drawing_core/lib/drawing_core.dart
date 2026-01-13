@@ -56,3 +56,6 @@ export 'src/history/remove_stroke_command.dart';
 
 // Input Processing
 export 'src/input/path_smoother.dart';
+
+// Hit Testing
+export 'src/hit_testing/hit_testing.dart';
