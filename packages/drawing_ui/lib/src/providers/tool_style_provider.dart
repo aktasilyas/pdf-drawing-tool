@@ -145,3 +145,9 @@ final isPenToolProvider = Provider<bool>((ref) {
     ToolType.highlighter,
   ].contains(toolType);
 });
+
+/// Whether the current tool is the selection tool.
+final isSelectionToolProvider = Provider<bool>((ref) {
+  final toolType = ref.watch(currentToolProvider);
+  return toolType == ToolType.selection;
+});

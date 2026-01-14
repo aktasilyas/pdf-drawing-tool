@@ -165,17 +165,18 @@ void main() {
     });
 
     group('selection tool providers', () {
-      test('default selection tool type is rectangle', () {
-        expect(container.read(activeSelectionToolTypeProvider),
-            equals(SelectionType.rectangle));
-      });
-
-      test('can change selection tool type to lasso', () {
-        container.read(activeSelectionToolTypeProvider.notifier).state =
-            SelectionType.lasso;
-
+      test('default selection tool type is lasso (matches LassoMode.freeform)', () {
+        // Default should be lasso to match LassoSettings.defaultSettings().mode = freeform
         expect(container.read(activeSelectionToolTypeProvider),
             equals(SelectionType.lasso));
+      });
+
+      test('can change selection tool type to rectangle', () {
+        container.read(activeSelectionToolTypeProvider.notifier).state =
+            SelectionType.rectangle;
+
+        expect(container.read(activeSelectionToolTypeProvider),
+            equals(SelectionType.rectangle));
       });
 
       test('lassoSelectionToolProvider returns lasso tool', () {
@@ -188,28 +189,29 @@ void main() {
         expect(tool.selectionType, equals(SelectionType.rectangle));
       });
 
-      test('activeSelectionToolProvider returns rectangle tool by default',
+      test('activeSelectionToolProvider returns lasso tool by default',
           () {
-        final tool = container.read(activeSelectionToolProvider);
-        expect(tool.selectionType, equals(SelectionType.rectangle));
-      });
-
-      test('activeSelectionToolProvider returns lasso tool when selected', () {
-        container.read(activeSelectionToolTypeProvider.notifier).state =
-            SelectionType.lasso;
-
+        // Default should be lasso to match LassoSettings.defaultSettings().mode = freeform
         final tool = container.read(activeSelectionToolProvider);
         expect(tool.selectionType, equals(SelectionType.lasso));
       });
 
-      test('activeSelectionToolProvider switches back to rectangle', () {
-        container.read(activeSelectionToolTypeProvider.notifier).state =
-            SelectionType.lasso;
+      test('activeSelectionToolProvider returns rectangle tool when selected', () {
         container.read(activeSelectionToolTypeProvider.notifier).state =
             SelectionType.rectangle;
 
         final tool = container.read(activeSelectionToolProvider);
         expect(tool.selectionType, equals(SelectionType.rectangle));
+      });
+
+      test('activeSelectionToolProvider switches back to lasso', () {
+        container.read(activeSelectionToolTypeProvider.notifier).state =
+            SelectionType.rectangle;
+        container.read(activeSelectionToolTypeProvider.notifier).state =
+            SelectionType.lasso;
+
+        final tool = container.read(activeSelectionToolProvider);
+        expect(tool.selectionType, equals(SelectionType.lasso));
       });
     });
   });

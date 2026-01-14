@@ -151,8 +151,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
         return ImagePanel(onClose: _closePanel);
 
       case ToolType.selection:
-        // Using selection type as placeholder for toolbar editor
-        return ToolbarEditorPanel(onClose: _closePanel);
+        return LassoSelectionPanel(onClose: _closePanel);
 
       case ToolType.laserPointer:
         return _LaserPointerPanel(onClose: _closePanel);

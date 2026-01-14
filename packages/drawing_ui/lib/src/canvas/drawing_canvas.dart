@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/canvas/stroke_painter.dart';
+import 'package:drawing_ui/src/canvas/selection_painter.dart';
 import 'package:drawing_ui/src/rendering/rendering.dart';
 import 'package:drawing_ui/src/providers/document_provider.dart';
 import 'package:drawing_ui/src/providers/eraser_provider.dart';
 import 'package:drawing_ui/src/providers/history_provider.dart';
 import 'package:drawing_ui/src/providers/tool_style_provider.dart';
 import 'package:drawing_ui/src/providers/canvas_transform_provider.dart';
+import 'package:drawing_ui/src/providers/selection_provider.dart';
+import 'package:drawing_ui/src/widgets/selection_handles.dart';
 
 // =============================================================================
 // DRAWING CANVAS WIDGET
@@ -19,6 +22,8 @@ import 'package:drawing_ui/src/providers/canvas_transform_provider.dart';
 /// - Layer 1: Background grid (never repaints)
 /// - Layer 2: Committed strokes (repaints only when strokes are added/removed)
 /// - Layer 3: Active stroke (repaints on every pointer move)
+/// - Layer 4: Selection overlay (selection bounds, handles, preview)
+/// - Layer 5: Selection handles (for drag interactions)
 ///
 /// ## Performance Rules Applied:
 /// - NO setState for drawing updates
@@ -38,14 +43,14 @@ class DrawingCanvas extends ConsumerStatefulWidget {
   final double width;
 
   /// Height of the canvas. Defaults to fill available space.
-  final double height;
 
-  /// Creates a drawing canvas widget.
   const DrawingCanvas({
     super.key,
     this.width = double.infinity,
     this.height = double.infinity,
   });
+
+  final double height;
 
   @override
   ConsumerState<DrawingCanvas> createState() => DrawingCanvasState();
@@ -87,6 +92,13 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
   /// Last scale value for calculating zoom delta.
   double? _lastScale;
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // SELECTION TRACKING
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /// Whether a selection operation is in progress.
+  bool _isSelecting = false;
+
   /// Exposes the drawing controller for testing.
   @visibleForTesting
   DrawingController get drawingController => _drawingController;
@@ -98,6 +110,10 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
   /// Exposes last point for testing distance filtering.
   @visibleForTesting
   Offset? get lastPoint => _lastPoint;
+
+  /// Exposes isSelecting for testing.
+  @visibleForTesting
+  bool get isSelecting => _isSelecting;
 
   @override
   void initState() {
@@ -116,12 +132,45 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
   // ─────────────────────────────────────────────────────────────────────────
   // NO setState here! Only DrawingController.notifyListeners() triggers repaint.
 
-  /// Handles pointer down - starts a new stroke or eraser action if single finger.
+  /// Handles pointer down - starts a new stroke, eraser, or selection.
   void _handlePointerDown(PointerDownEvent event) {
     _pointerCount++;
 
     // Only handle with single finger
     if (_pointerCount != 1) return;
+
+    // Check if selection tool is active
+    final isSelectionTool = ref.read(isSelectionToolProvider);
+    if (isSelectionTool) {
+      // Check if there's an existing selection
+      final selection = ref.read(selectionProvider);
+      if (selection != null) {
+        final transform = ref.read(canvasTransformProvider);
+        final canvasPoint =
+            (event.localPosition - transform.offset) / transform.zoom;
+
+        // If tap is inside selection, let SelectionHandles handle the drag
+        if (_isPointInSelection(canvasPoint, selection)) {
+          // Don't start new selection - SelectionHandles will handle this
+          return;
+        }
+      }
+      // Start new selection (outside existing or no selection)
+      _handleSelectionDown(event);
+      return;
+    }
+
+    // Check if there's an existing selection and tap is outside
+    final selection = ref.read(selectionProvider);
+    if (selection != null) {
+      final transform = ref.read(canvasTransformProvider);
+      final canvasPoint =
+          (event.localPosition - transform.offset) / transform.zoom;
+
+      if (!_isPointInSelection(canvasPoint, selection)) {
+        ref.read(selectionProvider.notifier).clearSelection();
+      }
+    }
 
     // Check if eraser is active
     final isEraser = ref.read(isEraserToolProvider);
@@ -137,10 +186,16 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     _lastPoint = event.localPosition;
   }
 
-  /// Handles pointer move - adds points to active stroke or erases if single finger.
+  /// Handles pointer move - adds points to active stroke, erases, or updates selection.
   void _handlePointerMove(PointerMoveEvent event) {
     // Only handle with single finger
     if (_pointerCount != 1) return;
+
+    // Selection mode
+    if (_isSelecting) {
+      _handleSelectionMove(event);
+      return;
+    }
 
     // Check if eraser is active
     final isEraser = ref.read(isEraserToolProvider);
@@ -163,9 +218,15 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     _lastPoint = event.localPosition;
   }
 
-  /// Handles pointer up - finishes stroke or eraser action and commits it.
+  /// Handles pointer up - finishes stroke, eraser, or selection.
   void _handlePointerUp(PointerUpEvent event) {
     _pointerCount = (_pointerCount - 1).clamp(0, 10);
+
+    // Selection mode
+    if (_isSelecting) {
+      _handleSelectionUp(event);
+      return;
+    }
 
     // Check if eraser is active
     final isEraser = ref.read(isEraserToolProvider);
@@ -185,9 +246,17 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     _lastPoint = null;
   }
 
-  /// Handles pointer cancel - cancels the current stroke or eraser action.
+  /// Handles pointer cancel - cancels the current operation.
   void _handlePointerCancel(PointerCancelEvent event) {
     _pointerCount = (_pointerCount - 1).clamp(0, 10);
+
+    // Selection mode
+    if (_isSelecting) {
+      ref.read(activeSelectionToolProvider).cancelSelection();
+      _isSelecting = false;
+      setState(() {});
+      return;
+    }
 
     // Check if eraser is active
     final isEraser = ref.read(isEraserToolProvider);
@@ -198,6 +267,72 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
       _drawingController.cancelStroke();
     }
     _lastPoint = null;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // SELECTION EVENT HANDLERS
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /// Handles selection pointer down - starts selection operation.
+  void _handleSelectionDown(PointerDownEvent event) {
+    // Clear any existing selection first
+    ref.read(selectionProvider.notifier).clearSelection();
+
+    final transform = ref.read(canvasTransformProvider);
+    final canvasPoint =
+        (event.localPosition - transform.offset) / transform.zoom;
+
+    final tool = ref.read(activeSelectionToolProvider);
+    tool.startSelection(DrawingPoint(
+      x: canvasPoint.dx,
+      y: canvasPoint.dy,
+      pressure: 1.0,
+    ));
+
+    _isSelecting = true;
+    setState(() {});
+  }
+
+  /// Handles selection pointer move - updates selection path.
+  void _handleSelectionMove(PointerMoveEvent event) {
+    final transform = ref.read(canvasTransformProvider);
+    final canvasPoint =
+        (event.localPosition - transform.offset) / transform.zoom;
+
+    final tool = ref.read(activeSelectionToolProvider);
+    tool.updateSelection(DrawingPoint(
+      x: canvasPoint.dx,
+      y: canvasPoint.dy,
+      pressure: 1.0,
+    ));
+
+    // Trigger rebuild for preview
+    setState(() {});
+  }
+
+  /// Handles selection pointer up - finalizes selection.
+  void _handleSelectionUp(PointerUpEvent event) {
+    _isSelecting = false;
+
+    final tool = ref.read(activeSelectionToolProvider);
+    final strokes = ref.read(activeLayerStrokesProvider);
+
+    final selection = tool.endSelection(strokes);
+
+    if (selection != null) {
+      ref.read(selectionProvider.notifier).setSelection(selection);
+    }
+
+    setState(() {});
+  }
+
+  /// Checks if a point is inside the selection bounds.
+  bool _isPointInSelection(Offset point, Selection selection) {
+    final bounds = selection.bounds;
+    return point.dx >= bounds.left &&
+        point.dx <= bounds.right &&
+        point.dy >= bounds.top &&
+        point.dy <= bounds.bottom;
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -264,10 +399,14 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
   void _handleScaleStart(ScaleStartDetails details) {
     // Only handle zoom/pan with 2+ fingers
     if (details.pointerCount < 2) return;
-    
-    // Cancel any ongoing drawing when zoom/pan starts
+
+    // Cancel any ongoing operations when zoom/pan starts
     if (_drawingController.isDrawing) {
       _drawingController.cancelStroke();
+    }
+    if (_isSelecting) {
+      ref.read(activeSelectionToolProvider).cancelSelection();
+      _isSelecting = false;
     }
     _lastFocalPoint = details.focalPoint;
     _lastScale = 1.0;
@@ -277,7 +416,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
   void _handleScaleUpdate(ScaleUpdateDetails details) {
     // Only handle zoom/pan with 2+ fingers
     if (details.pointerCount < 2) return;
-    
+
     final transformNotifier = ref.read(canvasTransformProvider.notifier);
 
     // Apply zoom (pinch gesture)
@@ -323,22 +462,28 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     );
   }
 
-  /// Gets the current stroke style.
-  /// Will be connected to provider in Step 9.
   /// Gets the current stroke style from provider.
   StrokeStyle _getCurrentStyle() {
-    // Get style from active tool provider
     return ref.read(activeStrokeStyleProvider);
   }
 
   @override
   Widget build(BuildContext context) {
-    // Watch provider for committed strokes
+    // Watch providers
     final strokes = ref.watch(activeLayerStrokesProvider);
-    // Check if current tool is a drawing tool
     final isDrawingTool = ref.watch(isDrawingToolProvider);
-    // Watch canvas transform for zoom/pan
+    final isSelectionTool = ref.watch(isSelectionToolProvider);
     final transform = ref.watch(canvasTransformProvider);
+    final selection = ref.watch(selectionProvider);
+
+    // Selection tool preview path
+    List<DrawingPoint>? selectionPreviewPath;
+    if (isSelectionTool && _isSelecting) {
+      selectionPreviewPath = ref.read(activeSelectionToolProvider).currentPath;
+    }
+
+    // Enable pointer events for drawing tools and selection tool
+    final enablePointerEvents = isDrawingTool || isSelectionTool;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -349,13 +494,13 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
               : widget.height,
         );
 
-        // Listener first for raw pointer events (drawing)
+        // Listener first for raw pointer events (drawing/selection)
         // GestureDetector inside for scale gesture (zoom/pan)
         return Listener(
-          onPointerDown: isDrawingTool ? _handlePointerDown : null,
-          onPointerMove: isDrawingTool ? _handlePointerMove : null,
-          onPointerUp: isDrawingTool ? _handlePointerUp : null,
-          onPointerCancel: isDrawingTool ? _handlePointerCancel : null,
+          onPointerDown: enablePointerEvents ? _handlePointerDown : null,
+          onPointerMove: enablePointerEvents ? _handlePointerMove : null,
+          onPointerUp: enablePointerEvents ? _handlePointerUp : null,
+          onPointerCancel: enablePointerEvents ? _handlePointerCancel : null,
           behavior: HitTestBehavior.translucent,
           child: GestureDetector(
             onScaleStart: _handleScaleStart,
@@ -421,15 +566,30 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
                     ),
 
                     // ─────────────────────────────────────────────────────────
-                    // LAYER 4: Selection Overlay (Phase 4)
+                    // LAYER 4: Selection Overlay
                     // ─────────────────────────────────────────────────────────
-                    // Placeholder for future selection features
-                    // RepaintBoundary(
-                    //   child: CustomPaint(
-                    //     size: size,
-                    //     painter: SelectionOverlayPainter(),
-                    //   ),
-                    // ),
+                    // Selection bounds, lasso path, and preview
+                    RepaintBoundary(
+                      child: CustomPaint(
+                        size: size,
+                        painter: SelectionPainter(
+                          selection: selection,
+                          previewPath: selectionPreviewPath,
+                          zoom: transform.zoom,
+                        ),
+                        isComplex: false,
+                        willChange: true,
+                      ),
+                    ),
+
+                    // ─────────────────────────────────────────────────────────
+                    // LAYER 5: Selection Handles (for drag interactions)
+                    // ─────────────────────────────────────────────────────────
+                    if (selection != null)
+                      SelectionHandles(
+                        selection: selection,
+                        onSelectionChanged: () => setState(() {}),
+                      ),
                   ],
                 ),
               ),

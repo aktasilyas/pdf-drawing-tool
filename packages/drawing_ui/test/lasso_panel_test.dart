@@ -30,11 +30,12 @@ void main() {
         ),
       );
 
-      expect(find.text('Serbest\nkement'), findsOneWidget);
-      expect(find.text('Dikdörtgen\nkement'), findsOneWidget);
+      // New compact mode labels
+      expect(find.text('Serbest'), findsOneWidget);
+      expect(find.text('Dikdörtgen'), findsOneWidget);
     });
 
-    testWidgets('renders all 8 selectable type toggles', (tester) async {
+    testWidgets('renders all 8 selectable type chips', (tester) async {
       await tester.pumpWidget(
         const ProviderScope(
           child: MaterialApp(
@@ -45,14 +46,14 @@ void main() {
         ),
       );
 
-      // Check all Turkish labels
+      // Check all Turkish chip labels (new compact names)
       expect(find.text('Şekil'), findsOneWidget);
-      expect(find.text('Resim/Çıkartma'), findsOneWidget);
+      expect(find.text('Resim'), findsOneWidget); // Changed from "Resim/Çıkartma"
       expect(find.text('Bant'), findsOneWidget);
-      expect(find.text('Metin kutusu'), findsOneWidget);
+      expect(find.text('Metin'), findsOneWidget); // Changed from "Metin kutusu"
       expect(find.text('El yazısı'), findsOneWidget);
       expect(find.text('Vurgulayıcı'), findsOneWidget);
-      expect(find.text('Bağlantı'), findsOneWidget);
+      expect(find.text('Link'), findsOneWidget); // Changed from "Bağlantı"
       expect(find.text('Etiket'), findsOneWidget);
     });
 
@@ -105,7 +106,7 @@ void main() {
       expect(find.text('Mode: freeform'), findsOneWidget);
 
       // Tap rectangle option
-      await tester.tap(find.text('Dikdörtgen\nkement'));
+      await tester.tap(find.text('Dikdörtgen'));
       await tester.pump();
 
       // Should be rectangle now
@@ -166,7 +167,7 @@ void main() {
       expect(find.text('Shape: true'), findsOneWidget);
     });
 
-    testWidgets('can toggle selectable type', (tester) async {
+    testWidgets('can toggle selectable type by tapping chip', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
@@ -196,12 +197,8 @@ void main() {
       // Initially ON
       expect(find.text('Shape: true'), findsOneWidget);
 
-      // Find and tap the Switch for Şekil
-      final switches = find.byType(Switch);
-      expect(switches, findsNWidgets(8)); // 8 toggles
-
-      // Tap the first switch (Şekil)
-      await tester.tap(switches.first);
+      // Find and tap the Şekil chip (now using chips instead of switches)
+      await tester.tap(find.text('Şekil'));
       await tester.pump();
 
       // Should be OFF now
@@ -244,7 +241,8 @@ void main() {
         ),
       );
 
-      expect(find.text('SEÇİLEBİLİR'), findsOneWidget);
+      // Updated to lowercase "Seçilebilir" in new compact design
+      expect(find.text('Seçilebilir'), findsOneWidget);
     });
   });
 

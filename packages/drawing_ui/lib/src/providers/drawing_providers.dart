@@ -732,6 +732,7 @@ class ToolbarConfig {
         ToolType.highlighter,
         ToolType.pixelEraser,
         ToolType.strokeEraser,
+        ToolType.selection, // Selection tool added
         ToolType.shapes,
         ToolType.text,
         ToolType.sticker,
@@ -744,6 +745,7 @@ class ToolbarConfig {
         ToolType.brush,
         ToolType.highlighter,
         ToolType.pixelEraser,
+        ToolType.selection, // Selection tool visible
         ToolType.shapes,
         ToolType.text,
         ToolType.sticker,

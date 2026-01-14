@@ -43,10 +43,25 @@ class CommittedStrokesPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CommittedStrokesPainter oldDelegate) {
-    // Only repaint if stroke count or total point count changed
-    // This is much faster than deep comparing stroke objects
-    return oldDelegate._strokeCount != _strokeCount ||
-        oldDelegate._totalPointCount != _totalPointCount;
+    // Quick check: different stroke count means definitely repaint
+    if (oldDelegate._strokeCount != _strokeCount) return true;
+
+    // Quick check: different total point count means definitely repaint
+    if (oldDelegate._totalPointCount != _totalPointCount) return true;
+
+    // If counts are same, check if stroke objects actually changed
+    // This handles move/transform operations where coordinates change
+    // but counts stay the same
+    if (!identical(oldDelegate.strokes, strokes)) {
+      // Check if any stroke is different (using Equatable comparison)
+      for (int i = 0; i < strokes.length; i++) {
+        if (oldDelegate.strokes[i] != strokes[i]) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 }
 

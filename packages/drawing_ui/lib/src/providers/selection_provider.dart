@@ -61,8 +61,9 @@ final selectedStrokeIdsProvider = Provider<List<String>>((ref) {
 });
 
 /// The active selection tool type (lasso or rectangle).
+/// Default matches LassoSettings.defaultSettings() which is freeform (lasso).
 final activeSelectionToolTypeProvider = StateProvider<SelectionType>((ref) {
-  return SelectionType.rectangle; // Default to rectangle selection
+  return SelectionType.lasso; // Default to lasso (matches LassoMode.freeform)
 });
 
 /// Lasso selection tool instance.

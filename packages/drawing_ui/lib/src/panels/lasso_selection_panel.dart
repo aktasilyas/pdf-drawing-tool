@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/panels/tool_panel.dart';
 
 /// Settings panel for the lasso (kement) selection tool.
 ///
-/// Allows configuring selection mode and selectable element types.
-/// All changes update MOCK state only - no real selection effect.
+/// Compact design showing all options without scrolling.
 class LassoSelectionPanel extends ConsumerWidget {
   const LassoSelectionPanel({
     super.key,
@@ -24,103 +24,40 @@ class LassoSelectionPanel extends ConsumerWidget {
       title: 'Kement',
       onClose: onClose,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Mode selector
-          _LassoModeSelector(
+          // Compact mode selector
+          _CompactModeSelector(
             selectedMode: settings.mode,
             onModeSelected: (mode) {
               ref.read(lassoSettingsProvider.notifier).setMode(mode);
+              final selectionType = mode == LassoMode.freeform
+                  ? SelectionType.lasso
+                  : SelectionType.rectangle;
+              ref.read(activeSelectionToolTypeProvider.notifier).state =
+                  selectionType;
             },
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 12),
 
-          // Selectable types section
-          PanelSection(
-            title: 'SEÇİLEBİLİR',
-            child: Column(
-              children: [
-                _SelectableTypeToggle(
-                  label: 'Şekil',
-                  type: SelectableType.shape,
-                  value: settings.selectableTypes[SelectableType.shape] ?? true,
-                  onChanged: (value) {
-                    ref.read(lassoSettingsProvider.notifier)
-                        .setSelectableType(SelectableType.shape, value);
-                  },
-                ),
-                const Divider(height: 1),
-                _SelectableTypeToggle(
-                  label: 'Resim/Çıkartma',
-                  type: SelectableType.imageSticker,
-                  value: settings.selectableTypes[SelectableType.imageSticker] ?? true,
-                  onChanged: (value) {
-                    ref.read(lassoSettingsProvider.notifier)
-                        .setSelectableType(SelectableType.imageSticker, value);
-                  },
-                ),
-                const Divider(height: 1),
-                _SelectableTypeToggle(
-                  label: 'Bant',
-                  type: SelectableType.tape,
-                  value: settings.selectableTypes[SelectableType.tape] ?? true,
-                  onChanged: (value) {
-                    ref.read(lassoSettingsProvider.notifier)
-                        .setSelectableType(SelectableType.tape, value);
-                  },
-                ),
-                const Divider(height: 1),
-                _SelectableTypeToggle(
-                  label: 'Metin kutusu',
-                  type: SelectableType.textBox,
-                  value: settings.selectableTypes[SelectableType.textBox] ?? true,
-                  onChanged: (value) {
-                    ref.read(lassoSettingsProvider.notifier)
-                        .setSelectableType(SelectableType.textBox, value);
-                  },
-                ),
-                const Divider(height: 1),
-                _SelectableTypeToggle(
-                  label: 'El yazısı',
-                  type: SelectableType.handwriting,
-                  value: settings.selectableTypes[SelectableType.handwriting] ?? true,
-                  onChanged: (value) {
-                    ref.read(lassoSettingsProvider.notifier)
-                        .setSelectableType(SelectableType.handwriting, value);
-                  },
-                ),
-                const Divider(height: 1),
-                _SelectableTypeToggle(
-                  label: 'Vurgulayıcı',
-                  type: SelectableType.highlighter,
-                  value: settings.selectableTypes[SelectableType.highlighter] ?? false,
-                  onChanged: (value) {
-                    ref.read(lassoSettingsProvider.notifier)
-                        .setSelectableType(SelectableType.highlighter, value);
-                  },
-                ),
-                const Divider(height: 1),
-                _SelectableTypeToggle(
-                  label: 'Bağlantı',
-                  type: SelectableType.link,
-                  value: settings.selectableTypes[SelectableType.link] ?? true,
-                  onChanged: (value) {
-                    ref.read(lassoSettingsProvider.notifier)
-                        .setSelectableType(SelectableType.link, value);
-                  },
-                ),
-                const Divider(height: 1),
-                _SelectableTypeToggle(
-                  label: 'Etiket',
-                  type: SelectableType.label,
-                  value: settings.selectableTypes[SelectableType.label] ?? true,
-                  onChanged: (value) {
-                    ref.read(lassoSettingsProvider.notifier)
-                        .setSelectableType(SelectableType.label, value);
-                  },
-                ),
-              ],
+          // Compact selectable types as chips
+          const Text(
+            'Seçilebilir',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey,
+              letterSpacing: 0.5,
             ),
+          ),
+          const SizedBox(height: 8),
+          _SelectableTypesGrid(
+            selectableTypes: settings.selectableTypes,
+            onTypeChanged: (type, value) {
+              ref.read(lassoSettingsProvider.notifier)
+                  .setSelectableType(type, value);
+            },
           ),
         ],
       ),
@@ -128,9 +65,9 @@ class LassoSelectionPanel extends ConsumerWidget {
   }
 }
 
-/// Selector for lasso selection modes.
-class _LassoModeSelector extends StatelessWidget {
-  const _LassoModeSelector({
+/// Compact mode selector with two inline buttons.
+class _CompactModeSelector extends StatelessWidget {
+  const _CompactModeSelector({
     required this.selectedMode,
     required this.onModeSelected,
   });
@@ -140,43 +77,44 @@ class _LassoModeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _LassoModeOption(
-            mode: LassoMode.freeform,
-            icon: Icons.gesture,
-            label: 'Serbest\nkement',
-            isSelected: selectedMode == LassoMode.freeform,
-            onTap: () => onModeSelected(LassoMode.freeform),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      padding: const EdgeInsets.all(3),
+      child: Row(
+        children: [
+          Expanded(
+            child: _ModeButton(
+              icon: Icons.gesture,
+              label: 'Serbest',
+              isSelected: selectedMode == LassoMode.freeform,
+              onTap: () => onModeSelected(LassoMode.freeform),
+            ),
           ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: _LassoModeOption(
-            mode: LassoMode.rectangle,
-            icon: Icons.crop_square,
-            label: 'Dikdörtgen\nkement',
-            isSelected: selectedMode == LassoMode.rectangle,
-            onTap: () => onModeSelected(LassoMode.rectangle),
+          Expanded(
+            child: _ModeButton(
+              icon: Icons.crop_square,
+              label: 'Dikdörtgen',
+              isSelected: selectedMode == LassoMode.rectangle,
+              onTap: () => onModeSelected(LassoMode.rectangle),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
 
-/// A single lasso mode option button.
-class _LassoModeOption extends StatelessWidget {
-  const _LassoModeOption({
-    required this.mode,
+class _ModeButton extends StatelessWidget {
+  const _ModeButton({
     required this.icon,
     required this.label,
     required this.isSelected,
     required this.onTap,
   });
 
-  final LassoMode mode;
   final IconData icon;
   final String label;
   final bool isSelected;
@@ -187,45 +125,38 @@ class _LassoModeOption extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.blue.shade50 : Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isSelected ? Colors.blue : Colors.grey.shade300,
-            width: isSelected ? 2 : 1,
-          ),
+          color: isSelected ? Colors.white : Colors.transparent,
+          borderRadius: BorderRadius.circular(6),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 4,
+                    offset: const Offset(0, 1),
+                  ),
+                ]
+              : null,
         ),
-        child: Column(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               icon,
-              size: 32,
+              size: 16,
               color: isSelected ? Colors.blue : Colors.grey.shade600,
             ),
-            const SizedBox(height: 8),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 12,
-                height: 1.2,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color: isSelected ? Colors.blue : Colors.grey.shade700,
-              ),
-            ),
-            const SizedBox(height: 8),
-            // Selection indicator dot
-            Container(
-              width: 8,
-              height: 8,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: isSelected ? Colors.blue : Colors.transparent,
-                border: Border.all(
-                  color: isSelected ? Colors.blue : Colors.grey.shade400,
-                  width: 1.5,
+            const SizedBox(width: 4),
+            Flexible(
+              child: Text(
+                label,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                  color: isSelected ? Colors.blue : Colors.grey.shade700,
                 ),
               ),
             ),
@@ -236,41 +167,91 @@ class _LassoModeOption extends StatelessWidget {
   }
 }
 
-/// Toggle row for selectable element types.
-class _SelectableTypeToggle extends StatelessWidget {
-  const _SelectableTypeToggle({
-    required this.label,
-    required this.type,
-    required this.value,
-    required this.onChanged,
+/// Compact grid of selectable type chips.
+class _SelectableTypesGrid extends StatelessWidget {
+  const _SelectableTypesGrid({
+    required this.selectableTypes,
+    required this.onTypeChanged,
   });
 
-  final String label;
-  final SelectableType type;
-  final bool value;
-  final ValueChanged<bool> onChanged;
+  final Map<SelectableType, bool> selectableTypes;
+  final void Function(SelectableType, bool) onTypeChanged;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Colors.black87,
+    final types = [
+      (SelectableType.handwriting, 'El yazısı', Icons.edit),
+      (SelectableType.shape, 'Şekil', Icons.category_outlined),
+      (SelectableType.imageSticker, 'Resim', Icons.image_outlined),
+      (SelectableType.highlighter, 'Vurgulayıcı', Icons.highlight),
+      (SelectableType.textBox, 'Metin', Icons.text_fields),
+      (SelectableType.tape, 'Bant', Icons.straighten),
+      (SelectableType.link, 'Link', Icons.link),
+      (SelectableType.label, 'Etiket', Icons.label_outline),
+    ];
+
+    return Wrap(
+      spacing: 6,
+      runSpacing: 6,
+      children: types.map((t) {
+        final isSelected = selectableTypes[t.$1] ?? true;
+        return _TypeChip(
+          label: t.$2,
+          icon: t.$3,
+          isSelected: isSelected,
+          onTap: () => onTypeChanged(t.$1, !isSelected),
+        );
+      }).toList(),
+    );
+  }
+}
+
+class _TypeChip extends StatelessWidget {
+  const _TypeChip({
+    required this.label,
+    required this.icon,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final String label;
+  final IconData icon;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.blue.shade50 : Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? Colors.blue.shade300 : Colors.grey.shade300,
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 14,
+              color: isSelected ? Colors.blue : Colors.grey.shade600,
             ),
-          ),
-          Switch(
-            value: value,
-            onChanged: onChanged,
-            activeTrackColor: Colors.blue.shade200,
-            activeThumbColor: Colors.blue,
-          ),
-        ],
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
+                color: isSelected ? Colors.blue.shade700 : Colors.grey.shade700,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

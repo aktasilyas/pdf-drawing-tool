@@ -41,17 +41,6 @@ class SelectionPainter extends CustomPainter {
     ..style = PaintingStyle.stroke
     ..strokeWidth = 1.5;
 
-  /// Paint for lasso path fill (semi-transparent blue).
-  static final Paint _lassoFillPaint = Paint()
-    ..color = const Color(0x202196F3)
-    ..style = PaintingStyle.fill;
-
-  /// Paint for lasso path stroke.
-  static final Paint _lassoStrokePaint = Paint()
-    ..color = const Color(0xFF2196F3)
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = 1.5;
-
   /// Paint for preview path during selection.
   static final Paint _previewPaint = Paint()
     ..color = const Color(0x802196F3)
@@ -82,10 +71,11 @@ class SelectionPainter extends CustomPainter {
 
     final bounds = selection!.bounds;
 
-    // Draw lasso path if present
-    if (selection!.lassoPath != null && selection!.lassoPath!.isNotEmpty) {
-      _drawLassoPath(canvas, selection!.lassoPath!);
-    }
+    // NOTE: We intentionally do NOT draw the lasso path after selection is complete.
+    // The lasso path was useful during selection creation to show the area being selected,
+    // but once selection is finalized, showing both the lasso path AND the bounding box
+    // is confusing (lasso path is at draw location, bounds are around selected strokes).
+    // The bounding box with handles is sufficient to indicate the selection.
 
     // Draw selection bounds rectangle
     _drawSelectionBounds(canvas, bounds);
@@ -106,24 +96,6 @@ class SelectionPainter extends CustomPainter {
     }
 
     canvas.drawPath(path, _previewPaint);
-  }
-
-  /// Draws the lasso selection path with semi-transparent fill.
-  void _drawLassoPath(Canvas canvas, List<DrawingPoint> lassoPath) {
-    if (lassoPath.length < 3) return;
-
-    final path = Path();
-    path.moveTo(lassoPath.first.x, lassoPath.first.y);
-
-    for (int i = 1; i < lassoPath.length; i++) {
-      path.lineTo(lassoPath[i].x, lassoPath[i].y);
-    }
-    path.close();
-
-    // Semi-transparent fill
-    canvas.drawPath(path, _lassoFillPaint);
-    // Stroke outline
-    canvas.drawPath(path, _lassoStrokePaint);
   }
 
   /// Draws the selection bounds rectangle.

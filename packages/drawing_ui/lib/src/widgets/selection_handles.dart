@@ -32,6 +32,7 @@ class SelectionHandles extends ConsumerStatefulWidget {
 class _SelectionHandlesState extends ConsumerState<SelectionHandles> {
   SelectionHandle? _activeHandle;
   Offset? _dragStartPoint;
+  Offset? _lastDragPosition;
   BoundingBox? _originalBounds;
 
   /// Hit radius for handle detection (in logical pixels).
@@ -40,7 +41,7 @@ class _SelectionHandlesState extends ConsumerState<SelectionHandles> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      behavior: HitTestBehavior.translucent,
+      behavior: HitTestBehavior.opaque,
       onPanStart: _handlePanStart,
       onPanUpdate: _handlePanUpdate,
       onPanEnd: _handlePanEnd,
@@ -49,14 +50,14 @@ class _SelectionHandlesState extends ConsumerState<SelectionHandles> {
   }
 
   void _handlePanStart(DragStartDetails details) {
-    final transform = ref.read(canvasTransformProvider);
-    final localPos =
-        (details.localPosition - transform.offset) / transform.zoom;
+    // localPosition is already in canvas coordinates (inside Transform widget)
+    final localPos = details.localPosition;
 
     _activeHandle = _hitTestHandle(localPos);
 
     if (_activeHandle != null) {
       _dragStartPoint = localPos;
+      _lastDragPosition = localPos;
       _originalBounds = widget.selection.bounds;
     }
   }
@@ -68,9 +69,9 @@ class _SelectionHandlesState extends ConsumerState<SelectionHandles> {
       return;
     }
 
-    final transform = ref.read(canvasTransformProvider);
-    final localPos =
-        (details.localPosition - transform.offset) / transform.zoom;
+    // localPosition is already in canvas coordinates (inside Transform widget)
+    final localPos = details.localPosition;
+    _lastDragPosition = localPos;
     final delta = localPos - _dragStartPoint!;
 
     if (_activeHandle == SelectionHandle.center) {
@@ -83,14 +84,13 @@ class _SelectionHandlesState extends ConsumerState<SelectionHandles> {
   void _handlePanEnd(DragEndDetails details) {
     if (_activeHandle == null ||
         _originalBounds == null ||
-        _dragStartPoint == null) {
+        _dragStartPoint == null ||
+        _lastDragPosition == null) {
       return;
     }
 
-    final transform = ref.read(canvasTransformProvider);
-    final localPos = details.localPosition;
-    final canvasPos = (localPos - transform.offset) / transform.zoom;
-    final delta = canvasPos - _dragStartPoint!;
+    // Use the last known drag position
+    final delta = _lastDragPosition! - _dragStartPoint!;
 
     if (_activeHandle == SelectionHandle.center &&
         (delta.dx != 0 || delta.dy != 0)) {
@@ -100,6 +100,7 @@ class _SelectionHandlesState extends ConsumerState<SelectionHandles> {
 
     _activeHandle = null;
     _dragStartPoint = null;
+    _lastDragPosition = null;
     _originalBounds = null;
   }
 
@@ -136,8 +137,14 @@ class _SelectionHandlesState extends ConsumerState<SelectionHandles> {
       bottom: _originalBounds!.bottom + delta.dy,
     );
 
+    // Update selection with new bounds and clear lasso path (it's no longer valid after move)
     ref.read(selectionProvider.notifier).setSelection(
-          widget.selection.copyWith(bounds: newBounds),
+          widget.selection.copyWith(
+            bounds: newBounds,
+            // Clear lasso path after move - convert to rectangle selection
+            lassoPath: null,
+            type: SelectionType.rectangle,
+          ),
         );
 
     widget.onSelectionChanged?.call();
@@ -146,8 +153,9 @@ class _SelectionHandlesState extends ConsumerState<SelectionHandles> {
   /// Hit tests which handle (if any) was tapped.
   SelectionHandle? _hitTestHandle(Offset point) {
     final bounds = widget.selection.bounds;
-    final zoom = ref.read(canvasTransformProvider).zoom;
-    final hitRadius = _hitRadius / zoom;
+    // Since we're inside Transform, coordinates are in canvas space
+    // Use fixed hit radius (no zoom adjustment needed)
+    const hitRadius = _hitRadius;
 
     // Check corner and edge handles first
     const handles = [
