@@ -40,18 +40,25 @@ export 'src/models/document.dart';
 export 'src/models/drawing_point.dart';
 export 'src/models/layer.dart';
 export 'src/models/selection.dart';
+export 'src/models/shape.dart';
+export 'src/models/shape_type.dart';
 export 'src/models/stroke.dart';
 export 'src/models/stroke_style.dart';
 
 // Tools
+export 'src/tools/arrow_tool.dart';
 export 'src/tools/brush_tool.dart';
 export 'src/tools/drawing_tool.dart';
+export 'src/tools/ellipse_tool.dart';
 export 'src/tools/eraser_tool.dart';
 export 'src/tools/highlighter_tool.dart';
 export 'src/tools/lasso_selection_tool.dart';
+export 'src/tools/line_tool.dart';
 export 'src/tools/pen_tool.dart';
 export 'src/tools/rect_selection_tool.dart';
+export 'src/tools/rectangle_tool.dart';
 export 'src/tools/selection_tool.dart';
+export 'src/tools/shape_tool.dart';
 
 // History
 export 'src/history/add_stroke_command.dart';
