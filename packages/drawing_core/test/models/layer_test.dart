@@ -2,6 +2,8 @@ import 'package:test/test.dart';
 import 'package:drawing_core/src/models/bounding_box.dart';
 import 'package:drawing_core/src/models/drawing_point.dart';
 import 'package:drawing_core/src/models/layer.dart';
+import 'package:drawing_core/src/models/shape.dart';
+import 'package:drawing_core/src/models/shape_type.dart';
 import 'package:drawing_core/src/models/stroke.dart';
 import 'package:drawing_core/src/models/stroke_style.dart';
 
@@ -11,9 +13,25 @@ void main() {
     late Stroke testStroke1;
     late Stroke testStroke2;
     late Stroke testStroke3;
+    late Shape testShape1;
+    late Shape testShape2;
 
     setUp(() {
       defaultStyle = StrokeStyle.pen();
+      testShape1 = Shape(
+        id: 'shape-1',
+        type: ShapeType.rectangle,
+        startPoint: DrawingPoint(x: 0, y: 0),
+        endPoint: DrawingPoint(x: 100, y: 100),
+        style: defaultStyle,
+      );
+      testShape2 = Shape(
+        id: 'shape-2',
+        type: ShapeType.ellipse,
+        startPoint: DrawingPoint(x: 50, y: 50),
+        endPoint: DrawingPoint(x: 150, y: 150),
+        style: defaultStyle,
+      );
       testStroke1 = Stroke(
         id: 'stroke-1',
         points: [DrawingPoint(x: 0, y: 0), DrawingPoint(x: 10, y: 10)],
@@ -582,6 +600,368 @@ void main() {
         expect(str, contains('isVisible: true'));
         expect(str, contains('isLocked: false'));
         expect(str, contains('opacity: 0.8'));
+      });
+    });
+
+    // ============================================================
+    // SHAPE TESTS
+    // ============================================================
+
+    group('shapes property', () {
+      test('defaults to empty list', () {
+        final layer = Layer(
+          id: 'id',
+          name: 'name',
+          strokes: const [],
+        );
+        expect(layer.shapes, isEmpty);
+        expect(layer.shapeCount, 0);
+      });
+
+      test('accepts shapes in constructor', () {
+        final layer = Layer(
+          id: 'id',
+          name: 'name',
+          strokes: const [],
+          shapes: [testShape1, testShape2],
+        );
+        expect(layer.shapeCount, 2);
+      });
+
+      test('shapes list is unmodifiable', () {
+        final mutableList = [testShape1];
+        final layer = Layer(
+          id: 'id',
+          name: 'name',
+          strokes: const [],
+          shapes: mutableList,
+        );
+
+        // Original list modification should not affect layer
+        mutableList.add(testShape2);
+        expect(layer.shapeCount, 1);
+
+        // Layer's shapes list should throw on modification
+        expect(
+          () => layer.shapes.add(testShape2),
+          throwsUnsupportedError,
+        );
+      });
+    });
+
+    group('addShape', () {
+      test('returns new layer with shape added', () {
+        final original = Layer.empty('Test');
+        final updated = original.addShape(testShape1);
+
+        expect(original.shapeCount, 0); // original unchanged
+        expect(updated.shapeCount, 1);
+        expect(updated.shapes[0], testShape1);
+      });
+
+      test('preserves strokes and other properties', () {
+        final original = Layer(
+          id: 'my-id',
+          name: 'My Layer',
+          strokes: [testStroke1],
+          isVisible: false,
+          isLocked: true,
+          opacity: 0.7,
+        );
+        final updated = original.addShape(testShape1);
+
+        expect(updated.id, 'my-id');
+        expect(updated.name, 'My Layer');
+        expect(updated.strokeCount, 1);
+        expect(updated.isVisible, false);
+        expect(updated.isLocked, true);
+        expect(updated.opacity, 0.7);
+      });
+
+      test('can chain multiple addShape calls', () {
+        final layer = Layer.empty('Test')
+            .addShape(testShape1)
+            .addShape(testShape2);
+
+        expect(layer.shapeCount, 2);
+      });
+    });
+
+    group('removeShape', () {
+      test('removes shape by id', () {
+        final original = Layer(
+          id: 'id',
+          name: 'name',
+          strokes: const [],
+          shapes: [testShape1, testShape2],
+        );
+        final updated = original.removeShape('shape-1');
+
+        expect(original.shapeCount, 2); // original unchanged
+        expect(updated.shapeCount, 1);
+        expect(updated.shapes.any((s) => s.id == 'shape-1'), false);
+        expect(updated.shapes.any((s) => s.id == 'shape-2'), true);
+      });
+
+      test('returns copy if shape not found', () {
+        final original = Layer(
+          id: 'id',
+          name: 'name',
+          strokes: const [],
+          shapes: [testShape1],
+        );
+        final updated = original.removeShape('non-existent');
+
+        expect(updated.shapeCount, 1);
+        expect(updated.shapes[0], testShape1);
+      });
+
+      test('preserves strokes', () {
+        final original = Layer(
+          id: 'id',
+          name: 'name',
+          strokes: [testStroke1],
+          shapes: [testShape1],
+        );
+        final updated = original.removeShape('shape-1');
+
+        expect(updated.strokeCount, 1);
+        expect(updated.shapeCount, 0);
+      });
+    });
+
+    group('updateShape', () {
+      test('updates shape by id', () {
+        final original = Layer(
+          id: 'id',
+          name: 'name',
+          strokes: const [],
+          shapes: [testShape1, testShape2],
+        );
+
+        final updatedShape = testShape1.copyWith(
+          endPoint: DrawingPoint(x: 200, y: 200),
+        );
+        final updated = original.updateShape(updatedShape);
+
+        expect(original.shapes[0].endPoint.x, 100); // original unchanged
+        expect(updated.shapes[0].endPoint.x, 200);
+        expect(updated.shapeCount, 2);
+      });
+
+      test('returns copy if shape not found', () {
+        final original = Layer(
+          id: 'id',
+          name: 'name',
+          strokes: const [],
+          shapes: [testShape1],
+        );
+
+        final nonExistentShape = Shape(
+          id: 'non-existent',
+          type: ShapeType.line,
+          startPoint: DrawingPoint(x: 0, y: 0),
+          endPoint: DrawingPoint(x: 10, y: 10),
+          style: defaultStyle,
+        );
+        final updated = original.updateShape(nonExistentShape);
+
+        expect(updated.shapeCount, 1);
+        expect(updated.shapes[0].id, 'shape-1');
+      });
+
+      test('preserves shape order', () {
+        final original = Layer(
+          id: 'id',
+          name: 'name',
+          strokes: const [],
+          shapes: [testShape1, testShape2],
+        );
+
+        final updatedShape = testShape2.copyWith(isFilled: true);
+        final updated = original.updateShape(updatedShape);
+
+        expect(updated.shapes[0].id, 'shape-1');
+        expect(updated.shapes[1].id, 'shape-2');
+        expect(updated.shapes[1].isFilled, true);
+      });
+    });
+
+    group('getShapeById', () {
+      test('returns shape when found', () {
+        final layer = Layer(
+          id: 'id',
+          name: 'name',
+          strokes: const [],
+          shapes: [testShape1, testShape2],
+        );
+
+        final found = layer.getShapeById('shape-2');
+        expect(found, isNotNull);
+        expect(found!.id, 'shape-2');
+      });
+
+      test('returns null when not found', () {
+        final layer = Layer(
+          id: 'id',
+          name: 'name',
+          strokes: const [],
+          shapes: [testShape1],
+        );
+
+        final found = layer.getShapeById('non-existent');
+        expect(found, isNull);
+      });
+
+      test('returns null for empty layer', () {
+        final layer = Layer.empty('Empty');
+        final found = layer.getShapeById('any-id');
+        expect(found, isNull);
+      });
+    });
+
+    group('clear with shapes', () {
+      test('removes all strokes and shapes', () {
+        final original = Layer(
+          id: 'id',
+          name: 'name',
+          strokes: [testStroke1],
+          shapes: [testShape1, testShape2],
+        );
+        final cleared = original.clear();
+
+        expect(cleared.strokeCount, 0);
+        expect(cleared.shapeCount, 0);
+        expect(cleared.isEmpty, true);
+      });
+    });
+
+    group('isEmpty with shapes', () {
+      test('returns false when only shapes exist', () {
+        final layer = Layer(
+          id: 'id',
+          name: 'name',
+          strokes: const [],
+          shapes: [testShape1],
+        );
+        expect(layer.isEmpty, false);
+        expect(layer.isNotEmpty, true);
+      });
+    });
+
+    group('JSON serialization with shapes', () {
+      test('toJson includes shapes', () {
+        final layer = Layer(
+          id: 'test-id',
+          name: 'Test Layer',
+          strokes: const [],
+          shapes: [testShape1],
+        );
+
+        final json = layer.toJson();
+
+        expect(json['shapes'], isA<List>());
+        expect((json['shapes'] as List).length, 1);
+      });
+
+      test('fromJson restores shapes', () {
+        final json = {
+          'id': 'restored-id',
+          'name': 'Restored Layer',
+          'strokes': <Map<String, dynamic>>[],
+          'shapes': [testShape1.toJson()],
+          'isVisible': true,
+          'isLocked': false,
+          'opacity': 1.0,
+        };
+
+        final layer = Layer.fromJson(json);
+
+        expect(layer.shapeCount, 1);
+        expect(layer.shapes[0].type, ShapeType.rectangle);
+      });
+
+      test('fromJson handles missing shapes field', () {
+        final json = {
+          'id': 'id',
+          'name': 'name',
+          'strokes': <Map<String, dynamic>>[],
+        };
+
+        final layer = Layer.fromJson(json);
+
+        expect(layer.shapeCount, 0);
+      });
+
+      test('roundtrip with shapes preserves values', () {
+        final original = Layer(
+          id: 'roundtrip-id',
+          name: 'Roundtrip Layer',
+          strokes: [testStroke1],
+          shapes: [testShape1, testShape2],
+          isVisible: false,
+          isLocked: true,
+          opacity: 0.65,
+        );
+
+        final json = original.toJson();
+        final restored = Layer.fromJson(json);
+
+        expect(restored.strokeCount, original.strokeCount);
+        expect(restored.shapeCount, original.shapeCount);
+        expect(restored.shapes[0].type, testShape1.type);
+        expect(restored.shapes[1].type, testShape2.type);
+      });
+    });
+
+    group('Equality with shapes', () {
+      test('two layers with same shapes are equal', () {
+        final layer1 = Layer(
+          id: 'same-id',
+          name: 'Same Name',
+          strokes: const [],
+          shapes: [testShape1],
+        );
+
+        final layer2 = Layer(
+          id: 'same-id',
+          name: 'Same Name',
+          strokes: const [],
+          shapes: [testShape1],
+        );
+
+        expect(layer1, equals(layer2));
+      });
+
+      test('two layers with different shapes are not equal', () {
+        final layer1 = Layer(
+          id: 'id',
+          name: 'Name',
+          strokes: const [],
+          shapes: [testShape1],
+        );
+        final layer2 = Layer(
+          id: 'id',
+          name: 'Name',
+          strokes: const [],
+          shapes: [testShape2],
+        );
+
+        expect(layer1, isNot(equals(layer2)));
+      });
+    });
+
+    group('copyWith shapes', () {
+      test('copies with shapes changed', () {
+        final original = Layer(
+          id: 'id',
+          name: 'name',
+          strokes: const [],
+          shapes: [testShape1],
+        );
+        final copied = original.copyWith(shapes: [testShape2]);
+
+        expect(copied.shapes[0].id, 'shape-2');
       });
     });
   });
