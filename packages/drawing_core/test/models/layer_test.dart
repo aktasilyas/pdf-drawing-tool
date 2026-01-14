@@ -6,6 +6,7 @@ import 'package:drawing_core/src/models/shape.dart';
 import 'package:drawing_core/src/models/shape_type.dart';
 import 'package:drawing_core/src/models/stroke.dart';
 import 'package:drawing_core/src/models/stroke_style.dart';
+import 'package:drawing_core/src/models/text_element.dart';
 
 void main() {
   group('Layer', () {
@@ -962,6 +963,435 @@ void main() {
         final copied = original.copyWith(shapes: [testShape2]);
 
         expect(copied.shapes[0].id, 'shape-2');
+      });
+    });
+
+    // ============================================================
+    // TEXT TESTS
+    // ============================================================
+
+    group('texts property', () {
+      test('defaults to empty list', () {
+        final layer = Layer(
+          id: 'id',
+          name: 'name',
+          strokes: const [],
+        );
+        expect(layer.texts, isEmpty);
+        expect(layer.textCount, 0);
+      });
+
+      test('accepts texts in constructor', () {
+        final text1 = TextElement.create(text: 'Hello', x: 0, y: 0);
+        final text2 = TextElement.create(text: 'World', x: 100, y: 100);
+        final layer = Layer(
+          id: 'id',
+          name: 'name',
+          strokes: const [],
+          texts: [text1, text2],
+        );
+        expect(layer.textCount, 2);
+      });
+
+      test('texts list is unmodifiable', () {
+        final text1 = TextElement.create(text: 'Hello', x: 0, y: 0);
+        final text2 = TextElement.create(text: 'World', x: 100, y: 100);
+        final mutableList = [text1];
+        final layer = Layer(
+          id: 'id',
+          name: 'name',
+          strokes: const [],
+          texts: mutableList,
+        );
+
+        // Original list modification should not affect layer
+        mutableList.add(text2);
+        expect(layer.textCount, 1);
+
+        // Layer's texts list should throw on modification
+        expect(
+          () => layer.texts.add(text2),
+          throwsUnsupportedError,
+        );
+      });
+    });
+
+    group('addText', () {
+      test('returns new layer with text added', () {
+        final original = Layer.empty('Test');
+        final text = TextElement.create(text: 'Hello', x: 50, y: 50);
+        final updated = original.addText(text);
+
+        expect(original.textCount, 0); // original unchanged
+        expect(updated.textCount, 1);
+        expect(updated.texts[0].id, text.id);
+      });
+
+      test('preserves strokes, shapes and other properties', () {
+        final original = Layer(
+          id: 'my-id',
+          name: 'My Layer',
+          strokes: [testStroke1],
+          shapes: [testShape1],
+          isVisible: false,
+          isLocked: true,
+          opacity: 0.7,
+        );
+        final text = TextElement.create(text: 'Hello', x: 0, y: 0);
+        final updated = original.addText(text);
+
+        expect(updated.id, 'my-id');
+        expect(updated.name, 'My Layer');
+        expect(updated.strokeCount, 1);
+        expect(updated.shapeCount, 1);
+        expect(updated.isVisible, false);
+        expect(updated.isLocked, true);
+        expect(updated.opacity, 0.7);
+      });
+
+      test('can chain multiple addText calls', () {
+        final text1 = TextElement.create(text: 'Hello', x: 0, y: 0);
+        final text2 = TextElement.create(text: 'World', x: 100, y: 100);
+        final layer = Layer.empty('Test').addText(text1).addText(text2);
+
+        expect(layer.textCount, 2);
+      });
+    });
+
+    group('removeText', () {
+      test('removes text by id', () {
+        final text1 = const TextElement(id: 'text-1', text: 'Hello', x: 0, y: 0);
+        final text2 = const TextElement(id: 'text-2', text: 'World', x: 100, y: 100);
+        final original = Layer(
+          id: 'id',
+          name: 'name',
+          strokes: const [],
+          texts: [text1, text2],
+        );
+        final updated = original.removeText(text1.id);
+
+        expect(original.textCount, 2); // original unchanged
+        expect(updated.textCount, 1);
+        expect(updated.texts.any((t) => t.id == text1.id), false);
+        expect(updated.texts.any((t) => t.id == text2.id), true);
+      });
+
+      test('returns copy if text not found', () {
+        final text = const TextElement(id: 'text-1', text: 'Hello', x: 0, y: 0);
+        final original = Layer(
+          id: 'id',
+          name: 'name',
+          strokes: const [],
+          texts: [text],
+        );
+        final updated = original.removeText('non-existent');
+
+        expect(updated.textCount, 1);
+        expect(updated.texts[0].id, text.id);
+      });
+
+      test('preserves strokes and shapes', () {
+        final text = const TextElement(id: 'text-1', text: 'Hello', x: 0, y: 0);
+        final original = Layer(
+          id: 'id',
+          name: 'name',
+          strokes: [testStroke1],
+          shapes: [testShape1],
+          texts: [text],
+        );
+        final updated = original.removeText(text.id);
+
+        expect(updated.strokeCount, 1);
+        expect(updated.shapeCount, 1);
+        expect(updated.textCount, 0);
+      });
+    });
+
+    group('updateText', () {
+      test('updates text by id', () {
+        final text = const TextElement(id: 'text-1', text: 'Original', x: 0, y: 0);
+        final original = Layer(
+          id: 'id',
+          name: 'name',
+          strokes: const [],
+          texts: [text],
+        );
+
+        final updatedText = text.copyWith(text: 'Updated');
+        final updated = original.updateText(updatedText);
+
+        expect(original.texts[0].text, 'Original'); // original unchanged
+        expect(updated.texts[0].text, 'Updated');
+        expect(updated.textCount, 1);
+      });
+
+      test('returns copy if text not found', () {
+        final text = const TextElement(id: 'text-1', text: 'Hello', x: 0, y: 0);
+        final original = Layer(
+          id: 'id',
+          name: 'name',
+          strokes: const [],
+          texts: [text],
+        );
+
+        final nonExistentText = const TextElement(
+          id: 'non-existent',
+          text: 'Not found',
+          x: 0,
+          y: 0,
+        );
+        final updated = original.updateText(nonExistentText);
+
+        expect(updated.textCount, 1);
+        expect(updated.texts[0].id, text.id);
+      });
+
+      test('preserves text order', () {
+        final text1 = const TextElement(id: 'text-1', text: 'First', x: 0, y: 0);
+        final text2 = const TextElement(id: 'text-2', text: 'Second', x: 100, y: 100);
+        final original = Layer(
+          id: 'id',
+          name: 'name',
+          strokes: const [],
+          texts: [text1, text2],
+        );
+
+        final updatedText = text2.copyWith(text: 'Updated Second');
+        final updated = original.updateText(updatedText);
+
+        expect(updated.texts[0].id, text1.id);
+        expect(updated.texts[1].id, text2.id);
+        expect(updated.texts[1].text, 'Updated Second');
+      });
+    });
+
+    group('getTextById', () {
+      test('returns text when found', () {
+        final text1 = const TextElement(id: 'text-1', text: 'Hello', x: 0, y: 0);
+        final text2 = const TextElement(id: 'text-2', text: 'World', x: 100, y: 100);
+        final layer = Layer(
+          id: 'id',
+          name: 'name',
+          strokes: const [],
+          texts: [text1, text2],
+        );
+
+        final found = layer.getTextById(text2.id);
+        expect(found, isNotNull);
+        expect(found!.id, text2.id);
+      });
+
+      test('returns null when not found', () {
+        final text = const TextElement(id: 'text-1', text: 'Hello', x: 0, y: 0);
+        final layer = Layer(
+          id: 'id',
+          name: 'name',
+          strokes: const [],
+          texts: [text],
+        );
+
+        final found = layer.getTextById('non-existent');
+        expect(found, isNull);
+      });
+
+      test('returns null for empty layer', () {
+        final layer = Layer.empty('Empty');
+        final found = layer.getTextById('any-id');
+        expect(found, isNull);
+      });
+    });
+
+    group('clear with texts', () {
+      test('removes all strokes, shapes and texts', () {
+        final text = TextElement.create(text: 'Hello', x: 0, y: 0);
+        final original = Layer(
+          id: 'id',
+          name: 'name',
+          strokes: [testStroke1],
+          shapes: [testShape1],
+          texts: [text],
+        );
+        final cleared = original.clear();
+
+        expect(cleared.strokeCount, 0);
+        expect(cleared.shapeCount, 0);
+        expect(cleared.textCount, 0);
+        expect(cleared.isEmpty, true);
+      });
+    });
+
+    group('isEmpty with texts', () {
+      test('returns false when only texts exist', () {
+        final text = TextElement.create(text: 'Hello', x: 0, y: 0);
+        final layer = Layer(
+          id: 'id',
+          name: 'name',
+          strokes: const [],
+          texts: [text],
+        );
+        expect(layer.isEmpty, false);
+        expect(layer.isNotEmpty, true);
+      });
+    });
+
+    group('JSON serialization with texts', () {
+      test('toJson includes texts', () {
+        final text = TextElement.create(text: 'Hello', x: 50, y: 50);
+        final layer = Layer(
+          id: 'test-id',
+          name: 'Test Layer',
+          strokes: const [],
+          texts: [text],
+        );
+
+        final json = layer.toJson();
+
+        expect(json['texts'], isA<List>());
+        expect((json['texts'] as List).length, 1);
+      });
+
+      test('fromJson restores texts', () {
+        final text = TextElement.create(
+          text: 'Hello World',
+          x: 100,
+          y: 200,
+          fontSize: 24,
+        );
+        final json = {
+          'id': 'restored-id',
+          'name': 'Restored Layer',
+          'strokes': <Map<String, dynamic>>[],
+          'texts': [text.toJson()],
+          'isVisible': true,
+          'isLocked': false,
+          'opacity': 1.0,
+        };
+
+        final layer = Layer.fromJson(json);
+
+        expect(layer.textCount, 1);
+        expect(layer.texts[0].text, 'Hello World');
+        expect(layer.texts[0].fontSize, 24);
+      });
+
+      test('fromJson handles missing texts field', () {
+        final json = {
+          'id': 'id',
+          'name': 'name',
+          'strokes': <Map<String, dynamic>>[],
+        };
+
+        final layer = Layer.fromJson(json);
+
+        expect(layer.textCount, 0);
+      });
+
+      test('roundtrip with texts preserves values', () {
+        final text1 = TextElement.create(
+          text: 'Hello',
+          x: 0,
+          y: 0,
+          fontSize: 16,
+        );
+        final text2 = TextElement.create(
+          text: 'World',
+          x: 100,
+          y: 100,
+          fontSize: 24,
+          isBold: true,
+        );
+        final original = Layer(
+          id: 'roundtrip-id',
+          name: 'Roundtrip Layer',
+          strokes: [testStroke1],
+          shapes: [testShape1],
+          texts: [text1, text2],
+          isVisible: false,
+          isLocked: true,
+          opacity: 0.65,
+        );
+
+        final json = original.toJson();
+        final restored = Layer.fromJson(json);
+
+        expect(restored.strokeCount, original.strokeCount);
+        expect(restored.shapeCount, original.shapeCount);
+        expect(restored.textCount, original.textCount);
+        expect(restored.texts[0].text, 'Hello');
+        expect(restored.texts[1].text, 'World');
+        expect(restored.texts[1].isBold, true);
+      });
+    });
+
+    group('Equality with texts', () {
+      test('two layers with same texts are equal', () {
+        final text = TextElement(id: 'text-1', text: 'Hello', x: 0, y: 0);
+        final layer1 = Layer(
+          id: 'same-id',
+          name: 'Same Name',
+          strokes: const [],
+          texts: [text],
+        );
+
+        final layer2 = Layer(
+          id: 'same-id',
+          name: 'Same Name',
+          strokes: const [],
+          texts: [text],
+        );
+
+        expect(layer1, equals(layer2));
+      });
+
+      test('two layers with different texts are not equal', () {
+        final text1 = TextElement(id: 'text-1', text: 'Hello', x: 0, y: 0);
+        final text2 = TextElement(id: 'text-2', text: 'World', x: 0, y: 0);
+        final layer1 = Layer(
+          id: 'id',
+          name: 'Name',
+          strokes: const [],
+          texts: [text1],
+        );
+        final layer2 = Layer(
+          id: 'id',
+          name: 'Name',
+          strokes: const [],
+          texts: [text2],
+        );
+
+        expect(layer1, isNot(equals(layer2)));
+      });
+    });
+
+    group('copyWith texts', () {
+      test('copies with texts changed', () {
+        final text1 = TextElement.create(text: 'Hello', x: 0, y: 0);
+        final text2 = TextElement.create(text: 'World', x: 100, y: 100);
+        final original = Layer(
+          id: 'id',
+          name: 'name',
+          strokes: const [],
+          texts: [text1],
+        );
+        final copied = original.copyWith(texts: [text2]);
+
+        expect(copied.texts[0].text, 'World');
+      });
+    });
+
+    group('toString with texts', () {
+      test('includes textCount', () {
+        final text = TextElement.create(text: 'Hello', x: 0, y: 0);
+        final layer = Layer(
+          id: 'test-id',
+          name: 'Test Layer',
+          strokes: const [],
+          texts: [text],
+        );
+
+        final str = layer.toString();
+
+        expect(str, contains('textCount: 1'));
       });
     });
   });

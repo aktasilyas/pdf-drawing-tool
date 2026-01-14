@@ -3,7 +3,7 @@
 > **Single Source of Truth** for all development progress.  
 > Update this file as features are implemented.
 > 
-> **Last Updated**: 2025-01-13 (Phase 3 Complete, Phase 4 Ready)
+> **Last Updated**: 2025-01-14 (Phase 4C Complete, Phase 4D In Progress)
 
 ---
 
@@ -15,7 +15,10 @@
 | Phase 1 | ✅ COMPLETE | main | v0.1.0-phase1 | 100% |
 | Phase 2 | ✅ COMPLETE | main | v0.2.0-phase2 | 100% |
 | Phase 3 | ✅ COMPLETE | main | v0.3.0-phase3 | 100% |
-| Phase 4 | ❌ NOT STARTED | - | - | 0% |
+| Phase 4A | ✅ COMPLETE | feature/phase4-advanced-features | v0.4.0-phase4a | 100% |
+| Phase 4B | ✅ COMPLETE | feature/phase4-advanced-features | v0.4.0-phase4b | 100% |
+| Phase 4C | ✅ COMPLETE | feature/phase4-advanced-features | v0.4.0-phase4c | 100% |
+| Phase 4D | 🔄 IN PROGRESS | feature/phase4-advanced-features | - | 30% |
 | Phase 5 | ❌ NOT STARTED | - | - | 0% |
 
 ---
@@ -69,62 +72,76 @@
 
 ---
 
-## Phase 4: Advanced Features ❌ NOT STARTED
+## Phase 4: Advanced Features 🔄 IN PROGRESS
 
-### Phase 4A: Eraser System (7 steps)
-
-#### drawing_core
-- [ ] Hit testing infrastructure (hit_tester.dart)
-- [ ] StrokeHitTester implementation
-- [ ] EraserTool (stroke mode)
-- [ ] EraseStrokesCommand
-
-#### drawing_ui
-- [ ] Eraser providers
-- [ ] DrawingCanvas eraser integration
-- [ ] Eraser cursor indicator (optional)
-- [ ] Manual testing & polish
-
-### Phase 4B: Selection System (9 steps)
+### Phase 4A: Eraser System ✅ COMPLETE
 
 #### drawing_core
-- [ ] Selection model
-- [ ] SelectionTool abstract class
-- [ ] LassoSelectionTool (point-in-polygon)
-- [ ] RectSelectionTool
-- [ ] MoveSelectionCommand
-- [ ] DeleteSelectionCommand
+- [x] Hit testing infrastructure (hit_tester.dart)
+- [x] StrokeHitTester implementation
+- [x] EraserTool (stroke mode)
+- [x] EraseStrokesCommand
 
 #### drawing_ui
-- [ ] SelectionProvider
-- [ ] SelectionPainter
-- [ ] SelectionHandles widget
-- [ ] DrawingCanvas selection integration
+- [x] Eraser providers
+- [x] DrawingCanvas eraser integration
+- [x] Manual testing & polish
 
-### Phase 4C: Shape Tools (6 steps)
+### Phase 4B: Selection System ✅ COMPLETE
 
 #### drawing_core
-- [ ] Shape model
-- [ ] ShapeType enum
-- [ ] Layer model update (shapes list)
-- [ ] ShapeTool abstract class
-- [ ] LineTool
-- [ ] RectangleTool
-- [ ] EllipseTool
-- [ ] ArrowTool
-- [ ] AddShapeCommand
-- [ ] RemoveShapeCommand
+- [x] Selection model
+- [x] SelectionTool abstract class
+- [x] LassoSelectionTool (point-in-polygon)
+- [x] RectSelectionTool
+- [x] MoveSelectionCommand
+- [x] DeleteSelectionCommand
 
 #### drawing_ui
-- [ ] ShapePainter
-- [ ] Shape providers
-- [ ] DrawingCanvas shape integration
+- [x] SelectionProvider
+- [x] SelectionPainter
+- [x] SelectionHandles widget
+- [x] DrawingCanvas selection integration
 
-### Phase 4D: Text Tool (OPTIONAL)
-- [ ] TextElement model
-- [ ] TextTool
-- [ ] TextInputOverlay widget
+### Phase 4C: Shape Tools ✅ COMPLETE
+
+#### drawing_core
+- [x] Shape model (with fillColor support)
+- [x] ShapeType enum (10 types: line, arrow, rectangle, ellipse, triangle, diamond, star, pentagon, hexagon, plus)
+- [x] Layer model update (shapes list)
+- [x] ShapeTool abstract class
+- [x] LineTool
+- [x] RectangleTool
+- [x] EllipseTool
+- [x] ArrowTool
+- [x] GenericShapeTool (for polygon shapes)
+- [x] AddShapeCommand
+- [x] RemoveShapeCommand
+- [x] Shape erasing support
+- [x] Shape selection support (lasso + rect)
+- [x] MoveSelectionCommand (strokes + shapes)
+- [x] DeleteSelectionCommand (strokes + shapes)
+
+#### drawing_ui
+- [x] ShapePainter (renders all 10 shapes)
+- [x] Shape providers (shapeFillColorProvider)
+- [x] DrawingCanvas shape integration
+- [x] Shapes settings panel (5x2 grid)
+
+### Phase 4D: Text Tool 🔄 IN PROGRESS
+
+#### drawing_core
+- [x] TextElement model
+- [x] Layer model update (texts list)
+- [ ] AddTextCommand
+- [ ] RemoveTextCommand
+- [ ] UpdateTextCommand
+
+#### drawing_ui
 - [ ] TextPainter
+- [ ] Text providers
+- [ ] TextInputOverlay widget
+- [ ] DrawingCanvas text integration
 
 ---
 
@@ -156,9 +173,10 @@
 | v0.1.0-phase1 | UI Skeleton | 2025-01-13 |
 | v0.2.0-phase2 | Drawing Core | 2025-01-13 |
 | v0.3.0-phase3 | Canvas Integration | 2025-01-13 |
-| v0.4.0-phase4a | Eraser System | TBD |
-| v0.4.0-phase4b | Selection System | TBD |
-| v0.4.0-phase4c | Shape Tools | TBD |
+| v0.4.0-phase4a | Eraser System | 2025-01-14 |
+| v0.4.0-phase4b | Selection System | 2025-01-14 |
+| v0.4.0-phase4c | Shape Tools | 2025-01-14 |
+| v0.4.0-phase4d | Text Tool | TBD |
 | v0.4.0-phase4 | Advanced Features | TBD |
 
 ---
@@ -167,19 +185,19 @@
 
 | Package | Tests | Status |
 |---------|-------|--------|
-| drawing_core | ~150 | ✅ Full |
+| drawing_core | ~200+ | ✅ Full |
 | drawing_ui | ~70 | ✅ Good |
 
 ---
 
 ## Performance Metrics
 
-| Metric | Target | Phase 3 Status |
+| Metric | Target | Phase 4 Status |
 |--------|--------|----------------|
 | Frame time | <16ms | ✅ Achieved |
 | Input latency | <16ms | ✅ Achieved |
 | FPS | 60 | ✅ Achieved |
-| Hit test (Phase 4) | <5ms | TBD |
+| Hit test | <5ms | ✅ Achieved |
 
 ---
 
@@ -191,7 +209,10 @@
 - ✅ No setState for drawing
 - ✅ Full undo/redo support
 - ✅ Vector rendering (zoom quality)
+- ✅ Shape tools with 10 types
+- ✅ Selection includes shapes
+- ✅ Eraser works on shapes
 
 ---
 
-*Last updated: 2025-01-13 - Phase 3 Complete*
+*Last updated: 2025-01-14 - Phase 4D In Progress*
