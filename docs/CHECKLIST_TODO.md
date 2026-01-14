@@ -128,7 +128,7 @@
 - [x] DrawingCanvas shape integration
 - [x] Shapes settings panel (5x2 grid)
 
-### Phase 4D: Text Tool 🔄 IN PROGRESS
+### Phase 4D: Text Tool ✅ COMPLETED
 
 #### drawing_core
 - [x] TextElement model
@@ -142,7 +142,11 @@
 - [x] TextPainter
 - [x] Text providers
 - [x] TextInputOverlay widget
+- [x] TextContextMenu (5 actions: Edit, Delete, Style, Duplicate, Move)
+- [x] TextStylePopup (color, font size, B/I/U)
+- [x] Move mode with visual indicator
 - [x] DrawingCanvas text integration
+- [x] Eraser deletes text elements
 
 ---
 
@@ -177,7 +181,7 @@
 | v0.4.0-phase4a | Eraser System | 2025-01-14 |
 | v0.4.0-phase4b | Selection System | 2025-01-14 |
 | v0.4.0-phase4c | Shape Tools | 2025-01-14 |
-| v0.4.0-phase4d | Text Tool | TBD |
+| v0.4.0-phase4d | Text Tool | 2025-01-14 |
 | v0.4.0-phase4 | Advanced Features | TBD |
 
 ---
@@ -213,7 +217,10 @@
 - ✅ Shape tools with 10 types
 - ✅ Selection includes shapes
 - ✅ Eraser works on shapes
+- ✅ Text tool with context menu
+- ✅ Text style editor (color, size, B/I/U)
+- ✅ Text move mode
 
 ---
 
-*Last updated: 2025-01-14 - Phase 4D In Progress*
+*Last updated: 2025-01-14 - Phase 4D Complete*
