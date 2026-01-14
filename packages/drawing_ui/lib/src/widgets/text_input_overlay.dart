@@ -118,7 +118,7 @@ class _TextInputOverlayState extends ConsumerState<TextInputOverlay> {
                 isDense: true,
               ),
               onSubmitted: _onSubmitted,
-              onTapOutside: (_) => widget.onEditingComplete(),
+              // onTapOutside removed - handled by canvas pointer events
             ),
           ),
         ),

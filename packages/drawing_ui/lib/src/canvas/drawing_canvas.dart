@@ -123,13 +123,17 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
   /// Shape IDs erased in current gesture session.
   final Set<String> _erasedShapeIds = {};
 
+  /// Text IDs erased in current gesture session.
+  final Set<String> _erasedTextIds = {};
+
   /// Exposes the drawing controller for testing.
   @visibleForTesting
   DrawingController get drawingController => _drawingController;
 
   /// Exposes committed strokes from provider for testing.
   @visibleForTesting
-  List<core.Stroke> get committedStrokes => ref.read(activeLayerStrokesProvider);
+  List<core.Stroke> get committedStrokes =>
+      ref.read(activeLayerStrokesProvider);
 
   /// Exposes last point for testing distance filtering.
   @visibleForTesting
@@ -418,6 +422,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     final eraserTool = ref.read(eraserToolProvider);
     eraserTool.startErasing();
     _erasedShapeIds.clear();
+    _erasedTextIds.clear();
     _eraseAtPoint(event.localPosition);
   }
 
@@ -426,7 +431,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     _eraseAtPoint(event.localPosition);
   }
 
-  /// Handles eraser pointer up - commits all erased strokes and shapes as commands.
+  /// Handles eraser pointer up - commits all erased strokes, shapes, and texts as commands.
   void _handleEraserUp(PointerUpEvent event) {
     final eraserTool = ref.read(eraserToolProvider);
     final erasedStrokeIds = eraserTool.endErasing();
@@ -451,9 +456,19 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
       ref.read(historyManagerProvider.notifier).execute(command);
     }
     _erasedShapeIds.clear();
+
+    // Commit erased texts (each text as separate command for undo granularity)
+    for (final textId in _erasedTextIds) {
+      final command = core.RemoveTextCommand(
+        layerIndex: layerIndex,
+        textId: textId,
+      );
+      ref.read(historyManagerProvider.notifier).execute(command);
+    }
+    _erasedTextIds.clear();
   }
 
-  /// Erases strokes and shapes at the given screen point.
+  /// Erases strokes, shapes, and texts at the given screen point.
   /// Transforms screen coordinates to canvas coordinates.
   void _eraseAtPoint(Offset point) {
     // Transform screen coordinates to canvas coordinates (zoom/pan)
@@ -462,6 +477,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
 
     final strokes = ref.read(activeLayerStrokesProvider);
     final shapes = ref.read(activeLayerShapesProvider);
+    final texts = ref.read(activeLayerTextsProvider);
     final eraserTool = ref.read(eraserToolProvider);
 
     // Find strokes to erase
@@ -486,6 +502,19 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
           eraserTool.tolerance,
         )) {
           _erasedShapeIds.add(shape.id);
+        }
+      }
+    }
+
+    // Find texts to erase
+    for (final text in texts) {
+      if (!_erasedTextIds.contains(text.id)) {
+        if (text.containsPoint(
+          canvasPoint.dx,
+          canvasPoint.dy,
+          eraserTool.tolerance,
+        )) {
+          _erasedTextIds.add(text.id);
         }
       }
     }
@@ -593,24 +622,61 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
   // TEXT EVENT HANDLERS
   // ─────────────────────────────────────────────────────────────────────────
 
-  /// Handles text pointer down - starts text editing.
+  /// Handles text pointer down - shows context menu or starts text editing.
   void _handleTextDown(PointerDownEvent event) {
     final transform = ref.read(canvasTransformProvider);
     final canvasPoint =
         (event.localPosition - transform.offset) / transform.zoom;
 
-    // Check if tapped on existing text
+    // Check if there's already active text editing
+    final textToolState = ref.read(textToolProvider);
+
+    // Handle move mode - move text to tapped location
+    if (textToolState.isMoving) {
+      _moveTextTo(canvasPoint.dx, canvasPoint.dy);
+      return;
+    }
+
+    if (textToolState.isEditing) {
+      // Check if tapped on the same text element - if not, finish current and STOP
+      final activeText = textToolState.activeText;
+      if (activeText != null) {
+        // Check if tapped on current active text
+        if (activeText.containsPoint(canvasPoint.dx, canvasPoint.dy, 10)) {
+          // Same text clicked - do nothing, let TextField handle it
+          return;
+        }
+        // Tapped somewhere else - finish current editing and STOP
+        // User needs to tap again to create new text (this closes keyboard)
+        _finishTextEditing();
+        return; // IMPORTANT: Don't create new text on same tap
+      }
+    }
+
+    // If menu is showing, close it first
+    if (textToolState.showMenu) {
+      ref.read(textToolProvider.notifier).hideContextMenu();
+      return;
+    }
+
+    // If style popup is showing, close it first
+    if (textToolState.showStylePopup) {
+      ref.read(textToolProvider.notifier).hideStylePopup();
+      return;
+    }
+
+    // Check if tapped on existing text - show context menu
     final texts = ref.read(activeLayerTextsProvider);
 
     for (final text in texts.reversed) {
       if (text.containsPoint(canvasPoint.dx, canvasPoint.dy, 10)) {
-        // Edit existing text
-        ref.read(textToolProvider.notifier).editExistingText(text);
+        // Show context menu for existing text
+        ref.read(textToolProvider.notifier).showContextMenu(text);
         return;
       }
     }
 
-    // Create new text at tap location
+    // Create new text at tap location (only if no text was being edited)
     final style = ref.read(activeStrokeStyleProvider);
     ref.read(textToolProvider.notifier).startNewText(
           canvasPoint.dx,
@@ -623,11 +689,11 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
   /// Finishes text editing and saves the text.
   void _finishTextEditing() {
     final textToolState = ref.read(textToolProvider);
-    
+
     // IMPORTANT: Get the current text state BEFORE calling finishEditing
     // because finishEditing clears the state
     final currentText = textToolState.activeText;
-    
+
     if (currentText == null || currentText.text.trim().isEmpty) {
       ref.read(textToolProvider.notifier).cancelEditing();
       return;
@@ -661,6 +727,106 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
   }
 
   // ─────────────────────────────────────────────────────────────────────────
+  // TEXT CONTEXT MENU HANDLERS
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /// Handles edit action from context menu - opens TextField for editing.
+  void _handleTextEdit() {
+    final textToolState = ref.read(textToolProvider);
+    if (textToolState.menuText != null) {
+      ref
+          .read(textToolProvider.notifier)
+          .editExistingText(textToolState.menuText!);
+    }
+  }
+
+  /// Handles delete action from context menu - removes text.
+  void _handleTextDelete() {
+    final textToolState = ref.read(textToolProvider);
+    if (textToolState.menuText != null) {
+      final document = ref.read(documentProvider);
+      final command = core.RemoveTextCommand(
+        layerIndex: document.activeLayerIndex,
+        textId: textToolState.menuText!.id,
+      );
+      ref.read(historyManagerProvider.notifier).execute(command);
+      ref.read(textToolProvider.notifier).hideContextMenu();
+    }
+  }
+
+  /// Handles style action from context menu - opens style popup.
+  void _handleTextStyle() {
+    final textToolState = ref.read(textToolProvider);
+    if (textToolState.menuText != null) {
+      ref
+          .read(textToolProvider.notifier)
+          .showStylePopup(textToolState.menuText!);
+    }
+  }
+
+  /// Handles style change from popup - updates text style.
+  void _handleTextStyleChanged(core.TextElement updatedText) {
+    final document = ref.read(documentProvider);
+    final command = core.UpdateTextCommand(
+      layerIndex: document.activeLayerIndex,
+      newText: updatedText,
+    );
+    ref.read(historyManagerProvider.notifier).execute(command);
+  }
+
+  /// Handles duplicate action from context menu - copies text.
+  void _handleTextDuplicate() {
+    final textToolState = ref.read(textToolProvider);
+    if (textToolState.menuText != null) {
+      final originalText = textToolState.menuText!;
+      // Create duplicate with visible offset (40px diagonal)
+      final duplicateText = core.TextElement.create(
+        text: originalText.text,
+        x: originalText.x + 40, // Offset by 40 pixels
+        y: originalText.y + 40,
+        fontSize: originalText.fontSize,
+        color: originalText.color,
+        fontFamily: originalText.fontFamily,
+        isBold: originalText.isBold,
+        isItalic: originalText.isItalic,
+        isUnderline: originalText.isUnderline,
+        alignment: originalText.alignment,
+      );
+
+      final document = ref.read(documentProvider);
+      final command = core.AddTextCommand(
+        layerIndex: document.activeLayerIndex,
+        textElement: duplicateText,
+      );
+      ref.read(historyManagerProvider.notifier).execute(command);
+      ref.read(textToolProvider.notifier).hideContextMenu();
+    }
+  }
+
+  /// Handles move action from context menu - starts move mode.
+  void _handleTextMove() {
+    final textToolState = ref.read(textToolProvider);
+    if (textToolState.menuText != null) {
+      ref.read(textToolProvider.notifier).startMoving(textToolState.menuText!);
+    }
+  }
+
+  /// Handles text move to new location.
+  void _moveTextTo(double x, double y) {
+    final textToolState = ref.read(textToolProvider);
+    if (textToolState.movingText != null) {
+      final movedText = textToolState.movingText!.copyWith(x: x, y: y);
+      final document = ref.read(documentProvider);
+      final command = core.UpdateTextCommand(
+        layerIndex: document.activeLayerIndex,
+        newText: movedText,
+      );
+      ref.read(historyManagerProvider.notifier).execute(command);
+      ref.read(textToolProvider.notifier).cancelMoving();
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
   // SCALE GESTURE HANDLERS (Two Finger Zoom/Pan)
   // ─────────────────────────────────────────────────────────────────────────
 
@@ -682,6 +848,13 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
       _activeShapeTool = null;
       _isDrawingShape = false;
     }
+
+    // Finish text editing if active (save the text)
+    final textToolState = ref.read(textToolProvider);
+    if (textToolState.isEditing) {
+      _finishTextEditing();
+    }
+
     _lastFocalPoint = details.focalPoint;
     _lastScale = 1.0;
   }
@@ -769,7 +942,8 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
 
     // Enable pointer events for drawing tools, selection tool, shape tool, and text tool
     final isTextTool = currentTool == ToolType.text;
-    final enablePointerEvents = isDrawingTool || isSelectionTool || isShapeTool || isTextTool;
+    final enablePointerEvents =
+        isDrawingTool || isSelectionTool || isShapeTool || isTextTool;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -780,160 +954,247 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
               : widget.height,
         );
 
-        // Listener first for raw pointer events (drawing/selection)
-        // GestureDetector inside for scale gesture (zoom/pan)
-        return Listener(
-          onPointerDown: enablePointerEvents ? _handlePointerDown : null,
-          onPointerMove: enablePointerEvents ? _handlePointerMove : null,
-          onPointerUp: enablePointerEvents ? _handlePointerUp : null,
-          onPointerCancel: enablePointerEvents ? _handlePointerCancel : null,
-          behavior: HitTestBehavior.translucent,
-          child: GestureDetector(
-            onScaleStart: _handleScaleStart,
-            onScaleUpdate: _handleScaleUpdate,
-            onScaleEnd: _handleScaleEnd,
-            behavior: HitTestBehavior.opaque,
-            child: ClipRect(
-              child: Stack(
-                children: [
-                  Transform(
-                    // Apply zoom and pan transformation
-                    transform: transform.matrix,
-                    alignment: Alignment.topLeft,
-                    child: Stack(
-                      children: [
-                    // ─────────────────────────────────────────────────────────
-                    // LAYER 1: Background Grid
-                    // ─────────────────────────────────────────────────────────
-                    // Never repaints - shouldRepaint always returns false
-                    RepaintBoundary(
-                      child: CustomPaint(
-                        size: size,
-                        painter: const GridPainter(),
-                        isComplex: false,
-                        willChange: false,
-                      ),
-                    ),
-
-                    // ─────────────────────────────────────────────────────────
-                    // LAYER 2: Committed Strokes (from DocumentProvider)
-                    // ─────────────────────────────────────────────────────────
-                    // Repaints when strokes are added/removed via provider
-                    RepaintBoundary(
-                      child: CustomPaint(
-                        size: size,
-                        painter: CommittedStrokesPainter(
-                          strokes: strokes,
-                          renderer: _renderer,
-                        ),
-                        isComplex: true,
-                        willChange: false,
-                      ),
-                    ),
-
-                    // ─────────────────────────────────────────────────────────
-                    // LAYER 3: Committed Shapes + Preview Shape
-                    // ─────────────────────────────────────────────────────────
-                    // Repaints when shapes are added/removed or during shape preview
-                    RepaintBoundary(
-                      child: CustomPaint(
-                        size: size,
-                        painter: ShapePainter(
-                          shapes: shapes,
-                          activeShape: previewShape,
-                        ),
-                        isComplex: true,
-                        willChange: previewShape != null,
-                      ),
-                    ),
-
-                    // ─────────────────────────────────────────────────────────
-                    // LAYER 4: Committed Texts + Active Text
-                    // ─────────────────────────────────────────────────────────
-                    // Repaints when texts are added/removed or during editing
-                    RepaintBoundary(
-                      child: CustomPaint(
-                        size: size,
-                        painter: TextElementPainter(
-                          texts: texts,
-                          activeText: textToolState.isEditing
-                              ? textToolState.activeText
-                              : null,
-                        ),
-                        isComplex: true,
-                        willChange: textToolState.isEditing,
-                      ),
-                    ),
-
-                    // ─────────────────────────────────────────────────────────
-                    // LAYER 5: Active Stroke (Live Drawing)
-                    // ─────────────────────────────────────────────────────────
-                    // Repaints on every pointer move - must be fast!
-                    RepaintBoundary(
-                      child: ListenableBuilder(
-                        listenable: _drawingController,
-                        builder: (context, _) {
-                          return CustomPaint(
-                            size: size,
-                            painter: ActiveStrokePainter(
-                              points: _drawingController.activePoints,
-                              style: _drawingController.activeStyle,
-                              renderer: _renderer,
+        // Wrap everything in a Stack to put menu/overlay OUTSIDE gesture handlers
+        return Stack(
+          children: [
+            // Canvas with gesture handlers
+            Listener(
+              onPointerDown: enablePointerEvents ? _handlePointerDown : null,
+              onPointerMove: enablePointerEvents ? _handlePointerMove : null,
+              onPointerUp: enablePointerEvents ? _handlePointerUp : null,
+              onPointerCancel:
+                  enablePointerEvents ? _handlePointerCancel : null,
+              behavior: HitTestBehavior.translucent,
+              child: GestureDetector(
+                onScaleStart: _handleScaleStart,
+                onScaleUpdate: _handleScaleUpdate,
+                onScaleEnd: _handleScaleEnd,
+                behavior: HitTestBehavior.opaque,
+                child: ClipRect(
+                  child: SizedBox(
+                    width: size.width,
+                    height: size.height,
+                    child: Transform(
+                      // Apply zoom and pan transformation
+                      transform: transform.matrix,
+                      alignment: Alignment.topLeft,
+                      child: Stack(
+                        children: [
+                          // ─────────────────────────────────────────────────────────
+                          // LAYER 1: Background Grid
+                          // ─────────────────────────────────────────────────────────
+                          // Never repaints - shouldRepaint always returns false
+                          RepaintBoundary(
+                            child: CustomPaint(
+                              size: size,
+                              painter: const GridPainter(),
+                              isComplex: false,
+                              willChange: false,
                             ),
-                            isComplex: false,
-                            willChange: true,
-                          );
-                        },
+                          ),
+
+                          // ─────────────────────────────────────────────────────────
+                          // LAYER 2: Committed Strokes (from DocumentProvider)
+                          // ─────────────────────────────────────────────────────────
+                          // Repaints when strokes are added/removed via provider
+                          RepaintBoundary(
+                            child: CustomPaint(
+                              size: size,
+                              painter: CommittedStrokesPainter(
+                                strokes: strokes,
+                                renderer: _renderer,
+                              ),
+                              isComplex: true,
+                              willChange: false,
+                            ),
+                          ),
+
+                          // ─────────────────────────────────────────────────────────
+                          // LAYER 3: Committed Shapes + Preview Shape
+                          // ─────────────────────────────────────────────────────────
+                          // Repaints when shapes are added/removed or during shape preview
+                          RepaintBoundary(
+                            child: CustomPaint(
+                              size: size,
+                              painter: ShapePainter(
+                                shapes: shapes,
+                                activeShape: previewShape,
+                              ),
+                              isComplex: true,
+                              willChange: previewShape != null,
+                            ),
+                          ),
+
+                          // ─────────────────────────────────────────────────────────
+                          // LAYER 4: Committed Texts + Active Text
+                          // ─────────────────────────────────────────────────────────
+                          // Repaints when texts are added/removed or during editing
+                          RepaintBoundary(
+                            child: CustomPaint(
+                              size: size,
+                              painter: TextElementPainter(
+                                texts: texts,
+                                activeText: textToolState.isEditing
+                                    ? textToolState.activeText
+                                    : null,
+                              ),
+                              isComplex: true,
+                              willChange: textToolState.isEditing,
+                            ),
+                          ),
+
+                          // ─────────────────────────────────────────────────────────
+                          // LAYER 5: Active Stroke (Live Drawing)
+                          // ─────────────────────────────────────────────────────────
+                          // Repaints on every pointer move - must be fast!
+                          RepaintBoundary(
+                            child: ListenableBuilder(
+                              listenable: _drawingController,
+                              builder: (context, _) {
+                                return CustomPaint(
+                                  size: size,
+                                  painter: ActiveStrokePainter(
+                                    points: _drawingController.activePoints,
+                                    style: _drawingController.activeStyle,
+                                    renderer: _renderer,
+                                  ),
+                                  isComplex: false,
+                                  willChange: true,
+                                );
+                              },
+                            ),
+                          ),
+
+                          // ─────────────────────────────────────────────────────────
+                          // LAYER 6: Selection Overlay
+                          // ─────────────────────────────────────────────────────────
+                          // Selection bounds, lasso path, and preview
+                          RepaintBoundary(
+                            child: CustomPaint(
+                              size: size,
+                              painter: SelectionPainter(
+                                selection: selection,
+                                previewPath: selectionPreviewPath,
+                                zoom: transform.zoom,
+                              ),
+                              isComplex: false,
+                              willChange: true,
+                            ),
+                          ),
+
+                          // ─────────────────────────────────────────────────────────
+                          // LAYER 7: Selection Handles (for drag interactions)
+                          // ─────────────────────────────────────────────────────────
+                          if (selection != null)
+                            SelectionHandles(
+                              selection: selection,
+                              onSelectionChanged: () => setState(() {}),
+                            ),
+                        ],
                       ),
                     ),
+                  ),
+                ),
+              ),
+            ),
 
-                    // ─────────────────────────────────────────────────────────
-                    // LAYER 6: Selection Overlay
-                    // ─────────────────────────────────────────────────────────
-                    // Selection bounds, lasso path, and preview
-                    RepaintBoundary(
-                      child: CustomPaint(
-                        size: size,
-                        painter: SelectionPainter(
-                          selection: selection,
-                          previewPath: selectionPreviewPath,
-                          zoom: transform.zoom,
+            // ───────────────────────────────────────────────────────────
+            // Text Context Menu (OUTSIDE gesture handlers - screen coordinates)
+            // ───────────────────────────────────────────────────────────
+            if (textToolState.showMenu && textToolState.menuText != null)
+              TextContextMenu(
+                textElement: textToolState.menuText!,
+                zoom: transform.zoom,
+                canvasOffset: transform.offset,
+                onEdit: _handleTextEdit,
+                onDelete: _handleTextDelete,
+                onStyle: _handleTextStyle,
+                onDuplicate: _handleTextDuplicate,
+                onMove: _handleTextMove,
+              ),
+
+            // ───────────────────────────────────────────────────────────
+            // Text Input Overlay (OUTSIDE gesture handlers - screen coordinates)
+            // ───────────────────────────────────────────────────────────
+            if (textToolState.isEditing && textToolState.activeText != null)
+              TextInputOverlay(
+                textElement: textToolState.activeText!,
+                zoom: transform.zoom,
+                canvasOffset: transform.offset,
+                onTextChanged: (updatedText) {
+                  ref.read(textToolProvider.notifier).updateText(updatedText);
+                },
+                onEditingComplete: () => _finishTextEditing(),
+                onCancel: () => _cancelTextEditing(),
+              ),
+
+            // ───────────────────────────────────────────────────────────
+            // Text Style Popup (OUTSIDE gesture handlers - screen coordinates)
+            // ───────────────────────────────────────────────────────────
+            if (textToolState.showStylePopup && textToolState.styleText != null)
+              TextStylePopup(
+                textElement: textToolState.styleText!,
+                zoom: transform.zoom,
+                canvasOffset: transform.offset,
+                onStyleChanged: _handleTextStyleChanged,
+                onClose: () =>
+                    ref.read(textToolProvider.notifier).hideStylePopup(),
+              ),
+
+            // ───────────────────────────────────────────────────────────
+            // Text Move Mode Indicator
+            // ───────────────────────────────────────────────────────────
+            if (textToolState.isMoving)
+              Positioned(
+                top: 60,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade700,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.2),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
                         ),
-                        isComplex: false,
-                        willChange: true,
-                      ),
+                      ],
                     ),
-
-                    // ─────────────────────────────────────────────────────────
-                    // LAYER 7: Selection Handles (for drag interactions)
-                    // ─────────────────────────────────────────────────────────
-                    if (selection != null)
-                      SelectionHandles(
-                        selection: selection,
-                        onSelectionChanged: () => setState(() {}),
-                      ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.touch_app,
+                            color: Colors.white, size: 18),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'Taşımak için bir yere dokunun',
+                          style: TextStyle(color: Colors.white, fontSize: 14),
+                        ),
+                        const SizedBox(width: 12),
+                        GestureDetector(
+                          onTap: () => ref
+                              .read(textToolProvider.notifier)
+                              .cancelMoving(),
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.2),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.close,
+                                color: Colors.white, size: 16),
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                  
-                  // ───────────────────────────────────────────────────────────
-                  // Text Input Overlay (outside Transform - screen coordinates)
-                  // ───────────────────────────────────────────────────────────
-                  if (textToolState.isEditing && textToolState.activeText != null)
-                    TextInputOverlay(
-                      textElement: textToolState.activeText!,
-                      zoom: transform.zoom,
-                      canvasOffset: transform.offset,
-                      onTextChanged: (updatedText) {
-                        ref.read(textToolProvider.notifier).updateText(updatedText);
-                      },
-                      onEditingComplete: () => _finishTextEditing(),
-                      onCancel: () => _cancelTextEditing(),
-                    ),
-                ],
+                ),
               ),
-            ),
-          ),
+          ],
         );
       },
     );
