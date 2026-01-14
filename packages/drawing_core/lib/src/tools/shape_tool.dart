@@ -9,8 +9,11 @@ abstract class ShapeTool {
   /// Çizgi stili
   final StrokeStyle style;
 
+  /// Dolgu rengi (ARGB32 format)
+  final int? fillColor;
+
   /// Constructor
-  ShapeTool({required this.style});
+  ShapeTool({required this.style, this.fillColor});
 
   /// Shape tipi
   ShapeType get shapeType;
@@ -55,6 +58,7 @@ abstract class ShapeTool {
       endPoint: _currentPoint!,
       style: style,
       isFilled: isFilled,
+      fillColor: fillColor,
     );
 
     _clear();
@@ -93,6 +97,7 @@ abstract class ShapeTool {
       endPoint: _currentPoint!,
       style: style,
       isFilled: isFilled,
+      fillColor: fillColor,
     );
   }
 }

@@ -51,6 +51,7 @@ export 'src/tools/brush_tool.dart';
 export 'src/tools/drawing_tool.dart';
 export 'src/tools/ellipse_tool.dart';
 export 'src/tools/eraser_tool.dart';
+export 'src/tools/generic_shape_tool.dart';
 export 'src/tools/highlighter_tool.dart';
 export 'src/tools/lasso_selection_tool.dart';
 export 'src/tools/line_tool.dart';

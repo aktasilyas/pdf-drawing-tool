@@ -123,6 +123,7 @@ class _SelectionHandlesState extends ConsumerState<SelectionHandles> {
     final command = MoveSelectionCommand(
       layerIndex: document.activeLayerIndex,
       strokeIds: widget.selection.selectedStrokeIds,
+      shapeIds: widget.selection.selectedShapeIds,
       deltaX: delta.dx,
       deltaY: delta.dy,
     );
@@ -219,6 +220,7 @@ class SelectionActions extends ConsumerWidget {
     final command = DeleteSelectionCommand(
       layerIndex: document.activeLayerIndex,
       strokeIds: selection.selectedStrokeIds,
+      shapeIds: selection.selectedShapeIds,
     );
 
     ref.read(historyManagerProvider.notifier).execute(command);

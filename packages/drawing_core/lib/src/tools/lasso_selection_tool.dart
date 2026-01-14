@@ -3,11 +3,13 @@ import 'package:drawing_core/drawing_core.dart';
 
 /// Lasso (free-form) selection tool.
 ///
-/// Allows users to draw a free-form path to select strokes.
+/// Allows users to draw a free-form path to select strokes and shapes.
 /// Uses ray casting algorithm for point-in-polygon testing.
 ///
 /// A stroke is considered selected if any of its points
 /// fall within the lasso polygon.
+/// A shape is considered selected if its center point
+/// falls within the lasso polygon.
 class LassoSelectionTool implements SelectionTool {
   final List<DrawingPoint> _path = [];
   bool _isSelecting = false;
@@ -29,7 +31,7 @@ class LassoSelectionTool implements SelectionTool {
   }
 
   @override
-  Selection? endSelection(List<Stroke> strokes) {
+  Selection? endSelection(List<Stroke> strokes, [List<Shape> shapes = const []]) {
     if (!_isSelecting || _path.length < 3) {
       cancelSelection();
       return null;
@@ -44,19 +46,28 @@ class LassoSelectionTool implements SelectionTool {
     }
 
     // Find strokes inside the lasso
-    final selectedIds = _findStrokesInLasso(strokes, closedPath);
+    final selectedStrokeIds = _findStrokesInLasso(strokes, closedPath);
 
-    if (selectedIds.isEmpty) {
+    // Find shapes inside the lasso
+    final selectedShapeIds = _findShapesInLasso(shapes, closedPath);
+
+    if (selectedStrokeIds.isEmpty && selectedShapeIds.isEmpty) {
       _path.clear();
       return null;
     }
 
-    // Calculate bounds of selected strokes
-    final bounds = _calculateSelectionBounds(strokes, selectedIds);
+    // Calculate bounds of selected items
+    final bounds = _calculateSelectionBounds(
+      strokes,
+      selectedStrokeIds,
+      shapes,
+      selectedShapeIds,
+    );
 
     final selection = Selection.create(
       type: SelectionType.lasso,
-      selectedStrokeIds: selectedIds,
+      selectedStrokeIds: selectedStrokeIds,
+      selectedShapeIds: selectedShapeIds,
       bounds: bounds,
       lassoPath: closedPath,
     );
@@ -93,10 +104,42 @@ class LassoSelectionTool implements SelectionTool {
     return selectedIds;
   }
 
+  /// Finds all shapes that have their center inside the lasso.
+  List<String> _findShapesInLasso(
+    List<Shape> shapes,
+    List<DrawingPoint> polygon,
+  ) {
+    final selectedIds = <String>[];
+
+    for (final shape in shapes) {
+      if (_isShapeInLasso(shape, polygon)) {
+        selectedIds.add(shape.id);
+      }
+    }
+
+    return selectedIds;
+  }
+
   /// Checks if a stroke has any point inside the lasso polygon.
   bool _isStrokeInLasso(Stroke stroke, List<DrawingPoint> polygon) {
     for (final point in stroke.points) {
       if (_isPointInPolygon(point.x, point.y, polygon)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /// Checks if a shape's center is inside the lasso polygon.
+  bool _isShapeInLasso(Shape shape, List<DrawingPoint> polygon) {
+    // Check center point
+    if (_isPointInPolygon(shape.centerX, shape.centerY, polygon)) {
+      return true;
+    }
+    // Also check start and end points for lines/arrows
+    if (shape.type == ShapeType.line || shape.type == ShapeType.arrow) {
+      if (_isPointInPolygon(shape.startPoint.x, shape.startPoint.y, polygon) ||
+          _isPointInPolygon(shape.endPoint.x, shape.endPoint.y, polygon)) {
         return true;
       }
     }
@@ -132,22 +175,36 @@ class LassoSelectionTool implements SelectionTool {
     return inside;
   }
 
-  /// Calculates the bounding box of selected strokes.
+  /// Calculates the bounding box of selected strokes and shapes.
   BoundingBox _calculateSelectionBounds(
     List<Stroke> strokes,
-    List<String> selectedIds,
+    List<String> selectedStrokeIds,
+    List<Shape> shapes,
+    List<String> selectedShapeIds,
   ) {
     double minX = double.infinity;
     double minY = double.infinity;
     double maxX = double.negativeInfinity;
     double maxY = double.negativeInfinity;
 
+    // Add stroke bounds
     for (final stroke in strokes) {
-      if (!selectedIds.contains(stroke.id)) continue;
+      if (!selectedStrokeIds.contains(stroke.id)) continue;
 
       final bounds = stroke.bounds;
       if (bounds == null) continue;
 
+      minX = min(minX, bounds.left);
+      minY = min(minY, bounds.top);
+      maxX = max(maxX, bounds.right);
+      maxY = max(maxY, bounds.bottom);
+    }
+
+    // Add shape bounds
+    for (final shape in shapes) {
+      if (!selectedShapeIds.contains(shape.id)) continue;
+
+      final bounds = shape.bounds;
       minX = min(minX, bounds.left);
       minY = min(minY, bounds.top);
       maxX = max(maxX, bounds.right);

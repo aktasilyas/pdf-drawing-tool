@@ -37,16 +37,41 @@ class ShapePainter extends CustomPainter {
   }
 
   void _drawShape(Canvas canvas, Shape shape, {bool isPreview = false}) {
-    // Paint ayarla
-    _paint.color = Color(shape.style.color).withOpacity(
-      isPreview ? 0.5 : shape.style.opacity,
-    );
-    _paint.strokeWidth = shape.style.thickness;
-    _paint.style = shape.isFilled ? PaintingStyle.fill : PaintingStyle.stroke;
+    final previewOpacity = isPreview ? 0.5 : 1.0;
 
+    // Filled shapes: önce dolgu, sonra kontur çiz
+    if (shape.isFilled) {
+      // Dolgu rengi
+      final fillColorValue = shape.fillColor ?? shape.style.color;
+      _paint.color = Color(fillColorValue).withValues(alpha: previewOpacity);
+      _paint.style = PaintingStyle.fill;
+      _drawShapeByType(canvas, shape);
+
+      // Kontur çiz (stroke)
+      _paint.color = Color(shape.style.color).withValues(
+        alpha: shape.style.opacity * previewOpacity,
+      );
+      _paint.strokeWidth = shape.style.thickness;
+      _paint.style = PaintingStyle.stroke;
+      _drawShapeByType(canvas, shape);
+    } else {
+      // Sadece kontur
+      _paint.color = Color(shape.style.color).withValues(
+        alpha: shape.style.opacity * previewOpacity,
+      );
+      _paint.strokeWidth = shape.style.thickness;
+      _paint.style = PaintingStyle.stroke;
+      _drawShapeByType(canvas, shape);
+    }
+  }
+
+  void _drawShapeByType(Canvas canvas, Shape shape) {
     switch (shape.type) {
       case ShapeType.line:
         _drawLine(canvas, shape);
+        break;
+      case ShapeType.arrow:
+        _drawArrow(canvas, shape);
         break;
       case ShapeType.rectangle:
         _drawRectangle(canvas, shape);
@@ -54,8 +79,23 @@ class ShapePainter extends CustomPainter {
       case ShapeType.ellipse:
         _drawEllipse(canvas, shape);
         break;
-      case ShapeType.arrow:
-        _drawArrow(canvas, shape);
+      case ShapeType.triangle:
+        _drawTriangle(canvas, shape);
+        break;
+      case ShapeType.diamond:
+        _drawDiamond(canvas, shape);
+        break;
+      case ShapeType.star:
+        _drawStar(canvas, shape);
+        break;
+      case ShapeType.pentagon:
+        _drawPolygon(canvas, shape, 5);
+        break;
+      case ShapeType.hexagon:
+        _drawPolygon(canvas, shape, 6);
+        break;
+      case ShapeType.plus:
+        _drawPlus(canvas, shape);
         break;
     }
   }
@@ -125,6 +165,98 @@ class ShapePainter extends CustomPainter {
       ..isAntiAlias = true;
 
     canvas.drawPath(path, fillPaint);
+  }
+
+  void _drawTriangle(Canvas canvas, Shape shape) {
+    final left = min(shape.startPoint.x, shape.endPoint.x);
+    final right = max(shape.startPoint.x, shape.endPoint.x);
+    final top = min(shape.startPoint.y, shape.endPoint.y);
+    final bottom = max(shape.startPoint.y, shape.endPoint.y);
+
+    final path = Path()
+      ..moveTo((left + right) / 2, top) // Top center
+      ..lineTo(left, bottom) // Bottom left
+      ..lineTo(right, bottom) // Bottom right
+      ..close();
+    canvas.drawPath(path, _paint);
+  }
+
+  void _drawDiamond(Canvas canvas, Shape shape) {
+    final cx = (shape.startPoint.x + shape.endPoint.x) / 2;
+    final cy = (shape.startPoint.y + shape.endPoint.y) / 2;
+    final hw = (shape.endPoint.x - shape.startPoint.x).abs() / 2;
+    final hh = (shape.endPoint.y - shape.startPoint.y).abs() / 2;
+
+    final path = Path()
+      ..moveTo(cx, cy - hh) // Top
+      ..lineTo(cx + hw, cy) // Right
+      ..lineTo(cx, cy + hh) // Bottom
+      ..lineTo(cx - hw, cy) // Left
+      ..close();
+    canvas.drawPath(path, _paint);
+  }
+
+  void _drawStar(Canvas canvas, Shape shape) {
+    final cx = (shape.startPoint.x + shape.endPoint.x) / 2;
+    final cy = (shape.startPoint.y + shape.endPoint.y) / 2;
+    final rx = (shape.endPoint.x - shape.startPoint.x).abs() / 2;
+    final ry = (shape.endPoint.y - shape.startPoint.y).abs() / 2;
+    final radius = min(rx, ry);
+    final innerRadius = radius * 0.4;
+
+    final path = Path();
+    const points = 5;
+
+    for (int i = 0; i < points * 2; i++) {
+      final rScale = i.isEven ? 1.0 : (innerRadius / radius);
+      final angle = (i * pi / points) - pi / 2;
+      final x = cx + (rx * rScale) * cos(angle);
+      final y = cy + (ry * rScale) * sin(angle);
+
+      if (i == 0) {
+        path.moveTo(x, y);
+      } else {
+        path.lineTo(x, y);
+      }
+    }
+    path.close();
+    canvas.drawPath(path, _paint);
+  }
+
+  void _drawPolygon(Canvas canvas, Shape shape, int sides) {
+    final cx = (shape.startPoint.x + shape.endPoint.x) / 2;
+    final cy = (shape.startPoint.y + shape.endPoint.y) / 2;
+    final rx = (shape.endPoint.x - shape.startPoint.x).abs() / 2;
+    final ry = (shape.endPoint.y - shape.startPoint.y).abs() / 2;
+
+    final path = Path();
+    for (int i = 0; i < sides; i++) {
+      final angle = (i * 2 * pi / sides) - pi / 2;
+      final x = cx + rx * cos(angle);
+      final y = cy + ry * sin(angle);
+
+      if (i == 0) {
+        path.moveTo(x, y);
+      } else {
+        path.lineTo(x, y);
+      }
+    }
+    path.close();
+    canvas.drawPath(path, _paint);
+  }
+
+  void _drawPlus(Canvas canvas, Shape shape) {
+    final left = min(shape.startPoint.x, shape.endPoint.x);
+    final right = max(shape.startPoint.x, shape.endPoint.x);
+    final top = min(shape.startPoint.y, shape.endPoint.y);
+    final bottom = max(shape.startPoint.y, shape.endPoint.y);
+    final cx = (left + right) / 2;
+    final cy = (top + bottom) / 2;
+
+    // Vertical line
+    canvas.drawLine(Offset(cx, top), Offset(cx, bottom), _paint);
+    // Horizontal line
+    canvas.drawLine(Offset(left, cy), Offset(right, cy), _paint);
   }
 
   @override

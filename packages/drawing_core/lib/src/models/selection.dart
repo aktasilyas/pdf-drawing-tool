@@ -69,11 +69,12 @@ extension SelectionHandlePosition on SelectionHandle {
   }
 }
 
-/// Represents a selection of strokes on the canvas.
+/// Represents a selection of strokes and shapes on the canvas.
 ///
 /// A selection contains:
 /// - A list of selected stroke IDs
-/// - The bounding box enclosing all selected strokes
+/// - A list of selected shape IDs
+/// - The bounding box enclosing all selected items
 /// - The selection type (lasso or rectangle)
 /// - Optional lasso path for free-form selections
 ///
@@ -88,7 +89,10 @@ class Selection extends Equatable {
   /// IDs of selected strokes.
   final List<String> selectedStrokeIds;
 
-  /// Bounding box enclosing all selected strokes.
+  /// IDs of selected shapes.
+  final List<String> selectedShapeIds;
+
+  /// Bounding box enclosing all selected items.
   final BoundingBox bounds;
 
   /// The lasso path points (only for lasso selections).
@@ -99,6 +103,7 @@ class Selection extends Equatable {
     required this.id,
     required this.type,
     required this.selectedStrokeIds,
+    this.selectedShapeIds = const [],
     required this.bounds,
     this.lassoPath,
   });
@@ -107,6 +112,7 @@ class Selection extends Equatable {
   factory Selection.create({
     required SelectionType type,
     required List<String> selectedStrokeIds,
+    List<String> selectedShapeIds = const [],
     required BoundingBox bounds,
     List<DrawingPoint>? lassoPath,
   }) {
@@ -114,6 +120,7 @@ class Selection extends Equatable {
       id: DateTime.now().microsecondsSinceEpoch.toString(),
       type: type,
       selectedStrokeIds: List.unmodifiable(selectedStrokeIds),
+      selectedShapeIds: List.unmodifiable(selectedShapeIds),
       bounds: bounds,
       lassoPath: lassoPath != null ? List.unmodifiable(lassoPath) : null,
     );
@@ -125,18 +132,25 @@ class Selection extends Equatable {
       id: '',
       type: SelectionType.rectangle,
       selectedStrokeIds: const [],
+      selectedShapeIds: const [],
       bounds: BoundingBox.zero(),
     );
   }
 
-  /// Whether the selection is empty (no strokes selected).
-  bool get isEmpty => selectedStrokeIds.isEmpty;
+  /// Whether the selection is empty (no strokes or shapes selected).
+  bool get isEmpty => selectedStrokeIds.isEmpty && selectedShapeIds.isEmpty;
 
-  /// Whether the selection has strokes.
-  bool get isNotEmpty => selectedStrokeIds.isNotEmpty;
+  /// Whether the selection has items.
+  bool get isNotEmpty => selectedStrokeIds.isNotEmpty || selectedShapeIds.isNotEmpty;
+
+  /// Total number of selected items (strokes + shapes).
+  int get count => selectedStrokeIds.length + selectedShapeIds.length;
 
   /// Number of selected strokes.
-  int get count => selectedStrokeIds.length;
+  int get strokeCount => selectedStrokeIds.length;
+
+  /// Number of selected shapes.
+  int get shapeCount => selectedShapeIds.length;
 
   /// Center point of the selection.
   Point2D get center => Point2D(
@@ -155,11 +169,17 @@ class Selection extends Equatable {
     return selectedStrokeIds.contains(strokeId);
   }
 
+  /// Checks if a shape is in this selection.
+  bool containsShape(String shapeId) {
+    return selectedShapeIds.contains(shapeId);
+  }
+
   /// Creates a copy with updated fields.
   Selection copyWith({
     String? id,
     SelectionType? type,
     List<String>? selectedStrokeIds,
+    List<String>? selectedShapeIds,
     BoundingBox? bounds,
     List<DrawingPoint>? lassoPath,
   }) {
@@ -167,6 +187,7 @@ class Selection extends Equatable {
       id: id ?? this.id,
       type: type ?? this.type,
       selectedStrokeIds: selectedStrokeIds ?? this.selectedStrokeIds,
+      selectedShapeIds: selectedShapeIds ?? this.selectedShapeIds,
       bounds: bounds ?? this.bounds,
       lassoPath: lassoPath ?? this.lassoPath,
     );
@@ -177,6 +198,7 @@ class Selection extends Equatable {
         'id': id,
         'type': type.name,
         'selectedStrokeIds': selectedStrokeIds,
+        'selectedShapeIds': selectedShapeIds,
         'bounds': bounds.toJson(),
         if (lassoPath != null)
           'lassoPath': lassoPath!.map((p) => p.toJson()).toList(),
@@ -188,6 +210,9 @@ class Selection extends Equatable {
       id: json['id'] as String,
       type: SelectionType.values.byName(json['type'] as String),
       selectedStrokeIds: List<String>.from(json['selectedStrokeIds'] as List),
+      selectedShapeIds: json['selectedShapeIds'] != null
+          ? List<String>.from(json['selectedShapeIds'] as List)
+          : const [],
       bounds: BoundingBox.fromJson(json['bounds'] as Map<String, dynamic>),
       lassoPath: json['lassoPath'] != null
           ? (json['lassoPath'] as List)
@@ -198,7 +223,8 @@ class Selection extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, type, selectedStrokeIds, bounds, lassoPath];
+  List<Object?> get props =>
+      [id, type, selectedStrokeIds, selectedShapeIds, bounds, lassoPath];
 
   @override
   String toString() {

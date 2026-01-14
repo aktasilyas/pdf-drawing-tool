@@ -292,37 +292,38 @@ final shapesSettingsProvider =
   )),
 );
 
-/// Shape type enum.
-/// Shape types for the shapes tool (24 shapes in 6x4 grid).
+/// Shape type enum - En çok kullanılan 10 şekil.
+/// Core ShapeType ile birebir eşleşir.
 enum ShapeType {
-  // Row 1 - Lines
+  /// Düz çizgi
   line,
-  wavyLine,
-  curvedLine,
-  dashedLine,
-  arrowRight,
-  doubleArrow,
-  // Row 2 - Lines/Symbols
-  curvedArrow,
-  angle,
-  plus,
-  tShape,
-  bracket,
-  triangleArrow,
-  // Row 3 - Basic Shapes
-  triangleUp,
-  triangleCorner,
-  triangleRight,
-  squareFilled,
+
+  /// Ok işareti
+  arrow,
+
+  /// Dikdörtgen
   rectangle,
-  rightTriangle,
-  // Row 4 - More Shapes
-  squareOutline,
-  rectangleOutline,
+
+  /// Elips/Daire
+  ellipse,
+
+  /// Üçgen
+  triangle,
+
+  /// Eşkenar dörtgen
   diamond,
-  pentagon,
-  hexagon,
+
+  /// Yıldız
   star,
+
+  /// Beşgen
+  pentagon,
+
+  /// Altıgen
+  hexagon,
+
+  /// Artı işareti
+  plus,
 }
 
 /// Shapes settings data model.

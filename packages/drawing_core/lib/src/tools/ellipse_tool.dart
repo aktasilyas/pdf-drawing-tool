@@ -8,6 +8,7 @@ class EllipseTool extends ShapeTool {
   /// Constructor
   EllipseTool({
     required super.style,
+    super.fillColor,
     this.filled = false,
   });
 

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_core/drawing_core.dart' as core;
 import 'package:drawing_ui/src/canvas/stroke_painter.dart';
 import 'package:drawing_ui/src/canvas/selection_painter.dart';
+import 'package:drawing_ui/src/canvas/shape_painter.dart';
 import 'package:drawing_ui/src/rendering/rendering.dart';
 import 'package:drawing_ui/src/providers/document_provider.dart';
 import 'package:drawing_ui/src/providers/eraser_provider.dart';
@@ -10,6 +11,7 @@ import 'package:drawing_ui/src/providers/history_provider.dart';
 import 'package:drawing_ui/src/providers/tool_style_provider.dart';
 import 'package:drawing_ui/src/providers/canvas_transform_provider.dart';
 import 'package:drawing_ui/src/providers/selection_provider.dart';
+import 'package:drawing_ui/src/providers/shape_provider.dart';
 import 'package:drawing_ui/src/widgets/selection_handles.dart';
 
 // =============================================================================
@@ -21,9 +23,10 @@ import 'package:drawing_ui/src/widgets/selection_handles.dart';
 /// This widget uses a multi-layer architecture for optimal performance:
 /// - Layer 1: Background grid (never repaints)
 /// - Layer 2: Committed strokes (repaints only when strokes are added/removed)
-/// - Layer 3: Active stroke (repaints on every pointer move)
-/// - Layer 4: Selection overlay (selection bounds, handles, preview)
-/// - Layer 5: Selection handles (for drag interactions)
+/// - Layer 3: Committed shapes + preview (repaints when shapes change or during preview)
+/// - Layer 4: Active stroke (repaints on every pointer move)
+/// - Layer 5: Selection overlay (selection bounds, handles, preview)
+/// - Layer 6: Selection handles (for drag interactions)
 ///
 /// ## Performance Rules Applied:
 /// - NO setState for drawing updates
@@ -99,13 +102,30 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
   /// Whether a selection operation is in progress.
   bool _isSelecting = false;
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // SHAPE TRACKING
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /// Whether a shape drawing operation is in progress.
+  bool _isDrawingShape = false;
+
+  /// Active shape tool instance.
+  core.ShapeTool? _activeShapeTool;
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // ERASER SHAPE TRACKING
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /// Shape IDs erased in current gesture session.
+  final Set<String> _erasedShapeIds = {};
+
   /// Exposes the drawing controller for testing.
   @visibleForTesting
   DrawingController get drawingController => _drawingController;
 
   /// Exposes committed strokes from provider for testing.
   @visibleForTesting
-  List<Stroke> get committedStrokes => ref.read(activeLayerStrokesProvider);
+  List<core.Stroke> get committedStrokes => ref.read(activeLayerStrokesProvider);
 
   /// Exposes last point for testing distance filtering.
   @visibleForTesting
@@ -114,6 +134,10 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
   /// Exposes isSelecting for testing.
   @visibleForTesting
   bool get isSelecting => _isSelecting;
+
+  /// Exposes isDrawingShape for testing.
+  @visibleForTesting
+  bool get isDrawingShape => _isDrawingShape;
 
   @override
   void initState() {
@@ -132,7 +156,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
   // ─────────────────────────────────────────────────────────────────────────
   // NO setState here! Only DrawingController.notifyListeners() triggers repaint.
 
-  /// Handles pointer down - starts a new stroke, eraser, or selection.
+  /// Handles pointer down - starts a new stroke, eraser, selection, or shape.
   void _handlePointerDown(PointerDownEvent event) {
     _pointerCount++;
 
@@ -179,6 +203,13 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
       return;
     }
 
+    // Check if shape tool is active
+    final isShapeTool = ref.read(isShapeToolProvider);
+    if (isShapeTool) {
+      _handleShapeDown(event);
+      return;
+    }
+
     // Drawing mode
     final point = _createDrawingPoint(event);
     final style = _getCurrentStyle();
@@ -186,7 +217,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     _lastPoint = event.localPosition;
   }
 
-  /// Handles pointer move - adds points to active stroke, erases, or updates selection.
+  /// Handles pointer move - adds points to active stroke, erases, updates selection, or shape.
   void _handlePointerMove(PointerMoveEvent event) {
     // Only handle with single finger
     if (_pointerCount != 1) return;
@@ -194,6 +225,12 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     // Selection mode
     if (_isSelecting) {
       _handleSelectionMove(event);
+      return;
+    }
+
+    // Shape mode
+    if (_isDrawingShape) {
+      _handleShapeMove(event);
       return;
     }
 
@@ -218,13 +255,19 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     _lastPoint = event.localPosition;
   }
 
-  /// Handles pointer up - finishes stroke, eraser, or selection.
+  /// Handles pointer up - finishes stroke, eraser, selection, or shape.
   void _handlePointerUp(PointerUpEvent event) {
     _pointerCount = (_pointerCount - 1).clamp(0, 10);
 
     // Selection mode
     if (_isSelecting) {
       _handleSelectionUp(event);
+      return;
+    }
+
+    // Shape mode
+    if (_isDrawingShape) {
+      _handleShapeUp(event);
       return;
     }
 
@@ -258,6 +301,15 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
       return;
     }
 
+    // Shape mode
+    if (_isDrawingShape) {
+      _activeShapeTool?.cancelShape();
+      _activeShapeTool = null;
+      _isDrawingShape = false;
+      setState(() {});
+      return;
+    }
+
     // Check if eraser is active
     final isEraser = ref.read(isEraserToolProvider);
     if (isEraser) {
@@ -283,7 +335,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
         (event.localPosition - transform.offset) / transform.zoom;
 
     final tool = ref.read(activeSelectionToolProvider);
-    tool.startSelection(DrawingPoint(
+    tool.startSelection(core.DrawingPoint(
       x: canvasPoint.dx,
       y: canvasPoint.dy,
       pressure: 1.0,
@@ -300,7 +352,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
         (event.localPosition - transform.offset) / transform.zoom;
 
     final tool = ref.read(activeSelectionToolProvider);
-    tool.updateSelection(DrawingPoint(
+    tool.updateSelection(core.DrawingPoint(
       x: canvasPoint.dx,
       y: canvasPoint.dy,
       pressure: 1.0,
@@ -316,8 +368,9 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
 
     final tool = ref.read(activeSelectionToolProvider);
     final strokes = ref.read(activeLayerStrokesProvider);
+    final shapes = ref.read(activeLayerShapesProvider);
 
-    final selection = tool.endSelection(strokes);
+    final selection = tool.endSelection(strokes, shapes);
 
     if (selection != null) {
       ref.read(selectionProvider.notifier).setSelection(selection);
@@ -327,7 +380,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
   }
 
   /// Checks if a point is inside the selection bounds.
-  bool _isPointInSelection(Offset point, Selection selection) {
+  bool _isPointInSelection(Offset point, core.Selection selection) {
     final bounds = selection.bounds;
     return point.dx >= bounds.left &&
         point.dx <= bounds.right &&
@@ -344,6 +397,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
   void _handleEraserDown(PointerDownEvent event) {
     final eraserTool = ref.read(eraserToolProvider);
     eraserTool.startErasing();
+    _erasedShapeIds.clear();
     _eraseAtPoint(event.localPosition);
   }
 
@@ -352,23 +406,34 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     _eraseAtPoint(event.localPosition);
   }
 
-  /// Handles eraser pointer up - commits all erased strokes as single command.
+  /// Handles eraser pointer up - commits all erased strokes and shapes as commands.
   void _handleEraserUp(PointerUpEvent event) {
     final eraserTool = ref.read(eraserToolProvider);
-    final erasedIds = eraserTool.endErasing();
+    final erasedStrokeIds = eraserTool.endErasing();
+    final document = ref.read(documentProvider);
+    final layerIndex = document.activeLayerIndex;
 
-    if (erasedIds.isNotEmpty) {
-      // Single command for all erased strokes (batching)
-      final document = ref.read(documentProvider);
-      final command = EraseStrokesCommand(
-        layerIndex: document.activeLayerIndex,
-        strokeIds: erasedIds.toList(),
+    // Commit erased strokes
+    if (erasedStrokeIds.isNotEmpty) {
+      final command = core.EraseStrokesCommand(
+        layerIndex: layerIndex,
+        strokeIds: erasedStrokeIds.toList(),
       );
       ref.read(historyManagerProvider.notifier).execute(command);
     }
+
+    // Commit erased shapes (each shape as separate command for undo granularity)
+    for (final shapeId in _erasedShapeIds) {
+      final command = core.RemoveShapeCommand(
+        layerIndex: layerIndex,
+        shapeId: shapeId,
+      );
+      ref.read(historyManagerProvider.notifier).execute(command);
+    }
+    _erasedShapeIds.clear();
   }
 
-  /// Erases strokes at the given screen point.
+  /// Erases strokes and shapes at the given screen point.
   /// Transforms screen coordinates to canvas coordinates.
   void _eraseAtPoint(Offset point) {
     // Transform screen coordinates to canvas coordinates (zoom/pan)
@@ -376,8 +441,10 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     final canvasPoint = transform.screenToCanvas(point);
 
     final strokes = ref.read(activeLayerStrokesProvider);
+    final shapes = ref.read(activeLayerShapesProvider);
     final eraserTool = ref.read(eraserToolProvider);
 
+    // Find strokes to erase
     final toErase = eraserTool.findStrokesToErase(
       strokes,
       canvasPoint.dx,
@@ -389,6 +456,117 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
         eraserTool.markAsErased(stroke.id);
       }
     }
+
+    // Find shapes to erase
+    for (final shape in shapes) {
+      if (!_erasedShapeIds.contains(shape.id)) {
+        if (shape.containsPoint(
+          canvasPoint.dx,
+          canvasPoint.dy,
+          eraserTool.tolerance,
+        )) {
+          _erasedShapeIds.add(shape.id);
+        }
+      }
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // SHAPE EVENT HANDLERS
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /// Handles shape pointer down - starts shape drawing.
+  void _handleShapeDown(PointerDownEvent event) {
+    final transform = ref.read(canvasTransformProvider);
+    final canvasPoint = transform.screenToCanvas(event.localPosition);
+
+    final coreShapeType = ref.read(activeCoreShapeTypeProvider);
+    final isFilled = ref.read(shapeFilledProvider);
+    final fillColor = ref.read(shapeFillColorProvider);
+    final style = ref.read(shapeStrokeStyleProvider);
+
+    // Create shape tool based on type
+    switch (coreShapeType) {
+      case core.ShapeType.line:
+        _activeShapeTool = core.LineTool(style: style);
+        break;
+      case core.ShapeType.arrow:
+        _activeShapeTool = core.ArrowTool(style: style);
+        break;
+      case core.ShapeType.rectangle:
+        _activeShapeTool = core.RectangleTool(
+          style: style,
+          filled: isFilled,
+          fillColor: fillColor,
+        );
+        break;
+      case core.ShapeType.ellipse:
+        _activeShapeTool = core.EllipseTool(
+          style: style,
+          filled: isFilled,
+          fillColor: fillColor,
+        );
+        break;
+      case core.ShapeType.triangle:
+      case core.ShapeType.diamond:
+      case core.ShapeType.star:
+      case core.ShapeType.pentagon:
+      case core.ShapeType.hexagon:
+      case core.ShapeType.plus:
+        _activeShapeTool = core.GenericShapeTool(
+          style: style,
+          shapeType: coreShapeType,
+          filled: isFilled,
+          fillColor: fillColor,
+        );
+        break;
+    }
+
+    _activeShapeTool!.startShape(core.DrawingPoint(
+      x: canvasPoint.dx,
+      y: canvasPoint.dy,
+      pressure: 1.0,
+    ));
+
+    _isDrawingShape = true;
+    setState(() {});
+  }
+
+  /// Handles shape pointer move - updates shape preview.
+  void _handleShapeMove(PointerMoveEvent event) {
+    if (_activeShapeTool == null) return;
+
+    final transform = ref.read(canvasTransformProvider);
+    final canvasPoint = transform.screenToCanvas(event.localPosition);
+
+    _activeShapeTool!.updateShape(core.DrawingPoint(
+      x: canvasPoint.dx,
+      y: canvasPoint.dy,
+      pressure: 1.0,
+    ));
+
+    setState(() {});
+  }
+
+  /// Handles shape pointer up - commits shape to document.
+  void _handleShapeUp(PointerUpEvent event) {
+    if (_activeShapeTool == null) return;
+
+    _isDrawingShape = false;
+
+    final shape = _activeShapeTool!.endShape();
+
+    if (shape != null) {
+      final document = ref.read(documentProvider);
+      final command = core.AddShapeCommand(
+        layerIndex: document.activeLayerIndex,
+        shape: shape,
+      );
+      ref.read(historyManagerProvider.notifier).execute(command);
+    }
+
+    _activeShapeTool = null;
+    setState(() {});
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -407,6 +585,11 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     if (_isSelecting) {
       ref.read(activeSelectionToolProvider).cancelSelection();
       _isSelecting = false;
+    }
+    if (_isDrawingShape) {
+      _activeShapeTool?.cancelShape();
+      _activeShapeTool = null;
+      _isDrawingShape = false;
     }
     _lastFocalPoint = details.focalPoint;
     _lastScale = 1.0;
@@ -447,13 +630,13 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
 
   /// Creates a DrawingPoint from a pointer event.
   /// Transforms screen coordinates to canvas coordinates based on zoom/pan.
-  DrawingPoint _createDrawingPoint(PointerEvent event) {
+  core.DrawingPoint _createDrawingPoint(PointerEvent event) {
     final transform = ref.read(canvasTransformProvider);
 
     // Convert screen coordinates to canvas coordinates
     final canvasPoint = transform.screenToCanvas(event.localPosition);
 
-    return DrawingPoint(
+    return core.DrawingPoint(
       x: canvasPoint.dx,
       y: canvasPoint.dy,
       pressure: event.pressure.clamp(0.0, 1.0),
@@ -463,7 +646,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
   }
 
   /// Gets the current stroke style from provider.
-  StrokeStyle _getCurrentStyle() {
+  core.StrokeStyle _getCurrentStyle() {
     return ref.read(activeStrokeStyleProvider);
   }
 
@@ -471,19 +654,27 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
   Widget build(BuildContext context) {
     // Watch providers
     final strokes = ref.watch(activeLayerStrokesProvider);
+    final shapes = ref.watch(activeLayerShapesProvider);
     final isDrawingTool = ref.watch(isDrawingToolProvider);
     final isSelectionTool = ref.watch(isSelectionToolProvider);
+    final isShapeTool = ref.watch(isShapeToolProvider);
     final transform = ref.watch(canvasTransformProvider);
     final selection = ref.watch(selectionProvider);
 
     // Selection tool preview path
-    List<DrawingPoint>? selectionPreviewPath;
+    List<core.DrawingPoint>? selectionPreviewPath;
     if (isSelectionTool && _isSelecting) {
       selectionPreviewPath = ref.read(activeSelectionToolProvider).currentPath;
     }
 
-    // Enable pointer events for drawing tools and selection tool
-    final enablePointerEvents = isDrawingTool || isSelectionTool;
+    // Shape preview
+    core.Shape? previewShape;
+    if (_isDrawingShape && _activeShapeTool != null) {
+      previewShape = _activeShapeTool!.previewShape;
+    }
+
+    // Enable pointer events for drawing tools, selection tool, and shape tool
+    final enablePointerEvents = isDrawingTool || isSelectionTool || isShapeTool;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -544,7 +735,23 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
                     ),
 
                     // ─────────────────────────────────────────────────────────
-                    // LAYER 3: Active Stroke (Live Drawing)
+                    // LAYER 3: Committed Shapes + Preview Shape
+                    // ─────────────────────────────────────────────────────────
+                    // Repaints when shapes are added/removed or during shape preview
+                    RepaintBoundary(
+                      child: CustomPaint(
+                        size: size,
+                        painter: ShapePainter(
+                          shapes: shapes,
+                          activeShape: previewShape,
+                        ),
+                        isComplex: true,
+                        willChange: previewShape != null,
+                      ),
+                    ),
+
+                    // ─────────────────────────────────────────────────────────
+                    // LAYER 4: Active Stroke (Live Drawing)
                     // ─────────────────────────────────────────────────────────
                     // Repaints on every pointer move - must be fast!
                     RepaintBoundary(
@@ -566,7 +773,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
                     ),
 
                     // ─────────────────────────────────────────────────────────
-                    // LAYER 4: Selection Overlay
+                    // LAYER 5: Selection Overlay
                     // ─────────────────────────────────────────────────────────
                     // Selection bounds, lasso path, and preview
                     RepaintBoundary(
@@ -583,7 +790,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
                     ),
 
                     // ─────────────────────────────────────────────────────────
-                    // LAYER 5: Selection Handles (for drag interactions)
+                    // LAYER 6: Selection Handles (for drag interactions)
                     // ─────────────────────────────────────────────────────────
                     if (selection != null)
                       SelectionHandles(

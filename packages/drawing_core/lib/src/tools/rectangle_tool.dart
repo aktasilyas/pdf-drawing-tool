@@ -8,6 +8,7 @@ class RectangleTool extends ShapeTool {
   /// Constructor
   RectangleTool({
     required super.style,
+    super.fillColor,
     this.filled = false,
   });
 

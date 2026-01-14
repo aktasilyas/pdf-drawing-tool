@@ -100,7 +100,7 @@ void main() {
         );
       });
 
-      testWidgets('has 4 RepaintBoundary layers', (tester) async {
+      testWidgets('has 5 RepaintBoundary layers', (tester) async {
         await tester.pumpWidget(
           const ProviderScope(
             child: MaterialApp(
@@ -111,17 +111,17 @@ void main() {
           ),
         );
 
-        // Grid + Committed + Active + Selection = 4 RepaintBoundary
+        // Grid + Committed + Shapes + Active + Selection = 5 RepaintBoundary
         expect(
           find.descendant(
             of: find.byType(DrawingCanvas),
             matching: find.byType(RepaintBoundary),
           ),
-          findsNWidgets(4),
+          findsNWidgets(5),
         );
       });
 
-      testWidgets('has 4 CustomPaint widgets', (tester) async {
+      testWidgets('has 5 CustomPaint widgets', (tester) async {
         await tester.pumpWidget(
           const ProviderScope(
             child: MaterialApp(
@@ -132,13 +132,13 @@ void main() {
           ),
         );
 
-        // Grid + Committed + Active + Selection = 4 CustomPaint
+        // Grid + Committed + Shapes + Active + Selection = 5 CustomPaint
         expect(
           find.descendant(
             of: find.byType(DrawingCanvas),
             matching: find.byType(CustomPaint),
           ),
-          findsNWidgets(4),
+          findsNWidgets(5),
         );
       });
 

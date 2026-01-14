@@ -236,7 +236,7 @@ class _CompactToggle extends StatelessWidget {
   }
 }
 
-/// Grid of available shapes (6x4 = 24 shapes) - compact.
+/// Grid of available shapes (5x2 = 10 shapes) - compact.
 class _ShapeGrid extends StatelessWidget {
   const _ShapeGrid({
     required this.selectedShape,
@@ -251,9 +251,9 @@ class _ShapeGrid extends StatelessWidget {
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 6,
-      mainAxisSpacing: 4,
-      crossAxisSpacing: 4,
+      crossAxisCount: 5,
+      mainAxisSpacing: 6,
+      crossAxisSpacing: 6,
       childAspectRatio: 1.0,
       children: ShapeType.values.map((shape) {
         return _ShapeOption(
@@ -305,7 +305,7 @@ class _ShapeOption extends StatelessWidget {
   }
 }
 
-/// Painter for shape icons.
+/// Painter for shape icons - 10 şekil.
 class _ShapeIconPainter extends CustomPainter {
   _ShapeIconPainter({
     required this.shape,
@@ -323,185 +323,57 @@ class _ShapeIconPainter extends CustomPainter {
       ..strokeWidth = 1.5
       ..strokeCap = StrokeCap.round;
 
-    final fillPaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill;
-
     final center = Offset(size.width / 2, size.height / 2);
     final w = size.width;
     final h = size.height;
 
     switch (shape) {
-      // Row 1 - Lines
+      // Row 1
       case ShapeType.line:
         canvas.drawLine(Offset(3, h - 3), Offset(w - 3, 3), paint);
 
-      case ShapeType.wavyLine:
-        final path = Path()
-          ..moveTo(3, h / 2)
-          ..cubicTo(w * 0.25, h * 0.2, w * 0.25, h * 0.8, w * 0.5, h / 2)
-          ..cubicTo(w * 0.75, h * 0.2, w * 0.75, h * 0.8, w - 3, h / 2);
-        canvas.drawPath(path, paint);
-
-      case ShapeType.curvedLine:
-        final path = Path()
-          ..moveTo(3, h - 3)
-          ..quadraticBezierTo(w / 2, 0, w - 3, h - 3);
-        canvas.drawPath(path, paint);
-
-      case ShapeType.dashedLine:
-        _drawDashedLine(canvas, Offset(3, h / 2), Offset(w - 3, h / 2), paint);
-
-      case ShapeType.arrowRight:
+      case ShapeType.arrow:
         canvas.drawLine(Offset(3, h / 2), Offset(w - 3, h / 2), paint);
         canvas.drawLine(Offset(w - 8, 5), Offset(w - 3, h / 2), paint);
         canvas.drawLine(Offset(w - 8, h - 5), Offset(w - 3, h / 2), paint);
 
-      case ShapeType.doubleArrow:
-        canvas.drawLine(Offset(6, h / 2), Offset(w - 6, h / 2), paint);
-        // Left arrow
-        canvas.drawLine(Offset(3, h / 2), Offset(8, 5), paint);
-        canvas.drawLine(Offset(3, h / 2), Offset(8, h - 5), paint);
-        // Right arrow
-        canvas.drawLine(Offset(w - 3, h / 2), Offset(w - 8, 5), paint);
-        canvas.drawLine(Offset(w - 3, h / 2), Offset(w - 8, h - 5), paint);
-
-      // Row 2 - Lines/Symbols
-      case ShapeType.curvedArrow:
-        final path = Path()
-          ..moveTo(5, h - 5)
-          ..quadraticBezierTo(w / 2, 3, w - 5, h / 2);
-        canvas.drawPath(path, paint);
-        // Arrow head
-        canvas.drawLine(Offset(w - 5, h / 2), Offset(w - 10, h / 2 - 4), paint);
-        canvas.drawLine(Offset(w - 5, h / 2), Offset(w - 9, h / 2 + 5), paint);
-
-      case ShapeType.angle:
-        canvas.drawLine(Offset(5, 5), Offset(5, h - 5), paint);
-        canvas.drawLine(Offset(5, h - 5), Offset(w - 5, h - 5), paint);
-
-      case ShapeType.plus:
-        canvas.drawLine(Offset(w / 2, 4), Offset(w / 2, h - 4), paint);
-        canvas.drawLine(Offset(4, h / 2), Offset(w - 4, h / 2), paint);
-
-      case ShapeType.tShape:
-        canvas.drawLine(Offset(4, 6), Offset(w - 4, 6), paint);
-        canvas.drawLine(Offset(w / 2, 6), Offset(w / 2, h - 4), paint);
-
-      case ShapeType.bracket:
-        final path = Path()
-          ..moveTo(w - 6, 4)
-          ..quadraticBezierTo(6, 4, 6, h / 2)
-          ..quadraticBezierTo(6, h - 4, w - 6, h - 4);
-        canvas.drawPath(path, paint);
-
-      case ShapeType.triangleArrow:
-        final path = Path()
-          ..moveTo(w - 4, h / 2)
-          ..lineTo(4, 4)
-          ..lineTo(4, h - 4)
-          ..close();
-        canvas.drawPath(path, paint);
-
-      // Row 3 - Basic Shapes
-      case ShapeType.triangleUp:
-        final path = Path()
-          ..moveTo(w / 2, 4)
-          ..lineTo(4, h - 4)
-          ..lineTo(w - 4, h - 4)
-          ..close();
-        canvas.drawPath(path, paint);
-
-      case ShapeType.triangleCorner:
-        final path = Path()
-          ..moveTo(4, 4)
-          ..lineTo(4, h - 4)
-          ..lineTo(w - 4, h - 4)
-          ..close();
-        canvas.drawPath(path, paint);
-
-      case ShapeType.triangleRight:
-        final path = Path()
-          ..moveTo(4, 4)
-          ..lineTo(4, h - 4)
-          ..lineTo(w - 4, h / 2)
-          ..close();
-        canvas.drawPath(path, paint);
-
-      case ShapeType.squareFilled:
-        canvas.drawRect(
-          Rect.fromLTRB(5, 5, w - 5, h - 5),
-          fillPaint,
-        );
-
       case ShapeType.rectangle:
-        canvas.drawRect(
-          Rect.fromLTRB(3, 6, w - 3, h - 6),
-          paint,
-        );
+        canvas.drawRect(Rect.fromLTRB(3, 5, w - 3, h - 5), paint);
 
-      case ShapeType.rightTriangle:
+      case ShapeType.ellipse:
+        canvas.drawOval(Rect.fromLTRB(3, 4, w - 3, h - 4), paint);
+
+      case ShapeType.triangle:
         final path = Path()
-          ..moveTo(4, 4)
-          ..lineTo(4, h - 4)
-          ..lineTo(w - 4, h - 4)
+          ..moveTo(w / 2, 3)
+          ..lineTo(3, h - 3)
+          ..lineTo(w - 3, h - 3)
           ..close();
         canvas.drawPath(path, paint);
 
-      // Row 4 - More Shapes
-      case ShapeType.squareOutline:
-        canvas.drawRect(
-          Rect.fromLTRB(5, 5, w - 5, h - 5),
-          paint,
-        );
-
-      case ShapeType.rectangleOutline:
-        canvas.drawRect(
-          Rect.fromLTRB(3, 6, w - 3, h - 6),
-          paint,
-        );
-
+      // Row 2
       case ShapeType.diamond:
         final path = Path()
-          ..moveTo(w / 2, 4)
-          ..lineTo(w - 4, h / 2)
-          ..lineTo(w / 2, h - 4)
-          ..lineTo(4, h / 2)
+          ..moveTo(w / 2, 3)
+          ..lineTo(w - 3, h / 2)
+          ..lineTo(w / 2, h - 3)
+          ..lineTo(3, h / 2)
           ..close();
         canvas.drawPath(path, paint);
 
+      case ShapeType.star:
+        _drawStar(canvas, center, 8, paint);
+
       case ShapeType.pentagon:
-        _drawPolygon(canvas, center, 10, 5, paint);
+        _drawPolygon(canvas, center, 8, 5, paint);
 
       case ShapeType.hexagon:
-        _drawPolygon(canvas, center, 10, 6, paint);
+        _drawPolygon(canvas, center, 8, 6, paint);
 
-      case ShapeType.star:
-        _drawStar(canvas, center, 10, paint);
-    }
-  }
-
-  void _drawDashedLine(Canvas canvas, Offset start, Offset end, Paint paint) {
-    const dashWidth = 4.0;
-    const dashSpace = 3.0;
-    final distance = (end - start).distance;
-    final dx = (end.dx - start.dx) / distance;
-    final dy = (end.dy - start.dy) / distance;
-
-    var x = start.dx;
-    var y = start.dy;
-    var drawn = 0.0;
-
-    while (drawn < distance) {
-      final dashEnd = math.min(drawn + dashWidth, distance);
-      canvas.drawLine(
-        Offset(x, y),
-        Offset(start.dx + dx * dashEnd, start.dy + dy * dashEnd),
-        paint,
-      );
-      drawn += dashWidth + dashSpace;
-      x = start.dx + dx * drawn;
-      y = start.dy + dy * drawn;
+      case ShapeType.plus:
+        // Cross/plus shape
+        canvas.drawLine(Offset(w / 2, 3), Offset(w / 2, h - 3), paint);
+        canvas.drawLine(Offset(3, h / 2), Offset(w - 3, h / 2), paint);
     }
   }
 

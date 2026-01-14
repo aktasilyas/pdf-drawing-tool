@@ -2,7 +2,7 @@ import 'package:drawing_core/drawing_core.dart';
 
 /// Abstract interface for selection tools.
 ///
-/// Selection tools allow users to select strokes on the canvas
+/// Selection tools allow users to select strokes and shapes on the canvas
 /// using different selection modes (lasso, rectangle).
 ///
 /// Implementations:
@@ -22,10 +22,11 @@ abstract class SelectionTool {
   /// Completes the selection and returns the result.
   ///
   /// [strokes] - The list of strokes to check for selection.
+  /// [shapes] - The list of shapes to check for selection.
   ///
-  /// Returns a [Selection] containing the selected strokes,
+  /// Returns a [Selection] containing the selected strokes and shapes,
   /// or null if the selection is invalid or empty.
-  Selection? endSelection(List<Stroke> strokes);
+  Selection? endSelection(List<Stroke> strokes, [List<Shape> shapes = const []]);
 
   /// Cancels the current selection.
   ///

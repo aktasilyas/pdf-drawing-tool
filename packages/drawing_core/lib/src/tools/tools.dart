@@ -6,6 +6,7 @@ export 'brush_tool.dart';
 export 'drawing_tool.dart';
 export 'ellipse_tool.dart';
 export 'eraser_tool.dart';
+export 'generic_shape_tool.dart';
 export 'highlighter_tool.dart';
 export 'lasso_selection_tool.dart';
 export 'line_tool.dart';

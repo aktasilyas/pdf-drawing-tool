@@ -30,7 +30,7 @@ class RectSelectionTool implements SelectionTool {
   }
 
   @override
-  Selection? endSelection(List<Stroke> strokes) {
+  Selection? endSelection(List<Stroke> strokes, [List<Shape> shapes = const []]) {
     if (!_isSelecting || _startPoint == null || _endPoint == null) {
       cancelSelection();
       return null;
@@ -53,19 +53,28 @@ class RectSelectionTool implements SelectionTool {
     }
 
     // Find strokes that intersect with selection rectangle
-    final selectedIds = _findStrokesInRect(strokes, selectionBounds);
+    final selectedStrokeIds = _findStrokesInRect(strokes, selectionBounds);
 
-    if (selectedIds.isEmpty) {
+    // Find shapes that intersect with selection rectangle
+    final selectedShapeIds = _findShapesInRect(shapes, selectionBounds);
+
+    if (selectedStrokeIds.isEmpty && selectedShapeIds.isEmpty) {
       _clear();
       return null;
     }
 
-    // Calculate actual bounds of selected strokes
-    final actualBounds = _calculateSelectionBounds(strokes, selectedIds);
+    // Calculate actual bounds of selected items
+    final actualBounds = _calculateSelectionBounds(
+      strokes,
+      selectedStrokeIds,
+      shapes,
+      selectedShapeIds,
+    );
 
     final selection = Selection.create(
       type: SelectionType.rectangle,
-      selectedStrokeIds: selectedIds,
+      selectedStrokeIds: selectedStrokeIds,
+      selectedShapeIds: selectedShapeIds,
       bounds: actualBounds,
     );
 
@@ -126,6 +135,17 @@ class RectSelectionTool implements SelectionTool {
         .toList();
   }
 
+  /// Finds all shapes whose bounds intersect with the selection rectangle.
+  List<String> _findShapesInRect(
+    List<Shape> shapes,
+    BoundingBox selectionBounds,
+  ) {
+    return shapes
+        .where((s) => _isShapeInRect(s, selectionBounds))
+        .map((s) => s.id)
+        .toList();
+  }
+
   /// Checks if a stroke's bounding box intersects with the rectangle.
   bool _isStrokeInRect(Stroke stroke, BoundingBox rect) {
     final bounds = stroke.bounds;
@@ -138,22 +158,47 @@ class RectSelectionTool implements SelectionTool {
         bounds.bottom > rect.top;
   }
 
-  /// Calculates the bounding box of selected strokes.
+  /// Checks if a shape's bounding box intersects with the rectangle.
+  bool _isShapeInRect(Shape shape, BoundingBox rect) {
+    final bounds = shape.bounds;
+
+    // AABB intersection test
+    return bounds.left < rect.right &&
+        bounds.right > rect.left &&
+        bounds.top < rect.bottom &&
+        bounds.bottom > rect.top;
+  }
+
+  /// Calculates the bounding box of selected strokes and shapes.
   BoundingBox _calculateSelectionBounds(
     List<Stroke> strokes,
-    List<String> selectedIds,
+    List<String> selectedStrokeIds,
+    List<Shape> shapes,
+    List<String> selectedShapeIds,
   ) {
     double minX = double.infinity;
     double minY = double.infinity;
     double maxX = double.negativeInfinity;
     double maxY = double.negativeInfinity;
 
+    // Add stroke bounds
     for (final stroke in strokes) {
-      if (!selectedIds.contains(stroke.id)) continue;
+      if (!selectedStrokeIds.contains(stroke.id)) continue;
 
       final bounds = stroke.bounds;
       if (bounds == null) continue;
 
+      minX = min(minX, bounds.left);
+      minY = min(minY, bounds.top);
+      maxX = max(maxX, bounds.right);
+      maxY = max(maxY, bounds.bottom);
+    }
+
+    // Add shape bounds
+    for (final shape in shapes) {
+      if (!selectedShapeIds.contains(shape.id)) continue;
+
+      final bounds = shape.bounds;
       minX = min(minX, bounds.left);
       minY = min(minY, bounds.top);
       maxX = max(maxX, bounds.right);

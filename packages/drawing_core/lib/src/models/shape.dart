@@ -25,6 +25,9 @@ class Shape {
   /// İçi dolu mu?
   final bool isFilled;
 
+  /// Dolgu rengi (ARGB32 format, null ise style.color kullanılır)
+  final int? fillColor;
+
   const Shape({
     required this.id,
     required this.type,
@@ -32,6 +35,7 @@ class Shape {
     required this.endPoint,
     required this.style,
     this.isFilled = false,
+    this.fillColor,
   });
 
   /// Factory - yeni shape oluştur
@@ -41,6 +45,7 @@ class Shape {
     required DrawingPoint endPoint,
     required StrokeStyle style,
     bool isFilled = false,
+    int? fillColor,
   }) {
     return Shape(
       id: DateTime.now().microsecondsSinceEpoch.toString(),
@@ -49,6 +54,7 @@ class Shape {
       endPoint: endPoint,
       style: style,
       isFilled: isFilled,
+      fillColor: fillColor,
     );
   }
 
@@ -105,9 +111,46 @@ class Shape {
       case ShapeType.arrow:
         return _arrowContainsPoint(x, y, tolerance);
       case ShapeType.rectangle:
+      case ShapeType.plus:
         return _rectangleContainsPoint(x, y, tolerance);
       case ShapeType.ellipse:
         return _ellipseContainsPoint(x, y, tolerance);
+      case ShapeType.triangle:
+      case ShapeType.diamond:
+      case ShapeType.star:
+      case ShapeType.pentagon:
+      case ShapeType.hexagon:
+        // Polygon shapes use bounds-based hit test for simplicity
+        return _polygonContainsPoint(x, y, tolerance);
+    }
+  }
+
+  bool _polygonContainsPoint(double x, double y, double tolerance) {
+    // Simplified hit test using bounding box for complex polygon shapes
+    // This provides good UX without complex polygon intersection math
+    final effectiveTolerance = tolerance + style.thickness / 2;
+    final b = bounds;
+
+    if (isFilled) {
+      return x >= b.left - effectiveTolerance &&
+          x <= b.right + effectiveTolerance &&
+          y >= b.top - effectiveTolerance &&
+          y <= b.bottom + effectiveTolerance;
+    } else {
+      // For stroked polygons, check if near any edge (approximate)
+      final cx = centerX;
+      final cy = centerY;
+      final hw = width / 2;
+      final hh = height / 2;
+
+      // Check distance from center as approximation
+      final dx = (x - cx).abs();
+      final dy = (y - cy).abs();
+
+      // If within tolerance of the polygon boundary
+      final normalizedDist = (dx / hw + dy / hh) / 2;
+      return normalizedDist >= 0.7 - effectiveTolerance / min(hw, hh) &&
+          normalizedDist <= 1.0 + effectiveTolerance / min(hw, hh);
     }
   }
 
@@ -231,6 +274,7 @@ class Shape {
     DrawingPoint? endPoint,
     StrokeStyle? style,
     bool? isFilled,
+    int? fillColor,
   }) {
     return Shape(
       id: id,
@@ -239,6 +283,7 @@ class Shape {
       endPoint: endPoint ?? this.endPoint,
       style: style ?? this.style,
       isFilled: isFilled ?? this.isFilled,
+      fillColor: fillColor ?? this.fillColor,
     );
   }
 
@@ -250,6 +295,7 @@ class Shape {
         'endPoint': endPoint.toJson(),
         'style': style.toJson(),
         'isFilled': isFilled,
+        'fillColor': fillColor,
       };
 
   /// JSON deserialization
@@ -263,6 +309,7 @@ class Shape {
           DrawingPoint.fromJson(json['endPoint'] as Map<String, dynamic>),
       style: StrokeStyle.fromJson(json['style'] as Map<String, dynamic>),
       isFilled: (json['isFilled'] as bool?) ?? false,
+      fillColor: json['fillColor'] as int?,
     );
   }
 
