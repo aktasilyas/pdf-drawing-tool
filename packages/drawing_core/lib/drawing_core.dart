@@ -61,12 +61,14 @@ export 'src/tools/selection_tool.dart';
 export 'src/tools/shape_tool.dart';
 
 // History
+export 'src/history/add_shape_command.dart';
 export 'src/history/add_stroke_command.dart';
 export 'src/history/delete_selection_command.dart';
 export 'src/history/drawing_command.dart';
 export 'src/history/erase_strokes_command.dart';
 export 'src/history/history_manager.dart';
 export 'src/history/move_selection_command.dart';
+export 'src/history/remove_shape_command.dart';
 export 'src/history/remove_stroke_command.dart';
 
 // Input Processing
