@@ -743,6 +743,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     final isDrawingTool = ref.watch(isDrawingToolProvider);
     final isSelectionTool = ref.watch(isSelectionToolProvider);
     final isShapeTool = ref.watch(isShapeToolProvider);
+    final currentTool = ref.watch(currentToolProvider);
     final transform = ref.watch(canvasTransformProvider);
     final selection = ref.watch(selectionProvider);
     final textToolState = ref.watch(textToolProvider);
@@ -760,7 +761,8 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     }
 
     // Enable pointer events for drawing tools, selection tool, shape tool, and text tool
-    final enablePointerEvents = isDrawingTool || isSelectionTool || isShapeTool || textToolState.isEditing;
+    final isTextTool = currentTool == ToolType.text;
+    final enablePointerEvents = isDrawingTool || isSelectionTool || isShapeTool || isTextTool;
 
     return LayoutBuilder(
       builder: (context, constraints) {
