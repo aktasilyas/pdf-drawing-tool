@@ -623,11 +623,18 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
   /// Finishes text editing and saves the text.
   void _finishTextEditing() {
     final textToolState = ref.read(textToolProvider);
-    final finishedText = ref.read(textToolProvider.notifier).finishEditing();
-
-    if (finishedText == null || finishedText.text.trim().isEmpty) {
+    
+    // IMPORTANT: Get the current text state BEFORE calling finishEditing
+    // because finishEditing clears the state
+    final currentText = textToolState.activeText;
+    
+    if (currentText == null || currentText.text.trim().isEmpty) {
+      ref.read(textToolProvider.notifier).cancelEditing();
       return;
     }
+
+    // Now finish editing (this clears the state)
+    ref.read(textToolProvider.notifier).finishEditing();
 
     final document = ref.read(documentProvider);
 
@@ -635,14 +642,14 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
       // Add new text
       final command = core.AddTextCommand(
         layerIndex: document.activeLayerIndex,
-        textElement: finishedText,
+        textElement: currentText,
       );
       ref.read(historyManagerProvider.notifier).execute(command);
     } else {
       // Update existing text
       final command = core.UpdateTextCommand(
         layerIndex: document.activeLayerIndex,
-        newText: finishedText,
+        newText: currentText,
       );
       ref.read(historyManagerProvider.notifier).execute(command);
     }
