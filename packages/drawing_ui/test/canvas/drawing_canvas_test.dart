@@ -91,16 +91,18 @@ void main() {
         );
 
         // Find Stack that is descendant of DrawingCanvas
+        // Now has 2 Stacks: one for outer layout (with Transform and TextInputOverlay)
+        // and one inside Transform for canvas layers
         expect(
           find.descendant(
             of: find.byType(DrawingCanvas),
             matching: find.byType(Stack),
           ),
-          findsOneWidget,
+          findsNWidgets(2),
         );
       });
 
-      testWidgets('has 5 RepaintBoundary layers', (tester) async {
+      testWidgets('has 6 RepaintBoundary layers', (tester) async {
         await tester.pumpWidget(
           const ProviderScope(
             child: MaterialApp(
@@ -111,17 +113,17 @@ void main() {
           ),
         );
 
-        // Grid + Committed + Shapes + Active + Selection = 5 RepaintBoundary
+        // Grid + Committed Strokes + Shapes + Texts + Active + Selection = 6 RepaintBoundary
         expect(
           find.descendant(
             of: find.byType(DrawingCanvas),
             matching: find.byType(RepaintBoundary),
           ),
-          findsNWidgets(5),
+          findsNWidgets(6),
         );
       });
 
-      testWidgets('has 5 CustomPaint widgets', (tester) async {
+      testWidgets('has 6 CustomPaint widgets', (tester) async {
         await tester.pumpWidget(
           const ProviderScope(
             child: MaterialApp(
@@ -132,13 +134,13 @@ void main() {
           ),
         );
 
-        // Grid + Committed + Shapes + Active + Selection = 5 CustomPaint
+        // Grid + Committed Strokes + Shapes + Texts + Active + Selection = 6 CustomPaint
         expect(
           find.descendant(
             of: find.byType(DrawingCanvas),
             matching: find.byType(CustomPaint),
           ),
-          findsNWidgets(5),
+          findsNWidgets(6),
         );
       });
 

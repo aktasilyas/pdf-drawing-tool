@@ -4,7 +4,9 @@ import 'package:drawing_core/drawing_core.dart' as core;
 import 'package:drawing_ui/src/canvas/stroke_painter.dart';
 import 'package:drawing_ui/src/canvas/selection_painter.dart';
 import 'package:drawing_ui/src/canvas/shape_painter.dart';
+import 'package:drawing_ui/src/canvas/text_painter.dart';
 import 'package:drawing_ui/src/rendering/rendering.dart';
+import 'package:drawing_ui/src/models/tool_type.dart';
 import 'package:drawing_ui/src/providers/document_provider.dart';
 import 'package:drawing_ui/src/providers/eraser_provider.dart';
 import 'package:drawing_ui/src/providers/history_provider.dart';
@@ -12,7 +14,9 @@ import 'package:drawing_ui/src/providers/tool_style_provider.dart';
 import 'package:drawing_ui/src/providers/canvas_transform_provider.dart';
 import 'package:drawing_ui/src/providers/selection_provider.dart';
 import 'package:drawing_ui/src/providers/shape_provider.dart';
-import 'package:drawing_ui/src/widgets/selection_handles.dart';
+import 'package:drawing_ui/src/providers/text_provider.dart';
+import 'package:drawing_ui/src/providers/drawing_providers.dart';
+import 'package:drawing_ui/src/widgets/widgets.dart';
 
 // =============================================================================
 // DRAWING CANVAS WIDGET
@@ -156,12 +160,22 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
   // ─────────────────────────────────────────────────────────────────────────
   // NO setState here! Only DrawingController.notifyListeners() triggers repaint.
 
-  /// Handles pointer down - starts a new stroke, eraser, selection, or shape.
+  /// Handles pointer down - starts a new stroke, eraser, selection, shape, or text.
   void _handlePointerDown(PointerDownEvent event) {
     _pointerCount++;
 
     // Only handle with single finger
     if (_pointerCount != 1) return;
+
+    // Get current tool type
+    final toolType = ref.read(currentToolProvider);
+
+    // If text editing is active and tap is outside, finish editing
+    final textToolState = ref.read(textToolProvider);
+    if (textToolState.isEditing && toolType != ToolType.text) {
+      _finishTextEditing();
+      return;
+    }
 
     // Check if selection tool is active
     final isSelectionTool = ref.read(isSelectionToolProvider);
@@ -207,6 +221,12 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     final isShapeTool = ref.read(isShapeToolProvider);
     if (isShapeTool) {
       _handleShapeDown(event);
+      return;
+    }
+
+    // Check if text tool is active
+    if (toolType == ToolType.text) {
+      _handleTextDown(event);
       return;
     }
 
@@ -570,6 +590,70 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
   }
 
   // ─────────────────────────────────────────────────────────────────────────
+  // TEXT EVENT HANDLERS
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /// Handles text pointer down - starts text editing.
+  void _handleTextDown(PointerDownEvent event) {
+    final transform = ref.read(canvasTransformProvider);
+    final canvasPoint =
+        (event.localPosition - transform.offset) / transform.zoom;
+
+    // Check if tapped on existing text
+    final texts = ref.read(activeLayerTextsProvider);
+
+    for (final text in texts.reversed) {
+      if (text.containsPoint(canvasPoint.dx, canvasPoint.dy, 10)) {
+        // Edit existing text
+        ref.read(textToolProvider.notifier).editExistingText(text);
+        return;
+      }
+    }
+
+    // Create new text at tap location
+    final style = ref.read(activeStrokeStyleProvider);
+    ref.read(textToolProvider.notifier).startNewText(
+          canvasPoint.dx,
+          canvasPoint.dy,
+          fontSize: style.thickness * 4, // Font size based on stroke thickness
+          color: style.color,
+        );
+  }
+
+  /// Finishes text editing and saves the text.
+  void _finishTextEditing() {
+    final textToolState = ref.read(textToolProvider);
+    final finishedText = ref.read(textToolProvider.notifier).finishEditing();
+
+    if (finishedText == null || finishedText.text.trim().isEmpty) {
+      return;
+    }
+
+    final document = ref.read(documentProvider);
+
+    if (textToolState.isNewText) {
+      // Add new text
+      final command = core.AddTextCommand(
+        layerIndex: document.activeLayerIndex,
+        textElement: finishedText,
+      );
+      ref.read(historyManagerProvider.notifier).execute(command);
+    } else {
+      // Update existing text
+      final command = core.UpdateTextCommand(
+        layerIndex: document.activeLayerIndex,
+        newText: finishedText,
+      );
+      ref.read(historyManagerProvider.notifier).execute(command);
+    }
+  }
+
+  /// Cancels text editing without saving.
+  void _cancelTextEditing() {
+    ref.read(textToolProvider.notifier).cancelEditing();
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
   // SCALE GESTURE HANDLERS (Two Finger Zoom/Pan)
   // ─────────────────────────────────────────────────────────────────────────
 
@@ -655,11 +739,13 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     // Watch providers
     final strokes = ref.watch(activeLayerStrokesProvider);
     final shapes = ref.watch(activeLayerShapesProvider);
+    final texts = ref.watch(activeLayerTextsProvider);
     final isDrawingTool = ref.watch(isDrawingToolProvider);
     final isSelectionTool = ref.watch(isSelectionToolProvider);
     final isShapeTool = ref.watch(isShapeToolProvider);
     final transform = ref.watch(canvasTransformProvider);
     final selection = ref.watch(selectionProvider);
+    final textToolState = ref.watch(textToolProvider);
 
     // Selection tool preview path
     List<core.DrawingPoint>? selectionPreviewPath;
@@ -673,8 +759,8 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
       previewShape = _activeShapeTool!.previewShape;
     }
 
-    // Enable pointer events for drawing tools, selection tool, and shape tool
-    final enablePointerEvents = isDrawingTool || isSelectionTool || isShapeTool;
+    // Enable pointer events for drawing tools, selection tool, shape tool, and text tool
+    final enablePointerEvents = isDrawingTool || isSelectionTool || isShapeTool || textToolState.isEditing;
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -699,12 +785,14 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
             onScaleEnd: _handleScaleEnd,
             behavior: HitTestBehavior.opaque,
             child: ClipRect(
-              child: Transform(
-                // Apply zoom and pan transformation
-                transform: transform.matrix,
-                alignment: Alignment.topLeft,
-                child: Stack(
-                  children: [
+              child: Stack(
+                children: [
+                  Transform(
+                    // Apply zoom and pan transformation
+                    transform: transform.matrix,
+                    alignment: Alignment.topLeft,
+                    child: Stack(
+                      children: [
                     // ─────────────────────────────────────────────────────────
                     // LAYER 1: Background Grid
                     // ─────────────────────────────────────────────────────────
@@ -751,7 +839,25 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
                     ),
 
                     // ─────────────────────────────────────────────────────────
-                    // LAYER 4: Active Stroke (Live Drawing)
+                    // LAYER 4: Committed Texts + Active Text
+                    // ─────────────────────────────────────────────────────────
+                    // Repaints when texts are added/removed or during editing
+                    RepaintBoundary(
+                      child: CustomPaint(
+                        size: size,
+                        painter: TextElementPainter(
+                          texts: texts,
+                          activeText: textToolState.isEditing
+                              ? textToolState.activeText
+                              : null,
+                        ),
+                        isComplex: true,
+                        willChange: textToolState.isEditing,
+                      ),
+                    ),
+
+                    // ─────────────────────────────────────────────────────────
+                    // LAYER 5: Active Stroke (Live Drawing)
                     // ─────────────────────────────────────────────────────────
                     // Repaints on every pointer move - must be fast!
                     RepaintBoundary(
@@ -773,7 +879,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
                     ),
 
                     // ─────────────────────────────────────────────────────────
-                    // LAYER 5: Selection Overlay
+                    // LAYER 6: Selection Overlay
                     // ─────────────────────────────────────────────────────────
                     // Selection bounds, lasso path, and preview
                     RepaintBoundary(
@@ -790,15 +896,32 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
                     ),
 
                     // ─────────────────────────────────────────────────────────
-                    // LAYER 6: Selection Handles (for drag interactions)
+                    // LAYER 7: Selection Handles (for drag interactions)
                     // ─────────────────────────────────────────────────────────
                     if (selection != null)
                       SelectionHandles(
                         selection: selection,
                         onSelectionChanged: () => setState(() {}),
                       ),
-                  ],
-                ),
+                      ],
+                    ),
+                  ),
+                  
+                  // ───────────────────────────────────────────────────────────
+                  // Text Input Overlay (outside Transform - screen coordinates)
+                  // ───────────────────────────────────────────────────────────
+                  if (textToolState.isEditing && textToolState.activeText != null)
+                    TextInputOverlay(
+                      textElement: textToolState.activeText!,
+                      zoom: transform.zoom,
+                      canvasOffset: transform.offset,
+                      onTextChanged: (updatedText) {
+                        ref.read(textToolProvider.notifier).updateText(updatedText);
+                      },
+                      onEditingComplete: () => _finishTextEditing(),
+                      onCancel: () => _cancelTextEditing(),
+                    ),
+                ],
               ),
             ),
           ),
