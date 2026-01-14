@@ -18,7 +18,7 @@
 | Phase 4A | ✅ COMPLETE | feature/phase4-advanced-features | v0.4.0-phase4a | 100% |
 | Phase 4B | ✅ COMPLETE | feature/phase4-advanced-features | v0.4.0-phase4b | 100% |
 | Phase 4C | ✅ COMPLETE | feature/phase4-advanced-features | v0.4.0-phase4c | 100% |
-| Phase 4D | 🔄 IN PROGRESS | feature/phase4-advanced-features | - | 60% |
+| Phase 4D | 🔄 IN PROGRESS | feature/phase4-advanced-features | - | 70% |
 | Phase 5 | ❌ NOT STARTED | - | - | 0% |
 
 ---
@@ -139,7 +139,7 @@
 - [x] UpdateTextCommand
 
 #### drawing_ui
-- [ ] TextPainter
+- [x] TextPainter
 - [ ] Text providers
 - [ ] TextInputOverlay widget
 - [ ] DrawingCanvas text integration
