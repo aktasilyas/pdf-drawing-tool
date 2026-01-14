@@ -18,7 +18,7 @@
 | Phase 4A | ✅ COMPLETE | feature/phase4-advanced-features | v0.4.0-phase4a | 100% |
 | Phase 4B | ✅ COMPLETE | feature/phase4-advanced-features | v0.4.0-phase4b | 100% |
 | Phase 4C | ✅ COMPLETE | feature/phase4-advanced-features | v0.4.0-phase4c | 100% |
-| Phase 4D | 🔄 IN PROGRESS | feature/phase4-advanced-features | - | 30% |
+| Phase 4D | 🔄 IN PROGRESS | feature/phase4-advanced-features | - | 60% |
 | Phase 5 | ❌ NOT STARTED | - | - | 0% |
 
 ---
@@ -133,9 +133,10 @@
 #### drawing_core
 - [x] TextElement model
 - [x] Layer model update (texts list)
-- [ ] AddTextCommand
-- [ ] RemoveTextCommand
-- [ ] UpdateTextCommand
+- [x] TextTool
+- [x] AddTextCommand
+- [x] RemoveTextCommand
+- [x] UpdateTextCommand
 
 #### drawing_ui
 - [ ] TextPainter

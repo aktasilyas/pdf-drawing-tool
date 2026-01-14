@@ -10,3 +10,6 @@ export 'history_manager.dart';
 export 'move_selection_command.dart';
 export 'remove_shape_command.dart';
 export 'remove_stroke_command.dart';
+export 'add_text_command.dart';
+export 'remove_text_command.dart';
+export 'update_text_command.dart';

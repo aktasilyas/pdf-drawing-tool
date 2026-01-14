@@ -61,6 +61,7 @@ export 'src/tools/rect_selection_tool.dart';
 export 'src/tools/rectangle_tool.dart';
 export 'src/tools/selection_tool.dart';
 export 'src/tools/shape_tool.dart';
+export 'src/tools/text_tool.dart';
 
 // History
 export 'src/history/add_shape_command.dart';
@@ -72,6 +73,9 @@ export 'src/history/history_manager.dart';
 export 'src/history/move_selection_command.dart';
 export 'src/history/remove_shape_command.dart';
 export 'src/history/remove_stroke_command.dart';
+export 'src/history/add_text_command.dart';
+export 'src/history/remove_text_command.dart';
+export 'src/history/update_text_command.dart';
 
 // Input Processing
 export 'src/input/path_smoother.dart';

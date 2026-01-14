@@ -15,3 +15,4 @@ export 'rect_selection_tool.dart';
 export 'rectangle_tool.dart';
 export 'selection_tool.dart';
 export 'shape_tool.dart';
+export 'text_tool.dart';
