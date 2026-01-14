@@ -44,6 +44,7 @@ export 'src/models/shape.dart';
 export 'src/models/shape_type.dart';
 export 'src/models/stroke.dart';
 export 'src/models/stroke_style.dart';
+export 'src/models/text_element.dart';
 
 // Tools
 export 'src/tools/arrow_tool.dart';

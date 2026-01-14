@@ -10,3 +10,4 @@ export 'shape.dart';
 export 'shape_type.dart';
 export 'stroke.dart';
 export 'stroke_style.dart';
+export 'text_element.dart';
