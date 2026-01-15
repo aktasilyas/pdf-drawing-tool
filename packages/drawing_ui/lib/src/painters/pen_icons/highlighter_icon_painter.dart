@@ -1,149 +1,179 @@
 import 'package:flutter/material.dart';
 import 'pen_icon_painter.dart';
 
-/// Highlighter marker icon painter.
+/// Premium highlighter marker icon painter.
 ///
 /// Wide rectangular body with semi-transparent colored appearance,
-/// chisel tip for broad strokes.
+/// chisel tip for broad strokes, colored glow effect.
+/// Drawn with TIP POINTING UP (top = chisel tip, bottom = cap).
 class HighlighterIconPainter extends PenIconPainter {
   const HighlighterIconPainter({
     super.penColor = const Color(0xFFFFEB3B), // Yellow default
     super.isSelected = false,
     super.size = 56.0,
+    super.orientation = PenOrientation.vertical,
   });
 
   @override
   Path buildBodyPath(Rect rect) {
     final path = Path();
-    final centerX = rect.width / 2;
-    final centerY = rect.height / 2;
+    final w = rect.width;
+    final h = rect.height;
 
     path.addRRect(RRect.fromRectAndRadius(
       Rect.fromCenter(
-        center: Offset(centerX, centerY),
-        width: 14,
-        height: 32,
+        center: Offset(w * 0.5, h * 0.5),
+        width: w * 0.24,
+        height: h * 0.5,
       ),
-      const Radius.circular(3),
+      const Radius.circular(4),
     ));
 
     return path;
   }
 
   @override
-  void paintBody(Canvas canvas, Rect rect) {
-    final centerX = rect.width / 2;
-    final centerY = rect.height / 2;
+  void paintShadow(Canvas canvas, Rect rect) {
+    // Colored shadow for glow effect
+    final glowPaint = Paint()
+      ..color = penColor.withOpacity(0.25)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
+
+    final bodyPath = buildBodyPath(rect);
 
     canvas.save();
-    canvas.translate(centerX, centerY);
-    canvas.rotate(-0.3); // Slight tilt
-    canvas.translate(-centerX, -centerY);
+    canvas.translate(2, 3);
+    canvas.drawPath(bodyPath, glowPaint);
 
-    // Wide rectangular body
+    // Also dark shadow for depth
+    canvas.drawPath(
+      bodyPath,
+      Paint()
+        ..color = Colors.black.withOpacity(0.12)
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5),
+    );
+    canvas.restore();
+  }
+
+  @override
+  void paintBody(Canvas canvas, Rect rect) {
+    final w = rect.width;
+    final h = rect.height;
+
     final bodyRect = Rect.fromCenter(
-      center: Offset(centerX, centerY),
-      width: 14,
-      height: 32,
+      center: Offset(w * 0.5, h * 0.5),
+      width: w * 0.24,
+      height: h * 0.5,
     );
 
-    // Semi-transparent colored body
-    final bodyPaint = Paint()..color = penColor.withAlpha(204); // 0.8 opacity
+    // Semi-transparent colored body with 4-color gradient
+    final bodyGradient = LinearGradient(
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+      colors: [
+        penColor.withOpacity(0.5), // highlight - more transparent
+        penColor.withOpacity(0.75), // mid
+        penColor.withOpacity(0.85), // core
+        penColor.withOpacity(0.7), // shadow side
+      ],
+      stops: const [0.0, 0.3, 0.65, 1.0],
+    ).createShader(bodyRect);
+
     canvas.drawRRect(
-      RRect.fromRectAndRadius(bodyRect, const Radius.circular(3)),
-      bodyPaint,
+      RRect.fromRectAndRadius(bodyRect, const Radius.circular(4)),
+      Paint()..shader = bodyGradient,
     );
 
-    // Body outline for definition
-    final outlinePaint = Paint()
-      ..color = penColor.withAlpha(255)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.5;
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(bodyRect, const Radius.circular(3)),
-      outlinePaint,
-    );
-
-    // Cap (top part, slightly darker)
+    // Cap (at bottom, more opaque)
     final capRect = Rect.fromCenter(
-      center: Offset(centerX, centerY - 14),
-      width: 14,
-      height: 6,
+      center: Offset(w * 0.5, h * 0.84),
+      width: w * 0.25,
+      height: h * 0.1,
     );
-    final capPaint = Paint()..color = penColor.withAlpha(242); // 0.95 opacity
+
+    final capGradient = LinearGradient(
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+      colors: [
+        penColor.withOpacity(0.7),
+        penColor.withOpacity(0.9),
+        penColor,
+        penColor.withOpacity(0.85),
+      ],
+    ).createShader(capRect);
+
     canvas.drawRRect(
-      RRect.fromRectAndRadius(capRect, const Radius.circular(2)),
-      capPaint,
+      RRect.fromRectAndRadius(capRect, const Radius.circular(3)),
+      Paint()..shader = capGradient,
     );
 
     // Cap ring
     final ringRect = Rect.fromCenter(
-      center: Offset(centerX, centerY - 10),
-      width: 14,
-      height: 2,
+      center: Offset(w * 0.5, h * 0.78),
+      width: w * 0.24,
+      height: h * 0.02,
     );
-    final ringPaint = Paint()..color = penColor;
-    canvas.drawRect(ringRect, ringPaint);
-
-    canvas.restore();
+    canvas.drawRect(ringRect, Paint()..color = penColor);
   }
 
   @override
   void paintTip(Canvas canvas, Rect rect) {
-    final centerX = rect.width / 2;
-    final centerY = rect.height / 2;
+    final w = rect.width;
+    final h = rect.height;
 
-    canvas.save();
-    canvas.translate(centerX, centerY);
-    canvas.rotate(-0.3);
-    canvas.translate(-centerX, -centerY);
-
-    // Chisel tip (angled flat tip)
+    // Chisel tip (at TOP)
     final tipPath = Path();
-    tipPath.moveTo(centerX - 7, centerY + 16);
-    tipPath.lineTo(centerX - 4, centerY + 24);
-    tipPath.lineTo(centerX + 4, centerY + 24);
-    tipPath.lineTo(centerX + 7, centerY + 16);
+    tipPath.moveTo(w * 0.38, h * 0.25);
+    tipPath.lineTo(w * 0.42, h * 0.10);
+    tipPath.lineTo(w * 0.58, h * 0.10);
+    tipPath.lineTo(w * 0.62, h * 0.25);
     tipPath.close();
 
-    final tipPaint = Paint()..color = penColor;
-    canvas.drawPath(tipPath, tipPaint);
+    final tipGradient = LinearGradient(
+      begin: Alignment.centerLeft,
+      end: Alignment.centerRight,
+      colors: [
+        penColor.withOpacity(0.8),
+        penColor.withOpacity(0.95),
+        penColor,
+        penColor.withOpacity(0.9),
+      ],
+    ).createShader(tipPath.getBounds());
 
-    // Tip outline
-    final tipOutline = Paint()
-      ..color = penColor.withAlpha(255)
+    canvas.drawPath(tipPath, Paint()..shader = tipGradient);
+
+    // Tip edge (darker for definition)
+    final edgePaint = Paint()
+      ..color = penColor.withOpacity(0.6)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 0.5;
-    canvas.drawPath(tipPath, tipOutline);
 
-    canvas.restore();
+    canvas.drawLine(
+      Offset(w * 0.42, h * 0.10),
+      Offset(w * 0.58, h * 0.10),
+      edgePaint,
+    );
   }
 
   @override
   void paintHighlights(Canvas canvas, Rect rect) {
-    final centerX = rect.width / 2;
-    final centerY = rect.height / 2;
+    final w = rect.width;
+    final h = rect.height;
 
-    canvas.save();
-    canvas.translate(centerX, centerY);
-    canvas.rotate(-0.3);
-    canvas.translate(-centerX, -centerY);
+    final highlightPaint = createHighlightPaint(opacity: 0.6, width: 2.5);
 
-    // Vertical shine on body
-    final shinePaint = highlightPaint(opacity: 0.3);
+    // Strong body highlight
     canvas.drawLine(
-      Offset(centerX - 5, centerY - 12),
-      Offset(centerX - 5, centerY + 12),
-      shinePaint,
+      Offset(w * 0.40, h * 0.30),
+      Offset(w * 0.40, h * 0.72),
+      highlightPaint,
     );
 
-    // Horizontal shine on cap
+    // Cap highlight
     canvas.drawLine(
-      Offset(centerX - 5, centerY - 15),
-      Offset(centerX + 3, centerY - 15),
-      shinePaint,
+      Offset(w * 0.41, h * 0.80),
+      Offset(w * 0.41, h * 0.88),
+      createHighlightPaint(opacity: 0.5, width: 1.5),
     );
-
-    canvas.restore();
   }
 }

@@ -7,6 +7,10 @@ import '../painters/pen_icons/pen_icons.dart';
 ///
 /// Uses custom painters to render premium, realistic pen icons
 /// with gradients, shadows, and 3D depth effects.
+///
+/// The [orientation] parameter controls the pen direction:
+/// - [PenOrientation.vertical]: Tip points UP (for popup/settings)
+/// - [PenOrientation.horizontal]: Tip points RIGHT (for PenBox)
 class PenIconWidget extends StatelessWidget {
   /// The pen type to display.
   final PenType penType;
@@ -20,12 +24,19 @@ class PenIconWidget extends StatelessWidget {
   /// The size of the icon.
   final double size;
 
+  /// The orientation of the pen icon.
+  ///
+  /// - [PenOrientation.vertical]: Tip points UP (default, for popups)
+  /// - [PenOrientation.horizontal]: Tip points RIGHT (for PenBox)
+  final PenOrientation orientation;
+
   const PenIconWidget({
     super.key,
     required this.penType,
     this.color = Colors.black,
     this.isSelected = false,
     this.size = 56.0,
+    this.orientation = PenOrientation.vertical,
   });
 
   @override
@@ -43,60 +54,70 @@ class PenIconWidget extends StatelessWidget {
           penColor: color,
           isSelected: isSelected,
           size: size,
+          orientation: orientation,
         );
       case PenType.hardPencil:
         return HardPencilIconPainter(
           penColor: color,
           isSelected: isSelected,
           size: size,
+          orientation: orientation,
         );
       case PenType.ballpointPen:
         return BallpointIconPainter(
           penColor: color,
           isSelected: isSelected,
           size: size,
+          orientation: orientation,
         );
       case PenType.gelPen:
         return GelPenIconPainter(
           penColor: color,
           isSelected: isSelected,
           size: size,
+          orientation: orientation,
         );
       case PenType.dashedPen:
         return DashedPenIconPainter(
           penColor: color,
           isSelected: isSelected,
           size: size,
+          orientation: orientation,
         );
       case PenType.highlighter:
         return HighlighterIconPainter(
           penColor: color,
           isSelected: isSelected,
           size: size,
+          orientation: orientation,
         );
       case PenType.brushPen:
         return BrushPenIconPainter(
           penColor: color,
           isSelected: isSelected,
           size: size,
+          orientation: orientation,
         );
       case PenType.marker:
         return MarkerIconPainter(
           penColor: color,
           isSelected: isSelected,
           size: size,
+          orientation: orientation,
         );
       case PenType.neonHighlighter:
         return NeonHighlighterIconPainter(
           penColor: color,
           isSelected: isSelected,
           size: size,
+          orientation: orientation,
         );
       case PenType.rulerPen:
         return RulerPenIconPainter(
           penColor: color,
           isSelected: isSelected,
           size: size,
+          orientation: orientation,
         );
     }
   }
@@ -119,12 +140,16 @@ class ToolPenIcon extends StatelessWidget {
   /// The size of the icon.
   final double size;
 
+  /// The orientation of the pen icon.
+  final PenOrientation orientation;
+
   const ToolPenIcon({
     super.key,
     required this.toolType,
     this.color,
     this.isSelected = false,
     this.size = 48.0,
+    this.orientation = PenOrientation.vertical,
   });
 
   @override
@@ -144,6 +169,7 @@ class ToolPenIcon extends StatelessWidget {
       color: color ?? Colors.black,
       isSelected: isSelected,
       size: size,
+      orientation: orientation,
     );
   }
 }
