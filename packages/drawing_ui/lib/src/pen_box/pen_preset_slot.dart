@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
-import 'package:drawing_ui/src/pen_box/nib_preview.dart';
+import 'package:drawing_ui/src/widgets/pen_icon_widget.dart';
 
 /// A single slot in the pen box for a pen preset.
 ///
@@ -73,12 +73,12 @@ class PenPresetSlot extends StatelessWidget {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // Nib preview
-            NibPreview(
-              nibShape: preset.nibShape,
+            // Custom pen icon
+            ToolPenIcon(
+              toolType: preset.toolType,
               color: preset.color,
-              thickness: preset.thickness,
-              size: slotSize * 0.6,
+              isSelected: isSelected,
+              size: slotSize * 0.75,
             ),
 
             // Thickness indicator (bottom bar)
@@ -190,11 +190,10 @@ class CompactPenPreview extends StatelessWidget {
         ),
       ),
       child: Center(
-        child: NibPreview(
-          nibShape: preset.nibShape,
+        child: ToolPenIcon(
+          toolType: preset.toolType,
           color: preset.color,
-          thickness: preset.thickness,
-          size: size * 0.6,
+          size: size * 0.7,
         ),
       ),
     );

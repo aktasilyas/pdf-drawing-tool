@@ -4,7 +4,7 @@ import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/widgets/unified_color_picker.dart';
-import 'package:drawing_ui/src/widgets/floating_pen_box.dart' show RealisticPenPainter;
+import 'package:drawing_ui/src/widgets/pen_icon_widget.dart';
 import 'package:drawing_ui/src/panels/tool_panel.dart';
 
 /// Settings panel for pen tools (ballpoint, fountain, pencil, brush).
@@ -340,12 +340,11 @@ class _PenTypeOption extends StatelessWidget {
             ),
           ),
           child: Center(
-            child: CustomPaint(
-              size: const Size(28, 28),
-              painter: RealisticPenPainter(
-                toolType: type,
-                tipColor: isSelected ? _selectedColor : Colors.grey.shade600,
-              ),
+            child: ToolPenIcon(
+              toolType: type,
+              color: isSelected ? _selectedColor : Colors.grey.shade600,
+              isSelected: isSelected,
+              size: 30,
             ),
           ),
         ),

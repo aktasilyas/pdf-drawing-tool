@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
+import 'package:drawing_ui/src/widgets/pen_icon_widget.dart';
 
 /// Floating pen box that appears on the canvas.
 /// Draggable, collapsible, with edit mode for removing pens.
@@ -314,20 +315,16 @@ class _PenPresetItem extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Pen icon centered
+                  // Custom pen icon
                   SizedBox(
-                    width: 24,
-                    height: 24,
+                    width: 28,
+                    height: 28,
                     child: Center(
-                      child: Transform.rotate(
-                        angle: penAngle,
-                        child: CustomPaint(
-                          size: const Size(22, 22),
-                          painter: RealisticPenPainter(
-                            toolType: preset.toolType,
-                            tipColor: preset.color,
-                          ),
-                        ),
+                      child: ToolPenIcon(
+                        toolType: preset.toolType,
+                        color: preset.color,
+                        isSelected: isSelected,
+                        size: 26,
                       ),
                     ),
                   ),
@@ -404,20 +401,16 @@ class _PenPresetItem extends StatelessWidget {
               const SizedBox(width: 4),
             ],
 
-            // Pen icon centered
+            // Custom pen icon
             SizedBox(
-              width: 24,
-              height: 24,
+              width: 28,
+              height: 28,
               child: Center(
-                child: Transform.rotate(
-                  angle: penAngle,
-                  child: CustomPaint(
-                    size: const Size(22, 22),
-                    painter: RealisticPenPainter(
-                      toolType: preset.toolType,
-                      tipColor: preset.color,
-                    ),
-                  ),
+                child: ToolPenIcon(
+                  toolType: preset.toolType,
+                  color: preset.color,
+                  isSelected: isSelected,
+                  size: 26,
                 ),
               ),
             ),
