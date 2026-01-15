@@ -41,11 +41,8 @@ class QuickAccessRow extends ConsumerWidget {
   }
 
   bool _isDrawingTool(ToolType tool) {
-    return tool == ToolType.ballpointPen ||
-        tool == ToolType.fountainPen ||
-        tool == ToolType.pencil ||
-        tool == ToolType.brush ||
-        tool == ToolType.highlighter;
+    // Use the isPenTool getter from ToolType
+    return tool.isPenTool || tool == ToolType.highlighter;
   }
 }
 

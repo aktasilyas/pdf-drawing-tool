@@ -31,8 +31,8 @@ void main() {
       // Default ballpointPen settings
       final style = container.read(activeStrokeStyleProvider);
 
-      // Default thickness is 2.0 for ballpointPen
-      expect(style.thickness, 2.0);
+      // Default thickness is 1.5 for ballpointPen
+      expect(style.thickness, 1.5);
       // Default color is black (0xFF000000)
       expect(style.color, 0xFF000000);
       expect(style.nibShape, NibShape.circle);
@@ -40,7 +40,7 @@ void main() {
       container.dispose();
     });
 
-    test('returns highlighter style with 0.5 opacity', () {
+    test('returns highlighter style with 0.4 opacity', () {
       final container = ProviderContainer(
         overrides: [
           currentToolProvider.overrideWith((ref) => ToolType.highlighter),
@@ -49,7 +49,7 @@ void main() {
 
       final style = container.read(activeStrokeStyleProvider);
 
-      expect(style.opacity, 0.5);
+      expect(style.opacity, 0.4); // Updated from 0.5 to 0.4
       expect(style.nibShape, NibShape.rectangle);
       expect(style.isEraser, false);
 
@@ -74,7 +74,7 @@ void main() {
     test('returns brush style with ellipse nib', () {
       final container = ProviderContainer(
         overrides: [
-          currentToolProvider.overrideWith((ref) => ToolType.brush),
+          currentToolProvider.overrideWith((ref) => ToolType.brushPen),
         ],
       );
 
@@ -111,7 +111,7 @@ void main() {
       // Change to highlighter
       container.read(currentToolProvider.notifier).state = ToolType.highlighter;
       style = container.read(activeStrokeStyleProvider);
-      expect(style.opacity, 0.5);
+      expect(style.opacity, 0.4); // Updated from 0.5 to 0.4
 
       container.dispose();
     });
@@ -138,7 +138,7 @@ void main() {
 
       // Initial thickness
       var style = container.read(activeStrokeStyleProvider);
-      expect(style.thickness, 2.0);
+      expect(style.thickness, 1.5); // Updated from 2.0 to 1.5
 
       // Change thickness
       container
@@ -165,7 +165,7 @@ void main() {
     test('returns true for fountainPen', () {
       final container = ProviderContainer(
         overrides: [
-          currentToolProvider.overrideWith((ref) => ToolType.fountainPen),
+          currentToolProvider.overrideWith((ref) => ToolType.gelPen),
         ],
       );
       expect(container.read(isDrawingToolProvider), true);
@@ -185,7 +185,7 @@ void main() {
     test('returns true for brush', () {
       final container = ProviderContainer(
         overrides: [
-          currentToolProvider.overrideWith((ref) => ToolType.brush),
+          currentToolProvider.overrideWith((ref) => ToolType.brushPen),
         ],
       );
       expect(container.read(isDrawingToolProvider), true);
@@ -323,9 +323,9 @@ void main() {
     test('returns true for all pen types', () {
       for (final toolType in [
         ToolType.ballpointPen,
-        ToolType.fountainPen,
+        ToolType.gelPen,
         ToolType.pencil,
-        ToolType.brush,
+        ToolType.brushPen,
         ToolType.highlighter,
       ]) {
         final container = ProviderContainer(

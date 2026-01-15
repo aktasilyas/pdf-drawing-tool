@@ -36,15 +36,15 @@ void main() {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
-      container.read(activePanelProvider.notifier).state = ToolType.brush;
-      expect(container.read(activePanelProvider), ToolType.brush);
+      container.read(activePanelProvider.notifier).state = ToolType.brushPen;
+      expect(container.read(activePanelProvider), ToolType.brushPen);
     });
 
     test('can close panel by setting to null', () {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
-      container.read(activePanelProvider.notifier).state = ToolType.brush;
+      container.read(activePanelProvider.notifier).state = ToolType.brushPen;
       container.read(activePanelProvider.notifier).state = null;
       expect(container.read(activePanelProvider), isNull);
     });
@@ -57,7 +57,7 @@ void main() {
 
       final settings = container.read(penSettingsProvider(ToolType.ballpointPen));
       expect(settings.color, const Color(0xFF000000));
-      expect(settings.thickness, 2.0);
+      expect(settings.thickness, 1.5); // Updated from 2.0 to 1.5
       expect(settings.nibShape, NibShapeType.circle);
     });
 
@@ -85,13 +85,13 @@ void main() {
       expect(settings.thickness, 5.0);
     });
 
-    test('fountain pen has ellipse nib by default', () {
+    test('gel pen has circle nib by default', () {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
-      final settings = container.read(penSettingsProvider(ToolType.fountainPen));
-      expect(settings.nibShape, NibShapeType.ellipse);
-      expect(settings.nibAngle, -0.4);
+      final settings = container.read(penSettingsProvider(ToolType.gelPen));
+      expect(settings.nibShape, NibShapeType.circle);
+      expect(settings.thickness, 2.0);
     });
   });
 
@@ -164,7 +164,7 @@ void main() {
 
       final newPreset = PenPreset(
         id: 'new_preset',
-        toolType: ToolType.brush,
+        toolType: ToolType.brushPen,
         color: Colors.red,
         thickness: 10.0,
         nibShape: NibShapeType.ellipse,
@@ -290,13 +290,13 @@ void main() {
 
       // Make some changes
       container.read(toolbarConfigProvider.notifier).reorderTools(0, 3);
-      container.read(toolbarConfigProvider.notifier).setToolVisibility(ToolType.brush, false);
+      container.read(toolbarConfigProvider.notifier).setToolVisibility(ToolType.brushPen, false);
 
       // Reset
       container.read(toolbarConfigProvider.notifier).resetToDefault();
       
       final config = container.read(toolbarConfigProvider);
-      expect(config.visibleTools.contains(ToolType.brush), true);
+      expect(config.visibleTools.contains(ToolType.brushPen), true);
     });
   });
 

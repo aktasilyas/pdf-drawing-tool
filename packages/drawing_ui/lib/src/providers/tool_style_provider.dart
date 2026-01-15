@@ -16,16 +16,20 @@ final activeStrokeStyleProvider = Provider<StrokeStyle>((ref) {
   final toolType = ref.watch(currentToolProvider);
 
   switch (toolType) {
-    // Pen tools
-    case ToolType.ballpointPen:
-    case ToolType.fountainPen:
+    // Pen tools (9 types)
     case ToolType.pencil:
-    case ToolType.brush:
+    case ToolType.hardPencil:
+    case ToolType.ballpointPen:
+    case ToolType.gelPen:
+    case ToolType.dashedPen:
+    case ToolType.brushPen:
+    case ToolType.marker:
       return _getPenStyle(ref, toolType);
 
-    // Highlighter
+    // Highlighter tools
     case ToolType.highlighter:
-      return _getHighlighterStyle(ref);
+    case ToolType.neonHighlighter:
+      return _getHighlighterStyle(ref, toolType);
 
     // Eraser tools
     case ToolType.pixelEraser:
@@ -60,14 +64,29 @@ StrokeStyle _getPenStyle(Ref ref, ToolType toolType) {
 }
 
 /// Creates StrokeStyle for highlighter.
-StrokeStyle _getHighlighterStyle(Ref ref) {
+StrokeStyle _getHighlighterStyle(Ref ref, ToolType toolType) {
   final settings = ref.watch(highlighterSettingsProvider);
 
+  if (toolType == ToolType.neonHighlighter) {
+    // Neon highlighter with glow effect
+    return StrokeStyle(
+      color: settings.color.toARGB32(),
+      thickness: settings.thickness * 0.75, // Slightly thinner
+      opacity: 0.8,
+      nibShape: NibShape.rectangle,
+      blendMode: DrawingBlendMode.normal,
+      isEraser: false,
+      glowRadius: 8.0,
+      glowIntensity: 0.6,
+    );
+  }
+
+  // Regular highlighter
   return StrokeStyle(
     color: settings.color.toARGB32(),
     thickness: settings.thickness,
-    opacity: 0.5, // Highlighter is semi-transparent
-    nibShape: NibShape.rectangle, // Chisel tip for highlighter
+    opacity: 0.4, // Semi-transparent
+    nibShape: NibShape.rectangle,
     blendMode: DrawingBlendMode.normal,
     isEraser: false,
   );
@@ -106,16 +125,20 @@ NibShape _convertNibShape(NibShapeType nibType) {
 /// Whether the current tool is a drawing tool.
 ///
 /// Use this to enable/disable pointer event handling.
-/// Returns true for pen, highlighter, brush, and eraser tools.
+/// Returns true for pen, highlighter, and eraser tools.
 final isDrawingToolProvider = Provider<bool>((ref) {
   final toolType = ref.watch(currentToolProvider);
 
   return const [
-    ToolType.ballpointPen,
-    ToolType.fountainPen,
     ToolType.pencil,
-    ToolType.brush,
+    ToolType.hardPencil,
+    ToolType.ballpointPen,
+    ToolType.gelPen,
+    ToolType.dashedPen,
     ToolType.highlighter,
+    ToolType.brushPen,
+    ToolType.marker,
+    ToolType.neonHighlighter,
     ToolType.pixelEraser,
     ToolType.strokeEraser,
     ToolType.lassoEraser,
@@ -137,13 +160,8 @@ final isEraserToolProvider = Provider<bool>((ref) {
 final isPenToolProvider = Provider<bool>((ref) {
   final toolType = ref.watch(currentToolProvider);
 
-  return const [
-    ToolType.ballpointPen,
-    ToolType.fountainPen,
-    ToolType.pencil,
-    ToolType.brush,
-    ToolType.highlighter,
-  ].contains(toolType);
+  // Use the new isPenTool getter from ToolType
+  return toolType.isPenTool;
 });
 
 /// Whether the current tool is the selection tool.

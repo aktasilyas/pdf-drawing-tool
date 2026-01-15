@@ -124,16 +124,20 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
 
   Widget _buildActivePanel(ToolType panel) {
     switch (panel) {
-      case ToolType.ballpointPen:
-      case ToolType.fountainPen:
       case ToolType.pencil:
-      case ToolType.brush:
+      case ToolType.hardPencil:
+      case ToolType.ballpointPen:
+      case ToolType.gelPen:
+      case ToolType.dashedPen:
+      case ToolType.brushPen:
+      case ToolType.marker:
         return PenSettingsPanel(
           toolType: panel,
           onClose: _closePanel,
         );
 
       case ToolType.highlighter:
+      case ToolType.neonHighlighter:
         return HighlighterSettingsPanel(onClose: _closePanel);
 
       case ToolType.pixelEraser:

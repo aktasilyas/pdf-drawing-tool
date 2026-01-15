@@ -130,7 +130,7 @@ void main() {
                   theme: const DrawingTheme(),
                   child: SingleChildScrollView(
                     child: PenSettingsPanel(
-                      toolType: ToolType.fountainPen,
+                      toolType: ToolType.gelPen,
                       onClose: () {},
                     ),
                   ),

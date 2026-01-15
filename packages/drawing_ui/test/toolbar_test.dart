@@ -203,7 +203,7 @@ void main() {
             body: DrawingThemeProvider(
               theme: const DrawingTheme(),
               child: ToolButton(
-                toolType: ToolType.brush,
+                toolType: ToolType.brushPen,
                 isSelected: false,
                 onPressed: () => pressed = true,
               ),
@@ -225,7 +225,7 @@ void main() {
             body: DrawingThemeProvider(
               theme: const DrawingTheme(),
               child: ToolButton(
-                toolType: ToolType.brush,
+                toolType: ToolType.brushPen,
                 isSelected: true, // Must be selected to trigger panel tap
                 onPressed: () {},
                 onPanelTap: () => panelTapped = true,

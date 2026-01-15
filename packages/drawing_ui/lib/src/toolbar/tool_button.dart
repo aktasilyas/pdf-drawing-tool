@@ -113,14 +113,22 @@ class ToolButton extends StatelessWidget {
   /// Gets the appropriate icon for a tool type.
   static IconData getIconForTool(ToolType type) {
     switch (type) {
-      case ToolType.ballpointPen:
-        return Icons.edit;
-      case ToolType.fountainPen:
-        return Icons.create;
       case ToolType.pencil:
         return Icons.edit_outlined;
-      case ToolType.brush:
+      case ToolType.hardPencil:
+        return Icons.create;
+      case ToolType.ballpointPen:
+        return Icons.edit;
+      case ToolType.gelPen:
+        return Icons.edit;
+      case ToolType.dashedPen:
+        return Icons.timeline;
+      case ToolType.brushPen:
         return Icons.brush;
+      case ToolType.marker:
+        return Icons.border_color;
+      case ToolType.neonHighlighter:
+        return Icons.flash_on;
       case ToolType.highlighter:
         return Icons.highlight;
       case ToolType.pixelEraser:

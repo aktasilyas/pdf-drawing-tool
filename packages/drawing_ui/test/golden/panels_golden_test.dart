@@ -53,7 +53,7 @@ void main() {
                       height: 600,
                       child: SingleChildScrollView(
                         child: PenSettingsPanel(
-                          toolType: ToolType.fountainPen,
+                          toolType: ToolType.gelPen,
                           onClose: () {},
                         ),
                       ),

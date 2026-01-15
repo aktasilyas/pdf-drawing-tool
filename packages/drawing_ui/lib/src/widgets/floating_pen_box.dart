@@ -459,14 +459,22 @@ class RealisticPenPainter extends CustomPainter {
     final h = size.height;
 
     switch (toolType) {
-      case ToolType.ballpointPen:
-        _drawBallpointPen(canvas, w, h);
-      case ToolType.fountainPen:
-        _drawFountainPen(canvas, w, h);
       case ToolType.pencil:
         _drawPencil(canvas, w, h);
-      case ToolType.brush:
+      case ToolType.hardPencil:
+        _drawPencil(canvas, w, h); // Use same icon, lighter color
+      case ToolType.ballpointPen:
+        _drawBallpointPen(canvas, w, h);
+      case ToolType.gelPen:
+        _drawFountainPen(canvas, w, h); // Reuse fountain pen icon
+      case ToolType.dashedPen:
+        _drawBallpointPen(canvas, w, h); // Similar to ballpoint
+      case ToolType.brushPen:
         _drawBrush(canvas, w, h);
+      case ToolType.marker:
+        _drawBrush(canvas, w, h); // Similar to brush
+      case ToolType.neonHighlighter:
+        _drawHighlighter(canvas, w, h);
       case ToolType.highlighter:
         _drawHighlighter(canvas, w, h);
       default:

@@ -28,23 +28,6 @@ final penSettingsProvider =
 
 PenSettings _defaultPenSettings(ToolType toolType) {
   switch (toolType) {
-    case ToolType.ballpointPen:
-      return const PenSettings(
-        color: Color(0xFF000000),
-        thickness: 2.0,
-        stabilization: 0.3,
-        nibShape: NibShapeType.circle,
-        pressureSensitive: true,
-      );
-    case ToolType.fountainPen:
-      return const PenSettings(
-        color: Color(0xFF1A237E),
-        thickness: 3.0,
-        stabilization: 0.4,
-        nibShape: NibShapeType.ellipse,
-        pressureSensitive: true,
-        nibAngle: -0.4, // Tilted for fountain pen
-      );
     case ToolType.pencil:
       return const PenSettings(
         color: Color(0xFF424242),
@@ -54,13 +37,62 @@ PenSettings _defaultPenSettings(ToolType toolType) {
         pressureSensitive: true,
         textured: true,
       );
-    case ToolType.brush:
+    case ToolType.hardPencil:
+      return const PenSettings(
+        color: Color(0xFF616161),
+        thickness: 1.0,
+        stabilization: 0.2,
+        nibShape: NibShapeType.circle,
+        pressureSensitive: true,
+        textured: true,
+      );
+    case ToolType.ballpointPen:
       return const PenSettings(
         color: Color(0xFF000000),
-        thickness: 8.0,
+        thickness: 1.5,
+        stabilization: 0.3,
+        nibShape: NibShapeType.circle,
+        pressureSensitive: true,
+      );
+    case ToolType.gelPen:
+      return const PenSettings(
+        color: Color(0xFF1A237E),
+        thickness: 2.0,
+        stabilization: 0.3,
+        nibShape: NibShapeType.circle,
+        pressureSensitive: true,
+      );
+    case ToolType.dashedPen:
+      return const PenSettings(
+        color: Color(0xFF000000),
+        thickness: 2.0,
+        stabilization: 0.3,
+        nibShape: NibShapeType.circle,
+        pressureSensitive: false,
+      );
+    case ToolType.brushPen:
+      return const PenSettings(
+        color: Color(0xFF000000),
+        thickness: 5.0,
         stabilization: 0.5,
         nibShape: NibShapeType.ellipse,
         pressureSensitive: true,
+      );
+    case ToolType.marker:
+      return const PenSettings(
+        color: Color(0xFF000000),
+        thickness: 8.0,
+        stabilization: 0.3,
+        nibShape: NibShapeType.rectangle,
+        pressureSensitive: false,
+      );
+    case ToolType.neonHighlighter:
+      return const PenSettings(
+        color: Color(0xFFFF00FF),
+        thickness: 15.0,
+        stabilization: 0.3,
+        nibShape: NibShapeType.rectangle,
+        pressureSensitive: false,
       );
     default:
       return const PenSettings(
@@ -726,27 +758,32 @@ class ToolbarConfig {
   factory ToolbarConfig.defaultConfig() {
     return ToolbarConfig(
       toolOrder: [
-        ToolType.ballpointPen,
-        ToolType.fountainPen,
         ToolType.pencil,
-        ToolType.brush,
+        ToolType.hardPencil,
+        ToolType.ballpointPen,
+        ToolType.gelPen,
+        ToolType.dashedPen,
         ToolType.highlighter,
+        ToolType.brushPen,
+        ToolType.marker,
+        ToolType.neonHighlighter,
         ToolType.pixelEraser,
         ToolType.strokeEraser,
-        ToolType.selection, // Selection tool added
+        ToolType.selection,
         ToolType.shapes,
         ToolType.text,
         ToolType.sticker,
         ToolType.image,
       ],
       visibleTools: {
-        ToolType.ballpointPen,
-        ToolType.fountainPen,
         ToolType.pencil,
-        ToolType.brush,
+        ToolType.ballpointPen,
+        ToolType.gelPen,
         ToolType.highlighter,
+        ToolType.brushPen,
+        ToolType.marker,
         ToolType.pixelEraser,
-        ToolType.selection, // Selection tool visible
+        ToolType.selection,
         ToolType.shapes,
         ToolType.text,
         ToolType.sticker,

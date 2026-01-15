@@ -40,18 +40,22 @@ class _ToolBarState extends ConsumerState<ToolBar> {
 
   /// Kalem araçları - tek ikon olarak grupla
   static const _penTools = [
-    ToolType.ballpointPen,
-    ToolType.fountainPen,
     ToolType.pencil,
-    ToolType.brush,
+    ToolType.ballpointPen,
+    ToolType.gelPen,
+    ToolType.brushPen,
   ];
 
   /// Panel'i olan araçlar
   static const _toolsWithPanel = {
-    ToolType.ballpointPen,
-    ToolType.fountainPen,
     ToolType.pencil,
-    ToolType.brush,
+    ToolType.hardPencil,
+    ToolType.ballpointPen,
+    ToolType.gelPen,
+    ToolType.dashedPen,
+    ToolType.brushPen,
+    ToolType.marker,
+    ToolType.neonHighlighter,
     ToolType.highlighter,
     ToolType.pixelEraser,
     ToolType.strokeEraser,

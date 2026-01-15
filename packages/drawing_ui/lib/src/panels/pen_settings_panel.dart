@@ -100,14 +100,20 @@ class PenSettingsPanel extends ConsumerWidget {
 
   String _getTurkishTitle(ToolType type) {
     switch (type) {
-      case ToolType.ballpointPen:
-        return 'Tükenmez kalem';
-      case ToolType.fountainPen:
-        return 'Dolma kalem';
       case ToolType.pencil:
-        return 'Kurşun kalem';
-      case ToolType.brush:
-        return 'Fırça';
+        return 'Kurşun Kalem';
+      case ToolType.hardPencil:
+        return 'Sert Kalem';
+      case ToolType.ballpointPen:
+        return 'Tükenmez Kalem';
+      case ToolType.gelPen:
+        return 'Jel Kalem';
+      case ToolType.dashedPen:
+        return 'Kesik Çizgi';
+      case ToolType.brushPen:
+        return 'Fırça Kalem';
+      case ToolType.marker:
+        return 'Keçeli Kalem';
       default:
         return 'Kalem';
     }
@@ -115,8 +121,10 @@ class PenSettingsPanel extends ConsumerWidget {
 
   double _getMinThickness(ToolType type) {
     switch (type) {
-      case ToolType.brush:
+      case ToolType.brushPen:
         return 1.0;
+      case ToolType.marker:
+        return 4.0;
       default:
         return 0.1;
     }
@@ -124,12 +132,16 @@ class PenSettingsPanel extends ConsumerWidget {
 
   double _getMaxThickness(ToolType type) {
     switch (type) {
-      case ToolType.brush:
+      case ToolType.brushPen:
+        return 30.0;
+      case ToolType.marker:
         return 20.0;
       case ToolType.pencil:
         return 8.0;
-      default:
+      case ToolType.hardPencil:
         return 5.0;
+      default:
+        return 8.0;
     }
   }
 
@@ -267,10 +279,12 @@ class _PenTypeSelector extends StatelessWidget {
   final ValueChanged<ToolType> onTypeSelected;
 
   static const _penTypes = [
-    ToolType.ballpointPen,
-    ToolType.fountainPen,
     ToolType.pencil,
-    ToolType.brush,
+    ToolType.ballpointPen,
+    ToolType.gelPen,
+    ToolType.brushPen,
+    ToolType.marker,
+    ToolType.dashedPen,
   ];
 
   @override
