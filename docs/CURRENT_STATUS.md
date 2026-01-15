@@ -11,19 +11,19 @@
 |-----|-------|
 | **Current Phase** | 4E - Enhancement & Cleanup |
 | **Current Module** | 4E-2 Custom Pen Icons |
-| **Current Step** | 4E-2.2c Concrete Pen Painters (Part 3) |
-| **Last Commit** | feat(ui): add gelPen, dashedPen, highlighter icon painters |
+| **Current Step** | 4E-2.3 PenIconWidget |
+| **Last Commit** | feat(ui): add brushPen, marker, neonHighlighter icon painters |
 | **Branch** | feature/phase4e-enhancements |
 
 ---
 
 ## Next Task
 
-**Görev:** brushPen, marker, neonHighlighter painter'ları oluştur
+**Görev:** PenIconWidget wrapper oluştur
 
-**Dosya:** `packages/drawing_ui/lib/src/painters/pen_icons/`
+**Dosya:** `packages/drawing_ui/lib/src/widgets/pen_icon_widget.dart`
 
-**Talimat dosyası:** `docs/PHASE4E_CURSOR_INSTRUCTIONS.md` → ADIM 4E-2.2c
+**Talimat dosyası:** `docs/PHASE4E_CURSOR_INSTRUCTIONS.md` → ADIM 4E-2.3
 
 ---
 
@@ -31,7 +31,7 @@
 
 ```
 4E-1: Pen Types    [██████] 6/6 ✅
-4E-2: Pen Icons    [███___] 3/6
+4E-2: Pen Icons    [████__] 4/6
 4E-3: Eraser Modes [_____]  0/5
 4E-4: Color Picker [______] 0/6
 4E-5: Toolbar UX   [_____]  0/5
