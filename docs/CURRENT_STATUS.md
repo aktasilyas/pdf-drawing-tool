@@ -11,19 +11,19 @@
 |-----|-------|
 | **Current Phase** | 4E - Enhancement & Cleanup |
 | **Current Module** | 4E-2 Custom Pen Icons |
-| **Current Step** | 4E-2.5 Toolbar Integration |
-| **Last Commit** | feat(ui): integrate custom pen icons into PenBox |
+| **Current Step** | 4E-2.6 Test & Polish |
+| **Last Commit** | feat(ui): integrate custom pen icons into Toolbar |
 | **Branch** | feature/phase4e-enhancements |
 
 ---
 
 ## Next Task
 
-**Görev:** Toolbar'da custom ikonları kullan
+**Görev:** PenIcon testleri yaz ve polish
 
-**Dosya:** `packages/drawing_ui/lib/src/widgets/drawing_toolbar.dart`
+**Dosya:** Test dosyaları
 
-**Talimat dosyası:** `docs/PHASE4E_CURSOR_INSTRUCTIONS.md` → ADIM 4E-2.5
+**Talimat dosyası:** `docs/PHASE4E_CURSOR_INSTRUCTIONS.md` → ADIM 4E-2.6
 
 ---
 

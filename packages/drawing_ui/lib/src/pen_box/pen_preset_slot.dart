@@ -50,9 +50,8 @@ class PenPresetSlot extends StatelessWidget {
         width: slotSize,
         height: slotSize,
         decoration: BoxDecoration(
-          color: isSelected
-              ? theme.penBoxSlotSelectedColor
-              : Colors.transparent,
+          color:
+              isSelected ? theme.penBoxSlotSelectedColor : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: isSelected
@@ -97,7 +96,8 @@ class PenPresetSlot extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptySlot(BuildContext context, double slotSize, DrawingTheme theme) {
+  Widget _buildEmptySlot(
+      BuildContext context, double slotSize, DrawingTheme theme) {
     return GestureDetector(
       onTap: onTap,
       child: Container(

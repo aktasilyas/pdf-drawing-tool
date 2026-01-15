@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
+import 'package:drawing_ui/src/widgets/pen_icon_widget.dart';
 
 /// A button for selecting a tool in the toolbar.
 ///
@@ -88,10 +89,10 @@ class ToolButton extends StatelessWidget {
             // Ana ikon - chevron varsa biraz yukarı kaydır
             Padding(
               padding: EdgeInsets.only(bottom: showChevron ? 4 : 0),
-              child: Icon(
-                customIcon ?? _getIconForTool(toolType),
-                size: showChevron ? theme.toolIconSize - 2 : theme.toolIconSize,
-                color: iconColor,
+              child: _buildIcon(
+                theme: theme,
+                iconColor: iconColor,
+                showChevron: showChevron,
               ),
             ),
             // Chevron indicator - alt kısımda
@@ -157,6 +158,32 @@ class ToolButton extends StatelessWidget {
   }
 
   IconData _getIconForTool(ToolType type) => getIconForTool(type);
+
+  /// Build the appropriate icon widget based on tool type.
+  Widget _buildIcon({
+    required DrawingTheme theme,
+    required Color iconColor,
+    required bool showChevron,
+  }) {
+    // For pen tools (that have a PenType), use custom icon
+    final penType = toolType.penType;
+    if (penType != null && customIcon == null) {
+      final iconSize = showChevron ? theme.toolIconSize : theme.toolIconSize + 4;
+      return ToolPenIcon(
+        toolType: toolType,
+        color: iconColor,
+        isSelected: isSelected,
+        size: iconSize,
+      );
+    }
+
+    // For other tools, use Material icon
+    return Icon(
+      customIcon ?? _getIconForTool(toolType),
+      size: showChevron ? theme.toolIconSize - 2 : theme.toolIconSize,
+      color: iconColor,
+    );
+  }
 }
 
 /// Undo button for the toolbar.
