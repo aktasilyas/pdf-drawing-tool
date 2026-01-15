@@ -500,5 +500,240 @@ void main() {
         recorder.endRecording();
       });
     });
+
+    group('dash pattern rendering', () {
+      test('should render dashed stroke', () {
+        final stroke = Stroke.create(
+          points: [
+            DrawingPoint(x: 0, y: 0),
+            DrawingPoint(x: 100, y: 0),
+          ],
+          style: StrokeStyle(
+            color: 0xFF000000,
+            thickness: 2.0,
+            pattern: StrokePattern.dashed,
+            dashPattern: [8.0, 4.0],
+          ),
+        );
+
+        final recorder = PictureRecorder();
+        final canvas = Canvas(recorder);
+
+        expect(() => renderer.renderStroke(canvas, stroke), returnsNormally);
+
+        recorder.endRecording();
+      });
+
+      test('should render dotted stroke', () {
+        final stroke = Stroke.create(
+          points: [
+            DrawingPoint(x: 0, y: 0),
+            DrawingPoint(x: 100, y: 0),
+          ],
+          style: StrokeStyle(
+            color: 0xFF000000,
+            thickness: 2.0,
+            pattern: StrokePattern.dotted,
+            dashPattern: [2.0, 2.0],
+          ),
+        );
+
+        final recorder = PictureRecorder();
+        final canvas = Canvas(recorder);
+
+        expect(() => renderer.renderStroke(canvas, stroke), returnsNormally);
+
+        recorder.endRecording();
+      });
+
+      test('should handle solid pattern (no dashing)', () {
+        final stroke = Stroke.create(
+          points: [
+            DrawingPoint(x: 0, y: 0),
+            DrawingPoint(x: 100, y: 0),
+          ],
+          style: StrokeStyle(
+            color: 0xFF000000,
+            thickness: 2.0,
+            pattern: StrokePattern.solid,
+          ),
+        );
+
+        final recorder = PictureRecorder();
+        final canvas = Canvas(recorder);
+
+        expect(() => renderer.renderStroke(canvas, stroke), returnsNormally);
+
+        recorder.endRecording();
+      });
+
+      test('should handle complex dash pattern', () {
+        final stroke = Stroke.create(
+          points: [
+            DrawingPoint(x: 0, y: 0),
+            DrawingPoint(x: 50, y: 50),
+            DrawingPoint(x: 100, y: 0),
+          ],
+          style: StrokeStyle(
+            color: 0xFF000000,
+            thickness: 2.0,
+            pattern: StrokePattern.dashed,
+            dashPattern: [10.0, 5.0, 2.0, 5.0],
+          ),
+        );
+
+        final recorder = PictureRecorder();
+        final canvas = Canvas(recorder);
+
+        expect(() => renderer.renderStroke(canvas, stroke), returnsNormally);
+
+        recorder.endRecording();
+      });
+    });
+
+    group('glow effect rendering', () {
+      test('should render stroke with glow', () {
+        final stroke = Stroke.create(
+          points: [
+            DrawingPoint(x: 0, y: 0),
+            DrawingPoint(x: 100, y: 100),
+          ],
+          style: StrokeStyle(
+            color: 0xFF00FF00,
+            thickness: 3.0,
+            glowRadius: 8.0,
+            glowIntensity: 0.6,
+          ),
+        );
+
+        final recorder = PictureRecorder();
+        final canvas = Canvas(recorder);
+
+        expect(() => renderer.renderStroke(canvas, stroke), returnsNormally);
+
+        recorder.endRecording();
+      });
+
+      test('should render neon highlighter style', () {
+        final stroke = Stroke.create(
+          points: [
+            DrawingPoint(x: 0, y: 50),
+            DrawingPoint(x: 100, y: 50),
+          ],
+          style: StrokeStyle(
+            color: 0xFFFF00FF,
+            thickness: 15.0,
+            opacity: 0.8,
+            glowRadius: 8.0,
+            glowIntensity: 0.6,
+            nibShape: NibShape.rectangle,
+          ),
+        );
+
+        final recorder = PictureRecorder();
+        final canvas = Canvas(recorder);
+
+        expect(() => renderer.renderStroke(canvas, stroke), returnsNormally);
+
+        recorder.endRecording();
+      });
+
+      test('should handle zero glow (no effect)', () {
+        final stroke = Stroke.create(
+          points: [
+            DrawingPoint(x: 0, y: 0),
+            DrawingPoint(x: 100, y: 100),
+          ],
+          style: StrokeStyle(
+            color: 0xFF000000,
+            thickness: 2.0,
+            glowRadius: 0.0,
+            glowIntensity: 0.0,
+          ),
+        );
+
+        final recorder = PictureRecorder();
+        final canvas = Canvas(recorder);
+
+        expect(() => renderer.renderStroke(canvas, stroke), returnsNormally);
+
+        recorder.endRecording();
+      });
+
+      test('should handle glow with zero intensity', () {
+        final stroke = Stroke.create(
+          points: [
+            DrawingPoint(x: 0, y: 0),
+            DrawingPoint(x: 100, y: 100),
+          ],
+          style: StrokeStyle(
+            color: 0xFF000000,
+            thickness: 2.0,
+            glowRadius: 10.0,
+            glowIntensity: 0.0,
+          ),
+        );
+
+        final recorder = PictureRecorder();
+        final canvas = Canvas(recorder);
+
+        expect(() => renderer.renderStroke(canvas, stroke), returnsNormally);
+
+        recorder.endRecording();
+      });
+    });
+
+    group('combined effects', () {
+      test('should render dashed stroke with glow', () {
+        final stroke = Stroke.create(
+          points: [
+            DrawingPoint(x: 0, y: 0),
+            DrawingPoint(x: 100, y: 100),
+          ],
+          style: StrokeStyle(
+            color: 0xFF00FFFF,
+            thickness: 3.0,
+            pattern: StrokePattern.dashed,
+            dashPattern: [8.0, 4.0],
+            glowRadius: 5.0,
+            glowIntensity: 0.5,
+          ),
+        );
+
+        final recorder = PictureRecorder();
+        final canvas = Canvas(recorder);
+
+        expect(() => renderer.renderStroke(canvas, stroke), returnsNormally);
+
+        recorder.endRecording();
+      });
+
+      test('should render active stroke with all effects', () {
+        final points = [
+          DrawingPoint(x: 0, y: 0),
+          DrawingPoint(x: 50, y: 50),
+          DrawingPoint(x: 100, y: 0),
+        ];
+
+        final style = StrokeStyle(
+          color: 0xFFFF00FF,
+          thickness: 4.0,
+          pattern: StrokePattern.dashed,
+          dashPattern: [10.0, 5.0],
+          glowRadius: 6.0,
+          glowIntensity: 0.7,
+        );
+
+        final recorder = PictureRecorder();
+        final canvas = Canvas(recorder);
+
+        expect(
+          () => renderer.renderActiveStroke(canvas, points, style),
+          returnsNormally,
+        );
+
+        recorder.endRecording();
+      });
+    });
   });
 }

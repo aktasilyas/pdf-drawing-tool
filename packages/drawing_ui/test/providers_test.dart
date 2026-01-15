@@ -55,7 +55,8 @@ void main() {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
-      final settings = container.read(penSettingsProvider(ToolType.ballpointPen));
+      final settings =
+          container.read(penSettingsProvider(ToolType.ballpointPen));
       expect(settings.color, const Color(0xFF000000));
       expect(settings.thickness, 1.5); // Updated from 2.0 to 1.5
       expect(settings.nibShape, NibShapeType.circle);
@@ -68,8 +69,9 @@ void main() {
       container
           .read(penSettingsProvider(ToolType.ballpointPen).notifier)
           .setColor(Colors.blue);
-      
-      final settings = container.read(penSettingsProvider(ToolType.ballpointPen));
+
+      final settings =
+          container.read(penSettingsProvider(ToolType.ballpointPen));
       expect(settings.color, Colors.blue);
     });
 
@@ -80,8 +82,9 @@ void main() {
       container
           .read(penSettingsProvider(ToolType.ballpointPen).notifier)
           .setThickness(5.0);
-      
-      final settings = container.read(penSettingsProvider(ToolType.ballpointPen));
+
+      final settings =
+          container.read(penSettingsProvider(ToolType.ballpointPen));
       expect(settings.thickness, 5.0);
     });
 
@@ -113,7 +116,7 @@ void main() {
       container
           .read(highlighterSettingsProvider.notifier)
           .setStraightLineMode(true);
-      
+
       final settings = container.read(highlighterSettingsProvider);
       expect(settings.straightLineMode, true);
     });
@@ -132,8 +135,10 @@ void main() {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
-      container.read(eraserSettingsProvider.notifier).setMode(EraserMode.stroke);
-      
+      container
+          .read(eraserSettingsProvider.notifier)
+          .setMode(EraserMode.stroke);
+
       final settings = container.read(eraserSettingsProvider);
       expect(settings.mode, EraserMode.stroke);
     });
@@ -142,8 +147,10 @@ void main() {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
-      container.read(eraserSettingsProvider.notifier).setEraseOnlyHighlighter(true);
-      
+      container
+          .read(eraserSettingsProvider.notifier)
+          .setEraseOnlyHighlighter(true);
+
       final settings = container.read(eraserSettingsProvider);
       expect(settings.eraseOnlyHighlighter, true);
     });
@@ -171,7 +178,7 @@ void main() {
       );
 
       container.read(penBoxPresetsProvider.notifier).addPreset(newPreset);
-      
+
       final presets = container.read(penBoxPresetsProvider);
       // Should find the new preset in one of the empty slots
       final addedPreset = presets.firstWhere((p) => p.id == 'new_preset');
@@ -231,8 +238,10 @@ void main() {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
-      container.read(shapesSettingsProvider.notifier).setSelectedShape(ShapeType.star);
-      
+      container
+          .read(shapesSettingsProvider.notifier)
+          .setSelectedShape(ShapeType.star);
+
       final settings = container.read(shapesSettingsProvider);
       expect(settings.selectedShape, ShapeType.star);
     });
@@ -242,7 +251,7 @@ void main() {
       addTearDown(container.dispose);
 
       container.read(shapesSettingsProvider.notifier).setFillEnabled(true);
-      
+
       final settings = container.read(shapesSettingsProvider);
       expect(settings.fillEnabled, true);
     });
@@ -267,7 +276,7 @@ void main() {
       final originalSecond = originalOrder[1];
 
       container.read(toolbarConfigProvider.notifier).reorderTools(0, 1);
-      
+
       final newOrder = container.read(toolbarConfigProvider).toolOrder;
       expect(newOrder[0], originalSecond);
       expect(newOrder[1], originalFirst);
@@ -278,8 +287,10 @@ void main() {
       addTearDown(container.dispose);
 
       final tool = ToolType.sticker;
-      container.read(toolbarConfigProvider.notifier).setToolVisibility(tool, false);
-      
+      container
+          .read(toolbarConfigProvider.notifier)
+          .setToolVisibility(tool, false);
+
       final config = container.read(toolbarConfigProvider);
       expect(config.visibleTools.contains(tool), false);
     });
@@ -290,11 +301,13 @@ void main() {
 
       // Make some changes
       container.read(toolbarConfigProvider.notifier).reorderTools(0, 3);
-      container.read(toolbarConfigProvider.notifier).setToolVisibility(ToolType.brushPen, false);
+      container
+          .read(toolbarConfigProvider.notifier)
+          .setToolVisibility(ToolType.brushPen, false);
 
       // Reset
       container.read(toolbarConfigProvider.notifier).resetToDefault();
-      
+
       final config = container.read(toolbarConfigProvider);
       expect(config.visibleTools.contains(ToolType.brushPen), true);
     });

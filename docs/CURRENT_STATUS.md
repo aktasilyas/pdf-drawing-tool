@@ -11,26 +11,26 @@
 |-----|-------|
 | **Current Phase** | 4E - Enhancement & Cleanup |
 | **Current Module** | 4E-1 Pen Types System |
-| **Current Step** | 4E-1.4 Renderer Update |
-| **Last Commit** | feat(ui): update ToolType with 9 pen types |
+| **Current Step** | 4E-1.5 Provider Update |
+| **Last Commit** | feat(ui): add dash and glow support to renderer |
 | **Branch** | feature/phase4e-enhancements |
 
 ---
 
 ## Next Task
 
-**Görev:** Renderer'ı dash, glow, texture destekleyecek şekilde güncelle
+**Görev:** Provider'ları yeni PenType sistemiyle entegre et
 
-**Dosya:** `packages/drawing_ui/lib/src/rendering/flutter_stroke_renderer.dart`
+**Dosya:** `packages/drawing_ui/lib/src/providers/tool_style_provider.dart`
 
-**Talimat dosyası:** `docs/PHASE4E_CURSOR_INSTRUCTIONS.md` → ADIM 4E-1.4
+**Talimat dosyası:** `docs/PHASE4E_CURSOR_INSTRUCTIONS.md` → ADIM 4E-1.5
 
 ---
 
 ## Phase 4E Progress
 
 ```
-4E-1: Pen Types    [███___] 3/6
+4E-1: Pen Types    [████__] 4/6
 4E-2: Pen Icons    [______] 0/6
 4E-3: Eraser Modes [_____]  0/5
 4E-4: Color Picker [______] 0/6

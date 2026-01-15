@@ -12,8 +12,17 @@ class FlutterStrokeRenderer {
   void renderStroke(Canvas canvas, Stroke stroke) {
     if (stroke.isEmpty) return;
 
-    final paint = _createPaint(stroke.style);
-    final path = _createPath(stroke.points, stroke.style);
+    final style = stroke.style;
+    var paint = _createPaint(style);
+    var path = _createPath(stroke.points, style);
+
+    // Apply glow effect
+    paint = _buildPaintWithGlow(style, paint);
+
+    // Apply dash pattern
+    if (style.pattern != StrokePattern.solid && style.dashPattern != null) {
+      path = _createDashedPath(path, style.dashPattern!);
+    }
 
     canvas.drawPath(path, paint);
   }
@@ -37,8 +46,16 @@ class FlutterStrokeRenderer {
   ) {
     if (points.isEmpty) return;
 
-    final paint = _createPaint(style);
-    final path = _createPath(points, style);
+    var paint = _createPaint(style);
+    var path = _createPath(points, style);
+
+    // Apply glow effect
+    paint = _buildPaintWithGlow(style, paint);
+
+    // Apply dash pattern
+    if (style.pattern != StrokePattern.solid && style.dashPattern != null) {
+      path = _createDashedPath(path, style.dashPattern!);
+    }
 
     canvas.drawPath(path, paint);
   }
@@ -136,5 +153,50 @@ class FlutterStrokeRenderer {
       case DrawingBlendMode.lighten:
         return BlendMode.lighten;
     }
+  }
+
+  /// Creates a dashed path from a continuous path.
+  ///
+  /// Uses the provided [dashPattern] to create alternating
+  /// drawn and empty segments.
+  Path _createDashedPath(Path source, List<double> dashPattern) {
+    if (dashPattern.isEmpty) return source;
+
+    final result = Path();
+
+    for (final metric in source.computeMetrics()) {
+      double distance = 0.0;
+      bool draw = true;
+      int patternIndex = 0;
+
+      while (distance < metric.length) {
+        final len = dashPattern[patternIndex % dashPattern.length];
+        final end = (distance + len).clamp(0.0, metric.length);
+
+        if (draw) {
+          result.addPath(metric.extractPath(distance, end), Offset.zero);
+        }
+
+        distance = end;
+        draw = !draw;
+        patternIndex++;
+      }
+    }
+
+    return result;
+  }
+
+  /// Builds paint with glow support.
+  ///
+  /// Applies a blur mask filter if glow radius and intensity are set.
+  Paint _buildPaintWithGlow(StrokeStyle style, Paint basePaint) {
+    if (style.glowRadius > 0 && style.glowIntensity > 0) {
+      return basePaint
+        ..maskFilter = MaskFilter.blur(
+          BlurStyle.normal,
+          style.glowRadius * style.glowIntensity,
+        );
+    }
+    return basePaint;
   }
 }
