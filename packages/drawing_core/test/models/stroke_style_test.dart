@@ -23,6 +23,25 @@ void main() {
     });
   });
 
+  group('StrokePattern enum', () {
+    test('has correct values', () {
+      expect(StrokePattern.values.length, 3);
+      expect(StrokePattern.values, contains(StrokePattern.solid));
+      expect(StrokePattern.values, contains(StrokePattern.dashed));
+      expect(StrokePattern.values, contains(StrokePattern.dotted));
+    });
+  });
+
+  group('StrokeTexture enum', () {
+    test('has correct values', () {
+      expect(StrokeTexture.values.length, 4);
+      expect(StrokeTexture.values, contains(StrokeTexture.none));
+      expect(StrokeTexture.values, contains(StrokeTexture.pencil));
+      expect(StrokeTexture.values, contains(StrokeTexture.chalk));
+      expect(StrokeTexture.values, contains(StrokeTexture.watercolor));
+    });
+  });
+
   group('StrokeStyle', () {
     group('Constructor', () {
       test('creates with required parameters', () {
@@ -288,14 +307,18 @@ void main() {
 
         final json = style.toJson();
 
-        expect(json, {
-          'color': 0xFFFF0000,
-          'thickness': 5.0,
-          'opacity': 0.8,
-          'nibShape': 'ellipse',
-          'blendMode': 'multiply',
-          'isEraser': false,
-        });
+        expect(json['color'], 0xFFFF0000);
+        expect(json['thickness'], 5.0);
+        expect(json['opacity'], 0.8);
+        expect(json['nibShape'], 'ellipse');
+        expect(json['blendMode'], 'multiply');
+        expect(json['isEraser'], false);
+        // New properties should have defaults
+        expect(json['pattern'], 'solid');
+        expect(json['texture'], 'none');
+        expect(json['glowRadius'], 0.0);
+        expect(json['glowIntensity'], 0.0);
+        expect(json['dashPattern'], isNull);
       });
 
       test('converts factory styles correctly', () {
@@ -402,6 +425,296 @@ void main() {
         expect(str, contains('0xFF000000'));
         expect(str, contains('thickness: 2.0'));
         expect(str, contains('nibShape: NibShape.circle'));
+      });
+    });
+
+    group('New properties (pattern, texture, glow)', () {
+      test('creates with default new property values', () {
+        final style = StrokeStyle(
+          color: 0xFF000000,
+          thickness: 2.0,
+        );
+
+        expect(style.pattern, StrokePattern.solid);
+        expect(style.texture, StrokeTexture.none);
+        expect(style.glowRadius, 0.0);
+        expect(style.glowIntensity, 0.0);
+        expect(style.dashPattern, isNull);
+      });
+
+      test('creates with pattern', () {
+        final style = StrokeStyle(
+          color: 0xFF000000,
+          thickness: 2.0,
+          pattern: StrokePattern.dashed,
+        );
+        expect(style.pattern, StrokePattern.dashed);
+      });
+
+      test('creates with texture', () {
+        final style = StrokeStyle(
+          color: 0xFF000000,
+          thickness: 2.0,
+          texture: StrokeTexture.pencil,
+        );
+        expect(style.texture, StrokeTexture.pencil);
+      });
+
+      test('creates with glow properties', () {
+        final style = StrokeStyle(
+          color: 0xFF000000,
+          thickness: 2.0,
+          glowRadius: 5.0,
+          glowIntensity: 0.5,
+        );
+        expect(style.glowRadius, 5.0);
+        expect(style.glowIntensity, 0.5);
+      });
+
+      test('clamps glow values', () {
+        final style = StrokeStyle(
+          color: 0xFF000000,
+          thickness: 2.0,
+          glowRadius: 50.0, // should clamp to 20
+          glowIntensity: 2.0, // should clamp to 1.0
+        );
+        expect(style.glowRadius, 20.0);
+        expect(style.glowIntensity, 1.0);
+      });
+
+      test('clamps negative glow values to 0', () {
+        final style = StrokeStyle(
+          color: 0xFF000000,
+          thickness: 2.0,
+          glowRadius: -5.0,
+          glowIntensity: -0.5,
+        );
+        expect(style.glowRadius, 0.0);
+        expect(style.glowIntensity, 0.0);
+      });
+
+      test('dash pattern is nullable', () {
+        final solid = StrokeStyle(color: 0xFF000000, thickness: 2.0);
+        final dashed = StrokeStyle(
+          color: 0xFF000000,
+          thickness: 2.0,
+          dashPattern: [5.0, 3.0],
+        );
+        expect(solid.dashPattern, isNull);
+        expect(dashed.dashPattern, [5.0, 3.0]);
+      });
+
+      test('creates with all new properties', () {
+        final style = StrokeStyle(
+          color: 0xFF000000,
+          thickness: 2.0,
+          pattern: StrokePattern.dotted,
+          texture: StrokeTexture.chalk,
+          glowRadius: 10.0,
+          glowIntensity: 0.8,
+          dashPattern: [2.0, 2.0],
+        );
+
+        expect(style.pattern, StrokePattern.dotted);
+        expect(style.texture, StrokeTexture.chalk);
+        expect(style.glowRadius, 10.0);
+        expect(style.glowIntensity, 0.8);
+        expect(style.dashPattern, [2.0, 2.0]);
+      });
+    });
+
+    group('copyWith with new properties', () {
+      test('copies with pattern changed', () {
+        final original = StrokeStyle.pen();
+        final copied = original.copyWith(pattern: StrokePattern.dashed);
+
+        expect(copied.pattern, StrokePattern.dashed);
+        expect(copied.texture, StrokeTexture.none); // unchanged
+      });
+
+      test('copies with texture changed', () {
+        final original = StrokeStyle.pen();
+        final copied = original.copyWith(texture: StrokeTexture.pencil);
+
+        expect(copied.texture, StrokeTexture.pencil);
+        expect(copied.pattern, StrokePattern.solid); // unchanged
+      });
+
+      test('copies with glow properties changed', () {
+        final original = StrokeStyle.pen();
+        final copied = original.copyWith(
+          glowRadius: 8.0,
+          glowIntensity: 0.6,
+        );
+
+        expect(copied.glowRadius, 8.0);
+        expect(copied.glowIntensity, 0.6);
+      });
+
+      test('copies with dashPattern changed', () {
+        final original = StrokeStyle.pen();
+        final copied = original.copyWith(dashPattern: [4.0, 2.0]);
+
+        expect(copied.dashPattern, [4.0, 2.0]);
+      });
+    });
+
+    group('JSON with new properties', () {
+      test('toJson includes new properties', () {
+        final style = StrokeStyle(
+          color: 0xFF000000,
+          thickness: 2.0,
+          pattern: StrokePattern.dashed,
+          texture: StrokeTexture.pencil,
+          glowRadius: 5.0,
+          glowIntensity: 0.5,
+          dashPattern: [4.0, 2.0],
+        );
+
+        final json = style.toJson();
+
+        expect(json['pattern'], 'dashed');
+        expect(json['texture'], 'pencil');
+        expect(json['glowRadius'], 5.0);
+        expect(json['glowIntensity'], 0.5);
+        expect(json['dashPattern'], [4.0, 2.0]);
+      });
+
+      test('fromJson parses new properties', () {
+        final json = {
+          'color': 0xFF000000,
+          'thickness': 2.0,
+          'pattern': 'dotted',
+          'texture': 'chalk',
+          'glowRadius': 10.0,
+          'glowIntensity': 0.8,
+          'dashPattern': [2.0, 2.0],
+        };
+
+        final style = StrokeStyle.fromJson(json);
+
+        expect(style.pattern, StrokePattern.dotted);
+        expect(style.texture, StrokeTexture.chalk);
+        expect(style.glowRadius, 10.0);
+        expect(style.glowIntensity, 0.8);
+        expect(style.dashPattern, [2.0, 2.0]);
+      });
+
+      test('fromJson uses defaults for missing new properties', () {
+        final json = {
+          'color': 0xFF000000,
+          'thickness': 2.0,
+        };
+
+        final style = StrokeStyle.fromJson(json);
+
+        expect(style.pattern, StrokePattern.solid);
+        expect(style.texture, StrokeTexture.none);
+        expect(style.glowRadius, 0.0);
+        expect(style.glowIntensity, 0.0);
+        expect(style.dashPattern, isNull);
+      });
+
+      test('fromJson handles unknown enum values for new properties', () {
+        final json = {
+          'color': 0xFF000000,
+          'thickness': 2.0,
+          'pattern': 'unknown_pattern',
+          'texture': 'unknown_texture',
+        };
+
+        final style = StrokeStyle.fromJson(json);
+
+        expect(style.pattern, StrokePattern.solid); // fallback
+        expect(style.texture, StrokeTexture.none); // fallback
+      });
+
+      test('roundtrip preserves new properties', () {
+        final original = StrokeStyle(
+          color: 0xFF000000,
+          thickness: 2.0,
+          pattern: StrokePattern.dashed,
+          texture: StrokeTexture.pencil,
+          glowRadius: 5.0,
+          glowIntensity: 0.5,
+          dashPattern: [4.0, 2.0],
+        );
+
+        final json = original.toJson();
+        final restored = StrokeStyle.fromJson(json);
+
+        expect(restored, equals(original));
+      });
+    });
+
+    group('Equality with new properties', () {
+      test('styles with different pattern are not equal', () {
+        final style1 = StrokeStyle(
+          color: 0xFF000000,
+          thickness: 2.0,
+          pattern: StrokePattern.solid,
+        );
+        final style2 = StrokeStyle(
+          color: 0xFF000000,
+          thickness: 2.0,
+          pattern: StrokePattern.dashed,
+        );
+
+        expect(style1, isNot(equals(style2)));
+      });
+
+      test('styles with different texture are not equal', () {
+        final style1 = StrokeStyle(
+          color: 0xFF000000,
+          thickness: 2.0,
+          texture: StrokeTexture.none,
+        );
+        final style2 = StrokeStyle(
+          color: 0xFF000000,
+          thickness: 2.0,
+          texture: StrokeTexture.pencil,
+        );
+
+        expect(style1, isNot(equals(style2)));
+      });
+
+      test('styles with different glow are not equal', () {
+        final style1 = StrokeStyle(
+          color: 0xFF000000,
+          thickness: 2.0,
+          glowRadius: 0.0,
+        );
+        final style2 = StrokeStyle(
+          color: 0xFF000000,
+          thickness: 2.0,
+          glowRadius: 5.0,
+        );
+
+        expect(style1, isNot(equals(style2)));
+      });
+
+      test('styles with same new properties are equal', () {
+        final style1 = StrokeStyle(
+          color: 0xFF000000,
+          thickness: 2.0,
+          pattern: StrokePattern.dashed,
+          texture: StrokeTexture.pencil,
+          glowRadius: 5.0,
+          glowIntensity: 0.5,
+          dashPattern: [4.0, 2.0],
+        );
+        final style2 = StrokeStyle(
+          color: 0xFF000000,
+          thickness: 2.0,
+          pattern: StrokePattern.dashed,
+          texture: StrokeTexture.pencil,
+          glowRadius: 5.0,
+          glowIntensity: 0.5,
+          dashPattern: [4.0, 2.0],
+        );
+
+        expect(style1, equals(style2));
+        expect(style1.hashCode, equals(style2.hashCode));
       });
     });
   });

@@ -33,9 +33,37 @@ enum DrawingBlendMode {
   lighten,
 }
 
+/// Stroke pattern types for dashed lines.
+enum StrokePattern {
+  /// Solid continuous line.
+  solid,
+
+  /// Dashed line pattern.
+  dashed,
+
+  /// Dotted line pattern.
+  dotted,
+}
+
+/// Texture types for stroke rendering.
+enum StrokeTexture {
+  /// No texture, smooth stroke.
+  none,
+
+  /// Pencil-like grainy texture.
+  pencil,
+
+  /// Chalk-like rough texture.
+  chalk,
+
+  /// Watercolor-like soft edges.
+  watercolor,
+}
+
 /// Defines the visual style of a stroke.
 ///
-/// Contains color, thickness, opacity, nib shape, blend mode, and eraser flag.
+/// Contains color, thickness, opacity, nib shape, blend mode, eraser flag,
+/// pattern, texture, and glow effects.
 /// Colors are represented as ARGB integers (0xAARRGGBB format).
 ///
 /// This class is immutable and uses [Equatable] for value equality.
@@ -58,11 +86,28 @@ class StrokeStyle extends Equatable {
   /// Whether this style is for an eraser tool.
   final bool isEraser;
 
+  /// The pattern of the stroke (solid, dashed, dotted).
+  final StrokePattern pattern;
+
+  /// The texture of the stroke.
+  final StrokeTexture texture;
+
+  /// Glow radius for neon effects (0 = no glow, max 20.0).
+  final double glowRadius;
+
+  /// Glow intensity (0.0 to 1.0).
+  final double glowIntensity;
+
+  /// Dash pattern [dash length, gap length]. Null for solid.
+  final List<double>? dashPattern;
+
   /// Creates a new [StrokeStyle].
   ///
   /// [color] is in ARGB format (0xAARRGGBB).
   /// [thickness] is clamped to the range [0.1, 50.0].
   /// [opacity] is clamped to the range [0.0, 1.0].
+  /// [glowRadius] is clamped to the range [0.0, 20.0].
+  /// [glowIntensity] is clamped to the range [0.0, 1.0].
   StrokeStyle({
     required this.color,
     required double thickness,
@@ -70,8 +115,15 @@ class StrokeStyle extends Equatable {
     this.nibShape = NibShape.circle,
     this.blendMode = DrawingBlendMode.normal,
     this.isEraser = false,
+    this.pattern = StrokePattern.solid,
+    this.texture = StrokeTexture.none,
+    double glowRadius = 0.0,
+    double glowIntensity = 0.0,
+    this.dashPattern,
   })  : thickness = thickness.clamp(0.1, 50.0),
-        opacity = opacity.clamp(0.0, 1.0);
+        opacity = opacity.clamp(0.0, 1.0),
+        glowRadius = glowRadius.clamp(0.0, 20.0),
+        glowIntensity = glowIntensity.clamp(0.0, 1.0);
 
   /// Creates a pen style.
   ///
@@ -149,6 +201,11 @@ class StrokeStyle extends Equatable {
     NibShape? nibShape,
     DrawingBlendMode? blendMode,
     bool? isEraser,
+    StrokePattern? pattern,
+    StrokeTexture? texture,
+    double? glowRadius,
+    double? glowIntensity,
+    List<double>? dashPattern,
   }) {
     return StrokeStyle(
       color: color ?? this.color,
@@ -157,6 +214,11 @@ class StrokeStyle extends Equatable {
       nibShape: nibShape ?? this.nibShape,
       blendMode: blendMode ?? this.blendMode,
       isEraser: isEraser ?? this.isEraser,
+      pattern: pattern ?? this.pattern,
+      texture: texture ?? this.texture,
+      glowRadius: glowRadius ?? this.glowRadius,
+      glowIntensity: glowIntensity ?? this.glowIntensity,
+      dashPattern: dashPattern ?? this.dashPattern,
     );
   }
 
@@ -169,6 +231,11 @@ class StrokeStyle extends Equatable {
       'nibShape': nibShape.name,
       'blendMode': blendMode.name,
       'isEraser': isEraser,
+      'pattern': pattern.name,
+      'texture': texture.name,
+      'glowRadius': glowRadius,
+      'glowIntensity': glowIntensity,
+      'dashPattern': dashPattern,
     };
   }
 
@@ -187,6 +254,19 @@ class StrokeStyle extends Equatable {
         orElse: () => DrawingBlendMode.normal,
       ),
       isEraser: json['isEraser'] as bool? ?? false,
+      pattern: StrokePattern.values.firstWhere(
+        (e) => e.name == json['pattern'],
+        orElse: () => StrokePattern.solid,
+      ),
+      texture: StrokeTexture.values.firstWhere(
+        (e) => e.name == json['texture'],
+        orElse: () => StrokeTexture.none,
+      ),
+      glowRadius: (json['glowRadius'] as num?)?.toDouble() ?? 0.0,
+      glowIntensity: (json['glowIntensity'] as num?)?.toDouble() ?? 0.0,
+      dashPattern: (json['dashPattern'] as List<dynamic>?)
+          ?.map((e) => (e as num).toDouble())
+          .toList(),
     );
   }
 
@@ -198,12 +278,18 @@ class StrokeStyle extends Equatable {
         nibShape,
         blendMode,
         isEraser,
+        pattern,
+        texture,
+        glowRadius,
+        glowIntensity,
+        dashPattern,
       ];
 
   @override
   String toString() {
     return 'StrokeStyle(color: 0x${color.toRadixString(16).padLeft(8, '0').toUpperCase()}, '
         'thickness: $thickness, opacity: $opacity, nibShape: $nibShape, '
-        'blendMode: $blendMode, isEraser: $isEraser)';
+        'blendMode: $blendMode, isEraser: $isEraser, pattern: $pattern, '
+        'texture: $texture, glowRadius: $glowRadius, glowIntensity: $glowIntensity)';
   }
 }
