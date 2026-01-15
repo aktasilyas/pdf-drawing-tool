@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/models/models.dart';
 
 // =============================================================================
@@ -21,87 +22,47 @@ final activePanelProvider = StateProvider<ToolType?>((ref) {
 // =============================================================================
 
 /// Settings for pen tools (family provider by tool type).
+/// 
+/// For pen tools with PenType, default values come from PenType.config.
 final penSettingsProvider =
     StateNotifierProvider.family<PenSettingsNotifier, PenSettings, ToolType>(
   (ref, toolType) => PenSettingsNotifier(_defaultPenSettings(toolType)),
 );
 
 PenSettings _defaultPenSettings(ToolType toolType) {
-  switch (toolType) {
-    case ToolType.pencil:
-      return const PenSettings(
-        color: Color(0xFF424242),
-        thickness: 1.5,
-        stabilization: 0.2,
-        nibShape: NibShapeType.circle,
-        pressureSensitive: true,
-        textured: true,
-      );
-    case ToolType.hardPencil:
-      return const PenSettings(
-        color: Color(0xFF616161),
-        thickness: 1.0,
-        stabilization: 0.2,
-        nibShape: NibShapeType.circle,
-        pressureSensitive: true,
-        textured: true,
-      );
-    case ToolType.ballpointPen:
-      return const PenSettings(
-        color: Color(0xFF000000),
-        thickness: 1.5,
-        stabilization: 0.3,
-        nibShape: NibShapeType.circle,
-        pressureSensitive: true,
-      );
-    case ToolType.gelPen:
-      return const PenSettings(
-        color: Color(0xFF1A237E),
-        thickness: 2.0,
-        stabilization: 0.3,
-        nibShape: NibShapeType.circle,
-        pressureSensitive: true,
-      );
-    case ToolType.dashedPen:
-      return const PenSettings(
-        color: Color(0xFF000000),
-        thickness: 2.0,
-        stabilization: 0.3,
-        nibShape: NibShapeType.circle,
-        pressureSensitive: false,
-      );
-    case ToolType.brushPen:
-      return const PenSettings(
-        color: Color(0xFF000000),
-        thickness: 5.0,
-        stabilization: 0.5,
-        nibShape: NibShapeType.ellipse,
-        pressureSensitive: true,
-      );
-    case ToolType.marker:
-      return const PenSettings(
-        color: Color(0xFF000000),
-        thickness: 8.0,
-        stabilization: 0.3,
-        nibShape: NibShapeType.rectangle,
-        pressureSensitive: false,
-      );
-    case ToolType.neonHighlighter:
-      return const PenSettings(
-        color: Color(0xFFFF00FF),
-        thickness: 15.0,
-        stabilization: 0.3,
-        nibShape: NibShapeType.rectangle,
-        pressureSensitive: false,
-      );
-    default:
-      return const PenSettings(
-        color: Color(0xFF000000),
-        thickness: 2.0,
-        stabilization: 0.3,
-        nibShape: NibShapeType.circle,
-        pressureSensitive: true,
-      );
+  // Use PenType config for pen tools
+  final penType = toolType.penType;
+  if (penType != null) {
+    final config = penType.config;
+    return PenSettings(
+      color: const Color(0xFF000000), // Default black
+      thickness: config.defaultThickness,
+      stabilization: 0.3, // Default stabilization
+      nibShape: _nibShapeFromCore(config.nibShape),
+      pressureSensitive: true, // Default pressure sensitivity
+      textured: config.texture != StrokeTexture.none,
+    );
+  }
+
+  // Fallback for non-pen tools
+  return const PenSettings(
+    color: Color(0xFF000000),
+    thickness: 2.0,
+    stabilization: 0.3,
+    nibShape: NibShapeType.circle,
+    pressureSensitive: true,
+  );
+}
+
+/// Converts core NibShape to UI NibShapeType.
+NibShapeType _nibShapeFromCore(NibShape nibShape) {
+  switch (nibShape) {
+    case NibShape.circle:
+      return NibShapeType.circle;
+    case NibShape.ellipse:
+      return NibShapeType.ellipse;
+    case NibShape.rectangle:
+      return NibShapeType.rectangle;
   }
 }
 

@@ -12,101 +12,57 @@ import 'package:drawing_ui/src/models/tool_type.dart';
 /// This provider bridges the UI tool selection with the drawing_core
 /// StrokeStyle model. When the user changes tool, color, or thickness,
 /// this provider automatically updates to reflect those changes.
+///
+/// For pen tools, uses PenType.toStrokeStyle() for proper configuration.
 final activeStrokeStyleProvider = Provider<StrokeStyle>((ref) {
   final toolType = ref.watch(currentToolProvider);
 
-  switch (toolType) {
-    // Pen tools (9 types)
-    case ToolType.pencil:
-    case ToolType.hardPencil:
-    case ToolType.ballpointPen:
-    case ToolType.gelPen:
-    case ToolType.dashedPen:
-    case ToolType.brushPen:
-    case ToolType.marker:
-      return _getPenStyle(ref, toolType);
-
-    // Highlighter tools
-    case ToolType.highlighter:
-    case ToolType.neonHighlighter:
-      return _getHighlighterStyle(ref, toolType);
-
-    // Eraser tools
-    case ToolType.pixelEraser:
-    case ToolType.strokeEraser:
-    case ToolType.lassoEraser:
-      return _getEraserStyle(ref);
-
-    // Non-drawing tools - return default
-    case ToolType.shapes:
-    case ToolType.text:
-    case ToolType.sticker:
-    case ToolType.image:
-    case ToolType.selection:
-    case ToolType.panZoom:
-    case ToolType.laserPointer:
-      return StrokeStyle.pen();
-  }
-});
-
-/// Creates StrokeStyle from pen settings.
-StrokeStyle _getPenStyle(Ref ref, ToolType toolType) {
-  final settings = ref.watch(penSettingsProvider(toolType));
-
-  return StrokeStyle(
-    color: settings.color.toARGB32(),
-    thickness: settings.thickness,
-    opacity: 1.0,
-    nibShape: _convertNibShape(settings.nibShape),
-    blendMode: DrawingBlendMode.normal,
-    isEraser: false,
-  );
-}
-
-/// Creates StrokeStyle for highlighter.
-StrokeStyle _getHighlighterStyle(Ref ref, ToolType toolType) {
-  final settings = ref.watch(highlighterSettingsProvider);
-
-  if (toolType == ToolType.neonHighlighter) {
-    // Neon highlighter with glow effect
-    return StrokeStyle(
+  // Pen tools - use PenType for configuration
+  final penType = toolType.penType;
+  if (penType != null) {
+    final settings = ref.watch(penSettingsProvider(toolType));
+    return penType.toStrokeStyle(
       color: settings.color.toARGB32(),
-      thickness: settings.thickness * 0.75, // Slightly thinner
-      opacity: 0.8,
-      nibShape: NibShape.rectangle,
-      blendMode: DrawingBlendMode.normal,
-      isEraser: false,
-      glowRadius: 8.0,
-      glowIntensity: 0.6,
+      thickness: settings.thickness,
     );
   }
 
-  // Regular highlighter
-  return StrokeStyle(
-    color: settings.color.toARGB32(),
-    thickness: settings.thickness,
-    opacity: 0.4, // Semi-transparent
-    nibShape: NibShape.rectangle,
-    blendMode: DrawingBlendMode.normal,
-    isEraser: false,
-  );
-}
+  // Highlighter (special case - uses separate settings provider)
+  if (toolType == ToolType.highlighter) {
+    final settings = ref.watch(highlighterSettingsProvider);
+    return StrokeStyle(
+      color: settings.color.toARGB32(),
+      thickness: settings.thickness,
+      opacity: 0.4,
+      nibShape: NibShape.rectangle,
+      blendMode: DrawingBlendMode.normal,
+      isEraser: false,
+    );
+  }
 
-/// Creates StrokeStyle for eraser.
-StrokeStyle _getEraserStyle(Ref ref) {
-  final settings = ref.watch(eraserSettingsProvider);
+  // Eraser tools
+  if (toolType == ToolType.pixelEraser ||
+      toolType == ToolType.strokeEraser ||
+      toolType == ToolType.lassoEraser) {
+    final settings = ref.watch(eraserSettingsProvider);
+    return StrokeStyle(
+      color: 0xFFFFFFFF,
+      thickness: settings.size,
+      opacity: 1.0,
+      nibShape: NibShape.circle,
+      blendMode: DrawingBlendMode.normal,
+      isEraser: true,
+    );
+  }
 
-  return StrokeStyle(
-    color: 0xFFFFFFFF, // White color for eraser
-    thickness: settings.size,
-    opacity: 1.0,
-    nibShape: NibShape.circle,
-    blendMode: DrawingBlendMode.normal,
-    isEraser: true,
-  );
-}
+  // Non-drawing tools - return default
+  return StrokeStyle.pen();
+});
 
 /// Converts UI NibShapeType to drawing_core NibShape.
+/// 
+/// Note: This is kept for compatibility but may not be needed
+/// since PenType.toStrokeStyle() handles this internally.
 NibShape _convertNibShape(NibShapeType nibType) {
   switch (nibType) {
     case NibShapeType.circle:
@@ -129,16 +85,14 @@ NibShape _convertNibShape(NibShapeType nibType) {
 final isDrawingToolProvider = Provider<bool>((ref) {
   final toolType = ref.watch(currentToolProvider);
 
+  // Pen tools (uses isPenTool getter from ToolType)
+  if (toolType.isPenTool) return true;
+
+  // Highlighter
+  if (toolType == ToolType.highlighter) return true;
+
+  // Eraser tools
   return const [
-    ToolType.pencil,
-    ToolType.hardPencil,
-    ToolType.ballpointPen,
-    ToolType.gelPen,
-    ToolType.dashedPen,
-    ToolType.highlighter,
-    ToolType.brushPen,
-    ToolType.marker,
-    ToolType.neonHighlighter,
     ToolType.pixelEraser,
     ToolType.strokeEraser,
     ToolType.lassoEraser,

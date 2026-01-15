@@ -11,26 +11,26 @@
 |-----|-------|
 | **Current Phase** | 4E - Enhancement & Cleanup |
 | **Current Module** | 4E-1 Pen Types System |
-| **Current Step** | 4E-1.5 Provider Update |
-| **Last Commit** | feat(ui): add dash and glow support to renderer |
+| **Current Step** | 4E-1.6 Test & Polish |
+| **Last Commit** | feat(ui): integrate providers with PenType system |
 | **Branch** | feature/phase4e-enhancements |
 
 ---
 
 ## Next Task
 
-**Görev:** Provider'ları yeni PenType sistemiyle entegre et
+**Görev:** Tüm kalem tiplerini test et, UI polish
 
-**Dosya:** `packages/drawing_ui/lib/src/providers/tool_style_provider.dart`
+**Dosya:** example app + manual testing
 
-**Talimat dosyası:** `docs/PHASE4E_CURSOR_INSTRUCTIONS.md` → ADIM 4E-1.5
+**Talimat dosyası:** `docs/PHASE4E_CURSOR_INSTRUCTIONS.md` → ADIM 4E-1.6
 
 ---
 
 ## Phase 4E Progress
 
 ```
-4E-1: Pen Types    [████__] 4/6
+4E-1: Pen Types    [█████_] 5/6
 4E-2: Pen Icons    [______] 0/6
 4E-3: Eraser Modes [_____]  0/5
 4E-4: Color Picker [______] 0/6
