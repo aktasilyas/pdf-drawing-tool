@@ -23,11 +23,11 @@ class NeonHighlighterIconPainter extends PenIconPainter {
 
     path.addRRect(RRect.fromRectAndRadius(
       Rect.fromCenter(
-        center: Offset(w * 0.5, h * 0.5),
-        width: w * 0.24,
-        height: h * 0.50,
+        center: Offset(w * 0.5, h * 0.52),
+        width: w * 0.38,
+        height: h * 0.48,
       ),
-      const Radius.circular(4),
+      const Radius.circular(5),
     ));
 
     return path;
@@ -40,33 +40,33 @@ class NeonHighlighterIconPainter extends PenIconPainter {
 
     // Strong colored glow effect
     final glowPaint = Paint()
-      ..color = penColor.withOpacity(0.4)
-      ..maskFilter = const ui.MaskFilter.blur(BlurStyle.normal, 10);
+      ..color = penColor.withOpacity(0.45)
+      ..maskFilter = const ui.MaskFilter.blur(BlurStyle.normal, 12);
 
     final glowRect = RRect.fromRectAndRadius(
       Rect.fromCenter(
-        center: Offset(w * 0.5, h * 0.5),
-        width: w * 0.28,
-        height: h * 0.56,
+        center: Offset(w * 0.5, h * 0.52),
+        width: w * 0.44,
+        height: h * 0.54,
       ),
-      const Radius.circular(5),
+      const Radius.circular(6),
     );
 
     canvas.drawRRect(glowRect, glowPaint);
 
     // Secondary glow layer (more concentrated)
     final innerGlowPaint = Paint()
-      ..color = penColor.withOpacity(0.3)
-      ..maskFilter = const ui.MaskFilter.blur(BlurStyle.normal, 5);
+      ..color = penColor.withOpacity(0.35)
+      ..maskFilter = const ui.MaskFilter.blur(BlurStyle.normal, 6);
 
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         Rect.fromCenter(
-          center: Offset(w * 0.5, h * 0.5),
-          width: w * 0.25,
-          height: h * 0.52,
+          center: Offset(w * 0.5, h * 0.52),
+          width: w * 0.40,
+          height: h * 0.50,
         ),
-        const Radius.circular(4),
+        const Radius.circular(5),
       ),
       innerGlowPaint,
     );
@@ -78,9 +78,9 @@ class NeonHighlighterIconPainter extends PenIconPainter {
     final h = rect.height;
 
     final bodyRect = Rect.fromCenter(
-      center: Offset(w * 0.5, h * 0.5),
-      width: w * 0.24,
-      height: h * 0.50,
+      center: Offset(w * 0.5, h * 0.52),
+      width: w * 0.38,
+      height: h * 0.48,
     );
 
     // Bright neon body with inner glow effect
@@ -89,15 +89,15 @@ class NeonHighlighterIconPainter extends PenIconPainter {
         center: const Alignment(-0.3, -0.2),
         radius: 1.2,
         colors: [
-          penColor.withOpacity(0.95),
-          penColor.withOpacity(0.85),
-          penColor.withOpacity(0.75),
+          penColor.withOpacity(0.96),
+          penColor.withOpacity(0.88),
+          penColor.withOpacity(0.78),
         ],
         stops: const [0.0, 0.5, 1.0],
       ).createShader(bodyRect);
 
     canvas.drawRRect(
-      RRect.fromRectAndRadius(bodyRect, const Radius.circular(4)),
+      RRect.fromRectAndRadius(bodyRect, const Radius.circular(5)),
       innerPaint,
     );
 
@@ -105,40 +105,40 @@ class NeonHighlighterIconPainter extends PenIconPainter {
     final outlinePaint = Paint()
       ..color = penColor
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.8;
+      ..strokeWidth = 1.0;
     canvas.drawRRect(
-      RRect.fromRectAndRadius(bodyRect, const Radius.circular(4)),
+      RRect.fromRectAndRadius(bodyRect, const Radius.circular(5)),
       outlinePaint,
     );
 
     // Cap (at bottom)
     final capRect = Rect.fromCenter(
-      center: Offset(w * 0.5, h * 0.82),
-      width: w * 0.25,
-      height: h * 0.10,
+      center: Offset(w * 0.5, h * 0.84),
+      width: w * 0.40,
+      height: h * 0.11,
     );
 
     final capGradient = LinearGradient(
       begin: Alignment.centerLeft,
       end: Alignment.centerRight,
       colors: [
-        penColor.withOpacity(0.85),
-        penColor.withOpacity(0.95),
+        penColor.withOpacity(0.88),
+        penColor.withOpacity(0.96),
         penColor,
-        penColor.withOpacity(0.9),
+        penColor.withOpacity(0.92),
       ],
     ).createShader(capRect);
 
     canvas.drawRRect(
-      RRect.fromRectAndRadius(capRect, const Radius.circular(3)),
+      RRect.fromRectAndRadius(capRect, const Radius.circular(4)),
       Paint()..shader = capGradient,
     );
 
     // Cap ring
     final ringRect = Rect.fromCenter(
-      center: Offset(w * 0.5, h * 0.76),
-      width: w * 0.24,
-      height: h * 0.02,
+      center: Offset(w * 0.5, h * 0.78),
+      width: w * 0.38,
+      height: h * 0.025,
     );
     canvas.drawRect(ringRect, Paint()..color = penColor);
   }
@@ -148,18 +148,18 @@ class NeonHighlighterIconPainter extends PenIconPainter {
     final w = rect.width;
     final h = rect.height;
 
-    // Chisel tip with glow (at TOP)
+    // Chisel tip with glow (at TOP) - bigger
     final tipPath = Path();
-    tipPath.moveTo(w * 0.38, h * 0.25);
-    tipPath.lineTo(w * 0.42, h * 0.10);
-    tipPath.lineTo(w * 0.58, h * 0.10);
-    tipPath.lineTo(w * 0.62, h * 0.25);
+    tipPath.moveTo(w * 0.31, h * 0.28);
+    tipPath.lineTo(w * 0.38, h * 0.10);
+    tipPath.lineTo(w * 0.62, h * 0.10);
+    tipPath.lineTo(w * 0.69, h * 0.28);
     tipPath.close();
 
     // Tip glow
     final tipGlowPaint = Paint()
-      ..color = penColor.withOpacity(0.5)
-      ..maskFilter = const ui.MaskFilter.blur(BlurStyle.normal, 4);
+      ..color = penColor.withOpacity(0.55)
+      ..maskFilter = const ui.MaskFilter.blur(BlurStyle.normal, 5);
     canvas.drawPath(tipPath, tipGlowPaint);
 
     // Solid tip
@@ -167,10 +167,10 @@ class NeonHighlighterIconPainter extends PenIconPainter {
       begin: Alignment.centerLeft,
       end: Alignment.centerRight,
       colors: [
-        penColor.withOpacity(0.85),
-        penColor.withOpacity(0.95),
+        penColor.withOpacity(0.88),
+        penColor.withOpacity(0.96),
         penColor,
-        penColor.withOpacity(0.9),
+        penColor.withOpacity(0.92),
       ],
     ).createShader(tipPath.getBounds());
 
@@ -180,11 +180,11 @@ class NeonHighlighterIconPainter extends PenIconPainter {
     final edgePaint = Paint()
       ..color = penColor
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.5;
+      ..strokeWidth = 0.8;
 
     canvas.drawLine(
-      Offset(w * 0.42, h * 0.10),
-      Offset(w * 0.58, h * 0.10),
+      Offset(w * 0.38, h * 0.10),
+      Offset(w * 0.62, h * 0.10),
       edgePaint,
     );
   }
@@ -195,19 +195,19 @@ class NeonHighlighterIconPainter extends PenIconPainter {
     final h = rect.height;
 
     // Bright white highlight (stronger for neon effect)
-    final highlightPaint = createHighlightPaint(opacity: 0.7, width: 2.5);
+    final highlightPaint = createHighlightPaint(opacity: 0.75, width: 3.0);
 
     canvas.drawLine(
-      Offset(w * 0.40, h * 0.30),
-      Offset(w * 0.40, h * 0.70),
+      Offset(w * 0.34, h * 0.32),
+      Offset(w * 0.34, h * 0.72),
       highlightPaint,
     );
 
     // Top shine
     canvas.drawLine(
-      Offset(w * 0.41, h * 0.78),
-      Offset(w * 0.41, h * 0.86),
-      createHighlightPaint(opacity: 0.6, width: 1.5),
+      Offset(w * 0.35, h * 0.80),
+      Offset(w * 0.35, h * 0.88),
+      createHighlightPaint(opacity: 0.65, width: 2.0),
     );
   }
 }

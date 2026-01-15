@@ -20,20 +20,20 @@ class HardPencilIconPainter extends PenIconPainter {
     final w = rect.width;
     final h = rect.height;
 
-    // Pencil body - vertical, tip UP
+    // Pencil body - vertical, tip UP (thicker)
     path.addRRect(RRect.fromRectAndRadius(
       Rect.fromCenter(
-        center: Offset(w * 0.5, h * 0.5),
-        width: w * 0.18,
-        height: h * 0.55,
+        center: Offset(w * 0.5, h * 0.52),
+        width: w * 0.30,
+        height: h * 0.52,
       ),
-      const Radius.circular(1.5),
+      const Radius.circular(2),
     ));
 
     // Tip triangle
-    path.moveTo(w * 0.41, h * 0.22);
+    path.moveTo(w * 0.35, h * 0.26);
     path.lineTo(w * 0.5, h * 0.08);
-    path.lineTo(w * 0.59, h * 0.22);
+    path.lineTo(w * 0.65, h * 0.26);
     path.close();
 
     return path;
@@ -42,13 +42,13 @@ class HardPencilIconPainter extends PenIconPainter {
   @override
   void paintShadow(Canvas canvas, Rect rect) {
     final shadowPaint = Paint()
-      ..color = Colors.black.withOpacity(0.18)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5);
+      ..color = Colors.black.withOpacity(0.22)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
 
     final shadowPath = buildBodyPath(rect);
 
     canvas.save();
-    canvas.translate(2.5, 3.0);
+    canvas.translate(3, 3.5);
     canvas.drawPath(shadowPath, shadowPaint);
     canvas.restore();
   }
@@ -59,9 +59,9 @@ class HardPencilIconPainter extends PenIconPainter {
     final h = rect.height;
 
     final bodyRect = Rect.fromCenter(
-      center: Offset(w * 0.5, h * 0.5),
-      width: w * 0.18,
-      height: h * 0.55,
+      center: Offset(w * 0.5, h * 0.52),
+      width: w * 0.30,
+      height: h * 0.52,
     );
 
     // 4-color gradient for cool gray wood body
@@ -78,21 +78,21 @@ class HardPencilIconPainter extends PenIconPainter {
     ).createShader(bodyRect);
 
     canvas.drawRRect(
-      RRect.fromRectAndRadius(bodyRect, const Radius.circular(1.5)),
+      RRect.fromRectAndRadius(bodyRect, const Radius.circular(2)),
       Paint()..shader = bodyGradient,
     );
 
     // Subtle wood grain lines (more muted)
     final grainPaint = Paint()
-      ..color = const Color(0xFFC4C0BC).withOpacity(0.4)
-      ..strokeWidth = 0.5
+      ..color = const Color(0xFFC4C0BC).withOpacity(0.45)
+      ..strokeWidth = 0.8
       ..style = PaintingStyle.stroke;
 
-    for (var i = -1; i <= 1; i++) {
-      final x = w * 0.5 + i * (w * 0.04);
+    for (var i = -2; i <= 2; i++) {
+      final x = w * 0.5 + i * (w * 0.055);
       canvas.drawLine(
-        Offset(x, h * 0.28),
-        Offset(x, h * 0.72),
+        Offset(x, h * 0.30),
+        Offset(x, h * 0.74),
         grainPaint,
       );
     }
@@ -105,9 +105,9 @@ class HardPencilIconPainter extends PenIconPainter {
 
     // Sharpened wood cone (gray tint, at TOP)
     final conePath = Path();
-    conePath.moveTo(w * 0.41, h * 0.22);
+    conePath.moveTo(w * 0.35, h * 0.26);
     conePath.lineTo(w * 0.5, h * 0.08);
-    conePath.lineTo(w * 0.59, h * 0.22);
+    conePath.lineTo(w * 0.65, h * 0.26);
     conePath.close();
 
     final coneGradient = LinearGradient(
@@ -122,11 +122,11 @@ class HardPencilIconPainter extends PenIconPainter {
 
     canvas.drawPath(conePath, Paint()..shader = coneGradient);
 
-    // Light graphite tip
+    // Light graphite tip (bigger)
     final graphitePath = Path();
-    graphitePath.moveTo(w * 0.47, h * 0.14);
+    graphitePath.moveTo(w * 0.44, h * 0.16);
     graphitePath.lineTo(w * 0.5, h * 0.08);
-    graphitePath.lineTo(w * 0.53, h * 0.14);
+    graphitePath.lineTo(w * 0.56, h * 0.16);
     graphitePath.close();
 
     final graphiteGradient = LinearGradient(
@@ -148,8 +148,8 @@ class HardPencilIconPainter extends PenIconPainter {
     // Silver ferrule (instead of gold, at BOTTOM)
     final ferruleRect = Rect.fromCenter(
       center: Offset(w * 0.5, h * 0.82),
-      width: w * 0.19,
-      height: h * 0.06,
+      width: w * 0.32,
+      height: h * 0.07,
     );
 
     final ferruleGradient = LinearGradient(
@@ -168,8 +168,8 @@ class HardPencilIconPainter extends PenIconPainter {
 
     // White/gray eraser (at BOTTOM)
     final eraserRect = Rect.fromCenter(
-      center: Offset(w * 0.5, h * 0.90),
-      width: w * 0.16,
+      center: Offset(w * 0.5, h * 0.91),
+      width: w * 0.28,
       height: h * 0.10,
     );
 
@@ -197,19 +197,19 @@ class HardPencilIconPainter extends PenIconPainter {
     final h = rect.height;
 
     // White highlight on body left edge
-    final highlightPaint = createHighlightPaint(opacity: 0.6, width: 1.8);
+    final highlightPaint = createHighlightPaint(opacity: 0.65, width: 2.5);
 
     canvas.drawLine(
-      Offset(w * 0.42, h * 0.26),
-      Offset(w * 0.42, h * 0.76),
+      Offset(w * 0.37, h * 0.30),
+      Offset(w * 0.37, h * 0.76),
       highlightPaint,
     );
 
     // Small highlight on eraser
     canvas.drawLine(
-      Offset(w * 0.44, h * 0.86),
-      Offset(w * 0.44, h * 0.94),
-      createHighlightPaint(opacity: 0.5, width: 1.2),
+      Offset(w * 0.39, h * 0.87),
+      Offset(w * 0.39, h * 0.95),
+      createHighlightPaint(opacity: 0.55, width: 1.5),
     );
   }
 }

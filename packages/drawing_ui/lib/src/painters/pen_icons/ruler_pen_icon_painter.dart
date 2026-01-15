@@ -20,11 +20,11 @@ class RulerPenIconPainter extends PenIconPainter {
     final w = rect.width;
     final h = rect.height;
 
-    // Combined ruler + pencil shape
+    // Combined ruler + pencil shape (thicker)
     path.addRect(Rect.fromCenter(
-      center: Offset(w * 0.5, h * 0.5),
-      width: w * 0.36,
-      height: h * 0.58,
+      center: Offset(w * 0.5, h * 0.52),
+      width: w * 0.48,
+      height: h * 0.56,
     ));
 
     return path;
@@ -33,13 +33,13 @@ class RulerPenIconPainter extends PenIconPainter {
   @override
   void paintShadow(Canvas canvas, Rect rect) {
     final shadowPaint = Paint()
-      ..color = Colors.black.withOpacity(0.18)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5);
+      ..color = Colors.black.withOpacity(0.22)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
 
     final shadowPath = buildBodyPath(rect);
 
     canvas.save();
-    canvas.translate(2.5, 3.0);
+    canvas.translate(3, 3.5);
     canvas.drawPath(shadowPath, shadowPaint);
     canvas.restore();
   }
@@ -49,12 +49,12 @@ class RulerPenIconPainter extends PenIconPainter {
     final w = rect.width;
     final h = rect.height;
 
-    // Ruler part (left side)
+    // Ruler part (left side - thicker)
     final rulerRect = Rect.fromLTWH(
-      w * 0.30,
-      h * 0.20,
-      w * 0.18,
-      h * 0.65,
+      w * 0.24,
+      h * 0.22,
+      w * 0.26,
+      h * 0.64,
     );
 
     final rulerGradient = LinearGradient(
@@ -70,19 +70,19 @@ class RulerPenIconPainter extends PenIconPainter {
     ).createShader(rulerRect);
 
     canvas.drawRRect(
-      RRect.fromRectAndRadius(rulerRect, const Radius.circular(1)),
+      RRect.fromRectAndRadius(rulerRect, const Radius.circular(2)),
       Paint()..shader = rulerGradient,
     );
 
     // Ruler markings
     final markPaint = Paint()
       ..color = const Color(0xFF8B7355)
-      ..strokeWidth = 0.5
+      ..strokeWidth = 0.7
       ..style = PaintingStyle.stroke;
 
-    for (var i = 0; i < 10; i++) {
-      final y = h * 0.24 + i * (h * 0.058);
-      final markLength = i % 2 == 0 ? w * 0.08 : w * 0.05;
+    for (var i = 0; i < 9; i++) {
+      final y = h * 0.26 + i * (h * 0.068);
+      final markLength = i % 2 == 0 ? w * 0.12 : w * 0.07;
       canvas.drawLine(
         Offset(rulerRect.left, y),
         Offset(rulerRect.left + markLength, y),
@@ -90,12 +90,12 @@ class RulerPenIconPainter extends PenIconPainter {
       );
     }
 
-    // Pencil body (right side)
+    // Pencil body (right side - thicker)
     final pencilRect = Rect.fromLTWH(
-      w * 0.52,
-      h * 0.25,
-      w * 0.15,
-      h * 0.50,
+      w * 0.54,
+      h * 0.28,
+      w * 0.22,
+      h * 0.48,
     );
 
     final pencilGradient = LinearGradient(
@@ -111,16 +111,16 @@ class RulerPenIconPainter extends PenIconPainter {
     ).createShader(pencilRect);
 
     canvas.drawRRect(
-      RRect.fromRectAndRadius(pencilRect, const Radius.circular(1)),
+      RRect.fromRectAndRadius(pencilRect, const Radius.circular(2)),
       Paint()..shader = pencilGradient,
     );
 
     // Metal band on pencil top
     final bandRect = Rect.fromLTWH(
-      w * 0.52,
-      h * 0.25,
-      w * 0.15,
-      h * 0.04,
+      w * 0.54,
+      h * 0.28,
+      w * 0.22,
+      h * 0.05,
     );
     canvas.drawRect(
       bandRect,
@@ -133,11 +133,11 @@ class RulerPenIconPainter extends PenIconPainter {
     final w = rect.width;
     final h = rect.height;
 
-    // Pencil tip cone (at TOP, right side)
+    // Pencil tip cone (at TOP, right side - bigger)
     final conePath = Path();
-    conePath.moveTo(w * 0.52, h * 0.25);
-    conePath.lineTo(w * 0.595, h * 0.10);
-    conePath.lineTo(w * 0.67, h * 0.25);
+    conePath.moveTo(w * 0.54, h * 0.28);
+    conePath.lineTo(w * 0.65, h * 0.10);
+    conePath.lineTo(w * 0.76, h * 0.28);
     conePath.close();
 
     final coneGradient = LinearGradient(
@@ -152,11 +152,11 @@ class RulerPenIconPainter extends PenIconPainter {
 
     canvas.drawPath(conePath, Paint()..shader = coneGradient);
 
-    // Graphite tip
+    // Graphite tip (bigger)
     final graphitePath = Path();
-    graphitePath.moveTo(w * 0.565, h * 0.18);
-    graphitePath.lineTo(w * 0.595, h * 0.10);
-    graphitePath.lineTo(w * 0.625, h * 0.18);
+    graphitePath.moveTo(w * 0.60, h * 0.20);
+    graphitePath.lineTo(w * 0.65, h * 0.10);
+    graphitePath.lineTo(w * 0.70, h * 0.20);
     graphitePath.close();
 
     canvas.drawPath(graphitePath, Paint()..color = penColor);
@@ -167,16 +167,16 @@ class RulerPenIconPainter extends PenIconPainter {
     final w = rect.width;
     final h = rect.height;
 
-    // Straight line indicator on ruler
+    // Straight line indicator on ruler (thicker)
     final linePaint = Paint()
       ..color = penColor
-      ..strokeWidth = 1.8
+      ..strokeWidth = 2.5
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
     canvas.drawLine(
       Offset(w * 0.38, h * 0.35),
-      Offset(w * 0.38, h * 0.70),
+      Offset(w * 0.38, h * 0.75),
       linePaint,
     );
   }
@@ -188,16 +188,16 @@ class RulerPenIconPainter extends PenIconPainter {
 
     // Ruler edge highlight
     canvas.drawLine(
-      Offset(w * 0.32, h * 0.24),
-      Offset(w * 0.32, h * 0.80),
-      createHighlightPaint(opacity: 0.35, width: 1.5),
+      Offset(w * 0.27, h * 0.26),
+      Offset(w * 0.27, h * 0.82),
+      createHighlightPaint(opacity: 0.40, width: 2.0),
     );
 
     // Pencil highlight
     canvas.drawLine(
-      Offset(w * 0.54, h * 0.28),
-      Offset(w * 0.54, h * 0.72),
-      createHighlightPaint(opacity: 0.4, width: 1.2),
+      Offset(w * 0.56, h * 0.32),
+      Offset(w * 0.56, h * 0.74),
+      createHighlightPaint(opacity: 0.45, width: 1.5),
     );
   }
 }

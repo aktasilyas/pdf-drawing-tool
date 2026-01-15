@@ -20,14 +20,14 @@ class BallpointIconPainter extends PenIconPainter {
     final w = rect.width;
     final h = rect.height;
 
-    // Body
+    // Body (thicker)
     path.addRRect(RRect.fromRectAndRadius(
       Rect.fromCenter(
-        center: Offset(w * 0.5, h * 0.45),
-        width: w * 0.14,
-        height: h * 0.6,
+        center: Offset(w * 0.5, h * 0.48),
+        width: w * 0.26,
+        height: h * 0.58,
       ),
-      const Radius.circular(3),
+      const Radius.circular(4),
     ));
 
     // Tip
@@ -38,8 +38,8 @@ class BallpointIconPainter extends PenIconPainter {
 
   Path _createTipPath(double w, double h) {
     final path = Path();
-    path.moveTo(w * 0.43, h * 0.15);
-    path.quadraticBezierTo(w * 0.5, h * 0.02, w * 0.57, h * 0.15);
+    path.moveTo(w * 0.38, h * 0.19);
+    path.quadraticBezierTo(w * 0.5, h * 0.04, w * 0.62, h * 0.19);
     path.close();
     return path;
   }
@@ -47,13 +47,13 @@ class BallpointIconPainter extends PenIconPainter {
   @override
   void paintShadow(Canvas canvas, Rect rect) {
     final shadowPaint = Paint()
-      ..color = Colors.black.withOpacity(0.2)
+      ..color = Colors.black.withOpacity(0.22)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
 
     final shadowPath = buildBodyPath(rect);
 
     canvas.save();
-    canvas.translate(3, 3.5);
+    canvas.translate(3.5, 4);
     canvas.drawPath(shadowPath, shadowPaint);
     canvas.restore();
   }
@@ -64,9 +64,9 @@ class BallpointIconPainter extends PenIconPainter {
     final h = rect.height;
 
     final bodyRect = Rect.fromCenter(
-      center: Offset(w * 0.5, h * 0.45),
-      width: w * 0.14,
-      height: h * 0.6,
+      center: Offset(w * 0.5, h * 0.48),
+      width: w * 0.26,
+      height: h * 0.58,
     );
 
     // 5-color glossy white/cream plastic body
@@ -84,15 +84,15 @@ class BallpointIconPainter extends PenIconPainter {
     ).createShader(bodyRect);
 
     canvas.drawRRect(
-      RRect.fromRectAndRadius(bodyRect, const Radius.circular(3)),
+      RRect.fromRectAndRadius(bodyRect, const Radius.circular(4)),
       Paint()..shader = bodyGradient,
     );
 
     // Grip section (rubber texture, below body center)
     final gripRect = Rect.fromCenter(
-      center: Offset(w * 0.5, h * 0.32),
-      width: w * 0.15,
-      height: h * 0.12,
+      center: Offset(w * 0.5, h * 0.34),
+      width: w * 0.27,
+      height: h * 0.14,
     );
 
     final gripGradient = LinearGradient(
@@ -107,20 +107,20 @@ class BallpointIconPainter extends PenIconPainter {
     ).createShader(gripRect);
 
     canvas.drawRRect(
-      RRect.fromRectAndRadius(gripRect, const Radius.circular(2)),
+      RRect.fromRectAndRadius(gripRect, const Radius.circular(3)),
       Paint()..shader = gripGradient,
     );
 
     // Grip texture lines
     final gripLinePaint = Paint()
-      ..color = const Color(0xFF808080).withOpacity(0.4)
-      ..strokeWidth = 0.5;
+      ..color = const Color(0xFF808080).withOpacity(0.45)
+      ..strokeWidth = 0.7;
 
-    for (var i = 0; i < 5; i++) {
-      final y = gripRect.top + 2 + i * 2.5;
+    for (var i = 0; i < 4; i++) {
+      final y = gripRect.top + 3 + i * 3.5;
       canvas.drawLine(
-        Offset(gripRect.left + 1, y),
-        Offset(gripRect.right - 1, y),
+        Offset(gripRect.left + 2, y),
+        Offset(gripRect.right - 2, y),
         gripLinePaint,
       );
     }
@@ -147,10 +147,10 @@ class BallpointIconPainter extends PenIconPainter {
 
     canvas.drawPath(tipPath, Paint()..shader = tipGradient);
 
-    // Ball point
+    // Ball point (bigger)
     canvas.drawCircle(
-      Offset(w * 0.5, h * 0.04),
-      w * 0.028,
+      Offset(w * 0.5, h * 0.06),
+      w * 0.04,
       Paint()..color = penColor,
     );
   }
@@ -163,8 +163,8 @@ class BallpointIconPainter extends PenIconPainter {
     // Click button on top (at BOTTOM of icon)
     final buttonRect = Rect.fromCenter(
       center: Offset(w * 0.5, h * 0.88),
-      width: w * 0.10,
-      height: h * 0.08,
+      width: w * 0.16,
+      height: h * 0.10,
     );
 
     final buttonGradient = LinearGradient(
@@ -178,20 +178,20 @@ class BallpointIconPainter extends PenIconPainter {
     ).createShader(buttonRect);
 
     canvas.drawRRect(
-      RRect.fromRectAndRadius(buttonRect, const Radius.circular(1.5)),
+      RRect.fromRectAndRadius(buttonRect, const Radius.circular(2)),
       Paint()..shader = buttonGradient,
     );
 
     // Metal clip (on right side, from bottom going up)
     final clipPath = Path();
-    clipPath.moveTo(w * 0.58, h * 0.82);
-    clipPath.lineTo(w * 0.62, h * 0.82);
-    clipPath.lineTo(w * 0.62, h * 0.45);
-    clipPath.quadraticBezierTo(w * 0.62, h * 0.40, w * 0.58, h * 0.40);
-    clipPath.lineTo(w * 0.58, h * 0.42);
-    clipPath.lineTo(w * 0.60, h * 0.42);
-    clipPath.lineTo(w * 0.60, h * 0.80);
-    clipPath.lineTo(w * 0.58, h * 0.80);
+    clipPath.moveTo(w * 0.64, h * 0.82);
+    clipPath.lineTo(w * 0.70, h * 0.82);
+    clipPath.lineTo(w * 0.70, h * 0.45);
+    clipPath.quadraticBezierTo(w * 0.70, h * 0.40, w * 0.64, h * 0.40);
+    clipPath.lineTo(w * 0.64, h * 0.42);
+    clipPath.lineTo(w * 0.68, h * 0.42);
+    clipPath.lineTo(w * 0.68, h * 0.80);
+    clipPath.lineTo(w * 0.64, h * 0.80);
     clipPath.close();
 
     final clipGradient = LinearGradient(
@@ -213,20 +213,20 @@ class BallpointIconPainter extends PenIconPainter {
     final w = rect.width;
     final h = rect.height;
 
-    final highlightPaint = createHighlightPaint(opacity: 0.6, width: 1.5);
+    final highlightPaint = createHighlightPaint(opacity: 0.65, width: 2.2);
 
     // Body highlight
     canvas.drawLine(
-      Offset(w * 0.44, h * 0.20),
-      Offset(w * 0.44, h * 0.70),
+      Offset(w * 0.38, h * 0.22),
+      Offset(w * 0.38, h * 0.72),
       highlightPaint,
     );
 
     // Clip highlight
     canvas.drawLine(
-      Offset(w * 0.59, h * 0.45),
-      Offset(w * 0.59, h * 0.78),
-      createHighlightPaint(opacity: 0.4, width: 0.8),
+      Offset(w * 0.65, h * 0.45),
+      Offset(w * 0.65, h * 0.78),
+      createHighlightPaint(opacity: 0.45, width: 1.0),
     );
   }
 }

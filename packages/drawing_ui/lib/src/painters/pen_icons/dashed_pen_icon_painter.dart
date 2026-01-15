@@ -22,11 +22,11 @@ class DashedPenIconPainter extends PenIconPainter {
 
     path.addRRect(RRect.fromRectAndRadius(
       Rect.fromCenter(
-        center: Offset(w * 0.5, h * 0.5),
-        width: w * 0.14,
-        height: h * 0.6,
+        center: Offset(w * 0.5, h * 0.52),
+        width: w * 0.26,
+        height: h * 0.56,
       ),
-      const Radius.circular(4),
+      const Radius.circular(5),
     ));
 
     return path;
@@ -35,13 +35,13 @@ class DashedPenIconPainter extends PenIconPainter {
   @override
   void paintShadow(Canvas canvas, Rect rect) {
     final shadowPaint = Paint()
-      ..color = Colors.black.withOpacity(0.18)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5);
+      ..color = Colors.black.withOpacity(0.20)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
 
     final shadowPath = buildBodyPath(rect);
 
     canvas.save();
-    canvas.translate(2.5, 3.0);
+    canvas.translate(3, 3.5);
     canvas.drawPath(shadowPath, shadowPaint);
     canvas.restore();
   }
@@ -52,9 +52,9 @@ class DashedPenIconPainter extends PenIconPainter {
     final h = rect.height;
 
     final bodyRect = Rect.fromCenter(
-      center: Offset(w * 0.5, h * 0.5),
-      width: w * 0.14,
-      height: h * 0.6,
+      center: Offset(w * 0.5, h * 0.52),
+      width: w * 0.26,
+      height: h * 0.56,
     );
 
     // Light gray glossy body
@@ -72,7 +72,7 @@ class DashedPenIconPainter extends PenIconPainter {
     ).createShader(bodyRect);
 
     canvas.drawRRect(
-      RRect.fromRectAndRadius(bodyRect, const Radius.circular(4)),
+      RRect.fromRectAndRadius(bodyRect, const Radius.circular(5)),
       Paint()..shader = bodyGradient,
     );
 
@@ -80,10 +80,10 @@ class DashedPenIconPainter extends PenIconPainter {
     final outlinePaint = Paint()
       ..color = const Color(0xFFD0D0D0)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.5;
+      ..strokeWidth = 0.7;
 
     canvas.drawRRect(
-      RRect.fromRectAndRadius(bodyRect, const Radius.circular(4)),
+      RRect.fromRectAndRadius(bodyRect, const Radius.circular(5)),
       outlinePaint,
     );
   }
@@ -95,9 +95,9 @@ class DashedPenIconPainter extends PenIconPainter {
 
     // Metal tip cone (at TOP)
     final tipPath = Path();
-    tipPath.moveTo(w * 0.43, h * 0.20);
+    tipPath.moveTo(w * 0.38, h * 0.24);
     tipPath.lineTo(w * 0.5, h * 0.06);
-    tipPath.lineTo(w * 0.57, h * 0.20);
+    tipPath.lineTo(w * 0.62, h * 0.24);
     tipPath.close();
 
     final tipGradient = LinearGradient(
@@ -113,10 +113,10 @@ class DashedPenIconPainter extends PenIconPainter {
 
     canvas.drawPath(tipPath, Paint()..shader = tipGradient);
 
-    // Ball point
+    // Ball point (bigger)
     canvas.drawCircle(
       Offset(w * 0.5, h * 0.08),
-      w * 0.028,
+      w * 0.04,
       Paint()..color = penColor,
     );
   }
@@ -126,17 +126,17 @@ class DashedPenIconPainter extends PenIconPainter {
     final w = rect.width;
     final h = rect.height;
 
-    // Dash pattern indicator on body (3 short dashes)
+    // Dash pattern indicator on body (3 short dashes - thicker)
     final dashPaint = Paint()
       ..color = penColor
-      ..strokeWidth = 2.0
+      ..strokeWidth = 2.8
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
     for (var i = 0; i < 3; i++) {
       canvas.drawLine(
-        Offset(w * 0.46, h * 0.42 + i * (h * 0.08)),
-        Offset(w * 0.54, h * 0.42 + i * (h * 0.08)),
+        Offset(w * 0.42, h * 0.42 + i * (h * 0.10)),
+        Offset(w * 0.58, h * 0.42 + i * (h * 0.10)),
         dashPaint,
       );
     }
@@ -144,8 +144,8 @@ class DashedPenIconPainter extends PenIconPainter {
     // Colored band at bottom
     final bandRect = Rect.fromCenter(
       center: Offset(w * 0.5, h * 0.86),
-      width: w * 0.14,
-      height: h * 0.08,
+      width: w * 0.26,
+      height: h * 0.10,
     );
 
     final bandGradient = LinearGradient(
@@ -160,7 +160,7 @@ class DashedPenIconPainter extends PenIconPainter {
     ).createShader(bandRect);
 
     canvas.drawRRect(
-      RRect.fromRectAndRadius(bandRect, const Radius.circular(2)),
+      RRect.fromRectAndRadius(bandRect, const Radius.circular(3)),
       Paint()..shader = bandGradient,
     );
   }
@@ -170,12 +170,12 @@ class DashedPenIconPainter extends PenIconPainter {
     final w = rect.width;
     final h = rect.height;
 
-    final highlightPaint = createHighlightPaint(opacity: 0.6, width: 1.5);
+    final highlightPaint = createHighlightPaint(opacity: 0.65, width: 2.2);
 
     // Body highlight
     canvas.drawLine(
-      Offset(w * 0.44, h * 0.22),
-      Offset(w * 0.44, h * 0.78),
+      Offset(w * 0.38, h * 0.26),
+      Offset(w * 0.38, h * 0.78),
       highlightPaint,
     );
   }

@@ -22,11 +22,11 @@ class GelPenIconPainter extends PenIconPainter {
 
     path.addRRect(RRect.fromRectAndRadius(
       Rect.fromCenter(
-        center: Offset(w * 0.5, h * 0.5),
-        width: w * 0.16,
-        height: h * 0.6,
+        center: Offset(w * 0.5, h * 0.52),
+        width: w * 0.28,
+        height: h * 0.56,
       ),
-      const Radius.circular(4),
+      const Radius.circular(5),
     ));
 
     return path;
@@ -35,13 +35,13 @@ class GelPenIconPainter extends PenIconPainter {
   @override
   void paintShadow(Canvas canvas, Rect rect) {
     final shadowPaint = Paint()
-      ..color = Colors.black.withOpacity(0.18)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5);
+      ..color = Colors.black.withOpacity(0.20)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
 
     final shadowPath = buildBodyPath(rect);
 
     canvas.save();
-    canvas.translate(2.5, 3.0);
+    canvas.translate(3, 3.5);
     canvas.drawPath(shadowPath, shadowPaint);
     canvas.restore();
   }
@@ -52,9 +52,9 @@ class GelPenIconPainter extends PenIconPainter {
     final h = rect.height;
 
     final bodyRect = Rect.fromCenter(
-      center: Offset(w * 0.5, h * 0.5),
-      width: w * 0.16,
-      height: h * 0.6,
+      center: Offset(w * 0.5, h * 0.52),
+      width: w * 0.28,
+      height: h * 0.56,
     );
 
     // Transparent/semi-transparent outer body
@@ -71,46 +71,46 @@ class GelPenIconPainter extends PenIconPainter {
     ).createShader(bodyRect);
 
     canvas.drawRRect(
-      RRect.fromRectAndRadius(bodyRect, const Radius.circular(4)),
+      RRect.fromRectAndRadius(bodyRect, const Radius.circular(5)),
       Paint()..shader = outerGradient,
     );
 
     // Body outline for definition
     final outlinePaint = Paint()
-      ..color = const Color(0xFFE0E0E0)
+      ..color = const Color(0xFFD8D8D8)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.5;
+      ..strokeWidth = 0.8;
     canvas.drawRRect(
-      RRect.fromRectAndRadius(bodyRect, const Radius.circular(4)),
+      RRect.fromRectAndRadius(bodyRect, const Radius.circular(5)),
       outlinePaint,
     );
 
     // Inner ink reservoir (colored, visible through transparent body)
     final inkRect = Rect.fromCenter(
-      center: Offset(w * 0.5, h * 0.48),
-      width: w * 0.07,
-      height: h * 0.45,
+      center: Offset(w * 0.5, h * 0.50),
+      width: w * 0.12,
+      height: h * 0.42,
     );
 
     final inkGradient = LinearGradient(
       begin: Alignment.centerLeft,
       end: Alignment.centerRight,
       colors: [
-        penColor.withOpacity(0.4),
-        penColor.withOpacity(0.6),
+        penColor.withOpacity(0.45),
+        penColor.withOpacity(0.65),
         penColor.withOpacity(0.55),
       ],
     ).createShader(inkRect);
 
     canvas.drawRRect(
-      RRect.fromRectAndRadius(inkRect, const Radius.circular(2)),
+      RRect.fromRectAndRadius(inkRect, const Radius.circular(3)),
       Paint()..shader = inkGradient,
     );
 
     // Rubber grip section (at lower part of body)
     final gripRect = Rect.fromCenter(
-      center: Offset(w * 0.5, h * 0.30),
-      width: w * 0.17,
+      center: Offset(w * 0.5, h * 0.32),
+      width: w * 0.29,
       height: h * 0.14,
     );
 
@@ -126,20 +126,20 @@ class GelPenIconPainter extends PenIconPainter {
     ).createShader(gripRect);
 
     canvas.drawRRect(
-      RRect.fromRectAndRadius(gripRect, const Radius.circular(2)),
+      RRect.fromRectAndRadius(gripRect, const Radius.circular(3)),
       Paint()..shader = gripGradient,
     );
 
     // Grip texture lines
     final gripLinePaint = Paint()
-      ..color = const Color(0xFF909090).withOpacity(0.5)
-      ..strokeWidth = 0.5;
+      ..color = const Color(0xFF909090).withOpacity(0.55)
+      ..strokeWidth = 0.7;
 
-    for (var i = 0; i < 5; i++) {
-      final y = gripRect.top + 3 + i * 3.0;
+    for (var i = 0; i < 4; i++) {
+      final y = gripRect.top + 3.5 + i * 3.5;
       canvas.drawLine(
-        Offset(gripRect.left + 1, y),
-        Offset(gripRect.right - 1, y),
+        Offset(gripRect.left + 2, y),
+        Offset(gripRect.right - 2, y),
         gripLinePaint,
       );
     }
@@ -152,8 +152,8 @@ class GelPenIconPainter extends PenIconPainter {
 
     // Conical tip (at TOP)
     final tipPath = Path();
-    tipPath.moveTo(w * 0.43, h * 0.20);
-    tipPath.quadraticBezierTo(w * 0.5, h * 0.06, w * 0.57, h * 0.20);
+    tipPath.moveTo(w * 0.38, h * 0.24);
+    tipPath.quadraticBezierTo(w * 0.5, h * 0.06, w * 0.62, h * 0.24);
     tipPath.close();
 
     final tipGradient = LinearGradient(
@@ -169,10 +169,10 @@ class GelPenIconPainter extends PenIconPainter {
 
     canvas.drawPath(tipPath, Paint()..shader = tipGradient);
 
-    // Colored tip point
+    // Colored tip point (bigger)
     canvas.drawCircle(
-      Offset(w * 0.5, h * 0.08),
-      w * 0.028,
+      Offset(w * 0.5, h * 0.09),
+      w * 0.04,
       Paint()..color = penColor,
     );
   }
@@ -185,8 +185,8 @@ class GelPenIconPainter extends PenIconPainter {
     // Colored cap at bottom
     final capRect = Rect.fromCenter(
       center: Offset(w * 0.5, h * 0.88),
-      width: w * 0.14,
-      height: h * 0.10,
+      width: w * 0.24,
+      height: h * 0.12,
     );
 
     final capGradient = LinearGradient(
@@ -201,7 +201,7 @@ class GelPenIconPainter extends PenIconPainter {
     ).createShader(capRect);
 
     canvas.drawRRect(
-      RRect.fromRectAndRadius(capRect, const Radius.circular(3)),
+      RRect.fromRectAndRadius(capRect, const Radius.circular(4)),
       Paint()..shader = capGradient,
     );
   }
@@ -211,20 +211,20 @@ class GelPenIconPainter extends PenIconPainter {
     final w = rect.width;
     final h = rect.height;
 
-    final highlightPaint = createHighlightPaint(opacity: 0.5, width: 1.5);
+    final highlightPaint = createHighlightPaint(opacity: 0.55, width: 2.2);
 
     // Body highlight
     canvas.drawLine(
-      Offset(w * 0.43, h * 0.22),
-      Offset(w * 0.43, h * 0.75),
+      Offset(w * 0.38, h * 0.26),
+      Offset(w * 0.38, h * 0.76),
       highlightPaint,
     );
 
     // Grip highlight
     canvas.drawLine(
-      Offset(w * 0.43, h * 0.24),
-      Offset(w * 0.43, h * 0.36),
-      createHighlightPaint(opacity: 0.4, width: 1.0),
+      Offset(w * 0.38, h * 0.26),
+      Offset(w * 0.38, h * 0.38),
+      createHighlightPaint(opacity: 0.45, width: 1.5),
     );
   }
 }
