@@ -38,12 +38,14 @@ class ToolBar extends ConsumerStatefulWidget {
 class _ToolBarState extends ConsumerState<ToolBar> {
   final Map<ToolType, GlobalKey> _toolButtonKeys = {};
 
-  /// Kalem araçları - tek ikon olarak grupla
+  /// Ana kalem araçları - toolbar'da görünenler (5 adet)
+  /// Diğerleri (hardPencil, gelPen, dashedPen, neonHighlighter) panel'de
   static const _penTools = [
     ToolType.pencil,
     ToolType.ballpointPen,
-    ToolType.gelPen,
+    ToolType.highlighter,
     ToolType.brushPen,
+    ToolType.marker,
   ];
 
   /// Panel'i olan araçlar

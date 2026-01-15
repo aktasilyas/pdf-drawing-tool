@@ -68,8 +68,8 @@ void main() {
         ),
       );
 
-      // Tap on highlighter tool
-      await tester.tap(find.byIcon(Icons.highlight));
+      // Tap on eraser tool (not grouped, directly visible)
+      await tester.tap(find.byIcon(Icons.auto_fix_normal));
       await tester.pump();
 
       // Verify the tool is now selected (would need to verify via provider)

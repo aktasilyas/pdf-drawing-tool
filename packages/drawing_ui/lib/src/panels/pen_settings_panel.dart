@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/widgets/unified_color_picker.dart';
@@ -99,50 +100,30 @@ class PenSettingsPanel extends ConsumerWidget {
   }
 
   String _getTurkishTitle(ToolType type) {
-    switch (type) {
-      case ToolType.pencil:
-        return 'Kurşun Kalem';
-      case ToolType.hardPencil:
-        return 'Sert Kalem';
-      case ToolType.ballpointPen:
-        return 'Tükenmez Kalem';
-      case ToolType.gelPen:
-        return 'Jel Kalem';
-      case ToolType.dashedPen:
-        return 'Kesik Çizgi';
-      case ToolType.brushPen:
-        return 'Fırça Kalem';
-      case ToolType.marker:
-        return 'Keçeli Kalem';
-      default:
-        return 'Kalem';
+    // Use PenType config for display name
+    final penType = type.penType;
+    if (penType != null) {
+      return penType.config.displayNameTr;
     }
+    return 'Kalem';
   }
 
   double _getMinThickness(ToolType type) {
-    switch (type) {
-      case ToolType.brushPen:
-        return 1.0;
-      case ToolType.marker:
-        return 4.0;
-      default:
-        return 0.1;
+    // Use PenType config for min thickness
+    final penType = type.penType;
+    if (penType != null) {
+      return penType.config.minThickness;
     }
+    return 0.1;
   }
 
   double _getMaxThickness(ToolType type) {
-    switch (type) {
-      case ToolType.brushPen:
-        return 30.0;
-      case ToolType.marker:
-        return 20.0;
-      case ToolType.pencil:
-        return 8.0;
-      case ToolType.hardPencil:
-        return 5.0;
-      default:
-        return 8.0;
+    // Use PenType config for max thickness
+    final penType = type.penType;
+    if (penType != null) {
+      return penType.config.maxThickness;
     }
+    return 20.0;
   }
 
   void _addToPenBox(BuildContext context, WidgetRef ref, PenSettings settings) {
@@ -268,7 +249,7 @@ class _StrokePreviewPainter extends CustomPainter {
   }
 }
 
-/// Selector for 4 pen types.
+/// Selector for all 9 pen types.
 class _PenTypeSelector extends StatelessWidget {
   const _PenTypeSelector({
     required this.selectedType,
@@ -278,19 +259,26 @@ class _PenTypeSelector extends StatelessWidget {
   final ToolType selectedType;
   final ValueChanged<ToolType> onTypeSelected;
 
+  // All 9 pen types
   static const _penTypes = [
     ToolType.pencil,
+    ToolType.hardPencil,
     ToolType.ballpointPen,
     ToolType.gelPen,
+    ToolType.dashedPen,
+    ToolType.highlighter,
     ToolType.brushPen,
     ToolType.marker,
-    ToolType.dashedPen,
+    ToolType.neonHighlighter,
   ];
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    // Use Wrap instead of Row to handle 9 items
+    return Wrap(
+      spacing: 6,
+      runSpacing: 6,
+      alignment: WrapAlignment.center,
       children: _penTypes.map((type) {
         final isSelected = type == selectedType;
         return _PenTypeOption(
@@ -319,25 +307,31 @@ class _PenTypeOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          color: isSelected ? _selectedColor.withAlpha(20) : Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: isSelected ? _selectedColor : Colors.grey.shade300,
-            width: isSelected ? 1.5 : 0.5,
+    // Get display name from PenType config
+    final displayName = type.penType?.config.displayNameTr ?? type.displayName;
+
+    return Tooltip(
+      message: displayName,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: isSelected ? _selectedColor.withAlpha(20) : Colors.grey.shade100,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isSelected ? _selectedColor : Colors.grey.shade300,
+              width: isSelected ? 1.5 : 0.5,
+            ),
           ),
-        ),
-        child: Center(
-          child: CustomPaint(
-            size: const Size(28, 28),
-            painter: RealisticPenPainter(
-              toolType: type,
-              tipColor: isSelected ? _selectedColor : Colors.grey.shade600,
+          child: Center(
+            child: CustomPaint(
+              size: const Size(28, 28),
+              painter: RealisticPenPainter(
+                toolType: type,
+                tipColor: isSelected ? _selectedColor : Colors.grey.shade600,
+              ),
             ),
           ),
         ),
