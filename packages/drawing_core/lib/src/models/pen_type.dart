@@ -23,9 +23,6 @@ enum PenType {
   /// Pressure-sensitive brush pen.
   brushPen,
 
-  /// Flat marker, opaque and bold.
-  marker,
-
   /// Neon highlighter with glow effect.
   neonHighlighter,
 
@@ -153,15 +150,6 @@ extension PenTypeExtension on PenType {
           defaultThickness: 5.0,
           maxThickness: 30.0,
           nibShape: NibShape.ellipse,
-        );
-      case PenType.marker:
-        return const PenTypeConfig(
-          displayName: 'Marker',
-          displayNameTr: 'Keçeli Kalem',
-          defaultThickness: 8.0,
-          minThickness: 4.0,
-          maxThickness: 20.0,
-          nibShape: NibShape.rectangle,
         );
       case PenType.neonHighlighter:
         return const PenTypeConfig(

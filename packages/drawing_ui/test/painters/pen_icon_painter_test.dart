@@ -69,11 +69,6 @@ void main() {
       expect(painter.size, 56.0);
     });
 
-    test('MarkerIconPainter has default size', () {
-      const painter = MarkerIconPainter();
-      expect(painter.size, 56.0);
-    });
-
     test('NeonHighlighterIconPainter has default size', () {
       const painter = NeonHighlighterIconPainter();
       expect(painter.size, 56.0);
@@ -99,11 +94,6 @@ void main() {
     test('NeonHighlighterIconPainter accepts custom color', () {
       const painter = NeonHighlighterIconPainter(penColor: Colors.green);
       expect(painter.penColor, Colors.green);
-    });
-
-    test('MarkerIconPainter accepts isSelected', () {
-      const painter = MarkerIconPainter(isSelected: true);
-      expect(painter.isSelected, isTrue);
     });
 
     test('BrushPenIconPainter accepts custom size', () {

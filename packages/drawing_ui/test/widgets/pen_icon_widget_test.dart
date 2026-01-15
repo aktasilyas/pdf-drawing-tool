@@ -62,7 +62,7 @@ void main() {
         const MaterialApp(
           home: Scaffold(
             body: PenIconWidget(
-              penType: PenType.marker,
+              penType: PenType.brushPen,
               isSelected: true,
             ),
           ),

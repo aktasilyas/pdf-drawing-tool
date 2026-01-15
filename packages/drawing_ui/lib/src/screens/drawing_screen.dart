@@ -130,7 +130,6 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
       case ToolType.gelPen:
       case ToolType.dashedPen:
       case ToolType.brushPen:
-      case ToolType.marker:
       case ToolType.rulerPen:
         return PenSettingsPanel(
           toolType: panel,

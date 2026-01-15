@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/widgets/pen_icon_widget.dart';
+import 'package:drawing_ui/src/painters/pen_icons/pen_icon_painter.dart';
 
 /// Floating pen box that appears on the canvas.
 /// Draggable, collapsible, with edit mode for removing pens.
@@ -322,6 +323,7 @@ class _PenPresetItem extends StatelessWidget {
                         color: preset.color,
                         isSelected: isSelected,
                         size: 26,
+                        orientation: PenOrientation.horizontal,
                       ),
                     ),
                   ),
@@ -407,6 +409,7 @@ class _PenPresetItem extends StatelessWidget {
                   color: preset.color,
                   isSelected: isSelected,
                   size: 26,
+                  orientation: PenOrientation.vertical,
                 ),
               ),
             ),
@@ -460,8 +463,6 @@ class RealisticPenPainter extends CustomPainter {
         _drawBallpointPen(canvas, w, h); // Similar to ballpoint
       case ToolType.brushPen:
         _drawBrush(canvas, w, h);
-      case ToolType.marker:
-        _drawBrush(canvas, w, h); // Similar to brush
       case ToolType.neonHighlighter:
         _drawHighlighter(canvas, w, h);
       case ToolType.highlighter:
@@ -732,12 +733,12 @@ class RealisticPenPainter extends CustomPainter {
 
   void _drawrulerPen(Canvas canvas, double w, double h) {
     // Ruler pen - pencil with ruler attached
-    
+
     // Ruler part (left side)
     final rulerPaint = Paint()
       ..color = const Color(0xFFE8D4A8) // Light wood color
       ..style = PaintingStyle.fill;
-    
+
     final rulerPath = Path()
       ..moveTo(w * 0.15, h * 0.1)
       ..lineTo(w * 0.35, h * 0.1)
@@ -745,13 +746,13 @@ class RealisticPenPainter extends CustomPainter {
       ..lineTo(w * 0.15, h * 0.85)
       ..close();
     canvas.drawPath(rulerPath, rulerPaint);
-    
+
     // Ruler markings
     final markPaint = Paint()
       ..color = Colors.black54
       ..strokeWidth = 0.5
       ..style = PaintingStyle.stroke;
-    
+
     for (var i = 0; i < 8; i++) {
       final y = h * (0.15 + i * 0.1);
       final markLength = i % 2 == 0 ? w * 0.1 : w * 0.05;
@@ -761,12 +762,12 @@ class RealisticPenPainter extends CustomPainter {
         markPaint,
       );
     }
-    
+
     // Pencil body (right side, overlapping slightly)
     final bodyPaint = Paint()
       ..color = const Color(0xFF4A7C59) // Green pencil
       ..style = PaintingStyle.fill;
-    
+
     final bodyPath = Path()
       ..moveTo(w * 0.45, h * 0.05)
       ..lineTo(w * 0.75, h * 0.05)
@@ -774,31 +775,31 @@ class RealisticPenPainter extends CustomPainter {
       ..lineTo(w * 0.45, h * 0.65)
       ..close();
     canvas.drawPath(bodyPath, bodyPaint);
-    
+
     // Pencil tip cone
     final conePaint = Paint()
       ..color = const Color(0xFFDEB887) // Wood color
       ..style = PaintingStyle.fill;
-    
+
     final conePath = Path()
       ..moveTo(w * 0.45, h * 0.65)
       ..lineTo(w * 0.75, h * 0.65)
       ..lineTo(w * 0.6, h * 0.85)
       ..close();
     canvas.drawPath(conePath, conePaint);
-    
+
     // Pencil graphite tip
     final tipPaint = Paint()
       ..color = tipColor
       ..style = PaintingStyle.fill;
-    
+
     final tipPath = Path()
       ..moveTo(w * 0.55, h * 0.82)
       ..lineTo(w * 0.65, h * 0.82)
       ..lineTo(w * 0.6, h * 0.95)
       ..close();
     canvas.drawPath(tipPath, tipPaint);
-    
+
     // Straight line indicator on ruler
     final linePaint = Paint()
       ..color = tipColor

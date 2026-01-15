@@ -98,13 +98,6 @@ class PenIconWidget extends StatelessWidget {
           size: size,
           orientation: orientation,
         );
-      case PenType.marker:
-        return MarkerIconPainter(
-          penColor: color,
-          isSelected: isSelected,
-          size: size,
-          orientation: orientation,
-        );
       case PenType.neonHighlighter:
         return NeonHighlighterIconPainter(
           penColor: color,

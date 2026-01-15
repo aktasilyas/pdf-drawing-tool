@@ -6,6 +6,5 @@ export 'gel_pen_icon_painter.dart';
 export 'dashed_pen_icon_painter.dart';
 export 'highlighter_icon_painter.dart';
 export 'brush_pen_icon_painter.dart';
-export 'marker_icon_painter.dart';
 export 'neon_highlighter_icon_painter.dart';
 export 'ruler_pen_icon_painter.dart';

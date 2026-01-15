@@ -59,22 +59,23 @@ class ToolButton extends StatelessWidget {
             ? selectedColor
             : defaultColor;
 
-    final bgColor = isSelected
-        ? selectedColor.withAlpha(25)
-        : Colors.transparent;
+    final bgColor =
+        isSelected ? selectedColor.withAlpha(25) : Colors.transparent;
 
     // Show chevron when selected AND has panel
     final showChevron = isSelected && hasPanel && onPanelTap != null;
 
     return GestureDetector(
-      onTap: enabled ? () {
-        // Eğer zaten seçiliyse ve panel varsa, panel aç
-        if (isSelected && hasPanel && onPanelTap != null) {
-          onPanelTap!();
-        } else {
-          onPressed();
-        }
-      } : null,
+      onTap: enabled
+          ? () {
+              // Eğer zaten seçiliyse ve panel varsa, panel aç
+              if (isSelected && hasPanel && onPanelTap != null) {
+                onPanelTap!();
+              } else {
+                onPressed();
+              }
+            }
+          : null,
       child: Container(
         key: buttonKey,
         width: theme.toolButtonSize,
@@ -126,8 +127,6 @@ class ToolButton extends StatelessWidget {
         return Icons.timeline;
       case ToolType.brushPen:
         return Icons.brush;
-      case ToolType.marker:
-        return Icons.border_color;
       case ToolType.neonHighlighter:
         return Icons.flash_on;
       case ToolType.highlighter:

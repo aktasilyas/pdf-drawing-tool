@@ -46,7 +46,6 @@ class _ToolBarState extends ConsumerState<ToolBar> {
     ToolType.gelPen,
     ToolType.dashedPen,
     ToolType.brushPen,
-    ToolType.marker,
     ToolType.rulerPen,
   ];
 
@@ -64,7 +63,6 @@ class _ToolBarState extends ConsumerState<ToolBar> {
     ToolType.gelPen,
     ToolType.dashedPen,
     ToolType.brushPen,
-    ToolType.marker,
     ToolType.neonHighlighter,
     ToolType.highlighter,
     ToolType.pixelEraser,

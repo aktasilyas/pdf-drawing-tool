@@ -160,8 +160,6 @@ class _ToolListItem extends StatelessWidget {
         return Icons.timeline;
       case ToolType.brushPen:
         return Icons.brush;
-      case ToolType.marker:
-        return Icons.border_color;
       case ToolType.neonHighlighter:
         return Icons.flash_on;
       case ToolType.highlighter:

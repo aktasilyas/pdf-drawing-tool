@@ -110,7 +110,6 @@ class PenSettingsPanel extends ConsumerWidget {
       ToolType.gelPen,
       ToolType.dashedPen,
       ToolType.brushPen,
-      ToolType.marker,
       ToolType.rulerPen,
     ].contains(tool);
   }
@@ -283,7 +282,6 @@ class _PenTypeSelector extends StatelessWidget {
     ToolType.gelPen,
     ToolType.dashedPen,
     ToolType.brushPen,
-    ToolType.marker,
     ToolType.rulerPen,
   ];
 
@@ -336,11 +334,11 @@ class _PenTypeOption extends StatelessWidget {
             borderRadius: BorderRadius.circular(8),
           ),
           child: Center(
-            child: ToolPenIcon(
+            child:             ToolPenIcon(
               toolType: type,
               color: isSelected ? _selectedColor : Colors.grey.shade600,
               isSelected: isSelected,
-              size: 36,
+              size: 52,
             ),
           ),
         ),

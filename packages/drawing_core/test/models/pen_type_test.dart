@@ -15,7 +15,6 @@ void main() {
       expect(PenType.values, contains(PenType.dashedPen));
       expect(PenType.values, contains(PenType.highlighter));
       expect(PenType.values, contains(PenType.brushPen));
-      expect(PenType.values, contains(PenType.marker));
       expect(PenType.values, contains(PenType.neonHighlighter));
     });
   });
@@ -85,16 +84,6 @@ void main() {
       expect(config.defaultThickness, 5.0);
       expect(config.maxThickness, 30.0);
       expect(config.nibShape, NibShape.ellipse);
-    });
-
-    test('marker config', () {
-      final config = PenType.marker.config;
-      expect(config.displayName, 'Marker');
-      expect(config.displayNameTr, 'Keçeli Kalem');
-      expect(config.defaultThickness, 8.0);
-      expect(config.minThickness, 4.0);
-      expect(config.maxThickness, 20.0);
-      expect(config.nibShape, NibShape.rectangle);
     });
 
     test('neonHighlighter config', () {

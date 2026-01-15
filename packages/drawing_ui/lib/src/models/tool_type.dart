@@ -27,9 +27,6 @@ enum ToolType {
   /// Brush pen - pressure-sensitive with variable width.
   brushPen,
 
-  /// Marker - flat and opaque, bold strokes.
-  marker,
-
   /// Neon highlighter - with glow effect.
   neonHighlighter,
 
@@ -85,8 +82,6 @@ enum ToolType {
         return 'Fosforlu Kalem';
       case ToolType.brushPen:
         return 'Fırça Kalem';
-      case ToolType.marker:
-        return 'Keçeli Kalem';
       case ToolType.neonHighlighter:
         return 'Neon Fosforlu';
       case ToolType.rulerPen:
@@ -132,8 +127,6 @@ enum ToolType {
         return PenType.highlighter;
       case ToolType.brushPen:
         return PenType.brushPen;
-      case ToolType.marker:
-        return PenType.marker;
       case ToolType.neonHighlighter:
         return PenType.neonHighlighter;
       case ToolType.rulerPen:
