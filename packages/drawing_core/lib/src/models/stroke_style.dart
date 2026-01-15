@@ -101,6 +101,9 @@ class StrokeStyle extends Equatable {
   /// Dash pattern [dash length, gap length]. Null for solid.
   final List<double>? dashPattern;
 
+  /// Nib angle in degrees (for calligraphy ellipse nib). 0 = horizontal, 90 = vertical.
+  final double nibAngle;
+
   /// Creates a new [StrokeStyle].
   ///
   /// [color] is in ARGB format (0xAARRGGBB).
@@ -108,6 +111,7 @@ class StrokeStyle extends Equatable {
   /// [opacity] is clamped to the range [0.0, 1.0].
   /// [glowRadius] is clamped to the range [0.0, 20.0].
   /// [glowIntensity] is clamped to the range [0.0, 1.0].
+  /// [nibAngle] is the angle in degrees for ellipse nib (calligraphy).
   StrokeStyle({
     required this.color,
     required double thickness,
@@ -120,6 +124,7 @@ class StrokeStyle extends Equatable {
     double glowRadius = 0.0,
     double glowIntensity = 0.0,
     this.dashPattern,
+    this.nibAngle = 0.0,
   })  : thickness = thickness.clamp(0.1, 50.0),
         opacity = opacity.clamp(0.0, 1.0),
         glowRadius = glowRadius.clamp(0.0, 20.0),
@@ -206,6 +211,7 @@ class StrokeStyle extends Equatable {
     double? glowRadius,
     double? glowIntensity,
     List<double>? dashPattern,
+    double? nibAngle,
   }) {
     return StrokeStyle(
       color: color ?? this.color,
@@ -219,6 +225,7 @@ class StrokeStyle extends Equatable {
       glowRadius: glowRadius ?? this.glowRadius,
       glowIntensity: glowIntensity ?? this.glowIntensity,
       dashPattern: dashPattern ?? this.dashPattern,
+      nibAngle: nibAngle ?? this.nibAngle,
     );
   }
 
@@ -236,6 +243,7 @@ class StrokeStyle extends Equatable {
       'glowRadius': glowRadius,
       'glowIntensity': glowIntensity,
       'dashPattern': dashPattern,
+      'nibAngle': nibAngle,
     };
   }
 
@@ -267,6 +275,7 @@ class StrokeStyle extends Equatable {
       dashPattern: (json['dashPattern'] as List<dynamic>?)
           ?.map((e) => (e as num).toDouble())
           .toList(),
+      nibAngle: (json['nibAngle'] as num?)?.toDouble() ?? 0.0,
     );
   }
 
@@ -283,6 +292,7 @@ class StrokeStyle extends Equatable {
         glowRadius,
         glowIntensity,
         dashPattern,
+        nibAngle,
       ];
 
   @override

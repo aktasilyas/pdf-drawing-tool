@@ -3,8 +3,8 @@ import 'package:drawing_core/drawing_core.dart';
 
 void main() {
   group('PenType enum', () {
-    test('has 9 pen types', () {
-      expect(PenType.values.length, 9);
+    test('has 10 pen types', () {
+      expect(PenType.values.length, 10);
     });
 
     test('contains all expected values', () {
@@ -109,6 +109,17 @@ void main() {
       expect(config.glowIntensity, 0.6);
       expect(config.nibShape, NibShape.rectangle);
     });
+
+    test('calligraphyPen config', () {
+      final config = PenType.calligraphyPen.config;
+      expect(config.displayName, 'Calligraphy Pen');
+      expect(config.displayNameTr, 'Kaligrafi Kalemi');
+      expect(config.defaultThickness, 4.0);
+      expect(config.minThickness, 1.0);
+      expect(config.maxThickness, 15.0);
+      expect(config.nibShape, NibShape.ellipse);
+      expect(config.nibAngle, 45.0);
+    });
   });
 
   group('PenTypeConfig defaults', () {
@@ -173,6 +184,14 @@ void main() {
 
       expect(style.nibShape, NibShape.ellipse);
       expect(style.thickness, 5.0);
+    });
+
+    test('calligraphyPen creates angled ellipse style', () {
+      final style = PenType.calligraphyPen.toStrokeStyle(color: 0xFF000000);
+
+      expect(style.nibShape, NibShape.ellipse);
+      expect(style.nibAngle, 45.0);
+      expect(style.thickness, 4.0);
     });
 
     test('all pen types create valid StrokeStyle', () {

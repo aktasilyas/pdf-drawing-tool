@@ -5,7 +5,7 @@ import 'package:drawing_core/drawing_core.dart';
 /// This enum is used by the UI layer to identify which tool is currently
 /// selected and to determine which settings panel to show.
 enum ToolType {
-  // PEN TOOLS (9 types)
+  // PEN TOOLS (10 types)
   /// Pencil - matte with slight texture.
   pencil,
 
@@ -32,6 +32,9 @@ enum ToolType {
 
   /// Neon highlighter - with glow effect.
   neonHighlighter,
+
+  /// Calligraphy pen - angled nib for beautiful strokes.
+  calligraphyPen,
 
   // ERASER TOOLS
   /// Pixel eraser - erases specific pixels/parts of strokes.
@@ -86,6 +89,8 @@ enum ToolType {
         return 'Keçeli Kalem';
       case ToolType.neonHighlighter:
         return 'Neon Fosforlu';
+      case ToolType.calligraphyPen:
+        return 'Kaligrafi Kalemi';
       case ToolType.pixelEraser:
         return 'Silgi';
       case ToolType.strokeEraser:
@@ -131,6 +136,8 @@ enum ToolType {
         return PenType.marker;
       case ToolType.neonHighlighter:
         return PenType.neonHighlighter;
+      case ToolType.calligraphyPen:
+        return PenType.calligraphyPen;
       default:
         return null;
     }

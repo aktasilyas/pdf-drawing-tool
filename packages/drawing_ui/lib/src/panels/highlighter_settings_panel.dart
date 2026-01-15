@@ -5,7 +5,7 @@ import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/widgets/unified_color_picker.dart';
 import 'package:drawing_ui/src/panels/tool_panel.dart';
 
-/// Settings panel for the highlighter tool (compact version).
+/// Settings panel for the highlighter tools (highlighter + neonHighlighter).
 class HighlighterSettingsPanel extends ConsumerWidget {
   const HighlighterSettingsPanel({
     super.key,
@@ -17,33 +17,61 @@ class HighlighterSettingsPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(highlighterSettingsProvider);
+    final currentTool = ref.watch(currentToolProvider);
+    final isNeon = currentTool == ToolType.neonHighlighter;
 
     return ToolPanel(
-      title: 'Vurgulayıcı',
+      title: isNeon ? 'Neon Fosforlu' : 'Fosforlu Kalem',
       onClose: onClose,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Highlighter type selector
+          _HighlighterTypeSelector(
+            selectedType: currentTool,
+            onTypeSelected: (type) {
+              ref.read(currentToolProvider.notifier).state = type;
+            },
+          ),
+          const SizedBox(height: 12),
+
           // Thickness bar preview (compact)
           _ThicknessBarPreview(
             color: settings.color,
             thickness: settings.thickness,
+            isNeon: isNeon,
           ),
           const SizedBox(height: 12),
 
           // Thickness slider (compact)
           _CompactSlider(
             title: 'Kalınlık',
-            value: settings.thickness,
-            min: 5.0,
-            max: 40.0,
-            label: '${settings.thickness.toStringAsFixed(0)}mm',
+            value: settings.thickness.clamp(isNeon ? 8.0 : 10.0, isNeon ? 30.0 : 40.0),
+            min: isNeon ? 8.0 : 10.0,
+            max: isNeon ? 30.0 : 40.0,
+            label: '${settings.thickness.clamp(isNeon ? 8.0 : 10.0, isNeon ? 30.0 : 40.0).toStringAsFixed(0)}mm',
             color: settings.color,
             onChanged: (value) {
               ref.read(highlighterSettingsProvider.notifier).setThickness(value);
             },
           ),
           const SizedBox(height: 10),
+
+          // Neon-specific: Glow intensity slider
+          if (isNeon) ...[
+            _CompactSlider(
+              title: 'Parlaklık',
+              value: settings.glowIntensity,
+              min: 0.1,
+              max: 1.0,
+              label: '${(settings.glowIntensity * 100).round()}%',
+              color: settings.color,
+              onChanged: (value) {
+                ref.read(highlighterSettingsProvider.notifier).setGlowIntensity(value);
+              },
+            ),
+            const SizedBox(height: 10),
+          ],
 
           // Straight line toggle (compact)
           _CompactToggle(
@@ -61,34 +89,36 @@ class HighlighterSettingsPanel extends ConsumerWidget {
             onColorSelected: (color) {
               ref.read(highlighterSettingsProvider.notifier).setColor(color);
             },
+            isNeon: isNeon,
           ),
           const SizedBox(height: 12),
 
           // Add button (compact)
           _CompactAddButton(
-            onPressed: () => _addToPenBox(context, ref, settings),
+            onPressed: () => _addToPenBox(context, ref, settings, isNeon),
           ),
         ],
       ),
     );
   }
 
-  void _addToPenBox(BuildContext context, WidgetRef ref, HighlighterSettings settings) {
+  void _addToPenBox(BuildContext context, WidgetRef ref, HighlighterSettings settings, bool isNeon) {
     final presets = ref.read(penBoxPresetsProvider);
+    final toolType = isNeon ? ToolType.neonHighlighter : ToolType.highlighter;
     
     // Duplicate kontrolü
     final isDuplicate = presets.any((p) => 
       !p.isEmpty &&
-      p.toolType == ToolType.highlighter &&
+      p.toolType == toolType &&
       p.color.value == settings.color.value &&
       (p.thickness - settings.thickness).abs() < 0.1
     );
     
     if (isDuplicate) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Bu vurgulayıcı zaten kalem kutusunda mevcut'),
-          duration: Duration(seconds: 2),
+        SnackBar(
+          content: Text('Bu ${isNeon ? "neon fosforlu" : "fosforlu kalem"} zaten kalem kutusunda mevcut'),
+          duration: const Duration(seconds: 2),
         ),
       );
       return;
@@ -96,7 +126,7 @@ class HighlighterSettingsPanel extends ConsumerWidget {
     
     final newPreset = PenPreset(
       id: 'preset_${DateTime.now().millisecondsSinceEpoch}',
-      toolType: ToolType.highlighter,
+      toolType: toolType,
       color: settings.color,
       thickness: settings.thickness,
       nibShape: NibShapeType.rectangle,
@@ -112,15 +142,109 @@ class HighlighterSettingsPanel extends ConsumerWidget {
   }
 }
 
+/// Highlighter type selector (2 options: normal + neon)
+class _HighlighterTypeSelector extends StatelessWidget {
+  const _HighlighterTypeSelector({
+    required this.selectedType,
+    required this.onTypeSelected,
+  });
+
+  final ToolType selectedType;
+  final ValueChanged<ToolType> onTypeSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: _HighlighterTypeButton(
+            label: 'Fosforlu',
+            icon: Icons.highlight,
+            isSelected: selectedType == ToolType.highlighter,
+            onTap: () => onTypeSelected(ToolType.highlighter),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: _HighlighterTypeButton(
+            label: 'Neon',
+            icon: Icons.flash_on,
+            isSelected: selectedType == ToolType.neonHighlighter,
+            onTap: () => onTypeSelected(ToolType.neonHighlighter),
+            isNeon: true,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _HighlighterTypeButton extends StatelessWidget {
+  const _HighlighterTypeButton({
+    required this.label,
+    required this.icon,
+    required this.isSelected,
+    required this.onTap,
+    this.isNeon = false,
+  });
+
+  final String label;
+  final IconData icon;
+  final bool isSelected;
+  final VoidCallback onTap;
+  final bool isNeon;
+
+  @override
+  Widget build(BuildContext context) {
+    final selectedColor = isNeon ? const Color(0xFFFF00FF) : const Color(0xFFFFEB3B);
+    
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? selectedColor.withAlpha(30) : Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: isSelected ? selectedColor : Colors.grey.shade300,
+            width: isSelected ? 1.5 : 0.5,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 18,
+              color: isSelected ? selectedColor : Colors.grey.shade600,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                color: isSelected ? Colors.black87 : Colors.grey.shade600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 /// Thickness bar preview (compact).
 class _ThicknessBarPreview extends StatelessWidget {
   const _ThicknessBarPreview({
     required this.color,
     required this.thickness,
+    this.isNeon = false,
   });
 
   final Color color;
   final double thickness;
+  final bool isNeon;
 
   @override
   Widget build(BuildContext context) {
@@ -128,7 +252,7 @@ class _ThicknessBarPreview extends StatelessWidget {
       width: double.infinity,
       height: 28,
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        color: isNeon ? Colors.grey.shade900 : Colors.grey.shade50,
         borderRadius: BorderRadius.circular(6),
         border: Border.all(color: Colors.grey.shade200, width: 0.5),
       ),
@@ -140,6 +264,15 @@ class _ThicknessBarPreview extends StatelessWidget {
           decoration: BoxDecoration(
             color: color,
             borderRadius: BorderRadius.circular(2),
+            boxShadow: isNeon
+                ? [
+                    BoxShadow(
+                      color: color.withAlpha(180),
+                      blurRadius: 8,
+                      spreadRadius: 2,
+                    ),
+                  ]
+                : null,
           ),
         ),
       ),
@@ -235,10 +368,22 @@ class _CompactHighlighterColors extends StatelessWidget {
   const _CompactHighlighterColors({
     required this.selectedColor,
     required this.onColorSelected,
+    this.isNeon = false,
   });
 
   final Color selectedColor;
   final ValueChanged<Color> onColorSelected;
+  final bool isNeon;
+
+  // Neon renkler (canlı, parlak)
+  static const _neonColors = [
+    Color(0xFFFF00FF), // Magenta
+    Color(0xFF00FFFF), // Cyan
+    Color(0xFFFF0080), // Pink
+    Color(0xFF00FF00), // Green
+    Color(0xFFFF8000), // Orange
+    Color(0xFF8000FF), // Purple
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -257,11 +402,10 @@ class _CompactHighlighterColors extends StatelessWidget {
         UnifiedColorPicker(
           selectedColor: selectedColor,
           onColorSelected: onColorSelected,
-          quickColors: ColorSets.highlighter.take(6).toList(),
-          colorSets: const {
-            'Vurgulayıcı': ColorSets.highlighter,
-            'Pastel': ColorSets.pastel,
-          },
+          quickColors: isNeon ? _neonColors : ColorSets.highlighter.take(6).toList(),
+          colorSets: isNeon
+              ? const {'Neon': _neonColors, 'Vurgulayıcı': ColorSets.highlighter}
+              : const {'Vurgulayıcı': ColorSets.highlighter, 'Pastel': ColorSets.pastel},
           chipSize: 28.0,
           spacing: 6.0,
           isHighlighter: true,

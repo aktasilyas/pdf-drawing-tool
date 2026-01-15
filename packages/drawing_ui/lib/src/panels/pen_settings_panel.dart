@@ -26,11 +26,13 @@ class PenSettingsPanel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(penSettingsProvider(toolType));
     final currentTool = ref.watch(currentToolProvider);
+    // Aktif kalem tipine göre settings al (değişime duyarlı)
+    final activePenTool = _isPenTool(currentTool) ? currentTool : toolType;
+    final settings = ref.watch(penSettingsProvider(activePenTool));
 
     return ToolPanel(
-      title: _getTurkishTitle(toolType),
+      title: _getTurkishTitle(activePenTool),
       onClose: onClose,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,11 +41,11 @@ class PenSettingsPanel extends ConsumerWidget {
           _LiveStrokePreview(
             color: settings.color,
             thickness: settings.thickness,
-            toolType: toolType,
+            toolType: activePenTool,
           ),
           const SizedBox(height: 12),
 
-          // 4 Pen type selector (compact)
+          // Pen type selector (compact)
           _PenTypeSelector(
             selectedType: currentTool,
             onTypeSelected: (type) {
@@ -55,13 +57,13 @@ class PenSettingsPanel extends ConsumerWidget {
           // Thickness slider (compact) - dynamic range based on tool
           _CompactSliderSection(
             title: 'Kalınlık',
-            value: settings.thickness.clamp(_getMinThickness(toolType), _getMaxThickness(toolType)),
-            min: _getMinThickness(toolType),
-            max: _getMaxThickness(toolType),
+            value: settings.thickness.clamp(_getMinThickness(activePenTool), _getMaxThickness(activePenTool)),
+            min: _getMinThickness(activePenTool),
+            max: _getMaxThickness(activePenTool),
             label: '${settings.thickness.toStringAsFixed(1)}mm',
             color: settings.color,
             onChanged: (value) {
-              ref.read(penSettingsProvider(toolType).notifier).setThickness(value);
+              ref.read(penSettingsProvider(activePenTool).notifier).setThickness(value);
             },
           ),
           const SizedBox(height: 12),
@@ -74,7 +76,7 @@ class PenSettingsPanel extends ConsumerWidget {
             max: 1.0,
             label: '${(settings.stabilization * 100).round()}%',
             onChanged: (value) {
-              ref.read(penSettingsProvider(toolType).notifier).setStabilization(value);
+              ref.read(penSettingsProvider(activePenTool).notifier).setStabilization(value);
             },
           ),
           const SizedBox(height: 14),
@@ -83,7 +85,7 @@ class PenSettingsPanel extends ConsumerWidget {
           _CompactColorRow(
             selectedColor: settings.color,
             onColorSelected: (color) {
-              ref.read(penSettingsProvider(toolType).notifier).setColor(color);
+              ref.read(penSettingsProvider(activePenTool).notifier).setColor(color);
             },
           ),
           const SizedBox(height: 14),
@@ -97,6 +99,20 @@ class PenSettingsPanel extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  /// Pen tool check
+  bool _isPenTool(ToolType tool) {
+    return const [
+      ToolType.pencil,
+      ToolType.hardPencil,
+      ToolType.ballpointPen,
+      ToolType.gelPen,
+      ToolType.dashedPen,
+      ToolType.brushPen,
+      ToolType.marker,
+      ToolType.calligraphyPen,
+    ].contains(tool);
   }
 
   String _getTurkishTitle(ToolType type) {
@@ -249,7 +265,7 @@ class _StrokePreviewPainter extends CustomPainter {
   }
 }
 
-/// Selector for all 9 pen types.
+/// Selector for pen types (7 kalem - fosforlu hariç).
 class _PenTypeSelector extends StatelessWidget {
   const _PenTypeSelector({
     required this.selectedType,
@@ -259,22 +275,20 @@ class _PenTypeSelector extends StatelessWidget {
   final ToolType selectedType;
   final ValueChanged<ToolType> onTypeSelected;
 
-  // All 9 pen types
+  // Sadece kalemler (highlighter'lar ayrı panel'de)
   static const _penTypes = [
     ToolType.pencil,
     ToolType.hardPencil,
     ToolType.ballpointPen,
     ToolType.gelPen,
     ToolType.dashedPen,
-    ToolType.highlighter,
     ToolType.brushPen,
     ToolType.marker,
-    ToolType.neonHighlighter,
+    ToolType.calligraphyPen,
   ];
 
   @override
   Widget build(BuildContext context) {
-    // Use Wrap instead of Row to handle 9 items
     return Wrap(
       spacing: 6,
       runSpacing: 6,

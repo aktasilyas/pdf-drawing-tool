@@ -28,6 +28,9 @@ enum PenType {
 
   /// Neon highlighter with glow effect.
   neonHighlighter,
+
+  /// Calligraphy pen with angled nib for beautiful strokes.
+  calligraphyPen,
 }
 
 /// Configuration for each pen type.
@@ -68,6 +71,9 @@ class PenTypeConfig {
   /// Dash pattern [dash length, gap length].
   final List<double>? dashPattern;
 
+  /// Nib angle in degrees for calligraphy (0 = horizontal, 90 = vertical).
+  final double nibAngle;
+
   const PenTypeConfig({
     required this.displayName,
     required this.displayNameTr,
@@ -81,6 +87,7 @@ class PenTypeConfig {
     this.glowRadius = 0.0,
     this.glowIntensity = 0.0,
     this.dashPattern,
+    this.nibAngle = 0.0,
   });
 }
 
@@ -168,6 +175,16 @@ extension PenTypeExtension on PenType {
           glowIntensity: 0.6,
           nibShape: NibShape.rectangle,
         );
+      case PenType.calligraphyPen:
+        return const PenTypeConfig(
+          displayName: 'Calligraphy Pen',
+          displayNameTr: 'Kaligrafi Kalemi',
+          defaultThickness: 4.0,
+          minThickness: 1.0,
+          maxThickness: 15.0,
+          nibShape: NibShape.ellipse, // Angled ellipse for calligraphy effect
+          nibAngle: 45.0, // 45 degree angle for classic calligraphy look
+        );
     }
   }
 
@@ -187,6 +204,7 @@ extension PenTypeExtension on PenType {
       glowRadius: c.glowRadius,
       glowIntensity: c.glowIntensity,
       dashPattern: c.dashPattern,
+      nibAngle: c.nibAngle,
     );
   }
 }

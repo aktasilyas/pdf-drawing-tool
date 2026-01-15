@@ -38,14 +38,22 @@ class ToolBar extends ConsumerStatefulWidget {
 class _ToolBarState extends ConsumerState<ToolBar> {
   final Map<ToolType, GlobalKey> _toolButtonKeys = {};
 
-  /// Ana kalem araçları - toolbar'da görünenler (5 adet)
-  /// Diğerleri (hardPencil, gelPen, dashedPen, neonHighlighter) panel'de
+  /// Kalem araçları (tek ikon olarak grupla) - panel'de hepsi görünür
   static const _penTools = [
     ToolType.pencil,
+    ToolType.hardPencil,
     ToolType.ballpointPen,
-    ToolType.highlighter,
+    ToolType.gelPen,
+    ToolType.dashedPen,
     ToolType.brushPen,
     ToolType.marker,
+    ToolType.calligraphyPen,
+  ];
+
+  /// Fosforlu kalem araçları (ayrı ikon) - panel'de görünür
+  static const _highlighterTools = [
+    ToolType.highlighter,
+    ToolType.neonHighlighter,
   ];
 
   /// Panel'i olan araçlar
@@ -172,15 +180,15 @@ class _ToolBarState extends ConsumerState<ToolBar> {
     );
   }
 
-  /// Görünür araçları al, kalem araçlarını tek ikon olarak grupla
+  /// Görünür araçları al, kalem ve fosforlu araçları ayrı grupla
   List<ToolType> _getGroupedVisibleTools(ToolbarConfig config, ToolType currentTool) {
     final visibleTools = config.toolOrder
         .where((tool) => config.visibleTools.contains(tool))
         .toList();
 
-    // Kalem araçlarını grupla - sadece ilk kalem aracını göster (veya aktif olanı)
     final result = <ToolType>[];
     bool penGroupAdded = false;
+    bool highlighterGroupAdded = false;
 
     for (final tool in visibleTools) {
       if (_isPenTool(tool)) {
@@ -194,6 +202,17 @@ class _ToolBarState extends ConsumerState<ToolBar> {
           penGroupAdded = true;
         }
         // Diğer kalem araçlarını atla
+      } else if (_isHighlighterTool(tool)) {
+        if (!highlighterGroupAdded) {
+          // Aktif fosforlu aracını ekle, yoksa highlighter
+          if (_isHighlighterTool(currentTool)) {
+            result.add(currentTool);
+          } else {
+            result.add(ToolType.highlighter);
+          }
+          highlighterGroupAdded = true;
+        }
+        // Diğer fosforlu araçlarını atla
       } else {
         result.add(tool);
       }
@@ -207,11 +226,19 @@ class _ToolBarState extends ConsumerState<ToolBar> {
     if (_isPenTool(tool) && _isPenTool(currentTool)) {
       return true;
     }
+    // Fosforlu grubu için: herhangi bir fosforlu aracı seçiliyse grup seçili
+    if (_isHighlighterTool(tool) && _isHighlighterTool(currentTool)) {
+      return true;
+    }
     return tool == currentTool;
   }
 
   bool _isPenTool(ToolType tool) {
     return _penTools.contains(tool);
+  }
+
+  bool _isHighlighterTool(ToolType tool) {
+    return _highlighterTools.contains(tool);
   }
 
   void _onToolPressed(ToolType tool) {

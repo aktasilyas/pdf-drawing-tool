@@ -237,7 +237,27 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     // Drawing mode
     final point = _createDrawingPoint(event);
     final style = _getCurrentStyle();
-    _drawingController.startStroke(point, style);
+    
+    // Get stabilization and straight line settings
+    double stabilization = 0.0;
+    bool straightLine = false;
+    
+    if (toolType.isPenTool && toolType != ToolType.highlighter && toolType != ToolType.neonHighlighter) {
+      // Pen tools have stabilization
+      final penSettings = ref.read(penSettingsProvider(toolType));
+      stabilization = penSettings.stabilization;
+    } else if (toolType == ToolType.highlighter || toolType == ToolType.neonHighlighter) {
+      // Highlighter tools have straight line mode
+      final highlighterSettings = ref.read(highlighterSettingsProvider);
+      straightLine = highlighterSettings.straightLineMode;
+    }
+    
+    _drawingController.startStroke(
+      point,
+      style,
+      stabilization: stabilization,
+      straightLine: straightLine,
+    );
     _lastPoint = event.localPosition;
   }
 
@@ -268,8 +288,13 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     // Drawing mode
     if (!_drawingController.isDrawing) return;
 
-    // Performance: Skip points that are too close together
-    if (_lastPoint != null) {
+    // Check if straight line mode is active (for real-time preview)
+    final toolType = ref.read(currentToolProvider);
+    final isStraightLineMode = (toolType == ToolType.highlighter || toolType == ToolType.neonHighlighter) 
+        && ref.read(highlighterSettingsProvider).straightLineMode;
+
+    // Performance: Skip points that are too close together (except in straight line mode)
+    if (!isStraightLineMode && _lastPoint != null) {
       final distance = (event.localPosition - _lastPoint!).distance;
       if (distance < _minPointDistance) return;
     }

@@ -90,6 +90,8 @@ class MockCanvas extends ConsumerWidget {
         return Icons.flash_on;
       case ToolType.highlighter:
         return Icons.highlight;
+      case ToolType.calligraphyPen:
+        return Icons.gesture;
       case ToolType.pixelEraser:
         return Icons.auto_fix_normal;
       case ToolType.strokeEraser:

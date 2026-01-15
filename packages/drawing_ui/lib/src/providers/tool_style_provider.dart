@@ -17,17 +17,7 @@ import 'package:drawing_ui/src/models/tool_type.dart';
 final activeStrokeStyleProvider = Provider<StrokeStyle>((ref) {
   final toolType = ref.watch(currentToolProvider);
 
-  // Pen tools - use PenType for configuration
-  final penType = toolType.penType;
-  if (penType != null) {
-    final settings = ref.watch(penSettingsProvider(toolType));
-    return penType.toStrokeStyle(
-      color: settings.color.toARGB32(),
-      thickness: settings.thickness,
-    );
-  }
-
-  // Highlighter (special case - uses separate settings provider)
+  // Highlighter tools (special case - uses separate settings provider)
   if (toolType == ToolType.highlighter) {
     final settings = ref.watch(highlighterSettingsProvider);
     return StrokeStyle(
@@ -37,6 +27,31 @@ final activeStrokeStyleProvider = Provider<StrokeStyle>((ref) {
       nibShape: NibShape.rectangle,
       blendMode: DrawingBlendMode.normal,
       isEraser: false,
+    );
+  }
+
+  // Neon Highlighter (special case - uses highlighter settings + glow)
+  if (toolType == ToolType.neonHighlighter) {
+    final settings = ref.watch(highlighterSettingsProvider);
+    return StrokeStyle(
+      color: settings.color.toARGB32(),
+      thickness: settings.thickness,
+      opacity: 0.9,
+      nibShape: NibShape.rectangle,
+      blendMode: DrawingBlendMode.normal,
+      isEraser: false,
+      glowRadius: 4.0, // Daha az bulanık
+      glowIntensity: settings.glowIntensity,
+    );
+  }
+
+  // Pen tools - use PenType for configuration
+  final penType = toolType.penType;
+  if (penType != null) {
+    final settings = ref.watch(penSettingsProvider(toolType));
+    return penType.toStrokeStyle(
+      color: settings.color.toARGB32(),
+      thickness: settings.thickness,
     );
   }
 
@@ -86,10 +101,13 @@ final isDrawingToolProvider = Provider<bool>((ref) {
   final toolType = ref.watch(currentToolProvider);
 
   // Pen tools (uses isPenTool getter from ToolType)
-  if (toolType.isPenTool) return true;
+  // Note: neonHighlighter.isPenTool is true but we handle it separately
+  if (toolType.isPenTool && toolType != ToolType.neonHighlighter) return true;
 
-  // Highlighter
-  if (toolType == ToolType.highlighter) return true;
+  // Highlighter tools
+  if (toolType == ToolType.highlighter || toolType == ToolType.neonHighlighter) {
+    return true;
+  }
 
   // Eraser tools
   return const [

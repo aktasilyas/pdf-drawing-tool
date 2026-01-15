@@ -477,6 +477,8 @@ class RealisticPenPainter extends CustomPainter {
         _drawHighlighter(canvas, w, h);
       case ToolType.highlighter:
         _drawHighlighter(canvas, w, h);
+      case ToolType.calligraphyPen:
+        _drawCalligraphyPen(canvas, w, h);
       default:
         _drawBallpointPen(canvas, w, h);
     }
@@ -736,6 +738,73 @@ class RealisticPenPainter extends CustomPainter {
     canvas.drawRect(
       Rect.fromLTWH(w * 0.35, h * 0.35, w * 0.3, h * 0.2),
       Paint()..color = tipColor.withAlpha(60),
+    );
+  }
+
+  void _drawCalligraphyPen(Canvas canvas, double w, double h) {
+    // Elegant calligraphy pen body
+    final bodyPaint = Paint()
+      ..color = Colors.brown.shade800
+      ..style = PaintingStyle.fill;
+
+    final goldAccent = Paint()
+      ..color = const Color(0xFFD4AF37)
+      ..style = PaintingStyle.fill;
+
+    // Main body (elegant tapered shape)
+    final bodyPath = Path()
+      ..moveTo(w * 0.42, h * 0.02)
+      ..lineTo(w * 0.58, h * 0.02)
+      ..lineTo(w * 0.56, h * 0.6)
+      ..lineTo(w * 0.44, h * 0.6)
+      ..close();
+    canvas.drawPath(bodyPath, bodyPaint);
+
+    // Gold band decorations
+    canvas.drawRect(
+      Rect.fromLTWH(w * 0.4, h * 0.1, w * 0.2, h * 0.04),
+      goldAccent,
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(w * 0.42, h * 0.55, w * 0.16, h * 0.03),
+      goldAccent,
+    );
+
+    // Angled nib holder
+    final nibHolderPaint = Paint()
+      ..color = Colors.black87
+      ..style = PaintingStyle.fill;
+
+    final nibHolderPath = Path()
+      ..moveTo(w * 0.44, h * 0.6)
+      ..lineTo(w * 0.56, h * 0.6)
+      ..lineTo(w * 0.54, h * 0.72)
+      ..lineTo(w * 0.46, h * 0.72)
+      ..close();
+    canvas.drawPath(nibHolderPath, nibHolderPaint);
+
+    // Angled calligraphy nib (characteristic flat angle)
+    final nibPaint = Paint()
+      ..color = tipColor
+      ..style = PaintingStyle.fill;
+
+    final nibPath = Path()
+      ..moveTo(w * 0.46, h * 0.72)
+      ..lineTo(w * 0.54, h * 0.72)
+      ..lineTo(w * 0.65, h * 0.95) // Angled tip
+      ..lineTo(w * 0.35, h * 0.98)
+      ..close();
+    canvas.drawPath(nibPath, nibPaint);
+
+    // Nib slit (characteristic of calligraphy pens)
+    final slitPaint = Paint()
+      ..color = Colors.black54
+      ..strokeWidth = 0.8
+      ..style = PaintingStyle.stroke;
+    canvas.drawLine(
+      Offset(w * 0.5, h * 0.74),
+      Offset(w * 0.5, h * 0.94),
+      slitPaint,
     );
   }
 

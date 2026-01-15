@@ -146,6 +146,7 @@ final highlighterSettingsProvider =
     color: Color(0x80FFEB3B),
     thickness: 20.0,
     straightLineMode: false,
+    glowIntensity: 0.6,
   )),
 );
 
@@ -155,21 +156,25 @@ class HighlighterSettings {
     required this.color,
     required this.thickness,
     required this.straightLineMode,
+    this.glowIntensity = 0.6,
   });
 
   final Color color;
   final double thickness;
   final bool straightLineMode;
+  final double glowIntensity;
 
   HighlighterSettings copyWith({
     Color? color,
     double? thickness,
     bool? straightLineMode,
+    double? glowIntensity,
   }) {
     return HighlighterSettings(
       color: color ?? this.color,
       thickness: thickness ?? this.thickness,
       straightLineMode: straightLineMode ?? this.straightLineMode,
+      glowIntensity: glowIntensity ?? this.glowIntensity,
     );
   }
 }
@@ -188,6 +193,10 @@ class HighlighterSettingsNotifier extends StateNotifier<HighlighterSettings> {
 
   void setStraightLineMode(bool straightLineMode) {
     state = state.copyWith(straightLineMode: straightLineMode);
+  }
+
+  void setGlowIntensity(double glowIntensity) {
+    state = state.copyWith(glowIntensity: glowIntensity);
   }
 }
 
