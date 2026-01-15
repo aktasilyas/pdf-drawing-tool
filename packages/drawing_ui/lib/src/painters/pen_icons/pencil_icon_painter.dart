@@ -35,44 +35,45 @@ class PencilIconPainter extends PenIconPainter {
     final centerX = rect.width / 2;
     final centerY = rect.height / 2;
 
-    canvas.save();
-    canvas.translate(centerX, centerY);
-    canvas.rotate(-0.5); // ~30° tilt
-    canvas.translate(-centerX, -centerY);
-
-    // Wood body gradient (cream/beige)
+    // Horizontal pencil (no rotation)
     final bodyRect = Rect.fromCenter(
       center: Offset(centerX, centerY),
-      width: 10,
-      height: 36,
+      width: 38,
+      height: 8,
     );
 
-    final bodyPaint = gradientPaint(
-      bodyRect,
-      const Color(0xFFF5E6D3),
-      const Color(0xFFE8D4BE),
-    );
+    // Refined wood gradient - more realistic
+    final bodyPaint = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          const Color(0xFFF5E6D3).withAlpha(255),
+          const Color(0xFFE8D4BE),
+          const Color(0xFFD4C4B0),
+        ],
+        stops: const [0.0, 0.5, 1.0],
+      ).createShader(bodyRect);
 
     canvas.drawRRect(
-      RRect.fromRectAndRadius(bodyRect, const Radius.circular(1)),
+      RRect.fromRectAndRadius(bodyRect, const Radius.circular(1.5)),
       bodyPaint,
     );
 
-    // Wood grain lines
+    // Subtle wood grain (horizontal lines)
     final grainPaint = Paint()
-      ..color = const Color(0xFFD4C4B0)
-      ..strokeWidth = 0.5
+      ..color = const Color(0xFFD4C4B0).withAlpha(60)
+      ..strokeWidth = 0.3
       ..style = PaintingStyle.stroke;
 
-    for (var i = -1; i <= 1; i++) {
+    for (var i = 0; i < 3; i++) {
+      final x = centerX - 14 + i * 6;
       canvas.drawLine(
-        Offset(centerX + i * 2.5, centerY - 15),
-        Offset(centerX + i * 2.5, centerY + 12),
+        Offset(x, centerY - 3),
+        Offset(x, centerY + 3),
         grainPaint,
       );
     }
-
-    canvas.restore();
   }
 
   @override
@@ -80,32 +81,31 @@ class PencilIconPainter extends PenIconPainter {
     final centerX = rect.width / 2;
     final centerY = rect.height / 2;
 
-    canvas.save();
-    canvas.translate(centerX, centerY);
-    canvas.rotate(-0.5);
-    canvas.translate(-centerX, -centerY);
-
-    // Sharpened wood cone
+    // Sharpened wood cone (horizontal, pointing right)
     final conePath = Path();
-    conePath.moveTo(centerX - 5, centerY + 18);
-    conePath.lineTo(centerX, centerY + 28);
-    conePath.lineTo(centerX + 5, centerY + 18);
+    conePath.moveTo(centerX + 14, centerY - 4);
+    conePath.lineTo(centerX + 24, centerY);
+    conePath.lineTo(centerX + 14, centerY + 4);
     conePath.close();
 
-    final conePaint = Paint()..color = const Color(0xFFDEB887);
+    final conePaint = Paint()
+      ..shader = LinearGradient(
+        colors: [
+          const Color(0xFFDEB887),
+          const Color(0xFFC9A870),
+        ],
+      ).createShader(conePath.getBounds());
     canvas.drawPath(conePath, conePaint);
 
-    // Graphite tip
+    // Graphite tip (smaller, more refined)
     final graphitePath = Path();
-    graphitePath.moveTo(centerX - 2, centerY + 24);
-    graphitePath.lineTo(centerX, centerY + 28);
-    graphitePath.lineTo(centerX + 2, centerY + 24);
+    graphitePath.moveTo(centerX + 20, centerY - 1.5);
+    graphitePath.lineTo(centerX + 26, centerY);
+    graphitePath.lineTo(centerX + 20, centerY + 1.5);
     graphitePath.close();
 
     final graphitePaint = Paint()..color = penColor;
     canvas.drawPath(graphitePath, graphitePaint);
-
-    canvas.restore();
   }
 
   @override
@@ -113,33 +113,32 @@ class PencilIconPainter extends PenIconPainter {
     final centerX = rect.width / 2;
     final centerY = rect.height / 2;
 
-    canvas.save();
-    canvas.translate(centerX, centerY);
-    canvas.rotate(-0.5);
-    canvas.translate(-centerX, -centerY);
-
-    // Metal ferrule
+    // Metal ferrule (left side, horizontal)
     final ferruleRect = Rect.fromCenter(
-      center: Offset(centerX, centerY - 18),
-      width: 10,
-      height: 4,
+      center: Offset(centerX - 15, centerY),
+      width: 3,
+      height: 8,
     );
-    final ferrulePaint = Paint()..color = const Color(0xFFB8860B);
+    final ferrulePaint = Paint()
+      ..shader = LinearGradient(
+        colors: [
+          const Color(0xFFB8860B),
+          const Color(0xFFD4AF37),
+        ],
+      ).createShader(ferruleRect);
     canvas.drawRect(ferruleRect, ferrulePaint);
 
-    // Pink eraser
+    // Pink eraser (left end)
     final eraserRect = Rect.fromCenter(
-      center: Offset(centerX, centerY - 22),
-      width: 8,
-      height: 6,
+      center: Offset(centerX - 20, centerY),
+      width: 6,
+      height: 7,
     );
     final eraserPaint = Paint()..color = const Color(0xFFFFB6C1);
     canvas.drawRRect(
       RRect.fromRectAndRadius(eraserRect, const Radius.circular(2)),
       eraserPaint,
     );
-
-    canvas.restore();
   }
 
   @override
@@ -147,18 +146,11 @@ class PencilIconPainter extends PenIconPainter {
     final centerX = rect.width / 2;
     final centerY = rect.height / 2;
 
-    canvas.save();
-    canvas.translate(centerX, centerY);
-    canvas.rotate(-0.5);
-    canvas.translate(-centerX, -centerY);
-
-    // Edge highlight
-    final highlightPath = Path();
-    highlightPath.moveTo(centerX - 4, centerY - 16);
-    highlightPath.lineTo(centerX - 4, centerY + 16);
-
-    canvas.drawPath(highlightPath, highlightPaint(opacity: 0.3));
-
-    canvas.restore();
+    // Top edge highlight (horizontal pencil)
+    canvas.drawLine(
+      Offset(centerX - 16, centerY - 3),
+      Offset(centerX + 12, centerY - 3),
+      highlightPaint(opacity: 0.4),
+    );
   }
 }

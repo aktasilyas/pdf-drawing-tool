@@ -165,19 +165,7 @@ class ToolButton extends StatelessWidget {
     required Color iconColor,
     required bool showChevron,
   }) {
-    // For pen tools (that have a PenType), use custom icon
-    final penType = toolType.penType;
-    if (penType != null && customIcon == null) {
-      final iconSize = showChevron ? theme.toolIconSize : theme.toolIconSize + 4;
-      return ToolPenIcon(
-        toolType: toolType,
-        color: iconColor,
-        isSelected: isSelected,
-        size: iconSize,
-      );
-    }
-
-    // For other tools, use Material icon
+    // Always use Material icon in toolbar
     return Icon(
       customIcon ?? _getIconForTool(toolType),
       size: showChevron ? theme.toolIconSize - 2 : theme.toolIconSize,

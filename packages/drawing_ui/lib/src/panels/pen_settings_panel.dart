@@ -330,21 +330,17 @@ class _PenTypeOption extends StatelessWidget {
         onTap: onTap,
         child: Container(
           width: 44,
-          height: 44,
+          height: 50,
           decoration: BoxDecoration(
-            color: isSelected ? _selectedColor.withAlpha(20) : Colors.grey.shade100,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(
-              color: isSelected ? _selectedColor : Colors.grey.shade300,
-              width: isSelected ? 1.5 : 0.5,
-            ),
+            color: isSelected ? _selectedColor.withAlpha(20) : Colors.transparent,
+            borderRadius: BorderRadius.circular(8),
           ),
           child: Center(
             child: ToolPenIcon(
               toolType: type,
               color: isSelected ? _selectedColor : Colors.grey.shade600,
               isSelected: isSelected,
-              size: 30,
+              size: 36,
             ),
           ),
         ),

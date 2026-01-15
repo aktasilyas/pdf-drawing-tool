@@ -286,14 +286,12 @@ class _PenPresetItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Pen rotation angle
-    final penAngle = isHorizontal ? 0.0 : -1.5708;
+    // Pen rotation angle - always horizontal (0)
+    final penAngle = 0.0;
 
-    // Soft selection - use pen color with very low opacity
+    // Soft selection - subtle background only
     final bgColor =
-        isSelected ? preset.color.withAlpha(18) : Colors.grey.shade50;
-    final borderColor =
-        isSelected ? preset.color.withAlpha(50) : Colors.transparent;
+        isSelected ? preset.color.withAlpha(15) : Colors.transparent;
 
     if (isHorizontal) {
       // Horizontal item layout
@@ -306,7 +304,6 @@ class _PenPresetItem extends StatelessWidget {
           decoration: BoxDecoration(
             color: bgColor,
             borderRadius: BorderRadius.circular(6),
-            border: Border.all(color: borderColor, width: 1),
           ),
           child: Stack(
             alignment: Alignment.center,
@@ -376,7 +373,6 @@ class _PenPresetItem extends StatelessWidget {
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: borderColor, width: 1),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
