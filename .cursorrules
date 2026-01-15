@@ -1,0 +1,325 @@
+# =====================================================
+# PROJECT: StarNote-like Drawing App + pub.dev Library
+# OWNER: İlyas Aktaş
+# TOOLS: Cursor IDE (Implementer) + Claude Opus (Architect)
+# =====================================================
+
+# -----------------------------------------------------
+# PHASE STATUS (UPDATED: 2025-01-15)
+# -----------------------------------------------------
+- Phase 0: COMPLETE ✅ (Scaffolding)
+- Phase 1: COMPLETE ✅ (UI Skeleton)
+- Phase 2: COMPLETE ✅ (Drawing Core)
+- Phase 3: COMPLETE ✅ (Canvas Integration)
+- Phase 4A: COMPLETE ✅ (Eraser System)
+- Phase 4B: COMPLETE ✅ (Selection System)
+- Phase 4C: COMPLETE ✅ (Shape Tools)
+- Phase 4D: COMPLETE ✅ (Text Tool)
+- Phase 4E: IN PROGRESS 🔄 (Enhancement & Cleanup)
+- Phase 5: NOT STARTED ❌ (Multi-Page & PDF)
+
+Current Branch: feature/phase4-advanced-features
+
+# -----------------------------------------------------
+# PHASE 4E PRIORITY DOCUMENTS (READ FIRST!)
+# -----------------------------------------------------
+Before writing ANY code, read these documents IN ORDER:
+
+1. docs/PHASE4E_MASTER_PLAN.md - Overall plan and scope
+2. docs/PHASE4E_CURSOR_INSTRUCTIONS.md - Step-by-step tasks
+3. docs/PHASE4_PERFORMANCE_RULES.md - Performance rules (still applies)
+
+# -----------------------------------------------------
+# PHASE 4E STRUCTURE
+# -----------------------------------------------------
+
+## Modules (IN ORDER - DO NOT SKIP)
+```
+4E-1: Pen Types System    (6 steps)  ← CURRENT
+4E-2: Custom Pen Icons    (6 steps)
+4E-3: Eraser Modes        (5 steps)
+4E-4: Color Picker        (6 steps)
+4E-5: Toolbar UX          (5 steps)
+4E-6: Performance Audit   (5 steps)
+4E-7: Code Quality        (4 steps)
+```
+
+# -----------------------------------------------------
+# ⚠️ CRITICAL: DO NOT BREAK EXISTING FUNCTIONALITY
+# -----------------------------------------------------
+
+Before ANY change:
+```bash
+# 1. Run all tests FIRST
+cd packages/drawing_core && flutter test
+cd ../drawing_ui && flutter test
+
+# 2. Check analyzer
+melos run analyze
+
+# 3. Verify no regressions after change
+flutter test
+```
+
+All changes MUST be backward compatible!
+
+# -----------------------------------------------------
+# ARCHITECTURE RULES (ENFORCED)
+# -----------------------------------------------------
+
+## Package Boundaries
+```
+drawing_core/
+├── ZERO Flutter imports (except dart:ui for Color if needed)
+├── Pure Dart only
+├── Models, Tools, Commands, History
+└── Export via barrel files ONLY
+
+drawing_ui/
+├── Flutter widgets and painters
+├── Imports drawing_core via package import
+├── Providers (Riverpod)
+└── Export via barrel files ONLY
+```
+
+## Import Rules
+```dart
+// ✅ CORRECT
+import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/drawing_ui.dart';
+
+// ❌ WRONG - No relative imports from other packages
+import '../../../drawing_core/lib/src/models/stroke.dart';
+
+// ❌ WRONG - No direct src imports
+import 'package:drawing_core/src/models/stroke.dart';
+```
+
+## New File Checklist
+Every new file MUST:
+1. Have dartdoc comment at top
+2. Be exported in barrel file
+3. Have corresponding test file
+4. Pass analyzer with 0 warnings
+
+# -----------------------------------------------------
+# PERFORMANCE RULES (NON-NEGOTIABLE)
+# -----------------------------------------------------
+
+## Targets
+- Frame time: <16ms (60 FPS)
+- Hit test: <5ms
+- Input latency: <16ms
+
+## Required Patterns
+```dart
+// ✅ Always use bounding box pre-filter
+if (!stroke.boundingBox.contains(point)) continue;
+
+// ✅ Cache paths
+Path? _cachedPath;
+Path get path => _cachedPath ??= _buildPath();
+
+// ✅ Use RepaintBoundary for layers
+RepaintBoundary(
+  child: CustomPaint(painter: StrokePainter()),
+)
+
+// ✅ Batch commands per gesture
+// One command for entire gesture, NOT per point
+```
+
+## Forbidden Patterns
+```dart
+// ❌ Never iterate all points without bounds check
+for (final point in allPoints) { ... }
+
+// ❌ Never rebuild path on every paint
+Path _buildPath() { ... } // Called in paint()
+
+// ❌ Never use setState for drawing state
+setState(() { _strokes.add(stroke); }); // WRONG
+```
+
+# -----------------------------------------------------
+# PHASE 4E SPECIFIC RULES
+# -----------------------------------------------------
+
+## Pen Types (4E-1)
+- Add new properties to StrokeStyle with DEFAULT values
+- Existing code must work without changes
+- New PenType enum maps to StrokeStyle factories
+
+## Custom Icons (4E-2)
+- All pen icons drawn with Canvas (CustomPainter)
+- Consistent size: 48x48 or 56x56
+- Must look premium, soft, and professional
+- No blurry edges, crisp rendering
+
+## Eraser Modes (4E-3)
+- PixelEraser: splits strokes at intersection
+- LassoEraser: select area then delete
+- Show cursor indicator on canvas
+
+## Color Picker (4E-4)
+- HSV wheel for custom colors
+- Preset palettes (Basic, Pastel, Neon, Natural, Grays)
+- Recent colors (persist in preferences)
+- Hex input support
+
+## Toolbar (4E-5)
+- Settings panel for customization
+- Drag to reorder tools
+- Show/hide individual tools
+- Persist configuration
+
+# -----------------------------------------------------
+# FILE SIZE LIMITS
+# -----------------------------------------------------
+
+- Maximum 300 lines per file
+- If file > 300 lines, split into logical parts
+- Use part/part of ONLY if necessary, prefer separate files
+
+# -----------------------------------------------------
+# TEST REQUIREMENTS
+# -----------------------------------------------------
+
+Every feature needs:
+1. Unit tests for logic
+2. Widget tests for UI components
+3. Golden tests for painters (if visual)
+
+Minimum coverage: 80%
+
+# -----------------------------------------------------
+# COMMIT WORKFLOW
+# -----------------------------------------------------
+
+After EVERY task:
+
+```
+📁 Files Created/Modified:
+- path/to/file.dart (created/modified)
+
+🧪 Test Results:
+- flutter analyze: ✅/❌
+- flutter test: ✅ X tests passed
+
+⚡ Performance Check (if applicable):
+- Bounds check used: ✅/❌
+- Path cached: ✅/❌
+
+📝 Suggested Commit:
+feat(core/ui): description
+
+Ready to commit? (y/n)
+```
+
+## Commit Format
+```
+feat(core): add PenType enum with 9 pen types
+feat(ui): add PencilIconPainter
+fix(core): fix StrokeStyle JSON serialization
+refactor(ui): split DrawingCanvas into smaller files
+test(core): add PixelEraserTool tests
+docs: update Phase 4E checklist
+```
+
+# -----------------------------------------------------
+# PHASE 4E PROGRESS TRACKER
+# -----------------------------------------------------
+
+## 4E-1: Pen Types System
+| # | Step | Status |
+|---|------|--------|
+| 1 | StrokeStyle extension | ❌ |
+| 2 | PenType enum | ❌ |
+| 3 | ToolType update | ❌ |
+| 4 | Renderer update | ❌ |
+| 5 | Provider update | ❌ |
+| 6 | Test & Polish | ❌ |
+
+## 4E-2: Custom Pen Icons
+| # | Step | Status |
+|---|------|--------|
+| 1 | PenIconPainter base | ❌ |
+| 2 | 9 pen painters | ❌ |
+| 3 | PenIconWidget | ❌ |
+| 4 | PenBox integration | ❌ |
+| 5 | Toolbar integration | ❌ |
+| 6 | Test & Polish | ❌ |
+
+## 4E-3: Eraser Modes
+| # | Step | Status |
+|---|------|--------|
+| 1 | PixelEraser logic | ❌ |
+| 2 | LassoEraser logic | ❌ |
+| 3 | Eraser cursor | ❌ |
+| 4 | Canvas integration | ❌ |
+| 5 | Test & Polish | ❌ |
+
+## 4E-4: Color Picker
+| # | Step | Status |
+|---|------|--------|
+| 1 | HSV wheel | ❌ |
+| 2 | Sliders | ❌ |
+| 3 | Hex input | ❌ |
+| 4 | Preset palettes | ❌ |
+| 5 | Recent colors | ❌ |
+| 6 | Integration | ❌ |
+
+## 4E-5: Toolbar UX
+| # | Step | Status |
+|---|------|--------|
+| 1 | Settings panel | ❌ |
+| 2 | Reorder logic | ❌ |
+| 3 | Show/hide | ❌ |
+| 4 | Quick access | ❌ |
+| 5 | Persist | ❌ |
+
+## 4E-6: Performance Audit
+| # | Step | Status |
+|---|------|--------|
+| 1 | Path cache audit | ❌ |
+| 2 | Repaint audit | ❌ |
+| 3 | Memory profiling | ❌ |
+| 4 | Large doc test | ❌ |
+| 5 | Optimizations | ❌ |
+
+## 4E-7: Code Quality
+| # | Step | Status |
+|---|------|--------|
+| 1 | File size audit | ❌ |
+| 2 | DRY refactor | ❌ |
+| 3 | Documentation | ❌ |
+| 4 | Test coverage | ❌ |
+
+# -----------------------------------------------------
+# QUICK COMMANDS
+# -----------------------------------------------------
+
+```bash
+# Run all tests
+melos run test
+
+# Run analyzer
+melos run analyze
+
+# Format code
+melos run format
+
+# Generate coverage
+melos run coverage
+```
+
+# -----------------------------------------------------
+# REMINDER: Quality > Speed
+# -----------------------------------------------------
+
+- Read the spec document BEFORE coding
+- Write tests BEFORE or WITH implementation
+- Check performance AFTER each feature
+- Update checklist AFTER each commit
+
+*Phase 4E will make StarNote professional and polished! 🚀*
