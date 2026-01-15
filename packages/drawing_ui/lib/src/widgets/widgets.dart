@@ -11,3 +11,4 @@ export 'text_input_overlay.dart';
 export 'text_style_popup.dart';
 export 'thickness_slider.dart';
 export 'unified_color_picker.dart';
+export 'pen_icon_widget.dart';
