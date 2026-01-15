@@ -33,8 +33,8 @@ enum ToolType {
   /// Neon highlighter - with glow effect.
   neonHighlighter,
 
-  /// Calligraphy pen - angled nib for beautiful strokes.
-  calligraphyPen,
+  /// Ruler pen - draws perfectly straight lines.
+  rulerPen,
 
   // ERASER TOOLS
   /// Pixel eraser - erases specific pixels/parts of strokes.
@@ -89,8 +89,8 @@ enum ToolType {
         return 'Keçeli Kalem';
       case ToolType.neonHighlighter:
         return 'Neon Fosforlu';
-      case ToolType.calligraphyPen:
-        return 'Kaligrafi Kalemi';
+      case ToolType.rulerPen:
+        return 'Cetvelli Kalem';
       case ToolType.pixelEraser:
         return 'Silgi';
       case ToolType.strokeEraser:
@@ -136,8 +136,8 @@ enum ToolType {
         return PenType.marker;
       case ToolType.neonHighlighter:
         return PenType.neonHighlighter;
-      case ToolType.calligraphyPen:
-        return PenType.calligraphyPen;
+      case ToolType.rulerPen:
+        return PenType.rulerPen;
       default:
         return null;
     }

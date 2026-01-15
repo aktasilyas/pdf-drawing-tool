@@ -117,6 +117,22 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
   core.ShapeTool? _activeShapeTool;
 
   // ─────────────────────────────────────────────────────────────────────────
+  // STRAIGHT LINE MODE TRACKING (for highlighters)
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /// Whether straight line drawing is in progress.
+  bool _isStraightLineDrawing = false;
+
+  /// Start point for straight line.
+  core.DrawingPoint? _straightLineStart;
+
+  /// Current end point for straight line (for preview).
+  core.DrawingPoint? _straightLineEnd;
+
+  /// Style for straight line.
+  core.StrokeStyle? _straightLineStyle;
+
+  // ─────────────────────────────────────────────────────────────────────────
   // ERASER SHAPE TRACKING
   // ─────────────────────────────────────────────────────────────────────────
 
@@ -234,29 +250,35 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
       return;
     }
 
+    // Check if highlighter straight line mode is active
+    if ((toolType == ToolType.highlighter || toolType == ToolType.neonHighlighter) &&
+        ref.read(highlighterSettingsProvider).straightLineMode) {
+      _handleStraightLineDown(event);
+      return;
+    }
+
+    // Ruler pen always draws straight lines
+    if (toolType == ToolType.rulerPen) {
+      _handleStraightLineDown(event);
+      return;
+    }
+
     // Drawing mode
     final point = _createDrawingPoint(event);
     final style = _getCurrentStyle();
     
-    // Get stabilization and straight line settings
+    // Get stabilization setting (only for pen tools, not highlighters)
     double stabilization = 0.0;
-    bool straightLine = false;
-    
     if (toolType.isPenTool && toolType != ToolType.highlighter && toolType != ToolType.neonHighlighter) {
-      // Pen tools have stabilization
       final penSettings = ref.read(penSettingsProvider(toolType));
       stabilization = penSettings.stabilization;
-    } else if (toolType == ToolType.highlighter || toolType == ToolType.neonHighlighter) {
-      // Highlighter tools have straight line mode
-      final highlighterSettings = ref.read(highlighterSettingsProvider);
-      straightLine = highlighterSettings.straightLineMode;
     }
     
     _drawingController.startStroke(
       point,
       style,
       stabilization: stabilization,
-      straightLine: straightLine,
+      straightLine: false,
     );
     _lastPoint = event.localPosition;
   }
@@ -278,6 +300,12 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
       return;
     }
 
+    // Straight line mode (highlighter)
+    if (_isStraightLineDrawing) {
+      _handleStraightLineMove(event);
+      return;
+    }
+
     // Check if eraser is active
     final isEraser = ref.read(isEraserToolProvider);
     if (isEraser) {
@@ -288,13 +316,8 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     // Drawing mode
     if (!_drawingController.isDrawing) return;
 
-    // Check if straight line mode is active (for real-time preview)
-    final toolType = ref.read(currentToolProvider);
-    final isStraightLineMode = (toolType == ToolType.highlighter || toolType == ToolType.neonHighlighter) 
-        && ref.read(highlighterSettingsProvider).straightLineMode;
-
-    // Performance: Skip points that are too close together (except in straight line mode)
-    if (!isStraightLineMode && _lastPoint != null) {
+    // Performance: Skip points that are too close together
+    if (_lastPoint != null) {
       final distance = (event.localPosition - _lastPoint!).distance;
       if (distance < _minPointDistance) return;
     }
@@ -317,6 +340,12 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     // Shape mode
     if (_isDrawingShape) {
       _handleShapeUp(event);
+      return;
+    }
+
+    // Straight line mode
+    if (_isStraightLineDrawing) {
+      _handleStraightLineUp(event);
       return;
     }
 
@@ -355,6 +384,16 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
       _activeShapeTool?.cancelShape();
       _activeShapeTool = null;
       _isDrawingShape = false;
+      setState(() {});
+      return;
+    }
+
+    // Straight line mode
+    if (_isStraightLineDrawing) {
+      _straightLineStart = null;
+      _straightLineEnd = null;
+      _straightLineStyle = null;
+      _isStraightLineDrawing = false;
       setState(() {});
       return;
     }
@@ -435,6 +474,62 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
         point.dx <= bounds.right &&
         point.dy >= bounds.top &&
         point.dy <= bounds.bottom;
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // STRAIGHT LINE EVENT HANDLERS (for highlighter)
+  // ─────────────────────────────────────────────────────────────────────────
+  // Real-time preview like shape tools - setState triggers rebuild
+
+  /// Handles straight line pointer down - starts straight line drawing.
+  void _handleStraightLineDown(PointerDownEvent event) {
+    final point = _createDrawingPoint(event);
+    final style = _getCurrentStyle();
+
+    _straightLineStart = point;
+    _straightLineEnd = point;
+    _straightLineStyle = style;
+    _isStraightLineDrawing = true;
+
+    setState(() {});
+  }
+
+  /// Handles straight line pointer move - updates end point for preview.
+  void _handleStraightLineMove(PointerMoveEvent event) {
+    if (!_isStraightLineDrawing || _straightLineStart == null) return;
+
+    final point = _createDrawingPoint(event);
+    _straightLineEnd = point;
+
+    setState(() {}); // Triggers rebuild for real-time preview
+  }
+
+  /// Handles straight line pointer up - commits the straight line stroke.
+  void _handleStraightLineUp(PointerUpEvent event) {
+    if (!_isStraightLineDrawing) return;
+
+    final start = _straightLineStart;
+    final end = _straightLineEnd;
+    final style = _straightLineStyle;
+
+    if (start != null && end != null && style != null) {
+      // Create stroke with just two points (start and end)
+      final stroke = core.Stroke.create(
+        points: [start, end],
+        style: style,
+      );
+
+      // Add stroke via history provider (enables undo/redo)
+      ref.read(historyManagerProvider.notifier).addStroke(stroke);
+    }
+
+    // Reset state
+    _straightLineStart = null;
+    _straightLineEnd = null;
+    _straightLineStyle = null;
+    _isStraightLineDrawing = false;
+
+    setState(() {});
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -965,6 +1060,14 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
       previewShape = _activeShapeTool!.previewShape;
     }
 
+    // Straight line preview (for highlighter)
+    List<core.DrawingPoint>? straightLinePreviewPoints;
+    core.StrokeStyle? straightLinePreviewStyle;
+    if (_isStraightLineDrawing && _straightLineStart != null && _straightLineEnd != null) {
+      straightLinePreviewPoints = [_straightLineStart!, _straightLineEnd!];
+      straightLinePreviewStyle = _straightLineStyle;
+    }
+
     // Enable pointer events for drawing tools, selection tool, shape tool, and text tool
     final isTextTool = currentTool == ToolType.text;
     final enablePointerEvents =
@@ -1089,6 +1192,24 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
                               },
                             ),
                           ),
+
+                          // ─────────────────────────────────────────────────────────
+                          // LAYER 5.5: Straight Line Preview (for highlighter)
+                          // ─────────────────────────────────────────────────────────
+                          // Real-time preview when drawing straight line
+                          if (straightLinePreviewPoints != null && straightLinePreviewStyle != null)
+                            RepaintBoundary(
+                              child: CustomPaint(
+                                size: size,
+                                painter: ActiveStrokePainter(
+                                  points: straightLinePreviewPoints,
+                                  style: straightLinePreviewStyle,
+                                  renderer: _renderer,
+                                ),
+                                isComplex: false,
+                                willChange: true,
+                              ),
+                            ),
 
                           // ─────────────────────────────────────────────────────────
                           // LAYER 6: Selection Overlay

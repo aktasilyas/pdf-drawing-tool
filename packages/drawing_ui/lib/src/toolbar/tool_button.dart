@@ -131,8 +131,8 @@ class ToolButton extends StatelessWidget {
         return Icons.flash_on;
       case ToolType.highlighter:
         return Icons.highlight;
-      case ToolType.calligraphyPen:
-        return Icons.gesture; // Calligraphy style icon
+      case ToolType.rulerPen:
+        return Icons.straighten; // Ruler icon for straight lines
       case ToolType.pixelEraser:
         return Icons.auto_fix_normal;
       case ToolType.strokeEraser:

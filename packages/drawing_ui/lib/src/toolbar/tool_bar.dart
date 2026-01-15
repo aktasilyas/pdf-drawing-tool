@@ -47,7 +47,7 @@ class _ToolBarState extends ConsumerState<ToolBar> {
     ToolType.dashedPen,
     ToolType.brushPen,
     ToolType.marker,
-    ToolType.calligraphyPen,
+    ToolType.rulerPen,
   ];
 
   /// Fosforlu kalem araçları (ayrı ikon) - panel'de görünür

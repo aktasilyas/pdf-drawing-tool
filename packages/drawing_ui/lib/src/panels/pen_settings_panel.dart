@@ -111,7 +111,7 @@ class PenSettingsPanel extends ConsumerWidget {
       ToolType.dashedPen,
       ToolType.brushPen,
       ToolType.marker,
-      ToolType.calligraphyPen,
+      ToolType.rulerPen,
     ].contains(tool);
   }
 
@@ -284,7 +284,7 @@ class _PenTypeSelector extends StatelessWidget {
     ToolType.dashedPen,
     ToolType.brushPen,
     ToolType.marker,
-    ToolType.calligraphyPen,
+    ToolType.rulerPen,
   ];
 
   @override

@@ -477,8 +477,8 @@ class RealisticPenPainter extends CustomPainter {
         _drawHighlighter(canvas, w, h);
       case ToolType.highlighter:
         _drawHighlighter(canvas, w, h);
-      case ToolType.calligraphyPen:
-        _drawCalligraphyPen(canvas, w, h);
+      case ToolType.rulerPen:
+        _drawrulerPen(canvas, w, h);
       default:
         _drawBallpointPen(canvas, w, h);
     }
@@ -741,70 +741,84 @@ class RealisticPenPainter extends CustomPainter {
     );
   }
 
-  void _drawCalligraphyPen(Canvas canvas, double w, double h) {
-    // Elegant calligraphy pen body
+  void _drawrulerPen(Canvas canvas, double w, double h) {
+    // Ruler pen - pencil with ruler attached
+    
+    // Ruler part (left side)
+    final rulerPaint = Paint()
+      ..color = const Color(0xFFE8D4A8) // Light wood color
+      ..style = PaintingStyle.fill;
+    
+    final rulerPath = Path()
+      ..moveTo(w * 0.15, h * 0.1)
+      ..lineTo(w * 0.35, h * 0.1)
+      ..lineTo(w * 0.35, h * 0.85)
+      ..lineTo(w * 0.15, h * 0.85)
+      ..close();
+    canvas.drawPath(rulerPath, rulerPaint);
+    
+    // Ruler markings
+    final markPaint = Paint()
+      ..color = Colors.black54
+      ..strokeWidth = 0.5
+      ..style = PaintingStyle.stroke;
+    
+    for (var i = 0; i < 8; i++) {
+      final y = h * (0.15 + i * 0.1);
+      final markLength = i % 2 == 0 ? w * 0.1 : w * 0.05;
+      canvas.drawLine(
+        Offset(w * 0.15, y),
+        Offset(w * 0.15 + markLength, y),
+        markPaint,
+      );
+    }
+    
+    // Pencil body (right side, overlapping slightly)
     final bodyPaint = Paint()
-      ..color = Colors.brown.shade800
+      ..color = const Color(0xFF4A7C59) // Green pencil
       ..style = PaintingStyle.fill;
-
-    final goldAccent = Paint()
-      ..color = const Color(0xFFD4AF37)
-      ..style = PaintingStyle.fill;
-
-    // Main body (elegant tapered shape)
+    
     final bodyPath = Path()
-      ..moveTo(w * 0.42, h * 0.02)
-      ..lineTo(w * 0.58, h * 0.02)
-      ..lineTo(w * 0.56, h * 0.6)
-      ..lineTo(w * 0.44, h * 0.6)
+      ..moveTo(w * 0.45, h * 0.05)
+      ..lineTo(w * 0.75, h * 0.05)
+      ..lineTo(w * 0.75, h * 0.65)
+      ..lineTo(w * 0.45, h * 0.65)
       ..close();
     canvas.drawPath(bodyPath, bodyPaint);
-
-    // Gold band decorations
-    canvas.drawRect(
-      Rect.fromLTWH(w * 0.4, h * 0.1, w * 0.2, h * 0.04),
-      goldAccent,
-    );
-    canvas.drawRect(
-      Rect.fromLTWH(w * 0.42, h * 0.55, w * 0.16, h * 0.03),
-      goldAccent,
-    );
-
-    // Angled nib holder
-    final nibHolderPaint = Paint()
-      ..color = Colors.black87
+    
+    // Pencil tip cone
+    final conePaint = Paint()
+      ..color = const Color(0xFFDEB887) // Wood color
       ..style = PaintingStyle.fill;
-
-    final nibHolderPath = Path()
-      ..moveTo(w * 0.44, h * 0.6)
-      ..lineTo(w * 0.56, h * 0.6)
-      ..lineTo(w * 0.54, h * 0.72)
-      ..lineTo(w * 0.46, h * 0.72)
+    
+    final conePath = Path()
+      ..moveTo(w * 0.45, h * 0.65)
+      ..lineTo(w * 0.75, h * 0.65)
+      ..lineTo(w * 0.6, h * 0.85)
       ..close();
-    canvas.drawPath(nibHolderPath, nibHolderPaint);
-
-    // Angled calligraphy nib (characteristic flat angle)
-    final nibPaint = Paint()
+    canvas.drawPath(conePath, conePaint);
+    
+    // Pencil graphite tip
+    final tipPaint = Paint()
       ..color = tipColor
       ..style = PaintingStyle.fill;
-
-    final nibPath = Path()
-      ..moveTo(w * 0.46, h * 0.72)
-      ..lineTo(w * 0.54, h * 0.72)
-      ..lineTo(w * 0.65, h * 0.95) // Angled tip
-      ..lineTo(w * 0.35, h * 0.98)
+    
+    final tipPath = Path()
+      ..moveTo(w * 0.55, h * 0.82)
+      ..lineTo(w * 0.65, h * 0.82)
+      ..lineTo(w * 0.6, h * 0.95)
       ..close();
-    canvas.drawPath(nibPath, nibPaint);
-
-    // Nib slit (characteristic of calligraphy pens)
-    final slitPaint = Paint()
-      ..color = Colors.black54
-      ..strokeWidth = 0.8
+    canvas.drawPath(tipPath, tipPaint);
+    
+    // Straight line indicator on ruler
+    final linePaint = Paint()
+      ..color = tipColor
+      ..strokeWidth = 1.5
       ..style = PaintingStyle.stroke;
     canvas.drawLine(
-      Offset(w * 0.5, h * 0.74),
-      Offset(w * 0.5, h * 0.94),
-      slitPaint,
+      Offset(w * 0.2, h * 0.3),
+      Offset(w * 0.2, h * 0.7),
+      linePaint,
     );
   }
 

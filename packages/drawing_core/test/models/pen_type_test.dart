@@ -110,15 +110,14 @@ void main() {
       expect(config.nibShape, NibShape.rectangle);
     });
 
-    test('calligraphyPen config', () {
-      final config = PenType.calligraphyPen.config;
-      expect(config.displayName, 'Calligraphy Pen');
-      expect(config.displayNameTr, 'Kaligrafi Kalemi');
-      expect(config.defaultThickness, 4.0);
-      expect(config.minThickness, 1.0);
-      expect(config.maxThickness, 15.0);
-      expect(config.nibShape, NibShape.ellipse);
-      expect(config.nibAngle, 45.0);
+    test('rulerPen config', () {
+      final config = PenType.rulerPen.config;
+      expect(config.displayName, 'Ruler Pen');
+      expect(config.displayNameTr, 'Cetvelli Kalem');
+      expect(config.defaultThickness, 2.0);
+      expect(config.minThickness, 0.5);
+      expect(config.maxThickness, 10.0);
+      expect(config.nibShape, NibShape.circle);
     });
   });
 
@@ -186,12 +185,11 @@ void main() {
       expect(style.thickness, 5.0);
     });
 
-    test('calligraphyPen creates angled ellipse style', () {
-      final style = PenType.calligraphyPen.toStrokeStyle(color: 0xFF000000);
+    test('rulerPen creates circle nib style', () {
+      final style = PenType.rulerPen.toStrokeStyle(color: 0xFF000000);
 
-      expect(style.nibShape, NibShape.ellipse);
-      expect(style.nibAngle, 45.0);
-      expect(style.thickness, 4.0);
+      expect(style.nibShape, NibShape.circle);
+      expect(style.thickness, 2.0);
     });
 
     test('all pen types create valid StrokeStyle', () {

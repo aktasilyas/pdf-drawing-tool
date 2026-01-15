@@ -29,8 +29,8 @@ enum PenType {
   /// Neon highlighter with glow effect.
   neonHighlighter,
 
-  /// Calligraphy pen with angled nib for beautiful strokes.
-  calligraphyPen,
+  /// Ruler pen for drawing straight lines.
+  rulerPen,
 }
 
 /// Configuration for each pen type.
@@ -175,15 +175,14 @@ extension PenTypeExtension on PenType {
           glowIntensity: 0.6,
           nibShape: NibShape.rectangle,
         );
-      case PenType.calligraphyPen:
+      case PenType.rulerPen:
         return const PenTypeConfig(
-          displayName: 'Calligraphy Pen',
-          displayNameTr: 'Kaligrafi Kalemi',
-          defaultThickness: 4.0,
-          minThickness: 1.0,
-          maxThickness: 15.0,
-          nibShape: NibShape.ellipse, // Angled ellipse for calligraphy effect
-          nibAngle: 45.0, // 45 degree angle for classic calligraphy look
+          displayName: 'Ruler Pen',
+          displayNameTr: 'Cetvelli Kalem',
+          defaultThickness: 2.0,
+          minThickness: 0.5,
+          maxThickness: 10.0,
+          nibShape: NibShape.circle,
         );
     }
   }

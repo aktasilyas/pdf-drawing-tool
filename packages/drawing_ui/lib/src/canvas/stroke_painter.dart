@@ -112,8 +112,19 @@ class ActiveStrokePainter extends CustomPainter {
     // Repaint when:
     // 1. Point count changed (new point added)
     // 2. Style changed (user changed tool settings)
-    return oldDelegate._pointCount != _pointCount ||
-        oldDelegate.style != style;
+    // 3. Points content changed (for straight line mode where count stays 2 but positions change)
+    if (oldDelegate._pointCount != _pointCount) return true;
+    if (oldDelegate.style != style) return true;
+    
+    // Check if point positions changed (important for straight line preview)
+    if (_pointCount > 0 && _pointCount == oldDelegate._pointCount) {
+      // Compare last point position (most likely to change)
+      final oldLast = oldDelegate.points.last;
+      final newLast = points.last;
+      if (oldLast.x != newLast.x || oldLast.y != newLast.y) return true;
+    }
+    
+    return false;
   }
 }
 

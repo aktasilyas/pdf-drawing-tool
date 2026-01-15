@@ -42,7 +42,8 @@ class QuickAccessRow extends ConsumerWidget {
 
   bool _isDrawingTool(ToolType tool) {
     // Use the isPenTool getter from ToolType
-    return tool.isPenTool || tool == ToolType.highlighter;
+    // Note: neonHighlighter.isPenTool returns true, so it's covered
+    return tool.isPenTool || tool == ToolType.highlighter || tool == ToolType.neonHighlighter;
   }
 }
 
@@ -58,7 +59,8 @@ class QuickColorChips extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Vurgulayıcı için farklı renkler kullan
-    final colors = currentTool == ToolType.highlighter
+    final isHighlighter = currentTool == ToolType.highlighter || currentTool == ToolType.neonHighlighter;
+    final colors = isHighlighter
         ? ColorSets.highlighter.take(5).toList()
         : ColorSets.quickAccess.take(5).toList();
     final selectedColor = _getSelectedColor(ref);
@@ -100,16 +102,17 @@ class QuickColorChips extends ConsumerWidget {
   }
 
   Color _getSelectedColor(WidgetRef ref) {
-    if (currentTool == ToolType.highlighter) {
+    if (currentTool == ToolType.highlighter || currentTool == ToolType.neonHighlighter) {
       return ref.watch(highlighterSettingsProvider).color;
     }
     return ref.watch(penSettingsProvider(currentTool)).color;
   }
 
   void _setColor(WidgetRef ref, Color color) {
-    if (currentTool == ToolType.highlighter) {
-      // For highlighter, apply alpha for transparency
-      final highlighterColor = color.withAlpha(128);
+    if (currentTool == ToolType.highlighter || currentTool == ToolType.neonHighlighter) {
+      // For highlighter, apply alpha for transparency (less for neon)
+      final alpha = currentTool == ToolType.neonHighlighter ? 200 : 128;
+      final highlighterColor = color.withAlpha(alpha);
       ref.read(highlighterSettingsProvider.notifier).setColor(highlighterColor);
     } else {
       ref.read(penSettingsProvider(currentTool).notifier).setColor(color);
@@ -117,7 +120,7 @@ class QuickColorChips extends ConsumerWidget {
   }
 
   void _showColorPalette(BuildContext context, WidgetRef ref, Color selectedColor) {
-    final isHighlighter = currentTool == ToolType.highlighter;
+    final isHighlighter = currentTool == ToolType.highlighter || currentTool == ToolType.neonHighlighter;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -233,22 +236,24 @@ class QuickThicknessDots extends ConsumerWidget {
     );
   }
 
+  bool get _isHighlighter => currentTool == ToolType.highlighter || currentTool == ToolType.neonHighlighter;
+
   double _getSelectedThickness(WidgetRef ref) {
-    if (currentTool == ToolType.highlighter) {
+    if (_isHighlighter) {
       return ref.watch(highlighterSettingsProvider).thickness;
     }
     return ref.watch(penSettingsProvider(currentTool)).thickness;
   }
 
   Color _getToolColor(WidgetRef ref) {
-    if (currentTool == ToolType.highlighter) {
+    if (_isHighlighter) {
       return ref.watch(highlighterSettingsProvider).color;
     }
     return ref.watch(penSettingsProvider(currentTool)).color;
   }
 
   void _setThickness(WidgetRef ref, double thickness) {
-    if (currentTool == ToolType.highlighter) {
+    if (_isHighlighter) {
       // Scale up for highlighter (highlighter is typically thicker)
       final highlighterThickness = thickness * 4;
       ref
@@ -261,7 +266,7 @@ class QuickThicknessDots extends ConsumerWidget {
 
   bool _thicknessMatches(double a, double b) {
     // For highlighter, compare scaled values
-    if (currentTool == ToolType.highlighter) {
+    if (_isHighlighter) {
       return (a * 4 - b).abs() < 0.1;
     }
     return (a - b).abs() < 0.1;
