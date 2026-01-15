@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'pen_icon_painter.dart';
 
-/// Premium pencil icon painter.
+/// Minimalist pencil icon painter.
 ///
-/// Classic yellow wood pencil with pink eraser, gold ferrule, and graphite tip.
-/// Drawn with TIP POINTING UP (top = writing tip, bottom = eraser).
+/// Slim gray pencil with simple design - inspired by iOS style.
+/// Drawn with TIP POINTING UP.
 class PencilIconPainter extends PenIconPainter {
   const PencilIconPainter({
-    super.penColor = const Color(0xFF2D2D2D),
+    super.penColor = const Color(0xFF4A4A4A),
     super.isSelected = false,
     super.size = 56.0,
     super.orientation = PenOrientation.vertical,
@@ -19,35 +19,30 @@ class PencilIconPainter extends PenIconPainter {
     final w = rect.width;
     final h = rect.height;
 
-    // Pencil body - vertical, tip UP (thicker)
+    // Slim pencil body
     path.addRRect(RRect.fromRectAndRadius(
       Rect.fromCenter(
         center: Offset(w * 0.5, h * 0.52),
-        width: w * 0.30,
-        height: h * 0.52,
+        width: w * 0.16,
+        height: h * 0.58,
       ),
       const Radius.circular(2),
     ));
-
-    // Tip triangle
-    path.moveTo(w * 0.35, h * 0.26);
-    path.lineTo(w * 0.5, h * 0.08);
-    path.lineTo(w * 0.65, h * 0.26);
-    path.close();
 
     return path;
   }
 
   @override
   void paintShadow(Canvas canvas, Rect rect) {
+    // Minimal shadow - very subtle
     final shadowPaint = Paint()
-      ..color = Colors.black.withOpacity(0.22)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
+      ..color = Colors.black.withOpacity(0.08)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
 
     final shadowPath = buildBodyPath(rect);
 
     canvas.save();
-    canvas.translate(3, 3.5);
+    canvas.translate(1.5, 2);
     canvas.drawPath(shadowPath, shadowPaint);
     canvas.restore();
   }
@@ -57,23 +52,21 @@ class PencilIconPainter extends PenIconPainter {
     final w = rect.width;
     final h = rect.height;
 
+    // Main body - light gray gradient
     final bodyRect = Rect.fromCenter(
       center: Offset(w * 0.5, h * 0.52),
-      width: w * 0.30,
-      height: h * 0.52,
+      width: w * 0.16,
+      height: h * 0.58,
     );
 
-    // 4-color gradient for cylindrical wood body
     final bodyGradient = LinearGradient(
       begin: Alignment.centerLeft,
       end: Alignment.centerRight,
       colors: const [
-        Color(0xFFFFF3E0), // highlight edge (cream)
-        Color(0xFFFFE0B2), // light wood
-        Color(0xFFFFCC80), // core yellow
-        Color(0xFFE6A84C), // shadow + warm reflected
+        Color(0xFFE8E8E8),
+        Color(0xFFD8D8D8),
+        Color(0xFFCCCCCC),
       ],
-      stops: const [0.0, 0.25, 0.65, 1.0],
     ).createShader(bodyRect);
 
     canvas.drawRRect(
@@ -81,20 +74,14 @@ class PencilIconPainter extends PenIconPainter {
       Paint()..shader = bodyGradient,
     );
 
-    // Subtle wood grain lines
-    final grainPaint = Paint()
-      ..color = const Color(0xFFDDBB88).withOpacity(0.35)
-      ..strokeWidth = 0.8
-      ..style = PaintingStyle.stroke;
-
-    for (var i = -2; i <= 2; i++) {
-      final x = w * 0.5 + i * (w * 0.055);
-      canvas.drawLine(
-        Offset(x, h * 0.30),
-        Offset(x, h * 0.74),
-        grainPaint,
-      );
-    }
+    // Subtle body outline
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(bodyRect, const Radius.circular(2)),
+      Paint()
+        ..color = const Color(0xFFBBBBBB)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 0.5,
+    );
   }
 
   @override
@@ -102,106 +89,39 @@ class PencilIconPainter extends PenIconPainter {
     final w = rect.width;
     final h = rect.height;
 
-    // Sharpened wood cone (at TOP)
-    final conePath = Path();
-    conePath.moveTo(w * 0.35, h * 0.26);
-    conePath.lineTo(w * 0.5, h * 0.08);
-    conePath.lineTo(w * 0.65, h * 0.26);
-    conePath.close();
+    // Sharpened tip cone
+    final tipPath = Path();
+    tipPath.moveTo(w * 0.42, h * 0.23);
+    tipPath.lineTo(w * 0.5, h * 0.08);
+    tipPath.lineTo(w * 0.58, h * 0.23);
+    tipPath.close();
 
-    final coneGradient = LinearGradient(
+    // Light wood color
+    final tipGradient = LinearGradient(
       begin: Alignment.centerLeft,
       end: Alignment.centerRight,
       colors: const [
-        Color(0xFFE8D4B8), // light wood
-        Color(0xFFD4A574), // mid
-        Color(0xFFB8865C), // shadow
+        Color(0xFFE0D0C0),
+        Color(0xFFD0C0B0),
+        Color(0xFFC0B0A0),
       ],
-    ).createShader(conePath.getBounds());
+    ).createShader(tipPath.getBounds());
 
-    canvas.drawPath(conePath, Paint()..shader = coneGradient);
+    canvas.drawPath(tipPath, Paint()..shader = tipGradient);
 
-    // Graphite core - dark with slight sheen (bigger)
+    // Dark graphite point - small triangle
     final graphitePath = Path();
-    graphitePath.moveTo(w * 0.44, h * 0.16);
+    graphitePath.moveTo(w * 0.47, h * 0.14);
     graphitePath.lineTo(w * 0.5, h * 0.08);
-    graphitePath.lineTo(w * 0.56, h * 0.16);
+    graphitePath.lineTo(w * 0.53, h * 0.14);
     graphitePath.close();
 
-    final graphiteGradient = LinearGradient(
-      colors: [
-        penColor.withOpacity(0.8),
-        penColor,
-        penColor.withOpacity(0.9),
-      ],
-    ).createShader(graphitePath.getBounds());
-
-    canvas.drawPath(graphitePath, Paint()..shader = graphiteGradient);
+    canvas.drawPath(graphitePath, Paint()..color = penColor);
   }
 
   @override
   void paintDetails(Canvas canvas, Rect rect) {
-    final w = rect.width;
-    final h = rect.height;
-
-    // Metal ferrule with reflected light (at BOTTOM, above eraser)
-    final ferruleRect = Rect.fromCenter(
-      center: Offset(w * 0.5, h * 0.82),
-      width: w * 0.32,
-      height: h * 0.07,
-    );
-
-    final ferruleGradient = LinearGradient(
-      begin: Alignment.centerLeft,
-      end: Alignment.centerRight,
-      colors: const [
-        Color(0xFFD8D8D8), // highlight
-        Color(0xFFB0B0B0), // light metal
-        Color(0xFF787878), // shadow
-        Color(0xFF989898), // reflected light!
-      ],
-      stops: const [0.0, 0.3, 0.75, 1.0],
-    ).createShader(ferruleRect);
-
-    canvas.drawRect(ferruleRect, Paint()..shader = ferruleGradient);
-
-    // Ferrule ridge lines
-    final ridgePaint = Paint()
-      ..color = const Color(0xFF606060)
-      ..strokeWidth = 0.6;
-
-    for (var i = 0; i < 3; i++) {
-      final y = ferruleRect.top + 2 + i * 3;
-      canvas.drawLine(
-        Offset(ferruleRect.left + 1, y),
-        Offset(ferruleRect.right - 1, y),
-        ridgePaint,
-      );
-    }
-
-    // Pink eraser with gradient (at BOTTOM)
-    final eraserRect = Rect.fromCenter(
-      center: Offset(w * 0.5, h * 0.91),
-      width: w * 0.28,
-      height: h * 0.10,
-    );
-
-    final eraserGradient = LinearGradient(
-      begin: Alignment.centerLeft,
-      end: Alignment.centerRight,
-      colors: const [
-        Color(0xFFFFCDD2), // light pink
-        Color(0xFFEF9A9A), // pink
-        Color(0xFFE57373), // dark pink
-        Color(0xFFEF9A9A), // reflected
-      ],
-      stops: const [0.0, 0.35, 0.75, 1.0],
-    ).createShader(eraserRect);
-
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(eraserRect, const Radius.circular(2)),
-      Paint()..shader = eraserGradient,
-    );
+    // No extra details - minimalist
   }
 
   @override
@@ -209,20 +129,16 @@ class PencilIconPainter extends PenIconPainter {
     final w = rect.width;
     final h = rect.height;
 
-    // Strong white highlight on body left edge
-    final highlightPaint = createHighlightPaint(opacity: 0.6, width: 2.5);
+    // Single subtle highlight line
+    final highlightPaint = Paint()
+      ..color = Colors.white.withOpacity(0.5)
+      ..strokeWidth = 1.2
+      ..strokeCap = StrokeCap.round;
 
     canvas.drawLine(
-      Offset(w * 0.37, h * 0.30),
-      Offset(w * 0.37, h * 0.76),
+      Offset(w * 0.44, h * 0.26),
+      Offset(w * 0.44, h * 0.78),
       highlightPaint,
-    );
-
-    // Small highlight on eraser
-    canvas.drawLine(
-      Offset(w * 0.39, h * 0.87),
-      Offset(w * 0.39, h * 0.95),
-      createHighlightPaint(opacity: 0.45, width: 1.5),
     );
   }
 }

@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'pen_icon_painter.dart';
 
-/// Premium highlighter marker icon painter.
+/// Minimalist highlighter icon painter.
 ///
-/// Wide rectangular body with semi-transparent colored appearance,
-/// chisel tip for broad strokes, colored glow effect.
-/// Drawn with TIP POINTING UP (top = chisel tip, bottom = cap).
+/// Wider body with small colored band - inspired by iOS style.
+/// Drawn with TIP POINTING UP.
 class HighlighterIconPainter extends PenIconPainter {
   const HighlighterIconPainter({
-    super.penColor = const Color(0xFFFFEB3B), // Yellow default
+    super.penColor = const Color(0xFFAB47BC), // Purple default
     super.isSelected = false,
     super.size = 56.0,
     super.orientation = PenOrientation.vertical,
@@ -23,10 +22,10 @@ class HighlighterIconPainter extends PenIconPainter {
     path.addRRect(RRect.fromRectAndRadius(
       Rect.fromCenter(
         center: Offset(w * 0.5, h * 0.52),
-        width: w * 0.38,
-        height: h * 0.48,
+        width: w * 0.20,
+        height: h * 0.56,
       ),
-      const Radius.circular(5),
+      const Radius.circular(4),
     ));
 
     return path;
@@ -34,24 +33,15 @@ class HighlighterIconPainter extends PenIconPainter {
 
   @override
   void paintShadow(Canvas canvas, Rect rect) {
-    // Colored shadow for glow effect
-    final glowPaint = Paint()
-      ..color = penColor.withOpacity(0.30)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 9);
+    final shadowPaint = Paint()
+      ..color = Colors.black.withOpacity(0.08)
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
 
-    final bodyPath = buildBodyPath(rect);
+    final shadowPath = buildBodyPath(rect);
 
     canvas.save();
-    canvas.translate(2.5, 3.5);
-    canvas.drawPath(bodyPath, glowPaint);
-
-    // Also dark shadow for depth
-    canvas.drawPath(
-      bodyPath,
-      Paint()
-        ..color = Colors.black.withOpacity(0.14)
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
-    );
+    canvas.translate(1.5, 2);
+    canvas.drawPath(shadowPath, shadowPaint);
     canvas.restore();
   }
 
@@ -62,58 +52,44 @@ class HighlighterIconPainter extends PenIconPainter {
 
     final bodyRect = Rect.fromCenter(
       center: Offset(w * 0.5, h * 0.52),
-      width: w * 0.38,
-      height: h * 0.48,
+      width: w * 0.20,
+      height: h * 0.56,
     );
 
-    // Semi-transparent colored body with 4-color gradient
+    // Clean white body
     final bodyGradient = LinearGradient(
       begin: Alignment.centerLeft,
       end: Alignment.centerRight,
-      colors: [
-        penColor.withOpacity(0.55), // highlight - more transparent
-        penColor.withOpacity(0.78), // mid
-        penColor.withOpacity(0.88), // core
-        penColor.withOpacity(0.72), // shadow side
+      colors: const [
+        Color(0xFFFAFAFA),
+        Color(0xFFF0F0F0),
+        Color(0xFFE8E8E8),
       ],
-      stops: const [0.0, 0.3, 0.65, 1.0],
     ).createShader(bodyRect);
 
     canvas.drawRRect(
-      RRect.fromRectAndRadius(bodyRect, const Radius.circular(5)),
+      RRect.fromRectAndRadius(bodyRect, const Radius.circular(4)),
       Paint()..shader = bodyGradient,
     );
 
-    // Cap (at bottom, more opaque)
-    final capRect = Rect.fromCenter(
-      center: Offset(w * 0.5, h * 0.84),
-      width: w * 0.40,
-      height: h * 0.11,
-    );
-
-    final capGradient = LinearGradient(
-      begin: Alignment.centerLeft,
-      end: Alignment.centerRight,
-      colors: [
-        penColor.withOpacity(0.72),
-        penColor.withOpacity(0.92),
-        penColor,
-        penColor.withOpacity(0.88),
-      ],
-    ).createShader(capRect);
-
     canvas.drawRRect(
-      RRect.fromRectAndRadius(capRect, const Radius.circular(4)),
-      Paint()..shader = capGradient,
+      RRect.fromRectAndRadius(bodyRect, const Radius.circular(4)),
+      Paint()
+        ..color = const Color(0xFFD4D4D4)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 0.5,
     );
 
-    // Cap ring
-    final ringRect = Rect.fromCenter(
-      center: Offset(w * 0.5, h * 0.78),
-      width: w * 0.38,
-      height: h * 0.025,
+    // Small colored band/dot near top
+    final bandRect = Rect.fromCenter(
+      center: Offset(w * 0.5, h * 0.30),
+      width: w * 0.06,
+      height: h * 0.04,
     );
-    canvas.drawRect(ringRect, Paint()..color = penColor);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(bandRect, const Radius.circular(2)),
+      Paint()..color = penColor,
+    );
   }
 
   @override
@@ -121,38 +97,40 @@ class HighlighterIconPainter extends PenIconPainter {
     final w = rect.width;
     final h = rect.height;
 
-    // Chisel tip (at TOP) - bigger
+    // Chisel/flat tip
     final tipPath = Path();
-    tipPath.moveTo(w * 0.31, h * 0.28);
-    tipPath.lineTo(w * 0.38, h * 0.10);
-    tipPath.lineTo(w * 0.62, h * 0.10);
-    tipPath.lineTo(w * 0.69, h * 0.28);
+    tipPath.moveTo(w * 0.40, h * 0.24);
+    tipPath.lineTo(w * 0.44, h * 0.12);
+    tipPath.lineTo(w * 0.56, h * 0.12);
+    tipPath.lineTo(w * 0.60, h * 0.24);
     tipPath.close();
 
     final tipGradient = LinearGradient(
       begin: Alignment.centerLeft,
       end: Alignment.centerRight,
-      colors: [
-        penColor.withOpacity(0.82),
-        penColor.withOpacity(0.96),
-        penColor,
-        penColor.withOpacity(0.92),
+      colors: const [
+        Color(0xFFE8E8E8),
+        Color(0xFFDCDCDC),
+        Color(0xFFD0D0D0),
       ],
     ).createShader(tipPath.getBounds());
 
     canvas.drawPath(tipPath, Paint()..shader = tipGradient);
 
-    // Tip edge (darker for definition)
-    final edgePaint = Paint()
-      ..color = penColor.withOpacity(0.65)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.8;
-
+    // Small colored tip edge
     canvas.drawLine(
-      Offset(w * 0.38, h * 0.10),
-      Offset(w * 0.62, h * 0.10),
-      edgePaint,
+      Offset(w * 0.45, h * 0.12),
+      Offset(w * 0.55, h * 0.12),
+      Paint()
+        ..color = penColor.withOpacity(0.7)
+        ..strokeWidth = 1.5
+        ..strokeCap = StrokeCap.round,
     );
+  }
+
+  @override
+  void paintDetails(Canvas canvas, Rect rect) {
+    // Minimalist
   }
 
   @override
@@ -160,20 +138,15 @@ class HighlighterIconPainter extends PenIconPainter {
     final w = rect.width;
     final h = rect.height;
 
-    final highlightPaint = createHighlightPaint(opacity: 0.65, width: 3.0);
+    final highlightPaint = Paint()
+      ..color = Colors.white.withOpacity(0.6)
+      ..strokeWidth = 1.5
+      ..strokeCap = StrokeCap.round;
 
-    // Strong body highlight
     canvas.drawLine(
-      Offset(w * 0.34, h * 0.32),
-      Offset(w * 0.34, h * 0.74),
+      Offset(w * 0.42, h * 0.28),
+      Offset(w * 0.42, h * 0.76),
       highlightPaint,
-    );
-
-    // Cap highlight
-    canvas.drawLine(
-      Offset(w * 0.35, h * 0.80),
-      Offset(w * 0.35, h * 0.88),
-      createHighlightPaint(opacity: 0.55, width: 2.0),
     );
   }
 }
