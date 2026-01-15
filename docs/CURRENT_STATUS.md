@@ -11,19 +11,19 @@
 |-----|-------|
 | **Current Phase** | 4E - Enhancement & Cleanup |
 | **Current Module** | 4E-2 Custom Pen Icons |
-| **Current Step** | 4E-2.6 Test & Polish |
-| **Last Commit** | feat(ui): integrate custom pen icons into Toolbar |
+| **Current Step** | 4E-4.1 HSV Color Wheel |
+| **Last Commit** | test(ui): add PenIcon widget and painter tests |
 | **Branch** | feature/phase4e-enhancements |
 
 ---
 
 ## Next Task
 
-**Görev:** PenIcon testleri yaz ve polish
+**Görev:** HSV color wheel widget oluştur
 
-**Dosya:** Test dosyaları
+**Dosya:** `packages/drawing_ui/lib/src/widgets/color_picker/`
 
-**Talimat dosyası:** `docs/PHASE4E_CURSOR_INSTRUCTIONS.md` → ADIM 4E-2.6
+**Talimat dosyası:** `docs/PHASE4E_CURSOR_INSTRUCTIONS.md` → ADIM 4E-4.1
 
 ---
 
@@ -31,7 +31,9 @@
 
 ```
 4E-1: Pen Types    [██████] 6/6 ✅
-4E-2: Pen Icons    [█████_] 5/6
+4E-2: Pen Icons    [██████] 6/6 ✅
+4E-3: Eraser Modes [______] 0/5 (4E-4'ten sonra)
+4E-4: Color Picker [______] 0/6
 4E-3: Eraser Modes [_____]  0/5
 4E-4: Color Picker [______] 0/6
 4E-5: Toolbar UX   [_____]  0/5
