@@ -2,3 +2,6 @@ export 'pen_icon_painter.dart';
 export 'pencil_icon_painter.dart';
 export 'hard_pencil_icon_painter.dart';
 export 'ballpoint_icon_painter.dart';
+export 'gel_pen_icon_painter.dart';
+export 'dashed_pen_icon_painter.dart';
+export 'highlighter_icon_painter.dart';
