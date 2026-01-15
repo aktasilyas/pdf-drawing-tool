@@ -409,7 +409,7 @@ class _PenPresetItem extends StatelessWidget {
                   color: preset.color,
                   isSelected: isSelected,
                   size: 26,
-                  orientation: PenOrientation.vertical,
+                  orientation: PenOrientation.horizontal,
                 ),
               ),
             ),
