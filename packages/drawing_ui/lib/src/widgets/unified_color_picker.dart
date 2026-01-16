@@ -3,95 +3,99 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flex_color_picker/flex_color_picker.dart';
 import 'package:drawing_ui/src/providers/recent_colors_provider.dart';
 
-/// Renk setleri tanımları
+/// Premium renk paleti - 24 renk, 4 satır
+class PremiumColors {
+  PremiumColors._();
+
+  /// Gri tonları (6)
+  static const List<Color> grayscale = [
+    Color(0xFF000000), // Pure Black
+    Color(0xFF3D3D3D), // Charcoal
+    Color(0xFF6B6B6B), // Dark Gray
+    Color(0xFFA0A0A0), // Medium Gray
+    Color(0xFFD4D4D4), // Light Gray
+    Color(0xFFFFFFFF), // Pure White
+  ];
+
+  /// Canlı renkler (6)
+  static const List<Color> vivid = [
+    Color(0xFFE53935), // Red
+    Color(0xFFFB8C00), // Orange
+    Color(0xFFFFD600), // Yellow
+    Color(0xFF43A047), // Green
+    Color(0xFF1E88E5), // Blue
+    Color(0xFF8E24AA), // Purple
+  ];
+
+  /// Soft renkler (6)
+  static const List<Color> soft = [
+    Color(0xFFFFCDD2), // Soft Pink
+    Color(0xFFFFE0B2), // Soft Peach
+    Color(0xFFFFF9C4), // Soft Yellow
+    Color(0xFFC8E6C9), // Soft Green
+    Color(0xFFBBDEFB), // Soft Blue
+    Color(0xFFE1BEE7), // Soft Purple
+  ];
+
+  /// Aksan renkler (6)
+  static const List<Color> accent = [
+    Color(0xFF6D4C41), // Brown
+    Color(0xFF546E7A), // Blue Gray
+    Color(0xFF37474F), // Dark Slate
+    Color(0xFFD32F2F), // Deep Red
+    Color(0xFF1565C0), // Deep Blue
+    Color(0xFFAD1457), // Deep Pink
+  ];
+
+  /// Tüm renkler (24)
+  static List<Color> get all => [
+        ...grayscale,
+        ...vivid,
+        ...soft,
+        ...accent,
+      ];
+
+  /// Hızlı erişim (6)
+  static const List<Color> quickAccess = [
+    Color(0xFF000000), // Black
+    Color(0xFFE53935), // Red
+    Color(0xFF1E88E5), // Blue
+    Color(0xFF43A047), // Green
+    Color(0xFFFB8C00), // Orange
+    Color(0xFF8E24AA), // Purple
+  ];
+
+  /// Vurgulayıcı (5) - yarı saydam
+  static const List<Color> highlighter = [
+    Color(0x80FFD600), // Yellow
+    Color(0x8043A047), // Green
+    Color(0x801E88E5), // Blue
+    Color(0x80E91E63), // Pink
+    Color(0x80FB8C00), // Orange
+  ];
+}
+
+/// Renk setleri (eski API uyumluluğu için)
 class ColorSets {
   ColorSets._();
 
-  /// Temel renkler
-  static const List<Color> basic = [
-    Color(0xFF000000), // Siyah
-    Color(0xFF666666), // Koyu gri
-    Color(0xFF999999), // Gri
-    Color(0xFFFFFFFF), // Beyaz
-    Color(0xFFFF0000), // Kırmızı
-    Color(0xFFFF9800), // Turuncu
-    Color(0xFFFFEB3B), // Sarı
-    Color(0xFF4CAF50), // Yeşil
-    Color(0xFF2196F3), // Mavi
-    Color(0xFF9C27B0), // Mor
-    Color(0xFFE91E63), // Pembe
-    Color(0xFF795548), // Kahverengi
-  ];
+  static List<Color> get basic => PremiumColors.all;
+  static const List<Color> pastel = PremiumColors.soft;
+  static const List<Color> neon = PremiumColors.vivid;
+  static const List<Color> highlighter = PremiumColors.highlighter;
+  static const List<Color> quickAccess = PremiumColors.quickAccess;
 
-  /// Pastel renkler
-  static const List<Color> pastel = [
-    Color(0xFFFFCDD2), // Açık pembe
-    Color(0xFFFFE0B2), // Açık turuncu
-    Color(0xFFFFF9C4), // Açık sarı
-    Color(0xFFC8E6C9), // Açık yeşil
-    Color(0xFFB3E5FC), // Açık mavi
-    Color(0xFFE1BEE7), // Açık mor
-    Color(0xFFD7CCC8), // Açık kahve
-    Color(0xFFCFD8DC), // Açık gri-mavi
-    Color(0xFFF8BBD0), // Soft pembe
-    Color(0xFFDCEDC8), // Soft yeşil
-    Color(0xFFB2EBF2), // Soft cyan
-    Color(0xFFD1C4E9), // Soft lavanta
-  ];
-
-  /// Neon renkler
-  static const List<Color> neon = [
-    Color(0xFFFF1744), // Neon kırmızı
-    Color(0xFFFF9100), // Neon turuncu
-    Color(0xFFFFEA00), // Neon sarı
-    Color(0xFF00E676), // Neon yeşil
-    Color(0xFF00B0FF), // Neon mavi
-    Color(0xFFD500F9), // Neon mor
-    Color(0xFFFF4081), // Neon pembe
-    Color(0xFF1DE9B6), // Neon turkuaz
-    Color(0xFF76FF03), // Neon lime
-    Color(0xFFE040FB), // Neon fuşya
-    Color(0xFF00E5FF), // Neon cyan
-    Color(0xFFFFFF00), // Parlak sarı
-  ];
-
-  /// Vurgulayıcı renkleri (yarı saydam)
-  static const List<Color> highlighter = [
-    Color(0x80FFEB3B), // Sarı
-    Color(0x804CAF50), // Yeşil
-    Color(0x8000BCD4), // Cyan
-    Color(0x802196F3), // Mavi
-    Color(0x80E91E63), // Pembe
-    Color(0x80FF9800), // Turuncu
-    Color(0x809C27B0), // Mor
-    Color(0x80F44336), // Kırmızı
-  ];
-
-  /// Lazer renkleri
   static const List<Color> laser = [
-    Color(0xFFFF0000), // Kırmızı
-    Color(0xFF00FF00), // Yeşil
-    Color(0xFF0000FF), // Mavi
-    Color(0xFFFFFF00), // Sarı
-    Color(0xFFFF00FF), // Magenta
+    Color(0xFFFF0000),
+    Color(0xFF00FF00),
+    Color(0xFF0000FF),
+    Color(0xFFFFFF00),
+    Color(0xFFFF00FF),
   ];
 
-  /// Varsayılan hızlı erişim renkleri
-  static const List<Color> quickAccess = [
-    Color(0xFF000000), // Siyah
-    Color(0xFF4A9DFF), // Mavi
-    Color(0xFFFF5252), // Kırmızı
-    Color(0xFF4CAF50), // Yeşil
-    Color(0xFFFF9800), // Turuncu
-    Color(0xFF9C27B0), // Mor
-  ];
-
-  /// Tüm renk setleri
-  static const Map<String, List<Color>> all = {
-    'Temel': basic,
-    'Pastel': pastel,
-    'Neon': neon,
-  };
+  static Map<String, List<Color>> get all => {
+        'Temel': PremiumColors.all,
+      };
 }
 
 /// Ortak renk seçici widget.
@@ -295,7 +299,18 @@ class ColorPaletteSheet extends StatefulWidget {
 }
 
 class _ColorPaletteSheetState extends State<ColorPaletteSheet> {
-  bool _showWheel = false;
+  late Color _selectedColor;
+  bool _showCustomPicker = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedColor = widget.selectedColor;
+  }
+
+  String _colorToHex(Color color) {
+    return '#${(color.value & 0xFFFFFF).toRadixString(16).padLeft(6, '0').toUpperCase()}';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -304,31 +319,30 @@ class _ColorPaletteSheetState extends State<ColorPaletteSheet> {
         final recentColors = ref.watch(recentColorsProvider);
 
         return Container(
-          margin: const EdgeInsets.all(12),
+          margin: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(20),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withAlpha(30),
-                blurRadius: 20,
-                offset: const Offset(0, -4),
+                color: Colors.black.withAlpha(25),
+                blurRadius: 30,
+                offset: const Offset(0, 8),
               ),
             ],
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Kompakt Header
-              _buildCompactHeader(ref),
-              const Divider(height: 1),
+              // Header
+              _buildHeader(),
 
-              // Color Grids veya Wheel
+              // Content
               Padding(
-                padding: const EdgeInsets.all(12),
-                child: _showWheel
-                    ? _buildWheelPicker(ref)
-                    : _buildCompactPalettes(ref, recentColors),
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+                child: _showCustomPicker
+                    ? _buildCustomPicker(ref)
+                    : _buildPremiumPalette(ref, recentColors),
               ),
             ],
           ),
@@ -337,72 +351,29 @@ class _ColorPaletteSheetState extends State<ColorPaletteSheet> {
     );
   }
 
-  Widget _buildCompactHeader(WidgetRef ref) {
+  Widget _buildHeader() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 12, 8, 8),
+      padding: const EdgeInsets.fromLTRB(20, 16, 12, 12),
       child: Row(
         children: [
-          // Seçili renk önizleme
-          Container(
-            width: 24,
-            height: 24,
-            decoration: BoxDecoration(
-              color: widget.selectedColor,
-              borderRadius: BorderRadius.circular(6),
-              border: Border.all(
-                color: widget.selectedColor.computeLuminance() > 0.8
-                    ? Colors.grey.shade300
-                    : Colors.transparent,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
           const Text(
-            'Renk Seç',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+            'Renk Seçici',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              letterSpacing: -0.3,
+            ),
           ),
           const Spacer(),
-          // Wheel toggle
-          GestureDetector(
-            onTap: () => setState(() => _showWheel = !_showWheel),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: _showWheel
-                    ? const Color(0xFF4A9DFF).withAlpha(20)
-                    : Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    _showWheel ? Icons.palette : Icons.color_lens,
-                    size: 14,
-                    color: _showWheel
-                        ? const Color(0xFF4A9DFF)
-                        : Colors.grey.shade600,
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    _showWheel ? 'Paletler' : 'Özel',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: _showWheel
-                          ? const Color(0xFF4A9DFF)
-                          : Colors.grey.shade600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(width: 4),
           GestureDetector(
             onTap: () => Navigator.pop(context),
-            child: const Padding(
-              padding: EdgeInsets.all(4),
-              child: Icon(Icons.close, size: 18, color: Color(0xFF666666)),
+            child: Container(
+              padding: const EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.close, size: 16, color: Color(0xFF666666)),
             ),
           ),
         ],
@@ -410,123 +381,273 @@ class _ColorPaletteSheetState extends State<ColorPaletteSheet> {
     );
   }
 
-  Widget _buildCompactPalettes(WidgetRef ref, List<Color> recentColors) {
+  Widget _buildPremiumPalette(WidgetRef ref, List<Color> recentColors) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         // Recent colors (varsa)
         if (recentColors.isNotEmpty) ...[
-          _buildColorRow('Son Kullanılan', recentColors.take(8).toList(), ref),
-          const SizedBox(height: 10),
+          Text(
+            'Son Kullanılan',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey.shade500,
+            ),
+          ),
+          const SizedBox(height: 8),
+          _buildColorGrid(recentColors.take(6).toList(), ref),
+          const SizedBox(height: 16),
+          Divider(height: 1, color: Colors.grey.shade200),
+          const SizedBox(height: 16),
         ],
-        // Temel renkler
-        _buildColorRow('Temel', ColorSets.basic, ref),
+
+        // 4x6 Premium Grid
+        _buildColorGrid(PremiumColors.grayscale, ref),
         const SizedBox(height: 10),
-        // Pastel
-        _buildColorRow('Pastel', ColorSets.pastel, ref),
+        _buildColorGrid(PremiumColors.vivid, ref),
         const SizedBox(height: 10),
-        // Neon
-        _buildColorRow('Neon', ColorSets.neon, ref),
+        _buildColorGrid(PremiumColors.soft, ref),
+        const SizedBox(height: 10),
+        _buildColorGrid(PremiumColors.accent, ref),
+
+        const SizedBox(height: 16),
+        Divider(height: 1, color: Colors.grey.shade200),
+        const SizedBox(height: 16),
+
+        // Bottom: Hex + Custom button
+        _buildBottomRow(ref),
       ],
     );
   }
 
-  Widget _buildColorRow(String label, List<Color> colors, WidgetRef ref) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w500,
-            color: Colors.grey.shade500,
+  Widget _buildColorGrid(List<Color> colors, WidgetRef ref) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: colors.map((color) {
+        final isSelected = _colorsMatch(color, _selectedColor);
+        return GestureDetector(
+          onTap: () {
+            setState(() => _selectedColor = color);
+            ref.read(recentColorsProvider.notifier).addColor(color);
+            widget.onColorSelected(color);
+          },
+          child: Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: isSelected
+                    ? const Color(0xFF4A9DFF)
+                    : (color.computeLuminance() > 0.85
+                        ? Colors.grey.shade300
+                        : Colors.transparent),
+                width: isSelected ? 2.5 : 1,
+              ),
+              boxShadow: [
+                if (isSelected)
+                  BoxShadow(
+                    color: const Color(0xFF4A9DFF).withAlpha(40),
+                    blurRadius: 8,
+                    spreadRadius: 2,
+                  )
+                else
+                  BoxShadow(
+                    color: Colors.black.withAlpha(10),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+              ],
+            ),
+            child: isSelected
+                ? Icon(
+                    Icons.check,
+                    size: 18,
+                    color: color.computeLuminance() > 0.5
+                        ? Colors.black87
+                        : Colors.white,
+                  )
+                : null,
           ),
-        ),
-        const SizedBox(height: 6),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: colors.map((color) {
-            final isSelected = _colorsMatch(color, widget.selectedColor);
-            return GestureDetector(
-              onTap: () {
-                ref.read(recentColorsProvider.notifier).addColor(color);
-                widget.onColorSelected(color);
-              },
-              child: Container(
-                width: 28,
-                height: 28,
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildBottomRow(WidgetRef ref) {
+    return Row(
+      children: [
+        // Hex preview
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade50,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.grey.shade200),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 20,
+                height: 20,
                 decoration: BoxDecoration(
-                  color: color,
-                  shape: BoxShape.circle,
+                  color: _selectedColor,
+                  borderRadius: BorderRadius.circular(5),
                   border: Border.all(
-                    color: isSelected
-                        ? const Color(0xFF4A9DFF)
-                        : (color.computeLuminance() > 0.8
-                            ? Colors.grey.shade300
-                            : Colors.transparent),
-                    width: isSelected ? 2 : 1,
+                    color: _selectedColor.computeLuminance() > 0.85
+                        ? Colors.grey.shade300
+                        : Colors.transparent,
                   ),
                 ),
-                child: isSelected
-                    ? Icon(
-                        Icons.check,
-                        size: 14,
-                        color: color.computeLuminance() > 0.5
-                            ? Colors.black
-                            : Colors.white,
-                      )
-                    : null,
               ),
-            );
-          }).toList(),
+              const SizedBox(width: 8),
+              Text(
+                _colorToHex(_selectedColor),
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  fontFamily: 'monospace',
+                  color: Colors.grey.shade700,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const Spacer(),
+        // Custom color button
+        GestureDetector(
+          onTap: () => setState(() => _showCustomPicker = true),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: const Color(0xFF4A9DFF).withAlpha(12),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.colorize,
+                  size: 16,
+                  color: Color(0xFF4A9DFF),
+                ),
+                SizedBox(width: 6),
+                Text(
+                  'Özel Renk',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF4A9DFF),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildWheelPicker(WidgetRef ref) {
-    return ColorPicker(
-      color: widget.selectedColor,
-      onColorChanged: (Color color) {
-        ref.read(recentColorsProvider.notifier).addColor(color);
-        widget.onColorSelected(color);
-      },
-      width: 28,
-      height: 28,
-      spacing: 6,
-      runSpacing: 6,
-      borderRadius: 14,
-      wheelDiameter: 140,
-      wheelWidth: 14,
-      wheelHasBorder: false,
-      enableShadesSelection: false,
-      enableTonalPalette: false,
-      pickersEnabled: const <ColorPickerType, bool>{
-        ColorPickerType.both: false,
-        ColorPickerType.primary: false,
-        ColorPickerType.accent: false,
-        ColorPickerType.bw: false,
-        ColorPickerType.custom: false,
-        ColorPickerType.customSecondary: false,
-        ColorPickerType.wheel: true,
-      },
-      showRecentColors: false,
-      showColorCode: true,
-      colorCodeHasColor: true,
-      colorCodeReadOnly: false,
-      showColorName: false,
-      copyPasteBehavior: const ColorPickerCopyPasteBehavior(
-        copyButton: false,
-        pasteButton: false,
-      ),
-      actionButtons: const ColorPickerActionButtons(
-        okButton: false,
-        closeButton: false,
-        dialogActionButtons: false,
-      ),
+  Widget _buildCustomPicker(WidgetRef ref) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Back button
+        Row(
+          children: [
+            GestureDetector(
+              onTap: () => setState(() => _showCustomPicker = false),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.arrow_back_ios, size: 12, color: Colors.grey.shade600),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Paletler',
+                      style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        // Wheel picker
+        ColorPicker(
+          color: _selectedColor,
+          onColorChanged: (Color color) {
+            setState(() => _selectedColor = color);
+          },
+          width: 32,
+          height: 32,
+          spacing: 8,
+          runSpacing: 8,
+          borderRadius: 16,
+          wheelDiameter: 180,
+          wheelWidth: 20,
+          wheelHasBorder: false,
+          enableShadesSelection: false,
+          enableTonalPalette: false,
+          pickersEnabled: const <ColorPickerType, bool>{
+            ColorPickerType.both: false,
+            ColorPickerType.primary: false,
+            ColorPickerType.accent: false,
+            ColorPickerType.bw: false,
+            ColorPickerType.custom: false,
+            ColorPickerType.customSecondary: false,
+            ColorPickerType.wheel: true,
+          },
+          showRecentColors: false,
+          showColorCode: true,
+          colorCodeHasColor: true,
+          colorCodeReadOnly: false,
+          showColorName: false,
+          copyPasteBehavior: const ColorPickerCopyPasteBehavior(
+            copyButton: false,
+            pasteButton: false,
+          ),
+          actionButtons: const ColorPickerActionButtons(
+            okButton: false,
+            closeButton: false,
+            dialogActionButtons: false,
+          ),
+        ),
+        const SizedBox(height: 16),
+        // Apply button
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: () {
+              ref.read(recentColorsProvider.notifier).addColor(_selectedColor);
+              widget.onColorSelected(_selectedColor);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF4A9DFF),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              elevation: 0,
+            ),
+            child: const Text(
+              'Uygula',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+            ),
+          ),
+        ),
+      ],
     );
   }
 

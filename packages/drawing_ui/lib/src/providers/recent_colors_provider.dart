@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Son kullanılan renkler yöneticisi (max 12)
+/// Son kullanılan renkler yöneticisi (max 6)
 class RecentColorsNotifier extends StateNotifier<List<Color>> {
   RecentColorsNotifier() : super([]);
 
   /// Maksimum renk sayısı
-  static const int maxColors = 12;
+  static const int maxColors = 6;
 
   /// Yeni renk ekle (başa ekler, duplicate varsa önce kaldırır)
   void addColor(Color color) {
