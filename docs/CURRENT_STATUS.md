@@ -10,9 +10,9 @@
 | Key | Value |
 |-----|-------|
 | **Current Phase** | 4E - Enhancement & Cleanup |
-| **Current Module** | 4E-2 Custom Pen Icons |
+| **Current Module** | 4E-4 Advanced Color Picker |
 | **Current Step** | 4E-4.1 HSV Color Wheel |
-| **Last Commit** | test(ui): add PenIcon widget and painter tests |
+| **Last Commit** | feat(ui): integrate flutter_pen_toolbar package, remove custom painters |
 | **Branch** | feature/phase4e-enhancements |
 
 ---
@@ -31,10 +31,8 @@
 
 ```
 4E-1: Pen Types    [██████] 6/6 ✅
-4E-2: Pen Icons    [██████] 6/6 ✅
+4E-2: Pen Icons    [██████] 6/6 ✅ (flutter_pen_toolbar)
 4E-3: Eraser Modes [______] 0/5 (4E-4'ten sonra)
-4E-4: Color Picker [______] 0/6
-4E-3: Eraser Modes [_____]  0/5
 4E-4: Color Picker [______] 0/6
 4E-5: Toolbar UX   [_____]  0/5
 4E-6: Performance  [_____]  0/5
@@ -57,15 +55,17 @@
 ## Notes
 
 - Phase 4A-4D tamamlandı (Eraser, Selection, Shapes, Text)
-- 9 kalem tipi eklendi: pencil, hardPencil, ballpoint, gel, dashed, highlighter, brush, marker, neon
-- **rulerPen** eklendi (düz çizgi çizen kalem)
-- Fosforlu kalem için **düz çizgi modu** eklendi
-- **Neon Highlighter toolbar** düzeltildi (renk/kalınlık çalışıyor)
-- PenIconPainter base class oluşturuldu
-- Custom Canvas ikonları çizilecek
+- 9 kalem tipi: pencil, hardPencil, ballpoint, gel, dashed, highlighter, brush, neon, rulerPen
+- **marker kaldırıldı** (projeden tamamen silindi)
+- **flutter_pen_toolbar paketi entegre edildi** (GitHub'dan)
+- Custom pen icon painters silindi (flutter_pen_toolbar kullanılıyor)
+- PenTypeMapper oluşturuldu (drawing_core ↔ toolbar mapping)
+- PenIconWidget güncellendi (toolbar.PenPainter kullanıyor)
+- Fosforlu kalem için **düz çizgi modu** var
+- **Neon Highlighter toolbar** düzeltildi
 - PixelEraser ve LassoEraser tamamlanacak
 - Gelişmiş Color Picker eklenecek
 
 ---
 
-*Last updated: 2026-01-15*
+*Last updated: 2026-01-16*

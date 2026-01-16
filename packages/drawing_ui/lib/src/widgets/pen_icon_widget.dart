@@ -29,7 +29,7 @@ class PenIconWidget extends StatelessWidget {
   /// The pen type to display.
   final PenType penType;
 
-  /// The color of the pen stripe/accent.
+  /// The color of the pen stripe and tip.
   final Color color;
 
   /// Whether the pen is currently selected.
@@ -63,7 +63,13 @@ class PenIconWidget extends StatelessWidget {
       penHeight: size,
       stripeHeight: size * 0.06,
       stripeTopOffset: size * 0.15,
+      // Selection animation offsets
+      selectedOffset: 0,
+      unselectedOffset: size * -0.15,
     );
+
+    // Calculate the offset for selection animation
+    final double verticalOffset = isSelected ? config.selectedOffset : config.unselectedOffset;
 
     Widget penWidget = CustomPaint(
       size: Size(size * 0.5, size),
@@ -84,10 +90,20 @@ class PenIconWidget extends StatelessWidget {
       );
     }
 
+    // Wrap with animated offset for selection effect
     return SizedBox(
       width: size,
       height: size,
-      child: Center(child: penWidget),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOutCubic,
+        transform: Matrix4.translationValues(
+          orientation == PenOrientation.horizontal ? -verticalOffset : 0,
+          orientation == PenOrientation.vertical ? verticalOffset : 0,
+          0,
+        ),
+        child: Center(child: penWidget),
+      ),
     );
   }
 }
@@ -100,7 +116,7 @@ class ToolPenIcon extends StatelessWidget {
   /// The tool type to display.
   final ToolType toolType;
 
-  /// Optional color override for the pen stripe.
+  /// Optional color override for the pen stripe and tip.
   final Color? color;
 
   /// Whether the tool is currently selected.

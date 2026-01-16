@@ -286,10 +286,7 @@ class _PenPresetItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Soft selection - subtle background only
-    final bgColor =
-        isSelected ? preset.color.withAlpha(15) : Colors.transparent;
-
+    // No background color - pen selection is shown via offset animation
     if (isHorizontal) {
       // Horizontal item layout
       return GestureDetector(
@@ -298,10 +295,6 @@ class _PenPresetItem extends StatelessWidget {
           width: 40,
           margin: const EdgeInsets.symmetric(horizontal: 1),
           padding: const EdgeInsets.symmetric(vertical: 3),
-          decoration: BoxDecoration(
-            color: bgColor,
-            borderRadius: BorderRadius.circular(6),
-          ),
           child: Stack(
             alignment: Alignment.center,
             children: [
@@ -361,17 +354,13 @@ class _PenPresetItem extends StatelessWidget {
       );
     }
 
-    // Vertical item layout
+    // Vertical item layout - no background color, selection shown via pen offset
     return GestureDetector(
       onTap: onTap,
       child: Container(
         height: 36,
         margin: const EdgeInsets.symmetric(vertical: 1),
         padding: const EdgeInsets.symmetric(horizontal: 4),
-        decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(6),
-        ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
