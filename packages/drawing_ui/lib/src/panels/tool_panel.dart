@@ -33,12 +33,19 @@ class ToolPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = DrawingTheme.of(context);
 
+    // Yatay/dikey ekrana göre maxHeight ayarla
+    final screenSize = MediaQuery.of(context).size;
+    final isLandscape = screenSize.width > screenSize.height;
+    final maxPanelHeight = isLandscape
+        ? screenSize.height * 0.85  // Yatay: ekranın %85'i
+        : screenSize.height * 0.7;  // Dikey: ekranın %70'i
+
     return Material(
       color: Colors.transparent,
       child: Container(
         width: width ?? theme.panelMaxWidth,
         constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.7,
+          maxHeight: maxPanelHeight,
         ),
         decoration: BoxDecoration(
           color: theme.panelBackground,

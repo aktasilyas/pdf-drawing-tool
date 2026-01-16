@@ -22,9 +22,9 @@ enum PenOrientation {
 /// Uses the toolbar package's PenPainter for consistent,
 /// premium pen icon rendering.
 ///
-/// The [orientation] parameter controls the pen direction:
-/// - [PenOrientation.vertical]: Tip points UP (for popup/settings)
-/// - [PenOrientation.horizontal]: Tip points RIGHT (for PenBox)
+/// NOTE: This widget does NOT handle selection animation.
+/// Animation should be handled by the parent widget using
+/// AnimatedPositioned inside a ClipRect for proper clipping.
 class PenIconWidget extends StatelessWidget {
   /// The pen type to display.
   final PenType penType;
@@ -32,7 +32,7 @@ class PenIconWidget extends StatelessWidget {
   /// The color of the pen stripe and tip.
   final Color color;
 
-  /// Whether the pen is currently selected.
+  /// Whether the pen is currently selected (for visual styling only).
   final bool isSelected;
 
   /// The size of the icon.
@@ -63,13 +63,10 @@ class PenIconWidget extends StatelessWidget {
       penHeight: size,
       stripeHeight: size * 0.06,
       stripeTopOffset: size * 0.15,
-      // Selection animation offsets
+      // Disable internal animation - we handle it externally
       selectedOffset: 0,
-      unselectedOffset: size * -0.15,
+      unselectedOffset: 0,
     );
-
-    // Calculate the offset for selection animation
-    final double verticalOffset = isSelected ? config.selectedOffset : config.unselectedOffset;
 
     Widget penWidget = CustomPaint(
       size: Size(size * 0.5, size),
@@ -90,20 +87,11 @@ class PenIconWidget extends StatelessWidget {
       );
     }
 
-    // Wrap with animated offset for selection effect
+    // NO animation here - parent handles animation with AnimatedPositioned
     return SizedBox(
-      width: size,
-      height: size,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        curve: Curves.easeOutCubic,
-        transform: Matrix4.translationValues(
-          orientation == PenOrientation.horizontal ? -verticalOffset : 0,
-          orientation == PenOrientation.vertical ? verticalOffset : 0,
-          0,
-        ),
-        child: Center(child: penWidget),
-      ),
+      width: orientation == PenOrientation.horizontal ? size : size * 0.5,
+      height: orientation == PenOrientation.horizontal ? size * 0.5 : size,
+      child: Center(child: penWidget),
     );
   }
 }
@@ -112,6 +100,9 @@ class PenIconWidget extends StatelessWidget {
 ///
 /// Automatically maps ToolType to PenType and displays
 /// the appropriate pen icon using flutter_pen_toolbar.
+///
+/// NOTE: This widget does NOT handle selection animation.
+/// Animation should be handled by the parent widget.
 class ToolPenIcon extends StatelessWidget {
   /// The tool type to display.
   final ToolType toolType;

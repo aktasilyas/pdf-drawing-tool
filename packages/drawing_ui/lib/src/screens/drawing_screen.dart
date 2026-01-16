@@ -96,12 +96,15 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                         ),
                       ),
 
-                    // Floating panel (left side, offset for pen box)
+                    // Floating panel (centered horizontally)
                     if (activePanel != null)
                       Positioned(
-                        left: 70,
+                        left: 0,
+                        right: 0,
                         top: 16,
-                        child: _buildActivePanel(activePanel),
+                        child: Center(
+                          child: _buildActivePanel(activePanel),
+                        ),
                       ),
 
                     // AI Assistant button (right bottom)

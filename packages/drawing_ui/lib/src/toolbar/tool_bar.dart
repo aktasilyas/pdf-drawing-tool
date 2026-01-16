@@ -105,75 +105,82 @@ class _ToolBarState extends ConsumerState<ToolBar> {
           ),
         ),
       ),
-      child: Row(
-        children: [
-          const SizedBox(width: 8),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Küçük ekranlarda QuickAccessRow'u gizle
+          final showQuickAccess = constraints.maxWidth > 500;
+          
+          return Row(
+            children: [
+              const SizedBox(width: 4),
 
-          // Undo/Redo section
-          _UndoRedoButtons(
-            canUndo: canUndo,
-            canRedo: canRedo,
-            onUndo: widget.onUndoPressed,
-            onRedo: widget.onRedoPressed,
-          ),
-
-          // Divider
-          _VerticalDivider(),
-
-          // Tools section (scrollable)
-          Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: visibleTools.map((tool) {
-                  final isPenGroup = _isPenTool(tool);
-                  final isSelected = _isToolSelected(tool, currentTool);
-                  final hasPanel = _toolsWithPanel.contains(tool);
-
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 2),
-                    child: ToolButton(
-                      toolType: tool,
-                      isSelected: isSelected,
-                      buttonKey: _toolButtonKeys[tool],
-                      onPressed: () => _onToolPressed(tool),
-                      onPanelTap: hasPanel ? () => _onPanelTap(tool) : null,
-                      hasPanel: hasPanel,
-                      // Kalem grubu için aktif kalem ikonunu göster
-                      customIcon: isPenGroup && _isPenTool(currentTool)
-                          ? ToolButton.getIconForTool(currentTool)
-                          : null,
-                    ),
-                  );
-                }).toList(),
+              // Undo/Redo section
+              _UndoRedoButtons(
+                canUndo: canUndo,
+                canRedo: canRedo,
+                onUndo: widget.onUndoPressed,
+                onRedo: widget.onRedoPressed,
               ),
-            ),
-          ),
 
-          // Divider
-          _VerticalDivider(),
+              // Divider
+              _VerticalDivider(),
 
-          // Quick access (colors & thickness)
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 4),
-            child: QuickAccessRow(),
-          ),
+              // Tools section (scrollable)
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: visibleTools.map((tool) {
+                      final isPenGroup = _isPenTool(tool);
+                      final isSelected = _isToolSelected(tool, currentTool);
+                      final hasPanel = _toolsWithPanel.contains(tool);
 
-          // Divider
-          _VerticalDivider(),
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 2),
+                        child: ToolButton(
+                          toolType: tool,
+                          isSelected: isSelected,
+                          buttonKey: _toolButtonKeys[tool],
+                          onPressed: () => _onToolPressed(tool),
+                          onPanelTap: hasPanel ? () => _onPanelTap(tool) : null,
+                          hasPanel: hasPanel,
+                          // Kalem grubu için aktif kalem ikonunu göster
+                          customIcon: isPenGroup && _isPenTool(currentTool)
+                              ? ToolButton.getIconForTool(currentTool)
+                              : null,
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
 
-          // Toolbar config button
-          _ConfigButton(
-            onPressed: () {
-              widget.onSettingsPressed?.call();
-              _openToolbarEditor();
-            },
-          ),
+              // Quick access (only on larger screens)
+              if (showQuickAccess) ...[
+                _VerticalDivider(),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 4),
+                  child: QuickAccessRow(),
+                ),
+              ],
 
-          const SizedBox(width: 8),
-        ],
+              // Divider
+              _VerticalDivider(),
+
+              // Toolbar config button
+              _ConfigButton(
+                onPressed: () {
+                  widget.onSettingsPressed?.call();
+                  _openToolbarEditor();
+                },
+              ),
+
+              const SizedBox(width: 4),
+            ],
+          );
+        },
       ),
     );
   }

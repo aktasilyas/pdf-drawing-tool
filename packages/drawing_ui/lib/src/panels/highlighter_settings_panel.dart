@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/widgets/unified_color_picker.dart';
+import 'package:drawing_ui/src/widgets/pen_icon_widget.dart';
 import 'package:drawing_ui/src/panels/tool_panel.dart';
 
 /// Settings panel for the highlighter tools (highlighter + neonHighlighter).
@@ -29,6 +30,7 @@ class HighlighterSettingsPanel extends ConsumerWidget {
           // Highlighter type selector
           _HighlighterTypeSelector(
             selectedType: currentTool,
+            selectedColor: settings.color,
             onTypeSelected: (type) {
               ref.read(currentToolProvider.notifier).state = type;
             },
@@ -46,13 +48,17 @@ class HighlighterSettingsPanel extends ConsumerWidget {
           // Thickness slider (compact)
           _CompactSlider(
             title: 'Kalınlık',
-            value: settings.thickness.clamp(isNeon ? 8.0 : 10.0, isNeon ? 30.0 : 40.0),
+            value: settings.thickness
+                .clamp(isNeon ? 8.0 : 10.0, isNeon ? 30.0 : 40.0),
             min: isNeon ? 8.0 : 10.0,
             max: isNeon ? 30.0 : 40.0,
-            label: '${settings.thickness.clamp(isNeon ? 8.0 : 10.0, isNeon ? 30.0 : 40.0).toStringAsFixed(0)}mm',
+            label:
+                '${settings.thickness.clamp(isNeon ? 8.0 : 10.0, isNeon ? 30.0 : 40.0).toStringAsFixed(0)}mm',
             color: settings.color,
             onChanged: (value) {
-              ref.read(highlighterSettingsProvider.notifier).setThickness(value);
+              ref
+                  .read(highlighterSettingsProvider.notifier)
+                  .setThickness(value);
             },
           ),
           const SizedBox(height: 10),
@@ -67,7 +73,9 @@ class HighlighterSettingsPanel extends ConsumerWidget {
               label: '${(settings.glowIntensity * 100).round()}%',
               color: settings.color,
               onChanged: (value) {
-                ref.read(highlighterSettingsProvider.notifier).setGlowIntensity(value);
+                ref
+                    .read(highlighterSettingsProvider.notifier)
+                    .setGlowIntensity(value);
               },
             ),
             const SizedBox(height: 10),
@@ -78,7 +86,9 @@ class HighlighterSettingsPanel extends ConsumerWidget {
             label: 'Düz çizgi',
             value: settings.straightLineMode,
             onChanged: (value) {
-              ref.read(highlighterSettingsProvider.notifier).setStraightLineMode(value);
+              ref
+                  .read(highlighterSettingsProvider.notifier)
+                  .setStraightLineMode(value);
             },
           ),
           const SizedBox(height: 12),
@@ -102,28 +112,29 @@ class HighlighterSettingsPanel extends ConsumerWidget {
     );
   }
 
-  void _addToPenBox(BuildContext context, WidgetRef ref, HighlighterSettings settings, bool isNeon) {
+  void _addToPenBox(BuildContext context, WidgetRef ref,
+      HighlighterSettings settings, bool isNeon) {
     final presets = ref.read(penBoxPresetsProvider);
     final toolType = isNeon ? ToolType.neonHighlighter : ToolType.highlighter;
-    
+
     // Duplicate kontrolü
-    final isDuplicate = presets.any((p) => 
-      !p.isEmpty &&
-      p.toolType == toolType &&
-      p.color.value == settings.color.value &&
-      (p.thickness - settings.thickness).abs() < 0.1
-    );
-    
+    final isDuplicate = presets.any((p) =>
+        !p.isEmpty &&
+        p.toolType == toolType &&
+        p.color.value == settings.color.value &&
+        (p.thickness - settings.thickness).abs() < 0.1);
+
     if (isDuplicate) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Bu ${isNeon ? "neon fosforlu" : "fosforlu kalem"} zaten kalem kutusunda mevcut'),
+          content: Text(
+              'Bu ${isNeon ? "neon fosforlu" : "fosforlu kalem"} zaten kalem kutusunda mevcut'),
           duration: const Duration(seconds: 2),
         ),
       );
       return;
     }
-    
+
     final newPreset = PenPreset(
       id: 'preset_${DateTime.now().millisecondsSinceEpoch}',
       toolType: toolType,
@@ -132,7 +143,7 @@ class HighlighterSettingsPanel extends ConsumerWidget {
       nibShape: NibShapeType.rectangle,
     );
     ref.read(penBoxPresetsProvider.notifier).addPreset(newPreset);
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Kalem kutusuna eklendi'),
@@ -142,92 +153,115 @@ class HighlighterSettingsPanel extends ConsumerWidget {
   }
 }
 
-/// Highlighter type selector (2 options: normal + neon)
+/// Highlighter type selector - GoodNotes/Fenci style toolbar.
+/// Pens are vertical, tip UP, bottom clipped by container.
+/// Selected pen rises up to show more body.
 class _HighlighterTypeSelector extends StatelessWidget {
   const _HighlighterTypeSelector({
     required this.selectedType,
+    required this.selectedColor,
     required this.onTypeSelected,
   });
 
   final ToolType selectedType;
+  final Color selectedColor;
   final ValueChanged<ToolType> onTypeSelected;
+
+  static const _highlighterTypes = [
+    ToolType.highlighter,
+    ToolType.neonHighlighter,
+  ];
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _HighlighterTypeButton(
-            label: 'Fosforlu',
-            icon: Icons.highlight,
-            isSelected: selectedType == ToolType.highlighter,
-            onTap: () => onTypeSelected(ToolType.highlighter),
+    return Container(
+      height: 52,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(15),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _HighlighterTypeButton(
-            label: 'Neon',
-            icon: Icons.flash_on,
-            isSelected: selectedType == ToolType.neonHighlighter,
-            onTap: () => onTypeSelected(ToolType.neonHighlighter),
-            isNeon: true,
-          ),
-        ),
-      ],
+        ],
+      ),
+      clipBehavior: Clip.hardEdge,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: _highlighterTypes.map((type) {
+          final isSelected = type == selectedType;
+          return _HighlighterSlot(
+            type: type,
+            isSelected: isSelected,
+            selectedColor: selectedColor,
+            onTap: () => onTypeSelected(type),
+          );
+        }).toList(),
+      ),
     );
   }
 }
 
-class _HighlighterTypeButton extends StatelessWidget {
-  const _HighlighterTypeButton({
-    required this.label,
-    required this.icon,
+/// Single highlighter slot with proper clipping and animation.
+class _HighlighterSlot extends StatelessWidget {
+  const _HighlighterSlot({
+    required this.type,
     required this.isSelected,
+    required this.selectedColor,
     required this.onTap,
-    this.isNeon = false,
   });
 
-  final String label;
-  final IconData icon;
+  final ToolType type;
   final bool isSelected;
+  final Color selectedColor;
   final VoidCallback onTap;
-  final bool isNeon;
+
+  // Highlighter dimensions (wider than regular pens)
+  static const double _penHeight = 70;
+  static const double _slotHeight = 52;
+  static const double _slotWidth = 56;
+
+  // Vertical offsets
+  static const double _selectedTopOffset = -8;
+  static const double _unselectedTopOffset = 6;
 
   @override
   Widget build(BuildContext context) {
-    final selectedColor = isNeon ? const Color(0xFFFF00FF) : const Color(0xFFFFEB3B);
-    
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected ? selectedColor.withAlpha(30) : Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isSelected ? selectedColor : Colors.grey.shade300,
-            width: isSelected ? 1.5 : 0.5,
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 18,
-              color: isSelected ? selectedColor : Colors.grey.shade600,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                color: isSelected ? Colors.black87 : Colors.grey.shade600,
+    final displayName = type.displayName;
+
+    return Tooltip(
+      message: displayName,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: SizedBox(
+          width: _slotWidth,
+          height: _slotHeight,
+          child: ClipRect(
+            child: OverflowBox(
+              maxHeight: _penHeight + 20,
+              alignment: Alignment.topCenter,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOutCubic,
+                height: _penHeight,
+                margin: EdgeInsets.only(
+                  top: isSelected
+                      ? _selectedTopOffset + 10
+                      : _unselectedTopOffset + 10,
+                ),
+                child: ToolPenIcon(
+                  toolType: type,
+                  color: isSelected ? selectedColor : Colors.grey.shade400,
+                  isSelected: false,
+                  size: _penHeight,
+                  orientation: PenOrientation.vertical,
+                ),
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -308,8 +342,16 @@ class _CompactSlider extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(title, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.grey.shade600)),
-            Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF333333))),
+            Text(title,
+                style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey.shade600)),
+            Text(label,
+                style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF333333))),
           ],
         ),
         const SizedBox(height: 4),
@@ -324,7 +366,8 @@ class _CompactSlider extends StatelessWidget {
               inactiveTrackColor: Colors.grey.shade200,
               thumbColor: color ?? const Color(0xFF4A9DFF),
             ),
-            child: Slider(value: value, min: min, max: max, onChanged: onChanged),
+            child:
+                Slider(value: value, min: min, max: max, onChanged: onChanged),
           ),
         ),
       ],
@@ -349,7 +392,8 @@ class _CompactToggle extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: const TextStyle(fontSize: 12, color: Color(0xFF333333))),
+        Text(label,
+            style: const TextStyle(fontSize: 12, color: Color(0xFF333333))),
         Transform.scale(
           scale: 0.75,
           child: Switch(
@@ -402,10 +446,17 @@ class _CompactHighlighterColors extends StatelessWidget {
         UnifiedColorPicker(
           selectedColor: selectedColor,
           onColorSelected: onColorSelected,
-          quickColors: isNeon ? _neonColors : ColorSets.highlighter.take(6).toList(),
+          quickColors:
+              isNeon ? _neonColors : ColorSets.highlighter.take(6).toList(),
           colorSets: isNeon
-              ? const {'Neon': _neonColors, 'Vurgulayıcı': ColorSets.highlighter}
-              : const {'Vurgulayıcı': ColorSets.highlighter, 'Pastel': ColorSets.pastel},
+              ? const {
+                  'Neon': _neonColors,
+                  'Vurgulayıcı': ColorSets.highlighter
+                }
+              : const {
+                  'Vurgulayıcı': ColorSets.highlighter,
+                  'Pastel': ColorSets.pastel
+                },
           chipSize: 28.0,
           spacing: 6.0,
           isHighlighter: true,
@@ -437,7 +488,11 @@ class _CompactAddButton extends StatelessWidget {
           children: [
             Icon(Icons.add, size: 14, color: Color(0xFF374151)),
             SizedBox(width: 6),
-            Text('Kalem kutusuna ekle', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF374151))),
+            Text('Kalem kutusuna ekle',
+                style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF374151))),
           ],
         ),
       ),

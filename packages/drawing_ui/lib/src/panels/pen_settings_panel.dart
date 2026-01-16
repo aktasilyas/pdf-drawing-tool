@@ -48,6 +48,7 @@ class PenSettingsPanel extends ConsumerWidget {
           // Pen type selector (compact)
           _PenTypeSelector(
             selectedType: currentTool,
+            selectedColor: settings.color,
             onTypeSelected: (type) {
               ref.read(currentToolProvider.notifier).state = type;
             },
@@ -57,13 +58,16 @@ class PenSettingsPanel extends ConsumerWidget {
           // Thickness slider (compact) - dynamic range based on tool
           _CompactSliderSection(
             title: 'Kalınlık',
-            value: settings.thickness.clamp(_getMinThickness(activePenTool), _getMaxThickness(activePenTool)),
+            value: settings.thickness.clamp(_getMinThickness(activePenTool),
+                _getMaxThickness(activePenTool)),
             min: _getMinThickness(activePenTool),
             max: _getMaxThickness(activePenTool),
             label: '${settings.thickness.toStringAsFixed(1)}mm',
             color: settings.color,
             onChanged: (value) {
-              ref.read(penSettingsProvider(activePenTool).notifier).setThickness(value);
+              ref
+                  .read(penSettingsProvider(activePenTool).notifier)
+                  .setThickness(value);
             },
           ),
           const SizedBox(height: 12),
@@ -76,7 +80,9 @@ class PenSettingsPanel extends ConsumerWidget {
             max: 1.0,
             label: '${(settings.stabilization * 100).round()}%',
             onChanged: (value) {
-              ref.read(penSettingsProvider(activePenTool).notifier).setStabilization(value);
+              ref
+                  .read(penSettingsProvider(activePenTool).notifier)
+                  .setStabilization(value);
             },
           ),
           const SizedBox(height: 14),
@@ -85,7 +91,9 @@ class PenSettingsPanel extends ConsumerWidget {
           _CompactColorRow(
             selectedColor: settings.color,
             onColorSelected: (color) {
-              ref.read(penSettingsProvider(activePenTool).notifier).setColor(color);
+              ref
+                  .read(penSettingsProvider(activePenTool).notifier)
+                  .setColor(color);
             },
           ),
           const SizedBox(height: 14),
@@ -147,15 +155,14 @@ class PenSettingsPanel extends ConsumerWidget {
     final currentTool = ref.read(currentToolProvider);
     // Güncel kalem tipinin ayarlarını al
     final currentSettings = ref.read(penSettingsProvider(currentTool));
-    
+
     // Duplicate kontrolü - aynı tool, renk ve kalınlık varsa ekleme
-    final isDuplicate = presets.any((p) => 
-      !p.isEmpty &&
-      p.toolType == currentTool &&
-      p.color.value == currentSettings.color.value &&
-      (p.thickness - currentSettings.thickness).abs() < 0.1
-    );
-    
+    final isDuplicate = presets.any((p) =>
+        !p.isEmpty &&
+        p.toolType == currentTool &&
+        p.color.value == currentSettings.color.value &&
+        (p.thickness - currentSettings.thickness).abs() < 0.1);
+
     if (isDuplicate) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -165,7 +172,7 @@ class PenSettingsPanel extends ConsumerWidget {
       );
       return;
     }
-    
+
     final newPreset = PenPreset(
       id: 'preset_${DateTime.now().millisecondsSinceEpoch}',
       toolType: currentTool,
@@ -174,7 +181,7 @@ class PenSettingsPanel extends ConsumerWidget {
       nibShape: currentSettings.nibShape,
     );
     ref.read(penBoxPresetsProvider.notifier).addPreset(newPreset);
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Kalem kutusuna eklendi'),
@@ -264,17 +271,20 @@ class _StrokePreviewPainter extends CustomPainter {
   }
 }
 
-/// Selector for pen types (7 kalem - fosforlu hariç).
+/// Selector for pen types - GoodNotes/Fenci style toolbar.
+/// Pens are vertical, tip UP, bottom clipped by container.
+/// Selected pen rises up to show more body.
 class _PenTypeSelector extends StatelessWidget {
   const _PenTypeSelector({
     required this.selectedType,
+    required this.selectedColor,
     required this.onTypeSelected,
   });
 
   final ToolType selectedType;
+  final Color selectedColor;
   final ValueChanged<ToolType> onTypeSelected;
 
-  // Sadece kalemler (highlighter'lar ayrı panel'de)
   static const _penTypes = [
     ToolType.pencil,
     ToolType.hardPencil,
@@ -287,58 +297,96 @@ class _PenTypeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 6,
-      runSpacing: 6,
-      alignment: WrapAlignment.center,
-      children: _penTypes.map((type) {
-        final isSelected = type == selectedType;
-        return _PenTypeOption(
-          type: type,
-          isSelected: isSelected,
-          onTap: () => onTypeSelected(type),
-        );
-      }).toList(),
+    return Container(
+      height: 52,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withAlpha(15),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      // ÖNEMLİ: clipBehavior ile taşan kısımları kes
+      clipBehavior: Clip.hardEdge,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: _penTypes.map((type) {
+          final isSelected = type == selectedType;
+          return _PenSlot(
+            type: type,
+            isSelected: isSelected,
+            selectedColor: selectedColor,
+            onTap: () => onTypeSelected(type),
+          );
+        }).toList(),
+      ),
     );
   }
 }
 
-/// A single pen type option (compact).
-class _PenTypeOption extends StatelessWidget {
-  const _PenTypeOption({
+/// Single pen slot with proper clipping and animation.
+/// Pen is taller than visible area, bottom gets clipped.
+/// Selected pen rises up to reveal more of the body.
+class _PenSlot extends StatelessWidget {
+  const _PenSlot({
     required this.type,
     required this.isSelected,
+    required this.selectedColor,
     required this.onTap,
   });
 
   final ToolType type;
   final bool isSelected;
+  final Color selectedColor;
   final VoidCallback onTap;
 
-  static const _selectedColor = Color(0xFF4A9DFF);
+  // Pen dimensions
+  static const double _penHeight = 70; // Kalem tam yüksekliği
+  static const double _slotHeight = 52; // Görünür alan (container height)
+  static const double _slotWidth = 36; // Her slot genişliği
+
+  // Vertical offsets (negative = pen moves UP, showing more body)
+  static const double _selectedTopOffset = -8; // Seçili: yukarı çık
+  static const double _unselectedTopOffset = 6; // Seçili değil: aşağıda kal
 
   @override
   Widget build(BuildContext context) {
-    // Get display name from PenType config
     final displayName = type.penType?.config.displayNameTr ?? type.displayName;
 
     return Tooltip(
       message: displayName,
       child: GestureDetector(
         onTap: onTap,
-        child: Container(
-          width: 44,
-          height: 50,
-          decoration: BoxDecoration(
-            color: isSelected ? _selectedColor.withAlpha(20) : Colors.transparent,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Center(
-            child:             ToolPenIcon(
-              toolType: type,
-              color: isSelected ? _selectedColor : Colors.grey.shade600,
-              isSelected: isSelected,
-              size: 52,
+        behavior: HitTestBehavior.opaque,
+        child: SizedBox(
+          width: _slotWidth,
+          height: _slotHeight,
+          // ClipRect - kalem taşmasını keser
+          child: ClipRect(
+            child: OverflowBox(
+              maxHeight: _penHeight + 20, // Animasyon için ekstra alan
+              alignment: Alignment.topCenter,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOutCubic,
+                height: _penHeight,
+                margin: EdgeInsets.only(
+                  top: isSelected
+                      ? _selectedTopOffset + 10
+                      : _unselectedTopOffset + 10,
+                ),
+                child: ToolPenIcon(
+                  toolType: type,
+                  color: isSelected ? selectedColor : Colors.grey.shade400,
+                  isSelected: false, // Selection handled by color
+                  size: _penHeight,
+                  orientation: PenOrientation.vertical,
+                ),
+              ),
             ),
           ),
         ),

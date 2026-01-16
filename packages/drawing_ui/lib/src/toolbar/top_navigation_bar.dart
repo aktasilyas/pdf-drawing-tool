@@ -34,76 +34,72 @@ class TopNavigationBar extends ConsumerWidget {
           ),
         ),
       ),
-      child: Row(
-        children: [
-          // Left actions
-          _NavButton(
-            icon: Icons.arrow_back,
-            tooltip: 'Geri',
-            onPressed: onBackPressed ?? () => _showPlaceholder(context, 'Geri'),
-          ),
-          _NavButton(
-            icon: Icons.camera_alt_outlined,
-            tooltip: 'Kamera',
-            onPressed: () => _showPlaceholder(context, 'Kamera'),
-          ),
-          _NavButton(
-            icon: Icons.crop,
-            tooltip: 'Kırp',
-            onPressed: () => _showPlaceholder(context, 'Kırp'),
-          ),
-          _NavButton(
-            icon: Icons.mic_none,
-            tooltip: 'Ses kaydı',
-            onPressed: () => _showPlaceholder(context, 'Ses kaydı'),
-          ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Küçük ekranlarda daha az buton göster
+          final isSmallScreen = constraints.maxWidth < 500;
+          
+          return Row(
+            children: [
+              // Left actions - always visible
+              _NavButton(
+                icon: Icons.arrow_back,
+                tooltip: 'Geri',
+                onPressed: onBackPressed ?? () => _showPlaceholder(context, 'Geri'),
+              ),
+              if (!isSmallScreen) ...[
+                _NavButton(
+                  icon: Icons.camera_alt_outlined,
+                  tooltip: 'Kamera',
+                  onPressed: () => _showPlaceholder(context, 'Kamera'),
+                ),
+                _NavButton(
+                  icon: Icons.crop,
+                  tooltip: 'Kırp',
+                  onPressed: () => _showPlaceholder(context, 'Kırp'),
+                ),
+              ],
 
-          // Center - Document tabs
-          Expanded(
-            child: _DocumentTabs(),
-          ),
+              // Center - Document tabs
+              Expanded(
+                child: _DocumentTabs(),
+              ),
 
-          // Right actions
-          _NavButton(
-            icon: Icons.menu_book_outlined,
-            tooltip: 'Okuyucu modu',
-            onPressed: () => _showPlaceholder(context, 'Okuyucu modu'),
-          ),
-          _NavButton(
-            icon: Icons.home_outlined,
-            tooltip: 'Ana sayfa',
-            onPressed: () => _showPlaceholder(context, 'Ana sayfa'),
-          ),
-          _NavButton(
-            icon: Icons.layers_outlined,
-            tooltip: 'Katmanlar',
-            onPressed: () => _showPlaceholder(context, 'Katmanlar'),
-          ),
-          _NavButton(
-            icon: Icons.ios_share,
-            tooltip: 'Dışa aktar',
-            onPressed: () => _showPlaceholder(context, 'Dışa aktar'),
-          ),
-          _NavButton(
-            icon: gridVisible ? Icons.grid_on : Icons.grid_off,
-            tooltip: gridVisible ? 'Izgarayı gizle' : 'Izgarayı göster',
-            isActive: gridVisible,
-            onPressed: () {
-              ref.read(gridVisibilityProvider.notifier).state = !gridVisible;
-            },
-          ),
-          _NavButton(
-            icon: Icons.settings_outlined,
-            tooltip: 'Ayarlar',
-            onPressed: () => _showPlaceholder(context, 'Ayarlar'),
-          ),
-          _NavButton(
-            icon: Icons.more_horiz,
-            tooltip: 'Daha fazla',
-            onPressed: () => _showPlaceholder(context, 'Daha fazla'),
-          ),
-          const SizedBox(width: 4),
-        ],
+              // Right actions - responsive
+              if (!isSmallScreen) ...[
+                _NavButton(
+                  icon: Icons.menu_book_outlined,
+                  tooltip: 'Okuyucu modu',
+                  onPressed: () => _showPlaceholder(context, 'Okuyucu modu'),
+                ),
+                _NavButton(
+                  icon: Icons.home_outlined,
+                  tooltip: 'Ana sayfa',
+                  onPressed: () => _showPlaceholder(context, 'Ana sayfa'),
+                ),
+              ],
+              _NavButton(
+                icon: Icons.layers_outlined,
+                tooltip: 'Katmanlar',
+                onPressed: () => _showPlaceholder(context, 'Katmanlar'),
+              ),
+              _NavButton(
+                icon: gridVisible ? Icons.grid_on : Icons.grid_off,
+                tooltip: gridVisible ? 'Izgarayı gizle' : 'Izgarayı göster',
+                isActive: gridVisible,
+                onPressed: () {
+                  ref.read(gridVisibilityProvider.notifier).state = !gridVisible;
+                },
+              ),
+              _NavButton(
+                icon: Icons.more_horiz,
+                tooltip: 'Daha fazla',
+                onPressed: () => _showPlaceholder(context, 'Daha fazla'),
+              ),
+              const SizedBox(width: 4),
+            ],
+          );
+        },
       ),
     );
   }
@@ -145,9 +141,9 @@ class _NavButton extends StatelessWidget {
           onTap: onPressed,
           borderRadius: BorderRadius.circular(6),
           child: Container(
-            width: 36,
-            height: 36,
-            margin: const EdgeInsets.symmetric(horizontal: 2),
+            width: 32,
+            height: 32,
+            margin: const EdgeInsets.symmetric(horizontal: 1),
             decoration: BoxDecoration(
               color: isActive
                   ? theme.toolbarIconSelectedColor.withAlpha(25)
@@ -156,7 +152,7 @@ class _NavButton extends StatelessWidget {
             ),
             child: Icon(
               icon,
-              size: 20,
+              size: 18,
               color: isActive
                   ? theme.toolbarIconSelectedColor
                   : theme.toolbarIconColor,
