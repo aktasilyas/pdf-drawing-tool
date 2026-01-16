@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/widgets/pen_icon_widget.dart';
-import 'package:drawing_ui/src/painters/pen_icons/pen_icon_painter.dart';
 
 /// Floating pen box that appears on the canvas.
 /// Draggable, collapsible, with edit mode for removing pens.
@@ -287,9 +286,6 @@ class _PenPresetItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Pen rotation angle - always horizontal (0)
-    final penAngle = 0.0;
-
     // Soft selection - subtle background only
     final bgColor =
         isSelected ? preset.color.withAlpha(15) : Colors.transparent;

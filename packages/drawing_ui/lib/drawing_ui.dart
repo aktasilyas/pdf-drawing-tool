@@ -59,6 +59,12 @@ export 'src/widgets/unified_color_picker.dart';
 export 'src/widgets/floating_pen_box.dart';
 export 'src/widgets/pen_icon_widget.dart';
 
+// Utils
+export 'src/utils/pen_type_mapper.dart';
+
+// Re-export flutter_pen_toolbar for convenience
+export 'package:flutter_pen_toolbar/flutter_pen_toolbar.dart';
+
 // State Management
 export 'src/providers/drawing_providers.dart';
 export 'src/providers/document_provider.dart';

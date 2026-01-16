@@ -77,6 +77,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
+  flutter_pen_toolbar:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: main
+      resolved-ref: d6b726eff8b38ad5df8066d75f0375549b02b570
+      url: "https://github.com/aktasilyas/flutter_pen_toolbar.git"
+    source: git
+    version: "1.0.0"
   flutter_riverpod:
     dependency: "direct main"
     description:

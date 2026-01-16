@@ -1,12 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:flutter_pen_toolbar/flutter_pen_toolbar.dart' as toolbar;
 import 'package:drawing_ui/src/models/tool_type.dart';
-import '../painters/pen_icons/pen_icons.dart';
+import 'package:drawing_ui/src/utils/pen_type_mapper.dart';
 
-/// Widget that displays a custom pen icon based on pen type.
+/// Orientation of the pen icon.
 ///
-/// Uses custom painters to render premium, realistic pen icons
-/// with gradients, shadows, and 3D depth effects.
+/// Controls the direction the pen tip points:
+/// - [vertical]: Tip points UP (for popup/settings panels)
+/// - [horizontal]: Tip points RIGHT (for PenBox, toward canvas)
+enum PenOrientation {
+  /// Tip points UP - used in popup/settings panels.
+  vertical,
+
+  /// Tip points RIGHT - used in PenBox (toward canvas).
+  horizontal,
+}
+
+/// Widget that displays a pen icon using flutter_pen_toolbar.
+///
+/// Uses the toolbar package's PenPainter for consistent,
+/// premium pen icon rendering.
 ///
 /// The [orientation] parameter controls the pen direction:
 /// - [PenOrientation.vertical]: Tip points UP (for popup/settings)
@@ -15,7 +29,7 @@ class PenIconWidget extends StatelessWidget {
   /// The pen type to display.
   final PenType penType;
 
-  /// The color of the pen tip/ink.
+  /// The color of the pen stripe/accent.
   final Color color;
 
   /// Whether the pen is currently selected.
@@ -41,90 +55,52 @@ class PenIconWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      size: Size(size, size),
-      painter: _getPainter(),
-    );
-  }
+    final toolbarPenType = PenTypeMapper.toToolbarPenType(penType);
 
-  PenIconPainter _getPainter() {
-    switch (penType) {
-      case PenType.pencil:
-        return PencilIconPainter(
-          penColor: color,
-          isSelected: isSelected,
-          size: size,
-          orientation: orientation,
-        );
-      case PenType.hardPencil:
-        return HardPencilIconPainter(
-          penColor: color,
-          isSelected: isSelected,
-          size: size,
-          orientation: orientation,
-        );
-      case PenType.ballpointPen:
-        return BallpointIconPainter(
-          penColor: color,
-          isSelected: isSelected,
-          size: size,
-          orientation: orientation,
-        );
-      case PenType.gelPen:
-        return GelPenIconPainter(
-          penColor: color,
-          isSelected: isSelected,
-          size: size,
-          orientation: orientation,
-        );
-      case PenType.dashedPen:
-        return DashedPenIconPainter(
-          penColor: color,
-          isSelected: isSelected,
-          size: size,
-          orientation: orientation,
-        );
-      case PenType.highlighter:
-        return HighlighterIconPainter(
-          penColor: color,
-          isSelected: isSelected,
-          size: size,
-          orientation: orientation,
-        );
-      case PenType.brushPen:
-        return BrushPenIconPainter(
-          penColor: color,
-          isSelected: isSelected,
-          size: size,
-          orientation: orientation,
-        );
-      case PenType.neonHighlighter:
-        return NeonHighlighterIconPainter(
-          penColor: color,
-          isSelected: isSelected,
-          size: size,
-          orientation: orientation,
-        );
-      case PenType.rulerPen:
-        return RulerPenIconPainter(
-          penColor: color,
-          isSelected: isSelected,
-          size: size,
-          orientation: orientation,
-        );
+    // Calculate config based on size
+    final config = toolbar.PenToolbarConfig(
+      penWidth: size * 0.45,
+      penHeight: size,
+      stripeHeight: size * 0.06,
+      stripeTopOffset: size * 0.15,
+    );
+
+    Widget penWidget = CustomPaint(
+      size: Size(size * 0.5, size),
+      painter: toolbar.PenPainter(
+        penColor: color,
+        penType: toolbarPenType,
+        isSelected: isSelected,
+        isEnabled: true,
+        config: config,
+      ),
+    );
+
+    // Apply rotation for horizontal orientation
+    if (orientation == PenOrientation.horizontal) {
+      penWidget = Transform.rotate(
+        angle: 1.5708, // 90 degrees in radians (pi/2)
+        child: penWidget,
+      );
     }
+
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Center(child: penWidget),
+    );
   }
 }
 
 /// Convenience widget for ToolType-based icon display.
 ///
 /// Automatically maps ToolType to PenType and displays
-/// the appropriate custom pen icon.
+/// the appropriate pen icon using flutter_pen_toolbar.
 class ToolPenIcon extends StatelessWidget {
   /// The tool type to display.
   final ToolType toolType;
 
-  /// Optional color override for the pen tip.
+  /// Optional color override for the pen stripe.
   final Color? color;
 
   /// Whether the tool is currently selected.

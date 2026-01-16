@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_core/drawing_core.dart' as core;
 import 'package:drawing_ui/drawing_ui.dart';
 
 void main() {
   group('PenIconWidget', () {
     testWidgets('renders without error for all pen types', (tester) async {
-      for (final penType in PenType.values) {
+      for (final penType in core.PenType.values) {
         await tester.pumpWidget(
           MaterialApp(
             home: Scaffold(
@@ -25,10 +25,10 @@ void main() {
 
     testWidgets('respects size parameter', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
+        MaterialApp(
           home: Scaffold(
             body: PenIconWidget(
-              penType: PenType.pencil,
+              penType: core.PenType.pencil,
               size: 100,
             ),
           ),
@@ -42,10 +42,10 @@ void main() {
 
     testWidgets('passes color to widget', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
+        MaterialApp(
           home: Scaffold(
             body: PenIconWidget(
-              penType: PenType.highlighter,
+              penType: core.PenType.highlighter,
               color: Colors.yellow,
             ),
           ),
@@ -59,10 +59,10 @@ void main() {
 
     testWidgets('passes isSelected to widget', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
+        MaterialApp(
           home: Scaffold(
             body: PenIconWidget(
-              penType: PenType.brushPen,
+              penType: core.PenType.brushPen,
               isSelected: true,
             ),
           ),
@@ -76,10 +76,10 @@ void main() {
 
     testWidgets('default values are set correctly', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
+        MaterialApp(
           home: Scaffold(
             body: PenIconWidget(
-              penType: PenType.ballpointPen,
+              penType: core.PenType.ballpointPen,
             ),
           ),
         ),
