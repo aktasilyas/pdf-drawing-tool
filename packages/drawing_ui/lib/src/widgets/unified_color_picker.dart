@@ -319,15 +319,15 @@ class _ColorPaletteSheetState extends State<ColorPaletteSheet> {
         final recentColors = ref.watch(recentColorsProvider);
 
         return Container(
-          margin: const EdgeInsets.all(12),
+          margin: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(14),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withAlpha(20),
-                blurRadius: 20,
-                offset: const Offset(0, 4),
+                color: Colors.black.withAlpha(15),
+                blurRadius: 15,
+                offset: const Offset(0, 3),
               ),
             ],
           ),
@@ -339,7 +339,7 @@ class _ColorPaletteSheetState extends State<ColorPaletteSheet> {
 
               // Content
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                padding: const EdgeInsets.fromLTRB(12, 6, 12, 12),
                 child: _showCustomPicker
                     ? _buildCustomPicker(ref)
                     : _buildPremiumPalette(ref, recentColors),
@@ -353,13 +353,13 @@ class _ColorPaletteSheetState extends State<ColorPaletteSheet> {
 
   Widget _buildHeader() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 14, 10, 10),
+      padding: const EdgeInsets.fromLTRB(12, 10, 8, 8),
       child: Row(
         children: [
           const Text(
             'Renk Seçici',
             style: TextStyle(
-              fontSize: 15,
+              fontSize: 14,
               fontWeight: FontWeight.w600,
               letterSpacing: -0.3,
             ),
@@ -368,12 +368,12 @@ class _ColorPaletteSheetState extends State<ColorPaletteSheet> {
           GestureDetector(
             onTap: () => Navigator.pop(context),
             child: Container(
-              padding: const EdgeInsets.all(5),
+              padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
                 color: Colors.grey.shade100,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.close, size: 15, color: Color(0xFF666666)),
+              child: const Icon(Icons.close, size: 14, color: Color(0xFF666666)),
             ),
           ),
         ],
@@ -391,30 +391,30 @@ class _ColorPaletteSheetState extends State<ColorPaletteSheet> {
           Text(
             'Son Kullanılan',
             style: TextStyle(
-              fontSize: 10,
+              fontSize: 9,
               fontWeight: FontWeight.w500,
               color: Colors.grey.shade500,
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
           _buildColorGrid(recentColors.take(6).toList(), ref),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           Divider(height: 1, color: Colors.grey.shade200),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
         ],
 
         // 4x6 Premium Grid
         _buildColorGrid(PremiumColors.grayscale, ref),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         _buildColorGrid(PremiumColors.vivid, ref),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         _buildColorGrid(PremiumColors.soft, ref),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         _buildColorGrid(PremiumColors.accent, ref),
 
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         Divider(height: 1, color: Colors.grey.shade200),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
 
         // Bottom: Hex + Custom button
         _buildBottomRow(ref),
@@ -434,8 +434,8 @@ class _ColorPaletteSheetState extends State<ColorPaletteSheet> {
             widget.onColorSelected(color);
           },
           child: Container(
-            width: 30,
-            height: 30,
+            width: 26,
+            height: 26,
             decoration: BoxDecoration(
               color: color,
               shape: BoxShape.circle,
@@ -445,21 +445,21 @@ class _ColorPaletteSheetState extends State<ColorPaletteSheet> {
                     : (color.computeLuminance() > 0.85
                         ? Colors.grey.shade300
                         : Colors.transparent),
-                width: isSelected ? 2 : 0.8,
+                width: isSelected ? 1.8 : 0.6,
               ),
               boxShadow: [
                 if (isSelected)
                   BoxShadow(
-                    color: const Color(0xFF4A9DFF).withAlpha(30),
-                    blurRadius: 6,
-                    spreadRadius: 1,
+                    color: const Color(0xFF4A9DFF).withAlpha(25),
+                    blurRadius: 5,
+                    spreadRadius: 0.5,
                   ),
               ],
             ),
             child: isSelected
                 ? Icon(
                     Icons.check,
-                    size: 16,
+                    size: 14,
                     color: color.computeLuminance() > 0.5
                         ? Colors.black87
                         : Colors.white,
@@ -476,33 +476,34 @@ class _ColorPaletteSheetState extends State<ColorPaletteSheet> {
       children: [
         // Hex preview
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
           decoration: BoxDecoration(
             color: Colors.grey.shade50,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: Colors.grey.shade200),
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(color: Colors.grey.shade200, width: 0.5),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 18,
-                height: 18,
+                width: 16,
+                height: 16,
                 decoration: BoxDecoration(
                   color: _selectedColor,
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(3),
                   border: Border.all(
                     color: _selectedColor.computeLuminance() > 0.85
                         ? Colors.grey.shade300
                         : Colors.transparent,
+                    width: 0.5,
                   ),
                 ),
               ),
-              const SizedBox(width: 6),
+              const SizedBox(width: 5),
               Text(
                 _colorToHex(_selectedColor),
                 style: TextStyle(
-                  fontSize: 11,
+                  fontSize: 10,
                   fontWeight: FontWeight.w500,
                   fontFamily: 'monospace',
                   color: Colors.grey.shade700,
@@ -516,24 +517,24 @@ class _ColorPaletteSheetState extends State<ColorPaletteSheet> {
         GestureDetector(
           onTap: () => setState(() => _showCustomPicker = true),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
               color: const Color(0xFF4A9DFF).withAlpha(12),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(6),
             ),
             child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(
                   Icons.colorize,
-                  size: 14,
+                  size: 12,
                   color: Color(0xFF4A9DFF),
                 ),
-                SizedBox(width: 4),
+                SizedBox(width: 3),
                 Text(
                   'Özel',
                   style: TextStyle(
-                    fontSize: 11,
+                    fontSize: 10,
                     fontWeight: FontWeight.w500,
                     color: Color(0xFF4A9DFF),
                   ),
@@ -556,19 +557,19 @@ class _ColorPaletteSheetState extends State<ColorPaletteSheet> {
             GestureDetector(
               onTap: () => setState(() => _showCustomPicker = false),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(6),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.arrow_back_ios, size: 12, color: Colors.grey.shade600),
-                    const SizedBox(width: 4),
+                    Icon(Icons.arrow_back_ios, size: 10, color: Colors.grey.shade600),
+                    const SizedBox(width: 2),
                     Text(
-                      'Paletler',
-                      style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                      'Geri',
+                      style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
                     ),
                   ],
                 ),
@@ -576,20 +577,20 @@ class _ColorPaletteSheetState extends State<ColorPaletteSheet> {
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         // Wheel picker
         ColorPicker(
           color: _selectedColor,
           onColorChanged: (Color color) {
             setState(() => _selectedColor = color);
           },
-          width: 32,
-          height: 32,
-          spacing: 8,
-          runSpacing: 8,
-          borderRadius: 16,
-          wheelDiameter: 180,
-          wheelWidth: 20,
+          width: 24,
+          height: 24,
+          spacing: 4,
+          runSpacing: 4,
+          borderRadius: 12,
+          wheelDiameter: 130,
+          wheelWidth: 16,
           wheelHasBorder: false,
           enableShadesSelection: false,
           enableTonalPalette: false,
@@ -617,7 +618,7 @@ class _ColorPaletteSheetState extends State<ColorPaletteSheet> {
             dialogActionButtons: false,
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 10),
         // Apply button
         SizedBox(
           width: double.infinity,
@@ -629,15 +630,15 @@ class _ColorPaletteSheetState extends State<ColorPaletteSheet> {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF4A9DFF),
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 14),
+              padding: const EdgeInsets.symmetric(vertical: 10),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(8),
               ),
               elevation: 0,
             ),
             child: const Text(
               'Uygula',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
             ),
           ),
         ),
