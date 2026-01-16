@@ -3,7 +3,6 @@ library;
 
 export 'color_chip.dart';
 export 'color_chips_grid.dart';
-export 'color_picker/color_picker.dart';
 export 'floating_pen_box.dart';
 export 'panel_overlay.dart';
 export 'pen_icon_widget.dart';

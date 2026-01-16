@@ -18,6 +18,7 @@ dependencies:
     git:
       url: https://github.com/aktasilyas/flutter_pen_toolbar.git
       ref: main
+  flex_color_picker: ^3.8.0
 
 dev_dependencies:
   flutter_test:
