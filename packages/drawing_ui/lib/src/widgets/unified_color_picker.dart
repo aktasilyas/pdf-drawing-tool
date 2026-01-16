@@ -295,13 +295,7 @@ class ColorPaletteSheet extends StatefulWidget {
 }
 
 class _ColorPaletteSheetState extends State<ColorPaletteSheet> {
-  late Color _selectedColor;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedColor = widget.selectedColor;
-  }
+  bool _showWheel = false;
 
   @override
   Widget build(BuildContext context) {
@@ -325,107 +319,16 @@ class _ColorPaletteSheetState extends State<ColorPaletteSheet> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Header
-              _buildHeader(),
+              // Kompakt Header
+              _buildCompactHeader(ref),
               const Divider(height: 1),
 
-              // Color Picker
+              // Color Grids veya Wheel
               Padding(
                 padding: const EdgeInsets.all(12),
-                child: ColorPicker(
-                  color: _selectedColor,
-                  onColorChanged: (Color color) {
-                    setState(() => _selectedColor = color);
-                  },
-                  width: 36,
-                  height: 36,
-                  spacing: 8,
-                  runSpacing: 8,
-                  borderRadius: 18,
-                  wheelDiameter: 160,
-                  wheelWidth: 16,
-                  wheelHasBorder: false,
-                  enableShadesSelection: true,
-                  enableTonalPalette: false,
-                  pickersEnabled: const <ColorPickerType, bool>{
-                    ColorPickerType.both: false,
-                    ColorPickerType.primary: false,
-                    ColorPickerType.accent: false,
-                    ColorPickerType.bw: false,
-                    ColorPickerType.custom: true,
-                    ColorPickerType.customSecondary: false,
-                    ColorPickerType.wheel: true,
-                  },
-                  customColorSwatchesAndNames: <ColorSwatch<Object>, String>{
-                    _createSwatch(ColorSets.basic): 'Temel',
-                    _createSwatch(ColorSets.pastel): 'Pastel',
-                    _createSwatch(ColorSets.neon): 'Neon',
-                  },
-                  recentColors: recentColors,
-                  maxRecentColors: 12,
-                  recentColorsSubheading: Text(
-                    'Son Kullanılan',
-                    style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
-                  ),
-                  showRecentColors: recentColors.isNotEmpty,
-                  onRecentColorsChanged: (List<Color> colors) {
-                    // Recent colors güncellendi
-                    for (final color in colors) {
-                      ref.read(recentColorsProvider.notifier).addColor(color);
-                    }
-                  },
-                  showColorCode: true,
-                  colorCodeHasColor: true,
-                  colorCodeReadOnly: false,
-                  showColorName: false,
-                  copyPasteBehavior: const ColorPickerCopyPasteBehavior(
-                    copyButton: true,
-                    pasteButton: true,
-                    copyFormat: ColorPickerCopyFormat.hexRRGGBB,
-                  ),
-                  actionButtons: const ColorPickerActionButtons(
-                    okButton: false,
-                    closeButton: false,
-                    dialogActionButtons: false,
-                  ),
-                  subheading: Text(
-                    'Ton Seç',
-                    style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
-                  ),
-                  wheelSubheading: Text(
-                    'Renk ve Ton',
-                    style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
-                  ),
-                ),
-              ),
-
-              // Apply Button
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      ref
-                          .read(recentColorsProvider.notifier)
-                          .addColor(_selectedColor);
-                      widget.onColorSelected(_selectedColor);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF4A9DFF),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: const Text(
-                      'Uygula',
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                ),
+                child: _showWheel
+                    ? _buildWheelPicker(ref)
+                    : _buildCompactPalettes(ref, recentColors),
               ),
             ],
           ),
@@ -434,44 +337,72 @@ class _ColorPaletteSheetState extends State<ColorPaletteSheet> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildCompactHeader(WidgetRef ref) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 8, 12),
+      padding: const EdgeInsets.fromLTRB(12, 12, 8, 8),
       child: Row(
         children: [
-          // Color preview
+          // Seçili renk önizleme
           Container(
-            width: 28,
-            height: 28,
+            width: 24,
+            height: 24,
             decoration: BoxDecoration(
-              color: _selectedColor,
-              borderRadius: BorderRadius.circular(8),
+              color: widget.selectedColor,
+              borderRadius: BorderRadius.circular(6),
               border: Border.all(
-                color: _selectedColor.computeLuminance() > 0.8
+                color: widget.selectedColor.computeLuminance() > 0.8
                     ? Colors.grey.shade300
                     : Colors.transparent,
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withAlpha(20),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: 8),
           const Text(
-            'Renk Seçici',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            'Renk Seç',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
           const Spacer(),
+          // Wheel toggle
+          GestureDetector(
+            onTap: () => setState(() => _showWheel = !_showWheel),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: _showWheel
+                    ? const Color(0xFF4A9DFF).withAlpha(20)
+                    : Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    _showWheel ? Icons.palette : Icons.color_lens,
+                    size: 14,
+                    color: _showWheel
+                        ? const Color(0xFF4A9DFF)
+                        : Colors.grey.shade600,
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    _showWheel ? 'Paletler' : 'Özel',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: _showWheel
+                          ? const Color(0xFF4A9DFF)
+                          : Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 4),
           GestureDetector(
             onTap: () => Navigator.pop(context),
-            child: Container(
-              padding: const EdgeInsets.all(4),
-              child:
-                  const Icon(Icons.close, size: 20, color: Color(0xFF666666)),
+            child: const Padding(
+              padding: EdgeInsets.all(4),
+              child: Icon(Icons.close, size: 18, color: Color(0xFF666666)),
             ),
           ),
         ],
@@ -479,14 +410,130 @@ class _ColorPaletteSheetState extends State<ColorPaletteSheet> {
     );
   }
 
-  /// ColorSwatch oluştur (List<Color>'dan)
-  ColorSwatch<Object> _createSwatch(List<Color> colors) {
-    final primary = colors.isNotEmpty ? colors.first : Colors.grey;
-    final Map<int, Color> swatch = {};
-    for (var i = 0; i < colors.length; i++) {
-      swatch[(i + 1) * 100] = colors[i];
-    }
-    return ColorSwatch<Object>(primary.toARGB32(), swatch);
+  Widget _buildCompactPalettes(WidgetRef ref, List<Color> recentColors) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Recent colors (varsa)
+        if (recentColors.isNotEmpty) ...[
+          _buildColorRow('Son Kullanılan', recentColors.take(8).toList(), ref),
+          const SizedBox(height: 10),
+        ],
+        // Temel renkler
+        _buildColorRow('Temel', ColorSets.basic, ref),
+        const SizedBox(height: 10),
+        // Pastel
+        _buildColorRow('Pastel', ColorSets.pastel, ref),
+        const SizedBox(height: 10),
+        // Neon
+        _buildColorRow('Neon', ColorSets.neon, ref),
+      ],
+    );
+  }
+
+  Widget _buildColorRow(String label, List<Color> colors, WidgetRef ref) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w500,
+            color: Colors.grey.shade500,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: colors.map((color) {
+            final isSelected = _colorsMatch(color, widget.selectedColor);
+            return GestureDetector(
+              onTap: () {
+                ref.read(recentColorsProvider.notifier).addColor(color);
+                widget.onColorSelected(color);
+              },
+              child: Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  color: color,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: isSelected
+                        ? const Color(0xFF4A9DFF)
+                        : (color.computeLuminance() > 0.8
+                            ? Colors.grey.shade300
+                            : Colors.transparent),
+                    width: isSelected ? 2 : 1,
+                  ),
+                ),
+                child: isSelected
+                    ? Icon(
+                        Icons.check,
+                        size: 14,
+                        color: color.computeLuminance() > 0.5
+                            ? Colors.black
+                            : Colors.white,
+                      )
+                    : null,
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildWheelPicker(WidgetRef ref) {
+    return ColorPicker(
+      color: widget.selectedColor,
+      onColorChanged: (Color color) {
+        ref.read(recentColorsProvider.notifier).addColor(color);
+        widget.onColorSelected(color);
+      },
+      width: 28,
+      height: 28,
+      spacing: 6,
+      runSpacing: 6,
+      borderRadius: 14,
+      wheelDiameter: 140,
+      wheelWidth: 14,
+      wheelHasBorder: false,
+      enableShadesSelection: false,
+      enableTonalPalette: false,
+      pickersEnabled: const <ColorPickerType, bool>{
+        ColorPickerType.both: false,
+        ColorPickerType.primary: false,
+        ColorPickerType.accent: false,
+        ColorPickerType.bw: false,
+        ColorPickerType.custom: false,
+        ColorPickerType.customSecondary: false,
+        ColorPickerType.wheel: true,
+      },
+      showRecentColors: false,
+      showColorCode: true,
+      colorCodeHasColor: true,
+      colorCodeReadOnly: false,
+      showColorName: false,
+      copyPasteBehavior: const ColorPickerCopyPasteBehavior(
+        copyButton: false,
+        pasteButton: false,
+      ),
+      actionButtons: const ColorPickerActionButtons(
+        okButton: false,
+        closeButton: false,
+        dialogActionButtons: false,
+      ),
+    );
+  }
+
+  bool _colorsMatch(Color a, Color b) {
+    return (a.r * 255).round() == (b.r * 255).round() &&
+        (a.g * 255).round() == (b.g * 255).round() &&
+        (a.b * 255).round() == (b.b * 255).round();
   }
 }
 
