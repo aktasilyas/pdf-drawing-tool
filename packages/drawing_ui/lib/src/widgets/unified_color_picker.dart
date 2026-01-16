@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:drawing_ui/src/providers/recent_colors_provider.dart';
+import 'package:drawing_ui/src/widgets/color_picker/color_picker.dart';
 
 /// Renk setleri tanımları
 class ColorSets {
@@ -291,13 +294,24 @@ class ColorPaletteSheet extends StatefulWidget {
   State<ColorPaletteSheet> createState() => _ColorPaletteSheetState();
 }
 
-class _ColorPaletteSheetState extends State<ColorPaletteSheet> {
-  late String _selectedSet;
+class _ColorPaletteSheetState extends State<ColorPaletteSheet>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  late HSVColor _hsvColor;
+  double _opacity = 1.0;
 
   @override
   void initState() {
     super.initState();
-    _selectedSet = widget.colorSets.keys.first;
+    _tabController = TabController(length: 2, vsync: this);
+    _hsvColor = HSVColor.fromColor(widget.selectedColor);
+    _opacity = widget.selectedColor.alpha / 255.0;
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   @override
@@ -318,85 +332,210 @@ class _ColorPaletteSheetState extends State<ColorPaletteSheet> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Başlık
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 8, 12),
-            child: Row(
-              children: [
-                const Text(
-                  'Renk Paleti',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const Spacer(),
-                GestureDetector(
-                  onTap: () => Navigator.pop(context),
-                  child: const Icon(Icons.close, size: 20, color: Color(0xFF666666)),
-                ),
-              ],
-            ),
-          ),
+          // Header
+          _buildHeader(),
           const Divider(height: 1),
 
-          // Renk seti seçici
-          if (widget.colorSets.length > 1) ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              child: Row(
-                children: widget.colorSets.keys.map((setName) {
-                  final isSelected = setName == _selectedSet;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: GestureDetector(
-                      onTap: () => setState(() => _selectedSet = setName),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? const Color(0xFF4A9DFF).withAlpha(25)
-                              : Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color: isSelected ? const Color(0xFF4A9DFF) : Colors.transparent,
-                            width: 1,
-                          ),
-                        ),
-                        child: Text(
-                          setName,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                            color: isSelected ? const Color(0xFF4A9DFF) : const Color(0xFF666666),
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-          ],
+          // Tabs
+          TabBar(
+            controller: _tabController,
+            labelColor: const Color(0xFF4A9DFF),
+            unselectedLabelColor: Colors.grey.shade600,
+            indicatorSize: TabBarIndicatorSize.label,
+            indicatorColor: const Color(0xFF4A9DFF),
+            labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+            unselectedLabelStyle: const TextStyle(fontSize: 13),
+            tabs: const [
+              Tab(text: 'Paletler'),
+              Tab(text: 'Özel'),
+            ],
+          ),
 
-          // Renk grid'i
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
-            child: _buildColorGrid(widget.colorSets[_selectedSet] ?? []),
+          // Tab content
+          SizedBox(
+            height: 340,
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildPalettesTab(),
+                _buildCustomTab(),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildColorGrid(List<Color> colors) {
+  Widget _buildHeader() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 8, 12),
+      child: Row(
+        children: [
+          const Text(
+            'Renk Seçici',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
+          const Spacer(),
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              child: const Icon(Icons.close, size: 20, color: Color(0xFF666666)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPalettesTab() {
+    return Consumer(
+      builder: (context, ref, _) {
+        final recentColors = ref.watch(recentColorsProvider);
+
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Recent colors (eğer varsa)
+              if (recentColors.isNotEmpty) ...[
+                Text(
+                  'Son Kullanılan',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                _buildColorGrid(recentColors, ref),
+                const SizedBox(height: 16),
+              ],
+
+              // Renk setleri
+              ...widget.colorSets.entries.map((entry) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      entry.key,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    _buildColorGrid(entry.value, ref),
+                    const SizedBox(height: 16),
+                  ],
+                );
+              }),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildCustomTab() {
+    return Consumer(
+      builder: (context, ref, _) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              // HSV Wheel
+              Center(
+                child: HSVColorWheel(
+                  color: _hsvColor.toColor(),
+                  size: 160,
+                  onColorChanged: (color) {
+                    setState(() {
+                      _hsvColor = HSVColor.fromColor(color);
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Brightness slider
+              BrightnessSlider(
+                hsvColor: _hsvColor,
+                onChanged: (hsv) {
+                  setState(() => _hsvColor = hsv);
+                },
+              ),
+              const SizedBox(height: 14),
+
+              // Opacity slider
+              OpacitySlider(
+                color: _hsvColor.toColor(),
+                opacity: _opacity,
+                onChanged: (value) {
+                  setState(() => _opacity = value);
+                },
+              ),
+              const SizedBox(height: 14),
+
+              // Hex input
+              HexColorInput(
+                color: _hsvColor.toColor(),
+                onColorChanged: (color) {
+                  setState(() {
+                    _hsvColor = HSVColor.fromColor(color);
+                  });
+                },
+              ),
+              const SizedBox(height: 20),
+
+              // Apply button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    final finalColor = _hsvColor
+                        .toColor()
+                        .withAlpha((_opacity * 255).round());
+                    // Recent colors'a ekle
+                    ref.read(recentColorsProvider.notifier).addColor(finalColor);
+                    widget.onColorSelected(finalColor);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF4A9DFF),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: const Text(
+                    'Uygula',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildColorGrid(List<Color> colors, WidgetRef ref) {
     return Wrap(
       spacing: 10,
       runSpacing: 10,
       children: colors.map((color) {
         final isSelected = _colorsMatch(color, widget.selectedColor);
         return GestureDetector(
-          onTap: () => widget.onColorSelected(color),
+          onTap: () {
+            ref.read(recentColorsProvider.notifier).addColor(color);
+            widget.onColorSelected(color);
+          },
           child: Container(
             width: 36,
             height: 36,
@@ -406,7 +545,9 @@ class _ColorPaletteSheetState extends State<ColorPaletteSheet> {
               border: Border.all(
                 color: isSelected
                     ? const Color(0xFF4A9DFF)
-                    : (color.computeLuminance() > 0.8 ? Colors.grey.shade400 : Colors.transparent),
+                    : (color.computeLuminance() > 0.8
+                        ? Colors.grey.shade400
+                        : Colors.transparent),
                 width: isSelected ? 2.5 : 1,
               ),
               boxShadow: [
@@ -421,7 +562,9 @@ class _ColorPaletteSheetState extends State<ColorPaletteSheet> {
                 ? Icon(
                     Icons.check,
                     size: 18,
-                    color: color.computeLuminance() > 0.5 ? Colors.black : Colors.white,
+                    color: color.computeLuminance() > 0.5
+                        ? Colors.black
+                        : Colors.white,
                   )
                 : null,
           ),

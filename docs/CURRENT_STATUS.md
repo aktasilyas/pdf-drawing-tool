@@ -10,20 +10,20 @@
 | Key | Value |
 |-----|-------|
 | **Current Phase** | 4E - Enhancement & Cleanup |
-| **Current Module** | 4E-4 Advanced Color Picker |
-| **Current Step** | 4E-4.1 HSV Color Wheel |
-| **Last Commit** | feat(ui): integrate flutter_pen_toolbar package, remove custom painters |
+| **Current Module** | 4E-4 Advanced Color Picker ✅ |
+| **Current Step** | Tamamlandı |
+| **Last Commit** | feat(ui): add advanced HSV color picker |
 | **Branch** | feature/phase4e-enhancements |
 
 ---
 
 ## Next Task
 
-**Görev:** HSV color wheel widget oluştur
+**Görev:** 4E-3 Eraser Modes veya 4E-5 Toolbar UX
 
-**Dosya:** `packages/drawing_ui/lib/src/widgets/color_picker/`
-
-**Talimat dosyası:** `docs/PHASE4E_CURSOR_INSTRUCTIONS.md` → ADIM 4E-4.1
+**Seçenekler:**
+- 4E-3: PixelEraser, LassoEraser, Eraser cursor
+- 4E-5: Toolbar settings panel, reorder, show/hide
 
 ---
 
@@ -32,8 +32,8 @@
 ```
 4E-1: Pen Types    [██████] 6/6 ✅
 4E-2: Pen Icons    [██████] 6/6 ✅ (flutter_pen_toolbar)
-4E-3: Eraser Modes [______] 0/5 (4E-4'ten sonra)
-4E-4: Color Picker [______] 0/6
+4E-3: Eraser Modes [______] 0/5
+4E-4: Color Picker [██████] 6/6 ✅
 4E-5: Toolbar UX   [_____]  0/5
 4E-6: Performance  [_____]  0/5
 4E-7: Code Quality [____]   0/4
@@ -63,8 +63,13 @@
 - PenIconWidget güncellendi (toolbar.PenPainter kullanıyor)
 - Fosforlu kalem için **düz çizgi modu** var
 - **Neon Highlighter toolbar** düzeltildi
+- **Advanced Color Picker eklendi:**
+  - HSV Color Wheel (dairesel renk seçici)
+  - Brightness/Opacity sliders
+  - Hex color input
+  - Recent colors provider
+  - Paletler + Özel tabs
 - PixelEraser ve LassoEraser tamamlanacak
-- Gelişmiş Color Picker eklenecek
 
 ---
 
