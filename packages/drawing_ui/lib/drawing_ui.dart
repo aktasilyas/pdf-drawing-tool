@@ -47,6 +47,7 @@ export 'src/panels/sticker_panel.dart';
 export 'src/panels/image_panel.dart';
 export 'src/panels/ai_assistant_panel.dart';
 export 'src/panels/toolbar_editor_panel.dart';
+export 'src/panels/toolbar_settings_panel.dart';
 export 'src/panels/lasso_selection_panel.dart';
 export 'src/panels/laser_pointer_panel.dart';
 

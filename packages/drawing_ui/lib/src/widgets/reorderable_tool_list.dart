@@ -76,12 +76,15 @@ class _ToolListItem extends StatelessWidget {
               color: isVisible ? Colors.grey.shade700 : Colors.grey.shade400,
             ),
             const SizedBox(width: 12),
-            Text(
-              toolConfig.toolType.displayName,
-              style: TextStyle(
-                fontSize: 14,
-                color: isVisible ? Colors.grey.shade800 : Colors.grey.shade500,
-                decoration: isVisible ? null : TextDecoration.lineThrough,
+            Expanded(
+              child: Text(
+                toolConfig.toolType.displayName,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: isVisible ? Colors.grey.shade800 : Colors.grey.shade500,
+                  decoration: isVisible ? null : TextDecoration.lineThrough,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
