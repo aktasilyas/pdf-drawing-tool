@@ -11,17 +11,17 @@
 |-----|-------|
 | **Current Phase** | 4E - Enhancement & Cleanup |
 | **Current Module** | 4E-5 Toolbar UX Improvements |
-| **Current Step** | 2/5 - Toolbar Config Provider ✅ |
-| **Last Commit** | feat(ui): add toolbar config provider with SharedPreferences |
+| **Current Step** | 3/5 - Reorderable Tool List Widget ✅ |
+| **Last Commit** | feat(ui): add ReorderableToolList widget |
 | **Branch** | main |
 
 ---
 
 ## Next Task
 
-**Görev:** Phase 4E-5 Toolbar UX - ADIM 2/5 tamamlandı
+**Görev:** Phase 4E-5 Toolbar UX - ADIM 3/5 tamamlandı
 
-**Sırada:** ADIM 3 - Toolbar Editor UI Update
+**Sırada:** ADIM 4 - Toolbar Settings Panel (Full-featured UI)
 
 ---
 
@@ -32,7 +32,7 @@
 4E-2: Pen Icons    [██████] 6/6 ✅ (flutter_pen_toolbar)
 4E-3: Eraser Modes [██████] 5/5 ✅
 4E-4: Color Picker [██████] 6/6 ✅
-4E-5: Toolbar UX   [██____] 2/5
+4E-5: Toolbar UX   [███___] 3/5
 4E-6: Performance  [______] 0/5
 4E-7: Code Quality [______] 0/4
 ```
@@ -115,6 +115,14 @@
     - shared_preferences: ^2.2.2 eklendi
     - providers_test.dart güncellendi (mock setup)
     - Default config: 10 tool (brushPen, sticker eklendi)
+  - **ADIM 3/5 - Reorderable Tool List Widget:**
+    - ReorderableToolList widget oluşturuldu
+    - Sürükle-bırak ile tool reordering
+    - Visibility toggle switch
+    - Tool icons and displayNames from ToolType enum
+    - toolbar_editor_panel.dart güncellendi (yeni widget kullanıyor)
+    - 5/5 widget test passed ✅
+    - Clean, reusable widget design
 
 ---
 

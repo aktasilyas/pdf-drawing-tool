@@ -326,7 +326,8 @@ void main() {
       await container.read(toolbarConfigProvider.notifier).resetToDefault();
 
       final config = container.read(toolbarConfigProvider);
-      final brushPenConfig = config.tools.firstWhere((t) => t.toolType == ToolType.brushPen);
+      final brushPenConfig =
+          config.tools.firstWhere((t) => t.toolType == ToolType.brushPen);
       expect(brushPenConfig.isVisible, true);
     });
   });

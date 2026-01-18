@@ -58,6 +58,7 @@ export 'src/widgets/panel_overlay.dart';
 export 'src/widgets/unified_color_picker.dart';
 export 'src/widgets/floating_pen_box.dart';
 export 'src/widgets/pen_icon_widget.dart';
+export 'src/widgets/reorderable_tool_list.dart';
 
 // Utils
 export 'src/utils/pen_type_mapper.dart';
