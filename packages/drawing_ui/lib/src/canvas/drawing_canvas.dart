@@ -142,6 +142,16 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
   /// Text IDs erased in current gesture session.
   final Set<String> _erasedTextIds = {};
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // PIXEL ERASER TRACKING
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /// Accumulated segment hits for pixel eraser during a gesture.
+  final Map<String, List<int>> _pixelEraseHits = {};
+
+  /// Original strokes affected by pixel eraser (for undo).
+  final List<core.Stroke> _pixelEraseOriginalStrokes = [];
+
   /// Exposes the drawing controller for testing.
   @visibleForTesting
   DrawingController get drawingController => _drawingController;
@@ -537,58 +547,216 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
   // ─────────────────────────────────────────────────────────────────────────
   // Eraser uses command batching: single gesture = single undo command
 
-  /// Handles eraser pointer down - starts eraser session.
+  /// Handles eraser pointer down - starts eraser session based on mode.
   void _handleEraserDown(PointerDownEvent event) {
-    final eraserTool = ref.read(eraserToolProvider);
-    eraserTool.startErasing();
-    _erasedShapeIds.clear();
-    _erasedTextIds.clear();
-    _eraseAtPoint(event.localPosition);
+    final settings = ref.read(eraserSettingsProvider);
+    final transform = ref.read(canvasTransformProvider);
+    final canvasPoint = transform.screenToCanvas(event.localPosition);
+
+    // Update cursor position
+    ref.read(eraserCursorPositionProvider.notifier).state = event.localPosition;
+
+    switch (settings.mode) {
+      case EraserMode.pixel:
+        // Start pixel eraser session
+        final pixelTool = ref.read(pixelEraserToolProvider);
+        pixelTool.onPointerDown(
+          canvasPoint.dx,
+          canvasPoint.dy,
+          event.pressure.clamp(0.0, 1.0),
+        );
+        _pixelEraseHits.clear();
+        _pixelEraseOriginalStrokes.clear();
+        _handlePixelEraseAt(canvasPoint);
+        break;
+
+      case EraserMode.stroke:
+        // Existing stroke eraser logic
+        final eraserTool = ref.read(eraserToolProvider);
+        eraserTool.startErasing();
+        _erasedShapeIds.clear();
+        _erasedTextIds.clear();
+        _eraseAtPoint(event.localPosition);
+        break;
+
+      case EraserMode.lasso:
+        // Start lasso selection
+        final lassoTool = ref.read(lassoEraserToolProvider);
+        lassoTool.onPointerDown(canvasPoint.dx, canvasPoint.dy);
+        ref.read(lassoEraserPointsProvider.notifier).state = [event.localPosition];
+        break;
+    }
   }
 
-  /// Handles eraser pointer move - erases strokes along the path.
+  /// Handles eraser pointer move - erases along the path based on mode.
   void _handleEraserMove(PointerMoveEvent event) {
-    _eraseAtPoint(event.localPosition);
+    final settings = ref.read(eraserSettingsProvider);
+    final transform = ref.read(canvasTransformProvider);
+    final canvasPoint = transform.screenToCanvas(event.localPosition);
+
+    // Update cursor position
+    ref.read(eraserCursorPositionProvider.notifier).state = event.localPosition;
+
+    switch (settings.mode) {
+      case EraserMode.pixel:
+        final pixelTool = ref.read(pixelEraserToolProvider);
+        pixelTool.onPointerMove(
+          canvasPoint.dx,
+          canvasPoint.dy,
+          event.pressure.clamp(0.0, 1.0),
+        );
+        _handlePixelEraseAt(canvasPoint);
+        break;
+
+      case EraserMode.stroke:
+        _eraseAtPoint(event.localPosition);
+        break;
+
+      case EraserMode.lasso:
+        final lassoTool = ref.read(lassoEraserToolProvider);
+        lassoTool.onPointerMove(canvasPoint.dx, canvasPoint.dy);
+        ref.read(lassoEraserPointsProvider.notifier).update(
+          (points) => [...points, event.localPosition],
+        );
+        break;
+    }
   }
 
-  /// Handles eraser pointer up - commits all erased strokes, shapes, and texts as commands.
+  /// Handles eraser pointer up - commits erased strokes based on mode.
   void _handleEraserUp(PointerUpEvent event) {
-    final eraserTool = ref.read(eraserToolProvider);
-    final erasedStrokeIds = eraserTool.endErasing();
+    final settings = ref.read(eraserSettingsProvider);
     final document = ref.read(documentProvider);
     final layerIndex = document.activeLayerIndex;
 
-    // Commit erased strokes
-    if (erasedStrokeIds.isNotEmpty) {
-      final command = core.EraseStrokesCommand(
-        layerIndex: layerIndex,
-        strokeIds: erasedStrokeIds.toList(),
-      );
-      ref.read(historyManagerProvider.notifier).execute(command);
-    }
+    // Clear cursor position
+    ref.read(eraserCursorPositionProvider.notifier).state = null;
 
-    // Commit erased shapes (each shape as separate command for undo granularity)
-    for (final shapeId in _erasedShapeIds) {
-      final command = core.RemoveShapeCommand(
-        layerIndex: layerIndex,
-        shapeId: shapeId,
-      );
-      ref.read(historyManagerProvider.notifier).execute(command);
-    }
-    _erasedShapeIds.clear();
+    switch (settings.mode) {
+      case EraserMode.pixel:
+        _commitPixelErase(layerIndex);
+        break;
 
-    // Commit erased texts (each text as separate command for undo granularity)
-    for (final textId in _erasedTextIds) {
-      final command = core.RemoveTextCommand(
-        layerIndex: layerIndex,
-        textId: textId,
-      );
-      ref.read(historyManagerProvider.notifier).execute(command);
+      case EraserMode.stroke:
+        final eraserTool = ref.read(eraserToolProvider);
+        final erasedStrokeIds = eraserTool.endErasing();
+
+        // Commit erased strokes
+        if (erasedStrokeIds.isNotEmpty) {
+          final command = core.EraseStrokesCommand(
+            layerIndex: layerIndex,
+            strokeIds: erasedStrokeIds.toList(),
+          );
+          ref.read(historyManagerProvider.notifier).execute(command);
+        }
+
+        // Commit erased shapes
+        for (final shapeId in _erasedShapeIds) {
+          final command = core.RemoveShapeCommand(
+            layerIndex: layerIndex,
+            shapeId: shapeId,
+          );
+          ref.read(historyManagerProvider.notifier).execute(command);
+        }
+        _erasedShapeIds.clear();
+
+        // Commit erased texts
+        for (final textId in _erasedTextIds) {
+          final command = core.RemoveTextCommand(
+            layerIndex: layerIndex,
+            textId: textId,
+          );
+          ref.read(historyManagerProvider.notifier).execute(command);
+        }
+        _erasedTextIds.clear();
+        break;
+
+      case EraserMode.lasso:
+        _commitLassoErase(layerIndex);
+        ref.read(lassoEraserPointsProvider.notifier).state = [];
+        break;
     }
-    _erasedTextIds.clear();
   }
 
-  /// Erases strokes, shapes, and texts at the given screen point.
+  /// Handles pixel erase at a specific canvas point.
+  void _handlePixelEraseAt(Offset canvasPoint) {
+    final strokes = ref.read(activeLayerStrokesProvider);
+    final settings = ref.read(eraserSettingsProvider);
+    final pixelTool = ref.read(pixelEraserToolProvider);
+
+    final hits = pixelTool.findSegmentsAt(
+      strokes,
+      canvasPoint.dx,
+      canvasPoint.dy,
+      settings.size,
+    );
+
+    for (final hit in hits) {
+      // Track original stroke if not already tracked
+      if (!_pixelEraseHits.containsKey(hit.strokeId)) {
+        final originalStroke = strokes.firstWhere(
+          (s) => s.id == hit.strokeId,
+          orElse: () => core.Stroke.create(style: core.StrokeStyle.pen()),
+        );
+        if (originalStroke.id == hit.strokeId) {
+          _pixelEraseOriginalStrokes.add(originalStroke);
+        }
+        _pixelEraseHits[hit.strokeId] = [];
+      }
+
+      // Add segment index if not already present
+      if (!_pixelEraseHits[hit.strokeId]!.contains(hit.segmentIndex)) {
+        _pixelEraseHits[hit.strokeId]!.add(hit.segmentIndex);
+      }
+    }
+  }
+
+  /// Commits pixel erase operation to history.
+  void _commitPixelErase(int layerIndex) {
+    if (_pixelEraseHits.isEmpty || _pixelEraseOriginalStrokes.isEmpty) {
+      _pixelEraseHits.clear();
+      _pixelEraseOriginalStrokes.clear();
+      return;
+    }
+
+    // Split strokes and create resulting strokes
+    final splitResult = core.StrokeSplitter.splitStrokes(
+      _pixelEraseOriginalStrokes,
+      _pixelEraseHits,
+    );
+
+    final resultingStrokes = <core.Stroke>[];
+    for (final pieces in splitResult.values) {
+      resultingStrokes.addAll(pieces);
+    }
+
+    final command = core.ErasePointsCommand(
+      layerIndex: layerIndex,
+      originalStrokes: _pixelEraseOriginalStrokes.toList(),
+      resultingStrokes: resultingStrokes,
+    );
+    ref.read(historyManagerProvider.notifier).execute(command);
+
+    _pixelEraseHits.clear();
+    _pixelEraseOriginalStrokes.clear();
+  }
+
+  /// Commits lasso erase operation to history.
+  void _commitLassoErase(int layerIndex) {
+    final strokes = ref.read(activeLayerStrokesProvider);
+    final lassoTool = ref.read(lassoEraserToolProvider);
+
+    final strokeIds = lassoTool.onPointerUp(strokes);
+
+    if (strokeIds.isNotEmpty) {
+      final command = core.EraseStrokesCommand(
+        layerIndex: layerIndex,
+        strokeIds: strokeIds,
+      );
+      ref.read(historyManagerProvider.notifier).execute(command);
+    }
+  }
+
+  /// Erases strokes, shapes, and texts at the given screen point (stroke mode).
   /// Transforms screen coordinates to canvas coordinates.
   void _eraseAtPoint(Offset point) {
     // Transform screen coordinates to canvas coordinates (zoom/pan)
@@ -1048,6 +1216,11 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     final selection = ref.watch(selectionProvider);
     final textToolState = ref.watch(textToolProvider);
 
+    // Eraser cursor state
+    final eraserCursorPosition = ref.watch(eraserCursorPositionProvider);
+    final lassoEraserPoints = ref.watch(lassoEraserPointsProvider);
+    final isEraserTool = ref.watch(isEraserToolProvider);
+
     // Selection tool preview path
     List<core.DrawingPoint>? selectionPreviewPath;
     if (isSelectionTool && _isSelecting) {
@@ -1339,6 +1512,16 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
                     ),
                   ),
                 ),
+              ),
+
+            // ───────────────────────────────────────────────────────────
+            // Eraser Cursor Overlay
+            // ───────────────────────────────────────────────────────────
+            if (isEraserTool)
+              EraserCursorWidget(
+                cursorPosition: eraserCursorPosition ?? Offset.zero,
+                isVisible: eraserCursorPosition != null,
+                lassoPoints: lassoEraserPoints,
               ),
           ],
         );

@@ -3,6 +3,7 @@ library;
 
 export 'color_chip.dart';
 export 'color_chips_grid.dart';
+export 'eraser_cursor_widget.dart';
 export 'floating_pen_box.dart';
 export 'panel_overlay.dart';
 export 'pen_icon_widget.dart';

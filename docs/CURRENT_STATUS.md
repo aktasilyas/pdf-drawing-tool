@@ -11,17 +11,17 @@
 |-----|-------|
 | **Current Phase** | 4E - Enhancement & Cleanup |
 | **Current Module** | 4E-3 Eraser Modes |
-| **Current Step** | 4/5 - EraserCursorPainter ✅ |
-| **Last Commit** | feat(ui): add EraserCursorPainter with visual feedback |
+| **Current Step** | 5/5 - Canvas Integration ✅ |
+| **Last Commit** | feat(ui): integrate all eraser modes with canvas |
 | **Branch** | main |
 
 ---
 
 ## Next Task
 
-**Görev:** 4E-3 Eraser Modes - ADIM 5
+**Görev:** 4E-3 Eraser Modes - TAMAMLANDI ✅
 
-**Sırada:** Canvas Integration & Polish (tüm modları DrawingCanvas'a entegre et)
+**Sırada:** TABLET TESTİ (Tüm modları test et: stroke, pixel, lasso)
 
 ---
 
@@ -30,7 +30,7 @@
 ```
 4E-1: Pen Types    [██████] 6/6 ✅
 4E-2: Pen Icons    [██████] 6/6 ✅ (flutter_pen_toolbar)
-4E-3: Eraser Modes [████__] 4/5
+4E-3: Eraser Modes [██████] 5/5 ✅
 4E-4: Color Picker [██████] 6/6 ✅
 4E-5: Toolbar UX   [_____]  0/5
 4E-6: Performance  [_____]  0/5
@@ -70,15 +70,16 @@
   - 5 preset kategorisi: Classic (light/dark), Highlighter, Tape (cream/bright)
   - Dark tema (#1E1E1E)
   - 280px genişlik (mobil uyumlu)
-- **Phase 4E-3 başladı:**
+- **Phase 4E-3 tamamlandı:**
   - PixelEraserTool oluşturuldu (segment detection)
   - ErasePointsCommand oluşturuldu (undo/redo support)
   - StrokeSplitter utility eklendi (stroke parçalama)
   - LassoEraserTool oluşturuldu (point-in-polygon algoritması)
   - EraserCursorPainter oluşturuldu (visual feedback)
   - EraserCursorWidget oluşturuldu (canvas overlay)
+  - DrawingCanvas'a tüm modlar entegre edildi (stroke, pixel, lasso)
   - Bounding box pre-filter performans optimizasyonu
-  - 28/28 test geçti ✅
+  - 41/41 test geçti ✅
 
 ---
 
