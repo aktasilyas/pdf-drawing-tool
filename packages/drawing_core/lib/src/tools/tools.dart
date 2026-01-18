@@ -11,6 +11,7 @@ export 'highlighter_tool.dart';
 export 'lasso_selection_tool.dart';
 export 'line_tool.dart';
 export 'pen_tool.dart';
+export 'pixel_eraser_tool.dart';
 export 'rect_selection_tool.dart';
 export 'rectangle_tool.dart';
 export 'selection_tool.dart';

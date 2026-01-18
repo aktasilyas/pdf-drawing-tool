@@ -10,20 +10,18 @@
 | Key | Value |
 |-----|-------|
 | **Current Phase** | 4E - Enhancement & Cleanup |
-| **Current Module** | 4E-4 Advanced Color Picker ✅ |
-| **Current Step** | Tamamlandı |
-| **Last Commit** | feat(ui): add advanced HSV color picker |
-| **Branch** | feature/phase4e-enhancements |
+| **Current Module** | 4E-3 Eraser Modes |
+| **Current Step** | 1/5 - PixelEraserTool ✅ |
+| **Last Commit** | feat(core): add PixelEraserTool with segment detection |
+| **Branch** | main |
 
 ---
 
 ## Next Task
 
-**Görev:** 4E-3 Eraser Modes veya 4E-5 Toolbar UX
+**Görev:** 4E-3 Eraser Modes - ADIM 2
 
-**Seçenekler:**
-- 4E-3: PixelEraser, LassoEraser, Eraser cursor
-- 4E-5: Toolbar settings panel, reorder, show/hide
+**Sırada:** ErasePointsCommand with StrokeSplitter (undo/redo support)
 
 ---
 
@@ -32,7 +30,7 @@
 ```
 4E-1: Pen Types    [██████] 6/6 ✅
 4E-2: Pen Icons    [██████] 6/6 ✅ (flutter_pen_toolbar)
-4E-3: Eraser Modes [______] 0/5
+4E-3: Eraser Modes [█_____] 1/5
 4E-4: Color Picker [██████] 6/6 ✅
 4E-5: Toolbar UX   [_____]  0/5
 4E-6: Performance  [_____]  0/5
@@ -64,12 +62,18 @@
 - Fosforlu kalem için **düz çizgi modu** var
 - **Neon Highlighter toolbar** düzeltildi
 - **Advanced Color Picker eklendi:**
-  - HSV Color Wheel (dairesel renk seçici)
-  - Brightness/Opacity sliders
-  - Hex color input
-  - Recent colors provider
-  - Paletler + Özel tabs
-- PixelEraser ve LassoEraser tamamlanacak
+  - Fenci/GoodNotes tarzı kompakt tasarım
+  - 2 tab: Renk paleti (HSV wheel) + Renk Seti (presets)
+  - HSV picker box (160x160) + Hue/Opacity sliders
+  - Hex input + opacity % + save button
+  - Recent colors (max 12)
+  - 5 preset kategorisi: Classic (light/dark), Highlighter, Tape (cream/bright)
+  - Dark tema (#1E1E1E)
+  - 280px genişlik (mobil uyumlu)
+- **Phase 4E-3 başladı:**
+  - PixelEraserTool oluşturuldu (segment detection)
+  - Bounding box pre-filter performans optimizasyonu
+  - 5/5 test geçti ✅
 
 ---
 
