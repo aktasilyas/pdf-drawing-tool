@@ -705,31 +705,8 @@ class PenBoxPresetsNotifier extends StateNotifier<List<PenPreset>> {
 // TOOLBAR CONFIGURATION
 // =============================================================================
 // NOTE: ToolbarConfig model is now in models/toolbar_config.dart
-// TODO Phase 4E-5: This provider will be replaced with toolbar_config_provider.dart
-// which includes SharedPreferences persistence
-
-/// Toolbar configuration provider (temporary).
-final toolbarConfigProvider =
-    StateNotifierProvider<ToolbarConfigNotifier, ToolbarConfig>(
-  (ref) => ToolbarConfigNotifier(),
-);
-
-/// Notifier for toolbar configuration (temporary).
-class ToolbarConfigNotifier extends StateNotifier<ToolbarConfig> {
-  ToolbarConfigNotifier() : super(ToolbarConfig.defaultConfig());
-
-  void reorderTools(int oldIndex, int newIndex) {
-    state = state.reorderTools(oldIndex, newIndex);
-  }
-
-  void toggleToolVisibility(ToolType tool) {
-    state = state.toggleToolVisibility(tool);
-  }
-
-  void resetToDefault() {
-    state = ToolbarConfig.defaultConfig();
-  }
-}
+// NOTE: Toolbar configuration provider is now in toolbar_config_provider.dart
+// with SharedPreferences persistence
 
 // =============================================================================
 // HISTORY (UNDO/REDO)

@@ -77,11 +77,13 @@ class ToolbarConfig {
     final defaultTools = [
       ToolType.ballpointPen,
       ToolType.pencil,
+      ToolType.brushPen,
       ToolType.highlighter,
       ToolType.pixelEraser,
       ToolType.selection,
       ToolType.shapes,
       ToolType.text,
+      ToolType.sticker,
       ToolType.image,
     ];
 

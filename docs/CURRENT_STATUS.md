@@ -11,17 +11,17 @@
 |-----|-------|
 | **Current Phase** | 4E - Enhancement & Cleanup |
 | **Current Module** | 4E-5 Toolbar UX Improvements |
-| **Current Step** | 1/5 - ToolbarConfig Model ✅ |
-| **Last Commit** | feat(ui): add ToolbarConfig model with serialization |
+| **Current Step** | 2/5 - Toolbar Config Provider ✅ |
+| **Last Commit** | feat(ui): add toolbar config provider with SharedPreferences |
 | **Branch** | main |
 
 ---
 
 ## Next Task
 
-**Görev:** Phase 4E-5 Toolbar UX - ADIM 1/5 tamamlandı
+**Görev:** Phase 4E-5 Toolbar UX - ADIM 2/5 tamamlandı
 
-**Sırada:** ADIM 2 - Toolbar Config Provider with Persistence (SharedPreferences)
+**Sırada:** ADIM 3 - Toolbar Editor UI Update
 
 ---
 
@@ -32,7 +32,7 @@
 4E-2: Pen Icons    [██████] 6/6 ✅ (flutter_pen_toolbar)
 4E-3: Eraser Modes [██████] 5/5 ✅
 4E-4: Color Picker [██████] 6/6 ✅
-4E-5: Toolbar UX   [█_____] 1/5
+4E-5: Toolbar UX   [██____] 2/5
 4E-6: Performance  [______] 0/5
 4E-7: Code Quality [______] 0/4
 ```
@@ -104,6 +104,17 @@
     - reorderTools, toggleToolVisibility, reset methods
     - 8/8 test passed ✅
     - Eski provider refactor edildi (temporary placeholder)
+  - **ADIM 2/5 - Toolbar Config Provider:**
+    - SharedPreferences integration ✅
+    - toolbarConfigProvider with persistence
+    - sharedPreferencesProvider (must override in main)
+    - Auto-save on config changes
+    - Load from storage on init
+    - visibleToolsProvider, isToolVisibleProvider helpers
+    - 14/14 provider test passed ✅
+    - shared_preferences: ^2.2.2 eklendi
+    - providers_test.dart güncellendi (mock setup)
+    - Default config: 10 tool (brushPen, sticker eklendi)
 
 ---
 

@@ -10,4 +10,5 @@ export 'recent_colors_provider.dart';
 export 'selection_provider.dart';
 export 'shape_provider.dart';
 export 'text_provider.dart';
+export 'toolbar_config_provider.dart';
 export 'tool_style_provider.dart';

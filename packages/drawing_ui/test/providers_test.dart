@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:drawing_ui/drawing_ui.dart';
 import 'package:drawing_ui/src/providers/history_provider.dart';
 
@@ -123,12 +124,12 @@ void main() {
   });
 
   group('Eraser Settings Provider', () {
-    test('pixel mode is default', () {
+    test('stroke mode is default', () {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
       final settings = container.read(eraserSettingsProvider);
-      expect(settings.mode, EraserMode.pixel);
+      expect(settings.mode, EraserMode.stroke);
     });
 
     test('can change eraser mode', () {
@@ -258,8 +259,23 @@ void main() {
   });
 
   group('Toolbar Config Provider', () {
+    late SharedPreferences prefs;
+
+    setUp(() async {
+      SharedPreferences.setMockInitialValues({});
+      prefs = await SharedPreferences.getInstance();
+    });
+
+    ProviderContainer createContainer() {
+      return ProviderContainer(
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+        ],
+      );
+    }
+
     test('has default tools', () {
-      final container = ProviderContainer();
+      final container = createContainer();
       addTearDown(container.dispose);
 
       final config = container.read(toolbarConfigProvider);
@@ -267,48 +283,51 @@ void main() {
       expect(config.visibleTools, isNotEmpty);
     });
 
-    test('can reorder tools', () {
-      final container = ProviderContainer();
+    test('can reorder tools', () async {
+      final container = createContainer();
       addTearDown(container.dispose);
 
       final originalOrder = container.read(toolbarConfigProvider).sortedTools;
       final originalFirst = originalOrder[0].toolType;
       final originalSecond = originalOrder[1].toolType;
 
-      container.read(toolbarConfigProvider.notifier).reorderTools(0, 1);
+      await container.read(toolbarConfigProvider.notifier).reorderTools(0, 1);
 
       final newOrder = container.read(toolbarConfigProvider).sortedTools;
       expect(newOrder[0].toolType, originalSecond);
       expect(newOrder[1].toolType, originalFirst);
     });
 
-    test('can toggle tool visibility', () {
-      final container = ProviderContainer();
+    test('can toggle tool visibility', () async {
+      final container = createContainer();
       addTearDown(container.dispose);
 
       final tool = ToolType.sticker;
-      container.read(toolbarConfigProvider.notifier).toggleToolVisibility(tool);
+      await container
+          .read(toolbarConfigProvider.notifier)
+          .toggleToolVisibility(tool);
 
       final config = container.read(toolbarConfigProvider);
       final toolConfig = config.tools.firstWhere((t) => t.toolType == tool);
       expect(toolConfig.isVisible, false);
     });
 
-    test('can reset to default', () {
-      final container = ProviderContainer();
+    test('can reset to default', () async {
+      final container = createContainer();
       addTearDown(container.dispose);
 
       // Make some changes
-      container.read(toolbarConfigProvider.notifier).reorderTools(0, 3);
-      container
+      await container.read(toolbarConfigProvider.notifier).reorderTools(0, 3);
+      await container
           .read(toolbarConfigProvider.notifier)
           .toggleToolVisibility(ToolType.brushPen);
 
       // Reset
-      container.read(toolbarConfigProvider.notifier).resetToDefault();
+      await container.read(toolbarConfigProvider.notifier).resetToDefault();
 
       final config = container.read(toolbarConfigProvider);
-      expect(config.visibleTools.contains(ToolType.brushPen), true);
+      final brushPenConfig = config.tools.firstWhere((t) => t.toolType == ToolType.brushPen);
+      expect(brushPenConfig.isVisible, true);
     });
   });
 

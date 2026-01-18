@@ -70,4 +70,5 @@ export 'src/providers/drawing_providers.dart';
 export 'src/providers/document_provider.dart';
 export 'src/providers/history_provider.dart';
 export 'src/providers/tool_style_provider.dart';
+export 'src/providers/toolbar_config_provider.dart';
 export 'src/providers/canvas_transform_provider.dart';

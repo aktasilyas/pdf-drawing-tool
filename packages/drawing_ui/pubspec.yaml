@@ -14,6 +14,7 @@ dependencies:
     path: ../drawing_core
   flutter_riverpod: ^2.4.0
   equatable: ^2.0.5
+  shared_preferences: ^2.2.2
   flutter_pen_toolbar:
     git:
       url: https://github.com/aktasilyas/flutter_pen_toolbar.git
