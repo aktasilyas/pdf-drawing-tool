@@ -186,6 +186,9 @@ class EraserCursorPainter extends CustomPainter {
     final metric = metrics.first;
     final length = metric.length;
     
+    // Skip if path is too short
+    if (length < 1) return;
+    
     for (double d = 0; d < length; d += 8) {
       final tangent = metric.getTangentForOffset(d);
       if (tangent != null) {
