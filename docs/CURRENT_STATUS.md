@@ -11,17 +11,17 @@
 |-----|-------|
 | **Current Phase** | 4E - Enhancement & Cleanup |
 | **Current Module** | 4E-3 Eraser Modes |
-| **Current Step** | 2/5 - ErasePointsCommand ✅ |
-| **Last Commit** | feat(core): add ErasePointsCommand with StrokeSplitter |
+| **Current Step** | 3/5 - LassoEraserTool ✅ |
+| **Last Commit** | feat(core): add LassoEraserTool with point-in-polygon |
 | **Branch** | main |
 
 ---
 
 ## Next Task
 
-**Görev:** 4E-3 Eraser Modes - ADIM 3
+**Görev:** 4E-3 Eraser Modes - ADIM 4
 
-**Sırada:** LassoEraserTool (point-in-polygon algoritması)
+**Sırada:** EraserCursorPainter (visual feedback)
 
 ---
 
@@ -30,7 +30,7 @@
 ```
 4E-1: Pen Types    [██████] 6/6 ✅
 4E-2: Pen Icons    [██████] 6/6 ✅ (flutter_pen_toolbar)
-4E-3: Eraser Modes [██____] 2/5
+4E-3: Eraser Modes [███___] 3/5
 4E-4: Color Picker [██████] 6/6 ✅
 4E-5: Toolbar UX   [_____]  0/5
 4E-6: Performance  [_____]  0/5
@@ -74,8 +74,9 @@
   - PixelEraserTool oluşturuldu (segment detection)
   - ErasePointsCommand oluşturuldu (undo/redo support)
   - StrokeSplitter utility eklendi (stroke parçalama)
+  - LassoEraserTool oluşturuldu (point-in-polygon algoritması)
   - Bounding box pre-filter performans optimizasyonu
-  - 15/15 test geçti ✅
+  - 22/22 test geçti ✅
 
 ---
 
