@@ -258,12 +258,12 @@ void main() {
   });
 
   group('Toolbar Config Provider', () {
-    test('has default tool order', () {
+    test('has default tools', () {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
       final config = container.read(toolbarConfigProvider);
-      expect(config.toolOrder, isNotEmpty);
+      expect(config.tools, isNotEmpty);
       expect(config.visibleTools, isNotEmpty);
     });
 
@@ -271,15 +271,15 @@ void main() {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
-      final originalOrder = container.read(toolbarConfigProvider).toolOrder;
-      final originalFirst = originalOrder[0];
-      final originalSecond = originalOrder[1];
+      final originalOrder = container.read(toolbarConfigProvider).sortedTools;
+      final originalFirst = originalOrder[0].toolType;
+      final originalSecond = originalOrder[1].toolType;
 
       container.read(toolbarConfigProvider.notifier).reorderTools(0, 1);
 
-      final newOrder = container.read(toolbarConfigProvider).toolOrder;
-      expect(newOrder[0], originalSecond);
-      expect(newOrder[1], originalFirst);
+      final newOrder = container.read(toolbarConfigProvider).sortedTools;
+      expect(newOrder[0].toolType, originalSecond);
+      expect(newOrder[1].toolType, originalFirst);
     });
 
     test('can toggle tool visibility', () {
@@ -287,12 +287,11 @@ void main() {
       addTearDown(container.dispose);
 
       final tool = ToolType.sticker;
-      container
-          .read(toolbarConfigProvider.notifier)
-          .setToolVisibility(tool, false);
+      container.read(toolbarConfigProvider.notifier).toggleToolVisibility(tool);
 
       final config = container.read(toolbarConfigProvider);
-      expect(config.visibleTools.contains(tool), false);
+      final toolConfig = config.tools.firstWhere((t) => t.toolType == tool);
+      expect(toolConfig.isVisible, false);
     });
 
     test('can reset to default', () {
@@ -303,7 +302,7 @@ void main() {
       container.read(toolbarConfigProvider.notifier).reorderTools(0, 3);
       container
           .read(toolbarConfigProvider.notifier)
-          .setToolVisibility(ToolType.brushPen, false);
+          .toggleToolVisibility(ToolType.brushPen);
 
       // Reset
       container.read(toolbarConfigProvider.notifier).resetToDefault();

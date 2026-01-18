@@ -187,8 +187,8 @@ class _ToolBarState extends ConsumerState<ToolBar> {
 
   /// Görünür araçları al, kalem ve fosforlu araçları ayrı grupla
   List<ToolType> _getGroupedVisibleTools(ToolbarConfig config, ToolType currentTool) {
-    final visibleTools = config.toolOrder
-        .where((tool) => config.visibleTools.contains(tool))
+    final visibleTools = config.visibleTools
+        .map((toolConfig) => toolConfig.toolType)
         .toList();
 
     final result = <ToolType>[];

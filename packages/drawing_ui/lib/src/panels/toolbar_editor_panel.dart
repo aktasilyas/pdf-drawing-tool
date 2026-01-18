@@ -56,7 +56,7 @@ class ToolbarEditorPanel extends ConsumerWidget {
           ReorderableListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: config.toolOrder.length,
+            itemCount: config.sortedTools.length,
             onReorder: (oldIndex, newIndex) {
               if (newIndex > oldIndex) newIndex--;
               ref
@@ -64,16 +64,15 @@ class ToolbarEditorPanel extends ConsumerWidget {
                   .reorderTools(oldIndex, newIndex);
             },
             itemBuilder: (context, index) {
-              final tool = config.toolOrder[index];
-              final isVisible = config.visibleTools.contains(tool);
+              final toolConfig = config.sortedTools[index];
               return _ToolListItem(
-                key: ValueKey(tool),
-                tool: tool,
-                isVisible: isVisible,
+                key: ValueKey(toolConfig.toolType),
+                tool: toolConfig.toolType,
+                isVisible: toolConfig.isVisible,
                 onVisibilityChanged: (visible) {
                   ref
                       .read(toolbarConfigProvider.notifier)
-                      .setToolVisibility(tool, visible);
+                      .toggleToolVisibility(toolConfig.toolType);
                 },
               );
             },

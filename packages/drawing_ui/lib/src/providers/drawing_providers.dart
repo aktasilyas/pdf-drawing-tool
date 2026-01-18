@@ -704,92 +704,26 @@ class PenBoxPresetsNotifier extends StateNotifier<List<PenPreset>> {
 // =============================================================================
 // TOOLBAR CONFIGURATION
 // =============================================================================
+// NOTE: ToolbarConfig model is now in models/toolbar_config.dart
+// TODO Phase 4E-5: This provider will be replaced with toolbar_config_provider.dart
+// which includes SharedPreferences persistence
 
-/// Toolbar configuration provider.
+/// Toolbar configuration provider (temporary).
 final toolbarConfigProvider =
     StateNotifierProvider<ToolbarConfigNotifier, ToolbarConfig>(
-  (ref) => ToolbarConfigNotifier(ToolbarConfig.defaultConfig()),
+  (ref) => ToolbarConfigNotifier(),
 );
 
-/// Toolbar configuration data model.
-class ToolbarConfig {
-  const ToolbarConfig({
-    required this.toolOrder,
-    required this.visibleTools,
-  });
-
-  /// Order of tools in the toolbar.
-  final List<ToolType> toolOrder;
-
-  /// Which tools are visible in the toolbar.
-  final Set<ToolType> visibleTools;
-
-  /// Default toolbar configuration.
-  factory ToolbarConfig.defaultConfig() {
-    return ToolbarConfig(
-      toolOrder: [
-        ToolType.pencil,
-        ToolType.hardPencil,
-        ToolType.ballpointPen,
-        ToolType.gelPen,
-        ToolType.dashedPen,
-        ToolType.highlighter,
-        ToolType.brushPen,
-        ToolType.neonHighlighter,
-        ToolType.pixelEraser,
-        ToolType.strokeEraser,
-        ToolType.selection,
-        ToolType.shapes,
-        ToolType.text,
-        ToolType.sticker,
-        ToolType.image,
-      ],
-      visibleTools: {
-        ToolType.pencil,
-        ToolType.ballpointPen,
-        ToolType.gelPen,
-        ToolType.highlighter,
-        ToolType.brushPen,
-        ToolType.pixelEraser,
-        ToolType.selection,
-        ToolType.shapes,
-        ToolType.text,
-        ToolType.sticker,
-        ToolType.image,
-      },
-    );
-  }
-
-  ToolbarConfig copyWith({
-    List<ToolType>? toolOrder,
-    Set<ToolType>? visibleTools,
-  }) {
-    return ToolbarConfig(
-      toolOrder: toolOrder ?? this.toolOrder,
-      visibleTools: visibleTools ?? this.visibleTools,
-    );
-  }
-}
-
-/// Notifier for toolbar configuration.
+/// Notifier for toolbar configuration (temporary).
 class ToolbarConfigNotifier extends StateNotifier<ToolbarConfig> {
-  ToolbarConfigNotifier(super.state);
+  ToolbarConfigNotifier() : super(ToolbarConfig.defaultConfig());
 
   void reorderTools(int oldIndex, int newIndex) {
-    final tools = List<ToolType>.from(state.toolOrder);
-    final tool = tools.removeAt(oldIndex);
-    tools.insert(newIndex, tool);
-    state = state.copyWith(toolOrder: tools);
+    state = state.reorderTools(oldIndex, newIndex);
   }
 
-  void setToolVisibility(ToolType tool, bool visible) {
-    final visibleTools = Set<ToolType>.from(state.visibleTools);
-    if (visible) {
-      visibleTools.add(tool);
-    } else {
-      visibleTools.remove(tool);
-    }
-    state = state.copyWith(visibleTools: visibleTools);
+  void toggleToolVisibility(ToolType tool) {
+    state = state.toggleToolVisibility(tool);
   }
 
   void resetToDefault() {

@@ -10,18 +10,18 @@
 | Key | Value |
 |-----|-------|
 | **Current Phase** | 4E - Enhancement & Cleanup |
-| **Current Module** | 4E-3 Eraser Modes - COMPLETED ✅ |
-| **Current Step** | All steps complete + improvements |
-| **Last Commit** | fix(eraser): prevent crash when lasso path is empty |
+| **Current Module** | 4E-5 Toolbar UX Improvements |
+| **Current Step** | 1/5 - ToolbarConfig Model ✅ |
+| **Last Commit** | feat(ui): add ToolbarConfig model with serialization |
 | **Branch** | main |
 
 ---
 
 ## Next Task
 
-**Görev:** Phase 4E-3 ✅ TAMAMLANDI
+**Görev:** Phase 4E-5 Toolbar UX - ADIM 1/5 tamamlandı
 
-**Sırada:** Phase 4E-5 Toolbar UX Improvements (docs/PHASE4E5_TOOLBAR_UX.md)
+**Sırada:** ADIM 2 - Toolbar Config Provider with Persistence (SharedPreferences)
 
 ---
 
@@ -32,9 +32,9 @@
 4E-2: Pen Icons    [██████] 6/6 ✅ (flutter_pen_toolbar)
 4E-3: Eraser Modes [██████] 5/5 ✅
 4E-4: Color Picker [██████] 6/6 ✅
-4E-5: Toolbar UX   [_____]  0/5
-4E-6: Performance  [_____]  0/5
-4E-7: Code Quality [____]   0/4
+4E-5: Toolbar UX   [█_____] 1/5
+4E-6: Performance  [______] 0/5
+4E-7: Code Quality [______] 0/4
 ```
 
 ---
@@ -95,6 +95,15 @@
   - **Bug Fixes:**
     - Empty lasso path crash düzeltildi
     - Segment filters aktif (highlighter detection)
+- **Phase 4E-5 başladı (Toolbar UX):**
+  - **ADIM 1/5 - ToolbarConfig Model:**
+    - ToolConfig: Tek araç konfigürasyonu (toolType, isVisible, order)
+    - ToolbarConfig: Tam toolbar konfigürasyonu
+    - JSON serialization/deserialization
+    - visibleTools, sortedTools helper methods
+    - reorderTools, toggleToolVisibility, reset methods
+    - 8/8 test passed ✅
+    - Eski provider refactor edildi (temporary placeholder)
 
 ---
 
