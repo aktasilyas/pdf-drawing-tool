@@ -685,8 +685,11 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     final settings = ref.read(eraserSettingsProvider);
     final pixelTool = ref.read(pixelEraserToolProvider);
 
+    // Apply eraser filters first
+    final filteredStrokes = _applyEraserFilters(strokes, settings);
+
     final hits = pixelTool.findSegmentsAt(
-      strokes,
+      filteredStrokes,
       canvasPoint.dx,
       canvasPoint.dy,
       settings.size,
@@ -695,7 +698,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     for (final hit in hits) {
       // Track original stroke if not already tracked
       if (!_pixelEraseHits.containsKey(hit.strokeId)) {
-        final originalStroke = strokes.firstWhere(
+        final originalStroke = filteredStrokes.firstWhere(
           (s) => s.id == hit.strokeId,
           orElse: () => core.Stroke.create(style: core.StrokeStyle.pen()),
         );
@@ -789,13 +792,17 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     final shapes = ref.read(activeLayerShapesProvider);
     final texts = ref.read(activeLayerTextsProvider);
     final eraserTool = ref.read(eraserToolProvider);
+    final eraserSettings = ref.read(eraserSettingsProvider);
 
     // Find strokes to erase
-    final toErase = eraserTool.findStrokesToErase(
+    var toErase = eraserTool.findStrokesToErase(
       strokes,
       canvasPoint.dx,
       canvasPoint.dy,
     );
+
+    // Apply eraser filters
+    toErase = _applyEraserFilters(toErase, eraserSettings);
 
     for (final stroke in toErase) {
       if (!eraserTool.isAlreadyErased(stroke.id)) {
@@ -803,7 +810,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
       }
     }
 
-    // Find shapes to erase
+    // Find shapes to erase (no filters for shapes)
     for (final shape in shapes) {
       if (!_erasedShapeIds.contains(shape.id)) {
         if (shape.containsPoint(
@@ -816,7 +823,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
       }
     }
 
-    // Find texts to erase
+    // Find texts to erase (no filters for texts)
     for (final text in texts) {
       if (!_erasedTextIds.contains(text.id)) {
         if (text.containsPoint(
@@ -828,6 +835,25 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
         }
       }
     }
+  }
+
+  /// Apply eraser filters based on settings
+  List<core.Stroke> _applyEraserFilters(
+    List<core.Stroke> strokes,
+    EraserSettings settings,
+  ) {
+    var filtered = strokes;
+
+    // Filter: Erase only highlighter strokes
+    if (settings.eraseOnlyHighlighter) {
+      filtered = filtered.where((stroke) {
+        // Check if stroke is a highlighter (has transparency)
+        final color = Color(stroke.style.color);
+        return color.a < 1.0; // Highlighters typically have alpha < 1.0
+      }).toList();
+    }
+
+    return filtered;
   }
 
   // ─────────────────────────────────────────────────────────────────────────

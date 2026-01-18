@@ -63,10 +63,8 @@ class EraserCursorPainter extends CustomPainter {
     _strokePaint.color = isActive ? Colors.red : Colors.grey.shade600;
     canvas.drawCircle(position, radius, _strokePaint);
     
-    // Eraser icon inside (small)
-    if (size > 30) {
-      _drawEraserIcon(canvas, position, size * 0.4);
-    }
+    // Eraser icon inside - ALWAYS SHOW, larger and more visible
+    _drawEraserIcon(canvas, position, size * 0.5);
   }
   
   void _drawLassoCursor(Canvas canvas) {
@@ -115,13 +113,31 @@ class EraserCursorPainter extends CustomPainter {
   }
   
   void _drawEraserIcon(Canvas canvas, Offset center, double iconSize) {
-    final paint = Paint()
-      ..color = Colors.grey.shade600
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5
-      ..strokeCap = StrokeCap.round;
+    // White background for better visibility
+    final bgPaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
     
-    // Simple eraser shape (rectangle with angled top)
+    final iconRect = Rect.fromCenter(
+      center: center,
+      width: iconSize * 1.2,
+      height: iconSize * 0.8,
+    );
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(iconRect, const Radius.circular(3)),
+      bgPaint,
+    );
+    
+    final paint = Paint()
+      ..color = isActive ? Colors.red.shade700 : Colors.grey.shade700
+      ..style = PaintingStyle.fill;
+    
+    final strokePaint = Paint()
+      ..color = isActive ? Colors.red.shade900 : Colors.grey.shade900
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+    
+    // Eraser shape (rectangle with angled top)
     final rect = Rect.fromCenter(
       center: center,
       width: iconSize,
@@ -136,7 +152,10 @@ class EraserCursorPainter extends CustomPainter {
     path.lineTo(rect.right, rect.bottom);
     path.close();
     
+    // Fill
     canvas.drawPath(path, paint);
+    // Outline
+    canvas.drawPath(path, strokePaint);
   }
   
   void _drawMarchingAnts(Canvas canvas, Path path) {

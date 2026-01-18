@@ -69,6 +69,7 @@ export 'src/tools/text_tool.dart';
 // History
 export 'src/history/add_shape_command.dart';
 export 'src/history/add_stroke_command.dart';
+export 'src/history/clear_layer_command.dart';
 export 'src/history/delete_selection_command.dart';
 export 'src/history/drawing_command.dart';
 export 'src/history/erase_points_command.dart';

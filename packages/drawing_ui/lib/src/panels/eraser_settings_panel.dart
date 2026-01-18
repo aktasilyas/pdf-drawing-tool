@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:drawing_core/drawing_core.dart' as core;
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/panels/tool_panel.dart';
 
@@ -84,14 +85,14 @@ class EraserSettingsPanel extends ConsumerWidget {
             label: 'Sayfayı Temizle',
             icon: Icons.delete_outline,
             isDestructive: true,
-            onPressed: () => _showClearConfirmation(context),
+            onPressed: () => _showClearConfirmation(context, ref),
           ),
         ],
       ),
     );
   }
 
-  void _showClearConfirmation(BuildContext context) {
+  void _showClearConfirmation(BuildContext context, WidgetRef ref) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -108,13 +109,24 @@ class EraserSettingsPanel extends ConsumerWidget {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              // MOCK: Would clear the canvas
+              // Clear active layer
+              _clearActivePage(ref);
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Temizle'),
           ),
         ],
       ),
+    );
+  }
+
+  void _clearActivePage(WidgetRef ref) {
+    final document = ref.read(documentProvider);
+    final layerIndex = document.activeLayerIndex;
+    
+    // Clear all strokes, shapes, and texts from active layer
+    ref.read(historyManagerProvider.notifier).execute(
+      core.ClearLayerCommand(layerIndex: layerIndex),
     );
   }
 }

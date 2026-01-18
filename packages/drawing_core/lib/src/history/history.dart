@@ -3,6 +3,7 @@ library;
 
 export 'add_shape_command.dart';
 export 'add_stroke_command.dart';
+export 'clear_layer_command.dart';
 export 'delete_selection_command.dart';
 export 'drawing_command.dart';
 export 'erase_points_command.dart';
