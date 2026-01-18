@@ -77,6 +77,11 @@ class EraserTool extends DrawingTool {
           tolerance,
         );
         return stroke != null ? [stroke] : [];
+
+      case EraserMode.lasso:
+        // Lasso mode is handled separately by LassoEraserTool
+        // This method is not used for lasso mode
+        return [];
     }
   }
 

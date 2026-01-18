@@ -204,7 +204,7 @@ class HighlighterSettingsNotifier extends StateNotifier<HighlighterSettings> {
 final eraserSettingsProvider =
     StateNotifierProvider<EraserSettingsNotifier, EraserSettings>(
   (ref) => EraserSettingsNotifier(const EraserSettings(
-    mode: EraserMode.pixel,
+    mode: EraserMode.stroke,
     size: 20.0,
     pressureSensitive: true,
     eraseOnlyHighlighter: false,
