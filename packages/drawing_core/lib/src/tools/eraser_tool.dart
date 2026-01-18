@@ -5,8 +5,11 @@ enum EraserMode {
   /// Tüm çizgiyi sil (varsayılan)
   stroke,
 
-  /// Nokta bazlı sil (Phase 5+ için)
+  /// Nokta bazlı sil
   pixel,
+
+  /// Seçim yaparak sil
+  lasso,
 }
 
 /// Silgi aracı.

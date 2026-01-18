@@ -1,25 +1,58 @@
+import 'dart:ui';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/providers/drawing_providers.dart' as dp;
 
-/// Eraser mode state - stroke veya pixel
-final eraserModeProvider = StateProvider<EraserMode>((ref) {
-  return EraserMode.stroke;
+// EraserSettings ve EraserSettingsNotifier drawing_providers.dart'ta tanımlı
+// Burada sadece re-export ediyoruz
+export 'package:drawing_ui/src/providers/drawing_providers.dart' 
+    show EraserSettings, EraserSettingsNotifier, eraserSettingsProvider;
+
+/// Eraser mode state - stroke, pixel veya lasso (backward compatibility)
+final eraserModeProvider = StateProvider<dp.EraserMode>((ref) {
+  return ref.watch(dp.eraserSettingsProvider).mode;
 });
 
-/// Eraser size state (piksel cinsinden)
+/// Eraser size state (piksel cinsinden) (backward compatibility)
 final eraserSizeProvider = StateProvider<double>((ref) {
-  return 20.0;
+  return ref.watch(dp.eraserSettingsProvider).size;
 });
 
 /// Aktif eraser tool instance.
 ///
 /// Mode veya size değiştiğinde otomatik yeniden oluşturulur.
 final eraserToolProvider = Provider<EraserTool>((ref) {
-  final mode = ref.watch(eraserModeProvider);
-  final size = ref.watch(eraserSizeProvider);
+  final settings = ref.watch(dp.eraserSettingsProvider);
+  
+  // drawing_providers.dart'taki EraserMode'u drawing_core'daki EraserMode'a çevir
+  final coreMode = switch (settings.mode) {
+    dp.EraserMode.stroke => EraserMode.stroke,
+    dp.EraserMode.pixel => EraserMode.pixel,
+    dp.EraserMode.lasso => EraserMode.stroke, // Lasso için de stroke kullan
+  };
 
-  return EraserTool(mode: mode, eraserSize: size);
+  return EraserTool(mode: coreMode, eraserSize: settings.size);
 });
+
+/// Pixel eraser tool instance
+final pixelEraserToolProvider = Provider<PixelEraserTool>((ref) {
+  final settings = ref.watch(dp.eraserSettingsProvider);
+  return PixelEraserTool(
+    size: settings.size,
+    pressureSensitive: settings.pressureSensitive,
+  );
+});
+
+/// Lasso eraser tool instance
+final lassoEraserToolProvider = Provider<LassoEraserTool>((ref) {
+  return LassoEraserTool();
+});
+
+/// Current eraser cursor position
+final eraserCursorPositionProvider = StateProvider<Offset?>((ref) => null);
+
+/// Lasso eraser path points
+final lassoEraserPointsProvider = StateProvider<List<Offset>>((ref) => []);
 
 /// Eraser aktif mi? (currentTool eraser tiplerinden biri mi?)
 final isEraserActiveProvider = Provider<bool>((ref) {
