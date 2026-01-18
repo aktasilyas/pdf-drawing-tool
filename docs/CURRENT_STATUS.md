@@ -10,18 +10,18 @@
 | Key | Value |
 |-----|-------|
 | **Current Phase** | 4E - Enhancement & Cleanup |
-| **Current Module** | 4E-3 Eraser Modes |
-| **Current Step** | 5/5 - Canvas Integration ✅ |
-| **Last Commit** | feat(ui): integrate all eraser modes with canvas |
+| **Current Module** | 4E-3 Eraser Modes - COMPLETED ✅ |
+| **Current Step** | All steps complete + improvements |
+| **Last Commit** | fix(eraser): prevent crash when lasso path is empty |
 | **Branch** | main |
 
 ---
 
 ## Next Task
 
-**Görev:** 4E-3 Eraser Modes - TAMAMLANDI ✅
+**Görev:** Phase 4E-3 ✅ TAMAMLANDI
 
-**Sırada:** TABLET TESTİ (Tüm modları test et: stroke, pixel, lasso)
+**Sırada:** Phase 4E-5 Toolbar UX Improvements (docs/PHASE4E5_TOOLBAR_UX.md)
 
 ---
 
@@ -70,17 +70,32 @@
   - 5 preset kategorisi: Classic (light/dark), Highlighter, Tape (cream/bright)
   - Dark tema (#1E1E1E)
   - 280px genişlik (mobil uyumlu)
-- **Phase 4E-3 tamamlandı:**
-  - PixelEraserTool oluşturuldu (segment detection)
-  - ErasePointsCommand oluşturuldu (undo/redo support)
-  - StrokeSplitter utility eklendi (stroke parçalama)
-  - LassoEraserTool oluşturuldu (point-in-polygon algoritması)
-  - EraserCursorPainter oluşturuldu (visual feedback)
-  - EraserCursorWidget oluşturuldu (canvas overlay)
-  - DrawingCanvas'a tüm modlar entegre edildi (stroke, pixel, lasso)
-  - Bounding box pre-filter performans optimizasyonu
-  - 41/41 test geçti ✅
+- **Phase 4E-3 tamamlandı (ENHANCED):**
+  - **Core Tools:**
+    - PixelEraserTool: Segment-based silme, shapes & texts desteği
+    - LassoEraserTool: Segment-based lasso silme (polygon detection)
+    - ErasePointsCommand: Segment deletion için undo/redo
+    - StrokeSplitter: Stroke parçalama utility
+  - **UI Components:**
+    - EraserCursorPainter: Modern 3D silgi ikonu (shadow + highlight + corner fold)
+    - EraserCursorWidget: Canvas overlay widget
+    - PixelEraserPreviewPainter: Real-time kırmızı preview
+  - **Panel Features:**
+    - Clear page button (ClearLayerCommand ile undo/redo)
+    - "Erase only highlighter" filter (aktif)
+    - Pressure sensitivity toggle (UI hazır)
+    - Auto-lift toggle (UI hazır)
+  - **Eraser Modes:**
+    - Pixel: Segment silme + shapes/texts + preview
+    - Stroke: Tam stroke silme + shapes/texts
+    - Lasso: Segment-based lasso silme (polygon içi)
+  - **Test Coverage:**
+    - 44/44 test passed ✅
+    - ClearLayerCommand: 3/3 test ✅
+  - **Bug Fixes:**
+    - Empty lasso path crash düzeltildi
+    - Segment filters aktif (highlighter detection)
 
 ---
 
-*Last updated: 2026-01-16*
+*Last updated: 2026-01-18*
