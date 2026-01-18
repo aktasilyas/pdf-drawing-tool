@@ -22,14 +22,14 @@ void main() {
       expect(lasso.isActive, isTrue);
     });
     
-    test('finds strokes inside lasso', () {
+    test('finds segments inside lasso', () {
       // Create a square lasso
       lasso.onPointerDown(0, 0);
       lasso.onPointerMove(100, 0);
       lasso.onPointerMove(100, 100);
       lasso.onPointerMove(0, 100);
       
-      // Stroke inside
+      // Stroke with segment inside
       final insideStroke = Stroke(
         id: 'inside',
         points: [
@@ -40,7 +40,7 @@ void main() {
         createdAt: DateTime.now(),
       );
       
-      // Stroke outside
+      // Stroke completely outside
       final outsideStroke = Stroke(
         id: 'outside',
         points: [
@@ -53,8 +53,9 @@ void main() {
       
       final result = lasso.onPointerUp([insideStroke, outsideStroke]);
       
-      expect(result, contains('inside'));
-      expect(result, isNot(contains('outside')));
+      expect(result.affectedSegments.keys, contains('inside'));
+      expect(result.affectedSegments.keys, isNot(contains('outside')));
+      expect(result.affectedStrokes.length, equals(1));
     });
     
     test('returns empty for small lasso', () {
@@ -63,7 +64,8 @@ void main() {
       
       final result = lasso.onPointerUp([]);
       
-      expect(result, isEmpty);
+      expect(result.affectedSegments, isEmpty);
+      expect(result.affectedStrokes, isEmpty);
     });
     
     test('clears on cancel', () {
@@ -96,17 +98,17 @@ void main() {
       
       final result = lasso.onPointerUp([farStroke]);
       
-      expect(result, isEmpty);
+      expect(result.affectedSegments, isEmpty);
     });
     
-    test('detects stroke crossing lasso boundary', () {
+    test('detects segments crossing lasso boundary', () {
       // Create a square lasso
       lasso.onPointerDown(0, 0);
       lasso.onPointerMove(100, 0);
       lasso.onPointerMove(100, 100);
       lasso.onPointerMove(0, 100);
       
-      // Stroke that starts outside but crosses into lasso
+      // Stroke that crosses lasso - only middle segment should be affected
       final crossingStroke = Stroke(
         id: 'crossing',
         points: [
@@ -120,7 +122,8 @@ void main() {
       
       final result = lasso.onPointerUp([crossingStroke]);
       
-      expect(result, contains('crossing'));
+      expect(result.affectedSegments.keys, contains('crossing'));
+      expect(result.affectedSegments['crossing'], isNotEmpty);
     });
     
     test('handles multiple strokes inside lasso', () {
@@ -152,9 +155,10 @@ void main() {
       
       final result = lasso.onPointerUp([stroke1, stroke2]);
       
-      expect(result.length, equals(2));
-      expect(result, contains('stroke1'));
-      expect(result, contains('stroke2'));
+      expect(result.affectedSegments.length, equals(2));
+      expect(result.affectedSegments.keys, contains('stroke1'));
+      expect(result.affectedSegments.keys, contains('stroke2'));
+      expect(result.affectedStrokes.length, equals(2));
     });
   });
 }

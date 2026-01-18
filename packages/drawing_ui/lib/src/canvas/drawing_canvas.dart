@@ -753,15 +753,29 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     final strokes = ref.read(activeLayerStrokesProvider);
     final lassoTool = ref.read(lassoEraserToolProvider);
 
-    final strokeIds = lassoTool.onPointerUp(strokes);
+    final result = lassoTool.onPointerUp(strokes);
 
-    if (strokeIds.isNotEmpty) {
-      final command = core.EraseStrokesCommand(
-        layerIndex: layerIndex,
-        strokeIds: strokeIds,
-      );
-      ref.read(historyManagerProvider.notifier).execute(command);
+    if (result.affectedSegments.isEmpty) {
+      return;
     }
+
+    // Split strokes and create resulting strokes (same as pixel eraser)
+    final splitResult = core.StrokeSplitter.splitStrokes(
+      result.affectedStrokes,
+      result.affectedSegments,
+    );
+
+    final resultingStrokes = <core.Stroke>[];
+    for (final pieces in splitResult.values) {
+      resultingStrokes.addAll(pieces);
+    }
+
+    final command = core.ErasePointsCommand(
+      layerIndex: layerIndex,
+      originalStrokes: result.affectedStrokes,
+      resultingStrokes: resultingStrokes,
+    );
+    ref.read(historyManagerProvider.notifier).execute(command);
   }
 
   /// Erases strokes, shapes, and texts at the given screen point (stroke mode).

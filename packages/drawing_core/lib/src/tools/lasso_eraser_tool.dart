@@ -1,7 +1,21 @@
 import 'dart:math' as math;
 import 'package:drawing_core/drawing_core.dart';
 
-/// Lasso-based eraser that removes all strokes within drawn selection.
+/// Result of lasso eraser operation - segments to remove.
+class LassoEraseResult {
+  const LassoEraseResult({
+    required this.affectedSegments,
+    required this.affectedStrokes,
+  });
+  
+  /// Map of stroke ID to list of segment indices to remove
+  final Map<String, List<int>> affectedSegments;
+  
+  /// List of original strokes that were affected
+  final List<Stroke> affectedStrokes;
+}
+
+/// Lasso-based eraser that removes segments within drawn selection.
 class LassoEraserTool {
   LassoEraserTool();
   
@@ -31,28 +45,37 @@ class LassoEraserTool {
     ));
   }
   
-  /// Returns IDs of strokes to erase
-  List<String> onPointerUp(List<Stroke> strokes) {
+  /// Returns segments to erase
+  LassoEraseResult onPointerUp(List<Stroke> strokes) {
     if (_lassoPoints.length < 3) {
       _lassoPoints.clear();
-      return [];
+      return const LassoEraseResult(
+        affectedSegments: {},
+        affectedStrokes: [],
+      );
     }
     
-    // IMPORTANT: Find strokes BEFORE clearing points
-    final strokeIds = findStrokesInLasso(strokes);
+    // IMPORTANT: Find segments BEFORE clearing points
+    final result = findSegmentsInLasso(strokes);
     _lassoPoints.clear();
-    return strokeIds;
+    return result;
   }
   
   void cancel() {
     _lassoPoints.clear();
   }
   
-  /// Find all strokes that have any point inside the lasso
-  List<String> findStrokesInLasso(List<Stroke> strokes) {
-    if (_lassoPoints.length < 3) return [];
+  /// Find all segments that are inside the lasso
+  LassoEraseResult findSegmentsInLasso(List<Stroke> strokes) {
+    if (_lassoPoints.length < 3) {
+      return const LassoEraseResult(
+        affectedSegments: {},
+        affectedStrokes: [],
+      );
+    }
     
-    final result = <String>[];
+    final affectedSegments = <String, List<int>>{};
+    final affectedStrokes = <Stroke>[];
     final polygon = _lassoPoints.map((p) => math.Point(p.x, p.y)).toList();
     
     for (final stroke in strokes) {
@@ -61,16 +84,33 @@ class LassoEraserTool {
         continue;
       }
       
-      // Check if any point is inside lasso
-      for (final point in stroke.points) {
-        if (_isPointInPolygon(math.Point(point.x, point.y), polygon)) {
-          result.add(stroke.id);
-          break; // One point inside is enough
+      final points = stroke.points;
+      if (points.length < 2) continue;
+      
+      final strokeSegments = <int>[];
+      
+      // Check each segment (pair of consecutive points)
+      for (int i = 0; i < points.length - 1; i++) {
+        final p1 = math.Point(points[i].x, points[i].y);
+        final p2 = math.Point(points[i + 1].x, points[i + 1].y);
+        
+        // Check if either endpoint is inside lasso
+        if (_isPointInPolygon(p1, polygon) || _isPointInPolygon(p2, polygon)) {
+          strokeSegments.add(i);
         }
+      }
+      
+      // If any segments were found, add to results
+      if (strokeSegments.isNotEmpty) {
+        affectedSegments[stroke.id] = strokeSegments;
+        affectedStrokes.add(stroke);
       }
     }
     
-    return result;
+    return LassoEraseResult(
+      affectedSegments: affectedSegments,
+      affectedStrokes: affectedStrokes,
+    );
   }
   
   BoundingBox _getLassoBounds() {
