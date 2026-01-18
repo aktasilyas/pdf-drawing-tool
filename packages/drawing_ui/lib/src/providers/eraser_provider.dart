@@ -54,6 +54,9 @@ final eraserCursorPositionProvider = StateProvider<Offset?>((ref) => null);
 /// Lasso eraser path points
 final lassoEraserPointsProvider = StateProvider<List<Offset>>((ref) => []);
 
+/// Pixel eraser preview - affected segments (strokeId -> segment indices)
+final pixelEraserPreviewProvider = StateProvider<Map<String, List<int>>>((ref) => {});
+
 /// Eraser aktif mi? (currentTool eraser tiplerinden biri mi?)
 final isEraserActiveProvider = Provider<bool>((ref) {
   // Bu provider tool_style_provider'daki currentToolProvider'a bağlı

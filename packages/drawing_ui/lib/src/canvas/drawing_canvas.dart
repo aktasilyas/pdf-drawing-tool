@@ -5,6 +5,7 @@ import 'package:drawing_ui/src/canvas/stroke_painter.dart';
 import 'package:drawing_ui/src/canvas/selection_painter.dart';
 import 'package:drawing_ui/src/canvas/shape_painter.dart';
 import 'package:drawing_ui/src/canvas/text_painter.dart';
+import 'package:drawing_ui/src/canvas/pixel_eraser_preview_painter.dart';
 import 'package:drawing_ui/src/rendering/rendering.dart';
 import 'package:drawing_ui/src/models/tool_type.dart';
 import 'package:drawing_ui/src/providers/document_provider.dart';
@@ -567,6 +568,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
         );
         _pixelEraseHits.clear();
         _pixelEraseOriginalStrokes.clear();
+        ref.read(pixelEraserPreviewProvider.notifier).state = {};
         _handlePixelEraseAt(canvasPoint);
         break;
 
@@ -708,6 +710,10 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
         _pixelEraseHits[hit.strokeId]!.add(hit.segmentIndex);
       }
     }
+
+    // Update preview provider for visual feedback
+    ref.read(pixelEraserPreviewProvider.notifier).state = 
+        Map<String, List<int>>.from(_pixelEraseHits);
   }
 
   /// Commits pixel erase operation to history.
@@ -715,6 +721,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     if (_pixelEraseHits.isEmpty || _pixelEraseOriginalStrokes.isEmpty) {
       _pixelEraseHits.clear();
       _pixelEraseOriginalStrokes.clear();
+      ref.read(pixelEraserPreviewProvider.notifier).state = {};
       return;
     }
 
@@ -738,6 +745,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
 
     _pixelEraseHits.clear();
     _pixelEraseOriginalStrokes.clear();
+    ref.read(pixelEraserPreviewProvider.notifier).state = {};
   }
 
   /// Commits lasso erase operation to history.
@@ -1220,6 +1228,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     final eraserCursorPosition = ref.watch(eraserCursorPositionProvider);
     final lassoEraserPoints = ref.watch(lassoEraserPointsProvider);
     final isEraserTool = ref.watch(isEraserToolProvider);
+    final pixelEraserPreview = ref.watch(pixelEraserPreviewProvider);
 
     // Selection tool preview path
     List<core.DrawingPoint>? selectionPreviewPath;
@@ -1400,6 +1409,23 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
                               willChange: true,
                             ),
                           ),
+
+                          // ─────────────────────────────────────────────────────────
+                          // LAYER 6.5: Pixel Eraser Preview
+                          // ─────────────────────────────────────────────────────────
+                          // Shows affected segments in real-time
+                          if (pixelEraserPreview.isNotEmpty)
+                            RepaintBoundary(
+                              child: CustomPaint(
+                                size: size,
+                                painter: PixelEraserPreviewPainter(
+                                  strokes: strokes,
+                                  affectedSegments: pixelEraserPreview,
+                                ),
+                                isComplex: false,
+                                willChange: true,
+                              ),
+                            ),
 
                           // ─────────────────────────────────────────────────────────
                           // LAYER 7: Selection Handles (for drag interactions)

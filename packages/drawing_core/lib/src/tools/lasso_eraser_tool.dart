@@ -38,6 +38,7 @@ class LassoEraserTool {
       return [];
     }
     
+    // IMPORTANT: Find strokes BEFORE clearing points
     final strokeIds = findStrokesInLasso(strokes);
     _lassoPoints.clear();
     return strokeIds;
