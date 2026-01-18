@@ -113,49 +113,64 @@ class EraserCursorPainter extends CustomPainter {
   }
   
   void _drawEraserIcon(Canvas canvas, Offset center, double iconSize) {
-    // White background for better visibility
-    final bgPaint = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.fill;
-    
-    final iconRect = Rect.fromCenter(
-      center: center,
-      width: iconSize * 1.2,
-      height: iconSize * 0.8,
-    );
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(iconRect, const Radius.circular(3)),
-      bgPaint,
-    );
-    
+    // Draw a modern eraser icon (rounded rectangle with corner fold)
     final paint = Paint()
-      ..color = isActive ? Colors.red.shade700 : Colors.grey.shade700
-      ..style = PaintingStyle.fill;
+      ..style = PaintingStyle.fill
+      ..color = isActive ? Colors.red.shade700 : Colors.grey.shade700;
     
     final strokePaint = Paint()
-      ..color = isActive ? Colors.red.shade900 : Colors.grey.shade900
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
-    
-    // Eraser shape (rectangle with angled top)
-    final rect = Rect.fromCenter(
-      center: center,
-      width: iconSize,
-      height: iconSize * 0.6,
+      ..strokeWidth = 1.5
+      ..color = Colors.white;
+
+    // Main eraser body (rounded rectangle)
+    final bodyRect = RRect.fromRectAndRadius(
+      Rect.fromCenter(
+        center: center + const Offset(0, 2),
+        width: iconSize * 0.8,
+        height: iconSize * 0.5,
+      ),
+      const Radius.circular(2),
     );
     
-    final path = Path();
-    path.moveTo(rect.left, rect.bottom);
-    path.lineTo(rect.left, rect.top + rect.height * 0.3);
-    path.lineTo(rect.left + rect.width * 0.3, rect.top);
-    path.lineTo(rect.right, rect.top);
-    path.lineTo(rect.right, rect.bottom);
-    path.close();
+    // Draw shadow first
+    final shadowPaint = Paint()
+      ..style = PaintingStyle.fill
+      ..color = Colors.black26;
+    canvas.drawRRect(
+      bodyRect.shift(const Offset(1, 1)),
+      shadowPaint,
+    );
     
-    // Fill
-    canvas.drawPath(path, paint);
-    // Outline
-    canvas.drawPath(path, strokePaint);
+    // Draw main body
+    canvas.drawRRect(bodyRect, paint);
+    canvas.drawRRect(bodyRect, strokePaint);
+    
+    // Draw highlight line (makes it look 3D)
+    final highlightPaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0
+      ..color = Colors.white.withValues(alpha: 0.5);
+    
+    canvas.drawLine(
+      Offset(bodyRect.left + 2, bodyRect.top + 2),
+      Offset(bodyRect.right - 2, bodyRect.top + 2),
+      highlightPaint,
+    );
+    
+    // Draw corner fold (top-left)
+    final foldPath = Path();
+    final foldSize = iconSize * 0.15;
+    foldPath.moveTo(bodyRect.left, bodyRect.top + foldSize);
+    foldPath.lineTo(bodyRect.left + foldSize, bodyRect.top);
+    foldPath.lineTo(bodyRect.left, bodyRect.top);
+    foldPath.close();
+    
+    final foldPaint = Paint()
+      ..style = PaintingStyle.fill
+      ..color = isActive ? Colors.red.shade900 : Colors.grey.shade900;
+    canvas.drawPath(foldPath, foldPaint);
+    canvas.drawPath(foldPath, strokePaint);
   }
   
   void _drawMarchingAnts(Canvas canvas, Path path) {

@@ -682,6 +682,8 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
   /// Handles pixel erase at a specific canvas point.
   void _handlePixelEraseAt(Offset canvasPoint) {
     final strokes = ref.read(activeLayerStrokesProvider);
+    final shapes = ref.read(activeLayerShapesProvider);
+    final texts = ref.read(activeLayerTextsProvider);
     final settings = ref.read(eraserSettingsProvider);
     final pixelTool = ref.read(pixelEraserToolProvider);
 
@@ -714,6 +716,32 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
       }
     }
 
+    // Check shapes (use eraser size as tolerance)
+    for (final shape in shapes) {
+      if (!_erasedShapeIds.contains(shape.id)) {
+        if (shape.containsPoint(
+          canvasPoint.dx,
+          canvasPoint.dy,
+          settings.size / 2, // Use radius as tolerance
+        )) {
+          _erasedShapeIds.add(shape.id);
+        }
+      }
+    }
+
+    // Check texts
+    for (final text in texts) {
+      if (!_erasedTextIds.contains(text.id)) {
+        if (text.containsPoint(
+          canvasPoint.dx,
+          canvasPoint.dy,
+          settings.size / 2, // Use radius as tolerance
+        )) {
+          _erasedTextIds.add(text.id);
+        }
+      }
+    }
+
     // Update preview provider for visual feedback
     ref.read(pixelEraserPreviewProvider.notifier).state = 
         Map<String, List<int>>.from(_pixelEraseHits);
@@ -721,33 +749,50 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
 
   /// Commits pixel erase operation to history.
   void _commitPixelErase(int layerIndex) {
-    if (_pixelEraseHits.isEmpty || _pixelEraseOriginalStrokes.isEmpty) {
-      _pixelEraseHits.clear();
-      _pixelEraseOriginalStrokes.clear();
-      ref.read(pixelEraserPreviewProvider.notifier).state = {};
-      return;
+    // Commit strokes
+    if (_pixelEraseHits.isNotEmpty && _pixelEraseOriginalStrokes.isNotEmpty) {
+      // Split strokes and create resulting strokes
+      final splitResult = core.StrokeSplitter.splitStrokes(
+        _pixelEraseOriginalStrokes,
+        _pixelEraseHits,
+      );
+
+      final resultingStrokes = <core.Stroke>[];
+      for (final pieces in splitResult.values) {
+        resultingStrokes.addAll(pieces);
+      }
+
+      final command = core.ErasePointsCommand(
+        layerIndex: layerIndex,
+        originalStrokes: _pixelEraseOriginalStrokes.toList(),
+        resultingStrokes: resultingStrokes,
+      );
+      ref.read(historyManagerProvider.notifier).execute(command);
     }
 
-    // Split strokes and create resulting strokes
-    final splitResult = core.StrokeSplitter.splitStrokes(
-      _pixelEraseOriginalStrokes,
-      _pixelEraseHits,
-    );
-
-    final resultingStrokes = <core.Stroke>[];
-    for (final pieces in splitResult.values) {
-      resultingStrokes.addAll(pieces);
+    // Commit shapes
+    for (final shapeId in _erasedShapeIds) {
+      final command = core.RemoveShapeCommand(
+        layerIndex: layerIndex,
+        shapeId: shapeId,
+      );
+      ref.read(historyManagerProvider.notifier).execute(command);
     }
 
-    final command = core.ErasePointsCommand(
-      layerIndex: layerIndex,
-      originalStrokes: _pixelEraseOriginalStrokes.toList(),
-      resultingStrokes: resultingStrokes,
-    );
-    ref.read(historyManagerProvider.notifier).execute(command);
+    // Commit texts
+    for (final textId in _erasedTextIds) {
+      final command = core.RemoveTextCommand(
+        layerIndex: layerIndex,
+        textId: textId,
+      );
+      ref.read(historyManagerProvider.notifier).execute(command);
+    }
 
+    // Clear tracking
     _pixelEraseHits.clear();
     _pixelEraseOriginalStrokes.clear();
+    _erasedShapeIds.clear();
+    _erasedTextIds.clear();
     ref.read(pixelEraserPreviewProvider.notifier).state = {};
   }
 
