@@ -180,10 +180,11 @@ class EraserCursorPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
     
     // Draw white dots along the path for contrast
-    final metrics = path.computeMetrics();
-    if (metrics.isEmpty) return;
+    // Convert to list to avoid lazy iterable issues
+    final metricsList = path.computeMetrics().toList();
+    if (metricsList.isEmpty) return;
     
-    final metric = metrics.first;
+    final metric = metricsList.first;
     final length = metric.length;
     
     // Skip if path is too short

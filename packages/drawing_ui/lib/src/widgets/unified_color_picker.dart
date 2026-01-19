@@ -1,6 +1,3 @@
-import 'dart:math' as math;
-import 'dart:io';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -139,18 +136,42 @@ class UnifiedColorPicker extends StatelessWidget {
   }
 
   void _showColorPalette(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => CompactColorPicker(
-        selectedColor: selectedColor,
-        onColorSelected: (color) {
-          onColorSelected(color);
-          Navigator.pop(ctx);
-        },
-      ),
+    // Use custom overlay instead of showDialog to prevent interference with anchored panel
+    final overlay = Overlay.of(context);
+    late OverlayEntry overlayEntry;
+    
+    overlayEntry = OverlayEntry(
+      builder: (overlayContext) {
+        return Material(
+          color: Colors.black54,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              // Tap on barrier closes the color picker
+              overlayEntry.remove();
+            },
+            child: Center(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {}, // Absorb taps on picker content
+                child: Material(
+                  type: MaterialType.transparency,
+                  child: CompactColorPicker(
+                    selectedColor: selectedColor,
+                    onColorSelected: (color) {
+                      onColorSelected(color);
+                      overlayEntry.remove();
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
+    
+    overlay.insert(overlayEntry);
   }
 
   bool _colorsMatch(Color a, Color b) {
@@ -287,63 +308,61 @@ class _CompactColorPickerState extends State<CompactColorPicker>
   }
 
   Color get _currentColor {
-    final color = _hsvColor.toColor().withValues(alpha: widget.showOpacity ? _opacity : 1.0);
-    // #region agent log
-    try{File(r'c:\Users\aktas\source\repos\starnote_drawing_workspace\.cursor\debug.log').writeAsStringSync(jsonEncode({'location':'unified_color_picker.dart:269','message':'_currentColor getter called','data':{'hsvColor':{'h':_hsvColor.hue,'s':_hsvColor.saturation,'v':_hsvColor.value},'opacity':_opacity,'resultColor':{'r':(color.r*255).round(),'g':(color.g*255).round(),'b':(color.b*255).round(),'a':color.opacity}},'timestamp':DateTime.now().millisecondsSinceEpoch,'sessionId':'debug-session','hypothesisId':'E'})+'\n',mode:FileMode.append);}catch(_){}
-    // #endregion
-    return color;
+    return _hsvColor.toColor().withValues(alpha: widget.showOpacity ? _opacity : 1.0);
   }
 
   void _updateColor(HSVColor hsv) {
-    // #region agent log
-    try{File(r'c:\Users\aktas\source\repos\starnote_drawing_workspace\.cursor\debug.log').writeAsStringSync(jsonEncode({'location':'unified_color_picker.dart:271','message':'_updateColor called','data':{'hue':hsv.hue,'saturation':hsv.saturation,'value':hsv.value},'timestamp':DateTime.now().millisecondsSinceEpoch,'sessionId':'debug-session','hypothesisId':'B'})+'\n',mode:FileMode.append);}catch(_){}
-    // #endregion
     setState(() => _hsvColor = hsv);
-    // #region agent log
-    try{File(r'c:\Users\aktas\source\repos\starnote_drawing_workspace\.cursor\debug.log').writeAsStringSync(jsonEncode({'location':'unified_color_picker.dart:275','message':'setState completed for _updateColor','data':{'newHsvColor':{'h':_hsvColor.hue,'s':_hsvColor.saturation,'v':_hsvColor.value}},'timestamp':DateTime.now().millisecondsSinceEpoch,'sessionId':'debug-session','hypothesisId':'C'})+'\n',mode:FileMode.append);}catch(_){}
-    // #endregion
   }
 
   void _updateOpacity(double opacity) {
-    // #region agent log
-    try{File(r'c:\Users\aktas\source\repos\starnote_drawing_workspace\.cursor\debug.log').writeAsStringSync(jsonEncode({'location':'unified_color_picker.dart:281','message':'_updateOpacity called','data':{'opacity':opacity},'timestamp':DateTime.now().millisecondsSinceEpoch,'sessionId':'debug-session','hypothesisId':'C'})+'\n',mode:FileMode.append);}catch(_){}
-    // #endregion
     setState(() => _opacity = opacity);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 280,
-      margin: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: const Color(0xFF1E1E1E),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(60),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Header with tabs
-          _buildHeader(),
-          // Tab content
-          SizedBox(
-            height: 380,
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildColorPaletteTab(),
-                _buildColorSetsTab(),
-              ],
+    final screenHeight = MediaQuery.of(context).size.height;
+    // Responsive height - max 60% of screen or 420px, whichever is smaller
+    final maxContentHeight = (screenHeight * 0.55).clamp(280.0, 420.0);
+
+    // Wrap in GestureDetector to absorb all taps and prevent propagation to underlying overlays
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {}, // Absorb taps - do nothing
+      child: Container(
+        width: 280,
+        margin: const EdgeInsets.all(12),
+        constraints: BoxConstraints(
+          maxHeight: maxContentHeight + 80, // 80 for header
+        ),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E1E1E),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withAlpha(60),
+              blurRadius: 24,
+              offset: const Offset(0, 8),
             ),
-          ),
-        ],
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header with tabs
+            _buildHeader(),
+            // Tab content - flexible height
+            Flexible(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildColorPaletteTab(),
+                  _buildColorSetsTab(),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -413,12 +432,7 @@ class _CompactColorPickerState extends State<CompactColorPicker>
           // Hue Slider
           HueSlider(
             hue: _hsvColor.hue,
-            onChanged: (hue) {
-              // #region agent log
-              try{File(r'c:\Users\aktas\source\repos\starnote_drawing_workspace\.cursor\debug.log').writeAsStringSync(jsonEncode({'location':'unified_color_picker.dart:411','message':'HueSlider onChanged','data':{'newHue':hue,'oldHue':_hsvColor.hue},'timestamp':DateTime.now().millisecondsSinceEpoch,'sessionId':'debug-session','hypothesisId':'C'})+'\n',mode:FileMode.append);}catch(_){}
-              // #endregion
-              _updateColor(_hsvColor.withHue(hue));
-            },
+            onChanged: (hue) => _updateColor(_hsvColor.withHue(hue)),
           ),
           const SizedBox(height: 12),
           // Opacity Slider
@@ -441,18 +455,10 @@ class _CompactColorPickerState extends State<CompactColorPicker>
                 _opacity = color.opacity;
               });
             },
-            onSave: () {
-              // #region agent log
-              try{File(r'c:\Users\aktas\source\repos\starnote_drawing_workspace\.cursor\debug.log').writeAsStringSync(jsonEncode({'location':'unified_color_picker.dart:444','message':'Save button tapped','data':{'currentColor':{'r':(_currentColor.r*255).round(),'g':(_currentColor.g*255).round(),'b':(_currentColor.b*255).round(),'a':_currentColor.opacity}},'timestamp':DateTime.now().millisecondsSinceEpoch,'sessionId':'debug-session','hypothesisId':'D'})+'\n',mode:FileMode.append);}catch(_){}
-              // #endregion
-              widget.onColorSelected(_currentColor);
-              // #region agent log
-              try{File(r'c:\Users\aktas\source\repos\starnote_drawing_workspace\.cursor\debug.log').writeAsStringSync(jsonEncode({'location':'unified_color_picker.dart:448','message':'onColorSelected callback called','data':{},'timestamp':DateTime.now().millisecondsSinceEpoch,'sessionId':'debug-session','hypothesisId':'D'})+'\n',mode:FileMode.append);}catch(_){}
-              // #endregion
-            },
+            onSave: () => widget.onColorSelected(_currentColor),
           ),
           const SizedBox(height: 16),
-          // Recent Colors
+          // Recent Colors - tap to apply immediately
           Consumer(
             builder: (context, ref, _) {
               final recentColors = ref.watch(recentColorsProvider);
@@ -466,10 +472,8 @@ class _CompactColorPickerState extends State<CompactColorPicker>
                     colors: recentColors,
                     selectedColor: _currentColor,
                     onColorSelected: (color) {
-                      setState(() {
-                        _hsvColor = HSVColor.fromColor(color);
-                        _opacity = color.opacity;
-                      });
+                      // Apply immediately when recent color is tapped
+                      widget.onColorSelected(color);
                     },
                   ),
                 ],
@@ -582,29 +586,16 @@ class HSVPickerBox extends StatefulWidget {
 
 class _HSVPickerBoxState extends State<HSVPickerBox> {
   void _handlePositionUpdate(Offset globalPosition, BoxConstraints constraints) {
-    // #region agent log
-    try{File(r'c:\Users\aktas\source\repos\starnote_drawing_workspace\.cursor\debug.log').writeAsStringSync(jsonEncode({'location':'unified_color_picker.dart:560','message':'HSV Box position update','data':{'globalX':globalPosition.dx,'globalY':globalPosition.dy},'timestamp':DateTime.now().millisecondsSinceEpoch,'sessionId':'debug-session','hypothesisId':'A'})+'\n',mode:FileMode.append);}catch(_){}
-    // #endregion
-    
     final RenderBox? box = context.findRenderObject() as RenderBox?;
     if (box == null) return;
     
     final localPosition = box.globalToLocal(globalPosition);
-    
     final saturation = (localPosition.dx / constraints.maxWidth).clamp(0.0, 1.0);
     final value = 1.0 - (localPosition.dy / constraints.maxHeight).clamp(0.0, 1.0);
-    
-    // #region agent log
-    try{File(r'c:\Users\aktas\source\repos\starnote_drawing_workspace\.cursor\debug.log').writeAsStringSync(jsonEncode({'location':'unified_color_picker.dart:570','message':'HSV values calculated','data':{'saturation':saturation,'value':value,'localX':localPosition.dx,'localY':localPosition.dy},'timestamp':DateTime.now().millisecondsSinceEpoch,'sessionId':'debug-session','hypothesisId':'A'})+'\n',mode:FileMode.append);}catch(_){}
-    // #endregion
     
     widget.onColorChanged(
       widget.hsvColor.withSaturation(saturation).withValue(value),
     );
-    
-    // #region agent log
-    try{File(r'c:\Users\aktas\source\repos\starnote_drawing_workspace\.cursor\debug.log').writeAsStringSync(jsonEncode({'location':'unified_color_picker.dart:577','message':'onColorChanged called','data':{'newSaturation':saturation,'newValue':value},'timestamp':DateTime.now().millisecondsSinceEpoch,'sessionId':'debug-session','hypothesisId':'B'})+'\n',mode:FileMode.append);}catch(_){}
-    // #endregion
   }
 
   @override
@@ -613,24 +604,9 @@ class _HSVPickerBoxState extends State<HSVPickerBox> {
       builder: (context, constraints) {
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTapDown: (details) {
-            // #region agent log
-            try{File(r'c:\Users\aktas\source\repos\starnote_drawing_workspace\.cursor\debug.log').writeAsStringSync(jsonEncode({'location':'unified_color_picker.dart:590','message':'onTapDown triggered','data':{'x':details.globalPosition.dx,'y':details.globalPosition.dy},'timestamp':DateTime.now().millisecondsSinceEpoch,'sessionId':'debug-session','hypothesisId':'A'})+'\n',mode:FileMode.append);}catch(_){}
-            // #endregion
-            _handlePositionUpdate(details.globalPosition, constraints);
-          },
-          onPanStart: (details) {
-            // #region agent log
-            try{File(r'c:\Users\aktas\source\repos\starnote_drawing_workspace\.cursor\debug.log').writeAsStringSync(jsonEncode({'location':'unified_color_picker.dart:596','message':'onPanStart triggered','data':{'x':details.globalPosition.dx,'y':details.globalPosition.dy},'timestamp':DateTime.now().millisecondsSinceEpoch,'sessionId':'debug-session','hypothesisId':'A'})+'\n',mode:FileMode.append);}catch(_){}
-            // #endregion
-            _handlePositionUpdate(details.globalPosition, constraints);
-          },
-          onPanUpdate: (details) {
-            // #region agent log
-            try{File(r'c:\Users\aktas\source\repos\starnote_drawing_workspace\.cursor\debug.log').writeAsStringSync(jsonEncode({'location':'unified_color_picker.dart:602','message':'onPanUpdate triggered','data':{'x':details.globalPosition.dx,'y':details.globalPosition.dy},'timestamp':DateTime.now().millisecondsSinceEpoch,'sessionId':'debug-session','hypothesisId':'A'})+'\n',mode:FileMode.append);}catch(_){}
-            // #endregion
-            _handlePositionUpdate(details.globalPosition, constraints);
-          },
+          onTapDown: (details) => _handlePositionUpdate(details.globalPosition, constraints),
+          onPanStart: (details) => _handlePositionUpdate(details.globalPosition, constraints),
+          onPanUpdate: (details) => _handlePositionUpdate(details.globalPosition, constraints),
           child: Container(
             width: 160,
             height: 160,

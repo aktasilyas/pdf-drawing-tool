@@ -14,8 +14,7 @@ class ReorderableToolList extends ConsumerWidget {
     final sortedTools = config.sortedTools;
 
     return ReorderableListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 4),
       itemCount: sortedTools.length,
       onReorder: (oldIndex, newIndex) async {
         // Adjust for ReorderableListView behavior
@@ -28,6 +27,7 @@ class ReorderableToolList extends ConsumerWidget {
         final toolConfig = sortedTools[index];
         return _ToolListItem(
           key: ValueKey(toolConfig.toolType),
+          index: index,
           toolConfig: toolConfig,
           onVisibilityToggle: () async {
             await ref.read(toolbarConfigProvider.notifier)
@@ -42,10 +42,12 @@ class ReorderableToolList extends ConsumerWidget {
 class _ToolListItem extends StatelessWidget {
   const _ToolListItem({
     super.key,
+    required this.index,
     required this.toolConfig,
     required this.onVisibilityToggle,
   });
 
+  final int index;
   final ToolConfig toolConfig;
   final VoidCallback onVisibilityToggle;
 
@@ -54,45 +56,71 @@ class _ToolListItem extends StatelessWidget {
     final isVisible = toolConfig.isVisible;
 
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
+      margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 6),
       decoration: BoxDecoration(
         color: isVisible ? Colors.white : Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(6),
         border: Border.all(
           color: isVisible ? Colors.grey.shade300 : Colors.grey.shade200,
+          width: 0.5,
         ),
       ),
-      child: ListTile(
-        dense: true,
-        leading: Icon(
-          Icons.drag_handle,
-          color: Colors.grey.shade400,
-        ),
-        title: Row(
-          children: [
-            Icon(
-              _getToolIcon(toolConfig.toolType),
-              size: 20,
-              color: isVisible ? Colors.grey.shade700 : Colors.grey.shade400,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                toolConfig.toolType.displayName,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: isVisible ? Colors.grey.shade800 : Colors.grey.shade500,
-                  decoration: isVisible ? null : TextDecoration.lineThrough,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(6),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            child: Row(
+              children: [
+                // Drag handle with larger touch area - ONLY THIS AREA IS DRAGGABLE
+                ReorderableDragStartListener(
+                  index: index,
+                  child: Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade200,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Icon(
+                      Icons.drag_indicator,
+                      color: Colors.grey.shade700,
+                      size: 18,
+                    ),
+                  ),
                 ),
-                overflow: TextOverflow.ellipsis,
-              ),
+                const SizedBox(width: 8),
+                // Tool icon
+                Icon(
+                  _getToolIcon(toolConfig.toolType),
+                  size: 18,
+                  color: isVisible ? Colors.grey.shade700 : Colors.grey.shade400,
+                ),
+                const SizedBox(width: 10),
+                // Tool name
+                Expanded(
+                  child: Text(
+                    toolConfig.toolType.displayName,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: isVisible ? Colors.grey.shade800 : Colors.grey.shade500,
+                      decoration: isVisible ? null : TextDecoration.lineThrough,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                // Switch
+                Transform.scale(
+                  scale: 0.75,
+                  child: Switch(
+                    value: isVisible,
+                    onChanged: (_) => onVisibilityToggle(),
+                    activeColor: Colors.blue,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-        trailing: Switch(
-          value: isVisible,
-          onChanged: (_) => onVisibilityToggle(),
-          activeColor: Colors.blue,
+          ),
         ),
       ),
     );

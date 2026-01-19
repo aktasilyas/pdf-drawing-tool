@@ -43,7 +43,7 @@ class PenSettingsPanel extends ConsumerWidget {
             thickness: settings.thickness,
             toolType: activePenTool,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
 
           // Pen type selector (compact)
           _PenTypeSelector(
@@ -53,7 +53,7 @@ class PenSettingsPanel extends ConsumerWidget {
               ref.read(currentToolProvider.notifier).state = type;
             },
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 10),
 
           // Thickness slider (compact) - dynamic range based on tool
           _CompactSliderSection(
@@ -70,7 +70,7 @@ class PenSettingsPanel extends ConsumerWidget {
                   .setThickness(value);
             },
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
 
           // Stabilization slider (compact)
           _CompactSliderSection(
@@ -85,18 +85,21 @@ class PenSettingsPanel extends ConsumerWidget {
                   .setStabilization(value);
             },
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 10),
 
           // Compact color row (6 colors + more on double tap)
-          _CompactColorRow(
-            selectedColor: settings.color,
-            onColorSelected: (color) {
-              ref
-                  .read(penSettingsProvider(activePenTool).notifier)
-                  .setColor(color);
+          Builder(
+            builder: (context) {
+              final notifier = ref.read(penSettingsProvider(activePenTool).notifier);
+              return _CompactColorRow(
+                selectedColor: settings.color,
+                onColorSelected: (color) {
+                  notifier.setColor(color);
+                },
+              );
             },
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 10),
 
           // Add to pen box button (compact)
           _CompactActionButton(
@@ -207,16 +210,16 @@ class _LiveStrokePreview extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      height: 36,
+      height: 28,
       decoration: BoxDecoration(
         color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(6),
         border: Border.all(color: Colors.grey.shade200, width: 0.5),
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(7),
+        borderRadius: BorderRadius.circular(5),
         child: CustomPaint(
-          size: const Size(double.infinity, 36),
+          size: const Size(double.infinity, 28),
           painter: _StrokePreviewPainter(
             color: color,
             thickness: thickness,
@@ -298,14 +301,14 @@ class _PenTypeSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 52,
+      height: 44,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withAlpha(15),
-            blurRadius: 8,
+            blurRadius: 6,
             offset: const Offset(0, 2),
           ),
         ],
@@ -344,14 +347,14 @@ class _PenSlot extends StatelessWidget {
   final Color selectedColor;
   final VoidCallback onTap;
 
-  // Pen dimensions
-  static const double _penHeight = 70; // Kalem tam yüksekliği
-  static const double _slotHeight = 52; // Görünür alan (container height)
-  static const double _slotWidth = 36; // Her slot genişliği
+  // Pen dimensions - kompakt
+  static const double _penHeight = 56; // Kalem tam yüksekliği
+  static const double _slotHeight = 44; // Görünür alan (container height)
+  static const double _slotWidth = 32; // Her slot genişliği
 
   // Vertical offsets (negative = pen moves UP, showing more body)
-  static const double _selectedTopOffset = -8; // Seçili: yukarı çık
-  static const double _unselectedTopOffset = 6; // Seçili değil: aşağıda kal
+  static const double _selectedTopOffset = -6; // Seçili: yukarı çık
+  static const double _unselectedTopOffset = 4; // Seçili değil: aşağıda kal
 
   @override
   Widget build(BuildContext context) {
@@ -443,9 +446,9 @@ class _CompactSliderSection extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 4),
         SizedBox(
-          height: 20,
+          height: 18,
           child: SliderTheme(
             data: SliderThemeData(
               trackHeight: 3,
@@ -491,14 +494,14 @@ class _CompactColorRow extends StatelessWidget {
             color: Colors.grey.shade600,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
         UnifiedColorPicker(
           selectedColor: selectedColor,
           onColorSelected: onColorSelected,
           quickColors: ColorSets.quickAccess,
           colorSets: ColorSets.all,
-          chipSize: 28.0,
-          spacing: 8.0,
+          chipSize: 24.0,
+          spacing: 6.0,
         ),
       ],
     );
@@ -523,22 +526,22 @@ class _CompactActionButton extends StatelessWidget {
       onTap: onPressed,
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 10),
+        padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
           color: const Color(0xFFF3F4F6),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(6),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (icon != null) ...[
-              Icon(icon, size: 14, color: const Color(0xFF374151)),
-              const SizedBox(width: 6),
+              Icon(icon, size: 12, color: const Color(0xFF374151)),
+              const SizedBox(width: 4),
             ],
             Text(
               label,
               style: const TextStyle(
-                fontSize: 12,
+                fontSize: 11,
                 fontWeight: FontWeight.w600,
                 color: Color(0xFF374151),
               ),

@@ -1,8 +1,36 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/panels/tool_panel.dart';
+
+void _writeDebugLog({
+  required String hypothesisId,
+  required String message,
+  Map<String, Object?> data = const {},
+}) {
+  try {
+    final file = File(
+      r'c:\Users\aktas\source\repos\starnote_drawing_workspace\.cursor\debug.log',
+    );
+    final payload = {
+      'sessionId': 'debug-session',
+      'runId': 'run1',
+      'hypothesisId': hypothesisId,
+      'location': 'panels/eraser_settings_panel.dart',
+      'message': message,
+      'data': data,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    };
+    file.writeAsStringSync(
+      '${jsonEncode(payload)}\n',
+      mode: FileMode.append,
+    );
+  } catch (_) {}
+}
 
 /// Settings panel for eraser tools.
 ///
@@ -20,11 +48,45 @@ class EraserSettingsPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(eraserSettingsProvider);
+    final columnKey = GlobalKey();
+    final buttonKey = GlobalKey();
+    final showSizeSlider = settings.mode != EraserMode.lasso;
+
+    // #region agent log - H1/H2/H3: Panel build
+    _writeDebugLog(
+      hypothesisId: 'H1',
+      message: 'eraser_panel_build',
+      data: {
+        'mode': settings.mode.name,
+        'showSizeSlider': showSizeSlider,
+      },
+    );
+    // #endregion
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final columnBox = columnKey.currentContext?.findRenderObject() as RenderBox?;
+      final buttonBox = buttonKey.currentContext?.findRenderObject() as RenderBox?;
+      if (columnBox != null && buttonBox != null) {
+        // #region agent log - H2: Panel layout sizes
+        _writeDebugLog(
+          hypothesisId: 'H2',
+          message: 'eraser_panel_layout',
+          data: {
+            'panelHeight': columnBox.size.height,
+            'panelWidth': columnBox.size.width,
+            'buttonHeight': buttonBox.size.height,
+            'buttonWidth': buttonBox.size.width,
+          },
+        );
+        // #endregion
+      }
+    });
 
     return ToolPanel(
       title: 'Silgi',
       onClose: onClose,
       child: Column(
+        key: columnKey,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Mode selector
@@ -34,10 +96,10 @@ class EraserSettingsPanel extends ConsumerWidget {
               ref.read(eraserSettingsProvider.notifier).setMode(mode);
             },
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
 
           // Size slider (only for pixel and stroke eraser)
-          if (settings.mode != EraserMode.lasso)
+          if (showSizeSlider)
             _CompactSizeSlider(
               label: 'Boyut',
               value: settings.size,
@@ -47,7 +109,7 @@ class EraserSettingsPanel extends ConsumerWidget {
                 ref.read(eraserSettingsProvider.notifier).setSize(value);
               },
             ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
 
           // Options - compact toggles
           _CompactToggle(
@@ -78,10 +140,11 @@ class EraserSettingsPanel extends ConsumerWidget {
               ref.read(eraserSettingsProvider.notifier).setAutoLift(value);
             },
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
 
           // Clear page button (destructive action)
           _CompactActionButton(
+            key: buttonKey,
             label: 'Sayfayı Temizle',
             icon: Icons.delete_outline,
             isDestructive: true,
@@ -172,14 +235,14 @@ class _CompactSizeSlider extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 3),
         SizedBox(
-          height: 28,
+          height: 22,
           child: SliderTheme(
             data: SliderThemeData(
-              trackHeight: 3,
-              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-              overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
+              trackHeight: 2,
+              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 5),
+              overlayShape: const RoundSliderOverlayShape(overlayRadius: 10),
               activeTrackColor: const Color(0xFF4A9DFF),
               inactiveTrackColor: Colors.grey.shade200,
               thumbColor: const Color(0xFF4A9DFF),
@@ -212,20 +275,20 @@ class _CompactToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         children: [
           Expanded(
             child: Text(
               label,
               style: const TextStyle(
-                fontSize: 12,
+                fontSize: 11,
                 color: Color(0xFF444444),
               ),
             ),
           ),
           Transform.scale(
-            scale: 0.7,
+            scale: 0.65,
             child: Switch(
               value: value,
               onChanged: onChanged,
@@ -242,6 +305,7 @@ class _CompactToggle extends StatelessWidget {
 /// Compact action button
 class _CompactActionButton extends StatelessWidget {
   const _CompactActionButton({
+    super.key,
     required this.label,
     required this.icon,
     required this.onPressed,
@@ -258,23 +322,23 @@ class _CompactActionButton extends StatelessWidget {
     final color = isDestructive ? Colors.red : const Color(0xFF4A9DFF);
     return InkWell(
       onTap: onPressed,
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(6),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(6),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 16, color: color),
-            const SizedBox(width: 6),
+            Icon(icon, size: 14, color: color),
+            const SizedBox(width: 4),
             Text(
               label,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: 11,
                 fontWeight: FontWeight.w500,
                 color: color,
               ),
@@ -309,7 +373,7 @@ class _EraserModeSelector extends StatelessWidget {
             onTap: () => onModeSelected(EraserMode.pixel),
           ),
         ),
-        const SizedBox(width: 6),
+        const SizedBox(width: 4),
         Expanded(
           child: _EraserModeOption(
             mode: EraserMode.stroke,
@@ -319,7 +383,7 @@ class _EraserModeSelector extends StatelessWidget {
             onTap: () => onModeSelected(EraserMode.stroke),
           ),
         ),
-        const SizedBox(width: 6),
+        const SizedBox(width: 4),
         Expanded(
           child: _EraserModeOption(
             mode: EraserMode.lasso,
@@ -358,13 +422,13 @@ class _EraserModeOption extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.symmetric(vertical: 6),
         decoration: BoxDecoration(
           color: isSelected ? const Color(0xFF4A9DFF).withValues(alpha: 0.1) : Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(5),
           border: Border.all(
             color: isSelected ? const Color(0xFF4A9DFF) : Colors.grey.shade300,
-            width: isSelected ? 1.5 : 1,
+            width: isSelected ? 1.2 : 1,
           ),
         ),
         child: Column(
@@ -374,26 +438,26 @@ class _EraserModeOption extends StatelessWidget {
               children: [
                 Icon(
                   icon,
-                  size: 18,
+                  size: 16,
                   color: isSelected ? const Color(0xFF4A9DFF) : Colors.grey.shade600,
                 ),
                 if (isPremium)
                   const Positioned(
-                    top: -3,
-                    right: -3,
+                    top: -2,
+                    right: -2,
                     child: Icon(
                       Icons.lock,
-                      size: 10,
+                      size: 9,
                       color: Colors.orange,
                     ),
                   ),
               ],
             ),
-            const SizedBox(height: 3),
+            const SizedBox(height: 2),
             Text(
               label,
               style: TextStyle(
-                fontSize: 10,
+                fontSize: 9,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 color: isSelected ? const Color(0xFF4A9DFF) : Colors.grey.shade600,
               ),

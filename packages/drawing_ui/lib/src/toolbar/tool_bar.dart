@@ -20,6 +20,10 @@ class ToolBar extends ConsumerStatefulWidget {
     this.onUndoPressed,
     this.onRedoPressed,
     this.onSettingsPressed,
+    this.settingsButtonKey,
+    this.toolButtonKeys,
+    this.penGroupButtonKey,
+    this.highlighterGroupButtonKey,
   });
 
   /// Callback when undo is pressed.
@@ -30,6 +34,18 @@ class ToolBar extends ConsumerStatefulWidget {
 
   /// Callback when toolbar config is pressed.
   final VoidCallback? onSettingsPressed;
+
+  /// GlobalKey for settings button (for anchored panel positioning)
+  final GlobalKey? settingsButtonKey;
+
+  /// GlobalKeys for each tool button (for anchored panel positioning)
+  final Map<ToolType, GlobalKey>? toolButtonKeys;
+
+  /// Single GlobalKey for pen group button (all pen tools share this)
+  final GlobalKey? penGroupButtonKey;
+
+  /// Single GlobalKey for highlighter group button
+  final GlobalKey? highlighterGroupButtonKey;
 
   @override
   ConsumerState<ToolBar> createState() => _ToolBarState();
@@ -134,23 +150,38 @@ class _ToolBarState extends ConsumerState<ToolBar> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: visibleTools.map((tool) {
                       final isPenGroup = _isPenTool(tool);
+                      final isHighlighterGroup = _isHighlighterTool(tool);
                       final isSelected = _isToolSelected(tool, currentTool);
                       final hasPanel = _toolsWithPanel.contains(tool);
 
+                      // Get GlobalKey for this tool button (for anchored panel positioning)
+                      // Pen tools share a single key, same for highlighters
+                      final GlobalKey? buttonKey;
+                      if (isPenGroup) {
+                        buttonKey = widget.penGroupButtonKey;
+                      } else if (isHighlighterGroup) {
+                        buttonKey = widget.highlighterGroupButtonKey;
+                      } else {
+                        buttonKey = widget.toolButtonKeys?[tool];
+                      }
+
+                      Widget toolButton = ToolButton(
+                        key: buttonKey, // Use GlobalKey for positioning
+                        toolType: tool,
+                        isSelected: isSelected,
+                        buttonKey: _toolButtonKeys[tool],
+                        onPressed: () => _onToolPressed(tool),
+                        onPanelTap: hasPanel ? () => _onPanelTap(tool) : null,
+                        hasPanel: hasPanel,
+                        // Kalem grubu için aktif kalem ikonunu göster
+                        customIcon: isPenGroup && _isPenTool(currentTool)
+                            ? ToolButton.getIconForTool(currentTool)
+                            : null,
+                      );
+
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 2),
-                        child: ToolButton(
-                          toolType: tool,
-                          isSelected: isSelected,
-                          buttonKey: _toolButtonKeys[tool],
-                          onPressed: () => _onToolPressed(tool),
-                          onPanelTap: hasPanel ? () => _onPanelTap(tool) : null,
-                          hasPanel: hasPanel,
-                          // Kalem grubu için aktif kalem ikonunu göster
-                          customIcon: isPenGroup && _isPenTool(currentTool)
-                              ? ToolButton.getIconForTool(currentTool)
-                              : null,
-                        ),
+                        child: toolButton,
                       );
                     }).toList(),
                   ),
@@ -171,24 +202,30 @@ class _ToolBarState extends ConsumerState<ToolBar> {
               // Divider before settings
               _VerticalDivider(),
 
-              // Toolbar config button - ALWAYS visible, NEVER hidden
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.2),
-                  border: Border.all(color: Colors.blue, width: 2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: IconButton(
-                  icon: const Icon(Icons.tune, size: 24),
-                  color: Colors.blue,
-                  onPressed: () {
-                    print('🔧 Settings button tapped!');
-                    widget.onSettingsPressed?.call();
-                    _openToolbarEditor();
-                  },
-                  tooltip: 'Araç Çubuğu Ayarları',
+              // ⚙️ SETTINGS BUTTON - After all tools (with GlobalKey for anchoring)
+              GestureDetector(
+                key: widget.settingsButtonKey,
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  final current = ref.read(activePanelProvider);
+                  if (current == ToolType.toolbarSettings) {
+                    ref.read(activePanelProvider.notifier).state = null;
+                  } else {
+                    ref.read(activePanelProvider.notifier).state = ToolType.toolbarSettings;
+                  }
+                },
+                child: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: theme.toolbarBackground,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Icons.settings,
+                    size: 20,
+                    color: theme.toolbarIconColor,
+                  ),
                 ),
               ),
 

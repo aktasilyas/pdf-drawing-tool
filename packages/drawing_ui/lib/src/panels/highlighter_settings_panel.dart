@@ -35,7 +35,7 @@ class HighlighterSettingsPanel extends ConsumerWidget {
               ref.read(currentToolProvider.notifier).state = type;
             },
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
 
           // Thickness bar preview (compact)
           _ThicknessBarPreview(
@@ -43,7 +43,7 @@ class HighlighterSettingsPanel extends ConsumerWidget {
             thickness: settings.thickness,
             isNeon: isNeon,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
 
           // Thickness slider (compact)
           _CompactSlider(
@@ -61,7 +61,7 @@ class HighlighterSettingsPanel extends ConsumerWidget {
                   .setThickness(value);
             },
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
 
           // Neon-specific: Glow intensity slider
           if (isNeon) ...[
@@ -78,7 +78,7 @@ class HighlighterSettingsPanel extends ConsumerWidget {
                     .setGlowIntensity(value);
               },
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
           ],
 
           // Straight line toggle (compact)
@@ -91,17 +91,22 @@ class HighlighterSettingsPanel extends ConsumerWidget {
                   .setStraightLineMode(value);
             },
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
 
           // Colors (compact)
-          _CompactHighlighterColors(
-            selectedColor: settings.color,
-            onColorSelected: (color) {
-              ref.read(highlighterSettingsProvider.notifier).setColor(color);
+          Builder(
+            builder: (context) {
+              final notifier = ref.read(highlighterSettingsProvider.notifier);
+              return _CompactHighlighterColors(
+                selectedColor: settings.color,
+                onColorSelected: (color) {
+                  notifier.setColor(color);
+                },
+                isNeon: isNeon,
+              );
             },
-            isNeon: isNeon,
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
 
           // Add button (compact)
           _CompactAddButton(
@@ -175,14 +180,14 @@ class _HighlighterTypeSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 52,
+      height: 44,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withAlpha(15),
-            blurRadius: 8,
+            blurRadius: 6,
             offset: const Offset(0, 2),
           ),
         ],
@@ -218,14 +223,14 @@ class _HighlighterSlot extends StatelessWidget {
   final Color selectedColor;
   final VoidCallback onTap;
 
-  // Highlighter dimensions (wider than regular pens)
-  static const double _penHeight = 70;
-  static const double _slotHeight = 52;
-  static const double _slotWidth = 56;
+  // Highlighter dimensions (kompakt)
+  static const double _penHeight = 56;
+  static const double _slotHeight = 44;
+  static const double _slotWidth = 48;
 
   // Vertical offsets
-  static const double _selectedTopOffset = -8;
-  static const double _unselectedTopOffset = 6;
+  static const double _selectedTopOffset = -6;
+  static const double _unselectedTopOffset = 4;
 
   @override
   Widget build(BuildContext context) {
@@ -457,8 +462,8 @@ class _CompactHighlighterColors extends StatelessWidget {
                   'Vurgulayıcı': ColorSets.highlighter,
                   'Pastel': ColorSets.pastel
                 },
-          chipSize: 28.0,
-          spacing: 6.0,
+          chipSize: 24.0,
+          spacing: 5.0,
           isHighlighter: true,
         ),
       ],

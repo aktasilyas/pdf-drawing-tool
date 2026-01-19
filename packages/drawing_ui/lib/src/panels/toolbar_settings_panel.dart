@@ -13,18 +13,24 @@ class ToolbarSettingsPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final config = ref.watch(toolbarConfigProvider);
+    final screenHeight = MediaQuery.of(context).size.height;
+    // Responsive maxHeight - smaller on smaller screens
+    final maxHeight = (screenHeight * 0.5).clamp(280.0, 400.0);
 
     return Container(
-      width: 320,
-      constraints: const BoxConstraints(maxHeight: 500),
+      width: 280,
+      // Esnek yükseklik - ekran boyutuna göre ayarlanır
+      constraints: BoxConstraints(
+        maxHeight: maxHeight,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.15),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
+            blurRadius: 12,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -36,29 +42,24 @@ class ToolbarSettingsPanel extends ConsumerWidget {
           
           const Divider(height: 1),
           
-          // Content
+          const SizedBox(height: 8),
+          
+          // Quick Access Toggle
+          _buildQuickAccessSection(context, ref, config),
+          
+          const SizedBox(height: 12),
+          
+          // Tools Section (scrollable)
           Flexible(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Quick Access Toggle
-                  _buildQuickAccessSection(context, ref, config),
-                  
-                  const SizedBox(height: 16),
-                  
-                  // Tools Section
-                  _buildToolsSection(context),
-                  
-                  const SizedBox(height: 16),
-                  
-                  // Reset Button
-                  _buildResetButton(context, ref),
-                ],
-              ),
-            ),
+            child: _buildToolsSection(context),
           ),
+          
+          const SizedBox(height: 12),
+          
+          // Reset Button
+          _buildResetButton(context, ref),
+          
+          const SizedBox(height: 8),
         ],
       ),
     );
@@ -66,23 +67,23 @@ class ToolbarSettingsPanel extends ConsumerWidget {
 
   Widget _buildHeader(BuildContext context, WidgetRef ref) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Row(
         children: [
-          const Icon(Icons.settings, size: 20, color: Colors.grey),
-          const SizedBox(width: 8),
+          const Icon(Icons.settings, size: 16, color: Colors.grey),
+          const SizedBox(width: 6),
           const Expanded(
             child: Text(
               'Araç Çubuğu Ayarları',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),
               overflow: TextOverflow.ellipsis,
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.close, size: 20),
+            icon: const Icon(Icons.close, size: 16),
             onPressed: () {
               if (onClose != null) {
                 onClose!();
@@ -104,7 +105,7 @@ class ToolbarSettingsPanel extends ConsumerWidget {
     ToolbarConfig config,
   ) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -115,25 +116,28 @@ class ToolbarSettingsPanel extends ConsumerWidget {
                 child: Text(
                   'Hızlı Erişim Çubuğu',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 12,
                     fontWeight: FontWeight.w500,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              Switch(
-                value: config.showQuickAccess,
-                onChanged: (_) async {
-                  await ref.read(toolbarConfigProvider.notifier).toggleQuickAccess();
-                },
-                activeColor: Colors.blue,
+              Transform.scale(
+                scale: 0.8,
+                child: Switch(
+                  value: config.showQuickAccess,
+                  onChanged: (_) async {
+                    await ref.read(toolbarConfigProvider.notifier).toggleQuickAccess();
+                  },
+                  activeColor: Colors.blue,
+                ),
               ),
             ],
           ),
           Text(
             'Sık kullanılan renk ve kalınlıkları göster',
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 10,
               color: Colors.grey.shade600,
             ),
           ),
@@ -144,51 +148,56 @@ class ToolbarSettingsPanel extends ConsumerWidget {
 
   Widget _buildToolsSection(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Row(
             children: [
               const Text(
                 'Araçlar',
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 12,
                   fontWeight: FontWeight.w500,
                 ),
               ),
               const Spacer(),
-              Flexible(
-                child: Text(
-                  'Sıralamak için sürükle',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: Colors.grey.shade500,
-                  ),
-                  overflow: TextOverflow.ellipsis,
+              Text(
+                'Sürükle',
+                style: TextStyle(
+                  fontSize: 10,
+                  color: Colors.grey.shade500,
                 ),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 8),
-        const ReorderableToolList(),
+        const SizedBox(height: 6),
+        const Flexible(
+          child: ReorderableToolList(),
+        ),
       ],
     );
   }
 
   Widget _buildResetButton(BuildContext context, WidgetRef ref) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 12),
       child: SizedBox(
         width: double.infinity,
+        height: 32,
         child: OutlinedButton.icon(
           onPressed: () => _showResetConfirmation(context, ref),
-          icon: const Icon(Icons.restore, size: 18),
-          label: const Text('Varsayılana Sıfırla'),
+          icon: const Icon(Icons.restore, size: 14),
+          label: const Text(
+            'Varsayılana Sıfırla',
+            style: TextStyle(fontSize: 11),
+          ),
           style: OutlinedButton.styleFrom(
             foregroundColor: Colors.grey.shade700,
             side: BorderSide(color: Colors.grey.shade300),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
           ),
         ),
       ),

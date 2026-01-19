@@ -65,6 +65,7 @@ class ToolButton extends StatelessWidget {
     final showChevron = isSelected && hasPanel && onPanelTap != null;
 
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: enabled
           ? () {
               // Eğer zaten seçiliyse ve panel varsa, panel aç

@@ -1,4 +1,2 @@
-/// Utility classes for drawing_ui.
-library;
-
-export 'pen_type_mapper.dart';
+// Utility exports for drawing_ui
+export 'anchor_position_calculator.dart';

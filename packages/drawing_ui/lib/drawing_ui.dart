@@ -52,10 +52,12 @@ export 'src/panels/lasso_selection_panel.dart';
 export 'src/panels/laser_pointer_panel.dart';
 
 // Common Widgets
+export 'src/widgets/anchored_panel.dart';
 export 'src/widgets/color_chip.dart';
 export 'src/widgets/color_chips_grid.dart';
 export 'src/widgets/thickness_slider.dart';
 export 'src/widgets/panel_overlay.dart';
+export 'src/widgets/panel_arrow.dart';
 export 'src/widgets/unified_color_picker.dart';
 export 'src/widgets/floating_pen_box.dart';
 export 'src/widgets/pen_icon_widget.dart';
@@ -63,6 +65,7 @@ export 'src/widgets/reorderable_tool_list.dart';
 
 // Utils
 export 'src/utils/pen_type_mapper.dart';
+export 'src/utils/anchor_position_calculator.dart';
 
 // Re-export flutter_pen_toolbar for convenience
 export 'package:flutter_pen_toolbar/flutter_pen_toolbar.dart';

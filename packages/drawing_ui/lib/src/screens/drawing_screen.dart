@@ -9,9 +9,6 @@ import 'package:drawing_ui/src/panels/panels.dart';
 import 'package:drawing_ui/src/widgets/widgets.dart';
 
 /// The main drawing screen that combines all UI components.
-///
-/// This is the primary widget for the drawing experience.
-/// Phase 1: UI skeleton only - no real drawing logic.
 class DrawingScreen extends ConsumerStatefulWidget {
   const DrawingScreen({super.key});
 
@@ -20,24 +17,38 @@ class DrawingScreen extends ConsumerStatefulWidget {
 }
 
 class _DrawingScreenState extends ConsumerState<DrawingScreen> {
-  // Keys for anchoring panels
-  final Map<ToolType, GlobalKey> _toolButtonKeys = {};
-  final GlobalKey _toolbarKey = GlobalKey();
+  // GlobalKeys for anchored panels - one per tool type
+  final Map<ToolType, GlobalKey> _toolButtonKeys = {
+    for (final tool in ToolType.values) tool: GlobalKey(),
+  };
+
+  // Single GlobalKey for pen group (all pen tools share this button)
+  final GlobalKey _penGroupButtonKey = GlobalKey();
+
+  // Single GlobalKey for highlighter group
+  final GlobalKey _highlighterGroupButtonKey = GlobalKey();
+
+  // Settings button has its own GlobalKey
+  final GlobalKey _settingsButtonKey = GlobalKey();
+
+  // Panel controller for overlay-based panels
+  final AnchoredPanelController _panelController = AnchoredPanelController();
 
   // Pen box position (draggable when collapsed)
   Offset _penBoxPosition = const Offset(12, 12);
 
   @override
-  void initState() {
-    super.initState();
-    for (final tool in ToolType.values) {
-      _toolButtonKeys[tool] = GlobalKey();
-    }
+  void dispose() {
+    _panelController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final activePanel = ref.watch(activePanelProvider);
+    // Listen to activePanel changes
+    ref.listen<ToolType?>(activePanelProvider, (previous, next) {
+      _handlePanelChange(next);
+    });
 
     return DrawingThemeProvider(
       theme: const DrawingTheme(),
@@ -50,10 +61,13 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
 
               // Row 2: Tool bar
               ToolBar(
-                key: _toolbarKey,
                 onUndoPressed: _onUndoPressed,
                 onRedoPressed: _onRedoPressed,
                 onSettingsPressed: _onSettingsPressed,
+                settingsButtonKey: _settingsButtonKey,
+                toolButtonKeys: _toolButtonKeys,
+                penGroupButtonKey: _penGroupButtonKey,
+                highlighterGroupButtonKey: _highlighterGroupButtonKey,
               ),
 
               // Canvas area with floating elements
@@ -64,6 +78,17 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                     const Positioned.fill(
                       child: DrawingCanvas(),
                     ),
+
+                    // Invisible tap barrier to close panel when tapping canvas
+                    // Uses onTap (not onTapDown) so drawing gestures are not affected
+                    if (ref.watch(activePanelProvider) != null)
+                      Positioned.fill(
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.translucent,
+                          onTap: _closePanel,
+                          child: const SizedBox.expand(),
+                        ),
+                      ),
 
                     // Floating pen box (draggable when collapsed)
                     Positioned(
@@ -86,27 +111,6 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                       ),
                     ),
 
-                    // Tap barrier to close panels
-                    if (activePanel != null)
-                      Positioned.fill(
-                        child: GestureDetector(
-                          onTap: _closePanel,
-                          behavior: HitTestBehavior.translucent,
-                          child: const SizedBox.expand(),
-                        ),
-                      ),
-
-                    // Floating panel (centered horizontally)
-                    if (activePanel != null)
-                      Positioned(
-                        left: 0,
-                        right: 0,
-                        top: 16,
-                        child: Center(
-                          child: _buildActivePanel(activePanel),
-                        ),
-                      ),
-
                     // AI Assistant button (right bottom)
                     Positioned(
                       right: 16,
@@ -123,6 +127,90 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
         ),
       ),
     );
+  }
+
+  // Pen tools that share the same LayerLink
+  static const _penTools = {
+    ToolType.pencil,
+    ToolType.hardPencil,
+    ToolType.ballpointPen,
+    ToolType.gelPen,
+    ToolType.dashedPen,
+    ToolType.brushPen,
+    ToolType.rulerPen,
+  };
+
+  // Highlighter tools that share the same LayerLink
+  static const _highlighterTools = {
+    ToolType.highlighter,
+    ToolType.neonHighlighter,
+  };
+
+  /// Handle panel state changes - show/hide overlay
+  void _handlePanelChange(ToolType? panel) {
+    if (panel == null) {
+      // Close panel
+      _panelController.hide();
+    } else if (panel != ToolType.panZoom) {
+      // Show panel as overlay
+      // Get the appropriate GlobalKey for this panel's button
+      // Pen tools share a single button, same for highlighters
+      final GlobalKey anchorKey;
+      if (panel == ToolType.toolbarSettings) {
+        anchorKey = _settingsButtonKey;
+      } else if (_penTools.contains(panel)) {
+        anchorKey = _penGroupButtonKey;
+      } else if (_highlighterTools.contains(panel)) {
+        anchorKey = _highlighterGroupButtonKey;
+      } else {
+        anchorKey = _toolButtonKeys[panel] ?? GlobalKey();
+      }
+
+      // Determine alignment based on tool position in toolbar
+      final alignment = _getAlignmentForTool(panel);
+
+      // Use post-frame callback to ensure button is rendered
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _panelController.show(
+            context: context,
+            anchorKey: anchorKey,
+            alignment: alignment,
+            verticalOffset: 8,
+            onBarrierTap: _closePanel,
+            child: _buildActivePanel(panel),
+          );
+        }
+      });
+    }
+  }
+
+  /// Determine panel alignment based on tool's position in toolbar
+  AnchorAlignment _getAlignmentForTool(ToolType tool) {
+    // Left-edge tools (first tools in toolbar) - align panel to left
+    const leftTools = {
+      ToolType.pencil,
+      ToolType.hardPencil,
+      ToolType.ballpointPen,
+      ToolType.gelPen,
+      ToolType.dashedPen,
+      ToolType.brushPen,
+      ToolType.rulerPen,
+    };
+
+    // Right-edge tools (last tools in toolbar) - align panel to right
+    const rightTools = {
+      ToolType.toolbarSettings,
+      ToolType.laserPointer,
+      ToolType.image,
+    };
+
+    if (leftTools.contains(tool)) {
+      return AnchorAlignment.left;
+    } else if (rightTools.contains(tool)) {
+      return AnchorAlignment.right;
+    }
+    return AnchorAlignment.center;
   }
 
   Widget _buildActivePanel(ToolType panel) {
