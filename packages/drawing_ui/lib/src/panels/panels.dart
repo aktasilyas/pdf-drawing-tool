@@ -8,5 +8,6 @@ export 'sticker_panel.dart';
 export 'image_panel.dart';
 export 'ai_assistant_panel.dart';
 export 'toolbar_editor_panel.dart';
+export 'toolbar_settings_panel.dart';
 export 'lasso_selection_panel.dart';
 export 'laser_pointer_panel.dart';

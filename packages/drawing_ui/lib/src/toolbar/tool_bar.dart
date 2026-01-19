@@ -263,10 +263,10 @@ class _ToolBarState extends ConsumerState<ToolBar> {
 
   void _openToolbarEditor() {
     final activePanel = ref.read(activePanelProvider);
-    if (activePanel == ToolType.selection) {
+    if (activePanel == ToolType.toolbarSettings) {
       ref.read(activePanelProvider.notifier).state = null;
     } else {
-      ref.read(activePanelProvider.notifier).state = ToolType.selection;
+      ref.read(activePanelProvider.notifier).state = ToolType.toolbarSettings;
     }
   }
 

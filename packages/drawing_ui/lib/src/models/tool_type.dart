@@ -63,7 +63,10 @@ enum ToolType {
   panZoom,
 
   /// Laser pointer - temporary pointer for presentations.
-  laserPointer;
+  laserPointer,
+
+  /// Toolbar settings - configure toolbar layout and tools.
+  toolbarSettings;
 
   /// Human-readable display name for the tool.
   String get displayName {
@@ -106,6 +109,8 @@ enum ToolType {
         return 'Kaydır/Yakınlaştır';
       case ToolType.laserPointer:
         return 'Lazer İşaretçi';
+      case ToolType.toolbarSettings:
+        return 'Araç Çubuğu Ayarları';
     }
   }
 

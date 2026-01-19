@@ -132,6 +132,8 @@ class _ToolListItem extends StatelessWidget {
         return Icons.pan_tool;
       case ToolType.laserPointer:
         return Icons.location_searching;
+      case ToolType.toolbarSettings:
+        return Icons.tune;
     }
   }
 }

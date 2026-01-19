@@ -168,6 +168,9 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
 
       case ToolType.panZoom:
         return const SizedBox.shrink();
+
+      case ToolType.toolbarSettings:
+        return ToolbarSettingsPanel(onClose: _closePanel);
     }
   }
 
@@ -181,10 +184,10 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
 
   void _onSettingsPressed() {
     final current = ref.read(activePanelProvider);
-    if (current == ToolType.selection) {
+    if (current == ToolType.toolbarSettings) {
       _closePanel();
     } else {
-      ref.read(activePanelProvider.notifier).state = ToolType.selection;
+      ref.read(activePanelProvider.notifier).state = ToolType.toolbarSettings;
     }
   }
 

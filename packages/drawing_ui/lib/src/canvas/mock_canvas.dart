@@ -110,6 +110,8 @@ class MockCanvas extends ConsumerWidget {
         return Icons.pan_tool;
       case ToolType.laserPointer:
         return Icons.highlight_alt;
+      case ToolType.toolbarSettings:
+        return Icons.tune;
     }
   }
 }
