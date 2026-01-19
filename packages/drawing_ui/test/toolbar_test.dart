@@ -1,23 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:drawing_ui/drawing_ui.dart';
 
 void main() {
-  group('ToolBar', () {
-    testWidgets('renders all visible tool buttons', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: Scaffold(
-              body: DrawingThemeProvider(
-                theme: const DrawingTheme(),
-                child: const ToolBar(),
-              ),
-            ),
+  late SharedPreferences prefs;
+
+  setUp(() async {
+    SharedPreferences.setMockInitialValues({});
+    prefs = await SharedPreferences.getInstance();
+  });
+
+  Widget createToolBarWidget() {
+    return ProviderScope(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+      ],
+      child: MaterialApp(
+        home: Scaffold(
+          body: DrawingThemeProvider(
+            theme: const DrawingTheme(),
+            child: const ToolBar(),
           ),
         ),
-      );
+      ),
+    );
+  }
+
+  Widget createTopNavBarWidget() {
+    return ProviderScope(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+      ],
+      child: MaterialApp(
+        home: Scaffold(
+          body: DrawingThemeProvider(
+            theme: const DrawingTheme(),
+            child: const TopNavigationBar(),
+          ),
+        ),
+      ),
+    );
+  }
+
+  group('ToolBar', () {
+    testWidgets('renders all visible tool buttons', (tester) async {
+      await tester.pumpWidget(createToolBarWidget());
 
       // Verify undo/redo buttons exist
       expect(find.byIcon(Icons.undo), findsOneWidget);
@@ -28,18 +57,7 @@ void main() {
     });
 
     testWidgets('undo and redo buttons are disabled by default', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: Scaffold(
-              body: DrawingThemeProvider(
-                theme: const DrawingTheme(),
-                child: const ToolBar(),
-              ),
-            ),
-          ),
-        ),
-      );
+      await tester.pumpWidget(createToolBarWidget());
 
       // Both should be disabled (canUndo and canRedo are false by default)
       final undoIcon = tester.widget<Icon>(find.byIcon(Icons.undo));
@@ -51,22 +69,7 @@ void main() {
     });
 
     testWidgets('tool selection updates current tool provider', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: Scaffold(
-              body: DrawingThemeProvider(
-                theme: const DrawingTheme(),
-                child: Consumer(
-                  builder: (context, ref, child) {
-                    return const ToolBar();
-                  },
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
+      await tester.pumpWidget(createToolBarWidget());
 
       // Tap on eraser tool (not grouped, directly visible)
       await tester.tap(find.byIcon(Icons.auto_fix_normal));
@@ -78,18 +81,7 @@ void main() {
 
   group('TopNavigationBar', () {
     testWidgets('renders all navigation buttons', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: Scaffold(
-              body: DrawingThemeProvider(
-                theme: const DrawingTheme(),
-                child: const TopNavigationBar(),
-              ),
-            ),
-          ),
-        ),
-      );
+      await tester.pumpWidget(createTopNavBarWidget());
 
       // Verify navigation buttons exist
       expect(find.byIcon(Icons.arrow_back), findsOneWidget);
@@ -99,18 +91,7 @@ void main() {
     });
 
     testWidgets('renders right action buttons', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: Scaffold(
-              body: DrawingThemeProvider(
-                theme: const DrawingTheme(),
-                child: const TopNavigationBar(),
-              ),
-            ),
-          ),
-        ),
-      );
+      await tester.pumpWidget(createTopNavBarWidget());
 
       // Verify right action buttons exist
       expect(find.byIcon(Icons.menu_book_outlined), findsOneWidget);
@@ -122,18 +103,7 @@ void main() {
     });
 
     testWidgets('grid toggle works', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: Scaffold(
-              body: DrawingThemeProvider(
-                theme: const DrawingTheme(),
-                child: const TopNavigationBar(),
-              ),
-            ),
-          ),
-        ),
-      );
+      await tester.pumpWidget(createTopNavBarWidget());
 
       // Grid should be on by default
       expect(find.byIcon(Icons.grid_on), findsOneWidget);
@@ -147,18 +117,7 @@ void main() {
     });
 
     testWidgets('document tab is displayed', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: Scaffold(
-              body: DrawingThemeProvider(
-                theme: const DrawingTheme(),
-                child: const TopNavigationBar(),
-              ),
-            ),
-          ),
-        ),
-      );
+      await tester.pumpWidget(createTopNavBarWidget());
 
       // Verify document tab text
       expect(find.text('İsimsiz not'), findsOneWidget);
