@@ -166,15 +166,28 @@ class _ToolBarState extends ConsumerState<ToolBar> {
                 ),
               ],
 
-              // Divider
+              // Divider before settings
               _VerticalDivider(),
 
-              // Toolbar config button
-              _ConfigButton(
-                onPressed: () {
-                  widget.onSettingsPressed?.call();
-                  _openToolbarEditor();
-                },
+              // Toolbar config button - ALWAYS visible
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.2),
+                  border: Border.all(color: Colors.blue, width: 2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.tune, size: 24),
+                  color: Colors.blue,
+                  onPressed: () {
+                    print('🔧 Settings button tapped!');
+                    widget.onSettingsPressed?.call();
+                    _openToolbarEditor();
+                  },
+                  tooltip: 'Araç Çubuğu Ayarları',
+                ),
               ),
 
               const SizedBox(width: 4),
