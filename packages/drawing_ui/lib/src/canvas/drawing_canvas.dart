@@ -6,11 +6,13 @@ import 'package:drawing_ui/src/canvas/selection_painter.dart';
 import 'package:drawing_ui/src/canvas/shape_painter.dart';
 import 'package:drawing_ui/src/canvas/text_painter.dart';
 import 'package:drawing_ui/src/canvas/pixel_eraser_preview_painter.dart';
+import 'package:drawing_ui/src/canvas/drawing_canvas_painters.dart';
+import 'package:drawing_ui/src/canvas/drawing_canvas_helpers.dart';
+import 'package:drawing_ui/src/canvas/drawing_canvas_gesture_handlers.dart';
 import 'package:drawing_ui/src/rendering/rendering.dart';
 import 'package:drawing_ui/src/models/tool_type.dart';
 import 'package:drawing_ui/src/providers/document_provider.dart';
 import 'package:drawing_ui/src/providers/eraser_provider.dart';
-import 'package:drawing_ui/src/providers/history_provider.dart';
 import 'package:drawing_ui/src/providers/tool_style_provider.dart';
 import 'package:drawing_ui/src/providers/canvas_transform_provider.dart';
 import 'package:drawing_ui/src/providers/selection_provider.dart';
@@ -28,9 +30,6 @@ import 'package:drawing_ui/src/widgets/widgets.dart';
 /// This widget uses a multi-layer architecture for optimal performance:
 /// - Layer 1: Background grid (never repaints)
 /// - Layer 2: Committed strokes (repaints only when strokes are added/removed)
-/// - Layer 3: Committed shapes + preview (repaints when shapes change or during preview)
-/// - Layer 4: Active stroke (repaints on every pointer move)
-/// - Layer 5: Selection overlay (selection bounds, handles, preview)
 /// - Layer 6: Selection handles (for drag interactions)
 ///
 /// ## Performance Rules Applied:
@@ -67,7 +66,9 @@ class DrawingCanvas extends ConsumerStatefulWidget {
 /// State for [DrawingCanvas].
 ///
 /// Exposed as public for testing purposes.
-class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
+/// Uses mixins for gesture handling and helpers to keep file size manageable.
+class DrawingCanvasState extends ConsumerState<DrawingCanvas>
+    with DrawingCanvasHelpers, DrawingCanvasGestureHandlers {
   /// Controller for managing active stroke state.
   /// Uses ChangeNotifier instead of setState for performance.
   late final DrawingController _drawingController;
@@ -81,7 +82,6 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
 
   /// Minimum distance between points to avoid excessive point creation.
   /// Points closer than this are skipped for performance.
-  static const double _minPointDistance = 1.0;
 
   /// Last recorded point position for distance filtering.
   Offset? _lastPoint;
@@ -153,26 +153,21 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
   /// Original strokes affected by pixel eraser (for undo).
   final List<core.Stroke> _pixelEraseOriginalStrokes = [];
 
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Public Getters/Setters (for mixins and testing)
+  // ─────────────────────────────────────────────────────────────────────────
+
+  @override
   /// Exposes the drawing controller for testing.
   @visibleForTesting
   DrawingController get drawingController => _drawingController;
+
 
   /// Exposes committed strokes from provider for testing.
   @visibleForTesting
   List<core.Stroke> get committedStrokes =>
       ref.read(activeLayerStrokesProvider);
-
-  /// Exposes last point for testing distance filtering.
-  @visibleForTesting
-  Offset? get lastPoint => _lastPoint;
-
-  /// Exposes isSelecting for testing.
-  @visibleForTesting
-  bool get isSelecting => _isSelecting;
-
-  /// Exposes isDrawingShape for testing.
-  @visibleForTesting
-  bool get isDrawingShape => _isDrawingShape;
 
   @override
   void initState() {
@@ -186,1115 +181,72 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
     super.dispose();
   }
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // POINTER EVENT HANDLERS (Single Finger Drawing)
-  // ─────────────────────────────────────────────────────────────────────────
-  // NO setState here! Only DrawingController.notifyListeners() triggers repaint.
-
-  /// Handles pointer down - starts a new stroke, eraser, selection, shape, or text.
-  void _handlePointerDown(PointerDownEvent event) {
-    _pointerCount++;
-
-    // Only handle with single finger
-    if (_pointerCount != 1) return;
-
-    // Get current tool type
-    final toolType = ref.read(currentToolProvider);
-
-    // If text editing is active and tap is outside, finish editing
-    final textToolState = ref.read(textToolProvider);
-    if (textToolState.isEditing && toolType != ToolType.text) {
-      _finishTextEditing();
-      return;
-    }
-
-    // Check if selection tool is active
-    final isSelectionTool = ref.read(isSelectionToolProvider);
-    if (isSelectionTool) {
-      // Check if there's an existing selection
-      final selection = ref.read(selectionProvider);
-      if (selection != null) {
-        final transform = ref.read(canvasTransformProvider);
-        final canvasPoint =
-            (event.localPosition - transform.offset) / transform.zoom;
-
-        // If tap is inside selection, let SelectionHandles handle the drag
-        if (_isPointInSelection(canvasPoint, selection)) {
-          // Don't start new selection - SelectionHandles will handle this
-          return;
-        }
-      }
-      // Start new selection (outside existing or no selection)
-      _handleSelectionDown(event);
-      return;
-    }
-
-    // Check if there's an existing selection and tap is outside
-    final selection = ref.read(selectionProvider);
-    if (selection != null) {
-      final transform = ref.read(canvasTransformProvider);
-      final canvasPoint =
-          (event.localPosition - transform.offset) / transform.zoom;
-
-      if (!_isPointInSelection(canvasPoint, selection)) {
-        ref.read(selectionProvider.notifier).clearSelection();
-      }
-    }
-
-    // Check if eraser is active
-    final isEraser = ref.read(isEraserToolProvider);
-    if (isEraser) {
-      _handleEraserDown(event);
-      return;
-    }
-
-    // Check if shape tool is active
-    final isShapeTool = ref.read(isShapeToolProvider);
-    if (isShapeTool) {
-      _handleShapeDown(event);
-      return;
-    }
-
-    // Check if text tool is active
-    if (toolType == ToolType.text) {
-      _handleTextDown(event);
-      return;
-    }
-
-    // Check if highlighter straight line mode is active
-    if ((toolType == ToolType.highlighter || toolType == ToolType.neonHighlighter) &&
-        ref.read(highlighterSettingsProvider).straightLineMode) {
-      _handleStraightLineDown(event);
-      return;
-    }
-
-    // Ruler pen always draws straight lines
-    if (toolType == ToolType.rulerPen) {
-      _handleStraightLineDown(event);
-      return;
-    }
-
-    // Drawing mode
-    final point = _createDrawingPoint(event);
-    final style = _getCurrentStyle();
-    
-    // Get stabilization setting (only for pen tools, not highlighters)
-    double stabilization = 0.0;
-    if (toolType.isPenTool && toolType != ToolType.highlighter && toolType != ToolType.neonHighlighter) {
-      final penSettings = ref.read(penSettingsProvider(toolType));
-      stabilization = penSettings.stabilization;
-    }
-    
-    _drawingController.startStroke(
-      point,
-      style,
-      stabilization: stabilization,
-      straightLine: false,
-    );
-    _lastPoint = event.localPosition;
-  }
-
-  /// Handles pointer move - adds points to active stroke, erases, updates selection, or shape.
-  void _handlePointerMove(PointerMoveEvent event) {
-    // Only handle with single finger
-    if (_pointerCount != 1) return;
-
-    // Selection mode
-    if (_isSelecting) {
-      _handleSelectionMove(event);
-      return;
-    }
-
-    // Shape mode
-    if (_isDrawingShape) {
-      _handleShapeMove(event);
-      return;
-    }
-
-    // Straight line mode (highlighter)
-    if (_isStraightLineDrawing) {
-      _handleStraightLineMove(event);
-      return;
-    }
-
-    // Check if eraser is active
-    final isEraser = ref.read(isEraserToolProvider);
-    if (isEraser) {
-      _handleEraserMove(event);
-      return;
-    }
-
-    // Drawing mode
-    if (!_drawingController.isDrawing) return;
-
-    // Performance: Skip points that are too close together
-    if (_lastPoint != null) {
-      final distance = (event.localPosition - _lastPoint!).distance;
-      if (distance < _minPointDistance) return;
-    }
-
-    final point = _createDrawingPoint(event);
-    _drawingController.addPoint(point);
-    _lastPoint = event.localPosition;
-  }
-
-  /// Handles pointer up - finishes stroke, eraser, selection, or shape.
-  void _handlePointerUp(PointerUpEvent event) {
-    _pointerCount = (_pointerCount - 1).clamp(0, 10);
-
-    // Selection mode
-    if (_isSelecting) {
-      _handleSelectionUp(event);
-      return;
-    }
-
-    // Shape mode
-    if (_isDrawingShape) {
-      _handleShapeUp(event);
-      return;
-    }
-
-    // Straight line mode
-    if (_isStraightLineDrawing) {
-      _handleStraightLineUp(event);
-      return;
-    }
-
-    // Check if eraser is active
-    final isEraser = ref.read(isEraserToolProvider);
-    if (isEraser) {
-      _handleEraserUp(event);
-      return;
-    }
-
-    // Drawing mode - commit if we were drawing with single finger
-    if (_pointerCount == 0 && _drawingController.isDrawing) {
-      final stroke = _drawingController.endStroke();
-      if (stroke != null) {
-        // Add stroke via history provider (enables undo/redo)
-        ref.read(historyManagerProvider.notifier).addStroke(stroke);
-      }
-    }
-    _lastPoint = null;
-  }
-
-  /// Handles pointer cancel - cancels the current operation.
-  void _handlePointerCancel(PointerCancelEvent event) {
-    _pointerCount = (_pointerCount - 1).clamp(0, 10);
-
-    // Selection mode
-    if (_isSelecting) {
-      ref.read(activeSelectionToolProvider).cancelSelection();
-      _isSelecting = false;
-      setState(() {});
-      return;
-    }
-
-    // Shape mode
-    if (_isDrawingShape) {
-      _activeShapeTool?.cancelShape();
-      _activeShapeTool = null;
-      _isDrawingShape = false;
-      setState(() {});
-      return;
-    }
-
-    // Straight line mode
-    if (_isStraightLineDrawing) {
-      _straightLineStart = null;
-      _straightLineEnd = null;
-      _straightLineStyle = null;
-      _isStraightLineDrawing = false;
-      setState(() {});
-      return;
-    }
-
-    // Check if eraser is active
-    final isEraser = ref.read(isEraserToolProvider);
-    if (isEraser) {
-      // Cancel eraser session
-      ref.read(eraserToolProvider).endErasing();
-    } else {
-      _drawingController.cancelStroke();
-    }
-    _lastPoint = null;
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // SELECTION EVENT HANDLERS
-  // ─────────────────────────────────────────────────────────────────────────
-
-  /// Handles selection pointer down - starts selection operation.
-  void _handleSelectionDown(PointerDownEvent event) {
-    // Clear any existing selection first
-    ref.read(selectionProvider.notifier).clearSelection();
-
-    final transform = ref.read(canvasTransformProvider);
-    final canvasPoint =
-        (event.localPosition - transform.offset) / transform.zoom;
-
-    final tool = ref.read(activeSelectionToolProvider);
-    tool.startSelection(core.DrawingPoint(
-      x: canvasPoint.dx,
-      y: canvasPoint.dy,
-      pressure: 1.0,
-    ));
-
-    _isSelecting = true;
-    setState(() {});
-  }
-
-  /// Handles selection pointer move - updates selection path.
-  void _handleSelectionMove(PointerMoveEvent event) {
-    final transform = ref.read(canvasTransformProvider);
-    final canvasPoint =
-        (event.localPosition - transform.offset) / transform.zoom;
-
-    final tool = ref.read(activeSelectionToolProvider);
-    tool.updateSelection(core.DrawingPoint(
-      x: canvasPoint.dx,
-      y: canvasPoint.dy,
-      pressure: 1.0,
-    ));
-
-    // Trigger rebuild for preview
-    setState(() {});
-  }
-
-  /// Handles selection pointer up - finalizes selection.
-  void _handleSelectionUp(PointerUpEvent event) {
-    _isSelecting = false;
-
-    final tool = ref.read(activeSelectionToolProvider);
-    final strokes = ref.read(activeLayerStrokesProvider);
-    final shapes = ref.read(activeLayerShapesProvider);
-
-    final selection = tool.endSelection(strokes, shapes);
-
-    if (selection != null) {
-      ref.read(selectionProvider.notifier).setSelection(selection);
-    }
-
-    setState(() {});
-  }
-
-  /// Checks if a point is inside the selection bounds.
-  bool _isPointInSelection(Offset point, core.Selection selection) {
-    final bounds = selection.bounds;
-    return point.dx >= bounds.left &&
-        point.dx <= bounds.right &&
-        point.dy >= bounds.top &&
-        point.dy <= bounds.bottom;
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // STRAIGHT LINE EVENT HANDLERS (for highlighter)
-  // ─────────────────────────────────────────────────────────────────────────
-  // Real-time preview like shape tools - setState triggers rebuild
-
-  /// Handles straight line pointer down - starts straight line drawing.
-  void _handleStraightLineDown(PointerDownEvent event) {
-    final point = _createDrawingPoint(event);
-    final style = _getCurrentStyle();
-
-    _straightLineStart = point;
-    _straightLineEnd = point;
-    _straightLineStyle = style;
-    _isStraightLineDrawing = true;
-
-    setState(() {});
-  }
-
-  /// Handles straight line pointer move - updates end point for preview.
-  void _handleStraightLineMove(PointerMoveEvent event) {
-    if (!_isStraightLineDrawing || _straightLineStart == null) return;
-
-    final point = _createDrawingPoint(event);
-    _straightLineEnd = point;
-
-    setState(() {}); // Triggers rebuild for real-time preview
-  }
-
-  /// Handles straight line pointer up - commits the straight line stroke.
-  void _handleStraightLineUp(PointerUpEvent event) {
-    if (!_isStraightLineDrawing) return;
-
-    final start = _straightLineStart;
-    final end = _straightLineEnd;
-    final style = _straightLineStyle;
-
-    if (start != null && end != null && style != null) {
-      // Create stroke with just two points (start and end)
-      final stroke = core.Stroke.create(
-        points: [start, end],
-        style: style,
-      );
-
-      // Add stroke via history provider (enables undo/redo)
-      ref.read(historyManagerProvider.notifier).addStroke(stroke);
-    }
-
-    // Reset state
-    _straightLineStart = null;
-    _straightLineEnd = null;
-    _straightLineStyle = null;
-    _isStraightLineDrawing = false;
-
-    setState(() {});
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // ERASER EVENT HANDLERS
-  // ─────────────────────────────────────────────────────────────────────────
-  // Eraser uses command batching: single gesture = single undo command
-
-  /// Handles eraser pointer down - starts eraser session based on mode.
-  void _handleEraserDown(PointerDownEvent event) {
-    final settings = ref.read(eraserSettingsProvider);
-    final transform = ref.read(canvasTransformProvider);
-    final canvasPoint = transform.screenToCanvas(event.localPosition);
-
-    // Update cursor position
-    ref.read(eraserCursorPositionProvider.notifier).state = event.localPosition;
-
-    switch (settings.mode) {
-      case EraserMode.pixel:
-        // Start pixel eraser session
-        final pixelTool = ref.read(pixelEraserToolProvider);
-        pixelTool.onPointerDown(
-          canvasPoint.dx,
-          canvasPoint.dy,
-          event.pressure.clamp(0.0, 1.0),
-        );
-        _pixelEraseHits.clear();
-        _pixelEraseOriginalStrokes.clear();
-        ref.read(pixelEraserPreviewProvider.notifier).state = {};
-        _handlePixelEraseAt(canvasPoint);
-        break;
-
-      case EraserMode.stroke:
-        // Existing stroke eraser logic
-        final eraserTool = ref.read(eraserToolProvider);
-        eraserTool.startErasing();
-        _erasedShapeIds.clear();
-        _erasedTextIds.clear();
-        _eraseAtPoint(event.localPosition);
-        break;
-
-      case EraserMode.lasso:
-        // Start lasso selection
-        final lassoTool = ref.read(lassoEraserToolProvider);
-        lassoTool.onPointerDown(canvasPoint.dx, canvasPoint.dy);
-        ref.read(lassoEraserPointsProvider.notifier).state = [event.localPosition];
-        break;
-    }
-  }
-
-  /// Handles eraser pointer move - erases along the path based on mode.
-  void _handleEraserMove(PointerMoveEvent event) {
-    final settings = ref.read(eraserSettingsProvider);
-    final transform = ref.read(canvasTransformProvider);
-    final canvasPoint = transform.screenToCanvas(event.localPosition);
-
-    // Update cursor position
-    ref.read(eraserCursorPositionProvider.notifier).state = event.localPosition;
-
-    switch (settings.mode) {
-      case EraserMode.pixel:
-        final pixelTool = ref.read(pixelEraserToolProvider);
-        pixelTool.onPointerMove(
-          canvasPoint.dx,
-          canvasPoint.dy,
-          event.pressure.clamp(0.0, 1.0),
-        );
-        _handlePixelEraseAt(canvasPoint);
-        break;
-
-      case EraserMode.stroke:
-        _eraseAtPoint(event.localPosition);
-        break;
-
-      case EraserMode.lasso:
-        final lassoTool = ref.read(lassoEraserToolProvider);
-        lassoTool.onPointerMove(canvasPoint.dx, canvasPoint.dy);
-        ref.read(lassoEraserPointsProvider.notifier).update(
-          (points) => [...points, event.localPosition],
-        );
-        break;
-    }
-  }
-
-  /// Handles eraser pointer up - commits erased strokes based on mode.
-  void _handleEraserUp(PointerUpEvent event) {
-    final settings = ref.read(eraserSettingsProvider);
-    final document = ref.read(documentProvider);
-    final layerIndex = document.activeLayerIndex;
-
-    // Clear cursor position
-    ref.read(eraserCursorPositionProvider.notifier).state = null;
-
-    switch (settings.mode) {
-      case EraserMode.pixel:
-        _commitPixelErase(layerIndex);
-        break;
-
-      case EraserMode.stroke:
-        final eraserTool = ref.read(eraserToolProvider);
-        final erasedStrokeIds = eraserTool.endErasing();
-
-        // Commit erased strokes
-        if (erasedStrokeIds.isNotEmpty) {
-          final command = core.EraseStrokesCommand(
-            layerIndex: layerIndex,
-            strokeIds: erasedStrokeIds.toList(),
-          );
-          ref.read(historyManagerProvider.notifier).execute(command);
-        }
-
-        // Commit erased shapes
-        for (final shapeId in _erasedShapeIds) {
-          final command = core.RemoveShapeCommand(
-            layerIndex: layerIndex,
-            shapeId: shapeId,
-          );
-          ref.read(historyManagerProvider.notifier).execute(command);
-        }
-        _erasedShapeIds.clear();
-
-        // Commit erased texts
-        for (final textId in _erasedTextIds) {
-          final command = core.RemoveTextCommand(
-            layerIndex: layerIndex,
-            textId: textId,
-          );
-          ref.read(historyManagerProvider.notifier).execute(command);
-        }
-        _erasedTextIds.clear();
-        break;
-
-      case EraserMode.lasso:
-        _commitLassoErase(layerIndex);
-        ref.read(lassoEraserPointsProvider.notifier).state = [];
-        break;
-    }
-  }
-
-  /// Handles pixel erase at a specific canvas point.
-  void _handlePixelEraseAt(Offset canvasPoint) {
-    final strokes = ref.read(activeLayerStrokesProvider);
-    final shapes = ref.read(activeLayerShapesProvider);
-    final texts = ref.read(activeLayerTextsProvider);
-    final settings = ref.read(eraserSettingsProvider);
-    final pixelTool = ref.read(pixelEraserToolProvider);
-
-    // Apply eraser filters first
-    final filteredStrokes = _applyEraserFilters(strokes, settings);
-
-    final hits = pixelTool.findSegmentsAt(
-      filteredStrokes,
-      canvasPoint.dx,
-      canvasPoint.dy,
-      settings.size,
-    );
-
-    for (final hit in hits) {
-      // Track original stroke if not already tracked
-      if (!_pixelEraseHits.containsKey(hit.strokeId)) {
-        final originalStroke = filteredStrokes.firstWhere(
-          (s) => s.id == hit.strokeId,
-          orElse: () => core.Stroke.create(style: core.StrokeStyle.pen()),
-        );
-        if (originalStroke.id == hit.strokeId) {
-          _pixelEraseOriginalStrokes.add(originalStroke);
-        }
-        _pixelEraseHits[hit.strokeId] = [];
-      }
-
-      // Add segment index if not already present
-      if (!_pixelEraseHits[hit.strokeId]!.contains(hit.segmentIndex)) {
-        _pixelEraseHits[hit.strokeId]!.add(hit.segmentIndex);
-      }
-    }
-
-    // Check shapes (use eraser size as tolerance)
-    for (final shape in shapes) {
-      if (!_erasedShapeIds.contains(shape.id)) {
-        if (shape.containsPoint(
-          canvasPoint.dx,
-          canvasPoint.dy,
-          settings.size / 2, // Use radius as tolerance
-        )) {
-          _erasedShapeIds.add(shape.id);
-        }
-      }
-    }
-
-    // Check texts
-    for (final text in texts) {
-      if (!_erasedTextIds.contains(text.id)) {
-        if (text.containsPoint(
-          canvasPoint.dx,
-          canvasPoint.dy,
-          settings.size / 2, // Use radius as tolerance
-        )) {
-          _erasedTextIds.add(text.id);
-        }
-      }
-    }
-
-    // Update preview provider for visual feedback
-    ref.read(pixelEraserPreviewProvider.notifier).state = 
-        Map<String, List<int>>.from(_pixelEraseHits);
-  }
-
-  /// Commits pixel erase operation to history.
-  void _commitPixelErase(int layerIndex) {
-    // Commit strokes
-    if (_pixelEraseHits.isNotEmpty && _pixelEraseOriginalStrokes.isNotEmpty) {
-      // Split strokes and create resulting strokes
-      final splitResult = core.StrokeSplitter.splitStrokes(
-        _pixelEraseOriginalStrokes,
-        _pixelEraseHits,
-      );
-
-      final resultingStrokes = <core.Stroke>[];
-      for (final pieces in splitResult.values) {
-        resultingStrokes.addAll(pieces);
-      }
-
-      final command = core.ErasePointsCommand(
-        layerIndex: layerIndex,
-        originalStrokes: _pixelEraseOriginalStrokes.toList(),
-        resultingStrokes: resultingStrokes,
-      );
-      ref.read(historyManagerProvider.notifier).execute(command);
-    }
-
-    // Commit shapes
-    for (final shapeId in _erasedShapeIds) {
-      final command = core.RemoveShapeCommand(
-        layerIndex: layerIndex,
-        shapeId: shapeId,
-      );
-      ref.read(historyManagerProvider.notifier).execute(command);
-    }
-
-    // Commit texts
-    for (final textId in _erasedTextIds) {
-      final command = core.RemoveTextCommand(
-        layerIndex: layerIndex,
-        textId: textId,
-      );
-      ref.read(historyManagerProvider.notifier).execute(command);
-    }
-
-    // Clear tracking
-    _pixelEraseHits.clear();
-    _pixelEraseOriginalStrokes.clear();
-    _erasedShapeIds.clear();
-    _erasedTextIds.clear();
-    ref.read(pixelEraserPreviewProvider.notifier).state = {};
-  }
-
-  /// Commits lasso erase operation to history.
-  void _commitLassoErase(int layerIndex) {
-    final strokes = ref.read(activeLayerStrokesProvider);
-    final lassoTool = ref.read(lassoEraserToolProvider);
-
-    final result = lassoTool.onPointerUp(strokes);
-
-    if (result.affectedSegments.isEmpty) {
-      return;
-    }
-
-    // Split strokes and create resulting strokes (same as pixel eraser)
-    final splitResult = core.StrokeSplitter.splitStrokes(
-      result.affectedStrokes,
-      result.affectedSegments,
-    );
-
-    final resultingStrokes = <core.Stroke>[];
-    for (final pieces in splitResult.values) {
-      resultingStrokes.addAll(pieces);
-    }
-
-    final command = core.ErasePointsCommand(
-      layerIndex: layerIndex,
-      originalStrokes: result.affectedStrokes,
-      resultingStrokes: resultingStrokes,
-    );
-    ref.read(historyManagerProvider.notifier).execute(command);
-  }
-
-  /// Erases strokes, shapes, and texts at the given screen point (stroke mode).
-  /// Transforms screen coordinates to canvas coordinates.
-  void _eraseAtPoint(Offset point) {
-    // Transform screen coordinates to canvas coordinates (zoom/pan)
-    final transform = ref.read(canvasTransformProvider);
-    final canvasPoint = transform.screenToCanvas(point);
-
-    final strokes = ref.read(activeLayerStrokesProvider);
-    final shapes = ref.read(activeLayerShapesProvider);
-    final texts = ref.read(activeLayerTextsProvider);
-    final eraserTool = ref.read(eraserToolProvider);
-    final eraserSettings = ref.read(eraserSettingsProvider);
-
-    // Find strokes to erase
-    var toErase = eraserTool.findStrokesToErase(
-      strokes,
-      canvasPoint.dx,
-      canvasPoint.dy,
-    );
-
-    // Apply eraser filters
-    toErase = _applyEraserFilters(toErase, eraserSettings);
-
-    for (final stroke in toErase) {
-      if (!eraserTool.isAlreadyErased(stroke.id)) {
-        eraserTool.markAsErased(stroke.id);
-      }
-    }
-
-    // Find shapes to erase (no filters for shapes)
-    for (final shape in shapes) {
-      if (!_erasedShapeIds.contains(shape.id)) {
-        if (shape.containsPoint(
-          canvasPoint.dx,
-          canvasPoint.dy,
-          eraserTool.tolerance,
-        )) {
-          _erasedShapeIds.add(shape.id);
-        }
-      }
-    }
-
-    // Find texts to erase (no filters for texts)
-    for (final text in texts) {
-      if (!_erasedTextIds.contains(text.id)) {
-        if (text.containsPoint(
-          canvasPoint.dx,
-          canvasPoint.dy,
-          eraserTool.tolerance,
-        )) {
-          _erasedTextIds.add(text.id);
-        }
-      }
-    }
-  }
-
-  /// Apply eraser filters based on settings
-  List<core.Stroke> _applyEraserFilters(
-    List<core.Stroke> strokes,
-    EraserSettings settings,
-  ) {
-    var filtered = strokes;
-
-    // Filter: Erase only highlighter strokes
-    if (settings.eraseOnlyHighlighter) {
-      filtered = filtered.where((stroke) {
-        // Check if stroke is a highlighter (has transparency)
-        final color = Color(stroke.style.color);
-        return color.a < 1.0; // Highlighters typically have alpha < 1.0
-      }).toList();
-    }
-
-    return filtered;
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // SHAPE EVENT HANDLERS
-  // ─────────────────────────────────────────────────────────────────────────
-
-  /// Handles shape pointer down - starts shape drawing.
-  void _handleShapeDown(PointerDownEvent event) {
-    final transform = ref.read(canvasTransformProvider);
-    final canvasPoint = transform.screenToCanvas(event.localPosition);
-
-    final coreShapeType = ref.read(activeCoreShapeTypeProvider);
-    final isFilled = ref.read(shapeFilledProvider);
-    final fillColor = ref.read(shapeFillColorProvider);
-    final style = ref.read(shapeStrokeStyleProvider);
-
-    // Create shape tool based on type
-    switch (coreShapeType) {
-      case core.ShapeType.line:
-        _activeShapeTool = core.LineTool(style: style);
-        break;
-      case core.ShapeType.arrow:
-        _activeShapeTool = core.ArrowTool(style: style);
-        break;
-      case core.ShapeType.rectangle:
-        _activeShapeTool = core.RectangleTool(
-          style: style,
-          filled: isFilled,
-          fillColor: fillColor,
-        );
-        break;
-      case core.ShapeType.ellipse:
-        _activeShapeTool = core.EllipseTool(
-          style: style,
-          filled: isFilled,
-          fillColor: fillColor,
-        );
-        break;
-      case core.ShapeType.triangle:
-      case core.ShapeType.diamond:
-      case core.ShapeType.star:
-      case core.ShapeType.pentagon:
-      case core.ShapeType.hexagon:
-      case core.ShapeType.plus:
-        _activeShapeTool = core.GenericShapeTool(
-          style: style,
-          shapeType: coreShapeType,
-          filled: isFilled,
-          fillColor: fillColor,
-        );
-        break;
-    }
-
-    _activeShapeTool!.startShape(core.DrawingPoint(
-      x: canvasPoint.dx,
-      y: canvasPoint.dy,
-      pressure: 1.0,
-    ));
-
-    _isDrawingShape = true;
-    setState(() {});
-  }
-
-  /// Handles shape pointer move - updates shape preview.
-  void _handleShapeMove(PointerMoveEvent event) {
-    if (_activeShapeTool == null) return;
-
-    final transform = ref.read(canvasTransformProvider);
-    final canvasPoint = transform.screenToCanvas(event.localPosition);
-
-    _activeShapeTool!.updateShape(core.DrawingPoint(
-      x: canvasPoint.dx,
-      y: canvasPoint.dy,
-      pressure: 1.0,
-    ));
-
-    setState(() {});
-  }
-
-  /// Handles shape pointer up - commits shape to document.
-  void _handleShapeUp(PointerUpEvent event) {
-    if (_activeShapeTool == null) return;
-
-    _isDrawingShape = false;
-
-    final shape = _activeShapeTool!.endShape();
-
-    if (shape != null) {
-      final document = ref.read(documentProvider);
-      final command = core.AddShapeCommand(
-        layerIndex: document.activeLayerIndex,
-        shape: shape,
-      );
-      ref.read(historyManagerProvider.notifier).execute(command);
-    }
-
-    _activeShapeTool = null;
-    setState(() {});
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // TEXT EVENT HANDLERS
-  // ─────────────────────────────────────────────────────────────────────────
-
-  /// Handles text pointer down - shows context menu or starts text editing.
-  void _handleTextDown(PointerDownEvent event) {
-    final transform = ref.read(canvasTransformProvider);
-    final canvasPoint =
-        (event.localPosition - transform.offset) / transform.zoom;
-
-    // Check if there's already active text editing
-    final textToolState = ref.read(textToolProvider);
-
-    // Handle move mode - move text to tapped location
-    if (textToolState.isMoving) {
-      _moveTextTo(canvasPoint.dx, canvasPoint.dy);
-      return;
-    }
-
-    if (textToolState.isEditing) {
-      // Check if tapped on the same text element - if not, finish current and STOP
-      final activeText = textToolState.activeText;
-      if (activeText != null) {
-        // Check if tapped on current active text
-        if (activeText.containsPoint(canvasPoint.dx, canvasPoint.dy, 10)) {
-          // Same text clicked - do nothing, let TextField handle it
-          return;
-        }
-        // Tapped somewhere else - finish current editing and STOP
-        // User needs to tap again to create new text (this closes keyboard)
-        _finishTextEditing();
-        return; // IMPORTANT: Don't create new text on same tap
-      }
-    }
-
-    // If menu is showing, close it first
-    if (textToolState.showMenu) {
-      ref.read(textToolProvider.notifier).hideContextMenu();
-      return;
-    }
-
-    // If style popup is showing, close it first
-    if (textToolState.showStylePopup) {
-      ref.read(textToolProvider.notifier).hideStylePopup();
-      return;
-    }
-
-    // Check if tapped on existing text - show context menu
-    final texts = ref.read(activeLayerTextsProvider);
-
-    for (final text in texts.reversed) {
-      if (text.containsPoint(canvasPoint.dx, canvasPoint.dy, 10)) {
-        // Show context menu for existing text
-        ref.read(textToolProvider.notifier).showContextMenu(text);
-        return;
-      }
-    }
-
-    // Create new text at tap location (only if no text was being edited)
-    final style = ref.read(activeStrokeStyleProvider);
-    ref.read(textToolProvider.notifier).startNewText(
-          canvasPoint.dx,
-          canvasPoint.dy,
-          fontSize: style.thickness * 4, // Font size based on stroke thickness
-          color: style.color,
-        );
-  }
-
-  /// Finishes text editing and saves the text.
-  void _finishTextEditing() {
-    final textToolState = ref.read(textToolProvider);
-
-    // IMPORTANT: Get the current text state BEFORE calling finishEditing
-    // because finishEditing clears the state
-    final currentText = textToolState.activeText;
-
-    if (currentText == null || currentText.text.trim().isEmpty) {
-      ref.read(textToolProvider.notifier).cancelEditing();
-      return;
-    }
-
-    // Now finish editing (this clears the state)
-    ref.read(textToolProvider.notifier).finishEditing();
-
-    final document = ref.read(documentProvider);
-
-    if (textToolState.isNewText) {
-      // Add new text
-      final command = core.AddTextCommand(
-        layerIndex: document.activeLayerIndex,
-        textElement: currentText,
-      );
-      ref.read(historyManagerProvider.notifier).execute(command);
-    } else {
-      // Update existing text
-      final command = core.UpdateTextCommand(
-        layerIndex: document.activeLayerIndex,
-        newText: currentText,
-      );
-      ref.read(historyManagerProvider.notifier).execute(command);
-    }
-  }
-
-  /// Cancels text editing without saving.
-  void _cancelTextEditing() {
-    ref.read(textToolProvider.notifier).cancelEditing();
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // TEXT CONTEXT MENU HANDLERS
-  // ─────────────────────────────────────────────────────────────────────────
-
-  /// Handles edit action from context menu - opens TextField for editing.
-  void _handleTextEdit() {
-    final textToolState = ref.read(textToolProvider);
-    if (textToolState.menuText != null) {
-      ref
-          .read(textToolProvider.notifier)
-          .editExistingText(textToolState.menuText!);
-    }
-  }
-
-  /// Handles delete action from context menu - removes text.
-  void _handleTextDelete() {
-    final textToolState = ref.read(textToolProvider);
-    if (textToolState.menuText != null) {
-      final document = ref.read(documentProvider);
-      final command = core.RemoveTextCommand(
-        layerIndex: document.activeLayerIndex,
-        textId: textToolState.menuText!.id,
-      );
-      ref.read(historyManagerProvider.notifier).execute(command);
-      ref.read(textToolProvider.notifier).hideContextMenu();
-    }
-  }
-
-  /// Handles style action from context menu - opens style popup.
-  void _handleTextStyle() {
-    final textToolState = ref.read(textToolProvider);
-    if (textToolState.menuText != null) {
-      ref
-          .read(textToolProvider.notifier)
-          .showStylePopup(textToolState.menuText!);
-    }
-  }
-
-  /// Handles style change from popup - updates text style.
-  void _handleTextStyleChanged(core.TextElement updatedText) {
-    final document = ref.read(documentProvider);
-    final command = core.UpdateTextCommand(
-      layerIndex: document.activeLayerIndex,
-      newText: updatedText,
-    );
-    ref.read(historyManagerProvider.notifier).execute(command);
-  }
-
-  /// Handles duplicate action from context menu - copies text.
-  void _handleTextDuplicate() {
-    final textToolState = ref.read(textToolProvider);
-    if (textToolState.menuText != null) {
-      final originalText = textToolState.menuText!;
-      // Create duplicate with visible offset (40px diagonal)
-      final duplicateText = core.TextElement.create(
-        text: originalText.text,
-        x: originalText.x + 40, // Offset by 40 pixels
-        y: originalText.y + 40,
-        fontSize: originalText.fontSize,
-        color: originalText.color,
-        fontFamily: originalText.fontFamily,
-        isBold: originalText.isBold,
-        isItalic: originalText.isItalic,
-        isUnderline: originalText.isUnderline,
-        alignment: originalText.alignment,
-      );
-
-      final document = ref.read(documentProvider);
-      final command = core.AddTextCommand(
-        layerIndex: document.activeLayerIndex,
-        textElement: duplicateText,
-      );
-      ref.read(historyManagerProvider.notifier).execute(command);
-      ref.read(textToolProvider.notifier).hideContextMenu();
-    }
-  }
-
-  /// Handles move action from context menu - starts move mode.
-  void _handleTextMove() {
-    final textToolState = ref.read(textToolProvider);
-    if (textToolState.menuText != null) {
-      ref.read(textToolProvider.notifier).startMoving(textToolState.menuText!);
-    }
-  }
-
-  /// Handles text move to new location.
-  void _moveTextTo(double x, double y) {
-    final textToolState = ref.read(textToolProvider);
-    if (textToolState.movingText != null) {
-      final movedText = textToolState.movingText!.copyWith(x: x, y: y);
-      final document = ref.read(documentProvider);
-      final command = core.UpdateTextCommand(
-        layerIndex: document.activeLayerIndex,
-        newText: movedText,
-      );
-      ref.read(historyManagerProvider.notifier).execute(command);
-      ref.read(textToolProvider.notifier).cancelMoving();
-    }
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // SCALE GESTURE HANDLERS (Two Finger Zoom/Pan)
-  // ─────────────────────────────────────────────────────────────────────────
-
-  /// Handles scale start - initializes zoom/pan gesture.
-  void _handleScaleStart(ScaleStartDetails details) {
-    // Only handle zoom/pan with 2+ fingers
-    if (details.pointerCount < 2) return;
-
-    // Cancel any ongoing operations when zoom/pan starts
-    if (_drawingController.isDrawing) {
-      _drawingController.cancelStroke();
-    }
-    if (_isSelecting) {
-      ref.read(activeSelectionToolProvider).cancelSelection();
-      _isSelecting = false;
-    }
-    if (_isDrawingShape) {
-      _activeShapeTool?.cancelShape();
-      _activeShapeTool = null;
-      _isDrawingShape = false;
-    }
-
-    // Finish text editing if active (save the text)
-    final textToolState = ref.read(textToolProvider);
-    if (textToolState.isEditing) {
-      _finishTextEditing();
-    }
-
-    _lastFocalPoint = details.focalPoint;
-    _lastScale = 1.0;
-  }
-
-  /// Handles scale update - applies zoom and pan.
-  void _handleScaleUpdate(ScaleUpdateDetails details) {
-    // Only handle zoom/pan with 2+ fingers
-    if (details.pointerCount < 2) return;
-
-    final transformNotifier = ref.read(canvasTransformProvider.notifier);
-
-    // Apply zoom (pinch gesture)
-    if (_lastScale != null && details.scale != 1.0) {
-      final scaleDelta = details.scale / _lastScale!;
-      if ((scaleDelta - 1.0).abs() > 0.001) {
-        transformNotifier.applyZoomDelta(scaleDelta, details.focalPoint);
-      }
-    }
-
-    // Apply pan (two finger drag)
-    if (_lastFocalPoint != null) {
-      final panDelta = details.focalPoint - _lastFocalPoint!;
-      if (panDelta.distance > 0.5) {
-        transformNotifier.applyPanDelta(panDelta);
-      }
-    }
-
-    _lastFocalPoint = details.focalPoint;
-    _lastScale = details.scale;
-  }
-
-  /// Handles scale end - finalizes zoom/pan gesture.
-  void _handleScaleEnd(ScaleEndDetails details) {
-    _lastFocalPoint = null;
-    _lastScale = null;
-  }
-
-  /// Creates a DrawingPoint from a pointer event.
-  /// Transforms screen coordinates to canvas coordinates based on zoom/pan.
-  core.DrawingPoint _createDrawingPoint(PointerEvent event) {
-    final transform = ref.read(canvasTransformProvider);
-
-    // Convert screen coordinates to canvas coordinates
-    final canvasPoint = transform.screenToCanvas(event.localPosition);
-
-    return core.DrawingPoint(
-      x: canvasPoint.dx,
-      y: canvasPoint.dy,
-      pressure: event.pressure.clamp(0.0, 1.0),
-      tilt: 0.0,
-      timestamp: event.timeStamp.inMilliseconds,
-    );
-  }
-
-  /// Gets the current stroke style from provider.
-  core.StrokeStyle _getCurrentStyle() {
-    return ref.read(activeStrokeStyleProvider);
-  }
-
+  @override
+  int get pointerCount => _pointerCount;
+  @override
+  set pointerCount(int value) => _pointerCount = value;
+
+  @override
+  Offset? get lastPoint => _lastPoint;
+  @override
+  set lastPoint(Offset? value) => _lastPoint = value;
+
+  @override
+  bool get isSelecting => _isSelecting;
+  @override
+  set isSelecting(bool value) => _isSelecting = value;
+
+  @override
+  bool get isDrawingShape => _isDrawingShape;
+  @override
+  set isDrawingShape(bool value) => _isDrawingShape = value;
+
+  @override
+  core.ShapeTool? get activeShapeTool => _activeShapeTool;
+  @override
+  set activeShapeTool(core.ShapeTool? value) => _activeShapeTool = value;
+
+  @override
+  bool get isStraightLineDrawing => _isStraightLineDrawing;
+  @override
+  set isStraightLineDrawing(bool value) => _isStraightLineDrawing = value;
+
+  @override
+  core.DrawingPoint? get straightLineStart => _straightLineStart;
+  @override
+  set straightLineStart(core.DrawingPoint? value) => _straightLineStart = value;
+
+  @override
+  core.DrawingPoint? get straightLineEnd => _straightLineEnd;
+  @override
+  set straightLineEnd(core.DrawingPoint? value) => _straightLineEnd = value;
+
+  @override
+  core.StrokeStyle? get straightLineStyle => _straightLineStyle;
+  @override
+  set straightLineStyle(core.StrokeStyle? value) => _straightLineStyle = value;
+
+  @override
+  Set<String> get erasedShapeIds => _erasedShapeIds;
+
+  @override
+  Set<String> get erasedTextIds => _erasedTextIds;
+
+  @override
+  Map<String, List<int>> get pixelEraseHits => _pixelEraseHits;
+
+  @override
+  List<core.Stroke> get pixelEraseOriginalStrokes => _pixelEraseOriginalStrokes;
+
+  @override
+  Offset? get lastFocalPoint => _lastFocalPoint;
+  @override
+  set lastFocalPoint(Offset? value) => _lastFocalPoint = value;
+
+  @override
+  double? get lastScale => _lastScale;
+  @override
+  set lastScale(double? value) => _lastScale = value;
   @override
   Widget build(BuildContext context) {
     // Watch providers
@@ -1354,16 +306,16 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
           children: [
             // Canvas with gesture handlers
             Listener(
-              onPointerDown: enablePointerEvents ? _handlePointerDown : null,
-              onPointerMove: enablePointerEvents ? _handlePointerMove : null,
-              onPointerUp: enablePointerEvents ? _handlePointerUp : null,
+              onPointerDown: enablePointerEvents ? handlePointerDown : null,
+              onPointerMove: enablePointerEvents ? handlePointerMove : null,
+              onPointerUp: enablePointerEvents ? handlePointerUp : null,
               onPointerCancel:
-                  enablePointerEvents ? _handlePointerCancel : null,
+                  enablePointerEvents ? handlePointerCancel : null,
               behavior: HitTestBehavior.translucent,
               child: GestureDetector(
-                onScaleStart: _handleScaleStart,
-                onScaleUpdate: _handleScaleUpdate,
-                onScaleEnd: _handleScaleEnd,
+                onScaleStart: handleScaleStart,
+                onScaleUpdate: handleScaleUpdate,
+                onScaleEnd: handleScaleEnd,
                 behavior: HitTestBehavior.opaque,
                 child: ClipRect(
                   child: SizedBox(
@@ -1536,11 +488,11 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
                 textElement: textToolState.menuText!,
                 zoom: transform.zoom,
                 canvasOffset: transform.offset,
-                onEdit: _handleTextEdit,
-                onDelete: _handleTextDelete,
-                onStyle: _handleTextStyle,
-                onDuplicate: _handleTextDuplicate,
-                onMove: _handleTextMove,
+                onEdit: handleTextEdit,
+                onDelete: handleTextDelete,
+                onStyle: handleTextStyle,
+                onDuplicate: handleTextDuplicate,
+                onMove: handleTextMove,
               ),
 
             // ───────────────────────────────────────────────────────────
@@ -1554,8 +506,8 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
                 onTextChanged: (updatedText) {
                   ref.read(textToolProvider.notifier).updateText(updatedText);
                 },
-                onEditingComplete: () => _finishTextEditing(),
-                onCancel: () => _cancelTextEditing(),
+                onEditingComplete: () => finishTextEditing(),
+                onCancel: () => cancelTextEditing(),
               ),
 
             // ───────────────────────────────────────────────────────────
@@ -1566,7 +518,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
                 textElement: textToolState.styleText!,
                 zoom: transform.zoom,
                 canvasOffset: transform.offset,
-                onStyleChanged: _handleTextStyleChanged,
+                onStyleChanged: handleTextStyleChanged,
                 onClose: () =>
                     ref.read(textToolProvider.notifier).hideStylePopup(),
               ),
@@ -1651,43 +603,3 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas> {
 /// - Paint object is static and cached
 /// - shouldRepaint always returns false
 /// - Grid size is constant
-class GridPainter extends CustomPainter {
-  /// Grid spacing in logical pixels.
-  static const double gridSize = 25.0;
-
-  // CACHED Paint object - NO allocation in paint()!
-  static final Paint _gridPaint = Paint()
-    ..color = const Color(0xFFE0E0E0)
-    ..strokeWidth = 0.5
-    ..isAntiAlias = true;
-
-  /// Creates a grid painter.
-  const GridPainter();
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    // Draw vertical lines
-    for (double x = 0; x <= size.width; x += gridSize) {
-      canvas.drawLine(
-        Offset(x, 0),
-        Offset(x, size.height),
-        _gridPaint,
-      );
-    }
-
-    // Draw horizontal lines
-    for (double y = 0; y <= size.height; y += gridSize) {
-      canvas.drawLine(
-        Offset(0, y),
-        Offset(size.width, y),
-        _gridPaint,
-      );
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant GridPainter oldDelegate) {
-    // Grid never changes - NEVER repaint
-    return false;
-  }
-}

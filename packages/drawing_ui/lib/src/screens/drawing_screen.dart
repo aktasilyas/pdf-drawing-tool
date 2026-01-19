@@ -200,9 +200,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
 
     // Right-edge tools (last tools in toolbar) - align panel to right
     const rightTools = {
-      ToolType.toolbarSettings,
       ToolType.laserPointer,
-      ToolType.image,
     };
 
     if (leftTools.contains(tool)) {

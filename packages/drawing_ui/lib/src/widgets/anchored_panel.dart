@@ -143,11 +143,19 @@ class _PositionedPanelOverlay extends StatelessWidget {
 
     // Calculate arrow position (points to anchor center)
     final anchorCenterX = anchorPosition.dx + anchorSize.width / 2;
-    final arrowLeftPosition = panelLeft != null 
-        ? anchorCenterX - panelLeft - 12 // 12 = half of arrow width
-        : panelRight != null 
-            ? screenSize.width - panelRight - anchorCenterX - 12
-            : panelMaxWidth / 2 - 12;
+    final double arrowLeftPosition;
+    
+    if (panelLeft != null) {
+      // Panel positioned from left - arrow relative to panelLeft
+      arrowLeftPosition = anchorCenterX - panelLeft - 12; // 12 = half of arrow width
+    } else if (panelRight != null) {
+      // Panel positioned from right - calculate panel's actual left position first
+      final actualPanelLeft = screenSize.width - panelRight - panelMaxWidth;
+      arrowLeftPosition = anchorCenterX - actualPanelLeft - 12;
+    } else {
+      // Fallback to center
+      arrowLeftPosition = panelMaxWidth / 2 - 12;
+    }
 
     return Stack(
       children: [
@@ -182,7 +190,7 @@ class _PositionedPanelOverlay extends StatelessWidget {
                     // Arrow pointing up to anchor
                     Padding(
                       padding: EdgeInsets.only(
-                        left: arrowLeftPosition.clamp(8, panelMaxWidth - 32),
+                        left: arrowLeftPosition.clamp(40, panelMaxWidth - 64),
                       ),
                       child: CustomPaint(
                         size: const Size(24, 12),

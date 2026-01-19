@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/src/providers/recent_colors_provider.dart';
-import 'package:drawing_ui/src/widgets/anchored_panel.dart';
 
 /// Preset renk kategorileri
 class ColorPresets {
@@ -90,7 +89,7 @@ class ColorSets {
 }
 
 /// Ortak renk seçici widget - hızlı renkler + daha fazla butonu
-class UnifiedColorPicker extends StatefulWidget {
+class UnifiedColorPicker extends StatelessWidget {
   const UnifiedColorPicker({
     super.key,
     required this.selectedColor,
@@ -115,38 +114,23 @@ class UnifiedColorPicker extends StatefulWidget {
   final bool isHighlighter;
 
   @override
-  State<UnifiedColorPicker> createState() => _UnifiedColorPickerState();
-}
-
-class _UnifiedColorPickerState extends State<UnifiedColorPicker> {
-  final AnchoredPanelController _panelController = AnchoredPanelController();
-  final GlobalKey _moreButtonKey = GlobalKey();
-
-  @override
-  void dispose() {
-    _panelController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final colors = (widget.quickColors ?? ColorPresets.quickAccess).take(5).toList();
+    final colors = (quickColors ?? ColorPresets.quickAccess).take(5).toList();
 
     return Wrap(
-      spacing: widget.spacing,
+      spacing: spacing,
       runSpacing: 4,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         ...colors.map((color) => _ColorChip(
               color: color,
-              isSelected: _colorsMatch(color, widget.selectedColor),
-              size: widget.chipSize,
-              onTap: () => widget.onColorSelected(color),
+              isSelected: _colorsMatch(color, selectedColor),
+              size: chipSize,
+              onTap: () => onColorSelected(color),
               onDoubleTap: () => _showColorPalette(context),
             )),
-        if (widget.showMoreButton)
+        if (showMoreButton)
           _MoreButton(
-            key: _moreButtonKey,
             onTap: () => _showColorPalette(context),
           ),
       ],
@@ -154,23 +138,43 @@ class _UnifiedColorPickerState extends State<UnifiedColorPicker> {
   }
 
   void _showColorPalette(BuildContext context) {
-    _panelController.show(
-      context: context,
-      anchorKey: _moreButtonKey,
-      alignment: AnchorAlignment.center,
-      verticalOffset: 8,
-      onBarrierTap: () => _panelController.hide(),
-      child: Material(
-        color: Colors.black.withAlpha(38), // 0.15 opacity
-        child: CompactColorPicker(
-          selectedColor: widget.selectedColor,
-          onColorSelected: (color) {
-            widget.onColorSelected(color);
-            _panelController.hide();
-          },
-        ),
-      ),
+    // Use custom full-screen overlay for color picker
+    // This ensures it appears above all panels and is centered on screen
+    final overlay = Overlay.of(context);
+    late OverlayEntry overlayEntry;
+    
+    overlayEntry = OverlayEntry(
+      builder: (overlayContext) {
+        return Material(
+          color: Colors.black.withAlpha(137), // 0.54 opacity for stronger backdrop
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => overlayEntry.remove(),
+            child: Center(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {}, // Absorb taps on picker
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: 320,
+                    maxHeight: MediaQuery.of(overlayContext).size.height * 0.85,
+                  ),
+                  child: CompactColorPicker(
+                    selectedColor: selectedColor,
+                    onColorSelected: (color) {
+                      onColorSelected(color);
+                      overlayEntry.remove();
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
+    
+    overlay.insert(overlayEntry);
   }
 
   bool _colorsMatch(Color a, Color b) {
@@ -239,10 +243,7 @@ class _ColorChip extends StatelessWidget {
 
 /// "Daha fazla" butonu
 class _MoreButton extends StatelessWidget {
-  const _MoreButton({
-    super.key,
-    required this.onTap,
-  });
+  const _MoreButton({required this.onTap});
 
   final VoidCallback onTap;
 
