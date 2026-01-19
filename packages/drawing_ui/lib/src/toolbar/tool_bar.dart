@@ -157,19 +157,21 @@ class _ToolBarState extends ConsumerState<ToolBar> {
                 ),
               ),
 
-              // Quick access (only on larger screens)
-              if (showQuickAccess) ...[
+              // Quick access (conditionally on larger screens)
+              if (showQuickAccess && constraints.maxWidth > 700) ...[
                 _VerticalDivider(),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 4),
-                  child: QuickAccessRow(),
+                const Flexible(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 4),
+                    child: QuickAccessRow(),
+                  ),
                 ),
               ],
 
               // Divider before settings
               _VerticalDivider(),
 
-              // Toolbar config button - ALWAYS visible
+              // Toolbar config button - ALWAYS visible, NEVER hidden
               Container(
                 width: 48,
                 height: 48,
