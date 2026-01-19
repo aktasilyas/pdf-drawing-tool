@@ -1,36 +1,8 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/panels/tool_panel.dart';
-
-void _writeDebugLog({
-  required String hypothesisId,
-  required String message,
-  Map<String, Object?> data = const {},
-}) {
-  try {
-    final file = File(
-      r'c:\Users\aktas\source\repos\starnote_drawing_workspace\.cursor\debug.log',
-    );
-    final payload = {
-      'sessionId': 'debug-session',
-      'runId': 'run1',
-      'hypothesisId': hypothesisId,
-      'location': 'panels/eraser_settings_panel.dart',
-      'message': message,
-      'data': data,
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-    };
-    file.writeAsStringSync(
-      '${jsonEncode(payload)}\n',
-      mode: FileMode.append,
-    );
-  } catch (_) {}
-}
 
 /// Settings panel for eraser tools.
 ///
@@ -48,45 +20,12 @@ class EraserSettingsPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(eraserSettingsProvider);
-    final columnKey = GlobalKey();
-    final buttonKey = GlobalKey();
     final showSizeSlider = settings.mode != EraserMode.lasso;
-
-    // #region agent log - H1/H2/H3: Panel build
-    _writeDebugLog(
-      hypothesisId: 'H1',
-      message: 'eraser_panel_build',
-      data: {
-        'mode': settings.mode.name,
-        'showSizeSlider': showSizeSlider,
-      },
-    );
-    // #endregion
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final columnBox = columnKey.currentContext?.findRenderObject() as RenderBox?;
-      final buttonBox = buttonKey.currentContext?.findRenderObject() as RenderBox?;
-      if (columnBox != null && buttonBox != null) {
-        // #region agent log - H2: Panel layout sizes
-        _writeDebugLog(
-          hypothesisId: 'H2',
-          message: 'eraser_panel_layout',
-          data: {
-            'panelHeight': columnBox.size.height,
-            'panelWidth': columnBox.size.width,
-            'buttonHeight': buttonBox.size.height,
-            'buttonWidth': buttonBox.size.width,
-          },
-        );
-        // #endregion
-      }
-    });
 
     return ToolPanel(
       title: 'Silgi',
       onClose: onClose,
       child: Column(
-        key: columnKey,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Mode selector
@@ -144,7 +83,6 @@ class EraserSettingsPanel extends ConsumerWidget {
 
           // Clear page button (destructive action)
           _CompactActionButton(
-            key: buttonKey,
             label: 'Sayfayı Temizle',
             icon: Icons.delete_outline,
             isDestructive: true,
@@ -305,7 +243,6 @@ class _CompactToggle extends StatelessWidget {
 /// Compact action button
 class _CompactActionButton extends StatelessWidget {
   const _CompactActionButton({
-    super.key,
     required this.label,
     required this.icon,
     required this.onPressed,

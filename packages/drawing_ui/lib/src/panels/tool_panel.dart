@@ -1,33 +1,5 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
-
-void _writeDebugLog({
-  required String hypothesisId,
-  required String message,
-  Map<String, Object?> data = const {},
-}) {
-  try {
-    final file = File(
-      r'c:\Users\aktas\source\repos\starnote_drawing_workspace\.cursor\debug.log',
-    );
-    final payload = {
-      'sessionId': 'debug-session',
-      'runId': 'run1',
-      'hypothesisId': hypothesisId,
-      'location': 'panels/tool_panel.dart',
-      'message': message,
-      'data': data,
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-    };
-    file.writeAsStringSync(
-      '${jsonEncode(payload)}\n',
-      mode: FileMode.append,
-    );
-  } catch (_) {}
-}
 
 /// Base container for tool settings panels.
 ///
@@ -67,20 +39,6 @@ class ToolPanel extends StatelessWidget {
     final maxPanelHeight = isLandscape
         ? screenSize.height * 0.85  // Yatay: ekranın %85'i
         : screenSize.height * 0.7;  // Dikey: ekranın %70'i
-
-    // #region agent log - H2: ToolPanel max height
-    _writeDebugLog(
-      hypothesisId: 'H2',
-      message: 'tool_panel_max_height',
-      data: {
-        'title': title,
-        'screenHeight': screenSize.height,
-        'screenWidth': screenSize.width,
-        'isLandscape': isLandscape,
-        'maxPanelHeight': maxPanelHeight,
-      },
-    );
-    // #endregion
 
     return Material(
       color: Colors.transparent,

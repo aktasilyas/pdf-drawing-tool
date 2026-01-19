@@ -1,5 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 
 /// Direction where the arrow should point
@@ -63,10 +61,6 @@ class AnchorPositionCalculator {
     // Get anchor button position in global coordinates
     final anchorPosition = renderBox.localToGlobal(Offset.zero);
     final anchorSize = renderBox.size;
-    
-    // #region agent log
-    try { File(r'c:\Users\aktas\source\repos\starnote_drawing_workspace\.cursor\debug.log').writeAsStringSync('${jsonEncode({'location':'anchor_position_calculator.dart:50','message':'Anchor metrics','data':{'anchorPos_dx':anchorPosition.dx,'anchorPos_dy':anchorPosition.dy,'anchorSize_w':anchorSize.width,'anchorSize_h':anchorSize.height,'panelSize_w':panelSize.width,'panelSize_h':panelSize.height,'screenSize_w':screenSize.width,'screenSize_h':screenSize.height},'timestamp':DateTime.now().millisecondsSinceEpoch,'sessionId':'debug-session','hypothesisId':'A,B,C'})}\n', mode: FileMode.append, flush: true); } catch(_) {}
-    // #endregion
 
     // Try preferred direction first
     final preferred = _tryDirection(
@@ -114,10 +108,6 @@ class AnchorPositionCalculator {
     final anchorCenterX = anchorPosition.dx + anchorSize.width / 2;
     final anchorCenterY = anchorPosition.dy + anchorSize.height / 2;
 
-    // #region agent log
-    try { File(r'c:\Users\aktas\source\repos\starnote_drawing_workspace\.cursor\debug.log').writeAsStringSync('${jsonEncode({'location':'anchor_position_calculator.dart:106','message':'Before offset calc','data':{'direction':direction.toString(),'anchorCenterX':anchorCenterX,'anchorCenterY':anchorCenterY,'padding':padding,'arrowSize':arrowSize},'timestamp':DateTime.now().millisecondsSinceEpoch,'sessionId':'debug-session','hypothesisId':'D'})}\n', mode: FileMode.append, flush: true); } catch(_) {}
-    // #endregion
-
     switch (direction) {
       case ArrowDirection.down:
         // Panel below anchor
@@ -127,10 +117,6 @@ class AnchorPositionCalculator {
         );
         alignment = Alignment.topCenter;
         arrowOffset = panelSize.width / 2;
-        
-        // #region agent log
-        try { File(r'c:\Users\aktas\source\repos\starnote_drawing_workspace\.cursor\debug.log').writeAsStringSync('${jsonEncode({'location':'anchor_position_calculator.dart:125','message':'ArrowDirection.down offset','data':{'offset_dx':offset.dx,'offset_dy':offset.dy,'calculation':'anchorPos.dy(${anchorPosition.dy}) + anchorSize.h(${anchorSize.height}) + padding($padding) + arrowSize($arrowSize)'},'timestamp':DateTime.now().millisecondsSinceEpoch,'sessionId':'debug-session','hypothesisId':'D'})}\n', mode: FileMode.append, flush: true); } catch(_) {}
-        // #endregion
         break;
 
       case ArrowDirection.up:

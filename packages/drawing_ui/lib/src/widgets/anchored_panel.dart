@@ -1,32 +1,4 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-
-void _writeDebugLog({
-  required String hypothesisId,
-  required String message,
-  Map<String, Object?> data = const {},
-}) {
-  try {
-    final file = File(
-      r'c:\Users\aktas\source\repos\starnote_drawing_workspace\.cursor\debug.log',
-    );
-    final payload = {
-      'sessionId': 'debug-session',
-      'runId': 'run1',
-      'hypothesisId': hypothesisId,
-      'location': 'widgets/anchored_panel.dart',
-      'message': message,
-      'data': data,
-      'timestamp': DateTime.now().millisecondsSinceEpoch,
-    };
-    file.writeAsStringSync(
-      '${jsonEncode(payload)}\n',
-      mode: FileMode.append,
-    );
-  } catch (_) {}
-}
 
 /// Alignment hint for anchored panels
 enum AnchorAlignment {
@@ -65,21 +37,6 @@ class AnchoredPanelController {
     final anchorPosition = renderBox.localToGlobal(Offset.zero);
     final anchorSize = renderBox.size;
     final screenSize = MediaQuery.of(context).size;
-
-    // #region agent log - H1: Anchored panel show
-    _writeDebugLog(
-      hypothesisId: 'H1',
-      message: 'anchored_panel_show',
-      data: {
-        'screenHeight': screenSize.height,
-        'screenWidth': screenSize.width,
-        'anchorX': anchorPosition.dx,
-        'anchorY': anchorPosition.dy,
-        'anchorWidth': anchorSize.width,
-        'anchorHeight': anchorSize.height,
-      },
-    );
-    // #endregion
 
     final overlay = Overlay.of(context);
 
