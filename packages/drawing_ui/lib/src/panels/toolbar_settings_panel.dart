@@ -28,7 +28,7 @@ class ToolbarSettingsPanel extends ConsumerWidget {
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
+            color: Colors.black.withAlpha(38), // 0.15 * 255 ≈ 38
             blurRadius: 12,
             offset: const Offset(0, 2),
           ),

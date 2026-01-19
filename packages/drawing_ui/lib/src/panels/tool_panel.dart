@@ -83,11 +83,16 @@ class ToolPanel extends StatelessWidget {
               color: Colors.grey.shade200,
             ),
 
-            // Content
+            // Content - use LayoutBuilder to conditionally scroll
             Flexible(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(12),
-                child: child,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return SingleChildScrollView(
+                    physics: const ClampingScrollPhysics(),
+                    padding: const EdgeInsets.all(12),
+                    child: child,
+                  );
+                },
               ),
             ),
           ],

@@ -174,30 +174,27 @@ class _PositionedPanelOverlay extends StatelessWidget {
               child: ConstrainedBox(
                 constraints: BoxConstraints(
                   maxWidth: panelMaxWidth,
-                  maxHeight: screenSize.height * 0.55,
                 ),
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Arrow pointing up to anchor
-                      Padding(
-                        padding: EdgeInsets.only(
-                          left: arrowLeftPosition.clamp(8, panelMaxWidth - 32),
-                        ),
-                        child: CustomPaint(
-                          size: const Size(24, 12),
-                          painter: _ArrowPainter(),
-                        ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Arrow pointing up to anchor
+                    Padding(
+                      padding: EdgeInsets.only(
+                        left: arrowLeftPosition.clamp(8, panelMaxWidth - 32),
                       ),
-                      // Panel content
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: child,
+                      child: CustomPaint(
+                        size: const Size(24, 12),
+                        painter: _ArrowPainter(),
                       ),
-                    ],
-                  ),
+                    ),
+                    // Panel content
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: child,
+                    ),
+                  ],
                 ),
               ),
             ),

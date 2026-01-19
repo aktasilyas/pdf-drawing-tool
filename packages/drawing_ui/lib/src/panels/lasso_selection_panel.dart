@@ -132,7 +132,7 @@ class _ModeButton extends StatelessWidget {
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.08),
+                    color: Colors.black.withAlpha(20), // 0.08 * 255 ≈ 20
                     blurRadius: 4,
                     offset: const Offset(0, 1),
                   ),
