@@ -1,27 +1,72 @@
 import 'package:drawing_core/drawing_core.dart';
 
-/// Text alignment
+/// Text alignment options.
 enum TextAlignment {
+  /// Align text to the left.
   left,
+
+  /// Center align text.
   center,
+
+  /// Align text to the right.
   right,
 }
 
-/// Text element modeli
+/// Represents a text element in a drawing.
+///
+/// A [TextElement] contains styled text positioned at a specific location.
+/// It supports font styling, alignment, and optional width/height constraints.
+///
+/// Example:
+/// ```dart
+/// final text = TextElement.create(
+///   text: 'Hello World',
+///   x: 100,
+///   y: 200,
+///   fontSize: 24,
+///   color: 0xFF000000,
+///   isBold: true,
+/// );
+/// ```
 class TextElement {
+  /// Unique identifier for the text element.
   final String id;
+
+  /// The text content.
   final String text;
+
+  /// X-coordinate of the text position.
   final double x;
+
+  /// Y-coordinate of the text position.
   final double y;
+
+  /// Font size in logical pixels.
   final double fontSize;
+
+  /// Text color in ARGB32 format.
   final int color;
+
+  /// Font family name.
   final String fontFamily;
+
+  /// Whether the text is bold.
   final bool isBold;
+
+  /// Whether the text is italic.
   final bool isItalic;
+
+  /// Whether the text is underlined.
   final bool isUnderline;
+
+  /// Text alignment.
   final TextAlignment alignment;
-  final double? width; // null = auto width
-  final double? height; // null = auto height
+
+  /// Optional width constraint (null = auto width).
+  final double? width;
+
+  /// Optional height constraint (null = auto height).
+  final double? height;
 
   const TextElement({
     required this.id,
@@ -39,7 +84,9 @@ class TextElement {
     this.height,
   });
 
-  /// Factory - yeni text element oluştur
+  /// Creates a new text element with a generated ID.
+  ///
+  /// Use this factory to create a new text element when the user adds text.
   factory TextElement.create({
     required String text,
     required double x,

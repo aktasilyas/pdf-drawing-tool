@@ -5,27 +5,46 @@ import 'package:drawing_core/src/models/drawing_point.dart';
 import 'package:drawing_core/src/models/shape_type.dart';
 import 'package:drawing_core/src/models/stroke_style.dart';
 
-/// Geometrik şekil modeli
+/// Represents a geometric shape in a drawing.
+///
+/// A [Shape] is defined by two points (start and end) and can be one of several
+/// [ShapeType]s (line, arrow, rectangle, ellipse, etc.).
+///
+/// Shapes can have stroke styling and optional fill.
+///
+/// Example:
+/// ```dart
+/// final shape = Shape.create(
+///   type: ShapeType.rectangle,
+///   startPoint: DrawingPoint(x: 10, y: 10),
+///   endPoint: DrawingPoint(x: 100, y: 100),
+///   style: StrokeStyle.solid(color: Colors.blue, thickness: 2.0),
+///   isFilled: true,
+///   fillColor: Colors.blue.withAlpha(100).value,
+/// );
+/// ```
 class Shape {
-  /// Unique identifier
+  /// Unique identifier for the shape.
   final String id;
 
-  /// Şekil tipi
+  /// The type of this shape (line, rectangle, ellipse, etc).
   final ShapeType type;
 
-  /// Başlangıç noktası
+  /// The starting point of the shape.
   final DrawingPoint startPoint;
 
-  /// Bitiş noktası
+  /// The ending point of the shape.
   final DrawingPoint endPoint;
 
-  /// Çizgi stili
+  /// The stroke style for this shape.
   final StrokeStyle style;
 
-  /// İçi dolu mu?
+  /// Whether the shape should be filled.
   final bool isFilled;
 
-  /// Dolgu rengi (ARGB32 format, null ise style.color kullanılır)
+  /// The fill color in ARGB32 format.
+  ///
+  /// If null, [style.color] is used for fill.
   final int? fillColor;
 
   const Shape({
@@ -38,7 +57,9 @@ class Shape {
     this.fillColor,
   });
 
-  /// Factory - yeni shape oluştur
+  /// Creates a new shape with a generated ID.
+  ///
+  /// Use this factory to create a new shape when the user completes drawing.
   factory Shape.create({
     required ShapeType type,
     required DrawingPoint startPoint,
