@@ -2,6 +2,9 @@
 library;
 
 export 'anchored_panel.dart';
+export 'compact_color_picker.dart';
+export 'color_picker_widgets.dart';
+export 'color_presets.dart';
 export 'color_chip.dart';
 export 'color_chips_grid.dart';
 export 'eraser_cursor_widget.dart';

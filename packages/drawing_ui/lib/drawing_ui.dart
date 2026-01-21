@@ -16,6 +16,7 @@ export 'src/theme/drawing_colors.dart';
 
 // Screens
 export 'src/screens/drawing_screen.dart';
+export 'src/screens/drawing_screen_panels.dart';
 
 // Canvas
 export 'src/canvas/mock_canvas.dart';
@@ -30,6 +31,7 @@ export 'src/toolbar/top_navigation_bar.dart';
 export 'src/toolbar/tool_bar.dart';
 export 'src/toolbar/tool_button.dart';
 export 'src/toolbar/quick_access_row.dart';
+export 'src/toolbar/toolbar_widgets.dart';
 
 // Note: drawing_toolbar.dart and right_action_buttons.dart deprecated
 // Actions moved to TopNavigationBar
@@ -53,8 +55,11 @@ export 'src/panels/laser_pointer_panel.dart';
 
 // Common Widgets
 export 'src/widgets/anchored_panel.dart';
+export 'src/widgets/compact_color_picker.dart';
 export 'src/widgets/color_chip.dart';
 export 'src/widgets/color_chips_grid.dart';
+export 'src/widgets/color_picker_widgets.dart';
+export 'src/widgets/color_presets.dart';
 export 'src/widgets/thickness_slider.dart';
 export 'src/widgets/panel_overlay.dart';
 export 'src/widgets/panel_arrow.dart';

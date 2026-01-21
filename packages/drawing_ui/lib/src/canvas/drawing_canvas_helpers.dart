@@ -8,7 +8,8 @@ abstract class DrawingCanvas {}
 
 /// Helper methods for DrawingCanvas.
 /// These are extracted for better maintainability.
-mixin DrawingCanvasHelpers<T extends ConsumerStatefulWidget> on ConsumerState<T> {
+mixin DrawingCanvasHelpers<T extends ConsumerStatefulWidget>
+    on ConsumerState<T> {
   /// Creates a DrawingPoint from a pointer event.
   /// Transforms screen coordinates to canvas coordinates based on zoom/pan.
   core.DrawingPoint createDrawingPoint(PointerEvent event) {

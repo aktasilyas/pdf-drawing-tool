@@ -5,6 +5,7 @@ import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/toolbar/tool_button.dart';
 import 'package:drawing_ui/src/toolbar/quick_access_row.dart';
+import 'package:drawing_ui/src/toolbar/toolbar_widgets.dart';
 
 /// Tool bar (Row 2) - Drawing tools and quick access.
 ///
@@ -131,7 +132,7 @@ class _ToolBarState extends ConsumerState<ToolBar> {
               const SizedBox(width: 4),
 
               // Undo/Redo section
-              _UndoRedoButtons(
+              ToolbarUndoRedoButtons(
                 canUndo: canUndo,
                 canRedo: canRedo,
                 onUndo: widget.onUndoPressed,
@@ -139,7 +140,7 @@ class _ToolBarState extends ConsumerState<ToolBar> {
               ),
 
               // Divider
-              _VerticalDivider(),
+              const ToolbarVerticalDivider(),
 
               // Tools section (scrollable)
               Expanded(
@@ -221,7 +222,7 @@ class _ToolBarState extends ConsumerState<ToolBar> {
 
               // Quick access (conditionally on larger screens)
               if (showQuickAccess && constraints.maxWidth > 700) ...[
-                _VerticalDivider(),
+                const ToolbarVerticalDivider(),
                 const Flexible(
                   child: Padding(
                     padding: EdgeInsets.symmetric(horizontal: 4),
@@ -315,101 +316,4 @@ class _ToolBarState extends ConsumerState<ToolBar> {
   }
 
   GlobalKey? getToolButtonKey(ToolType tool) => _toolButtonKeys[tool];
-}
-
-/// Undo/Redo button group.
-class _UndoRedoButtons extends StatelessWidget {
-  const _UndoRedoButtons({
-    required this.canUndo,
-    required this.canRedo,
-    this.onUndo,
-    this.onRedo,
-  });
-
-  final bool canUndo;
-  final bool canRedo;
-  final VoidCallback? onUndo;
-  final VoidCallback? onRedo;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _ToolbarIconButton(
-          icon: Icons.undo,
-          tooltip: 'Geri al',
-          enabled: canUndo,
-          onPressed: onUndo,
-        ),
-        const SizedBox(width: 4),
-        _ToolbarIconButton(
-          icon: Icons.redo,
-          tooltip: 'İleri al',
-          enabled: canRedo,
-          onPressed: onRedo,
-        ),
-      ],
-    );
-  }
-}
-
-/// Vertical divider for toolbar sections.
-class _VerticalDivider extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final theme = DrawingTheme.of(context);
-
-    return Container(
-      width: 1,
-      height: 32,
-      margin: const EdgeInsets.symmetric(horizontal: 8),
-      color: theme.panelBorderColor,
-    );
-  }
-}
-
-/// Generic toolbar icon button.
-class _ToolbarIconButton extends StatelessWidget {
-  const _ToolbarIconButton({
-    required this.icon,
-    required this.tooltip,
-    required this.enabled,
-    this.onPressed,
-  });
-
-  final IconData icon;
-  final String tooltip;
-  final bool enabled;
-  final VoidCallback? onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = DrawingTheme.of(context);
-
-    return Tooltip(
-      message: tooltip,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: enabled ? onPressed : null,
-          borderRadius: BorderRadius.circular(8),
-          child: Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(
-              icon,
-              size: 20,
-              color: enabled
-                  ? theme.toolbarIconColor
-                  : theme.toolbarIconColor.withAlpha(100),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }

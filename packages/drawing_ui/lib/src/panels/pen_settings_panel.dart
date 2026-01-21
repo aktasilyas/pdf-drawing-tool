@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
+import 'package:drawing_ui/src/widgets/color_presets.dart';
 import 'package:drawing_ui/src/widgets/unified_color_picker.dart';
 import 'package:drawing_ui/src/widgets/pen_icon_widget.dart';
 import 'package:drawing_ui/src/panels/tool_panel.dart';

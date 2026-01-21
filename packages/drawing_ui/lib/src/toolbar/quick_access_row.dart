@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
+import 'package:drawing_ui/src/widgets/color_presets.dart';
 import 'package:drawing_ui/src/widgets/unified_color_picker.dart';
 
 /// Quick access row for changing color and thickness without opening panels.
