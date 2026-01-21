@@ -4,6 +4,7 @@ import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/widgets/color_presets.dart';
+import 'package:drawing_ui/src/widgets/compact_slider.dart';
 import 'package:drawing_ui/src/widgets/unified_color_picker.dart';
 import 'package:drawing_ui/src/widgets/pen_icon_widget.dart';
 import 'package:drawing_ui/src/panels/tool_panel.dart';
@@ -57,14 +58,14 @@ class PenSettingsPanel extends ConsumerWidget {
           const SizedBox(height: 10),
 
           // Thickness slider (compact) - dynamic range based on tool
-          _CompactSliderSection(
+          CompactSlider(
             title: 'Kalınlık',
             value: settings.thickness.clamp(_getMinThickness(activePenTool),
                 _getMaxThickness(activePenTool)),
             min: _getMinThickness(activePenTool),
             max: _getMaxThickness(activePenTool),
             label: '${settings.thickness.toStringAsFixed(1)}mm',
-            color: settings.color,
+            activeColor: settings.color,
             onChanged: (value) {
               ref
                   .read(penSettingsProvider(activePenTool).notifier)
@@ -74,7 +75,7 @@ class PenSettingsPanel extends ConsumerWidget {
           const SizedBox(height: 8),
 
           // Stabilization slider (compact)
-          _CompactSliderSection(
+          CompactSlider(
             title: 'Sabitleme',
             value: settings.stabilization,
             min: 0.0,
@@ -399,78 +400,7 @@ class _PenSlot extends StatelessWidget {
   }
 }
 
-/// Compact slider section with inline title and value.
-class _CompactSliderSection extends StatelessWidget {
-  const _CompactSliderSection({
-    required this.title,
-    required this.value,
-    required this.min,
-    required this.max,
-    required this.label,
-    required this.onChanged,
-    this.color,
-  });
-
-  final String title;
-  final double value;
-  final double min;
-  final double max;
-  final String label;
-  final ValueChanged<double> onChanged;
-  final Color? color;
-
-  static const _accentColor = Color(0xFF4A9DFF);
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: Colors.grey.shade600,
-              ),
-            ),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF333333),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        SizedBox(
-          height: 18,
-          child: SliderTheme(
-            data: SliderThemeData(
-              trackHeight: 3,
-              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-              overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
-              activeTrackColor: color ?? _accentColor,
-              inactiveTrackColor: Colors.grey.shade200,
-              thumbColor: color ?? _accentColor,
-            ),
-            child: Slider(
-              value: value,
-              min: min,
-              max: max,
-              onChanged: onChanged,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
+// _CompactSliderSection removed - using shared CompactSlider widget
 
 /// Compact color row using unified color system.
 class _CompactColorRow extends StatelessWidget {

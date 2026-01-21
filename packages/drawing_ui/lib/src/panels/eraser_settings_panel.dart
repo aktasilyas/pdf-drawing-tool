@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
 import 'package:drawing_ui/src/providers/providers.dart';
+import 'package:drawing_ui/src/widgets/compact_toggle.dart';
 import 'package:drawing_ui/src/panels/tool_panel.dart';
 
 /// Settings panel for eraser tools.
@@ -51,28 +52,28 @@ class EraserSettingsPanel extends ConsumerWidget {
           const SizedBox(height: 8),
 
           // Options - compact toggles
-          _CompactToggle(
+          CompactToggle(
             label: 'Basınç hassasiyeti',
             value: settings.pressureSensitive,
             onChanged: (value) {
               ref.read(eraserSettingsProvider.notifier).setPressureSensitive(value);
             },
           ),
-          _CompactToggle(
+          CompactToggle(
             label: 'Sadece vurgulayıcı sil',
             value: settings.eraseOnlyHighlighter,
             onChanged: (value) {
               ref.read(eraserSettingsProvider.notifier).setEraseOnlyHighlighter(value);
             },
           ),
-          _CompactToggle(
+          CompactToggle(
             label: 'Sadece bant sil',
             value: settings.eraseBandOnly,
             onChanged: (value) {
               ref.read(eraserSettingsProvider.notifier).setEraseBandOnly(value);
             },
           ),
-          _CompactToggle(
+          CompactToggle(
             label: 'Otomatik kaldır',
             value: settings.autoLift,
             onChanged: (value) {
@@ -198,47 +199,7 @@ class _CompactSizeSlider extends StatelessWidget {
   }
 }
 
-/// Compact toggle row
-class _CompactToggle extends StatelessWidget {
-  const _CompactToggle({
-    required this.label,
-    required this.value,
-    required this.onChanged,
-  });
-
-  final String label;
-  final bool value;
-  final ValueChanged<bool> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              label,
-              style: const TextStyle(
-                fontSize: 11,
-                color: Color(0xFF444444),
-              ),
-            ),
-          ),
-          Transform.scale(
-            scale: 0.65,
-            child: Switch(
-              value: value,
-              onChanged: onChanged,
-              activeColor: const Color(0xFF4A9DFF),
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+// _CompactToggle removed - using shared CompactToggle widget
 
 /// Compact action button
 class _CompactActionButton extends StatelessWidget {

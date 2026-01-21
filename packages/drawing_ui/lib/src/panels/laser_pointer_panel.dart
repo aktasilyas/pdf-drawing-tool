@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/widgets/color_presets.dart';
+import 'package:drawing_ui/src/widgets/compact_slider.dart';
 import 'package:drawing_ui/src/widgets/unified_color_picker.dart';
 import 'package:drawing_ui/src/panels/tool_panel.dart';
 
@@ -38,24 +39,24 @@ class LaserPointerPanel extends ConsumerWidget {
           const SizedBox(height: 14),
 
           // Thickness slider (compact)
-          _CompactSlider(
+          CompactSlider(
             title: 'Kalınlık',
             value: settings.thickness,
-            valueLabel: '${settings.thickness.toStringAsFixed(1)}mm',
+            label: '${settings.thickness.toStringAsFixed(1)}mm',
             min: 0.5,
             max: 5.0,
             onChanged: (value) {
               ref.read(laserSettingsProvider.notifier).setThickness(value);
             },
-            color: settings.color,
+            activeColor: settings.color,
           ),
           const SizedBox(height: 12),
 
           // Duration slider (compact)
-          _CompactSlider(
+          CompactSlider(
             title: 'Süre',
             value: settings.duration,
-            valueLabel: '${settings.duration.toStringAsFixed(1)}s',
+            label: '${settings.duration.toStringAsFixed(1)}s',
             min: 0.5,
             max: 5.0,
             onChanged: (value) {
@@ -77,57 +78,7 @@ class LaserPointerPanel extends ConsumerWidget {
   }
 }
 
-/// Compact slider for laser panel.
-class _CompactSlider extends StatelessWidget {
-  const _CompactSlider({
-    required this.title,
-    required this.value,
-    required this.valueLabel,
-    required this.min,
-    required this.max,
-    required this.onChanged,
-    this.color,
-  });
-
-  final String title;
-  final double value;
-  final String valueLabel;
-  final double min;
-  final double max;
-  final ValueChanged<double> onChanged;
-  final Color? color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(title, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.grey.shade600)),
-            Text(valueLabel, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF333333))),
-          ],
-        ),
-        const SizedBox(height: 4),
-        SizedBox(
-          height: 20,
-          child: SliderTheme(
-            data: SliderThemeData(
-              trackHeight: 3,
-              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-              overlayShape: const RoundSliderOverlayShape(overlayRadius: 10),
-              activeTrackColor: color ?? Colors.red,
-              inactiveTrackColor: Colors.grey.shade200,
-              thumbColor: color ?? Colors.red,
-            ),
-            child: Slider(value: value.clamp(min, max), min: min, max: max, onChanged: onChanged),
-          ),
-        ),
-      ],
-    );
-  }
-}
+// _CompactSlider removed - using shared CompactSlider widget
 
 /// Color section for laser panel.
 class _ColorSection extends StatelessWidget {

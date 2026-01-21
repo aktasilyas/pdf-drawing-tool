@@ -11,17 +11,17 @@
 |-----|-------|
 | **Current Phase** | 4E - Enhancement & Cleanup |
 | **Current Module** | 4E-7 Code Quality & Cleanup - IN PROGRESS |
-| **Current Step** | Step 1/4 - File Size Audit ✅ |
-| **Last Commit** | refactor: split drawing_canvas.dart into maintainable modules |
+| **Current Step** | Step 2/4 - DRY Refactor ✅ |
+| **Last Commit** | refactor(ui): extract common widgets and utilities (DRY) |
 | **Branch** | main |
 
 ---
 
 ## Next Task
 
-**Görev:** Phase 4E-7 ✅ ADIM 1 TAMAMLANDI
+**Görev:** Phase 4E-7 ✅ ADIM 2 TAMAMLANDI
 
-**Sırada:** Phase 4E-7 ADIM 2 - DRY Refactor
+**Sırada:** Phase 4E-7 ADIM 3 - Documentation (Dartdoc)
 
 ---
 
@@ -34,7 +34,7 @@
 4E-4: Color Picker [██████] 6/6 ✅
 4E-5: Toolbar UX   [██████] 5/5 ✅
 4E-6: Performance  [______] 0/5
-4E-7: Code Quality [█_____] 1/4 (File Size Audit complete)
+4E-7: Code Quality [██____] 2/4 (File Size + DRY complete)
 ```
 
 ---
@@ -177,6 +177,30 @@
 - `test/widgets/compact_color_picker_test.dart`
 - `test/widgets/toolbar_widgets_test.dart`
 - `test/screens/drawing_screen_panels_test.dart`
+
+**ADIM 2: DRY Refactor** - COMPLETE ✅
+
+✅ **Common widgets extracted:**
+- `compact_slider.dart` - Shared slider widget for all panels
+- `compact_toggle.dart` - Shared toggle widget for all panels
+- Removed 5+ duplicate private widget classes
+
+✅ **Utility extensions created:**
+- `color_utils.dart` - ColorUtils extension (withAlphaSafe, matchesRGB, rgbInt)
+- `size_utils.dart` - SizeUtils extension (isLandscape, screenWidth/Height, etc)
+
+✅ **Panels updated:**
+- `pen_settings_panel.dart` - Using shared CompactSlider
+- `highlighter_settings_panel.dart` - Using shared CompactSlider & CompactToggle
+- `shapes_settings_panel.dart` - Using shared CompactSlider & CompactToggle
+- `laser_pointer_panel.dart` - Using shared CompactSlider
+- `eraser_settings_panel.dart` - Using shared CompactToggle
+
+🧪 **New tests added:**
+- `test/widgets/compact_slider_test.dart` (3 tests, all passing)
+- `test/widgets/compact_toggle_test.dart` (3 tests, all passing)
+- `test/utils/color_utils_test.dart` (6 tests, all passing)
+- `test/utils/size_utils_test.dart` (4 tests, all passing)
 
 ---
 

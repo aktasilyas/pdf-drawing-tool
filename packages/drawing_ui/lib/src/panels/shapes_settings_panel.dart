@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/widgets/color_presets.dart';
+import 'package:drawing_ui/src/widgets/compact_slider.dart';
+import 'package:drawing_ui/src/widgets/compact_toggle.dart';
 import 'package:drawing_ui/src/widgets/unified_color_picker.dart';
 import 'package:drawing_ui/src/panels/tool_panel.dart';
 
@@ -40,10 +42,10 @@ class ShapesSettingsPanel extends ConsumerWidget {
           const SizedBox(height: 12),
 
           // Stroke thickness - compact
-          _CompactSlider(
-            label: 'Kontur kalınlığı',
+          CompactSlider(
+            title: 'Kontur kalınlığı',
             value: settings.strokeThickness,
-            valueLabel: '${settings.strokeThickness.toStringAsFixed(1)}mm',
+            label: '${settings.strokeThickness.toStringAsFixed(1)}mm',
             min: 0.1,
             max: 10.0,
             onChanged: (value) {
@@ -63,7 +65,7 @@ class ShapesSettingsPanel extends ConsumerWidget {
           const SizedBox(height: 8),
 
           // Fill toggle - compact
-          _CompactToggle(
+          CompactToggle(
             label: 'Şekil dolgusu',
             value: settings.fillEnabled,
             onChanged: (value) {
@@ -123,116 +125,6 @@ class _ColorSection extends StatelessWidget {
           spacing: 6.0,
         ),
       ],
-    );
-  }
-}
-
-/// Compact slider
-class _CompactSlider extends StatelessWidget {
-  const _CompactSlider({
-    required this.label,
-    required this.value,
-    required this.valueLabel,
-    required this.min,
-    required this.max,
-    required this.onChanged,
-  });
-
-  final String label;
-  final double value;
-  final String valueLabel;
-  final double min;
-  final double max;
-  final ValueChanged<double> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF666666),
-              ),
-            ),
-            const Spacer(),
-            Text(
-              valueLabel,
-              style: const TextStyle(
-                fontSize: 11,
-                color: Color(0xFF999999),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 4),
-        SizedBox(
-          height: 24,
-          child: SliderTheme(
-            data: SliderThemeData(
-              trackHeight: 3,
-              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-              overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
-              activeTrackColor: const Color(0xFF4A9DFF),
-              inactiveTrackColor: Colors.grey.shade200,
-              thumbColor: const Color(0xFF4A9DFF),
-            ),
-            child: Slider(
-              value: value.clamp(min, max),
-              min: min,
-              max: max,
-              onChanged: onChanged,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Compact toggle
-class _CompactToggle extends StatelessWidget {
-  const _CompactToggle({
-    required this.label,
-    required this.value,
-    required this.onChanged,
-  });
-
-  final String label;
-  final bool value;
-  final ValueChanged<bool> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              label,
-              style: const TextStyle(
-                fontSize: 12,
-                color: Color(0xFF444444),
-              ),
-            ),
-          ),
-          Transform.scale(
-            scale: 0.7,
-            child: Switch(
-              value: value,
-              onChanged: onChanged,
-              activeColor: const Color(0xFF4A9DFF),
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

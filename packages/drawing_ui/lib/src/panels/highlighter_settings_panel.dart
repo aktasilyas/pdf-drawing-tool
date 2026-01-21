@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/widgets/color_presets.dart';
+import 'package:drawing_ui/src/widgets/compact_slider.dart';
+import 'package:drawing_ui/src/widgets/compact_toggle.dart';
 import 'package:drawing_ui/src/widgets/unified_color_picker.dart';
 import 'package:drawing_ui/src/widgets/pen_icon_widget.dart';
 import 'package:drawing_ui/src/panels/tool_panel.dart';
@@ -47,7 +49,7 @@ class HighlighterSettingsPanel extends ConsumerWidget {
           const SizedBox(height: 8),
 
           // Thickness slider (compact)
-          _CompactSlider(
+          CompactSlider(
             title: 'Kalınlık',
             value: settings.thickness
                 .clamp(isNeon ? 8.0 : 10.0, isNeon ? 30.0 : 40.0),
@@ -55,7 +57,7 @@ class HighlighterSettingsPanel extends ConsumerWidget {
             max: isNeon ? 30.0 : 40.0,
             label:
                 '${settings.thickness.clamp(isNeon ? 8.0 : 10.0, isNeon ? 30.0 : 40.0).toStringAsFixed(0)}mm',
-            color: settings.color,
+            activeColor: settings.color,
             onChanged: (value) {
               ref
                   .read(highlighterSettingsProvider.notifier)
@@ -66,13 +68,13 @@ class HighlighterSettingsPanel extends ConsumerWidget {
 
           // Neon-specific: Glow intensity slider
           if (isNeon) ...[
-            _CompactSlider(
+            CompactSlider(
               title: 'Parlaklık',
               value: settings.glowIntensity,
               min: 0.1,
               max: 1.0,
               label: '${(settings.glowIntensity * 100).round()}%',
-              color: settings.color,
+              activeColor: settings.color,
               onChanged: (value) {
                 ref
                     .read(highlighterSettingsProvider.notifier)
@@ -83,7 +85,7 @@ class HighlighterSettingsPanel extends ConsumerWidget {
           ],
 
           // Straight line toggle (compact)
-          _CompactToggle(
+          CompactToggle(
             label: 'Düz çizgi',
             value: settings.straightLineMode,
             onChanged: (value) {
@@ -320,98 +322,7 @@ class _ThicknessBarPreview extends StatelessWidget {
   }
 }
 
-/// Compact slider.
-class _CompactSlider extends StatelessWidget {
-  const _CompactSlider({
-    required this.title,
-    required this.value,
-    required this.min,
-    required this.max,
-    required this.label,
-    required this.onChanged,
-    this.color,
-  });
-
-  final String title;
-  final double value;
-  final double min;
-  final double max;
-  final String label;
-  final ValueChanged<double> onChanged;
-  final Color? color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(title,
-                style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey.shade600)),
-            Text(label,
-                style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF333333))),
-          ],
-        ),
-        const SizedBox(height: 4),
-        SizedBox(
-          height: 20,
-          child: SliderTheme(
-            data: SliderThemeData(
-              trackHeight: 3,
-              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
-              overlayShape: const RoundSliderOverlayShape(overlayRadius: 10),
-              activeTrackColor: color ?? const Color(0xFF4A9DFF),
-              inactiveTrackColor: Colors.grey.shade200,
-              thumbColor: color ?? const Color(0xFF4A9DFF),
-            ),
-            child:
-                Slider(value: value, min: min, max: max, onChanged: onChanged),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Compact toggle.
-class _CompactToggle extends StatelessWidget {
-  const _CompactToggle({
-    required this.label,
-    required this.value,
-    required this.onChanged,
-  });
-
-  final String label;
-  final bool value;
-  final ValueChanged<bool> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label,
-            style: const TextStyle(fontSize: 12, color: Color(0xFF333333))),
-        Transform.scale(
-          scale: 0.75,
-          child: Switch(
-            value: value,
-            onChanged: onChanged,
-            activeColor: const Color(0xFF4A9DFF),
-          ),
-        ),
-      ],
-    );
-  }
-}
+// Private widgets removed - using shared CompactSlider and CompactToggle
 
 /// Compact highlighter colors using unified color system.
 class _CompactHighlighterColors extends StatelessWidget {

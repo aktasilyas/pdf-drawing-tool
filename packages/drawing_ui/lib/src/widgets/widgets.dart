@@ -3,6 +3,8 @@ library;
 
 export 'anchored_panel.dart';
 export 'compact_color_picker.dart';
+export 'compact_slider.dart';
+export 'compact_toggle.dart';
 export 'color_picker_widgets.dart';
 export 'color_presets.dart';
 export 'color_chip.dart';
