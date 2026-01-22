@@ -15,6 +15,7 @@ export 'page_navigator.dart';
 export 'page_thumbnail.dart';
 export 'panel_arrow.dart';
 export 'panel_overlay.dart';
+export 'pdf_import_dialog.dart';
 export 'pen_icon_widget.dart';
 export 'reorderable_tool_list.dart';
 export 'selection_handles.dart';
