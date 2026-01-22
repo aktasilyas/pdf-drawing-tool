@@ -11,3 +11,4 @@ export 'pdf_to_page_converter.dart';
 export 'preloading_strategy.dart';
 export 'thumbnail_cache.dart';
 export 'thumbnail_generator.dart';
+export 'vector_pdf_renderer.dart';
