@@ -12,6 +12,8 @@ abstract class DocumentLocalDatasource {
   Future<DocumentModel> updateDocument(DocumentModel document);
   Future<void> deleteDocument(String id);
   Stream<List<DocumentModel>> watchDocuments({String? folderId});
+  Future<Map<String, dynamic>?> getDocumentContent(String id);
+  Future<void> saveDocumentContent(String id, Map<String, dynamic> content);
 }
 
 @Injectable(as: DocumentLocalDatasource)
@@ -119,6 +121,31 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
     return _controller.stream.map(
       (documents) => documents.where((doc) => doc.folderId == folderId).toList(),
     );
+  }
+
+  @override
+  Future<Map<String, dynamic>?> getDocumentContent(String id) async {
+    try {
+      final key = 'document_content_$id';
+      final jsonString = _prefs.getString(key);
+      if (jsonString == null) {
+        return null;
+      }
+      return json.decode(jsonString) as Map<String, dynamic>;
+    } catch (e) {
+      throw CacheException('Failed to get document content: $e');
+    }
+  }
+
+  @override
+  Future<void> saveDocumentContent(String id, Map<String, dynamic> content) async {
+    try {
+      final key = 'document_content_$id';
+      final jsonString = json.encode(content);
+      await _prefs.setString(key, jsonString);
+    } catch (e) {
+      throw CacheException('Failed to save document content: $e');
+    }
   }
 
   Future<void> _saveDocuments(List<DocumentModel> documents) async {

@@ -10,13 +10,13 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:example_app/features/editor/editor.dart';
 import 'route_names.dart';
 
 // TODO: Import screens when created
 // import '../../features/auth/presentation/screens/splash_screen.dart';
 // import '../../features/auth/presentation/screens/login_screen.dart';
 // import '../../features/documents/presentation/screens/documents_screen.dart';
-// import '../../features/editor/presentation/screens/editor_screen.dart';
 
 /// Global router configuration
 final appRouter = GoRouter(
@@ -81,7 +81,7 @@ final appRouter = GoRouter(
       name: 'editor',
       builder: (context, state) {
         final documentId = state.pathParameters['documentId']!;
-        return _PlaceholderScreen(title: 'Editor: $documentId');
+        return EditorScreen(documentId: documentId);
       },
     ),
     GoRoute(
