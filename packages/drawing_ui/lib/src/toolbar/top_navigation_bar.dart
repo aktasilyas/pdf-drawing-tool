@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
+import 'package:drawing_ui/src/widgets/pdf_import_dialog.dart';
+import 'package:drawing_ui/src/widgets/pdf_export_dialog.dart';
 
 /// Top navigation bar (Row 1) - Navigation and document actions.
 ///
@@ -91,6 +93,18 @@ class TopNavigationBar extends ConsumerWidget {
                   ref.read(gridVisibilityProvider.notifier).state = !gridVisible;
                 },
               ),
+              if (!isSmallScreen) ...[
+                _NavButton(
+                  icon: Icons.upload_file,
+                  tooltip: 'PDF İçe Aktar',
+                  onPressed: () => _showPDFImportDialog(context, ref),
+                ),
+                _NavButton(
+                  icon: Icons.picture_as_pdf,
+                  tooltip: 'PDF Olarak Dışa Aktar',
+                  onPressed: () => _showPDFExportDialog(context, ref),
+                ),
+              ],
               _NavButton(
                 icon: Icons.more_horiz,
                 tooltip: 'Daha fazla',
@@ -110,6 +124,43 @@ class TopNavigationBar extends ConsumerWidget {
         content: Text('$feature - Yakında eklenecek'),
         duration: const Duration(seconds: 1),
         behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  void _showPDFImportDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (context) => PDFImportDialog(
+        onImportComplete: (result) {
+          if (result.isSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('${result.pageCount} sayfa içe aktarıldı'),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+        },
+      ),
+    );
+  }
+
+  void _showPDFExportDialog(BuildContext context, WidgetRef ref) {
+    final pageCount = ref.read(pageCountProvider);
+
+    showDialog(
+      context: context,
+      builder: (context) => PDFExportDialog(
+        totalPages: pageCount,
+        onExport: (config) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('PDF dışa aktarılıyor...'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        },
       ),
     );
   }

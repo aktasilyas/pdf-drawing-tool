@@ -8,6 +8,7 @@ import 'package:drawing_ui/src/canvas/canvas.dart';
 import 'package:drawing_ui/src/panels/panels.dart';
 import 'package:drawing_ui/src/screens/drawing_screen_panels.dart';
 import 'package:drawing_ui/src/widgets/widgets.dart';
+import 'package:drawing_ui/src/services/thumbnail_cache.dart';
 
 /// The main drawing screen that combines all UI components.
 class DrawingScreen extends ConsumerStatefulWidget {
@@ -38,9 +39,13 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
   // Pen box position (draggable when collapsed)
   Offset _penBoxPosition = const Offset(12, 12);
 
+  // Thumbnail cache for page navigator
+  final ThumbnailCache _thumbnailCache = ThumbnailCache(maxSize: 20);
+
   @override
   void dispose() {
     _panelController.dispose();
+    _thumbnailCache.clear();
     super.dispose();
   }
 
@@ -73,12 +78,15 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
 
               // Canvas area with floating elements
               Expanded(
-                child: Stack(
+                child: Column(
                   children: [
-                    // Full width canvas - Real drawing canvas
-                    const Positioned.fill(
-                      child: DrawingCanvas(),
-                    ),
+                    Expanded(
+                      child: Stack(
+                        children: [
+                          // Full width canvas - Real drawing canvas
+                          const Positioned.fill(
+                            child: DrawingCanvas(),
+                          ),
 
                     // Invisible tap barrier to close panel when tapping canvas
                     // Uses onTap (not onTapDown) so drawing gestures are not affected
@@ -120,6 +128,12 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                         onTap: _openAIPanel,
                       ),
                     ),
+                  ],
+                        ),
+                    ),
+
+                    // Page Navigator (bottom bar)
+                    _buildPageNavigator(),
                   ],
                 ),
               ),
@@ -213,6 +227,45 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
 
   void _closePanel() {
     ref.read(activePanelProvider.notifier).state = null;
+  }
+
+  /// Builds the page navigator widget.
+  Widget _buildPageNavigator() {
+    final pageManager = ref.watch(pageManagerProvider);
+    final pageCount = ref.watch(pageCountProvider);
+
+    // Only show if there are multiple pages
+    if (pageCount <= 1) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      height: 120,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        border: Border(
+          top: BorderSide(
+            color: Theme.of(context).dividerColor,
+          ),
+        ),
+      ),
+      child: PageNavigator(
+        pageManager: pageManager,
+        cache: _thumbnailCache,
+        onPageChanged: (index) {
+          ref.read(pageManagerProvider.notifier).goToPage(index);
+        },
+        onAddPage: () {
+          ref.read(pageManagerProvider.notifier).addPage();
+        },
+        onDeletePage: (index) {
+          ref.read(pageManagerProvider.notifier).deletePage(index);
+        },
+        onDuplicatePage: (index) {
+          ref.read(pageManagerProvider.notifier).duplicatePage(index);
+        },
+      ),
+    );
   }
 }
 
