@@ -91,3 +91,6 @@ export 'src/input/path_smoother.dart';
 
 // Hit Testing
 export 'src/hit_testing/hit_testing.dart';
+
+// Managers
+export 'src/managers/page_manager.dart';
