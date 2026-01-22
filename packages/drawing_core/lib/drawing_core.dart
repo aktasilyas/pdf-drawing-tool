@@ -37,6 +37,7 @@ library drawing_core;
 // Models
 export 'src/models/bounding_box.dart';
 export 'src/models/document.dart';
+export 'src/models/document_settings.dart';
 export 'src/models/drawing_point.dart';
 export 'src/models/layer.dart';
 export 'src/models/page.dart';
