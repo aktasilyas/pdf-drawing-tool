@@ -26,6 +26,9 @@ export 'src/canvas/stroke_painter.dart';
 // Rendering
 export 'src/rendering/flutter_stroke_renderer.dart';
 
+// Services
+export 'src/services/services.dart';
+
 // Toolbar (Two-row layout)
 export 'src/toolbar/top_navigation_bar.dart';
 export 'src/toolbar/tool_bar.dart';
