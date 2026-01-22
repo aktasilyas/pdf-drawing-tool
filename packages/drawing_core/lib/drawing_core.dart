@@ -37,8 +37,12 @@ library drawing_core;
 // Models
 export 'src/models/bounding_box.dart';
 export 'src/models/document.dart';
+export 'src/models/document_settings.dart';
 export 'src/models/drawing_point.dart';
 export 'src/models/layer.dart';
+export 'src/models/page.dart';
+export 'src/models/page_background.dart';
+export 'src/models/page_size.dart';
 export 'src/models/pen_type.dart';
 export 'src/models/selection.dart';
 export 'src/models/shape.dart';
@@ -87,3 +91,6 @@ export 'src/input/path_smoother.dart';
 
 // Hit Testing
 export 'src/hit_testing/hit_testing.dart';
+
+// Managers
+export 'src/managers/page_manager.dart';
