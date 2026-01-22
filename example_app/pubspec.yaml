@@ -22,6 +22,8 @@ dependencies:
   equatable: ^2.0.5
   connectivity_plus: ^5.0.2
   uuid: ^4.2.2
+  supabase_flutter: ^2.3.0
+  google_sign_in: ^6.1.6
 
 dev_dependencies:
   flutter_test:
