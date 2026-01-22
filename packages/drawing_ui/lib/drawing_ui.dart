@@ -29,6 +29,12 @@ export 'src/rendering/flutter_stroke_renderer.dart';
 // Services
 export 'src/services/services.dart';
 
+// Models (PDF)
+export 'src/models/models.dart';
+
+// Widgets (Multi-page & PDF)
+export 'src/widgets/widgets.dart';
+
 // Toolbar (Two-row layout)
 export 'src/toolbar/top_navigation_bar.dart';
 export 'src/toolbar/tool_bar.dart';
@@ -85,3 +91,5 @@ export 'src/providers/history_provider.dart';
 export 'src/providers/tool_style_provider.dart';
 export 'src/providers/toolbar_config_provider.dart';
 export 'src/providers/canvas_transform_provider.dart';
+export 'src/providers/page_provider.dart';
+export 'src/providers/pdf_provider.dart';
