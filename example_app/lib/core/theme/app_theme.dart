@@ -20,6 +20,17 @@ abstract class AppTheme {
           elevation: 0,
           scrolledUnderElevation: 1,
         ),
+<<<<<<< HEAD
+=======
+        cardTheme: CardThemeData(
+          color: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: Colors.grey.shade200),
+          ),
+        ),
+>>>>>>> feature/premium
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: Colors.grey.shade50,
@@ -39,7 +50,8 @@ abstract class AppTheme {
             borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(color: AppColors.error),
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
@@ -100,6 +112,17 @@ abstract class AppTheme {
           elevation: 0,
           scrolledUnderElevation: 1,
         ),
+<<<<<<< HEAD
+=======
+        cardTheme: CardThemeData(
+          color: AppColors.surfaceDark,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+            side: BorderSide(color: Colors.grey.shade800),
+          ),
+        ),
+>>>>>>> feature/premium
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: AppColors.surfaceDark,
@@ -119,7 +142,8 @@ abstract class AppTheme {
             borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(color: AppColors.error),
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
