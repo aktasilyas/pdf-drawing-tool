@@ -25,11 +25,18 @@ dependencies:
   uuid: ^4.2.2
   supabase_flutter: ^2.3.0
   google_sign_in: ^6.1.6
+  drift: ^2.14.0
+  sqlite3_flutter_libs: ^0.5.18
+  path_provider: ^2.1.1
+  path: ^1.8.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
+  drift_dev: ^2.14.0
+  build_runner: ^2.4.7
+  mocktail: ^1.0.0
 
 flutter:
   uses-material-design: true
