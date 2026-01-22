@@ -1,0 +1,15 @@
+import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
+import 'package:example_app/core/core.dart';
+import '../repositories/document_repository.dart';
+
+@injectable
+class MoveDocumentUseCase {
+  final DocumentRepository _repository;
+
+  MoveDocumentUseCase(this._repository);
+
+  Future<Either<Failure, void>> call(String id, String? folderId) {
+    return _repository.moveDocument(id, folderId);
+  }
+}
