@@ -16,6 +16,12 @@ dependencies:
     path: ../packages/drawing_ui
   drawing_core:
     path: ../packages/drawing_core
+  go_router: ^13.0.0
+  get_it: ^7.6.4
+  dartz: ^0.10.1
+  equatable: ^2.0.5
+  connectivity_plus: ^5.0.2
+  uuid: ^4.2.2
 
 dev_dependencies:
   flutter_test:
