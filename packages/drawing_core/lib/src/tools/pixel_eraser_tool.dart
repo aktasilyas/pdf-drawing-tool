@@ -40,12 +40,8 @@ class PixelEraserTool {
   }
   
   void _addErasePoint(double x, double y, double pressure) {
-    final effectiveSize = pressureSensitive 
-        ? size * (0.5 + pressure * 0.5)
-        : size;
-    
-    // effectiveSize is calculated for future use (pressure-based erasing)
-    // Currently tracked but not used in this version
+    // TODO: Implement pressure-based eraser size in future version
+    // effectiveSize = pressureSensitive ? size * (0.5 + pressure * 0.5) : size;
     
     _erasePoints.add(DrawingPoint(
       x: x,

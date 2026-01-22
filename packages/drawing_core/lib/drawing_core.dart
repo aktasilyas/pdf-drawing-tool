@@ -39,6 +39,7 @@ export 'src/models/bounding_box.dart';
 export 'src/models/document.dart';
 export 'src/models/drawing_point.dart';
 export 'src/models/layer.dart';
+export 'src/models/page_size.dart';
 export 'src/models/pen_type.dart';
 export 'src/models/selection.dart';
 export 'src/models/shape.dart';
