@@ -308,21 +308,21 @@ class ExportModeSelector extends StatelessWidget {
           subtitle: const Text('Best quality, smaller file size'),
           value: PDFExportMode.vector,
           groupValue: selectedMode,
-          onChanged: onModeChanged,
+          onChanged: (mode) => mode != null ? onModeChanged(mode) : null,
         ),
         RadioListTile<PDFExportMode>(
           title: const Text('Raster'),
           subtitle: const Text('Image-based, handles complex content'),
           value: PDFExportMode.raster,
           groupValue: selectedMode,
-          onChanged: onModeChanged,
+          onChanged: (mode) => mode != null ? onModeChanged(mode) : null,
         ),
         RadioListTile<PDFExportMode>(
           title: const Text('Hybrid'),
           subtitle: const Text('Balanced approach, automatic fallback'),
           value: PDFExportMode.hybrid,
           groupValue: selectedMode,
-          onChanged: onModeChanged,
+          onChanged: (mode) => mode != null ? onModeChanged(mode) : null,
         ),
       ],
     );
@@ -430,7 +430,7 @@ class FormatSelector extends StatelessWidget {
               child: Text('Legal (${PDFPageFormat.legal.width.toInt()} × ${PDFPageFormat.legal.height.toInt()})'),
             ),
           ],
-          onChanged: onFormatChanged,
+          onChanged: (format) => format != null && onFormatChanged != null ? onFormatChanged!(format) : null,
         ),
       ],
     );

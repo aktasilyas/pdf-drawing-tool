@@ -94,13 +94,13 @@ class RasterExportOptions {
   /// Background color (ARGB).
   final int backgroundColor;
 
-  const RasterExportOptions({
+  RasterExportOptions({
     this.quality = RasterQuality.high,
     this.format = RasterImageFormat.png,
     this.antialiasing = true,
-    this.compression = const CompressionSettings(),
+    CompressionSettings? compression,
     this.backgroundColor = 0xFFFFFFFF,
-  });
+  }) : compression = compression ?? const CompressionSettings();
 
   /// Gets DPI from quality level.
   int get dpi => quality.dpi;

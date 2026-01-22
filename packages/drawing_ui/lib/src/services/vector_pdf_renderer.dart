@@ -48,8 +48,8 @@ class VectorPDFRenderer {
   }
 
   /// Checks if text can be rendered.
-  bool canRenderText(DrawingText text) {
-    return text.content.isNotEmpty;
+  bool canRenderText(TextElement text) {
+    return text.text.isNotEmpty;
   }
 
   /// Checks if a pen style is supported.
@@ -93,43 +93,37 @@ class VectorPDFRenderer {
         return (shape.bounds.width * shape.bounds.height) / 2;
 
       case ShapeType.line:
+      case ShapeType.arrow:
         return 0.0;
+
+      case ShapeType.star:
+      case ShapeType.pentagon:
+      case ShapeType.hexagon:
+      case ShapeType.plus:
+        // Approximate area for complex shapes
+        return shape.bounds.width * shape.bounds.height * 0.7;
     }
   }
 
   /// Estimates text width based on content and font size.
-  double estimateTextWidth(DrawingText text) {
+  double estimateTextWidth(TextElement text) {
     // Rough estimate: ~0.6 * fontSize per character
-    return text.content.length * text.style.fontSize * 0.6;
+    return text.text.length * text.fontSize * 0.6;
   }
 
-  /// Converts StrokeCap to PDF line cap.
-  int convertLineCap(StrokeCap cap) {
-    switch (cap) {
-      case StrokeCap.round:
-        return 1; // Round cap
-      case StrokeCap.square:
-        return 2; // Projecting square cap
-      case StrokeCap.butt:
-        return 0; // Butt cap
-    }
+  /// Gets default PDF line cap (round).
+  int getDefaultLineCap() {
+    return 1; // Round cap
   }
 
-  /// Converts StrokeJoin to PDF line join.
-  int convertLineJoin(StrokeJoin join) {
-    switch (join) {
-      case StrokeJoin.round:
-        return 1; // Round join
-      case StrokeJoin.miter:
-        return 0; // Miter join
-      case StrokeJoin.bevel:
-        return 2; // Bevel join
-    }
+  /// Gets default PDF line join (round).
+  int getDefaultLineJoin() {
+    return 1; // Round join
   }
 
-  /// Converts ARGB color to PDF color with alpha.
+  /// Converts ARGB color to PDF color.
   PdfColor convertColor(int argbColor) {
-    final a = (argbColor >> 24) & 0xFF;
+    // Alpha channel is not used in basic PDF colors
     final r = (argbColor >> 16) & 0xFF;
     final g = (argbColor >> 8) & 0xFF;
     final b = argbColor & 0xFF;
@@ -331,34 +325,37 @@ class VectorPDFRenderer {
     return points;
   }
 
-  /// Gets line cap style based on pen type.
-  StrokeCap getRecommendedLineCap(PenType penType) {
+  /// Gets recommended PDF line cap style based on pen type.
+  /// Returns: 0 = butt, 1 = round, 2 = square
+  int getRecommendedLineCap(PenType penType) {
     switch (penType) {
-      case PenType.ballpoint:
+      case PenType.ballpointPen:
       case PenType.pencil:
-        return StrokeCap.round;
-      case PenType.marker:
+      case PenType.brushPen:
+        return 1; // Round
       case PenType.highlighter:
-        return StrokeCap.square;
-      case PenType.fountain:
-        return StrokeCap.round;
-      case PenType.eraser:
-        return StrokeCap.round;
+      case PenType.dashedPen:
+        return 2; // Square
+      case PenType.gelPen:
+      case PenType.hardPencil:
+        return 1; // Round
     }
   }
 
-  /// Gets line join style based on pen type.
-  StrokeJoin getRecommendedLineJoin(PenType penType) {
+  /// Gets recommended PDF line join style based on pen type.
+  /// Returns: 0 = miter, 1 = round, 2 = bevel
+  int getRecommendedLineJoin(PenType penType) {
     switch (penType) {
-      case PenType.ballpoint:
+      case PenType.ballpointPen:
       case PenType.pencil:
-      case PenType.fountain:
-        return StrokeJoin.round;
-      case PenType.marker:
+      case PenType.gelPen:
+      case PenType.brushPen:
+        return 1; // Round
       case PenType.highlighter:
-        return StrokeJoin.miter;
-      case PenType.eraser:
-        return StrokeJoin.round;
+      case PenType.dashedPen:
+        return 0; // Miter
+      case PenType.hardPencil:
+        return 1; // Round
     }
   }
 }
