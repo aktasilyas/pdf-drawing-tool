@@ -20,14 +20,6 @@ abstract class AppTheme {
           elevation: 0,
           scrolledUnderElevation: 1,
         ),
-        cardTheme: CardTheme(
-          color: Colors.white,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: Colors.grey.shade200),
-          ),
-        ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: Colors.grey.shade50,
@@ -107,14 +99,6 @@ abstract class AppTheme {
           foregroundColor: Colors.white,
           elevation: 0,
           scrolledUnderElevation: 1,
-        ),
-        cardTheme: CardTheme(
-          color: AppColors.surfaceDark,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: BorderSide(color: Colors.grey.shade800),
-          ),
         ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
