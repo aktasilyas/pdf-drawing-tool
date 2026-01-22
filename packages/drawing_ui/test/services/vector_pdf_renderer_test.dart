@@ -32,7 +32,7 @@ void main() {
             DrawingPoint(x: 0, y: 0),
             DrawingPoint(x: 100, y: 100),
           ],
-          style: StrokeStyle.ballpoint(),
+          style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
         );
 
         expect(renderer.canRenderStroke(stroke), true);
@@ -45,7 +45,7 @@ void main() {
             DrawingPoint(x: 0, y: 0, pressure: 0.5),
             DrawingPoint(x: 100, y: 100, pressure: 1.0),
           ],
-          style: StrokeStyle.ballpoint(),
+          style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
         );
 
         expect(renderer.canRenderStroke(stroke), true);
@@ -55,7 +55,7 @@ void main() {
         final stroke = Stroke(
           id: 's1',
           points: [DrawingPoint(x: 0, y: 0)],
-          style: StrokeStyle.ballpoint(),
+          style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
         );
 
         expect(renderer.canRenderStroke(stroke), false);
@@ -65,7 +65,7 @@ void main() {
         final stroke = Stroke(
           id: 's1',
           points: [],
-          style: StrokeStyle.ballpoint(),
+          style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
         );
 
         expect(renderer.canRenderStroke(stroke), false);
@@ -79,7 +79,7 @@ void main() {
             DrawingPoint(x: 100, y: 0),
             DrawingPoint(x: 100, y: 100),
           ],
-          style: StrokeStyle.ballpoint(),
+          style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
         );
 
         final length = renderer.calculateStrokeLength(stroke);
@@ -358,7 +358,7 @@ void main() {
         final stroke = Stroke(
           id: 's1',
           points: List.generate(1000, (i) => DrawingPoint(x: i * 1.0, y: 0)),
-          style: StrokeStyle.ballpoint(),
+          style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
         );
 
         final complexity = renderer.estimateComplexity(stroke);
@@ -369,7 +369,7 @@ void main() {
         final stroke = Stroke(
           id: 's1',
           points: List.generate(10000, (i) => DrawingPoint(x: i * 1.0, y: 0)),
-          style: StrokeStyle.ballpoint(),
+          style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
         );
 
         expect(renderer.shouldOptimize(stroke), true);

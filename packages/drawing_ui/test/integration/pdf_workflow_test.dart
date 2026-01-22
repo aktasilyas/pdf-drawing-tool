@@ -75,7 +75,7 @@ void main() {
               DrawingPoint(x: 0, y: 0),
               DrawingPoint(x: 100, y: 100),
             ],
-            style: StrokeStyle.ballpoint(),
+            style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
           ),
         );
 
@@ -92,7 +92,7 @@ void main() {
           pages: [
             Page.create(index: 0),
             Page.create(index: 1),
-          ],
+          ], createdAt: DateTime.now(), updatedAt: DateTime.now(),
         );
 
         final exportService = PDFExportService();
@@ -156,7 +156,7 @@ void main() {
             DrawingPoint(x: 0, y: 0),
             DrawingPoint(x: 100, y: 100),
           ],
-          style: StrokeStyle.ballpoint(),
+          style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
         );
 
         final complexity = renderer.estimateComplexity(simpleStroke);
@@ -172,7 +172,7 @@ void main() {
             10000,
             (i) => DrawingPoint(x: i.toDouble(), y: 0),
           ),
-          style: StrokeStyle.ballpoint(),
+          style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
         );
 
         expect(renderer.shouldOptimize(complexStroke), true);
@@ -193,7 +193,7 @@ void main() {
                 DrawingPoint(x: 0, y: 0),
                 DrawingPoint(x: 100, y: 100),
               ],
-              style: StrokeStyle.ballpoint(),
+              style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
             ),
           );
         }
@@ -367,7 +367,7 @@ void main() {
                   DrawingPoint(x: 0, y: 0),
                   DrawingPoint(x: 100, y: 100),
                 ],
-                style: StrokeStyle.ballpoint(),
+                style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
               ),
             ),
             Page.create(index: 1),

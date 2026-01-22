@@ -72,7 +72,7 @@ void main() {
             Page.create(index: 0),
             Page.create(index: 1),
             Page.create(index: 2),
-          ],
+          ], createdAt: DateTime.now(), updatedAt: DateTime.now(),
         );
 
         final json = doc.toJson();
@@ -195,7 +195,7 @@ void main() {
         final doc = DrawingDocument.multiPage(
           id: 'd1',
           title: 'Workflow Test',
-          pages: [Page.create(index: 0)],
+          pages: [Page.create(index: 0)], createdAt: DateTime.now(), updatedAt: DateTime.now(),
         );
 
         expect(doc.pages.length, 1);
@@ -213,7 +213,7 @@ void main() {
             DrawingPoint(x: 0, y: 0),
             DrawingPoint(x: 100, y: 100),
           ],
-          style: StrokeStyle.ballpoint(),
+          style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
         );
 
         final updatedPage = newDoc.pages[0].addStroke(stroke);
@@ -259,7 +259,7 @@ void main() {
             DrawingPoint(x: 0, y: 0),
             DrawingPoint(x: 100, y: 100),
           ],
-          style: StrokeStyle.ballpoint(),
+          style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
         );
 
         final page = Page.create(index: 0).addStroke(stroke);

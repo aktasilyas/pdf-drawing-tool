@@ -232,7 +232,7 @@ void main() {
         final doc = DrawingDocument.multiPage(
           id: 'd1',
           title: 'Test Document',
-          pages: [Page.create(index: 0)],
+          pages: [Page.create(index: 0)], createdAt: DateTime.now(), updatedAt: DateTime.now(),
         );
 
         final metadata = service.createMetadata(doc);
@@ -244,7 +244,7 @@ void main() {
         final doc = DrawingDocument.multiPage(
           id: 'd1',
           title: '',
-          pages: [Page.create(index: 0)],
+          pages: [Page.create(index: 0)], createdAt: DateTime.now(), updatedAt: DateTime.now(),
         );
 
         final metadata = service.createMetadata(doc);
@@ -262,7 +262,7 @@ void main() {
               DrawingPoint(x: 0, y: 0),
               DrawingPoint(x: 100, y: 100),
             ],
-            style: StrokeStyle.ballpoint(),
+            style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
           ),
         );
 
@@ -281,7 +281,7 @@ void main() {
                 DrawingPoint(x: 0, y: 0),
                 DrawingPoint(x: 100, y: 100),
               ],
-              style: StrokeStyle.ballpoint(),
+              style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
             ),
           );
         }

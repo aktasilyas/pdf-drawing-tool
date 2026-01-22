@@ -131,7 +131,7 @@ void main() {
               DrawingPoint(x: 0, y: 0),
               DrawingPoint(x: 100, y: 100),
             ],
-            style: StrokeStyle.ballpoint(),
+            style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
           ),
         );
 
