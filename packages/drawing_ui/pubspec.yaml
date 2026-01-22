@@ -21,6 +21,7 @@ dependencies:
       ref: main
   flex_color_picker: ^3.8.0
   pdfx: ^2.6.0  # PDF rendering and import
+  pdf: ^3.10.8  # PDF creation and export
 
 dev_dependencies:
   flutter_test:
