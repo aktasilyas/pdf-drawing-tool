@@ -14,6 +14,8 @@ abstract class DocumentRepository {
     required String title,
     required String templateId,
     String? folderId,
+    String paperColor = 'Sarı kağıt',
+    bool isPortrait = true,
   });
 
   /// Update document metadata

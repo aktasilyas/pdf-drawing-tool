@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:example_app/features/documents/domain/entities/view_mode.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
-import 'package:example_app/features/documents/presentation/constants/documents_strings.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
-import 'package:example_app/features/documents/presentation/widgets/document_grid.dart';
 import 'package:example_app/features/documents/presentation/widgets/sidebar.dart';
+import 'package:example_app/features/documents/presentation/widgets/document_card.dart';
+import 'package:example_app/features/documents/presentation/widgets/documents_header.dart'
+    show DocumentsHeader, SortOption;
 import 'package:example_app/features/documents/presentation/widgets/new_document_dialog.dart';
-import 'package:example_app/features/documents/presentation/widgets/document_context_menu.dart';
 
 class DocumentsScreen extends ConsumerStatefulWidget {
   const DocumentsScreen({super.key});
@@ -18,45 +17,70 @@ class DocumentsScreen extends ConsumerStatefulWidget {
 }
 
 class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
-  SidebarSection _selectedSection = SidebarSection.allDocuments;
-  final TextEditingController _searchController = TextEditingController();
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
+  SidebarSection _selectedSection = SidebarSection.documents;
+  SortOption _sortOption = SortOption.date;
+  bool _isSelectionMode = false;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final viewMode = ref.watch(viewModeProvider);
-    
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Row(
         children: [
           // Sidebar
           Sidebar(
             selectedSection: _selectedSection,
-            onSectionTap: (section) {
-              setState(() {
-                _selectedSection = section;
-              });
+            onSectionChanged: (section) {
+              setState(() => _selectedSection = section);
             },
-            onFolderTap: (folderId) {
-              // TODO: Handle folder tap
-            },
-            onNewFolderPressed: _showNewFolderDialog,
           ),
-          
+
+          // Vertical divider
+          Container(
+            width: 1,
+            color: const Color(0xFFE0E0E0),
+          ),
+
           // Main content
           Expanded(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // App bar
-                _buildAppBar(theme, viewMode),
-                
-                // Documents content
+                // Settings icon (top right)
+                Align(
+                  alignment: Alignment.topRight,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: IconButton(
+                      icon: const Icon(Icons.settings_outlined),
+                      onPressed: () {
+                        // TODO: Open settings
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Ayarlar yakında eklenecek'),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+
+                // Header
+                DocumentsHeader(
+                  title: _getSectionTitle(),
+                  onNewPressed: _showNewDocumentDialog,
+                  sortOption: _sortOption,
+                  onSortChanged: (option) {
+                    setState(() => _sortOption = option);
+                  },
+                  isSelectionMode: _isSelectionMode,
+                  onSelectionToggle: () {
+                    setState(() => _isSelectionMode = !_isSelectionMode);
+                  },
+                ),
+
+                // Content
                 Expanded(
                   child: _buildContent(),
                 ),
@@ -68,301 +92,152 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     );
   }
 
-  Widget _buildAppBar(ThemeData theme, ViewMode viewMode) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        border: Border(
-          bottom: BorderSide(
-            color: theme.dividerColor,
-            width: 1,
-          ),
+  String _getSectionTitle() {
+    switch (_selectedSection) {
+      case SidebarSection.documents:
+        return 'Belgeler';
+      case SidebarSection.favorites:
+        return 'Sık Kullanılanlar';
+      case SidebarSection.shared:
+        return 'Paylaşılan';
+      case SidebarSection.store:
+        return 'Mağaza';
+      case SidebarSection.trash:
+        return 'Çöp';
+    }
+  }
+
+  Widget _buildContent() {
+    switch (_selectedSection) {
+      case SidebarSection.documents:
+        return _buildDocumentGrid(ref.watch(documentsProvider(null)));
+      case SidebarSection.favorites:
+        return _buildDocumentGrid(ref.watch(favoriteDocumentsProvider));
+      case SidebarSection.trash:
+        return _buildDocumentGrid(ref.watch(trashDocumentsProvider));
+      case SidebarSection.shared:
+      case SidebarSection.store:
+        return _buildComingSoon();
+    }
+  }
+
+  Widget _buildDocumentGrid(AsyncValue<List<DocumentInfo>> documentsAsync) {
+    return documentsAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, _) => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: Colors.grey),
+            const SizedBox(height: 16),
+            Text('Hata: $error'),
+          ],
         ),
       ),
-      child: Row(
-        children: [
-          // Title
-          Text(
-            _getSectionTitle(),
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          
-          const SizedBox(width: 16),
-          
-          // Search bar
-          Expanded(
-            child: Container(
-              constraints: const BoxConstraints(maxWidth: 400),
-              child: TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: DocumentsStrings.searchDocuments,
-                  prefixIcon: const Icon(Icons.search, size: 20),
-                  suffixIcon: _searchController.text.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear, size: 20),
-                          onPressed: () {
-                            _searchController.clear();
-                            setState(() {});
-                          },
-                        )
-                      : null,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(24),
-                    borderSide: BorderSide.none,
-                  ),
-                  filled: true,
-                  fillColor: theme.colorScheme.surfaceContainerHighest,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
+      data: (documents) {
+        if (documents.isEmpty) {
+          return _buildEmptyState();
+        }
+
+        // Sort documents
+        final sorted = List<DocumentInfo>.from(documents);
+        switch (_sortOption) {
+          case SortOption.date:
+            sorted.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+            break;
+          case SortOption.name:
+            sorted.sort((a, b) => a.title.compareTo(b.title));
+            break;
+          case SortOption.size:
+            sorted.sort((a, b) => b.pageCount.compareTo(a.pageCount));
+            break;
+        }
+
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            // Responsive card size based on available width
+            final width = constraints.maxWidth;
+            final cardWidth = width < 600 ? 160.0 : 180.0;
+            final spacing = width < 600 ? 16.0 : 24.0;
+            final padding = width < 600 ? 16.0 : 32.0;
+            
+            return Padding(
+              padding: EdgeInsets.symmetric(horizontal: padding),
+              child: GridView.builder(
+                gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                  maxCrossAxisExtent: cardWidth,
+                  childAspectRatio: 0.68, // Slightly shorter for mobile
+                  crossAxisSpacing: spacing,
+                  mainAxisSpacing: spacing,
                 ),
-                onChanged: (value) {
-                  setState(() {});
-                  // Update search query
-                  ref.read(searchQueryProvider.notifier).state = value;
+                itemCount: sorted.length,
+                itemBuilder: (context, index) {
+                  final doc = sorted[index];
+                  return DocumentCard(
+                    document: doc,
+                    onTap: () => context.push('/editor/${doc.id}'),
+                    onFavoriteToggle: () => _toggleFavorite(doc.id),
+                    onMorePressed: () => _showDocumentMenu(doc),
+                  );
                 },
               ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.note_add_outlined,
+            size: 64,
+            color: Colors.grey.shade300,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Henüz belge yok',
+            style: TextStyle(
+              fontSize: 18,
+              color: Colors.grey.shade600,
             ),
           ),
-          
-          const SizedBox(width: 16),
-          
-          // View mode toggle
-          IconButton(
-            icon: Icon(
-              viewMode == ViewMode.grid
-                  ? Icons.view_list
-                  : Icons.grid_view,
+          const SizedBox(height: 8),
+          Text(
+            'Yeni bir belge oluşturmak için "Yeni" butonuna tıklayın',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey.shade400,
             ),
-            onPressed: () {
-              ref.read(viewModeProvider.notifier).state =
-                  viewMode == ViewMode.grid ? ViewMode.list : ViewMode.grid;
-            },
-            tooltip: viewMode == ViewMode.grid
-                ? 'Liste görünümü'
-                : 'Grid görünümü',
-          ),
-          
-          const SizedBox(width: 8),
-          
-          // New document button
-          FilledButton.icon(
-            onPressed: _showNewDocumentDialog,
-            icon: const Icon(Icons.add),
-            label: const Text(DocumentsStrings.newDocument),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildContent() {
-    // If searching, show search results
-    final searchQuery = ref.watch(searchQueryProvider);
-    if (searchQuery.isNotEmpty) {
-      return _buildSearchResults(searchQuery);
-    }
-
-    // Otherwise show section content
-    switch (_selectedSection) {
-      case SidebarSection.allDocuments:
-        return _buildAllDocuments();
-      case SidebarSection.favorites:
-        return _buildFavorites();
-      case SidebarSection.recent:
-        return _buildRecent();
-      case SidebarSection.trash:
-        return _buildTrash();
-    }
-  }
-
-  Widget _buildAllDocuments() {
-    final folderId = ref.watch(currentFolderIdProvider);
-    final documentsAsync = ref.watch(documentsProvider(folderId));
-    
-    return documentsAsync.when(
-      data: (documents) => RefreshIndicator(
-        onRefresh: () async {
-          ref.invalidate(documentsProvider(folderId));
-        },
-        child: DocumentGrid(
-          documents: documents,
-          emptyTitle: DocumentsStrings.noDocuments,
-          emptyDescription: DocumentsStrings.noDocumentsDescription,
-          onDocumentTap: _openDocument,
-          onFavoriteToggle: (document) => _toggleFavorite(document.id),
-          onMorePressed: (document) => _showContextMenu(document),
-        ),
-      ),
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => Center(
-        child: Text(
-          DocumentsStrings.errorLoadingDocuments,
-          style: TextStyle(color: Theme.of(context).colorScheme.error),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFavorites() {
-    final favoritesAsync = ref.watch(favoriteDocumentsProvider);
-    
-    return favoritesAsync.when(
-      data: (documents) => RefreshIndicator(
-        onRefresh: () async {
-          ref.invalidate(favoriteDocumentsProvider);
-        },
-        child: DocumentGrid(
-          documents: documents,
-          emptyTitle: DocumentsStrings.noFavorites,
-          emptyDescription: DocumentsStrings.noFavoritesDescription,
-          onDocumentTap: _openDocument,
-          onFavoriteToggle: (document) => _toggleFavorite(document.id),
-          onMorePressed: (document) => _showContextMenu(document),
-        ),
-      ),
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => Center(
-        child: Text(
-          DocumentsStrings.errorLoadingDocuments,
-          style: TextStyle(color: Theme.of(context).colorScheme.error),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRecent() {
-    final recentAsync = ref.watch(recentDocumentsProvider);
-    
-    return recentAsync.when(
-      data: (documents) => RefreshIndicator(
-        onRefresh: () async {
-          ref.invalidate(recentDocumentsProvider);
-        },
-        child: DocumentGrid(
-          documents: documents,
-          emptyTitle: DocumentsStrings.noRecent,
-          emptyDescription: DocumentsStrings.noRecentDescription,
-          onDocumentTap: _openDocument,
-          onFavoriteToggle: (document) => _toggleFavorite(document.id),
-          onMorePressed: (document) => _showContextMenu(document),
-        ),
-      ),
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => Center(
-        child: Text(
-          DocumentsStrings.errorLoadingDocuments,
-          style: TextStyle(color: Theme.of(context).colorScheme.error),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTrash() {
-    final trashAsync = ref.watch(trashDocumentsProvider);
-    
-    return trashAsync.when(
-      data: (documents) => RefreshIndicator(
-        onRefresh: () async {
-          ref.invalidate(trashDocumentsProvider);
-        },
-        child: DocumentGrid(
-          documents: documents,
-          emptyTitle: DocumentsStrings.noTrash,
-          emptyDescription: DocumentsStrings.noTrashDescription,
-          onDocumentTap: _openDocument,
-          onMorePressed: (document) => _showTrashContextMenu(document),
-        ),
-      ),
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => Center(
-        child: Text(
-          DocumentsStrings.errorLoadingDocuments,
-          style: TextStyle(color: Theme.of(context).colorScheme.error),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSearchResults(String query) {
-    final searchAsync = ref.watch(searchResultsProvider);
-    
-    return searchAsync.when(
-      data: (documents) => DocumentGrid(
-        documents: documents,
-        emptyTitle: DocumentsStrings.noSearchResults,
-        emptyDescription: DocumentsStrings.noSearchResultsDescription,
-        onDocumentTap: _openDocument,
-        onFavoriteToggle: (document) => _toggleFavorite(document.id),
-        onMorePressed: (document) => _showContextMenu(document),
-      ),
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, stack) => Center(
-        child: Text(
-          DocumentsStrings.errorLoadingDocuments,
-          style: TextStyle(color: Theme.of(context).colorScheme.error),
-        ),
-      ),
-    );
-  }
-
-  String _getSectionTitle() {
-    switch (_selectedSection) {
-      case SidebarSection.allDocuments:
-        return DocumentsStrings.myDocuments;
-      case SidebarSection.favorites:
-        return DocumentsStrings.favorites;
-      case SidebarSection.recent:
-        return DocumentsStrings.recent;
-      case SidebarSection.trash:
-        return DocumentsStrings.trash;
-    }
-  }
-
-  void _openDocument(DocumentInfo document) {
-    context.push('/editor/${document.id}');
-  }
-
-  Future<void> _toggleFavorite(String documentId) async {
-    try {
-      await ref
-          .read(documentsControllerProvider.notifier)
-          .toggleFavorite(documentId);
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Hata: $e')),
-        );
-      }
-    }
-  }
-
-  void _showContextMenu(DocumentInfo document) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => DocumentContextMenu(
-        document: document,
-        onRename: () => _renameDocument(document),
-        onMove: () => _moveDocument(document),
-        onToggleFavorite: () => _toggleFavorite(document.id),
-        onMoveToTrash: () => _moveToTrash(document.id),
-      ),
-    );
-  }
-
-  void _showTrashContextMenu(DocumentInfo document) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => DocumentContextMenu(
-        document: document,
-        isInTrash: true,
-        onRestore: () => _restoreFromTrash(document.id),
-        onDeletePermanently: () => _deletePermanently(document.id),
+  Widget _buildComingSoon() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.construction,
+            size: 64,
+            color: Colors.grey.shade300,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Yakında',
+            style: TextStyle(
+              fontSize: 18,
+              color: Colors.grey.shade600,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -371,118 +246,103 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     showNewDocumentSheet(context);
   }
 
-  void _showNewFolderDialog() {
-    // TODO: Implement new folder dialog
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Klasör oluşturma yakında eklenecek')),
+  void _toggleFavorite(String documentId) {
+    ref.read(documentsControllerProvider.notifier).toggleFavorite(documentId);
+  }
+
+  void _showDocumentMenu(DocumentInfo document) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.edit_outlined),
+              title: const Text('Yeniden Adlandır'),
+              onTap: () {
+                Navigator.pop(context);
+                _showRenameDialog(document);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.drive_file_move_outlined),
+              title: const Text('Taşı'),
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Taşıma özelliği yakında eklenecek'),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(
+                document.isFavorite ? Icons.star : Icons.star_outline,
+              ),
+              title: Text(
+                document.isFavorite ? 'Favorilerden Kaldır' : 'Favorilere Ekle',
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                _toggleFavorite(document.id);
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: Icon(Icons.delete_outline, color: Colors.red.shade400),
+              title: Text('Çöpe Taşı', style: TextStyle(color: Colors.red.shade400)),
+              onTap: () {
+                Navigator.pop(context);
+                ref.read(documentsControllerProvider.notifier).moveToTrash(document.id);
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
     );
   }
 
-  void _renameDocument(DocumentInfo document) {
-    // TODO: Implement rename dialog
-    Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Yeniden adlandırma yakında eklenecek')),
-    );
-  }
-
-  void _moveDocument(DocumentInfo document) {
-    // TODO: Implement move dialog
-    Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Taşıma yakında eklenecek')),
-    );
-  }
-
-  Future<void> _moveToTrash(String documentId) async {
-    Navigator.pop(context);
-    
-    try {
-      await ref
-          .read(documentsControllerProvider.notifier)
-          .moveToTrash(documentId);
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Belge çöpe taşındı')),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Hata: $e')),
-        );
-      }
-    }
-  }
-
-  Future<void> _restoreFromTrash(String documentId) async {
-    Navigator.pop(context);
-    
-    try {
-      await ref
-          .read(documentsControllerProvider.notifier)
-          .restoreFromTrash(documentId);
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Belge geri yüklendi')),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Hata: $e')),
-        );
-      }
-    }
-  }
-
-  Future<void> _deletePermanently(String documentId) async {
-    Navigator.pop(context);
-    
-    // Show confirmation dialog
-    final confirm = await showDialog<bool>(
+  void _showRenameDialog(DocumentInfo document) {
+    final controller = TextEditingController(text: document.title);
+    showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Kalıcı Olarak Sil'),
-        content: const Text(
-          'Bu belge kalıcı olarak silinecek ve geri getirilemeyecek. Emin misiniz?',
+        title: const Text('Yeniden Adlandır'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            labelText: 'Belge Adı',
+            border: OutlineInputBorder(),
+          ),
+          autofocus: true,
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text(DocumentsStrings.cancel),
+            onPressed: () => Navigator.pop(context),
+            child: const Text('İptal'),
           ),
           FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-            child: const Text(DocumentsStrings.delete),
+            onPressed: () {
+              final newTitle = controller.text.trim();
+              if (newTitle.isNotEmpty) {
+                ref.read(documentsControllerProvider.notifier).renameDocument(
+                      document.id,
+                      newTitle,
+                    );
+              }
+              Navigator.pop(context);
+            },
+            child: const Text('Kaydet'),
           ),
         ],
       ),
     );
-
-    if (confirm != true) return;
-    
-    try {
-      await ref
-          .read(documentsControllerProvider.notifier)
-          .deleteDocument(documentId);
-      
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Belge kalıcı olarak silindi')),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Hata: $e')),
-        );
-      }
-    }
   }
 }

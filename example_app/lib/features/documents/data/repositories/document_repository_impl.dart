@@ -56,6 +56,8 @@ class DocumentRepositoryImpl implements DocumentRepository {
     required String title,
     required String templateId,
     String? folderId,
+    String paperColor = 'Sarı kağıt',
+    bool isPortrait = true,
   }) async {
     try {
       final now = DateTime.now();
@@ -70,6 +72,8 @@ class DocumentRepositoryImpl implements DocumentRepository {
         isFavorite: false,
         isInTrash: false,
         syncState: SyncState.local.index,
+        paperColor: paperColor,
+        isPortrait: isPortrait,
       );
 
       final created = await _localDatasource.createDocument(document);

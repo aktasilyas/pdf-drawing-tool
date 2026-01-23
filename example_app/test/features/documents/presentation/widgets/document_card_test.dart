@@ -19,6 +19,7 @@ void main() {
         home: Scaffold(
           body: DocumentCard(
             document: document,
+            onTap: () {},
           ),
         ),
       );
@@ -89,6 +90,7 @@ void main() {
           home: Scaffold(
             body: DocumentCard(
               document: testDocument,
+              onTap: () {},
               onFavoriteToggle: () => favoriteToggled = true,
             ),
           ),
@@ -112,6 +114,7 @@ void main() {
           home: Scaffold(
             body: DocumentCard(
               document: testDocument,
+              onTap: () {},
               onMorePressed: () => morePressed = true,
             ),
           ),

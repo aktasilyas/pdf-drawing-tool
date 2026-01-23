@@ -1,128 +1,88 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:example_app/features/documents/presentation/constants/documents_strings.dart';
 
 enum SidebarSection {
-  allDocuments,
+  documents,
   favorites,
-  recent,
+  shared,
+  store,
   trash,
 }
 
 class Sidebar extends ConsumerWidget {
   final SidebarSection selectedSection;
-  final Function(SidebarSection) onSectionTap;
-  final String? selectedFolderId;
-  final Function(String?) onFolderTap;
-  final VoidCallback onNewFolderPressed;
+  final ValueChanged<SidebarSection> onSectionChanged;
 
   const Sidebar({
     super.key,
     required this.selectedSection,
-    required this.onSectionTap,
-    this.selectedFolderId,
-    required this.onFolderTap,
-    required this.onNewFolderPressed,
+    required this.onSectionChanged,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    
     return Container(
-      width: 250,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        border: Border(
-          right: BorderSide(
-            color: theme.dividerColor,
-            width: 1,
-          ),
-        ),
-      ),
+      width: 240,
+      color: const Color(0xFFFAFAFA),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Navigation sections
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              children: [
-                _SidebarItem(
-                  icon: Icons.description_outlined,
-                  title: DocumentsStrings.myDocuments,
-                  isSelected: selectedSection == SidebarSection.allDocuments,
-                  onTap: () => onSectionTap(SidebarSection.allDocuments),
-                ),
-                
-                _SidebarItem(
-                  icon: Icons.favorite_border,
-                  title: DocumentsStrings.favorites,
-                  isSelected: selectedSection == SidebarSection.favorites,
-                  onTap: () => onSectionTap(SidebarSection.favorites),
-                ),
-                
-                _SidebarItem(
-                  icon: Icons.access_time,
-                  title: DocumentsStrings.recent,
-                  isSelected: selectedSection == SidebarSection.recent,
-                  onTap: () => onSectionTap(SidebarSection.recent),
-                ),
-                
-                _SidebarItem(
-                  icon: Icons.delete_outline,
-                  title: DocumentsStrings.trash,
-                  isSelected: selectedSection == SidebarSection.trash,
-                  onTap: () => onSectionTap(SidebarSection.trash),
-                ),
-                
-                const Divider(height: 24),
-                
-                // Folders section header
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                  child: Row(
-                    children: [
-                      Text(
-                        DocumentsStrings.folders,
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      
-                      const Spacer(),
-                      
-                      InkWell(
-                        onTap: onNewFolderPressed,
-                        borderRadius: BorderRadius.circular(16),
-                        child: Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: Icon(
-                            Icons.add,
-                            size: 18,
-                            color: theme.colorScheme.primary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                
-                // TODO: Folder tree will be displayed here
-                // This will be implemented with FolderTree widget
-                const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Center(
-                    child: Text(
-                      'Klasörler yakında eklenecek',
-                      style: TextStyle(fontSize: 12, color: Colors.grey),
-                    ),
-                  ),
-                ),
-              ],
+          // Logo / App name
+          const Padding(
+            padding: EdgeInsets.fromLTRB(24, 32, 24, 32),
+            child: Text(
+              'StarNote',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1A1A1A),
+                letterSpacing: -0.5,
+              ),
             ),
           ),
+
+          // Navigation items
+          _SidebarItem(
+            icon: Icons.folder_outlined,
+            selectedIcon: Icons.folder,
+            label: 'Belgeler',
+            isSelected: selectedSection == SidebarSection.documents,
+            onTap: () => onSectionChanged(SidebarSection.documents),
+          ),
+          _SidebarItem(
+            icon: Icons.star_outline,
+            selectedIcon: Icons.star,
+            label: 'Sık Kullanılanlar',
+            isSelected: selectedSection == SidebarSection.favorites,
+            onTap: () => onSectionChanged(SidebarSection.favorites),
+          ),
+          _SidebarItem(
+            icon: Icons.people_outline,
+            selectedIcon: Icons.people,
+            label: 'Paylaşılan',
+            isSelected: selectedSection == SidebarSection.shared,
+            onTap: () => onSectionChanged(SidebarSection.shared),
+          ),
+          _SidebarItem(
+            icon: Icons.storefront_outlined,
+            selectedIcon: Icons.storefront,
+            label: 'Mağaza',
+            isSelected: selectedSection == SidebarSection.store,
+            onTap: () => onSectionChanged(SidebarSection.store),
+          ),
+
+          const Spacer(),
+
+          // Trash at bottom
+          _SidebarItem(
+            icon: Icons.delete_outline,
+            selectedIcon: Icons.delete,
+            label: 'Çöp',
+            isSelected: selectedSection == SidebarSection.trash,
+            onTap: () => onSectionChanged(SidebarSection.trash),
+          ),
+
+          const SizedBox(height: 24),
         ],
       ),
     );
@@ -131,29 +91,25 @@ class Sidebar extends ConsumerWidget {
 
 class _SidebarItem extends StatelessWidget {
   final IconData icon;
-  final String title;
+  final IconData selectedIcon;
+  final String label;
   final bool isSelected;
   final VoidCallback onTap;
-  final int? count;
 
   const _SidebarItem({
     required this.icon,
-    required this.title,
+    required this.selectedIcon,
+    required this.label,
     required this.isSelected,
     required this.onTap,
-    this.count,
   });
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
       child: Material(
-        color: isSelected
-            ? theme.colorScheme.primaryContainer
-            : Colors.transparent,
+        color: isSelected ? const Color(0xFFE8F4FD) : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
         child: InkWell(
           onTap: onTap,
@@ -163,44 +119,23 @@ class _SidebarItem extends StatelessWidget {
             child: Row(
               children: [
                 Icon(
-                  icon,
+                  isSelected ? selectedIcon : icon,
                   size: 20,
                   color: isSelected
-                      ? theme.colorScheme.onPrimaryContainer
-                      : theme.colorScheme.onSurfaceVariant,
+                      ? const Color(0xFF1976D2)
+                      : const Color(0xFF666666),
                 ),
-                
                 const SizedBox(width: 12),
-                
-                Expanded(
-                  child: Text(
-                    title,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: isSelected
-                          ? theme.colorScheme.onPrimaryContainer
-                          : theme.colorScheme.onSurface,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                    ),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                    color: isSelected
+                        ? const Color(0xFF1976D2)
+                        : const Color(0xFF333333),
                   ),
                 ),
-                
-                if (count != null)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.secondaryContainer,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      count.toString(),
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: theme.colorScheme.onSecondaryContainer,
-                      ),
-                    ),
-                  ),
               ],
             ),
           ),

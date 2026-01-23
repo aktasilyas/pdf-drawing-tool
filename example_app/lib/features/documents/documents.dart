@@ -45,6 +45,7 @@ export 'presentation/screens/documents_screen.dart';
 export 'presentation/widgets/sidebar.dart';
 export 'presentation/widgets/document_card.dart';
 export 'presentation/widgets/document_grid.dart';
+export 'presentation/widgets/documents_header.dart';
 export 'presentation/widgets/new_document_dialog.dart';
 export 'presentation/widgets/document_context_menu.dart';
 export 'presentation/widgets/empty_state.dart';

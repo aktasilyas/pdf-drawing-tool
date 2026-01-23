@@ -14,6 +14,8 @@ class DocumentInfo extends Equatable {
   final bool isFavorite;
   final bool isInTrash;
   final SyncState syncState;
+  final String paperColor;
+  final bool isPortrait;
 
   const DocumentInfo({
     required this.id,
@@ -27,6 +29,8 @@ class DocumentInfo extends Equatable {
     this.isFavorite = false,
     this.isInTrash = false,
     this.syncState = SyncState.local,
+    this.paperColor = 'Sarı kağıt',
+    this.isPortrait = true,
   });
 
   DocumentInfo copyWith({
@@ -41,6 +45,8 @@ class DocumentInfo extends Equatable {
     bool? isFavorite,
     bool? isInTrash,
     SyncState? syncState,
+    String? paperColor,
+    bool? isPortrait,
   }) {
     return DocumentInfo(
       id: id ?? this.id,
@@ -54,6 +60,8 @@ class DocumentInfo extends Equatable {
       isFavorite: isFavorite ?? this.isFavorite,
       isInTrash: isInTrash ?? this.isInTrash,
       syncState: syncState ?? this.syncState,
+      paperColor: paperColor ?? this.paperColor,
+      isPortrait: isPortrait ?? this.isPortrait,
     );
   }
 
@@ -70,5 +78,7 @@ class DocumentInfo extends Equatable {
         isFavorite,
         isInTrash,
         syncState,
+        paperColor,
+        isPortrait,
       ];
 }

@@ -12,6 +12,8 @@ class DocumentModel {
   final bool isFavorite;
   final bool isInTrash;
   final int syncState;
+  final String paperColor;
+  final bool isPortrait;
 
   const DocumentModel({
     required this.id,
@@ -25,6 +27,8 @@ class DocumentModel {
     this.isFavorite = false,
     this.isInTrash = false,
     this.syncState = 0,
+    this.paperColor = 'Sarı kağıt',
+    this.isPortrait = true,
   });
 
   factory DocumentModel.fromJson(Map<String, dynamic> json) {
@@ -40,6 +44,8 @@ class DocumentModel {
       isFavorite: json['is_favorite'] as bool? ?? false,
       isInTrash: json['is_in_trash'] as bool? ?? false,
       syncState: json['sync_state'] as int? ?? 0,
+      paperColor: json['paper_color'] as String? ?? 'Sarı kağıt',
+      isPortrait: json['is_portrait'] as bool? ?? true,
     );
   }
 
@@ -55,6 +61,8 @@ class DocumentModel {
         'is_favorite': isFavorite,
         'is_in_trash': isInTrash,
         'sync_state': syncState,
+        'paper_color': paperColor,
+        'is_portrait': isPortrait,
       };
 
   DocumentInfo toEntity() => DocumentInfo(
@@ -69,6 +77,8 @@ class DocumentModel {
         isFavorite: isFavorite,
         isInTrash: isInTrash,
         syncState: SyncState.values[syncState],
+        paperColor: paperColor,
+        isPortrait: isPortrait,
       );
 
   factory DocumentModel.fromEntity(DocumentInfo entity) => DocumentModel(
@@ -83,6 +93,8 @@ class DocumentModel {
         isFavorite: entity.isFavorite,
         isInTrash: entity.isInTrash,
         syncState: entity.syncState.index,
+        paperColor: entity.paperColor,
+        isPortrait: entity.isPortrait,
       );
 
   DocumentModel copyWith({
@@ -97,6 +109,8 @@ class DocumentModel {
     bool? isFavorite,
     bool? isInTrash,
     int? syncState,
+    String? paperColor,
+    bool? isPortrait,
   }) {
     return DocumentModel(
       id: id ?? this.id,
@@ -110,6 +124,8 @@ class DocumentModel {
       isFavorite: isFavorite ?? this.isFavorite,
       isInTrash: isInTrash ?? this.isInTrash,
       syncState: syncState ?? this.syncState,
+      paperColor: paperColor ?? this.paperColor,
+      isPortrait: isPortrait ?? this.isPortrait,
     );
   }
 }

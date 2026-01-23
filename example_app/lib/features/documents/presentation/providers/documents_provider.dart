@@ -18,11 +18,6 @@ final viewModeProvider = StateProvider<ViewMode>((ref) => ViewMode.grid);
 // Search query
 final searchQueryProvider = StateProvider<String>((ref) => '');
 
-// Sort option
-final sortOptionProvider = StateProvider<SortOption>((ref) => SortOption.updatedAt);
-
-enum SortOption { title, createdAt, updatedAt }
-
 // Documents list
 final documentsProvider = FutureProvider.family<List<DocumentInfo>, String?>((ref, folderId) async {
   final repository = ref.watch(documentRepositoryProvider);
@@ -87,12 +82,16 @@ class DocumentsController extends StateNotifier<AsyncValue<void>> {
     required String title,
     required String templateId,
     String? folderId,
+    String paperColor = 'Sarı kağıt',
+    bool isPortrait = true,
   }) async {
     state = const AsyncValue.loading();
     final result = await _repository.createDocument(
       title: title,
       templateId: templateId,
       folderId: folderId,
+      paperColor: paperColor,
+      isPortrait: isPortrait,
     );
     return result.fold(
       (failure) {

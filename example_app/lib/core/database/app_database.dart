@@ -50,6 +50,13 @@ class Documents extends Table {
   /// Document content (serialized drawing data)
   BlobColumn get content => blob().nullable()();
 
+  /// Paper color: 'Beyaz kağıt', 'Sarı kağıt', 'Gri kağıt'
+  TextColumn get paperColor =>
+      text().withDefault(const Constant('Sarı kağıt'))();
+
+  /// Orientation: true=portrait, false=landscape
+  BoolColumn get isPortrait => boolean().withDefault(const Constant(true))();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -122,7 +129,27 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration {
+    return MigrationStrategy(
+      onCreate: (Migrator m) async {
+        await m.createAll();
+      },
+      onUpgrade: (Migrator m, int from, int to) async {
+        if (from < 2) {
+          // Add paperColor and isPortrait columns with SQL
+          await customStatement(
+            'ALTER TABLE documents ADD COLUMN paper_color TEXT NOT NULL DEFAULT "Sarı kağıt"',
+          );
+          await customStatement(
+            'ALTER TABLE documents ADD COLUMN is_portrait INTEGER NOT NULL DEFAULT 1',
+          );
+        }
+      },
+    );
+  }
 
   /// Opens platform-specific database connection
   static QueryExecutor _openConnection() {

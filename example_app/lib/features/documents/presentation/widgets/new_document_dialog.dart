@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:example_app/features/documents/domain/entities/template.dart';
-import 'package:example_app/features/documents/presentation/constants/documents_strings.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 
 /// Shows the new document bottom sheet
@@ -10,9 +9,7 @@ void showNewDocumentSheet(BuildContext context) {
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    ),
+    backgroundColor: Colors.transparent,
     builder: (context) => const NewDocumentSheet(),
   );
 }
@@ -25,8 +22,10 @@ class NewDocumentSheet extends ConsumerStatefulWidget {
 }
 
 class _NewDocumentSheetState extends ConsumerState<NewDocumentSheet> {
-  final _titleController = TextEditingController();
+  final _titleController = TextEditingController(text: 'Adsız Not Defteri');
   Template _selectedTemplate = Template.all.first;
+  String _paperColor = 'Sarı kağıt';
+  bool _isPortrait = true;
   bool _isCreating = false;
 
   @override
@@ -37,109 +36,298 @@ class _NewDocumentSheetState extends ConsumerState<NewDocumentSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final screenHeight = MediaQuery.of(context).size.height;
-    
-    return Container(
-      height: screenHeight * 0.6, // 60% of screen height
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return DraggableScrollableSheet(
+      initialChildSize: 0.85,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
+      builder: (context, scrollController) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
             children: [
-              Text(
-                DocumentsStrings.createNewDocument,
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
+              // Drag handle
+              Container(
+                margin: const EdgeInsets.only(top: 8),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-              IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.close),
+
+              // Content
+              Expanded(
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Header with title and settings
+                        _buildHeader(),
+
+                        const SizedBox(height: 24),
+
+                        // Template sections
+                        _buildTemplateSection(
+                          'Temel',
+                          Template.all.where((t) =>
+                              t.type == TemplateType.blank ||
+                              t.type == TemplateType.thinLined ||
+                              t.type == TemplateType.thickLined ||
+                              t.type == TemplateType.dotted ||
+                              t.type == TemplateType.smallGrid ||
+                              t.type == TemplateType.largeGrid).toList(),
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        _buildTemplateSection(
+                          'Yazım Kağıtları',
+                          Template.all.where((t) => t.type == TemplateType.cornell).toList(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              // Bottom action bar
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  border: Border(
+                    top: BorderSide(color: Colors.grey.shade200),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: _isCreating ? null : () => Navigator.pop(context),
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      ),
+                      child: const Text('İptal'),
+                    ),
+                    const SizedBox(width: 12),
+                    FilledButton(
+                      onPressed: _isCreating ? null : _createDocument,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFF1976D2),
+                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                      ),
+                      child: _isCreating
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text('Not Defteri Oluştur'),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
-          
-          const SizedBox(height: 16),
-          
-          // Document title
-          TextField(
-            controller: _titleController,
-            decoration: const InputDecoration(
-              labelText: DocumentsStrings.documentTitle,
-              hintText: 'Başlıksız Belge',
-              border: OutlineInputBorder(),
-              prefixIcon: Icon(Icons.edit_outlined),
+        );
+      },
+    );
+  }
+
+  Widget _buildHeader() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Title input
+        const Text(
+          'Başlık',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF666666),
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextField(
+          controller: _titleController,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
+          decoration: InputDecoration(
+            hintText: 'Adsız Not Defteri',
+            filled: true,
+            fillColor: const Color(0xFFF5F5F5),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide.none,
             ),
-            autofocus: true,
-          ),
-          
-          const SizedBox(height: 24),
-          
-          // Template selection header
-          Text(
-            DocumentsStrings.selectTemplate,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(color: Colors.grey.shade300),
             ),
-          ),
-          
-          const SizedBox(height: 12),
-          
-          // Template grid - expanded
-          Expanded(
-            child: GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-                childAspectRatio: 0.75,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-              ),
-              itemCount: Template.all.length,
-              itemBuilder: (context, index) {
-                final template = Template.all[index];
-                return _TemplateCard(
-                  template: template,
-                  isSelected: template.id == _selectedTemplate.id,
-                  onTap: () {
-                    setState(() {
-                      _selectedTemplate = template;
-                    });
-                  },
-                );
-              },
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
             ),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
-          
-          const SizedBox(height: 16),
-          
-          // Action buttons
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              TextButton(
-                onPressed: _isCreating ? null : () => Navigator.pop(context),
-                child: const Text(DocumentsStrings.cancel),
+        ),
+
+        const SizedBox(height: 16),
+
+        // Quick options row
+        Row(
+          children: [
+            // Paper color dropdown
+            Expanded(
+              child: _buildDropdownButton(
+                value: _paperColor,
+                items: ['Beyaz kağıt', 'Sarı kağıt', 'Gri kağıt'],
+                onChanged: (value) {
+                  setState(() {
+                    _paperColor = value!;
+                  });
+                },
               ),
-              const SizedBox(width: 12),
-              FilledButton.icon(
-                onPressed: _isCreating ? null : _createDocument,
-                icon: _isCreating
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.add),
-                label: const Text(DocumentsStrings.create),
+            ),
+            const SizedBox(width: 12),
+            // Orientation toggle
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade300),
+                borderRadius: BorderRadius.circular(8),
               ),
-            ],
-          ),
-        ],
+              child: Row(
+                children: [
+                  _buildOrientationButton(Icons.phone_android, true),
+                  Container(width: 1, height: 24, color: Colors.grey.shade300),
+                  _buildOrientationButton(Icons.stay_current_landscape, false),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDropdownButton({
+    required String value,
+    required List<String> items,
+    required ValueChanged<String?> onChanged,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(8),
+        color: Colors.white,
       ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: value,
+          isExpanded: true,
+          icon: const Icon(Icons.keyboard_arrow_down, size: 20),
+          items: items.map((item) {
+            return DropdownMenuItem(
+              value: item,
+              child: Text(
+                item,
+                style: const TextStyle(fontSize: 14),
+              ),
+            );
+          }).toList(),
+          onChanged: onChanged,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOrientationButton(IconData icon, bool isPortraitBtn) {
+    final isSelected = _isPortrait == isPortraitBtn;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          setState(() {
+            _isPortrait = isPortraitBtn;
+          });
+        },
+        borderRadius: BorderRadius.circular(7),
+        child: Container(
+          padding: const EdgeInsets.all(8),
+          child: Icon(
+            icon,
+            size: 20,
+            color: isSelected ? const Color(0xFF1976D2) : Colors.grey.shade600,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTemplateSection(String title, List<Template> templates) {
+    if (templates.isEmpty) return const SizedBox.shrink();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.expand_more, size: 20),
+            const SizedBox(width: 4),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF333333),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final width = constraints.maxWidth;
+            final cardWidth = (width - 48) / 5; // 5 cards per row with spacing
+            final cardHeight = cardWidth * 1.3;
+
+            return Wrap(
+              spacing: 12,
+              runSpacing: 16,
+              children: templates.map((template) {
+                return SizedBox(
+                  width: cardWidth,
+                  child: _TemplateCard(
+                    template: template,
+                    isSelected: template.id == _selectedTemplate.id,
+                    paperColor: _paperColor,
+                    isPortrait: _isPortrait,
+                    onTap: () {
+                      setState(() {
+                        _selectedTemplate = template;
+                      });
+                    },
+                    height: cardHeight,
+                  ),
+                );
+              }).toList(),
+            );
+          },
+        ),
+      ],
     );
   }
 
@@ -150,22 +338,33 @@ class _NewDocumentSheetState extends ConsumerState<NewDocumentSheet> {
 
     try {
       final title = _titleController.text.trim().isEmpty
-          ? 'Başlıksız Belge'
+          ? 'Adsız Not Defteri'
           : _titleController.text.trim();
 
       final folderId = ref.read(currentFolderIdProvider);
-      
+
+      // Log selections for debugging
+      debugPrint('📝 Creating document:');
+      debugPrint('  Title: $title');
+      debugPrint('  Template: ${_selectedTemplate.name}');
+      debugPrint('  Paper Color: $_paperColor');
+      debugPrint('  Orientation: ${_isPortrait ? "Portrait" : "Landscape"}');
+
       await ref.read(documentsControllerProvider.notifier).createDocument(
             title: title,
             templateId: _selectedTemplate.id,
             folderId: folderId,
+            paperColor: _paperColor,
+            isPortrait: _isPortrait,
           );
 
       if (mounted) {
         Navigator.pop(context);
+        
+        final orientation = _isPortrait ? 'Dikey' : 'Yatay';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Belge oluşturuldu: $title'),
+            content: Text('$title oluşturuldu ($_paperColor, $orientation)'),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -176,6 +375,7 @@ class _NewDocumentSheetState extends ConsumerState<NewDocumentSheet> {
           SnackBar(
             content: Text('Hata: $e'),
             backgroundColor: Theme.of(context).colorScheme.error,
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
@@ -194,97 +394,95 @@ class _TemplateCard extends StatelessWidget {
   final Template template;
   final bool isSelected;
   final VoidCallback onTap;
+  final double height;
+  final String paperColor;
+  final bool isPortrait;
 
   const _TemplateCard({
     required this.template,
     required this.isSelected,
     required this.onTap,
+    required this.height,
+    required this.paperColor,
+    required this.isPortrait,
   });
+
+  Color get _getPaperColor {
+    switch (paperColor) {
+      case 'Beyaz kağıt':
+        return const Color(0xFFFFFFFF);
+      case 'Sarı kağıt':
+        return const Color(0xFFFFFDE7);
+      case 'Gri kağıt':
+        return const Color(0xFFF5F5F5);
+      default:
+        return const Color(0xFFFFFDE7);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    
-    return InkWell(
+    return GestureDetector(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: isSelected
-                ? theme.colorScheme.primary
-                : theme.dividerColor,
-            width: isSelected ? 3 : 1,
-          ),
-          borderRadius: BorderRadius.circular(12),
-          color: isSelected 
-              ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3)
-              : null,
-        ),
-        child: Column(
-          children: [
-            // Template preview
-            Expanded(
-              child: Container(
-                margin: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: theme.dividerColor),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(5),
-                  child: CustomPaint(
-                    painter: _TemplatePreviewPainter(template.type),
-                    size: Size.infinite,
-                  ),
-                ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Template preview
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            height: height * 0.75,
+            decoration: BoxDecoration(
+              color: _getPaperColor,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: isSelected ? const Color(0xFF1976D2) : const Color(0xFFE0E0E0),
+                width: isSelected ? 3 : 1,
               ),
-            ),
-            
-            // Template name
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? theme.colorScheme.primaryContainer
-                    : theme.colorScheme.surfaceContainerHighest,
-                borderRadius: const BorderRadius.vertical(
-                  bottom: Radius.circular(11),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Flexible(
-                    child: Text(
-                      template.name,
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                        color: isSelected
-                            ? theme.colorScheme.onPrimaryContainer
-                            : null,
+              boxShadow: isSelected
+                  ? [
+                      BoxShadow(
+                        color: const Color(0xFF1976D2).withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
                       ),
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  if (template.isPremium) ...[
-                    const SizedBox(width: 4),
-                    Icon(
-                      Icons.workspace_premium,
-                      size: 14,
-                      color: Colors.amber.shade700,
-                    ),
-                  ],
-                ],
+                    ]
+                  : null,
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(7),
+              child: CustomPaint(
+                painter: _TemplatePreviewPainter(template.type),
+                size: Size.infinite,
               ),
             ),
-          ],
-        ),
+          ),
+
+          const SizedBox(height: 6),
+
+          // Template name
+          Text(
+            template.name,
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+              color: isSelected ? const Color(0xFF1976D2) : const Color(0xFF666666),
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+
+          // Premium badge if needed
+          if (template.isPremium)
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Icon(
+                Icons.workspace_premium,
+                size: 12,
+                color: Colors.amber.shade700,
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -306,116 +504,105 @@ class _TemplatePreviewPainter extends CustomPainter {
       case TemplateType.blank:
         // Just white background, no lines
         break;
-        
+
       case TemplateType.thinLined:
         // Thin horizontal lines
-        final spacing = size.height / 12;
+        final spacing = size.height / 15;
+        paint.color = Colors.grey.shade300;
         for (var y = spacing; y < size.height; y += spacing) {
           canvas.drawLine(
-            Offset(0, y),
-            Offset(size.width, y),
+            Offset(4, y),
+            Offset(size.width - 4, y),
             paint..strokeWidth = 0.5,
           );
         }
         break;
-        
+
       case TemplateType.thickLined:
         // Thick horizontal lines
-        final spacing = size.height / 8;
+        final spacing = size.height / 10;
+        paint.color = Colors.grey.shade300;
         for (var y = spacing; y < size.height; y += spacing) {
           canvas.drawLine(
-            Offset(0, y),
-            Offset(size.width, y),
-            paint..strokeWidth = 1.5,
+            Offset(4, y),
+            Offset(size.width - 4, y),
+            paint..strokeWidth = 1.2,
           );
         }
         break;
-        
+
       case TemplateType.smallGrid:
         // Small grid
-        final spacing = size.width / 10;
+        final spacing = size.width / 12;
+        paint.color = Colors.grey.shade300;
+        paint.strokeWidth = 0.4;
         // Vertical lines
         for (var x = spacing; x < size.width; x += spacing) {
-          canvas.drawLine(
-            Offset(x, 0),
-            Offset(x, size.height),
-            paint..strokeWidth = 0.5,
-          );
+          canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
         }
         // Horizontal lines
         for (var y = spacing; y < size.height; y += spacing) {
-          canvas.drawLine(
-            Offset(0, y),
-            Offset(size.width, y),
-            paint..strokeWidth = 0.5,
-          );
+          canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
         }
         break;
-        
+
       case TemplateType.largeGrid:
         // Large grid
-        final spacing = size.width / 5;
+        final spacing = size.width / 6;
+        paint.color = Colors.grey.shade300;
+        paint.strokeWidth = 0.8;
         // Vertical lines
         for (var x = spacing; x < size.width; x += spacing) {
-          canvas.drawLine(
-            Offset(x, 0),
-            Offset(x, size.height),
-            paint..strokeWidth = 1,
-          );
+          canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
         }
         // Horizontal lines
         for (var y = spacing; y < size.height; y += spacing) {
-          canvas.drawLine(
-            Offset(0, y),
-            Offset(size.width, y),
-            paint..strokeWidth = 1,
-          );
+          canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
         }
         break;
-        
+
       case TemplateType.dotted:
         // Dots
-        final spacing = size.width / 8;
-        paint.strokeCap = StrokeCap.round;
+        final spacing = size.width / 10;
+        paint.color = Colors.grey.shade400;
+        paint.style = PaintingStyle.fill;
         for (var x = spacing; x < size.width; x += spacing) {
           for (var y = spacing; y < size.height; y += spacing) {
-            canvas.drawCircle(
-              Offset(x, y),
-              1.5,
-              paint..style = PaintingStyle.fill,
-            );
+            canvas.drawCircle(Offset(x, y), 1.2, paint);
           }
         }
         break;
-        
+
       case TemplateType.cornell:
         // Cornell note template
         paint.strokeWidth = 1;
-        
+        paint.color = Colors.red.shade300;
+
         // Left margin line (for cue column)
-        final leftMargin = size.width * 0.25;
+        final leftMargin = size.width * 0.28;
         canvas.drawLine(
-          Offset(leftMargin, 0),
-          Offset(leftMargin, size.height * 0.8),
-          paint..color = Colors.red.shade300,
+          Offset(leftMargin, 4),
+          Offset(leftMargin, size.height * 0.75),
+          paint,
         );
-        
+
         // Bottom section line (for summary)
-        final bottomLine = size.height * 0.8;
+        final bottomLine = size.height * 0.75;
         canvas.drawLine(
-          Offset(0, bottomLine),
-          Offset(size.width, bottomLine),
-          paint..color = Colors.red.shade300,
+          Offset(4, bottomLine),
+          Offset(size.width - 4, bottomLine),
+          paint,
         );
-        
+
         // Horizontal lines in main area
         paint.color = Colors.grey.shade300;
-        final lineSpacing = size.height / 10;
+        paint.strokeWidth = 0.5;
+        final lineSpacing = size.height / 12;
         for (var y = lineSpacing; y < bottomLine; y += lineSpacing) {
           canvas.drawLine(
             Offset(leftMargin + 4, y),
-            Offset(size.width, y),
-            paint..strokeWidth = 0.5,
+            Offset(size.width - 4, y),
+            paint,
           );
         }
         break;
