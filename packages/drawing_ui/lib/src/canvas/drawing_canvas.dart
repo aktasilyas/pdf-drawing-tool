@@ -49,17 +49,14 @@ class DrawingCanvas extends ConsumerStatefulWidget {
   final double width;
 
   /// Height of the canvas. Defaults to fill available space.
-  final double height;
-
-  /// Canvas mode configuration (determines behavior)
-  final core.CanvasMode? canvasMode;
 
   const DrawingCanvas({
     super.key,
     this.width = double.infinity,
     this.height = double.infinity,
-    this.canvasMode,
   });
+
+  final double height;
 
   @override
   ConsumerState<DrawingCanvas> createState() => DrawingCanvasState();
@@ -251,9 +248,6 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
   set lastScale(double? value) => _lastScale = value;
   @override
   Widget build(BuildContext context) {
-    // Get canvas mode (defaults to infinite whiteboard)
-    final canvasMode = widget.canvasMode ?? const core.CanvasMode(isInfinite: true);
-    
     // Watch providers
     final strokes = ref.watch(activeLayerStrokesProvider);
     final shapes = ref.watch(activeLayerShapesProvider);
@@ -332,34 +326,6 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                       alignment: Alignment.topLeft,
                       child: Stack(
                         children: [
-                          // ─────────────────────────────────────────────────────────
-                          // LAYER 0: Page Boundary (only for limited canvas)
-                          // ─────────────────────────────────────────────────────────
-                          // Shows page border and shadow for notebook/quicknote modes
-                          if (!canvasMode.isInfinite && canvasMode.pageBorderWidth > 0)
-                            Positioned.fill(
-                              child: IgnorePointer(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    border: Border.all(
-                                      color: Color(canvasMode.pageBorderColor),
-                                      width: canvasMode.pageBorderWidth,
-                                    ),
-                                    boxShadow: canvasMode.showPageShadow
-                                        ? [
-                                            BoxShadow(
-                                              color: Colors.black.withOpacity(0.15),
-                                              blurRadius: 16,
-                                              spreadRadius: 2,
-                                              offset: const Offset(0, 4),
-                                            ),
-                                          ]
-                                        : null,
-                                  ),
-                                ),
-                              ),
-                            ),
-
                           // ─────────────────────────────────────────────────────────
                           // LAYER 1: Committed Strokes (from DocumentProvider)
                           // ─────────────────────────────────────────────────────────

@@ -1,5 +1,4 @@
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
-import 'package:drawing_core/drawing_core.dart';
 
 class DocumentModel {
   final String id;
@@ -15,7 +14,6 @@ class DocumentModel {
   final int syncState;
   final String paperColor;
   final bool isPortrait;
-  final String documentType;
 
   const DocumentModel({
     required this.id,
@@ -31,7 +29,6 @@ class DocumentModel {
     this.syncState = 0,
     this.paperColor = 'Sarı kağıt',
     this.isPortrait = true,
-    this.documentType = 'notebook',
   });
 
   factory DocumentModel.fromJson(Map<String, dynamic> json) {
@@ -49,7 +46,6 @@ class DocumentModel {
       syncState: json['sync_state'] as int? ?? 0,
       paperColor: json['paper_color'] as String? ?? 'Sarı kağıt',
       isPortrait: json['is_portrait'] as bool? ?? true,
-      documentType: json['document_type'] as String? ?? 'notebook',
     );
   }
 
@@ -67,7 +63,6 @@ class DocumentModel {
         'sync_state': syncState,
         'paper_color': paperColor,
         'is_portrait': isPortrait,
-        'document_type': documentType,
       };
 
   DocumentInfo toEntity() => DocumentInfo(
@@ -84,10 +79,6 @@ class DocumentModel {
         syncState: SyncState.values[syncState],
         paperColor: paperColor,
         isPortrait: isPortrait,
-        documentType: DocumentType.values.firstWhere(
-          (t) => t.name == documentType,
-          orElse: () => DocumentType.notebook,
-        ),
       );
 
   factory DocumentModel.fromEntity(DocumentInfo entity) => DocumentModel(
@@ -104,7 +95,6 @@ class DocumentModel {
         syncState: entity.syncState.index,
         paperColor: entity.paperColor,
         isPortrait: entity.isPortrait,
-        documentType: entity.documentType.name,
       );
 
   DocumentModel copyWith({
@@ -121,7 +111,6 @@ class DocumentModel {
     int? syncState,
     String? paperColor,
     bool? isPortrait,
-    String? documentType,
   }) {
     return DocumentModel(
       id: id ?? this.id,
@@ -137,7 +126,6 @@ class DocumentModel {
       syncState: syncState ?? this.syncState,
       paperColor: paperColor ?? this.paperColor,
       isPortrait: isPortrait ?? this.isPortrait,
-      documentType: documentType ?? this.documentType,
     );
   }
 }

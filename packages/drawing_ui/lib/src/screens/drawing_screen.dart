@@ -75,22 +75,15 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
       _handlePanelChange(next);
     });
 
-    // Get document, canvas mode, and transform
-    final document = ref.watch(documentProvider);
-    // Get canvas mode from document (defaults to whiteboard if undefined)
-    final canvasMode = document.canvasMode;
+    // Get canvas background color and transform for infinite background
     final currentPage = ref.watch(currentPageProvider);
+    final bgColor = currentPage.background.color;
     final transform = ref.watch(canvasTransformProvider);
-    
-    // Background color based on canvas mode
-    final backgroundColor = canvasMode.isInfinite
-        ? Color(currentPage.background.color)  // Infinite: same as page color
-        : Color(canvasMode.surroundingAreaColor); // Limited: surrounding area color
 
     return DrawingThemeProvider(
       theme: const DrawingTheme(),
       child: Scaffold(
-        backgroundColor: backgroundColor,
+        backgroundColor: Color(bgColor),
         body: SafeArea(
           child: Column(
             children: [
@@ -119,26 +112,25 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                     Expanded(
                       child: Stack(
                         children: [
-                          // LAYER 0: Infinite Background (sadece infinite canvas modunda)
+                          // LAYER 0: Infinite Background (zoom ile ölçeklenir, tüm ekranı kaplar)
                           // Pattern zoom seviyesiyle birlikte küçülür/büyür
                           // Sayfa dışında da devam eder (sonsuz kağıt efekti)
-                          if (canvasMode.isInfinite)
-                            Positioned.fill(
-                              child: RepaintBoundary(
-                                child: CustomPaint(
-                                  painter: InfiniteBackgroundPainter(
-                                    background: currentPage.background,
-                                    zoom: transform.zoom,
-                                    offset: transform.offset,
-                                  ),
-                                  size: Size.infinite,
+                          Positioned.fill(
+                            child: RepaintBoundary(
+                              child: CustomPaint(
+                                painter: InfiniteBackgroundPainter(
+                                  background: currentPage.background,
+                                  zoom: transform.zoom,
+                                  offset: transform.offset,
                                 ),
+                                size: Size.infinite,
                               ),
                             ),
+                          ),
 
                           // LAYER 1: Drawing Canvas (zoom/pan transform içinde)
-                          Positioned.fill(
-                            child: DrawingCanvas(canvasMode: canvasMode),
+                          const Positioned.fill(
+                            child: DrawingCanvas(),
                           ),
 
                     // Invisible tap barrier to close panel when tapping canvas

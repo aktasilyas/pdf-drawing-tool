@@ -57,10 +57,6 @@ class Documents extends Table {
   /// Orientation: true=portrait, false=landscape
   BoolColumn get isPortrait => boolean().withDefault(const Constant(true))();
 
-  /// Document type: 'notebook', 'whiteboard', 'quickNote', etc.
-  TextColumn get documentType =>
-      text().withDefault(const Constant('notebook'))();
-
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -133,7 +129,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration {
@@ -149,12 +145,6 @@ class AppDatabase extends _$AppDatabase {
           );
           await customStatement(
             'ALTER TABLE documents ADD COLUMN is_portrait INTEGER NOT NULL DEFAULT 1',
-          );
-        }
-        if (from < 3) {
-          // Add documentType column
-          await customStatement(
-            'ALTER TABLE documents ADD COLUMN document_type TEXT NOT NULL DEFAULT "notebook"',
           );
         }
       },

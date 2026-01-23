@@ -16,7 +16,6 @@ abstract class DocumentRepository {
     String? folderId,
     String paperColor = 'Sarı kağıt',
     bool isPortrait = true,
-    String documentType = 'notebook',
   });
 
   /// Update document metadata
