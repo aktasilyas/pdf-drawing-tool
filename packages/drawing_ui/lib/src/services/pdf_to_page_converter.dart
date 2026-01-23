@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:pdfx/pdfx.dart';
 import 'pdf_page_renderer.dart';
@@ -75,12 +74,12 @@ class PDFToPageConverter {
 
   /// Creates a default white background.
   PageBackground createDefaultBackground() {
-    return PageBackground.solid(color: 0xFFFFFFFF);
+    return const PageBackground(type: BackgroundType.blank, color: 0xFFFFFFFF);
   }
 
   /// Creates a background with a custom color.
   PageBackground createBackgroundWithColor(int color) {
-    return PageBackground.solid(color: color);
+    return PageBackground(type: BackgroundType.blank, color: color);
   }
 
   /// Determines the page index to use.
@@ -144,10 +143,10 @@ class PDFToPageConverter {
     String? name,
     PageBackground? background,
   }) {
+    // Note: name parameter is not used as Page model doesn't have a name field
     return Page(
       id: 'page_${DateTime.now().millisecondsSinceEpoch}_$index',
       index: index,
-      name: name ?? 'Page ${index + 1}',
       size: PageSize(width: width, height: height),
       background: background ?? createDefaultBackground(),
       layers: [],

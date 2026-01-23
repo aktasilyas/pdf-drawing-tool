@@ -172,9 +172,8 @@ void main() {
         final page = Page(
           id: 'p1',
           index: 0,
-          name: 'Page 1',
           size: PageSize(width: 0, height: 0),
-          background: PageBackground.solid(),
+          background: PageBackground(type: BackgroundType.blank, color: 0xFFFFFFFF),
           layers: [],
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
@@ -232,7 +231,7 @@ void main() {
         final doc = DrawingDocument.multiPage(
           id: 'd1',
           title: 'Test Document',
-          pages: [Page.create(index: 0)],
+          pages: [Page.create(index: 0)], createdAt: DateTime.now(), updatedAt: DateTime.now(),
         );
 
         final metadata = service.createMetadata(doc);
@@ -244,7 +243,7 @@ void main() {
         final doc = DrawingDocument.multiPage(
           id: 'd1',
           title: '',
-          pages: [Page.create(index: 0)],
+          pages: [Page.create(index: 0)], createdAt: DateTime.now(), updatedAt: DateTime.now(),
         );
 
         final metadata = service.createMetadata(doc);
@@ -262,7 +261,7 @@ void main() {
               DrawingPoint(x: 0, y: 0),
               DrawingPoint(x: 100, y: 100),
             ],
-            style: StrokeStyle.ballpoint(),
+            style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
           ),
         );
 
@@ -281,7 +280,7 @@ void main() {
                 DrawingPoint(x: 0, y: 0),
                 DrawingPoint(x: 100, y: 100),
               ],
-              style: StrokeStyle.ballpoint(),
+              style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
             ),
           );
         }
@@ -306,9 +305,8 @@ void main() {
         final page = Page(
           id: 'p1',
           index: 0,
-          name: 'Page 1',
           size: PageSize(width: -1, height: -1),
-          background: PageBackground.solid(),
+          background: PageBackground(type: BackgroundType.blank, color: 0xFFFFFFFF),
           layers: [],
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),

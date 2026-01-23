@@ -11,8 +11,9 @@
 library;
 
 import 'package:get_it/get_it.dart';
-// import 'package:injectable/injectable.dart';
-// import 'injection.config.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:example_app/features/documents/documents.dart';
+import 'package:example_app/features/editor/editor.dart';
 
 /// Global service locator instance
 final getIt = GetIt.instance;
@@ -21,11 +22,11 @@ final getIt = GetIt.instance;
 /// 
 /// Call this in main() before runApp()
 Future<void> configureDependencies() async {
-  // TODO: Uncomment when injectable is set up
-  // await getIt.init();
+  // Core services
+  final prefs = await SharedPreferences.getInstance();
+  getIt.registerSingleton<SharedPreferences>(prefs);
   
-  // Manual registrations (until injectable generates config)
-  _registerCoreServices();
+  // Manual registrations
   _registerRepositories();
   _registerUseCases();
 }
@@ -44,46 +45,21 @@ void _registerCoreServices() {
 }
 
 void _registerRepositories() {
-  // Auth
-  // getIt.registerLazySingleton<AuthRepository>(
-  //   () => AuthRepositoryImpl(getIt(), getIt()),
-  // );
+  // Datasources
+  getIt.registerLazySingleton<DocumentLocalDatasource>(
+    () => DocumentLocalDatasourceImpl(getIt()),
+  );
   
   // Documents
-  // getIt.registerLazySingleton<DocumentRepository>(
-  //   () => DocumentRepositoryImpl(getIt()),
-  // );
-  
-  // Folders
-  // getIt.registerLazySingleton<FolderRepository>(
-  //   () => FolderRepositoryImpl(getIt()),
-  // );
-  
-  // Sync
-  // getIt.registerLazySingleton<SyncRepository>(
-  //   () => SyncRepositoryImpl(getIt(), getIt(), getIt()),
-  // );
-  
-  // Premium
-  // getIt.registerLazySingleton<SubscriptionRepository>(
-  //   () => SubscriptionRepositoryImpl(),
-  // );
+  getIt.registerLazySingleton<DocumentRepository>(
+    () => DocumentRepositoryImpl(getIt()),
+  );
 }
 
 void _registerUseCases() {
-  // Auth use cases
-  // getIt.registerFactory(() => LoginUseCase(getIt()));
-  // getIt.registerFactory(() => RegisterUseCase(getIt()));
-  // getIt.registerFactory(() => LogoutUseCase(getIt()));
-  
-  // Document use cases
-  // getIt.registerFactory(() => GetDocumentsUseCase(getIt()));
-  // getIt.registerFactory(() => CreateDocumentUseCase(getIt(), getIt()));
-  // getIt.registerFactory(() => DeleteDocumentUseCase(getIt()));
-  
-  // Premium use cases
-  // getIt.registerFactory(() => CheckSubscriptionUseCase(getIt()));
-  // getIt.registerFactory(() => PurchaseUseCase(getIt()));
+  // Editor use cases
+  getIt.registerFactory(() => LoadDocumentUseCase(getIt()));
+  getIt.registerFactory(() => SaveDocumentUseCase(getIt()));
 }
 
 /// Reset all registrations (useful for testing)

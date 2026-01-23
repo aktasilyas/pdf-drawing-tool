@@ -305,4 +305,45 @@ class DocumentRepositoryImpl implements DocumentRepository {
       return Left(CacheFailure('Failed to permanently delete: $e'));
     }
   }
+
+  @override
+  Future<Either<Failure, Map<String, dynamic>?>> getDocumentContent(String id) async {
+    try {
+      final content = await _localDatasource.getDocumentContent(id);
+      return Right(content);
+    } on CacheException catch (e) {
+      return Left(CacheFailure(e.message));
+    } catch (e) {
+      return Left(CacheFailure('Failed to get document content: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> saveDocumentContent({
+    required String id,
+    required Map<String, dynamic> content,
+    int? pageCount,
+    DateTime? updatedAt,
+  }) async {
+    try {
+      // Save content
+      await _localDatasource.saveDocumentContent(id, content);
+      
+      // Update metadata if provided
+      if (pageCount != null || updatedAt != null) {
+        final document = await _localDatasource.getDocument(id);
+        final updated = document.copyWith(
+          pageCount: pageCount,
+          updatedAt: updatedAt ?? DateTime.now(),
+        );
+        await _localDatasource.updateDocument(updated);
+      }
+      
+      return const Right(null);
+    } on CacheException catch (e) {
+      return Left(CacheFailure(e.message));
+    } catch (e) {
+      return Left(CacheFailure('Failed to save document content: $e'));
+    }
+  }
 }

@@ -32,7 +32,7 @@ void main() {
             DrawingPoint(x: 0, y: 0),
             DrawingPoint(x: 100, y: 100),
           ],
-          style: StrokeStyle.ballpoint(),
+          style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
         );
 
         expect(renderer.canRenderStroke(stroke), true);
@@ -45,7 +45,7 @@ void main() {
             DrawingPoint(x: 0, y: 0, pressure: 0.5),
             DrawingPoint(x: 100, y: 100, pressure: 1.0),
           ],
-          style: StrokeStyle.ballpoint(),
+          style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
         );
 
         expect(renderer.canRenderStroke(stroke), true);
@@ -55,7 +55,7 @@ void main() {
         final stroke = Stroke(
           id: 's1',
           points: [DrawingPoint(x: 0, y: 0)],
-          style: StrokeStyle.ballpoint(),
+          style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
         );
 
         expect(renderer.canRenderStroke(stroke), false);
@@ -65,7 +65,7 @@ void main() {
         final stroke = Stroke(
           id: 's1',
           points: [],
-          style: StrokeStyle.ballpoint(),
+          style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
         );
 
         expect(renderer.canRenderStroke(stroke), false);
@@ -79,7 +79,7 @@ void main() {
             DrawingPoint(x: 100, y: 0),
             DrawingPoint(x: 100, y: 100),
           ],
-          style: StrokeStyle.ballpoint(),
+          style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
         );
 
         final length = renderer.calculateStrokeLength(stroke);
@@ -91,7 +91,8 @@ void main() {
       test('should support rectangle', () {
         final shape = Shape.create(
           type: ShapeType.rectangle,
-          bounds: const Rect(left: 0, top: 0, width: 100, height: 100),
+          point1: DrawingPoint(x: 0, y: 0),
+          point2: DrawingPoint(x: 100, y: 100),
         );
 
         expect(renderer.canRenderShape(shape), true);
@@ -100,7 +101,8 @@ void main() {
       test('should support ellipse', () {
         final shape = Shape.create(
           type: ShapeType.ellipse,
-          bounds: const Rect(left: 0, top: 0, width: 100, height: 100),
+          point1: DrawingPoint(x: 0, y: 0),
+          point2: DrawingPoint(x: 100, y: 100),
         );
 
         expect(renderer.canRenderShape(shape), true);
@@ -109,7 +111,8 @@ void main() {
       test('should support line', () {
         final shape = Shape.create(
           type: ShapeType.line,
-          bounds: const Rect(left: 0, top: 0, width: 100, height: 100),
+          point1: DrawingPoint(x: 0, y: 0),
+          point2: DrawingPoint(x: 100, y: 100),
         );
 
         expect(renderer.canRenderShape(shape), true);
@@ -118,7 +121,8 @@ void main() {
       test('should support triangle', () {
         final shape = Shape.create(
           type: ShapeType.triangle,
-          bounds: const Rect(left: 0, top: 0, width: 100, height: 100),
+          point1: DrawingPoint(x: 0, y: 0),
+          point2: DrawingPoint(x: 100, y: 100),
         );
 
         expect(renderer.canRenderShape(shape), true);
@@ -127,7 +131,8 @@ void main() {
       test('should support diamond', () {
         final shape = Shape.create(
           type: ShapeType.diamond,
-          bounds: const Rect(left: 0, top: 0, width: 100, height: 100),
+          point1: DrawingPoint(x: 0, y: 0),
+          point2: DrawingPoint(x: 100, y: 100),
         );
 
         expect(renderer.canRenderShape(shape), true);
@@ -136,7 +141,8 @@ void main() {
       test('should calculate shape area', () {
         final shape = Shape.create(
           type: ShapeType.rectangle,
-          bounds: const Rect(left: 0, top: 0, width: 100, height: 50),
+          point1: DrawingPoint(x: 0, y: 0),
+          point2: DrawingPoint(x: 100, y: 50),
         );
 
         final area = renderer.calculateShapeArea(shape);
@@ -146,10 +152,11 @@ void main() {
 
     group('Text Rendering', () {
       test('should support basic text', () {
-        final text = DrawingText(
+        final text = TextElement(
           id: 't1',
           content: 'Hello',
-          bounds: const Rect(left: 0, top: 0, width: 100, height: 20),
+          position: DrawingPoint(x: 0, y: 0),
+          size: Size(width: 100, height: 20),
           style: TextStyle.create(),
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
@@ -159,10 +166,11 @@ void main() {
       });
 
       test('should reject empty text', () {
-        final text = DrawingText(
+        final text = TextElement(
           id: 't1',
           content: '',
-          bounds: const Rect(left: 0, top: 0, width: 100, height: 20),
+          position: DrawingPoint(x: 0, y: 0),
+          size: Size(width: 100, height: 20),
           style: TextStyle.create(),
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
@@ -172,10 +180,11 @@ void main() {
       });
 
       test('should calculate text width estimate', () {
-        final text = DrawingText(
+        final text = TextElement(
           id: 't1',
           content: 'Hello',
-          bounds: const Rect(left: 0, top: 0, width: 100, height: 20),
+          position: DrawingPoint(x: 0, y: 0),
+          size: Size(width: 100, height: 20),
           style: TextStyle.create(fontSize: 16),
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
@@ -188,11 +197,11 @@ void main() {
 
     group('Pen Style Support', () {
       test('should support ballpoint pen', () {
-        expect(renderer.supportsPenStyle(PenType.ballpoint), true);
+        expect(renderer.supportsPenStyle(PenType.ballpointPen), true);
       });
 
       test('should support fountain pen', () {
-        expect(renderer.supportsPenStyle(PenType.fountain), true);
+        expect(renderer.supportsPenStyle(PenType.fountainPen), true);
       });
 
       test('should support marker', () {
@@ -213,36 +222,36 @@ void main() {
     });
 
     group('Line Cap Style', () {
-      test('should convert round cap', () {
-        final cap = renderer.convertLineCap(StrokeCap.round);
-        expect(cap, isNotNull);
+      test('should get default round cap', () {
+        final cap = renderer.getDefaultLineCap();
+        expect(cap, isA<int>());
       });
 
-      test('should convert square cap', () {
-        final cap = renderer.convertLineCap(StrokeCap.square);
-        expect(cap, isNotNull);
+      test('should get recommended cap for ballpoint', () {
+        final cap = renderer.getRecommendedLineCap(PenType.ballpointPen);
+        expect(cap, isA<int>());
       });
 
-      test('should convert butt cap', () {
-        final cap = renderer.convertLineCap(StrokeCap.butt);
-        expect(cap, isNotNull);
+      test('should get recommended cap for marker', () {
+        final cap = renderer.getRecommendedLineCap(PenType.marker);
+        expect(cap, isA<int>());
       });
     });
 
     group('Line Join Style', () {
-      test('should convert round join', () {
-        final join = renderer.convertLineJoin(StrokeJoin.round);
-        expect(join, isNotNull);
+      test('should get default round join', () {
+        final join = renderer.getDefaultLineJoin();
+        expect(join, isA<int>());
       });
 
-      test('should convert miter join', () {
-        final join = renderer.convertLineJoin(StrokeJoin.miter);
-        expect(join, isNotNull);
+      test('should get recommended join for ballpoint', () {
+        final join = renderer.getRecommendedLineJoin(PenType.ballpointPen);
+        expect(join, isA<int>());
       });
 
-      test('should convert bevel join', () {
-        final join = renderer.convertLineJoin(StrokeJoin.bevel);
-        expect(join, isNotNull);
+      test('should get recommended join for marker', () {
+        final join = renderer.getRecommendedLineJoin(PenType.marker);
+        expect(join, isA<int>());
       });
     });
 
@@ -358,7 +367,7 @@ void main() {
         final stroke = Stroke(
           id: 's1',
           points: List.generate(1000, (i) => DrawingPoint(x: i * 1.0, y: 0)),
-          style: StrokeStyle.ballpoint(),
+          style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
         );
 
         final complexity = renderer.estimateComplexity(stroke);
@@ -369,7 +378,7 @@ void main() {
         final stroke = Stroke(
           id: 's1',
           points: List.generate(10000, (i) => DrawingPoint(x: i * 1.0, y: 0)),
-          style: StrokeStyle.ballpoint(),
+          style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
         );
 
         expect(renderer.shouldOptimize(stroke), true);

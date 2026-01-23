@@ -82,7 +82,7 @@ void main() {
               DrawingPoint(x: 0, y: 0),
               DrawingPoint(x: 100, y: 100),
             ],
-            style: StrokeStyle.ballpoint(),
+            style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
           ),
         );
 
@@ -101,7 +101,7 @@ void main() {
                 DrawingPoint(x: 0, y: 0),
                 DrawingPoint(x: 100, y: 100),
               ],
-              style: StrokeStyle.ballpoint(),
+              style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
             ),
           );
         }
@@ -116,7 +116,7 @@ void main() {
             10000,
             (i) => DrawingPoint(x: i.toDouble(), y: 0),
           ),
-          style: StrokeStyle.ballpoint(),
+          style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
         );
 
         final page = Page.create(index: 0).addStroke(stroke);
@@ -134,7 +134,7 @@ void main() {
               DrawingPoint(x: 0, y: 0),
               DrawingPoint(x: 100, y: 100),
             ],
-            style: StrokeStyle.ballpoint(),
+            style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
           ),
         );
 
@@ -152,7 +152,7 @@ void main() {
                 DrawingPoint(x: 0, y: 0),
                 DrawingPoint(x: 100, y: 100),
               ],
-              style: StrokeStyle.ballpoint(),
+              style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
             ),
           );
         }
@@ -324,7 +324,7 @@ void main() {
                 DrawingPoint(x: 0, y: 0),
                 DrawingPoint(x: 100, y: 100),
               ],
-              style: StrokeStyle.ballpoint(),
+              style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
             ),
           );
         }
@@ -337,7 +337,7 @@ void main() {
         final stroke = Stroke(
           id: 's1',
           points: List.generate(100, (i) => DrawingPoint(x: i.toDouble(), y: 0)),
-          style: StrokeStyle.ballpoint(),
+          style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
         );
 
         final page = Page.create(index: 0).addStroke(stroke);
@@ -357,7 +357,7 @@ void main() {
                 100,
                 (j) => DrawingPoint(x: j.toDouble(), y: 0),
               ),
-              style: StrokeStyle.ballpoint(),
+              style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
             ),
           );
         }
@@ -376,7 +376,7 @@ void main() {
               DrawingPoint(x: 0, y: 0),
               DrawingPoint(x: 100, y: 100),
             ],
-            style: StrokeStyle.ballpoint(),
+            style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
           ),
         );
 
@@ -395,7 +395,7 @@ void main() {
                 100,
                 (j) => DrawingPoint(x: j.toDouble(), y: 0),
               ),
-              style: StrokeStyle.ballpoint(),
+              style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
             ),
           );
         }

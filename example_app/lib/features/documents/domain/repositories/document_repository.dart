@@ -57,4 +57,15 @@ abstract class DocumentRepository {
 
   /// Permanently delete document
   Future<Either<Failure, void>> permanentlyDelete(String id);
+
+  /// Get document content (drawing data as JSON)
+  Future<Either<Failure, Map<String, dynamic>?>> getDocumentContent(String id);
+
+  /// Save document content (drawing data as JSON)
+  Future<Either<Failure, void>> saveDocumentContent({
+    required String id,
+    required Map<String, dynamic> content,
+    int? pageCount,
+    DateTime? updatedAt,
+  });
 }

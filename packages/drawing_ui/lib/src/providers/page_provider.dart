@@ -144,8 +144,10 @@ class PageManagerNotifier extends StateNotifier<PageManager> {
   }
 
   /// Disposes the notifier.
+  @override
   void dispose() {
-    state.dispose();
+    // Cleanup if needed
+    super.dispose();
   }
 }
 
