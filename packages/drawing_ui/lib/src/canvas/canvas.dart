@@ -7,3 +7,4 @@ export 'selection_painter.dart';
 export 'shape_painter.dart';
 export 'stroke_painter.dart';
 export 'text_painter.dart';
+export 'page_background_painter.dart';
