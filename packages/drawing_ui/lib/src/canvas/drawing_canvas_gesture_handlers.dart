@@ -1013,6 +1013,9 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     // Only handle zoom/pan with 2+ fingers
     if (details.pointerCount < 2) return;
 
+    // Show zoom indicator
+    ref.read(isZoomingProvider.notifier).state = true;
+
     // Cancel any ongoing operations when zoom/pan starts
     if (drawingController.isDrawing) {
       drawingController.cancelStroke();
@@ -1064,6 +1067,9 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
   }
 
   void handleScaleEnd(ScaleEndDetails details) {
+    // Hide zoom indicator
+    ref.read(isZoomingProvider.notifier).state = false;
+    
     lastFocalPoint = null;
     lastScale = null;
   }

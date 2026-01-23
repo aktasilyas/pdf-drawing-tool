@@ -5,6 +5,7 @@ import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/toolbar/toolbar.dart';
 import 'package:drawing_ui/src/canvas/canvas.dart';
+import 'package:drawing_ui/src/canvas/infinite_background_painter.dart';
 import 'package:drawing_ui/src/panels/panels.dart';
 import 'package:drawing_ui/src/screens/drawing_screen_panels.dart';
 import 'package:drawing_ui/src/widgets/widgets.dart';
@@ -74,9 +75,10 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
       _handlePanelChange(next);
     });
 
-    // Get canvas background color for Scaffold
+    // Get canvas background color and transform for infinite background
     final currentPage = ref.watch(currentPageProvider);
     final bgColor = currentPage.background.color;
+    final transform = ref.watch(canvasTransformProvider);
 
     return DrawingThemeProvider(
       theme: const DrawingTheme(),
@@ -110,7 +112,23 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                     Expanded(
                       child: Stack(
                         children: [
-                          // Full width canvas - Real drawing canvas
+                          // LAYER 0: Infinite Background (zoom ile ölçeklenir, tüm ekranı kaplar)
+                          // Pattern zoom seviyesiyle birlikte küçülür/büyür
+                          // Sayfa dışında da devam eder (sonsuz kağıt efekti)
+                          Positioned.fill(
+                            child: RepaintBoundary(
+                              child: CustomPaint(
+                                painter: InfiniteBackgroundPainter(
+                                  background: currentPage.background,
+                                  zoom: transform.zoom,
+                                  offset: transform.offset,
+                                ),
+                                size: Size.infinite,
+                              ),
+                            ),
+                          ),
+
+                          // LAYER 1: Drawing Canvas (zoom/pan transform içinde)
                           const Positioned.fill(
                             child: DrawingCanvas(),
                           ),
@@ -155,6 +173,14 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                         onTap: _openAIPanel,
                       ),
                     ),
+
+                    // Zoom indicator (center, visible only while zooming)
+                    if (ref.watch(isZoomingProvider))
+                      Center(
+                        child: _ZoomIndicator(
+                          zoomPercentage: ref.watch(zoomPercentageProvider),
+                        ),
+                      ),
                   ],
                         ),
                     ),
@@ -328,6 +354,42 @@ class _AskAIButton extends StatelessWidget {
           Icons.auto_awesome,
           color: Colors.white,
           size: 24,
+        ),
+      ),
+    );
+  }
+}
+
+/// Zoom indicator shown in center while zooming.
+class _ZoomIndicator extends StatelessWidget {
+  const _ZoomIndicator({required this.zoomPercentage});
+
+  final String zoomPercentage;
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.7),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.3),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Text(
+          zoomPercentage,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 28,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 1,
+          ),
         ),
       ),
     );

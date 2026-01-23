@@ -178,3 +178,6 @@ final canZoomOutProvider = Provider<bool>((ref) {
   final zoom = ref.watch(zoomLevelProvider);
   return zoom > CanvasTransform.minZoom;
 });
+
+/// Whether zoom gesture is currently active.
+final isZoomingProvider = StateProvider<bool>((ref) => false);

@@ -22,6 +22,7 @@ export 'src/screens/drawing_screen_panels.dart';
 export 'src/canvas/mock_canvas.dart';
 export 'src/canvas/drawing_canvas.dart';
 export 'src/canvas/stroke_painter.dart';
+export 'src/canvas/infinite_background_painter.dart';
 
 // Rendering
 export 'src/rendering/flutter_stroke_renderer.dart';
