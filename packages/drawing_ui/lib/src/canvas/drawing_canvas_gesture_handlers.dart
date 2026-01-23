@@ -11,6 +11,7 @@ import 'package:drawing_ui/src/models/tool_type.dart';
 mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget> 
     on ConsumerState<T>, DrawingCanvasHelpers<T> {
   // Required fields from DrawingCanvasState
+  core.CanvasMode? get canvasMode;  // Canvas mode configuration
   DrawingController get drawingController;
   int get pointerCount;
   set pointerCount(int value);
@@ -48,6 +49,24 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
 
   /// Handles pointer down - starts a new stroke, eraser, selection, shape, or text.
   void handlePointerDown(PointerDownEvent event) {
+    // ══════════════════════════════════════════════════════════════
+    // Sayfa sınırı kontrolü (LIMITED mod için)
+    // ══════════════════════════════════════════════════════════════
+    final mode = canvasMode ?? const core.CanvasMode(isInfinite: true);
+    
+    if (!mode.allowDrawingOutsidePage) {
+      final transform = ref.read(canvasTransformProvider);
+      final canvasPoint = transform.screenToCanvas(event.localPosition);
+      final currentPage = ref.read(currentPageProvider);
+      
+      // Sayfa dışında mı?
+      if (canvasPoint.dx < 0 || canvasPoint.dx > currentPage.size.width ||
+          canvasPoint.dy < 0 || canvasPoint.dy > currentPage.size.height) {
+        return; // Sayfa dışı - çizim başlatma
+      }
+    }
+    // ══════════════════════════════════════════════════════════════
+
     pointerCount++;
 
     // Only handle with single finger
@@ -153,6 +172,24 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
   void handlePointerMove(PointerMoveEvent event) {
     // Only handle with single finger
     if (pointerCount != 1) return;
+
+    // ══════════════════════════════════════════════════════════════
+    // Sayfa sınırı kontrolü (LIMITED mod için)
+    // ══════════════════════════════════════════════════════════════
+    final mode = canvasMode ?? const core.CanvasMode(isInfinite: true);
+    
+    if (!mode.allowDrawingOutsidePage && drawingController.isDrawing) {
+      final currentPage = ref.read(currentPageProvider);
+      final transform = ref.read(canvasTransformProvider);
+      final canvasPoint = transform.screenToCanvas(event.localPosition);
+      
+      // Sayfa dışındaysa - çizime devam etme
+      if (canvasPoint.dx < 0 || canvasPoint.dx > currentPage.size.width ||
+          canvasPoint.dy < 0 || canvasPoint.dy > currentPage.size.height) {
+        return;
+      }
+    }
+    // ══════════════════════════════════════════════════════════════
 
     // Selection mode
     if (isSelecting) {

@@ -6,6 +6,7 @@ import 'package:drawing_ui/src/canvas/selection_painter.dart';
 import 'package:drawing_ui/src/canvas/shape_painter.dart';
 import 'package:drawing_ui/src/canvas/text_painter.dart';
 import 'package:drawing_ui/src/canvas/pixel_eraser_preview_painter.dart';
+import 'package:drawing_ui/src/canvas/page_background_painter.dart';
 import 'package:drawing_ui/src/canvas/drawing_canvas_helpers.dart';
 import 'package:drawing_ui/src/canvas/drawing_canvas_gesture_handlers.dart';
 import 'package:drawing_ui/src/rendering/rendering.dart';
@@ -17,6 +18,7 @@ import 'package:drawing_ui/src/providers/canvas_transform_provider.dart';
 import 'package:drawing_ui/src/providers/selection_provider.dart';
 import 'package:drawing_ui/src/providers/shape_provider.dart';
 import 'package:drawing_ui/src/providers/text_provider.dart';
+import 'package:drawing_ui/src/providers/page_provider.dart';
 import 'package:drawing_ui/src/providers/drawing_providers.dart';
 import 'package:drawing_ui/src/widgets/widgets.dart';
 
@@ -49,14 +51,17 @@ class DrawingCanvas extends ConsumerStatefulWidget {
   final double width;
 
   /// Height of the canvas. Defaults to fill available space.
+  final double height;
+
+  /// Canvas mode configuration (determines behavior)
+  final core.CanvasMode? canvasMode;
 
   const DrawingCanvas({
     super.key,
     this.width = double.infinity,
     this.height = double.infinity,
+    this.canvasMode,
   });
-
-  final double height;
 
   @override
   ConsumerState<DrawingCanvas> createState() => DrawingCanvasState();
@@ -68,6 +73,10 @@ class DrawingCanvas extends ConsumerStatefulWidget {
 /// Uses mixins for gesture handling and helpers to keep file size manageable.
 class DrawingCanvasState extends ConsumerState<DrawingCanvas>
     with DrawingCanvasHelpers, DrawingCanvasGestureHandlers {
+  /// Canvas mode configuration (for gesture handlers)
+  @override
+  core.CanvasMode? get canvasMode => widget.canvasMode;
+
   /// Controller for managing active stroke state.
   /// Uses ChangeNotifier instead of setState for performance.
   late final DrawingController _drawingController;
@@ -260,6 +269,12 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
     final selection = ref.watch(selectionProvider);
     final textToolState = ref.watch(textToolProvider);
 
+    // Canvas mode configuration
+    final canvasMode = widget.canvasMode ?? const core.CanvasMode(isInfinite: true);
+    
+    // Current page (LIMITED mod için)
+    final currentPage = ref.watch(currentPageProvider);
+
     // Eraser cursor state
     final eraserCursorPosition = ref.watch(eraserCursorPositionProvider);
     final lassoEraserPoints = ref.watch(lassoEraserPointsProvider);
@@ -326,6 +341,61 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                       alignment: Alignment.topLeft,
                       child: Stack(
                         children: [
+                          // ═══════════════════════════════════════════════════════════
+                          // LAYER 0: Page Container (LIMITED mod için)
+                          // ═══════════════════════════════════════════════════════════
+                          if (!canvasMode.isInfinite) ...[
+                            // Sayfa gölgesi
+                            if (canvasMode.showPageShadow)
+                              Positioned(
+                                left: 0,
+                                top: 0,
+                                child: IgnorePointer(
+                                  child: Container(
+                                    width: currentPage.size.width,
+                                    height: currentPage.size.height,
+                                    decoration: BoxDecoration(
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.15),
+                                          blurRadius: 20,
+                                          spreadRadius: 2,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                            // Sayfa arka planı + pattern
+                            Positioned(
+                              left: 0,
+                              top: 0,
+                              child: IgnorePointer(
+                                child: Container(
+                                  width: currentPage.size.width,
+                                  height: currentPage.size.height,
+                                  decoration: BoxDecoration(
+                                    color: Color(currentPage.background.color),
+                                    border: canvasMode.pageBorderWidth > 0
+                                        ? Border.all(
+                                            color: Color(canvasMode.pageBorderColor),
+                                            width: canvasMode.pageBorderWidth,
+                                          )
+                                        : null,
+                                  ),
+                                  child: CustomPaint(
+                                    painter: PageBackgroundPatternPainter(
+                                      background: currentPage.background,
+                                    ),
+                                    size: Size(currentPage.size.width, currentPage.size.height),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+
                           // ─────────────────────────────────────────────────────────
                           // LAYER 1: Committed Strokes (from DocumentProvider)
                           // ─────────────────────────────────────────────────────────
