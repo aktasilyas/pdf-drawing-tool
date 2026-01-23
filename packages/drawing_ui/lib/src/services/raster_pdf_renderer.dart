@@ -100,7 +100,7 @@ class RasterExportOptions {
     this.antialiasing = true,
     CompressionSettings? compression,
     this.backgroundColor = 0xFFFFFFFF,
-  }) : compression = compression ?? const CompressionSettings();
+  }) : compression = compression ?? CompressionSettings();
 
   /// Gets DPI from quality level.
   int get dpi => quality.dpi;

@@ -172,9 +172,8 @@ void main() {
         final page = Page(
           id: 'p1',
           index: 0,
-          name: 'Page 1',
           size: PageSize(width: 0, height: 0),
-          background: PageBackground.solid(),
+          background: PageBackground(type: BackgroundType.blank, color: 0xFFFFFFFF),
           layers: [],
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
@@ -306,9 +305,8 @@ void main() {
         final page = Page(
           id: 'p1',
           index: 0,
-          name: 'Page 1',
           size: PageSize(width: -1, height: -1),
-          background: PageBackground.solid(),
+          background: PageBackground(type: BackgroundType.blank, color: 0xFFFFFFFF),
           layers: [],
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),

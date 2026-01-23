@@ -334,6 +334,7 @@ class VectorPDFRenderer {
       case PenType.brushPen:
         return 1; // Round
       case PenType.highlighter:
+      case PenType.neonHighlighter:
       case PenType.dashedPen:
         return 2; // Square
       case PenType.gelPen:
@@ -352,6 +353,7 @@ class VectorPDFRenderer {
       case PenType.brushPen:
         return 1; // Round
       case PenType.highlighter:
+      case PenType.neonHighlighter:
       case PenType.dashedPen:
         return 0; // Miter
       case PenType.hardPencil:
