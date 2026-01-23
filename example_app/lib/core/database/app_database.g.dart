@@ -91,6 +91,32 @@ class $DocumentsTable extends Documents
   late final GeneratedColumn<Uint8List> content = GeneratedColumn<Uint8List>(
       'content', aliasedName, true,
       type: DriftSqlType.blob, requiredDuringInsert: false);
+  static const VerificationMeta _paperColorMeta =
+      const VerificationMeta('paperColor');
+  @override
+  late final GeneratedColumn<String> paperColor = GeneratedColumn<String>(
+      'paper_color', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('Sarı kağıt'));
+  static const VerificationMeta _isPortraitMeta =
+      const VerificationMeta('isPortrait');
+  @override
+  late final GeneratedColumn<bool> isPortrait = GeneratedColumn<bool>(
+      'is_portrait', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("is_portrait" IN (0, 1))'),
+      defaultValue: const Constant(true));
+  static const VerificationMeta _documentTypeMeta =
+      const VerificationMeta('documentType');
+  @override
+  late final GeneratedColumn<String> documentType = GeneratedColumn<String>(
+      'document_type', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('notebook'));
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -104,7 +130,10 @@ class $DocumentsTable extends Documents
         isFavorite,
         isInTrash,
         syncState,
-        content
+        content,
+        paperColor,
+        isPortrait,
+        documentType
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -181,6 +210,24 @@ class $DocumentsTable extends Documents
       context.handle(_contentMeta,
           content.isAcceptableOrUnknown(data['content']!, _contentMeta));
     }
+    if (data.containsKey('paper_color')) {
+      context.handle(
+          _paperColorMeta,
+          paperColor.isAcceptableOrUnknown(
+              data['paper_color']!, _paperColorMeta));
+    }
+    if (data.containsKey('is_portrait')) {
+      context.handle(
+          _isPortraitMeta,
+          isPortrait.isAcceptableOrUnknown(
+              data['is_portrait']!, _isPortraitMeta));
+    }
+    if (data.containsKey('document_type')) {
+      context.handle(
+          _documentTypeMeta,
+          documentType.isAcceptableOrUnknown(
+              data['document_type']!, _documentTypeMeta));
+    }
     return context;
   }
 
@@ -214,6 +261,12 @@ class $DocumentsTable extends Documents
           .read(DriftSqlType.int, data['${effectivePrefix}sync_state'])!,
       content: attachedDatabase.typeMapping
           .read(DriftSqlType.blob, data['${effectivePrefix}content']),
+      paperColor: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}paper_color'])!,
+      isPortrait: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_portrait'])!,
+      documentType: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}document_type'])!,
     );
   }
 
@@ -259,6 +312,15 @@ class Document extends DataClass implements Insertable<Document> {
 
   /// Document content (serialized drawing data)
   final Uint8List? content;
+
+  /// Paper color: 'Beyaz kağıt', 'Sarı kağıt', 'Gri kağıt'
+  final String paperColor;
+
+  /// Orientation: true=portrait, false=landscape
+  final bool isPortrait;
+
+  /// Document type: 'notebook', 'whiteboard', 'quickNote', etc.
+  final String documentType;
   const Document(
       {required this.id,
       required this.title,
@@ -271,7 +333,10 @@ class Document extends DataClass implements Insertable<Document> {
       required this.isFavorite,
       required this.isInTrash,
       required this.syncState,
-      this.content});
+      this.content,
+      required this.paperColor,
+      required this.isPortrait,
+      required this.documentType});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -293,6 +358,9 @@ class Document extends DataClass implements Insertable<Document> {
     if (!nullToAbsent || content != null) {
       map['content'] = Variable<Uint8List>(content);
     }
+    map['paper_color'] = Variable<String>(paperColor);
+    map['is_portrait'] = Variable<bool>(isPortrait);
+    map['document_type'] = Variable<String>(documentType);
     return map;
   }
 
@@ -316,6 +384,9 @@ class Document extends DataClass implements Insertable<Document> {
       content: content == null && nullToAbsent
           ? const Value.absent()
           : Value(content),
+      paperColor: Value(paperColor),
+      isPortrait: Value(isPortrait),
+      documentType: Value(documentType),
     );
   }
 
@@ -335,6 +406,9 @@ class Document extends DataClass implements Insertable<Document> {
       isInTrash: serializer.fromJson<bool>(json['isInTrash']),
       syncState: serializer.fromJson<int>(json['syncState']),
       content: serializer.fromJson<Uint8List?>(json['content']),
+      paperColor: serializer.fromJson<String>(json['paperColor']),
+      isPortrait: serializer.fromJson<bool>(json['isPortrait']),
+      documentType: serializer.fromJson<String>(json['documentType']),
     );
   }
   @override
@@ -353,6 +427,9 @@ class Document extends DataClass implements Insertable<Document> {
       'isInTrash': serializer.toJson<bool>(isInTrash),
       'syncState': serializer.toJson<int>(syncState),
       'content': serializer.toJson<Uint8List?>(content),
+      'paperColor': serializer.toJson<String>(paperColor),
+      'isPortrait': serializer.toJson<bool>(isPortrait),
+      'documentType': serializer.toJson<String>(documentType),
     };
   }
 
@@ -368,7 +445,10 @@ class Document extends DataClass implements Insertable<Document> {
           bool? isFavorite,
           bool? isInTrash,
           int? syncState,
-          Value<Uint8List?> content = const Value.absent()}) =>
+          Value<Uint8List?> content = const Value.absent(),
+          String? paperColor,
+          bool? isPortrait,
+          String? documentType}) =>
       Document(
         id: id ?? this.id,
         title: title ?? this.title,
@@ -383,6 +463,9 @@ class Document extends DataClass implements Insertable<Document> {
         isInTrash: isInTrash ?? this.isInTrash,
         syncState: syncState ?? this.syncState,
         content: content.present ? content.value : this.content,
+        paperColor: paperColor ?? this.paperColor,
+        isPortrait: isPortrait ?? this.isPortrait,
+        documentType: documentType ?? this.documentType,
       );
   Document copyWithCompanion(DocumentsCompanion data) {
     return Document(
@@ -402,6 +485,13 @@ class Document extends DataClass implements Insertable<Document> {
       isInTrash: data.isInTrash.present ? data.isInTrash.value : this.isInTrash,
       syncState: data.syncState.present ? data.syncState.value : this.syncState,
       content: data.content.present ? data.content.value : this.content,
+      paperColor:
+          data.paperColor.present ? data.paperColor.value : this.paperColor,
+      isPortrait:
+          data.isPortrait.present ? data.isPortrait.value : this.isPortrait,
+      documentType: data.documentType.present
+          ? data.documentType.value
+          : this.documentType,
     );
   }
 
@@ -419,7 +509,10 @@ class Document extends DataClass implements Insertable<Document> {
           ..write('isFavorite: $isFavorite, ')
           ..write('isInTrash: $isInTrash, ')
           ..write('syncState: $syncState, ')
-          ..write('content: $content')
+          ..write('content: $content, ')
+          ..write('paperColor: $paperColor, ')
+          ..write('isPortrait: $isPortrait, ')
+          ..write('documentType: $documentType')
           ..write(')'))
         .toString();
   }
@@ -437,7 +530,10 @@ class Document extends DataClass implements Insertable<Document> {
       isFavorite,
       isInTrash,
       syncState,
-      $driftBlobEquality.hash(content));
+      $driftBlobEquality.hash(content),
+      paperColor,
+      isPortrait,
+      documentType);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -453,7 +549,10 @@ class Document extends DataClass implements Insertable<Document> {
           other.isFavorite == this.isFavorite &&
           other.isInTrash == this.isInTrash &&
           other.syncState == this.syncState &&
-          $driftBlobEquality.equals(other.content, this.content));
+          $driftBlobEquality.equals(other.content, this.content) &&
+          other.paperColor == this.paperColor &&
+          other.isPortrait == this.isPortrait &&
+          other.documentType == this.documentType);
 }
 
 class DocumentsCompanion extends UpdateCompanion<Document> {
@@ -469,6 +568,9 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
   final Value<bool> isInTrash;
   final Value<int> syncState;
   final Value<Uint8List?> content;
+  final Value<String> paperColor;
+  final Value<bool> isPortrait;
+  final Value<String> documentType;
   final Value<int> rowid;
   const DocumentsCompanion({
     this.id = const Value.absent(),
@@ -483,6 +585,9 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
     this.isInTrash = const Value.absent(),
     this.syncState = const Value.absent(),
     this.content = const Value.absent(),
+    this.paperColor = const Value.absent(),
+    this.isPortrait = const Value.absent(),
+    this.documentType = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   DocumentsCompanion.insert({
@@ -498,6 +603,9 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
     this.isInTrash = const Value.absent(),
     this.syncState = const Value.absent(),
     this.content = const Value.absent(),
+    this.paperColor = const Value.absent(),
+    this.isPortrait = const Value.absent(),
+    this.documentType = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         title = Value(title),
@@ -517,6 +625,9 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
     Expression<bool>? isInTrash,
     Expression<int>? syncState,
     Expression<Uint8List>? content,
+    Expression<String>? paperColor,
+    Expression<bool>? isPortrait,
+    Expression<String>? documentType,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -532,6 +643,9 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
       if (isInTrash != null) 'is_in_trash': isInTrash,
       if (syncState != null) 'sync_state': syncState,
       if (content != null) 'content': content,
+      if (paperColor != null) 'paper_color': paperColor,
+      if (isPortrait != null) 'is_portrait': isPortrait,
+      if (documentType != null) 'document_type': documentType,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -549,6 +663,9 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
       Value<bool>? isInTrash,
       Value<int>? syncState,
       Value<Uint8List?>? content,
+      Value<String>? paperColor,
+      Value<bool>? isPortrait,
+      Value<String>? documentType,
       Value<int>? rowid}) {
     return DocumentsCompanion(
       id: id ?? this.id,
@@ -563,6 +680,9 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
       isInTrash: isInTrash ?? this.isInTrash,
       syncState: syncState ?? this.syncState,
       content: content ?? this.content,
+      paperColor: paperColor ?? this.paperColor,
+      isPortrait: isPortrait ?? this.isPortrait,
+      documentType: documentType ?? this.documentType,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -606,6 +726,15 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
     if (content.present) {
       map['content'] = Variable<Uint8List>(content.value);
     }
+    if (paperColor.present) {
+      map['paper_color'] = Variable<String>(paperColor.value);
+    }
+    if (isPortrait.present) {
+      map['is_portrait'] = Variable<bool>(isPortrait.value);
+    }
+    if (documentType.present) {
+      map['document_type'] = Variable<String>(documentType.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -627,6 +756,9 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
           ..write('isInTrash: $isInTrash, ')
           ..write('syncState: $syncState, ')
           ..write('content: $content, ')
+          ..write('paperColor: $paperColor, ')
+          ..write('isPortrait: $isPortrait, ')
+          ..write('documentType: $documentType, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1581,6 +1713,9 @@ typedef $$DocumentsTableCreateCompanionBuilder = DocumentsCompanion Function({
   Value<bool> isInTrash,
   Value<int> syncState,
   Value<Uint8List?> content,
+  Value<String> paperColor,
+  Value<bool> isPortrait,
+  Value<String> documentType,
   Value<int> rowid,
 });
 typedef $$DocumentsTableUpdateCompanionBuilder = DocumentsCompanion Function({
@@ -1596,6 +1731,9 @@ typedef $$DocumentsTableUpdateCompanionBuilder = DocumentsCompanion Function({
   Value<bool> isInTrash,
   Value<int> syncState,
   Value<Uint8List?> content,
+  Value<String> paperColor,
+  Value<bool> isPortrait,
+  Value<String> documentType,
   Value<int> rowid,
 });
 
@@ -1643,6 +1781,15 @@ class $$DocumentsTableFilterComposer
 
   ColumnFilters<Uint8List> get content => $composableBuilder(
       column: $table.content, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get paperColor => $composableBuilder(
+      column: $table.paperColor, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isPortrait => $composableBuilder(
+      column: $table.isPortrait, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get documentType => $composableBuilder(
+      column: $table.documentType, builder: (column) => ColumnFilters(column));
 }
 
 class $$DocumentsTableOrderingComposer
@@ -1690,6 +1837,16 @@ class $$DocumentsTableOrderingComposer
 
   ColumnOrderings<Uint8List> get content => $composableBuilder(
       column: $table.content, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get paperColor => $composableBuilder(
+      column: $table.paperColor, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isPortrait => $composableBuilder(
+      column: $table.isPortrait, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get documentType => $composableBuilder(
+      column: $table.documentType,
+      builder: (column) => ColumnOrderings(column));
 }
 
 class $$DocumentsTableAnnotationComposer
@@ -1736,6 +1893,15 @@ class $$DocumentsTableAnnotationComposer
 
   GeneratedColumn<Uint8List> get content =>
       $composableBuilder(column: $table.content, builder: (column) => column);
+
+  GeneratedColumn<String> get paperColor => $composableBuilder(
+      column: $table.paperColor, builder: (column) => column);
+
+  GeneratedColumn<bool> get isPortrait => $composableBuilder(
+      column: $table.isPortrait, builder: (column) => column);
+
+  GeneratedColumn<String> get documentType => $composableBuilder(
+      column: $table.documentType, builder: (column) => column);
 }
 
 class $$DocumentsTableTableManager extends RootTableManager<
@@ -1773,6 +1939,9 @@ class $$DocumentsTableTableManager extends RootTableManager<
             Value<bool> isInTrash = const Value.absent(),
             Value<int> syncState = const Value.absent(),
             Value<Uint8List?> content = const Value.absent(),
+            Value<String> paperColor = const Value.absent(),
+            Value<bool> isPortrait = const Value.absent(),
+            Value<String> documentType = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               DocumentsCompanion(
@@ -1788,6 +1957,9 @@ class $$DocumentsTableTableManager extends RootTableManager<
             isInTrash: isInTrash,
             syncState: syncState,
             content: content,
+            paperColor: paperColor,
+            isPortrait: isPortrait,
+            documentType: documentType,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -1803,6 +1975,9 @@ class $$DocumentsTableTableManager extends RootTableManager<
             Value<bool> isInTrash = const Value.absent(),
             Value<int> syncState = const Value.absent(),
             Value<Uint8List?> content = const Value.absent(),
+            Value<String> paperColor = const Value.absent(),
+            Value<bool> isPortrait = const Value.absent(),
+            Value<String> documentType = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               DocumentsCompanion.insert(
@@ -1818,6 +1993,9 @@ class $$DocumentsTableTableManager extends RootTableManager<
             isInTrash: isInTrash,
             syncState: syncState,
             content: content,
+            paperColor: paperColor,
+            isPortrait: isPortrait,
+            documentType: documentType,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0

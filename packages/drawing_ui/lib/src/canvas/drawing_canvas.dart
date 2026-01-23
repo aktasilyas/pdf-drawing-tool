@@ -161,6 +161,15 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
   /// Original strokes affected by pixel eraser (for undo).
   final List<core.Stroke> _pixelEraseOriginalStrokes = [];
 
+  // ─────────────────────────────────────────────────────────────────────────
+  // CANVAS INITIALIZATION
+  // ─────────────────────────────────────────────────────────────────────────
+
+  /// Whether the canvas has been initialized for the current mode.
+  bool _hasInitialized = false;
+
+  /// Last viewport size (to detect orientation changes).
+  Size? _lastViewportSize;
 
   // ─────────────────────────────────────────────────────────────────────────
   // Public Getters/Setters (for mixins and testing)
@@ -181,6 +190,51 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
   void initState() {
     super.initState();
     _drawingController = DrawingController();
+  }
+
+  @override
+  void didUpdateWidget(covariant DrawingCanvas oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Reset initialization when canvas mode changes
+    if (oldWidget.canvasMode?.isInfinite != widget.canvasMode?.isInfinite) {
+      _hasInitialized = false;
+    }
+  }
+
+  /// Initialize canvas for limited mode (fills viewport with page).
+  void _initializeCanvasForLimitedMode(Size viewportSize, core.Page currentPage) {
+    final canvasMode = widget.canvasMode ?? const core.CanvasMode(isInfinite: true);
+    if (canvasMode.isInfinite) {
+      _hasInitialized = true;
+      _lastViewportSize = viewportSize;
+      return;
+    }
+
+    // Check if viewport size changed significantly (orientation change)
+    final needsReInit = !_hasInitialized || _isOrientationChanged(viewportSize);
+    if (!needsReInit) return;
+
+    // Use post-frame callback to ensure layout is complete
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      
+      ref.read(canvasTransformProvider.notifier).initializeForPage(
+        viewportSize: viewportSize,
+        pageSize: Size(currentPage.size.width, currentPage.size.height),
+      );
+      _hasInitialized = true;
+      _lastViewportSize = viewportSize;
+    });
+  }
+
+  /// Check if orientation changed (width/height swapped).
+  bool _isOrientationChanged(Size newSize) {
+    if (_lastViewportSize == null) return false;
+    
+    final wasPortrait = _lastViewportSize!.height > _lastViewportSize!.width;
+    final isPortrait = newSize.height > newSize.width;
+    
+    return wasPortrait != isPortrait;
   }
 
   @override
@@ -275,6 +329,12 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
     // Current page (LIMITED mod için)
     final currentPage = ref.watch(currentPageProvider);
 
+    // #region agent log
+    debugPrint('🔍 [DEBUG] DrawingCanvas.build - widget.canvasMode: ${widget.canvasMode}');
+    debugPrint('🔍 [DEBUG] DrawingCanvas.build - canvasMode.isInfinite: ${canvasMode.isInfinite}');
+    debugPrint('🔍 [DEBUG] DrawingCanvas.build - canvasMode.allowDrawingOutsidePage: ${canvasMode.allowDrawingOutsidePage}');
+    // #endregion
+
     // Eraser cursor state
     final eraserCursorPosition = ref.watch(eraserCursorPositionProvider);
     final lassoEraserPoints = ref.watch(lassoEraserPointsProvider);
@@ -315,6 +375,11 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
               : widget.height,
         );
 
+        // Initialize canvas for limited mode (centers page on first render)
+        if (!canvasMode.isInfinite) {
+          _initializeCanvasForLimitedMode(size, currentPage);
+        }
+
         // Wrap everything in a Stack to put menu/overlay OUTSIDE gesture handlers
         return Stack(
           children: [
@@ -340,7 +405,27 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                       transform: transform.matrix,
                       alignment: Alignment.topLeft,
                       child: Stack(
+                        clipBehavior: Clip.none, // Allow content outside bounds
                         children: [
+                          // ═══════════════════════════════════════════════════════════
+                          // LAYER -1: Surrounding Area Background (LIMITED mod için)
+                          // ═══════════════════════════════════════════════════════════
+                          // This creates a large background that shows the surrounding
+                          // area color outside the page bounds
+                          if (!canvasMode.isInfinite)
+                            Positioned(
+                              // Position way outside to cover all pan area
+                              left: -5000,
+                              top: -5000,
+                              child: IgnorePointer(
+                                child: Container(
+                                  width: 10000 + currentPage.size.width,
+                                  height: 10000 + currentPage.size.height,
+                                  color: Color(canvasMode.surroundingAreaColor),
+                                ),
+                              ),
+                            ),
+
                           // ═══════════════════════════════════════════════════════════
                           // LAYER 0: Page Container (LIMITED mod için)
                           // ═══════════════════════════════════════════════════════════

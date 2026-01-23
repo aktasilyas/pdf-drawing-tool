@@ -1082,12 +1082,32 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     if (details.pointerCount < 2) return;
 
     final transformNotifier = ref.read(canvasTransformProvider.notifier);
+    final mode = canvasMode ?? const core.CanvasMode(isInfinite: true);
+    final currentPage = ref.read(currentPageProvider);
+    
+    // Get viewport size from context
+    final renderBox = context.findRenderObject() as RenderBox?;
+    final viewportSize = renderBox?.size ?? const Size(800, 600);
 
     // Apply zoom (pinch gesture)
     if (lastScale != null && details.scale != 1.0) {
       final scaleDelta = details.scale / lastScale!;
       if ((scaleDelta - 1.0).abs() > 0.001) {
-        transformNotifier.applyZoomDelta(scaleDelta, details.focalPoint);
+        if (mode.isInfinite) {
+          // Unlimited zoom for whiteboard
+          transformNotifier.applyZoomDelta(scaleDelta, details.focalPoint);
+        } else {
+          // Clamped zoom for notebook/limited modes
+          transformNotifier.applyZoomDeltaClamped(
+            scaleDelta,
+            details.focalPoint,
+            minZoom: mode.minZoom,
+            maxZoom: mode.maxZoom,
+            viewportSize: viewportSize,
+            pageSize: Size(currentPage.size.width, currentPage.size.height),
+            unlimitedPan: mode.unlimitedPan,
+          );
+        }
       }
     }
 
@@ -1095,7 +1115,18 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     if (lastFocalPoint != null) {
       final panDelta = details.focalPoint - lastFocalPoint!;
       if (panDelta.distance > 0.5) {
-        transformNotifier.applyPanDelta(panDelta);
+        if (mode.isInfinite || mode.unlimitedPan) {
+          // Unlimited pan for whiteboard
+          transformNotifier.applyPanDelta(panDelta);
+        } else {
+          // Clamped pan for notebook/limited modes
+          transformNotifier.applyPanDeltaClamped(
+            panDelta,
+            viewportSize: viewportSize,
+            pageSize: Size(currentPage.size.width, currentPage.size.height),
+            unlimitedPan: mode.unlimitedPan,
+          );
+        }
       }
     }
 
@@ -1106,6 +1137,19 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
   void handleScaleEnd(ScaleEndDetails details) {
     // Hide zoom indicator
     ref.read(isZoomingProvider.notifier).state = false;
+    
+    // Snap back for limited canvas mode
+    final mode = canvasMode ?? const core.CanvasMode(isInfinite: true);
+    if (!mode.isInfinite && !mode.unlimitedPan) {
+      final currentPage = ref.read(currentPageProvider);
+      final renderBox = context.findRenderObject() as RenderBox?;
+      final viewportSize = renderBox?.size ?? const Size(800, 600);
+      
+      ref.read(canvasTransformProvider.notifier).snapBackForPage(
+        viewportSize: viewportSize,
+        pageSize: Size(currentPage.size.width, currentPage.size.height),
+      );
+    }
     
     lastFocalPoint = null;
     lastScale = null;

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:example_app/core/core.dart';
@@ -24,7 +25,13 @@ final documentLoaderProvider = FutureProvider.family<DrawingDocument, String>((r
   final result = await useCase(documentId);
   return result.fold(
     (failure) => throw Exception(failure.message),
-    (document) => document,
+    (document) {
+      // #region agent log
+      debugPrint('🔍 [DEBUG] documentLoaderProvider - documentType: ${document.documentType}');
+      debugPrint('🔍 [DEBUG] documentLoaderProvider - isMultiPage: ${document.isMultiPage}');
+      // #endregion
+      return document;
+    },
   );
 });
 

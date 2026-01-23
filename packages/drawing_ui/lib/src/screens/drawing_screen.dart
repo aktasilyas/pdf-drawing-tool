@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:drawing_core/drawing_core.dart' as core;
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
@@ -16,6 +17,7 @@ class DrawingScreen extends ConsumerStatefulWidget {
   const DrawingScreen({
     super.key,
     this.documentTitle,
+    this.canvasMode,
     this.onHomePressed,
     this.onTitlePressed,
     this.onDocumentChanged,
@@ -23,6 +25,9 @@ class DrawingScreen extends ConsumerStatefulWidget {
 
   /// Document title to display in TopNavigationBar.
   final String? documentTitle;
+
+  /// Canvas mode (infinite/limited, page boundaries, etc.).
+  final core.CanvasMode? canvasMode;
 
   /// Callback when home button is pressed.
   final VoidCallback? onHomePressed;
@@ -129,8 +134,10 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                           ),
 
                           // LAYER 1: Drawing Canvas (zoom/pan transform içinde)
-                          const Positioned.fill(
-                            child: DrawingCanvas(),
+                          Positioned.fill(
+                            child: DrawingCanvas(
+                              canvasMode: widget.canvasMode,
+                            ),
                           ),
 
                     // Invisible tap barrier to close panel when tapping canvas

@@ -523,12 +523,18 @@ class _NewDocumentSheetState extends ConsumerState<NewDocumentSheet> {
       debugPrint('  Paper Color: $_paperColor');
       debugPrint('  Orientation: ${_isPortrait ? "Portrait" : "Landscape"}');
 
+      // #region agent log
+      debugPrint('🔍 [DEBUG] _createDocument - selectedDocumentType: $_selectedDocumentType');
+      debugPrint('🔍 [DEBUG] _createDocument - templateId: ${_selectedTemplate.id}');
+      // #endregion
+
       await ref.read(documentsControllerProvider.notifier).createDocument(
             title: title,
             templateId: _selectedTemplate.id,
             folderId: folderId,
             paperColor: _paperColor,
             isPortrait: _isPortrait,
+            documentType: _selectedDocumentType,
           );
 
       if (mounted) {

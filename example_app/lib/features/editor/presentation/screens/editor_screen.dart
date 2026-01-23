@@ -55,10 +55,20 @@ class EditorScreen extends ConsumerWidget {
           }
         });
 
+        // Get canvasMode from document (based on documentType)
+        final canvasMode = document.canvasMode;
+
+        // #region agent log
+        debugPrint('🔍 [DEBUG] EditorScreen - documentType: ${document.documentType}');
+        debugPrint('🔍 [DEBUG] EditorScreen - canvasMode.isInfinite: ${canvasMode.isInfinite}');
+        debugPrint('🔍 [DEBUG] EditorScreen - canvasMode.allowDrawingOutsidePage: ${canvasMode.allowDrawingOutsidePage}');
+        // #endregion
+
         return Scaffold(
           // NO AppBar - DrawingScreen handles everything
           body: DrawingScreen(
             documentTitle: document.title,
+            canvasMode: canvasMode,
             onHomePressed: () => _handleBack(context, ref),
             onTitlePressed: () => _showDocumentMenu(context, ref, document),
             onDocumentChanged: (doc) {

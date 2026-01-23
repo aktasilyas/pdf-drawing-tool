@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get_it/get_it.dart';
+import 'package:drawing_core/drawing_core.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
 import 'package:example_app/features/documents/domain/entities/view_mode.dart';
 import 'package:example_app/features/documents/domain/repositories/document_repository.dart';
@@ -84,6 +85,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>> {
     String? folderId,
     String paperColor = 'Sarı kağıt',
     bool isPortrait = true,
+    DocumentType documentType = DocumentType.notebook,
   }) async {
     state = const AsyncValue.loading();
     final result = await _repository.createDocument(
@@ -92,6 +94,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>> {
       folderId: folderId,
       paperColor: paperColor,
       isPortrait: isPortrait,
+      documentType: documentType,
     );
     return result.fold(
       (failure) {

@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:drawing_core/drawing_core.dart';
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
 
@@ -16,6 +17,7 @@ abstract class DocumentRepository {
     String? folderId,
     String paperColor = 'Sarı kağıt',
     bool isPortrait = true,
+    DocumentType documentType = DocumentType.notebook,
   });
 
   /// Update document metadata

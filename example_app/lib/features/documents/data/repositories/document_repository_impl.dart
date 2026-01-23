@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 import 'package:uuid/uuid.dart';
+import 'package:drawing_core/drawing_core.dart';
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
 import 'package:example_app/features/documents/domain/repositories/document_repository.dart';
@@ -58,6 +59,7 @@ class DocumentRepositoryImpl implements DocumentRepository {
     String? folderId,
     String paperColor = 'Sarı kağıt',
     bool isPortrait = true,
+    DocumentType documentType = DocumentType.notebook,
   }) async {
     try {
       final now = DateTime.now();
@@ -74,6 +76,7 @@ class DocumentRepositoryImpl implements DocumentRepository {
         syncState: SyncState.local.index,
         paperColor: paperColor,
         isPortrait: isPortrait,
+        documentType: documentType.name,
       );
 
       final created = await _localDatasource.createDocument(document);

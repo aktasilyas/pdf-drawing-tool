@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 
+import 'package:drawing_core/src/models/canvas_mode.dart';
 import 'package:drawing_core/src/models/document_settings.dart';
+import 'package:drawing_core/src/models/document_type.dart';
 import 'package:drawing_core/src/models/layer.dart';
 import 'package:drawing_core/src/models/page.dart';
 import 'package:drawing_core/src/models/page_background.dart';
@@ -45,6 +47,9 @@ class DrawingDocument extends Equatable {
   /// Page height (V1 legacy).
   final double? _height;
 
+  /// Document type (notebook, whiteboard, etc.)
+  final DocumentType documentType;
+
   /// When this document was created.
   final DateTime createdAt;
 
@@ -83,6 +88,12 @@ class DrawingDocument extends Equatable {
 
   /// Document settings.
   DocumentSettings get settings => _settings ?? DocumentSettings.defaults();
+
+  /// Canvas mode (based on document type).
+  CanvasMode get canvasMode => CanvasMode.fromDocumentType(documentType);
+
+  /// Is this an infinite canvas document?
+  bool get isInfiniteCanvas => documentType.isInfiniteCanvas;
 
   /// The layers in the current page.
   ///
@@ -130,6 +141,7 @@ class DrawingDocument extends Equatable {
     required this.updatedAt,
     double width = 1920.0,
     double height = 1080.0,
+    this.documentType = DocumentType.notebook,
   })  : _layers = List.unmodifiable(layers),
         _activeLayerIndex = activeLayerIndex,
         _width = width,
@@ -147,6 +159,7 @@ class DrawingDocument extends Equatable {
     DocumentSettings? settings,
     required this.createdAt,
     required this.updatedAt,
+    this.documentType = DocumentType.notebook,
   })  : _pages = List.unmodifiable(pages),
         _currentPageIndex = currentPageIndex,
         _settings = settings ?? DocumentSettings.defaults(),
@@ -163,6 +176,7 @@ class DrawingDocument extends Equatable {
     String title, {
     double? width,
     double? height,
+    DocumentType documentType = DocumentType.notebook,
   }) {
     final now = DateTime.now();
     return DrawingDocument(
@@ -174,6 +188,7 @@ class DrawingDocument extends Equatable {
       updatedAt: now,
       width: width ?? 1920.0,
       height: height ?? 1080.0,
+      documentType: documentType,
     );
   }
 
@@ -183,6 +198,7 @@ class DrawingDocument extends Equatable {
     PageSize? pageSize,
     PageBackground? background,
     DocumentSettings? settings,
+    DocumentType documentType = DocumentType.notebook,
   }) {
     final now = DateTime.now();
     final defaultSettings = settings ?? DocumentSettings.defaults();
@@ -201,6 +217,7 @@ class DrawingDocument extends Equatable {
       settings: defaultSettings,
       createdAt: now,
       updatedAt: now,
+      documentType: documentType,
     );
   }
 
@@ -210,6 +227,7 @@ class DrawingDocument extends Equatable {
     List<Layer> layers, {
     double? width,
     double? height,
+    DocumentType documentType = DocumentType.notebook,
   }) {
     final now = DateTime.now();
     return DrawingDocument(
@@ -221,6 +239,7 @@ class DrawingDocument extends Equatable {
       updatedAt: now,
       width: width ?? 1920.0,
       height: height ?? 1080.0,
+      documentType: documentType,
     );
   }
 
@@ -299,6 +318,7 @@ class DrawingDocument extends Equatable {
         updatedAt: DateTime.now(),
         width: width,
         height: height,
+        documentType: documentType,
       );
     }
   }
@@ -341,6 +361,7 @@ class DrawingDocument extends Equatable {
         updatedAt: DateTime.now(),
         width: width,
         height: height,
+        documentType: documentType,
       );
     }
   }
@@ -377,6 +398,7 @@ class DrawingDocument extends Equatable {
         updatedAt: DateTime.now(),
         width: width,
         height: height,
+        documentType: documentType,
       );
     }
   }
@@ -404,6 +426,7 @@ class DrawingDocument extends Equatable {
         updatedAt: updatedAt, // Don't update for just changing active layer
         width: width,
         height: height,
+        documentType: documentType,
       );
     }
   }
@@ -469,6 +492,7 @@ class DrawingDocument extends Equatable {
       settings: settings,
       createdAt: createdAt,
       updatedAt: DateTime.now(),
+      documentType: documentType,
     );
   }
 
@@ -501,6 +525,7 @@ class DrawingDocument extends Equatable {
       settings: settings,
       createdAt: createdAt,
       updatedAt: DateTime.now(),
+      documentType: documentType,
     );
   }
 
@@ -523,6 +548,7 @@ class DrawingDocument extends Equatable {
       settings: settings,
       createdAt: createdAt,
       updatedAt: updatedAt,
+      documentType: documentType,
     );
   }
 
@@ -543,6 +569,7 @@ class DrawingDocument extends Equatable {
       settings: settings,
       createdAt: createdAt,
       updatedAt: DateTime.now(),
+      documentType: documentType,
     );
   }
 
@@ -559,6 +586,7 @@ class DrawingDocument extends Equatable {
     DateTime? updatedAt,
     double? width,
     double? height,
+    DocumentType? documentType,
   }) {
     if (isMultiPage) {
       // V2: Copy as multi-page
@@ -570,6 +598,7 @@ class DrawingDocument extends Equatable {
         settings: settings ?? this.settings,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
+        documentType: documentType ?? this.documentType,
       );
     } else {
       // V1: Copy as legacy
@@ -582,6 +611,7 @@ class DrawingDocument extends Equatable {
         updatedAt: updatedAt ?? this.updatedAt,
         width: width ?? this.width,
         height: height ?? this.height,
+        documentType: documentType ?? this.documentType,
       );
     }
   }
@@ -597,6 +627,7 @@ class DrawingDocument extends Equatable {
         'pages': pages.map((p) => p.toJson()).toList(),
         'currentPageIndex': currentPageIndex,
         'settings': settings.toJson(),
+        'documentType': documentType.name,
         'createdAt': createdAt.toIso8601String(),
         'updatedAt': updatedAt.toIso8601String(),
       };
@@ -607,6 +638,7 @@ class DrawingDocument extends Equatable {
         'title': title,
         'layers': layers.map((l) => l.toJson()).toList(),
         'activeLayerIndex': activeLayerIndex,
+        'documentType': documentType.name,
         'createdAt': createdAt.toIso8601String(),
         'updatedAt': updatedAt.toIso8601String(),
         'width': width,
@@ -621,6 +653,14 @@ class DrawingDocument extends Equatable {
   factory DrawingDocument.fromJson(Map<String, dynamic> json) {
     // Version detection
     final version = json['version'] as int? ?? 1;
+
+    // Parse documentType (with fallback to notebook for backward compatibility)
+    final documentType = json.containsKey('documentType')
+        ? DocumentType.values.firstWhere(
+            (e) => e.name == json['documentType'],
+            orElse: () => DocumentType.notebook,
+          )
+        : DocumentType.notebook;
 
     // V2: Has version >= 2 AND pages field
     if (version >= 2 && json.containsKey('pages')) {
@@ -637,6 +677,7 @@ class DrawingDocument extends Equatable {
             : DocumentSettings.defaults(),
         createdAt: DateTime.parse(json['createdAt'] as String),
         updatedAt: DateTime.parse(json['updatedAt'] as String),
+        documentType: documentType,
       );
     }
 
@@ -652,6 +693,7 @@ class DrawingDocument extends Equatable {
       updatedAt: DateTime.parse(json['updatedAt'] as String),
       width: (json['width'] as num?)?.toDouble() ?? 1920.0,
       height: (json['height'] as num?)?.toDouble() ?? 1080.0,
+      documentType: documentType,
     );
   }
 
@@ -666,6 +708,7 @@ class DrawingDocument extends Equatable {
         _settings,
         _width,
         _height,
+        documentType,
         createdAt,
         updatedAt,
       ];

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 import 'package:example_app/core/core.dart';
@@ -24,23 +25,41 @@ class LoadDocumentUseCase {
           return contentResult.fold(
             (failure) => Left(failure),
             (content) {
+              // #region agent log
+              debugPrint('🔍 [DEBUG] LoadDocumentUseCase - hasContent: ${content != null}');
+              debugPrint('🔍 [DEBUG] LoadDocumentUseCase - templateId: ${docInfo.templateId}');
+              // #endregion
+              
               if (content == null) {
                 // New document - create with template background
                 final background = _getBackgroundForTemplate(
                   docInfo.templateId,
                   paperColor: docInfo.paperColor,
                 );
+                
+                // #region agent log
+                debugPrint('🔍 [DEBUG] LoadDocumentUseCase - Creating NEW document (content was null)');
+                debugPrint('🔍 [DEBUG] LoadDocumentUseCase - documentType from DB: ${docInfo.documentType}');
+                // #endregion
+                
                 return Right(DrawingDocument.multiPage(
                   id: docInfo.id,
                   title: docInfo.title,
                   pages: [Page.create(index: 0, background: background)],
                   createdAt: docInfo.createdAt,
                   updatedAt: docInfo.updatedAt,
+                  documentType: docInfo.documentType,
                 ));
               }
               // Deserialize from JSON
               try {
                 final doc = DrawingDocument.fromJson(content);
+                
+                // #region agent log
+                debugPrint('🔍 [DEBUG] LoadDocumentUseCase - Loaded EXISTING document from JSON');
+                debugPrint('🔍 [DEBUG] LoadDocumentUseCase - loadedDocumentType: ${doc.documentType}');
+                // #endregion
+                
                 return Right(doc);
               } catch (e) {
                 return Left(CacheFailure('Document corrupted: $e'));
