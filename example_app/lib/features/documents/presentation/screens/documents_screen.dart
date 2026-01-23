@@ -17,6 +17,7 @@ class DocumentsScreen extends ConsumerStatefulWidget {
 }
 
 class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
+  final GlobalKey _addButtonKey = GlobalKey();
   SidebarSection _selectedSection = SidebarSection.documents;
   SortOption _sortOption = SortOption.date;
   bool _isSelectionMode = false;
@@ -69,6 +70,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                 // Header
                 DocumentsHeader(
                   title: _getSectionTitle(),
+                  newButtonKey: _addButtonKey,
                   onNewPressed: _showNewDocumentDialog,
                   sortOption: _sortOption,
                   onSortChanged: (option) {
@@ -243,7 +245,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
   }
 
   void _showNewDocumentDialog() {
-    showNewDocumentSheet(context);
+    showNewDocumentDropdown(context, _addButtonKey);
   }
 
   void _toggleFavorite(String documentId) {

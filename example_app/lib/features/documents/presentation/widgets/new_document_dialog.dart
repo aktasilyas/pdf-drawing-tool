@@ -1,21 +1,138 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:drawing_core/drawing_core.dart';
 import 'package:example_app/features/documents/domain/entities/template.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 
+/// Dropdown menü item'ları
+enum NewDocumentOption {
+  notebook,    // 📓 Not Defteri - şablon seçimi göster
+  whiteboard,  // 🔲 Beyaz Tahta - şablon seçimi göster  
+  quickNote,   // ✏️ Hızlı Not - direkt aç
+  importPdf,   // 📄 PDF İçe Aktar - dosya seç, direkt aç
+  importImage, // 🖼️ Resim İçe Aktar - dosya seç, direkt aç
+}
+
+/// Yeni doküman dropdown menüsünü gösterir
+void showNewDocumentDropdown(BuildContext context, GlobalKey buttonKey) {
+  final RenderBox button = buttonKey.currentContext!.findRenderObject() as RenderBox;
+  final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
+  final Offset position = button.localToGlobal(Offset.zero, ancestor: overlay);
+  
+  showMenu<NewDocumentOption>(
+    context: context,
+    position: RelativeRect.fromLTRB(
+      position.dx,
+      position.dy + button.size.height + 4,
+      position.dx + button.size.width,
+      position.dy + button.size.height + 300,
+    ),
+    elevation: 8,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12),
+    ),
+    items: [
+      _buildMenuItem(NewDocumentOption.notebook, Icons.book_outlined, 'Not Defteri'),
+      _buildMenuItem(NewDocumentOption.whiteboard, Icons.space_dashboard_outlined, 'Beyaz Tahta'),
+      _buildMenuItem(NewDocumentOption.quickNote, Icons.note_outlined, 'Hızlı Not'),
+      const PopupMenuDivider(height: 1),
+      _buildMenuItem(NewDocumentOption.importPdf, Icons.picture_as_pdf_outlined, 'PDF İçe Aktar'),
+      _buildMenuItem(NewDocumentOption.importImage, Icons.image_outlined, 'Resim İçe Aktar'),
+    ],
+  ).then((value) {
+    if (value == null) return;
+    _handleNewDocumentOption(context, value);
+  });
+}
+
+PopupMenuItem<NewDocumentOption> _buildMenuItem(
+  NewDocumentOption option, 
+  IconData icon, 
+  String label,
+) {
+  return PopupMenuItem<NewDocumentOption>(
+    value: option,
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+    height: 44,
+    child: Row(
+      children: [
+        Icon(
+          icon,
+          size: 20,
+          color: const Color(0xFF616161),
+        ),
+        const SizedBox(width: 12),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            color: Color(0xFF1A1A1A),
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+void _handleNewDocumentOption(BuildContext context, NewDocumentOption option) {
+  switch (option) {
+    case NewDocumentOption.notebook:
+      // Şablon seçimi ile aç
+      showNewDocumentSheet(context, documentType: DocumentType.notebook);
+      break;
+    case NewDocumentOption.whiteboard:
+      // Şablon seçimi ile aç (sadece kağıt rengi)
+      showNewDocumentSheet(context, documentType: DocumentType.whiteboard);
+      break;
+    case NewDocumentOption.quickNote:
+      // Direkt aç - varsayılan ayarlar
+      _createQuickNote(context);
+      break;
+    case NewDocumentOption.importPdf:
+      // PDF dosya seçici
+      _importPdf(context);
+      break;
+    case NewDocumentOption.importImage:
+      // Resim dosya seçici
+      _importImage(context);
+      break;
+  }
+}
+
+void _createQuickNote(BuildContext context) {
+  // TODO: Direkt canvas aç, varsayılan ayarlarla
+  // DocumentType.quickNote, blank background, white paper
+}
+
+void _importPdf(BuildContext context) {
+  // TODO: file_picker ile PDF seç
+}
+
+void _importImage(BuildContext context) {
+  // TODO: file_picker ile resim seç
+}
+
 /// Shows the new document bottom sheet
-void showNewDocumentSheet(BuildContext context) {
+void showNewDocumentSheet(BuildContext context, {DocumentType? documentType}) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
     backgroundColor: Colors.transparent,
-    builder: (context) => const NewDocumentSheet(),
+    builder: (context) => NewDocumentSheet(
+      initialDocumentType: documentType,
+    ),
   );
 }
 
 class NewDocumentSheet extends ConsumerStatefulWidget {
-  const NewDocumentSheet({super.key});
+  final DocumentType? initialDocumentType;
+  
+  const NewDocumentSheet({
+    super.key,
+    this.initialDocumentType,
+  });
 
   @override
   ConsumerState<NewDocumentSheet> createState() => _NewDocumentSheetState();
@@ -23,10 +140,41 @@ class NewDocumentSheet extends ConsumerStatefulWidget {
 
 class _NewDocumentSheetState extends ConsumerState<NewDocumentSheet> {
   final _titleController = TextEditingController(text: 'Adsız Not Defteri');
+  DocumentType _selectedDocumentType = DocumentType.notebook;
   Template _selectedTemplate = Template.all.first;
   String _paperColor = 'Sarı kağıt';
   bool _isPortrait = true;
   bool _isCreating = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _updateTitlePlaceholder();
+    
+    // initialDocumentType varsa onu kullan
+    if (widget.initialDocumentType != null) {
+      _selectedDocumentType = widget.initialDocumentType!;
+      _updateTitlePlaceholder();
+      
+      // Whiteboard seçilince blank template'e geç
+      if (_selectedDocumentType == DocumentType.whiteboard) {
+        _selectedTemplate = Template.all.firstWhere(
+          (t) => t.type == TemplateType.blank,
+          orElse: () => Template.all.first,
+        );
+      }
+    }
+  }
+
+  void _updateTitlePlaceholder() {
+    final placeholder = switch (_selectedDocumentType) {
+      DocumentType.notebook => 'Adsız Not Defteri',
+      DocumentType.whiteboard => 'Adsız Beyaz Tahta',
+      DocumentType.quickNote => 'Hızlı Not',
+      _ => 'Adsız Doküman',
+    };
+    _titleController.text = placeholder;
+  }
 
   @override
   void dispose() {
@@ -73,24 +221,34 @@ class _NewDocumentSheetState extends ConsumerState<NewDocumentSheet> {
 
                         const SizedBox(height: 24),
 
-                        // Template sections
-                        _buildTemplateSection(
-                          'Temel',
-                          Template.all.where((t) =>
-                              t.type == TemplateType.blank ||
-                              t.type == TemplateType.thinLined ||
-                              t.type == TemplateType.thickLined ||
-                              t.type == TemplateType.dotted ||
-                              t.type == TemplateType.smallGrid ||
-                              t.type == TemplateType.largeGrid).toList(),
-                        ),
+                        // Template sections (dinamik - doküman tipine göre)
+                        if (_selectedDocumentType == DocumentType.whiteboard) ...[
+                          // Whiteboard: Sadece blank
+                          _buildTemplateSection(
+                            'Şablon',
+                            Template.all.where((t) => t.type == TemplateType.blank).toList(),
+                            showWhiteboardNote: true,
+                          ),
+                        ] else ...[
+                          // Notebook: Tüm şablonlar
+                          _buildTemplateSection(
+                            'Temel',
+                            Template.all.where((t) =>
+                                t.type == TemplateType.blank ||
+                                t.type == TemplateType.thinLined ||
+                                t.type == TemplateType.thickLined ||
+                                t.type == TemplateType.dotted ||
+                                t.type == TemplateType.smallGrid ||
+                                t.type == TemplateType.largeGrid).toList(),
+                          ),
 
-                        const SizedBox(height: 24),
+                          const SizedBox(height: 24),
 
-                        _buildTemplateSection(
-                          'Yazım Kağıtları',
-                          Template.all.where((t) => t.type == TemplateType.cornell).toList(),
-                        ),
+                          _buildTemplateSection(
+                            'Yazım Kağıtları',
+                            Template.all.where((t) => t.type == TemplateType.cornell).toList(),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -277,7 +435,7 @@ class _NewDocumentSheetState extends ConsumerState<NewDocumentSheet> {
     );
   }
 
-  Widget _buildTemplateSection(String title, List<Template> templates) {
+  Widget _buildTemplateSection(String title, List<Template> templates, {bool showWhiteboardNote = false}) {
     if (templates.isEmpty) return const SizedBox.shrink();
 
     return Column(
@@ -297,6 +455,21 @@ class _NewDocumentSheetState extends ConsumerState<NewDocumentSheet> {
             ),
           ],
         ),
+        
+        // Whiteboard için açıklama
+        if (showWhiteboardNote)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              'Beyaz tahta sonsuz bir canvas\'tır. Çizgi deseni olmaz.',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey.shade600,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ),
+        
         const SizedBox(height: 12),
         LayoutBuilder(
           builder: (context, constraints) {

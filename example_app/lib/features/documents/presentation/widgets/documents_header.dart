@@ -9,6 +9,7 @@ class DocumentsHeader extends StatelessWidget {
   final ValueChanged<SortOption> onSortChanged;
   final bool isSelectionMode;
   final VoidCallback? onSelectionToggle;
+  final GlobalKey? newButtonKey;
 
   const DocumentsHeader({
     super.key,
@@ -18,6 +19,7 @@ class DocumentsHeader extends StatelessWidget {
     required this.onSortChanged,
     this.isSelectionMode = false,
     this.onSelectionToggle,
+    this.newButtonKey,
   });
 
   @override
@@ -40,10 +42,19 @@ class DocumentsHeader extends StatelessWidget {
           const Spacer(),
 
           // New button
-          FilledButton.icon(
+          FilledButton(
+            key: newButtonKey,
             onPressed: onNewPressed,
-            icon: const Icon(Icons.add, size: 18),
-            label: const Text('Yeni'),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: const [
+                Icon(Icons.add, size: 18),
+                SizedBox(width: 6),
+                Text('Yeni'),
+                SizedBox(width: 4),
+                Icon(Icons.arrow_drop_down, size: 20),
+              ],
+            ),
             style: FilledButton.styleFrom(
               backgroundColor: const Color(0xFF1976D2),
               foregroundColor: Colors.white,
