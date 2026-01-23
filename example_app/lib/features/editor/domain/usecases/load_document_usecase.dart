@@ -36,6 +36,7 @@ class LoadDocumentUseCase {
                   pages: [Page.create(index: 0, background: background)],
                   createdAt: docInfo.createdAt,
                   updatedAt: docInfo.updatedAt,
+                  documentType: docInfo.documentType,
                 ));
               }
               // Deserialize from JSON

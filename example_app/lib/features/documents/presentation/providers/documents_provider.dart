@@ -84,6 +84,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>> {
     String? folderId,
     String paperColor = 'Sarı kağıt',
     bool isPortrait = true,
+    String documentType = 'notebook',
   }) async {
     state = const AsyncValue.loading();
     final result = await _repository.createDocument(
@@ -92,6 +93,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>> {
       folderId: folderId,
       paperColor: paperColor,
       isPortrait: isPortrait,
+      documentType: documentType,
     );
     return result.fold(
       (failure) {

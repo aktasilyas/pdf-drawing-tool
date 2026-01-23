@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:drawing_core/drawing_core.dart';
 import 'package:example_app/features/documents/domain/entities/template.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 
@@ -23,6 +24,7 @@ class NewDocumentSheet extends ConsumerStatefulWidget {
 
 class _NewDocumentSheetState extends ConsumerState<NewDocumentSheet> {
   final _titleController = TextEditingController(text: 'Adsız Not Defteri');
+  DocumentType _selectedDocumentType = DocumentType.notebook;
   Template _selectedTemplate = Template.all.first;
   String _paperColor = 'Sarı kağıt';
   bool _isPortrait = true;
@@ -73,8 +75,14 @@ class _NewDocumentSheetState extends ConsumerState<NewDocumentSheet> {
 
                         const SizedBox(height: 24),
 
-                        // Template sections
-                        _buildTemplateSection(
+                        // Document type selector
+                        _buildDocumentTypeSelector(),
+
+                        const SizedBox(height: 24),
+
+                        // Template sections (only for types that support templates)
+                        if (_selectedDocumentType.showsTemplateSelection) ...[
+                          _buildTemplateSection(
                           'Temel',
                           Template.all.where((t) =>
                               t.type == TemplateType.blank ||
@@ -85,12 +93,13 @@ class _NewDocumentSheetState extends ConsumerState<NewDocumentSheet> {
                               t.type == TemplateType.largeGrid).toList(),
                         ),
 
-                        const SizedBox(height: 24),
+                          const SizedBox(height: 24),
 
-                        _buildTemplateSection(
-                          'Yazım Kağıtları',
-                          Template.all.where((t) => t.type == TemplateType.cornell).toList(),
-                        ),
+                          _buildTemplateSection(
+                            'Yazım Kağıtları',
+                            Template.all.where((t) => t.type == TemplateType.cornell).toList(),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -132,7 +141,7 @@ class _NewDocumentSheetState extends ConsumerState<NewDocumentSheet> {
                                 color: Colors.white,
                               ),
                             )
-                          : const Text('Not Defteri Oluştur'),
+                          : Text('${_selectedDocumentType.displayName} Oluştur'),
                     ),
                   ],
                 ),
@@ -220,6 +229,97 @@ class _NewDocumentSheetState extends ConsumerState<NewDocumentSheet> {
         ),
       ],
     );
+  }
+
+  Widget _buildDocumentTypeSelector() {
+    // Kullanılabilir tipler (şimdilik sadece 3 tane)
+    final availableTypes = [
+      DocumentType.notebook,
+      DocumentType.whiteboard,
+      DocumentType.quickNote,
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Doküman Tipi',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF666666),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: availableTypes.map((type) {
+            final isSelected = type == _selectedDocumentType;
+            return InkWell(
+              onTap: () {
+                setState(() {
+                  _selectedDocumentType = type;
+                  // Update title placeholder
+                  if (_titleController.text == 'Adsız Not Defteri' ||
+                      _titleController.text.startsWith('Adsız')) {
+                    _titleController.text = 'Adsız ${type.displayName}';
+                  }
+                });
+              },
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                decoration: BoxDecoration(
+                  color: isSelected ? const Color(0xFFE3F2FD) : const Color(0xFFF5F5F5),
+                  border: Border.all(
+                    color: isSelected ? const Color(0xFF1976D2) : Colors.grey.shade300,
+                    width: isSelected ? 2 : 1,
+                  ),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      _getIconForType(type),
+                      size: 20,
+                      color: isSelected ? const Color(0xFF1976D2) : const Color(0xFF666666),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      type.displayName,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                        color: isSelected ? const Color(0xFF1976D2) : const Color(0xFF333333),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  IconData _getIconForType(DocumentType type) {
+    switch (type) {
+      case DocumentType.notebook:
+        return Icons.description_outlined;
+      case DocumentType.whiteboard:
+        return Icons.grid_on;
+      case DocumentType.quickNote:
+        return Icons.edit_note;
+      case DocumentType.image:
+        return Icons.image_outlined;
+      case DocumentType.pdf:
+        return Icons.picture_as_pdf_outlined;
+      case DocumentType.textDocument:
+        return Icons.article_outlined;
+    }
   }
 
   Widget _buildDropdownButton({
@@ -345,6 +445,7 @@ class _NewDocumentSheetState extends ConsumerState<NewDocumentSheet> {
 
       // Log selections for debugging
       debugPrint('📝 Creating document:');
+      debugPrint('  Type: ${_selectedDocumentType.displayName}');
       debugPrint('  Title: $title');
       debugPrint('  Template: ${_selectedTemplate.name}');
       debugPrint('  Paper Color: $_paperColor');
@@ -356,6 +457,7 @@ class _NewDocumentSheetState extends ConsumerState<NewDocumentSheet> {
             folderId: folderId,
             paperColor: _paperColor,
             isPortrait: _isPortrait,
+            documentType: _selectedDocumentType.name,
           );
 
       if (mounted) {

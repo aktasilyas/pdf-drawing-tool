@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:drawing_core/drawing_core.dart';
 
 enum SyncState { local, syncing, synced, error }
 
@@ -16,6 +17,7 @@ class DocumentInfo extends Equatable {
   final SyncState syncState;
   final String paperColor;
   final bool isPortrait;
+  final DocumentType documentType;
 
   const DocumentInfo({
     required this.id,
@@ -31,6 +33,7 @@ class DocumentInfo extends Equatable {
     this.syncState = SyncState.local,
     this.paperColor = 'Sarı kağıt',
     this.isPortrait = true,
+    this.documentType = DocumentType.notebook,
   });
 
   DocumentInfo copyWith({
@@ -47,6 +50,7 @@ class DocumentInfo extends Equatable {
     SyncState? syncState,
     String? paperColor,
     bool? isPortrait,
+    DocumentType? documentType,
   }) {
     return DocumentInfo(
       id: id ?? this.id,
@@ -62,6 +66,7 @@ class DocumentInfo extends Equatable {
       syncState: syncState ?? this.syncState,
       paperColor: paperColor ?? this.paperColor,
       isPortrait: isPortrait ?? this.isPortrait,
+      documentType: documentType ?? this.documentType,
     );
   }
 
@@ -80,5 +85,6 @@ class DocumentInfo extends Equatable {
         syncState,
         paperColor,
         isPortrait,
+        documentType,
       ];
 }
