@@ -2,8 +2,8 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:example_app/core/core.dart';
-import '../../domain/usecases/load_document_usecase.dart';
-import '../../domain/usecases/save_document_usecase.dart';
+import 'package:example_app/features/editor/domain/usecases/load_document_usecase.dart';
+import 'package:example_app/features/editor/domain/usecases/save_document_usecase.dart';
 
 // Provider for LoadDocumentUseCase
 final loadDocumentUseCaseProvider = Provider<LoadDocumentUseCase>((ref) {

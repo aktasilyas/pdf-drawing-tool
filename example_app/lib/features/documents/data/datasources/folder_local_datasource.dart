@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:example_app/core/core.dart';
-import '../models/folder_model.dart';
+import 'package:example_app/features/documents/data/models/folder_model.dart';
 
 abstract class FolderLocalDatasource {
   Future<List<FolderModel>> getFolders({String? parentId});

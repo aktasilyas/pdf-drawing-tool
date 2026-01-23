@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/drawing_ui.dart';
@@ -36,7 +38,7 @@ void main() {
         final page1 = Page.create(index: 0);
         final page2 = Page.create(index: 1);
 
-        final manager = PageManager(pages: [page1, page2]);
+        final manager = PageManager(pages: [page1, page2], currentIndex: 0);
 
         expect(manager.currentIndex, 0);
         expect(manager.canGoNext, true);
@@ -109,7 +111,7 @@ void main() {
         final thumbnailData = [1, 2, 3, 4]; // Mock thumbnail
 
         final key = 'page_${page.id}';
-        thumbnailCache.put(key, thumbnailData);
+        thumbnailCache.put(key, Uint8List.fromList(thumbnailData));
 
         final cached = thumbnailCache.get(key);
         expect(cached, thumbnailData);
@@ -118,9 +120,9 @@ void main() {
       test('should evict old thumbnails when cache is full', () {
         final cache = ThumbnailCache(maxSize: 2);
 
-        cache.put('thumb1', [1]);
-        cache.put('thumb2', [2]);
-        cache.put('thumb3', [3]); // Should evict thumb1
+        cache.put('thumb1', Uint8List.fromList([1]));
+        cache.put('thumb2', Uint8List.fromList([2]));
+        cache.put('thumb3', Uint8List.fromList([3])); // Should evict thumb1
 
         expect(cache.get('thumb1'), isNull);
         expect(cache.get('thumb2'), isNotNull);
@@ -160,7 +162,7 @@ void main() {
         );
 
         final toPreload = strategy.getPagesToPreload(
-          currentPage: 5,
+          currentIndex: 5,
           totalPages: 10,
         );
 
@@ -176,7 +178,7 @@ void main() {
         );
 
         final toPreload = strategy.getPagesToPreload(
-          currentPage: 5,
+          currentIndex: 5,
           totalPages: 10,
         );
 
@@ -211,6 +213,7 @@ void main() {
             DrawingPoint(x: 100, y: 100),
           ],
           style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
+          createdAt: DateTime.now(),
         );
 
         final updatedPage = newDoc.pages[0].addStroke(stroke);
@@ -236,6 +239,7 @@ void main() {
             Page.create(index: 1),
             Page.create(index: 2),
           ],
+          currentIndex: 0,
         );
 
         expect(manager.pages[0].index, 0);
@@ -257,10 +261,11 @@ void main() {
             DrawingPoint(x: 100, y: 100),
           ],
           style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
+          createdAt: DateTime.now(),
         );
 
         final page = Page.create(index: 0).addStroke(stroke);
-        final manager = PageManager(pages: [page]);
+        final manager = PageManager(pages: [page], currentIndex: 0);
 
         manager.duplicatePage(0);
 

@@ -339,6 +339,7 @@ class VectorPDFRenderer {
         return 2; // Square
       case PenType.gelPen:
       case PenType.hardPencil:
+      case PenType.rulerPen:
         return 1; // Round
     }
   }
@@ -357,6 +358,7 @@ class VectorPDFRenderer {
       case PenType.dashedPen:
         return 0; // Miter
       case PenType.hardPencil:
+      case PenType.rulerPen:
         return 1; // Round
     }
   }

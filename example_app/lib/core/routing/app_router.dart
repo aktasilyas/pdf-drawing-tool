@@ -10,13 +10,12 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:example_app/features/editor/editor.dart';
-import 'route_names.dart';
-
-// TODO: Import screens when created
-// import '../../features/auth/presentation/screens/splash_screen.dart';
-// import '../../features/auth/presentation/screens/login_screen.dart';
-// import '../../features/documents/presentation/screens/documents_screen.dart';
+import 'package:example_app/core/routing/route_names.dart';
+import 'package:example_app/features/auth/presentation/screens/splash_screen.dart';
+import 'package:example_app/features/auth/presentation/screens/login_screen.dart';
+import 'package:example_app/features/auth/presentation/screens/register_screen.dart';
+import 'package:example_app/features/documents/presentation/screens/documents_screen.dart';
+import 'package:example_app/features/editor/presentation/screens/editor_screen.dart';
 
 /// Global router configuration
 final appRouter = GoRouter(
@@ -27,17 +26,17 @@ final appRouter = GoRouter(
     GoRoute(
       path: RouteNames.splash,
       name: 'splash',
-      builder: (context, state) => const _PlaceholderScreen(title: 'Splash'),
+      builder: (context, state) => const SplashScreen(),
     ),
     GoRoute(
       path: RouteNames.login,
       name: 'login',
-      builder: (context, state) => const _PlaceholderScreen(title: 'Login'),
+      builder: (context, state) => const LoginScreen(),
     ),
     GoRoute(
       path: RouteNames.register,
       name: 'register',
-      builder: (context, state) => const _PlaceholderScreen(title: 'Register'),
+      builder: (context, state) => const RegisterScreen(),
     ),
     GoRoute(
       path: RouteNames.forgotPassword,
@@ -49,14 +48,15 @@ final appRouter = GoRouter(
     GoRoute(
       path: RouteNames.documents,
       name: 'documents',
-      builder: (context, state) => const _PlaceholderScreen(title: 'Documents'),
+      builder: (context, state) => const DocumentsScreen(),
     ),
     GoRoute(
       path: RouteNames.folder,
       name: 'folder',
       builder: (context, state) {
-        final folderId = state.pathParameters['folderId']!;
-        return _PlaceholderScreen(title: 'Folder: $folderId');
+        // TODO: Pass folderId to DocumentsScreen when implemented
+        // final folderId = state.pathParameters['folderId']!;
+        return const DocumentsScreen();
       },
     ),
     GoRoute(
@@ -87,7 +87,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: RouteNames.newDocument,
       name: 'newDocument',
-      builder: (context, state) => const _PlaceholderScreen(title: 'New Document'),
+      builder: (context, state) {
+        // Create new document - pass empty/new document id
+        return const EditorScreen(documentId: 'new');
+      },
     ),
 
     // Settings routes
@@ -124,17 +127,7 @@ final appRouter = GoRouter(
   
   // Redirect logic for auth
   redirect: (context, state) {
-    // TODO: Implement auth redirect logic
-    // final isLoggedIn = ref.read(authStateProvider).isLoggedIn;
-    // final isAuthRoute = state.matchedLocation == RouteNames.login || 
-    //                     state.matchedLocation == RouteNames.register;
-    // 
-    // if (!isLoggedIn && !isAuthRoute) {
-    //   return RouteNames.login;
-    // }
-    // if (isLoggedIn && isAuthRoute) {
-    //   return RouteNames.documents;
-    // }
+    // TODO: Implement auth redirect logic when auth provider is ready
     return null;
   },
 );

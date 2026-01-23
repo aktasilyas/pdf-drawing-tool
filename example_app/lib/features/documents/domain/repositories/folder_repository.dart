@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:example_app/core/core.dart';
-import '../entities/folder.dart';
+import 'package:example_app/features/documents/domain/entities/folder.dart';
 
 abstract class FolderRepository {
   /// Get all folders, optionally filtered by parent

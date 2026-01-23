@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:drawing_core/drawing_core.dart' as core;
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/drawing_ui.dart';
 
@@ -76,6 +77,7 @@ void main() {
               DrawingPoint(x: 100, y: 100),
             ],
             style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
+            createdAt: DateTime.now(),
           ),
         );
 
@@ -141,10 +143,10 @@ void main() {
       test('should support all pen types', () {
         final renderer = VectorPDFRenderer();
 
-        expect(renderer.supportsPenStyle(PenType.ballpointPen), true);
-        expect(renderer.supportsPenStyle(PenType.fountainPen), true);
-        expect(renderer.supportsPenStyle(PenType.marker), true);
-        expect(renderer.supportsPenStyle(PenType.highlighter), true);
+        expect(renderer.supportsPenStyle(core.PenType.ballpointPen), true);
+        expect(renderer.supportsPenStyle(core.PenType.gelPen), true);
+        expect(renderer.supportsPenStyle(core.PenType.brushPen), true);
+        expect(renderer.supportsPenStyle(core.PenType.highlighter), true);
       });
 
       test('should calculate stroke complexity', () {
@@ -157,6 +159,7 @@ void main() {
             DrawingPoint(x: 100, y: 100),
           ],
           style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
+          createdAt: DateTime.now(),
         );
 
         final complexity = renderer.estimateComplexity(simpleStroke);
@@ -173,6 +176,7 @@ void main() {
             (i) => DrawingPoint(x: i.toDouble(), y: 0),
           ),
           style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
+          createdAt: DateTime.now(),
         );
 
         expect(renderer.shouldOptimize(complexStroke), true);
@@ -194,6 +198,7 @@ void main() {
                 DrawingPoint(x: 100, y: 100),
               ],
               style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
+              createdAt: DateTime.now(),
             ),
           );
         }
@@ -368,6 +373,7 @@ void main() {
                   DrawingPoint(x: 100, y: 100),
                 ],
                 style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
+                createdAt: DateTime.now(),
               ),
             ),
             Page.create(index: 1),

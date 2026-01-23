@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../constants/documents_strings.dart';
-import '../../domain/entities/document_info.dart';
+import 'package:example_app/features/documents/domain/entities/document_info.dart';
+import 'package:example_app/features/documents/presentation/constants/documents_strings.dart';
 
 class DocumentContextMenu extends StatelessWidget {
   final DocumentInfo document;

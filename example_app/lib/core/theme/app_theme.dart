@@ -20,8 +20,6 @@ abstract class AppTheme {
           elevation: 0,
           scrolledUnderElevation: 1,
         ),
-<<<<<<< HEAD
-=======
         cardTheme: CardThemeData(
           color: Colors.white,
           elevation: 0,
@@ -30,7 +28,6 @@ abstract class AppTheme {
             side: BorderSide(color: Colors.grey.shade200),
           ),
         ),
->>>>>>> feature/premium
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: Colors.grey.shade50,
@@ -112,8 +109,6 @@ abstract class AppTheme {
           elevation: 0,
           scrolledUnderElevation: 1,
         ),
-<<<<<<< HEAD
-=======
         cardTheme: CardThemeData(
           color: AppColors.surfaceDark,
           elevation: 0,
@@ -122,7 +117,6 @@ abstract class AppTheme {
             side: BorderSide(color: Colors.grey.shade800),
           ),
         ),
->>>>>>> feature/premium
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: AppColors.surfaceDark,

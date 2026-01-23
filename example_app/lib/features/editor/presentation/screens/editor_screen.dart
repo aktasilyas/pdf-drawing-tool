@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:drawing_ui/drawing_ui.dart';
-import '../providers/editor_provider.dart';
-import '../widgets/pdf_export_dialog.dart';
+import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/drawing_ui.dart' hide PDFExportDialog;
+import 'package:example_app/features/editor/presentation/providers/editor_provider.dart';
+import 'package:example_app/features/editor/presentation/widgets/pdf_export_dialog.dart';
 
 class EditorScreen extends ConsumerStatefulWidget {
   final String documentId;
@@ -15,6 +16,8 @@ class EditorScreen extends ConsumerStatefulWidget {
 }
 
 class _EditorScreenState extends ConsumerState<EditorScreen> {
+  bool _documentInitialized = false;
+
   @override
   Widget build(BuildContext context) {
     final documentAsync = ref.watch(documentLoaderProvider(widget.documentId));
@@ -41,71 +44,58 @@ class _EditorScreenState extends ConsumerState<EditorScreen> {
           ),
         ),
       ),
-      data: (document) => _EditorContent(
-        document: document,
-        onDocumentChanged: (doc) {
-          ref.read(currentDocumentProvider.notifier).state = doc;
-          ref.read(autoSaveProvider.notifier).documentChanged(doc);
-          ref.read(hasUnsavedChangesProvider.notifier).state = true;
-        },
-      ),
+      data: (document) {
+        // Initialize document in provider once
+        if (!_documentInitialized) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            ref.read(documentProvider.notifier).updateDocument(document);
+            ref.read(currentDocumentProvider.notifier).state = document;
+          });
+          _documentInitialized = true;
+        }
+        return _EditorContent(
+          initialDocument: document,
+        );
+      },
     );
   }
 }
 
-class _EditorContent extends ConsumerStatefulWidget {
-  final DrawingDocument document;
-  final ValueChanged<DrawingDocument> onDocumentChanged;
+class _EditorContent extends ConsumerWidget {
+  final DrawingDocument initialDocument;
 
   const _EditorContent({
-    required this.document,
-    required this.onDocumentChanged,
+    required this.initialDocument,
   });
 
   @override
-  ConsumerState<_EditorContent> createState() => _EditorContentState();
-}
-
-class _EditorContentState extends ConsumerState<_EditorContent> {
-  DrawingController? _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = DrawingController(document: widget.document);
-    _controller?.addListener(_onControllerChanged);
-  }
-
-  @override
-  void dispose() {
-    _controller?.removeListener(_onControllerChanged);
-    _controller?.dispose();
-    super.dispose();
-  }
-
-  void _onControllerChanged() {
-    if (_controller != null) {
-      widget.onDocumentChanged(_controller!.document);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final isSaving = ref.watch(autoSaveProvider);
     final hasUnsaved = ref.watch(hasUnsavedChangesProvider);
-    final currentDoc = ref.watch(currentDocumentProvider) ?? widget.document;
+    final currentDoc = ref.watch(documentProvider);
+    final canUndo = ref.watch(canUndoProvider);
+    final canRedo = ref.watch(canRedoProvider);
+
+    // Listen to document changes for auto-save
+    ref.listen<DrawingDocument>(documentProvider, (previous, next) {
+      if (previous != next) {
+        ref.read(currentDocumentProvider.notifier).state = next;
+        ref.read(autoSaveProvider.notifier).documentChanged(next);
+        ref.read(hasUnsavedChangesProvider.notifier).state = true;
+      }
+    });
 
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) async {
+      onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
-        await _handleBack(context);
+        await _handleBack(context, ref);
       },
       child: Scaffold(
         appBar: AppBar(
           leading: IconButton(
             icon: const Icon(Icons.arrow_back),
-            onPressed: () => _handleBack(context),
+            onPressed: () => _handleBack(context, ref),
           ),
           title: Row(
             children: [
@@ -130,20 +120,20 @@ class _EditorContentState extends ConsumerState<_EditorContent> {
             // Undo
             IconButton(
               icon: const Icon(Icons.undo),
-              onPressed: _controller?.canUndo ?? false
-                  ? () => _controller?.undo()
+              onPressed: canUndo
+                  ? () => ref.read(historyManagerProvider.notifier).undo()
                   : null,
             ),
             // Redo
             IconButton(
               icon: const Icon(Icons.redo),
-              onPressed: _controller?.canRedo ?? false
-                  ? () => _controller?.redo()
+              onPressed: canRedo
+                  ? () => ref.read(historyManagerProvider.notifier).redo()
                   : null,
             ),
             // More menu
             PopupMenuButton<String>(
-              onSelected: (value) => _handleMenuAction(context, value),
+              onSelected: (value) => _handleMenuAction(context, ref, value),
               itemBuilder: (context) => [
                 const PopupMenuItem(
                   value: 'rename',
@@ -161,20 +151,15 @@ class _EditorContentState extends ConsumerState<_EditorContent> {
             ),
           ],
         ),
-        body: _controller != null
-            ? DrawingScreen(
-                controller: _controller,
-                showToolbar: true,
-                showPageNavigator: currentDoc.pageCount > 1,
-              )
-            : const Center(child: CircularProgressIndicator()),
+        // DrawingScreen is self-contained and uses providers internally
+        body: const DrawingScreen(),
       ),
     );
   }
 
-  Future<void> _handleBack(BuildContext context) async {
+  Future<void> _handleBack(BuildContext context, WidgetRef ref) async {
     final hasUnsaved = ref.read(hasUnsavedChangesProvider);
-    final currentDoc = ref.read(currentDocumentProvider) ?? widget.document;
+    final currentDoc = ref.read(documentProvider);
     
     if (hasUnsaved) {
       // Force save before leaving
@@ -188,12 +173,12 @@ class _EditorContentState extends ConsumerState<_EditorContent> {
     }
   }
 
-  void _handleMenuAction(BuildContext context, String action) {
-    final currentDoc = ref.read(currentDocumentProvider) ?? widget.document;
+  void _handleMenuAction(BuildContext context, WidgetRef ref, String action) {
+    final currentDoc = ref.read(documentProvider);
     
     switch (action) {
       case 'rename':
-        _showRenameDialog(context, currentDoc);
+        _showRenameDialog(context, ref, currentDoc);
         break;
       case 'export_pdf':
         _showExportDialog(context, currentDoc);
@@ -206,7 +191,7 @@ class _EditorContentState extends ConsumerState<_EditorContent> {
     }
   }
 
-  void _showRenameDialog(BuildContext context, DrawingDocument document) {
+  void _showRenameDialog(BuildContext context, WidgetRef ref, DrawingDocument document) {
     final controller = TextEditingController(text: document.title);
     showDialog(
       context: context,
@@ -226,12 +211,8 @@ class _EditorContentState extends ConsumerState<_EditorContent> {
             onPressed: () {
               final newTitle = controller.text.trim();
               if (newTitle.isNotEmpty) {
-                // Update document title
-                final updatedDoc = document.copyWith(title: newTitle);
-                widget.onDocumentChanged(updatedDoc);
-                if (_controller != null) {
-                  _controller!.document = updatedDoc;
-                }
+                // Update document title via provider
+                ref.read(documentProvider.notifier).updateTitle(newTitle);
               }
               Navigator.pop(context);
             },

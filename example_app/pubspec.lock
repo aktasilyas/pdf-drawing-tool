@@ -583,6 +583,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.6.0"
+  injectable_generator:
+    dependency: "direct dev"
+    description:
+      name: injectable_generator
+      sha256: ba9fa6416392d2266be92c33eefe2d053ea958763a460c3a09e3287f8fbee95f
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.10.0"
+  intl:
+    dependency: transitive
+    description:
+      name: intl
+      sha256: "3df61194eb431efc39c4ceba583b95633a403f46c9fd341e550ce0bfa50e9aa5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.20.2"
   io:
     dependency: transitive
     description:
@@ -891,10 +907,10 @@ packages:
     dependency: "direct main"
     description:
       name: purchases_flutter
-      sha256: "83f58c4ef331c06af0548b009632ec2c45b119b87bf02a74f8f77a40e0f64bad"
+      sha256: "8d34712aa3201f675eeccaacf45c0b7b025575fc9d0378b2619bb61246e76064"
       url: "https://pub.dev"
     source: hosted
-    version: "6.30.2"
+    version: "8.11.0"
   qr:
     dependency: transitive
     description:
@@ -1148,6 +1164,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.7"
+  timeago:
+    dependency: "direct main"
+    description:
+      name: timeago
+      sha256: b05159406a97e1cbb2b9ee4faa9fb096fe0e2dfcd8b08fcd2a00553450d3422e
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.7.1"
   typed_data:
     dependency: transitive
     description:

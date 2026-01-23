@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:example_app/features/editor/editor.dart';
-import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_core/drawing_core.dart' as core;
 
 class MockLoadDocumentUseCase extends Mock implements LoadDocumentUseCase {}
 class MockSaveDocumentUseCase extends Mock implements SaveDocumentUseCase {}
@@ -31,13 +31,15 @@ void main() {
 
   group('EditorScreen', () {
     const testDocId = 'test-doc-id';
-    late DrawingDocument testDocument;
+    late core.DrawingDocument testDocument;
 
     setUp(() {
-      testDocument = DrawingDocument.multiPage(
+      testDocument = core.DrawingDocument.multiPage(
         id: testDocId,
         title: 'Test Document',
-        pages: [Page.create(index: 0)],
+        pages: [core.Page.create(index: 0)],
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
       );
     });
 

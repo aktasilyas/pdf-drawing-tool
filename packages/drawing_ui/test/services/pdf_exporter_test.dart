@@ -132,6 +132,7 @@ void main() {
               DrawingPoint(x: 100, y: 100),
             ],
             style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
+            createdAt: DateTime.now(),
           ),
         );
 
@@ -267,9 +268,8 @@ void main() {
         final page = Page(
           id: 'p1',
           index: 0,
-          name: 'Page 1',
           size: PageSize(width: 0, height: 0), // Invalid
-          background: PageBackground.solid(),
+          background: PageBackground(type: BackgroundType.blank, color: 0xFFFFFFFF),
           layers: [],
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),

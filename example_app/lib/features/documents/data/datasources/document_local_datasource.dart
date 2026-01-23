@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:example_app/core/core.dart';
-import '../models/document_model.dart';
+import 'package:example_app/features/documents/data/models/document_model.dart';
 
 abstract class DocumentLocalDatasource {
   Future<List<DocumentModel>> getDocuments({String? folderId});

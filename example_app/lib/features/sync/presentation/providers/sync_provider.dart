@@ -10,13 +10,13 @@ import 'package:example_app/core/database/app_database.dart';
 import 'package:example_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../domain/entities/sync_conflict.dart';
-import '../../domain/entities/sync_queue_item.dart';
-import '../../domain/entities/sync_status.dart';
-import '../../domain/repositories/sync_repository.dart';
-import '../../data/datasources/sync_local_datasource.dart';
-import '../../data/datasources/sync_remote_datasource.dart';
-import '../../data/repositories/sync_repository_impl.dart';
+import 'package:example_app/features/sync/domain/entities/sync_conflict.dart';
+import 'package:example_app/features/sync/domain/entities/sync_queue_item.dart';
+import 'package:example_app/features/sync/domain/entities/sync_status.dart';
+import 'package:example_app/features/sync/domain/repositories/sync_repository.dart';
+import 'package:example_app/features/sync/data/datasources/sync_local_datasource.dart';
+import 'package:example_app/features/sync/data/datasources/sync_remote_datasource.dart';
+import 'package:example_app/features/sync/data/repositories/sync_repository_impl.dart';
 
 // ==================== Infrastructure Providers ====================
 
@@ -39,8 +39,8 @@ final connectivityProvider = Provider<Connectivity>((ref) {
 
 /// Sync local datasource provider
 final syncLocalDatasourceProvider = Provider<SyncLocalDatasource>((ref) {
-  final db = ref.watch(appDatabaseProvider);
-  return SyncLocalDatasource(db);
+  // SyncLocalDatasource now uses SharedPreferences internally
+  return SyncLocalDatasource();
 });
 
 /// Sync remote datasource provider

@@ -6,7 +6,7 @@ library;
 
 import 'package:dartz/dartz.dart';
 import 'package:example_app/core/errors/failures.dart';
-import '../repositories/sync_repository.dart';
+import 'package:example_app/features/sync/domain/repositories/sync_repository.dart';
 
 /// Parameters for toggling auto sync
 class ToggleAutoSyncParams {

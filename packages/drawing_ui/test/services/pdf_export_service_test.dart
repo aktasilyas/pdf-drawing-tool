@@ -262,6 +262,7 @@ void main() {
               DrawingPoint(x: 100, y: 100),
             ],
             style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
+            createdAt: DateTime.now(),
           ),
         );
 
@@ -281,6 +282,7 @@ void main() {
                 DrawingPoint(x: 100, y: 100),
               ],
               style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
+              createdAt: DateTime.now(),
             ),
           );
         }

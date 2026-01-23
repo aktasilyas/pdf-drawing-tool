@@ -1,216 +1,129 @@
-/// Local data source for sync operations using Drift (SQLite).
-///
-/// This data source handles all local database operations for sync,
-/// including queue management and metadata storage.
-library;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:example_app/features/sync/domain/entities/sync_queue_item.dart';
 
-import 'package:drift/drift.dart';
-import 'package:example_app/core/database/app_database.dart';
-import 'package:example_app/core/errors/exceptions.dart';
-import '../../domain/entities/sync_queue_item.dart';
-import '../models/sync_queue_model.dart';
-
-/// Local data source for sync operations
+/// Local datasource for sync operations using SharedPreferences
+/// TODO: Migrate to Drift when database setup is complete
 class SyncLocalDatasource {
-  final AppDatabase _db;
+  static const String _queueKey = 'sync_queue';
+  static const String _metadataPrefix = 'sync_metadata_';
+  static const String _lastSyncKey = 'last_sync_time';
 
-  /// Creates a sync local data source
-  const SyncLocalDatasource(this._db);
+  Future<SharedPreferences> get _prefs => SharedPreferences.getInstance();
 
-  // ==================== Queue Operations ====================
-
-  /// Gets all pending items in the sync queue
+  // Queue operations
   Future<List<SyncQueueItem>> getPendingItems() async {
-    try {
-      final rows = await _db.select(_db.syncQueue).get();
-      return rows.map((row) => row.toEntity()).toList();
-    } catch (e) {
-      throw CacheException('Failed to get pending items: $e');
-    }
+    final prefs = await _prefs;
+    final jsonList = prefs.getStringList(_queueKey) ?? [];
+    return jsonList.map((json) {
+      final map = jsonDecode(json) as Map<String, dynamic>;
+      return SyncQueueItem(
+        id: map['id'] as String,
+        entityId: map['entity_id'] as String,
+        entityType: SyncEntityType.values[map['entity_type'] as int],
+        action: SyncAction.values[map['action'] as int],
+        createdAt: DateTime.parse(map['created_at'] as String),
+        retryCount: map['retry_count'] as int? ?? 0,
+        errorMessage: map['error_message'] as String?,
+      );
+    }).toList();
   }
 
-  /// Adds an item to the sync queue
   Future<void> addToQueue(SyncQueueItem item) async {
-    try {
-      await _db.into(_db.syncQueue).insert(item.toCompanion());
-    } catch (e) {
-      throw CacheException('Failed to add item to queue: $e');
-    }
+    final prefs = await _prefs;
+    final jsonList = prefs.getStringList(_queueKey) ?? [];
+    
+    final itemJson = jsonEncode({
+      'id': item.id,
+      'entity_id': item.entityId,
+      'entity_type': item.entityType.index,
+      'action': item.action.index,
+      'created_at': item.createdAt.toIso8601String(),
+      'retry_count': item.retryCount,
+      'error_message': item.errorMessage,
+    });
+    
+    jsonList.add(itemJson);
+    await prefs.setStringList(_queueKey, jsonList);
   }
 
-  /// Removes an item from the sync queue
   Future<void> removeFromQueue(String itemId) async {
-    try {
-      await (_db.delete(_db.syncQueue)..where((t) => t.id.equals(itemId)))
-          .go();
-    } catch (e) {
-      throw CacheException('Failed to remove item from queue: $e');
-    }
+    final prefs = await _prefs;
+    final jsonList = prefs.getStringList(_queueKey) ?? [];
+    
+    jsonList.removeWhere((json) {
+      final map = jsonDecode(json) as Map<String, dynamic>;
+      return map['id'] == itemId;
+    });
+    
+    await prefs.setStringList(_queueKey, jsonList);
   }
 
-  /// Updates retry count for a queue item
   Future<void> updateRetryCount(String itemId, int count, String? error) async {
-    try {
-      await (_db.update(_db.syncQueue)..where((t) => t.id.equals(itemId)))
-          .write(SyncQueueCompanion(
-        retryCount: Value(count),
-        errorMessage: Value(error),
-      ));
-    } catch (e) {
-      throw CacheException('Failed to update retry count: $e');
-    }
+    final prefs = await _prefs;
+    final jsonList = prefs.getStringList(_queueKey) ?? [];
+    
+    final updatedList = jsonList.map((json) {
+      final map = jsonDecode(json) as Map<String, dynamic>;
+      if (map['id'] == itemId) {
+        map['retry_count'] = count;
+        map['error_message'] = error;
+        return jsonEncode(map);
+      }
+      return json;
+    }).toList();
+    
+    await prefs.setStringList(_queueKey, updatedList);
   }
 
-  /// Gets count of pending items
-  Future<int> getPendingCount() async {
-    try {
-      final query = _db.selectOnly(_db.syncQueue)
-        ..addColumns([_db.syncQueue.id.count()]);
-      final result = await query.getSingle();
-      return result.read(_db.syncQueue.id.count()) ?? 0;
-    } catch (e) {
-      throw CacheException('Failed to get pending count: $e');
-    }
+  Future<void> clearQueue() async {
+    final prefs = await _prefs;
+    await prefs.remove(_queueKey);
   }
 
-  // ==================== Metadata Operations ====================
-
-  /// Gets a metadata value by key
+  // Metadata operations
   Future<String?> getMetadata(String key) async {
-    try {
-      final result = await (_db.select(_db.syncMetadata)
-            ..where((t) => t.key.equals(key)))
-          .getSingleOrNull();
-      return result?.value;
-    } catch (e) {
-      throw CacheException('Failed to get metadata: $e');
-    }
+    final prefs = await _prefs;
+    return prefs.getString('$_metadataPrefix$key');
   }
 
-  /// Sets a metadata value
   Future<void> setMetadata(String key, String value) async {
-    try {
-      await _db.into(_db.syncMetadata).insertOnConflictUpdate(
-            SyncMetadataCompanion.insert(key: key, value: value),
-          );
-    } catch (e) {
-      throw CacheException('Failed to set metadata: $e');
-    }
+    final prefs = await _prefs;
+    await prefs.setString('$_metadataPrefix$key', value);
   }
 
-  /// Deletes a metadata entry
-  Future<void> deleteMetadata(String key) async {
-    try {
-      await (_db.delete(_db.syncMetadata)..where((t) => t.key.equals(key)))
-          .go();
-    } catch (e) {
-      throw CacheException('Failed to delete metadata: $e');
-    }
+  Future<void> removeMetadata(String key) async {
+    final prefs = await _prefs;
+    await prefs.remove('$_metadataPrefix$key');
   }
 
-  // ==================== Document Sync Operations ====================
-
-  /// Gets a single document by ID
-  Future<DocumentData?> getDocument(String id) async {
-    try {
-      return await (_db.select(_db.documents)
-            ..where((t) => t.id.equals(id)))
-          .getSingleOrNull();
-    } catch (e) {
-      throw CacheException('Failed to get document: $e');
-    }
+  // Last sync time
+  Future<DateTime?> getLastSyncTime() async {
+    final prefs = await _prefs;
+    final timestamp = prefs.getString(_lastSyncKey);
+    if (timestamp == null) return null;
+    return DateTime.parse(timestamp);
   }
 
-  /// Gets documents modified after a specific date
-  Future<List<DocumentData>> getDocumentsModifiedAfter(DateTime date) async {
-    try {
-      return await (_db.select(_db.documents)
-            ..where((t) => t.updatedAt.isBiggerThanValue(date))
-            ..orderBy([(t) => OrderingTerm(expression: t.updatedAt)]))
-          .get();
-    } catch (e) {
-      throw CacheException('Failed to get modified documents: $e');
-    }
+  Future<void> setLastSyncTime(DateTime time) async {
+    final prefs = await _prefs;
+    await prefs.setString(_lastSyncKey, time.toIso8601String());
   }
 
-  /// Updates or inserts a document
-  Future<void> upsertDocument(DocumentsCompanion doc) async {
-    try {
-      await _db.into(_db.documents).insertOnConflictUpdate(doc);
-    } catch (e) {
-      throw CacheException('Failed to upsert document: $e');
-    }
+  // Pending changes count
+  Future<int> getPendingChangesCount() async {
+    final items = await getPendingItems();
+    return items.length;
   }
 
-  /// Deletes a document by ID
-  Future<void> deleteDocument(String id) async {
-    try {
-      await (_db.delete(_db.documents)..where((t) => t.id.equals(id))).go();
-    } catch (e) {
-      throw CacheException('Failed to delete document: $e');
-    }
+  // Auto sync setting
+  Future<bool> isAutoSyncEnabled() async {
+    final prefs = await _prefs;
+    return prefs.getBool('auto_sync_enabled') ?? true;
   }
 
-  /// Updates document sync state
-  Future<void> updateDocumentSyncState(String id, int syncState) async {
-    try {
-      await (_db.update(_db.documents)..where((t) => t.id.equals(id)))
-          .write(DocumentsCompanion(syncState: Value(syncState)));
-    } catch (e) {
-      throw CacheException('Failed to update document sync state: $e');
-    }
-  }
-
-  // ==================== Folder Sync Operations ====================
-
-  /// Gets a single folder by ID
-  Future<FolderData?> getFolder(String id) async {
-    try {
-      return await (_db.select(_db.folders)..where((t) => t.id.equals(id)))
-          .getSingleOrNull();
-    } catch (e) {
-      throw CacheException('Failed to get folder: $e');
-    }
-  }
-
-  /// Gets folders modified after a specific date
-  Future<List<FolderData>> getFoldersModifiedAfter(DateTime date) async {
-    try {
-      return await (_db.select(_db.folders)
-            ..where((t) => t.createdAt.isBiggerThanValue(date))
-            ..orderBy([(t) => OrderingTerm(expression: t.createdAt)]))
-          .get();
-    } catch (e) {
-      throw CacheException('Failed to get modified folders: $e');
-    }
-  }
-
-  /// Updates or inserts a folder
-  Future<void> upsertFolder(FoldersCompanion folder) async {
-    try {
-      await _db.into(_db.folders).insertOnConflictUpdate(folder);
-    } catch (e) {
-      throw CacheException('Failed to upsert folder: $e');
-    }
-  }
-
-  /// Deletes a folder by ID
-  Future<void> deleteFolder(String id) async {
-    try {
-      await (_db.delete(_db.folders)..where((t) => t.id.equals(id))).go();
-    } catch (e) {
-      throw CacheException('Failed to delete folder: $e');
-    }
-  }
-
-  // ==================== Transaction Support ====================
-
-  /// Executes multiple operations in a transaction
-  Future<T> transaction<T>(Future<T> Function() action) async {
-    try {
-      return await _db.transaction(() => action());
-    } catch (e) {
-      throw CacheException('Transaction failed: $e');
-    }
+  Future<void> setAutoSyncEnabled(bool enabled) async {
+    final prefs = await _prefs;
+    await prefs.setBool('auto_sync_enabled', enabled);
   }
 }

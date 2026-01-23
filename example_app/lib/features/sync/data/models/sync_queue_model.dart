@@ -1,40 +1,37 @@
-/// Model class for sync queue items with database and entity conversions.
+/// Model class for sync queue items.
 ///
-/// This model handles conversion between the domain entity [SyncQueueItem]
-/// and database table rows.
+/// Since we're using SharedPreferences-based SyncLocalDatasource,
+/// the datasource handles serialization internally.
+/// This file is kept for compatibility but simplified.
 library;
 
-import 'package:example_app/core/database/app_database.dart';
 import 'package:example_app/features/sync/domain/entities/sync_queue_item.dart';
 
-/// Extension on SyncQueueData to convert to entity
-extension SyncQueueDataX on SyncQueueData {
-  /// Converts database row to domain entity
-  SyncQueueItem toEntity() {
-    return SyncQueueItem(
-      id: id,
-      entityId: entityId,
-      entityType: SyncEntityType.values[entityType],
-      action: SyncAction.values[action],
-      createdAt: createdAt,
-      retryCount: retryCount,
-      errorMessage: errorMessage,
-    );
+/// Extension methods for SyncQueueItem
+extension SyncQueueItemExtensions on SyncQueueItem {
+  /// Converts to JSON map for SharedPreferences storage
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'entity_id': entityId,
+      'entity_type': entityType.index,
+      'action': action.index,
+      'created_at': createdAt.toIso8601String(),
+      'retry_count': retryCount,
+      'error_message': errorMessage,
+    };
   }
-}
 
-/// Extension on SyncQueueItem to convert to database companion
-extension SyncQueueItemX on SyncQueueItem {
-  /// Converts domain entity to database companion
-  SyncQueueCompanion toCompanion() {
-    return SyncQueueCompanion.insert(
-      id: id,
-      entityId: entityId,
-      entityType: entityType.index,
-      action: action.index,
-      createdAt: createdAt,
-      retryCount: Value(retryCount),
-      errorMessage: Value(errorMessage),
+  /// Creates from JSON map
+  static SyncQueueItem fromJson(Map<String, dynamic> json) {
+    return SyncQueueItem(
+      id: json['id'] as String,
+      entityId: json['entity_id'] as String,
+      entityType: SyncEntityType.values[json['entity_type'] as int],
+      action: SyncAction.values[json['action'] as int],
+      createdAt: DateTime.parse(json['created_at'] as String),
+      retryCount: json['retry_count'] as int? ?? 0,
+      errorMessage: json['error_message'] as String?,
     );
   }
 }

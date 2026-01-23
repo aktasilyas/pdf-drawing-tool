@@ -9,7 +9,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/sync_provider.dart';
+import 'package:example_app/features/sync/presentation/providers/sync_provider.dart';
 
 /// Settings tile for sync configuration
 class SyncSettingsTile extends ConsumerWidget {

@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:example_app/core/core.dart';
-import '../entities/document_info.dart';
+import 'package:example_app/features/documents/domain/entities/document_info.dart';
 
 abstract class DocumentRepository {
   /// Get all documents, optionally filtered by folder

@@ -29,6 +29,8 @@ void main() {
         id: 'test-doc-id',
         title: 'Test Document',
         pages: [Page.create(index: 0)],
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
       );
     });
 

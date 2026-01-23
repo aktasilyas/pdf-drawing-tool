@@ -6,8 +6,8 @@ library;
 
 import 'package:dartz/dartz.dart';
 import 'package:example_app/core/errors/failures.dart';
-import '../entities/sync_status.dart';
-import '../repositories/sync_repository.dart';
+import 'package:example_app/features/sync/domain/entities/sync_status.dart';
+import 'package:example_app/features/sync/domain/repositories/sync_repository.dart';
 
 /// Use case for getting sync status
 class GetSyncStatusUseCase {

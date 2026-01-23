@@ -10,8 +10,8 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../domain/entities/sync_status.dart';
-import '../providers/sync_provider.dart';
+import 'package:example_app/features/sync/domain/entities/sync_status.dart';
+import 'package:example_app/features/sync/presentation/providers/sync_provider.dart';
 
 /// Displays current sync status indicator
 class SyncStatusIndicator extends ConsumerWidget {

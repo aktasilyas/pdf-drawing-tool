@@ -1,4 +1,4 @@
-import '../../domain/entities/folder.dart';
+import 'package:example_app/features/documents/domain/entities/folder.dart';
 
 class FolderModel {
   final String id;

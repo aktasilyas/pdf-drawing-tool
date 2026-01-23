@@ -1,247 +1,192 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:example_app/core/core.dart';
-import '../../domain/entities/document_info.dart';
-import '../../domain/usecases/create_document_usecase.dart';
-import '../../domain/usecases/delete_document_usecase.dart';
-import '../../domain/usecases/get_documents_usecase.dart';
-import '../../domain/usecases/get_favorites_usecase.dart';
-import '../../domain/usecases/get_recent_usecase.dart';
-import '../../domain/usecases/get_trash_usecase.dart';
-import '../../domain/usecases/move_document_usecase.dart';
-import '../../domain/usecases/move_to_trash_usecase.dart';
-import '../../domain/usecases/restore_from_trash_usecase.dart';
-import '../../domain/usecases/search_documents_usecase.dart';
-import '../../domain/usecases/toggle_favorite_usecase.dart';
+import 'package:get_it/get_it.dart';
+import 'package:example_app/features/documents/domain/entities/document_info.dart';
+import 'package:example_app/features/documents/domain/entities/view_mode.dart';
+import 'package:example_app/features/documents/domain/repositories/document_repository.dart';
 
-part 'documents_provider.g.dart';
+// Repository provider using GetIt
+final documentRepositoryProvider = Provider<DocumentRepository>((ref) {
+  return GetIt.instance<DocumentRepository>();
+});
 
-@riverpod
-class Documents extends _$Documents {
-  @override
-  Future<List<DocumentInfo>> build({String? folderId}) async {
-    final useCase = ref.read(getDocumentsUseCaseProvider);
-    final result = await useCase(folderId: folderId);
-    
-    return result.fold(
-      (failure) => throw failure,
-      (documents) => documents,
-    );
-  }
+// Current folder ID
+final currentFolderIdProvider = StateProvider<String?>((ref) => null);
 
-  Future<void> createDocument({
+// View mode (grid/list)
+final viewModeProvider = StateProvider<ViewMode>((ref) => ViewMode.grid);
+
+// Search query
+final searchQueryProvider = StateProvider<String>((ref) => '');
+
+// Sort option
+final sortOptionProvider = StateProvider<SortOption>((ref) => SortOption.updatedAt);
+
+enum SortOption { title, createdAt, updatedAt }
+
+// Documents list
+final documentsProvider = FutureProvider.family<List<DocumentInfo>, String?>((ref, folderId) async {
+  final repository = ref.watch(documentRepositoryProvider);
+  final result = await repository.getDocuments(folderId: folderId);
+  return result.fold(
+    (failure) => throw Exception(failure.message),
+    (documents) => documents,
+  );
+});
+
+// Favorite documents
+final favoriteDocumentsProvider = FutureProvider<List<DocumentInfo>>((ref) async {
+  final repository = ref.watch(documentRepositoryProvider);
+  final result = await repository.getFavorites();
+  return result.fold(
+    (failure) => throw Exception(failure.message),
+    (documents) => documents,
+  );
+});
+
+// Recent documents
+final recentDocumentsProvider = FutureProvider<List<DocumentInfo>>((ref) async {
+  final repository = ref.watch(documentRepositoryProvider);
+  final result = await repository.getRecent(limit: 10);
+  return result.fold(
+    (failure) => throw Exception(failure.message),
+    (documents) => documents,
+  );
+});
+
+// Trash documents
+final trashDocumentsProvider = FutureProvider<List<DocumentInfo>>((ref) async {
+  final repository = ref.watch(documentRepositoryProvider);
+  final result = await repository.getTrash();
+  return result.fold(
+    (failure) => throw Exception(failure.message),
+    (documents) => documents,
+  );
+});
+
+// Search results
+final searchResultsProvider = FutureProvider<List<DocumentInfo>>((ref) async {
+  final query = ref.watch(searchQueryProvider);
+  if (query.isEmpty) return [];
+  
+  final repository = ref.watch(documentRepositoryProvider);
+  final result = await repository.search(query);
+  return result.fold(
+    (failure) => throw Exception(failure.message),
+    (documents) => documents,
+  );
+});
+
+// Documents controller for mutations
+class DocumentsController extends StateNotifier<AsyncValue<void>> {
+  final DocumentRepository _repository;
+  final Ref _ref;
+
+  DocumentsController(this._repository, this._ref) : super(const AsyncValue.data(null));
+
+  Future<String?> createDocument({
     required String title,
     required String templateId,
     String? folderId,
   }) async {
-    final useCase = ref.read(createDocumentUseCaseProvider);
-    final result = await useCase(
+    state = const AsyncValue.loading();
+    final result = await _repository.createDocument(
       title: title,
       templateId: templateId,
       folderId: folderId,
     );
-
-    result.fold(
-      (failure) => throw failure,
-      (_) => ref.invalidateSelf(),
-    );
-  }
-
-  Future<void> moveDocument(String id, String? folderId) async {
-    final useCase = ref.read(moveDocumentUseCaseProvider);
-    final result = await useCase(id, folderId);
-
-    result.fold(
-      (failure) => throw failure,
-      (_) => ref.invalidateSelf(),
-    );
-  }
-
-  Future<void> toggleFavorite(String id) async {
-    final useCase = ref.read(toggleFavoriteUseCaseProvider);
-    final result = await useCase(id);
-
-    result.fold(
-      (failure) => throw failure,
-      (_) => ref.invalidateSelf(),
-    );
-  }
-
-  Future<void> moveToTrash(String id) async {
-    final useCase = ref.read(moveToTrashUseCaseProvider);
-    final result = await useCase(id);
-
-    result.fold(
-      (failure) => throw failure,
-      (_) => ref.invalidateSelf(),
-    );
-  }
-
-  Future<void> deleteDocument(String id) async {
-    final useCase = ref.read(deleteDocumentUseCaseProvider);
-    final result = await useCase(id);
-
-    result.fold(
-      (failure) => throw failure,
-      (_) => ref.invalidateSelf(),
-    );
-  }
-
-  Future<void> refresh() async {
-    ref.invalidateSelf();
-  }
-}
-
-@riverpod
-class FavoriteDocuments extends _$FavoriteDocuments {
-  @override
-  Future<List<DocumentInfo>> build() async {
-    final useCase = ref.read(getFavoritesUseCaseProvider);
-    final result = await useCase();
-    
     return result.fold(
-      (failure) => throw failure,
-      (documents) => documents,
+      (failure) {
+        state = AsyncValue.error(failure, StackTrace.current);
+        return null;
+      },
+      (document) {
+        state = const AsyncValue.data(null);
+        _invalidateDocuments();
+        return document.id;
+      },
     );
   }
 
-  Future<void> refresh() async {
-    ref.invalidateSelf();
-  }
-}
-
-@riverpod
-class RecentDocuments extends _$RecentDocuments {
-  @override
-  Future<List<DocumentInfo>> build({int limit = 10}) async {
-    final useCase = ref.read(getRecentUseCaseProvider);
-    final result = await useCase(limit: limit);
-    
+  Future<bool> moveDocument(String documentId, String? targetFolderId) async {
+    state = const AsyncValue.loading();
+    final result = await _repository.moveDocument(documentId, targetFolderId);
     return result.fold(
-      (failure) => throw failure,
-      (documents) => documents,
+      (failure) {
+        state = AsyncValue.error(failure, StackTrace.current);
+        return false;
+      },
+      (_) {
+        state = const AsyncValue.data(null);
+        _invalidateDocuments();
+        return true;
+      },
     );
   }
 
-  Future<void> refresh() async {
-    ref.invalidateSelf();
-  }
-}
-
-@riverpod
-class TrashDocuments extends _$TrashDocuments {
-  @override
-  Future<List<DocumentInfo>> build() async {
-    final useCase = ref.read(getTrashUseCaseProvider);
-    final result = await useCase();
-    
+  Future<bool> toggleFavorite(String documentId) async {
+    final result = await _repository.toggleFavorite(documentId);
     return result.fold(
-      (failure) => throw failure,
-      (documents) => documents,
+      (failure) => false,
+      (_) {
+        _invalidateDocuments();
+        return true;
+      },
     );
   }
 
-  Future<void> restoreFromTrash(String id) async {
-    final useCase = ref.read(restoreFromTrashUseCaseProvider);
-    final result = await useCase(id);
-
-    result.fold(
-      (failure) => throw failure,
-      (_) => ref.invalidateSelf(),
-    );
-  }
-
-  Future<void> refresh() async {
-    ref.invalidateSelf();
-  }
-}
-
-@riverpod
-class SearchDocuments extends _$SearchDocuments {
-  @override
-  Future<List<DocumentInfo>> build(String query) async {
-    if (query.trim().isEmpty) {
-      return [];
-    }
-
-    final useCase = ref.read(searchDocumentsUseCaseProvider);
-    final result = await useCase(query);
-    
+  Future<bool> moveToTrash(String documentId) async {
+    final result = await _repository.moveToTrash(documentId);
     return result.fold(
-      (failure) => throw failure,
-      (documents) => documents,
+      (failure) => false,
+      (_) {
+        _invalidateDocuments();
+        return true;
+      },
     );
+  }
+
+  Future<bool> restoreFromTrash(String documentId) async {
+    final result = await _repository.restoreFromTrash(documentId);
+    return result.fold(
+      (failure) => false,
+      (_) {
+        _invalidateDocuments();
+        return true;
+      },
+    );
+  }
+
+  Future<bool> deleteDocument(String documentId) async {
+    final result = await _repository.deleteDocument(documentId);
+    return result.fold(
+      (failure) => false,
+      (_) {
+        _invalidateDocuments();
+        return true;
+      },
+    );
+  }
+
+  Future<bool> renameDocument(String documentId, String newTitle) async {
+    final result = await _repository.updateDocument(id: documentId, title: newTitle);
+    return result.fold(
+      (failure) => false,
+      (_) {
+        _invalidateDocuments();
+        return true;
+      },
+    );
+  }
+
+  void _invalidateDocuments() {
+    _ref.invalidate(documentsProvider);
+    _ref.invalidate(favoriteDocumentsProvider);
+    _ref.invalidate(recentDocumentsProvider);
+    _ref.invalidate(trashDocumentsProvider);
   }
 }
 
-// View mode state
-enum ViewMode { grid, list }
-
-final viewModeProvider = StateProvider<ViewMode>((ref) => ViewMode.grid);
-
-// Current folder state
-final currentFolderIdProvider = StateProvider<String?>((ref) => null);
-
-// Search query state
-final searchQueryProvider = StateProvider<String>((ref) => '');
-
-// Use case providers
-@riverpod
-GetDocumentsUseCase getDocumentsUseCase(GetDocumentsUseCaseRef ref) {
-  return ref.watch(getItProvider).get<GetDocumentsUseCase>();
-}
-
-@riverpod
-CreateDocumentUseCase createDocumentUseCase(CreateDocumentUseCaseRef ref) {
-  return ref.watch(getItProvider).get<CreateDocumentUseCase>();
-}
-
-@riverpod
-DeleteDocumentUseCase deleteDocumentUseCase(DeleteDocumentUseCaseRef ref) {
-  return ref.watch(getItProvider).get<DeleteDocumentUseCase>();
-}
-
-@riverpod
-MoveDocumentUseCase moveDocumentUseCase(MoveDocumentUseCaseRef ref) {
-  return ref.watch(getItProvider).get<MoveDocumentUseCase>();
-}
-
-@riverpod
-ToggleFavoriteUseCase toggleFavoriteUseCase(ToggleFavoriteUseCaseRef ref) {
-  return ref.watch(getItProvider).get<ToggleFavoriteUseCase>();
-}
-
-@riverpod
-GetFavoritesUseCase getFavoritesUseCase(GetFavoritesUseCaseRef ref) {
-  return ref.watch(getItProvider).get<GetFavoritesUseCase>();
-}
-
-@riverpod
-GetRecentUseCase getRecentUseCase(GetRecentUseCaseRef ref) {
-  return ref.watch(getItProvider).get<GetRecentUseCase>();
-}
-
-@riverpod
-SearchDocumentsUseCase searchDocumentsUseCase(SearchDocumentsUseCaseRef ref) {
-  return ref.watch(getItProvider).get<SearchDocumentsUseCase>();
-}
-
-@riverpod
-GetTrashUseCase getTrashUseCase(GetTrashUseCaseRef ref) {
-  return ref.watch(getItProvider).get<GetTrashUseCase>();
-}
-
-@riverpod
-MoveToTrashUseCase moveToTrashUseCase(MoveToTrashUseCaseRef ref) {
-  return ref.watch(getItProvider).get<MoveToTrashUseCase>();
-}
-
-@riverpod
-RestoreFromTrashUseCase restoreFromTrashUseCase(
-  RestoreFromTrashUseCaseRef ref,
-) {
-  return ref.watch(getItProvider).get<RestoreFromTrashUseCase>();
-}
-
-// GetIt provider (should exist in core)
-final getItProvider = Provider<GetIt>((ref) => GetIt.instance);
+final documentsControllerProvider = StateNotifierProvider<DocumentsController, AsyncValue<void>>((ref) {
+  final repository = ref.watch(documentRepositoryProvider);
+  return DocumentsController(repository, ref);
+});

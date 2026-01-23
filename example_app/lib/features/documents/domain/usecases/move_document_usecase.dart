@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 import 'package:example_app/core/core.dart';
-import '../repositories/document_repository.dart';
+import 'package:example_app/features/documents/domain/repositories/document_repository.dart';
 
 @injectable
 class MoveDocumentUseCase {

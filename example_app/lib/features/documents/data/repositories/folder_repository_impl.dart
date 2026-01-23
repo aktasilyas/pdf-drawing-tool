@@ -2,10 +2,10 @@ import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 import 'package:uuid/uuid.dart';
 import 'package:example_app/core/core.dart';
-import '../../domain/entities/folder.dart';
-import '../../domain/repositories/folder_repository.dart';
-import '../datasources/folder_local_datasource.dart';
-import '../models/folder_model.dart';
+import 'package:example_app/features/documents/domain/entities/folder.dart';
+import 'package:example_app/features/documents/domain/repositories/folder_repository.dart';
+import 'package:example_app/features/documents/data/datasources/folder_local_datasource.dart';
+import 'package:example_app/features/documents/data/models/folder_model.dart';
 
 @Injectable(as: FolderRepository)
 class FolderRepositoryImpl implements FolderRepository {

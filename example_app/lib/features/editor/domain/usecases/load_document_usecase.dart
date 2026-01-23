@@ -25,11 +25,14 @@ class LoadDocumentUseCase {
             (failure) => Left(failure),
             (content) {
               if (content == null) {
-                // New document - create empty
+                // New document - create with template background
+                final background = _getBackgroundForTemplate(docInfo.templateId);
                 return Right(DrawingDocument.multiPage(
                   id: docInfo.id,
                   title: docInfo.title,
-                  pages: [Page.create(index: 0)],
+                  pages: [Page.create(index: 0, background: background)],
+                  createdAt: docInfo.createdAt,
+                  updatedAt: docInfo.updatedAt,
                 ));
               }
               // Deserialize from JSON
@@ -46,5 +49,59 @@ class LoadDocumentUseCase {
         }
       },
     );
+  }
+
+  /// Convert template ID to PageBackground
+  PageBackground _getBackgroundForTemplate(String templateId) {
+    switch (templateId) {
+      case 'blank':
+        return PageBackground.blank;
+        
+      case 'thin_lined':
+        return const PageBackground(
+          type: BackgroundType.lined,
+          lineSpacing: 20,
+          lineColor: 0xFFE8E8E8,
+        );
+        
+      case 'thick_lined':
+        return const PageBackground(
+          type: BackgroundType.lined,
+          lineSpacing: 32,
+          lineColor: 0xFFD0D0D0,
+        );
+        
+      case 'small_grid':
+        return const PageBackground(
+          type: BackgroundType.grid,
+          gridSpacing: 16,
+          lineColor: 0xFFE8E8E8,
+        );
+        
+      case 'large_grid':
+        return const PageBackground(
+          type: BackgroundType.grid,
+          gridSpacing: 32,
+          lineColor: 0xFFD0D0D0,
+        );
+        
+      case 'dotted':
+        return const PageBackground(
+          type: BackgroundType.dotted,
+          gridSpacing: 20,
+          lineColor: 0xFFCCCCCC,
+        );
+        
+      case 'cornell':
+        // Cornell uses lined with special layout (handled by UI)
+        return const PageBackground(
+          type: BackgroundType.lined,
+          lineSpacing: 24,
+          lineColor: 0xFFE0E0E0,
+        );
+        
+      default:
+        return PageBackground.blank;
+    }
   }
 }

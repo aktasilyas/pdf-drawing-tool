@@ -2,8 +2,8 @@ import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/premium/premium.dart';
-import '../entities/document_info.dart';
-import '../repositories/document_repository.dart';
+import 'package:example_app/features/documents/domain/entities/document_info.dart';
+import 'package:example_app/features/documents/domain/repositories/document_repository.dart';
 
 @injectable
 class CreateDocumentUseCase {

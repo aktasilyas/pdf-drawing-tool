@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../constants/documents_strings.dart';
+import 'package:example_app/features/documents/presentation/constants/documents_strings.dart';
 
 enum SidebarSection {
   allDocuments,

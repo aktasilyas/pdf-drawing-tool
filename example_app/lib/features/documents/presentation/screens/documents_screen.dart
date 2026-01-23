@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../constants/documents_strings.dart';
-import '../providers/documents_provider.dart';
-import '../widgets/document_grid.dart';
-import '../widgets/sidebar.dart';
-import '../widgets/new_document_dialog.dart';
-import '../widgets/document_context_menu.dart';
-import '../../domain/entities/document_info.dart';
+import 'package:example_app/features/documents/domain/entities/view_mode.dart';
+import 'package:example_app/features/documents/domain/entities/document_info.dart';
+import 'package:example_app/features/documents/presentation/constants/documents_strings.dart';
+import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
+import 'package:example_app/features/documents/presentation/widgets/document_grid.dart';
+import 'package:example_app/features/documents/presentation/widgets/sidebar.dart';
+import 'package:example_app/features/documents/presentation/widgets/new_document_dialog.dart';
+import 'package:example_app/features/documents/presentation/widgets/document_context_menu.dart';
 
 class DocumentsScreen extends ConsumerStatefulWidget {
   const DocumentsScreen({super.key});
@@ -114,7 +115,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                     borderSide: BorderSide.none,
                   ),
                   filled: true,
-                  fillColor: theme.colorScheme.surfaceVariant,
+                  fillColor: theme.colorScheme.surfaceContainerHighest,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 8,
@@ -182,12 +183,12 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
 
   Widget _buildAllDocuments() {
     final folderId = ref.watch(currentFolderIdProvider);
-    final documentsAsync = ref.watch(documentsProvider(folderId: folderId));
+    final documentsAsync = ref.watch(documentsProvider(folderId));
     
     return documentsAsync.when(
       data: (documents) => RefreshIndicator(
         onRefresh: () async {
-          ref.invalidate(documentsProvider(folderId: folderId));
+          ref.invalidate(documentsProvider(folderId));
         },
         child: DocumentGrid(
           documents: documents,
@@ -236,12 +237,12 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
   }
 
   Widget _buildRecent() {
-    final recentAsync = ref.watch(recentDocumentsProvider());
+    final recentAsync = ref.watch(recentDocumentsProvider);
     
     return recentAsync.when(
       data: (documents) => RefreshIndicator(
         onRefresh: () async {
-          ref.invalidate(recentDocumentsProvider());
+          ref.invalidate(recentDocumentsProvider);
         },
         child: DocumentGrid(
           documents: documents,
@@ -289,7 +290,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
   }
 
   Widget _buildSearchResults(String query) {
-    final searchAsync = ref.watch(searchDocumentsProvider(query));
+    final searchAsync = ref.watch(searchResultsProvider);
     
     return searchAsync.when(
       data: (documents) => DocumentGrid(
@@ -323,21 +324,15 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     }
   }
 
-  void _openDocument() {
-    // TODO: Navigate to editor screen
-    // context.push('/editor/${document.id}');
+  void _openDocument(DocumentInfo document) {
+    context.push('/editor/${document.id}');
   }
 
   Future<void> _toggleFavorite(String documentId) async {
     try {
-      final folderId = ref.read(currentFolderIdProvider);
       await ref
-          .read(documentsProvider(folderId: folderId).notifier)
+          .read(documentsControllerProvider.notifier)
           .toggleFavorite(documentId);
-      
-      // Refresh other views
-      ref.invalidate(favoriteDocumentsProvider);
-      ref.invalidate(recentDocumentsProvider());
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -373,10 +368,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
   }
 
   void _showNewDocumentDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => const NewDocumentDialog(),
-    );
+    showNewDocumentSheet(context);
   }
 
   void _showNewFolderDialog() {
@@ -406,12 +398,9 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     Navigator.pop(context);
     
     try {
-      final folderId = ref.read(currentFolderIdProvider);
       await ref
-          .read(documentsProvider(folderId: folderId).notifier)
+          .read(documentsControllerProvider.notifier)
           .moveToTrash(documentId);
-      
-      ref.invalidate(trashDocumentsProvider);
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -432,11 +421,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     
     try {
       await ref
-          .read(trashDocumentsProvider.notifier)
+          .read(documentsControllerProvider.notifier)
           .restoreFromTrash(documentId);
-      
-      final folderId = ref.read(currentFolderIdProvider);
-      ref.invalidate(documentsProvider(folderId: folderId));
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -483,7 +469,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     
     try {
       await ref
-          .read(trashDocumentsProvider.notifier)
+          .read(documentsControllerProvider.notifier)
           .deleteDocument(documentId);
       
       if (mounted) {

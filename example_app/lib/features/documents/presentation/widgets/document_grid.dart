@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import '../../domain/entities/document_info.dart';
-import 'document_card.dart';
-import 'empty_state.dart';
+import 'package:example_app/features/documents/domain/entities/document_info.dart';
+import 'package:example_app/features/documents/presentation/widgets/document_card.dart';
+import 'package:example_app/features/documents/presentation/widgets/empty_state.dart';
 
 class DocumentGrid extends StatelessWidget {
   final List<DocumentInfo> documents;
   final String emptyTitle;
   final String emptyDescription;
-  final VoidCallback? onDocumentTap;
+  final Function(DocumentInfo)? onDocumentTap;
   final Function(DocumentInfo)? onDocumentLongPress;
   final Function(DocumentInfo)? onFavoriteToggle;
   final Function(DocumentInfo)? onMorePressed;
@@ -49,7 +49,7 @@ class DocumentGrid extends StatelessWidget {
         
         return DocumentCard(
           document: document,
-          onTap: onDocumentTap,
+          onTap: () => onDocumentTap?.call(document),
           onLongPress: () => onDocumentLongPress?.call(document),
           onFavoriteToggle: () => onFavoriteToggle?.call(document),
           onMorePressed: () => onMorePressed?.call(document),

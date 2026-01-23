@@ -5,7 +5,7 @@
 library;
 
 import 'package:flutter/material.dart';
-import '../../domain/entities/sync_conflict.dart';
+import 'package:example_app/features/sync/domain/entities/sync_conflict.dart';
 
 /// Dialog for resolving sync conflicts
 class ConflictResolutionDialog extends StatelessWidget {

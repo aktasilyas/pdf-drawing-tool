@@ -12,8 +12,10 @@ class PDFExportDialog extends StatefulWidget {
   State<PDFExportDialog> createState() => _PDFExportDialogState();
 }
 
+enum ExportMode { all, range }
+
 class _PDFExportDialogState extends State<PDFExportDialog> {
-  bool _exportAll = true;
+  ExportMode _exportMode = ExportMode.all;
   int _startPage = 1;
   int _endPage = 1;
 
@@ -31,27 +33,25 @@ class _PDFExportDialogState extends State<PDFExportDialog> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          RadioListTile<bool>(
-            title: const Text('Tüm Sayfalar'),
-            value: true,
-            groupValue: _exportAll,
-            onChanged: (value) {
+          SegmentedButton<ExportMode>(
+            segments: const [
+              ButtonSegment(
+                value: ExportMode.all,
+                label: Text('Tüm Sayfalar'),
+              ),
+              ButtonSegment(
+                value: ExportMode.range,
+                label: Text('Sayfa Aralığı'),
+              ),
+            ],
+            selected: {_exportMode},
+            onSelectionChanged: (Set<ExportMode> selection) {
               setState(() {
-                _exportAll = value!;
+                _exportMode = selection.first;
               });
             },
           ),
-          RadioListTile<bool>(
-            title: const Text('Sayfa Aralığı'),
-            value: false,
-            groupValue: _exportAll,
-            onChanged: (value) {
-              setState(() {
-                _exportAll = value!;
-              });
-            },
-          ),
-          if (!_exportAll) ...[
+          if (_exportMode == ExportMode.range) ...[
             const SizedBox(height: 16),
             Row(
               children: [
@@ -62,6 +62,7 @@ class _PDFExportDialogState extends State<PDFExportDialog> {
                       border: OutlineInputBorder(),
                     ),
                     keyboardType: TextInputType.number,
+                    controller: TextEditingController(text: _startPage.toString()),
                     onChanged: (value) {
                       final page = int.tryParse(value);
                       if (page != null && page >= 1 && page <= widget.totalPages) {
@@ -80,6 +81,7 @@ class _PDFExportDialogState extends State<PDFExportDialog> {
                       border: OutlineInputBorder(),
                     ),
                     keyboardType: TextInputType.number,
+                    controller: TextEditingController(text: _endPage.toString()),
                     onChanged: (value) {
                       final page = int.tryParse(value);
                       if (page != null && page >= 1 && page <= widget.totalPages) {

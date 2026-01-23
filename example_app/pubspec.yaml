@@ -21,10 +21,11 @@ dependencies:
   injectable: ^2.3.2
   dartz: ^0.10.1
   equatable: ^2.0.5
-  purchases_flutter: ^6.17.0
+  purchases_flutter: ^8.0.0
   connectivity_plus: ^5.0.2
   uuid: ^4.2.2
   supabase_flutter: ^2.3.0
+  timeago: ^3.6.0
   google_sign_in: ^6.1.6
   drift: ^2.14.0
   sqlite3_flutter_libs: ^0.5.18

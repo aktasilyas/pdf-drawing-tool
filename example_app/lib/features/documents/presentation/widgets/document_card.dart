@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:timeago/timeago.dart' as timeago;
-import '../../domain/entities/document_info.dart';
+import 'package:example_app/features/documents/domain/entities/document_info.dart';
 
 class DocumentCard extends StatelessWidget {
   final DocumentInfo document;

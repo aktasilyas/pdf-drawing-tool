@@ -1,4 +1,4 @@
-import '../../domain/entities/document_info.dart';
+import 'package:example_app/features/documents/domain/entities/document_info.dart';
 
 class DocumentModel {
   final String id;
