@@ -10,7 +10,7 @@ import 'package:drawing_ui/src/toolbar/toolbar_widgets.dart';
 /// Tool bar (Row 2) - Drawing tools and quick access.
 ///
 /// Contains:
-/// - Undo/Redo buttons
+/// - Undo/Redo buttons (leftmost)
 /// - Tool selection (scrollable)
 /// - Quick color chips
 /// - Quick thickness dots
@@ -131,7 +131,7 @@ class _ToolBarState extends ConsumerState<ToolBar> {
             children: [
               const SizedBox(width: 4),
 
-              // Undo/Redo section
+              // Undo/Redo section (leftmost)
               ToolbarUndoRedoButtons(
                 canUndo: canUndo,
                 canRedo: canRedo,

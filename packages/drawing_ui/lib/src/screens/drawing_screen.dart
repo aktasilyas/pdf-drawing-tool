@@ -12,7 +12,25 @@ import 'package:drawing_ui/src/services/thumbnail_cache.dart';
 
 /// The main drawing screen that combines all UI components.
 class DrawingScreen extends ConsumerStatefulWidget {
-  const DrawingScreen({super.key});
+  const DrawingScreen({
+    super.key,
+    this.documentTitle,
+    this.onHomePressed,
+    this.onTitlePressed,
+    this.onDocumentChanged,
+  });
+
+  /// Document title to display in TopNavigationBar.
+  final String? documentTitle;
+
+  /// Callback when home button is pressed.
+  final VoidCallback? onHomePressed;
+
+  /// Callback when document title is pressed (opens menu).
+  final VoidCallback? onTitlePressed;
+
+  /// Callback when document changes (for auto-save).
+  final ValueChanged<dynamic>? onDocumentChanged;
 
   @override
   ConsumerState<DrawingScreen> createState() => _DrawingScreenState();
@@ -63,7 +81,11 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
           child: Column(
             children: [
               // Row 1: Top navigation bar
-              const TopNavigationBar(),
+              TopNavigationBar(
+                documentTitle: widget.documentTitle,
+                onHomePressed: widget.onHomePressed,
+                onTitlePressed: widget.onTitlePressed,
+              ),
 
               // Row 2: Tool bar
               ToolBar(

@@ -8,14 +8,26 @@ import 'package:drawing_ui/src/widgets/pdf_export_dialog.dart';
 /// Top navigation bar (Row 1) - Navigation and document actions.
 ///
 /// Contains:
-/// - Left: Back, Camera, Crop, Mic buttons
-/// - Center: Document tabs
-/// - Right: Book, Home, Layers, Export, Grid, Settings, More buttons
+/// - Left: Home button and document title
+/// - Center: Document tabs (when multiple documents)
+/// - Right: Layers, Export, Grid, Settings, More buttons
 class TopNavigationBar extends ConsumerWidget {
   const TopNavigationBar({
     super.key,
+    this.documentTitle,
+    this.onHomePressed,
+    this.onTitlePressed,
     this.onBackPressed,
   });
+
+  /// Document title to display.
+  final String? documentTitle;
+
+  /// Callback when home button is pressed.
+  final VoidCallback? onHomePressed;
+
+  /// Callback when document title is pressed (opens menu).
+  final VoidCallback? onTitlePressed;
 
   /// Callback when back button is pressed.
   final VoidCallback? onBackPressed;
@@ -43,29 +55,47 @@ class TopNavigationBar extends ConsumerWidget {
           
           return Row(
             children: [
-              // Left actions - always visible
+              // Left - Home and Document Title
               _NavButton(
-                icon: Icons.arrow_back,
-                tooltip: 'Geri',
-                onPressed: onBackPressed ?? () => _showPlaceholder(context, 'Geri'),
+                icon: Icons.home_rounded,
+                tooltip: 'Ana Sayfa',
+                onPressed: onHomePressed ?? () => _showPlaceholder(context, 'Ana Sayfa'),
               ),
-              if (!isSmallScreen) ...[
-                _NavButton(
-                  icon: Icons.camera_alt_outlined,
-                  tooltip: 'Kamera',
-                  onPressed: () => _showPlaceholder(context, 'Kamera'),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: onTitlePressed ?? () => _showPlaceholder(context, 'Belge Menüsü'),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: theme.panelBorderColor.withAlpha(30),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        documentTitle ?? 'İsimsiz Not',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: theme.toolbarIconColor,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(width: 4),
+                      Icon(
+                        Icons.keyboard_arrow_down,
+                        size: 18,
+                        color: theme.toolbarIconColor,
+                      ),
+                    ],
+                  ),
                 ),
-                _NavButton(
-                  icon: Icons.crop,
-                  tooltip: 'Kırp',
-                  onPressed: () => _showPlaceholder(context, 'Kırp'),
-                ),
-              ],
+              ),
 
-              // Center - Document tabs
-              Expanded(
-                child: _DocumentTabs(),
-              ),
+              // Center - Spacer
+              const Expanded(child: SizedBox()),
 
               // Right actions - responsive
               if (!isSmallScreen) ...[
@@ -73,11 +103,6 @@ class TopNavigationBar extends ConsumerWidget {
                   icon: Icons.menu_book_outlined,
                   tooltip: 'Okuyucu modu',
                   onPressed: () => _showPlaceholder(context, 'Okuyucu modu'),
-                ),
-                _NavButton(
-                  icon: Icons.home_outlined,
-                  tooltip: 'Ana sayfa',
-                  onPressed: () => _showPlaceholder(context, 'Ana sayfa'),
                 ),
               ],
               _NavButton(
