@@ -74,9 +74,14 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
       _handlePanelChange(next);
     });
 
+    // Get canvas background color for Scaffold
+    final currentPage = ref.watch(currentPageProvider);
+    final bgColor = currentPage.background.color;
+
     return DrawingThemeProvider(
       theme: const DrawingTheme(),
       child: Scaffold(
+        backgroundColor: Color(bgColor),
         body: SafeArea(
           child: Column(
             children: [

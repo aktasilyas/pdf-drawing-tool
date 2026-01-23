@@ -26,7 +26,10 @@ class LoadDocumentUseCase {
             (content) {
               if (content == null) {
                 // New document - create with template background
-                final background = _getBackgroundForTemplate(docInfo.templateId);
+                final background = _getBackgroundForTemplate(
+                  docInfo.templateId,
+                  paperColor: docInfo.paperColor,
+                );
                 return Right(DrawingDocument.multiPage(
                   id: docInfo.id,
                   title: docInfo.title,
@@ -52,56 +55,85 @@ class LoadDocumentUseCase {
   }
 
   /// Convert template ID to PageBackground
-  PageBackground _getBackgroundForTemplate(String templateId) {
+  PageBackground _getBackgroundForTemplate(String templateId, {String paperColor = 'Sarı kağıt'}) {
+    // Convert paper color string to hex
+    final bgColor = _getPaperColor(paperColor);
+    
     switch (templateId) {
       case 'blank':
-        return PageBackground.blank;
+        return PageBackground(
+          type: BackgroundType.blank,
+          color: bgColor,
+        );
         
       case 'thin_lined':
-        return const PageBackground(
+        return PageBackground(
           type: BackgroundType.lined,
+          color: bgColor,
           lineSpacing: 20,
           lineColor: 0xFFE8E8E8,
         );
         
       case 'thick_lined':
-        return const PageBackground(
+        return PageBackground(
           type: BackgroundType.lined,
+          color: bgColor,
           lineSpacing: 32,
           lineColor: 0xFFD0D0D0,
         );
         
       case 'small_grid':
-        return const PageBackground(
+        return PageBackground(
           type: BackgroundType.grid,
+          color: bgColor,
           gridSpacing: 16,
           lineColor: 0xFFE8E8E8,
         );
         
       case 'large_grid':
-        return const PageBackground(
+        return PageBackground(
           type: BackgroundType.grid,
+          color: bgColor,
           gridSpacing: 32,
           lineColor: 0xFFD0D0D0,
         );
         
       case 'dotted':
-        return const PageBackground(
+        return PageBackground(
           type: BackgroundType.dotted,
+          color: bgColor,
           gridSpacing: 20,
           lineColor: 0xFFCCCCCC,
         );
         
       case 'cornell':
         // Cornell uses lined with special layout (handled by UI)
-        return const PageBackground(
+        return PageBackground(
           type: BackgroundType.lined,
+          color: bgColor,
           lineSpacing: 24,
           lineColor: 0xFFE0E0E0,
         );
         
       default:
-        return PageBackground.blank;
+        return PageBackground(
+          type: BackgroundType.blank,
+          color: bgColor,
+        );
+    }
+  }
+  
+  /// Convert paper color string to hex color
+  int _getPaperColor(String paperColor) {
+    switch (paperColor) {
+      case 'Beyaz kağıt':
+        return 0xFFFFFFFF; // Pure white
+      case 'Sarı kağıt':
+        return 0xFFFFFDE7; // Cream/yellow tint
+      case 'Gri kağıt':
+        return 0xFFF5F5F5; // Light gray
+      default:
+        return 0xFFFFFDE7; // Default to cream
     }
   }
 }

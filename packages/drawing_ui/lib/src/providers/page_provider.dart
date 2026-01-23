@@ -78,6 +78,15 @@ class PageManagerNotifier extends StateNotifier<PageManager> {
     );
   }
 
+  /// Initializes PageManager from document pages.
+  /// Called when loading a document.
+  void initializeFromDocument(List<Page> pages, {int currentIndex = 0}) {
+    state = PageManager(
+      pages: pages,
+      currentIndex: currentIndex,
+    );
+  }
+
   /// Navigates to next page.
   void nextPage() {
     if (state.canGoNext) {

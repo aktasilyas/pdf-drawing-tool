@@ -38,10 +38,12 @@ class EditorScreen extends ConsumerWidget {
         ),
       ),
       data: (document) {
-        // Initialize document in provider
+        // Initialize document AND PageManager with document's pages
         WidgetsBinding.instance.addPostFrameCallback((_) {
           ref.read(documentProvider.notifier).updateDocument(document);
           ref.read(currentDocumentProvider.notifier).state = document;
+          // FIX: Initialize PageManager with document's pages
+          ref.read(pageManagerProvider.notifier).initializeFromDocument(document.pages);
         });
 
         // Listen to document changes for auto-save

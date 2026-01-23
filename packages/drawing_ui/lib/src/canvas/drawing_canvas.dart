@@ -12,6 +12,7 @@ import 'package:drawing_ui/src/canvas/drawing_canvas_gesture_handlers.dart';
 import 'package:drawing_ui/src/rendering/rendering.dart';
 import 'package:drawing_ui/src/models/tool_type.dart';
 import 'package:drawing_ui/src/providers/document_provider.dart';
+import 'package:drawing_ui/src/providers/page_provider.dart';
 import 'package:drawing_ui/src/providers/eraser_provider.dart';
 import 'package:drawing_ui/src/providers/tool_style_provider.dart';
 import 'package:drawing_ui/src/providers/canvas_transform_provider.dart';
@@ -250,6 +251,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
   @override
   Widget build(BuildContext context) {
     // Watch providers
+    final currentPage = ref.watch(currentPageProvider);
     final strokes = ref.watch(activeLayerStrokesProvider);
     final shapes = ref.watch(activeLayerShapesProvider);
     final texts = ref.watch(activeLayerTextsProvider);
@@ -328,13 +330,15 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                       child: Stack(
                         children: [
                           // ─────────────────────────────────────────────────────────
-                          // LAYER 1: Background Grid
+                          // LAYER 1: Dynamic Background (color + pattern)
                           // ─────────────────────────────────────────────────────────
-                          // Never repaints - shouldRepaint always returns false
+                          // Repaints when page background changes
                           RepaintBoundary(
                             child: CustomPaint(
                               size: size,
-                              painter: const GridPainter(),
+                              painter: DynamicBackgroundPainter(
+                                background: currentPage.background,
+                              ),
                               isComplex: false,
                               willChange: false,
                             ),
