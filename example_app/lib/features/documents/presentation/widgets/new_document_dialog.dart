@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:example_app/features/documents/domain/entities/template.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
@@ -100,9 +101,29 @@ void _handleNewDocumentOption(BuildContext context, NewDocumentOption option) {
   }
 }
 
-void _createQuickNote(BuildContext context) {
-  // TODO: Direkt canvas aç, varsayılan ayarlarla
-  // DocumentType.quickNote, blank background, white paper
+void _createQuickNote(BuildContext context) async {
+  // WidgetsBinding ile context'in hala geçerli olduğundan emin ol
+  if (!context.mounted) return;
+  
+  // ProviderScope'tan ref al
+  final container = ProviderScope.containerOf(context);
+  final controller = container.read(documentsControllerProvider.notifier);
+  final folderId = container.read(currentFolderIdProvider);
+  
+  // Varsayılan ayarlarla hızlı not oluştur (sarı kağıt + ince çizgili)
+  final documentId = await controller.createDocument(
+    title: 'Hızlı Not - ${DateTime.now().toString().substring(0, 16)}',
+    templateId: 'thin_lined', // İnce çizgili şablon
+    folderId: folderId,
+    paperColor: 'Sarı kağıt',
+    isPortrait: true,
+    documentType: DocumentType.quickNote,
+  );
+  
+  // Doküman oluşturulduysa direkt editor'e git
+  if (documentId != null && context.mounted) {
+    context.push('/editor/$documentId');
+  }
 }
 
 void _importPdf(BuildContext context) {
