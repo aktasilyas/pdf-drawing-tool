@@ -8,10 +8,10 @@ import 'package:drawing_ui/src/models/tool_type.dart';
 
 /// Gesture handling methods for DrawingCanvas.
 /// Extracted for better maintainability (file size reduction).
-mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget> 
+mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     on ConsumerState<T>, DrawingCanvasHelpers<T> {
   // Required fields from DrawingCanvasState
-  core.CanvasMode? get canvasMode;  // Canvas mode configuration
+  core.CanvasMode? get canvasMode; // Canvas mode configuration
   DrawingController get drawingController;
   int get pointerCount;
   set pointerCount(int value);
@@ -53,15 +53,17 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     // Sayfa sınırı kontrolü (LIMITED mod için)
     // ══════════════════════════════════════════════════════════════
     final mode = canvasMode ?? const core.CanvasMode(isInfinite: true);
-    
+
     if (!mode.allowDrawingOutsidePage) {
       final transform = ref.read(canvasTransformProvider);
       final canvasPoint = transform.screenToCanvas(event.localPosition);
       final currentPage = ref.read(currentPageProvider);
-      
+
       // Sayfa dışında mı?
-      if (canvasPoint.dx < 0 || canvasPoint.dx > currentPage.size.width ||
-          canvasPoint.dy < 0 || canvasPoint.dy > currentPage.size.height) {
+      if (canvasPoint.dx < 0 ||
+          canvasPoint.dx > currentPage.size.width ||
+          canvasPoint.dy < 0 ||
+          canvasPoint.dy > currentPage.size.height) {
         return; // Sayfa dışı - çizim başlatma
       }
     }
@@ -136,7 +138,8 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     }
 
     // Check if highlighter straight line mode is active
-    if ((toolType == ToolType.highlighter || toolType == ToolType.neonHighlighter) &&
+    if ((toolType == ToolType.highlighter ||
+            toolType == ToolType.neonHighlighter) &&
         ref.read(highlighterSettingsProvider).straightLineMode) {
       handleStraightLineDown(event);
       return;
@@ -151,14 +154,16 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     // Drawing mode
     final point = createDrawingPoint(event);
     final style = getCurrentStyle();
-    
+
     // Get stabilization setting (only for pen tools, not highlighters)
     double stabilization = 0.0;
-    if (toolType.isPenTool && toolType != ToolType.highlighter && toolType != ToolType.neonHighlighter) {
+    if (toolType.isPenTool &&
+        toolType != ToolType.highlighter &&
+        toolType != ToolType.neonHighlighter) {
       final penSettings = ref.read(penSettingsProvider(toolType));
       stabilization = penSettings.stabilization;
     }
-    
+
     drawingController.startStroke(
       point,
       style,
@@ -177,15 +182,17 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     // Sayfa sınırı kontrolü (LIMITED mod için)
     // ══════════════════════════════════════════════════════════════
     final mode = canvasMode ?? const core.CanvasMode(isInfinite: true);
-    
+
     if (!mode.allowDrawingOutsidePage && drawingController.isDrawing) {
       final currentPage = ref.read(currentPageProvider);
       final transform = ref.read(canvasTransformProvider);
       final canvasPoint = transform.screenToCanvas(event.localPosition);
-      
+
       // Sayfa dışındaysa - çizime devam etme
-      if (canvasPoint.dx < 0 || canvasPoint.dx > currentPage.size.width ||
-          canvasPoint.dy < 0 || canvasPoint.dy > currentPage.size.height) {
+      if (canvasPoint.dx < 0 ||
+          canvasPoint.dx > currentPage.size.width ||
+          canvasPoint.dy < 0 ||
+          canvasPoint.dy > currentPage.size.height) {
         return;
       }
     }
@@ -459,7 +466,9 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
         // Start lasso selection
         final lassoTool = ref.read(lassoEraserToolProvider);
         lassoTool.onPointerDown(canvasPoint.dx, canvasPoint.dy);
-        ref.read(lassoEraserPointsProvider.notifier).state = [event.localPosition];
+        ref.read(lassoEraserPointsProvider.notifier).state = [
+          event.localPosition
+        ];
         break;
     }
   }
@@ -491,8 +500,8 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
         final lassoTool = ref.read(lassoEraserToolProvider);
         lassoTool.onPointerMove(canvasPoint.dx, canvasPoint.dy);
         ref.read(lassoEraserPointsProvider.notifier).update(
-          (points) => [...points, event.localPosition],
-        );
+              (points) => [...points, event.localPosition],
+            );
         break;
     }
   }
@@ -614,7 +623,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     }
 
     // Update preview provider for visual feedback
-    ref.read(pixelEraserPreviewProvider.notifier).state = 
+    ref.read(pixelEraserPreviewProvider.notifier).state =
         Map<String, List<int>>.from(pixelEraseHits);
   }
 
@@ -1084,7 +1093,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     final transformNotifier = ref.read(canvasTransformProvider.notifier);
     final mode = canvasMode ?? const core.CanvasMode(isInfinite: true);
     final currentPage = ref.read(currentPageProvider);
-    
+
     // Get viewport size from context
     final renderBox = context.findRenderObject() as RenderBox?;
     final viewportSize = renderBox?.size ?? const Size(800, 600);
@@ -1137,20 +1146,20 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
   void handleScaleEnd(ScaleEndDetails details) {
     // Hide zoom indicator
     ref.read(isZoomingProvider.notifier).state = false;
-    
+
     // Snap back for limited canvas mode
     final mode = canvasMode ?? const core.CanvasMode(isInfinite: true);
     if (!mode.isInfinite && !mode.unlimitedPan) {
       final currentPage = ref.read(currentPageProvider);
       final renderBox = context.findRenderObject() as RenderBox?;
       final viewportSize = renderBox?.size ?? const Size(800, 600);
-      
+
       ref.read(canvasTransformProvider.notifier).snapBackForPage(
-        viewportSize: viewportSize,
-        pageSize: Size(currentPage.size.width, currentPage.size.height),
-      );
+            viewportSize: viewportSize,
+            pageSize: Size(currentPage.size.width, currentPage.size.height),
+          );
     }
-    
+
     lastFocalPoint = null;
     lastScale = null;
   }
