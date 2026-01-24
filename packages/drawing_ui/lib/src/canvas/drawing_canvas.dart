@@ -162,13 +162,13 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
   final List<core.Stroke> _pixelEraseOriginalStrokes = [];
 
   // ─────────────────────────────────────────────────────────────────────────
-  // CANVAS INITIALIZATION
+  // INITIALIZATION TRACKING
   // ─────────────────────────────────────────────────────────────────────────
 
-  /// Whether the canvas has been initialized for the current mode.
+  /// Whether canvas has been initialized for limited mode.
   bool _hasInitialized = false;
 
-  /// Last viewport size (to detect orientation changes).
+  /// Last viewport size for detecting orientation changes.
   Size? _lastViewportSize;
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -176,10 +176,8 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
   // ─────────────────────────────────────────────────────────────────────────
 
   @override
-  /// Exposes the drawing controller for testing.
   @visibleForTesting
   DrawingController get drawingController => _drawingController;
-
 
   /// Exposes committed strokes from provider for testing.
   @visibleForTesting
@@ -193,17 +191,16 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
   }
 
   @override
-  void didUpdateWidget(covariant DrawingCanvas oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    // Reset initialization when canvas mode changes
-    if (oldWidget.canvasMode?.isInfinite != widget.canvasMode?.isInfinite) {
-      _hasInitialized = false;
-    }
+  void dispose() {
+    _drawingController.dispose();
+    super.dispose();
   }
 
-  /// Initialize canvas for limited mode (fills viewport with page).
-  void _initializeCanvasForLimitedMode(Size viewportSize, core.Page currentPage) {
-    final canvasMode = widget.canvasMode ?? const core.CanvasMode(isInfinite: true);
+  /// Initialize canvas transform for limited mode (page centering).
+  void _initializeCanvasForLimitedMode(
+      Size viewportSize, core.Page currentPage) {
+    final canvasMode =
+        widget.canvasMode ?? const core.CanvasMode(isInfinite: true);
     if (canvasMode.isInfinite) {
       _hasInitialized = true;
       _lastViewportSize = viewportSize;
@@ -214,33 +211,28 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
     final needsReInit = !_hasInitialized || _isOrientationChanged(viewportSize);
     if (!needsReInit) return;
 
-    // Use post-frame callback to ensure layout is complete
+    // Mark as initialized immediately to prevent multiple calls
+    _hasInitialized = true;
+    _lastViewportSize = viewportSize;
+
+    // Use post-frame callback to avoid modifying provider during build
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      
       ref.read(canvasTransformProvider.notifier).initializeForPage(
-        viewportSize: viewportSize,
-        pageSize: Size(currentPage.size.width, currentPage.size.height),
-      );
-      _hasInitialized = true;
-      _lastViewportSize = viewportSize;
+            viewportSize: viewportSize,
+            pageSize: Size(currentPage.size.width, currentPage.size.height),
+          );
     });
   }
 
   /// Check if orientation changed (width/height swapped).
   bool _isOrientationChanged(Size newSize) {
     if (_lastViewportSize == null) return false;
-    
+
     final wasPortrait = _lastViewportSize!.height > _lastViewportSize!.width;
     final isPortrait = newSize.height > newSize.width;
-    
-    return wasPortrait != isPortrait;
-  }
 
-  @override
-  void dispose() {
-    _drawingController.dispose();
-    super.dispose();
+    return wasPortrait != isPortrait;
   }
 
   @override
@@ -309,6 +301,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
   double? get lastScale => _lastScale;
   @override
   set lastScale(double? value) => _lastScale = value;
+
   @override
   Widget build(BuildContext context) {
     // Watch providers
@@ -324,16 +317,11 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
     final textToolState = ref.watch(textToolProvider);
 
     // Canvas mode configuration
-    final canvasMode = widget.canvasMode ?? const core.CanvasMode(isInfinite: true);
-    
+    final canvasMode =
+        widget.canvasMode ?? const core.CanvasMode(isInfinite: true);
+
     // Current page (LIMITED mod için)
     final currentPage = ref.watch(currentPageProvider);
-
-    // #region agent log
-    debugPrint('🔍 [DEBUG] DrawingCanvas.build - widget.canvasMode: ${widget.canvasMode}');
-    debugPrint('🔍 [DEBUG] DrawingCanvas.build - canvasMode.isInfinite: ${canvasMode.isInfinite}');
-    debugPrint('🔍 [DEBUG] DrawingCanvas.build - canvasMode.allowDrawingOutsidePage: ${canvasMode.allowDrawingOutsidePage}');
-    // #endregion
 
     // Eraser cursor state
     final eraserCursorPosition = ref.watch(eraserCursorPositionProvider);
@@ -356,7 +344,9 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
     // Straight line preview (for highlighter)
     List<core.DrawingPoint>? straightLinePreviewPoints;
     core.StrokeStyle? straightLinePreviewStyle;
-    if (_isStraightLineDrawing && _straightLineStart != null && _straightLineEnd != null) {
+    if (_isStraightLineDrawing &&
+        _straightLineStart != null &&
+        _straightLineEnd != null) {
       straightLinePreviewPoints = [_straightLineStart!, _straightLineEnd!];
       straightLinePreviewStyle = _straightLineStyle;
     }
@@ -383,13 +373,24 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
         // Wrap everything in a Stack to put menu/overlay OUTSIDE gesture handlers
         return Stack(
           children: [
+            // ═══════════════════════════════════════════════════════════════════
+            // LAYER -1: Surrounding Area Background (OUTSIDE Transform)
+            // ═══════════════════════════════════════════════════════════════════
+            // This fills the entire viewport with surrounding color.
+            // Being OUTSIDE Transform means it doesn't move with zoom/pan.
+            if (!canvasMode.isInfinite)
+              Positioned.fill(
+                child: ColoredBox(
+                  color: Color(canvasMode.surroundingAreaColor),
+                ),
+              ),
+
             // Canvas with gesture handlers
             Listener(
               onPointerDown: enablePointerEvents ? handlePointerDown : null,
               onPointerMove: enablePointerEvents ? handlePointerMove : null,
               onPointerUp: enablePointerEvents ? handlePointerUp : null,
-              onPointerCancel:
-                  enablePointerEvents ? handlePointerCancel : null,
+              onPointerCancel: enablePointerEvents ? handlePointerCancel : null,
               behavior: HitTestBehavior.translucent,
               child: GestureDetector(
                 onScaleStart: handleScaleStart,
@@ -407,25 +408,6 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                       child: Stack(
                         clipBehavior: Clip.none, // Allow content outside bounds
                         children: [
-                          // ═══════════════════════════════════════════════════════════
-                          // LAYER -1: Surrounding Area Background (LIMITED mod için)
-                          // ═══════════════════════════════════════════════════════════
-                          // This creates a large background that shows the surrounding
-                          // area color outside the page bounds
-                          if (!canvasMode.isInfinite)
-                            Positioned(
-                              // Position way outside to cover all pan area
-                              left: -5000,
-                              top: -5000,
-                              child: IgnorePointer(
-                                child: Container(
-                                  width: 10000 + currentPage.size.width,
-                                  height: 10000 + currentPage.size.height,
-                                  color: Color(canvasMode.surroundingAreaColor),
-                                ),
-                              ),
-                            ),
-
                           // ═══════════════════════════════════════════════════════════
                           // LAYER 0: Page Container (LIMITED mod için)
                           // ═══════════════════════════════════════════════════════════
@@ -465,7 +447,8 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                                     color: Color(currentPage.background.color),
                                     border: canvasMode.pageBorderWidth > 0
                                         ? Border.all(
-                                            color: Color(canvasMode.pageBorderColor),
+                                            color: Color(
+                                                canvasMode.pageBorderColor),
                                             width: canvasMode.pageBorderWidth,
                                           )
                                         : null,
@@ -474,7 +457,8 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                                     painter: PageBackgroundPatternPainter(
                                       background: currentPage.background,
                                     ),
-                                    size: Size(currentPage.size.width, currentPage.size.height),
+                                    size: Size(currentPage.size.width,
+                                        currentPage.size.height),
                                   ),
                                 ),
                               ),
@@ -498,9 +482,8 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                           ),
 
                           // ─────────────────────────────────────────────────────────
-                          // LAYER 3: Committed Shapes + Preview Shape
+                          // LAYER 2: Committed Shapes + Preview Shape
                           // ─────────────────────────────────────────────────────────
-                          // Repaints when shapes are added/removed or during shape preview
                           RepaintBoundary(
                             child: CustomPaint(
                               size: size,
@@ -514,9 +497,8 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                           ),
 
                           // ─────────────────────────────────────────────────────────
-                          // LAYER 4: Committed Texts + Active Text
+                          // LAYER 3: Committed Texts + Active Text
                           // ─────────────────────────────────────────────────────────
-                          // Repaints when texts are added/removed or during editing
                           RepaintBoundary(
                             child: CustomPaint(
                               size: size,
@@ -532,9 +514,10 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                           ),
 
                           // ─────────────────────────────────────────────────────────
-                          // LAYER 5: Active Stroke (Live Drawing)
+                          // LAYER 4: Active Stroke (Live Drawing)
                           // ─────────────────────────────────────────────────────────
-                          // Repaints on every pointer move - must be fast!
+                          // Uses ListenableBuilder to listen to DrawingController
+                          // for optimal performance during drawing
                           RepaintBoundary(
                             child: ListenableBuilder(
                               listenable: _drawingController,
@@ -554,10 +537,10 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                           ),
 
                           // ─────────────────────────────────────────────────────────
-                          // LAYER 5.5: Straight Line Preview (for highlighter)
+                          // LAYER 5: Straight Line Preview (for highlighter)
                           // ─────────────────────────────────────────────────────────
-                          // Real-time preview when drawing straight line
-                          if (straightLinePreviewPoints != null && straightLinePreviewStyle != null)
+                          if (straightLinePreviewPoints != null &&
+                              straightLinePreviewStyle != null)
                             RepaintBoundary(
                               child: CustomPaint(
                                 size: size,
@@ -574,7 +557,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                           // ─────────────────────────────────────────────────────────
                           // LAYER 6: Selection Overlay
                           // ─────────────────────────────────────────────────────────
-                          // Selection bounds, lasso path, and preview
+                          // Selection path and bounding box
                           RepaintBoundary(
                             child: CustomPaint(
                               size: size,
@@ -589,9 +572,8 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                           ),
 
                           // ─────────────────────────────────────────────────────────
-                          // LAYER 6.5: Pixel Eraser Preview
+                          // LAYER 7: Pixel Eraser Preview
                           // ─────────────────────────────────────────────────────────
-                          // Shows affected segments in real-time
                           if (pixelEraserPreview.isNotEmpty)
                             RepaintBoundary(
                               child: CustomPaint(
@@ -606,7 +588,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                             ),
 
                           // ─────────────────────────────────────────────────────────
-                          // LAYER 7: Selection Handles (for drag interactions)
+                          // LAYER 8: Selection Handles (for drag interactions)
                           // ─────────────────────────────────────────────────────────
                           if (selection != null)
                             SelectionHandles(
@@ -621,9 +603,9 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
               ),
             ),
 
-            // ───────────────────────────────────────────────────────────
-            // Text Context Menu (OUTSIDE gesture handlers - screen coordinates)
-            // ───────────────────────────────────────────────────────────
+            // ───────────────────────────────────────────────────────────────────
+            // Text Context Menu (must be outside gesture handlers, uses screen coordinates)
+            // ───────────────────────────────────────────────────────────────────
             if (textToolState.showMenu && textToolState.menuText != null)
               TextContextMenu(
                 textElement: textToolState.menuText!,
@@ -636,9 +618,9 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                 onMove: handleTextMove,
               ),
 
-            // ───────────────────────────────────────────────────────────
-            // Text Input Overlay (OUTSIDE gesture handlers - screen coordinates)
-            // ───────────────────────────────────────────────────────────
+            // ───────────────────────────────────────────────────────────────────
+            // Text Input Overlay (must be outside gesture handlers)
+            // ───────────────────────────────────────────────────────────────────
             if (textToolState.isEditing && textToolState.activeText != null)
               TextInputOverlay(
                 textElement: textToolState.activeText!,
@@ -651,9 +633,9 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                 onCancel: () => cancelTextEditing(),
               ),
 
-            // ───────────────────────────────────────────────────────────
-            // Text Style Popup (OUTSIDE gesture handlers - screen coordinates)
-            // ───────────────────────────────────────────────────────────
+            // ───────────────────────────────────────────────────────────────────
+            // Text Style Popup (must be outside gesture handlers)
+            // ───────────────────────────────────────────────────────────────────
             if (textToolState.showStylePopup && textToolState.styleText != null)
               TextStylePopup(
                 textElement: textToolState.styleText!,
@@ -664,9 +646,9 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                     ref.read(textToolProvider.notifier).hideStylePopup(),
               ),
 
-            // ───────────────────────────────────────────────────────────
+            // ───────────────────────────────────────────────────────────────────
             // Text Move Mode Indicator
-            // ───────────────────────────────────────────────────────────
+            // ───────────────────────────────────────────────────────────────────
             if (textToolState.isMoving)
               Positioned(
                 top: 60,
@@ -681,7 +663,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.2),
+                          color: Colors.black.withOpacity(0.2),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -705,7 +687,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                           child: Container(
                             padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.2),
+                              color: Colors.white.withOpacity(0.2),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(Icons.close,
@@ -718,9 +700,9 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                 ),
               ),
 
-            // ───────────────────────────────────────────────────────────
-            // Eraser Cursor Overlay
-            // ───────────────────────────────────────────────────────────
+            // ───────────────────────────────────────────────────────────────────
+            // Eraser Cursor Overlay (using screen coordinates)
+            // ───────────────────────────────────────────────────────────────────
             if (isEraserTool)
               EraserCursorWidget(
                 cursorPosition: eraserCursorPosition ?? Offset.zero,
@@ -733,14 +715,3 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
     );
   }
 }
-
-// =============================================================================
-// GRID PAINTER
-// =============================================================================
-
-/// Paints a grid background for the canvas.
-///
-/// This painter is optimized to never repaint:
-/// - Paint object is static and cached
-/// - shouldRepaint always returns false
-/// - Grid size is constant

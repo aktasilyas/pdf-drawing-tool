@@ -276,30 +276,32 @@ class CanvasTransformNotifier extends StateNotifier<CanvasTransform> {
     required Size pageSize,
   }) {
     // Calculate zoom to fill viewport (page fills the screen)
-    final fillZoom = _calculateFillZoom(viewportSize, pageSize);
-    
+    final fillZoom = _calculateFitZoom(viewportSize, pageSize);
+
     // Calculate offset - center horizontally, top-align vertically
     final pageScreenWidth = pageSize.width * fillZoom;
     final pageScreenHeight = pageSize.height * fillZoom;
-    
+
     // Center horizontally if page is narrower than viewport
-    final offsetX = pageScreenWidth < viewportSize.width 
-        ? (viewportSize.width - pageScreenWidth) / 2 
+    final offsetX = pageScreenWidth < viewportSize.width
+        ? (viewportSize.width - pageScreenWidth) / 2
         : 0.0;
     // Top-align vertically (offset Y = 0)
     final offsetY = pageScreenHeight < viewportSize.height
         ? (viewportSize.height - pageScreenHeight) / 2
         : 0.0;
-    
+
     // #region agent log
     debugPrint('🔍 [DEBUG] initializeForPage:');
-    debugPrint('🔍 [DEBUG]   viewportSize: ${viewportSize.width} x ${viewportSize.height}');
+    debugPrint(
+        '🔍 [DEBUG]   viewportSize: ${viewportSize.width} x ${viewportSize.height}');
     debugPrint('🔍 [DEBUG]   pageSize: ${pageSize.width} x ${pageSize.height}');
     debugPrint('🔍 [DEBUG]   fillZoom: $fillZoom');
-    debugPrint('🔍 [DEBUG]   pageScreenSize: $pageScreenWidth x $pageScreenHeight');
+    debugPrint(
+        '🔍 [DEBUG]   pageScreenSize: $pageScreenWidth x $pageScreenHeight');
     debugPrint('🔍 [DEBUG]   offset: ($offsetX, $offsetY)');
     // #endregion
-    
+
     state = CanvasTransform(
       zoom: fillZoom,
       offset: Offset(offsetX, offsetY),
@@ -307,7 +309,7 @@ class CanvasTransformNotifier extends StateNotifier<CanvasTransform> {
   }
 
   /// Snap back zoom and offset for limited canvas.
-  /// 
+  ///
   /// Called when gesture ends to ensure page fills viewport.
   /// [viewportSize] is the screen viewport size
   /// [pageSize] is the document page size
@@ -316,23 +318,23 @@ class CanvasTransformNotifier extends StateNotifier<CanvasTransform> {
     required Size pageSize,
   }) {
     // Calculate fill zoom (same as initializeForPage)
-    final fillZoom = _calculateFillZoom(viewportSize, pageSize);
-    
+    final fillZoom = _calculateFitZoom(viewportSize, pageSize);
+
     // If current zoom is below fill zoom, snap back to fill state
     if (state.zoom < fillZoom) {
       // Calculate new offset at fill zoom
       final pageScreenWidth = pageSize.width * fillZoom;
       final pageScreenHeight = pageSize.height * fillZoom;
-      
+
       // Center horizontally if page is narrower than viewport
-      final offsetX = pageScreenWidth < viewportSize.width 
-          ? (viewportSize.width - pageScreenWidth) / 2 
+      final offsetX = pageScreenWidth < viewportSize.width
+          ? (viewportSize.width - pageScreenWidth) / 2
           : 0.0;
       // Top-align or center vertically
       final offsetY = pageScreenHeight < viewportSize.height
           ? (viewportSize.height - pageScreenHeight) / 2
           : 0.0;
-      
+
       state = CanvasTransform(
         zoom: fillZoom,
         offset: Offset(offsetX, offsetY),
@@ -344,23 +346,28 @@ class CanvasTransformNotifier extends StateNotifier<CanvasTransform> {
   }
 
   /// Calculate zoom to fill viewport (page fills the screen).
-  /// 
+  ///
   /// Uses the larger zoom so page fills at least one dimension.
   /// - Portrait viewport: page fills width, user scrolls vertically
-  /// - Landscape viewport: page fills height, user scrolls horizontally
-  double _calculateFillZoom(Size viewportSize, Size pageSize) {
+  /// Calculate zoom to fit page in viewport (page fully visible, not enlarged).
+  ///
+  /// - If page is larger than viewport: scale down to fit
+  /// - If page is smaller than viewport: keep at 100% (don't enlarge)
+  double _calculateFitZoom(Size viewportSize, Size pageSize) {
     final horizontalZoom = viewportSize.width / pageSize.width;
     final verticalZoom = viewportSize.height / pageSize.height;
-    // Use the larger zoom to fill the viewport (page fills screen)
-    final fillZoom = horizontalZoom > verticalZoom ? horizontalZoom : verticalZoom;
-    return fillZoom.clamp(0.5, 2.0);
+    // Use the smaller zoom to fit the entire page in viewport
+    final fitZoom =
+        horizontalZoom < verticalZoom ? horizontalZoom : verticalZoom;
+    // Don't enlarge page beyond 100%, but allow shrinking
+    return fitZoom.clamp(0.25, 1.0);
   }
 
   /// Clamp offset to keep page within bounds.
   void _clampOffset(Size viewportSize, Size pageSize) {
     final pageScreenWidth = pageSize.width * state.zoom;
     final pageScreenHeight = pageSize.height * state.zoom;
-    
+
     var newOffset = state.offset;
 
     // Horizontal clamping
