@@ -23,19 +23,19 @@ class Sidebar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
       width: 240,
-      color: const Color(0xFFFAFAFA),
+      color: Theme.of(context).colorScheme.surfaceVariant,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Logo / App name
-          const Padding(
-            padding: EdgeInsets.fromLTRB(24, 32, 24, 32),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
             child: Text(
               'StarNote',
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF1A1A1A),
+                color: Theme.of(context).colorScheme.onSurface,
                 letterSpacing: -0.5,
               ),
             ),
@@ -106,10 +106,13 @@ class _SidebarItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
       child: Material(
-        color: isSelected ? const Color(0xFFE8F4FD) : Colors.transparent,
+        color: isSelected 
+            ? colorScheme.primaryContainer 
+            : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
         child: InkWell(
           onTap: onTap,
@@ -122,8 +125,8 @@ class _SidebarItem extends StatelessWidget {
                   isSelected ? selectedIcon : icon,
                   size: 20,
                   color: isSelected
-                      ? const Color(0xFF1976D2)
-                      : const Color(0xFF666666),
+                      ? colorScheme.primary
+                      : colorScheme.onSurfaceVariant,
                 ),
                 const SizedBox(width: 12),
                 Text(
@@ -132,8 +135,8 @@ class _SidebarItem extends StatelessWidget {
                     fontSize: 14,
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                     color: isSelected
-                        ? const Color(0xFF1976D2)
-                        : const Color(0xFF333333),
+                        ? colorScheme.primary
+                        : colorScheme.onSurface,
                   ),
                 ),
               ],

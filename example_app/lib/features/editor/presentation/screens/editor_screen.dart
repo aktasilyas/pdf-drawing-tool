@@ -165,7 +165,7 @@ class EditorScreen extends ConsumerWidget {
                         Text(
                           'Son düzenleme: ${_formatDate(currentDoc.updatedAt)}',
                           style: TextStyle(
-                            color: Colors.grey.shade600,
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
                             fontSize: 12,
                           ),
                         ),

@@ -29,7 +29,6 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       body: Row(
         children: [
           // Sidebar
@@ -43,7 +42,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
           // Vertical divider
           Container(
             width: 1,
-            color: const Color(0xFFE0E0E0),
+            color: Theme.of(context).dividerColor,
           ),
 
           // Main content
@@ -128,7 +127,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.grey),
+            Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
             const SizedBox(height: 16),
             Text('Hata: $error'),
           ],
@@ -196,14 +195,14 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
           Icon(
             Icons.note_add_outlined,
             size: 64,
-            color: Colors.grey.shade300,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           const SizedBox(height: 16),
           Text(
             'Henüz belge yok',
             style: TextStyle(
               fontSize: 18,
-              color: Colors.grey.shade600,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 8),
@@ -211,7 +210,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
             'Yeni bir belge oluşturmak için "Yeni" butonuna tıklayın',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey.shade400,
+              color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
             ),
           ),
         ],
@@ -227,14 +226,14 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
           Icon(
             Icons.construction,
             size: 64,
-            color: Colors.grey.shade300,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           const SizedBox(height: 16),
           Text(
             'Yakında',
             style: TextStyle(
               fontSize: 18,
-              color: Colors.grey.shade600,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ],

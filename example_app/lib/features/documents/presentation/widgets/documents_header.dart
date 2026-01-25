@@ -31,10 +31,10 @@ class DocumentsHeader extends StatelessWidget {
           // Title
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 32,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF1A1A1A),
+              color: Theme.of(context).colorScheme.onSurface,
               letterSpacing: -0.5,
             ),
           ),
@@ -45,23 +45,21 @@ class DocumentsHeader extends StatelessWidget {
           FilledButton(
             key: newButtonKey,
             onPressed: onNewPressed,
-            child: Row(
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: const Row(
               mainAxisSize: MainAxisSize.min,
-              children: const [
+              children: [
                 Icon(Icons.add, size: 18),
                 SizedBox(width: 6),
                 Text('Yeni'),
                 SizedBox(width: 4),
                 Icon(Icons.arrow_drop_down, size: 20),
               ],
-            ),
-            style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFF1976D2),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
             ),
           ),
 
@@ -71,7 +69,7 @@ class DocumentsHeader extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              border: Border.all(color: const Color(0xFFE0E0E0)),
+              border: Border.all(color: Theme.of(context).dividerColor),
               borderRadius: BorderRadius.circular(8),
             ),
             child: DropdownButtonHideUnderline(
@@ -108,8 +106,8 @@ class DocumentsHeader extends StatelessWidget {
             icon: Icon(
               isSelectionMode ? Icons.check_circle : Icons.check_circle_outline,
               color: isSelectionMode
-                  ? const Color(0xFF1976D2)
-                  : const Color(0xFF666666),
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             tooltip: 'Seçim modu',
           ),
