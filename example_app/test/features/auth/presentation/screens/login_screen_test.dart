@@ -1,19 +1,27 @@
-import 'package:dartz/dartz.dart';
-import 'package:example_app/core/core.dart';
 import 'package:example_app/core/routing/route_names.dart';
-import 'package:example_app/features/auth/domain/entities/user.dart';
-import 'package:example_app/features/auth/domain/repositories/auth_repository.dart';
-import 'package:example_app/features/auth/presentation/constants/auth_strings.dart';
 import 'package:example_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:example_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 void main() {
   late GoRouter router;
-  late _FakeAuthRepository fakeRepository;
+  late _FakeAuthController fakeAuthController;
+
+  setUpAll(() async {
+    // Initialize Supabase with fake credentials for testing
+    try {
+      await supabase.Supabase.initialize(
+        url: 'https://fake-test-url.supabase.co',
+        anonKey: 'fake-test-key',
+      );
+    } catch (e) {
+      // Already initialized, ignore
+    }
+  });
 
   Widget createTestApp() {
     router = GoRouter(
@@ -34,7 +42,7 @@ void main() {
 
     return ProviderScope(
       overrides: [
-        authRepositoryProvider.overrideWithValue(fakeRepository),
+        authControllerProvider.overrideWith((ref) => fakeAuthController),
       ],
       child: MaterialApp.router(
         routerConfig: router,
@@ -42,92 +50,157 @@ void main() {
     );
   }
 
-  final testUser = User(
-    id: 'u1',
-    email: 'test@example.com',
-    displayName: 'Test User',
-    photoUrl: null,
-    createdAt: DateTime(2023),
-    lastLoginAt: DateTime(2024),
-  );
-
   setUp(() {
-    fakeRepository = _FakeAuthRepository(testUser);
+    fakeAuthController = _FakeAuthController();
   });
 
   testWidgets('shows validation errors when fields are empty', (tester) async {
     await tester.pumpWidget(createTestApp());
 
-    await tester.tap(find.widgetWithText(FilledButton, AuthStrings.signInButton));
+    // Find and tap the "Giriş Yap" button
+    final loginButton = find.widgetWithText(FilledButton, 'Giriş Yap');
+    expect(loginButton, findsOneWidget);
+    
+    await tester.tap(loginButton);
     await tester.pumpAndSettle();
 
-    expect(find.text('E-posta adresi gerekli'), findsOneWidget);
+    // Should show validation error
+    expect(find.text('E-posta gerekli'), findsOneWidget);
   });
 
-  testWidgets('navigates to documents after successful login', (tester) async {
+  testWidgets('shows validation error for invalid email', (tester) async {
     await tester.pumpWidget(createTestApp());
 
-    await tester.enterText(find.byKey(loginEmailFieldKey), testUser.email);
+    // Enter invalid email
+    await tester.enterText(find.byKey(loginEmailFieldKey), 'invalid-email');
     await tester.enterText(find.byKey(loginPasswordFieldKey), 'password123');
-    await tester.tap(find.widgetWithText(FilledButton, AuthStrings.signInButton));
+    
+    await tester.tap(find.widgetWithText(FilledButton, 'Giriş Yap'));
     await tester.pumpAndSettle();
 
-    expect(fakeRepository.loginCalled, isTrue);
+    expect(find.text('Geçerli bir e-posta girin'), findsOneWidget);
+  });
+
+  testWidgets('shows validation error for short password', (tester) async {
+    await tester.pumpWidget(createTestApp());
+
+    await tester.enterText(find.byKey(loginEmailFieldKey), 'test@example.com');
+    await tester.enterText(find.byKey(loginPasswordFieldKey), '123');
+    
+    await tester.tap(find.widgetWithText(FilledButton, 'Giriş Yap'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Şifre en az 6 karakter olmalıdır'), findsOneWidget);
+  });
+
+  testWidgets('calls auth controller on valid login', (tester) async {
+    await tester.pumpWidget(createTestApp());
+
+    await tester.enterText(find.byKey(loginEmailFieldKey), 'test@example.com');
+    await tester.enterText(find.byKey(loginPasswordFieldKey), 'password123');
+    
+    await tester.tap(find.widgetWithText(FilledButton, 'Giriş Yap'));
+    await tester.pumpAndSettle();
+
+    expect(fakeAuthController.signInCalled, isTrue);
+    expect(fakeAuthController.lastEmail, 'test@example.com');
+    expect(fakeAuthController.lastPassword, 'password123');
+  });
+
+  testWidgets('navigates to documents on successful login', (tester) async {
+    fakeAuthController.shouldSucceed = true;
+    
+    await tester.pumpWidget(createTestApp());
+
+    await tester.enterText(find.byKey(loginEmailFieldKey), 'test@example.com');
+    await tester.enterText(find.byKey(loginPasswordFieldKey), 'password123');
+    
+    await tester.tap(find.widgetWithText(FilledButton, 'Giriş Yap'));
+    await tester.pumpAndSettle();
+
+    // Should navigate to documents
     expect(find.text('Documents'), findsOneWidget);
+  });
+
+  testWidgets('shows error snackbar on failed login', (tester) async {
+    fakeAuthController.shouldSucceed = false;
+    fakeAuthController.errorMessage = 'E-posta veya şifre hatalı';
+    
+    await tester.pumpWidget(createTestApp());
+
+    await tester.enterText(find.byKey(loginEmailFieldKey), 'test@example.com');
+    await tester.enterText(find.byKey(loginPasswordFieldKey), 'wrongpassword');
+    
+    await tester.tap(find.widgetWithText(FilledButton, 'Giriş Yap'));
+    await tester.pumpAndSettle();
+
+    // Should show error snackbar
+    expect(find.text('E-posta veya şifre hatalı'), findsOneWidget);
+  });
+
+  testWidgets('skip button navigates to documents', (tester) async {
+    await tester.pumpWidget(createTestApp());
+
+    await tester.tap(find.widgetWithText(OutlinedButton, 'Atla (Geliştirme)'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Documents'), findsOneWidget);
+  });
+
+  testWidgets('shows forgot password dialog', (tester) async {
+    await tester.pumpWidget(createTestApp());
+
+    await tester.tap(find.text('Şifremi Unuttum'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Şifre Sıfırlama'), findsOneWidget);
+    expect(find.widgetWithText(FilledButton, 'Gönder'), findsOneWidget);
   });
 }
 
-class _FakeAuthRepository implements AuthRepository {
-  final User successUser;
-  bool loginCalled = false;
-
-  _FakeAuthRepository(this.successUser);
+/// Fake auth controller for testing
+class _FakeAuthController extends AuthController {
+  bool signInCalled = false;
+  bool shouldSucceed = true;
+  String? errorMessage;
+  String? lastEmail;
+  String? lastPassword;
 
   @override
-  Future<Either<Failure, User>> login({
+  Future<String?> signIn({
     required String email,
     required String password,
   }) async {
-    loginCalled = true;
-    return Right(successUser);
+    signInCalled = true;
+    lastEmail = email;
+    lastPassword = password;
+
+    if (shouldSucceed) {
+      return null; // Success
+    } else {
+      return errorMessage ?? 'Giriş başarısız';
+    }
   }
 
   @override
-  Future<Either<Failure, User>> loginWithGoogle() {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<Either<Failure, User>> register({
+  Future<String?> signUp({
     required String email,
     required String password,
-    required String displayName,
-  }) {
-    throw UnimplementedError();
+    String? name,
+  }) async {
+    return null;
   }
 
   @override
-  Future<Either<Failure, void>> logout() {
-    throw UnimplementedError();
+  Future<void> signOut() async {}
+
+  @override
+  Future<String?> resetPassword(String email) async {
+    return null;
   }
 
   @override
-  Future<Either<Failure, User?>> getCurrentUser() {
-    throw UnimplementedError();
-  }
-
-  @override
-  Stream<User?> watchAuthState() {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<Either<Failure, void>> sendPasswordReset(String email) {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<Either<Failure, bool>> isEmailRegistered(String email) {
-    throw UnimplementedError();
+  Future<String?> signInWithGoogle() async {
+    return null;
   }
 }

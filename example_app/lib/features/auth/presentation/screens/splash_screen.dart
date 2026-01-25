@@ -1,10 +1,8 @@
 /// Splash screen that checks the auth session.
-import 'package:example_app/core/core.dart';
-import 'package:example_app/features/auth/domain/entities/user.dart';
-import 'package:example_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -14,108 +12,91 @@ class SplashScreen extends ConsumerStatefulWidget {
 }
 
 class _SplashScreenState extends ConsumerState<SplashScreen> {
-  bool _hasRedirected = false;
-
   @override
   void initState() {
     super.initState();
-    _checkAuthAndRedirect();
+    _checkAuthAndNavigate();
   }
 
-  Future<void> _checkAuthAndRedirect() async {
-    // Small delay to show splash screen
-    await Future.delayed(const Duration(milliseconds: 500));
-    
-    if (!mounted || _hasRedirected) return;
+  Future<void> _checkAuthAndNavigate() async {
+    // Show splash for 2 seconds
+    await Future.delayed(const Duration(seconds: 2));
 
-    try {
-      // Try to check auth state
-      final authState = ref.read(authStateProvider);
-      authState.whenOrNull(
-        data: (user) => _redirect(user),
-        error: (_, __) => _redirectToDocuments(), // On error, go to documents for testing
-        loading: () {
-          // Listen for auth state changes
-          ref.listen<AsyncValue<User?>>(authStateProvider, (previous, next) {
-            next.whenOrNull(
-              data: (user) => _redirect(user),
-              error: (_, __) => _redirectToDocuments(),
-            );
-          });
-        },
-      );
-      
-      // If still in loading state after 2 seconds, redirect to documents
-      Future.delayed(const Duration(seconds: 2), () {
-        if (!_hasRedirected && mounted) {
-          _redirectToDocuments();
-        }
-      });
-    } catch (e) {
-      // Supabase not initialized or other error - go to documents for testing
-      debugPrint('Auth check failed: $e');
-      _redirectToDocuments();
+    if (!mounted) return;
+
+    // Check Supabase session
+    final session = Supabase.instance.client.auth.currentSession;
+
+    if (session != null) {
+      // Session exists → Go to documents
+      debugPrint('✅ Session found: ${session.user.email}');
+      context.go('/documents');
+    } else {
+      // No session → Go to login
+      debugPrint('🔒 No session, redirecting to login');
+      context.go('/login');
     }
-  }
-
-  void _redirect(User? user) {
-    if (_hasRedirected || !mounted) return;
-    _hasRedirected = true;
-    
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      context.go(user == null ? RouteNames.login : RouteNames.documents);
-    });
-  }
-
-  void _redirectToDocuments() {
-    if (_hasRedirected || !mounted) return;
-    _hasRedirected = true;
-    
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      // Skip login for testing - go directly to documents
-      context.go(RouteNames.documents);
-    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF6366F1), // Indigo
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // App logo/icon
+            // Logo
             Container(
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primaryContainer,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.2),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
               ),
-              child: Icon(
-                Icons.edit_note,
+              child: const Icon(
+                Icons.edit_note_rounded,
                 size: 64,
-                color: Theme.of(context).colorScheme.primary,
+                color: Color(0xFF6366F1),
               ),
             ),
-            const SizedBox(height: 24),
-            Text(
+            const SizedBox(height: 32),
+            // Title
+            const Text(
               'StarNote',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              style: TextStyle(
+                fontSize: 36,
                 fontWeight: FontWeight.bold,
+                color: Colors.white,
+                letterSpacing: 1.2,
               ),
             ),
             const SizedBox(height: 8),
+            // Subtitle
             Text(
-              'Çizim ve Not Uygulaması',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              'Notlarınız, Çizimleriniz, Fikirleriniz',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.white.withOpacity(0.8),
               ),
             ),
             const SizedBox(height: 48),
-            const CircularProgressIndicator(),
+            // Loading
+            const SizedBox(
+              width: 32,
+              height: 32,
+              child: CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 3,
+              ),
+            ),
           ],
         ),
       ),
