@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'dart:ui';
+import 'package:flutter/foundation.dart';
 import 'package:pdfx/pdfx.dart';
 
 /// Quality levels for PDF rendering.
@@ -164,11 +165,8 @@ class PDFPageRenderer {
       // Get the page
       final page = await document.getPage(pageNumber);
 
-      // Calculate DPI and dimensions
-      final dpi = calculateDPI(
-        zoom: options.zoom,
-        devicePixelRatio: options.devicePixelRatio,
-      );
+      // Use quality-based DPI instead of zoom-based
+      final dpi = getRecommendedDPI(options.quality, options.devicePixelRatio);
 
       final width = calculateRenderWidth(
         pageWidth: page.width,
@@ -179,6 +177,9 @@ class PDFPageRenderer {
         pageHeight: page.height,
         dpi: dpi,
       );
+
+      // Debug: Log render dimensions
+      debugPrint('📄 Rendering page $pageNumber: ${width.toInt()}x${height.toInt()} px (DPI: $dpi)');
 
       // Render the page
       final pageImage = await page.render(
@@ -192,6 +193,7 @@ class PDFPageRenderer {
 
       return pageImage?.bytes;
     } catch (e) {
+      debugPrint('❌ PDF render error: $e');
       return null;
     }
   }

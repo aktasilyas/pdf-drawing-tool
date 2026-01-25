@@ -249,10 +249,29 @@ class StrokeStyle extends Equatable {
 
   /// Creates a [StrokeStyle] from a JSON map.
   factory StrokeStyle.fromJson(Map<String, dynamic> json) {
+    // Safe number parsing
+    double parseDouble(dynamic value, double defaultValue) {
+      if (value == null) return defaultValue;
+      if (value is double) return value;
+      if (value is int) return value.toDouble();
+      if (value is String) return double.tryParse(value) ?? defaultValue;
+      if (value is num) return value.toDouble();
+      return defaultValue;
+    }
+    
+    int parseInt(dynamic value, int defaultValue) {
+      if (value == null) return defaultValue;
+      if (value is int) return value;
+      if (value is double) return value.toInt();
+      if (value is String) return int.tryParse(value) ?? defaultValue;
+      if (value is num) return value.toInt();
+      return defaultValue;
+    }
+    
     return StrokeStyle(
-      color: json['color'] as int,
-      thickness: (json['thickness'] as num).toDouble(),
-      opacity: (json['opacity'] as num?)?.toDouble() ?? 1.0,
+      color: parseInt(json['color'], 0xFF000000),
+      thickness: parseDouble(json['thickness'], 1.0),
+      opacity: parseDouble(json['opacity'], 1.0),
       nibShape: NibShape.values.firstWhere(
         (e) => e.name == json['nibShape'],
         orElse: () => NibShape.circle,
@@ -270,12 +289,12 @@ class StrokeStyle extends Equatable {
         (e) => e.name == json['texture'],
         orElse: () => StrokeTexture.none,
       ),
-      glowRadius: (json['glowRadius'] as num?)?.toDouble() ?? 0.0,
-      glowIntensity: (json['glowIntensity'] as num?)?.toDouble() ?? 0.0,
+      glowRadius: parseDouble(json['glowRadius'], 0.0),
+      glowIntensity: parseDouble(json['glowIntensity'], 0.0),
       dashPattern: (json['dashPattern'] as List<dynamic>?)
-          ?.map((e) => (e as num).toDouble())
+          ?.map((e) => parseDouble(e, 0.0))
           .toList(),
-      nibAngle: (json['nibAngle'] as num?)?.toDouble() ?? 0.0,
+      nibAngle: parseDouble(json['nibAngle'], 0.0),
     );
   }
 

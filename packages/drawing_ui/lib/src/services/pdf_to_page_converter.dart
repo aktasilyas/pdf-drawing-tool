@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:pdfx/pdfx.dart';
 import 'pdf_page_renderer.dart';
@@ -41,7 +42,8 @@ class PDFConversionOptions {
           embedImages == other.embedImages;
 
   @override
-  int get hashCode => Object.hash(includeAnnotations, preserveLinks, embedImages);
+  int get hashCode =>
+      Object.hash(includeAnnotations, preserveLinks, embedImages);
 }
 
 /// Service for converting PDF pages to Drawing Page models.
@@ -55,7 +57,12 @@ class PDFToPageConverter {
   PDFToPageConverter({
     PDFRenderOptions? defaultRenderOptions,
     PDFPageRenderer? renderer,
-  })  : defaultRenderOptions = defaultRenderOptions ?? const PDFRenderOptions(),
+  })  : defaultRenderOptions = defaultRenderOptions ??
+            const PDFRenderOptions(
+              quality: RenderQuality
+                  .high, // 288 DPI - yüksek kalite (A4: ~2380x3368 px)
+              devicePixelRatio: 1.5, // 1.5x scale - dengeli kalite/boyut
+            ),
         _renderer = renderer ?? PDFPageRenderer();
 
   /// Calculates PageSize from PDF dimensions in points.
@@ -149,7 +156,9 @@ class PDFToPageConverter {
       index: index,
       size: PageSize(width: width, height: height),
       background: background ?? createDefaultBackground(),
-      layers: [],
+      layers: [
+        Layer.empty('Layer 1')
+      ], // FIX: PDF pages need at least one layer for drawing
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );
@@ -158,12 +167,17 @@ class PDFToPageConverter {
   /// Converts a single PDF page to a Drawing Page.
   ///
   /// The PDF page is rendered and embedded as the page background.
+  /// 
+  /// If [useLazyLoading] is true (default), the page will not be rendered immediately.
+  /// The page will be marked as PDF type with just the page index, and rendering
+  /// happens on-demand when the page is displayed.
   Future<Page?> convertPage(
     PdfDocument document,
     int pageNumber, {
     int? targetPageIndex,
     PDFRenderOptions? renderOptions,
     PDFConversionOptions? conversionOptions,
+    bool useLazyLoading = true, // Enable lazy loading by default
   }) async {
     try {
       // Validate page number
@@ -196,22 +210,46 @@ class PDFToPageConverter {
         name: generatePageName(pdfPageNumber: pageNumber),
       );
 
-      // Optionally render and embed PDF image
       final options = conversionOptions ?? const PDFConversionOptions();
-      if (options.embedImages) {
-        final renderedImage = await _renderer.renderPage(
-          document,
-          pageNumber,
-          options: renderOptions ?? defaultRenderOptions,
+      if (!options.embedImages) {
+        return page;
+      }
+
+      // ═══════════════════════════════════════════════════════════════════
+      // LAZY LOADING MODE - Don't render now, placeholder for lazy loading
+      // ═══════════════════════════════════════════════════════════════════
+      if (useLazyLoading) {
+        // NOTE: In lazy loading mode, we don't have pdfFilePath here.
+        // The file path is set during import in PDFImportService.
+        // This mode is not used when useLazyLoading=true in the new system.
+        // Return page without PDF background - will be set by import service.
+        debugPrint('⚡ PDF page $pageNumber prepared for lazy loading (not rendered yet)');
+        return page;
+      }
+
+      // ═══════════════════════════════════════════════════════════════════
+      // IMMEDIATE MODE - Render now (fallback for compatibility)
+      // ═══════════════════════════════════════════════════════════════════
+      final renderedImage = await _renderer.renderPage(
+        document,
+        pageNumber,
+        options: renderOptions ?? defaultRenderOptions,
+      );
+
+      if (renderedImage != null) {
+        // Create PDF background with rendered image data
+        final pdfBackground = PageBackground(
+          type: BackgroundType.pdf,
+          color: 0xFFFFFFFF,
+          pdfData: renderedImage,
+          pdfPageIndex: pageNumber,
         );
 
-        if (renderedImage != null) {
-          // Store rendered image data in page metadata
-          // (actual image embedding will be handled by UI layer)
-          return page.copyWith(
-            background: createDefaultBackground(),
-          );
-        }
+        // Debug logging
+        debugPrint(
+            '📄 PDF page $pageNumber rendered immediately, bytes: ${renderedImage.lengthInBytes}');
+
+        return page.copyWith(background: pdfBackground);
       }
 
       return page;
@@ -223,11 +261,14 @@ class PDFToPageConverter {
   /// Converts multiple PDF pages to Drawing Pages.
   ///
   /// Returns a list of successfully converted pages.
+  /// 
+  /// If [useLazyLoading] is true (default), pages are not rendered immediately.
   Future<List<Page>> convertPages(
     PdfDocument document,
     List<int> pageNumbers, {
     PDFRenderOptions? renderOptions,
     PDFConversionOptions? conversionOptions,
+    bool useLazyLoading = true,
   }) async {
     // Validate all page numbers
     if (!validatePageNumbers(
@@ -245,6 +286,7 @@ class PDFToPageConverter {
         pageNumber,
         renderOptions: renderOptions,
         conversionOptions: conversionOptions,
+        useLazyLoading: useLazyLoading,
       );
 
       if (page != null) {
@@ -260,6 +302,7 @@ class PDFToPageConverter {
     PdfDocument document, {
     PDFRenderOptions? renderOptions,
     PDFConversionOptions? conversionOptions,
+    bool useLazyLoading = true,
   }) async {
     final pageNumbers = generatePageRange(1, document.pagesCount);
     return convertPages(
@@ -267,6 +310,7 @@ class PDFToPageConverter {
       pageNumbers,
       renderOptions: renderOptions,
       conversionOptions: conversionOptions,
+      useLazyLoading: useLazyLoading,
     );
   }
 }

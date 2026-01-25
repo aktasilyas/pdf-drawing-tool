@@ -94,3 +94,5 @@ export 'src/providers/toolbar_config_provider.dart';
 export 'src/providers/canvas_transform_provider.dart';
 export 'src/providers/page_provider.dart';
 export 'src/providers/pdf_provider.dart';
+export 'src/providers/pdf_render_provider.dart';
+export 'src/providers/pdf_prefetch_provider.dart';

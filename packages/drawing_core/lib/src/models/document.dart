@@ -443,7 +443,10 @@ class DrawingDocument extends Equatable {
     if (isMultiPage) {
       // V2: Add to current page
       final current = currentPage;
-      if (current == null) return this;
+      if (current == null) {
+        print('🔴 [A] WARN: currentPage is NULL!');
+        return this;
+      }
 
       final updatedPage = current.addStroke(stroke);
       return _updatePageV2(currentPageIndex, updatedPage);
@@ -651,8 +654,8 @@ class DrawingDocument extends Equatable {
   ///
   /// Supports both V1 (legacy) and V2 (multi-page) formats.
   factory DrawingDocument.fromJson(Map<String, dynamic> json) {
-    // Version detection
-    final version = json['version'] as int? ?? 1;
+    // Version detection with safe parsing
+    final version = _parseVersion(json['version']) ?? 1;
 
     // Parse documentType (with fallback to notebook for backward compatibility)
     final documentType = json.containsKey('documentType')
@@ -670,7 +673,7 @@ class DrawingDocument extends Equatable {
         pages: (json['pages'] as List)
             .map((p) => Page.fromJson(p as Map<String, dynamic>))
             .toList(),
-        currentPageIndex: json['currentPageIndex'] as int? ?? 0,
+        currentPageIndex: _parseInt(json['currentPageIndex']) ?? 0,
         settings: json.containsKey('settings')
             ? DocumentSettings.fromJson(
                 json['settings'] as Map<String, dynamic>)
@@ -688,13 +691,43 @@ class DrawingDocument extends Equatable {
       layers: (json['layers'] as List)
           .map((l) => Layer.fromJson(l as Map<String, dynamic>))
           .toList(),
-      activeLayerIndex: json['activeLayerIndex'] as int? ?? 0,
+      activeLayerIndex: _parseInt(json['activeLayerIndex']) ?? 0,
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
-      width: (json['width'] as num?)?.toDouble() ?? 1920.0,
-      height: (json['height'] as num?)?.toDouble() ?? 1080.0,
+      width: _parseDouble(json['width']) ?? 1920.0,
+      height: _parseDouble(json['height']) ?? 1080.0,
       documentType: documentType,
     );
+  }
+
+  /// Safe version parsing
+  static int? _parseVersion(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    if (value is num) return value.toInt();
+    return null;
+  }
+
+  /// Safe int parsing
+  static int? _parseInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value);
+    if (value is num) return value.toInt();
+    return null;
+  }
+
+  /// Safe double parsing
+  static double? _parseDouble(dynamic value) {
+    if (value == null) return null;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) return double.tryParse(value);
+    if (value is num) return value.toDouble();
+    return null;
   }
 
   @override

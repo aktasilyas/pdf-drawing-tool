@@ -53,15 +53,31 @@ class LoadDocumentUseCase {
               }
               // Deserialize from JSON
               try {
+                debugPrint('🔍 [DEBUG] LoadDocumentUseCase - About to parse JSON');
+                debugPrint('🔍 [DEBUG] LoadDocumentUseCase - JSON keys: ${content.keys.toList()}');
+                debugPrint('🔍 [DEBUG] LoadDocumentUseCase - JSON version: ${content['version']}');
+                debugPrint('🔍 [DEBUG] LoadDocumentUseCase - isPDF: ${content['isPDF']}');
+                
                 final doc = DrawingDocument.fromJson(content);
                 
-                // #region agent log
                 debugPrint('🔍 [DEBUG] LoadDocumentUseCase - Loaded EXISTING document from JSON');
                 debugPrint('🔍 [DEBUG] LoadDocumentUseCase - loadedDocumentType: ${doc.documentType}');
-                // #endregion
                 
                 return Right(doc);
-              } catch (e) {
+              } catch (e, stackTrace) {
+                debugPrint('❌ JSON Parse Error: $e');
+                debugPrint('❌ Stack Trace: $stackTrace');
+                debugPrint('❌ Raw JSON (first 1000 chars): ${content.toString().substring(0, content.toString().length > 1000 ? 1000 : content.toString().length)}');
+                
+                // Try to identify which field failed
+                if (content.containsKey('pages')) {
+                  final pages = content['pages'] as List?;
+                  debugPrint('❌ Pages count: ${pages?.length}');
+                  if (pages != null && pages.isNotEmpty) {
+                    debugPrint('❌ First page sample: ${pages[0]}');
+                  }
+                }
+                
                 return Left(CacheFailure('Document corrupted: $e'));
               }
             },

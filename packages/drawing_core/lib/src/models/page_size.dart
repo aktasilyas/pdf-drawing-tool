@@ -78,9 +78,16 @@ class PageSize {
           )
         : null;
     
+    // Handle String/int/double parsing safely
+    double parseNumber(dynamic value) {
+      if (value is num) return value.toDouble();
+      if (value is String) return double.parse(value);
+      throw ArgumentError('Invalid number: $value');
+    }
+    
     return PageSize(
-      width: (json['width'] as num).toDouble(),
-      height: (json['height'] as num).toDouble(),
+      width: parseNumber(json['width']),
+      height: parseNumber(json['height']),
       preset: preset,
     );
   }

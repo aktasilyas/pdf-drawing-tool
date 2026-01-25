@@ -71,12 +71,31 @@ class DrawingPoint extends Equatable {
 
   /// Creates a [DrawingPoint] from a JSON map.
   factory DrawingPoint.fromJson(Map<String, dynamic> json) {
+    // Safe number parsing
+    double parseDouble(dynamic value, double defaultValue) {
+      if (value == null) return defaultValue;
+      if (value is double) return value;
+      if (value is int) return value.toDouble();
+      if (value is String) return double.tryParse(value) ?? defaultValue;
+      if (value is num) return value.toDouble();
+      return defaultValue;
+    }
+    
+    int parseInt(dynamic value, int defaultValue) {
+      if (value == null) return defaultValue;
+      if (value is int) return value;
+      if (value is double) return value.toInt();
+      if (value is String) return int.tryParse(value) ?? defaultValue;
+      if (value is num) return value.toInt();
+      return defaultValue;
+    }
+    
     return DrawingPoint(
-      x: (json['x'] as num).toDouble(),
-      y: (json['y'] as num).toDouble(),
-      pressure: (json['pressure'] as num?)?.toDouble() ?? 1.0,
-      tilt: (json['tilt'] as num?)?.toDouble() ?? 0.0,
-      timestamp: (json['timestamp'] as num?)?.toInt() ?? 0,
+      x: parseDouble(json['x'], 0.0),
+      y: parseDouble(json['y'], 0.0),
+      pressure: parseDouble(json['pressure'], 1.0),
+      tilt: parseDouble(json['tilt'], 0.0),
+      timestamp: parseInt(json['timestamp'], 0),
     );
   }
 

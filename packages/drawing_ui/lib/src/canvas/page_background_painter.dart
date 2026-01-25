@@ -35,7 +35,7 @@ class PageBackgroundPatternPainter extends CustomPainter {
         break;
 
       case BackgroundType.pdf:
-        // PDF background handled separately
+        // PDF background now handled by Image.memory widget
         break;
     }
   }
