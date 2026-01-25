@@ -206,20 +206,39 @@ class TextElement {
       };
 
   factory TextElement.fromJson(Map<String, dynamic> json) {
+    // Safe number parsing
+    double parseDouble(dynamic value, double defaultValue) {
+      if (value == null) return defaultValue;
+      if (value is double) return value;
+      if (value is int) return value.toDouble();
+      if (value is String) return double.tryParse(value) ?? defaultValue;
+      if (value is num) return value.toDouble();
+      return defaultValue;
+    }
+    
+    int parseInt(dynamic value, int defaultValue) {
+      if (value == null) return defaultValue;
+      if (value is int) return value;
+      if (value is double) return value.toInt();
+      if (value is String) return int.tryParse(value) ?? defaultValue;
+      if (value is num) return value.toInt();
+      return defaultValue;
+    }
+    
     return TextElement(
       id: json['id'],
       text: json['text'],
-      x: (json['x'] as num).toDouble(),
-      y: (json['y'] as num).toDouble(),
-      fontSize: (json['fontSize'] as num?)?.toDouble() ?? 16.0,
-      color: json['color'] ?? 0xFF000000,
+      x: parseDouble(json['x'], 0.0),
+      y: parseDouble(json['y'], 0.0),
+      fontSize: parseDouble(json['fontSize'], 16.0),
+      color: parseInt(json['color'], 0xFF000000),
       fontFamily: json['fontFamily'] ?? 'Roboto',
       isBold: json['isBold'] ?? false,
       isItalic: json['isItalic'] ?? false,
       isUnderline: json['isUnderline'] ?? false,
       alignment: TextAlignment.values.byName(json['alignment'] ?? 'left'),
-      width: (json['width'] as num?)?.toDouble(),
-      height: (json['height'] as num?)?.toDouble(),
+      width: json['width'] != null ? parseDouble(json['width'], 0.0) : null,
+      height: json['height'] != null ? parseDouble(json['height'], 0.0) : null,
     );
   }
 

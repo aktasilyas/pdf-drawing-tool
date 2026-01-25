@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,6 +9,9 @@ import 'package:example_app/features/documents/presentation/widgets/document_car
 import 'package:example_app/features/documents/presentation/widgets/documents_header.dart'
     show DocumentsHeader, SortOption;
 import 'package:example_app/features/documents/presentation/widgets/new_document_dialog.dart';
+import 'package:example_app/features/editor/presentation/providers/editor_provider.dart';
+import 'package:drawing_ui/drawing_ui.dart';
+import 'package:drawing_core/drawing_core.dart' as core;
 
 class DocumentsScreen extends ConsumerStatefulWidget {
   const DocumentsScreen({super.key});
@@ -177,7 +181,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                   final doc = sorted[index];
                   return DocumentCard(
                     document: doc,
-                    onTap: () => context.push('/editor/${doc.id}'),
+                    onTap: () => _openDocument(doc.id),
                     onFavoriteToggle: () => _toggleFavorite(doc.id),
                     onMorePressed: () => _showDocumentMenu(doc),
                   );
@@ -246,6 +250,100 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
 
   void _showNewDocumentDialog() {
     showNewDocumentDropdown(context, _addButtonKey);
+  }
+
+  /// Opens a document, prefetching PDF pages if necessary
+  Future<void> _openDocument(String documentId) async {
+    // Load document to check if it has PDF pages
+    final loadUseCase = ref.read(loadDocumentUseCaseProvider);
+    final result = await loadUseCase(documentId);
+
+    result.fold(
+      (failure) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Belge açılamadı: ${failure.message}'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      },
+      (document) async {
+        // Check if document has PDF pages
+        final hasPdfPages = document.pages.any((page) =>
+            page.background.type == core.BackgroundType.pdf &&
+            page.background.pdfFilePath != null &&
+            page.background.pdfPageIndex != null);
+
+        if (!hasPdfPages) {
+          // No PDF pages, navigate immediately
+          if (mounted) {
+            context.push('/editor/$documentId');
+          }
+          return;
+        }
+
+        // Has PDF pages - prefetch first 3 pages before navigation
+        if (mounted) {
+          // Show loading dialog
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (_) => const AlertDialog(
+              content: Row(
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(width: 16),
+                  Text('Sayfalar hazırlanıyor...'),
+                ],
+              ),
+            ),
+          );
+
+          try {
+            // Prefetch first 3 PDF pages (await)
+            final pdfPages = document.pages
+                .where((p) =>
+                    p.background.type == core.BackgroundType.pdf &&
+                    p.background.pdfFilePath != null &&
+                    p.background.pdfPageIndex != null)
+                .toList();
+
+            final pagesToPrefetch = min<int>(3, pdfPages.length);
+            for (int i = 0; i < pagesToPrefetch; i++) {
+              final page = pdfPages[i];
+              final cacheKey =
+                  '${page.background.pdfFilePath}|${page.background.pdfPageIndex}';
+              await ref.read(pdfPageRenderProvider(cacheKey).future);
+            }
+
+            // Background prefetch for pages 4-10 (fire and forget)
+            if (pdfPages.length > 3) {
+              final backgroundPrefetchCount = min<int>(10, pdfPages.length);
+              for (int i = 3; i < backgroundPrefetchCount; i++) {
+                final page = pdfPages[i];
+                final cacheKey =
+                    '${page.background.pdfFilePath}|${page.background.pdfPageIndex}';
+                ref.read(pdfPageRenderProvider(cacheKey));
+              }
+            }
+          } catch (e) {
+            debugPrint('❌ Prefetch error: $e');
+          } finally {
+            // Close loading dialog
+            if (mounted) {
+              Navigator.of(context, rootNavigator: true).pop();
+            }
+          }
+
+          // Navigate to editor
+          if (mounted) {
+            context.push('/editor/$documentId');
+          }
+        }
+      },
+    );
   }
 
   void _toggleFavorite(String documentId) {

@@ -1,7 +1,10 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:pdfx/pdfx.dart';
+import 'package:path_provider/path_provider.dart';
 import 'pdf_loader.dart';
 import 'pdf_page_renderer.dart';
 import 'pdf_to_page_converter.dart';
@@ -178,6 +181,7 @@ class PDFImportServiceResult {
 /// Service for orchestrating PDF import workflow.
 class PDFImportService {
   final PDFLoader _loader;
+  // ignore: unused_field
   final PDFPageRenderer _renderer;
   final PDFToPageConverter _converter;
   final PDFRenderOptions defaultRenderOptions;
@@ -360,14 +364,93 @@ class PDFImportService {
   }
 
   /// Imports PDF from bytes.
+  /// 
+  /// If [useLazyLoading] is true (default), pages will not be rendered immediately.
+  /// Instead, the PDF is saved to device storage and pages are rendered on-demand.
+  /// This significantly improves import performance for large PDFs.
   Future<PDFImportServiceResult> importFromBytes({
     required Uint8List bytes,
     required PDFImportConfig config,
+    bool useLazyLoading = true,
   }) async {
     _checkNotDisposed();
 
     try {
-      // Load PDF
+      // ═══════════════════════════════════════════════════════════════════
+      // LAZY LOADING MODE: Save PDF to device, don't render pages
+      // ═══════════════════════════════════════════════════════════════════
+      if (useLazyLoading) {
+        _updateState(PDFImportState.loadingPDF);
+        
+        // 1. PDF'i cihaza kaydet
+        final appDir = await getApplicationDocumentsDirectory();
+        final pdfDir = Directory('${appDir.path}/pdfs');
+        if (!await pdfDir.exists()) {
+          await pdfDir.create(recursive: true);
+        }
+        
+        final pdfId = 'pdf_${DateTime.now().millisecondsSinceEpoch}';
+        final pdfFile = File('${pdfDir.path}/$pdfId.pdf');
+        await pdfFile.writeAsBytes(bytes);
+        
+        debugPrint('📁 PDF saved to: ${pdfFile.path}');
+        
+        // 2. PDF'i aç ve sayfa bilgilerini al
+        final document = await _loader.loadFromBytes(bytes);
+        
+        // Validate config
+        if (!config.isValid(totalPages: document.pagesCount)) {
+          throw ArgumentError('Invalid import configuration');
+        }
+        
+        // Determine pages to import
+        final pageNumbers = _getPageNumbers(config, document.pagesCount);
+        _totalPages = pageNumbers.length;
+        _processedPages = 0;
+        _updateProgress(0.0);
+        
+        _updateState(PDFImportState.convertingPages);
+        
+        final pages = <Page>[];
+        
+        for (final pageNumber in pageNumbers) {
+          final pdfPage = await document.getPage(pageNumber);
+          
+          // Sadece boyut bilgisi + dosya yolu kaydet, RENDER YOK
+          final page = Page(
+            id: 'page_${DateTime.now().millisecondsSinceEpoch}_$pageNumber',
+            index: pageNumber - 1,
+            size: PageSize(width: pdfPage.width, height: pdfPage.height),
+            background: PageBackground.pdfLazy(
+              pageIndex: pageNumber,
+              pdfFilePath: pdfFile.path,
+            ),
+            layers: [Layer.empty('Layer 1')],
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          );
+          
+          pages.add(page);
+          await pdfPage.close();
+          
+          _processedPages++;
+          _updateProgress(calculateProgress(
+            processedPages: _processedPages,
+            totalPages: _totalPages,
+          ));
+          
+          debugPrint('⚡ Page $pageNumber metadata created (lazy)');
+        }
+        
+        await _loader.disposeDocument(document);
+        
+        _updateState(PDFImportState.completed);
+        return PDFImportServiceResult.success(pages);
+      }
+      
+      // ═══════════════════════════════════════════════════════════════════
+      // IMMEDIATE MODE: Legacy approach - render all pages now
+      // ═══════════════════════════════════════════════════════════════════
       _updateState(PDFImportState.loadingPDF);
       final document = await _loader.loadFromBytes(bytes);
 
@@ -382,12 +465,13 @@ class PDFImportService {
       _processedPages = 0;
       _updateProgress(0.0);
 
-      // Convert pages
+      // Convert pages (with immediate rendering)
       _updateState(PDFImportState.convertingPages);
       final pages = await _convertPages(
         document,
         pageNumbers,
         config,
+        useLazyLoading: false,
       );
 
       // Cleanup
@@ -422,10 +506,12 @@ class PDFImportService {
   Future<List<Page>> _convertPages(
     PdfDocument document,
     List<int> pageNumbers,
-    PDFImportConfig config,
-  ) async {
+    PDFImportConfig config, {
+    bool useLazyLoading = true,
+  }) async {
     final pages = <Page>[];
 
+    // IMMEDIATE MODE ONLY: Render pages now
     for (final pageNumber in pageNumbers) {
       final page = await _converter.convertPage(
         document,
@@ -434,6 +520,7 @@ class PDFImportService {
         conversionOptions: PDFConversionOptions(
           embedImages: config.embedImages,
         ),
+        useLazyLoading: false, // Force immediate rendering
       );
 
       if (page != null) {

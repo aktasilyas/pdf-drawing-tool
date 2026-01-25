@@ -321,6 +321,16 @@ class Shape {
 
   /// JSON deserialization
   factory Shape.fromJson(Map<String, dynamic> json) {
+    // Safe int parsing
+    int? parseInt(dynamic value) {
+      if (value == null) return null;
+      if (value is int) return value;
+      if (value is double) return value.toInt();
+      if (value is String) return int.tryParse(value);
+      if (value is num) return value.toInt();
+      return null;
+    }
+    
     return Shape(
       id: json['id'] as String,
       type: ShapeType.values.byName(json['type'] as String),
@@ -330,7 +340,7 @@ class Shape {
           DrawingPoint.fromJson(json['endPoint'] as Map<String, dynamic>),
       style: StrokeStyle.fromJson(json['style'] as Map<String, dynamic>),
       isFilled: (json['isFilled'] as bool?) ?? false,
-      fillColor: json['fillColor'] as int?,
+      fillColor: parseInt(json['fillColor']),
     );
   }
 

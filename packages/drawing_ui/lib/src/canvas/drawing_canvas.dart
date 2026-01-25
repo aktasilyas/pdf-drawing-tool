@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
+import 'package:drawing_core/drawing_core.dart' show BackgroundType;
 import 'package:drawing_ui/src/canvas/stroke_painter.dart';
 import 'package:drawing_ui/src/canvas/selection_painter.dart';
 import 'package:drawing_ui/src/canvas/shape_painter.dart';
@@ -20,7 +21,10 @@ import 'package:drawing_ui/src/providers/shape_provider.dart';
 import 'package:drawing_ui/src/providers/text_provider.dart';
 import 'package:drawing_ui/src/providers/page_provider.dart';
 import 'package:drawing_ui/src/providers/drawing_providers.dart';
+import 'package:drawing_ui/src/providers/pdf_render_provider.dart';
+import 'package:drawing_ui/src/providers/pdf_prefetch_provider.dart';
 import 'package:drawing_ui/src/widgets/widgets.dart';
+
 
 // =============================================================================
 // DRAWING CANVAS WIDGET
@@ -191,6 +195,17 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
   }
 
   @override
+  void didUpdateWidget(DrawingCanvas oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Canvas mode değiştiyse (farklı döküman türü) initialization'ı resetle
+    if (oldWidget.canvasMode != widget.canvasMode) {
+      debugPrint('🔄 [LIFECYCLE] Canvas mode changed, resetting initialization');
+      _hasInitialized = false;
+      _lastViewportSize = null;
+    }
+  }
+
+  @override
   void dispose() {
     _drawingController.dispose();
     super.dispose();
@@ -215,14 +230,33 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
     _hasInitialized = true;
     _lastViewportSize = viewportSize;
 
-    // Use post-frame callback to avoid modifying provider during build
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
+    // Check if transform is still at default (never initialized)
+    final currentTransform = ref.read(canvasTransformProvider);
+    final isDefaultTransform = currentTransform.zoom == 1.0 && 
+                                currentTransform.offset == Offset.zero;
+
+    debugPrint('🔍 [INIT] needsReInit: $needsReInit, isDefaultTransform: $isDefaultTransform');
+    debugPrint('🔍 [INIT] currentTransform: zoom=${currentTransform.zoom}, offset=${currentTransform.offset}');
+
+    if (isDefaultTransform) {
+      // First time initialization - do it immediately (no callback)
+      // This prevents the "gap at bottom" on first render
+      debugPrint('🚀 [INIT] Immediate initialization (first render)');
       ref.read(canvasTransformProvider.notifier).initializeForPage(
             viewportSize: viewportSize,
             pageSize: Size(currentPage.size.width, currentPage.size.height),
           );
-    });
+    } else {
+      // Re-initialization (orientation change) - use post-frame callback
+      debugPrint('🔄 [INIT] Post-frame initialization (re-init)');
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ref.read(canvasTransformProvider.notifier).initializeForPage(
+              viewportSize: viewportSize,
+              pageSize: Size(currentPage.size.width, currentPage.size.height),
+            );
+      });
+    }
   }
 
   /// Check if orientation changed (width/height swapped).
@@ -233,6 +267,184 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
     final isPortrait = newSize.height > newSize.width;
 
     return wasPortrait != isPortrait;
+  }
+
+  /// Build PDF background widget (with lazy loading support).
+  Widget _buildPdfBackground(core.Page page) {
+    final background = page.background;
+    
+    // Eğer pdfData cache'de varsa direkt göster
+    if (background.pdfData != null) {
+      // Container ile beyaz arka plan - PNG transparency fix
+      return Container(
+        width: page.size.width,
+        height: page.size.height,
+        color: Colors.white,
+        child: Image.memory(
+          background.pdfData!,
+          width: page.size.width,
+          height: page.size.height,
+          fit: BoxFit.fill,
+          filterQuality: FilterQuality.high,
+          isAntiAlias: true,
+        ),
+      );
+    }
+    
+    // Lazy load gerekiyor
+    if (background.pdfFilePath != null && background.pdfPageIndex != null) {
+      final cacheKey = '${background.pdfFilePath}|${background.pdfPageIndex}';
+      
+      return Consumer(
+        builder: (context, ref, child) {
+          final renderAsync = ref.watch(pdfPageRenderProvider(cacheKey));
+          
+          return renderAsync.when(
+            data: (bytes) {
+              if (bytes != null) {
+                // Render başarılı - Container ile beyaz arka plan
+                return Container(
+                  width: page.size.width,
+                  height: page.size.height,
+                  color: Colors.white,
+                  child: Image.memory(
+                    bytes,
+                    width: page.size.width,
+                    height: page.size.height,
+                    fit: BoxFit.fill,
+                    filterQuality: FilterQuality.high,
+                    isAntiAlias: true,
+                  ),
+                );
+              }
+              return _buildPdfPlaceholder(page);
+            },
+            loading: () => _buildPdfLoading(page),
+            error: (e, _) => _buildPdfError(page, e.toString()),
+          );
+        },
+      );
+    }
+    
+    return _buildPdfPlaceholder(page);
+  }
+
+  /// PDF yükleniyor widget'ı
+  Widget _buildPdfLoading(core.Page page) {
+    return Container(
+      width: page.size.width,
+      height: page.size.height,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        // Gölge ekle - normal sayfalar gibi
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 20,
+            spreadRadius: 2,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: const Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+            SizedBox(height: 12),
+            Text(
+              'Yükleniyor...',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.black38,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// PDF placeholder widget'ı
+  Widget _buildPdfPlaceholder(core.Page page) {
+    return Container(
+      width: page.size.width,
+      height: page.size.height,
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        // Gölge ekle
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 20,
+            spreadRadius: 2,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.picture_as_pdf, size: 40, color: Colors.grey[400]),
+            const SizedBox(height: 8),
+            Text(
+              'PDF Sayfası',
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// PDF hata widget'ı
+  Widget _buildPdfError(core.Page page, String error) {
+    return Container(
+      width: page.size.width,
+      height: page.size.height,
+      decoration: BoxDecoration(
+        color: Colors.red[50],
+        // Gölge ekle
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 20,
+            spreadRadius: 2,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.error_outline, size: 40, color: Colors.red),
+              const SizedBox(height: 8),
+              const Text(
+                'PDF Yüklenemedi',
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                error,
+                style: const TextStyle(fontSize: 10, color: Colors.black54),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -322,6 +534,39 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
 
     // Current page (LIMITED mod için)
     final currentPage = ref.watch(currentPageProvider);
+    
+    // Listen to page changes - reset initialization when page changes
+    ref.listen<core.Page>(currentPageProvider, (previous, current) {
+      if (previous != null && previous.id != current.id) {
+        debugPrint('📄 [PAGE] Page changed: ${previous.index} → ${current.index}, resetting initialization');
+        _hasInitialized = false;
+      }
+    });
+
+    // PDF Background Debug
+    if (!canvasMode.isInfinite && currentPage.background.type == BackgroundType.pdf) {
+      debugPrint('🖼️ PDF Check - type: ${currentPage.background.type.name}');
+      debugPrint('🖼️ PDF Check - has pdfData: ${currentPage.background.pdfData != null}');
+      
+      // 🚀 PREFETCH: Sayfa değiştiğinde etraftaki sayfaları yükle
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final allPages = ref.read(documentProvider).pages;
+        ref.read(pdfPrefetchNotifierProvider.notifier).onPageChanged(
+          currentPage.index,
+          allPages,
+        );
+      });
+    }
+
+    // PDF sayfası henüz render edilmemişse uyarı göster (ama bloke etme)
+    final isPdfNotRendered = !canvasMode.isInfinite && 
+        currentPage.background.type == core.BackgroundType.pdf &&
+        currentPage.background.pdfData == null;
+    
+    if (isPdfNotRendered) {
+      debugPrint('⚠️ PDF page not yet rendered (will show placeholder)');
+    }
 
     // Eraser cursor state
     final eraserCursorPosition = ref.watch(eraserCursorPositionProvider);
@@ -412,8 +657,9 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                           // LAYER 0: Page Container (LIMITED mod için)
                           // ═══════════════════════════════════════════════════════════
                           if (!canvasMode.isInfinite) ...[
-                            // Sayfa gölgesi
-                            if (canvasMode.showPageShadow)
+                            // Sayfa gölgesi - PDF için KAPALI
+                            if (canvasMode.showPageShadow && 
+                                currentPage.background.type != BackgroundType.pdf)
                               Positioned(
                                 left: 0,
                                 top: 0,
@@ -435,34 +681,44 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                                 ),
                               ),
 
-                            // Sayfa arka planı + pattern
-                            Positioned(
-                              left: 0,
-                              top: 0,
-                              child: IgnorePointer(
-                                child: Container(
-                                  width: currentPage.size.width,
-                                  height: currentPage.size.height,
-                                  decoration: BoxDecoration(
-                                    color: Color(currentPage.background.color),
-                                    border: canvasMode.pageBorderWidth > 0
-                                        ? Border.all(
-                                            color: Color(
-                                                canvasMode.pageBorderColor),
-                                            width: canvasMode.pageBorderWidth,
-                                          )
-                                        : null,
-                                  ),
-                                  child: CustomPaint(
-                                    painter: PageBackgroundPatternPainter(
-                                      background: currentPage.background,
+                            // PDF BACKGROUND - Lazy Loading destekli
+                            if (currentPage.background.type == BackgroundType.pdf) ...[
+                              Positioned(
+                                left: 0,
+                                top: 0,
+                                child: IgnorePointer(
+                                  child: _buildPdfBackground(currentPage),
+                                ),
+                              ),
+                            ],
+
+                            // Sayfa arka planı + pattern (PDF DEĞİLSE göster)
+                            if (currentPage.background.type != BackgroundType.pdf)
+                              Positioned(
+                                left: 0,
+                                top: 0,
+                                child: IgnorePointer(
+                                  child: Container(
+                                    width: currentPage.size.width,
+                                    height: currentPage.size.height,
+                                    decoration: BoxDecoration(
+                                      color: Color(currentPage.background.color),
+                                      border: canvasMode.pageBorderWidth > 0
+                                          ? Border.all(
+                                              color: Color(canvasMode.pageBorderColor),
+                                              width: canvasMode.pageBorderWidth,
+                                            )
+                                          : null,
                                     ),
-                                    size: Size(currentPage.size.width,
-                                        currentPage.size.height),
+                                    child: CustomPaint(
+                                      painter: PageBackgroundPatternPainter(
+                                        background: currentPage.background,
+                                      ),
+                                      size: Size(currentPage.size.width, currentPage.size.height),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
                           ],
 
                           // ─────────────────────────────────────────────────────────

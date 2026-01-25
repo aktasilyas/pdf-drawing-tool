@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:drawing_core/drawing_core.dart';
 
@@ -6,11 +8,15 @@ import 'package:drawing_core/drawing_core.dart';
 // =============================================================================
 
 /// Paints the page background based on PageBackground settings.
-/// Supports: blank, grid, lined, dotted patterns.
+/// Supports: blank, grid, lined, dotted patterns, and PDF images.
 class DynamicBackgroundPainter extends CustomPainter {
   final PageBackground background;
+  final ui.Image? pdfImage;
 
-  const DynamicBackgroundPainter({required this.background});
+  const DynamicBackgroundPainter({
+    required this.background,
+    this.pdfImage,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -43,7 +49,10 @@ class DynamicBackgroundPainter extends CustomPainter {
         break;
 
       case BackgroundType.pdf:
-        // PDF background handled separately
+        // Draw PDF image if available
+        if (pdfImage != null) {
+          _drawPdfImage(canvas, size, pdfImage!);
+        }
         break;
     }
   }
@@ -80,9 +89,17 @@ class DynamicBackgroundPainter extends CustomPainter {
     }
   }
 
+  void _drawPdfImage(Canvas canvas, Size size, ui.Image image) {
+    // Draw image to fill the entire size
+    final srcRect = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
+    final dstRect = Rect.fromLTWH(0, 0, size.width, size.height);
+    
+    canvas.drawImageRect(image, srcRect, dstRect, Paint());
+  }
+
   @override
   bool shouldRepaint(covariant DynamicBackgroundPainter oldDelegate) {
-    return oldDelegate.background != background;
+    return oldDelegate.background != background || oldDelegate.pdfImage != pdfImage;
   }
 }
 

@@ -60,6 +60,11 @@ class ThumbnailGenerator {
       canvas.translate(offsetX, offsetY);
       canvas.scale(scale);
 
+      // CRITICAL: Render PDF background if exists
+      if (page.background.type == BackgroundType.pdf) {
+        await _renderPdfBackground(canvas, page);
+      }
+
       // Render all layers
       for (final layer in page.layers) {
         _renderStrokes(canvas, layer.strokes);
@@ -78,6 +83,38 @@ class ThumbnailGenerator {
     } catch (e) {
       // Return null on any error (e.g., invalid dimensions, rendering issues)
       return null;
+    }
+  }
+
+  /// Renders PDF background on canvas
+  static Future<void> _renderPdfBackground(
+    Canvas canvas,
+    Page page,
+  ) async {
+    if (page.background.pdfFilePath == null || 
+        page.background.pdfPageIndex == null) {
+      return;
+    }
+
+    try {
+      // Bu kısım widget context'inden çağrılmalı
+      // Alternatif: PDF cache'den direkt oku
+      if (page.background.pdfData != null) {
+        final bytes = page.background.pdfData!;
+        final codec = await ui.instantiateImageCodec(bytes);
+        final frame = await codec.getNextFrame();
+        final pdfImage = frame.image;
+
+        // PDF'i page boyutuna sığdır
+        canvas.drawImageRect(
+          pdfImage,
+          Rect.fromLTWH(0, 0, pdfImage.width.toDouble(), pdfImage.height.toDouble()),
+          Rect.fromLTWH(0, 0, page.size.width, page.size.height),
+          Paint()..filterQuality = FilterQuality.high,
+        );
+      }
+    } catch (e) {
+      // PDF render hatası - sessizce devam et
     }
   }
 

@@ -62,34 +62,40 @@ class TopNavigationBar extends ConsumerWidget {
                 onPressed: onHomePressed ?? () => _showPlaceholder(context, 'Ana Sayfa'),
               ),
               const SizedBox(width: 8),
-              GestureDetector(
-                onTap: onTitlePressed ?? () => _showPlaceholder(context, 'Belge Menüsü'),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: theme.panelBorderColor.withAlpha(30),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        documentTitle ?? 'İsimsiz Not',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
+              // Document title - Constrained width to prevent overflow
+              Flexible(
+                child: GestureDetector(
+                  onTap: onTitlePressed ?? () => _showPlaceholder(context, 'Belge Menüsü'),
+                  child: Container(
+                    constraints: const BoxConstraints(maxWidth: 300), // Max 300px
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: theme.panelBorderColor.withAlpha(30),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            documentTitle ?? 'İsimsiz Not',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: theme.toolbarIconColor,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(
+                          Icons.keyboard_arrow_down,
+                          size: 18,
                           color: theme.toolbarIconColor,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(width: 4),
-                      Icon(
-                        Icons.keyboard_arrow_down,
-                        size: 18,
-                        color: theme.toolbarIconColor,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),

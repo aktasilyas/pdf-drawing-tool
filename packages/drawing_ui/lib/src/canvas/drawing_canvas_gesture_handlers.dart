@@ -164,12 +164,23 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       stabilization = penSettings.stabilization;
     }
 
+    // #region agent log [H1/H3]
+    debugPrint('✏️ [H1] handlePointerDown - Starting stroke');
+    debugPrint('✏️ [H1] point: ${point.x}, ${point.y}');
+    debugPrint('✏️ [H3] isDrawing BEFORE: ${drawingController.isDrawing}');
+    // #endregion
+
     drawingController.startStroke(
       point,
       style,
       stabilization: stabilization,
       straightLine: false,
     );
+
+    // #region agent log [H3]
+    debugPrint('✏️ [H3] isDrawing AFTER startStroke: ${drawingController.isDrawing}');
+    // #endregion
+
     lastPoint = event.localPosition;
   }
 
@@ -239,22 +250,36 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
 
   /// Handles pointer up - finishes stroke, eraser, selection, or shape.
   void handlePointerUp(PointerUpEvent event) {
+    // #region agent log [H1/H2]
+    debugPrint('✏️ [H1] handlePointerUp CALLED');
+    debugPrint('✏️ [H2] pointerCount BEFORE decrement: $pointerCount');
+    // #endregion
+
     pointerCount = (pointerCount - 1).clamp(0, 10);
+
+    // #region agent log [H2/H3]
+    debugPrint('✏️ [H2] pointerCount AFTER decrement: $pointerCount');
+    debugPrint('✏️ [H3] isDrawing: ${drawingController.isDrawing}');
+    debugPrint('✏️ [H2/H3] condition (pointerCount==0 && isDrawing): ${pointerCount == 0 && drawingController.isDrawing}');
+    // #endregion
 
     // Selection mode
     if (isSelecting) {
+      debugPrint('✏️ [BRANCH] isSelecting=true, returning early');
       handleSelectionUp(event);
       return;
     }
 
     // Shape mode
     if (isDrawingShape) {
+      debugPrint('✏️ [BRANCH] isDrawingShape=true, returning early');
       handleShapeUp(event);
       return;
     }
 
     // Straight line mode
     if (isStraightLineDrawing) {
+      debugPrint('✏️ [BRANCH] isStraightLineDrawing=true, returning early');
       handleStraightLineUp(event);
       return;
     }
@@ -262,17 +287,40 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     // Check if eraser is active
     final isEraser = ref.read(isEraserToolProvider);
     if (isEraser) {
+      debugPrint('✏️ [BRANCH] isEraser=true, returning early');
       handleEraserUp(event);
       return;
     }
 
     // Drawing mode - commit if we were drawing with single finger
     if (pointerCount == 0 && drawingController.isDrawing) {
+      // #region agent log [H4]
+      debugPrint('✏️ [H4] ENTERING stroke commit block');
+      // #endregion
+
       final stroke = drawingController.endStroke();
+
+      // #region agent log [H4]
+      debugPrint('✏️ [H4] endStroke() returned: ${stroke == null ? "NULL" : "STROKE"}');
+      debugPrint('✏️ [H4] stroke points: ${stroke?.points.length ?? 0}');
+      // #endregion
+
       if (stroke != null) {
+        // #region agent log [H5]
+        debugPrint('✏️ [H5] CALLING addStroke...');
+        // #endregion
+
         // Add stroke via history provider (enables undo/redo)
         ref.read(historyManagerProvider.notifier).addStroke(stroke);
+
+        // #region agent log [H5]
+        debugPrint('✏️ [H5] addStroke COMPLETED');
+        // #endregion
       }
+    } else {
+      // #region agent log [H2/H3]
+      debugPrint('✏️ [H2/H3] SKIPPED stroke commit - condition false');
+      // #endregion
     }
     lastPoint = null;
   }

@@ -31,7 +31,7 @@ class CanvasMode {
     required this.isInfinite,
     this.allowDrawingOutsidePage = false,
     this.showPageShadow = true,
-    this.surroundingAreaColor = 0xFFE5E5E5, // Light gray (default)
+    this.surroundingAreaColor = 0xFFF5F5F0, // Warm off-white (kirli beyaz)
     this.pageBorderColor = 0x1A000000, // Black 10%
     this.pageBorderWidth = 1.0,
     this.minZoom = 0.25,
@@ -57,7 +57,7 @@ class CanvasMode {
     isInfinite: false,
     allowDrawingOutsidePage: false,
     showPageShadow: true,
-    surroundingAreaColor: 0xFFE5E5E5, // Light gray (like GoodNotes)
+    surroundingAreaColor: 0xFFF5F5F0, // Warm off-white (kirli beyaz)
     pageBorderColor: 0x1A000000,
     pageBorderWidth: 1.0,
   );
@@ -67,7 +67,7 @@ class CanvasMode {
     isInfinite: false,
     allowDrawingOutsidePage: false,
     showPageShadow: true,
-    surroundingAreaColor: 0xFF424242, // Darker gray
+    surroundingAreaColor: 0xFFF5F5F0, // Warm off-white (kirli beyaz)
     pageBorderColor: 0x00000000, // No border
     pageBorderWidth: 0.0,
   );
@@ -77,7 +77,7 @@ class CanvasMode {
     isInfinite: false,
     allowDrawingOutsidePage: false,
     showPageShadow: true,
-    surroundingAreaColor: 0xFFE5E5E5, // Light gray (same as notebook)
+    surroundingAreaColor: 0xFFF5F5F0, // Warm off-white (kirli beyaz)
     minZoom: 0.5,
     maxZoom: 3.0,
   );

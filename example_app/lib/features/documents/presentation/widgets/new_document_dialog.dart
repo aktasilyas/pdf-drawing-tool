@@ -1,7 +1,9 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Page;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/drawing_ui.dart' show PDFImportService, PDFImportConfig, pdfPageRenderProvider;
+import 'package:file_picker/file_picker.dart';
 import 'package:example_app/features/documents/domain/entities/template.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 
@@ -126,12 +128,187 @@ void _createQuickNote(BuildContext context) async {
   }
 }
 
-void _importPdf(BuildContext context) {
-  // TODO: file_picker ile PDF seç
+void _importPdf(BuildContext context) async {
+  // 1. PDF dosyası seç
+  final result = await FilePicker.platform.pickFiles(
+    type: FileType.custom,
+    allowedExtensions: ['pdf'],
+    withData: true, // Dosya içeriğini al
+  );
+  
+  if (result == null || result.files.isEmpty) return;
+  
+  final file = result.files.first;
+  if (file.bytes == null) {
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('PDF dosyası okunamadı')),
+    );
+    return;
+  }
+  
+  // 2. Loading dialog göster
+  if (!context.mounted) return;
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (ctx) => const AlertDialog(
+      content: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircularProgressIndicator(),
+          SizedBox(width: 16),
+          Text('PDF yükleniyor...'),
+        ],
+      ),
+    ),
+  );
+  
+  try {
+    // 3. PDF Import Service kullan
+    final importService = PDFImportService();
+    final importResult = await importService.importFromBytes(
+      bytes: file.bytes!,
+      config: PDFImportConfig.all(), // Tüm sayfaları import et
+    );
+    
+    // Loading dialog kapat
+    if (!context.mounted) return;
+    Navigator.of(context).pop();
+    
+    if (!importResult.isSuccess) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(importResult.errorMessage ?? 'PDF import başarısız'),
+        ),
+      );
+      return;
+    }
+    
+    // 4. Doküman oluştur
+    final container = ProviderScope.containerOf(context);
+    final controller = container.read(documentsControllerProvider.notifier);
+    final folderId = container.read(currentFolderIdProvider);
+    
+    // Dosya adından başlık oluştur (.pdf uzantısını kaldır)
+    final title = file.name.replaceAll('.pdf', '');
+    
+    // PDF sayfalarını content olarak serialize et
+    final pagesJson = importResult.pages.map((page) => page.toJson()).toList();
+    final documentId = await controller.createDocumentWithPages(
+      title: title,
+      folderId: folderId,
+      documentType: DocumentType.pdf,
+      pages: pagesJson,
+      pageCount: importResult.pages.length,
+    );
+    
+    // 5. PDF'i direkt çizim ekranında aç
+    if (documentId != null && context.mounted) {
+      // CRITICAL: İlk 3 sayfayı AWAIT ile bekle (UX fix)
+      await _prefetchInitialPdfPages(context, importResult.pages);
+      
+      if (!context.mounted) return;
+      
+      // Başarılı mesajı göster
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$title açılıyor (${importResult.pages.length} sayfa)'),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      
+      // Editor'e yönlendir
+      context.push('/editor/$documentId');
+    }
+    
+  } catch (e) {
+    // Loading dialog kapat (eğer hala açıksa)
+    if (context.mounted) {
+      Navigator.of(context, rootNavigator: true).popUntil((route) => route.isFirst);
+    }
+    
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Hata: ${e.toString()}')),
+    );
+  }
 }
 
 void _importImage(BuildContext context) {
   // TODO: file_picker ile resim seç
+}
+
+/// İlk 3 PDF sayfasını AWAIT ile yükle (UX kritik)
+Future<void> _prefetchInitialPdfPages(BuildContext context, List<Page> pages) async {
+  const prefetchCount = 3; // İlk 3 sayfa AWAIT ile bekle
+  final pagesToPrefetch = pages.take(prefetchCount).toList();
+  
+  if (pagesToPrefetch.isEmpty) return;
+  
+  debugPrint('📦 Prefetching first $prefetchCount PDF pages (AWAIT mode)...');
+  
+  // Loading dialog göster
+  if (!context.mounted) return;
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (ctx) => const AlertDialog(
+      content: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircularProgressIndicator(),
+          SizedBox(width: 16),
+          Text('Sayfalar hazırlanıyor...'),
+        ],
+      ),
+    ),
+  );
+  
+  try {
+    // Provider container'a eriş
+    final container = ProviderScope.containerOf(context);
+    
+    // İlk 3 sayfayı SENKRON yükle
+    for (final page in pagesToPrefetch) {
+      if (page.background.type == BackgroundType.pdf &&
+          page.background.pdfFilePath != null &&
+          page.background.pdfPageIndex != null) {
+        
+        final cacheKey = '${page.background.pdfFilePath}|${page.background.pdfPageIndex}';
+        debugPrint('⏳ Awaiting page ${page.background.pdfPageIndex}...');
+        
+        // CRITICAL: await ile bekle
+        await container.read(pdfPageRenderProvider(cacheKey).future);
+        
+        debugPrint('✅ Page ${page.background.pdfPageIndex} ready');
+      }
+    }
+    
+    // Arka planda kalan sayfaları prefetch et (5-10. sayfalar)
+    const backgroundPrefetchCount = 10;
+    if (pages.length > prefetchCount) {
+      final backgroundPages = pages.skip(prefetchCount).take(backgroundPrefetchCount - prefetchCount).toList();
+      for (final page in backgroundPages) {
+        if (page.background.type == BackgroundType.pdf &&
+            page.background.pdfFilePath != null &&
+            page.background.pdfPageIndex != null) {
+          final cacheKey = '${page.background.pdfFilePath}|${page.background.pdfPageIndex}';
+          container.read(pdfPageRenderProvider(cacheKey)); // Fire and forget
+        }
+      }
+      debugPrint('🚀 Background prefetch started for pages ${prefetchCount + 1}-$backgroundPrefetchCount');
+    }
+    
+    debugPrint('✅ Initial prefetch completed for ${pagesToPrefetch.length} pages');
+  } finally {
+    // Loading dialog kapat
+    if (context.mounted) {
+      Navigator.of(context).pop();
+    }
+  }
 }
 
 /// Shows the new document bottom sheet

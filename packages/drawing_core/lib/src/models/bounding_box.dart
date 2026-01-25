@@ -112,11 +112,21 @@ class BoundingBox extends Equatable {
 
   /// Creates a [BoundingBox] from a JSON map.
   factory BoundingBox.fromJson(Map<String, dynamic> json) {
+    // Safe number parsing
+    double parseDouble(dynamic value, double defaultValue) {
+      if (value == null) return defaultValue;
+      if (value is double) return value;
+      if (value is int) return value.toDouble();
+      if (value is String) return double.tryParse(value) ?? defaultValue;
+      if (value is num) return value.toDouble();
+      return defaultValue;
+    }
+    
     return BoundingBox(
-      left: (json['left'] as num).toDouble(),
-      top: (json['top'] as num).toDouble(),
-      right: (json['right'] as num).toDouble(),
-      bottom: (json['bottom'] as num).toDouble(),
+      left: parseDouble(json['left'], 0.0),
+      top: parseDouble(json['top'], 0.0),
+      right: parseDouble(json['right'], 0.0),
+      bottom: parseDouble(json['bottom'], 0.0),
     );
   }
 

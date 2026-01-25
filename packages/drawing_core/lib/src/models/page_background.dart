@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 /// Sayfa arka plan türleri
@@ -16,8 +17,15 @@ class PageBackground {
   final double? gridSpacing;
   final double? lineSpacing;
   final int? lineColor;
+  
+  /// Rendered PDF image data (cache - lazy loaded)
   final Uint8List? pdfData;
+  
+  /// PDF page number (1-based)
   final int? pdfPageIndex;
+  
+  /// PDF file path for lazy loading (stored on device)
+  final String? pdfFilePath;
 
   const PageBackground({
     required this.type,
@@ -27,6 +35,7 @@ class PageBackground {
     this.lineColor,
     this.pdfData,
     this.pdfPageIndex,
+    this.pdfFilePath,
   });
 
   /// Blank white background
@@ -64,6 +73,19 @@ class PageBackground {
       pdfPageIndex: pageIndex,
     );
   }
+  
+  /// Create PDF background for lazy loading (with file path)
+  factory PageBackground.pdfLazy({
+    required int pageIndex,
+    required String pdfFilePath,
+  }) {
+    return PageBackground(
+      type: BackgroundType.pdf,
+      pdfPageIndex: pageIndex,
+      pdfFilePath: pdfFilePath,
+      pdfData: null, // Will be loaded on-demand
+    );
+  }
 
   /// Copy with
   PageBackground copyWith({
@@ -74,6 +96,7 @@ class PageBackground {
     int? lineColor,
     Uint8List? pdfData,
     int? pdfPageIndex,
+    String? pdfFilePath,
   }) {
     return PageBackground(
       type: type ?? this.type,
@@ -83,10 +106,12 @@ class PageBackground {
       lineColor: lineColor ?? this.lineColor,
       pdfData: pdfData ?? this.pdfData,
       pdfPageIndex: pdfPageIndex ?? this.pdfPageIndex,
+      pdfFilePath: pdfFilePath ?? this.pdfFilePath,
     );
   }
 
-  /// JSON serialization (PDF data excluded for size)
+  /// JSON serialization
+  /// Note: pdfData is NOT serialized (too large), will be lazy loaded
   Map<String, dynamic> toJson() => {
     'type': type.name,
     'color': color,
@@ -94,20 +119,43 @@ class PageBackground {
     if (lineSpacing != null) 'lineSpacing': lineSpacing,
     if (lineColor != null) 'lineColor': lineColor,
     if (pdfPageIndex != null) 'pdfPageIndex': pdfPageIndex,
-    // pdfData is stored separately
+    if (pdfFilePath != null) 'pdfFilePath': pdfFilePath,
+    // pdfData deliberately NOT serialized - will be rendered on-demand
   };
 
   factory PageBackground.fromJson(Map<String, dynamic> json) {
+    // Helper to parse int safely
+    int? parseInt(dynamic value) {
+      if (value == null) return null;
+      if (value is int) return value;
+      if (value is String) return int.parse(value);
+      if (value is num) return value.toInt();
+      return null;
+    }
+    
+    // Helper to parse double safely
+    double? parseDouble(dynamic value) {
+      if (value == null) return null;
+      if (value is double) return value;
+      if (value is String) return double.parse(value);
+      if (value is num) return value.toDouble();
+      return null;
+    }
+    
+    // pdfData NOT loaded from JSON - will be lazy loaded on-demand
+    
     return PageBackground(
       type: BackgroundType.values.firstWhere(
         (t) => t.name == json['type'],
         orElse: () => BackgroundType.blank,
       ),
-      color: json['color'] as int? ?? 0xFFFFFFFF,
-      gridSpacing: (json['gridSpacing'] as num?)?.toDouble(),
-      lineSpacing: (json['lineSpacing'] as num?)?.toDouble(),
-      lineColor: json['lineColor'] as int?,
-      pdfPageIndex: json['pdfPageIndex'] as int?,
+      color: parseInt(json['color']) ?? 0xFFFFFFFF,
+      gridSpacing: parseDouble(json['gridSpacing']),
+      lineSpacing: parseDouble(json['lineSpacing']),
+      lineColor: parseInt(json['lineColor']),
+      pdfPageIndex: parseInt(json['pdfPageIndex']),
+      pdfFilePath: json['pdfFilePath'] as String?,
+      pdfData: null, // Always null on load - lazy rendered
     );
   }
 }

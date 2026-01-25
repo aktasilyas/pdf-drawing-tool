@@ -1,14 +1,16 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart' hide Page;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/services/thumbnail_cache.dart';
 import 'package:drawing_ui/src/services/thumbnail_generator.dart';
+import 'package:drawing_ui/src/providers/pdf_render_provider.dart';
 
 /// A widget that displays a thumbnail preview of a page.
 ///
 /// Handles thumbnail generation, caching, and display with loading/error states.
 /// Supports selection styling and tap callbacks.
-class PageThumbnail extends StatefulWidget {
+class PageThumbnail extends ConsumerStatefulWidget {
   /// The page to display a thumbnail for.
   final Page page;
 
@@ -50,10 +52,10 @@ class PageThumbnail extends StatefulWidget {
   });
 
   @override
-  State<PageThumbnail> createState() => _PageThumbnailState();
+  ConsumerState<PageThumbnail> createState() => _PageThumbnailState();
 }
 
-class _PageThumbnailState extends State<PageThumbnail> {
+class _PageThumbnailState extends ConsumerState<PageThumbnail> {
   Uint8List? _thumbnailData;
   bool _isLoading = true;
   bool _hasError = false;
@@ -201,6 +203,14 @@ class _PageThumbnailState extends State<PageThumbnail> {
   }
 
   Widget _buildThumbnailContent() {
+    // SPECIAL CASE: PDF pages - use pdfPageRenderProvider directly
+    if (widget.page.background.type == BackgroundType.pdf &&
+        widget.page.background.pdfFilePath != null &&
+        widget.page.background.pdfPageIndex != null) {
+      return _buildPdfThumbnail();
+    }
+
+    // Normal page thumbnail rendering
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -243,6 +253,57 @@ class _PageThumbnailState extends State<PageThumbnail> {
           ),
         );
       },
+    );
+  }
+
+  /// Build PDF thumbnail using pdfPageRenderProvider
+  Widget _buildPdfThumbnail() {
+    final cacheKey = '${widget.page.background.pdfFilePath}|${widget.page.background.pdfPageIndex}';
+    final renderAsync = ref.watch(pdfPageRenderProvider(cacheKey));
+
+    return renderAsync.when(
+      data: (bytes) {
+        if (bytes != null) {
+          return Container(
+            color: Colors.white, // PDF background
+            child: Image.memory(
+              bytes,
+              fit: BoxFit.contain,
+              filterQuality: FilterQuality.medium,
+            ),
+          );
+        }
+        return Center(
+          child: Icon(
+            Icons.picture_as_pdf,
+            size: 32,
+            color: Colors.grey.shade400,
+          ),
+        );
+      },
+      loading: () => const Center(
+        child: CircularProgressIndicator(strokeWidth: 2),
+      ),
+      error: (e, _) => Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 32,
+              color: Colors.grey.shade400,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'PDF Error',
+              style: TextStyle(
+                color: Colors.grey.shade600,
+                fontSize: 10,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -25,6 +25,9 @@ class ToolBar extends ConsumerStatefulWidget {
     this.toolButtonKeys,
     this.penGroupButtonKey,
     this.highlighterGroupButtonKey,
+    this.onSidebarToggle,
+    this.showSidebarButton = false,
+    this.isSidebarOpen = false,
   });
 
   /// Callback when undo is pressed.
@@ -47,6 +50,15 @@ class ToolBar extends ConsumerStatefulWidget {
 
   /// Single GlobalKey for highlighter group button
   final GlobalKey? highlighterGroupButtonKey;
+  
+  /// Callback when sidebar toggle is pressed
+  final VoidCallback? onSidebarToggle;
+  
+  /// Whether to show sidebar toggle button
+  final bool showSidebarButton;
+  
+  /// Whether sidebar is currently open
+  final bool isSidebarOpen;
 
   @override
   ConsumerState<ToolBar> createState() => _ToolBarState();
@@ -130,8 +142,31 @@ class _ToolBarState extends ConsumerState<ToolBar> {
           return Row(
             children: [
               const SizedBox(width: 4),
+              
+              // Sidebar toggle button (GoodNotes style - leftmost)
+              if (widget.showSidebarButton) ...[
+                IconButton(
+                  icon: Icon(
+                    widget.isSidebarOpen ? Icons.menu_open : Icons.menu,
+                    size: 22,
+                  ),
+                  onPressed: widget.onSidebarToggle,
+                  tooltip: 'Sayfalar',
+                  padding: const EdgeInsets.all(10),
+                  constraints: const BoxConstraints(
+                    minWidth: 40,
+                    minHeight: 40,
+                  ),
+                ),
+                Container(
+                  width: 1,
+                  height: 28,
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  color: theme.panelBorderColor.withAlpha(60),
+                ),
+              ],
 
-              // Undo/Redo section (leftmost)
+              // Undo/Redo section
               ToolbarUndoRedoButtons(
                 canUndo: canUndo,
                 canRedo: canRedo,

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
 
@@ -79,7 +80,16 @@ class DocumentNotifier extends StateNotifier<DrawingDocument> {
   ///
   /// Used for undo/redo operations.
   void updateDocument(DrawingDocument document) {
+    // #region agent log [H7]
+    debugPrint('📄 [H7] updateDocument - strokes BEFORE: ${state.activeLayer?.strokes.length ?? 0}');
+    debugPrint('📄 [H7] updateDocument - strokes in NEW doc: ${document.activeLayer?.strokes.length ?? 0}');
+    // #endregion
+
     state = document;
+
+    // #region agent log [H7]
+    debugPrint('📄 [H7] updateDocument - strokes AFTER state=: ${state.activeLayer?.strokes.length ?? 0}');
+    // #endregion
   }
 
   /// Clear active layer - removes all strokes.
@@ -125,6 +135,24 @@ class DocumentNotifier extends StateNotifier<DrawingDocument> {
   /// Update document title.
   void updateTitle(String title) {
     state = state.updateTitle(title);
+  }
+
+  /// Update page background (used for lazy loading PDF pages).
+  void updatePageBackground(String pageId, PageBackground background) {
+    final pages = state.pages;
+    final pageIndex = pages.indexWhere((p) => p.id == pageId);
+    
+    if (pageIndex == -1) {
+      debugPrint('⚠️ Page not found: $pageId');
+      return;
+    }
+    
+    final updatedPage = pages[pageIndex].copyWith(background: background);
+    final updatedPages = List<Page>.from(pages);
+    updatedPages[pageIndex] = updatedPage;
+    
+    state = state.copyWith(pages: updatedPages);
+    debugPrint('✅ Page background updated: $pageId');
   }
 
   /// Get current document state.

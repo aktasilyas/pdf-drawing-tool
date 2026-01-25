@@ -90,6 +90,11 @@ class Page {
     }
     final lastIndex = updatedLayers.length - 1;
     updatedLayers[lastIndex] = updatedLayers[lastIndex].addStroke(stroke);
+    
+    // #region agent log - Hipotez A
+    print('🔵 [A] Page.addStroke - strokes in updated layer: ${updatedLayers[lastIndex].strokes.length}');
+    // #endregion
+    
     return copyWith(layers: updatedLayers);
   }
 
@@ -106,9 +111,17 @@ class Page {
   };
 
   factory Page.fromJson(Map<String, dynamic> json) {
+    // Helper to parse int safely
+    int parseInt(dynamic value, int defaultValue) {
+      if (value is int) return value;
+      if (value is String) return int.tryParse(value) ?? defaultValue;
+      if (value is num) return value.toInt();
+      return defaultValue;
+    }
+    
     return Page(
       id: json['id'] as String,
-      index: json['index'] as int,
+      index: parseInt(json['index'], 0),
       size: PageSize.fromJson(json['size'] as Map<String, dynamic>),
       background: PageBackground.fromJson(json['background'] as Map<String, dynamic>),
       layers: (json['layers'] as List)

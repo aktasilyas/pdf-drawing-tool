@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get_it/get_it.dart';
 import 'package:drawing_core/drawing_core.dart';
@@ -107,6 +108,87 @@ class DocumentsController extends StateNotifier<AsyncValue<void>> {
         return document.id;
       },
     );
+  }
+
+  /// Create document with pre-rendered pages (for PDF import).
+  Future<String?> createDocumentWithPages({
+    required String title,
+    String? folderId,
+    required DocumentType documentType,
+    required List<Map<String, dynamic>> pages,
+    required int pageCount,
+  }) async {
+    state = const AsyncValue.loading();
+    
+    try {
+      // 1. İlk olarak doküman oluştur (blank template ile)
+      final result = await _repository.createDocument(
+        title: title,
+        templateId: 'blank', // PDF için template gereksiz
+        folderId: folderId,
+        paperColor: 'Beyaz kağıt', // PDF için varsayılan
+        isPortrait: true,
+        documentType: documentType,
+      );
+      
+      return result.fold(
+        (failure) {
+          state = AsyncValue.error(failure, StackTrace.current);
+          return null;
+        },
+        (document) async {
+          // 2. JSON'u encode/decode ederek tip tutarlılığını sağla
+          // Bu sayede int/double/String karışıklığı önlenir
+          final jsonString = jsonEncode(pages);
+          final normalizedPages = jsonDecode(jsonString) as List;
+          
+          // 3. V2 format için complete document structure oluştur
+          final now = DateTime.now();
+          final content = {
+            'version': 2, // V2 format (int olarak)
+            'id': document.id,
+            'title': document.title,
+            'pages': normalizedPages,
+            'currentPageIndex': 0,
+            'settings': {
+              'defaultPageSize': {
+                'width': 595.0,
+                'height': 842.0,
+                'preset': 'a4Portrait',
+              },
+              'defaultBackground': {
+                'type': 'blank',
+                'color': 4294967295, // 0xFFFFFFFF (white)
+              },
+            },
+            'documentType': documentType.name,
+            'createdAt': document.createdAt.toIso8601String(),
+            'updatedAt': now.toIso8601String(),
+          };
+          
+          final saveResult = await _repository.saveDocumentContent(
+            id: document.id,
+            content: content,
+            pageCount: pageCount,
+          );
+          
+          return saveResult.fold(
+            (failure) {
+              state = AsyncValue.error(failure, StackTrace.current);
+              return null;
+            },
+            (_) {
+              state = const AsyncValue.data(null);
+              _invalidateDocuments();
+              return document.id;
+            },
+          );
+        },
+      );
+    } catch (e) {
+      state = AsyncValue.error(e, StackTrace.current);
+      return null;
+    }
   }
 
   Future<bool> moveDocument(String documentId, String? targetFolderId) async {
