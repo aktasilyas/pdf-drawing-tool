@@ -114,6 +114,9 @@ class _ColorChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return GestureDetector(
       onTap: onTap,
       onDoubleTap: onDoubleTap,
@@ -125,16 +128,16 @@ class _ColorChip extends StatelessWidget {
           shape: BoxShape.circle,
           border: Border.all(
             color: isSelected
-                ? const Color(0xFF4FC3F7)
+                ? colorScheme.primary
                 : (color.computeLuminance() > 0.8
-                    ? Colors.grey.shade400
+                    ? colorScheme.outline.withValues(alpha: 0.5)
                     : Colors.transparent),
             width: isSelected ? 2 : 1,
           ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: const Color(0xFF4FC3F7).withAlpha(60),
+                    color: colorScheme.primary.withValues(alpha: 0.3),
                     blurRadius: 4,
                     spreadRadius: 1,
                   ),
@@ -163,22 +166,35 @@ class _MoreButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
-          color: const Color(0xFF2D2D2D),
+          color: isDark ? colorScheme.surfaceContainerHighest : colorScheme.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: colorScheme.outline.withValues(alpha: 0.3),
+          ),
         ),
-        child: const Row(
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.palette_outlined, size: 12, color: Color(0xFF4FC3F7)),
-            SizedBox(width: 3),
+            Icon(
+              Icons.palette_outlined,
+              size: 12,
+              color: colorScheme.primary,
+            ),
+            const SizedBox(width: 3),
             Text(
               'Daha fazla',
-              style: TextStyle(fontSize: 10, color: Color(0xFF4FC3F7)),
+              style: TextStyle(
+                fontSize: 10,
+                color: colorScheme.primary,
+              ),
             ),
           ],
         ),

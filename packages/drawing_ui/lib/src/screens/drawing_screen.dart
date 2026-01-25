@@ -120,8 +120,25 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
         ? Color(bgColor) 
         : Color(canvasMode.surroundingAreaColor);
 
+    // Get Material theme colors
+    final materialTheme = Theme.of(context);
+    final colorScheme = materialTheme.colorScheme;
+    final isDark = materialTheme.brightness == Brightness.dark;
+    
+    // Create theme-aware DrawingTheme
+    final drawingTheme = DrawingTheme(
+      toolbarBackground: isDark ? colorScheme.surfaceContainerHighest : colorScheme.surface,
+      toolbarIconColor: colorScheme.onSurfaceVariant,
+      toolbarIconSelectedColor: colorScheme.primary,
+      toolbarIconDisabledColor: colorScheme.onSurface.withValues(alpha: 0.38),
+      panelBackground: isDark ? colorScheme.surfaceContainerHigh : colorScheme.surface,
+      panelBorderColor: colorScheme.outlineVariant,
+      penBoxBackground: isDark ? colorScheme.surfaceContainer : colorScheme.surface,
+      penBoxSlotSelectedColor: colorScheme.primaryContainer,
+    );
+
     return DrawingThemeProvider(
-      theme: const DrawingTheme(),
+      theme: drawingTheme,
       child: Scaffold(
         backgroundColor: scaffoldBgColor,
         body: SafeArea(

@@ -39,10 +39,22 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
             },
           ),
 
-          // Vertical divider
+          // Vertical divider (gradient, more visible)
           Container(
             width: 1,
-            color: Theme.of(context).dividerColor,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Theme.of(context).dividerColor.withValues(alpha: 0.0),
+                  Theme.of(context).dividerColor.withValues(alpha: 0.5),
+                  Theme.of(context).dividerColor.withValues(alpha: 0.5),
+                  Theme.of(context).dividerColor.withValues(alpha: 0.0),
+                ],
+                stops: const [0.0, 0.1, 0.9, 1.0],
+              ),
+            ),
           ),
 
           // Main content
@@ -77,6 +89,21 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                   onSelectionToggle: () {
                     setState(() => _isSelectionMode = !_isSelectionMode);
                   },
+                ),
+
+                // Divider between header and content (soft & compact)
+                Container(
+                  height: 1,
+                  margin: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Theme.of(context).dividerColor.withValues(alpha: 0.0),
+                        Theme.of(context).dividerColor.withValues(alpha: 0.3),
+                        Theme.of(context).dividerColor.withValues(alpha: 0.0),
+                      ],
+                    ),
+                  ),
                 ),
 
                 // Content

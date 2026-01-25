@@ -133,20 +133,20 @@ class DocumentCard extends ConsumerWidget {
                               Flexible(
                                 child: Text(
                                   document.title,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w500,
-                                    color: Color(0xFF333333),
+                                    color: Theme.of(context).colorScheme.onSurface,
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                               const SizedBox(width: 2),
-                              const Icon(
+                              Icon(
                                 Icons.keyboard_arrow_down,
-                                size: 14,
-                                color: Color(0xFF999999),
+                                size: 16,
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
                               ),
                             ],
                           ),
@@ -156,9 +156,9 @@ class DocumentCard extends ConsumerWidget {
                       // Date
                       Text(
                         _formatDate(document.updatedAt),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 10,
-                          color: Color(0xFF999999),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

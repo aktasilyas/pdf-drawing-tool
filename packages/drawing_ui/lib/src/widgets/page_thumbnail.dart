@@ -133,6 +133,9 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return GestureDetector(
       onTap: widget.onTap,
       onLongPress: widget.onLongPress,
@@ -145,21 +148,26 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
         ),
         decoration: BoxDecoration(
           border: widget.isSelected
-              ? Border.all(color: Theme.of(context).primaryColor, width: 3)
-              : Border.all(color: Colors.grey.shade300, width: 1),
+              ? Border.all(color: colorScheme.primary, width: 3)
+              : Border.all(
+                  color: isDark 
+                    ? colorScheme.outline.withValues(alpha: 0.5)
+                    : colorScheme.outline.withValues(alpha: 0.3),
+                  width: 1,
+                ),
           borderRadius: BorderRadius.circular(8),
           color: widget.backgroundColor,
           boxShadow: widget.isSelected
               ? [
                   BoxShadow(
-                    color: Theme.of(context).primaryColor.withValues(alpha: 0.3),
+                    color: colorScheme.primary.withValues(alpha: 0.3),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
                 ]
               : [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
+                    color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.1),
                     blurRadius: 4,
                     offset: const Offset(0, 2),
                   ),
@@ -203,6 +211,8 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
   }
 
   Widget _buildThumbnailContent() {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     // SPECIAL CASE: PDF pages - use pdfPageRenderProvider directly
     if (widget.page.background.type == BackgroundType.pdf &&
         widget.page.background.pdfFilePath != null &&
@@ -225,14 +235,14 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
             Icon(
               Icons.error_outline,
               size: 32,
-              color: Colors.grey.shade400,
+              color: colorScheme.error.withValues(alpha: 0.7),
             ),
             const SizedBox(height: 8),
             Text(
               'Failed to\ngenerate',
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Colors.grey.shade600,
+                color: colorScheme.onSurfaceVariant,
                 fontSize: 12,
               ),
             ),
@@ -245,11 +255,12 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
       _thumbnailData!,
       fit: BoxFit.contain,
       errorBuilder: (context, error, stackTrace) {
+        final colorScheme = Theme.of(context).colorScheme;
         return Center(
           child: Icon(
             Icons.broken_image,
             size: 32,
-            color: Colors.grey.shade400,
+            color: colorScheme.error.withValues(alpha: 0.7),
           ),
         );
       },
@@ -258,6 +269,7 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
 
   /// Build PDF thumbnail using pdfPageRenderProvider
   Widget _buildPdfThumbnail() {
+    final colorScheme = Theme.of(context).colorScheme;
     final cacheKey = '${widget.page.background.pdfFilePath}|${widget.page.background.pdfPageIndex}';
     final renderAsync = ref.watch(pdfPageRenderProvider(cacheKey));
 
@@ -277,7 +289,7 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
           child: Icon(
             Icons.picture_as_pdf,
             size: 32,
-            color: Colors.grey.shade400,
+            color: colorScheme.onSurfaceVariant,
           ),
         );
       },
@@ -291,13 +303,13 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
             Icon(
               Icons.error_outline,
               size: 32,
-              color: Colors.grey.shade400,
+              color: colorScheme.error.withValues(alpha: 0.7),
             ),
             const SizedBox(height: 4),
             Text(
               'PDF Error',
               style: TextStyle(
-                color: Colors.grey.shade600,
+                color: colorScheme.onSurfaceVariant,
                 fontSize: 10,
               ),
             ),

@@ -58,23 +58,25 @@ PopupMenuItem<NewDocumentOption> _buildMenuItem(
     value: option,
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
     height: 44,
-    child: Row(
-      children: [
-        Icon(
-          icon,
-          size: 20,
-          color: const Color(0xFF616161),
-        ),
-        const SizedBox(width: 12),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 14,
-            color: Color(0xFF1A1A1A),
-            fontWeight: FontWeight.w400,
+    child: Builder(
+      builder: (context) => Row(
+        children: [
+          Icon(
+            icon,
+            size: 20,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
-        ),
-      ],
+          const SizedBox(width: 12),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              color: Theme.of(context).colorScheme.onSurface,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        ],
+      ),
     ),
   );
 }
@@ -502,15 +504,29 @@ class _NewDocumentSheetState extends ConsumerState<NewDocumentSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return DraggableScrollableSheet(
       initialChildSize: 0.85,
       minChildSize: 0.5,
       maxChildSize: 0.95,
       builder: (context, scrollController) {
         return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          decoration: BoxDecoration(
+            color: isDark ? colorScheme.surfaceContainerHighest : colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            border: isDark ? Border.all(
+              color: colorScheme.outline.withValues(alpha: 0.2),
+              width: 1,
+            ) : null,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.5 : 0.1),
+                blurRadius: 16,
+                offset: const Offset(0, -4),
+              ),
+            ],
           ),
           child: Column(
             children: [
@@ -520,7 +536,7 @@ class _NewDocumentSheetState extends ConsumerState<NewDocumentSheet> {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
+                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -577,9 +593,11 @@ class _NewDocumentSheetState extends ConsumerState<NewDocumentSheet> {
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: isDark ? colorScheme.surfaceContainerHighest : colorScheme.surface,
                   border: Border(
-                    top: BorderSide(color: Colors.grey.shade200),
+                    top: BorderSide(
+                      color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+                    ),
                   ),
                 ),
                 child: Row(
@@ -596,7 +614,6 @@ class _NewDocumentSheetState extends ConsumerState<NewDocumentSheet> {
                     FilledButton(
                       onPressed: _isCreating ? null : _createDocument,
                       style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFF1976D2),
                         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                       ),
                       child: _isCreating
@@ -625,36 +642,42 @@ class _NewDocumentSheetState extends ConsumerState<NewDocumentSheet> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Title input
-        const Text(
+        Text(
           'Başlık',
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,
-            color: Color(0xFF666666),
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
           ),
         ),
         const SizedBox(height: 8),
         TextField(
           controller: _titleController,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w500,
+            color: Theme.of(context).colorScheme.onSurface,
           ),
           decoration: InputDecoration(
             hintText: 'Adsız Not Defteri',
             filled: true,
-            fillColor: const Color(0xFFF5F5F5),
+            fillColor: Theme.of(context).colorScheme.surfaceContainerHigh,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: BorderSide.none,
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(color: Colors.grey.shade300),
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+              ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
-              borderSide: const BorderSide(color: Color(0xFF1976D2), width: 2),
+              borderSide: BorderSide(
+                color: Theme.of(context).colorScheme.primary,
+                width: 2,
+              ),
             ),
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           ),
@@ -681,13 +704,19 @@ class _NewDocumentSheetState extends ConsumerState<NewDocumentSheet> {
             // Orientation toggle
             Container(
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade300),
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+                ),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
                 children: [
                   _buildOrientationButton(Icons.phone_android, true),
-                  Container(width: 1, height: 24, color: Colors.grey.shade300),
+                  Container(
+                    width: 1,
+                    height: 24,
+                    color: Theme.of(context).dividerColor,
+                  ),
                   _buildOrientationButton(Icons.stay_current_landscape, false),
                 ],
               ),
@@ -703,24 +732,37 @@ class _NewDocumentSheetState extends ConsumerState<NewDocumentSheet> {
     required List<String> items,
     required ValueChanged<String?> onChanged,
   }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(
+          color: colorScheme.outline.withValues(alpha: 0.3),
+        ),
         borderRadius: BorderRadius.circular(8),
-        color: Colors.white,
+        color: isDark ? colorScheme.surfaceContainerHigh : colorScheme.surface,
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
           value: value,
           isExpanded: true,
-          icon: const Icon(Icons.keyboard_arrow_down, size: 20),
+          icon: Icon(
+            Icons.keyboard_arrow_down,
+            size: 20,
+            color: colorScheme.onSurfaceVariant,
+          ),
+          dropdownColor: isDark ? colorScheme.surfaceContainerHighest : colorScheme.surface,
           items: items.map((item) {
             return DropdownMenuItem(
               value: item,
               child: Text(
                 item,
-                style: const TextStyle(fontSize: 14),
+                style: TextStyle(
+                  fontSize: 14,
+                  color: colorScheme.onSurface,
+                ),
               ),
             );
           }).toList(),
@@ -732,6 +774,8 @@ class _NewDocumentSheetState extends ConsumerState<NewDocumentSheet> {
 
   Widget _buildOrientationButton(IconData icon, bool isPortraitBtn) {
     final isSelected = _isPortrait == isPortraitBtn;
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -746,7 +790,7 @@ class _NewDocumentSheetState extends ConsumerState<NewDocumentSheet> {
           child: Icon(
             icon,
             size: 20,
-            color: isSelected ? const Color(0xFF1976D2) : Colors.grey.shade600,
+            color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
           ),
         ),
       ),
@@ -761,14 +805,18 @@ class _NewDocumentSheetState extends ConsumerState<NewDocumentSheet> {
       children: [
         Row(
           children: [
-            const Icon(Icons.expand_more, size: 20),
+            Icon(
+              Icons.expand_more,
+              size: 20,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
             const SizedBox(width: 4),
             Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF333333),
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
           ],
@@ -782,7 +830,7 @@ class _NewDocumentSheetState extends ConsumerState<NewDocumentSheet> {
               'Beyaz tahta sonsuz bir canvas\'tır. Çizgi deseni olmaz.',
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.grey.shade600,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 fontStyle: FontStyle.italic,
               ),
             ),
@@ -932,13 +980,15 @@ class _TemplateCard extends StatelessWidget {
               color: _getPaperColor,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: isSelected ? const Color(0xFF1976D2) : const Color(0xFFE0E0E0),
+                color: isSelected 
+                  ? Theme.of(context).colorScheme.primary 
+                  : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
                 width: isSelected ? 3 : 1,
               ),
               boxShadow: isSelected
                   ? [
                       BoxShadow(
-                        color: const Color(0xFF1976D2).withValues(alpha: 0.3),
+                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
@@ -962,7 +1012,9 @@ class _TemplateCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 11,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-              color: isSelected ? const Color(0xFF1976D2) : const Color(0xFF666666),
+              color: isSelected 
+                ? Theme.of(context).colorScheme.primary 
+                : Theme.of(context).colorScheme.onSurface,
             ),
             textAlign: TextAlign.center,
             maxLines: 1,

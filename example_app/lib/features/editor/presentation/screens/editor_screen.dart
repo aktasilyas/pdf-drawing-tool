@@ -113,9 +113,12 @@ class EditorScreen extends ConsumerWidget {
     final currentDoc = ref.watch(documentProvider);
     final isSaving = ref.watch(autoSaveProvider);
     final hasUnsaved = ref.watch(hasUnsavedChangesProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     showModalBottomSheet(
       context: context,
+      backgroundColor: isDark ? colorScheme.surfaceContainerHighest : colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -208,10 +211,10 @@ class EditorScreen extends ConsumerWidget {
             ),
             const Divider(height: 1),
             ListTile(
-              leading: Icon(Icons.delete_outline, color: Colors.red.shade400),
+              leading: Icon(Icons.delete_outline, color: colorScheme.error),
               title: Text(
                 'Çöpe Taşı',
-                style: TextStyle(color: Colors.red.shade400),
+                style: TextStyle(color: colorScheme.error),
               ),
               onTap: () {
                 Navigator.pop(context);
@@ -239,16 +242,26 @@ class EditorScreen extends ConsumerWidget {
 
   void _showRenameDialog(BuildContext context, WidgetRef ref, DrawingDocument document) {
     final controller = TextEditingController(text: document.title);
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Yeniden Adlandır'),
+        backgroundColor: isDark ? colorScheme.surfaceContainerHighest : colorScheme.surface,
+        title: Text('Yeniden Adlandır', style: TextStyle(color: colorScheme.onSurface)),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(
+          style: TextStyle(color: colorScheme.onSurface),
+          decoration: InputDecoration(
             labelText: 'Belge Adı',
-            border: OutlineInputBorder(),
+            border: const OutlineInputBorder(),
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: colorScheme.outline),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: colorScheme.primary, width: 2),
+            ),
           ),
           autofocus: true,
           onSubmitted: (value) {
@@ -288,12 +301,17 @@ class EditorScreen extends ConsumerWidget {
   }
 
   void _showDeleteConfirmation(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Çöpe Taşı'),
-        content: const Text(
+        backgroundColor: isDark ? colorScheme.surfaceContainerHighest : colorScheme.surface,
+        title: Text('Çöpe Taşı', style: TextStyle(color: colorScheme.onSurface)),
+        content: Text(
           'Bu belge çöpe taşınacak. Daha sonra geri yükleyebilirsiniz.',
+          style: TextStyle(color: colorScheme.onSurfaceVariant),
         ),
         actions: [
           TextButton(
@@ -302,7 +320,7 @@ class EditorScreen extends ConsumerWidget {
           ),
           FilledButton(
             style: FilledButton.styleFrom(
-              backgroundColor: Colors.red.shade400,
+              backgroundColor: colorScheme.error,
             ),
             onPressed: () {
               Navigator.pop(context);

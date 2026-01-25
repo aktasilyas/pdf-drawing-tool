@@ -80,7 +80,7 @@ class ToolPanel extends StatelessWidget {
             // Divider
             Container(
               height: 1,
-              color: Colors.grey.shade200,
+              color: Theme.of(context).dividerColor,
             ),
 
             // Content - use LayoutBuilder to conditionally scroll
@@ -116,6 +116,9 @@ class _PanelHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
       padding: const EdgeInsets.only(left: 16, right: 8, top: 12, bottom: 12),
       child: Row(
@@ -123,10 +126,10 @@ class _PanelHeader extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF1A1A1A),
+                color: colorScheme.onSurface,
               ),
             ),
           ),
@@ -141,13 +144,13 @@ class _PanelHeader extends StatelessWidget {
                   width: 32,
                   height: 32,
                   decoration: BoxDecoration(
-                    color: Colors.grey.shade100,
+                    color: isDark ? colorScheme.surfaceContainerHigh : colorScheme.surfaceContainerHighest,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.close,
                     size: 18,
-                    color: Color(0xFF666666),
+                    color: colorScheme.onSurfaceVariant,
                   ),
                 ),
               ),
@@ -182,6 +185,8 @@ class PanelSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -192,7 +197,7 @@ class PanelSection extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey.shade600,
+                color: colorScheme.onSurfaceVariant,
                 letterSpacing: 0.5,
               ),
             ),

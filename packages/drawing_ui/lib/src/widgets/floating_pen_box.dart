@@ -44,6 +44,8 @@ class _FloatingPenBoxState extends ConsumerState<FloatingPenBox> {
   Widget build(BuildContext context) {
     final presets = ref.watch(penBoxPresetsProvider);
     final activePresets = presets.where((p) => !p.isEmpty).toList();
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     if (activePresets.isEmpty) {
       return const SizedBox.shrink();
@@ -51,11 +53,15 @@ class _FloatingPenBoxState extends ConsumerState<FloatingPenBox> {
 
     final content = Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? colorScheme.surfaceContainer : colorScheme.surface,
         borderRadius: BorderRadius.circular(10),
+        border: isDark ? Border.all(
+          color: colorScheme.outline.withValues(alpha: 0.2),
+          width: 1,
+        ) : null,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(18),
+            color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.07),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -81,6 +87,8 @@ class _FloatingPenBoxState extends ConsumerState<FloatingPenBox> {
   }
 
   Widget _buildCollapsedView(int count) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return GestureDetector(
       onTap: () => setState(() => _isExpanded = true),
       child: SizedBox(
@@ -89,15 +97,19 @@ class _FloatingPenBoxState extends ConsumerState<FloatingPenBox> {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            Icon(Icons.brush_outlined, size: 18, color: Colors.grey.shade600),
+            Icon(
+              Icons.brush_outlined,
+              size: 18,
+              color: colorScheme.onSurfaceVariant,
+            ),
             Positioned(
               right: 2,
               bottom: 2,
               child: Container(
                 width: 14,
                 height: 14,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF4A9DFF),
+                decoration: BoxDecoration(
+                  color: colorScheme.primary,
                   shape: BoxShape.circle,
                 ),
                 child: Center(
@@ -167,6 +179,8 @@ class _FloatingPenBoxState extends ConsumerState<FloatingPenBox> {
   }
 
   Widget _buildBottomBar() {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
       child: Row(
@@ -177,7 +191,7 @@ class _FloatingPenBoxState extends ConsumerState<FloatingPenBox> {
             child: Icon(
               _isEditMode ? Icons.check : Icons.edit_outlined,
               size: 14,
-              color: _isEditMode ? Colors.green : Colors.grey.shade500,
+              color: _isEditMode ? colorScheme.primary : colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(width: 12),
@@ -186,8 +200,11 @@ class _FloatingPenBoxState extends ConsumerState<FloatingPenBox> {
               _isExpanded = false;
               _isEditMode = false;
             }),
-            child: Icon(Icons.keyboard_arrow_up,
-                size: 16, color: Colors.grey.shade400),
+            child: Icon(
+              Icons.keyboard_arrow_up,
+              size: 16,
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+            ),
           ),
         ],
       ),
@@ -195,6 +212,8 @@ class _FloatingPenBoxState extends ConsumerState<FloatingPenBox> {
   }
 
   Widget _buildRightBar() {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
       child: Column(
@@ -205,7 +224,7 @@ class _FloatingPenBoxState extends ConsumerState<FloatingPenBox> {
             child: Icon(
               _isEditMode ? Icons.check : Icons.edit_outlined,
               size: 14,
-              color: _isEditMode ? Colors.green : Colors.grey.shade500,
+              color: _isEditMode ? colorScheme.primary : colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 8),
@@ -214,8 +233,11 @@ class _FloatingPenBoxState extends ConsumerState<FloatingPenBox> {
               _isExpanded = false;
               _isEditMode = false;
             }),
-            child: Icon(Icons.keyboard_arrow_left,
-                size: 16, color: Colors.grey.shade400),
+            child: Icon(
+              Icons.keyboard_arrow_left,
+              size: 16,
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+            ),
           ),
         ],
       ),
@@ -281,14 +303,19 @@ class _VerticalPenSlot extends StatelessWidget {
     // Seçili: kalem sağa kayar (daha fazla görünür)
     // Seçili değil: kalem solda (sadece uç ve şerit görünür)
     final double leftOffset = isSelected ? 6 : -16;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return GestureDetector(
       onTap: onTap,
       onDoubleTap: onDoubleTap,
       behavior: HitTestBehavior.opaque,
-      child: SizedBox(
+      child: Container(
         width: _slotWidth,
         height: _slotHeight,
+        decoration: isSelected ? BoxDecoration(
+          color: colorScheme.primaryContainer.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(8),
+        ) : null,
         child: Stack(
           clipBehavior: Clip.hardEdge,
           children: [
@@ -316,12 +343,11 @@ class _VerticalPenSlot extends StatelessWidget {
                   child: Container(
                     width: 14,
                     height: 14,
-                    decoration: const BoxDecoration(
-                      color: Colors.red,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.error,
                       shape: BoxShape.circle,
                     ),
-                    child:
-                        const Icon(Icons.remove, size: 10, color: Colors.white),
+                    child: const Icon(Icons.remove, size: 10, color: Colors.white),
                   ),
                 ),
               ),
@@ -363,14 +389,19 @@ class _HorizontalPenSlot extends StatelessWidget {
     // Seçili: kalem aşağı kayar (daha fazla görünür)
     // Seçili değil: kalem yukarıda (sadece uç ve şerit görünür)
     final double topOffset = isSelected ? 6 : -16;
+    final colorScheme = Theme.of(context).colorScheme;
 
     return GestureDetector(
       onTap: onTap,
       onDoubleTap: onDoubleTap,
       behavior: HitTestBehavior.opaque,
-      child: SizedBox(
+      child: Container(
         width: _slotWidth,
         height: _slotHeight,
+        decoration: isSelected ? BoxDecoration(
+          color: colorScheme.primaryContainer.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(8),
+        ) : null,
         child: Stack(
           clipBehavior: Clip.hardEdge,
           children: [
@@ -401,12 +432,11 @@ class _HorizontalPenSlot extends StatelessWidget {
                   child: Container(
                     width: 14,
                     height: 14,
-                    decoration: const BoxDecoration(
-                      color: Colors.red,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.error,
                       shape: BoxShape.circle,
                     ),
-                    child:
-                        const Icon(Icons.remove, size: 10, color: Colors.white),
+                    child: const Icon(Icons.remove, size: 10, color: Colors.white),
                   ),
                 ),
               ),

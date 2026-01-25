@@ -102,16 +102,19 @@ class _PageNavigatorState extends State<PageNavigator> {
       return;
     }
 
+    final colorScheme = Theme.of(context).colorScheme;
+
     showModalBottomSheet(
       context: context,
+      backgroundColor: colorScheme.surface,
       builder: (context) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             if (widget.onDuplicatePage != null)
               ListTile(
-                leading: const Icon(Icons.content_copy),
-                title: const Text('Duplicate Page'),
+                leading: Icon(Icons.content_copy, color: colorScheme.onSurface),
+                title: Text('Duplicate Page', style: TextStyle(color: colorScheme.onSurface)),
                 onTap: () {
                   Navigator.pop(context);
                   widget.onDuplicatePage!(index);
@@ -119,9 +122,8 @@ class _PageNavigatorState extends State<PageNavigator> {
               ),
             if (widget.onDeletePage != null)
               ListTile(
-                leading: const Icon(Icons.delete, color: Colors.red),
-                title: const Text('Delete Page'),
-                textColor: Colors.red,
+                leading: Icon(Icons.delete, color: colorScheme.error),
+                title: Text('Delete Page', style: TextStyle(color: colorScheme.error)),
                 onTap: () {
                   Navigator.pop(context);
                   _confirmDelete(index);
@@ -141,11 +143,14 @@ class _PageNavigatorState extends State<PageNavigator> {
       return;
     }
 
+    final colorScheme = Theme.of(context).colorScheme;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Page'),
-        content: Text('Delete page ${index + 1}?'),
+        backgroundColor: colorScheme.surface,
+        title: Text('Delete Page', style: TextStyle(color: colorScheme.onSurface)),
+        content: Text('Delete page ${index + 1}?', style: TextStyle(color: colorScheme.onSurfaceVariant)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -156,7 +161,7 @@ class _PageNavigatorState extends State<PageNavigator> {
               Navigator.pop(context);
               widget.onDeletePage!(index);
             },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(foregroundColor: colorScheme.error),
             child: const Text('Delete'),
           ),
         ],
@@ -167,8 +172,10 @@ class _PageNavigatorState extends State<PageNavigator> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final backgroundColor =
-        widget.backgroundColor ?? theme.scaffoldBackgroundColor;
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+    final backgroundColor = widget.backgroundColor ?? 
+        (isDark ? colorScheme.surfaceContainerLow : colorScheme.surface);
 
     return Container(
       height: widget.height,
@@ -176,11 +183,14 @@ class _PageNavigatorState extends State<PageNavigator> {
       decoration: BoxDecoration(
         color: backgroundColor,
         border: Border(
-          top: BorderSide(color: Colors.grey.shade300, width: 1),
+          top: BorderSide(
+            color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+            width: 1,
+          ),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.1),
             blurRadius: 4,
             offset: const Offset(0, -2),
           ),
@@ -195,7 +205,7 @@ class _PageNavigatorState extends State<PageNavigator> {
               child: Text(
                 'Page ${widget.pageManager.currentIndex + 1} of ${widget.pageManager.pageCount}',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: Colors.grey.shade600,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
@@ -206,7 +216,7 @@ class _PageNavigatorState extends State<PageNavigator> {
                 ? Center(
                     child: Text(
                       'No pages',
-                      style: TextStyle(color: Colors.grey.shade600),
+                      style: TextStyle(color: colorScheme.onSurfaceVariant),
                     ),
                   )
                 : ListView.builder(
@@ -238,6 +248,7 @@ class _PageNavigatorState extends State<PageNavigator> {
                             height: widget.thumbnailHeight,
                             isSelected: isSelected,
                             showPageNumber: true,
+                            backgroundColor: Color(page.background.color),
                           ),
                         ),
                       );
@@ -250,6 +261,8 @@ class _PageNavigatorState extends State<PageNavigator> {
   }
 
   Widget _buildAddButton() {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: GestureDetector(
@@ -258,9 +271,12 @@ class _PageNavigatorState extends State<PageNavigator> {
           width: widget.thumbnailWidth,
           height: widget.thumbnailHeight,
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey.shade400, width: 2),
+            border: Border.all(
+              color: colorScheme.outline.withValues(alpha: 0.5),
+              width: 2,
+            ),
             borderRadius: BorderRadius.circular(8),
-            color: Colors.grey.shade100,
+            color: colorScheme.surfaceContainerHighest,
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -268,14 +284,14 @@ class _PageNavigatorState extends State<PageNavigator> {
               Icon(
                 Icons.add,
                 size: 32,
-                color: Colors.grey.shade600,
+                color: colorScheme.onSurfaceVariant,
               ),
               const SizedBox(height: 4),
               Text(
                 'Add Page',
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.grey.shade600,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
             ],

@@ -56,6 +56,8 @@ class _CompactColorPickerState extends State<CompactColorPicker>
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final screenHeight = MediaQuery.of(context).size.height;
     // Responsive height - max 60% of screen or 420px, whichever is smaller
     final maxContentHeight = (screenHeight * 0.55).clamp(280.0, 420.0);
@@ -71,11 +73,14 @@ class _CompactColorPickerState extends State<CompactColorPicker>
           maxHeight: maxContentHeight + 80, // 80 for header
         ),
         decoration: BoxDecoration(
-          color: const Color(0xFF1E1E1E),
+          color: isDark ? colorScheme.surfaceContainerHighest : colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
+          border: isDark ? Border.all(
+            color: colorScheme.outline.withValues(alpha: 0.2),
+          ) : null,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withAlpha(60),
+              color: Colors.black.withValues(alpha: isDark ? 0.5 : 0.2),
               blurRadius: 24,
               offset: const Offset(0, 8),
             ),
@@ -103,6 +108,9 @@ class _CompactColorPickerState extends State<CompactColorPicker>
   }
 
   Widget _buildHeader() {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Column(
       children: [
         // Close button
@@ -116,13 +124,13 @@ class _CompactColorPickerState extends State<CompactColorPicker>
                 child: Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF2D2D2D),
+                    color: isDark ? colorScheme.surfaceContainerHigh : colorScheme.surfaceContainerHighest,
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.close,
                     size: 16,
-                    color: Color(0xFFE0E0E0),
+                    color: colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -132,9 +140,9 @@ class _CompactColorPickerState extends State<CompactColorPicker>
         // TabBar
         TabBar(
           controller: _tabController,
-          labelColor: const Color(0xFF4FC3F7),
-          unselectedLabelColor: const Color(0xFFE0E0E0),
-          indicatorColor: const Color(0xFF4FC3F7),
+          labelColor: colorScheme.primary,
+          unselectedLabelColor: colorScheme.onSurfaceVariant,
+          indicatorColor: colorScheme.primary,
           indicatorWeight: 2,
           labelStyle: const TextStyle(
             fontSize: 14,

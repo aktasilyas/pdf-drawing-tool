@@ -47,19 +47,15 @@ class ToolButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = DrawingTheme.of(context);
 
-    // Modern color scheme
-    const selectedColor = Color(0xFF4A9DFF);
-    const defaultColor = Color(0xFF666666);
-    const disabledColor = Color(0xFFBBBBBB);
-
     final iconColor = !enabled
-        ? disabledColor
+        ? theme.toolbarIconDisabledColor
         : isSelected
-            ? selectedColor
-            : defaultColor;
+            ? theme.toolbarIconSelectedColor
+            : theme.toolbarIconColor;
 
-    final bgColor =
-        isSelected ? selectedColor.withAlpha(25) : Colors.transparent;
+    final bgColor = isSelected 
+        ? theme.toolbarIconSelectedColor.withValues(alpha: 0.1)
+        : Colors.transparent;
 
     // Show chevron when selected AND has panel
     final showChevron = isSelected && hasPanel && onPanelTap != null;
@@ -103,7 +99,7 @@ class ToolButton extends StatelessWidget {
                 child: Icon(
                   Icons.expand_more,
                   size: 10,
-                  color: selectedColor,
+                  color: theme.toolbarIconSelectedColor,
                 ),
               ),
           ],
