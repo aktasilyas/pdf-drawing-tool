@@ -359,8 +359,8 @@ class CanvasTransformNotifier extends StateNotifier<CanvasTransform> {
     // Use the smaller zoom to fit the entire page in viewport
     final fitZoom =
         horizontalZoom < verticalZoom ? horizontalZoom : verticalZoom;
-    // Don't enlarge page beyond 100%, but allow shrinking
-    return fitZoom.clamp(0.25, 1.0);
+    // Don't enlarge page beyond 100%, but allow shrinking to any level needed
+    return fitZoom.clamp(0.01, 1.0); // Min 1% zoom (was 25%)
   }
 
   /// Clamp offset to keep page within bounds.

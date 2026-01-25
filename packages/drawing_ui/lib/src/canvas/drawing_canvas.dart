@@ -238,14 +238,18 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
     debugPrint('🔍 [INIT] needsReInit: $needsReInit, isDefaultTransform: $isDefaultTransform');
     debugPrint('🔍 [INIT] currentTransform: zoom=${currentTransform.zoom}, offset=${currentTransform.offset}');
 
+    // CRITICAL: Always use postFrameCallback to avoid modifying provider during build
+    // The difference is in timing: immediate callback for first render, regular for re-init
     if (isDefaultTransform) {
-      // First time initialization - do it immediately (no callback)
-      // This prevents the "gap at bottom" on first render
+      // First time - schedule immediately (priority: 0)
       debugPrint('🚀 [INIT] Immediate initialization (first render)');
-      ref.read(canvasTransformProvider.notifier).initializeForPage(
-            viewportSize: viewportSize,
-            pageSize: Size(currentPage.size.width, currentPage.size.height),
-          );
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ref.read(canvasTransformProvider.notifier).initializeForPage(
+              viewportSize: viewportSize,
+              pageSize: Size(currentPage.size.width, currentPage.size.height),
+            );
+      });
     } else {
       // Re-initialization (orientation change) - use post-frame callback
       debugPrint('🔄 [INIT] Post-frame initialization (re-init)');
@@ -543,12 +547,8 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
       }
     });
 
-    // PDF Background Debug
+    // 🚀 PREFETCH: Sayfa değiştiğinde etraftaki sayfaları yükle (PDF için)
     if (!canvasMode.isInfinite && currentPage.background.type == BackgroundType.pdf) {
-      debugPrint('🖼️ PDF Check - type: ${currentPage.background.type.name}');
-      debugPrint('🖼️ PDF Check - has pdfData: ${currentPage.background.pdfData != null}');
-      
-      // 🚀 PREFETCH: Sayfa değiştiğinde etraftaki sayfaları yükle
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         final allPages = ref.read(documentProvider).pages;
@@ -559,14 +559,6 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
       });
     }
 
-    // PDF sayfası henüz render edilmemişse uyarı göster (ama bloke etme)
-    final isPdfNotRendered = !canvasMode.isInfinite && 
-        currentPage.background.type == core.BackgroundType.pdf &&
-        currentPage.background.pdfData == null;
-    
-    if (isPdfNotRendered) {
-      debugPrint('⚠️ PDF page not yet rendered (will show placeholder)');
-    }
 
     // Eraser cursor state
     final eraserCursorPosition = ref.watch(eraserCursorPositionProvider);
