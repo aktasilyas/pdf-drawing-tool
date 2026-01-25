@@ -16,6 +16,7 @@ import 'package:example_app/features/auth/presentation/screens/login_screen.dart
 import 'package:example_app/features/auth/presentation/screens/register_screen.dart';
 import 'package:example_app/features/documents/presentation/screens/documents_screen.dart';
 import 'package:example_app/features/editor/presentation/screens/editor_screen.dart';
+import 'package:example_app/features/settings/settings.dart';
 
 /// Global router configuration
 final appRouter = GoRouter(
@@ -97,7 +98,7 @@ final appRouter = GoRouter(
     GoRoute(
       path: RouteNames.settings,
       name: 'settings',
-      builder: (context, state) => const _PlaceholderScreen(title: 'Settings'),
+      builder: (context, state) => const SettingsScreen(),
     ),
     GoRoute(
       path: RouteNames.profile,

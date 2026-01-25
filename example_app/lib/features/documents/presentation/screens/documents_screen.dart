@@ -59,13 +59,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                     child: IconButton(
                       icon: const Icon(Icons.settings_outlined),
                       onPressed: () {
-                        // TODO: Open settings
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Ayarlar yakında eklenecek'),
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
+                        context.push('/settings');
                       },
                     ),
                   ),
