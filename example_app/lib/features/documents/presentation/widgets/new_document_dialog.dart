@@ -6,6 +6,7 @@ import 'package:drawing_ui/drawing_ui.dart' show PDFImportService, PDFImportConf
 import 'package:file_picker/file_picker.dart';
 import 'package:example_app/features/documents/domain/entities/template.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
+import 'dart:ui' as ui;
 
 /// Dropdown menü item'ları
 enum NewDocumentOption {
@@ -237,8 +238,127 @@ void _importPdf(BuildContext context) async {
   }
 }
 
-void _importImage(BuildContext context) {
-  // TODO: file_picker ile resim seç
+void _importImage(BuildContext context) async {
+  // 1. Resim seç
+  final result = await FilePicker.platform.pickFiles(
+    type: FileType.image,
+    allowMultiple: false,
+    withData: true,
+  );
+  
+  if (result == null || result.files.isEmpty) return;
+  
+  final file = result.files.first;
+  if (file.bytes == null) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Resim dosyası okunamadı')),
+      );
+    }
+    return;
+  }
+  
+  // 2. Loading göster
+  if (!context.mounted) return;
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => const AlertDialog(
+      content: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircularProgressIndicator(),
+          SizedBox(width: 16),
+          Text('Resim yükleniyor...'),
+        ],
+      ),
+    ),
+  );
+  
+  try {
+    // 3. Resim boyutunu al
+    final codec = await ui.instantiateImageCodec(file.bytes!);
+    final frame = await codec.getNextFrame();
+    final image = frame.image;
+    final imageWidth = image.width.toDouble();
+    final imageHeight = image.height.toDouble();
+    
+    debugPrint('🖼️ Image size: ${imageWidth}x$imageHeight');
+    
+    // Boyut kontrolü (max 4096x4096)
+    if (imageWidth > 4096 || imageHeight > 4096) {
+      if (context.mounted) {
+        Navigator.pop(context); // Loading kapat
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Resim çok büyük! Maksimum boyut: 4096x4096'),
+          ),
+        );
+      }
+      return;
+    }
+    
+    // 4. Sayfa oluştur (Resimler için lazy loading YOK - direkt memory'de tut)
+    final page = Page(
+      id: 'page_${DateTime.now().millisecondsSinceEpoch}_0',
+      index: 0,
+      size: PageSize(width: imageWidth, height: imageHeight),
+      background: PageBackground(
+        type: BackgroundType.pdf, // PDF renderer değil ama aynı display mekanizması
+        color: 0xFFFFFFFF,
+        pdfData: file.bytes, // Resmi direkt cache'de tut (lazy loading YOK)
+        pdfPageIndex: 1,
+        // pdfFilePath: null, // CRITICAL: Lazy loading tetiklenmemeli!
+      ),
+      layers: [Layer.empty('Layer 1')],
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+    
+    // 5. Doküman oluştur
+    final container = ProviderScope.containerOf(context);
+    final controller = container.read(documentsControllerProvider.notifier);
+    final folderId = container.read(currentFolderIdProvider);
+    
+    // Dosya adından başlık oluştur (uzantıyı kaldır)
+    final title = file.name.replaceAll(
+      RegExp(r'\.(png|jpg|jpeg|gif|webp|bmp)$', caseSensitive: false),
+      '',
+    );
+    
+    final documentId = await controller.createDocumentWithPages(
+      title: title,
+      folderId: folderId,
+      documentType: DocumentType.image,
+      pages: [page.toJson()],
+      pageCount: 1,
+    );
+    
+    // 6. Loading kapat
+    if (context.mounted) Navigator.pop(context);
+    
+    // 7. Editor'e yönlendir
+    if (documentId != null && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$title açılıyor'),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      
+      context.push('/editor/$documentId');
+    }
+    
+  } catch (e) {
+    debugPrint('❌ Image import error: $e');
+    if (context.mounted) {
+      Navigator.pop(context); // Loading kapat
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Hata: ${e.toString()}')),
+      );
+    }
+  }
 }
 
 /// İlk 3 PDF sayfasını AWAIT ile yükle (UX kritik)

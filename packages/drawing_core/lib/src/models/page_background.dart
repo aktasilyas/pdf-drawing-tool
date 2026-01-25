@@ -111,17 +111,25 @@ class PageBackground {
   }
 
   /// JSON serialization
-  /// Note: pdfData is NOT serialized (too large), will be lazy loaded
-  Map<String, dynamic> toJson() => {
-    'type': type.name,
-    'color': color,
-    if (gridSpacing != null) 'gridSpacing': gridSpacing,
-    if (lineSpacing != null) 'lineSpacing': lineSpacing,
-    if (lineColor != null) 'lineColor': lineColor,
-    if (pdfPageIndex != null) 'pdfPageIndex': pdfPageIndex,
-    if (pdfFilePath != null) 'pdfFilePath': pdfFilePath,
-    // pdfData deliberately NOT serialized - will be rendered on-demand
-  };
+  /// Note: For PDFs with pdfFilePath, pdfData is NOT serialized (lazy loading)
+  /// For images (no pdfFilePath), pdfData IS serialized (base64)
+  Map<String, dynamic> toJson() {
+    // Determine if we should serialize pdfData:
+    // - If pdfFilePath exists: NO (lazy loading for PDFs)
+    // - If pdfFilePath is null but pdfData exists: YES (images stored in memory)
+    final shouldSerializePdfData = pdfFilePath == null && pdfData != null;
+    
+    return {
+      'type': type.name,
+      'color': color,
+      if (gridSpacing != null) 'gridSpacing': gridSpacing,
+      if (lineSpacing != null) 'lineSpacing': lineSpacing,
+      if (lineColor != null) 'lineColor': lineColor,
+      if (pdfPageIndex != null) 'pdfPageIndex': pdfPageIndex,
+      if (pdfFilePath != null) 'pdfFilePath': pdfFilePath,
+      if (shouldSerializePdfData) 'pdfDataBase64': base64Encode(pdfData!),
+    };
+  }
 
   factory PageBackground.fromJson(Map<String, dynamic> json) {
     // Helper to parse int safely
@@ -142,7 +150,15 @@ class PageBackground {
       return null;
     }
     
-    // pdfData NOT loaded from JSON - will be lazy loaded on-demand
+    // Decode pdfData from base64 if present (for images)
+    Uint8List? pdfData;
+    if (json['pdfDataBase64'] != null) {
+      try {
+        pdfData = base64Decode(json['pdfDataBase64'] as String);
+      } catch (e) {
+        print('❌ Failed to decode pdfDataBase64: $e');
+      }
+    }
     
     return PageBackground(
       type: BackgroundType.values.firstWhere(
@@ -155,7 +171,7 @@ class PageBackground {
       lineColor: parseInt(json['lineColor']),
       pdfPageIndex: parseInt(json['pdfPageIndex']),
       pdfFilePath: json['pdfFilePath'] as String?,
-      pdfData: null, // Always null on load - lazy rendered
+      pdfData: pdfData, // Decoded from base64 or null for lazy loading
     );
   }
 }

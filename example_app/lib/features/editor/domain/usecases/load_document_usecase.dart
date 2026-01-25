@@ -37,10 +37,7 @@ class LoadDocumentUseCase {
                   paperColor: docInfo.paperColor,
                 );
                 
-                // #region agent log
-                debugPrint('🔍 [DEBUG] LoadDocumentUseCase - Creating NEW document (content was null)');
-                debugPrint('🔍 [DEBUG] LoadDocumentUseCase - documentType from DB: ${docInfo.documentType}');
-                // #endregion
+                debugPrint('📄 [LOAD] Creating NEW document (empty)');
                 
                 return Right(DrawingDocument.multiPage(
                   id: docInfo.id,
@@ -53,15 +50,9 @@ class LoadDocumentUseCase {
               }
               // Deserialize from JSON
               try {
-                debugPrint('🔍 [DEBUG] LoadDocumentUseCase - About to parse JSON');
-                debugPrint('🔍 [DEBUG] LoadDocumentUseCase - JSON keys: ${content.keys.toList()}');
-                debugPrint('🔍 [DEBUG] LoadDocumentUseCase - JSON version: ${content['version']}');
-                debugPrint('🔍 [DEBUG] LoadDocumentUseCase - isPDF: ${content['isPDF']}');
-                
                 final doc = DrawingDocument.fromJson(content);
                 
-                debugPrint('🔍 [DEBUG] LoadDocumentUseCase - Loaded EXISTING document from JSON');
-                debugPrint('🔍 [DEBUG] LoadDocumentUseCase - loadedDocumentType: ${doc.documentType}');
+                debugPrint('✅ [LOAD] Document loaded - id: ${doc.id}, strokes: ${doc.currentPage?.layers.firstOrNull?.strokes.length ?? 0}');
                 
                 return Right(doc);
               } catch (e, stackTrace) {

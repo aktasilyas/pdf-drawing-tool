@@ -34,7 +34,7 @@ class CanvasMode {
     this.surroundingAreaColor = 0xFFF5F5F0, // Warm off-white (kirli beyaz)
     this.pageBorderColor = 0x1A000000, // Black 10%
     this.pageBorderWidth = 1.0,
-    this.minZoom = 0.25,
+    this.minZoom = 0.01, // Allow extreme zoom out for large images/PDFs (was 0.25)
     this.maxZoom = 5.0,
     this.unlimitedPan = false,
   });
@@ -78,7 +78,7 @@ class CanvasMode {
     allowDrawingOutsidePage: false,
     showPageShadow: true,
     surroundingAreaColor: 0xFFF5F5F0, // Warm off-white (kirli beyaz)
-    minZoom: 0.5,
+    minZoom: 0.01, // Allow extreme zoom out (was 0.5)
     maxZoom: 3.0,
   );
 
@@ -87,7 +87,7 @@ class CanvasMode {
     isInfinite: false,
     allowDrawingOutsidePage: false,
     showPageShadow: true,
-    surroundingAreaColor: 0xFF212121, // Very dark
+    surroundingAreaColor: 0xFFF5F5F0, // Warm off-white (kirli beyaz)
     pageBorderColor: 0x00000000,
     pageBorderWidth: 0.0,
   );

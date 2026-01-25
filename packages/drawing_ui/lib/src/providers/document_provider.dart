@@ -80,16 +80,7 @@ class DocumentNotifier extends StateNotifier<DrawingDocument> {
   ///
   /// Used for undo/redo operations.
   void updateDocument(DrawingDocument document) {
-    // #region agent log [H7]
-    debugPrint('📄 [H7] updateDocument - strokes BEFORE: ${state.activeLayer?.strokes.length ?? 0}');
-    debugPrint('📄 [H7] updateDocument - strokes in NEW doc: ${document.activeLayer?.strokes.length ?? 0}');
-    // #endregion
-
     state = document;
-
-    // #region agent log [H7]
-    debugPrint('📄 [H7] updateDocument - strokes AFTER state=: ${state.activeLayer?.strokes.length ?? 0}');
-    // #endregion
   }
 
   /// Clear active layer - removes all strokes.

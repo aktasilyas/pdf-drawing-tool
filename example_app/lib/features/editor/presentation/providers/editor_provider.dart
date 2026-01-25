@@ -47,6 +47,8 @@ class AutoSaveNotifier extends StateNotifier<bool> {
   AutoSaveNotifier(this._ref) : super(false);
 
   void documentChanged(DrawingDocument document) {
+    debugPrint('💾 [SAVE] Auto-save scheduled (3s)');
+    
     _debounceTimer?.cancel();
     _debounceTimer = Timer(const Duration(seconds: 3), () {
       _save(document);
@@ -54,14 +56,23 @@ class AutoSaveNotifier extends StateNotifier<bool> {
   }
 
   Future<void> _save(DrawingDocument document) async {
+    debugPrint('💾 [SAVE] Saving document ${document.id}...');
+    
     state = true; // Saving...
     final useCase = _ref.read(saveDocumentUseCaseProvider);
-    await useCase(document);
+    final result = await useCase(document);
+    
+    result.fold(
+      (failure) => debugPrint('❌ [SAVE] Failed: ${failure.message}'),
+      (_) => debugPrint('✅ [SAVE] Success!'),
+    );
+    
     state = false; // Saved
     _ref.read(hasUnsavedChangesProvider.notifier).state = false;
   }
 
   void saveNow(DrawingDocument document) {
+    debugPrint('💾 [SAVE] Immediate save requested');
     _debounceTimer?.cancel();
     _save(document);
   }

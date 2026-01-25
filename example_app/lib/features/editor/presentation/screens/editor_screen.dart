@@ -38,17 +38,27 @@ class EditorScreen extends ConsumerWidget {
         ),
       ),
       data: (document) {
-        // Initialize document AND PageManager with document's pages
+        // Initialize document ONCE on first load
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          ref.read(documentProvider.notifier).updateDocument(document);
-          ref.read(currentDocumentProvider.notifier).state = document;
-          // FIX: Initialize PageManager with document's pages
-          ref.read(pageManagerProvider.notifier).initializeFromDocument(document.pages);
+          final currentDoc = ref.read(documentProvider);
+          
+          // Only initialize if it's a different document or empty
+          if (currentDoc.id != document.id || currentDoc.isEmpty) {
+            debugPrint('🔄 [INIT] First time init for ${document.id} - strokes: ${document.currentPage?.layers.firstOrNull?.strokes.length ?? 0}');
+            ref.read(documentProvider.notifier).updateDocument(document);
+            ref.read(currentDocumentProvider.notifier).state = document;
+            ref.read(pageManagerProvider.notifier).initializeFromDocument(document.pages);
+          } else {
+            debugPrint('🔄 [INIT] Document already initialized, skipping');
+          }
         });
 
-        // Listen to document changes for auto-save
+        // Listen to document changes for auto-save (NO INVALIDATE HERE!)
         ref.listen<DrawingDocument>(documentProvider, (previous, next) {
-          if (previous != next) {
+          // Only trigger save if document actually changed (same ID, different content)
+          if (previous != null && previous != next && previous.id == next.id) {
+            debugPrint('💾 [AUTOSAVE] Document changed, scheduling save...');
+            debugPrint('💾 [AUTOSAVE] Strokes: ${next.currentPage?.layers.firstOrNull?.strokes.length ?? 0}');
             ref.read(currentDocumentProvider.notifier).state = next;
             ref.read(autoSaveProvider.notifier).documentChanged(next);
             ref.read(hasUnsavedChangesProvider.notifier).state = true;
@@ -57,12 +67,6 @@ class EditorScreen extends ConsumerWidget {
 
         // Get canvasMode from document (based on documentType)
         final canvasMode = document.canvasMode;
-
-        // #region agent log
-        debugPrint('🔍 [DEBUG] EditorScreen - documentType: ${document.documentType}');
-        debugPrint('🔍 [DEBUG] EditorScreen - canvasMode.isInfinite: ${canvasMode.isInfinite}');
-        debugPrint('🔍 [DEBUG] EditorScreen - canvasMode.allowDrawingOutsidePage: ${canvasMode.allowDrawingOutsidePage}');
-        // #endregion
 
         return Scaffold(
           // NO AppBar - DrawingScreen handles everything
@@ -89,11 +93,16 @@ class EditorScreen extends ConsumerWidget {
     final currentDoc = ref.read(documentProvider);
 
     if (hasUnsaved) {
+      debugPrint('💾 [BACK] Saving before exit...');
       // Force save before leaving
       ref.read(autoSaveProvider.notifier).saveNow(currentDoc);
       // Wait a bit for save to complete
       await Future.delayed(const Duration(milliseconds: 500));
     }
+
+    // ONLY invalidate when leaving (for next time we open this document)
+    debugPrint('🔄 [BACK] Invalidating provider for fresh load next time');
+    ref.invalidate(documentLoaderProvider(documentId));
 
     if (context.mounted) {
       context.go('/documents');
