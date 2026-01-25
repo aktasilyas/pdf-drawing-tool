@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:drawing_ui/drawing_ui.dart';
 import 'package:example_app/core/routing/app_router.dart';
 import 'package:example_app/core/di/injection.dart';
+import 'package:example_app/features/settings/settings.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -49,26 +50,33 @@ void main() async {
 final supabase = Supabase.instance.client;
 
 /// Main application widget for StarNote.
-class StarNoteApp extends StatelessWidget {
+class StarNoteApp extends ConsumerWidget {
   const StarNoteApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(settingsProvider);
+    
+    final themeMode = switch (settings.themeMode) {
+      AppThemeMode.light => ThemeMode.light,
+      AppThemeMode.dark => ThemeMode.dark,
+      AppThemeMode.system => ThemeMode.system,
+    };
+
     return MaterialApp.router(
       title: 'StarNote',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        colorSchemeSeed: const Color(0xFF6366F1),
         useMaterial3: true,
+        brightness: Brightness.light,
       ),
       darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
-          brightness: Brightness.dark,
-        ),
+        colorSchemeSeed: const Color(0xFF6366F1),
         useMaterial3: true,
+        brightness: Brightness.dark,
       ),
-      themeMode: ThemeMode.system,
+      themeMode: themeMode,
       routerConfig: appRouter,
     );
   }
