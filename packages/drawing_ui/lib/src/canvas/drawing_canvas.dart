@@ -22,9 +22,7 @@ import 'package:drawing_ui/src/providers/text_provider.dart';
 import 'package:drawing_ui/src/providers/page_provider.dart';
 import 'package:drawing_ui/src/providers/drawing_providers.dart';
 import 'package:drawing_ui/src/providers/pdf_render_provider.dart';
-import 'package:drawing_ui/src/providers/pdf_prefetch_provider.dart';
 import 'package:drawing_ui/src/widgets/widgets.dart';
-
 
 // =============================================================================
 // DRAWING CANVAS WIDGET
@@ -199,7 +197,6 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
     super.didUpdateWidget(oldWidget);
     // Canvas mode değiştiyse (farklı döküman türü) initialization'ı resetle
     if (oldWidget.canvasMode != widget.canvasMode) {
-      debugPrint('🔄 [LIFECYCLE] Canvas mode changed, resetting initialization');
       _hasInitialized = false;
       _lastViewportSize = null;
     }
@@ -232,17 +229,12 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
 
     // Check if transform is still at default (never initialized)
     final currentTransform = ref.read(canvasTransformProvider);
-    final isDefaultTransform = currentTransform.zoom == 1.0 && 
-                                currentTransform.offset == Offset.zero;
-
-    debugPrint('🔍 [INIT] needsReInit: $needsReInit, isDefaultTransform: $isDefaultTransform');
-    debugPrint('🔍 [INIT] currentTransform: zoom=${currentTransform.zoom}, offset=${currentTransform.offset}');
+    final isDefaultTransform =
+        currentTransform.zoom == 1.0 && currentTransform.offset == Offset.zero;
 
     // CRITICAL: Always use postFrameCallback to avoid modifying provider during build
-    // The difference is in timing: immediate callback for first render, regular for re-init
     if (isDefaultTransform) {
-      // First time - schedule immediately (priority: 0)
-      debugPrint('🚀 [INIT] Immediate initialization (first render)');
+      // First time - schedule immediately
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         ref.read(canvasTransformProvider.notifier).initializeForPage(
@@ -251,8 +243,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
             );
       });
     } else {
-      // Re-initialization (orientation change) - use post-frame callback
-      debugPrint('🔄 [INIT] Post-frame initialization (re-init)');
+      // Re-initialization (orientation change)
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         ref.read(canvasTransformProvider.notifier).initializeForPage(
@@ -273,13 +264,12 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
     return wasPortrait != isPortrait;
   }
 
-  /// Build PDF background widget (with lazy loading support).
+  /// Build PDF background widget (with lazy loading + automatic prefetch).
   Widget _buildPdfBackground(core.Page page) {
     final background = page.background;
-    
-    // Eğer pdfData cache'de varsa direkt göster
+
+    // Eğer pdfData cache'de varsa direkt göster (immediate render)
     if (background.pdfData != null) {
-      // Container ile beyaz arka plan - PNG transparency fix
       return Container(
         width: page.size.width,
         height: page.size.height,
@@ -291,22 +281,49 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
           fit: BoxFit.fill,
           filterQuality: FilterQuality.high,
           isAntiAlias: true,
+          gaplessPlayback: true, // Smooth geçiş için
         ),
       );
     }
-    
-    // Lazy load gerekiyor
+
+    // Lazy load - provider üzerinden render
     if (background.pdfFilePath != null && background.pdfPageIndex != null) {
       final cacheKey = '${background.pdfFilePath}|${background.pdfPageIndex}';
-      
+
       return Consumer(
         builder: (context, ref, child) {
+          // Mevcut zoom'u al
+          final currentZoom = ref.watch(zoomBasedRenderProvider);
+          final quality = getQualityForZoom(currentZoom);
+          final qualityKey = getQualityCacheKey(cacheKey, quality);
+
+          // Cache'e bak - önce kaliteli, yoksa normal
+          final cache = ref.watch(pdfPageCacheProvider);
+          final displayBytes = cache[qualityKey] ?? cache[cacheKey];
+
+          if (displayBytes != null) {
+            return Container(
+              width: page.size.width,
+              height: page.size.height,
+              color: Colors.white,
+              child: Image.memory(
+                displayBytes,
+                width: page.size.width,
+                height: page.size.height,
+                fit: BoxFit.fill,
+                filterQuality: FilterQuality.high,
+                isAntiAlias: true,
+                gaplessPlayback: true,
+              ),
+            );
+          }
+
+          // Cache'de yok - render provider'ı tetikle (standard quality)
           final renderAsync = ref.watch(pdfPageRenderProvider(cacheKey));
-          
+
           return renderAsync.when(
             data: (bytes) {
               if (bytes != null) {
-                // Render başarılı - Container ile beyaz arka plan
                 return Container(
                   width: page.size.width,
                   height: page.size.height,
@@ -318,57 +335,36 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                     fit: BoxFit.fill,
                     filterQuality: FilterQuality.high,
                     isAntiAlias: true,
+                    gaplessPlayback: true,
                   ),
                 );
               }
               return _buildPdfPlaceholder(page);
             },
             loading: () => _buildPdfLoading(page),
-            error: (e, _) => _buildPdfError(page, e.toString()),
+            error: (e, st) => _buildPdfError(page, e.toString()),
           );
         },
       );
     }
-    
+
     return _buildPdfPlaceholder(page);
   }
 
-  /// PDF yükleniyor widget'ı
+  /// PDF yükleniyor widget'ı (minimal - kullanıcıyı rahatsız etmez)
   Widget _buildPdfLoading(core.Page page) {
     return Container(
       width: page.size.width,
       height: page.size.height,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        // Gölge ekle - normal sayfalar gibi
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.15),
-            blurRadius: 20,
-            spreadRadius: 2,
-            offset: const Offset(0, 4),
+      color: Colors.white,
+      child: Center(
+        child: SizedBox(
+          width: 32,
+          height: 32,
+          child: CircularProgressIndicator(
+            strokeWidth: 3,
+            color: Colors.grey[300],
           ),
-        ],
-      ),
-      child: const Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-            SizedBox(height: 12),
-            Text(
-              'Yükleniyor...',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.black38,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
         ),
       ),
     );
@@ -451,6 +447,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
     );
   }
 
+  /// Trigger high-quality render when user zooms in
   @override
   int get pointerCount => _pointerCount;
   @override
@@ -538,27 +535,20 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
 
     // Current page (LIMITED mod için)
     final currentPage = ref.watch(currentPageProvider);
-    
-    // Listen to page changes - reset initialization when page changes
+
+    // Listen to page changes - reset initialization and trigger prefetch
     ref.listen<core.Page>(currentPageProvider, (previous, current) {
       if (previous != null && previous.id != current.id) {
-        debugPrint('📄 [PAGE] Page changed: ${previous.index} → ${current.index}, resetting initialization');
         _hasInitialized = false;
+
+        // 🚀 PDF sayfaları için adjacent prefetch tetikle
+        if (current.background.type == BackgroundType.pdf &&
+            current.background.pdfFilePath != null) {
+          // Yeni prefetch sistemi - otomatik adjacent sayfaları yükler
+          prefetchOnPageChange(ref, current.index);
+        }
       }
     });
-
-    // 🚀 PREFETCH: Sayfa değiştiğinde etraftaki sayfaları yükle (PDF için)
-    if (!canvasMode.isInfinite && currentPage.background.type == BackgroundType.pdf) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        final allPages = ref.read(documentProvider).pages;
-        ref.read(pdfPrefetchNotifierProvider.notifier).onPageChanged(
-          currentPage.index,
-          allPages,
-        );
-      });
-    }
-
 
     // Eraser cursor state
     final eraserCursorPosition = ref.watch(eraserCursorPositionProvider);
@@ -650,8 +640,9 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                           // ═══════════════════════════════════════════════════════════
                           if (!canvasMode.isInfinite) ...[
                             // Sayfa gölgesi - PDF için KAPALI
-                            if (canvasMode.showPageShadow && 
-                                currentPage.background.type != BackgroundType.pdf)
+                            if (canvasMode.showPageShadow &&
+                                currentPage.background.type !=
+                                    BackgroundType.pdf)
                               Positioned(
                                 left: 0,
                                 top: 0,
@@ -674,7 +665,8 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                               ),
 
                             // PDF BACKGROUND - Lazy Loading destekli
-                            if (currentPage.background.type == BackgroundType.pdf) ...[
+                            if (currentPage.background.type ==
+                                BackgroundType.pdf) ...[
                               Positioned(
                                 left: 0,
                                 top: 0,
@@ -685,7 +677,8 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                             ],
 
                             // Sayfa arka planı + pattern (PDF DEĞİLSE göster)
-                            if (currentPage.background.type != BackgroundType.pdf)
+                            if (currentPage.background.type !=
+                                BackgroundType.pdf)
                               Positioned(
                                 left: 0,
                                 top: 0,
@@ -694,10 +687,12 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                                     width: currentPage.size.width,
                                     height: currentPage.size.height,
                                     decoration: BoxDecoration(
-                                      color: Color(currentPage.background.color),
+                                      color:
+                                          Color(currentPage.background.color),
                                       border: canvasMode.pageBorderWidth > 0
                                           ? Border.all(
-                                              color: Color(canvasMode.pageBorderColor),
+                                              color: Color(
+                                                  canvasMode.pageBorderColor),
                                               width: canvasMode.pageBorderWidth,
                                             )
                                           : null,
@@ -706,7 +701,8 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                                       painter: PageBackgroundPatternPainter(
                                         background: currentPage.background,
                                       ),
-                                      size: Size(currentPage.size.width, currentPage.size.height),
+                                      size: Size(currentPage.size.width,
+                                          currentPage.size.height),
                                     ),
                                   ),
                                 ),

@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -28,94 +27,219 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isMobile = screenWidth < 600;
+
     return Scaffold(
-      body: Row(
-        children: [
-          // Sidebar
-          Sidebar(
-            selectedSection: _selectedSection,
-            onSectionChanged: (section) {
-              setState(() => _selectedSection = section);
-            },
-          ),
+      drawer: isMobile ? _buildSidebarDrawer() : null,
+      body: isMobile
+          ? _buildMobileLayout()
+          : _buildDesktopLayout(),
+    );
+  }
 
-          // Vertical divider (gradient, more visible)
-          Container(
-            width: 1,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Theme.of(context).dividerColor.withValues(alpha: 0.0),
-                  Theme.of(context).dividerColor.withValues(alpha: 0.5),
-                  Theme.of(context).dividerColor.withValues(alpha: 0.5),
-                  Theme.of(context).dividerColor.withValues(alpha: 0.0),
-                ],
-                stops: const [0.0, 0.1, 0.9, 1.0],
-              ),
-            ),
-          ),
-
-          // Main content
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+  // Mobile layout - no persistent sidebar, use drawer
+  Widget _buildMobileLayout() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Mobile header with hamburger menu
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Builder(
+            builder: (context) => Row(
               children: [
-                // Settings icon (top right)
-                Align(
-                  alignment: Alignment.topRight,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: IconButton(
-                      icon: const Icon(Icons.settings_outlined),
-                      onPressed: () {
-                        context.push('/settings');
-                      },
-                    ),
-                  ),
-                ),
-
-                // Header
-                DocumentsHeader(
-                  title: _getSectionTitle(),
-                  newButtonKey: _addButtonKey,
-                  onNewPressed: _showNewDocumentDialog,
-                  sortOption: _sortOption,
-                  onSortChanged: (option) {
-                    setState(() => _sortOption = option);
-                  },
-                  isSelectionMode: _isSelectionMode,
-                  onSelectionToggle: () {
-                    setState(() => _isSelectionMode = !_isSelectionMode);
+                IconButton(
+                  icon: const Icon(Icons.menu),
+                  onPressed: () {
+                    Scaffold.of(context).openDrawer();
                   },
                 ),
-
-                // Divider between header and content (soft & compact)
-                Container(
-                  height: 1,
-                  margin: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Theme.of(context).dividerColor.withValues(alpha: 0.0),
-                        Theme.of(context).dividerColor.withValues(alpha: 0.3),
-                        Theme.of(context).dividerColor.withValues(alpha: 0.0),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // Content
+                const SizedBox(width: 8),
                 Expanded(
-                  child: _buildContent(),
+                  child: Text(
+                    _getSectionTitle(),
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.settings_outlined),
+                  onPressed: () {
+                    context.push('/settings');
+                  },
                 ),
               ],
             ),
           ),
-        ],
+        ),
+
+        // Header
+        DocumentsHeader(
+          title: _getSectionTitle(),
+          newButtonKey: _addButtonKey,
+          onNewPressed: _showNewDocumentDialog,
+          sortOption: _sortOption,
+          onSortChanged: (option) {
+            setState(() => _sortOption = option);
+          },
+          isSelectionMode: _isSelectionMode,
+          onSelectionToggle: () {
+            setState(() => _isSelectionMode = !_isSelectionMode);
+          },
+        ),
+
+        // Divider
+        Container(
+          height: 1,
+          margin: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).dividerColor.withValues(alpha: 0.0),
+                Theme.of(context).dividerColor.withValues(alpha: 0.3),
+                Theme.of(context).dividerColor.withValues(alpha: 0.3),
+                Theme.of(context).dividerColor.withValues(alpha: 0.0),
+              ],
+              stops: const [0.0, 0.1, 0.9, 1.0],
+            ),
+          ),
+        ),
+
+        // Document grid
+        Expanded(
+          child: _buildDocumentGrid(),
+        ),
+      ],
+    );
+  }
+
+  // Desktop layout - persistent sidebar
+  Widget _buildDesktopLayout() {
+    return Row(
+      children: [
+        // Sidebar
+        Sidebar(
+          selectedSection: _selectedSection,
+          onSectionChanged: (section) {
+            setState(() => _selectedSection = section);
+          },
+        ),
+
+        // Vertical divider
+        Container(
+          width: 1,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Theme.of(context).dividerColor.withValues(alpha: 0.0),
+                Theme.of(context).dividerColor.withValues(alpha: 0.5),
+                Theme.of(context).dividerColor.withValues(alpha: 0.5),
+                Theme.of(context).dividerColor.withValues(alpha: 0.0),
+              ],
+              stops: const [0.0, 0.1, 0.9, 1.0],
+            ),
+          ),
+        ),
+
+        // Main content
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Settings icon (top right)
+              Align(
+                alignment: Alignment.topRight,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: IconButton(
+                    icon: const Icon(Icons.settings_outlined),
+                    onPressed: () {
+                      context.push('/settings');
+                    },
+                  ),
+                ),
+              ),
+
+              // Header
+              DocumentsHeader(
+                title: _getSectionTitle(),
+                newButtonKey: _addButtonKey,
+                onNewPressed: _showNewDocumentDialog,
+                sortOption: _sortOption,
+                onSortChanged: (option) {
+                  setState(() => _sortOption = option);
+                },
+                isSelectionMode: _isSelectionMode,
+                onSelectionToggle: () {
+                  setState(() => _isSelectionMode = !_isSelectionMode);
+                },
+              ),
+
+              // Divider
+              Container(
+                height: 1,
+                margin: const EdgeInsets.symmetric(vertical: 12),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Theme.of(context).dividerColor.withValues(alpha: 0.0),
+                      Theme.of(context).dividerColor.withValues(alpha: 0.3),
+                      Theme.of(context).dividerColor.withValues(alpha: 0.3),
+                      Theme.of(context).dividerColor.withValues(alpha: 0.0),
+                    ],
+                    stops: const [0.0, 0.1, 0.9, 1.0],
+                  ),
+                ),
+              ),
+
+              // Document grid
+              Expanded(
+                child: _buildDocumentGrid(),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Sidebar drawer for mobile
+  Widget _buildSidebarDrawer() {
+    return Drawer(
+      child: Sidebar(
+        selectedSection: _selectedSection,
+        onSectionChanged: (section) {
+          setState(() => _selectedSection = section);
+          Navigator.pop(context); // Close drawer after selection
+        },
       ),
     );
+  }
+
+  // Document grid (shared by both layouts)
+  Widget _buildDocumentGrid() {
+    return _buildContent();
+  }
+
+  Widget _buildContent() {
+    switch (_selectedSection) {
+      case SidebarSection.documents:
+        return _buildDocumentGridContent(ref.watch(documentsProvider(null)));
+      case SidebarSection.favorites:
+        return _buildDocumentGridContent(ref.watch(favoriteDocumentsProvider));
+      case SidebarSection.trash:
+        return _buildDocumentGridContent(ref.watch(trashDocumentsProvider));
+      case SidebarSection.shared:
+      case SidebarSection.store:
+        return _buildComingSoon();
+    }
   }
 
   String _getSectionTitle() {
@@ -133,21 +257,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     }
   }
 
-  Widget _buildContent() {
-    switch (_selectedSection) {
-      case SidebarSection.documents:
-        return _buildDocumentGrid(ref.watch(documentsProvider(null)));
-      case SidebarSection.favorites:
-        return _buildDocumentGrid(ref.watch(favoriteDocumentsProvider));
-      case SidebarSection.trash:
-        return _buildDocumentGrid(ref.watch(trashDocumentsProvider));
-      case SidebarSection.shared:
-      case SidebarSection.store:
-        return _buildComingSoon();
-    }
-  }
-
-  Widget _buildDocumentGrid(AsyncValue<List<DocumentInfo>> documentsAsync) {
+  Widget _buildDocumentGridContent(AsyncValue<List<DocumentInfo>> documentsAsync) {
     return documentsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => Center(
@@ -272,9 +382,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     showNewDocumentDropdown(context, _addButtonKey);
   }
 
-  /// Opens a document, prefetching PDF pages if necessary
+  /// Opens a document with instant navigation
   Future<void> _openDocument(String documentId) async {
-    // Load document to check if it has PDF pages
     final loadUseCase = ref.read(loadDocumentUseCaseProvider);
     final result = await loadUseCase(documentId);
 
@@ -289,78 +398,27 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
           );
         }
       },
-      (document) async {
-        // Check if document has PDF pages
-        final hasPdfPages = document.pages.any((page) =>
-            page.background.type == core.BackgroundType.pdf &&
-            page.background.pdfFilePath != null &&
-            page.background.pdfPageIndex != null);
+      (document) {
+        // PDF sayfaları için sadece state güncelle
+        final pdfPages = document.pages
+            .where((p) =>
+                p.background.type == core.BackgroundType.pdf &&
+                p.background.pdfFilePath != null &&
+                p.background.pdfPageIndex != null)
+            .toList();
 
-        if (!hasPdfPages) {
-          // No PDF pages, navigate immediately
-          if (mounted) {
-            context.push('/editor/$documentId');
-          }
-          return;
+        if (pdfPages.isNotEmpty) {
+          final pdfFilePath = pdfPages.first.background.pdfFilePath!;
+          ref.read(currentPdfFilePathProvider.notifier).state = pdfFilePath;
+          ref.read(totalPdfPagesProvider.notifier).state = pdfPages.length;
+          ref.read(visiblePdfPageProvider.notifier).state = 0;
+          
+          // PREFETCH YOK - Canvas açılınca kendi render edecek
         }
 
-        // Has PDF pages - prefetch first 3 pages before navigation
+        // Editor'e HEMEN git
         if (mounted) {
-          // Show loading dialog
-          showDialog(
-            context: context,
-            barrierDismissible: false,
-            builder: (_) => const AlertDialog(
-              content: Row(
-                children: [
-                  CircularProgressIndicator(),
-                  SizedBox(width: 16),
-                  Text('Sayfalar hazırlanıyor...'),
-                ],
-              ),
-            ),
-          );
-
-          try {
-            // Prefetch first 3 PDF pages (await)
-            final pdfPages = document.pages
-                .where((p) =>
-                    p.background.type == core.BackgroundType.pdf &&
-                    p.background.pdfFilePath != null &&
-                    p.background.pdfPageIndex != null)
-                .toList();
-
-            final pagesToPrefetch = min<int>(3, pdfPages.length);
-            for (int i = 0; i < pagesToPrefetch; i++) {
-              final page = pdfPages[i];
-              final cacheKey =
-                  '${page.background.pdfFilePath}|${page.background.pdfPageIndex}';
-              await ref.read(pdfPageRenderProvider(cacheKey).future);
-            }
-
-            // Background prefetch for pages 4-10 (fire and forget)
-            if (pdfPages.length > 3) {
-              final backgroundPrefetchCount = min<int>(10, pdfPages.length);
-              for (int i = 3; i < backgroundPrefetchCount; i++) {
-                final page = pdfPages[i];
-                final cacheKey =
-                    '${page.background.pdfFilePath}|${page.background.pdfPageIndex}';
-                ref.read(pdfPageRenderProvider(cacheKey));
-              }
-            }
-          } catch (e) {
-            debugPrint('❌ Prefetch error: $e');
-          } finally {
-            // Close loading dialog
-            if (mounted) {
-              Navigator.of(context, rootNavigator: true).pop();
-            }
-          }
-
-          // Navigate to editor
-          if (mounted) {
-            context.push('/editor/$documentId');
-          }
+          context.push('/editor/$documentId');
         }
       },
     );

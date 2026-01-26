@@ -2,7 +2,7 @@ import 'package:flutter/material.dart' hide Page;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:drawing_core/drawing_core.dart';
-import 'package:drawing_ui/drawing_ui.dart' show PDFImportService, PDFImportConfig, pdfPageRenderProvider;
+import 'package:drawing_ui/drawing_ui.dart' show PDFImportService, PDFImportConfig, currentPdfFilePathProvider, totalPdfPagesProvider, visiblePdfPageProvider;
 import 'package:file_picker/file_picker.dart';
 import 'package:example_app/features/documents/domain/entities/template.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
@@ -136,11 +136,11 @@ void _importPdf(BuildContext context) async {
   final result = await FilePicker.platform.pickFiles(
     type: FileType.custom,
     allowedExtensions: ['pdf'],
-    withData: true, // Dosya içeriğini al
+    withData: true,
   );
-  
+
   if (result == null || result.files.isEmpty) return;
-  
+
   final file = result.files.first;
   if (file.bytes == null) {
     if (!context.mounted) return;
@@ -149,36 +149,43 @@ void _importPdf(BuildContext context) async {
     );
     return;
   }
-  
-  // 2. Loading dialog göster
+
+  // 2. Kısa loading (sadece PDF parse için - sayfaları DEĞİL)
   if (!context.mounted) return;
   showDialog(
     context: context,
     barrierDismissible: false,
-    builder: (ctx) => const AlertDialog(
+    builder: (ctx) => AlertDialog(
       content: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CircularProgressIndicator(),
-          SizedBox(width: 16),
-          Text('PDF yükleniyor...'),
+          const SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+          const SizedBox(width: 16),
+          Text(
+            'PDF açılıyor...',
+            style: TextStyle(color: Theme.of(ctx).colorScheme.onSurface),
+          ),
         ],
       ),
     ),
   );
-  
+
   try {
-    // 3. PDF Import Service kullan
+    // 3. PDF Import Service kullan (lazy loading mode)
     final importService = PDFImportService();
     final importResult = await importService.importFromBytes(
       bytes: file.bytes!,
-      config: PDFImportConfig.all(), // Tüm sayfaları import et
+      config: PDFImportConfig.all(),
     );
-    
+
     // Loading dialog kapat
     if (!context.mounted) return;
     Navigator.of(context).pop();
-    
+
     if (!importResult.isSuccess) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -188,17 +195,15 @@ void _importPdf(BuildContext context) async {
       );
       return;
     }
-    
+
     // 4. Doküman oluştur
     final container = ProviderScope.containerOf(context);
     final controller = container.read(documentsControllerProvider.notifier);
     final folderId = container.read(currentFolderIdProvider);
-    
-    // Dosya adından başlık oluştur (.pdf uzantısını kaldır)
+
     final title = file.name.replaceAll('.pdf', '');
-    
-    // PDF sayfalarını content olarak serialize et
     final pagesJson = importResult.pages.map((page) => page.toJson()).toList();
+
     final documentId = await controller.createDocumentWithPages(
       title: title,
       folderId: folderId,
@@ -206,15 +211,23 @@ void _importPdf(BuildContext context) async {
       pages: pagesJson,
       pageCount: importResult.pages.length,
     );
-    
-    // 5. PDF'i direkt çizim ekranında aç
+
+    // 5. Editor'e HEMEN git (PREFETCH YOK!)
     if (documentId != null && context.mounted) {
-      // CRITICAL: İlk 3 sayfayı AWAIT ile bekle (UX fix)
-      await _prefetchInitialPdfPages(context, importResult.pages);
-      
-      if (!context.mounted) return;
-      
-      // Başarılı mesajı göster
+      // State güncelle
+      if (importResult.pages.isNotEmpty) {
+        final firstPage = importResult.pages.first;
+        if (firstPage.background.pdfFilePath != null) {
+          container.read(currentPdfFilePathProvider.notifier).state = 
+              firstPage.background.pdfFilePath!;
+          container.read(totalPdfPagesProvider.notifier).state = 
+              importResult.pages.length;
+          container.read(visiblePdfPageProvider.notifier).state = 0;
+          
+          // ❌ PREFETCH KODLARI SİLİNDİ - Editor kendi halledecek
+        }
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('$title açılıyor (${importResult.pages.length} sayfa)'),
@@ -222,21 +235,17 @@ void _importPdf(BuildContext context) async {
           duration: const Duration(seconds: 2),
         ),
       );
-      
-      // Editor'e yönlendir
+
       context.push('/editor/$documentId');
     }
-    
   } catch (e) {
-    // Loading dialog kapat (eğer hala açıksa)
+    // Hata durumunda dialog kapat
     if (context.mounted) {
-      Navigator.of(context, rootNavigator: true).popUntil((route) => route.isFirst);
+      Navigator.of(context, rootNavigator: true).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Hata: ${e.toString()}')),
+      );
     }
-    
-    if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Hata: ${e.toString()}')),
-    );
   }
 }
 
@@ -359,76 +368,6 @@ void _importImage(BuildContext context) async {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Hata: ${e.toString()}')),
       );
-    }
-  }
-}
-
-/// İlk 3 PDF sayfasını AWAIT ile yükle (UX kritik)
-Future<void> _prefetchInitialPdfPages(BuildContext context, List<Page> pages) async {
-  const prefetchCount = 3; // İlk 3 sayfa AWAIT ile bekle
-  final pagesToPrefetch = pages.take(prefetchCount).toList();
-  
-  if (pagesToPrefetch.isEmpty) return;
-  
-  debugPrint('📦 Prefetching first $prefetchCount PDF pages (AWAIT mode)...');
-  
-  // Loading dialog göster
-  if (!context.mounted) return;
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (ctx) => const AlertDialog(
-      content: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          CircularProgressIndicator(),
-          SizedBox(width: 16),
-          Text('Sayfalar hazırlanıyor...'),
-        ],
-      ),
-    ),
-  );
-  
-  try {
-    // Provider container'a eriş
-    final container = ProviderScope.containerOf(context);
-    
-    // İlk 3 sayfayı SENKRON yükle
-    for (final page in pagesToPrefetch) {
-      if (page.background.type == BackgroundType.pdf &&
-          page.background.pdfFilePath != null &&
-          page.background.pdfPageIndex != null) {
-        
-        final cacheKey = '${page.background.pdfFilePath}|${page.background.pdfPageIndex}';
-        debugPrint('⏳ Awaiting page ${page.background.pdfPageIndex}...');
-        
-        // CRITICAL: await ile bekle
-        await container.read(pdfPageRenderProvider(cacheKey).future);
-        
-        debugPrint('✅ Page ${page.background.pdfPageIndex} ready');
-      }
-    }
-    
-    // Arka planda kalan sayfaları prefetch et (5-10. sayfalar)
-    const backgroundPrefetchCount = 10;
-    if (pages.length > prefetchCount) {
-      final backgroundPages = pages.skip(prefetchCount).take(backgroundPrefetchCount - prefetchCount).toList();
-      for (final page in backgroundPages) {
-        if (page.background.type == BackgroundType.pdf &&
-            page.background.pdfFilePath != null &&
-            page.background.pdfPageIndex != null) {
-          final cacheKey = '${page.background.pdfFilePath}|${page.background.pdfPageIndex}';
-          container.read(pdfPageRenderProvider(cacheKey)); // Fire and forget
-        }
-      }
-      debugPrint('🚀 Background prefetch started for pages ${prefetchCount + 1}-$backgroundPrefetchCount');
-    }
-    
-    debugPrint('✅ Initial prefetch completed for ${pagesToPrefetch.length} pages');
-  } finally {
-    // Loading dialog kapat
-    if (context.mounted) {
-      Navigator.of(context).pop();
     }
   }
 }

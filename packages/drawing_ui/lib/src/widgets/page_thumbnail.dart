@@ -4,7 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/services/thumbnail_cache.dart';
 import 'package:drawing_ui/src/services/thumbnail_generator.dart';
-import 'package:drawing_ui/src/providers/pdf_render_provider.dart';
+import 'package:drawing_ui/src/providers/pdf_render_provider.dart'
+    show renderThumbnail, pdfThumbnailCacheProvider;
 
 /// A widget that displays a thumbnail preview of a page.
 ///
@@ -267,55 +268,46 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
     );
   }
 
-  /// Build PDF thumbnail using pdfPageRenderProvider
+  /// Build PDF thumbnail using renderThumbnail (low-res)
   Widget _buildPdfThumbnail() {
-    final colorScheme = Theme.of(context).colorScheme;
     final cacheKey = '${widget.page.background.pdfFilePath}|${widget.page.background.pdfPageIndex}';
-    final renderAsync = ref.watch(pdfPageRenderProvider(cacheKey));
-
-    return renderAsync.when(
-      data: (bytes) {
-        if (bytes != null) {
-          return Container(
-            color: Colors.white, // PDF background
-            child: Image.memory(
-              bytes,
-              fit: BoxFit.contain,
-              filterQuality: FilterQuality.medium,
-            ),
+    
+    return Consumer(
+      builder: (context, ref, child) {
+        // 1. Önce thumbnail cache'e bak
+        final thumbCache = ref.watch(pdfThumbnailCacheProvider);
+        if (thumbCache.containsKey(cacheKey)) {
+          return Image.memory(
+            thumbCache[cacheKey]!,
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
+            gaplessPlayback: true,
           );
         }
-        return Center(
-          child: Icon(
-            Icons.picture_as_pdf,
-            size: 32,
-            color: colorScheme.onSurfaceVariant,
+        
+        // 2. Scroll sırasında loading yapma
+        final shouldDefer = Scrollable.recommendDeferredLoadingForContext(context);
+        if (!shouldDefer) {
+          // ProviderContainer kullan (dispose-safe)
+          final container = ProviderScope.containerOf(context);
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            renderThumbnail(container, cacheKey);
+          });
+        }
+        
+        // 3. Basit placeholder
+        return Container(
+          color: Colors.grey[200],
+          child: Center(
+            child: Icon(
+              Icons.picture_as_pdf,
+              size: 24,
+              color: Colors.grey[400],
+            ),
           ),
         );
       },
-      loading: () => const Center(
-        child: CircularProgressIndicator(strokeWidth: 2),
-      ),
-      error: (e, _) => Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.error_outline,
-              size: 32,
-              color: colorScheme.error.withValues(alpha: 0.7),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'PDF Error',
-              style: TextStyle(
-                color: colorScheme.onSurfaceVariant,
-                fontSize: 10,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

@@ -345,22 +345,22 @@ class CanvasTransformNotifier extends StateNotifier<CanvasTransform> {
     }
   }
 
-  /// Calculate zoom to fill viewport (page fills the screen).
+  /// Calculate zoom to fit page in viewport (page fully visible with margins).
   ///
-  /// Uses the larger zoom so page fills at least one dimension.
-  /// - Portrait viewport: page fills width, user scrolls vertically
-  /// Calculate zoom to fit page in viewport (page fully visible, not enlarged).
-  ///
-  /// - If page is larger than viewport: scale down to fit
-  /// - If page is smaller than viewport: keep at 100% (don't enlarge)
+  /// Uses fit strategy for both portrait and landscape:
+  /// - Portrait viewport: page fits in viewport, side/top margins
+  /// - Landscape viewport: page fits in viewport, fully visible
   double _calculateFitZoom(Size viewportSize, Size pageSize) {
     final horizontalZoom = viewportSize.width / pageSize.width;
     final verticalZoom = viewportSize.height / pageSize.height;
-    // Use the smaller zoom to fit the entire page in viewport
-    final fitZoom =
-        horizontalZoom < verticalZoom ? horizontalZoom : verticalZoom;
-    // Don't enlarge page beyond 100%, but allow shrinking to any level needed
-    return fitZoom.clamp(0.01, 1.0); // Min 1% zoom (was 25%)
+    
+    // Always use SMALLER zoom (fit to screen, no overflow)
+    // This ensures entire page is visible with margins
+    final fitZoom = horizontalZoom < verticalZoom ? horizontalZoom : verticalZoom;
+    
+    // Don't enlarge beyond 1.0 (keep natural size)
+    // But allow shrinking to any level needed to fit
+    return fitZoom.clamp(0.01, 1.0);
   }
 
   /// Clamp offset to keep page within bounds.

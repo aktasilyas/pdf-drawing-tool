@@ -14,3 +14,24 @@ export 'shape_provider.dart';
 export 'text_provider.dart';
 export 'toolbar_config_provider.dart';
 export 'tool_style_provider.dart';
+
+// PDF render providers
+export 'pdf_render_provider.dart'
+    show
+        pdfPageCacheProvider,
+        pdfThumbnailCacheProvider,
+        renderThumbnail,
+        pdfPageRenderProvider,
+        pdfBulkPrefetchProvider,
+        BulkPrefetchRequest,
+        prefetchOnPageChange,
+        visiblePdfPageProvider,
+        currentPdfFilePathProvider,
+        totalPdfPagesProvider,
+        clearPdfCacheProvider,
+        pdfCacheSizeProvider,
+        pdfCacheSizeMBProvider,
+        pdfCacheCountProvider,
+        pdfRenderQueueProvider;
+
+export 'pdf_prefetch_provider.dart';

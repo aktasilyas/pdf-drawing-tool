@@ -38,19 +38,12 @@ class EditorScreen extends ConsumerWidget {
         ),
       ),
       data: (document) {
-        // Initialize document ONCE on first load
+        // Initialize document on EVERY load (not just first time)
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          final currentDoc = ref.read(documentProvider);
-          
-          // Only initialize if it's a different document or empty
-          if (currentDoc.id != document.id || currentDoc.isEmpty) {
-            debugPrint('🔄 [INIT] First time init for ${document.id} - strokes: ${document.currentPage?.layers.firstOrNull?.strokes.length ?? 0}');
-            ref.read(documentProvider.notifier).updateDocument(document);
-            ref.read(currentDocumentProvider.notifier).state = document;
-            ref.read(pageManagerProvider.notifier).initializeFromDocument(document.pages);
-          } else {
-            debugPrint('🔄 [INIT] Document already initialized, skipping');
-          }
+          debugPrint('🔄 [INIT] Initializing document ${document.id}');
+          ref.read(documentProvider.notifier).updateDocument(document);
+          ref.read(currentDocumentProvider.notifier).state = document;
+          ref.read(pageManagerProvider.notifier).initializeFromDocument(document.pages);
         });
 
         // Listen to document changes for auto-save (NO INVALIDATE HERE!)
@@ -94,15 +87,21 @@ class EditorScreen extends ConsumerWidget {
 
     if (hasUnsaved) {
       debugPrint('💾 [BACK] Saving before exit...');
-      // Force save before leaving
       ref.read(autoSaveProvider.notifier).saveNow(currentDoc);
-      // Wait a bit for save to complete
       await Future.delayed(const Duration(milliseconds: 500));
     }
 
-    // ONLY invalidate when leaving (for next time we open this document)
-    debugPrint('🔄 [BACK] Invalidating provider for fresh load next time');
+    debugPrint('🔄 [BACK] Invalidating ALL providers for fresh load next time');
+    
+    // TÜM provider'ları invalidate et
     ref.invalidate(documentLoaderProvider(documentId));
+    ref.invalidate(documentProvider);  // ← EKLENDİ
+    ref.invalidate(pageManagerProvider);
+    
+    // PDF state'lerini sıfırla
+    ref.read(visiblePdfPageProvider.notifier).state = null;
+    ref.read(currentPdfFilePathProvider.notifier).state = null;
+    ref.read(totalPdfPagesProvider.notifier).state = 0;
 
     if (context.mounted) {
       context.go('/documents');

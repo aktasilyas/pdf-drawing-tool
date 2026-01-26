@@ -77,6 +77,60 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
     super.dispose();
   }
 
+  /// Toggle sidebar with animation completion callback
+  void _toggleSidebar() {
+    setState(() {
+      _isSidebarOpen = !_isSidebarOpen;
+    });
+    
+    // Animasyon bittikten sonra canvas'ı yeniden hesapla
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted) {
+        _recalculateCanvasTransform();
+      }
+    });
+  }
+
+  /// Close sidebar (for mobile backdrop tap)
+  void _closeSidebar() {
+    setState(() {
+      _isSidebarOpen = false;
+    });
+    
+    // Animasyon bittikten sonra canvas'ı yeniden hesapla
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted) {
+        _recalculateCanvasTransform();
+      }
+    });
+  }
+
+  /// Recalculate canvas transform after sidebar toggle
+  void _recalculateCanvasTransform() {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    final isTabletOrDesktop = screenWidth >= 600;
+    final showSidebar = _isSidebarOpen && ref.read(pageCountProvider) > 1;
+
+    // Calculate actual canvas viewport size
+    final sidebarWidth = (isTabletOrDesktop && showSidebar) ? 140.0 : 0.0;
+    final canvasWidth = screenWidth - sidebarWidth;
+    final viewportSize = Size(canvasWidth, screenHeight);
+
+    // Get current page
+    final currentPage = ref.read(currentPageProvider);
+    final pageSize = Size(currentPage.size.width, currentPage.size.height);
+
+    // Re-initialize canvas transform with correct viewport
+    final canvasMode = widget.canvasMode ?? const core.CanvasMode(isInfinite: true);
+    if (!canvasMode.isInfinite) {
+      ref.read(canvasTransformProvider.notifier).initializeForPage(
+        viewportSize: viewportSize,
+        pageSize: pageSize,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     // Listen to activePanel changes
@@ -104,6 +158,13 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
             allPages: current.pages,
           );
         }
+
+        // Canvas transform'u yeniden hesapla (sayfa boyutu değişmiş olabilir)
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            _recalculateCanvasTransform();
+          }
+        });
       }
     });
 
@@ -137,128 +198,178 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
       penBoxSlotSelectedColor: colorScheme.primaryContainer,
     );
 
+    // Responsive: Tablet/Desktop vs Mobile
+    final screenWidth = MediaQuery.of(context).size.width;
+    final isTabletOrDesktop = screenWidth >= 600;
+    final showSidebar = _isSidebarOpen && ref.watch(pageCountProvider) > 1;
+
     return DrawingThemeProvider(
       theme: drawingTheme,
       child: Scaffold(
         backgroundColor: scaffoldBgColor,
         body: SafeArea(
-          child: Column(
+          child: Stack(
             children: [
-              // Row 1: Top navigation bar (full width)
-              TopNavigationBar(
-                documentTitle: widget.documentTitle,
-                onHomePressed: widget.onHomePressed,
-                onTitlePressed: widget.onTitlePressed,
+              // Main content (always full width)
+              Column(
+                children: [
+                  // Row 1: Top navigation bar (full width)
+                  TopNavigationBar(
+                    documentTitle: widget.documentTitle,
+                    onHomePressed: widget.onHomePressed,
+                    onTitlePressed: widget.onTitlePressed,
+                  ),
+
+                  // Row 2: Tool bar (full width, hamburger icon ile)
+                  ToolBar(
+                    onUndoPressed: _onUndoPressed,
+                    onRedoPressed: _onRedoPressed,
+                    onSettingsPressed: _onSettingsPressed,
+                    settingsButtonKey: _settingsButtonKey,
+                    toolButtonKeys: _toolButtonKeys,
+                    penGroupButtonKey: _penGroupButtonKey,
+                    highlighterGroupButtonKey: _highlighterGroupButtonKey,
+                    // Hamburger button (GoodNotes style)
+                    showSidebarButton: ref.watch(pageCountProvider) > 1,
+                    isSidebarOpen: _isSidebarOpen,
+                    onSidebarToggle: _toggleSidebar,
+                  ),
+
+                  // Row 3: Canvas area
+                  Expanded(
+                    child: Row(
+                      children: [
+                        // TABLET/DESKTOP: Animated sidebar (yan yana)
+                        if (isTabletOrDesktop)
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 250),
+                            curve: Curves.easeInOut,
+                            width: showSidebar ? 140.0 : 0.0,
+                            clipBehavior: Clip.antiAlias,
+                            decoration: const BoxDecoration(),
+                            child: AnimatedOpacity(
+                              duration: const Duration(milliseconds: 200),
+                              opacity: showSidebar ? 1.0 : 0.0,
+                              child: showSidebar
+                                  ? _buildSidebar()
+                                  : const SizedBox.shrink(),
+                            ),
+                          ),
+                        
+                        // Canvas area (always present)
+                        Expanded(child: _buildCanvasArea(context, currentPage, transform)),
+                      ],
+                    ),
+                  ),
+                ],
               ),
 
-              // Row 2: Tool bar (full width, hamburger icon ile)
-              ToolBar(
-                onUndoPressed: _onUndoPressed,
-                onRedoPressed: _onRedoPressed,
-                onSettingsPressed: _onSettingsPressed,
-                settingsButtonKey: _settingsButtonKey,
-                toolButtonKeys: _toolButtonKeys,
-                penGroupButtonKey: _penGroupButtonKey,
-                highlighterGroupButtonKey: _highlighterGroupButtonKey,
-                // Hamburger button (GoodNotes style)
-                showSidebarButton: ref.watch(pageCountProvider) > 1,
-                isSidebarOpen: _isSidebarOpen,
-                onSidebarToggle: () => setState(() => _isSidebarOpen = !_isSidebarOpen),
-              ),
-
-              // Row 3: Canvas area with optional sidebar
-              Expanded(
-                child: Row(
-                  children: [
-                    // Sidebar (koşullu - sadece multi-page dokümanlarda)
-                    if (_isSidebarOpen && ref.watch(pageCountProvider) > 1)
-                      _buildSidebar(),
-                    
-                    // Main canvas area
-                    Expanded(
-                      child: Stack(
-                        children: [
-                          // LAYER 0: Infinite Background (zoom ile ölçeklenir, tüm ekranı kaplar)
-                          // Pattern zoom seviyesiyle birlikte küçülür/büyür
-                          // Sayfa dışında da devam eder (sonsuz kağıt efekti)
-                          Positioned.fill(
-                            child: RepaintBoundary(
-                              child: CustomPaint(
-                                painter: InfiniteBackgroundPainter(
-                                  background: currentPage.background,
-                                  zoom: transform.zoom,
-                                  offset: transform.offset,
-                                ),
-                                size: Size.infinite,
-                              ),
-                            ),
-                          ),
-
-                          // LAYER 1: Drawing Canvas (zoom/pan transform içinde)
-                          Positioned.fill(
-                            child: DrawingCanvas(
-                              canvasMode: widget.canvasMode,
-                            ),
-                          ),
-
-                          // Invisible tap barrier to close panel when tapping canvas
-                          // Uses onTap (not onTapDown) so drawing gestures are not affected
-                          if (ref.watch(activePanelProvider) != null)
-                            Positioned.fill(
-                              child: GestureDetector(
-                                behavior: HitTestBehavior.translucent,
-                                onTap: _closePanel,
-                                child: const SizedBox.expand(),
-                              ),
-                            ),
-
-                          // Floating pen box (draggable when collapsed)
-                          Positioned(
-                            left: _penBoxPosition.dx,
-                            top: _penBoxPosition.dy,
-                            child: FloatingPenBox(
-                              position: _penBoxPosition,
-                              onPositionChanged: (delta) {
-                                setState(() {
-                                  _penBoxPosition += delta;
-                                  // Keep within bounds
-                                  _penBoxPosition = Offset(
-                                    _penBoxPosition.dx.clamp(
-                                        0, MediaQuery.of(context).size.width - 60),
-                                    _penBoxPosition.dy.clamp(
-                                        0, MediaQuery.of(context).size.height - 200),
-                                  );
-                                });
-                              },
-                            ),
-                          ),
-
-                          // AI Assistant button (right bottom)
-                          Positioned(
-                            right: 16,
-                            bottom: 16,
-                            child: _AskAIButton(
-                              onTap: _openAIPanel,
-                            ),
-                          ),
-
-                          // Zoom indicator (center, visible only while zooming)
-                          if (ref.watch(isZoomingProvider))
-                            Center(
-                              child: _ZoomIndicator(
-                                zoomPercentage: ref.watch(zoomPercentageProvider),
-                              ),
-                            ),
-                        ],
+              // Mobile backdrop (tap to close) - ÖNCE
+              if (!isTabletOrDesktop && showSidebar)
+                Positioned.fill(
+                  child: GestureDetector(
+                    onTap: _closeSidebar,
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 250),
+                      opacity: showSidebar ? 0.5 : 0.0,
+                      child: Container(
+                        color: Colors.black,
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
+              
+              // MOBILE OVERLAY: Sidebar (drawer tarzı) - Animated - SONRA
+              if (!isTabletOrDesktop)
+                AnimatedPositioned(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  left: showSidebar ? 0 : -140,
+                  top: 0,
+                  bottom: 0,
+                  width: 140,
+                  child: _buildSidebar(),
+                ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  /// Canvas area with all layers (background, canvas, panels, etc.)
+  Widget _buildCanvasArea(BuildContext context, core.Page currentPage, CanvasTransform transform) {
+    return Stack(
+      children: [
+        // LAYER 0: Infinite Background (zoom ile ölçeklenir, tüm ekranı kaplar)
+        Positioned.fill(
+          child: RepaintBoundary(
+            child: CustomPaint(
+              painter: InfiniteBackgroundPainter(
+                background: currentPage.background,
+                zoom: transform.zoom,
+                offset: transform.offset,
+              ),
+              size: Size.infinite,
+            ),
+          ),
+        ),
+
+        // LAYER 1: Drawing Canvas (zoom/pan transform içinde)
+        Positioned.fill(
+          child: DrawingCanvas(
+            canvasMode: widget.canvasMode,
+          ),
+        ),
+
+        // Invisible tap barrier to close panel when tapping canvas
+        if (ref.watch(activePanelProvider) != null)
+          Positioned.fill(
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onTap: _closePanel,
+              child: const SizedBox.expand(),
+            ),
+          ),
+
+        // Floating pen box (draggable when collapsed)
+        Positioned(
+          left: _penBoxPosition.dx,
+          top: _penBoxPosition.dy,
+          child: FloatingPenBox(
+            position: _penBoxPosition,
+            onPositionChanged: (delta) {
+              setState(() {
+                _penBoxPosition += delta;
+                // Keep within bounds
+                _penBoxPosition = Offset(
+                  _penBoxPosition.dx.clamp(
+                      0, MediaQuery.of(context).size.width - 60),
+                  _penBoxPosition.dy.clamp(
+                      0, MediaQuery.of(context).size.height - 200),
+                );
+              });
+            },
+          ),
+        ),
+
+        // AI Assistant button (right bottom)
+        Positioned(
+          right: 16,
+          bottom: 16,
+          child: _AskAIButton(
+            onTap: _openAIPanel,
+          ),
+        ),
+
+        // Zoom indicator (center, visible only while zooming)
+        if (ref.watch(isZoomingProvider))
+          Center(
+            child: _ZoomIndicator(
+              zoomPercentage: ref.watch(zoomPercentageProvider),
+            ),
+          ),
+      ],
     );
   }
 
@@ -460,6 +571,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
   Widget _buildAddPageButton() {
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final screenWidth = MediaQuery.of(context).size.width;
     
     return Container(
       padding: const EdgeInsets.all(12),
@@ -486,6 +598,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
             ),
           ),
           child: Row(
+            mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(
@@ -493,16 +606,18 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                 size: 20,
                 color: colorScheme.primary,
               ),
-              const SizedBox(width: 6),
-              Text(
-                'Sayfa Ekle',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: colorScheme.primary,
-                  letterSpacing: -0.2,
+              if (screenWidth > 600) ...[
+                const SizedBox(width: 6),
+                Text(
+                  'Sayfa Ekle',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: colorScheme.primary,
+                    letterSpacing: -0.2,
+                  ),
                 ),
-              ),
+              ],
             ],
           ),
         ),

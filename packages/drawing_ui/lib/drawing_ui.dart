@@ -86,13 +86,4 @@ export 'src/utils/anchor_position_calculator.dart';
 export 'package:flutter_pen_toolbar/flutter_pen_toolbar.dart';
 
 // State Management
-export 'src/providers/drawing_providers.dart';
-export 'src/providers/document_provider.dart';
-export 'src/providers/history_provider.dart';
-export 'src/providers/tool_style_provider.dart';
-export 'src/providers/toolbar_config_provider.dart';
-export 'src/providers/canvas_transform_provider.dart';
-export 'src/providers/page_provider.dart';
-export 'src/providers/pdf_provider.dart';
-export 'src/providers/pdf_render_provider.dart';
-export 'src/providers/pdf_prefetch_provider.dart';
+export 'src/providers/providers.dart';

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
+import 'package:drawing_core/drawing_core.dart' show BackgroundType;
 import 'package:drawing_ui/src/canvas/stroke_painter.dart';
 import 'package:drawing_ui/src/canvas/drawing_canvas_helpers.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
+import 'package:drawing_ui/src/providers/pdf_render_provider.dart';
 import 'package:drawing_ui/src/models/tool_type.dart';
 
 /// Gesture handling methods for DrawingCanvas.
@@ -1194,6 +1196,18 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
   void handleScaleEnd(ScaleEndDetails details) {
     // Hide zoom indicator
     ref.read(isZoomingProvider.notifier).state = false;
+
+    // Zoom değişimini provider'a bildir (for adaptive PDF quality)
+    final currentTransform = ref.read(canvasTransformProvider);
+    final currentZoom = currentTransform.zoom;
+    final page = ref.read(currentPageProvider);
+
+    if (page.background.type == BackgroundType.pdf &&
+        page.background.pdfFilePath != null &&
+        page.background.pdfPageIndex != null) {
+      final cacheKey = '${page.background.pdfFilePath}|${page.background.pdfPageIndex}';
+      ref.read(zoomBasedRenderProvider.notifier).onZoomChanged(currentZoom, cacheKey);
+    }
 
     // Snap back for limited canvas mode
     final mode = canvasMode ?? const core.CanvasMode(isInfinite: true);
