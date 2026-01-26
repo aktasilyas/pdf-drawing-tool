@@ -54,14 +54,20 @@ class _ToolListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isVisible = toolConfig.isVisible;
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 6),
       decoration: BoxDecoration(
-        color: isVisible ? Colors.white : Colors.grey.shade100,
+        color: isVisible 
+            ? (isDark ? colorScheme.surface : colorScheme.surface) 
+            : (isDark ? colorScheme.surfaceContainerHigh.withValues(alpha: 0.5) : colorScheme.surfaceContainerHighest),
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
-          color: isVisible ? Colors.grey.shade300 : Colors.grey.shade200,
+          color: isVisible 
+              ? colorScheme.outline.withValues(alpha: 0.3) 
+              : colorScheme.outline.withValues(alpha: 0.15),
           width: 0.5,
         ),
       ),
@@ -70,22 +76,24 @@ class _ToolListItem extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(6),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
             child: Row(
               children: [
                 // Drag handle with larger touch area - ONLY THIS AREA IS DRAGGABLE
                 ReorderableDragStartListener(
                   index: index,
                   child: Container(
-                    padding: const EdgeInsets.all(4),
+                    padding: const EdgeInsets.all(3),
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade200,
+                      color: isDark 
+                          ? colorScheme.surfaceContainerHigh 
+                          : colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Icon(
                       Icons.drag_indicator,
-                      color: Colors.grey.shade700,
-                      size: 18,
+                      color: colorScheme.onSurfaceVariant,
+                      size: 16,
                     ),
                   ),
                 ),
@@ -93,17 +101,17 @@ class _ToolListItem extends StatelessWidget {
                 // Tool icon
                 Icon(
                   _getToolIcon(toolConfig.toolType),
-                  size: 18,
-                  color: isVisible ? Colors.grey.shade700 : Colors.grey.shade400,
+                  size: 16,
+                  color: isVisible ? colorScheme.onSurface : colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 8),
                 // Tool name
                 Expanded(
                   child: Text(
                     toolConfig.toolType.displayName,
                     style: TextStyle(
-                      fontSize: 12,
-                      color: isVisible ? Colors.grey.shade800 : Colors.grey.shade500,
+                      fontSize: 11,
+                      color: isVisible ? colorScheme.onSurface : colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
                       decoration: isVisible ? null : TextDecoration.lineThrough,
                     ),
                     overflow: TextOverflow.ellipsis,
@@ -111,11 +119,11 @@ class _ToolListItem extends StatelessWidget {
                 ),
                 // Switch
                 Transform.scale(
-                  scale: 0.75,
+                  scale: 0.7,
                   child: Switch(
                     value: isVisible,
                     onChanged: (_) => onVisibilityToggle(),
-                    activeColor: Colors.blue,
+                    activeColor: colorScheme.primary,
                   ),
                 ),
               ],

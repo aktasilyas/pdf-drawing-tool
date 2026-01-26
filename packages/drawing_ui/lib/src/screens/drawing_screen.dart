@@ -351,14 +351,16 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
   Widget _buildSidebar() {
     final pageManager = ref.watch(pageManagerProvider);
     final pageCount = ref.watch(pageCountProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return Container(
       width: 140, // GoodNotes gibi kompakt
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F7), // GoodNotes açık gri
+        color: isDark ? colorScheme.surfaceContainerLow : colorScheme.surfaceContainerLowest,
         border: Border(
           right: BorderSide(
-            color: Colors.grey.shade300,
+            color: colorScheme.outlineVariant,
             width: 0.5,
           ),
         ),
@@ -398,12 +400,12 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                         Container(
                           height: 152, // GoodNotes boyut
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: isDark ? colorScheme.surfaceContainer : colorScheme.surface,
                             borderRadius: BorderRadius.circular(8), // GoodNotes: 8px
                             border: Border.all(
                               color: isSelected
-                                  ? const Color(0xFF007AFF) // iOS blue
-                                  : Colors.grey.shade300,
+                                  ? colorScheme.primary
+                                  : colorScheme.outlineVariant,
                               width: isSelected ? 2 : 1,
                             ),
                             boxShadow: [
@@ -435,8 +437,8 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                             fontSize: 12,
                             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                             color: isSelected
-                                ? const Color(0xFF007AFF)
-                                : const Color(0xFF8E8E93), // iOS secondary text
+                                ? colorScheme.primary
+                                : colorScheme.onSurfaceVariant,
                             letterSpacing: -0.2,
                           ),
                         ),
@@ -456,12 +458,15 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
   }
   
   Widget _buildAddPageButton() {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         border: Border(
           top: BorderSide(
-            color: Colors.grey.shade300,
+            color: colorScheme.outlineVariant,
             width: 0.5,
           ),
         ),
@@ -473,10 +478,10 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
         child: Container(
           height: 48,
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: isDark ? colorScheme.surfaceContainer : colorScheme.surface,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: Colors.grey.shade300,
+              color: colorScheme.outlineVariant,
               width: 1,
             ),
           ),
@@ -486,15 +491,15 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
               Icon(
                 Icons.add,
                 size: 20,
-                color: const Color(0xFF007AFF),
+                color: colorScheme.primary,
               ),
               const SizedBox(width: 6),
-              const Text(
+              Text(
                 'Sayfa Ekle',
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: Color(0xFF007AFF),
+                  color: colorScheme.primary,
                   letterSpacing: -0.2,
                 ),
               ),

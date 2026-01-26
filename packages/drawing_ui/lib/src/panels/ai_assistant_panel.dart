@@ -167,10 +167,12 @@ class _AIAssistantPanelState extends ConsumerState<AIAssistantPanel> {
 class _PremiumBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.amber.shade100,
+        color: Colors.amber.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(12),
       ),
       child: const Row(
@@ -204,13 +206,17 @@ class _SelectionIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: hasSelection ? Colors.blue.shade50 : Colors.grey.shade100,
+        color: hasSelection 
+            ? colorScheme.primary.withValues(alpha: 0.1)
+            : colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: hasSelection ? Colors.blue.shade200 : Colors.grey.shade300,
+          color: hasSelection ? colorScheme.primary : colorScheme.outlineVariant,
         ),
       ),
       child: Row(
@@ -218,7 +224,7 @@ class _SelectionIndicator extends StatelessWidget {
           Icon(
             hasSelection ? Icons.check_circle : Icons.info_outline,
             size: 20,
-            color: hasSelection ? Colors.blue : Colors.grey,
+            color: hasSelection ? colorScheme.primary : colorScheme.outline,
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -228,7 +234,7 @@ class _SelectionIndicator extends StatelessWidget {
                   : 'Select content to ask AI about',
               style: TextStyle(
                 fontSize: 13,
-                color: hasSelection ? Colors.blue.shade700 : Colors.grey,
+                color: hasSelection ? colorScheme.primary : colorScheme.outline,
               ),
             ),
           ),
@@ -252,6 +258,8 @@ class _QuestionInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Row(
       children: [
         Expanded(
@@ -259,9 +267,9 @@ class _QuestionInput extends StatelessWidget {
             controller: controller,
             decoration: InputDecoration(
               hintText: 'Ask a question about your selection...',
-              hintStyle: TextStyle(color: Colors.grey.shade400),
+              hintStyle: TextStyle(color: colorScheme.onSurfaceVariant),
               filled: true,
-              fillColor: Colors.grey.shade100,
+              fillColor: colorScheme.surfaceContainerLowest,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide.none,
@@ -284,12 +292,12 @@ class _QuestionInput extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: isLoading ? Colors.grey : Colors.blue,
+              color: isLoading ? colorScheme.outline : colorScheme.primary,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
               isLoading ? Icons.hourglass_empty : Icons.send,
-              color: Colors.white,
+              color: colorScheme.onPrimary,
               size: 20,
             ),
           ),
@@ -316,6 +324,8 @@ class _QuickSuggestions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -325,13 +335,16 @@ class _QuickSuggestions extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
+              color: colorScheme.surfaceContainerLowest,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: Colors.grey.shade300),
+              border: Border.all(color: colorScheme.outlineVariant),
             ),
             child: Text(
               suggestion,
-              style: const TextStyle(fontSize: 13),
+              style: TextStyle(
+                fontSize: 13,
+                color: colorScheme.onSurface,
+              ),
             ),
           ),
         );
@@ -346,25 +359,30 @@ class _LoadingIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        color: colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(12),
       ),
-      child: const Column(
+      child: Column(
         children: [
           SizedBox(
             width: 24,
             height: 24,
-            child: CircularProgressIndicator(strokeWidth: 2),
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: colorScheme.primary,
+            ),
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           Text(
             'AI is thinking...',
             style: TextStyle(
               fontSize: 13,
-              color: Colors.grey,
+              color: colorScheme.outline,
             ),
           ),
         ],
@@ -387,37 +405,39 @@ class _ResponseArea extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.blue.shade50,
+        color: colorScheme.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.blue.shade200),
+        border: Border.all(color: colorScheme.primary),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.auto_awesome, size: 16, color: Colors.blue),
+              Icon(Icons.auto_awesome, size: 16, color: colorScheme.primary),
               const SizedBox(width: 8),
-              const Text(
+              Text(
                 'AI Response',
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: Colors.blue,
+                  color: colorScheme.primary,
                 ),
               ),
               const Spacer(),
               GestureDetector(
                 onTap: onCopy,
-                child: const Icon(Icons.copy, size: 18, color: Colors.blue),
+                child: Icon(Icons.copy, size: 18, color: colorScheme.primary),
               ),
               const SizedBox(width: 12),
               GestureDetector(
                 onTap: onRetry,
-                child: const Icon(Icons.refresh, size: 18, color: Colors.blue),
+                child: Icon(Icons.refresh, size: 18, color: colorScheme.primary),
               ),
             ],
           ),
@@ -426,7 +446,7 @@ class _ResponseArea extends StatelessWidget {
             response,
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey.shade800,
+              color: colorScheme.onSurface,
               height: 1.5,
             ),
           ),
@@ -445,20 +465,20 @@ class _PremiumNotice extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.amber.shade50,
+        color: Colors.amber.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.amber.shade200),
+        border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
       ),
-      child: Row(
+      child: const Row(
         children: [
-          Icon(Icons.info_outline, size: 18, color: Colors.amber.shade700),
-          const SizedBox(width: 8),
+          Icon(Icons.info_outline, size: 18, color: Colors.amber),
+          SizedBox(width: 8),
           Expanded(
             child: Text(
               'AI features are limited in free plan. Upgrade for unlimited access.',
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.amber.shade800,
+                color: Colors.amber,
               ),
             ),
           ),

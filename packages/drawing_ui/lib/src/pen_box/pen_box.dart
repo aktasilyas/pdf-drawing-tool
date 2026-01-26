@@ -87,9 +87,16 @@ class PenBox extends ConsumerWidget {
   }
 
   void _onPresetLongPressed(BuildContext context, WidgetRef ref, int index) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     // Show preset edit options
     showModalBottomSheet(
       context: context,
+      backgroundColor: isDark ? const Color(0xFF1C1C1E) : colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
       builder: (context) => _PresetOptionsSheet(index: index),
     );
   }
@@ -120,6 +127,8 @@ class _AddPresetButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = DrawingTheme.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: onTap,
@@ -127,16 +136,18 @@ class _AddPresetButton extends StatelessWidget {
         width: theme.penSlotSize,
         height: theme.penSlotSize,
         decoration: BoxDecoration(
-          color: Colors.grey.shade200,
+          color: isDark 
+              ? colorScheme.surfaceContainerHigh.withValues(alpha: 0.5) 
+              : colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: Colors.grey.shade400,
+            color: colorScheme.outline.withValues(alpha: 0.4),
             style: BorderStyle.solid,
           ),
         ),
-        child: const Icon(
+        child: Icon(
           Icons.add,
-          color: Colors.grey,
+          color: colorScheme.onSurfaceVariant,
           size: 20,
         ),
       ),
@@ -154,29 +165,51 @@ class _PresetOptionsSheet extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final presets = ref.watch(penBoxPresetsProvider);
     final preset = presets[index];
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // Handle bar
+          Container(
+            width: 40,
+            height: 4,
+            margin: const EdgeInsets.only(bottom: 16),
+            decoration: BoxDecoration(
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          
+          // Title
           Text(
-            preset.isEmpty ? 'Empty Slot' : 'Preset Options',
-            style: Theme.of(context).textTheme.titleMedium,
+            preset.isEmpty ? 'Boş Slot' : 'Kalem Seçenekleri',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: colorScheme.onSurface,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           const SizedBox(height: 16),
+          
           if (!preset.isEmpty) ...[
-            ListTile(
-              leading: const Icon(Icons.edit),
-              title: const Text('Edit Preset'),
+            _buildOptionTile(
+              context: context,
+              icon: Icons.edit_outlined,
+              label: 'Düzenle',
+              color: colorScheme.primary,
               onTap: () {
                 Navigator.pop(context);
                 // MOCK: Would open preset editor
               },
             ),
-            ListTile(
-              leading: const Icon(Icons.delete, color: Colors.red),
-              title: const Text('Delete Preset', style: TextStyle(color: Colors.red)),
+            const SizedBox(height: 4),
+            _buildOptionTile(
+              context: context,
+              icon: Icons.delete_outline,
+              label: 'Sil',
+              color: colorScheme.error,
               onTap: () {
                 ref.read(penBoxPresetsProvider.notifier).removePreset(index);
                 Navigator.pop(context);
@@ -184,9 +217,11 @@ class _PresetOptionsSheet extends ConsumerWidget {
             ),
           ],
           if (preset.isEmpty)
-            ListTile(
-              leading: const Icon(Icons.add),
-              title: const Text('Add Current Settings'),
+            _buildOptionTile(
+              context: context,
+              icon: Icons.add_circle_outline,
+              label: 'Mevcut Ayarları Ekle',
+              color: colorScheme.primary,
               onTap: () {
                 final currentTool = ref.read(currentToolProvider);
                 final settings = ref.read(penSettingsProvider(currentTool));
@@ -204,6 +239,66 @@ class _PresetOptionsSheet extends ConsumerWidget {
               },
             ),
         ],
+      ),
+    );
+  }
+  
+  Widget _buildOptionTile({
+    required BuildContext context,
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: colorScheme.outline.withValues(alpha: 0.2),
+            ),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: isDark ? 0.2 : 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  icon,
+                  color: color,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: colorScheme.onSurface,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                size: 20,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

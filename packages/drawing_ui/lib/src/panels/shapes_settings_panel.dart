@@ -104,6 +104,8 @@ class _ColorSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -112,7 +114,7 @@ class _ColorSection extends StatelessWidget {
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w600,
-            color: Colors.grey.shade600,
+            color: colorScheme.onSurfaceVariant,
           ),
         ),
         const SizedBox(height: 6),
@@ -173,14 +175,19 @@ class _ShapeOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return GestureDetector(
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF4A9DFF).withValues(alpha: 0.1) : Colors.grey.shade100,
+          color: isSelected 
+              ? colorScheme.primaryContainer 
+              : (isDark ? colorScheme.surfaceContainerHigh : colorScheme.surfaceContainerHighest),
           borderRadius: BorderRadius.circular(4),
           border: Border.all(
-            color: isSelected ? const Color(0xFF4A9DFF) : Colors.grey.shade300,
+            color: isSelected ? colorScheme.primary : colorScheme.outline.withValues(alpha: 0.3),
             width: isSelected ? 1.5 : 1,
           ),
         ),
@@ -189,7 +196,7 @@ class _ShapeOption extends StatelessWidget {
             size: const Size(18, 18),
             painter: _ShapeIconPainter(
               shape: shape,
-              color: isSelected ? const Color(0xFF4A9DFF) : Colors.grey.shade600,
+              color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
             ),
           ),
         ),

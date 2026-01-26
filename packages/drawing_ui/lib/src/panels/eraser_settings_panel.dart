@@ -95,13 +95,17 @@ class EraserSettingsPanel extends ConsumerWidget {
   }
 
   void _showClearConfirmation(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Sayfayı Temizle?'),
-        content: const Text(
+        backgroundColor: colorScheme.surface,
+        title: Text('Sayfayı Temizle?', style: TextStyle(color: colorScheme.onSurface)),
+        content: Text(
           'Bu sayfa içeriğini tamamen silecek. '
           'Bu işlem geri alınamaz.',
+          style: TextStyle(color: colorScheme.onSurfaceVariant),
         ),
         actions: [
           TextButton(
@@ -114,7 +118,7 @@ class EraserSettingsPanel extends ConsumerWidget {
               // Clear active layer
               _clearActivePage(ref);
             },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(foregroundColor: colorScheme.error),
             child: const Text('Temizle'),
           ),
         ],
@@ -151,6 +155,8 @@ class _CompactSizeSlider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -158,18 +164,18 @@ class _CompactSizeSlider extends StatelessWidget {
           children: [
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF666666),
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
             const Spacer(),
             Text(
               '${value.toInt()}px',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 11,
-                color: Color(0xFF999999),
+                color: colorScheme.outline,
               ),
             ),
           ],
@@ -182,9 +188,9 @@ class _CompactSizeSlider extends StatelessWidget {
               trackHeight: 2,
               thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 5),
               overlayShape: const RoundSliderOverlayShape(overlayRadius: 10),
-              activeTrackColor: const Color(0xFF4A9DFF),
-              inactiveTrackColor: Colors.grey.shade200,
-              thumbColor: const Color(0xFF4A9DFF),
+              activeTrackColor: colorScheme.primary,
+              inactiveTrackColor: colorScheme.outlineVariant,
+              thumbColor: colorScheme.primary,
             ),
             child: Slider(
               value: value.clamp(min, max),
@@ -217,7 +223,9 @@ class _CompactActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isDestructive ? Colors.red : const Color(0xFF4A9DFF);
+    final colorScheme = Theme.of(context).colorScheme;
+    final color = isDestructive ? colorScheme.error : colorScheme.primary;
+    
     return InkWell(
       onTap: onPressed,
       borderRadius: BorderRadius.circular(6),
@@ -317,15 +325,19 @@ class _EraserModeOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 6),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF4A9DFF).withValues(alpha: 0.1) : Colors.grey.shade100,
+          color: isSelected 
+              ? colorScheme.primary.withValues(alpha: 0.1) 
+              : colorScheme.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(5),
           border: Border.all(
-            color: isSelected ? const Color(0xFF4A9DFF) : Colors.grey.shade300,
+            color: isSelected ? colorScheme.primary : colorScheme.outlineVariant,
             width: isSelected ? 1.2 : 1,
           ),
         ),
@@ -337,7 +349,7 @@ class _EraserModeOption extends StatelessWidget {
                 Icon(
                   icon,
                   size: 16,
-                  color: isSelected ? const Color(0xFF4A9DFF) : Colors.grey.shade600,
+                  color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
                 ),
                 if (isPremium)
                   const Positioned(
@@ -357,7 +369,7 @@ class _EraserModeOption extends StatelessWidget {
               style: TextStyle(
                 fontSize: 9,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color: isSelected ? const Color(0xFF4A9DFF) : Colors.grey.shade600,
+                color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
               ),
             ),
           ],

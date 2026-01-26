@@ -35,10 +35,12 @@ class PenPresetSlot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = DrawingTheme.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final slotSize = size ?? theme.penSlotSize;
 
     if (preset.isEmpty) {
-      return _buildEmptySlot(context, slotSize, theme);
+      return _buildEmptySlot(context, slotSize, theme, colorScheme, isDark);
     }
 
     return GestureDetector(
@@ -50,64 +52,84 @@ class PenPresetSlot extends StatelessWidget {
         width: slotSize,
         height: slotSize,
         decoration: BoxDecoration(
-          color:
-              isSelected ? theme.penBoxSlotSelectedColor : Colors.transparent,
+          color: Colors.transparent, // No background
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: isSelected
-                ? theme.toolbarIconSelectedColor
-                : Colors.grey.shade300,
-            width: isSelected ? 2 : 1,
+                ? (isDark 
+                    ? colorScheme.primary.withValues(alpha: 0.4) // Even softer in dark mode
+                    : colorScheme.primary.withValues(alpha: 0.5))
+                : (isDark 
+                    ? colorScheme.outline.withValues(alpha: 0.2) 
+                    : colorScheme.outline.withValues(alpha: 0.3)),
+            width: isSelected ? 1.5 : 1,
           ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: theme.toolbarIconSelectedColor.withAlpha(40),
-                    blurRadius: 8,
-                    spreadRadius: 1,
+                    color: isDark 
+                        ? colorScheme.primary.withValues(alpha: 0.1) // Very subtle in dark
+                        : colorScheme.primary.withValues(alpha: 0.15),
+                    blurRadius: 4, // Even more compact
+                    spreadRadius: 0,
                   )
                 ]
               : null,
         ),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            // Custom pen icon
-            ToolPenIcon(
-              toolType: preset.toolType,
-              color: preset.color,
-              isSelected: isSelected,
-              size: slotSize * 0.75,
-            ),
-
-            // Thickness indicator (bottom bar)
-            Positioned(
-              bottom: 4,
-              left: 4,
-              right: 4,
-              child: _ThicknessIndicator(
-                thickness: preset.thickness,
-                color: preset.color,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              // Custom pen icon - clipped to show only top half
+              SizedBox(
+                width: slotSize,
+                height: slotSize,
+                child: ClipRect(
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    heightFactor: 0.6, // Show only top 60% of the pen
+                    child: ToolPenIcon(
+                      toolType: preset.toolType,
+                      color: preset.color,
+                      isSelected: isSelected,
+                      size: slotSize * 0.9,
+                    ),
+                  ),
+                ),
               ),
-            ),
-          ],
+
+              // Thickness indicator (bottom bar)
+              Positioned(
+                bottom: 4,
+                left: 4,
+                right: 4,
+                child: _ThicknessIndicator(
+                  thickness: preset.thickness,
+                  color: preset.color,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildEmptySlot(
-      BuildContext context, double slotSize, DrawingTheme theme) {
+      BuildContext context, double slotSize, DrawingTheme theme, ColorScheme colorScheme, bool isDark) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: slotSize,
         height: slotSize,
         decoration: BoxDecoration(
-          color: Colors.grey.shade100,
+          color: isDark 
+              ? colorScheme.surfaceContainerHigh.withValues(alpha: 0.5) 
+              : colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: Colors.grey.shade300,
+            color: colorScheme.outline.withValues(alpha: 0.3),
             width: 1,
             style: BorderStyle.solid,
           ),
@@ -116,7 +138,7 @@ class PenPresetSlot extends StatelessWidget {
           child: Icon(
             Icons.add,
             size: slotSize * 0.4,
-            color: Colors.grey.shade400,
+            color: colorScheme.onSurfaceVariant,
           ),
         ),
       ),
@@ -162,18 +184,23 @@ class CompactPenPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     if (preset.isEmpty) {
       return Container(
         width: size,
         height: size,
         decoration: BoxDecoration(
-          color: Colors.grey.shade200,
+          color: isDark 
+              ? colorScheme.surfaceContainerHigh 
+              : colorScheme.surfaceContainerHighest,
           shape: BoxShape.circle,
         ),
         child: Icon(
           Icons.add,
           size: size * 0.5,
-          color: Colors.grey.shade400,
+          color: colorScheme.onSurfaceVariant,
         ),
       );
     }
@@ -182,7 +209,7 @@ class CompactPenPreview extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: preset.color.withAlpha(40),
+        color: preset.color.withValues(alpha: 0.15),
         shape: BoxShape.circle,
         border: Border.all(
           color: preset.color,

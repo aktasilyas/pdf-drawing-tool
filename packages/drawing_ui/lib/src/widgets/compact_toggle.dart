@@ -39,10 +39,10 @@ class CompactToggle extends StatelessWidget {
   /// Scale factor for the switch (defaults to 0.65 for compact look)
   final double scale;
 
-  static const _defaultActiveColor = Color(0xFF4A9DFF);
-
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
@@ -50,9 +50,9 @@ class CompactToggle extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 11,
-                color: Color(0xFF444444),
+                color: colorScheme.onSurface,
               ),
             ),
           ),
@@ -61,7 +61,7 @@ class CompactToggle extends StatelessWidget {
             child: Switch(
               value: value,
               onChanged: onChanged,
-              activeColor: activeColor ?? _defaultActiveColor,
+              activeColor: activeColor ?? colorScheme.primary,
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
           ),

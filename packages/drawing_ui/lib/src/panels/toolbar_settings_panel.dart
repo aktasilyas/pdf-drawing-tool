@@ -13,9 +13,11 @@ class ToolbarSettingsPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final config = ref.watch(toolbarConfigProvider);
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final screenHeight = MediaQuery.of(context).size.height;
-    // Responsive maxHeight - smaller on smaller screens
-    final maxHeight = (screenHeight * 0.5).clamp(280.0, 400.0);
+    // Responsive maxHeight - increased for better visibility
+    final maxHeight = (screenHeight * 0.7).clamp(400.0, 600.0);
 
     return Container(
       width: 280,
@@ -24,11 +26,11 @@ class ToolbarSettingsPanel extends ConsumerWidget {
         maxHeight: maxHeight,
       ),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1C1C1E) : colorScheme.surface,
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(38), // 0.15 * 255 ≈ 38
+            color: Colors.black.withAlpha(isDark ? 60 : 38),
             blurRadius: 12,
             offset: const Offset(0, 2),
           ),
@@ -40,7 +42,7 @@ class ToolbarSettingsPanel extends ConsumerWidget {
           // Header
           _buildHeader(context, ref),
           
-          const Divider(height: 1),
+          Divider(height: 1, color: colorScheme.outlineVariant),
           
           const SizedBox(height: 8),
           
@@ -66,24 +68,27 @@ class ToolbarSettingsPanel extends ConsumerWidget {
   }
 
   Widget _buildHeader(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Row(
         children: [
-          const Icon(Icons.settings, size: 16, color: Colors.grey),
+          Icon(Icons.settings, size: 16, color: colorScheme.onSurfaceVariant),
           const SizedBox(width: 6),
-          const Expanded(
+          Expanded(
             child: Text(
               'Araç Çubuğu Ayarları',
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
+                color: colorScheme.onSurface,
               ),
               overflow: TextOverflow.ellipsis,
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.close, size: 16),
+            icon: Icon(Icons.close, size: 16, color: colorScheme.onSurfaceVariant),
             onPressed: () {
               if (onClose != null) {
                 onClose!();
@@ -104,6 +109,8 @@ class ToolbarSettingsPanel extends ConsumerWidget {
     WidgetRef ref,
     ToolbarConfig config,
   ) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Column(
@@ -112,12 +119,13 @@ class ToolbarSettingsPanel extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Flexible(
+              Flexible(
                 child: Text(
                   'Hızlı Erişim Çubuğu',
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
+                    color: colorScheme.onSurface,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -129,7 +137,7 @@ class ToolbarSettingsPanel extends ConsumerWidget {
                   onChanged: (_) async {
                     await ref.read(toolbarConfigProvider.notifier).toggleQuickAccess();
                   },
-                  activeColor: Colors.blue,
+                  activeColor: colorScheme.primary,
                 ),
               ),
             ],
@@ -138,7 +146,7 @@ class ToolbarSettingsPanel extends ConsumerWidget {
             'Sık kullanılan renk ve kalınlıkları göster',
             style: TextStyle(
               fontSize: 10,
-              color: Colors.grey.shade600,
+              color: colorScheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -147,6 +155,8 @@ class ToolbarSettingsPanel extends ConsumerWidget {
   }
 
   Widget _buildToolsSection(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -155,11 +165,12 @@ class ToolbarSettingsPanel extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Row(
             children: [
-              const Text(
+              Text(
                 'Araçlar',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
+                  color: colorScheme.onSurface,
                 ),
               ),
               const Spacer(),
@@ -167,7 +178,7 @@ class ToolbarSettingsPanel extends ConsumerWidget {
                 'Sürükle',
                 style: TextStyle(
                   fontSize: 10,
-                  color: Colors.grey.shade500,
+                  color: colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -182,6 +193,8 @@ class ToolbarSettingsPanel extends ConsumerWidget {
   }
 
   Widget _buildResetButton(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: SizedBox(
@@ -195,8 +208,8 @@ class ToolbarSettingsPanel extends ConsumerWidget {
             style: TextStyle(fontSize: 11),
           ),
           style: OutlinedButton.styleFrom(
-            foregroundColor: Colors.grey.shade700,
-            side: BorderSide(color: Colors.grey.shade300),
+            foregroundColor: colorScheme.onSurfaceVariant,
+            side: BorderSide(color: colorScheme.outline.withValues(alpha: 0.3)),
             padding: const EdgeInsets.symmetric(horizontal: 12),
           ),
         ),
@@ -205,12 +218,16 @@ class ToolbarSettingsPanel extends ConsumerWidget {
   }
 
   void _showResetConfirmation(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Sıfırla'),
-        content: const Text(
+        backgroundColor: colorScheme.surface,
+        title: Text('Sıfırla', style: TextStyle(color: colorScheme.onSurface)),
+        content: Text(
           'Araç çubuğu ayarları varsayılana döndürülecek. Devam etmek istiyor musunuz?',
+          style: TextStyle(color: colorScheme.onSurfaceVariant),
         ),
         actions: [
           TextButton(

@@ -22,28 +22,30 @@ class SettingsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return ListTile(
       leading: Icon(
         icon,
-        color: enabled ? null : Colors.grey,
+        color: enabled ? colorScheme.onSurface : colorScheme.outline,
       ),
       title: Text(
         title,
         style: TextStyle(
-          color: enabled ? null : Colors.grey,
+          color: enabled ? colorScheme.onSurface : colorScheme.outline,
         ),
       ),
       subtitle: subtitle != null
           ? Text(
               subtitle!,
               style: TextStyle(
-                color: enabled ? Colors.grey[600] : Colors.grey[400],
+                color: enabled ? colorScheme.onSurfaceVariant : colorScheme.outline,
                 fontSize: 13,
               ),
             )
           : null,
       trailing: trailing ?? (showArrow && onTap != null
-          ? Icon(Icons.chevron_right, color: Colors.grey[400])
+          ? Icon(Icons.chevron_right, color: colorScheme.outline)
           : null),
       onTap: enabled ? onTap : null,
       enabled: enabled,

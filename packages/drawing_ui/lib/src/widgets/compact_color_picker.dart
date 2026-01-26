@@ -12,11 +12,13 @@ class CompactColorPicker extends StatefulWidget {
     required this.selectedColor,
     required this.onColorSelected,
     this.showOpacity = true,
+    this.onClose,
   });
 
   final Color selectedColor;
   final ValueChanged<Color> onColorSelected;
   final bool showOpacity;
+  final VoidCallback? onClose;
 
   @override
   State<CompactColorPicker> createState() => _CompactColorPickerState();
@@ -120,7 +122,14 @@ class _CompactColorPickerState extends State<CompactColorPicker>
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               GestureDetector(
-                onTap: () => Navigator.pop(context),
+                onTap: () {
+                  // Use callback if provided, otherwise try Navigator.pop
+                  if (widget.onClose != null) {
+                    widget.onClose!();
+                  } else if (Navigator.canPop(context)) {
+                    Navigator.pop(context);
+                  }
+                },
                 child: Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(

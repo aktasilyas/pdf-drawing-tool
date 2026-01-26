@@ -185,16 +185,19 @@ class _PositionedPanelOverlay extends StatelessWidget {
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     // Arrow pointing up to anchor
-                    Padding(
-                      padding: EdgeInsets.only(
-                        left: arrowLeftPosition.clamp(40, panelMaxWidth - 64),
-                      ),
-                      child: CustomPaint(
-                        size: const Size(24, 12),
-                        painter: _ArrowPainter(),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          left: arrowLeftPosition.clamp(8, panelMaxWidth - 32),
+                        ),
+                        child: CustomPaint(
+                          size: const Size(24, 12),
+                          painter: _ArrowPainter(),
+                        ),
                       ),
                     ),
                     // Panel content

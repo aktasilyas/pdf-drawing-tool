@@ -42,14 +42,19 @@ class LassoSelectionPanel extends ConsumerWidget {
           const SizedBox(height: 12),
 
           // Compact selectable types as chips
-          const Text(
-            'Seçilebilir',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey,
-              letterSpacing: 0.5,
-            ),
+          Builder(
+            builder: (context) {
+              final colorScheme = Theme.of(context).colorScheme;
+              return Text(
+                'Seçilebilir',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.onSurfaceVariant,
+                  letterSpacing: 0.5,
+                ),
+              );
+            },
           ),
           const SizedBox(height: 8),
           _SelectableTypesGrid(
@@ -77,9 +82,12 @@ class _CompactModeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
+        color: isDark ? colorScheme.surfaceContainerHigh : colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(8),
       ),
       padding: const EdgeInsets.all(3),
@@ -122,17 +130,22 @@ class _ModeButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white : Colors.transparent,
+          color: isSelected 
+              ? (isDark ? colorScheme.surface : colorScheme.surface) 
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(6),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: Colors.black.withAlpha(20), // 0.08 * 255 ≈ 20
+                    color: Colors.black.withAlpha(isDark ? 40 : 20),
                     blurRadius: 4,
                     offset: const Offset(0, 1),
                   ),
@@ -146,7 +159,7 @@ class _ModeButton extends StatelessWidget {
             Icon(
               icon,
               size: 16,
-              color: isSelected ? Colors.blue : Colors.grey.shade600,
+              color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
             ),
             const SizedBox(width: 4),
             Flexible(
@@ -156,7 +169,7 @@ class _ModeButton extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                  color: isSelected ? Colors.blue : Colors.grey.shade700,
+                  color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
@@ -221,15 +234,22 @@ class _TypeChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.blue.shade50 : Colors.grey.shade100,
+          color: isSelected 
+              ? colorScheme.primaryContainer 
+              : (isDark ? colorScheme.surfaceContainerHigh : colorScheme.surfaceContainerHighest),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected ? Colors.blue.shade300 : Colors.grey.shade300,
+            color: isSelected 
+                ? colorScheme.primary.withValues(alpha: 0.5) 
+                : colorScheme.outline.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
@@ -239,7 +259,7 @@ class _TypeChip extends StatelessWidget {
             Icon(
               icon,
               size: 14,
-              color: isSelected ? Colors.blue : Colors.grey.shade600,
+              color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
             ),
             const SizedBox(width: 4),
             Text(
@@ -247,7 +267,7 @@ class _TypeChip extends StatelessWidget {
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
-                color: isSelected ? Colors.blue.shade700 : Colors.grey.shade700,
+                color: isSelected ? colorScheme.onPrimaryContainer : colorScheme.onSurfaceVariant,
               ),
             ),
           ],

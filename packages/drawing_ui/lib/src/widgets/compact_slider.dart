@@ -66,10 +66,10 @@ class CompactSlider extends StatelessWidget {
   /// Slider container height (defaults to 18.0)
   final double height;
 
-  static const _defaultActiveColor = Color(0xFF4A9DFF);
-
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -82,15 +82,15 @@ class CompactSlider extends StatelessWidget {
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey.shade600,
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF333333),
+                color: colorScheme.onSurface,
               ),
             ),
           ],
@@ -104,9 +104,9 @@ class CompactSlider extends StatelessWidget {
               trackHeight: trackHeight,
               thumbShape: RoundSliderThumbShape(enabledThumbRadius: thumbRadius),
               overlayShape: RoundSliderOverlayShape(overlayRadius: thumbRadius * 2),
-              activeTrackColor: activeColor ?? _defaultActiveColor,
-              inactiveTrackColor: inactiveColor ?? Colors.grey.shade200,
-              thumbColor: activeColor ?? _defaultActiveColor,
+              activeTrackColor: activeColor ?? colorScheme.primary,
+              inactiveTrackColor: inactiveColor ?? colorScheme.outlineVariant,
+              thumbColor: activeColor ?? colorScheme.primary,
             ),
             child: Slider(
               value: value.clamp(min, max),

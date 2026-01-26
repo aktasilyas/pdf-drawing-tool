@@ -79,6 +79,7 @@ class UnifiedColorPicker extends StatelessWidget {
                       onColorSelected(color);
                       overlayEntry.remove();
                     },
+                    onClose: () => overlayEntry.remove(),
                   ),
                 ),
               ),
@@ -115,7 +116,6 @@ class _ColorChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     
     return GestureDetector(
       onTap: onTap,

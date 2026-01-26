@@ -210,13 +210,16 @@ class _LiveStrokePreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
       width: double.infinity,
       height: 28,
       decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+        color: isDark ? colorScheme.surfaceContainerHigh : colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: Colors.grey.shade200, width: 0.5),
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.3), width: 0.5),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(5),
@@ -226,6 +229,7 @@ class _LiveStrokePreview extends StatelessWidget {
             color: color,
             thickness: thickness,
             toolType: toolType,
+            isDarkMode: isDark,
           ),
         ),
       ),
@@ -239,16 +243,21 @@ class _StrokePreviewPainter extends CustomPainter {
     required this.color,
     required this.thickness,
     required this.toolType,
+    required this.isDarkMode,
   });
 
   final Color color;
   final double thickness;
   final ToolType toolType;
+  final bool isDarkMode;
 
   @override
   void paint(Canvas canvas, Size size) {
+    // In dark mode, make colors darker for better visibility
+    final displayColor = isDarkMode ? _darkenColor(color, 0.3) : color;
+    
     final paint = Paint()
-      ..color = color
+      ..color = displayColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = thickness * 1.5
       ..strokeCap = StrokeCap.round
@@ -272,7 +281,17 @@ class _StrokePreviewPainter extends CustomPainter {
   bool shouldRepaint(_StrokePreviewPainter oldDelegate) {
     return color != oldDelegate.color ||
         thickness != oldDelegate.thickness ||
-        toolType != oldDelegate.toolType;
+        toolType != oldDelegate.toolType ||
+        isDarkMode != oldDelegate.isDarkMode;
+  }
+  
+  /// Darken a color by reducing its lightness in HSL color space
+  Color _darkenColor(Color color, double amount) {
+    final hslColor = HSLColor.fromColor(color);
+    final darkerColor = hslColor.withLightness(
+      (hslColor.lightness * (1 - amount)).clamp(0.0, 1.0),
+    );
+    return darkerColor.toColor();
   }
 }
 
@@ -302,14 +321,18 @@ class _PenTypeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
       height: 44,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? colorScheme.surfaceContainerHigh : colorScheme.surface,
         borderRadius: BorderRadius.circular(10),
+        border: isDark ? Border.all(color: colorScheme.outline.withValues(alpha: 0.3), width: 0.5) : null,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(15),
+            color: Colors.black.withAlpha(isDark ? 25 : 15),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -361,6 +384,13 @@ class _PenSlot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final displayName = type.penType?.config.displayNameTr ?? type.displayName;
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    // In dark mode, make selected color darker for better visibility
+    final displayColor = isSelected && isDark 
+        ? _darkenColor(selectedColor, 0.3) 
+        : selectedColor;
 
     return Tooltip(
       message: displayName,
@@ -386,7 +416,9 @@ class _PenSlot extends StatelessWidget {
                 ),
                 child: ToolPenIcon(
                   toolType: type,
-                  color: isSelected ? selectedColor : Colors.grey.shade400,
+                  color: isSelected 
+                      ? displayColor 
+                      : (isDark ? colorScheme.onSurface.withValues(alpha: 0.6) : colorScheme.onSurfaceVariant),
                   isSelected: false, // Selection handled by color
                   size: _penHeight,
                   orientation: PenOrientation.vertical,
@@ -397,6 +429,15 @@ class _PenSlot extends StatelessWidget {
         ),
       ),
     );
+  }
+  
+  /// Darken a color by reducing its lightness in HSL color space
+  Color _darkenColor(Color color, double amount) {
+    final hslColor = HSLColor.fromColor(color);
+    final darkerColor = hslColor.withLightness(
+      (hslColor.lightness * (1 - amount)).clamp(0.0, 1.0),
+    );
+    return darkerColor.toColor();
   }
 }
 
@@ -414,6 +455,8 @@ class _CompactColorRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -422,7 +465,7 @@ class _CompactColorRow extends StatelessWidget {
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w600,
-            color: Colors.grey.shade600,
+            color: colorScheme.onSurfaceVariant,
           ),
         ),
         const SizedBox(height: 6),
@@ -453,28 +496,30 @@ class _CompactActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return GestureDetector(
       onTap: onPressed,
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
-          color: const Color(0xFFF3F4F6),
+          color: colorScheme.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(6),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (icon != null) ...[
-              Icon(icon, size: 12, color: const Color(0xFF374151)),
+              Icon(icon, size: 12, color: colorScheme.onSurfaceVariant),
               const SizedBox(width: 4),
             ],
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF374151),
+                color: colorScheme.onSurfaceVariant,
               ),
             ),
           ],

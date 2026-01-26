@@ -182,14 +182,18 @@ class _HighlighterTypeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
     return Container(
       height: 44,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? colorScheme.surfaceContainerHigh : colorScheme.surface,
         borderRadius: BorderRadius.circular(10),
+        border: isDark ? Border.all(color: colorScheme.outline.withValues(alpha: 0.3), width: 0.5) : null,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(15),
+            color: Colors.black.withAlpha(isDark ? 25 : 15),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -238,6 +242,13 @@ class _HighlighterSlot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final displayName = type.displayName;
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    // In dark mode, make selected color darker for better visibility
+    final displayColor = isSelected && isDark 
+        ? _darkenColor(selectedColor, 0.3) 
+        : selectedColor;
 
     return Tooltip(
       message: displayName,
@@ -262,7 +273,9 @@ class _HighlighterSlot extends StatelessWidget {
                 ),
                 child: ToolPenIcon(
                   toolType: type,
-                  color: isSelected ? selectedColor : Colors.grey.shade400,
+                  color: isSelected 
+                      ? displayColor 
+                      : (isDark ? colorScheme.onSurface.withValues(alpha: 0.6) : colorScheme.onSurfaceVariant),
                   isSelected: false,
                   size: _penHeight,
                   orientation: PenOrientation.vertical,
@@ -273,6 +286,15 @@ class _HighlighterSlot extends StatelessWidget {
         ),
       ),
     );
+  }
+  
+  /// Darken a color by reducing its lightness in HSL color space
+  Color _darkenColor(Color color, double amount) {
+    final hslColor = HSLColor.fromColor(color);
+    final darkerColor = hslColor.withLightness(
+      (hslColor.lightness * (1 - amount)).clamp(0.0, 1.0),
+    );
+    return darkerColor.toColor();
   }
 }
 
@@ -290,13 +312,21 @@ class _ThicknessBarPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    
+    // In dark mode, make color darker for better visibility
+    final displayColor = isDark ? _darkenColor(color, 0.3) : color;
+    
     return Container(
       width: double.infinity,
       height: 28,
       decoration: BoxDecoration(
-        color: isNeon ? Colors.grey.shade900 : Colors.grey.shade50,
+        color: isNeon 
+            ? (isDark ? colorScheme.onSurface : colorScheme.surfaceContainerHighest)
+            : (isDark ? colorScheme.surfaceContainerHigh : colorScheme.surfaceContainerLowest),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: Colors.grey.shade200, width: 0.5),
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.3), width: 0.5),
       ),
       child: Center(
         child: Container(
@@ -304,7 +334,7 @@ class _ThicknessBarPreview extends StatelessWidget {
           height: (thickness / 3).clamp(4.0, 16.0),
           margin: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
-            color: color,
+            color: displayColor,
             borderRadius: BorderRadius.circular(2),
             boxShadow: isNeon
                 ? [
@@ -319,6 +349,15 @@ class _ThicknessBarPreview extends StatelessWidget {
         ),
       ),
     );
+  }
+  
+  /// Darken a color by reducing its lightness in HSL color space
+  Color _darkenColor(Color color, double amount) {
+    final hslColor = HSLColor.fromColor(color);
+    final darkerColor = hslColor.withLightness(
+      (hslColor.lightness * (1 - amount)).clamp(0.0, 1.0),
+    );
+    return darkerColor.toColor();
   }
 }
 
@@ -348,6 +387,8 @@ class _CompactHighlighterColors extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -356,7 +397,7 @@ class _CompactHighlighterColors extends StatelessWidget {
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w600,
-            color: Colors.grey.shade600,
+            color: colorScheme.onSurfaceVariant,
           ),
         ),
         const SizedBox(height: 6),
@@ -391,25 +432,27 @@ class _CompactAddButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return GestureDetector(
       onTap: onPressed,
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 10),
         decoration: BoxDecoration(
-          color: const Color(0xFFF3F4F6),
+          color: colorScheme.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(8),
         ),
-        child: const Row(
+        child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.add, size: 14, color: Color(0xFF374151)),
-            SizedBox(width: 6),
+            Icon(Icons.add, size: 14, color: colorScheme.onSurfaceVariant),
+            const SizedBox(width: 6),
             Text('Kalem kutusuna ekle',
                 style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF374151))),
+                    color: colorScheme.onSurfaceVariant)),
           ],
         ),
       ),

@@ -32,6 +32,8 @@ class ToolPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = DrawingTheme.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Yatay/dikey ekrana göre maxHeight ayarla
     final screenSize = MediaQuery.of(context).size;
@@ -48,7 +50,7 @@ class ToolPanel extends StatelessWidget {
           maxHeight: maxPanelHeight,
         ),
         decoration: BoxDecoration(
-          color: theme.panelBackground,
+          color: isDark ? const Color(0xFF1C1C1E) : colorScheme.surface,
           borderRadius: BorderRadius.circular(theme.panelBorderRadius),
           boxShadow: [
             // Main shadow
@@ -206,7 +208,7 @@ class PanelSection extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: Colors.orange.shade50,
+                  color: Colors.orange.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: const Row(
@@ -250,6 +252,8 @@ class _LockedSectionOverlay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return GestureDetector(
       onTap: onTap,
       child: Stack(
@@ -263,7 +267,7 @@ class _LockedSectionOverlay extends StatelessWidget {
           Positioned.fill(
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.grey.withAlpha(20),
+                color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Center(
@@ -308,6 +312,8 @@ class PanelToggleRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -318,7 +324,7 @@ class PanelToggleRow extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w400,
-              color: enabled ? const Color(0xFF333333) : Colors.grey,
+              color: enabled ? colorScheme.onSurface : colorScheme.outline,
             ),
           ),
           Transform.scale(
@@ -326,8 +332,8 @@ class PanelToggleRow extends StatelessWidget {
             child: Switch(
               value: value,
               onChanged: enabled ? onChanged : null,
-              activeColor: const Color(0xFF4F46E5),
-              activeTrackColor: const Color(0xFF4F46E5).withAlpha(100),
+              activeColor: colorScheme.primary,
+              activeTrackColor: colorScheme.primary.withValues(alpha: 0.4),
             ),
           ),
         ],
@@ -355,16 +361,18 @@ class PanelActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    
     final bgColor = isPrimary
-        ? const Color(0xFF4F46E5)
+        ? colorScheme.primary
         : isDestructive
-            ? const Color(0xFFFEE2E2)
-            : const Color(0xFFF3F4F6);
+            ? colorScheme.error.withValues(alpha: 0.1)
+            : colorScheme.surfaceContainerLowest;
     final fgColor = isPrimary
-        ? Colors.white
+        ? colorScheme.onPrimary
         : isDestructive
-            ? const Color(0xFFDC2626)
-            : const Color(0xFF374151);
+            ? colorScheme.error
+            : colorScheme.onSurface;
 
     return Material(
       color: Colors.transparent,
