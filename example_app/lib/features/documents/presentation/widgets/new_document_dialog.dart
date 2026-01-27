@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart' hide Page;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_core/drawing_core.dart' hide Template;
 import 'package:drawing_ui/drawing_ui.dart' show PDFImportService, PDFImportConfig, currentPdfFilePathProvider, totalPdfPagesProvider, visiblePdfPageProvider;
 import 'package:file_picker/file_picker.dart';
 import 'package:example_app/features/documents/domain/entities/template.dart';
