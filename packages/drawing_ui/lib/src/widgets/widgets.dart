@@ -26,3 +26,4 @@ export 'text_input_overlay.dart';
 export 'text_style_popup.dart';
 export 'thickness_slider.dart';
 export 'unified_color_picker.dart';
+export 'template_preview_widget.dart';

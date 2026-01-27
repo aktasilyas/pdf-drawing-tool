@@ -24,6 +24,9 @@ export 'src/canvas/drawing_canvas.dart';
 export 'src/canvas/stroke_painter.dart';
 export 'src/canvas/infinite_background_painter.dart';
 
+// Painters
+export 'src/painters/template_pattern_painter.dart';
+
 // Rendering
 export 'src/rendering/flutter_stroke_renderer.dart';
 
