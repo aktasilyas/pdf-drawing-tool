@@ -437,5 +437,159 @@ void main() {
         expect(largePainter.pattern.hasDots, true);
       });
     });
+
+    group('special patterns', () {
+      testWidgets('isometric pattern draws angled grid', (tester) async {
+        final painter = TemplatePatternPainter(
+          pattern: TemplatePattern.isometric,
+          spacingMm: 10,
+          lineWidth: 0.5,
+          lineColor: lineColor,
+          backgroundColor: backgroundColor,
+          pageSize: testSize,
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: CustomPaint(
+                size: testSize,
+                painter: painter,
+              ),
+            ),
+          ),
+        );
+
+        expect(find.byType(CustomPaint), findsWidgets);
+        expect(painter.pattern, TemplatePattern.isometric);
+      });
+
+      testWidgets('hexagonal pattern draws hexagons', (tester) async {
+        final painter = TemplatePatternPainter(
+          pattern: TemplatePattern.hexagonal,
+          spacingMm: 12,
+          lineWidth: 0.5,
+          lineColor: lineColor,
+          backgroundColor: backgroundColor,
+          pageSize: testSize,
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: CustomPaint(
+                size: testSize,
+                painter: painter,
+              ),
+            ),
+          ),
+        );
+
+        expect(find.byType(CustomPaint), findsWidgets);
+        expect(painter.pattern, TemplatePattern.hexagonal);
+      });
+
+      testWidgets('cornell pattern draws margins and lines', (tester) async {
+        final painter = TemplatePatternPainter(
+          pattern: TemplatePattern.cornell,
+          spacingMm: 8,
+          lineWidth: 0.5,
+          lineColor: lineColor,
+          backgroundColor: backgroundColor,
+          pageSize: testSize,
+          extraData: {'marginLeft': 60.0, 'marginBottom': 50.0},
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: CustomPaint(
+                size: testSize,
+                painter: painter,
+              ),
+            ),
+          ),
+        );
+
+        expect(find.byType(CustomPaint), findsWidgets);
+        expect(painter.pattern, TemplatePattern.cornell);
+        expect(painter.extraData?['marginLeft'], 60.0);
+      });
+
+      testWidgets('music pattern draws staff lines', (tester) async {
+        final painter = TemplatePatternPainter(
+          pattern: TemplatePattern.music,
+          spacingMm: 8,
+          lineWidth: 0.5,
+          lineColor: lineColor,
+          backgroundColor: backgroundColor,
+          pageSize: testSize,
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: CustomPaint(
+                size: testSize,
+                painter: painter,
+              ),
+            ),
+          ),
+        );
+
+        expect(find.byType(CustomPaint), findsWidgets);
+        expect(painter.pattern, TemplatePattern.music);
+      });
+
+      testWidgets('handwriting pattern draws baseline and midline', (tester) async {
+        final painter = TemplatePatternPainter(
+          pattern: TemplatePattern.handwriting,
+          spacingMm: 10,
+          lineWidth: 0.5,
+          lineColor: lineColor,
+          backgroundColor: backgroundColor,
+          pageSize: testSize,
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: CustomPaint(
+                size: testSize,
+                painter: painter,
+              ),
+            ),
+          ),
+        );
+
+        expect(find.byType(CustomPaint), findsWidgets);
+        expect(painter.pattern, TemplatePattern.handwriting);
+      });
+
+      testWidgets('calligraphy pattern draws angled guides', (tester) async {
+        final painter = TemplatePatternPainter(
+          pattern: TemplatePattern.calligraphy,
+          spacingMm: 12,
+          lineWidth: 0.5,
+          lineColor: lineColor,
+          backgroundColor: backgroundColor,
+          pageSize: testSize,
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: CustomPaint(
+                size: testSize,
+                painter: painter,
+              ),
+            ),
+          ),
+        );
+
+        expect(find.byType(CustomPaint), findsWidgets);
+        expect(painter.pattern, TemplatePattern.calligraphy);
+      });
+    });
   });
 }

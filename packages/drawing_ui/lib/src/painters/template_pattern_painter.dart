@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:drawing_core/drawing_core.dart';
 
@@ -127,27 +128,152 @@ class TemplatePatternPainter extends CustomPainter {
   }
 
   void _drawIsometric(Canvas canvas, Size size) {
-    // TODO: Step 2'de implement edilecek
+    final paint = _linePaint;
+    final spacing = _spacingPx;
+    
+    // 30° açılı çizgiler (tan(30°) ≈ 0.577)
+    final angle = 0.577;
+    
+    // Sol üstten sağ alta
+    for (double x = -size.height; x < size.width; x += spacing) {
+      canvas.drawLine(
+        Offset(x, 0),
+        Offset(x + size.height * angle, size.height),
+        paint,
+      );
+    }
+    
+    // Sağ üstten sol alta
+    for (double x = 0; x < size.width + size.height; x += spacing) {
+      canvas.drawLine(
+        Offset(x, 0),
+        Offset(x - size.height * angle, size.height),
+        paint,
+      );
+    }
+    
+    // Yatay çizgiler
+    for (double y = spacing; y < size.height; y += spacing) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
   }
 
   void _drawHexagonal(Canvas canvas, Size size) {
-    // TODO: Step 2'de implement edilecek
+    final paint = _linePaint;
+    final radius = _spacingPx / 2;
+    final hexHeight = radius * 1.732; // sqrt(3)
+    final hexWidth = radius * 2;
+    
+    for (double y = radius; y < size.height + radius; y += hexHeight * 0.75) {
+      final rowOffset = ((y ~/ (hexHeight * 0.75)) % 2 == 0) ? 0.0 : radius * 1.5;
+      for (double x = rowOffset; x < size.width + hexWidth; x += hexWidth * 1.5) {
+        _drawHexagon(canvas, Offset(x, y), radius, paint);
+      }
+    }
+  }
+
+  void _drawHexagon(Canvas canvas, Offset center, double radius, Paint paint) {
+    final path = Path();
+    for (int i = 0; i < 6; i++) {
+      final angle = (i * 60 - 30) * pi / 180;
+      final point = Offset(
+        center.dx + radius * cos(angle),
+        center.dy + radius * sin(angle),
+      );
+      if (i == 0) {
+        path.moveTo(point.dx, point.dy);
+      } else {
+        path.lineTo(point.dx, point.dy);
+      }
+    }
+    path.close();
+    canvas.drawPath(path, paint..style = PaintingStyle.stroke);
   }
 
   void _drawCornell(Canvas canvas, Size size) {
-    // TODO: Step 2'de implement edilecek
+    final paint = _linePaint;
+    final marginLeft = extraData?['marginLeft'] as double? ?? size.width * 0.3;
+    final marginBottom = extraData?['marginBottom'] as double? ?? size.height * 0.2;
+    
+    // Sol dikey çizgi (cue column)
+    canvas.drawLine(
+      Offset(marginLeft, 0),
+      Offset(marginLeft, size.height - marginBottom),
+      paint..strokeWidth = lineWidth * 2,
+    );
+    
+    // Alt yatay çizgi (summary)
+    canvas.drawLine(
+      Offset(0, size.height - marginBottom),
+      Offset(size.width, size.height - marginBottom),
+      paint..strokeWidth = lineWidth * 2,
+    );
+    
+    // Not alma alanında yatay çizgiler
+    paint.strokeWidth = lineWidth;
+    for (double y = _spacingPx * 2; y < size.height - marginBottom; y += _spacingPx) {
+      canvas.drawLine(Offset(marginLeft + 10, y), Offset(size.width, y), paint);
+    }
   }
 
   void _drawMusic(Canvas canvas, Size size) {
-    // TODO: Step 2'de implement edilecek
+    final paint = _linePaint;
+    final staffSpacing = _spacingPx * 0.8;
+    final staffGroupSpacing = _spacingPx * 4;
+    
+    double y = staffGroupSpacing;
+    while (y < size.height - staffGroupSpacing) {
+      // 5 çizgili staff
+      for (int i = 0; i < 5; i++) {
+        canvas.drawLine(
+          Offset(0, y + i * staffSpacing),
+          Offset(size.width, y + i * staffSpacing),
+          paint,
+        );
+      }
+      y += staffSpacing * 4 + staffGroupSpacing;
+    }
   }
 
   void _drawHandwriting(Canvas canvas, Size size) {
-    // TODO: Step 2'de implement edilecek
+    final paint = _linePaint;
+    final topMargin = _spacingPx * 2;
+    
+    for (double y = topMargin; y < size.height; y += _spacingPx) {
+      // Ana baseline
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+      
+      // Orta çizgi (dashed effect için daha açık renk)
+      final midY = y - _spacingPx * 0.4;
+      if (midY > topMargin) {
+        canvas.drawLine(
+          Offset(0, midY),
+          Offset(size.width, midY),
+          paint..color = lineColor.withValues(alpha: 0.4),
+        );
+        paint.color = lineColor; // Reset
+      }
+    }
   }
 
   void _drawCalligraphy(Canvas canvas, Size size) {
-    // TODO: Step 2'de implement edilecek
+    final paint = _linePaint;
+    final angle = 0.364; // tan(20°) - kaligrafi açısı
+    
+    // Yatay baseline'lar
+    for (double y = _spacingPx * 2; y < size.height; y += _spacingPx) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+    
+    // Açılı rehber çizgiler
+    paint.color = lineColor.withValues(alpha: 0.3);
+    for (double x = 0; x < size.width + size.height; x += _spacingPx * 2) {
+      canvas.drawLine(
+        Offset(x, 0),
+        Offset(x - size.height * angle, size.height),
+        paint,
+      );
+    }
   }
 
   @override
