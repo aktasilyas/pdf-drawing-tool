@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart' hide Page;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:drawing_core/drawing_core.dart' hide Template;
-import 'package:drawing_ui/drawing_ui.dart' show PDFImportService, PDFImportConfig, currentPdfFilePathProvider, totalPdfPagesProvider, visiblePdfPageProvider;
+import 'package:drawing_core/drawing_core.dart' as drawing_core;
+import 'package:drawing_ui/drawing_ui.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:example_app/features/documents/domain/entities/template.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'dart:ui' as ui;
 
@@ -56,24 +55,38 @@ PopupMenuItem<NewDocumentOption> _buildMenuItem(
 ) {
   return PopupMenuItem<NewDocumentOption>(
     value: option,
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-    height: 44,
+    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    height: 52,
     child: Builder(
       builder: (context) => Row(
         children: [
-          Icon(
-            icon,
-            size: 20,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          const SizedBox(width: 12),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 14,
-              color: Theme.of(context).colorScheme.onSurface,
-              fontWeight: FontWeight.w400,
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(10),
             ),
+            child: Icon(
+              icon,
+              size: 22,
+              color: Theme.of(context).colorScheme.onPrimaryContainer,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 15,
+                color: Theme.of(context).colorScheme.onSurface,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          Icon(
+            Icons.arrow_forward_ios_rounded,
+            size: 14,
+            color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
           ),
         ],
       ),
@@ -81,15 +94,12 @@ PopupMenuItem<NewDocumentOption> _buildMenuItem(
   );
 }
 
-void _handleNewDocumentOption(BuildContext context, NewDocumentOption option) {
+void _handleNewDocumentOption(BuildContext context, NewDocumentOption option) async {
   switch (option) {
     case NewDocumentOption.notebook:
-      // Şablon seçimi ile aç
-      showNewDocumentSheet(context, documentType: DocumentType.notebook);
-      break;
     case NewDocumentOption.whiteboard:
-      // Şablon seçimi ile aç (sadece kağıt rengi)
-      showNewDocumentSheet(context, documentType: DocumentType.whiteboard);
+      // Yeni TemplatePicker ile şablon seçimi
+      await _showTemplatePickerAndCreate(context, option);
       break;
     case NewDocumentOption.quickNote:
       // Direkt aç - varsayılan ayarlar
@@ -106,6 +116,120 @@ void _handleNewDocumentOption(BuildContext context, NewDocumentOption option) {
   }
 }
 
+Future<void> _showTemplatePickerAndCreate(
+  BuildContext context,
+  NewDocumentOption option,
+) async {
+  if (!context.mounted) return;
+  
+  final container = ProviderScope.containerOf(context);
+  
+  // Premium durumunu kontrol et (TODO: gerçek premium provider eklenecek)
+  final isPremiumUser = false; // TODO: ref.watch(premiumProvider)
+  
+  // TemplatePicker'ı göster
+  final result = await TemplatePicker.show(
+    context,
+    isLocked: (template) => template.isPremium && !isPremiumUser,
+    onPremiumTap: () {
+      // TODO: Premium dialog göster
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Bu şablon premium üyelere özeldir'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    },
+  );
+  
+  if (result == null || !context.mounted) return;
+  
+  // Yeni Template'den eski templateId'ye mapping
+  String mappedTemplateId = _mapNewTemplateToOldId(result.template);
+  
+  // Template'den paperColor çıkar
+  String paperColor = _mapTemplateToColor(result.template);
+  
+  // PaperSize'dan orientation çıkar
+  bool isPortrait = !result.paperSize.isLandscape;
+  
+  // Doküman oluştur
+  final controller = container.read(documentsControllerProvider.notifier);
+  final folderId = container.read(currentFolderIdProvider);
+  
+  final documentType = option == NewDocumentOption.notebook 
+      ? drawing_core.DocumentType.notebook 
+      : drawing_core.DocumentType.whiteboard;
+  
+  final title = documentType == drawing_core.DocumentType.notebook
+      ? 'Adsız Not Defteri'
+      : 'Adsız Beyaz Tahta';
+  
+  final documentId = await controller.createDocument(
+    title: title,
+    templateId: mappedTemplateId,
+    folderId: folderId,
+    paperColor: paperColor,
+    isPortrait: isPortrait,
+    documentType: documentType,
+  );
+  
+  if (documentId != null && context.mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$title oluşturuldu'),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+    
+    context.push('/editor/$documentId');
+  }
+}
+
+/// Yeni Template'i eski templateId'ye map et (geçici çözüm)
+String _mapNewTemplateToOldId(drawing_core.Template newTemplate) {
+  // Pattern bazlı mapping
+  switch (newTemplate.pattern) {
+    case drawing_core.TemplatePattern.blank:
+      return 'blank';
+    case drawing_core.TemplatePattern.thinLines:
+      return 'thin_lined';
+    case drawing_core.TemplatePattern.thickLines:
+      return 'thick_lined';
+    case drawing_core.TemplatePattern.smallDots:
+      return 'dotted';
+    case drawing_core.TemplatePattern.smallGrid:
+      return 'small_grid';
+    case drawing_core.TemplatePattern.largeGrid:
+      return 'large_grid';
+    case drawing_core.TemplatePattern.cornell:
+      return 'cornell';
+    default:
+      return 'blank'; // Fallback
+  }
+}
+
+/// Template'in defaultBackgroundColor'ını paperColor string'ine map et
+String _mapTemplateToColor(drawing_core.Template template) {
+  final colorValue = template.defaultBackgroundColor;
+  
+  // ARGB formatından renk tespiti
+  switch (colorValue) {
+    case 0xFFFFFFFF: // Beyaz
+      return 'Beyaz kağıt';
+    case 0xFFFFFDE7: // Sarı (Light Yellow 50)
+    case 0xFFFFF9C4: // Sarı (Light Yellow 100)
+      return 'Sarı kağıt';
+    case 0xFFF5F5F5: // Gri (Grey 100)
+    case 0xFFEEEEEE: // Gri (Grey 200)
+      return 'Gri kağıt';
+    default:
+      // Default olarak beyaz kullan (template'de farklı renk varsa)
+      return 'Beyaz kağıt';
+  }
+}
+
 void _createQuickNote(BuildContext context) async {
   // WidgetsBinding ile context'in hala geçerli olduğundan emin ol
   if (!context.mounted) return;
@@ -118,11 +242,11 @@ void _createQuickNote(BuildContext context) async {
   // Varsayılan ayarlarla hızlı not oluştur (sarı kağıt + ince çizgili)
   final documentId = await controller.createDocument(
     title: 'Hızlı Not - ${DateTime.now().toString().substring(0, 16)}',
-    templateId: 'thin_lined', // İnce çizgili şablon
+    templateId: 'thin_lined', // Eski template ID (ince çizgili)
     folderId: folderId,
     paperColor: 'Sarı kağıt',
     isPortrait: true,
-    documentType: DocumentType.quickNote,
+    documentType: drawing_core.DocumentType.quickNote,
   );
   
   // Doküman oluşturulduysa direkt editor'e git
@@ -207,7 +331,7 @@ void _importPdf(BuildContext context) async {
     final documentId = await controller.createDocumentWithPages(
       title: title,
       folderId: folderId,
-      documentType: DocumentType.pdf,
+      documentType: drawing_core.DocumentType.pdf,
       pages: pagesJson,
       pageCount: importResult.pages.length,
     );
@@ -310,18 +434,18 @@ void _importImage(BuildContext context) async {
     }
     
     // 4. Sayfa oluştur (Resimler için lazy loading YOK - direkt memory'de tut)
-    final page = Page(
+    final page = drawing_core.Page(
       id: 'page_${DateTime.now().millisecondsSinceEpoch}_0',
       index: 0,
-      size: PageSize(width: imageWidth, height: imageHeight),
-      background: PageBackground(
-        type: BackgroundType.pdf, // PDF renderer değil ama aynı display mekanizması
+      size: drawing_core.PageSize(width: imageWidth, height: imageHeight),
+      background: drawing_core.PageBackground(
+        type: drawing_core.BackgroundType.pdf, // PDF renderer değil ama aynı display mekanizması
         color: 0xFFFFFFFF,
         pdfData: file.bytes, // Resmi direkt cache'de tut (lazy loading YOK)
         pdfPageIndex: 1,
         // pdfFilePath: null, // CRITICAL: Lazy loading tetiklenmemeli!
       ),
-      layers: [Layer.empty('Layer 1')],
+      layers: [drawing_core.Layer.empty('Layer 1')],
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );
@@ -340,7 +464,7 @@ void _importImage(BuildContext context) async {
     final documentId = await controller.createDocumentWithPages(
       title: title,
       folderId: folderId,
-      documentType: DocumentType.image,
+      documentType: drawing_core.DocumentType.image,
       pages: [page.toJson()],
       pageCount: 1,
     );
@@ -373,732 +497,16 @@ void _importImage(BuildContext context) async {
 }
 
 /// Shows the new document bottom sheet
-void showNewDocumentSheet(BuildContext context, {DocumentType? documentType}) {
-  showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    useSafeArea: true,
-    backgroundColor: Colors.transparent,
-    builder: (context) => NewDocumentSheet(
-      initialDocumentType: documentType,
-    ),
+/// @deprecated Use TemplatePicker.show() instead
+@Deprecated('Use TemplatePicker.show() for new template selection')
+void showNewDocumentSheet(BuildContext context, {drawing_core.DocumentType? documentType}) {
+  // Redirect to new TemplatePicker
+  _showTemplatePickerAndCreate(
+    context,
+    documentType == drawing_core.DocumentType.whiteboard 
+        ? NewDocumentOption.whiteboard 
+        : NewDocumentOption.notebook,
   );
-}
-
-class NewDocumentSheet extends ConsumerStatefulWidget {
-  final DocumentType? initialDocumentType;
-  
-  const NewDocumentSheet({
-    super.key,
-    this.initialDocumentType,
-  });
-
-  @override
-  ConsumerState<NewDocumentSheet> createState() => _NewDocumentSheetState();
-}
-
-class _NewDocumentSheetState extends ConsumerState<NewDocumentSheet> {
-  final _titleController = TextEditingController(text: 'Adsız Not Defteri');
-  DocumentType _selectedDocumentType = DocumentType.notebook;
-  Template _selectedTemplate = Template.all.first;
-  String _paperColor = 'Sarı kağıt';
-  bool _isPortrait = true;
-  bool _isCreating = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _updateTitlePlaceholder();
-    
-    // initialDocumentType varsa onu kullan
-    if (widget.initialDocumentType != null) {
-      _selectedDocumentType = widget.initialDocumentType!;
-      _updateTitlePlaceholder();
-      
-      // Whiteboard seçilince blank template'e geç
-      if (_selectedDocumentType == DocumentType.whiteboard) {
-        _selectedTemplate = Template.all.firstWhere(
-          (t) => t.type == TemplateType.blank,
-          orElse: () => Template.all.first,
-        );
-      }
-    }
-  }
-
-  void _updateTitlePlaceholder() {
-    final placeholder = switch (_selectedDocumentType) {
-      DocumentType.notebook => 'Adsız Not Defteri',
-      DocumentType.whiteboard => 'Adsız Beyaz Tahta',
-      DocumentType.quickNote => 'Hızlı Not',
-      _ => 'Adsız Doküman',
-    };
-    _titleController.text = placeholder;
-  }
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    return DraggableScrollableSheet(
-      initialChildSize: 0.85,
-      minChildSize: 0.5,
-      maxChildSize: 0.95,
-      builder: (context, scrollController) {
-        return Container(
-          decoration: BoxDecoration(
-            color: isDark ? colorScheme.surfaceContainerHighest : colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-            border: isDark ? Border.all(
-              color: colorScheme.outline.withValues(alpha: 0.2),
-              width: 1,
-            ) : null,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.5 : 0.1),
-                blurRadius: 16,
-                offset: const Offset(0, -4),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              // Drag handle
-              Container(
-                margin: const EdgeInsets.only(top: 8),
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-
-              // Content
-              Expanded(
-                child: SingleChildScrollView(
-                  controller: scrollController,
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Header with title and settings
-                        _buildHeader(),
-
-                        const SizedBox(height: 24),
-
-                        // Template sections (dinamik - doküman tipine göre)
-                        if (_selectedDocumentType == DocumentType.whiteboard) ...[
-                          // Whiteboard: Sadece blank
-                          _buildTemplateSection(
-                            'Şablon',
-                            Template.all.where((t) => t.type == TemplateType.blank).toList(),
-                            showWhiteboardNote: true,
-                          ),
-                        ] else ...[
-                          // Notebook: Tüm şablonlar
-                          _buildTemplateSection(
-                            'Temel',
-                            Template.all.where((t) =>
-                                t.type == TemplateType.blank ||
-                                t.type == TemplateType.thinLined ||
-                                t.type == TemplateType.thickLined ||
-                                t.type == TemplateType.dotted ||
-                                t.type == TemplateType.smallGrid ||
-                                t.type == TemplateType.largeGrid).toList(),
-                          ),
-
-                          const SizedBox(height: 24),
-
-                          _buildTemplateSection(
-                            'Yazım Kağıtları',
-                            Template.all.where((t) => t.type == TemplateType.cornell).toList(),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
-              // Bottom action bar
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: isDark ? colorScheme.surfaceContainerHighest : colorScheme.surface,
-                  border: Border(
-                    top: BorderSide(
-                      color: colorScheme.outlineVariant.withValues(alpha: 0.5),
-                    ),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: _isCreating ? null : () => Navigator.pop(context),
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      ),
-                      child: const Text('İptal'),
-                    ),
-                    const SizedBox(width: 12),
-                    FilledButton(
-                      onPressed: _isCreating ? null : _createDocument,
-                      style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                      ),
-                      child: _isCreating
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
-                            )
-                          : const Text('Not Defteri Oluştur'),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildHeader() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Title input
-        Text(
-          'Başlık',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextField(
-          controller: _titleController,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: Theme.of(context).colorScheme.onSurface,
-          ),
-          decoration: InputDecoration(
-            hintText: 'Adsız Not Defteri',
-            filled: true,
-            fillColor: Theme.of(context).colorScheme.surfaceContainerHigh,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(
-                color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
-              ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(
-                color: Theme.of(context).colorScheme.primary,
-                width: 2,
-              ),
-            ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          ),
-        ),
-
-        const SizedBox(height: 16),
-
-        // Quick options row
-        Row(
-          children: [
-            // Paper color dropdown
-            Expanded(
-              child: _buildDropdownButton(
-                value: _paperColor,
-                items: ['Beyaz kağıt', 'Sarı kağıt', 'Gri kağıt'],
-                onChanged: (value) {
-                  setState(() {
-                    _paperColor = value!;
-                  });
-                },
-              ),
-            ),
-            const SizedBox(width: 12),
-            // Orientation toggle
-            Container(
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
-                ),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  _buildOrientationButton(Icons.phone_android, true),
-                  Container(
-                    width: 1,
-                    height: 24,
-                    color: Theme.of(context).dividerColor,
-                  ),
-                  _buildOrientationButton(Icons.stay_current_landscape, false),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildDropdownButton({
-    required String value,
-    required List<String> items,
-    required ValueChanged<String?> onChanged,
-  }) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: colorScheme.outline.withValues(alpha: 0.3),
-        ),
-        borderRadius: BorderRadius.circular(8),
-        color: isDark ? colorScheme.surfaceContainerHigh : colorScheme.surface,
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: value,
-          isExpanded: true,
-          icon: Icon(
-            Icons.keyboard_arrow_down,
-            size: 20,
-            color: colorScheme.onSurfaceVariant,
-          ),
-          dropdownColor: isDark ? colorScheme.surfaceContainerHighest : colorScheme.surface,
-          items: items.map((item) {
-            return DropdownMenuItem(
-              value: item,
-              child: Text(
-                item,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: colorScheme.onSurface,
-                ),
-              ),
-            );
-          }).toList(),
-          onChanged: onChanged,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOrientationButton(IconData icon, bool isPortraitBtn) {
-    final isSelected = _isPortrait == isPortraitBtn;
-    final colorScheme = Theme.of(context).colorScheme;
-    
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: () {
-          setState(() {
-            _isPortrait = isPortraitBtn;
-          });
-        },
-        borderRadius: BorderRadius.circular(7),
-        child: Container(
-          padding: const EdgeInsets.all(8),
-          child: Icon(
-            icon,
-            size: 20,
-            color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTemplateSection(String title, List<Template> templates, {bool showWhiteboardNote = false}) {
-    if (templates.isEmpty) return const SizedBox.shrink();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Icon(
-              Icons.expand_more,
-              size: 20,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-            ),
-          ],
-        ),
-        
-        // Whiteboard için açıklama
-        if (showWhiteboardNote)
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Text(
-              'Beyaz tahta sonsuz bir canvas\'tır. Çizgi deseni olmaz.',
-              style: TextStyle(
-                fontSize: 12,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                fontStyle: FontStyle.italic,
-              ),
-            ),
-          ),
-        
-        const SizedBox(height: 12),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            final width = constraints.maxWidth;
-            final cardWidth = (width - 48) / 5; // 5 cards per row with spacing
-            final cardHeight = cardWidth * 1.3;
-
-            return Wrap(
-              spacing: 12,
-              runSpacing: 16,
-              children: templates.map((template) {
-                return SizedBox(
-                  width: cardWidth,
-                  child: _TemplateCard(
-                    template: template,
-                    isSelected: template.id == _selectedTemplate.id,
-                    paperColor: _paperColor,
-                    isPortrait: _isPortrait,
-                    onTap: () {
-                      setState(() {
-                        _selectedTemplate = template;
-                      });
-                    },
-                    height: cardHeight,
-                  ),
-                );
-              }).toList(),
-            );
-          },
-        ),
-      ],
-    );
-  }
-
-  Future<void> _createDocument() async {
-    setState(() {
-      _isCreating = true;
-    });
-
-    try {
-      final title = _titleController.text.trim().isEmpty
-          ? 'Adsız Not Defteri'
-          : _titleController.text.trim();
-
-      final folderId = ref.read(currentFolderIdProvider);
-
-      // Log selections for debugging
-      debugPrint('📝 Creating document:');
-      debugPrint('  Title: $title');
-      debugPrint('  Template: ${_selectedTemplate.name}');
-      debugPrint('  Paper Color: $_paperColor');
-      debugPrint('  Orientation: ${_isPortrait ? "Portrait" : "Landscape"}');
-
-      // #region agent log
-      debugPrint('🔍 [DEBUG] _createDocument - selectedDocumentType: $_selectedDocumentType');
-      debugPrint('🔍 [DEBUG] _createDocument - templateId: ${_selectedTemplate.id}');
-      // #endregion
-
-      await ref.read(documentsControllerProvider.notifier).createDocument(
-            title: title,
-            templateId: _selectedTemplate.id,
-            folderId: folderId,
-            paperColor: _paperColor,
-            isPortrait: _isPortrait,
-            documentType: _selectedDocumentType,
-          );
-
-      if (mounted) {
-        Navigator.pop(context);
-        
-        final orientation = _isPortrait ? 'Dikey' : 'Yatay';
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('$title oluşturuldu ($_paperColor, $orientation)'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Hata: $e'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isCreating = false;
-        });
-      }
-    }
-  }
-}
-
-/// Template card with visual preview
-class _TemplateCard extends StatelessWidget {
-  final Template template;
-  final bool isSelected;
-  final VoidCallback onTap;
-  final double height;
-  final String paperColor;
-  final bool isPortrait;
-
-  const _TemplateCard({
-    required this.template,
-    required this.isSelected,
-    required this.onTap,
-    required this.height,
-    required this.paperColor,
-    required this.isPortrait,
-  });
-
-  Color get _getPaperColor {
-    switch (paperColor) {
-      case 'Beyaz kağıt':
-        return const Color(0xFFFFFFFF);
-      case 'Sarı kağıt':
-        return const Color(0xFFFFFDE7);
-      case 'Gri kağıt':
-        return const Color(0xFFF5F5F5);
-      default:
-        return const Color(0xFFFFFDE7);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Template preview
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            height: height * 0.75,
-            decoration: BoxDecoration(
-              color: _getPaperColor,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(
-                color: isSelected 
-                  ? Theme.of(context).colorScheme.primary 
-                  : Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
-                width: isSelected ? 3 : 1,
-              ),
-              boxShadow: isSelected
-                  ? [
-                      BoxShadow(
-                        color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
-                      ),
-                    ]
-                  : null,
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(7),
-              child: CustomPaint(
-                painter: _TemplatePreviewPainter(template.type),
-                size: Size.infinite,
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 6),
-
-          // Template name
-          Text(
-            template.name,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-              color: isSelected 
-                ? Theme.of(context).colorScheme.primary 
-                : Theme.of(context).colorScheme.onSurface,
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-
-          // Premium badge if needed
-          if (template.isPremium)
-            Padding(
-              padding: const EdgeInsets.only(top: 2),
-              child: Icon(
-                Icons.workspace_premium,
-                size: 12,
-                color: Colors.amber.shade700,
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Custom painter for template previews
-class _TemplatePreviewPainter extends CustomPainter {
-  final TemplateType type;
-
-  _TemplatePreviewPainter(this.type);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.grey.shade300
-      ..strokeWidth = 1;
-
-    switch (type) {
-      case TemplateType.blank:
-        // Just white background, no lines
-        break;
-
-      case TemplateType.thinLined:
-        // Thin horizontal lines
-        final spacing = size.height / 15;
-        paint.color = Colors.grey.shade300;
-        for (var y = spacing; y < size.height; y += spacing) {
-          canvas.drawLine(
-            Offset(4, y),
-            Offset(size.width - 4, y),
-            paint..strokeWidth = 0.5,
-          );
-        }
-        break;
-
-      case TemplateType.thickLined:
-        // Thick horizontal lines
-        final spacing = size.height / 10;
-        paint.color = Colors.grey.shade300;
-        for (var y = spacing; y < size.height; y += spacing) {
-          canvas.drawLine(
-            Offset(4, y),
-            Offset(size.width - 4, y),
-            paint..strokeWidth = 1.2,
-          );
-        }
-        break;
-
-      case TemplateType.smallGrid:
-        // Small grid
-        final spacing = size.width / 12;
-        paint.color = Colors.grey.shade300;
-        paint.strokeWidth = 0.4;
-        // Vertical lines
-        for (var x = spacing; x < size.width; x += spacing) {
-          canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-        }
-        // Horizontal lines
-        for (var y = spacing; y < size.height; y += spacing) {
-          canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-        }
-        break;
-
-      case TemplateType.largeGrid:
-        // Large grid
-        final spacing = size.width / 6;
-        paint.color = Colors.grey.shade300;
-        paint.strokeWidth = 0.8;
-        // Vertical lines
-        for (var x = spacing; x < size.width; x += spacing) {
-          canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-        }
-        // Horizontal lines
-        for (var y = spacing; y < size.height; y += spacing) {
-          canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-        }
-        break;
-
-      case TemplateType.dotted:
-        // Dots
-        final spacing = size.width / 10;
-        paint.color = Colors.grey.shade400;
-        paint.style = PaintingStyle.fill;
-        for (var x = spacing; x < size.width; x += spacing) {
-          for (var y = spacing; y < size.height; y += spacing) {
-            canvas.drawCircle(Offset(x, y), 1.2, paint);
-          }
-        }
-        break;
-
-      case TemplateType.cornell:
-        // Cornell note template
-        paint.strokeWidth = 1;
-        paint.color = Colors.red.shade300;
-
-        // Left margin line (for cue column)
-        final leftMargin = size.width * 0.28;
-        canvas.drawLine(
-          Offset(leftMargin, 4),
-          Offset(leftMargin, size.height * 0.75),
-          paint,
-        );
-
-        // Bottom section line (for summary)
-        final bottomLine = size.height * 0.75;
-        canvas.drawLine(
-          Offset(4, bottomLine),
-          Offset(size.width - 4, bottomLine),
-          paint,
-        );
-
-        // Horizontal lines in main area
-        paint.color = Colors.grey.shade300;
-        paint.strokeWidth = 0.5;
-        final lineSpacing = size.height / 12;
-        for (var y = lineSpacing; y < bottomLine; y += lineSpacing) {
-          canvas.drawLine(
-            Offset(leftMargin + 4, y),
-            Offset(size.width - 4, y),
-            paint,
-          );
-        }
-        break;
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 // Keep old class for backward compatibility but redirect
@@ -1113,10 +521,10 @@ class _NewDocumentDialogState extends ConsumerState<NewDocumentDialog> {
   @override
   void initState() {
     super.initState();
-    // Close this dialog and open the sheet instead
+    // Close this dialog and open the new TemplatePicker
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Navigator.pop(context);
-      showNewDocumentSheet(context);
+      TemplatePicker.show(context);
     });
   }
 

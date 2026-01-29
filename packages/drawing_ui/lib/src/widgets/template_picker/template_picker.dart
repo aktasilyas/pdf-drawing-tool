@@ -66,8 +66,8 @@ class TemplatePicker extends StatefulWidget {
           borderRadius: BorderRadius.circular(20),
         ),
         child: SizedBox(
-          width: 700,
-          height: 600,
+          width: 900, // 700 → 900 (daha geniş)
+          height: 700, // 600 → 700 (daha yüksek)
           child: TemplatePicker(
             initialTemplate: initialTemplate,
             initialPaperSize: initialPaperSize,
@@ -230,9 +230,25 @@ class _TemplatePickerState extends State<TemplatePicker> {
                   ),
                 ),
                 const SizedBox(width: 12),
-                FilledButton(
+                FilledButton.icon(
                   onPressed: _handleConfirm,
-                  child: const Text('Oluştur'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  icon: const Icon(Icons.add_rounded, size: 20),
+                  label: const Text(
+                    'Oluştur',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
               ],
             ),

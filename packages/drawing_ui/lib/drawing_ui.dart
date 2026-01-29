@@ -39,6 +39,9 @@ export 'src/models/models.dart';
 // Widgets (Multi-page & PDF)
 export 'src/widgets/widgets.dart';
 
+// Template Picker
+export 'src/widgets/template_picker/template_picker_widgets.dart';
+
 // Toolbar (Two-row layout)
 export 'src/toolbar/top_navigation_bar.dart';
 export 'src/toolbar/tool_bar.dart';
