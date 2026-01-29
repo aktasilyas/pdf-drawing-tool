@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/painters/template_pattern_painter.dart';
 
 /// Sayfa içi arka plan pattern çizici (LIMITED mod için).
 /// Transform zaten zoom/pan uyguladığı için bu painter
@@ -36,6 +37,21 @@ class PageBackgroundPatternPainter extends CustomPainter {
 
       case BackgroundType.pdf:
         // PDF background now handled by Image.memory widget
+        break;
+
+      case BackgroundType.template:
+        // Use TemplatePatternPainter for accurate template rendering
+        if (background.templatePattern != null) {
+          final templatePainter = TemplatePatternPainter(
+            pattern: background.templatePattern!,
+            spacingMm: background.templateSpacingMm ?? 8.0,
+            lineWidth: background.templateLineWidth ?? 0.5,
+            lineColor: Color(lineColor),
+            backgroundColor: Colors.transparent, // Already painted by canvas
+            pageSize: size,
+          );
+          templatePainter.paint(canvas, size);
+        }
         break;
     }
   }

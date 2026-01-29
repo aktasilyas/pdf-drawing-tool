@@ -1,6 +1,7 @@
 import 'dart:ui' show PointMode;
 import 'package:flutter/material.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/painters/template_pattern_painter.dart';
 
 // =============================================================================
 // INFINITE BACKGROUND PAINTER
@@ -52,6 +53,35 @@ class InfiniteBackgroundPainter extends CustomPainter {
 
       case BackgroundType.pdf:
         // PDF background handled separately
+        break;
+
+      case BackgroundType.template:
+        // Use TemplatePatternPainter for accurate template rendering
+        // Note: For infinite mode, we render a large tile and it repeats with pan/zoom
+        if (background.templatePattern != null) {
+          // Calculate effective spacing with zoom
+          final spacingMm = background.templateSpacingMm ?? 8.0;
+          final effectiveSpacingMm = spacingMm * zoom;
+          
+          // Only render if zoomed enough to see patterns
+          if (effectiveSpacingMm > 1.0) {
+            final templatePainter = TemplatePatternPainter(
+              pattern: background.templatePattern!,
+              spacingMm: spacingMm,
+              lineWidth: (background.templateLineWidth ?? 0.5) * zoom,
+              lineColor: Color(lineColor),
+              backgroundColor: Colors.transparent,
+              pageSize: size,
+            );
+            
+            // Apply zoom transformation
+            canvas.save();
+            canvas.scale(zoom);
+            canvas.translate(offset.dx / zoom, offset.dy / zoom);
+            templatePainter.paint(canvas, Size(size.width / zoom, size.height / zoom));
+            canvas.restore();
+          }
+        }
         break;
     }
   }

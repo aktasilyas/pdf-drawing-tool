@@ -15,6 +15,7 @@ import 'package:example_app/features/auth/presentation/screens/splash_screen.dar
 import 'package:example_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:example_app/features/auth/presentation/screens/register_screen.dart';
 import 'package:example_app/features/documents/presentation/screens/documents_screen.dart';
+import 'package:example_app/features/documents/presentation/screens/template_selection_screen.dart';
 import 'package:example_app/features/editor/presentation/screens/editor_screen.dart';
 import 'package:example_app/features/settings/settings.dart';
 
@@ -92,6 +93,11 @@ final appRouter = GoRouter(
         // Create new document - pass empty/new document id
         return const EditorScreen(documentId: 'new');
       },
+    ),
+    GoRoute(
+      path: RouteNames.templateSelection,
+      name: 'templateSelection',
+      builder: (context, state) => const TemplateSelectionScreen(),
     ),
 
     // Settings routes

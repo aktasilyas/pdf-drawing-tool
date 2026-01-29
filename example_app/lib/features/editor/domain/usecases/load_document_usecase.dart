@@ -85,68 +85,27 @@ class LoadDocumentUseCase {
     // Convert paper color string to hex
     final bgColor = _getPaperColor(paperColor);
     
-    switch (templateId) {
-      case 'blank':
-        return PageBackground(
-          type: BackgroundType.blank,
-          color: bgColor,
-        );
-        
-      case 'thin_lined':
-        return PageBackground(
-          type: BackgroundType.lined,
-          color: bgColor,
-          lineSpacing: 20,
-          lineColor: 0xFFE8E8E8,
-        );
-        
-      case 'thick_lined':
-        return PageBackground(
-          type: BackgroundType.lined,
-          color: bgColor,
-          lineSpacing: 32,
-          lineColor: 0xFFD0D0D0,
-        );
-        
-      case 'small_grid':
-        return PageBackground(
-          type: BackgroundType.grid,
-          color: bgColor,
-          gridSpacing: 16,
-          lineColor: 0xFFE8E8E8,
-        );
-        
-      case 'large_grid':
-        return PageBackground(
-          type: BackgroundType.grid,
-          color: bgColor,
-          gridSpacing: 32,
-          lineColor: 0xFFD0D0D0,
-        );
-        
-      case 'dotted':
-        return PageBackground(
-          type: BackgroundType.dotted,
-          color: bgColor,
-          gridSpacing: 20,
-          lineColor: 0xFFCCCCCC,
-        );
-        
-      case 'cornell':
-        // Cornell uses lined with special layout (handled by UI)
-        return PageBackground(
-          type: BackgroundType.lined,
-          color: bgColor,
-          lineSpacing: 24,
-          lineColor: 0xFFE0E0E0,
-        );
-        
-      default:
-        return PageBackground(
-          type: BackgroundType.blank,
-          color: bgColor,
-        );
+    // Try to get template from registry
+    final template = TemplateRegistry.getById(templateId);
+    
+    if (template == null) {
+      debugPrint('⚠️ [LOAD] Template not found: $templateId, using blank');
+      return PageBackground(
+        type: BackgroundType.blank,
+        color: bgColor,
+      );
     }
+    
+    // Use template-based background for ALL patterns
+    // This ensures all 16 patterns render correctly
+    return PageBackground(
+      type: BackgroundType.template,
+      color: bgColor,
+      lineColor: template.defaultLineColor,
+      templatePattern: template.pattern,
+      templateSpacingMm: template.spacingMm,
+      templateLineWidth: template.lineWidth,
+    );
   }
   
   /// Convert paper color string to hex color
@@ -154,12 +113,20 @@ class LoadDocumentUseCase {
     switch (paperColor) {
       case 'Beyaz kağıt':
         return 0xFFFFFFFF; // Pure white
-      case 'Sarı kağıt':
-        return 0xFFFFFDE7; // Cream/yellow tint
+      case 'Siyah kağıt':
+        return 0xFF1A1A1A; // Black (dark mode)
+      case 'Krem kağıt':
+        return 0xFFFFF8E7; // Cream
       case 'Gri kağıt':
         return 0xFFF5F5F5; // Light gray
+      case 'Yeşil kağıt':
+        return 0xFFE8F5E9; // Light green
+      case 'Mavi kağıt':
+        return 0xFFE3F2FD; // Light blue
+      case 'Sarı kağıt':
+        return 0xFFFFFDE7; // Cream/yellow tint (legacy)
       default:
-        return 0xFFFFFDE7; // Default to cream
+        return 0xFFFFFFFF; // Default to white
     }
   }
 }

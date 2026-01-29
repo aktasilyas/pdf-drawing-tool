@@ -3,8 +3,8 @@ import 'package:drawing_core/drawing_core.dart';
 
 void main() {
   group('TemplateCategory', () {
-    test('should have 6 categories', () {
-      expect(TemplateCategory.values.length, 6);
+    test('should have 4 categories', () {
+      expect(TemplateCategory.values.length, 4);
     });
     
     test('basic should be free', () {
@@ -15,8 +15,6 @@ void main() {
     test('non-basic categories should be premium', () {
       expect(TemplateCategory.productivity.isPremium, true);
       expect(TemplateCategory.creative.isPremium, true);
-      expect(TemplateCategory.education.isPremium, true);
-      expect(TemplateCategory.planning.isPremium, true);
       expect(TemplateCategory.special.isPremium, true);
     });
     

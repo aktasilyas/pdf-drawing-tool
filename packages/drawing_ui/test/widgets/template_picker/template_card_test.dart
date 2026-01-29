@@ -195,7 +195,7 @@ void main() {
         id: 'long-name',
         name: 'Çok Uzun Bir Şablon Adı Burada Yazıyor',
         nameEn: 'Very Long Template Name Here',
-        category: TemplateCategory.education,
+        category: TemplateCategory.productivity,
         pattern: TemplatePattern.cornell,
       );
 

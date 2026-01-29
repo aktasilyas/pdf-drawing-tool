@@ -18,6 +18,7 @@ abstract class RouteNames {
   // Editor
   static const String editor = '/editor/:documentId';
   static const String newDocument = '/new-document';
+  static const String templateSelection = '/template-selection';
 
   // Settings
   static const String settings = '/settings';

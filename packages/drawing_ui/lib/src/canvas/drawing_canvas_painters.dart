@@ -1,7 +1,7 @@
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/painters/template_pattern_painter.dart';
 
 // =============================================================================
 // DYNAMIC BACKGROUND PAINTER
@@ -52,6 +52,21 @@ class DynamicBackgroundPainter extends CustomPainter {
         // Draw PDF image if available
         if (pdfImage != null) {
           _drawPdfImage(canvas, size, pdfImage!);
+        }
+        break;
+
+      case BackgroundType.template:
+        // Use TemplatePatternPainter for accurate template rendering
+        if (background.templatePattern != null) {
+          final templatePainter = TemplatePatternPainter(
+            pattern: background.templatePattern!,
+            spacingMm: background.templateSpacingMm ?? 8.0,
+            lineWidth: background.templateLineWidth ?? 0.5,
+            lineColor: Color(lineColor),
+            backgroundColor: Colors.transparent, // Already painted above
+            pageSize: size,
+          );
+          templatePainter.paint(canvas, size);
         }
         break;
     }

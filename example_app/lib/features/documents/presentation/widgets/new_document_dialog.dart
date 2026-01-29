@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:drawing_core/drawing_core.dart' as drawing_core;
 import 'package:drawing_ui/drawing_ui.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:example_app/core/routing/route_names.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'dart:ui' as ui;
 
@@ -98,160 +99,44 @@ void _handleNewDocumentOption(BuildContext context, NewDocumentOption option) as
   switch (option) {
     case NewDocumentOption.notebook:
     case NewDocumentOption.whiteboard:
-      // Yeni TemplatePicker ile şablon seçimi
-      await _showTemplatePickerAndCreate(context, option);
+      // Template Selection Screen'e yönlendir
+      context.push(RouteNames.templateSelection);
       break;
     case NewDocumentOption.quickNote:
-      // Direkt aç - varsayılan ayarlar
+      // Hızlı not oluştur
       _createQuickNote(context);
       break;
     case NewDocumentOption.importPdf:
-      // PDF dosya seçici
+      // PDF içe aktar
       _importPdf(context);
       break;
     case NewDocumentOption.importImage:
-      // Resim dosya seçici
+      // Resim içe aktar
       _importImage(context);
       break;
   }
 }
 
-Future<void> _showTemplatePickerAndCreate(
-  BuildContext context,
-  NewDocumentOption option,
-) async {
-  if (!context.mounted) return;
-  
-  final container = ProviderScope.containerOf(context);
-  
-  // Premium durumunu kontrol et (TODO: gerçek premium provider eklenecek)
-  final isPremiumUser = false; // TODO: ref.watch(premiumProvider)
-  
-  // TemplatePicker'ı göster
-  final result = await TemplatePicker.show(
-    context,
-    isLocked: (template) => template.isPremium && !isPremiumUser,
-    onPremiumTap: () {
-      // TODO: Premium dialog göster
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Bu şablon premium üyelere özeldir'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    },
-  );
-  
-  if (result == null || !context.mounted) return;
-  
-  // Yeni Template'den eski templateId'ye mapping
-  String mappedTemplateId = _mapNewTemplateToOldId(result.template);
-  
-  // Template'den paperColor çıkar
-  String paperColor = _mapTemplateToColor(result.template);
-  
-  // PaperSize'dan orientation çıkar
-  bool isPortrait = !result.paperSize.isLandscape;
-  
-  // Doküman oluştur
-  final controller = container.read(documentsControllerProvider.notifier);
-  final folderId = container.read(currentFolderIdProvider);
-  
-  final documentType = option == NewDocumentOption.notebook 
-      ? drawing_core.DocumentType.notebook 
-      : drawing_core.DocumentType.whiteboard;
-  
-  final title = documentType == drawing_core.DocumentType.notebook
-      ? 'Adsız Not Defteri'
-      : 'Adsız Beyaz Tahta';
-  
-  final documentId = await controller.createDocument(
-    title: title,
-    templateId: mappedTemplateId,
-    folderId: folderId,
-    paperColor: paperColor,
-    isPortrait: isPortrait,
-    documentType: documentType,
-  );
-  
-  if (documentId != null && context.mounted) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$title oluşturuldu'),
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
-      ),
-    );
-    
-    context.push('/editor/$documentId');
-  }
-}
-
-/// Yeni Template'i eski templateId'ye map et (geçici çözüm)
-String _mapNewTemplateToOldId(drawing_core.Template newTemplate) {
-  // Pattern bazlı mapping
-  switch (newTemplate.pattern) {
-    case drawing_core.TemplatePattern.blank:
-      return 'blank';
-    case drawing_core.TemplatePattern.thinLines:
-      return 'thin_lined';
-    case drawing_core.TemplatePattern.thickLines:
-      return 'thick_lined';
-    case drawing_core.TemplatePattern.smallDots:
-      return 'dotted';
-    case drawing_core.TemplatePattern.smallGrid:
-      return 'small_grid';
-    case drawing_core.TemplatePattern.largeGrid:
-      return 'large_grid';
-    case drawing_core.TemplatePattern.cornell:
-      return 'cornell';
-    default:
-      return 'blank'; // Fallback
-  }
-}
-
-/// Template'in defaultBackgroundColor'ını paperColor string'ine map et
-String _mapTemplateToColor(drawing_core.Template template) {
-  final colorValue = template.defaultBackgroundColor;
-  
-  // ARGB formatından renk tespiti
-  switch (colorValue) {
-    case 0xFFFFFFFF: // Beyaz
-      return 'Beyaz kağıt';
-    case 0xFFFFFDE7: // Sarı (Light Yellow 50)
-    case 0xFFFFF9C4: // Sarı (Light Yellow 100)
-      return 'Sarı kağıt';
-    case 0xFFF5F5F5: // Gri (Grey 100)
-    case 0xFFEEEEEE: // Gri (Grey 200)
-      return 'Gri kağıt';
-    default:
-      // Default olarak beyaz kullan (template'de farklı renk varsa)
-      return 'Beyaz kağıt';
-  }
-}
-
 void _createQuickNote(BuildContext context) async {
-  // WidgetsBinding ile context'in hala geçerli olduğundan emin ol
   if (!context.mounted) return;
   
-  // ProviderScope'tan ref al
   final container = ProviderScope.containerOf(context);
   final controller = container.read(documentsControllerProvider.notifier);
   final folderId = container.read(currentFolderIdProvider);
   
-  // Varsayılan ayarlarla hızlı not oluştur (sarı kağıt + ince çizgili)
+  // Varsayılan ayarlarla hızlı not oluştur (beyaz kağıt + çizgili)
   final documentId = await controller.createDocument(
     title: 'Hızlı Not - ${DateTime.now().toString().substring(0, 16)}',
-    templateId: 'thin_lined', // Eski template ID (ince çizgili)
+    templateId: 'lined',
     folderId: folderId,
-    paperColor: 'Sarı kağıt',
+    paperColor: 'Beyaz kağıt',
     isPortrait: true,
     documentType: drawing_core.DocumentType.quickNote,
   );
   
   // Doküman oluşturulduysa direkt editor'e git
   if (documentId != null && context.mounted) {
-    context.push('/editor/$documentId');
+    context.push(RouteNames.editorPath(documentId));
   }
 }
 
@@ -274,7 +159,7 @@ void _importPdf(BuildContext context) async {
     return;
   }
 
-  // 2. Kısa loading (sadece PDF parse için - sayfaları DEĞİL)
+  // 2. Loading göster
   if (!context.mounted) return;
   showDialog(
     context: context,
@@ -299,7 +184,7 @@ void _importPdf(BuildContext context) async {
   );
 
   try {
-    // 3. PDF Import Service kullan (lazy loading mode)
+    // 3. PDF Import Service kullan
     final importService = PDFImportService();
     final importResult = await importService.importFromBytes(
       bytes: file.bytes!,
@@ -336,7 +221,7 @@ void _importPdf(BuildContext context) async {
       pageCount: importResult.pages.length,
     );
 
-    // 5. Editor'e HEMEN git (PREFETCH YOK!)
+    // 5. Editor'e git
     if (documentId != null && context.mounted) {
       // State güncelle
       if (importResult.pages.isNotEmpty) {
@@ -347,8 +232,6 @@ void _importPdf(BuildContext context) async {
           container.read(totalPdfPagesProvider.notifier).state = 
               importResult.pages.length;
           container.read(visiblePdfPageProvider.notifier).state = 0;
-          
-          // ❌ PREFETCH KODLARI SİLİNDİ - Editor kendi halledecek
         }
       }
 
@@ -360,10 +243,9 @@ void _importPdf(BuildContext context) async {
         ),
       );
 
-      context.push('/editor/$documentId');
+      context.push(RouteNames.editorPath(documentId));
     }
   } catch (e) {
-    // Hata durumunda dialog kapat
     if (context.mounted) {
       Navigator.of(context, rootNavigator: true).pop();
       ScaffoldMessenger.of(context).showSnackBar(
@@ -418,12 +300,10 @@ void _importImage(BuildContext context) async {
     final imageWidth = image.width.toDouble();
     final imageHeight = image.height.toDouble();
     
-    debugPrint('🖼️ Image size: ${imageWidth}x$imageHeight');
-    
-    // Boyut kontrolü (max 4096x4096)
+    // Boyut kontrolü
     if (imageWidth > 4096 || imageHeight > 4096) {
       if (context.mounted) {
-        Navigator.pop(context); // Loading kapat
+        Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Resim çok büyük! Maksimum boyut: 4096x4096'),
@@ -433,17 +313,16 @@ void _importImage(BuildContext context) async {
       return;
     }
     
-    // 4. Sayfa oluştur (Resimler için lazy loading YOK - direkt memory'de tut)
+    // 4. Sayfa oluştur
     final page = drawing_core.Page(
       id: 'page_${DateTime.now().millisecondsSinceEpoch}_0',
       index: 0,
       size: drawing_core.PageSize(width: imageWidth, height: imageHeight),
       background: drawing_core.PageBackground(
-        type: drawing_core.BackgroundType.pdf, // PDF renderer değil ama aynı display mekanizması
+        type: drawing_core.BackgroundType.pdf,
         color: 0xFFFFFFFF,
-        pdfData: file.bytes, // Resmi direkt cache'de tut (lazy loading YOK)
+        pdfData: file.bytes,
         pdfPageIndex: 1,
-        // pdfFilePath: null, // CRITICAL: Lazy loading tetiklenmemeli!
       ),
       layers: [drawing_core.Layer.empty('Layer 1')],
       createdAt: DateTime.now(),
@@ -455,7 +334,6 @@ void _importImage(BuildContext context) async {
     final controller = container.read(documentsControllerProvider.notifier);
     final folderId = container.read(currentFolderIdProvider);
     
-    // Dosya adından başlık oluştur (uzantıyı kaldır)
     final title = file.name.replaceAll(
       RegExp(r'\.(png|jpg|jpeg|gif|webp|bmp)$', caseSensitive: false),
       '',
@@ -482,54 +360,15 @@ void _importImage(BuildContext context) async {
         ),
       );
       
-      context.push('/editor/$documentId');
+      context.push(RouteNames.editorPath(documentId));
     }
     
   } catch (e) {
-    debugPrint('❌ Image import error: $e');
     if (context.mounted) {
-      Navigator.pop(context); // Loading kapat
+      Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Hata: ${e.toString()}')),
       );
     }
-  }
-}
-
-/// Shows the new document bottom sheet
-/// @deprecated Use TemplatePicker.show() instead
-@Deprecated('Use TemplatePicker.show() for new template selection')
-void showNewDocumentSheet(BuildContext context, {drawing_core.DocumentType? documentType}) {
-  // Redirect to new TemplatePicker
-  _showTemplatePickerAndCreate(
-    context,
-    documentType == drawing_core.DocumentType.whiteboard 
-        ? NewDocumentOption.whiteboard 
-        : NewDocumentOption.notebook,
-  );
-}
-
-// Keep old class for backward compatibility but redirect
-class NewDocumentDialog extends ConsumerStatefulWidget {
-  const NewDocumentDialog({super.key});
-
-  @override
-  ConsumerState<NewDocumentDialog> createState() => _NewDocumentDialogState();
-}
-
-class _NewDocumentDialogState extends ConsumerState<NewDocumentDialog> {
-  @override
-  void initState() {
-    super.initState();
-    // Close this dialog and open the new TemplatePicker
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Navigator.pop(context);
-      TemplatePicker.show(context);
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return const SizedBox.shrink();
   }
 }

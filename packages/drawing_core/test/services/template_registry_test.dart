@@ -3,32 +3,31 @@ import 'package:drawing_core/drawing_core.dart';
 
 void main() {
   group('TemplateRegistry', () {
-    test('has 44 templates total', () {
-      expect(TemplateRegistry.all.length, 44);
+    test('has correct template count', () {
+      // 6 basic + 4 productivity + 3 creative + 3 special = 16
+      expect(TemplateRegistry.all.length, 16);
     });
 
-    test('has 12 basic templates', () {
-      expect(TemplateRegistry.basicTemplates.length, 12);
+    test('has 6 basic templates', () {
+      expect(TemplateRegistry.basicTemplates.length, 6);
     });
 
-    test('has 8 productivity templates', () {
-      expect(TemplateRegistry.productivityTemplates.length, 8);
+    test('has 4 productivity templates', () {
+      expect(TemplateRegistry.productivityTemplates.length, 4);
     });
 
-    test('has 6 creative templates', () {
-      expect(TemplateRegistry.creativeTemplates.length, 6);
+    test('has 3 creative templates', () {
+      expect(TemplateRegistry.creativeTemplates.length, 3);
     });
 
-    test('has 6 education templates', () {
-      expect(TemplateRegistry.educationTemplates.length, 6);
+    test('has 3 special templates', () {
+      expect(TemplateRegistry.specialTemplates.length, 3);
     });
 
-    test('has 6 planning templates', () {
-      expect(TemplateRegistry.planningTemplates.length, 6);
-    });
-
-    test('has 6 special templates', () {
-      expect(TemplateRegistry.specialTemplates.length, 6);
+    test('blank getter works', () {
+      final template = TemplateRegistry.blank;
+      expect(template.id, 'blank');
+      expect(template.name, 'Boş');
     });
 
     test('all basic templates are free', () {
@@ -52,20 +51,6 @@ void main() {
       );
     });
 
-    test('all education templates are premium', () {
-      expect(
-        TemplateRegistry.educationTemplates.every((t) => t.isPremium),
-        true,
-      );
-    });
-
-    test('all planning templates are premium', () {
-      expect(
-        TemplateRegistry.planningTemplates.every((t) => t.isPremium),
-        true,
-      );
-    });
-
     test('all special templates are premium', () {
       expect(
         TemplateRegistry.specialTemplates.every((t) => t.isPremium),
@@ -81,10 +66,10 @@ void main() {
 
     group('getById', () {
       test('returns template when exists', () {
-        final template = TemplateRegistry.getById('blank_white');
+        final template = TemplateRegistry.getById('blank');
         expect(template, isNotNull);
-        expect(template!.id, 'blank_white');
-        expect(template.name, 'Boş (Beyaz)');
+        expect(template!.id, 'blank');
+        expect(template.name, 'Boş');
       });
 
       test('returns null when not exists', () {
@@ -92,23 +77,14 @@ void main() {
         expect(template, isNull);
       });
 
-      test('finds all expected IDs', () {
+      test('finds all basic IDs', () {
         final expectedIds = [
-          'blank_white', 'blank_cream', 'blank_gray',
-          'thin_lined', 'medium_lined', 'thick_lined',
-          'small_grid', 'medium_grid', 'large_grid',
-          'small_dots', 'medium_dots', 'large_dots',
-          'cornell', 'todo_list', 'meeting_notes',
-          'daily_planner', 'weekly_planner', 'project_tracker',
-          'habit_tracker', 'goal_setting',
-          'storyboard', 'music_staff', 'comic_panel',
-          'sketch_guide', 'calligraphy', 'lettering',
-          'math_grid', 'graph_paper', 'handwriting',
-          'chinese_grid', 'vocabulary', 'flashcard',
-          'monthly_cal', 'yearly_overview', 'budget_tracker',
-          'meal_planner', 'fitness_log', 'travel_itinerary',
-          'isometric', 'hexagonal', 'seyes',
-          'engineer_pad', 'legal_pad', 'manuscript',
+          'blank',
+          'thin_lined',
+          'grid',
+          'small_grid',
+          'dotted',
+          'cornell',
         ];
 
         for (final id in expectedIds) {
@@ -121,37 +97,25 @@ void main() {
     group('getByCategory', () {
       test('returns correct templates for basic', () {
         final templates = TemplateRegistry.getByCategory(TemplateCategory.basic);
-        expect(templates.length, 12);
+        expect(templates.length, 6);
         expect(templates.every((t) => t.category == TemplateCategory.basic), true);
       });
 
       test('returns correct templates for productivity', () {
         final templates = TemplateRegistry.getByCategory(TemplateCategory.productivity);
-        expect(templates.length, 8);
+        expect(templates.length, 4);
         expect(templates.every((t) => t.category == TemplateCategory.productivity), true);
       });
 
       test('returns correct templates for creative', () {
         final templates = TemplateRegistry.getByCategory(TemplateCategory.creative);
-        expect(templates.length, 6);
+        expect(templates.length, 3);
         expect(templates.every((t) => t.category == TemplateCategory.creative), true);
-      });
-
-      test('returns correct templates for education', () {
-        final templates = TemplateRegistry.getByCategory(TemplateCategory.education);
-        expect(templates.length, 6);
-        expect(templates.every((t) => t.category == TemplateCategory.education), true);
-      });
-
-      test('returns correct templates for planning', () {
-        final templates = TemplateRegistry.getByCategory(TemplateCategory.planning);
-        expect(templates.length, 6);
-        expect(templates.every((t) => t.category == TemplateCategory.planning), true);
       });
 
       test('returns correct templates for special', () {
         final templates = TemplateRegistry.getByCategory(TemplateCategory.special);
-        expect(templates.length, 6);
+        expect(templates.length, 3);
         expect(templates.every((t) => t.category == TemplateCategory.special), true);
       });
     });
@@ -160,7 +124,7 @@ void main() {
       test('returns only free templates', () {
         final free = TemplateRegistry.getFreeTemplates();
         expect(free.every((t) => !t.isPremium), true);
-        expect(free.length, 12); // All basic templates
+        expect(free.length, 6); // All basic templates
       });
     });
 
@@ -168,7 +132,7 @@ void main() {
       test('returns only premium templates', () {
         final premium = TemplateRegistry.getPremiumTemplates();
         expect(premium.every((t) => t.isPremium), true);
-        expect(premium.length, 32); // 44 - 12 = 32
+        expect(premium.length, 10); // 16 - 6 = 10
       });
     });
 
@@ -193,10 +157,10 @@ void main() {
     });
 
     group('specific templates', () {
-      test('blank_white has correct properties', () {
-        final template = TemplateRegistry.getById('blank_white')!;
-        expect(template.name, 'Boş (Beyaz)');
-        expect(template.nameEn, 'Blank (White)');
+      test('blank has correct properties', () {
+        final template = TemplateRegistry.getById('blank')!;
+        expect(template.name, 'Boş');
+        expect(template.nameEn, 'Blank');
         expect(template.category, TemplateCategory.basic);
         expect(template.pattern, TemplatePattern.blank);
         expect(template.isPremium, false);
@@ -205,10 +169,10 @@ void main() {
 
       test('cornell has correct properties and extraData', () {
         final template = TemplateRegistry.getById('cornell')!;
-        expect(template.name, 'Cornell Notes');
-        expect(template.category, TemplateCategory.productivity);
+        expect(template.name, 'Cornell');
+        expect(template.category, TemplateCategory.basic);
         expect(template.pattern, TemplatePattern.cornell);
-        expect(template.isPremium, true);
+        expect(template.isPremium, false);
         expect(template.extraData, isNotNull);
         expect(template.extraData!['leftMarginRatio'], 0.28);
         expect(template.extraData!['bottomSummaryRatio'], 0.25);
@@ -222,12 +186,6 @@ void main() {
         expect(template.pattern, TemplatePattern.music);
         expect(template.isPremium, true);
         expect(template.extraData!['staffLines'], 5);
-      });
-
-      test('legal_pad has yellow background', () {
-        final template = TemplateRegistry.getById('legal_pad')!;
-        expect(template.defaultBackgroundColor, 0xFFFFFDE7);
-        expect(template.extraData!['marginLineColor'], 0xFFFF0000);
       });
 
       test('isometric has correct angle', () {

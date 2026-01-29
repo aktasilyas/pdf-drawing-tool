@@ -218,20 +218,26 @@ class TemplatePatternPainter extends CustomPainter {
 
   void _drawMusic(Canvas canvas, Size size) {
     final paint = _linePaint;
-    final staffSpacing = _spacingPx * 0.8;
-    final staffGroupSpacing = _spacingPx * 4;
     
-    double y = staffGroupSpacing;
-    while (y < size.height - staffGroupSpacing) {
-      // 5 çizgili staff
+    // Staff içi çizgi aralığı (her staff 5 çizgiden oluşur)
+    final staffLineSpacing = _spacingPx * 0.25; // 2mm arası (8mm / 4 = 2mm)
+    final staffHeight = staffLineSpacing * 4; // 5 çizgi = 4 aralık
+    final staffGroupSpacing = _spacingPx * 2; // Staff grupları arası 16mm
+    
+    double y = _spacingPx; // Üstten başlangıç
+    
+    while (y + staffHeight < size.height) {
+      // 5 çizgili staff çiz
       for (int i = 0; i < 5; i++) {
+        final lineY = y + (i * staffLineSpacing);
         canvas.drawLine(
-          Offset(0, y + i * staffSpacing),
-          Offset(size.width, y + i * staffSpacing),
+          Offset(0, lineY),
+          Offset(size.width, lineY),
           paint,
         );
       }
-      y += staffSpacing * 4 + staffGroupSpacing;
+      // Bir sonraki staff grubuna geç
+      y += staffHeight + staffGroupSpacing;
     }
   }
 

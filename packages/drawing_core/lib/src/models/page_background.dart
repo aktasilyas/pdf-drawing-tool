@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:drawing_core/src/models/template_pattern.dart';
 
 /// Sayfa arka plan türleri
 enum BackgroundType {
@@ -8,6 +9,8 @@ enum BackgroundType {
   lined,
   dotted,
   pdf,
+  /// Template-based background (uses TemplatePattern for rendering)
+  template,
 }
 
 /// Sayfa arka plan modeli
@@ -17,6 +20,15 @@ class PageBackground {
   final double? gridSpacing;
   final double? lineSpacing;
   final int? lineColor;
+  
+  /// Template pattern for template-based backgrounds
+  final TemplatePattern? templatePattern;
+  
+  /// Template spacing in mm (for template-based backgrounds)
+  final double? templateSpacingMm;
+  
+  /// Template line width (for template-based backgrounds)
+  final double? templateLineWidth;
   
   /// Rendered PDF image data (cache - lazy loaded)
   final Uint8List? pdfData;
@@ -33,6 +45,9 @@ class PageBackground {
     this.gridSpacing,
     this.lineSpacing,
     this.lineColor,
+    this.templatePattern,
+    this.templateSpacingMm,
+    this.templateLineWidth,
     this.pdfData,
     this.pdfPageIndex,
     this.pdfFilePath,
@@ -94,6 +109,9 @@ class PageBackground {
     double? gridSpacing,
     double? lineSpacing,
     int? lineColor,
+    TemplatePattern? templatePattern,
+    double? templateSpacingMm,
+    double? templateLineWidth,
     Uint8List? pdfData,
     int? pdfPageIndex,
     String? pdfFilePath,
@@ -104,6 +122,9 @@ class PageBackground {
       gridSpacing: gridSpacing ?? this.gridSpacing,
       lineSpacing: lineSpacing ?? this.lineSpacing,
       lineColor: lineColor ?? this.lineColor,
+      templatePattern: templatePattern ?? this.templatePattern,
+      templateSpacingMm: templateSpacingMm ?? this.templateSpacingMm,
+      templateLineWidth: templateLineWidth ?? this.templateLineWidth,
       pdfData: pdfData ?? this.pdfData,
       pdfPageIndex: pdfPageIndex ?? this.pdfPageIndex,
       pdfFilePath: pdfFilePath ?? this.pdfFilePath,
@@ -125,6 +146,9 @@ class PageBackground {
       if (gridSpacing != null) 'gridSpacing': gridSpacing,
       if (lineSpacing != null) 'lineSpacing': lineSpacing,
       if (lineColor != null) 'lineColor': lineColor,
+      if (templatePattern != null) 'templatePattern': templatePattern!.name,
+      if (templateSpacingMm != null) 'templateSpacingMm': templateSpacingMm,
+      if (templateLineWidth != null) 'templateLineWidth': templateLineWidth,
       if (pdfPageIndex != null) 'pdfPageIndex': pdfPageIndex,
       if (pdfFilePath != null) 'pdfFilePath': pdfFilePath,
       if (shouldSerializePdfData) 'pdfDataBase64': base64Encode(pdfData!),
@@ -160,6 +184,18 @@ class PageBackground {
       }
     }
     
+    // Parse template pattern
+    TemplatePattern? templatePattern;
+    if (json['templatePattern'] != null) {
+      try {
+        templatePattern = TemplatePattern.values.firstWhere(
+          (p) => p.name == json['templatePattern'],
+        );
+      } catch (e) {
+        print('❌ Unknown template pattern: ${json['templatePattern']}');
+      }
+    }
+    
     return PageBackground(
       type: BackgroundType.values.firstWhere(
         (t) => t.name == json['type'],
@@ -169,6 +205,9 @@ class PageBackground {
       gridSpacing: parseDouble(json['gridSpacing']),
       lineSpacing: parseDouble(json['lineSpacing']),
       lineColor: parseInt(json['lineColor']),
+      templatePattern: templatePattern,
+      templateSpacingMm: parseDouble(json['templateSpacingMm']),
+      templateLineWidth: parseDouble(json['templateLineWidth']),
       pdfPageIndex: parseInt(json['pdfPageIndex']),
       pdfFilePath: json['pdfFilePath'] as String?,
       pdfData: pdfData, // Decoded from base64 or null for lazy loading
