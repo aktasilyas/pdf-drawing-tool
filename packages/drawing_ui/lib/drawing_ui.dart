@@ -76,6 +76,7 @@ export 'src/widgets/color_chip.dart';
 export 'src/widgets/color_chips_grid.dart';
 export 'src/widgets/color_picker_widgets.dart';
 export 'src/widgets/color_presets.dart';
+export 'src/widgets/cover_preview_widget.dart';
 export 'src/widgets/thickness_slider.dart';
 export 'src/widgets/panel_overlay.dart';
 export 'src/widgets/panel_arrow.dart';

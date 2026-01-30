@@ -37,6 +37,7 @@ library drawing_core;
 // Models
 export 'src/models/bounding_box.dart';
 export 'src/models/canvas_mode.dart';
+export 'src/models/cover.dart';
 export 'src/models/document.dart';
 export 'src/models/document_settings.dart';
 export 'src/models/document_type.dart';
@@ -102,4 +103,5 @@ export 'src/hit_testing/hit_testing.dart';
 export 'src/managers/page_manager.dart';
 
 // Services
+export 'src/services/cover_registry.dart';
 export 'src/services/template_registry.dart';
