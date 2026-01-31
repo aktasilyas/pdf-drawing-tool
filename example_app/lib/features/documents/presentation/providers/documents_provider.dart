@@ -17,6 +17,9 @@ final documentRepositoryProvider = Provider<DocumentRepository>((ref) {
 // Current folder ID
 final currentFolderIdProvider = StateProvider<String?>((ref) => null);
 
+// Search query
+final searchQueryProvider = StateProvider<String>((ref) => '');
+
 // View mode (grid/list) with persistence
 final viewModeProvider = StateNotifierProvider<ViewModeNotifier, ViewMode>((ref) {
   return ViewModeNotifier();
@@ -103,9 +106,6 @@ class SortDirectionNotifier extends StateNotifier<SortDirection> {
     await prefs.setString(StorageKeys.sortDirection, direction.name);
   }
 }
-
-// Search query
-final searchQueryProvider = StateProvider<String>((ref) => '');
 
 // Documents list
 final documentsProvider = FutureProvider.family<List<DocumentInfo>, String?>((ref, folderId) async {

@@ -40,81 +40,87 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
 
   // Mobile layout - no persistent sidebar, use drawer
   Widget _buildMobileLayout() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Mobile header with hamburger menu
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: Builder(
-            builder: (context) => Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.menu),
-                  onPressed: () {
-                    Scaffold.of(context).openDrawer();
-                  },
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    _getSectionTitle(),
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                    overflow: TextOverflow.ellipsis,
+    return GestureDetector(
+      onTap: () {
+        // Dismiss keyboard when tapping outside
+        FocusScope.of(context).unfocus();
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Mobile header with hamburger menu
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Builder(
+              builder: (context) => Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.menu),
+                    onPressed: () {
+                      Scaffold.of(context).openDrawer();
+                    },
                   ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.settings_outlined),
-                  onPressed: () {
-                    context.push('/settings');
-                  },
-                ),
-              ],
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _getSectionTitle(),
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.settings_outlined),
+                    onPressed: () {
+                      context.push('/settings');
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
 
-        // Header
-        DocumentsHeader(
-          title: _getSectionTitle(),
-          newButtonKey: _addButtonKey,
-          onNewPressed: _showNewDocumentDialog,
-          sortOption: ref.watch(sortOptionProvider),
-          onSortChanged: (option) {
-            ref.read(sortOptionProvider.notifier).set(option);
-          },
-          isSelectionMode: _isSelectionMode,
-          onSelectionToggle: () {
-            setState(() => _isSelectionMode = !_isSelectionMode);
-          },
-        ),
+          // Header
+          DocumentsHeader(
+            title: _getSectionTitle(),
+            newButtonKey: _addButtonKey,
+            onNewPressed: _showNewDocumentDialog,
+            sortOption: ref.watch(sortOptionProvider),
+            onSortChanged: (option) {
+              ref.read(sortOptionProvider.notifier).set(option);
+            },
+            isSelectionMode: _isSelectionMode,
+            onSelectionToggle: () {
+              setState(() => _isSelectionMode = !_isSelectionMode);
+            },
+          ),
 
-        // Divider
-        Container(
-          height: 1,
-          margin: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Theme.of(context).dividerColor.withValues(alpha: 0.0),
-                Theme.of(context).dividerColor.withValues(alpha: 0.3),
-                Theme.of(context).dividerColor.withValues(alpha: 0.3),
-                Theme.of(context).dividerColor.withValues(alpha: 0.0),
-              ],
-              stops: const [0.0, 0.1, 0.9, 1.0],
+          // Divider
+          Container(
+            height: 1,
+            margin: const EdgeInsets.symmetric(vertical: 12),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Theme.of(context).dividerColor.withValues(alpha: 0.0),
+                  Theme.of(context).dividerColor.withValues(alpha: 0.3),
+                  Theme.of(context).dividerColor.withValues(alpha: 0.3),
+                  Theme.of(context).dividerColor.withValues(alpha: 0.0),
+                ],
+                stops: const [0.0, 0.1, 0.9, 1.0],
+              ),
             ),
           ),
-        ),
 
-        // Document grid
-        Expanded(
-          child: _buildDocumentGrid(),
-        ),
-      ],
+          // Document grid
+          Expanded(
+            child: _buildDocumentGrid(),
+          ),
+        ],
+      ),
     );
   }
 
@@ -150,60 +156,66 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
 
         // Main content
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Settings icon (top right)
-              Align(
-                alignment: Alignment.topRight,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: IconButton(
-                    icon: const Icon(Icons.settings_outlined),
-                    onPressed: () {
-                      context.push('/settings');
-                    },
+          child: GestureDetector(
+            onTap: () {
+              // Dismiss keyboard when tapping outside
+              FocusScope.of(context).unfocus();
+            },
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Settings icon (top right)
+                Align(
+                  alignment: Alignment.topRight,
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: IconButton(
+                      icon: const Icon(Icons.settings_outlined),
+                      onPressed: () {
+                        context.push('/settings');
+                      },
+                    ),
                   ),
                 ),
-              ),
 
-              // Header
-              DocumentsHeader(
-                title: _getSectionTitle(),
-                newButtonKey: _addButtonKey,
-                onNewPressed: _showNewDocumentDialog,
-                sortOption: ref.watch(sortOptionProvider),
-                onSortChanged: (option) {
-                  ref.read(sortOptionProvider.notifier).set(option);
-                },
-                isSelectionMode: _isSelectionMode,
-                onSelectionToggle: () {
-                  setState(() => _isSelectionMode = !_isSelectionMode);
-                },
-              ),
+                // Header
+                DocumentsHeader(
+                  title: _getSectionTitle(),
+                  newButtonKey: _addButtonKey,
+                  onNewPressed: _showNewDocumentDialog,
+                  sortOption: ref.watch(sortOptionProvider),
+                  onSortChanged: (option) {
+                    ref.read(sortOptionProvider.notifier).set(option);
+                  },
+                  isSelectionMode: _isSelectionMode,
+                  onSelectionToggle: () {
+                    setState(() => _isSelectionMode = !_isSelectionMode);
+                  },
+                ),
 
-              // Divider
-              Container(
-                height: 1,
-                margin: const EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Theme.of(context).dividerColor.withValues(alpha: 0.0),
-                      Theme.of(context).dividerColor.withValues(alpha: 0.3),
-                      Theme.of(context).dividerColor.withValues(alpha: 0.3),
-                      Theme.of(context).dividerColor.withValues(alpha: 0.0),
-                    ],
-                    stops: const [0.0, 0.1, 0.9, 1.0],
+                // Divider
+                Container(
+                  height: 1,
+                  margin: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [
+                        Theme.of(context).dividerColor.withValues(alpha: 0.0),
+                        Theme.of(context).dividerColor.withValues(alpha: 0.3),
+                        Theme.of(context).dividerColor.withValues(alpha: 0.3),
+                        Theme.of(context).dividerColor.withValues(alpha: 0.0),
+                      ],
+                      stops: const [0.0, 0.1, 0.9, 1.0],
+                    ),
                   ),
                 ),
-              ),
 
-              // Document grid
-              Expanded(
-                child: _buildDocumentGrid(),
-              ),
-            ],
+                // Document grid
+                Expanded(
+                  child: _buildDocumentGrid(),
+                ),
+              ],
+            ),
           ),
         ),
       ],
@@ -279,6 +291,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
         final sortOption = ref.watch(sortOptionProvider);
         final sortDirection = ref.watch(sortDirectionProvider);
         final viewMode = ref.watch(viewModeProvider);
+        final searchQuery = ref.watch(searchQueryProvider);
         final sorted = List<DocumentInfo>.from(documents);
         
         switch (sortOption) {
@@ -299,10 +312,22 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
             break;
         }
 
+        // Filter by search query
+        final filtered = searchQuery.isEmpty
+            ? sorted
+            : sorted.where((doc) => 
+                doc.title.toLowerCase().contains(searchQuery.toLowerCase())
+              ).toList();
+
+        // Show empty search result if filtered is empty but search is active
+        if (filtered.isEmpty && searchQuery.isNotEmpty) {
+          return _buildEmptySearchResult(searchQuery);
+        }
+
         // Render based on view mode
         return viewMode == ViewMode.grid
-            ? _buildGridView(sorted)
-            : _buildListView(sorted);
+            ? _buildGridView(filtered)
+            : _buildListView(filtered);
       },
     );
   }
@@ -619,6 +644,56 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildEmptySearchResult(String query) {
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.search_off,
+              size: 48,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Sonuç bulunamadı',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                '"$query" için eşleşen belge bulunamadı',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                ),
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextButton.icon(
+              onPressed: () {
+                ref.read(searchQueryProvider.notifier).state = '';
+              },
+              icon: const Icon(Icons.clear, size: 18),
+              label: const Text('Aramayı temizle'),
+            ),
+          ],
+        ),
       ),
     );
   }
