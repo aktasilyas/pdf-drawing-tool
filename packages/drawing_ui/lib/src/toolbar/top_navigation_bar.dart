@@ -43,7 +43,7 @@ class TopNavigationBar extends ConsumerWidget {
         color: theme.toolbarBackground,
         border: Border(
           bottom: BorderSide(
-            color: theme.panelBorderColor.withAlpha(50),
+            color: theme.panelBorderColor.withValues(alpha: 50.0 / 255.0),
             width: 0.5,
           ),
         ),
@@ -70,7 +70,7 @@ class TopNavigationBar extends ConsumerWidget {
                     constraints: const BoxConstraints(maxWidth: 300), // Max 300px
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: theme.panelBorderColor.withAlpha(30),
+                      color: theme.panelBorderColor.withValues(alpha: 30.0 / 255.0),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Row(
@@ -228,7 +228,7 @@ class _NavButton extends StatelessWidget {
             margin: const EdgeInsets.symmetric(horizontal: 1),
             decoration: BoxDecoration(
               color: isActive
-                  ? theme.toolbarIconSelectedColor.withAlpha(25)
+                  ? theme.toolbarIconSelectedColor.withValues(alpha: 25.0 / 255.0)
                   : Colors.transparent,
               borderRadius: BorderRadius.circular(6),
             ),
@@ -247,7 +247,10 @@ class _NavButton extends StatelessWidget {
 }
 
 /// Document tabs in the center of the navigation bar.
+// ignore: unused_element
 class _DocumentTabs extends StatelessWidget {
+  const _DocumentTabs();
+
   @override
   Widget build(BuildContext context) {
     final theme = DrawingTheme.of(context);
@@ -257,7 +260,7 @@ class _DocumentTabs extends StatelessWidget {
         height: 32,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
-          color: theme.panelBorderColor.withAlpha(30),
+          color: theme.panelBorderColor.withValues(alpha: 30.0 / 255.0),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(

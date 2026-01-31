@@ -127,8 +127,6 @@ class Stroke extends Equatable {
   ///
   /// Returns false (stub).
   bool containsPoint(double x, double y, {double tolerance = 5.0}) {
-    // TODO: Implement in Phase 3
-    // Will check if (x, y) is within tolerance distance of any segment
     return false;
   }
 

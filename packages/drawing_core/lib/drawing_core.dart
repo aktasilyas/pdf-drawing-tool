@@ -17,7 +17,7 @@
 /// import 'package:drawing_core/drawing_core.dart';
 ///
 /// // Create a document
-/// final document = DrawingDocument.empty('My Drawing');
+/// final document = DrawingDocument.emptyMultiPage('My Drawing');
 ///
 /// // Create a pen tool
 /// final pen = PenTool();

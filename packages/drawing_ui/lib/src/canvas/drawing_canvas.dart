@@ -227,14 +227,15 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
     _hasInitialized = true;
     _lastViewportSize = viewportSize;
 
-    // Check if transform is still at default (never initialized)
+    // CRITICAL FIX: Initialize immediately on first build (not in postFrameCallback)
+    // This prevents the "small square" bug on initial render
     final currentTransform = ref.read(canvasTransformProvider);
     final isDefaultTransform =
         currentTransform.zoom == 1.0 && currentTransform.offset == Offset.zero;
 
-    // CRITICAL: Always use postFrameCallback to avoid modifying provider during build
+      // Schedule initialization (immediate callback)
     if (isDefaultTransform) {
-      // First time - schedule immediately
+      // First time - use immediate callback (before next frame)
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         ref.read(canvasTransformProvider.notifier).initializeForPage(
@@ -256,9 +257,10 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
 
   /// Check if orientation changed (width/height swapped).
   bool _isOrientationChanged(Size newSize) {
-    if (_lastViewportSize == null) return false;
+    final lastSize = _lastViewportSize;
+    if (lastSize == null) return false;
 
-    final wasPortrait = _lastViewportSize!.height > _lastViewportSize!.width;
+    final wasPortrait = lastSize.height > lastSize.width;
     final isPortrait = newSize.height > newSize.width;
 
     return wasPortrait != isPortrait;
@@ -380,7 +382,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
         // Gölge ekle
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
+            color: Colors.black.withValues(alpha: 0.15),
             blurRadius: 20,
             spreadRadius: 2,
             offset: const Offset(0, 4),
@@ -413,7 +415,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
         // Gölge ekle
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
+            color: Colors.black.withValues(alpha: 0.15),
             blurRadius: 20,
             spreadRadius: 2,
             offset: const Offset(0, 4),
@@ -571,10 +573,10 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
     // Straight line preview (for highlighter)
     List<core.DrawingPoint>? straightLinePreviewPoints;
     core.StrokeStyle? straightLinePreviewStyle;
-    if (_isStraightLineDrawing &&
-        _straightLineStart != null &&
-        _straightLineEnd != null) {
-      straightLinePreviewPoints = [_straightLineStart!, _straightLineEnd!];
+    final start = _straightLineStart;
+    final end = _straightLineEnd;
+    if (_isStraightLineDrawing && start != null && end != null) {
+      straightLinePreviewPoints = [start, end];
       straightLinePreviewStyle = _straightLineStyle;
     }
 
@@ -595,6 +597,33 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
         // Initialize canvas for limited mode (centers page on first render)
         if (!canvasMode.isInfinite) {
           _initializeCanvasForLimitedMode(size, currentPage);
+        }
+        
+        // CRITICAL FIX: Use computed transform if still at default state
+        // This prevents "small square" bug on first render
+        CanvasTransform effectiveTransform = transform;
+        if (!canvasMode.isInfinite) {
+          final isDefaultTransform = 
+              transform.zoom == 1.0 && transform.offset == Offset.zero;
+          if (isDefaultTransform) {
+            // Compute the correct transform immediately for first frame
+            // Using DEFAULT ZOOM: 1.0 (100%)
+            final pageSize = Size(currentPage.size.width, currentPage.size.height);
+            const defaultZoom = 1.0;
+            
+            final pageScreenWidth = pageSize.width * defaultZoom;
+            final pageScreenHeight = pageSize.height * defaultZoom;
+            
+            // Center horizontally
+            final offsetX = (size.width - pageScreenWidth) / 2;
+            // Center vertically
+            final offsetY = (size.height - pageScreenHeight) / 2;
+            
+            effectiveTransform = CanvasTransform(
+              zoom: defaultZoom,
+              offset: Offset(offsetX, offsetY),
+            );
+          }
         }
 
         // Wrap everything in a Stack to put menu/overlay OUTSIDE gesture handlers
@@ -625,13 +654,13 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                 onScaleEnd: handleScaleEnd,
                 behavior: HitTestBehavior.opaque,
                 child: ClipRect(
-                  child: SizedBox(
-                    width: size.width,
-                    height: size.height,
-                    child: Transform(
-                      // Apply zoom and pan transformation
-                      transform: transform.matrix,
-                      alignment: Alignment.topLeft,
+                child: SizedBox(
+                  width: size.width,
+                  height: size.height,
+                  child: Transform(
+                    // Apply zoom and pan transformation
+                    transform: effectiveTransform.matrix,
+                    alignment: Alignment.topLeft,
                       child: Stack(
                         clipBehavior: Clip.none, // Allow content outside bounds
                         children: [
@@ -653,7 +682,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                                     decoration: BoxDecoration(
                                       boxShadow: [
                                         BoxShadow(
-                                          color: Colors.black.withOpacity(0.15),
+                                          color: Colors.black.withValues(alpha: 0.15),
                                           blurRadius: 20,
                                           spreadRadius: 2,
                                           offset: const Offset(0, 4),
@@ -683,26 +712,32 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                                 left: 0,
                                 top: 0,
                                 child: IgnorePointer(
-                                  child: Container(
-                                    width: currentPage.size.width,
-                                    height: currentPage.size.height,
-                                    decoration: BoxDecoration(
-                                      color:
-                                          Color(currentPage.background.color),
-                                      border: canvasMode.pageBorderWidth > 0
-                                          ? Border.all(
-                                              color: Color(
-                                                  canvasMode.pageBorderColor),
-                                              width: canvasMode.pageBorderWidth,
-                                            )
-                                          : null,
-                                    ),
-                                    child: CustomPaint(
-                                      painter: PageBackgroundPatternPainter(
-                                        background: currentPage.background,
+                                  child: RepaintBoundary(
+                                    child: ClipRect(
+                                      child: Container(
+                                        width: currentPage.size.width,
+                                        height: currentPage.size.height,
+                                        decoration: BoxDecoration(
+                                          color:
+                                              Color(currentPage.background.color),
+                                          border: canvasMode.pageBorderWidth > 0
+                                              ? Border.all(
+                                                  color: Color(
+                                                      canvasMode.pageBorderColor),
+                                                  width: canvasMode.pageBorderWidth,
+                                                )
+                                              : null,
+                                        ),
+                                        child: CustomPaint(
+                                          painter: PageBackgroundPatternPainter(
+                                            background: currentPage.background,
+                                          ),
+                                          size: Size(currentPage.size.width,
+                                              currentPage.size.height),
+                                          isComplex: true,
+                                          willChange: false,
+                                        ),
                                       ),
-                                      size: Size(currentPage.size.width,
-                                          currentPage.size.height),
                                     ),
                                   ),
                                 ),
@@ -907,7 +942,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.2),
+                          color: Colors.black.withValues(alpha: 0.2),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -931,7 +966,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                           child: Container(
                             padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.2),
+                              color: Colors.white.withValues(alpha: 0.2),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(Icons.close,

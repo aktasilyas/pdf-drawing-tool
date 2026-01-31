@@ -106,6 +106,7 @@ class PDFExportServiceResult {
 /// Service for orchestrating PDF export workflow.
 class PDFExportService {
   final PDFExporter _exporter;
+  // ignore: unused_field
   final VectorPDFRenderer _vectorRenderer;
   final RasterPDFRenderer _rasterRenderer;
 

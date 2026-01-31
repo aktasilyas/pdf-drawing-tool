@@ -98,7 +98,6 @@ void main() {
         );
 
         final exportService = PDFExportService();
-        final config = ExportConfiguration();
 
         // Create metadata
         final metadata = exportService.createMetadata(doc);
@@ -384,10 +383,6 @@ void main() {
 
         // 2. Setup export
         final exportService = PDFExportService();
-        final config = ExportConfiguration(
-          exportMode: PDFExportMode.vector,
-          quality: PDFExportQuality.high,
-        );
 
         // 3. Validate
         expect(exportService.validatePages(doc.pages), true);

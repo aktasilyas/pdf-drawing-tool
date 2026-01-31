@@ -83,6 +83,11 @@ class InfiniteBackgroundPainter extends CustomPainter {
           }
         }
         break;
+        
+      case BackgroundType.cover:
+        // Cover backgrounds are rendered via PageBackgroundPatternPainter
+        // Not applicable in infinite canvas mode
+        break;
     }
   }
 

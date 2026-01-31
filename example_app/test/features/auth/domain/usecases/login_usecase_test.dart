@@ -30,12 +30,12 @@ void main() {
   });
 
   test('should propagate repository failure', () async {
-    repository = _FakeAuthRepository(loginResult: Left(AuthFailure('iptal')));
+    repository = _FakeAuthRepository(loginResult: const Left(AuthFailure('iptal')));
     useCase = LoginUseCase(repository);
 
     final result = await useCase(email: 'foo@example.com', password: 'p4ssw0rd');
 
-    expect(result, Left(AuthFailure('iptal')));
+    expect(result, const Left(AuthFailure('iptal')));
   });
 }
 

@@ -165,7 +165,7 @@ class TemplatePatternPainter extends CustomPainter {
     final hexWidth = radius * 2;
     
     for (double y = radius; y < size.height + radius; y += hexHeight * 0.75) {
-      final rowOffset = ((y ~/ (hexHeight * 0.75)) % 2 == 0) ? 0.0 : radius * 1.5;
+      final rowOffset = (y ~/ (hexHeight * 0.75)) % 2 == 0 ? 0.0 : radius * 1.5;
       for (double x = rowOffset; x < size.width + hexWidth; x += hexWidth * 1.5) {
         _drawHexagon(canvas, Offset(x, y), radius, paint);
       }

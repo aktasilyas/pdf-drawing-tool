@@ -52,7 +52,7 @@ class FolderLocalDatasourceImpl implements FolderLocalDatasource {
       final folders = await getFolders();
       return folders.firstWhere(
         (folder) => folder.id == id,
-        orElse: () => throw CacheException('Folder not found'),
+        orElse: () => throw const CacheException('Folder not found'),
       );
     } catch (e) {
       throw CacheException('Failed to get folder: $e');
@@ -79,7 +79,7 @@ class FolderLocalDatasourceImpl implements FolderLocalDatasource {
       final index = folders.indexWhere((f) => f.id == folder.id);
       
       if (index == -1) {
-        throw CacheException('Folder not found');
+        throw const CacheException('Folder not found');
       }
 
       folders[index] = folder;

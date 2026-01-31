@@ -1,4 +1,3 @@
-/// Use case for user login with email and password.
 import 'package:dartz/dartz.dart';
 import 'package:example_app/core/errors/failures.dart';
 import 'package:example_app/features/auth/domain/entities/user.dart';

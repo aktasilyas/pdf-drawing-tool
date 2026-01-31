@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../domain/entities/app_settings.dart';
+import 'package:example_app/features/settings/domain/entities/app_settings.dart';
 
 const _settingsKey = 'app_settings';
 

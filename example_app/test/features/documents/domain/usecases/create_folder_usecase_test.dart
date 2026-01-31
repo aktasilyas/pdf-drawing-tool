@@ -35,12 +35,12 @@ void main() {
       createdAt: DateTime(2024, 1, 1),
     );
 
-    final premiumSubscription = Subscription(
+    const premiumSubscription = Subscription(
       tier: SubscriptionTier.premium,
       isActive: true,
     );
 
-    final freeSubscription = Subscription(
+    const freeSubscription = Subscription(
       tier: SubscriptionTier.free,
       isActive: true,
     );
@@ -48,7 +48,7 @@ void main() {
     test('should create folder when user has premium subscription', () async {
       // Arrange
       when(() => mockSubscriptionRepository.getSubscription())
-          .thenAnswer((_) async => Right(premiumSubscription));
+          .thenAnswer((_) async => const Right(premiumSubscription));
       when(() => mockFolderRepository.createFolder(
             name: testName,
             parentId: testParentId,
@@ -84,7 +84,7 @@ void main() {
       );
 
       when(() => mockSubscriptionRepository.getSubscription())
-          .thenAnswer((_) async => Right(freeSubscription));
+          .thenAnswer((_) async => const Right(freeSubscription));
       when(() => mockFolderRepository.getFolders())
           .thenAnswer((_) async => Right(existingFolders));
       when(() => mockFolderRepository.createFolder(
@@ -116,7 +116,7 @@ void main() {
       );
 
       when(() => mockSubscriptionRepository.getSubscription())
-          .thenAnswer((_) async => Right(freeSubscription));
+          .thenAnswer((_) async => const Right(freeSubscription));
       when(() => mockFolderRepository.getFolders())
           .thenAnswer((_) async => Right(existingFolders));
 

@@ -30,7 +30,7 @@ class ToolbarSettingsPanel extends ConsumerWidget {
         borderRadius: BorderRadius.circular(8),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(isDark ? 60 : 38),
+            color: Colors.black.withValues(alpha: (isDark ? 60 : 38) / 255.0),
             blurRadius: 12,
             offset: const Offset(0, 2),
           ),
@@ -137,7 +137,7 @@ class ToolbarSettingsPanel extends ConsumerWidget {
                   onChanged: (_) async {
                     await ref.read(toolbarConfigProvider.notifier).toggleQuickAccess();
                   },
-                  activeColor: colorScheme.primary,
+                  activeThumbColor: colorScheme.primary,
                 ),
               ),
             ],

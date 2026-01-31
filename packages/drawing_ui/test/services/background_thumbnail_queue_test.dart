@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart' hide Page;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/services/background_thumbnail_queue.dart';

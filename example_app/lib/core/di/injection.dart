@@ -31,6 +31,7 @@ Future<void> configureDependencies() async {
   _registerUseCases();
 }
 
+// ignore: unused_element
 void _registerCoreServices() {
   // Network info
   // getIt.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl());

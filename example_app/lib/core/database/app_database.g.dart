@@ -117,6 +117,38 @@ class $DocumentsTable extends Documents
       type: DriftSqlType.string,
       requiredDuringInsert: false,
       defaultValue: const Constant('notebook'));
+  static const VerificationMeta _coverIdMeta =
+      const VerificationMeta('coverId');
+  @override
+  late final GeneratedColumn<String> coverId = GeneratedColumn<String>(
+      'cover_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _hasCoverMeta =
+      const VerificationMeta('hasCover');
+  @override
+  late final GeneratedColumn<bool> hasCover = GeneratedColumn<bool>(
+      'has_cover', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("has_cover" IN (0, 1))'),
+      defaultValue: const Constant(true));
+  static const VerificationMeta _paperWidthMmMeta =
+      const VerificationMeta('paperWidthMm');
+  @override
+  late final GeneratedColumn<double> paperWidthMm = GeneratedColumn<double>(
+      'paper_width_mm', aliasedName, false,
+      type: DriftSqlType.double,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(210.0));
+  static const VerificationMeta _paperHeightMmMeta =
+      const VerificationMeta('paperHeightMm');
+  @override
+  late final GeneratedColumn<double> paperHeightMm = GeneratedColumn<double>(
+      'paper_height_mm', aliasedName, false,
+      type: DriftSqlType.double,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(297.0));
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -133,7 +165,11 @@ class $DocumentsTable extends Documents
         content,
         paperColor,
         isPortrait,
-        documentType
+        documentType,
+        coverId,
+        hasCover,
+        paperWidthMm,
+        paperHeightMm
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -228,6 +264,26 @@ class $DocumentsTable extends Documents
           documentType.isAcceptableOrUnknown(
               data['document_type']!, _documentTypeMeta));
     }
+    if (data.containsKey('cover_id')) {
+      context.handle(_coverIdMeta,
+          coverId.isAcceptableOrUnknown(data['cover_id']!, _coverIdMeta));
+    }
+    if (data.containsKey('has_cover')) {
+      context.handle(_hasCoverMeta,
+          hasCover.isAcceptableOrUnknown(data['has_cover']!, _hasCoverMeta));
+    }
+    if (data.containsKey('paper_width_mm')) {
+      context.handle(
+          _paperWidthMmMeta,
+          paperWidthMm.isAcceptableOrUnknown(
+              data['paper_width_mm']!, _paperWidthMmMeta));
+    }
+    if (data.containsKey('paper_height_mm')) {
+      context.handle(
+          _paperHeightMmMeta,
+          paperHeightMm.isAcceptableOrUnknown(
+              data['paper_height_mm']!, _paperHeightMmMeta));
+    }
     return context;
   }
 
@@ -267,6 +323,14 @@ class $DocumentsTable extends Documents
           .read(DriftSqlType.bool, data['${effectivePrefix}is_portrait'])!,
       documentType: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}document_type'])!,
+      coverId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}cover_id']),
+      hasCover: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}has_cover'])!,
+      paperWidthMm: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}paper_width_mm'])!,
+      paperHeightMm: attachedDatabase.typeMapping.read(
+          DriftSqlType.double, data['${effectivePrefix}paper_height_mm'])!,
     );
   }
 
@@ -321,6 +385,18 @@ class Document extends DataClass implements Insertable<Document> {
 
   /// Document type: 'notebook', 'whiteboard', 'quickNote', etc.
   final String documentType;
+
+  /// Cover ID (nullable - references CoverRegistry)
+  final String? coverId;
+
+  /// Whether document has a cover page
+  final bool hasCover;
+
+  /// Paper width in millimeters (default A4: 210mm)
+  final double paperWidthMm;
+
+  /// Paper height in millimeters (default A4: 297mm)
+  final double paperHeightMm;
   const Document(
       {required this.id,
       required this.title,
@@ -336,7 +412,11 @@ class Document extends DataClass implements Insertable<Document> {
       this.content,
       required this.paperColor,
       required this.isPortrait,
-      required this.documentType});
+      required this.documentType,
+      this.coverId,
+      required this.hasCover,
+      required this.paperWidthMm,
+      required this.paperHeightMm});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -361,6 +441,12 @@ class Document extends DataClass implements Insertable<Document> {
     map['paper_color'] = Variable<String>(paperColor);
     map['is_portrait'] = Variable<bool>(isPortrait);
     map['document_type'] = Variable<String>(documentType);
+    if (!nullToAbsent || coverId != null) {
+      map['cover_id'] = Variable<String>(coverId);
+    }
+    map['has_cover'] = Variable<bool>(hasCover);
+    map['paper_width_mm'] = Variable<double>(paperWidthMm);
+    map['paper_height_mm'] = Variable<double>(paperHeightMm);
     return map;
   }
 
@@ -387,6 +473,12 @@ class Document extends DataClass implements Insertable<Document> {
       paperColor: Value(paperColor),
       isPortrait: Value(isPortrait),
       documentType: Value(documentType),
+      coverId: coverId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(coverId),
+      hasCover: Value(hasCover),
+      paperWidthMm: Value(paperWidthMm),
+      paperHeightMm: Value(paperHeightMm),
     );
   }
 
@@ -409,6 +501,10 @@ class Document extends DataClass implements Insertable<Document> {
       paperColor: serializer.fromJson<String>(json['paperColor']),
       isPortrait: serializer.fromJson<bool>(json['isPortrait']),
       documentType: serializer.fromJson<String>(json['documentType']),
+      coverId: serializer.fromJson<String?>(json['coverId']),
+      hasCover: serializer.fromJson<bool>(json['hasCover']),
+      paperWidthMm: serializer.fromJson<double>(json['paperWidthMm']),
+      paperHeightMm: serializer.fromJson<double>(json['paperHeightMm']),
     );
   }
   @override
@@ -430,6 +526,10 @@ class Document extends DataClass implements Insertable<Document> {
       'paperColor': serializer.toJson<String>(paperColor),
       'isPortrait': serializer.toJson<bool>(isPortrait),
       'documentType': serializer.toJson<String>(documentType),
+      'coverId': serializer.toJson<String?>(coverId),
+      'hasCover': serializer.toJson<bool>(hasCover),
+      'paperWidthMm': serializer.toJson<double>(paperWidthMm),
+      'paperHeightMm': serializer.toJson<double>(paperHeightMm),
     };
   }
 
@@ -448,7 +548,11 @@ class Document extends DataClass implements Insertable<Document> {
           Value<Uint8List?> content = const Value.absent(),
           String? paperColor,
           bool? isPortrait,
-          String? documentType}) =>
+          String? documentType,
+          Value<String?> coverId = const Value.absent(),
+          bool? hasCover,
+          double? paperWidthMm,
+          double? paperHeightMm}) =>
       Document(
         id: id ?? this.id,
         title: title ?? this.title,
@@ -466,6 +570,10 @@ class Document extends DataClass implements Insertable<Document> {
         paperColor: paperColor ?? this.paperColor,
         isPortrait: isPortrait ?? this.isPortrait,
         documentType: documentType ?? this.documentType,
+        coverId: coverId.present ? coverId.value : this.coverId,
+        hasCover: hasCover ?? this.hasCover,
+        paperWidthMm: paperWidthMm ?? this.paperWidthMm,
+        paperHeightMm: paperHeightMm ?? this.paperHeightMm,
       );
   Document copyWithCompanion(DocumentsCompanion data) {
     return Document(
@@ -492,6 +600,14 @@ class Document extends DataClass implements Insertable<Document> {
       documentType: data.documentType.present
           ? data.documentType.value
           : this.documentType,
+      coverId: data.coverId.present ? data.coverId.value : this.coverId,
+      hasCover: data.hasCover.present ? data.hasCover.value : this.hasCover,
+      paperWidthMm: data.paperWidthMm.present
+          ? data.paperWidthMm.value
+          : this.paperWidthMm,
+      paperHeightMm: data.paperHeightMm.present
+          ? data.paperHeightMm.value
+          : this.paperHeightMm,
     );
   }
 
@@ -512,7 +628,11 @@ class Document extends DataClass implements Insertable<Document> {
           ..write('content: $content, ')
           ..write('paperColor: $paperColor, ')
           ..write('isPortrait: $isPortrait, ')
-          ..write('documentType: $documentType')
+          ..write('documentType: $documentType, ')
+          ..write('coverId: $coverId, ')
+          ..write('hasCover: $hasCover, ')
+          ..write('paperWidthMm: $paperWidthMm, ')
+          ..write('paperHeightMm: $paperHeightMm')
           ..write(')'))
         .toString();
   }
@@ -533,7 +653,11 @@ class Document extends DataClass implements Insertable<Document> {
       $driftBlobEquality.hash(content),
       paperColor,
       isPortrait,
-      documentType);
+      documentType,
+      coverId,
+      hasCover,
+      paperWidthMm,
+      paperHeightMm);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -552,7 +676,11 @@ class Document extends DataClass implements Insertable<Document> {
           $driftBlobEquality.equals(other.content, this.content) &&
           other.paperColor == this.paperColor &&
           other.isPortrait == this.isPortrait &&
-          other.documentType == this.documentType);
+          other.documentType == this.documentType &&
+          other.coverId == this.coverId &&
+          other.hasCover == this.hasCover &&
+          other.paperWidthMm == this.paperWidthMm &&
+          other.paperHeightMm == this.paperHeightMm);
 }
 
 class DocumentsCompanion extends UpdateCompanion<Document> {
@@ -571,6 +699,10 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
   final Value<String> paperColor;
   final Value<bool> isPortrait;
   final Value<String> documentType;
+  final Value<String?> coverId;
+  final Value<bool> hasCover;
+  final Value<double> paperWidthMm;
+  final Value<double> paperHeightMm;
   final Value<int> rowid;
   const DocumentsCompanion({
     this.id = const Value.absent(),
@@ -588,6 +720,10 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
     this.paperColor = const Value.absent(),
     this.isPortrait = const Value.absent(),
     this.documentType = const Value.absent(),
+    this.coverId = const Value.absent(),
+    this.hasCover = const Value.absent(),
+    this.paperWidthMm = const Value.absent(),
+    this.paperHeightMm = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   DocumentsCompanion.insert({
@@ -606,6 +742,10 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
     this.paperColor = const Value.absent(),
     this.isPortrait = const Value.absent(),
     this.documentType = const Value.absent(),
+    this.coverId = const Value.absent(),
+    this.hasCover = const Value.absent(),
+    this.paperWidthMm = const Value.absent(),
+    this.paperHeightMm = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         title = Value(title),
@@ -628,6 +768,10 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
     Expression<String>? paperColor,
     Expression<bool>? isPortrait,
     Expression<String>? documentType,
+    Expression<String>? coverId,
+    Expression<bool>? hasCover,
+    Expression<double>? paperWidthMm,
+    Expression<double>? paperHeightMm,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -646,6 +790,10 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
       if (paperColor != null) 'paper_color': paperColor,
       if (isPortrait != null) 'is_portrait': isPortrait,
       if (documentType != null) 'document_type': documentType,
+      if (coverId != null) 'cover_id': coverId,
+      if (hasCover != null) 'has_cover': hasCover,
+      if (paperWidthMm != null) 'paper_width_mm': paperWidthMm,
+      if (paperHeightMm != null) 'paper_height_mm': paperHeightMm,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -666,6 +814,10 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
       Value<String>? paperColor,
       Value<bool>? isPortrait,
       Value<String>? documentType,
+      Value<String?>? coverId,
+      Value<bool>? hasCover,
+      Value<double>? paperWidthMm,
+      Value<double>? paperHeightMm,
       Value<int>? rowid}) {
     return DocumentsCompanion(
       id: id ?? this.id,
@@ -683,6 +835,10 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
       paperColor: paperColor ?? this.paperColor,
       isPortrait: isPortrait ?? this.isPortrait,
       documentType: documentType ?? this.documentType,
+      coverId: coverId ?? this.coverId,
+      hasCover: hasCover ?? this.hasCover,
+      paperWidthMm: paperWidthMm ?? this.paperWidthMm,
+      paperHeightMm: paperHeightMm ?? this.paperHeightMm,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -735,6 +891,18 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
     if (documentType.present) {
       map['document_type'] = Variable<String>(documentType.value);
     }
+    if (coverId.present) {
+      map['cover_id'] = Variable<String>(coverId.value);
+    }
+    if (hasCover.present) {
+      map['has_cover'] = Variable<bool>(hasCover.value);
+    }
+    if (paperWidthMm.present) {
+      map['paper_width_mm'] = Variable<double>(paperWidthMm.value);
+    }
+    if (paperHeightMm.present) {
+      map['paper_height_mm'] = Variable<double>(paperHeightMm.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -759,6 +927,10 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
           ..write('paperColor: $paperColor, ')
           ..write('isPortrait: $isPortrait, ')
           ..write('documentType: $documentType, ')
+          ..write('coverId: $coverId, ')
+          ..write('hasCover: $hasCover, ')
+          ..write('paperWidthMm: $paperWidthMm, ')
+          ..write('paperHeightMm: $paperHeightMm, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1716,6 +1888,10 @@ typedef $$DocumentsTableCreateCompanionBuilder = DocumentsCompanion Function({
   Value<String> paperColor,
   Value<bool> isPortrait,
   Value<String> documentType,
+  Value<String?> coverId,
+  Value<bool> hasCover,
+  Value<double> paperWidthMm,
+  Value<double> paperHeightMm,
   Value<int> rowid,
 });
 typedef $$DocumentsTableUpdateCompanionBuilder = DocumentsCompanion Function({
@@ -1734,6 +1910,10 @@ typedef $$DocumentsTableUpdateCompanionBuilder = DocumentsCompanion Function({
   Value<String> paperColor,
   Value<bool> isPortrait,
   Value<String> documentType,
+  Value<String?> coverId,
+  Value<bool> hasCover,
+  Value<double> paperWidthMm,
+  Value<double> paperHeightMm,
   Value<int> rowid,
 });
 
@@ -1790,6 +1970,18 @@ class $$DocumentsTableFilterComposer
 
   ColumnFilters<String> get documentType => $composableBuilder(
       column: $table.documentType, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get coverId => $composableBuilder(
+      column: $table.coverId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get hasCover => $composableBuilder(
+      column: $table.hasCover, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get paperWidthMm => $composableBuilder(
+      column: $table.paperWidthMm, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get paperHeightMm => $composableBuilder(
+      column: $table.paperHeightMm, builder: (column) => ColumnFilters(column));
 }
 
 class $$DocumentsTableOrderingComposer
@@ -1847,6 +2039,20 @@ class $$DocumentsTableOrderingComposer
   ColumnOrderings<String> get documentType => $composableBuilder(
       column: $table.documentType,
       builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get coverId => $composableBuilder(
+      column: $table.coverId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get hasCover => $composableBuilder(
+      column: $table.hasCover, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get paperWidthMm => $composableBuilder(
+      column: $table.paperWidthMm,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get paperHeightMm => $composableBuilder(
+      column: $table.paperHeightMm,
+      builder: (column) => ColumnOrderings(column));
 }
 
 class $$DocumentsTableAnnotationComposer
@@ -1902,6 +2108,18 @@ class $$DocumentsTableAnnotationComposer
 
   GeneratedColumn<String> get documentType => $composableBuilder(
       column: $table.documentType, builder: (column) => column);
+
+  GeneratedColumn<String> get coverId =>
+      $composableBuilder(column: $table.coverId, builder: (column) => column);
+
+  GeneratedColumn<bool> get hasCover =>
+      $composableBuilder(column: $table.hasCover, builder: (column) => column);
+
+  GeneratedColumn<double> get paperWidthMm => $composableBuilder(
+      column: $table.paperWidthMm, builder: (column) => column);
+
+  GeneratedColumn<double> get paperHeightMm => $composableBuilder(
+      column: $table.paperHeightMm, builder: (column) => column);
 }
 
 class $$DocumentsTableTableManager extends RootTableManager<
@@ -1942,6 +2160,10 @@ class $$DocumentsTableTableManager extends RootTableManager<
             Value<String> paperColor = const Value.absent(),
             Value<bool> isPortrait = const Value.absent(),
             Value<String> documentType = const Value.absent(),
+            Value<String?> coverId = const Value.absent(),
+            Value<bool> hasCover = const Value.absent(),
+            Value<double> paperWidthMm = const Value.absent(),
+            Value<double> paperHeightMm = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               DocumentsCompanion(
@@ -1960,6 +2182,10 @@ class $$DocumentsTableTableManager extends RootTableManager<
             paperColor: paperColor,
             isPortrait: isPortrait,
             documentType: documentType,
+            coverId: coverId,
+            hasCover: hasCover,
+            paperWidthMm: paperWidthMm,
+            paperHeightMm: paperHeightMm,
             rowid: rowid,
           ),
           createCompanionCallback: ({
@@ -1978,6 +2204,10 @@ class $$DocumentsTableTableManager extends RootTableManager<
             Value<String> paperColor = const Value.absent(),
             Value<bool> isPortrait = const Value.absent(),
             Value<String> documentType = const Value.absent(),
+            Value<String?> coverId = const Value.absent(),
+            Value<bool> hasCover = const Value.absent(),
+            Value<double> paperWidthMm = const Value.absent(),
+            Value<double> paperHeightMm = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               DocumentsCompanion.insert(
@@ -1996,6 +2226,10 @@ class $$DocumentsTableTableManager extends RootTableManager<
             paperColor: paperColor,
             isPortrait: isPortrait,
             documentType: documentType,
+            coverId: coverId,
+            hasCover: hasCover,
+            paperWidthMm: paperWidthMm,
+            paperHeightMm: paperHeightMm,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0

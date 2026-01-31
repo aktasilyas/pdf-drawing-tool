@@ -87,7 +87,7 @@ class HSVBoxPainter extends CustomPainter {
     final whiteGradient = LinearGradient(
       begin: Alignment.centerLeft,
       end: Alignment.centerRight,
-      colors: [Colors.white, Colors.white.withAlpha(0)],
+      colors: [Colors.white, Colors.white.withValues(alpha: 0)],
     );
     final whiteShader = whiteGradient.createShader(Offset.zero & size);
     canvas.drawRect(Offset.zero & size, Paint()..shader = whiteShader);
@@ -96,7 +96,7 @@ class HSVBoxPainter extends CustomPainter {
     final blackGradient = LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
-      colors: [Colors.black.withAlpha(0), Colors.black],
+      colors: [Colors.black.withValues(alpha: 0), Colors.black],
     );
     final blackShader = blackGradient.createShader(Offset.zero & size);
     canvas.drawRect(Offset.zero & size, Paint()..shader = blackShader);

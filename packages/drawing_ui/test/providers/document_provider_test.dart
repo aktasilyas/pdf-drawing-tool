@@ -105,7 +105,7 @@ void main() {
     });
 
     test('updateDocument replaces entire document', () {
-      final newDoc = DrawingDocument.empty('Yeni Doküman');
+      final newDoc = DrawingDocument.emptyMultiPage('Yeni Doküman');
       container.read(documentProvider.notifier).updateDocument(newDoc);
 
       final document = container.read(documentProvider);

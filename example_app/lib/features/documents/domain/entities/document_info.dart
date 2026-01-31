@@ -18,6 +18,10 @@ class DocumentInfo extends Equatable {
   final String paperColor;
   final bool isPortrait;
   final DocumentType documentType;
+  final String? coverId;
+  final bool hasCover;
+  final double paperWidthMm;
+  final double paperHeightMm;
 
   const DocumentInfo({
     required this.id,
@@ -34,6 +38,10 @@ class DocumentInfo extends Equatable {
     this.paperColor = 'Sarı kağıt',
     this.isPortrait = true,
     this.documentType = DocumentType.notebook,
+    this.coverId,
+    this.hasCover = true,
+    this.paperWidthMm = 210.0,
+    this.paperHeightMm = 297.0,
   });
 
   DocumentInfo copyWith({
@@ -51,6 +59,10 @@ class DocumentInfo extends Equatable {
     String? paperColor,
     bool? isPortrait,
     DocumentType? documentType,
+    String? coverId,
+    bool? hasCover,
+    double? paperWidthMm,
+    double? paperHeightMm,
   }) {
     return DocumentInfo(
       id: id ?? this.id,
@@ -67,6 +79,10 @@ class DocumentInfo extends Equatable {
       paperColor: paperColor ?? this.paperColor,
       isPortrait: isPortrait ?? this.isPortrait,
       documentType: documentType ?? this.documentType,
+      coverId: coverId ?? this.coverId,
+      hasCover: hasCover ?? this.hasCover,
+      paperWidthMm: paperWidthMm ?? this.paperWidthMm,
+      paperHeightMm: paperHeightMm ?? this.paperHeightMm,
     );
   }
 
@@ -86,5 +102,9 @@ class DocumentInfo extends Equatable {
         paperColor,
         isPortrait,
         documentType,
+        coverId,
+        hasCover,
+        paperWidthMm,
+        paperHeightMm,
       ];
 }

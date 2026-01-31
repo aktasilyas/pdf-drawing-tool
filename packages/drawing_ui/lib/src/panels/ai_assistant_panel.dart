@@ -77,7 +77,7 @@ class _AIAssistantPanelState extends ConsumerState<AIAssistantPanel> {
       title: 'Ask AI',
       onClose: widget.onClose,
       headerActions: [
-        _PremiumBadge(),
+        const _PremiumBadge(),
         const SizedBox(width: 8),
       ],
       child: Column(
@@ -165,10 +165,10 @@ class _AIAssistantPanelState extends ConsumerState<AIAssistantPanel> {
 
 /// Premium badge indicator.
 class _PremiumBadge extends StatelessWidget {
+  const _PremiumBadge();
+
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(

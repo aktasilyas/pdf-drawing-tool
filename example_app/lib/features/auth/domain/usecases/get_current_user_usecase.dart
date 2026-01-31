@@ -1,4 +1,6 @@
 /// Use case for retrieving the current authenticated user.
+library;
+
 import 'package:dartz/dartz.dart';
 import 'package:example_app/core/errors/failures.dart';
 import 'package:example_app/features/auth/domain/entities/user.dart';

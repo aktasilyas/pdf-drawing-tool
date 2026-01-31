@@ -138,8 +138,6 @@ void main() {
       );
 
       // Premium categories should show premium icon when not selected
-      final premiumCategories = TemplateCategory.values.where((c) => c.isPremium);
-      
       // Find premium icons (at least one should exist)
       expect(find.byIcon(Icons.workspace_premium_rounded), findsWidgets);
     });
@@ -277,8 +275,7 @@ void main() {
       );
 
       // Check premium categories exist by verifying premium icons
-      final premiumCategories = TemplateCategory.values.where((c) => c.isPremium);
-      if (premiumCategories.isNotEmpty) {
+      if (TemplateCategory.values.any((c) => c.isPremium)) {
         expect(find.byIcon(Icons.workspace_premium_rounded), findsWidgets);
       }
     });

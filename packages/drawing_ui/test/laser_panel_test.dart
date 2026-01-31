@@ -201,7 +201,7 @@ void main() {
                   final settings = ref.watch(laserSettingsProvider);
                   return Column(
                     children: [
-                      Text('ColorHex: ${settings.color.value.toRadixString(16)}'),
+                      Text('ColorHex: ${settings.color.toARGB32().toRadixString(16)}'),
                       const Expanded(
                         child: SingleChildScrollView(
                           child: LaserPointerPanel(),

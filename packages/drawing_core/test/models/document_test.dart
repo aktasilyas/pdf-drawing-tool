@@ -4,6 +4,7 @@ import 'package:drawing_core/src/models/drawing_point.dart';
 import 'package:drawing_core/src/models/layer.dart';
 import 'package:drawing_core/src/models/stroke.dart';
 import 'package:drawing_core/src/models/stroke_style.dart';
+import 'package:drawing_core/src/models/page_size.dart';
 
 void main() {
   group('DrawingDocument', () {
@@ -42,10 +43,11 @@ void main() {
     group('Constructor', () {
       test('creates with required parameters', () {
         final now = DateTime.now();
-        final doc = DrawingDocument(
+        final doc = DrawingDocument.withLayers(
+          'Test Document',
+          [testLayer1],
+        ).copyWith(
           id: 'test-id',
-          title: 'Test Document',
-          layers: [testLayer1],
           createdAt: now,
           updatedAt: now,
         );
@@ -61,15 +63,16 @@ void main() {
       test('creates with all parameters', () {
         final created = DateTime(2024, 1, 1);
         final updated = DateTime(2024, 1, 2);
-        final doc = DrawingDocument(
+        final doc = DrawingDocument.withLayers(
+          'Test Document',
+          [testLayer1, testLayer2],
+          width: 800.0,
+          height: 600.0,
+        ).copyWith(
           id: 'test-id',
-          title: 'Test Document',
-          layers: [testLayer1, testLayer2],
           activeLayerIndex: 1,
           createdAt: created,
           updatedAt: updated,
-          width: 800.0,
-          height: 600.0,
         );
 
         expect(doc.activeLayerIndex, 1);
@@ -82,10 +85,11 @@ void main() {
       test('layers list is unmodifiable', () {
         final now = DateTime.now();
         final mutableList = [testLayer1];
-        final doc = DrawingDocument(
+        final doc = DrawingDocument.withLayers(
+          'title',
+          mutableList,
+        ).copyWith(
           id: 'id',
-          title: 'title',
-          layers: mutableList,
           createdAt: now,
           updatedAt: now,
         );
@@ -104,7 +108,7 @@ void main() {
 
     group('Factory: empty', () {
       test('creates document with single empty layer', () {
-        final doc = DrawingDocument.empty('New Document');
+        final doc = DrawingDocument.emptyMultiPage('New Document');
 
         expect(doc.id, startsWith('doc_'));
         expect(doc.title, 'New Document');
@@ -117,10 +121,9 @@ void main() {
       });
 
       test('creates document with custom dimensions', () {
-        final doc = DrawingDocument.empty(
+        final doc = DrawingDocument.emptyMultiPage(
           'Custom Size',
-          width: 1024.0,
-          height: 768.0,
+          pageSize: PageSize(width: 1024.0, height: 768.0),
         );
 
         expect(doc.width, 1024.0);
@@ -129,7 +132,7 @@ void main() {
 
       test('sets createdAt and updatedAt to now', () {
         final before = DateTime.now();
-        final doc = DrawingDocument.empty('Test');
+        final doc = DrawingDocument.emptyMultiPage('Test');
         final after = DateTime.now();
 
         expect(
@@ -190,10 +193,11 @@ void main() {
 
       test('activeLayer returns null for invalid index', () {
         final now = DateTime.now();
-        final doc = DrawingDocument(
+        final doc = DrawingDocument.withLayers(
+          'title',
+          [testLayer1],
+        ).copyWith(
           id: 'id',
-          title: 'title',
-          layers: [testLayer1],
           activeLayerIndex: 5, // invalid
           createdAt: now,
           updatedAt: now,
@@ -211,7 +215,7 @@ void main() {
       });
 
       test('isEmpty returns true for document with no strokes', () {
-        final doc = DrawingDocument.empty('Empty');
+        final doc = DrawingDocument.emptyMultiPage('Empty');
         expect(doc.isEmpty, true);
         expect(doc.isNotEmpty, false);
       });
@@ -225,7 +229,7 @@ void main() {
 
     group('addLayer', () {
       test('adds layer to document', () {
-        final doc = DrawingDocument.empty('Test');
+        final doc = DrawingDocument.emptyMultiPage('Test');
         final updated = doc.addLayer(testLayer1);
 
         expect(doc.layerCount, 1); // original unchanged
@@ -234,7 +238,7 @@ void main() {
       });
 
       test('updates updatedAt', () {
-        final doc = DrawingDocument.empty('Test');
+        final doc = DrawingDocument.emptyMultiPage('Test');
         final before = doc.updatedAt;
 
         // Small delay to ensure different timestamp
@@ -273,7 +277,7 @@ void main() {
       });
 
       test('does not remove last layer', () {
-        final doc = DrawingDocument.empty('Test');
+        final doc = DrawingDocument.emptyMultiPage('Test');
         final updated = doc.removeLayer(0);
 
         expect(updated.layerCount, 1);
@@ -380,7 +384,7 @@ void main() {
 
     group('addStrokeToActiveLayer', () {
       test('adds stroke to active layer', () {
-        final doc = DrawingDocument.empty('Test');
+        final doc = DrawingDocument.emptyMultiPage('Test');
         final updated = doc.addStrokeToActiveLayer(testStroke1);
 
         expect(doc.strokeCount, 0); // original unchanged
@@ -390,10 +394,11 @@ void main() {
 
       test('returns same document if no valid active layer', () {
         final now = DateTime.now();
-        final doc = DrawingDocument(
+        final doc = DrawingDocument.withLayers(
+          'title',
+          [testLayer1],
+        ).copyWith(
           id: 'id',
-          title: 'title',
-          layers: [testLayer1],
           activeLayerIndex: 5, // invalid
           createdAt: now,
           updatedAt: now,
@@ -415,10 +420,11 @@ void main() {
 
       test('returns same document if no valid active layer', () {
         final now = DateTime.now();
-        final doc = DrawingDocument(
+        final doc = DrawingDocument.withLayers(
+          'title',
+          [testLayer1],
+        ).copyWith(
           id: 'id',
-          title: 'title',
-          layers: [testLayer1],
           activeLayerIndex: 5, // invalid
           createdAt: now,
           updatedAt: now,
@@ -431,7 +437,7 @@ void main() {
 
     group('updateTitle', () {
       test('updates document title', () {
-        final doc = DrawingDocument.empty('Old Title');
+        final doc = DrawingDocument.emptyMultiPage('Old Title');
         final updated = doc.updateTitle('New Title');
 
         expect(doc.title, 'Old Title'); // original unchanged
@@ -439,7 +445,7 @@ void main() {
       });
 
       test('updates updatedAt', () {
-        final doc = DrawingDocument.empty('Test');
+        final doc = DrawingDocument.emptyMultiPage('Test');
         final updated = doc.updateTitle('New Title');
 
         expect(
@@ -452,7 +458,7 @@ void main() {
 
     group('copyWith', () {
       test('copies with single parameter changed', () {
-        final doc = DrawingDocument.empty('Original');
+        final doc = DrawingDocument.emptyMultiPage('Original');
         final copied = doc.copyWith(title: 'Copied');
 
         expect(copied.title, 'Copied');
@@ -460,7 +466,7 @@ void main() {
       });
 
       test('copies with multiple parameters changed', () {
-        final doc = DrawingDocument.empty('Test');
+        final doc = DrawingDocument.emptyMultiPage('Test');
         final newUpdated = DateTime(2025, 1, 1);
         final copied = doc.copyWith(
           title: 'New Title',
@@ -479,26 +485,28 @@ void main() {
     group('Equality', () {
       test('two documents with same values are equal', () {
         final now = DateTime.now();
-        final doc1 = DrawingDocument(
+        final doc1 = DrawingDocument.withLayers(
+          'Same Title',
+          [testLayer1],
+          width: 1920.0,
+          height: 1080.0,
+        ).copyWith(
           id: 'same-id',
-          title: 'Same Title',
-          layers: [testLayer1],
           activeLayerIndex: 0,
           createdAt: now,
           updatedAt: now,
-          width: 1920.0,
-          height: 1080.0,
         );
 
-        final doc2 = DrawingDocument(
+        final doc2 = DrawingDocument.withLayers(
+          'Same Title',
+          [testLayer1],
+          width: 1920.0,
+          height: 1080.0,
+        ).copyWith(
           id: 'same-id',
-          title: 'Same Title',
-          layers: [testLayer1],
           activeLayerIndex: 0,
           createdAt: now,
           updatedAt: now,
-          width: 1920.0,
-          height: 1080.0,
         );
 
         expect(doc1, equals(doc2));
@@ -507,17 +515,19 @@ void main() {
 
       test('two documents with different ids are not equal', () {
         final now = DateTime.now();
-        final doc1 = DrawingDocument(
+        final doc1 = DrawingDocument.withLayers(
+          'Title',
+          const [],
+        ).copyWith(
           id: 'id-1',
-          title: 'Title',
-          layers: const [],
           createdAt: now,
           updatedAt: now,
         );
-        final doc2 = DrawingDocument(
+        final doc2 = DrawingDocument.withLayers(
+          'Title',
+          const [],
+        ).copyWith(
           id: 'id-2',
-          title: 'Title',
-          layers: const [],
           createdAt: now,
           updatedAt: now,
         );
@@ -530,15 +540,16 @@ void main() {
       test('toJson converts to correct map', () {
         final created = DateTime(2024, 1, 1, 10, 0);
         final updated = DateTime(2024, 1, 2, 15, 30);
-        final doc = DrawingDocument(
+        final doc = DrawingDocument.withLayers(
+          'Test Document',
+          [testLayer1],
+          width: 800.0,
+          height: 600.0,
+        ).copyWith(
           id: 'test-id',
-          title: 'Test Document',
-          layers: [testLayer1],
           activeLayerIndex: 0,
           createdAt: created,
           updatedAt: updated,
-          width: 800.0,
-          height: 600.0,
         );
 
         final json = doc.toJson();
@@ -593,15 +604,16 @@ void main() {
       });
 
       test('roundtrip preserves values', () {
-        final original = DrawingDocument(
+        final original = DrawingDocument.withLayers(
+          'Roundtrip Test',
+          [testLayer1, testLayer2],
+          width: 1024.0,
+          height: 768.0,
+        ).copyWith(
           id: 'roundtrip-id',
-          title: 'Roundtrip Test',
-          layers: [testLayer1, testLayer2],
           activeLayerIndex: 1,
           createdAt: DateTime(2024, 6, 15, 10, 30),
           updatedAt: DateTime(2024, 6, 16, 14, 45),
-          width: 1024.0,
-          height: 768.0,
         );
 
         final json = original.toJson();

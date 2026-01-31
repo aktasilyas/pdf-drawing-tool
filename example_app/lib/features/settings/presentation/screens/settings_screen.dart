@@ -3,11 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:example_app/features/auth/presentation/providers/auth_provider.dart';
-import '../providers/settings_provider.dart';
-import '../widgets/settings_section.dart';
-import '../widgets/settings_tile.dart';
-import '../widgets/profile_header.dart';
-import '../../domain/entities/app_settings.dart';
+import 'package:example_app/features/settings/presentation/providers/settings_provider.dart';
+import 'package:example_app/features/settings/presentation/widgets/settings_section.dart';
+import 'package:example_app/features/settings/presentation/widgets/settings_tile.dart';
+import 'package:example_app/features/settings/presentation/widgets/profile_header.dart';
+import 'package:example_app/features/settings/domain/entities/app_settings.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -121,7 +121,7 @@ class SettingsScreen extends ConsumerWidget {
               SettingsSection(
                 title: 'HAKKINDA',
                 children: [
-                  SettingsTile(
+                  const SettingsTile(
                     icon: Icons.info_outline,
                     title: 'Versiyon',
                     subtitle: '1.0.0 (1)',
@@ -175,15 +175,24 @@ class SettingsScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => SimpleDialog(
         title: const Text('Tema Seçin'),
-        children: AppThemeMode.values.map((mode) => RadioListTile<AppThemeMode>(
-          title: Text(_getThemeText(mode)),
-          value: mode,
-          groupValue: settings.themeMode,
-          onChanged: (v) {
-            ref.read(settingsProvider.notifier).setTheme(v!);
-            Navigator.pop(ctx);
-          },
-        )).toList(),
+        children: [
+          RadioGroup<AppThemeMode>(
+            groupValue: settings.themeMode,
+            onChanged: (v) {
+              if (v != null) {
+                ref.read(settingsProvider.notifier).setTheme(v);
+                Navigator.pop(ctx);
+              }
+            },
+            child: Column(
+              children: AppThemeMode.values.map((mode) => RadioListTile<AppThemeMode>(
+                title: Text(_getThemeText(mode)),
+                value: mode,
+                selected: settings.themeMode == mode,
+              )).toList(),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -194,23 +203,28 @@ class SettingsScreen extends ConsumerWidget {
       builder: (ctx) => SimpleDialog(
         title: const Text('Dil Seçin'),
         children: [
-          RadioListTile<AppLanguage>(
-            title: const Text('Türkçe'),
-            value: AppLanguage.tr,
+          RadioGroup<AppLanguage>(
             groupValue: settings.language,
             onChanged: (v) {
-              ref.read(settingsProvider.notifier).setLanguage(v!);
-              Navigator.pop(ctx);
+              if (v != null) {
+                ref.read(settingsProvider.notifier).setLanguage(v);
+                Navigator.pop(ctx);
+              }
             },
-          ),
-          RadioListTile<AppLanguage>(
-            title: const Text('English'),
-            value: AppLanguage.en,
-            groupValue: settings.language,
-            onChanged: (v) {
-              ref.read(settingsProvider.notifier).setLanguage(v!);
-              Navigator.pop(ctx);
-            },
+            child: Column(
+              children: [
+                RadioListTile<AppLanguage>(
+                  title: const Text('Türkçe'),
+                  value: AppLanguage.tr,
+                  selected: settings.language == AppLanguage.tr,
+                ),
+                RadioListTile<AppLanguage>(
+                  title: const Text('English'),
+                  value: AppLanguage.en,
+                  selected: settings.language == AppLanguage.en,
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -222,15 +236,24 @@ class SettingsScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => SimpleDialog(
         title: const Text('Kağıt Boyutu'),
-        children: PaperSize.values.map((size) => RadioListTile<PaperSize>(
-          title: Text(size.name.toUpperCase()),
-          value: size,
-          groupValue: settings.defaultPaperSize,
-          onChanged: (v) {
-            ref.read(settingsProvider.notifier).setPaperSize(v!);
-            Navigator.pop(ctx);
-          },
-        )).toList(),
+        children: [
+          RadioGroup<PaperSize>(
+            groupValue: settings.defaultPaperSize,
+            onChanged: (v) {
+              if (v != null) {
+                ref.read(settingsProvider.notifier).setPaperSize(v);
+                Navigator.pop(ctx);
+              }
+            },
+            child: Column(
+              children: PaperSize.values.map((size) => RadioListTile<PaperSize>(
+                title: Text(size.name.toUpperCase()),
+                value: size,
+                selected: settings.defaultPaperSize == size,
+              )).toList(),
+            ),
+          ),
+        ],
       ),
     );
   }

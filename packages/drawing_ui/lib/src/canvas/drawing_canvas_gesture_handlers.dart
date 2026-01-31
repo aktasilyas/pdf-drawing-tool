@@ -166,11 +166,6 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       stabilization = penSettings.stabilization;
     }
 
-    // #region agent log [H1/H3]
-    debugPrint('✏️ [H1] handlePointerDown - Starting stroke');
-    debugPrint('✏️ [H1] point: ${point.x}, ${point.y}');
-    debugPrint('✏️ [H3] isDrawing BEFORE: ${drawingController.isDrawing}');
-    // #endregion
 
     drawingController.startStroke(
       point,
@@ -178,10 +173,6 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       stabilization: stabilization,
       straightLine: false,
     );
-
-    // #region agent log [H3]
-    debugPrint('✏️ [H3] isDrawing AFTER startStroke: ${drawingController.isDrawing}');
-    // #endregion
 
     lastPoint = event.localPosition;
   }
@@ -240,8 +231,9 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     if (!drawingController.isDrawing) return;
 
     // Performance: Skip points that are too close together
-    if (lastPoint != null) {
-      final distance = (event.localPosition - lastPoint!).distance;
+    final lastPointValue = lastPoint;
+    if (lastPointValue != null) {
+      final distance = (event.localPosition - lastPointValue).distance;
       if (distance < minPointDistance) return;
     }
 
@@ -252,36 +244,22 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
 
   /// Handles pointer up - finishes stroke, eraser, selection, or shape.
   void handlePointerUp(PointerUpEvent event) {
-    // #region agent log [H1/H2]
-    debugPrint('✏️ [H1] handlePointerUp CALLED');
-    debugPrint('✏️ [H2] pointerCount BEFORE decrement: $pointerCount');
-    // #endregion
-
     pointerCount = (pointerCount - 1).clamp(0, 10);
-
-    // #region agent log [H2/H3]
-    debugPrint('✏️ [H2] pointerCount AFTER decrement: $pointerCount');
-    debugPrint('✏️ [H3] isDrawing: ${drawingController.isDrawing}');
-    debugPrint('✏️ [H2/H3] condition (pointerCount==0 && isDrawing): ${pointerCount == 0 && drawingController.isDrawing}');
-    // #endregion
 
     // Selection mode
     if (isSelecting) {
-      debugPrint('✏️ [BRANCH] isSelecting=true, returning early');
       handleSelectionUp(event);
       return;
     }
 
     // Shape mode
     if (isDrawingShape) {
-      debugPrint('✏️ [BRANCH] isDrawingShape=true, returning early');
       handleShapeUp(event);
       return;
     }
 
     // Straight line mode
     if (isStraightLineDrawing) {
-      debugPrint('✏️ [BRANCH] isStraightLineDrawing=true, returning early');
       handleStraightLineUp(event);
       return;
     }
@@ -289,40 +267,18 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     // Check if eraser is active
     final isEraser = ref.read(isEraserToolProvider);
     if (isEraser) {
-      debugPrint('✏️ [BRANCH] isEraser=true, returning early');
       handleEraserUp(event);
       return;
     }
 
     // Drawing mode - commit if we were drawing with single finger
     if (pointerCount == 0 && drawingController.isDrawing) {
-      // #region agent log [H4]
-      debugPrint('✏️ [H4] ENTERING stroke commit block');
-      // #endregion
-
       final stroke = drawingController.endStroke();
 
-      // #region agent log [H4]
-      debugPrint('✏️ [H4] endStroke() returned: ${stroke == null ? "NULL" : "STROKE"}');
-      debugPrint('✏️ [H4] stroke points: ${stroke?.points.length ?? 0}');
-      // #endregion
-
       if (stroke != null) {
-        // #region agent log [H5]
-        debugPrint('✏️ [H5] CALLING addStroke...');
-        // #endregion
-
         // Add stroke via history provider (enables undo/redo)
         ref.read(historyManagerProvider.notifier).addStroke(stroke);
-
-        // #region agent log [H5]
-        debugPrint('✏️ [H5] addStroke COMPLETED');
-        // #endregion
       }
-    } else {
-      // #region agent log [H2/H3]
-      debugPrint('✏️ [H2/H3] SKIPPED stroke commit - condition false');
-      // #endregion
     }
     lastPoint = null;
   }
@@ -869,12 +825,13 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
   }
 
   void handleShapeMove(PointerMoveEvent event) {
-    if (activeShapeTool == null) return;
+    final tool = activeShapeTool;
+    if (tool == null) return;
 
     final transform = ref.read(canvasTransformProvider);
     final canvasPoint = transform.screenToCanvas(event.localPosition);
 
-    activeShapeTool!.updateShape(core.DrawingPoint(
+    tool.updateShape(core.DrawingPoint(
       x: canvasPoint.dx,
       y: canvasPoint.dy,
       pressure: 1.0,
@@ -884,11 +841,12 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
   }
 
   void handleShapeUp(PointerUpEvent event) {
-    if (activeShapeTool == null) return;
+    final tool = activeShapeTool;
+    if (tool == null) return;
 
     isDrawingShape = false;
 
-    final shape = activeShapeTool!.endShape();
+    final shape = tool.endShape();
 
     if (shape != null) {
       final document = ref.read(documentProvider);
@@ -1014,20 +972,22 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
 
   void handleTextEdit() {
     final textToolState = ref.read(textToolProvider);
-    if (textToolState.menuText != null) {
+    final menuText = textToolState.menuText;
+    if (menuText != null) {
       ref
           .read(textToolProvider.notifier)
-          .editExistingText(textToolState.menuText!);
+          .editExistingText(menuText);
     }
   }
 
   void handleTextDelete() {
     final textToolState = ref.read(textToolProvider);
-    if (textToolState.menuText != null) {
+    final menuText = textToolState.menuText;
+    if (menuText != null) {
       final document = ref.read(documentProvider);
       final command = core.RemoveTextCommand(
         layerIndex: document.activeLayerIndex,
-        textId: textToolState.menuText!.id,
+        textId: menuText.id,
       );
       ref.read(historyManagerProvider.notifier).execute(command);
       ref.read(textToolProvider.notifier).hideContextMenu();
@@ -1036,10 +996,11 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
 
   void handleTextStyle() {
     final textToolState = ref.read(textToolProvider);
-    if (textToolState.menuText != null) {
+    final menuText = textToolState.menuText;
+    if (menuText != null) {
       ref
           .read(textToolProvider.notifier)
-          .showStylePopup(textToolState.menuText!);
+          .showStylePopup(menuText);
     }
   }
 
@@ -1054,8 +1015,9 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
 
   void handleTextDuplicate() {
     final textToolState = ref.read(textToolProvider);
-    if (textToolState.menuText != null) {
-      final originalText = textToolState.menuText!;
+    final menuText = textToolState.menuText;
+    if (menuText != null) {
+      final originalText = menuText;
       // Create duplicate with visible offset (40px diagonal)
       final duplicateText = core.TextElement.create(
         text: originalText.text,
@@ -1082,15 +1044,17 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
 
   void handleTextMove() {
     final textToolState = ref.read(textToolProvider);
-    if (textToolState.menuText != null) {
-      ref.read(textToolProvider.notifier).startMoving(textToolState.menuText!);
+    final menuText = textToolState.menuText;
+    if (menuText != null) {
+      ref.read(textToolProvider.notifier).startMoving(menuText);
     }
   }
 
   void moveTextTo(double x, double y) {
     final textToolState = ref.read(textToolProvider);
-    if (textToolState.movingText != null) {
-      final movedText = textToolState.movingText!.copyWith(x: x, y: y);
+    final movingText = textToolState.movingText;
+    if (movingText != null) {
+      final movedText = movingText.copyWith(x: x, y: y);
       final document = ref.read(documentProvider);
       final command = core.UpdateTextCommand(
         layerIndex: document.activeLayerIndex,
@@ -1153,8 +1117,13 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       final scaleDelta = details.scale / lastScale!;
       if ((scaleDelta - 1.0).abs() > 0.001) {
         if (mode.isInfinite) {
-          // Unlimited zoom for whiteboard
-          transformNotifier.applyZoomDelta(scaleDelta, details.focalPoint);
+          // Unlimited zoom for whiteboard - use mode's zoom limits
+          transformNotifier.applyZoomDelta(
+            scaleDelta, 
+            details.focalPoint,
+            minZoom: mode.minZoom,
+            maxZoom: mode.maxZoom,
+          );
         } else {
           // Clamped zoom for notebook/limited modes
           transformNotifier.applyZoomDeltaClamped(

@@ -63,26 +63,26 @@ class TextContextMenu extends ConsumerWidget {
                   tooltip: 'Düzenle',
                   onTap: onEdit,
                 ),
-                _MenuDivider(),
+                const _MenuDivider(),
                 _MenuButton(
                   icon: Icons.delete_outline,
                   tooltip: 'Sil',
                   onTap: onDelete,
                   color: Colors.red,
                 ),
-                _MenuDivider(),
+                const _MenuDivider(),
                 _MenuButton(
                   icon: Icons.palette_outlined,
                   tooltip: 'Stil',
                   onTap: onStyle,
                 ),
-                _MenuDivider(),
+                const _MenuDivider(),
                 _MenuButton(
                   icon: Icons.content_copy,
                   tooltip: 'Kopyala',
                   onTap: onDuplicate,
                 ),
-                _MenuDivider(),
+                const _MenuDivider(),
                 _MenuButton(
                   icon: Icons.open_with,
                   tooltip: 'Taşı',
@@ -139,6 +139,8 @@ class _MenuButton extends StatelessWidget {
 
 /// Vertical divider between menu buttons
 class _MenuDivider extends StatelessWidget {
+  const _MenuDivider();
+
   @override
   Widget build(BuildContext context) {
     return Container(

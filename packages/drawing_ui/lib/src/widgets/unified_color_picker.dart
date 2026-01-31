@@ -60,7 +60,7 @@ class UnifiedColorPicker extends StatelessWidget {
     overlayEntry = OverlayEntry(
       builder: (overlayContext) {
         return Material(
-          color: Colors.black.withAlpha(137), // 0.54 opacity for stronger backdrop
+          color: Colors.black.withValues(alpha: 137.0 / 255.0), // 0.54 opacity for stronger backdrop
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () => overlayEntry.remove(),
@@ -93,7 +93,9 @@ class UnifiedColorPicker extends StatelessWidget {
   }
 
   bool _colorsMatch(Color a, Color b) {
-    return a.red == b.red && a.green == b.green && a.blue == b.blue;
+    return (a.r * 255.0).round().clamp(0, 255) == (b.r * 255.0).round().clamp(0, 255) && 
+        (a.g * 255.0).round().clamp(0, 255) == (b.g * 255.0).round().clamp(0, 255) && 
+        (a.b * 255.0).round().clamp(0, 255) == (b.b * 255.0).round().clamp(0, 255);
   }
 }
 

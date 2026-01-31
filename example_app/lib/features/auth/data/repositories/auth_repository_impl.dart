@@ -1,4 +1,6 @@
 /// Supabase-backed implementation of the auth repository.
+library;
+
 import 'package:dartz/dartz.dart';
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/auth/data/datasources/auth_remote_datasource.dart';

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:example_app/core/core.dart';
@@ -25,13 +24,7 @@ final documentLoaderProvider = FutureProvider.family<DrawingDocument, String>((r
   final result = await useCase(documentId);
   return result.fold(
     (failure) => throw Exception(failure.message),
-    (document) {
-      // #region agent log
-      debugPrint('🔍 [DEBUG] documentLoaderProvider - documentType: ${document.documentType}');
-      debugPrint('🔍 [DEBUG] documentLoaderProvider - isMultiPage: ${document.isMultiPage}');
-      // #endregion
-      return document;
-    },
+    (document) => document,
   );
 });
 
@@ -47,8 +40,6 @@ class AutoSaveNotifier extends StateNotifier<bool> {
   AutoSaveNotifier(this._ref) : super(false);
 
   void documentChanged(DrawingDocument document) {
-    debugPrint('💾 [SAVE] Auto-save scheduled (3s)');
-    
     _debounceTimer?.cancel();
     _debounceTimer = Timer(const Duration(seconds: 3), () {
       _save(document);
@@ -56,15 +47,13 @@ class AutoSaveNotifier extends StateNotifier<bool> {
   }
 
   Future<void> _save(DrawingDocument document) async {
-    debugPrint('💾 [SAVE] Saving document ${document.id}...');
-    
     state = true; // Saving...
     final useCase = _ref.read(saveDocumentUseCaseProvider);
     final result = await useCase(document);
     
     result.fold(
-      (failure) => debugPrint('❌ [SAVE] Failed: ${failure.message}'),
-      (_) => debugPrint('✅ [SAVE] Success!'),
+      (failure) => logger.e('Save failed', error: failure.message),
+      (_) => logger.i('Document saved successfully: ${document.id}'),
     );
     
     state = false; // Saved
@@ -72,7 +61,6 @@ class AutoSaveNotifier extends StateNotifier<bool> {
   }
 
   void saveNow(DrawingDocument document) {
-    debugPrint('💾 [SAVE] Immediate save requested');
     _debounceTimer?.cancel();
     _save(document);
   }

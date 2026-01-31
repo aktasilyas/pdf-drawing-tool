@@ -4,10 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:drawing_ui/drawing_ui.dart';
-import 'package:example_app/core/routing/app_router.dart';
-import 'package:example_app/core/di/injection.dart';
+import 'package:example_app/core/core.dart';
 import 'package:example_app/features/settings/settings.dart';
+import 'package:example_app/features/sync/presentation/providers/sync_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,7 +27,7 @@ void main() async {
     debug: true, // Dev için debug açık
   );
 
-  debugPrint('✅ Supabase initialized: ${dotenv.env['SUPABASE_URL']}');
+  logger.i('Supabase initialized: ${dotenv.env['SUPABASE_URL']}');
 
   // Initialize SharedPreferences
   final prefs = await SharedPreferences.getInstance();

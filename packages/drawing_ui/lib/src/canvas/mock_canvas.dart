@@ -220,12 +220,12 @@ class _MockCursorIndicatorState extends ConsumerState<_MockCursorIndicator> {
                     shape: BoxShape.circle,
                     border: Border.all(
                       color: _isDrawing
-                          ? Colors.blue.withAlpha(180)
-                          : Colors.grey.withAlpha(100),
+                          ? Colors.blue.withValues(alpha: 180.0 / 255.0)
+                          : Colors.grey.withValues(alpha: 100.0 / 255.0),
                       width: 2,
                     ),
                     color: _isDrawing
-                        ? Colors.blue.withAlpha(30)
+                        ? Colors.blue.withValues(alpha: 30.0 / 255.0)
                         : Colors.transparent,
                   ),
                 ),

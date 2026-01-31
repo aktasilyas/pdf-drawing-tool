@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/documents.dart';
@@ -13,12 +12,24 @@ class SaveDocumentUseCase {
 
   Future<Either<Failure, void>> call(DrawingDocument document) async {
     try {
-      debugPrint('💿 [DB] Saving document ${document.id}');
+      // 1. Clean cover pages (remove drawings from cover pages)
+      final cleanedPages = document.pages.map((page) {
+        if (page.isCover) {
+          return page.clearDrawings();
+        }
+        return page;
+      }).toList();
       
-      // 1. Serialize document to JSON
-      final content = document.toJson();
+      // Create cleaned document
+      final cleanedDocument = document.copyWith(
+        pages: cleanedPages,
+        updatedAt: DateTime.now(),
+      );
       
-      // 2. Save to DB
+      // 2. Serialize document to JSON
+      final content = cleanedDocument.toJson();
+      
+      // 3. Save to DB
       final result = await _repository.saveDocumentContent(
         id: document.id,
         content: content,
@@ -27,13 +38,13 @@ class SaveDocumentUseCase {
       );
       
       result.fold(
-        (failure) => debugPrint('❌ [DB] Save failed: ${failure.message}'),
-        (_) => debugPrint('✅ [DB] Saved successfully'),
+        (failure) => logger.e('Save document failed', error: failure.message),
+        (_) => logger.i('Document saved: ${document.id}'),
       );
       
       return result;
     } catch (e) {
-      debugPrint('❌ [DB] Exception: $e');
+      logger.e('Save document exception', error: e, stackTrace: StackTrace.current);
       return Left(CacheFailure('Failed to save document: $e'));
     }
   }

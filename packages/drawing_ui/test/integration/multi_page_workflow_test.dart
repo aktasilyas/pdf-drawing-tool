@@ -6,11 +6,9 @@ import 'package:drawing_ui/drawing_ui.dart';
 
 void main() {
   group('Multi-Page Workflow Integration', () {
-    late PageManager pageManager;
     late ThumbnailCache thumbnailCache;
 
     setUp(() {
-      pageManager = PageManager();
       thumbnailCache = ThumbnailCache(maxSize: 10);
     });
 

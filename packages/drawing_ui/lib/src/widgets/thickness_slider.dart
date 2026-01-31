@@ -115,7 +115,7 @@ class ThicknessSlider extends StatelessWidget {
                   activeTrackColor: theme.toolbarIconSelectedColor,
                   inactiveTrackColor: Colors.grey.shade300,
                   thumbColor: theme.toolbarIconSelectedColor,
-                  overlayColor: theme.toolbarIconSelectedColor.withAlpha(32),
+                  overlayColor: theme.toolbarIconSelectedColor.withValues(alpha: 32.0 / 255.0),
                 ),
                 child: Slider(
                   value: value,
@@ -184,7 +184,7 @@ class StabilizationSlider extends StatelessWidget {
             activeTrackColor: theme.toolbarIconSelectedColor,
             inactiveTrackColor: Colors.grey.shade300,
             thumbColor: theme.toolbarIconSelectedColor,
-            overlayColor: theme.toolbarIconSelectedColor.withAlpha(32),
+            overlayColor: theme.toolbarIconSelectedColor.withValues(alpha: 32.0 / 255.0),
           ),
           child: Slider(
             value: value,

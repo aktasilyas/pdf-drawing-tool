@@ -15,7 +15,7 @@ void main() {
 
     setUp(() {
       final layer = Layer.empty('Layer 1');
-      document = DrawingDocument.empty('Test').copyWith(
+      document = DrawingDocument.emptyMultiPage('Test').copyWith(
         layers: [layer],
       );
 
@@ -98,7 +98,7 @@ void main() {
       );
 
       final layer = Layer.empty('Layer 1').addShape(shape);
-      document = DrawingDocument.empty('Test').copyWith(
+      document = DrawingDocument.emptyMultiPage('Test').copyWith(
         layers: [layer],
       );
     });

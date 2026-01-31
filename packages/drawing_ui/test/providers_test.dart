@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:drawing_ui/drawing_ui.dart';
-import 'package:drawing_ui/src/providers/history_provider.dart';
 
 void main() {
   group('Current Tool Provider', () {
@@ -105,7 +104,7 @@ void main() {
       addTearDown(container.dispose);
 
       final settings = container.read(highlighterSettingsProvider);
-      expect(settings.color.alpha, 0x80);
+      expect((settings.color.a * 255.0).round().clamp(0, 255), 0x80);
       expect(settings.thickness, 20.0);
       expect(settings.straightLineMode, false);
     });

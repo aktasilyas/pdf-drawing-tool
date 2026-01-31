@@ -40,18 +40,33 @@ class EditorScreen extends ConsumerWidget {
       data: (document) {
         // Initialize document on EVERY load (not just first time)
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          debugPrint('🔄 [INIT] Initializing document ${document.id}');
           ref.read(documentProvider.notifier).updateDocument(document);
           ref.read(currentDocumentProvider.notifier).state = document;
-          ref.read(pageManagerProvider.notifier).initializeFromDocument(document.pages);
+          ref.read(pageManagerProvider.notifier).initializeFromDocument(
+            document.pages,
+            currentIndex: document.currentPageIndex,
+          );
+          
+          // Initialize canvas transform for limited mode (notebook/notepad)
+          final canvasMode = document.canvasMode;
+          if (!canvasMode.isInfinite) {
+            final screenSize = MediaQuery.of(context).size;
+            final currentPage = document.currentPage;
+            if (currentPage != null) {
+              final pageSize = Size(currentPage.size.width, currentPage.size.height);
+              
+              ref.read(canvasTransformProvider.notifier).initializeForPage(
+                viewportSize: screenSize,
+                pageSize: pageSize,
+              );
+            }
+          }
         });
 
         // Listen to document changes for auto-save (NO INVALIDATE HERE!)
         ref.listen<DrawingDocument>(documentProvider, (previous, next) {
           // Only trigger save if document actually changed (same ID, different content)
           if (previous != null && previous != next && previous.id == next.id) {
-            debugPrint('💾 [AUTOSAVE] Document changed, scheduling save...');
-            debugPrint('💾 [AUTOSAVE] Strokes: ${next.currentPage?.layers.firstOrNull?.strokes.length ?? 0}');
             ref.read(currentDocumentProvider.notifier).state = next;
             ref.read(autoSaveProvider.notifier).documentChanged(next);
             ref.read(hasUnsavedChangesProvider.notifier).state = true;
@@ -86,12 +101,9 @@ class EditorScreen extends ConsumerWidget {
     final currentDoc = ref.read(documentProvider);
 
     if (hasUnsaved) {
-      debugPrint('💾 [BACK] Saving before exit...');
       ref.read(autoSaveProvider.notifier).saveNow(currentDoc);
       await Future.delayed(const Duration(milliseconds: 500));
     }
-
-    debugPrint('🔄 [BACK] Invalidating ALL providers for fresh load next time');
     
     // TÜM provider'ları invalidate et
     ref.invalidate(documentLoaderProvider(documentId));

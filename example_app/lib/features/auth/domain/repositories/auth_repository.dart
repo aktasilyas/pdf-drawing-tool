@@ -1,4 +1,6 @@
 /// Repository contract for auth operations.
+library;
+
 import 'package:dartz/dartz.dart';
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/auth/domain/entities/user.dart';

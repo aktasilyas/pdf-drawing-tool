@@ -61,7 +61,7 @@ class CompactToggle extends StatelessWidget {
             child: Switch(
               value: value,
               onChanged: onChanged,
-              activeColor: activeColor ?? colorScheme.primary,
+              activeThumbColor: activeColor ?? colorScheme.primary,
               materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
           ),

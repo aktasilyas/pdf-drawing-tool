@@ -1,7 +1,5 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
-import 'pdf_render_provider.dart';
 
 /// PDF Prefetching stratejisi
 class PrefetchStrategy {
@@ -49,6 +47,7 @@ class PDFPrefetchManager {
   }
 
   /// Tek bir sayfayı arka planda prefetch et
+  // ignore: unused_element
   Future<void> _prefetchPage(String cacheKey) async {
     // ❌ DEVRE DIŞI
     return;

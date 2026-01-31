@@ -55,13 +55,13 @@ class ToolPanel extends StatelessWidget {
           boxShadow: [
             // Main shadow
             BoxShadow(
-              color: Colors.black.withAlpha(20),
+              color: Colors.black.withValues(alpha: 20.0 / 255.0),
               blurRadius: theme.panelElevation,
               offset: const Offset(0, 4),
             ),
             // Subtle ambient shadow
             BoxShadow(
-              color: Colors.black.withAlpha(8),
+              color: Colors.black.withValues(alpha: 8.0 / 255.0),
               blurRadius: theme.panelElevation * 2,
               spreadRadius: 2,
             ),
@@ -332,7 +332,7 @@ class PanelToggleRow extends StatelessWidget {
             child: Switch(
               value: value,
               onChanged: enabled ? onChanged : null,
-              activeColor: colorScheme.primary,
+              activeThumbColor: colorScheme.primary,
               activeTrackColor: colorScheme.primary.withValues(alpha: 0.4),
             ),
           ),

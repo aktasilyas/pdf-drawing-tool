@@ -1,4 +1,5 @@
 /// Modern registration screen with Supabase auth.
+library;
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:example_app/features/auth/presentation/widgets/auth_layout.dart';

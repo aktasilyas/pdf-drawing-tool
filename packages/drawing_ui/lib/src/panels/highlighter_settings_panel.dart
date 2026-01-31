@@ -129,7 +129,7 @@ class HighlighterSettingsPanel extends ConsumerWidget {
     final isDuplicate = presets.any((p) =>
         !p.isEmpty &&
         p.toolType == toolType &&
-        p.color.value == settings.color.value &&
+        p.color.toARGB32() == settings.color.toARGB32() &&
         (p.thickness - settings.thickness).abs() < 0.1);
 
     if (isDuplicate) {
@@ -193,7 +193,7 @@ class _HighlighterTypeSelector extends StatelessWidget {
         border: isDark ? Border.all(color: colorScheme.outline.withValues(alpha: 0.3), width: 0.5) : null,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(isDark ? 25 : 15),
+            color: Colors.black.withValues(alpha: (isDark ? 25 : 15) / 255.0),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -339,7 +339,7 @@ class _ThicknessBarPreview extends StatelessWidget {
             boxShadow: isNeon
                 ? [
                     BoxShadow(
-                      color: color.withAlpha(180),
+                      color: color.withValues(alpha: 180.0 / 255.0),
                       blurRadius: 8,
                       spreadRadius: 2,
                     ),

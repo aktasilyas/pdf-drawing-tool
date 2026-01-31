@@ -20,7 +20,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
       final info = await _datasource.getCustomerInfo();
       return Right(_mapCustomerInfo(info));
     } catch (_) {
-      return Left(const PremiumFailure('Abonelik bilgisi alınamadı'));
+      return const Left(PremiumFailure('Abonelik bilgisi alınamadı'));
     }
   }
 
@@ -31,7 +31,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
       final entitlement = info.entitlements.all[entitlementId];
       return Right(entitlement?.isActive ?? false);
     } catch (_) {
-      return Left(const PremiumFailure('Entitlement kontrolü başarısız'));
+      return const Left(PremiumFailure('Entitlement kontrolü başarısız'));
     }
   }
 
@@ -50,7 +50,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
           .toList();
       return Right(entitlements);
     } catch (_) {
-      return Left(const PremiumFailure('Entitlement listesi alınamadı'));
+      return const Left(PremiumFailure('Entitlement listesi alınamadı'));
     }
   }
 
@@ -62,7 +62,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
       final products = packages.map(_mapPackage).toList();
       return Right(products);
     } catch (_) {
-      return Left(const PremiumFailure('Ürün listesi alınamadı'));
+      return const Left(PremiumFailure('Ürün listesi alınamadı'));
     }
   }
 
@@ -71,7 +71,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
     try {
       final package = await _findPackage(productId);
       if (package == null) {
-        return Left(const PremiumFailure('Ürün bulunamadı'));
+        return const Left(PremiumFailure('Ürün bulunamadı'));
       }
       final info = await _datasource.purchase(package);
       return Right(_mapCustomerInfo(info));
@@ -86,7 +86,7 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
       final info = await _datasource.restorePurchases();
       return Right(_mapCustomerInfo(info));
     } catch (_) {
-      return Left(const PremiumFailure('Satın alımlar geri yüklenemedi'));
+      return const Left(PremiumFailure('Satın alımlar geri yüklenemedi'));
     }
   }
 

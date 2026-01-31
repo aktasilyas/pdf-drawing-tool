@@ -61,9 +61,9 @@ class ColorChipsGrid extends StatelessWidget {
   /// Compare colors accounting for alpha differences in highlighter colors.
   bool _colorsEqual(Color a, Color b) {
     // Compare RGB values (ignore alpha for highlighter colors)
-    return a.red == b.red &&
-        a.green == b.green &&
-        a.blue == b.blue &&
-        (a.alpha == b.alpha || a.alpha == 0x80 || b.alpha == 0x80);
+    return (a.r * 255.0).round().clamp(0, 255) == (b.r * 255.0).round().clamp(0, 255) &&
+        (a.g * 255.0).round().clamp(0, 255) == (b.g * 255.0).round().clamp(0, 255) &&
+        (a.b * 255.0).round().clamp(0, 255) == (b.b * 255.0).round().clamp(0, 255) &&
+        ((a.a * 255.0).round().clamp(0, 255) == (b.a * 255.0).round().clamp(0, 255) || (a.a * 255.0).round().clamp(0, 255) == 0x80 || (b.a * 255.0).round().clamp(0, 255) == 0x80);
   }
 }

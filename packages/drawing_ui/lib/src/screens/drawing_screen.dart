@@ -4,7 +4,6 @@ import 'package:drawing_core/drawing_core.dart' as core;
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
-import 'package:drawing_ui/src/providers/pdf_prefetch_provider.dart';
 import 'package:drawing_ui/src/toolbar/toolbar.dart';
 import 'package:drawing_ui/src/canvas/canvas.dart';
 import 'package:drawing_ui/src/canvas/infinite_background_painter.dart';
@@ -121,10 +120,11 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
     final currentPage = ref.read(currentPageProvider);
     final pageSize = Size(currentPage.size.width, currentPage.size.height);
 
-    // Re-initialize canvas transform with correct viewport
+    // Re-calculate canvas transform with correct viewport
     final canvasMode = widget.canvasMode ?? const core.CanvasMode(isInfinite: true);
     if (!canvasMode.isInfinite) {
-      ref.read(canvasTransformProvider.notifier).initializeForPage(
+      // ✅ Use recenterForViewport - keeps current zoom, just adjusts position
+      ref.read(canvasTransformProvider.notifier).recenterForViewport(
         viewportSize: viewportSize,
         pageSize: pageSize,
       );
@@ -142,7 +142,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
     ref.listen<core.DrawingDocument>(documentProvider, (previous, current) {
       if (previous != null && previous.currentPageIndex != current.currentPageIndex) {
         // Sayfa değişti, prefetch tetikle
-        debugPrint('🔄 Page changed: ${previous.currentPageIndex} → ${current.currentPageIndex}');
+        // Page changed - prefetch will be triggered automatically
         
         // PDF sayfalarını kontrol et
         final hasPdfPages = current.pages.any((p) =>
@@ -299,28 +299,30 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
 
   /// Canvas area with all layers (background, canvas, panels, etc.)
   Widget _buildCanvasArea(BuildContext context, core.Page currentPage, CanvasTransform transform) {
-    return Stack(
-      children: [
-        // LAYER 0: Infinite Background (zoom ile ölçeklenir, tüm ekranı kaplar)
-        Positioned.fill(
-          child: RepaintBoundary(
-            child: CustomPaint(
-              painter: InfiniteBackgroundPainter(
-                background: currentPage.background,
-                zoom: transform.zoom,
-                offset: transform.offset,
+    return ClipRect(
+      child: Stack(
+        clipBehavior: Clip.hardEdge,
+        children: [
+          // LAYER 0: Infinite Background (zoom ile ölçeklenir, tüm ekranı kaplar)
+          Positioned.fill(
+            child: RepaintBoundary(
+              child: CustomPaint(
+                painter: InfiniteBackgroundPainter(
+                  background: currentPage.background,
+                  zoom: transform.zoom,
+                  offset: transform.offset,
+                ),
+                size: Size.infinite,
               ),
-              size: Size.infinite,
             ),
           ),
-        ),
 
-        // LAYER 1: Drawing Canvas (zoom/pan transform içinde)
-        Positioned.fill(
-          child: DrawingCanvas(
-            canvasMode: widget.canvasMode,
+          // LAYER 1: Drawing Canvas (zoom/pan transform içinde)
+          Positioned.fill(
+            child: DrawingCanvas(
+              canvasMode: widget.canvasMode,
+            ),
           ),
-        ),
 
         // Invisible tap barrier to close panel when tapping canvas
         if (ref.watch(activePanelProvider) != null)
@@ -370,6 +372,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
             ),
           ),
       ],
+      ),
     );
   }
 
@@ -467,6 +470,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
     
     return Container(
       width: 140, // GoodNotes gibi kompakt
+      constraints: const BoxConstraints(minWidth: 100), // Minimum genişlik garantisi
       decoration: BoxDecoration(
         color: isDark ? colorScheme.surfaceContainerLow : colorScheme.surfaceContainerLowest,
         border: Border(
@@ -571,57 +575,55 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
   Widget _buildAddPageButton() {
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final screenWidth = MediaQuery.of(context).size.width;
     
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(
-            color: colorScheme.outlineVariant,
-            width: 0.5,
-          ),
-        ),
-      ),
-      child: GestureDetector(
-        onTap: () {
-          ref.read(pageManagerProvider.notifier).addPage();
-        },
-        child: Container(
-          height: 48,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Mevcut genişliğe göre adaptive padding
+        final availableWidth = constraints.maxWidth;
+        
+        // ✅ Çok dar ise (animasyon sırasında) button'u gizle
+        if (availableWidth < 30) {
+          return const SizedBox.shrink();
+        }
+        
+        final horizontalPadding = availableWidth < 80 ? 2.0 : 8.0;
+        
+        return Container(
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: isDark ? colorScheme.surfaceContainer : colorScheme.surface,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: colorScheme.outlineVariant,
-              width: 1,
+            border: Border(
+              top: BorderSide(
+                color: colorScheme.outlineVariant,
+                width: 0.5,
+              ),
             ),
           ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.add,
-                size: 20,
-                color: colorScheme.primary,
-              ),
-              if (screenWidth > 600) ...[
-                const SizedBox(width: 6),
-                Text(
-                  'Sayfa Ekle',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: colorScheme.primary,
-                    letterSpacing: -0.2,
-                  ),
+          child: GestureDetector(
+            onTap: () {
+              ref.read(pageManagerProvider.notifier).addPage();
+            },
+            child: Container(
+              height: 48,
+              padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
+              decoration: BoxDecoration(
+                color: isDark ? colorScheme.surfaceContainer : colorScheme.surface,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: colorScheme.outlineVariant,
+                  width: 1,
                 ),
-              ],
-            ],
+              ),
+              child: Center(
+                child: Icon(
+                  Icons.add,
+                  size: availableWidth < 50 ? 16 : 20, // ✅ Dar ekranda daha küçük icon
+                  color: colorScheme.primary,
+                ),
+              ),
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -649,7 +651,7 @@ class _AskAIButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(28),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF6366F1).withAlpha(80),
+              color: const Color(0xFF6366F1).withValues(alpha: 80.0 / 255.0),
               blurRadius: 16,
               offset: const Offset(0, 4),
             ),
@@ -677,11 +679,11 @@ class _ZoomIndicator extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.7),
+          color: Colors.black.withValues(alpha: 0.7),
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.3),
+              color: Colors.black.withValues(alpha: 0.3),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),

@@ -13,9 +13,9 @@ class RecentColorsNotifier extends StateNotifier<List<Color>> {
     // Aynı renk varsa kaldır (RGB bazlı karşılaştırma)
     final filtered = state
         .where((c) =>
-            c.red != color.red ||
-            c.green != color.green ||
-            c.blue != color.blue)
+            (c.r * 255.0).round().clamp(0, 255) != (color.r * 255.0).round().clamp(0, 255) ||
+            (c.g * 255.0).round().clamp(0, 255) != (color.g * 255.0).round().clamp(0, 255) ||
+            (c.b * 255.0).round().clamp(0, 255) != (color.b * 255.0).round().clamp(0, 255))
         .toList();
 
     // Başa ekle ve max sayıya göre kes
@@ -26,9 +26,9 @@ class RecentColorsNotifier extends StateNotifier<List<Color>> {
   void removeColor(Color color) {
     state = state
         .where((c) =>
-            c.red != color.red ||
-            c.green != color.green ||
-            c.blue != color.blue)
+            (c.r * 255.0).round().clamp(0, 255) != (color.r * 255.0).round().clamp(0, 255) ||
+            (c.g * 255.0).round().clamp(0, 255) != (color.g * 255.0).round().clamp(0, 255) ||
+            (c.b * 255.0).round().clamp(0, 255) != (color.b * 255.0).round().clamp(0, 255))
         .toList();
   }
 

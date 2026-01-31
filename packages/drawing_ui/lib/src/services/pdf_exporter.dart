@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:drawing_core/drawing_core.dart';
@@ -492,7 +491,8 @@ class PDFExporter {
     // Text rendering in PDF requires fonts
     // This is a placeholder for the structure
     // Actual implementation would use pw.Text widget instead of CustomPaint
-    // Suppress unused variable warnings - these would be used in full implementation
+    // Suppress unused variable warnings
+    // ignore: unnecessary_type_check
     assert(x is double && y is double);
   }
 

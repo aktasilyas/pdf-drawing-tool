@@ -4,7 +4,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/documents.dart';
 import 'package:example_app/features/editor/editor.dart';
-import 'package:drawing_core/drawing_core.dart';
 
 class MockDocumentRepository extends Mock implements DocumentRepository {}
 
@@ -83,7 +82,7 @@ void main() {
     test('should return failure when document not found', () async {
       // Arrange
       when(() => mockRepository.getDocument(testDocId))
-          .thenAnswer((_) async => Left(CacheFailure('Document not found')));
+          .thenAnswer((_) async => const Left(CacheFailure('Document not found')));
 
       // Act
       final result = await useCase(testDocId);

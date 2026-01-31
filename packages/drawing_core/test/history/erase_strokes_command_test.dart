@@ -36,7 +36,7 @@ void main() {
           .addStroke(stroke2)
           .addStroke(stroke3);
 
-      document = DrawingDocument.empty('Test').copyWith(
+      document = DrawingDocument.emptyMultiPage('Test').copyWith(
         layers: [layer],
       );
     });

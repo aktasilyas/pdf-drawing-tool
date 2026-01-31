@@ -1,6 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:vector_math/vector_math_64.dart' as vector;
 
 // =============================================================================
 // CANVAS TRANSFORM STATE
@@ -43,8 +43,8 @@ class CanvasTransform {
   /// This order ensures zoom happens around the correct focal point.
   Matrix4 get matrix {
     return Matrix4.identity()
-      ..translate(offset.dx, offset.dy)
-      ..scale(zoom);
+      ..translateByVector3(vector.Vector3(offset.dx, offset.dy, 0))
+      ..scaleByVector3(vector.Vector3(zoom, zoom, 1.0));
   }
 
   /// Converts screen coordinates to canvas coordinates.
@@ -90,9 +90,11 @@ class CanvasTransformNotifier extends StateNotifier<CanvasTransform> {
   CanvasTransformNotifier() : super(const CanvasTransform());
 
   /// Set absolute zoom level (clamped to min/max).
-  void setZoom(double zoom) {
-    final clampedZoom =
-        zoom.clamp(CanvasTransform.minZoom, CanvasTransform.maxZoom);
+  /// 
+  /// [minZoom] minimum zoom limit (defaults to legacy 0.25)
+  /// [maxZoom] maximum zoom limit (defaults to legacy 5.0)
+  void setZoom(double zoom, {double minZoom = 0.25, double maxZoom = 5.0}) {
+    final clampedZoom = zoom.clamp(minZoom, maxZoom);
     state = state.copyWith(zoom: clampedZoom);
   }
 
@@ -105,11 +107,15 @@ class CanvasTransformNotifier extends StateNotifier<CanvasTransform> {
   ///
   /// [delta] is the scale multiplier (e.g., 1.1 for 10% zoom in)
   /// [focalPoint] is the screen coordinate to zoom around
-  void applyZoomDelta(double delta, Offset focalPoint) {
-    final newZoom = (state.zoom * delta).clamp(
-      CanvasTransform.minZoom,
-      CanvasTransform.maxZoom,
-    );
+  /// [minZoom] minimum zoom limit (defaults to legacy 0.25)
+  /// [maxZoom] maximum zoom limit (defaults to legacy 5.0)
+  void applyZoomDelta(
+    double delta, 
+    Offset focalPoint, {
+    double minZoom = 0.25,
+    double maxZoom = 5.0,
+  }) {
+    final newZoom = (state.zoom * delta).clamp(minZoom, maxZoom);
 
     // Calculate new offset to keep focal point stationary
     // The point under the finger should stay under the finger
@@ -275,74 +281,136 @@ class CanvasTransformNotifier extends StateNotifier<CanvasTransform> {
     required Size viewportSize,
     required Size pageSize,
   }) {
-    // Calculate zoom to fill viewport (page fills the screen)
-    final fillZoom = _calculateFitZoom(viewportSize, pageSize);
+    // DEFAULT ZOOM: Fit-to-height (page height = viewport height)
+    // This is the "100%" baseline - page fills screen vertically
+    final fitHeightZoom = viewportSize.height / pageSize.height;
 
-    // Calculate offset - center horizontally, top-align vertically
-    final pageScreenWidth = pageSize.width * fillZoom;
-    final pageScreenHeight = pageSize.height * fillZoom;
+    // Calculate offset - center page horizontally, top-align vertically
+    final pageScreenWidth = pageSize.width * fitHeightZoom;
 
-    // Center horizontally if page is narrower than viewport
-    final offsetX = pageScreenWidth < viewportSize.width
-        ? (viewportSize.width - pageScreenWidth) / 2
-        : 0.0;
-    // Top-align vertically (offset Y = 0)
-    final offsetY = pageScreenHeight < viewportSize.height
-        ? (viewportSize.height - pageScreenHeight) / 2
-        : 0.0;
+    // Center horizontally
+    final offsetX = (viewportSize.width - pageScreenWidth) / 2;
+    // Top-align vertically (page fills viewport height)
+    final offsetY = 0.0;
 
-    // #region agent log
-    debugPrint('🔍 [DEBUG] initializeForPage:');
-    debugPrint(
-        '🔍 [DEBUG]   viewportSize: ${viewportSize.width} x ${viewportSize.height}');
-    debugPrint('🔍 [DEBUG]   pageSize: ${pageSize.width} x ${pageSize.height}');
-    debugPrint('🔍 [DEBUG]   fillZoom: $fillZoom');
-    debugPrint(
-        '🔍 [DEBUG]   pageScreenSize: $pageScreenWidth x $pageScreenHeight');
-    debugPrint('🔍 [DEBUG]   offset: ($offsetX, $offsetY)');
-    // #endregion
 
     state = CanvasTransform(
-      zoom: fillZoom,
+      zoom: fitHeightZoom,
       offset: Offset(offsetX, offsetY),
     );
   }
 
   /// Snap back zoom and offset for limited canvas.
   ///
-  /// Called when gesture ends to ensure page fills viewport.
+  /// Called when gesture ends.
+  /// - If zoom < fitHeight: snap back to fitHeight (fill screen)
+  /// - If zoom >= fitHeight (zoom in): keep current zoom
   /// [viewportSize] is the screen viewport size
   /// [pageSize] is the document page size
   void snapBackForPage({
     required Size viewportSize,
     required Size pageSize,
   }) {
-    // Calculate fill zoom (same as initializeForPage)
-    final fillZoom = _calculateFitZoom(viewportSize, pageSize);
+    // Baseline zoom: fit-to-height (page fills viewport vertically)
+    final baselineZoom = viewportSize.height / pageSize.height;
 
-    // If current zoom is below fill zoom, snap back to fill state
-    if (state.zoom < fillZoom) {
-      // Calculate new offset at fill zoom
-      final pageScreenWidth = pageSize.width * fillZoom;
-      final pageScreenHeight = pageSize.height * fillZoom;
+    // If current zoom is below baseline (zoom out), snap back to baseline
+    if (state.zoom < baselineZoom) {
+      // Calculate offset at baseline zoom
+      final pageScreenWidth = pageSize.width * baselineZoom;
 
-      // Center horizontally if page is narrower than viewport
-      final offsetX = pageScreenWidth < viewportSize.width
-          ? (viewportSize.width - pageScreenWidth) / 2
-          : 0.0;
-      // Top-align or center vertically
-      final offsetY = pageScreenHeight < viewportSize.height
-          ? (viewportSize.height - pageScreenHeight) / 2
-          : 0.0;
+      // Center horizontally
+      final offsetX = (viewportSize.width - pageScreenWidth) / 2;
+      // Top-align vertically (page fills viewport height)
+      final offsetY = 0.0;
 
       state = CanvasTransform(
-        zoom: fillZoom,
+        zoom: baselineZoom,
         offset: Offset(offsetX, offsetY),
       );
     } else {
-      // Just ensure offset is clamped
-      _clampOffset(viewportSize, pageSize);
+      // Zoom >= baseline: keep current zoom, just clamp offset (top-aligned)
+      _clampOffsetLimitedCanvas(viewportSize, pageSize);
     }
+  }
+
+  /// Recenter page with current zoom (for viewport changes).
+  ///
+  /// Called when viewport size changes (e.g., sidebar toggle).
+  /// Keeps current zoom level, just adjusts offset to keep page visible.
+  void recenterForViewport({
+    required Size viewportSize,
+    required Size pageSize,
+  }) {
+    // For limited canvas: use special clamping (top-aligned)
+    _clampOffsetLimitedCanvas(viewportSize, pageSize);
+  }
+
+  /// Clamp offset for limited canvas (top-aligned, not centered).
+  void _clampOffsetLimitedCanvas(Size viewportSize, Size pageSize) {
+    final pageScreenWidth = pageSize.width * state.zoom;
+    final pageScreenHeight = pageSize.height * state.zoom;
+
+    var newOffset = state.offset;
+
+    // Horizontal clamping (center if smaller, clamp if larger)
+    if (pageScreenWidth <= viewportSize.width) {
+      // Page narrower than viewport: center horizontally
+      newOffset = Offset(
+        (viewportSize.width - pageScreenWidth) / 2,
+        newOffset.dy,
+      );
+    } else {
+      // Page wider than viewport: clamp to keep within bounds
+      final minX = viewportSize.width - pageScreenWidth; // negative
+      final maxX = 0.0;
+      newOffset = Offset(
+        newOffset.dx.clamp(minX, maxX),
+        newOffset.dy,
+      );
+    }
+
+    // Vertical clamping (top-aligned for limited canvas)
+    if (pageScreenHeight <= viewportSize.height) {
+      // Page shorter than viewport: top-align (offsetY = 0)
+      newOffset = Offset(
+        newOffset.dx,
+        0.0,
+      );
+    } else {
+      // Page taller than viewport: clamp to keep within bounds
+      final minY = viewportSize.height - pageScreenHeight; // negative
+      final maxY = 0.0;
+      newOffset = Offset(
+        newOffset.dx,
+        newOffset.dy.clamp(minY, maxY),
+      );
+    }
+
+    if (newOffset != state.offset) {
+      state = state.copyWith(offset: newOffset);
+    }
+  }
+
+  // NOTE: The following methods are kept for reference but not currently used
+  // since we now use 1.0 (100%) as default zoom instead of fit-to-height/fit-to-screen
+  
+  /*
+  /// Calculate zoom to fit page height to viewport height.
+  /// 
+  /// This ensures the page fills the viewport vertically (top=0, bottom=0).
+  /// Horizontally, the page will be centered if narrower than viewport.
+  /// 
+  /// Uses fit-to-height strategy:
+  /// - Page height = viewport height
+  /// - Page may be wider or narrower than viewport (horizontal scroll/center)
+  double _calculateFitHeightZoom(Size viewportSize, Size pageSize) {
+    // Calculate zoom needed to fit page height to viewport height
+    final verticalZoom = viewportSize.height / pageSize.height;
+    
+    // Allow any zoom level (no clamping to 1.0)
+    // This allows pages to be enlarged if they're smaller than viewport
+    return verticalZoom.clamp(0.01, double.infinity);
   }
 
   /// Calculate zoom to fit page in viewport (page fully visible with margins).
@@ -362,8 +430,14 @@ class CanvasTransformNotifier extends StateNotifier<CanvasTransform> {
     // But allow shrinking to any level needed to fit
     return fitZoom.clamp(0.01, 1.0);
   }
+  */
 
-  /// Clamp offset to keep page within bounds.
+
+  // NOTE: The following methods are kept for reference but not currently used
+  // since we now use _clampOffsetLimitedCanvas for limited canvas mode
+  
+  /*
+  /// Clamp offset to keep page within bounds (centers page if smaller than viewport).
   void _clampOffset(Size viewportSize, Size pageSize) {
     final pageScreenWidth = pageSize.width * state.zoom;
     final pageScreenHeight = pageSize.height * state.zoom;
@@ -404,6 +478,7 @@ class CanvasTransformNotifier extends StateNotifier<CanvasTransform> {
       state = state.copyWith(offset: newOffset);
     }
   }
+  */
 
   /// Zoom in by a fixed step (for button/keyboard).
   void zoomIn() {

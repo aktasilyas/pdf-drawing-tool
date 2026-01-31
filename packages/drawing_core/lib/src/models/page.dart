@@ -14,6 +14,7 @@ class Page {
   final Uint8List? thumbnail;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final bool isCover; // Flag for cover pages (drawings not saved)
 
   const Page({
     required this.id,
@@ -24,6 +25,7 @@ class Page {
     this.thumbnail,
     required this.createdAt,
     required this.updatedAt,
+    this.isCover = false,
   });
 
   /// Factory for creating new page
@@ -31,6 +33,7 @@ class Page {
     required int index,
     PageSize? size,
     PageBackground? background,
+    bool isCover = false,
   }) {
     final now = DateTime.now();
     return Page(
@@ -41,6 +44,21 @@ class Page {
       layers: [Layer.empty('Layer 1')], // Default empty layer
       createdAt: now,
       updatedAt: now,
+      isCover: isCover,
+    );
+  }
+
+  /// Factory for creating a cover page (drawings not saved)
+  factory Page.createCover({
+    required int index,
+    PageSize? size,
+    PageBackground? background,
+  }) {
+    return Page.create(
+      index: index,
+      size: size,
+      background: background,
+      isCover: true,
     );
   }
 
@@ -69,6 +87,7 @@ class Page {
     Uint8List? thumbnail,
     DateTime? createdAt,
     DateTime? updatedAt,
+    bool? isCover,
   }) {
     return Page(
       id: id ?? this.id,
@@ -79,6 +98,24 @@ class Page {
       thumbnail: thumbnail ?? this.thumbnail,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? DateTime.now(),
+      isCover: isCover ?? this.isCover,
+    );
+  }
+
+  /// Returns a clean version of this page with all strokes removed
+  /// (Used for cover pages before saving)
+  Page clearDrawings() {
+    final cleanLayers = layers.map((layer) {
+      return layer.copyWith(
+        strokes: [],
+        shapes: [],
+        texts: [],
+      );
+    }).toList();
+    
+    return copyWith(
+      layers: cleanLayers,
+      updatedAt: DateTime.now(),
     );
   }
 
@@ -107,6 +144,7 @@ class Page {
     'layers': layers.map((l) => l.toJson()).toList(),
     'createdAt': createdAt.toIso8601String(),
     'updatedAt': updatedAt.toIso8601String(),
+    'isCover': isCover,
     // thumbnail is stored separately
   };
 
@@ -129,6 +167,7 @@ class Page {
           .toList(),
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
+      isCover: json['isCover'] as bool? ?? false,  // Backward compatible
     );
   }
 

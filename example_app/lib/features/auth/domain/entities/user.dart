@@ -1,4 +1,6 @@
 /// User entity for the auth domain layer.
+library;
+
 import 'package:equatable/equatable.dart';
 
 class User extends Equatable {

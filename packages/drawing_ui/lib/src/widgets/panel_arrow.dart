@@ -61,7 +61,7 @@ class _PanelArrowPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
 
     final shadowPaint = Paint()
-      ..color = Colors.black.withAlpha(25) // 0.1 * 255 ≈ 25
+      ..color = Colors.black.withValues(alpha: 25.0 / 255.0) // 0.1 * 255 ≈ 25
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
 
     final path = Path();

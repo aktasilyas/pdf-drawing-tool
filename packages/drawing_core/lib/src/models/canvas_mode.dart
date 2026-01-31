@@ -47,7 +47,7 @@ class CanvasMode {
     surroundingAreaColor: 0xFFFFFFFF, // Pure white (like GoodNotes)
     pageBorderColor: 0x00000000,
     pageBorderWidth: 0.0,
-    minZoom: 0.1,
+    minZoom: 0.05, // %5'e kadar zoom out (extreme wide view)
     maxZoom: 10.0,
     unlimitedPan: true,
   );

@@ -180,7 +180,7 @@ class SyncRemoteDatasource {
     try {
       final userId = _client.auth.currentUser?.id;
       if (userId == null) {
-        throw ServerException('No authenticated user');
+        throw const ServerException('No authenticated user');
       }
 
       await _client.from('sync_metadata').upsert({

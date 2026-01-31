@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:drawing_ui/src/services/pdf_loader.dart';
-import 'package:drawing_ui/src/models/pdf_info.dart';
 
 void main() {
   group('PDFLoader', () {

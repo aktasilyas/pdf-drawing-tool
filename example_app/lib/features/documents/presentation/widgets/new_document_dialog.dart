@@ -11,7 +11,7 @@ import 'dart:ui' as ui;
 /// Dropdown menü item'ları
 enum NewDocumentOption {
   notebook,    // 📓 Not Defteri - şablon seçimi göster
-  whiteboard,  // 🔲 Beyaz Tahta - şablon seçimi göster  
+  whiteboard,  // 🔲 Beyaz Tahta - direkt aç (infinite canvas + blank)
   quickNote,   // ✏️ Hızlı Not - direkt aç
   importPdf,   // 📄 PDF İçe Aktar - dosya seç, direkt aç
   importImage, // 🖼️ Resim İçe Aktar - dosya seç, direkt aç
@@ -45,6 +45,7 @@ void showNewDocumentDropdown(BuildContext context, GlobalKey buttonKey) {
     ],
   ).then((value) {
     if (value == null) return;
+    if (!context.mounted) return;
     _handleNewDocumentOption(context, value);
   });
 }
@@ -98,10 +99,17 @@ PopupMenuItem<NewDocumentOption> _buildMenuItem(
 void _handleNewDocumentOption(BuildContext context, NewDocumentOption option) async {
   switch (option) {
     case NewDocumentOption.notebook:
-    case NewDocumentOption.whiteboard:
-      // Template Selection Screen'e yönlendir
-      context.push(RouteNames.templateSelection);
+      // Template Selection Screen'e yönlendir (Not Defteri)
+      if (context.mounted) {
+        context.push(RouteNames.templateSelection);
+      }
       break;
+      
+    case NewDocumentOption.whiteboard:
+      // Beyaz tahta - direkt aç (infinite canvas + blank background)
+      _createWhiteboard(context);
+      break;
+      
     case NewDocumentOption.quickNote:
       // Hızlı not oluştur
       _createQuickNote(context);
@@ -124,14 +132,37 @@ void _createQuickNote(BuildContext context) async {
   final controller = container.read(documentsControllerProvider.notifier);
   final folderId = container.read(currentFolderIdProvider);
   
-  // Varsayılan ayarlarla hızlı not oluştur (beyaz kağıt + çizgili)
+  // Varsayılan ayarlarla hızlı not oluştur (beyaz kağıt + ince çizgili)
   final documentId = await controller.createDocument(
     title: 'Hızlı Not - ${DateTime.now().toString().substring(0, 16)}',
-    templateId: 'lined',
+    templateId: 'thin_lined', // İnce çizgili şablon
     folderId: folderId,
     paperColor: 'Beyaz kağıt',
     isPortrait: true,
     documentType: drawing_core.DocumentType.quickNote,
+  );
+  
+  // Doküman oluşturulduysa direkt editor'e git
+  if (documentId != null && context.mounted) {
+    context.push(RouteNames.editorPath(documentId));
+  }
+}
+
+void _createWhiteboard(BuildContext context) async {
+  if (!context.mounted) return;
+  
+  final container = ProviderScope.containerOf(context);
+  final controller = container.read(documentsControllerProvider.notifier);
+  final folderId = container.read(currentFolderIdProvider);
+  
+  // Beyaz tahta oluştur (infinite canvas + blank background)
+  final documentId = await controller.createDocument(
+    title: 'Beyaz Tahta - ${DateTime.now().toString().substring(0, 16)}',
+    templateId: 'blank', // Boş arka plan
+    folderId: folderId,
+    paperColor: 'Beyaz kağıt',
+    isPortrait: true,
+    documentType: drawing_core.DocumentType.whiteboard, // Infinite canvas
   );
   
   // Doküman oluşturulduysa direkt editor'e git
@@ -330,6 +361,7 @@ void _importImage(BuildContext context) async {
     );
     
     // 5. Doküman oluştur
+    if (!context.mounted) return;
     final container = ProviderScope.containerOf(context);
     final controller = container.read(documentsControllerProvider.notifier);
     final folderId = container.read(currentFolderIdProvider);

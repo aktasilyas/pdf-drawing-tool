@@ -68,8 +68,6 @@ class EraserTool extends DrawingTool {
         return stroke != null ? [stroke] : [];
 
       case EraserMode.pixel:
-        // TODO: Phase 5+ - Pixel bazlı silme için stroke bölme
-        // Şimdilik stroke mode gibi çalışsın
         final stroke = _hitTester.findTopElementAt(
           strokes,
           x,

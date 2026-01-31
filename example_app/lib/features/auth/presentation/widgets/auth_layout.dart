@@ -1,4 +1,5 @@
 /// Modern split-screen layout for auth screens.
+library;
 import 'package:flutter/material.dart';
 
 class AuthLayout extends StatefulWidget {
@@ -35,7 +36,7 @@ class _AuthLayoutState extends State<AuthLayout> {
         children: [
           // Left side - Branding (hidden on mobile)
           if (!isMobile)
-            Expanded(
+            const Expanded(
               flex: 5,
               child: _BrandingSide(),
             ),
@@ -56,7 +57,7 @@ class _AuthLayoutState extends State<AuthLayout> {
                     children: [
                       // Mobile logo (only on mobile)
                       if (isMobile) ...[
-                        Center(
+                        const Center(
                           child: _AppLogo(size: 48),
                         ),
                         const SizedBox(height: 24),
@@ -96,6 +97,8 @@ class _AuthLayoutState extends State<AuthLayout> {
 }
 
 class _BrandingSide extends StatelessWidget {
+  const _BrandingSide();
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -105,7 +108,7 @@ class _BrandingSide extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: [
             Theme.of(context).primaryColor,
-            Theme.of(context).primaryColor.withOpacity(0.8),
+            Theme.of(context).primaryColor.withValues(alpha: 0.8),
           ],
         ),
       ),
@@ -120,7 +123,7 @@ class _BrandingSide extends StatelessWidget {
               height: 200,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.1),
+                color: Colors.white.withValues(alpha: 0.1),
               ),
             ),
           ),
@@ -132,7 +135,7 @@ class _BrandingSide extends StatelessWidget {
               height: 300,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.05),
+                color: Colors.white.withValues(alpha: 0.05),
               ),
             ),
           ),
@@ -153,7 +156,7 @@ class _BrandingSide extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        _AppLogo(size: 100),
+                        const _AppLogo(size: 100),
                         const SizedBox(height: 24),
                         const Text(
                           'StarNote',
@@ -169,23 +172,23 @@ class _BrandingSide extends StatelessWidget {
                           'Notlarınız, Çizimleriniz, Fikirleriniz',
                           style: TextStyle(
                             fontSize: 16,
-                            color: Colors.white.withOpacity(0.9),
+                            color: Colors.white.withValues(alpha: 0.9),
                             letterSpacing: 0.5,
                           ),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 40),
-                        _FeatureItem(
+                        const _FeatureItem(
                           icon: Icons.edit_note,
                           text: 'Sınırsız not ve çizim',
                         ),
                         const SizedBox(height: 14),
-                        _FeatureItem(
+                        const _FeatureItem(
                           icon: Icons.picture_as_pdf,
                           text: 'PDF üzerine çizim',
                         ),
                         const SizedBox(height: 14),
-                        _FeatureItem(
+                        const _FeatureItem(
                           icon: Icons.cloud_sync,
                           text: 'Tüm cihazlarda senkronize',
                         ),
@@ -217,7 +220,7 @@ class _AppLogo extends StatelessWidget {
         borderRadius: BorderRadius.circular(size * 0.2),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -250,7 +253,7 @@ class _FeatureItem extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(10), // Biraz küçük
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(

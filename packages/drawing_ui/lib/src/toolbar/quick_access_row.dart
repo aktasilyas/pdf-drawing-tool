@@ -113,7 +113,7 @@ class QuickColorChips extends ConsumerWidget {
     if (currentTool == ToolType.highlighter || currentTool == ToolType.neonHighlighter) {
       // For highlighter, apply alpha for transparency (less for neon)
       final alpha = currentTool == ToolType.neonHighlighter ? 200 : 128;
-      final highlighterColor = color.withAlpha(alpha);
+      final highlighterColor = color.withValues(alpha: alpha / 255.0);
       ref.read(highlighterSettingsProvider.notifier).setColor(highlighterColor);
     } else {
       ref.read(penSettingsProvider(currentTool).notifier).setColor(color);
@@ -141,7 +141,9 @@ class QuickColorChips extends ConsumerWidget {
 
   bool _colorsMatch(Color a, Color b) {
     // Compare RGB only (ignore alpha for highlighter comparison)
-    return a.red == b.red && a.green == b.green && a.blue == b.blue;
+    return (a.r * 255.0).round().clamp(0, 255) == (b.r * 255.0).round().clamp(0, 255) && 
+        (a.g * 255.0).round().clamp(0, 255) == (b.g * 255.0).round().clamp(0, 255) && 
+        (a.b * 255.0).round().clamp(0, 255) == (b.b * 255.0).round().clamp(0, 255);
   }
 }
 
@@ -177,7 +179,7 @@ class _QuickColorChip extends StatelessWidget {
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: color.withAlpha(80),
+                    color: color.withValues(alpha: 80.0 / 255.0),
                     blurRadius: 3,
                     spreadRadius: 1,
                   ),
@@ -304,14 +306,14 @@ class _QuickThicknessDot extends StatelessWidget {
           border: isSelected
               ? Border.all(color: selectedColor, width: 1.5)
               : null,
-          color: isSelected ? selectedColor.withAlpha(15) : Colors.transparent,
+          color: isSelected ? selectedColor.withValues(alpha: 15.0 / 255.0) : Colors.transparent,
         ),
         child: Center(
           child: Container(
             width: size * 0.85,
             height: size * 0.85,
             decoration: BoxDecoration(
-              color: isSelected ? selectedColor : color.withAlpha(150),
+              color: isSelected ? selectedColor : color.withValues(alpha: 150.0 / 255.0),
               shape: BoxShape.circle,
             ),
           ),

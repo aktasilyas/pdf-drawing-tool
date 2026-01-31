@@ -78,7 +78,6 @@ class _SelectionHandlesState extends ConsumerState<SelectionHandles> {
       // Move preview - update bounds without committing
       _moveSelectionPreview(delta);
     }
-    // TODO: Resize for other handles (Phase 5+)
   }
 
   void _handlePanEnd(DragEndDetails details) {

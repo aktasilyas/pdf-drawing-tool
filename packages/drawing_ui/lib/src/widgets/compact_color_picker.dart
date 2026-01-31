@@ -35,7 +35,7 @@ class _CompactColorPickerState extends State<CompactColorPicker>
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _hsvColor = HSVColor.fromColor(widget.selectedColor);
-    _opacity = widget.selectedColor.opacity;
+    _opacity = widget.selectedColor.a;
   }
 
   @override
@@ -204,7 +204,7 @@ class _CompactColorPickerState extends State<CompactColorPicker>
             onColorChanged: (color) {
               setState(() {
                 _hsvColor = HSVColor.fromColor(color);
-                _opacity = color.opacity;
+                _opacity = color.a;
               });
             },
             onSave: () => widget.onColorSelected(_currentColor),

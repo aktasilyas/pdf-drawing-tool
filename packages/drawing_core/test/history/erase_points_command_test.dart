@@ -23,7 +23,7 @@ void main() {
         createdAt: DateTime.now(),
       );
       
-      final document = DrawingDocument.empty('Test').copyWith(
+      final document = DrawingDocument.emptyMultiPage('Test').copyWith(
         layers: [Layer.empty('Layer 1').copyWith(strokes: [original])],
       );
       
@@ -54,7 +54,7 @@ void main() {
         createdAt: DateTime.now(),
       );
       
-      final documentAfterErase = DrawingDocument.empty('Test').copyWith(
+      final documentAfterErase = DrawingDocument.emptyMultiPage('Test').copyWith(
         layers: [Layer.empty('Layer 1').copyWith(strokes: [split1])],
       );
       
@@ -71,7 +71,7 @@ void main() {
     });
     
     test('handles invalid layer index gracefully', () {
-      final document = DrawingDocument.empty('Test');
+      final document = DrawingDocument.emptyMultiPage('Test');
       
       final command = ErasePointsCommand(
         layerIndex: 99,

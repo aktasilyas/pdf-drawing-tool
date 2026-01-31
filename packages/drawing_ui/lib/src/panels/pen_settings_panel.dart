@@ -165,7 +165,7 @@ class PenSettingsPanel extends ConsumerWidget {
     final isDuplicate = presets.any((p) =>
         !p.isEmpty &&
         p.toolType == currentTool &&
-        p.color.value == currentSettings.color.value &&
+        p.color.toARGB32() == currentSettings.color.toARGB32() &&
         (p.thickness - currentSettings.thickness).abs() < 0.1);
 
     if (isDuplicate) {
@@ -332,7 +332,7 @@ class _PenTypeSelector extends StatelessWidget {
         border: isDark ? Border.all(color: colorScheme.outline.withValues(alpha: 0.3), width: 0.5) : null,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withAlpha(isDark ? 25 : 15),
+            color: Colors.black.withValues(alpha: (isDark ? 25 : 15) / 255.0),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),

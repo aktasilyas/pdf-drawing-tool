@@ -188,6 +188,19 @@ class DocumentCard extends ConsumerWidget {
   }
 
   Widget _buildThumbnail(WidgetRef ref) {
+    // Cover önizlemesi - hasCover varsa ve coverId null değilse
+    if (document.hasCover && document.coverId != null) {
+      final cover = core.CoverRegistry.byId(document.coverId!);
+      if (cover != null) {
+        return CoverPreviewWidget(
+          cover: cover,
+          title: document.title,
+          width: double.infinity,
+          height: double.infinity,
+        );
+      }
+    }
+    
     // PDF veya Image için ilk sayfayı göster
     if (document.documentType == core.DocumentType.pdf || 
         document.documentType == core.DocumentType.image) {

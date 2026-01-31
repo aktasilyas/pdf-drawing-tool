@@ -1,9 +1,11 @@
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:example_app/features/sync/domain/entities/sync_queue_item.dart';
-
 /// Local datasource for sync operations using SharedPreferences
 /// TODO: Migrate to Drift when database setup is complete
+library;
+
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:example_app/features/sync/sync.dart';
+
 class SyncLocalDatasource {
   static const String _queueKey = 'sync_queue';
   static const String _metadataPrefix = 'sync_metadata_';

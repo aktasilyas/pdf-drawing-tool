@@ -123,11 +123,11 @@ class _TextToolPanel extends StatelessWidget {
             child: Row(
               children: [
                 _ColorDot(color: Colors.black, isSelected: true),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 _ColorDot(color: Colors.blue),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 _ColorDot(color: Colors.red),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 _ColorDot(color: Colors.green),
               ],
             ),
@@ -182,11 +182,11 @@ class _LaserPointerPanel extends StatelessWidget {
             child: Row(
               children: [
                 _ColorDot(color: Colors.red, isSelected: true),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 _ColorDot(color: Colors.green),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 _ColorDot(color: Colors.blue),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 _ColorDot(color: Colors.orange),
               ],
             ),

@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:pdfx/pdfx.dart';
@@ -178,9 +177,6 @@ class PDFPageRenderer {
         dpi: dpi,
       );
 
-      // Debug: Log render dimensions
-      debugPrint('📄 Rendering page $pageNumber: ${width.toInt()}x${height.toInt()} px (DPI: $dpi)');
-
       // Render the page
       final pageImage = await page.render(
         width: width,
@@ -193,7 +189,7 @@ class PDFPageRenderer {
 
       return pageImage?.bytes;
     } catch (e) {
-      debugPrint('❌ PDF render error: $e');
+      debugPrint('ERROR: PDF render error - $e');
       return null;
     }
   }

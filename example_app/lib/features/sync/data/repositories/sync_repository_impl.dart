@@ -34,6 +34,7 @@ class SyncRepositoryImpl implements SyncRepository {
   SyncStatus _currentStatus = SyncStatus.idle;
 
   /// Metadata keys
+  // ignore: unused_field
   static const String _autoSyncKey = 'auto_sync_enabled';
   static const String _lastSyncKey = 'last_sync_timestamp';
 
@@ -74,7 +75,7 @@ class SyncRepositoryImpl implements SyncRepository {
     try {
       // Check if online
       if (!await isOnline()) {
-        return Left(SyncFailure('Device is offline'));
+        return const Left(SyncFailure('Device is offline'));
       }
 
       // Get pending items count
@@ -220,7 +221,7 @@ class SyncRepositoryImpl implements SyncRepository {
   Future<Either<Failure, void>> syncDocument(String documentId) async {
     try {
       if (!await isOnline()) {
-        return Left(SyncFailure('Device is offline'));
+        return const Left(SyncFailure('Device is offline'));
       }
 
       // TODO: Implement full document sync with DocumentLocalDatasource

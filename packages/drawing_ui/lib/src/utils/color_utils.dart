@@ -12,7 +12,7 @@ extension ColorUtils on Color {
   /// final transparentRed = Colors.red.withAlphaSafe(0.5);
   /// ```
   Color withAlphaSafe(double opacity) {
-    return withAlpha((opacity * 255).round().clamp(0, 255));
+    return withValues(alpha: opacity.clamp(0.0, 1.0));
   }
 
   /// Compare colors ignoring alpha channel.

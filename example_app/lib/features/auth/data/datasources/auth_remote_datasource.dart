@@ -1,4 +1,6 @@
 /// Remote datasource for Supabase auth operations.
+library;
+
 import 'package:example_app/core/core.dart' as core;
 import 'package:example_app/features/auth/data/models/user_model.dart';
 import 'package:google_sign_in/google_sign_in.dart';

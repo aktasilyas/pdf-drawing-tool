@@ -11,6 +11,8 @@ enum BackgroundType {
   pdf,
   /// Template-based background (uses TemplatePattern for rendering)
   template,
+  /// Cover-based background (uses Cover model for rendering)
+  cover,
 }
 
 /// Sayfa arka plan modeli
@@ -30,6 +32,9 @@ class PageBackground {
   /// Template line width (for template-based backgrounds)
   final double? templateLineWidth;
   
+  /// Cover ID for cover-based backgrounds
+  final String? coverId;
+  
   /// Rendered PDF image data (cache - lazy loaded)
   final Uint8List? pdfData;
   
@@ -48,6 +53,7 @@ class PageBackground {
     this.templatePattern,
     this.templateSpacingMm,
     this.templateLineWidth,
+    this.coverId,
     this.pdfData,
     this.pdfPageIndex,
     this.pdfFilePath,
@@ -112,6 +118,7 @@ class PageBackground {
     TemplatePattern? templatePattern,
     double? templateSpacingMm,
     double? templateLineWidth,
+    String? coverId,
     Uint8List? pdfData,
     int? pdfPageIndex,
     String? pdfFilePath,
@@ -125,6 +132,7 @@ class PageBackground {
       templatePattern: templatePattern ?? this.templatePattern,
       templateSpacingMm: templateSpacingMm ?? this.templateSpacingMm,
       templateLineWidth: templateLineWidth ?? this.templateLineWidth,
+      coverId: coverId ?? this.coverId,
       pdfData: pdfData ?? this.pdfData,
       pdfPageIndex: pdfPageIndex ?? this.pdfPageIndex,
       pdfFilePath: pdfFilePath ?? this.pdfFilePath,
@@ -149,6 +157,7 @@ class PageBackground {
       if (templatePattern != null) 'templatePattern': templatePattern!.name,
       if (templateSpacingMm != null) 'templateSpacingMm': templateSpacingMm,
       if (templateLineWidth != null) 'templateLineWidth': templateLineWidth,
+      if (coverId != null) 'coverId': coverId,
       if (pdfPageIndex != null) 'pdfPageIndex': pdfPageIndex,
       if (pdfFilePath != null) 'pdfFilePath': pdfFilePath,
       if (shouldSerializePdfData) 'pdfDataBase64': base64Encode(pdfData!),
@@ -208,6 +217,7 @@ class PageBackground {
       templatePattern: templatePattern,
       templateSpacingMm: parseDouble(json['templateSpacingMm']),
       templateLineWidth: parseDouble(json['templateLineWidth']),
+      coverId: json['coverId'] as String?,
       pdfPageIndex: parseInt(json['pdfPageIndex']),
       pdfFilePath: json['pdfFilePath'] as String?,
       pdfData: pdfData, // Decoded from base64 or null for lazy loading

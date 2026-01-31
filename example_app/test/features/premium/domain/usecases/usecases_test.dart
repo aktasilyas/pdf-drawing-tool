@@ -83,8 +83,8 @@ void main() {
 
   setUp(() {
     repository = _FakeSubscriptionRepository(
-      subscriptionResult: Right(
-        const Subscription(
+      subscriptionResult: const Right(
+        Subscription(
           tier: SubscriptionTier.premium,
           isActive: true,
         ),
@@ -101,14 +101,14 @@ void main() {
           subscriptionPeriod: 'monthly',
         )
       ]),
-      purchaseResult: Right(
-        const Subscription(
+      purchaseResult: const Right(
+        Subscription(
           tier: SubscriptionTier.premiumPlus,
           isActive: true,
         ),
       ),
-      restoreResult: Right(
-        const Subscription(
+      restoreResult: const Right(
+        Subscription(
           tier: SubscriptionTier.premium,
           isActive: true,
         ),

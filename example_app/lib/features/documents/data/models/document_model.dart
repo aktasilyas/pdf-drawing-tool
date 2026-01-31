@@ -16,6 +16,10 @@ class DocumentModel {
   final String paperColor;
   final bool isPortrait;
   final String documentType;
+  final String? coverId;
+  final bool hasCover;
+  final double paperWidthMm;
+  final double paperHeightMm;
 
   const DocumentModel({
     required this.id,
@@ -32,6 +36,10 @@ class DocumentModel {
     this.paperColor = 'Sarı kağıt',
     this.isPortrait = true,
     this.documentType = 'notebook',
+    this.coverId,
+    this.hasCover = true,
+    this.paperWidthMm = 210.0,
+    this.paperHeightMm = 297.0,
   });
 
   factory DocumentModel.fromJson(Map<String, dynamic> json) {
@@ -50,6 +58,10 @@ class DocumentModel {
       paperColor: json['paper_color'] as String? ?? 'Sarı kağıt',
       isPortrait: json['is_portrait'] as bool? ?? true,
       documentType: json['document_type'] as String? ?? 'notebook',
+      coverId: json['cover_id'] as String?,
+      hasCover: json['has_cover'] as bool? ?? true,
+      paperWidthMm: (json['paper_width_mm'] as num?)?.toDouble() ?? 210.0,
+      paperHeightMm: (json['paper_height_mm'] as num?)?.toDouble() ?? 297.0,
     );
   }
 
@@ -68,6 +80,10 @@ class DocumentModel {
         'paper_color': paperColor,
         'is_portrait': isPortrait,
         'document_type': documentType,
+        'cover_id': coverId,
+        'has_cover': hasCover,
+        'paper_width_mm': paperWidthMm,
+        'paper_height_mm': paperHeightMm,
       };
 
   /// Convert string to DocumentType enum
@@ -93,6 +109,10 @@ class DocumentModel {
         paperColor: paperColor,
         isPortrait: isPortrait,
         documentType: _parseDocumentType(documentType),
+        coverId: coverId,
+        hasCover: hasCover,
+        paperWidthMm: paperWidthMm,
+        paperHeightMm: paperHeightMm,
       );
 
   factory DocumentModel.fromEntity(DocumentInfo entity) => DocumentModel(
@@ -110,6 +130,10 @@ class DocumentModel {
         paperColor: entity.paperColor,
         isPortrait: entity.isPortrait,
         documentType: entity.documentType.name,
+        coverId: entity.coverId,
+        hasCover: entity.hasCover,
+        paperWidthMm: entity.paperWidthMm,
+        paperHeightMm: entity.paperHeightMm,
       );
 
   DocumentModel copyWith({
@@ -127,6 +151,10 @@ class DocumentModel {
     String? paperColor,
     bool? isPortrait,
     String? documentType,
+    String? coverId,
+    bool? hasCover,
+    double? paperWidthMm,
+    double? paperHeightMm,
   }) {
     return DocumentModel(
       id: id ?? this.id,
@@ -143,6 +171,10 @@ class DocumentModel {
       paperColor: paperColor ?? this.paperColor,
       isPortrait: isPortrait ?? this.isPortrait,
       documentType: documentType ?? this.documentType,
+      coverId: coverId ?? this.coverId,
+      hasCover: hasCover ?? this.hasCover,
+      paperWidthMm: paperWidthMm ?? this.paperWidthMm,
+      paperHeightMm: paperHeightMm ?? this.paperHeightMm,
     );
   }
 }

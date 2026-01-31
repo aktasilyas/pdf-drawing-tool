@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:pdfx/pdfx.dart';
 import 'pdf_page_renderer.dart';
@@ -94,7 +93,7 @@ class PDFToPageConverter {
   /// If [targetIndex] is provided, uses that.
   /// Otherwise, derives from [pdfPageNumber] (1-based → 0-based).
   int determinePageIndex({
-    required int? targetIndex,
+    int? targetIndex,
     required int pdfPageNumber,
   }) {
     if (pdfPageNumber < 1) {
@@ -223,7 +222,6 @@ class PDFToPageConverter {
         // The file path is set during import in PDFImportService.
         // This mode is not used when useLazyLoading=true in the new system.
         // Return page without PDF background - will be set by import service.
-        debugPrint('⚡ PDF page $pageNumber prepared for lazy loading (not rendered yet)');
         return page;
       }
 
@@ -244,10 +242,6 @@ class PDFToPageConverter {
           pdfData: renderedImage,
           pdfPageIndex: pageNumber,
         );
-
-        // Debug logging
-        debugPrint(
-            '📄 PDF page $pageNumber rendered immediately, bytes: ${renderedImage.lengthInBytes}');
 
         return page.copyWith(background: pdfBackground);
       }

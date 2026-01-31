@@ -78,6 +78,7 @@ final activeStrokeStyleProvider = Provider<StrokeStyle>((ref) {
 /// 
 /// Note: This is kept for compatibility but may not be needed
 /// since PenType.toStrokeStyle() handles this internally.
+// ignore: unused_element
 NibShape _convertNibShape(NibShapeType nibType) {
   switch (nibType) {
     case NibShapeType.circle:

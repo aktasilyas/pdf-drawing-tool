@@ -18,6 +18,10 @@ abstract class DocumentRepository {
     String paperColor = 'Sarı kağıt',
     bool isPortrait = true,
     DocumentType documentType = DocumentType.notebook,
+    String? coverId,
+    bool hasCover = true,
+    double paperWidthMm = 210.0,
+    double paperHeightMm = 297.0,
   });
 
   /// Update document metadata

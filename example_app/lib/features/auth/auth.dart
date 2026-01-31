@@ -1,4 +1,6 @@
 /// Barrel exports for the auth feature.
+library;
+
 // Data
 export 'data/datasources/auth_remote_datasource.dart';
 export 'data/models/user_model.dart';

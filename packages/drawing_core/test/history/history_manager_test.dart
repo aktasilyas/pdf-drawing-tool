@@ -23,7 +23,7 @@ void main() {
 
     setUp(() {
       manager = HistoryManager();
-      document = DrawingDocument.empty('Test Document');
+      document = DrawingDocument.emptyMultiPage('Test Document');
     });
 
     group('Initial state', () {

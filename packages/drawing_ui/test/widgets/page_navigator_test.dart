@@ -345,8 +345,6 @@ void main() {
 
     testWidgets('should call onDuplicatePage when duplicate requested',
         (tester) async {
-      int? duplicatedIndex;
-
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -354,7 +352,9 @@ void main() {
               pageManager: pageManager,
               cache: cache,
               onPageChanged: (index) {},
-              onDuplicatePage: (index) => duplicatedIndex = index,
+              onDuplicatePage: (index) {
+                // Duplicate callback
+              },
             ),
           ),
         ),

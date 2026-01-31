@@ -1,4 +1,6 @@
 /// Supabase user model mapping for the auth feature.
+library;
+
 import 'package:example_app/features/auth/domain/entities/user.dart' as domain;
 import 'package:supabase_flutter/supabase_flutter.dart';
 

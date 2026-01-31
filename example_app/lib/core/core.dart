@@ -20,6 +20,7 @@ export 'constants/storage_keys.dart';
 // Utils
 export 'utils/extensions.dart';
 export 'utils/validators.dart';
+export 'utils/logger.dart';
 
 // Theme
 export 'theme/app_theme.dart';

@@ -94,7 +94,7 @@ class ToolbarIconButton extends StatelessWidget {
               size: 20,
               color: enabled
                   ? theme.toolbarIconColor
-                  : theme.toolbarIconColor.withAlpha(100),
+                  : theme.toolbarIconColor.withValues(alpha: 100.0 / 255.0),
             ),
           ),
         ),

@@ -1,3 +1,4 @@
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/painters/template_pattern_painter.dart';
@@ -5,13 +6,59 @@ import 'package:drawing_ui/src/painters/template_pattern_painter.dart';
 /// Sayfa içi arka plan pattern çizici (LIMITED mod için).
 /// Transform zaten zoom/pan uyguladığı için bu painter
 /// sadece sayfa boyutları içinde pattern çizer.
+/// 
+/// PERFORMANCE: Uses Picture caching to avoid redrawing patterns
 class PageBackgroundPatternPainter extends CustomPainter {
   final PageBackground background;
+  
+  // Static cache for pattern pictures
+  static final Map<String, ui.Picture> _pictureCache = {};
+  static const int _maxCacheSize = 20;
 
   const PageBackgroundPatternPainter({required this.background});
+  
+  /// Generate cache key from background properties
+  String _getCacheKey(Size size) {
+    return '${background.type}_${background.lineColor}_'
+        '${background.gridSpacing}_${background.lineSpacing}_'
+        '${background.templatePattern}_${background.templateSpacingMm}_'
+        '${background.coverId}_${size.width}_${size.height}';
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
+    // For PDF and blank, no caching needed
+    if (background.type == BackgroundType.pdf || 
+        background.type == BackgroundType.blank) {
+      return;
+    }
+    
+    // Try to get from cache
+    final cacheKey = _getCacheKey(size);
+    ui.Picture? cachedPicture = _pictureCache[cacheKey];
+    
+    if (cachedPicture == null) {
+      // Cache miss - draw and cache
+      final recorder = ui.PictureRecorder();
+      final recordingCanvas = Canvas(recorder);
+      
+      _drawPattern(recordingCanvas, size);
+      
+      cachedPicture = recorder.endRecording();
+      
+      // Evict oldest if cache is full
+      if (_pictureCache.length >= _maxCacheSize) {
+        _pictureCache.remove(_pictureCache.keys.first);
+      }
+      
+      _pictureCache[cacheKey] = cachedPicture;
+    }
+    
+    // Draw cached picture
+    canvas.drawPicture(cachedPicture);
+  }
+  
+  void _drawPattern(Canvas canvas, Size size) {
     final lineColor = background.lineColor ?? 0xFFE0E0E0;
     final linePaint = Paint()
       ..color = Color(lineColor)
@@ -53,6 +100,88 @@ class PageBackgroundPatternPainter extends CustomPainter {
           templatePainter.paint(canvas, size);
         }
         break;
+        
+      case BackgroundType.cover:
+        // Render cover background similar to CoverPreviewWidget
+        if (background.coverId != null) {
+          _drawCoverBackground(canvas, size, background.coverId!);
+        }
+        break;
+    }
+  }
+
+  void _drawCoverBackground(Canvas canvas, Size size, String coverId) {
+    final cover = CoverRegistry.byId(coverId);
+    if (cover == null) return;
+
+    switch (cover.style) {
+      case CoverStyle.solid:
+        // Solid already painted by canvas background color
+        break;
+
+      case CoverStyle.gradient:
+        // Gradient
+        final gradient = LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(cover.primaryColor),
+            Color(cover.secondaryColor ?? cover.primaryColor),
+          ],
+        );
+        final paint = Paint()..shader = gradient.createShader(Offset.zero & size);
+        canvas.drawRect(Offset.zero & size, paint);
+        break;
+
+      case CoverStyle.pattern:
+        // Pattern (dots or lines)
+        final bgColor = Color(cover.primaryColor);
+        final luminance = bgColor.computeLuminance();
+        final patternColor = luminance > 0.5
+            ? bgColor.withValues(alpha: 0.3)
+            : Colors.white.withValues(alpha: 0.15);
+
+        if (coverId.contains('dots')) {
+          _drawCoverDots(canvas, size, patternColor);
+        } else {
+          _drawCoverLines(canvas, size, patternColor);
+        }
+        break;
+
+      case CoverStyle.minimal:
+        // Minimal frame (already rendered correctly via solid color)
+        // Note: The frame decoration is typically done in UI layer, not canvas
+        break;
+    }
+  }
+
+  void _drawCoverDots(Canvas canvas, Size size, Color patternColor) {
+    const spacing = 15.0;
+    final paint = Paint()
+      ..color = patternColor
+      ..style = PaintingStyle.fill;
+
+    for (double x = spacing / 2; x < size.width; x += spacing) {
+      for (double y = spacing / 2; y < size.height; y += spacing) {
+        canvas.drawCircle(Offset(x, y), 1.5, paint);
+      }
+    }
+  }
+
+  void _drawCoverLines(Canvas canvas, Size size, Color patternColor) {
+    const spacing = 12.0;
+    final paint = Paint()
+      ..color = patternColor
+      ..strokeWidth = 1.5
+      ..style = PaintingStyle.stroke;
+
+    // Diagonal lines
+    for (double i = -size.height; i < size.width; i += spacing) {
+      canvas.drawLine(
+        Offset(i, 0),
+        Offset(i + size.height, size.height),
+        paint,
+      );
     }
   }
 

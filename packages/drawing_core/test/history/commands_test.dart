@@ -13,7 +13,7 @@ void main() {
     late Stroke testStroke;
 
     setUp(() {
-      document = DrawingDocument.empty('Test Document');
+      document = DrawingDocument.emptyMultiPage('Test Document');
       testStroke = Stroke(
         id: 'test-stroke',
         points: [
@@ -293,7 +293,7 @@ void main() {
         command.execute(document);
 
         // Create document with no layers for undo
-        final emptyDoc = DrawingDocument.empty('Empty');
+        final emptyDoc = DrawingDocument.emptyMultiPage('Empty');
 
         // Undo on document with different layer count
         final invalidCommand = RemoveStrokeCommand(
@@ -362,7 +362,7 @@ void main() {
 
   group('Command integration', () {
     test('add then remove returns to original', () {
-      final document = DrawingDocument.empty('Test');
+      final document = DrawingDocument.emptyMultiPage('Test');
       final stroke = Stroke(
         id: 'integration-stroke',
         points: [DrawingPoint(x: 5, y: 5)],
@@ -394,7 +394,7 @@ void main() {
     });
 
     test('multiple strokes with commands', () {
-      final document = DrawingDocument.empty('Test');
+      final document = DrawingDocument.emptyMultiPage('Test');
 
       final stroke1 = Stroke(
         id: 'stroke-1',

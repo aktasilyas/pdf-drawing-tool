@@ -7,7 +7,7 @@ void main() {
     late TextElement text;
 
     setUp(() {
-      document = DrawingDocument.empty('Test');
+      document = DrawingDocument.emptyMultiPage('Test');
       text = TextElement.create(text: 'Hello', x: 50, y: 50);
     });
 
@@ -39,7 +39,7 @@ void main() {
 
     setUp(() {
       text = TextElement.create(text: 'Hello', x: 50, y: 50);
-      final baseDoc = DrawingDocument.empty('Test');
+      final baseDoc = DrawingDocument.emptyMultiPage('Test');
       final layer = baseDoc.layers[0].addText(text);
       document = baseDoc.updateLayer(0, layer);
     });
@@ -72,7 +72,7 @@ void main() {
 
     setUp(() {
       text = TextElement.create(text: 'Original', x: 50, y: 50);
-      final baseDoc = DrawingDocument.empty('Test');
+      final baseDoc = DrawingDocument.emptyMultiPage('Test');
       final layer = baseDoc.layers[0].addText(text);
       document = baseDoc.updateLayer(0, layer);
     });

@@ -50,7 +50,7 @@ void main() {
     'monthly',
     PackageType.monthly,
     storeProduct,
-    const PresentedOfferingContext('default', null, null),
+    PresentedOfferingContext('default', null, null),
   );
 
   const offering = Offering(

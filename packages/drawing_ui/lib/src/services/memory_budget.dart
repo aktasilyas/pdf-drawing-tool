@@ -40,7 +40,7 @@ class MemoryBudget {
   /// Current memory usage as a percentage (0-100+).
   double get usagePercentage {
     if (maxBytes == 0) return 0.0;
-    return (currentBytes / maxBytes) * 100.0;
+    return currentBytes / maxBytes * 100.0;
   }
 
   /// Allocates memory for the given key.
@@ -81,7 +81,7 @@ class MemoryBudget {
 
   /// Checks if allocating additional bytes would exceed budget.
   bool wouldExceedBudget(int additionalBytes) {
-    return (currentBytes + additionalBytes) > maxBytes;
+    return currentBytes + additionalBytes > maxBytes;
   }
 
   /// Suggests how many items to evict to get back under budget.

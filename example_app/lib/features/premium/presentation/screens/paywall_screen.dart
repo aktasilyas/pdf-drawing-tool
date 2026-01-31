@@ -1,9 +1,11 @@
+/// Paywall screen showing products, restore button and feature table.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:example_app/core/errors/failures.dart';
+import 'package:example_app/core/core.dart';
 import 'package:example_app/features/premium/premium.dart';
 
-/// Paywall screen showing products, restore button and feature table.
 class PaywallScreen extends ConsumerWidget {
   const PaywallScreen({super.key});
 
@@ -104,7 +106,7 @@ class PaywallScreen extends ConsumerWidget {
   }
 
   Widget _buildFeatureComparison(WidgetRef ref) {
-    const rows = [
+    final rows = [
       {'label': 'Cloud Sync', 'entitlement': Entitlements.cloudSync},
       {'label': 'Unlimited Documents', 'entitlement': Entitlements.unlimitedDocuments},
       {'label': 'Premium Templates', 'entitlement': Entitlements.premiumTemplates},

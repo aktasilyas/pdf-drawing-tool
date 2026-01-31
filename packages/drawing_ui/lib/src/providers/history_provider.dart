@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'document_provider.dart';
@@ -95,27 +94,9 @@ class HistoryNotifier extends StateNotifier<HistoryState> {
   /// This is the main method for executing drawing commands.
   /// It updates both the document and the history state.
   void execute(DrawingCommand command) {
-    // #region agent log [H6]
-    debugPrint('📝 [H6] execute() - command: ${command.runtimeType}');
-    // #endregion
-
     final document = _ref.read(documentProvider);
-
-    // #region agent log [H6]
-    debugPrint('📝 [H6] BEFORE - activeLayer strokes: ${document.activeLayer?.strokes.length ?? 0}');
-    // #endregion
-
     final newDocument = _historyManager.execute(command, document);
-
-    // #region agent log [H6]
-    debugPrint('📝 [H6] AFTER execute - activeLayer strokes: ${newDocument.activeLayer?.strokes.length ?? 0}');
-    // #endregion
-
     _ref.read(documentProvider.notifier).updateDocument(newDocument);
-
-    // #region agent log [H7]
-    debugPrint('📝 [H7] updateDocument called');
-    // #endregion
 
     _updateState();
   }

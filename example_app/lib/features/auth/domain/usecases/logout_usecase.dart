@@ -1,4 +1,3 @@
-/// Use case for signing the current user out.
 import 'package:dartz/dartz.dart';
 import 'package:example_app/core/errors/failures.dart';
 import 'package:example_app/features/auth/domain/repositories/auth_repository.dart';

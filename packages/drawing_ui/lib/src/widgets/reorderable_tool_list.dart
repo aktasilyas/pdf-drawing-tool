@@ -123,7 +123,7 @@ class _ToolListItem extends StatelessWidget {
                   child: Switch(
                     value: isVisible,
                     onChanged: (_) => onVisibilityToggle(),
-                    activeColor: colorScheme.primary,
+                    activeThumbColor: colorScheme.primary,
                   ),
                 ),
               ],

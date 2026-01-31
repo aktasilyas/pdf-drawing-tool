@@ -64,7 +64,7 @@ void main() {
             content: any(named: 'content'),
             pageCount: any(named: 'pageCount'),
             updatedAt: any(named: 'updatedAt'),
-          )).thenAnswer((_) async => Left(CacheFailure('Save failed')));
+          )).thenAnswer((_) async => const Left(CacheFailure('Save failed')));
 
       // Act
       final result = await useCase(testDocument);

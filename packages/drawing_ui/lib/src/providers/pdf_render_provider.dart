@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdfx/pdfx.dart';
@@ -80,7 +79,6 @@ class ZoomBasedRenderNotifier extends StateNotifier<double> {
     // Zaten var mı?
     final cache = ref.read(pdfPageCacheProvider);
     if (cache.containsKey(qualityKey)) {
-      debugPrint('✅ HQ already cached: $qualityKey');
       return;
     }
     
@@ -88,8 +86,6 @@ class ZoomBasedRenderNotifier extends StateNotifier<double> {
     if (_currentlyRendering.contains(qualityKey)) {
       return;
     }
-    
-    debugPrint('🔍 HQ Rendering (${quality}x): $cacheKey');
     
     _currentlyRendering.add(qualityKey);
     
@@ -128,8 +124,8 @@ class ZoomBasedRenderNotifier extends StateNotifier<double> {
       await document.close();
       
       if (pageImage?.bytes != null) {
+        // ignore: unnecessary_non_null_assertion
         final bytes = pageImage!.bytes!;
-        debugPrint('✅ HQ Render success: $qualityKey (${bytes.length} bytes)');
         
         // Cache'e ekle
         ref.read(pdfPageCacheProvider.notifier).update((state) {
@@ -147,7 +143,6 @@ class ZoomBasedRenderNotifier extends StateNotifier<double> {
             }
           }
           for (final key in keysToRemove) {
-            debugPrint('🧹 Removing old quality: $key');
             newState.remove(key);
           }
           
@@ -158,7 +153,7 @@ class ZoomBasedRenderNotifier extends StateNotifier<double> {
         state = quality;
       }
     } catch (e) {
-      debugPrint('❌ HQ Render error: $e');
+      debugPrint('ERROR: HQ Render error - $e');
     } finally {
       _currentlyRendering.remove(qualityKey);
     }
@@ -220,6 +215,7 @@ Future<Uint8List?> renderThumbnail(
     await document.close();
 
     if (pageImage?.bytes != null) {
+      // ignore: unnecessary_non_null_assertion
       final bytes = pageImage!.bytes!;
       container.read(pdfThumbnailCacheProvider.notifier).update((state) {
         final newState = Map<String, Uint8List>.from(state);
@@ -233,7 +229,7 @@ Future<Uint8List?> renderThumbnail(
     }
     return null;
   } catch (e) {
-    debugPrint('❌ Thumbnail render error: $e');
+    debugPrint('ERROR: Thumbnail render error - $e');
     return null;
   } finally {
     _currentlyRendering.remove(thumbKey);
@@ -267,7 +263,6 @@ Future<Uint8List?> _renderSinglePage(Ref ref, String cacheKey) async {
 
   // 3. Start render
   _currentlyRendering.add(cacheKey);
-  debugPrint('📄 Rendering: $cacheKey');
 
   try {
     final parts = cacheKey.split('|');
@@ -313,8 +308,8 @@ Future<Uint8List?> _renderSinglePage(Ref ref, String cacheKey) async {
     await document.close();
 
     if (pageImage?.bytes != null) {
+      // ignore: unnecessary_non_null_assertion
       final bytes = pageImage!.bytes!;
-      debugPrint('✅ Render success: $cacheKey (${bytes.length} bytes)');
       _addToCache(ref, cacheKey, bytes);
       _currentlyRendering.remove(cacheKey);
       return bytes;
@@ -323,7 +318,7 @@ Future<Uint8List?> _renderSinglePage(Ref ref, String cacheKey) async {
     _currentlyRendering.remove(cacheKey);
     return null;
   } catch (e) {
-    debugPrint('❌ Render error: $cacheKey - $e');
+    debugPrint('ERROR: Render error: $cacheKey - $e');
     _currentlyRendering.remove(cacheKey);
     return null;
   }
@@ -386,7 +381,6 @@ void _prefetchAdjacent(WidgetRef ref, int currentPage, String pdfFilePath, int t
       
       // Cache'de yoksa ve şu an render edilmiyorsa prefetch et
       if (!cache.containsKey(targetKey) && !_currentlyRendering.contains(targetKey)) {
-        debugPrint('🔮 Prefetching adjacent page $targetPage');
         ref.read(pdfPageRenderProvider(targetKey));
       }
     }

@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 import 'package:example_app/core/core.dart';
@@ -15,8 +14,8 @@ class LoadDocumentUseCase {
     // 1. Get document info from DB
     final result = await _repository.getDocument(documentId);
     
-    return result.fold(
-      (failure) => Left(failure),
+    return await result.fold(
+      (failure) async => Left(failure),
       (docInfo) async {
         // 2. Load document content (blob) and deserialize
         try {
@@ -25,24 +24,54 @@ class LoadDocumentUseCase {
           return contentResult.fold(
             (failure) => Left(failure),
             (content) {
-              // #region agent log
-              debugPrint('🔍 [DEBUG] LoadDocumentUseCase - hasContent: ${content != null}');
-              debugPrint('🔍 [DEBUG] LoadDocumentUseCase - templateId: ${docInfo.templateId}');
-              // #endregion
-              
               if (content == null) {
                 // New document - create with template background
-                final background = _getBackgroundForTemplate(
+                // CRITICAL: Create page size that fills viewport at 1.0 zoom
+                // Use aspect ratio from paper dimensions, but scale to reasonable screen size
+                final aspectRatio = docInfo.paperWidthMm / docInfo.paperHeightMm;
+                
+                // Standard viewport height (portrait tablet ~1024px)
+                // Page will fill viewport height at 1.0 zoom
+                const targetHeight = 1024.0;
+                final targetWidth = targetHeight * aspectRatio;
+                
+                final pageSize = PageSize(
+                  width: targetWidth,
+                  height: targetHeight,
+                );
+                
+                final List<Page> pages = [];
+                
+                // If document has a cover, create cover page first
+                if (docInfo.hasCover && docInfo.coverId != null) {
+                  final coverBackground = _getBackgroundForCover(
+                    docInfo.coverId!,
+                    paperColor: docInfo.paperColor,
+                  );
+                  pages.add(Page.createCover(
+                    index: 0,
+                    size: pageSize,
+                    background: coverBackground,
+                  ));
+                }
+                
+                // Add template page
+                final templateBackground = _getBackgroundForTemplate(
                   docInfo.templateId,
                   paperColor: docInfo.paperColor,
                 );
+                pages.add(Page.create(
+                  index: pages.length,
+                  size: pageSize,
+                  background: templateBackground,
+                ));
                 
-                debugPrint('📄 [LOAD] Creating NEW document (empty)');
+                logger.i('Created new document: ${docInfo.id} with ${pages.length} pages');
                 
                 return Right(DrawingDocument.multiPage(
                   id: docInfo.id,
                   title: docInfo.title,
-                  pages: [Page.create(index: 0, background: background)],
+                  pages: pages,
                   createdAt: docInfo.createdAt,
                   updatedAt: docInfo.updatedAt,
                   documentType: docInfo.documentType,
@@ -51,24 +80,10 @@ class LoadDocumentUseCase {
               // Deserialize from JSON
               try {
                 final doc = DrawingDocument.fromJson(content);
-                
-                debugPrint('✅ [LOAD] Document loaded - id: ${doc.id}, strokes: ${doc.currentPage?.layers.firstOrNull?.strokes.length ?? 0}');
-                
+                logger.i('Document loaded: ${doc.id}');
                 return Right(doc);
               } catch (e, stackTrace) {
-                debugPrint('❌ JSON Parse Error: $e');
-                debugPrint('❌ Stack Trace: $stackTrace');
-                debugPrint('❌ Raw JSON (first 1000 chars): ${content.toString().substring(0, content.toString().length > 1000 ? 1000 : content.toString().length)}');
-                
-                // Try to identify which field failed
-                if (content.containsKey('pages')) {
-                  final pages = content['pages'] as List?;
-                  debugPrint('❌ Pages count: ${pages?.length}');
-                  if (pages != null && pages.isNotEmpty) {
-                    debugPrint('❌ First page sample: ${pages[0]}');
-                  }
-                }
-                
+                logger.e('JSON parse error', error: e, stackTrace: stackTrace);
                 return Left(CacheFailure('Document corrupted: $e'));
               }
             },
@@ -89,7 +104,7 @@ class LoadDocumentUseCase {
     final template = TemplateRegistry.getById(templateId);
     
     if (template == null) {
-      debugPrint('⚠️ [LOAD] Template not found: $templateId, using blank');
+      logger.w('Template not found: $templateId, using blank');
       return PageBackground(
         type: BackgroundType.blank,
         color: bgColor,
@@ -105,6 +120,27 @@ class LoadDocumentUseCase {
       templatePattern: template.pattern,
       templateSpacingMm: template.spacingMm,
       templateLineWidth: template.lineWidth,
+    );
+  }
+  
+  /// Convert cover ID to PageBackground
+  PageBackground _getBackgroundForCover(String coverId, {String paperColor = 'Sarı kağıt'}) {
+    // Try to get cover from registry
+    final cover = CoverRegistry.byId(coverId);
+    
+    if (cover == null) {
+      logger.w('Cover not found: $coverId, using blank black');
+      return const PageBackground(
+        type: BackgroundType.blank,
+        color: 0xFF000000, // Black fallback
+      );
+    }
+    
+    // Use cover type to render proper background on canvas
+    return PageBackground(
+      type: BackgroundType.cover,
+      color: cover.primaryColor,
+      coverId: coverId,
     );
   }
   

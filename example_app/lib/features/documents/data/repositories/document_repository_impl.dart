@@ -60,6 +60,10 @@ class DocumentRepositoryImpl implements DocumentRepository {
     String paperColor = 'Sarı kağıt',
     bool isPortrait = true,
     DocumentType documentType = DocumentType.notebook,
+    String? coverId,
+    bool hasCover = true,
+    double paperWidthMm = 210.0,
+    double paperHeightMm = 297.0,
   }) async {
     try {
       final now = DateTime.now();
@@ -77,6 +81,10 @@ class DocumentRepositoryImpl implements DocumentRepository {
         paperColor: paperColor,
         isPortrait: isPortrait,
         documentType: documentType.name,
+        coverId: coverId,
+        hasCover: hasCover,
+        paperWidthMm: paperWidthMm,
+        paperHeightMm: paperHeightMm,
       );
 
       final created = await _localDatasource.createDocument(document);

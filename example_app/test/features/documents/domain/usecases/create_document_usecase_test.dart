@@ -36,12 +36,12 @@ void main() {
       updatedAt: DateTime(2024, 1, 1),
     );
 
-    final premiumSubscription = Subscription(
+    const premiumSubscription = Subscription(
       tier: SubscriptionTier.premium,
       isActive: true,
     );
 
-    final freeSubscription = Subscription(
+    const freeSubscription = Subscription(
       tier: SubscriptionTier.free,
       isActive: true,
     );
@@ -49,7 +49,7 @@ void main() {
     test('should create document when user has premium subscription', () async {
       // Arrange
       when(() => mockSubscriptionRepository.getSubscription())
-          .thenAnswer((_) async => Right(premiumSubscription));
+          .thenAnswer((_) async => const Right(premiumSubscription));
       when(() => mockDocumentRepository.createDocument(
             title: testTitle,
             templateId: testTemplateId,
@@ -87,7 +87,7 @@ void main() {
       );
 
       when(() => mockSubscriptionRepository.getSubscription())
-          .thenAnswer((_) async => Right(freeSubscription));
+          .thenAnswer((_) async => const Right(freeSubscription));
       when(() => mockDocumentRepository.getDocuments())
           .thenAnswer((_) async => Right(existingDocs));
       when(() => mockDocumentRepository.createDocument(
@@ -128,7 +128,7 @@ void main() {
       );
 
       when(() => mockSubscriptionRepository.getSubscription())
-          .thenAnswer((_) async => Right(freeSubscription));
+          .thenAnswer((_) async => const Right(freeSubscription));
       when(() => mockDocumentRepository.getDocuments())
           .thenAnswer((_) async => Right(existingDocs));
 
@@ -184,7 +184,7 @@ void main() {
       ];
 
       when(() => mockSubscriptionRepository.getSubscription())
-          .thenAnswer((_) async => Right(freeSubscription));
+          .thenAnswer((_) async => const Right(freeSubscription));
       when(() => mockDocumentRepository.getDocuments())
           .thenAnswer((_) async => Right(existingDocs));
       when(() => mockDocumentRepository.createDocument(

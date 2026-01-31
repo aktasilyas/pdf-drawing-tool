@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:flutter/foundation.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:path_provider/path_provider.dart';
@@ -393,8 +392,6 @@ class PDFImportService {
         final pdfFile = File('${pdfDir.path}/$pdfId.pdf');
         await pdfFile.writeAsBytes(bytes);
         
-        debugPrint('📁 PDF saved to: ${pdfFile.path}');
-        
         // 2. PDF'i aç ve sayfa bilgilerini al
         final document = await _loader.loadFromBytes(bytes);
         
@@ -438,8 +435,6 @@ class PDFImportService {
             processedPages: _processedPages,
             totalPages: _totalPages,
           ));
-          
-          debugPrint('⚡ Page $pageNumber metadata created (lazy)');
         }
         
         await _loader.disposeDocument(document);

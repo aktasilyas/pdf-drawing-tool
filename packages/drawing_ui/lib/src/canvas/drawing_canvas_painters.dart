@@ -69,6 +69,11 @@ class DynamicBackgroundPainter extends CustomPainter {
           templatePainter.paint(canvas, size);
         }
         break;
+        
+      case BackgroundType.cover:
+        // Cover backgrounds are rendered via PageBackgroundPatternPainter
+        // Drawing canvas painters don't handle cover rendering
+        break;
     }
   }
 

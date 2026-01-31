@@ -303,26 +303,35 @@ class ExportModeSelector extends StatelessWidget {
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const SizedBox(height: 8),
-        RadioListTile<PDFExportMode>(
-          title: const Text('Vector'),
-          subtitle: const Text('Best quality, smaller file size'),
-          value: PDFExportMode.vector,
+        RadioGroup<PDFExportMode>(
           groupValue: selectedMode,
-          onChanged: (mode) => mode != null && onModeChanged != null ? onModeChanged!(mode) : null,
-        ),
-        RadioListTile<PDFExportMode>(
-          title: const Text('Raster'),
-          subtitle: const Text('Image-based, handles complex content'),
-          value: PDFExportMode.raster,
-          groupValue: selectedMode,
-          onChanged: (mode) => mode != null && onModeChanged != null ? onModeChanged!(mode) : null,
-        ),
-        RadioListTile<PDFExportMode>(
-          title: const Text('Hybrid'),
-          subtitle: const Text('Balanced approach, automatic fallback'),
-          value: PDFExportMode.hybrid,
-          groupValue: selectedMode,
-          onChanged: (mode) => mode != null && onModeChanged != null ? onModeChanged!(mode) : null,
+          onChanged: (PDFExportMode? value) {
+            if (value != null && onModeChanged != null) {
+              onModeChanged!(value);
+            }
+          },
+          child: Column(
+            children: [
+              RadioListTile<PDFExportMode>(
+                title: const Text('Vector'),
+                subtitle: const Text('Best quality, smaller file size'),
+                value: PDFExportMode.vector,
+                toggleable: false,
+              ),
+              RadioListTile<PDFExportMode>(
+                title: const Text('Raster'),
+                subtitle: const Text('Image-based, handles complex content'),
+                value: PDFExportMode.raster,
+                toggleable: false,
+              ),
+              RadioListTile<PDFExportMode>(
+                title: const Text('Hybrid'),
+                subtitle: const Text('Balanced approach, automatic fallback'),
+                value: PDFExportMode.hybrid,
+                toggleable: false,
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -407,7 +416,7 @@ class FormatSelector extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<PDFPageFormat>(
-          value: selectedFormat,
+          initialValue: selectedFormat,
           decoration: const InputDecoration(
             border: OutlineInputBorder(),
             contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),

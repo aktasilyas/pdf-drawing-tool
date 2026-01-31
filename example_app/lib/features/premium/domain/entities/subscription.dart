@@ -1,3 +1,6 @@
+/// Domain entity representing a user's subscription status.
+library;
+
 enum SubscriptionTier { free, premium, premiumPlus }
 
 /// Domain entity representing a user's subscription status.

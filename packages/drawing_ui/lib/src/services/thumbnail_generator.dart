@@ -60,6 +60,9 @@ class ThumbnailGenerator {
       canvas.translate(offsetX, offsetY);
       canvas.scale(scale);
 
+      // CRITICAL: Render page background (cover color, template pattern, etc.)
+      _renderPageBackground(canvas, page);
+
       // CRITICAL: Render PDF background if exists
       if (page.background.type == BackgroundType.pdf) {
         await _renderPdfBackground(canvas, page);
@@ -86,12 +89,155 @@ class ThumbnailGenerator {
     }
   }
 
+  /// Renders page background (cover color, template patterns, etc.)
+  static void _renderPageBackground(Canvas canvas, Page page) {
+    final background = page.background;
+
+    // 1. Draw base background color
+    final bgColor = Color(background.color);
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, page.size.width, page.size.height),
+      Paint()..color = bgColor,
+    );
+
+    // 2. Draw pattern/grid/lines for template types
+    final lineColor = background.lineColor ?? 0xFFE0E0E0;
+    final linePaint = Paint()
+      ..color = Color(lineColor)
+      ..strokeWidth = background.templateLineWidth ?? 0.5
+      ..isAntiAlias = true;
+
+    switch (background.type) {
+      case BackgroundType.blank:
+        // Solid color only (for covers)
+        break;
+
+      case BackgroundType.grid:
+        final spacing = background.gridSpacing ?? 25.0;
+        _drawGrid(canvas, Size(page.size.width, page.size.height), linePaint,
+            spacing);
+        break;
+
+      case BackgroundType.lined:
+        final spacing = background.lineSpacing ?? 25.0;
+        _drawLines(canvas, Size(page.size.width, page.size.height), linePaint,
+            spacing);
+        break;
+
+      case BackgroundType.dotted:
+        final spacing = background.gridSpacing ?? 20.0;
+        _drawDots(canvas, Size(page.size.width, page.size.height), spacing,
+            Color(lineColor));
+        break;
+
+      case BackgroundType.template:
+        // Template patterns (kareli, çizgili vb.)
+        if (background.templatePattern != null) {
+          _drawTemplatePattern(
+            canvas,
+            Size(page.size.width, page.size.height),
+            background.templatePattern!,
+            background.templateSpacingMm ?? 8.0,
+            background.templateLineWidth ?? 0.5,
+            Color(lineColor),
+          );
+        }
+        break;
+
+      case BackgroundType.pdf:
+        // PDF handled separately
+        break;
+        
+      case BackgroundType.cover:
+        // Cover backgrounds rendered via PageBackgroundPatternPainter in main canvas
+        // Thumbnails will show solid color from background.color
+        break;
+    }
+  }
+
+  /// Draw grid pattern
+  static void _drawGrid(Canvas canvas, Size size, Paint paint, double spacing) {
+    // Vertical lines
+    for (double x = spacing; x < size.width; x += spacing) {
+      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
+    }
+    // Horizontal lines
+    for (double y = spacing; y < size.height; y += spacing) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+  }
+
+  /// Draw lined pattern
+  static void _drawLines(
+      Canvas canvas, Size size, Paint paint, double spacing) {
+    final topMargin = spacing * 2;
+    for (double y = topMargin; y < size.height; y += spacing) {
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+  }
+
+  /// Draw dotted pattern
+  static void _drawDots(Canvas canvas, Size size, double spacing, Color color) {
+    final dotPaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+    const dotRadius = 1.0;
+
+    for (double x = spacing; x < size.width; x += spacing) {
+      for (double y = spacing; y < size.height; y += spacing) {
+        canvas.drawCircle(Offset(x, y), dotRadius, dotPaint);
+      }
+    }
+  }
+
+  /// Draw template pattern (simplified for thumbnail)
+  static void _drawTemplatePattern(
+    Canvas canvas,
+    Size size,
+    TemplatePattern pattern,
+    double spacingMm,
+    double lineWidth,
+    Color lineColor,
+  ) {
+    final paint = Paint()
+      ..color = lineColor
+      ..strokeWidth = lineWidth
+      ..isAntiAlias = true;
+
+    // Convert mm to pixels (assuming 96 DPI, 1mm ≈ 3.78 pixels)
+    final spacingPx = spacingMm * 3.78;
+
+    switch (pattern) {
+      case TemplatePattern.blank:
+        break;
+      case TemplatePattern.smallGrid:
+      case TemplatePattern.mediumGrid:
+      case TemplatePattern.largeGrid:
+        _drawGrid(canvas, size, paint, spacingPx);
+        break;
+      case TemplatePattern.thinLines:
+      case TemplatePattern.mediumLines:
+      case TemplatePattern.thickLines:
+        _drawLines(canvas, size, paint, spacingPx);
+        break;
+      case TemplatePattern.smallDots:
+      case TemplatePattern.mediumDots:
+      case TemplatePattern.largeDots:
+        _drawDots(canvas, size, spacingPx, lineColor);
+        break;
+      default:
+        // For other patterns, draw a simple grid as fallback
+        _drawGrid(canvas, size, paint, spacingPx);
+        break;
+    }
+  }
+
   /// Renders PDF background on canvas
   static Future<void> _renderPdfBackground(
     Canvas canvas,
     Page page,
   ) async {
-    if (page.background.pdfFilePath == null || 
+    if (page.background.pdfFilePath == null ||
         page.background.pdfPageIndex == null) {
       return;
     }
@@ -108,7 +254,8 @@ class ThumbnailGenerator {
         // PDF'i page boyutuna sığdır
         canvas.drawImageRect(
           pdfImage,
-          Rect.fromLTWH(0, 0, pdfImage.width.toDouble(), pdfImage.height.toDouble()),
+          Rect.fromLTWH(
+              0, 0, pdfImage.width.toDouble(), pdfImage.height.toDouble()),
           Rect.fromLTWH(0, 0, page.size.width, page.size.height),
           Paint()..filterQuality = FilterQuality.high,
         );
@@ -200,7 +347,6 @@ class ThumbnailGenerator {
         case ShapeType.triangle:
         case ShapeType.diamond:
         default:
-          // TODO: Implement triangle and diamond rendering
           // For now, draw a simple line as placeholder
           canvas.drawLine(
             Offset(start.x, start.y),

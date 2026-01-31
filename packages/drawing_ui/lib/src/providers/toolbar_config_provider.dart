@@ -6,9 +6,22 @@ import 'package:drawing_ui/src/models/tool_type.dart';
 /// Key for storing toolbar config in SharedPreferences
 const _toolbarConfigKey = 'starnote_toolbar_config';
 
-/// Provider for SharedPreferences instance
-final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
-  throw UnimplementedError('SharedPreferences must be overridden in main()');
+/// Provider for SharedPreferences instance for toolbar config
+/// 
+/// This provider can be overridden by the host app to enable persistence:
+/// 
+/// ```dart
+/// ProviderScope(
+///   overrides: [
+///     sharedPreferencesProvider.overrideWithValue(prefs),
+///   ],
+///   child: MyApp(),
+/// )
+/// ```
+/// 
+/// If not overridden, toolbar config will work without persistence (memory-only).
+final sharedPreferencesProvider = Provider<SharedPreferences?>((ref) {
+  return null; // Default: no persistence
 });
 
 /// Provider for toolbar configuration with persistence
@@ -21,9 +34,14 @@ final toolbarConfigProvider = StateNotifierProvider<ToolbarConfigNotifier, Toolb
 class ToolbarConfigNotifier extends StateNotifier<ToolbarConfig> {
   ToolbarConfigNotifier(this._prefs) : super(_loadConfig(_prefs));
 
-  final SharedPreferences _prefs;
+  final SharedPreferences? _prefs;
 
-  static ToolbarConfig _loadConfig(SharedPreferences prefs) {
+  static ToolbarConfig _loadConfig(SharedPreferences? prefs) {
+    if (prefs == null) {
+      // No persistence available, use default
+      return ToolbarConfig.defaultConfig();
+    }
+    
     final jsonString = prefs.getString(_toolbarConfigKey);
     if (jsonString != null) {
       try {
@@ -37,7 +55,10 @@ class ToolbarConfigNotifier extends StateNotifier<ToolbarConfig> {
   }
 
   Future<void> _saveConfig() async {
-    await _prefs.setString(_toolbarConfigKey, state.toJsonString());
+    if (_prefs != null) {
+      await _prefs!.setString(_toolbarConfigKey, state.toJsonString());
+    }
+    // If no prefs, just update state without persistence
   }
 
   /// Toggle visibility of a tool

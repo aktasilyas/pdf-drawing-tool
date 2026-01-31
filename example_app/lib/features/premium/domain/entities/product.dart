@@ -1,3 +1,6 @@
+/// Domain entity describing a purchasable premium product.
+library;
+
 enum ProductType { subscription, lifetime }
 
 /// Domain entity describing a purchasable premium product.

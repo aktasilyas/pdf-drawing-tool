@@ -217,34 +217,29 @@ class _PDFImportDialogState extends State<PDFImportDialog> {
             ),
             const SizedBox(height: 12),
 
-            RadioListTile<PDFImportMode>(
-              title: const Text('Import all pages'),
-              value: PDFImportMode.allPages,
+            RadioGroup<PDFImportMode>(
               groupValue: _importMode,
-              onChanged: _isLoading
-                  ? null
-                  : (value) {
-                      if (value != null) {
-                        setState(() {
-                          _importMode = value;
-                        });
-                      }
-                    },
-            ),
-
-            RadioListTile<PDFImportMode>(
-              title: const Text('Select page range'),
-              value: PDFImportMode.pageRange,
-              groupValue: _importMode,
-              onChanged: _isLoading
-                  ? null
-                  : (value) {
-                      if (value != null) {
-                        setState(() {
-                          _importMode = value;
-                        });
-                      }
-                    },
+              onChanged: (PDFImportMode? value) {
+                if (value != null && !_isLoading) {
+                  setState(() {
+                    _importMode = value;
+                  });
+                }
+              },
+              child: Column(
+                children: [
+                  RadioListTile<PDFImportMode>(
+                    title: const Text('Import all pages'),
+                    value: PDFImportMode.allPages,
+                    toggleable: false,
+                  ),
+                  RadioListTile<PDFImportMode>(
+                    title: const Text('Select page range'),
+                    value: PDFImportMode.pageRange,
+                    toggleable: false,
+                  ),
+                ],
+              ),
             ),
 
             if (_importMode == PDFImportMode.pageRange &&

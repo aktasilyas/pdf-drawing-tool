@@ -87,10 +87,10 @@ class VectorPDFRenderer {
         return math.pi * a * b;
 
       case ShapeType.triangle:
-        return (shape.bounds.width * shape.bounds.height) / 2;
+        return shape.bounds.width * shape.bounds.height / 2;
 
       case ShapeType.diamond:
-        return (shape.bounds.width * shape.bounds.height) / 2;
+        return shape.bounds.width * shape.bounds.height / 2;
 
       case ShapeType.line:
       case ShapeType.arrow:

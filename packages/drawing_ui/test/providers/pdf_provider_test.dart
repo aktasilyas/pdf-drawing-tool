@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/providers/pdf_provider.dart';
 import 'package:drawing_ui/src/services/pdf_import_service.dart';
 import 'package:drawing_ui/src/services/pdf_export_service.dart';

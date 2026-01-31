@@ -30,7 +30,7 @@ void main() {
 
       var layer = Layer.empty('Layer 1').addStroke(stroke1).addStroke(stroke2);
 
-      document = DrawingDocument.empty('Test').copyWith(
+      document = DrawingDocument.emptyMultiPage('Test').copyWith(
         layers: [layer],
       );
     });
@@ -65,7 +65,7 @@ void main() {
       );
 
       var layer = Layer.empty('Layer').addStroke(strokeWithPressure);
-      var doc = DrawingDocument.empty('Test').copyWith(layers: [layer]);
+      var doc = DrawingDocument.emptyMultiPage('Test').copyWith(layers: [layer]);
 
       final command = MoveSelectionCommand(
         layerIndex: 0,
@@ -210,7 +210,7 @@ void main() {
           .addStroke(stroke2)
           .addStroke(stroke3);
 
-      document = DrawingDocument.empty('Test').copyWith(
+      document = DrawingDocument.emptyMultiPage('Test').copyWith(
         layers: [layer],
       );
     });

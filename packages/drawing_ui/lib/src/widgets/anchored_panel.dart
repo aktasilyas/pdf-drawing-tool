@@ -30,7 +30,7 @@ class AnchoredPanelController {
     // Get anchor position
     final renderBox = anchorKey.currentContext?.findRenderObject() as RenderBox?;
     if (renderBox == null) {
-      debugPrint('[AnchoredPanel] ERROR: Could not find anchor RenderBox');
+      debugPrint('WARNING: Could not find anchor RenderBox');
       return;
     }
 
@@ -225,7 +225,7 @@ class _ArrowPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
 
     final shadowPaint = Paint()
-      ..color = Colors.black.withAlpha(25)
+      ..color = Colors.black.withValues(alpha: 25.0 / 255.0)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2);
 
     final path = Path()

@@ -61,6 +61,20 @@ class Documents extends Table {
   TextColumn get documentType =>
       text().withDefault(const Constant('notebook'))();
 
+  /// Cover ID (nullable - references CoverRegistry)
+  TextColumn get coverId => text().nullable()();
+
+  /// Whether document has a cover page
+  BoolColumn get hasCover => boolean().withDefault(const Constant(true))();
+
+  /// Paper width in millimeters (default A4: 210mm)
+  RealColumn get paperWidthMm =>
+      real().withDefault(const Constant(210.0))();
+
+  /// Paper height in millimeters (default A4: 297mm)
+  RealColumn get paperHeightMm =>
+      real().withDefault(const Constant(297.0))();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -133,7 +147,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration {
@@ -155,6 +169,21 @@ class AppDatabase extends _$AppDatabase {
           // Add documentType column
           await customStatement(
             'ALTER TABLE documents ADD COLUMN document_type TEXT NOT NULL DEFAULT "notebook"',
+          );
+        }
+        if (from < 4) {
+          // Add cover and paper size columns
+          await customStatement(
+            'ALTER TABLE documents ADD COLUMN cover_id TEXT',
+          );
+          await customStatement(
+            'ALTER TABLE documents ADD COLUMN has_cover INTEGER NOT NULL DEFAULT 1',
+          );
+          await customStatement(
+            'ALTER TABLE documents ADD COLUMN paper_width_mm REAL NOT NULL DEFAULT 210.0',
+          );
+          await customStatement(
+            'ALTER TABLE documents ADD COLUMN paper_height_mm REAL NOT NULL DEFAULT 297.0',
           );
         }
       },

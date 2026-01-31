@@ -153,7 +153,7 @@ void main() {
 
       // Now page range should be selected
       RadioListTile<PDFImportMode> updatedWidget = tester.widget(allPagesRadio.at(1));
-      expect(updatedWidget.groupValue, PDFImportMode.pageRange);
+      expect(updatedWidget.selected, true);
     });
   });
 

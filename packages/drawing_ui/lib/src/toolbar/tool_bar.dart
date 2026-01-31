@@ -129,7 +129,7 @@ class _ToolBarState extends ConsumerState<ToolBar> {
         color: theme.toolbarBackground,
         border: Border(
           bottom: BorderSide(
-            color: theme.panelBorderColor.withAlpha(80),
+            color: theme.panelBorderColor.withValues(alpha: 80.0 / 255.0),
             width: 0.5,
           ),
         ),
@@ -162,7 +162,7 @@ class _ToolBarState extends ConsumerState<ToolBar> {
                   width: 1,
                   height: 28,
                   margin: const EdgeInsets.symmetric(horizontal: 4),
-                  color: theme.panelBorderColor.withAlpha(60),
+                  color: theme.panelBorderColor.withValues(alpha: 60.0 / 255.0),
                 ),
               ],
 

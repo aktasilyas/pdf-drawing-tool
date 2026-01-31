@@ -40,7 +40,7 @@ class ColorChip extends StatelessWidget {
       child: Stack(
         children: [
           // Checkerboard pattern for transparent colors
-          if (showOpacity && color.alpha < 255)
+          if (showOpacity && (color.a * 255.0).round().clamp(0, 255) < 255)
             Container(
               width: chipSize,
               height: chipSize,
@@ -75,7 +75,7 @@ class ColorChip extends StatelessWidget {
               boxShadow: isSelected
                   ? [
                       BoxShadow(
-                        color: theme.toolbarIconSelectedColor.withAlpha(60),
+                        color: theme.toolbarIconSelectedColor.withValues(alpha: 60.0 / 255.0),
                         blurRadius: 8,
                         spreadRadius: 2,
                       )

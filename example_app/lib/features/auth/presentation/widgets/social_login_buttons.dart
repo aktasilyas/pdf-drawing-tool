@@ -1,4 +1,6 @@
 /// Social login buttons for auth screens.
+library;
+
 import 'package:example_app/features/auth/presentation/constants/auth_strings.dart';
 import 'package:flutter/material.dart';
 

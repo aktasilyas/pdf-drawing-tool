@@ -18,7 +18,7 @@ class _TemplateSelectionScreenState extends ConsumerState<TemplateSelectionScree
   bool _hasCover = true;
   PaperSize _selectedPaperSize = PaperSize.a4;
   int _selectedPaperColor = 0xFFFFFFFF; // Beyaz default
-  TemplateCategory? _selectedCategory = TemplateCategory.basic;
+  TemplateCategory _selectedCategory = TemplateCategory.basic;
   Template? _selectedTemplate;
   bool _isSelectingCover = false; // false = Kağıt seçili, true = Kapak seçili
   Cover _selectedCover = CoverRegistry.defaultCover;
@@ -45,8 +45,12 @@ class _TemplateSelectionScreenState extends ConsumerState<TemplateSelectionScree
       title: docTitle,
       templateId: _selectedTemplate!.id,
       paperColor: paperColorName,
-      isPortrait: true,
+      isPortrait: !_selectedPaperSize.isLandscape,
       documentType: DocumentType.notebook,
+      coverId: _hasCover ? _selectedCover.id : null,
+      hasCover: _hasCover,
+      paperWidthMm: _selectedPaperSize.widthMm,
+      paperHeightMm: _selectedPaperSize.heightMm,
     );
 
     if (mounted && documentId != null) {
@@ -96,10 +100,7 @@ class _TemplateSelectionScreenState extends ConsumerState<TemplateSelectionScree
   }
 
   Future<void> _showFormatPicker(BuildContext context) async {
-    print('_showFormatPicker çağrıldı');
     final colorScheme = Theme.of(context).colorScheme;
-    
-    print('Mevcut: ${_selectedPaperSize.isLandscape ? "Yatay" : "Dikey"}, ${_getFormatName(_selectedPaperSize.preset)}');
     
     final result = await showModalBottomSheet<PaperSize>(
       context: context,
@@ -138,7 +139,6 @@ class _TemplateSelectionScreenState extends ConsumerState<TemplateSelectionScree
                     icon: Icons.crop_portrait,
                     isSelected: !_selectedPaperSize.isLandscape,
                     onTap: () {
-                      print('Dikey butonuna tıklandı');
                       Navigator.pop(context, _selectedPaperSize.portrait);
                     },
                   ),
@@ -148,7 +148,6 @@ class _TemplateSelectionScreenState extends ConsumerState<TemplateSelectionScree
                     icon: Icons.crop_landscape,
                     isSelected: _selectedPaperSize.isLandscape,
                     onTap: () {
-                      print('Yatay butonuna tıklandı');
                       Navigator.pop(context, _selectedPaperSize.landscape);
                     },
                   ),
@@ -178,13 +177,13 @@ class _TemplateSelectionScreenState extends ConsumerState<TemplateSelectionScree
                   final isSelected = _selectedPaperSize.preset == preset;
                   return GestureDetector(
                     onTap: () {
-                      print('Boyut seçildi: ${_getFormatName(preset)}');
                       final newSize = PaperSize.fromPreset(preset);
-                      final result = _selectedPaperSize.isLandscape 
-                          ? newSize.landscape 
-                          : newSize;
-                      print('Döndürülecek: ${result.isLandscape ? "Yatay" : "Dikey"}, ${_getFormatName(result.preset)}');
-                      Navigator.pop(context, result);
+                      Navigator.pop(
+                        context,
+                        _selectedPaperSize.isLandscape 
+                            ? newSize.landscape 
+                            : newSize,
+                      );
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -220,16 +219,10 @@ class _TemplateSelectionScreenState extends ConsumerState<TemplateSelectionScree
       ),
     );
     
-    print('Bottom sheet kapandı. Result: $result');
-    
     if (result != null && mounted) {
-      print('Format değişti: ${result.isLandscape ? "Yatay" : "Dikey"}, ${_getFormatName(result.preset)}');
       setState(() {
         _selectedPaperSize = result;
       });
-      print('setState çağrıldı');
-    } else {
-      print('Result null veya widget unmounted');
     }
   }
 
@@ -299,14 +292,14 @@ class _TemplateSelectionScreenState extends ConsumerState<TemplateSelectionScree
             ),
           ),
           
-          // Kategori sekmeleri
+          // Kategori sekmeleri (sadece şablon seçiminde)
           _buildCategoryTabs(context),
 
           const SizedBox(height: 4),
 
-          // Template Grid
+          // Template Grid / Cover Grid
           Expanded(
-            child: _isSelectingCover
+            child: (_isSelectingCover && _hasCover)
                 ? _buildCoverGrid(context)
                 : _buildTemplateGrid(context),
           ),
@@ -338,25 +331,26 @@ class _TemplateSelectionScreenState extends ConsumerState<TemplateSelectionScree
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Kapak önizleme
-            GestureDetector(
-              onTap: () => setState(() => _isSelectingCover = true),
-              child: _PreviewCard(
-                key: ValueKey('cover_${_selectedPaperSize.isLandscape}'),
-                label: 'Kapak',
-                isSelected: _isSelectingCover,
-                width: previewWidth,
-                height: previewHeight,
-                child: CoverPreviewWidget(
-                  cover: _selectedCover,
-                  title: title.isEmpty ? 'Not Başlığı' : title,
-                  showBorder: false,
-                  borderRadius: BorderRadius.circular(4),
+            // Kapak önizleme - sadece _hasCover true ise göster
+            if (_hasCover) ...[
+              GestureDetector(
+                onTap: () => setState(() => _isSelectingCover = true),
+                child: _PreviewCard(
+                  key: ValueKey('cover_${_selectedPaperSize.isLandscape}'),
+                  label: 'Kapak',
+                  isSelected: _isSelectingCover,
+                  width: previewWidth,
+                  height: previewHeight,
+                  child: CoverPreviewWidget(
+                    cover: _selectedCover,
+                    title: title.isEmpty ? 'Not Başlığı' : title,
+                    showBorder: false,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
                 ),
               ),
-            ),
-            
-            const SizedBox(width: 8),
+              const SizedBox(width: 8),
+            ],
             
             // Kağıt önizleme
             GestureDetector(
@@ -430,7 +424,13 @@ class _TemplateSelectionScreenState extends ConsumerState<TemplateSelectionScree
                           scale: 0.75,
                           child: Switch(
                             value: _hasCover,
-                            onChanged: (value) => setState(() => _hasCover = value),
+                            onChanged: (value) => setState(() {
+                              _hasCover = value;
+                              // Kapak kapatılınca, kapak seçim modunu da kapat
+                              if (!value) {
+                                _isSelectingCover = false;
+                              }
+                            }),
                             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
                         ),
@@ -454,18 +454,12 @@ class _TemplateSelectionScreenState extends ConsumerState<TemplateSelectionScree
                             mainAxisSize: MainAxisSize.min,
                             key: ValueKey('format_${_selectedPaperSize.isLandscape}_${_selectedPaperSize.preset}'),
                             children: [
-                              Builder(
-                                builder: (context) {
-                                  final formatText = '${_selectedPaperSize.isLandscape ? "Yatay" : "Dikey"}, ${_getFormatName(_selectedPaperSize.preset)}';
-                                  print('BUILD: Format text = $formatText');
-                                  return Text(
-                                    formatText,
-                                    style: TextStyle(
-                                      color: colorScheme.onSurfaceVariant,
-                                      fontSize: 12,
-                                    ),
-                                  );
-                                },
+                              Text(
+                                '${_selectedPaperSize.isLandscape ? "Yatay" : "Dikey"}, ${_getFormatName(_selectedPaperSize.preset)}',
+                                style: TextStyle(
+                                  color: colorScheme.onSurfaceVariant,
+                                  fontSize: 12,
+                                ),
                               ),
                               const SizedBox(width: 3),
                               Icon(
@@ -539,9 +533,7 @@ class _TemplateSelectionScreenState extends ConsumerState<TemplateSelectionScree
   }
 
   Widget _buildTemplateGrid(BuildContext context) {
-    final templates = _selectedCategory != null
-        ? TemplateRegistry.getByCategory(_selectedCategory!)
-        : TemplateRegistry.all;
+    final templates = TemplateRegistry.getByCategory(_selectedCategory);
     
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -631,7 +623,7 @@ class _TemplateSelectionScreenState extends ConsumerState<TemplateSelectionScree
   }
 
   Widget _buildCoverGrid(BuildContext context) {
-    final covers = CoverRegistry.all;
+    const covers = CoverRegistry.all;
     
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -788,36 +780,6 @@ class _PreviewCard extends StatelessWidget {
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
           ),
         ),
-      ],
-    );
-  }
-}
-
-class _SettingsRow extends StatelessWidget {
-  final String label;
-  final Widget child;
-
-  const _SettingsRow({
-    super.key,
-    required this.label,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: colorScheme.onSurface,
-            fontSize: 13,
-          ),
-        ),
-        child,
       ],
     );
   }

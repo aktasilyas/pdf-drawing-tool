@@ -5,7 +5,6 @@ void main() {
   group('SyncStatus', () {
     test('should have correct properties', () {
       // Arrange
-      final lastSynced = DateTime(2026, 1, 22);
       const status = SyncStatus(
         state: SyncStateType.syncing,
         lastSyncedAt: null,

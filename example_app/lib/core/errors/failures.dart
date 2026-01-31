@@ -28,17 +28,17 @@ abstract class Failure extends Equatable {
 
 /// Server/API related failures
 class ServerFailure extends Failure {
-  const ServerFailure([String message = 'Sunucu hatası oluştu']) : super(message);
+  const ServerFailure([super.message = 'Sunucu hatası oluştu']);
 }
 
 /// Local cache/database failures
 class CacheFailure extends Failure {
-  const CacheFailure([String message = 'Yerel veri hatası']) : super(message);
+  const CacheFailure([super.message = 'Yerel veri hatası']);
 }
 
 /// Network connectivity failures
 class NetworkFailure extends Failure {
-  const NetworkFailure([String message = 'İnternet bağlantısı yok']) : super(message);
+  const NetworkFailure([super.message = 'İnternet bağlantısı yok']);
 }
 
 /// Authentication failures
@@ -116,5 +116,5 @@ class DocumentFailure extends Failure {
 
 /// Unknown/unexpected failures
 class UnknownFailure extends Failure {
-  const UnknownFailure([String message = 'Beklenmeyen bir hata oluştu']) : super(message);
+  const UnknownFailure([super.message = 'Beklenmeyen bir hata oluştu']);
 }

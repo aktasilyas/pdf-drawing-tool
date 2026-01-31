@@ -54,7 +54,7 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
       final documents = await getDocuments();
       return documents.firstWhere(
         (doc) => doc.id == id,
-        orElse: () => throw CacheException('Document not found'),
+        orElse: () => throw const CacheException('Document not found'),
       );
     } catch (e) {
       throw CacheException('Failed to get document: $e');
@@ -81,7 +81,7 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
       final index = documents.indexWhere((doc) => doc.id == document.id);
       
       if (index == -1) {
-        throw CacheException('Document not found');
+        throw const CacheException('Document not found');
       }
 
       documents[index] = document;

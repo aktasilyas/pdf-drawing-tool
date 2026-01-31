@@ -7,7 +7,6 @@ library;
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:example_app/core/database/app_database.dart';
-import 'package:example_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:example_app/features/sync/domain/entities/sync_conflict.dart';

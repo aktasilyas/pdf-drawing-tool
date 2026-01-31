@@ -60,7 +60,7 @@ final activeLayerIndexProvider = Provider<int>((ref) {
 /// - Document lifecycle (new, clear)
 class DocumentNotifier extends StateNotifier<DrawingDocument> {
   /// Creates a new DocumentNotifier with an empty document.
-  DocumentNotifier() : super(DrawingDocument.empty('İsimsiz Not'));
+  DocumentNotifier() : super(DrawingDocument.emptyMultiPage('İsimsiz Not'));
 
   /// Add stroke to active layer.
   ///
@@ -120,7 +120,7 @@ class DocumentNotifier extends StateNotifier<DrawingDocument> {
   ///
   /// Resets everything to a fresh state.
   void newDocument({String title = 'İsimsiz Not'}) {
-    state = DrawingDocument.empty(title);
+    state = DrawingDocument.emptyMultiPage(title);
   }
 
   /// Update document title.
@@ -134,7 +134,7 @@ class DocumentNotifier extends StateNotifier<DrawingDocument> {
     final pageIndex = pages.indexWhere((p) => p.id == pageId);
     
     if (pageIndex == -1) {
-      debugPrint('⚠️ Page not found: $pageId');
+      debugPrint('WARNING: Page not found: $pageId');
       return;
     }
     
@@ -143,7 +143,6 @@ class DocumentNotifier extends StateNotifier<DrawingDocument> {
     updatedPages[pageIndex] = updatedPage;
     
     state = state.copyWith(pages: updatedPages);
-    debugPrint('✅ Page background updated: $pageId');
   }
 
   /// Get current document state.
