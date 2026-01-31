@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:example_app/features/documents/domain/entities/sort_option.dart';
+import 'package:example_app/features/documents/domain/entities/view_mode.dart';
+import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 
-enum SortOption { date, name, size }
-
-class DocumentsHeader extends StatelessWidget {
+class DocumentsHeader extends ConsumerWidget {
   final String title;
   final VoidCallback onNewPressed;
   final SortOption sortOption;
@@ -23,9 +25,11 @@ class DocumentsHeader extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 600;
+    final sortDirection = ref.watch(sortDirectionProvider);
+    final viewMode = ref.watch(viewModeProvider);
 
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -137,6 +141,50 @@ class DocumentsHeader extends StatelessWidget {
                   },
                 ),
               ),
+            ),
+
+          if (!isMobile) const SizedBox(width: 12),
+
+          // View mode toggle (Grid/List)
+          if (!isMobile)
+            IconButton(
+              onPressed: () {
+                final newMode = viewMode == ViewMode.grid
+                    ? ViewMode.list
+                    : ViewMode.grid;
+                ref.read(viewModeProvider.notifier).set(newMode);
+              },
+              icon: Icon(
+                viewMode == ViewMode.grid
+                    ? Icons.view_list
+                    : Icons.grid_view,
+                size: 20,
+              ),
+              tooltip: viewMode == ViewMode.grid
+                  ? 'Liste görünümü'
+                  : 'Grid görünümü',
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+
+          if (!isMobile) const SizedBox(width: 12),
+
+          // Sort direction toggle - Shows after sort dropdown
+          if (!isMobile)
+            IconButton(
+              onPressed: () {
+                final newDirection = sortDirection == SortDirection.descending
+                    ? SortDirection.ascending
+                    : SortDirection.descending;
+                ref.read(sortDirectionProvider.notifier).set(newDirection);
+              },
+              icon: Icon(
+                sortDirection == SortDirection.descending
+                    ? Icons.arrow_downward
+                    : Icons.arrow_upward,
+                size: 18,
+              ),
+              tooltip: sortDirection.getDescription(sortOption),
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
 
           if (!isMobile) const SizedBox(width: 12),

@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
+import 'package:example_app/features/documents/domain/entities/sort_option.dart';
+import 'package:example_app/features/documents/domain/entities/view_mode.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/sidebar.dart';
 import 'package:example_app/features/documents/presentation/widgets/document_card.dart';
-import 'package:example_app/features/documents/presentation/widgets/documents_header.dart'
-    show DocumentsHeader, SortOption;
+import 'package:example_app/features/documents/presentation/widgets/documents_header.dart';
 import 'package:example_app/features/documents/presentation/widgets/new_document_dialog.dart';
 import 'package:example_app/features/editor/presentation/providers/editor_provider.dart';
 import 'package:drawing_ui/drawing_ui.dart';
@@ -22,7 +23,6 @@ class DocumentsScreen extends ConsumerStatefulWidget {
 class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
   final GlobalKey _addButtonKey = GlobalKey();
   SidebarSection _selectedSection = SidebarSection.documents;
-  SortOption _sortOption = SortOption.date;
   bool _isSelectionMode = false;
 
   @override
@@ -83,9 +83,9 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
           title: _getSectionTitle(),
           newButtonKey: _addButtonKey,
           onNewPressed: _showNewDocumentDialog,
-          sortOption: _sortOption,
+          sortOption: ref.watch(sortOptionProvider),
           onSortChanged: (option) {
-            setState(() => _sortOption = option);
+            ref.read(sortOptionProvider.notifier).set(option);
           },
           isSelectionMode: _isSelectionMode,
           onSelectionToggle: () {
@@ -172,9 +172,9 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                 title: _getSectionTitle(),
                 newButtonKey: _addButtonKey,
                 onNewPressed: _showNewDocumentDialog,
-                sortOption: _sortOption,
+                sortOption: ref.watch(sortOptionProvider),
                 onSortChanged: (option) {
-                  setState(() => _sortOption = option);
+                  ref.read(sortOptionProvider.notifier).set(option);
                 },
                 isSelectionMode: _isSelectionMode,
                 onSelectionToggle: () {
@@ -276,52 +276,166 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
         }
 
         // Sort documents
+        final sortOption = ref.watch(sortOptionProvider);
+        final sortDirection = ref.watch(sortDirectionProvider);
+        final viewMode = ref.watch(viewModeProvider);
         final sorted = List<DocumentInfo>.from(documents);
-        switch (_sortOption) {
+        
+        switch (sortOption) {
           case SortOption.date:
-            sorted.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+            sorted.sort((a, b) => sortDirection == SortDirection.descending
+                ? b.updatedAt.compareTo(a.updatedAt)
+                : a.updatedAt.compareTo(b.updatedAt));
             break;
           case SortOption.name:
-            sorted.sort((a, b) => a.title.compareTo(b.title));
+            sorted.sort((a, b) => sortDirection == SortDirection.descending
+                ? b.title.compareTo(a.title)
+                : a.title.compareTo(b.title));
             break;
           case SortOption.size:
-            sorted.sort((a, b) => b.pageCount.compareTo(a.pageCount));
+            sorted.sort((a, b) => sortDirection == SortDirection.descending
+                ? b.pageCount.compareTo(a.pageCount)
+                : a.pageCount.compareTo(b.pageCount));
             break;
         }
 
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            // Responsive card size based on available width
-            final width = constraints.maxWidth;
-            final cardWidth = width < 600 ? 160.0 : 180.0;
-            final spacing = width < 600 ? 16.0 : 24.0;
-            final padding = width < 600 ? 16.0 : 32.0;
-            
-            return Padding(
-              padding: EdgeInsets.symmetric(horizontal: padding),
-              child: GridView.builder(
-                gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: cardWidth,
-                  childAspectRatio: 0.68, // Slightly shorter for mobile
-                  crossAxisSpacing: spacing,
-                  mainAxisSpacing: spacing,
-                ),
-                itemCount: sorted.length,
-                itemBuilder: (context, index) {
-                  final doc = sorted[index];
-                  return DocumentCard(
-                    document: doc,
-                    onTap: () => _openDocument(doc.id),
-                    onFavoriteToggle: () => _toggleFavorite(doc.id),
-                    onMorePressed: () => _showDocumentMenu(doc),
-                  );
-                },
-              ),
-            );
-          },
+        // Render based on view mode
+        return viewMode == ViewMode.grid
+            ? _buildGridView(sorted)
+            : _buildListView(sorted);
+      },
+    );
+  }
+
+  // Grid view layout
+  Widget _buildGridView(List<DocumentInfo> documents) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Responsive card size based on available width
+        final width = constraints.maxWidth;
+        final cardWidth = width < 600 ? 160.0 : 180.0;
+        final spacing = width < 600 ? 16.0 : 24.0;
+        final padding = width < 600 ? 16.0 : 32.0;
+        
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: padding),
+          child: GridView.builder(
+            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+              maxCrossAxisExtent: cardWidth,
+              childAspectRatio: 0.68, // Slightly shorter for mobile
+              crossAxisSpacing: spacing,
+              mainAxisSpacing: spacing,
+            ),
+            itemCount: documents.length,
+            itemBuilder: (context, index) {
+              final doc = documents[index];
+              return DocumentCard(
+                document: doc,
+                onTap: () => _openDocument(doc.id),
+                onFavoriteToggle: () => _toggleFavorite(doc.id),
+                onMorePressed: () => _showDocumentMenu(doc),
+              );
+            },
+          ),
         );
       },
     );
+  }
+
+  // List view layout
+  Widget _buildListView(List<DocumentInfo> documents) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final padding = width < 600 ? 16.0 : 32.0;
+        
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: padding),
+          child: ListView.builder(
+            itemCount: documents.length,
+            itemBuilder: (context, index) {
+              final doc = documents[index];
+              return Card(
+                margin: const EdgeInsets.only(bottom: 8),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  leading: Container(
+                    width: 48,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Icon(
+                      Icons.description_outlined,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  title: Text(
+                    doc.title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  subtitle: Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      _formatDate(doc.updatedAt),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (doc.isFavorite)
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: Icon(
+                            Icons.star,
+                            size: 18,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                        ),
+                      Icon(
+                        Icons.chevron_right,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ],
+                  ),
+                  onTap: () => _openDocument(doc.id),
+                  onLongPress: () => _showDocumentMenu(doc),
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+    
+    if (difference.inDays == 0) {
+      return 'Bugün ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
+    } else if (difference.inDays == 1) {
+      return 'Dün';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays} gün önce';
+    } else {
+      return '${date.day}/${date.month}/${date.year}';
+    }
   }
 
   Widget _buildEmptyState() {

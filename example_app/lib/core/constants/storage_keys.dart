@@ -31,4 +31,9 @@ abstract class StorageKeys {
   // Recent
   static const String recentDocumentIds = 'recent_document_ids';
   static const String lastOpenedFolderId = 'last_opened_folder_id';
+  
+  // Documents - View Preferences
+  static const String viewMode = 'view_mode';
+  static const String sortOption = 'sort_option';
+  static const String sortDirection = 'sort_direction';
 }
