@@ -365,68 +365,60 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                     padding: const EdgeInsets.all(12),
                     child: Row(
                       children: [
-                        // Thumbnail preview (same as grid view)
-                        DocumentCard(
-                          document: doc,
-                          onTap: () => _openDocument(doc.id),
-                          onFavoriteToggle: () => _toggleFavorite(doc.id),
-                          onMorePressed: () => _showDocumentMenu(doc),
-                        ).build(context, ref)
-                            .runtimeType == Column
-                            ? _buildCompactThumbnail(doc)
-                            : Container(
-                                width: 64,
-                                height: 85,
-                                decoration: BoxDecoration(
-                                  color: _getPaperColor(doc.paperColor),
-                                  borderRadius: BorderRadius.circular(6),
-                                  border: Border.all(
-                                    color: const Color(0xFFE0E0E0),
-                                    width: 1,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.05),
-                                      blurRadius: 3,
-                                      offset: const Offset(0, 1),
-                                    ),
-                                  ],
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(5),
-                                  child: Stack(
-                                    children: [
-                                      // Thumbnail
-                                      _buildListThumbnail(doc),
-                                      
-                                      // Page count badge
-                                      if (doc.pageCount > 1)
-                                        Positioned(
-                                          bottom: 3,
-                                          right: 3,
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 4,
-                                              vertical: 2,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color: Colors.black.withValues(alpha: 0.7),
-                                              borderRadius: BorderRadius.circular(3),
-                                            ),
-                                            child: Text(
-                                              '${doc.pageCount}',
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 8,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                ),
+                        // Thumbnail preview
+                        Container(
+                          width: 64,
+                          height: 85,
+                          decoration: BoxDecoration(
+                            color: _getPaperColor(doc.paperColor),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(
+                              color: const Color(0xFFE0E0E0),
+                              width: 1,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.05),
+                                blurRadius: 3,
+                                offset: const Offset(0, 1),
                               ),
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(5),
+                            child: Stack(
+                              children: [
+                                // Thumbnail
+                                _buildListThumbnail(doc),
+                                
+                                // Page count badge
+                                if (doc.pageCount > 1)
+                                  Positioned(
+                                    bottom: 3,
+                                    right: 3,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 4,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withValues(alpha: 0.7),
+                                        borderRadius: BorderRadius.circular(3),
+                                      ),
+                                      child: Text(
+                                        '${doc.pageCount}',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 8,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
                         
                         const SizedBox(width: 12),
                         
@@ -490,29 +482,77 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
 
   // Build thumbnail for list view (compact version)
   Widget _buildListThumbnail(DocumentInfo doc) {
-    // Cover preview if available
+    // Cover preview if available (without title overlay for list view)
     if (doc.hasCover && doc.coverId != null) {
       final cover = core.CoverRegistry.byId(doc.coverId!);
       if (cover != null) {
         return CoverPreviewWidget(
           cover: cover,
-          title: doc.title,
+          title: '', // List view'da kapak üzerinde başlık gösterme
           width: double.infinity,
           height: double.infinity,
         );
       }
     }
     
-    // Template placeholder
-    return Container(
-      color: _getPaperColor(doc.paperColor),
-      child: Center(
-        child: Icon(
-          Icons.description_outlined,
-          size: 32,
-          color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
-        ),
-      ),
+    // Template pattern preview (same as DocumentCard)
+    // Notebook için spiral defter görünümü
+    if (doc.documentType == core.DocumentType.notebook) {
+      return Stack(
+        children: [
+          // Template pattern
+          CustomPaint(
+            painter: _TemplatePatternPainter(doc.templateId),
+            size: Size.infinite,
+          ),
+          // Spiral binding effect (left side)
+          Positioned(
+            left: 0,
+            top: 0,
+            bottom: 0,
+            child: Container(
+              width: 12,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                  colors: [
+                    Colors.black.withValues(alpha: 0.1),
+                    Colors.transparent,
+                  ],
+                ),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: List.generate(
+                  6,
+                  (index) => Container(
+                    width: 4,
+                    height: 4,
+                    margin: const EdgeInsets.only(left: 2),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.grey[400],
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.2),
+                          blurRadius: 1,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+    
+    // Diğer tipler için basit pattern
+    return CustomPaint(
+      painter: _TemplatePatternPainter(doc.templateId),
+      size: Size.infinite,
     );
   }
 
@@ -752,3 +792,114 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     );
   }
 }
+
+// Template pattern painter for thumbnails
+class _TemplatePatternPainter extends CustomPainter {
+  final String templateId;
+
+  _TemplatePatternPainter(this.templateId);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.grey[400]!
+      ..strokeWidth = 0.5
+      ..style = PaintingStyle.stroke;
+
+    // Template'e göre pattern çiz
+    switch (templateId) {
+      case 'lined':
+      case 'thin_lined':
+        _drawLines(canvas, size, paint);
+        break;
+      case 'grid':
+      case 'small_grid':
+        _drawGrid(canvas, size, paint);
+        break;
+      case 'dotted':
+        _drawDots(canvas, size, paint);
+        break;
+      case 'cornell':
+        _drawCornell(canvas, size, paint);
+        break;
+      default:
+        // Blank template - boş
+        break;
+    }
+  }
+
+  void _drawLines(Canvas canvas, Size size, Paint paint) {
+    final spacing = templateId == 'thin_lined' ? 6.0 : 8.0;
+    for (double y = spacing; y < size.height; y += spacing) {
+      canvas.drawLine(
+        Offset(0, y),
+        Offset(size.width, y),
+        paint,
+      );
+    }
+  }
+
+  void _drawGrid(Canvas canvas, Size size, Paint paint) {
+    final spacing = templateId == 'small_grid' ? 5.0 : 10.0;
+    
+    // Horizontal lines
+    for (double y = spacing; y < size.height; y += spacing) {
+      canvas.drawLine(
+        Offset(0, y),
+        Offset(size.width, y),
+        paint,
+      );
+    }
+    
+    // Vertical lines
+    for (double x = spacing; x < size.width; x += spacing) {
+      canvas.drawLine(
+        Offset(x, 0),
+        Offset(x, size.height),
+        paint,
+      );
+    }
+  }
+
+  void _drawDots(Canvas canvas, Size size, Paint paint) {
+    final dotPaint = Paint()
+      ..color = Colors.grey[400]!
+      ..style = PaintingStyle.fill;
+    
+    const spacing = 10.0;
+    for (double y = spacing; y < size.height; y += spacing) {
+      for (double x = spacing; x < size.width; x += spacing) {
+        canvas.drawCircle(Offset(x, y), 0.8, dotPaint);
+      }
+    }
+  }
+
+  void _drawCornell(Canvas canvas, Size size, Paint paint) {
+    // Left margin
+    canvas.drawLine(
+      Offset(size.width * 0.3, 0),
+      Offset(size.width * 0.3, size.height),
+      paint,
+    );
+    
+    // Bottom summary area
+    canvas.drawLine(
+      Offset(0, size.height * 0.8),
+      Offset(size.width, size.height * 0.8),
+      paint,
+    );
+    
+    // Horizontal lines
+    for (double y = 8.0; y < size.height * 0.8; y += 8.0) {
+      canvas.drawLine(
+        Offset(0, y),
+        Offset(size.width, y),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
