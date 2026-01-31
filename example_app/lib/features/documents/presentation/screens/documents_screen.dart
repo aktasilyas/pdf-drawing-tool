@@ -357,63 +357,128 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
               final doc = documents[index];
               return Card(
                 margin: const EdgeInsets.only(bottom: 8),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  leading: Container(
-                    width: 48,
-                    height: 64,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Icon(
-                      Icons.description_outlined,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  title: Text(
-                    doc.title,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Theme.of(context).colorScheme.onSurface,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  subtitle: Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      _formatDate(doc.updatedAt),
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (doc.isFavorite)
-                        Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: Icon(
-                            Icons.star,
-                            size: 18,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                        ),
-                      Icon(
-                        Icons.chevron_right,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ],
-                  ),
+                child: InkWell(
                   onTap: () => _openDocument(doc.id),
                   onLongPress: () => _showDocumentMenu(doc),
+                  borderRadius: BorderRadius.circular(12),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
+                      children: [
+                        // Thumbnail preview (same as grid view)
+                        DocumentCard(
+                          document: doc,
+                          onTap: () => _openDocument(doc.id),
+                          onFavoriteToggle: () => _toggleFavorite(doc.id),
+                          onMorePressed: () => _showDocumentMenu(doc),
+                        ).build(context, ref)
+                            .runtimeType == Column
+                            ? _buildCompactThumbnail(doc)
+                            : Container(
+                                width: 64,
+                                height: 85,
+                                decoration: BoxDecoration(
+                                  color: _getPaperColor(doc.paperColor),
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(
+                                    color: const Color(0xFFE0E0E0),
+                                    width: 1,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(alpha: 0.05),
+                                      blurRadius: 3,
+                                      offset: const Offset(0, 1),
+                                    ),
+                                  ],
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(5),
+                                  child: Stack(
+                                    children: [
+                                      // Thumbnail
+                                      _buildListThumbnail(doc),
+                                      
+                                      // Page count badge
+                                      if (doc.pageCount > 1)
+                                        Positioned(
+                                          bottom: 3,
+                                          right: 3,
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 4,
+                                              vertical: 2,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: Colors.black.withValues(alpha: 0.7),
+                                              borderRadius: BorderRadius.circular(3),
+                                            ),
+                                            child: Text(
+                                              '${doc.pageCount}',
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 8,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                        
+                        const SizedBox(width: 12),
+                        
+                        // Document info
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                doc.title,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  color: Theme.of(context).colorScheme.onSurface,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                _formatDate(doc.updatedAt),
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        
+                        // Favorite star and chevron
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (doc.isFavorite)
+                              Padding(
+                                padding: const EdgeInsets.only(right: 8),
+                                child: Icon(
+                                  Icons.star,
+                                  size: 18,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              ),
+                            Icon(
+                              Icons.chevron_right,
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               );
             },
@@ -421,6 +486,55 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
         );
       },
     );
+  }
+
+  // Build thumbnail for list view (compact version)
+  Widget _buildListThumbnail(DocumentInfo doc) {
+    // Cover preview if available
+    if (doc.hasCover && doc.coverId != null) {
+      final cover = core.CoverRegistry.byId(doc.coverId!);
+      if (cover != null) {
+        return CoverPreviewWidget(
+          cover: cover,
+          title: doc.title,
+          width: double.infinity,
+          height: double.infinity,
+        );
+      }
+    }
+    
+    // Template placeholder
+    return Container(
+      color: _getPaperColor(doc.paperColor),
+      child: Center(
+        child: Icon(
+          Icons.description_outlined,
+          size: 32,
+          color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
+        ),
+      ),
+    );
+  }
+
+  Color _getPaperColor(String paperColor) {
+    switch (paperColor) {
+      case 'Beyaz kağıt':
+        return const Color(0xFFFFFFFF);
+      case 'Sarı kağıt':
+      case 'Krem kağıt':
+        return const Color(0xFFFFFDE7);
+      case 'Gri kağıt':
+      case 'Açık Gri':
+        return const Color(0xFFF5F5F5);
+      case 'Siyah kağıt':
+        return const Color(0xFF212121);
+      case 'Açık Yeşil':
+        return const Color(0xFFE8F5E9);
+      case 'Açık Mavi':
+        return const Color(0xFFE3F2FD);
+      default:
+        return const Color(0xFFFFFDE7);
+    }
   }
 
   String _formatDate(DateTime date) {
