@@ -87,36 +87,50 @@ Documents ekranı sol menüde şu bölümleri içeriyor:
 
 ## 📦 PHASE 2: TEMPLATES (Şablonlar)
 
-**Branch:** `feature/templates`
-**Durum:** ⏳ Bekliyor
-**Öncelik:** Orta
+**Branch:** `feature/template-data-integration`
+**Durum:** ✅ TAMAMLANDI (31 Ocak 2025)
+**Öncelik:** Yüksek → Tamamlandı
 
-### Şablon Kategorileri
-- [ ] Boş (Free)
-- [ ] Çizgili (Free)
-- [ ] Kareli (Free)
-- [ ] Noktalı (Premium)
-- [ ] Cornell Notes (Premium)
-- [ ] To-Do List (Premium)
-- [ ] Meeting Notes (Premium)
-- [ ] Weekly Planner (Premium)
+### Şablon Kategorileri ✅
+- [x] Boş (Free)
+- [x] Çizgili (Free)
+- [x] Kareli (Free)
+- [x] Noktalı (Premium)
+- [x] Cornell Notes (Premium)
+- [x] To-Do List (Premium)
+- [x] Meeting Notes (Premium)
+- [x] Weekly Planner (Premium)
 
-### Şablon Önizleme
-- [ ] Thumbnail görselleri
-- [ ] Önizleme modalı
-- [ ] Premium badge overlay
+### Şablon Önizleme ✅
+- [x] Thumbnail görselleri
+- [x] Önizleme modalı
+- [x] Premium badge overlay
 
-### Şablon Seçimi
-- [ ] Not defteri oluştururken şablon seç
-- [ ] Mevcut nota şablon uygula
-- [ ] Favori şablonlar
+### Şablon Seçimi ✅
+- [x] Not defteri oluştururken şablon seç
+- [x] Mevcut nota şablon uygula
+- [x] Favori şablonlar
+
+### Kapak Sistemi ✅
+- [x] 10 kapak tasarımı (6 free, 4 premium gradient)
+- [x] Kapak önizleme widget
+- [x] Kapak toggle (açık/kapalı)
+- [x] Format seçici (A4/A5/Letter + Dikey/Yatay)
+- [x] Kağıt rengi seçimi (6 renk)
+
+### Performans İyileştirmeleri ✅
+- [x] Pattern rendering Picture caching (50-100x hızlanma)
+- [x] RepaintBoundary optimizasyonu
+- [x] Whiteboard direkt erişim
+- [x] Dinamik zoom limitleri (%5-%1000)
 
 ---
 
 ## 📦 PHASE 3: PREMIUM ENTEGRASYONU
 
 **Branch:** `feature/premium-integration`
-**Durum:** ⏳ Bekliyor
+**Durum:** 🔵 Proje bitiminde yapılacak
+**Öncelik:** Ertelenmiş
 
 ### Premium Provider
 - [ ] RevenueCat entegrasyonu kontrol
@@ -142,12 +156,15 @@ Documents ekranı sol menüde şu bölümleri içeriyor:
 - [ ] Satın alma işlemi
 - [ ] Restore purchases
 
+**NOT:** Premium sistemi altyapıda hazır, UI entegrasyonu proje tamamlandıktan sonra yapılacak.
+
 ---
 
 ## 📦 PHASE 4: DOCUMENT LİSTE İYİLEŞTİRMELERİ
 
 **Branch:** `feature/document-list-improvements`
-**Durum:** ⏳ Bekliyor
+**Durum:** 🔄 AKTİF (31 Ocak 2025)
+**Öncelik:** 🔴 YÜKSEK
 
 ### Görünüm Seçenekleri
 - [ ] Grid view (mevcut)
@@ -222,24 +239,34 @@ Documents ekranı sol menüde şu bölümleri içeriyor:
 
 ---
 
-## 📝 YARINKI GÖREVLER (26 Ocak 2025)
+## 📝 AKTİF GÖREVLER (31 Ocak 2025)
 
-### 🔴 Öncelik 1: Git İşlemleri
-- [ ] `.git/index.lock` dosyasını kontrol et/sil
-- [ ] Tema değişikliklerini commit et
-- [ ] Branch'i push et (fix/theme-modal-divider)
-- [ ] Test sonuçlarını gözden geçir
+### 🔴 Öncelik 1: Document Liste İyileştirmeleri (Bu Hafta)
+- [ ] Grid/List view toggle butonu ekle (header'a)
+- [ ] Görünüm tercihi kaydetme (SharedPreferences)
+- [ ] Sıralama dropdown menüsü
+  - [ ] Tarihe göre (Yeni → Eski) - default
+  - [ ] Tarihe göre (Eski → Yeni)
+  - [ ] İsme göre (A-Z)
+  - [ ] İsme göre (Z-A)
+  - [ ] Boyuta göre
+- [ ] Arama çubuğu implementation
+  - [ ] SearchBar widget ekle
+  - [ ] Başlığa göre filtreleme
+  - [ ] Real-time arama
+- [ ] List view tasarımı (DocumentListTile widget)
+- [ ] Grid/List geçiş animasyonu
 
-### 🟡 Öncelik 2: Kalan Tema Sorunları (Varsa)
-- [ ] Kalem kutusu seçimi dark mode'da test et
-- [ ] Page navigator dark mode test et
-- [ ] Tüm modalları hem light hem dark mode'da kontrol et
-- [ ] Eksik kalan UI elementleri varsa düzelt
+### 🟡 Öncelik 2: Toplu İşlemler (Sonrası)
+- [ ] Çoklu seçim modu
+- [ ] Toplu silme
+- [ ] Toplu taşıma
+- [ ] Toplu favorilere ekleme
 
-### 🟢 Öncelik 3: Sonraki Adımlar
-- [ ] Branch'i main'e merge et
-- [ ] PHASE 2 (Templates) için planlama yap
-- [ ] Premium entegrasyonu için hazırlık
+### 🟢 Öncelik 3: İlerideki İyileştirmeler
+- [ ] İçeriğe göre arama (Premium)
+- [ ] Arama geçmişi
+- [ ] Filtreleme (Klasör, Tarih aralığı, Etiket)
 
 ---
 
@@ -291,15 +318,34 @@ test(settings): add unit tests for provider
 
 ## 📅 TAHMİNİ ZAMAN ÇİZELGESİ
 
-| Phase | Tahmini Süre | Öncelik |
-|-------|--------------|---------|
-| Settings | 2-3 gün | 🔴 Yüksek |
-| Templates | 1-2 gün | 🟡 Orta |
-| Premium | 2-3 gün | 🔴 Yüksek |
-| Liste İyileştirme | 1-2 gün | 🟡 Orta |
-| Responsive | 1-2 gün | 🟡 Orta |
-| Sync | 3-5 gün | 🟢 Düşük |
+| Phase | Tahmini Süre | Öncelik | Durum |
+|-------|--------------|---------|-------|
+| Settings | 2-3 gün | 🔴 Yüksek | ✅ Tamamlandı |
+| Templates | 4-5 gün | 🔴 Yüksek | ✅ Tamamlandı |
+| Liste İyileştirme | 2-3 gün | 🔴 Yüksek | 🔄 Aktif |
+| Responsive | 1-2 gün | 🟡 Orta | ⏳ Sonra |
+| Toplu İşlemler | 1 gün | 🟡 Orta | ⏳ Sonra |
+| Premium | 2-3 gün | 🔵 Proje sonu | ⏳ Ertelenmiş |
+| Sync | 3-5 gün | 🔵 Proje sonu | ⏳ Ertelenmiş |
 
 ---
 
 *Bu plan her session başında gözden geçirilmeli ve ilerleme işaretlenmeli.*
+
+---
+
+## 📊 İLERLEME DURUMU
+
+### ✅ Tamamlanan Fazlar (31 Ocak 2025)
+- **Phase 1: Settings & Dark Mode** ✅ (25 Ocak 2025)
+- **Phase 2: Templates & Covers** ✅ (30-31 Ocak 2025)
+- **Performance Optimization** ✅ (31 Ocak 2025)
+
+### 🔄 Aktif Faz
+- **Phase 4: Document Liste İyileştirmeleri** (31 Ocak 2025 başladı)
+
+### ⏳ Gelecek Fazlar
+- Phase 5: Responsive Tasarım
+- Phase 6: Toplu İşlemler
+- Phase 3: Premium Entegrasyonu (Proje bitiminde)
+- Phase 7: Cloud Sync (Proje bitiminde)
