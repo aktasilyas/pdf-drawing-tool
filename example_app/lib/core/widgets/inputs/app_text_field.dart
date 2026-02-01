@@ -15,7 +15,7 @@ library;
 
 import 'package:flutter/material.dart';
 
-import '../../theme/tokens/index.dart';
+import 'package:example_app/core/theme/index.dart';
 
 /// StarNote text field komponenti.
 ///

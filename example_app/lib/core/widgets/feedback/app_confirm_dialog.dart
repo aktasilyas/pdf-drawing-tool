@@ -16,8 +16,9 @@ library;
 
 import 'package:flutter/material.dart';
 
-import '../../theme/tokens/index.dart';
-import '../buttons/index.dart';
+import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/core/widgets/buttons/index.dart';
+
 import 'app_modal.dart';
 
 /// StarNote onay dialogu komponenti.
