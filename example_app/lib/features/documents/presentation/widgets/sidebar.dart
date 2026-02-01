@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
 
 enum SidebarSection {
   documents,
@@ -7,20 +8,29 @@ enum SidebarSection {
   shared,
   store,
   trash,
+  folder, // For when a specific folder is selected
 }
 
 class Sidebar extends ConsumerWidget {
   final SidebarSection selectedSection;
   final ValueChanged<SidebarSection> onSectionChanged;
+  final String? selectedFolderId; // For folder selection
+  final ValueChanged<String>? onFolderSelected; // Callback for folder tap
+  final VoidCallback? onCreateFolder; // Callback for create folder button
 
   const Sidebar({
     super.key,
     required this.selectedSection,
     required this.onSectionChanged,
+    this.selectedFolderId,
+    this.onFolderSelected,
+    this.onCreateFolder,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final foldersAsync = ref.watch(foldersProvider);
+    
     return Container(
       width: 240,
       color: Theme.of(context).colorScheme.surfaceContainerHighest,
@@ -41,48 +51,149 @@ class Sidebar extends ConsumerWidget {
             ),
           ),
 
-          // Navigation items
-          _SidebarItem(
-            icon: Icons.folder_outlined,
-            selectedIcon: Icons.folder,
-            label: 'Belgeler',
-            isSelected: selectedSection == SidebarSection.documents,
-            onTap: () => onSectionChanged(SidebarSection.documents),
-          ),
-          _SidebarItem(
-            icon: Icons.star_outline,
-            selectedIcon: Icons.star,
-            label: 'Sık Kullanılanlar',
-            isSelected: selectedSection == SidebarSection.favorites,
-            onTap: () => onSectionChanged(SidebarSection.favorites),
-          ),
-          _SidebarItem(
-            icon: Icons.people_outline,
-            selectedIcon: Icons.people,
-            label: 'Paylaşılan',
-            isSelected: selectedSection == SidebarSection.shared,
-            onTap: () => onSectionChanged(SidebarSection.shared),
-          ),
-          _SidebarItem(
-            icon: Icons.storefront_outlined,
-            selectedIcon: Icons.storefront,
-            label: 'Mağaza',
-            isSelected: selectedSection == SidebarSection.store,
-            onTap: () => onSectionChanged(SidebarSection.store),
-          ),
+          // All scrollable content
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Navigation items
+                  _SidebarItem(
+                    icon: Icons.folder_outlined,
+                    selectedIcon: Icons.folder,
+                    label: 'Belgeler',
+                    isSelected: selectedSection == SidebarSection.documents,
+                    onTap: () => onSectionChanged(SidebarSection.documents),
+                  ),
+                  _SidebarItem(
+                    icon: Icons.star_outline,
+                    selectedIcon: Icons.star,
+                    label: 'Sık Kullanılanlar',
+                    isSelected: selectedSection == SidebarSection.favorites,
+                    onTap: () => onSectionChanged(SidebarSection.favorites),
+                  ),
+                  
+                  // Folders section header
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 16, 16, 8),
+                    child: Row(
+                      children: [
+                        Text(
+                          'Klasörler',
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                fontWeight: FontWeight.w600,
+                              ),
+                        ),
+                        const Spacer(),
+                        IconButton(
+                          icon: const Icon(Icons.add, size: 18),
+                          onPressed: onCreateFolder,
+                          tooltip: 'Yeni Klasör',
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(
+                            minWidth: 32,
+                            minHeight: 32,
+                          ),
+                          iconSize: 18,
+                          style: IconButton.styleFrom(
+                            foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  // Folders list
+                  foldersAsync.when(
+                    data: (folders) {
+                      // Only show root folders (parentId == null) in sidebar
+                      final rootFolders = folders.where((f) => f.parentId == null).toList();
+                      
+                      if (rootFolders.isEmpty) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                          child: Text(
+                            'Klasör yok',
+                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
+                          ),
+                        );
+                      }
+                      
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: rootFolders.map((folder) {
+                          final isSelected = selectedSection == SidebarSection.folder && 
+                                           selectedFolderId == folder.id;
+                          
+                          return _SidebarItem(
+                            icon: Icons.folder_outlined,
+                            selectedIcon: Icons.folder,
+                            label: folder.name,
+                            isSelected: isSelected,
+                            trailing: Text(
+                              '${folder.documentCount}',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: isSelected
+                                    ? Theme.of(context).colorScheme.onPrimaryContainer
+                                    : Theme.of(context).colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                            iconColor: Color(folder.colorValue),
+                            onTap: () {
+                              onFolderSelected?.call(folder.id);
+                            },
+                          );
+                        }).toList(),
+                      );
+                    },
+                    loading: () => const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(16),
+                        child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      ),
+                    ),
+                    error: (_, __) => const SizedBox.shrink(),
+                  ),
+                  
+                  _SidebarItem(
+                    icon: Icons.people_outline,
+                    selectedIcon: Icons.people,
+                    label: 'Paylaşılan',
+                    isSelected: selectedSection == SidebarSection.shared,
+                    onTap: () => onSectionChanged(SidebarSection.shared),
+                  ),
+                  _SidebarItem(
+                    icon: Icons.storefront_outlined,
+                    selectedIcon: Icons.storefront,
+                    label: 'Mağaza',
+                    isSelected: selectedSection == SidebarSection.store,
+                    onTap: () => onSectionChanged(SidebarSection.store),
+                  ),
 
-          const Spacer(),
+                  const Divider(height: 1),
 
-          // Trash at bottom
-          _SidebarItem(
-            icon: Icons.delete_outline,
-            selectedIcon: Icons.delete,
-            label: 'Çöp',
-            isSelected: selectedSection == SidebarSection.trash,
-            onTap: () => onSectionChanged(SidebarSection.trash),
+                  // Trash at bottom
+                  _SidebarItem(
+                    icon: Icons.delete_outline,
+                    selectedIcon: Icons.delete,
+                    label: 'Çöp',
+                    isSelected: selectedSection == SidebarSection.trash,
+                    onTap: () => onSectionChanged(SidebarSection.trash),
+                  ),
+
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
           ),
-
-          const SizedBox(height: 24),
         ],
       ),
     );
@@ -95,6 +206,8 @@ class _SidebarItem extends StatelessWidget {
   final String label;
   final bool isSelected;
   final VoidCallback onTap;
+  final Widget? trailing;
+  final Color? iconColor;
 
   const _SidebarItem({
     required this.icon,
@@ -102,6 +215,8 @@ class _SidebarItem extends StatelessWidget {
     required this.label,
     required this.isSelected,
     required this.onTap,
+    this.trailing,
+    this.iconColor,
   });
 
   @override
@@ -124,21 +239,29 @@ class _SidebarItem extends StatelessWidget {
                 Icon(
                   isSelected ? selectedIcon : icon,
                   size: 20,
-                  color: isSelected
+                  color: iconColor ?? (isSelected
                       ? colorScheme.primary
-                      : colorScheme.onSurfaceVariant,
+                      : colorScheme.onSurfaceVariant),
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                    color: isSelected
-                        ? colorScheme.primary
-                        : colorScheme.onSurface,
+                Expanded(
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                      color: isSelected
+                          ? colorScheme.primary
+                          : colorScheme.onSurface,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                if (trailing != null) ...[
+                  const SizedBox(width: 8),
+                  trailing!,
+                ],
               ],
             ),
           ),

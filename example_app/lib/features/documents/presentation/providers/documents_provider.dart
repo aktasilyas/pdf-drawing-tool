@@ -8,6 +8,7 @@ import 'package:example_app/features/documents/domain/entities/document_info.dar
 import 'package:example_app/features/documents/domain/entities/view_mode.dart';
 import 'package:example_app/features/documents/domain/entities/sort_option.dart';
 import 'package:example_app/features/documents/domain/repositories/document_repository.dart';
+import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
 
 // Repository provider using GetIt
 final documentRepositoryProvider = Provider<DocumentRepository>((ref) {
@@ -19,6 +20,15 @@ final currentFolderIdProvider = StateProvider<String?>((ref) => null);
 
 // Search query
 final searchQueryProvider = StateProvider<String>((ref) => '');
+
+// Selection mode
+final selectionModeProvider = StateProvider<bool>((ref) => false);
+
+// Selected documents (Set of document IDs)
+final selectedDocumentsProvider = StateProvider<Set<String>>((ref) => {});
+
+// Selected folders for multi-selection
+final selectedFoldersProvider = StateProvider<Set<String>>((ref) => {});
 
 // View mode (grid/list) with persistence
 final viewModeProvider = StateNotifierProvider<ViewModeNotifier, ViewMode>((ref) {
@@ -307,7 +317,8 @@ class DocumentsController extends StateNotifier<AsyncValue<void>> {
     return result.fold(
       (failure) => false,
       (_) {
-        _invalidateDocuments();
+        // Only invalidate favorites and the documents list
+        _invalidateSpecific(documents: true, favorites: true);
         return true;
       },
     );
@@ -318,18 +329,8 @@ class DocumentsController extends StateNotifier<AsyncValue<void>> {
     return result.fold(
       (failure) => false,
       (_) {
-        _invalidateDocuments();
-        return true;
-      },
-    );
-  }
-
-  Future<bool> restoreFromTrash(String documentId) async {
-    final result = await _repository.restoreFromTrash(documentId);
-    return result.fold(
-      (failure) => false,
-      (_) {
-        _invalidateDocuments();
+        // Invalidate documents, trash, and folders (for counts)
+        _invalidateSpecific(documents: true, trash: true, folders: true);
         return true;
       },
     );
@@ -351,7 +352,8 @@ class DocumentsController extends StateNotifier<AsyncValue<void>> {
     return result.fold(
       (failure) => false,
       (_) {
-        _invalidateDocuments();
+        // Only invalidate documents list (rename doesn't affect favorites/trash)
+        _invalidateSpecific(documents: true);
         return true;
       },
     );
@@ -362,6 +364,174 @@ class DocumentsController extends StateNotifier<AsyncValue<void>> {
     _ref.invalidate(favoriteDocumentsProvider);
     _ref.invalidate(recentDocumentsProvider);
     _ref.invalidate(trashDocumentsProvider);
+    _ref.invalidate(foldersProvider); // Folder counts need refresh too!
+  }
+
+  /// Invalidate only specific providers based on the operation
+  void _invalidateSpecific({
+    bool documents = false,
+    bool favorites = false,
+    bool recent = false,
+    bool trash = false,
+    bool folders = false,
+  }) {
+    if (documents) _ref.invalidate(documentsProvider);
+    if (favorites) _ref.invalidate(favoriteDocumentsProvider);
+    if (recent) _ref.invalidate(recentDocumentsProvider);
+    if (trash) _ref.invalidate(trashDocumentsProvider);
+    if (folders) _ref.invalidate(foldersProvider);
+  }
+
+  // Bulk move to trash (soft delete)
+  Future<void> moveDocumentsToTrash(List<String> ids) async {
+    state = const AsyncLoading();
+    try {
+      for (final id in ids) {
+        final result = await _repository.moveToTrash(id);
+        result.fold(
+          (failure) => throw Exception(failure.message),
+          (_) {},
+        );
+      }
+      // Invalidate documents, trash, and folders
+      _invalidateSpecific(documents: true, trash: true, folders: true);
+      state = const AsyncData(null);
+    } catch (e) {
+      state = AsyncError(e, StackTrace.current);
+      rethrow;
+    }
+  }
+
+  // Bulk permanent delete (hard delete) - for trash only
+  Future<void> permanentlyDeleteDocuments(List<String> ids) async {
+    state = const AsyncLoading();
+    try {
+      for (final id in ids) {
+        final result = await _repository.permanentlyDelete(id);
+        result.fold(
+          (failure) => throw Exception(failure.message),
+          (_) {},
+        );
+      }
+      // Only trash needs refresh for permanent delete
+      _invalidateSpecific(trash: true);
+      state = const AsyncData(null);
+    } catch (e) {
+      state = AsyncError(e, StackTrace.current);
+      rethrow;
+    }
+  }
+
+  // Legacy method - kept for backward compatibility but deprecated
+  @Deprecated('Use moveDocumentsToTrash or permanentlyDeleteDocuments instead')
+  Future<void> deleteDocuments(List<String> ids) async {
+    return moveDocumentsToTrash(ids);
+  }
+
+  // Bulk duplicate documents
+  Future<void> duplicateDocuments(List<String> ids) async {
+    state = const AsyncLoading();
+    try {
+      for (final id in ids) {
+        final result = await _repository.duplicateDocument(id);
+        result.fold(
+          (failure) => throw Exception(failure.message),
+          (_) {},
+        );
+      }
+      _invalidateDocuments();
+      state = const AsyncData(null);
+    } catch (e) {
+      state = AsyncError(e, StackTrace.current);
+      rethrow;
+    }
+  }
+
+  // Single document restore from trash
+  Future<bool> restoreFromTrash(String id) async {
+    try {
+      final result = await _repository.restoreFromTrash(id);
+      return result.fold(
+        (failure) {
+          state = AsyncError(failure, StackTrace.current);
+          return false;
+        },
+        (_) {
+          // Invalidate documents, trash, and folders
+          _invalidateSpecific(documents: true, trash: true, folders: true);
+          return true;
+        },
+      );
+    } catch (e) {
+      state = AsyncError(e, StackTrace.current);
+      return false;
+    }
+  }
+
+  // Single document duplicate
+  Future<bool> duplicateDocument(String id) async {
+    try {
+      final result = await _repository.duplicateDocument(id);
+      return result.fold(
+        (failure) {
+          state = AsyncError(failure, StackTrace.current);
+          return false;
+        },
+        (_) {
+          _invalidateDocuments();
+          return true;
+        },
+      );
+    } catch (e) {
+      state = AsyncError(e, StackTrace.current);
+      return false;
+    }
+  }
+
+  // Single document permanent delete
+  Future<bool> permanentlyDeleteDocument(String id) async {
+    try {
+      final result = await _repository.permanentlyDelete(id);
+      return result.fold(
+        (failure) {
+          state = AsyncError(failure, StackTrace.current);
+          return false;
+        },
+        (_) {
+          // Only trash needs refresh for permanent delete
+          _invalidateSpecific(trash: true);
+          return true;
+        },
+      );
+    } catch (e) {
+      state = AsyncError(e, StackTrace.current);
+      return false;
+    }
+  }
+
+  // Move documents to folder (bulk)
+  Future<bool> moveDocumentsToFolder(List<String> docIds, String? folderId) async {
+    state = const AsyncLoading();
+    try {
+      for (final id in docIds) {
+        final result = await _repository.updateDocument(
+          id: id,
+          folderId: folderId,
+        );
+        result.fold(
+          (failure) {
+            throw Exception(failure.message);
+          },
+          (_) {},
+        );
+      }
+      _invalidateDocuments();
+      state = const AsyncData(null);
+      return true;
+    } catch (e) {
+      state = AsyncError(e, StackTrace.current);
+      return false;
+    }
   }
 }
 

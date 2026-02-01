@@ -7,6 +7,7 @@ import 'package:example_app/features/documents/data/models/document_model.dart';
 
 abstract class DocumentLocalDatasource {
   Future<List<DocumentModel>> getDocuments({String? folderId});
+  Future<List<DocumentModel>> getAllDocuments(); // Get ALL documents regardless of folder
   Future<DocumentModel> getDocument(String id);
   Future<DocumentModel> createDocument(DocumentModel document);
   Future<DocumentModel> updateDocument(DocumentModel document);
@@ -39,7 +40,8 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
           .toList();
 
       if (folderId == null) {
-        return documents;
+        // Return only documents without a folder (root level)
+        return documents.where((doc) => doc.folderId == null).toList();
       }
 
       return documents.where((doc) => doc.folderId == folderId).toList();
@@ -49,9 +51,27 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
   }
 
   @override
+  Future<List<DocumentModel>> getAllDocuments() async {
+    try {
+      final jsonString = _prefs.getString(_documentsKey);
+      if (jsonString == null) {
+        return [];
+      }
+
+      final List<dynamic> jsonList = json.decode(jsonString) as List;
+      return jsonList
+          .map((json) => DocumentModel.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } catch (e) {
+      throw CacheException('Failed to get all documents: $e');
+    }
+  }
+
+  @override
   Future<DocumentModel> getDocument(String id) async {
     try {
-      final documents = await getDocuments();
+      // Get ALL documents (not filtered by folderId)
+      final documents = await getAllDocuments();
       return documents.firstWhere(
         (doc) => doc.id == id,
         orElse: () => throw const CacheException('Document not found'),
@@ -64,7 +84,8 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
   @override
   Future<DocumentModel> createDocument(DocumentModel document) async {
     try {
-      final documents = await getDocuments();
+      // Get ALL documents (not filtered by folderId)
+      final documents = await getAllDocuments();
       documents.add(document);
       await _saveDocuments(documents);
       _controller.add(documents);
@@ -77,7 +98,8 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
   @override
   Future<DocumentModel> updateDocument(DocumentModel document) async {
     try {
-      final documents = await getDocuments();
+      // Get ALL documents (not filtered by folderId)
+      final documents = await getAllDocuments();
       final index = documents.indexWhere((doc) => doc.id == document.id);
       
       if (index == -1) {
@@ -96,7 +118,8 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
   @override
   Future<void> deleteDocument(String id) async {
     try {
-      final documents = await getDocuments();
+      // Get ALL documents (not filtered by folderId)
+      final documents = await getAllDocuments();
       documents.removeWhere((doc) => doc.id == id);
       await _saveDocuments(documents);
       _controller.add(documents);
@@ -115,7 +138,10 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
     });
 
     if (folderId == null) {
-      return _controller.stream;
+      // Return only documents without a folder (root level)
+      return _controller.stream.map(
+        (documents) => documents.where((doc) => doc.folderId == null).toList(),
+      );
     }
 
     return _controller.stream.map(

@@ -13,6 +13,9 @@ library;
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:example_app/features/documents/documents.dart';
+import 'package:example_app/features/documents/data/datasources/folder_local_datasource.dart';
+import 'package:example_app/features/documents/data/repositories/folder_repository_impl.dart';
+import 'package:example_app/features/documents/domain/repositories/folder_repository.dart';
 import 'package:example_app/features/editor/editor.dart';
 
 /// Global service locator instance
@@ -51,9 +54,21 @@ void _registerRepositories() {
     () => DocumentLocalDatasourceImpl(getIt()),
   );
   
+  getIt.registerLazySingleton<FolderLocalDatasource>(
+    () => FolderLocalDatasourceImpl(getIt()),
+  );
+  
   // Documents
   getIt.registerLazySingleton<DocumentRepository>(
     () => DocumentRepositoryImpl(getIt()),
+  );
+  
+  // Folders
+  getIt.registerLazySingleton<FolderRepository>(
+    () => FolderRepositoryImpl(
+      getIt<FolderLocalDatasource>(),
+      getIt<DocumentLocalDatasource>(),
+    ),
   );
 }
 

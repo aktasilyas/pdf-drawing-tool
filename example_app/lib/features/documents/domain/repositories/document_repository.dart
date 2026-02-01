@@ -36,6 +36,9 @@ abstract class DocumentRepository {
   /// Delete document
   Future<Either<Failure, void>> deleteDocument(String id);
 
+  /// Duplicate document (create a copy)
+  Future<Either<Failure, DocumentInfo>> duplicateDocument(String id);
+
   /// Move document to folder
   Future<Either<Failure, void>> moveDocument(String id, String? folderId);
 

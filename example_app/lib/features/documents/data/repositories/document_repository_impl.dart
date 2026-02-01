@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:uuid/uuid.dart';
 import 'package:drawing_core/drawing_core.dart';
@@ -29,9 +30,7 @@ class DocumentRepositoryImpl implements DocumentRepository {
           .map((model) => model.toEntity())
           .toList();
       
-      // Sort by updated date (most recent first)
-      nonTrashDocs.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
-      
+      // Return unsorted list - UI will handle sorting based on user preference
       return Right(nonTrashDocs);
     } on CacheException catch (e) {
       return Left(CacheFailure(e.message));
@@ -106,12 +105,27 @@ class DocumentRepositoryImpl implements DocumentRepository {
   }) async {
     try {
       final document = await _localDatasource.getDocument(id);
-      final updated = document.copyWith(
-        title: title,
-        folderId: folderId,
-        thumbnailPath: thumbnailPath,
-        pageCount: pageCount,
+      
+      // Manually create updated document to handle null folderId correctly
+      final updated = DocumentModel(
+        id: document.id,
+        title: title ?? document.title,
+        folderId: folderId, // Explicitly use the passed folderId (can be null)
+        templateId: document.templateId,
+        createdAt: document.createdAt,
         updatedAt: DateTime.now(),
+        thumbnailPath: thumbnailPath ?? document.thumbnailPath,
+        pageCount: pageCount ?? document.pageCount,
+        isFavorite: document.isFavorite,
+        isInTrash: document.isInTrash,
+        syncState: document.syncState,
+        paperColor: document.paperColor,
+        isPortrait: document.isPortrait,
+        documentType: document.documentType,
+        coverId: document.coverId,
+        hasCover: document.hasCover,
+        paperWidthMm: document.paperWidthMm,
+        paperHeightMm: document.paperHeightMm,
       );
 
       final result = await _localDatasource.updateDocument(updated);
@@ -132,6 +146,44 @@ class DocumentRepositoryImpl implements DocumentRepository {
       return Left(CacheFailure(e.message));
     } catch (e) {
       return Left(CacheFailure('Failed to delete document: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, DocumentInfo>> duplicateDocument(String id) async {
+    try {
+      // Get the original document
+      final original = await _localDatasource.getDocument(id);
+      
+      // Create a copy with new ID and updated timestamps
+      final now = DateTime.now();
+      final duplicate = original.copyWith(
+        id: _uuid.v4(),
+        title: '${original.title} (kopya)',
+        createdAt: now,
+        updatedAt: now,
+        isFavorite: false, // Don't copy favorite status
+      );
+
+      // Save the duplicate
+      final created = await _localDatasource.createDocument(duplicate);
+      
+      // Copy document content if exists
+      try {
+        final content = await _localDatasource.getDocumentContent(id);
+        if (content != null) {
+          await _localDatasource.saveDocumentContent(created.id, content);
+        }
+      } catch (e) {
+        // Content copy failed, but document is created
+        debugPrint('Failed to copy document content: $e');
+      }
+
+      return Right(created.toEntity());
+    } on CacheException catch (e) {
+      return Left(CacheFailure(e.message));
+    } catch (e) {
+      return Left(CacheFailure('Failed to duplicate document: $e'));
     }
   }
 
@@ -258,7 +310,8 @@ class DocumentRepositoryImpl implements DocumentRepository {
   @override
   Future<Either<Failure, List<DocumentInfo>>> getTrash() async {
     try {
-      final documents = await _localDatasource.getDocuments();
+      // Get ALL documents (not filtered by folderId)
+      final documents = await _localDatasource.getAllDocuments();
       final trash = documents
           .where((doc) => doc.isInTrash)
           .map((model) => model.toEntity())

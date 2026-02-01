@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
+import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/editor/presentation/providers/editor_provider.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
 import 'package:drawing_ui/drawing_ui.dart';
@@ -11,6 +12,8 @@ class DocumentCard extends ConsumerWidget {
   final VoidCallback? onLongPress;
   final VoidCallback? onFavoriteToggle;
   final VoidCallback? onMorePressed;
+  final bool isSelectionMode;
+  final bool isSelected;
 
   const DocumentCard({
     super.key,
@@ -19,13 +22,23 @@ class DocumentCard extends ConsumerWidget {
     this.onLongPress,
     this.onFavoriteToggle,
     this.onMorePressed,
+    this.isSelectionMode = false,
+    this.isSelected = false,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return GestureDetector(
       onTap: onTap,
-      onLongPress: onLongPress,
+      onLongPress: () {
+        if (!isSelectionMode) {
+          // Enter selection mode and select this document
+          ref.read(selectionModeProvider.notifier).state = true;
+          ref.read(selectedDocumentsProvider.notifier).state = {document.id};
+        } else if (onLongPress != null) {
+          onLongPress!();
+        }
+      },
       child: LayoutBuilder(
         builder: (context, constraints) {
           // Calculate available height dynamically
@@ -41,8 +54,10 @@ class DocumentCard extends ConsumerWidget {
                     color: _getPaperColor(document.paperColor),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: const Color(0xFFE0E0E0),
-                      width: 1,
+                      color: isSelected 
+                          ? Theme.of(context).colorScheme.primary
+                          : const Color(0xFFE0E0E0),
+                      width: isSelected ? 3 : 1,
                     ),
                     boxShadow: [
                       BoxShadow(
@@ -59,6 +74,49 @@ class DocumentCard extends ConsumerWidget {
                         borderRadius: BorderRadius.circular(7),
                         child: _buildThumbnail(ref),
                       ),
+
+                      // Selection overlay (when in selection mode)
+                      if (isSelectionMode)
+                        Positioned.fill(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(7),
+                            ),
+                          ),
+                        ),
+
+                      // Selection checkbox (top left in selection mode)
+                      if (isSelectionMode)
+                        Positioned(
+                          top: 8,
+                          left: 8,
+                          child: Container(
+                            width: 24,
+                            height: 24,
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Colors.white,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: isSelected
+                                    ? Theme.of(context).colorScheme.primary
+                                    : Colors.grey.shade400,
+                                width: 2,
+                              ),
+                            ),
+                            child: isSelected
+                                ? Icon(
+                                    Icons.check,
+                                    size: 16,
+                                    color: Colors.white,
+                                  )
+                                : null,
+                          ),
+                        ),
 
                       // Page count badge (for PDF/multi-page)
                       if (document.pageCount > 1)
@@ -85,12 +143,13 @@ class DocumentCard extends ConsumerWidget {
                           ),
                         ),
 
-                      // Favorite star (top right) - smaller on mobile
-                      Positioned(
-                        top: 6,
-                        right: 6,
-                        child: GestureDetector(
-                          onTap: onFavoriteToggle,
+                      // Favorite star (top right) - hidden in selection mode
+                      if (!isSelectionMode)
+                        Positioned(
+                          top: 6,
+                          right: 6,
+                          child: GestureDetector(
+                            onTap: onFavoriteToggle,
                           child: Container(
                             padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(

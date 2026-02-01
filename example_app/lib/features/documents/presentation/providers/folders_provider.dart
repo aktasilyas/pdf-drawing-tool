@@ -116,7 +116,10 @@ class FoldersController extends StateNotifier<AsyncValue<void>> {
     );
   }
 
-  Future<bool> moveFolder(String folderId, String? newParentId) async {
+  Future<bool> moveFolder({
+    required String folderId,
+    required String? newParentId,
+  }) async {
     final result = await _repository.moveFolder(folderId, newParentId);
     return result.fold(
       (failure) => false,

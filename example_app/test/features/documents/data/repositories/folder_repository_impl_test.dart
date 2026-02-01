@@ -6,17 +6,26 @@ import 'package:example_app/features/documents/documents.dart';
 class MockFolderLocalDatasource extends Mock
     implements FolderLocalDatasource {}
 
+class MockDocumentLocalDatasource extends Mock
+    implements DocumentLocalDatasource {}
+
 class MockUuid extends Mock implements Uuid {}
 
 void main() {
   late FolderRepositoryImpl repository;
-  late MockFolderLocalDatasource mockDatasource;
+  late MockFolderLocalDatasource mockFolderDatasource;
+  late MockDocumentLocalDatasource mockDocumentDatasource;
   late MockUuid mockUuid;
 
   setUp(() {
-    mockDatasource = MockFolderLocalDatasource();
+    mockFolderDatasource = MockFolderLocalDatasource();
+    mockDocumentDatasource = MockDocumentLocalDatasource();
     mockUuid = MockUuid();
-    repository = FolderRepositoryImpl(mockDatasource, mockUuid);
+    repository = FolderRepositoryImpl(
+      mockFolderDatasource,
+      mockDocumentDatasource,
+      mockUuid,
+    );
   });
 
   group('FolderRepositoryImpl', () {
@@ -38,8 +47,10 @@ void main() {
     group('getFolders', () {
       test('should return list of folders sorted by name', () async {
         // Arrange
-        when(() => mockDatasource.getFolders(parentId: null))
+        when(() => mockFolderDatasource.getFolders(parentId: null))
             .thenAnswer((_) async => testModels);
+        when(() => mockDocumentDatasource.getAllDocuments())
+            .thenAnswer((_) async => []);
 
         // Act
         final result = await repository.getFolders();
@@ -53,14 +64,17 @@ void main() {
             expect(folders.first.name, 'Test Folder');
           },
         );
-        verify(() => mockDatasource.getFolders(parentId: null)).called(1);
+        verify(() => mockFolderDatasource.getFolders(parentId: null)).called(1);
+        verify(() => mockDocumentDatasource.getDocuments()).called(1);
       });
 
       test('should filter folders by parentId', () async {
         // Arrange
         const parentId = 'parent-1';
-        when(() => mockDatasource.getFolders(parentId: parentId))
+        when(() => mockFolderDatasource.getFolders(parentId: parentId))
             .thenAnswer((_) async => [testModel]);
+        when(() => mockDocumentDatasource.getAllDocuments())
+            .thenAnswer((_) async => []);
 
         // Act
         final result = await repository.getFolders(parentId: parentId);
@@ -83,7 +97,7 @@ void main() {
       test('should create folder with generated ID', () async {
         // Arrange
         when(() => mockUuid.v4()).thenReturn(testId);
-        when(() => mockDatasource.createFolder(any()))
+        when(() => mockFolderDatasource.createFolder(any()))
             .thenAnswer((invocation) async {
           final model = invocation.positionalArguments[0] as FolderModel;
           return model;
@@ -108,7 +122,7 @@ void main() {
           },
         );
         verify(() => mockUuid.v4()).called(1);
-        verify(() => mockDatasource.createFolder(any())).called(1);
+        verify(() => mockFolderDatasource.createFolder(any())).called(1);
       });
     });
 
@@ -128,9 +142,9 @@ void main() {
           createdAt: DateTime.now(),
         );
 
-        when(() => mockDatasource.getFolder('child'))
+        when(() => mockFolderDatasource.getFolder('child'))
             .thenAnswer((_) async => childFolder);
-        when(() => mockDatasource.getFolder('parent'))
+        when(() => mockFolderDatasource.getFolder('parent'))
             .thenAnswer((_) async => parentFolder);
 
         // Act - Try to move parent into its own child
@@ -154,15 +168,15 @@ void main() {
           createdAt: DateTime.now(),
         );
 
-        when(() => mockDatasource.getFolder('folder-1'))
+        when(() => mockFolderDatasource.getFolder('folder-1'))
             .thenAnswer((_) async => folder);
-        when(() => mockDatasource.getFolder('new-parent'))
+        when(() => mockFolderDatasource.getFolder('new-parent'))
             .thenAnswer((_) async => FolderModel(
                   id: 'new-parent',
                   name: 'New Parent',
                   createdAt: DateTime.now(),
                 ));
-        when(() => mockDatasource.updateFolder(any()))
+        when(() => mockFolderDatasource.updateFolder(any()))
             .thenAnswer((invocation) async {
           final model = invocation.positionalArguments[0] as FolderModel;
           return model;
@@ -199,11 +213,11 @@ void main() {
           createdAt: DateTime.now(),
         );
 
-        when(() => mockDatasource.getFolder('c'))
+        when(() => mockFolderDatasource.getFolder('c'))
             .thenAnswer((_) async => child);
-        when(() => mockDatasource.getFolder('p'))
+        when(() => mockFolderDatasource.getFolder('p'))
             .thenAnswer((_) async => parent);
-        when(() => mockDatasource.getFolder('gp'))
+        when(() => mockFolderDatasource.getFolder('gp'))
             .thenAnswer((_) async => grandparent);
 
         // Act

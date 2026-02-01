@@ -6,6 +6,7 @@ import 'package:drawing_ui/drawing_ui.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:example_app/core/routing/route_names.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
+import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
 import 'dart:ui' as ui;
 
 /// Dropdown menü item'ları
@@ -142,6 +143,12 @@ void _createQuickNote(BuildContext context) async {
     documentType: drawing_core.DocumentType.quickNote,
   );
   
+  // Refresh providers to update folder counts and document lists
+  if (documentId != null) {
+    container.invalidate(foldersProvider);
+    container.invalidate(documentsProvider);
+  }
+  
   // Doküman oluşturulduysa direkt editor'e git
   if (documentId != null && context.mounted) {
     context.push(RouteNames.editorPath(documentId));
@@ -164,6 +171,12 @@ void _createWhiteboard(BuildContext context) async {
     isPortrait: true,
     documentType: drawing_core.DocumentType.whiteboard, // Infinite canvas
   );
+  
+  // Refresh providers to update folder counts and document lists
+  if (documentId != null) {
+    container.invalidate(foldersProvider);
+    container.invalidate(documentsProvider);
+  }
   
   // Doküman oluşturulduysa direkt editor'e git
   if (documentId != null && context.mounted) {
@@ -223,20 +236,25 @@ void _importPdf(BuildContext context) async {
     );
 
     // Loading dialog kapat
-    if (!context.mounted) return;
-    Navigator.of(context).pop();
+    if (context.mounted) {
+      Navigator.of(context, rootNavigator: true).pop();
+    }
 
     if (!importResult.isSuccess) {
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(importResult.errorMessage ?? 'PDF import başarısız'),
-        ),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(importResult.errorMessage ?? 'PDF import başarısız'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
       return;
     }
 
     // 4. Doküman oluştur
+    if (!context.mounted) return;
     final container = ProviderScope.containerOf(context);
     final controller = container.read(documentsControllerProvider.notifier);
     final folderId = container.read(currentFolderIdProvider);
@@ -251,6 +269,12 @@ void _importPdf(BuildContext context) async {
       pages: pagesJson,
       pageCount: importResult.pages.length,
     );
+
+    // Refresh providers to update folder counts and document lists
+    if (documentId != null) {
+      container.invalidate(foldersProvider);
+      container.invalidate(documentsProvider);
+    }
 
     // 5. Editor'e git
     if (documentId != null && context.mounted) {
@@ -277,10 +301,17 @@ void _importPdf(BuildContext context) async {
       context.push(RouteNames.editorPath(documentId));
     }
   } catch (e) {
+    // Loading dialog'u kapat (eğer açıksa)
     if (context.mounted) {
       Navigator.of(context, rootNavigator: true).pop();
+      
+      // Hata mesajı göster
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Hata: ${e.toString()}')),
+        SnackBar(
+          content: Text('Hata: ${e.toString()}'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
     }
   }
@@ -379,6 +410,12 @@ void _importImage(BuildContext context) async {
       pageCount: 1,
     );
     
+    // Refresh providers to update folder counts and document lists
+    if (documentId != null) {
+      container.invalidate(foldersProvider);
+      container.invalidate(documentsProvider);
+    }
+    
     // 6. Loading kapat
     if (context.mounted) Navigator.pop(context);
     
@@ -396,10 +433,17 @@ void _importImage(BuildContext context) async {
     }
     
   } catch (e) {
+    // Loading dialog'u kapat (eğer açıksa)
     if (context.mounted) {
-      Navigator.pop(context);
+      Navigator.of(context, rootNavigator: true).pop();
+      
+      // Hata mesajı göster
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Hata: ${e.toString()}')),
+        SnackBar(
+          content: Text('Hata: ${e.toString()}'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
       );
     }
   }

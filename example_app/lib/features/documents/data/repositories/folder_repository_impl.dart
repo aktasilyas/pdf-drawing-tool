@@ -5,15 +5,18 @@ import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/domain/entities/folder.dart';
 import 'package:example_app/features/documents/domain/repositories/folder_repository.dart';
 import 'package:example_app/features/documents/data/datasources/folder_local_datasource.dart';
+import 'package:example_app/features/documents/data/datasources/document_local_datasource.dart';
 import 'package:example_app/features/documents/data/models/folder_model.dart';
 
 @Injectable(as: FolderRepository)
 class FolderRepositoryImpl implements FolderRepository {
   final FolderLocalDatasource _localDatasource;
+  final DocumentLocalDatasource _documentDatasource;
   final Uuid _uuid;
 
   FolderRepositoryImpl(
-    this._localDatasource, [
+    this._localDatasource,
+    this._documentDatasource, [
     Uuid? uuid,
   ]) : _uuid = uuid ?? const Uuid();
 
@@ -21,7 +24,13 @@ class FolderRepositoryImpl implements FolderRepository {
   Future<Either<Failure, List<Folder>>> getFolders({String? parentId}) async {
     try {
       final folders = await _localDatasource.getFolders(parentId: parentId);
-      final entities = folders.map((model) => model.toEntity()).toList();
+      final documents = await _documentDatasource.getAllDocuments(); // Get ALL documents
+      
+      // Calculate document count for each folder
+      final entities = folders.map((model) {
+        final docCount = documents.where((doc) => doc.folderId == model.id && !doc.isInTrash).length;
+        return model.copyWith(documentCount: docCount).toEntity();
+      }).toList();
       
       // Sort by name
       entities.sort((a, b) => a.name.compareTo(b.name));
