@@ -1,9 +1,13 @@
 /// Splash screen that checks the auth session.
 library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/core/widgets/index.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -21,7 +25,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
   Future<void> _checkAuthAndNavigate() async {
     // Show splash for 2 seconds
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(AppDurations.splash);
 
     if (!mounted) return;
 
@@ -42,61 +46,49 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF6366F1), // Indigo
+      backgroundColor: AppColors.primary,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Logo
+            // Logo Container
             Container(
               width: 120,
               height: 120,
+              padding: const EdgeInsets.all(AppSpacing.xl),
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
+                color: AppColors.surfaceLight,
+                borderRadius: BorderRadius.circular(AppRadius.bottomSheet),
+                boxShadow: AppShadows.lg,
               ),
               child: const Icon(
                 Icons.edit_note_rounded,
-                size: 64,
-                color: Color(0xFF6366F1),
+                size: AppIconSize.huge + 16,
+                color: AppColors.primary,
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: AppSpacing.xxl),
             // Title
-            const Text(
+            Text(
               'StarNote',
-              style: TextStyle(
-                fontSize: 36,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+              style: AppTypography.displayLarge.copyWith(
+                color: AppColors.onPrimary,
                 letterSpacing: 1.2,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             // Subtitle
             Text(
-              'Notlarınız, Çizimleriniz, Fikirleriniz',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.white.withOpacity(0.8),
+              'Notlarını özgürce yarat',
+              style: AppTypography.bodyLarge.copyWith(
+                color: AppColors.onPrimary.withValues(alpha: 0.8),
               ),
             ),
-            const SizedBox(height: 48),
-            // Loading
-            const SizedBox(
-              width: 32,
-              height: 32,
-              child: CircularProgressIndicator(
-                color: Colors.white,
-                strokeWidth: 3,
-              ),
+            const SizedBox(height: AppSpacing.xxxl),
+            // Loading Indicator
+            const AppLoadingIndicator(
+              size: 32,
+              color: AppColors.onPrimary,
             ),
           ],
         ),

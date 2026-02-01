@@ -176,7 +176,7 @@ example_app/lib/core/
 ## Phase 5-11: Screen Migration
 | Phase | Screen | Status |
 |-------|--------|--------|
-| 5 | Splash | ❌ |
+| 5 | Splash | ✅ |
 | 6 | Auth (Login/Register) | ❌ |
 | 7 | Documents | ❌ |
 | 8 | Settings | ❌ |
