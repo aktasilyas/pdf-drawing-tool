@@ -1,325 +1,354 @@
 # =====================================================
-# PROJECT: StarNote-like Drawing App + pub.dev Library
-# OWNER: İlyas Aktaş
-# TOOLS: Cursor IDE (Implementer) + Claude Opus (Architect)
+# PROJECT: StarNote - Professional Note-Taking App
+# OWNER: İlyas Aktaş (Product Owner)
+# ARCHITECT: Claude Opus (Senior Architect)
+# DEVELOPER: Cursor (Senior Flutter Developer)
 # =====================================================
 
-# -----------------------------------------------------
-# PHASE STATUS (UPDATED: 2025-01-15)
-# -----------------------------------------------------
-- Phase 0: COMPLETE ✅ (Scaffolding)
-- Phase 1: COMPLETE ✅ (UI Skeleton)
-- Phase 2: COMPLETE ✅ (Drawing Core)
-- Phase 3: COMPLETE ✅ (Canvas Integration)
-- Phase 4A: COMPLETE ✅ (Eraser System)
-- Phase 4B: COMPLETE ✅ (Selection System)
-- Phase 4C: COMPLETE ✅ (Shape Tools)
-- Phase 4D: COMPLETE ✅ (Text Tool)
-- Phase 4E: IN PROGRESS 🔄 (Enhancement & Cleanup)
-- Phase 5: NOT STARTED ❌ (Multi-Page & PDF)
+# 🚨 CURRENT PHASE: DESIGN SYSTEM IMPLEMENTATION
+# Status: IN PROGRESS 🔄
+# Start Date: 1 Şubat 2026
 
-Current Branch: feature/phase4-advanced-features
+# =====================================================
+# 📖 PRIORITY DOCUMENTS - READ BEFORE ANY CODE!
+# =====================================================
 
-# -----------------------------------------------------
-# PHASE 4E PRIORITY DOCUMENTS (READ FIRST!)
-# -----------------------------------------------------
-Before writing ANY code, read these documents IN ORDER:
+1. `docs/DESIGN_SYSTEM_MASTER_PLAN.md` - Full specification
+2. This file (`.cursorrules`) - Rules and progress tracker
 
-1. docs/PHASE4E_MASTER_PLAN.md - Overall plan and scope
-2. docs/PHASE4E_CURSOR_INSTRUCTIONS.md - Step-by-step tasks
-3. docs/PHASE4_PERFORMANCE_RULES.md - Performance rules (still applies)
+# =====================================================
+# 🎨 APPROVED COLOR PALETTE (1 Şubat 2026)
+# =====================================================
 
-# -----------------------------------------------------
-# PHASE 4E STRUCTURE
-# -----------------------------------------------------
+PRIMARY:        #5B7CFF (Light Indigo)
+PRIMARY_LIGHT:  #7B96FF (Hover)
+PRIMARY_DARK:   #4A68E0 (Pressed)
+ACCENT:         #FFB547 (Amber - SINIRLI KULLAN!)
 
-## Modules (IN ORDER - DO NOT SKIP)
-```
-4E-1: Pen Types System    (6 steps)  ← CURRENT
-4E-2: Custom Pen Icons    (6 steps)
-4E-3: Eraser Modes        (5 steps)
-4E-4: Color Picker        (6 steps)
-4E-5: Toolbar UX          (5 steps)
-4E-6: Performance Audit   (5 steps)
-4E-7: Code Quality        (4 steps)
-```
+SUCCESS:        #4ADE80
+WARNING:        #FACC15
+ERROR:          #EF4444
 
-# -----------------------------------------------------
-# ⚠️ CRITICAL: DO NOT BREAK EXISTING FUNCTIONALITY
-# -----------------------------------------------------
+LIGHT THEME:
+  Background:     #F5F7FB
+  Surface:        #FFFFFF
+  Text Primary:   #1B1F2A
+  Text Secondary: #6B7280
+  Outline:        #E5E7EB
 
-Before ANY change:
-```bash
-# 1. Run all tests FIRST
-cd packages/drawing_core && flutter test
-cd ../drawing_ui && flutter test
+DARK THEME:
+  Background:     #121212
+  Surface:        #1E1E1E
+  Text Primary:   #F4F4F4
+  Text Secondary: #A0A0A0
+  Outline:        #2C2C2C
 
-# 2. Check analyzer
-melos run analyze
+# =====================================================
+# 📏 DESIGN TOKENS
+# =====================================================
 
-# 3. Verify no regressions after change
-flutter test
-```
+## Spacing (4dp Grid)
+xxs: 2   xs: 4   sm: 8   md: 12   lg: 16   xl: 24   xxl: 32   xxxl: 48
 
-All changes MUST be backward compatible!
+## Border Radius (Standart: 10dp)
+button: 10   card: 12   modal: 16   bottomSheet: 20   textField: 10
 
-# -----------------------------------------------------
-# ARCHITECTURE RULES (ENFORCED)
-# -----------------------------------------------------
+## Touch Target
+MINIMUM: 48x48dp (non-negotiable!)
 
-## Package Boundaries
-```
-drawing_core/
-├── ZERO Flutter imports (except dart:ui for Color if needed)
-├── Pure Dart only
-├── Models, Tools, Commands, History
-└── Export via barrel files ONLY
+# =====================================================
+# 📁 FILE STRUCTURE
+# =====================================================
 
-drawing_ui/
-├── Flutter widgets and painters
-├── Imports drawing_core via package import
-├── Providers (Riverpod)
-└── Export via barrel files ONLY
-```
+example_app/lib/core/
+├── theme/
+│   ├── tokens/
+│   │   ├── app_colors.dart
+│   │   ├── app_spacing.dart
+│   │   ├── app_radius.dart
+│   │   ├── app_typography.dart
+│   │   ├── app_icon_sizes.dart
+│   │   ├── app_shadows.dart
+│   │   ├── app_durations.dart
+│   │   └── index.dart
+│   ├── app_theme.dart
+│   └── index.dart
+│
+├── widgets/
+│   ├── buttons/
+│   │   ├── app_button.dart
+│   │   ├── app_icon_button.dart
+│   │   └── index.dart
+│   ├── inputs/
+│   │   ├── app_text_field.dart
+│   │   ├── app_search_field.dart
+│   │   ├── app_password_field.dart
+│   │   └── index.dart
+│   ├── feedback/
+│   │   ├── app_modal.dart
+│   │   ├── app_confirm_dialog.dart
+│   │   ├── app_action_sheet.dart
+│   │   ├── app_toast.dart
+│   │   ├── app_loading.dart
+│   │   ├── app_empty_state.dart
+│   │   └── index.dart
+│   ├── layout/
+│   │   ├── app_card.dart
+│   │   ├── app_list_tile.dart
+│   │   ├── app_section_header.dart
+│   │   ├── app_divider.dart
+│   │   ├── app_avatar.dart
+│   │   ├── app_badge.dart
+│   │   ├── app_chip.dart
+│   │   └── index.dart
+│   ├── navigation/
+│   │   ├── adaptive_navigation.dart
+│   │   ├── master_detail_layout.dart
+│   │   ├── responsive_builder.dart
+│   │   └── index.dart
+│   └── index.dart
+│
+└── utils/
+    ├── responsive.dart
+    └── validators.dart
 
-## Import Rules
+# =====================================================
+# 🔄 PHASE PROGRESS TRACKER
+# =====================================================
+
+## Phase 0: Design Tokens ✅ COMPLETED
+| # | Task | File | Status |
+|---|------|------|--------|
+| 1 | Colors | app_colors.dart | ✅ |
+| 2 | Spacing | app_spacing.dart | ✅ |
+| 3 | Radius | app_radius.dart | ✅ |
+| 4 | Typography | app_typography.dart | ✅ |
+| 5 | Icon Sizes | app_icon_sizes.dart | ✅ |
+| 6 | Shadows | app_shadows.dart | ✅ |
+| 7 | Durations | app_durations.dart | ✅ |
+| 8 | Tokens barrel | tokens/index.dart | ✅ |
+| 9 | Theme | app_theme.dart | ✅ |
+| 10 | Theme barrel | theme/index.dart | ✅ |
+
+## Phase 1: Core Components
+| # | Task | File | Status |
+|---|------|------|--------|
+| 1 | Button | app_button.dart | ❌ |
+| 2 | Icon Button | app_icon_button.dart | ❌ |
+| 3 | Buttons barrel | buttons/index.dart | ❌ |
+| 4 | Text Field | app_text_field.dart | ❌ |
+| 5 | Search Field | app_search_field.dart | ❌ |
+| 6 | Password Field | app_password_field.dart | ❌ |
+| 7 | Inputs barrel | inputs/index.dart | ❌ |
+
+## Phase 2: Feedback Components
+| # | Task | File | Status |
+|---|------|------|--------|
+| 1 | Modal | app_modal.dart | ❌ |
+| 2 | Confirm Dialog | app_confirm_dialog.dart | ❌ |
+| 3 | Action Sheet | app_action_sheet.dart | ❌ |
+| 4 | Toast | app_toast.dart | ❌ |
+| 5 | Loading | app_loading.dart | ❌ |
+| 6 | Empty State | app_empty_state.dart | ❌ |
+| 7 | Feedback barrel | feedback/index.dart | ❌ |
+
+## Phase 3: Layout Components
+| # | Task | File | Status |
+|---|------|------|--------|
+| 1 | Card | app_card.dart | ❌ |
+| 2 | List Tile | app_list_tile.dart | ❌ |
+| 3 | Section Header | app_section_header.dart | ❌ |
+| 4 | Divider | app_divider.dart | ❌ |
+| 5 | Avatar | app_avatar.dart | ❌ |
+| 6 | Badge | app_badge.dart | ❌ |
+| 7 | Chip | app_chip.dart | ❌ |
+| 8 | Layout barrel | layout/index.dart | ❌ |
+
+## Phase 4: Responsive System
+| # | Task | File | Status |
+|---|------|------|--------|
+| 1 | Responsive Utils | responsive.dart | ❌ |
+| 2 | Responsive Builder | responsive_builder.dart | ❌ |
+| 3 | Adaptive Navigation | adaptive_navigation.dart | ❌ |
+| 4 | Master Detail | master_detail_layout.dart | ❌ |
+| 5 | Navigation barrel | navigation/index.dart | ❌ |
+
+## Phase 5-11: Screen Migration
+| Phase | Screen | Status |
+|-------|--------|--------|
+| 5 | Splash | ❌ |
+| 6 | Auth (Login/Register) | ❌ |
+| 7 | Documents | ❌ |
+| 8 | Settings | ❌ |
+| 9 | Template Selection | ❌ |
+| 10 | Drawing/Editor | ❌ |
+| 11 | Polish & QA | ❌ |
+
+# =====================================================
+# ⚠️ CRITICAL RULES - DO NOT VIOLATE!
+# =====================================================
+
+## 1. File Size Limit
+MAXIMUM: 300 lines per file
+If > 300 lines: Split into logical parts
+
+## 2. Import Rules
 ```dart
+// ✅ CORRECT - Use barrel exports
+import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/core/widgets/index.dart';
+
+// ❌ WRONG - Direct file imports from src
+import 'package:example_app/core/theme/tokens/app_colors.dart';
+```
+
+## 3. Hardcoded Colors FORBIDDEN
+```dart
+// ❌ WRONG
+color: Color(0xFF5B7CFF)
+color: Colors.red
+
 // ✅ CORRECT
-import 'package:drawing_core/drawing_core.dart';
-import 'package:drawing_ui/drawing_ui.dart';
-
-// ❌ WRONG - No relative imports from other packages
-import '../../../drawing_core/lib/src/models/stroke.dart';
-
-// ❌ WRONG - No direct src imports
-import 'package:drawing_core/src/models/stroke.dart';
+color: AppColors.primary
+color: Theme.of(context).colorScheme.primary
 ```
 
-## New File Checklist
-Every new file MUST:
-1. Have dartdoc comment at top
-2. Be exported in barrel file
-3. Have corresponding test file
-4. Pass analyzer with 0 warnings
-
-# -----------------------------------------------------
-# PERFORMANCE RULES (NON-NEGOTIABLE)
-# -----------------------------------------------------
-
-## Targets
-- Frame time: <16ms (60 FPS)
-- Hit test: <5ms
-- Input latency: <16ms
-
-## Required Patterns
+## 4. Hardcoded Spacing FORBIDDEN
 ```dart
-// ✅ Always use bounding box pre-filter
-if (!stroke.boundingBox.contains(point)) continue;
+// ❌ WRONG
+padding: EdgeInsets.all(16)
+SizedBox(height: 8)
 
-// ✅ Cache paths
-Path? _cachedPath;
-Path get path => _cachedPath ??= _buildPath();
-
-// ✅ Use RepaintBoundary for layers
-RepaintBoundary(
-  child: CustomPaint(painter: StrokePainter()),
-)
-
-// ✅ Batch commands per gesture
-// One command for entire gesture, NOT per point
+// ✅ CORRECT
+padding: EdgeInsets.all(AppSpacing.lg)
+SizedBox(height: AppSpacing.sm)
 ```
 
-## Forbidden Patterns
+## 5. Touch Target Minimum 48dp
 ```dart
-// ❌ Never iterate all points without bounds check
-for (final point in allPoints) { ... }
+// ❌ WRONG
+SizedBox(width: 32, height: 32)
 
-// ❌ Never rebuild path on every paint
-Path _buildPath() { ... } // Called in paint()
-
-// ❌ Never use setState for drawing state
-setState(() { _strokes.add(stroke); }); // WRONG
+// ✅ CORRECT
+SizedBox(width: 48, height: 48)
 ```
 
-# -----------------------------------------------------
-# PHASE 4E SPECIFIC RULES
-# -----------------------------------------------------
+# =====================================================
+# 🧩 COMPONENT SPECIFICATIONS
+# =====================================================
 
-## Pen Types (4E-1)
-- Add new properties to StrokeStyle with DEFAULT values
-- Existing code must work without changes
-- New PenType enum maps to StrokeStyle factories
+## AppButton
+Variants: primary, secondary, outline, text, destructive
+Sizes: small (36h), medium (44h), large (52h)
+Features: loading state, icons, isExpanded, disabled (50% opacity)
 
-## Custom Icons (4E-2)
-- All pen icons drawn with Canvas (CustomPainter)
-- Consistent size: 48x48 or 56x56
-- Must look premium, soft, and professional
-- No blurry edges, crisp rendering
+## AppIconButton
+Variants: filled, tonal, outline, ghost
+Sizes: small (40), medium (44), large (52)
+Features: tooltip (required!), badge, selected state
 
-## Eraser Modes (4E-3)
-- PixelEraser: splits strokes at intersection
-- LassoEraser: select area then delete
-- Show cursor indicator on canvas
+## AppTextField
+Features: label, hint, error, prefix icon, suffix widget, validation
 
-## Color Picker (4E-4)
-- HSV wheel for custom colors
-- Preset palettes (Basic, Pastel, Neon, Natural, Grays)
-- Recent colors (persist in preferences)
-- Hex input support
+## AppModal (Responsive)
+Phone (< 600px): Bottom sheet, drag handle, rounded top 20dp
+Tablet (≥ 600px): Center dialog, max-width 560px, rounded 16dp
 
-## Toolbar (4E-5)
-- Settings panel for customization
-- Drag to reorder tools
-- Show/hide individual tools
-- Persist configuration
+## AppToast
+Types: success (#4ADE80), error (#EF4444), warning (#FACC15), info (#5B7CFF)
+Features: auto-dismiss 4s, swipe to dismiss, action button
 
-# -----------------------------------------------------
-# FILE SIZE LIMITS
-# -----------------------------------------------------
+# =====================================================
+# 📱 RESPONSIVE BREAKPOINTS
+# =====================================================
 
-- Maximum 300 lines per file
-- If file > 300 lines, split into logical parts
-- Use part/part of ONLY if necessary, prefer separate files
+compact:  0 - 599px    (Phone)
+medium:   600 - 839px  (Phone landscape, small tablet)
+expanded: 840px+       (Tablet)
 
-# -----------------------------------------------------
-# TEST REQUIREMENTS
-# -----------------------------------------------------
+Phone:  BottomNavigationBar
+Tablet: NavigationRail
 
-Every feature needs:
-1. Unit tests for logic
-2. Widget tests for UI components
-3. Golden tests for painters (if visual)
+# =====================================================
+# 🧪 TEST REQUIREMENTS
+# =====================================================
 
-Minimum coverage: 80%
+Every component MUST have:
+1. Widget test (renders correctly)
+2. Interaction test (taps, focus)
+3. State test (loading, disabled, error)
+4. Theme test (light & dark)
 
-# -----------------------------------------------------
-# COMMIT WORKFLOW
-# -----------------------------------------------------
+# =====================================================
+# ✅ COMMIT WORKFLOW
+# =====================================================
 
 After EVERY task:
 
-```
 📁 Files Created/Modified:
-- path/to/file.dart (created/modified)
+- path/to/file.dart
 
 🧪 Test Results:
 - flutter analyze: ✅/❌
-- flutter test: ✅ X tests passed
+- flutter test: ✅ X passed
 
-⚡ Performance Check (if applicable):
-- Bounds check used: ✅/❌
-- Path cached: ✅/❌
+📏 Quality Check:
+- File < 300 lines: ✅/❌
+- No hardcoded colors: ✅/❌
+- No hardcoded spacing: ✅/❌
+- Touch targets ≥ 48dp: ✅/❌
 
 📝 Suggested Commit:
-feat(core/ui): description
-
-Ready to commit? (y/n)
-```
+feat(theme): add design tokens
 
 ## Commit Format
-```
-feat(core): add PenType enum with 9 pen types
-feat(ui): add PencilIconPainter
-fix(core): fix StrokeStyle JSON serialization
-refactor(ui): split DrawingCanvas into smaller files
-test(core): add PixelEraserTool tests
-docs: update Phase 4E checklist
-```
+feat(theme): add design tokens (colors, spacing)
+feat(widgets): add AppButton with 5 variants
+fix(widgets): fix AppTextField focus state
+test(widgets): add AppButton tests
 
-# -----------------------------------------------------
-# PHASE 4E PROGRESS TRACKER
-# -----------------------------------------------------
-
-## 4E-1: Pen Types System
-| # | Step | Status |
-|---|------|--------|
-| 1 | StrokeStyle extension | ❌ |
-| 2 | PenType enum | ❌ |
-| 3 | ToolType update | ❌ |
-| 4 | Renderer update | ❌ |
-| 5 | Provider update | ❌ |
-| 6 | Test & Polish | ❌ |
-
-## 4E-2: Custom Pen Icons
-| # | Step | Status |
-|---|------|--------|
-| 1 | PenIconPainter base | ❌ |
-| 2 | 9 pen painters | ❌ |
-| 3 | PenIconWidget | ❌ |
-| 4 | PenBox integration | ❌ |
-| 5 | Toolbar integration | ❌ |
-| 6 | Test & Polish | ❌ |
-
-## 4E-3: Eraser Modes
-| # | Step | Status |
-|---|------|--------|
-| 1 | PixelEraser logic | ❌ |
-| 2 | LassoEraser logic | ❌ |
-| 3 | Eraser cursor | ❌ |
-| 4 | Canvas integration | ❌ |
-| 5 | Test & Polish | ❌ |
-
-## 4E-4: Color Picker
-| # | Step | Status |
-|---|------|--------|
-| 1 | HSV wheel | ❌ |
-| 2 | Sliders | ❌ |
-| 3 | Hex input | ❌ |
-| 4 | Preset palettes | ❌ |
-| 5 | Recent colors | ❌ |
-| 6 | Integration | ❌ |
-
-## 4E-5: Toolbar UX
-| # | Step | Status |
-|---|------|--------|
-| 1 | Settings panel | ❌ |
-| 2 | Reorder logic | ❌ |
-| 3 | Show/hide | ❌ |
-| 4 | Quick access | ❌ |
-| 5 | Persist | ❌ |
-
-## 4E-6: Performance Audit
-| # | Step | Status |
-|---|------|--------|
-| 1 | Path cache audit | ❌ |
-| 2 | Repaint audit | ❌ |
-| 3 | Memory profiling | ❌ |
-| 4 | Large doc test | ❌ |
-| 5 | Optimizations | ❌ |
-
-## 4E-7: Code Quality
-| # | Step | Status |
-|---|------|--------|
-| 1 | File size audit | ❌ |
-| 2 | DRY refactor | ❌ |
-| 3 | Documentation | ❌ |
-| 4 | Test coverage | ❌ |
-
-# -----------------------------------------------------
-# QUICK COMMANDS
-# -----------------------------------------------------
+# =====================================================
+# 🚀 QUICK COMMANDS
+# =====================================================
 
 ```bash
-# Run all tests
-melos run test
-
-# Run analyzer
-melos run analyze
-
-# Format code
-melos run format
-
-# Generate coverage
-melos run coverage
+cd example_app && flutter test
+flutter analyze
+dart format lib/
+flutter run
 ```
 
-# -----------------------------------------------------
-# REMINDER: Quality > Speed
-# -----------------------------------------------------
+# =====================================================
+# 🎯 CURRENT TASK
+# =====================================================
 
-- Read the spec document BEFORE coding
-- Write tests BEFORE or WITH implementation
-- Check performance AFTER each feature
-- Update checklist AFTER each commit
+PHASE 0: ✅ COMPLETED (1 Şubat 2026)
 
-*Phase 4E will make StarNote professional and polished! 🚀*
+PHASE 1, STEP 1: Create AppButton
+
+Location: example_app/lib/core/widgets/buttons/app_button.dart
+
+Requirements:
+1. Create folder: lib/core/widgets/buttons/
+2. Create app_button.dart with 5 variants (primary, secondary, outline, text, destructive)
+3. 3 sizes: small (36h), medium (44h), large (52h)
+4. Features: loading state, icons, isExpanded, disabled (50% opacity)
+5. Use design tokens (AppColors, AppSpacing, AppRadius, AppTypography)
+6. Minimum touch target: 48dp
+
+After completion:
+- Update this file: Phase 1 Step 1 ❌ → ✅
+- Move to Step 2: app_icon_button.dart
+
+# =====================================================
+# 💡 REMINDERS
+# =====================================================
+
+- Quality > Speed
+- Read DESIGN_SYSTEM_MASTER_PLAN.md for details
+- Ask Claude if unclear
+- Test both phone AND tablet sizes
+- Test both light AND dark themes
+- Every component should feel "premium"
+
+*Let's build a GoodNotes-quality app! 🚀*
