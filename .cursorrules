@@ -177,7 +177,7 @@ example_app/lib/core/
 | Phase | Screen | Status |
 |-------|--------|--------|
 | 5 | Splash | ✅ |
-| 6 | Auth (Login/Register) | ❌ |
+| 6 | Auth (Login/Register) | ✅ |
 | 7 | Documents | ❌ |
 | 8 | Settings | ❌ |
 | 9 | Template Selection | ❌ |

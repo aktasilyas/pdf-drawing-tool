@@ -1,10 +1,19 @@
-/// Modern login screen with Supabase auth.
-import 'package:example_app/core/core.dart';
-import 'package:example_app/features/auth/presentation/providers/auth_provider.dart';
-import 'package:example_app/features/auth/presentation/widgets/auth_layout.dart';
+/// Modern login screen with responsive layout and design system.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+import 'package:example_app/core/routing/route_names.dart';
+import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/core/utils/responsive.dart';
+import 'package:example_app/core/utils/validators.dart';
+import 'package:example_app/core/widgets/index.dart';
+import 'package:example_app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:example_app/features/auth/presentation/widgets/auth_branding_panel.dart';
+import 'package:example_app/features/auth/presentation/widgets/auth_phone_header.dart';
+import 'package:example_app/features/auth/presentation/widgets/google_sign_in_button.dart';
 
 const Key loginEmailFieldKey = Key('login_email_field');
 const Key loginPasswordFieldKey = Key('login_password_field');
@@ -31,132 +40,197 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return AuthLayout(
-      title: 'Hoş Geldiniz',
-      subtitle: 'Hesabınıza giriş yapın ve notlarınıza erişin',
-      child: Form(
-        key: _formKey,
+    final isTablet = Responsive.isTablet(context);
+
+    return Scaffold(
+      backgroundColor:
+          isTablet ? AppColors.backgroundLight : AppColors.surfaceLight,
+      body: isTablet ? _buildTabletLayout() : _buildPhoneLayout(),
+    );
+  }
+
+  Widget _buildTabletLayout() {
+    return Row(
+      children: [
+        // Left: Branding Panel (45%)
+        const Expanded(
+          flex: 45,
+          child: AuthBrandingPanel(),
+        ),
+        // Right: Form Panel (55%)
+        Expanded(
+          flex: 55,
+          child: Container(
+            color: AppColors.surfaceLight,
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(AppSpacing.xxxl),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 400),
+                  child: _buildForm(),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPhoneLayout() {
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Email field
-            ModernTextField(
-              fieldKey: loginEmailFieldKey,
-              controller: _emailController,
-              label: 'E-posta',
-              hint: 'ornek@email.com',
-              icon: Icons.email_outlined,
-              keyboardType: TextInputType.emailAddress,
-              validator: Validators.email,
-            ),
-            const SizedBox(height: 16),
-
-            // Password field
-            ModernTextField(
-              fieldKey: loginPasswordFieldKey,
-              controller: _passwordController,
-              label: 'Şifre',
-              hint: '••••••••',
-              icon: Icons.lock_outline,
-              obscureText: true,
-              validator: Validators.password,
-            ),
-            const SizedBox(height: 8),
-
-            // Forgot password
-            Align(
-              alignment: Alignment.centerRight,
-              child: TextButton(
-                onPressed: _isLoading ? null : _showForgotPasswordDialog,
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                ),
-                child: const Text(
-                  'Şifremi Unuttum',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // Login button
-            ModernButton(
-              onPressed: _handleLogin,
-              text: 'Giriş Yap',
-              isLoading: _isLoading,
-            ),
-            const SizedBox(height: 12),
-
-            // Dev skip button
-            ModernButton(
-              onPressed: _skipLogin,
-              text: 'Atla (Geliştirme)',
-              isOutlined: true,
-            ),
-            const SizedBox(height: 24),
-
-            // Divider
-            Row(
-              children: [
-                Expanded(child: Divider(color: Colors.grey[300])),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Text(
-                    'veya',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 13,
-                    ),
-                  ),
-                ),
-                Expanded(child: Divider(color: Colors.grey[300])),
-              ],
-            ),
-            const SizedBox(height: 24),
-
-            // Social login buttons
-            _SocialLoginButton(
-              icon: Icons.g_mobiledata,
-              label: 'Google ile Giriş Yap',
-              onPressed: _isLoading ? null : _handleGoogleLogin,
-            ),
-            const SizedBox(height: 32),
-
-            // Sign up link
-            Center(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    'Hesabınız yok mu? ',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 13,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: _isLoading ? null : _goToRegister,
-                    style: TextButton.styleFrom(
-                      padding: EdgeInsets.zero,
-                      minimumSize: const Size(0, 0),
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    child: const Text(
-                      'Kayıt Ol',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            // Top Logo
+            const AuthPhoneHeader(),
+            const SizedBox(height: AppSpacing.xxl),
+            // Form
+            _buildForm(),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildForm() {
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Title
+          Text(
+            'Giriş Yap',
+            style: AppTypography.headlineLarge.copyWith(
+              color: AppColors.textPrimaryLight,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            'Hesabınıza giriş yapın',
+            style: AppTypography.bodyMedium.copyWith(
+              color: AppColors.textSecondaryLight,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xl),
+
+          // Email Field
+          AppTextField(
+            controller: _emailController,
+            label: 'E-posta',
+            hint: 'ornek@email.com',
+            prefixIcon: Icons.email_outlined,
+            keyboardType: TextInputType.emailAddress,
+            validator: Validators.email,
+            enabled: !_isLoading,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+
+          // Password Field
+          AppPasswordField(
+            controller: _passwordController,
+            label: 'Şifre',
+            hint: '••••••••',
+            validator: Validators.password,
+          ),
+          const SizedBox(height: AppSpacing.xs),
+
+          // Forgot Password Link
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: _isLoading ? null : _showForgotPasswordDialog,
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  vertical: AppSpacing.xs,
+                  horizontal: AppSpacing.sm,
+                ),
+              ),
+              child: Text(
+                'Şifremi Unuttum',
+                style: AppTypography.labelMedium.copyWith(
+                  color: AppColors.primary,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+
+          // Login Button
+          AppButton(
+            label: 'Giriş Yap',
+            onPressed: _isLoading ? null : _handleLogin,
+            isLoading: _isLoading,
+            isExpanded: true,
+          ),
+          const SizedBox(height: AppSpacing.md),
+
+          // Dev Skip Button (only in dev mode)
+          if (const bool.fromEnvironment('dart.vm.product') == false)
+            AppButton(
+              label: 'Atla (Geliştirme)',
+              variant: AppButtonVariant.outline,
+              onPressed: _skipLogin,
+              isExpanded: true,
+            ),
+          const SizedBox(height: AppSpacing.xl),
+
+          // Divider with "veya"
+          Row(
+            children: [
+              const Expanded(child: AppDivider()),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                child: Text(
+                  'veya',
+                  style: AppTypography.labelMedium.copyWith(
+                    color: AppColors.textSecondaryLight,
+                  ),
+                ),
+              ),
+              const Expanded(child: AppDivider()),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xl),
+
+          // Google Sign-In Button
+          GoogleSignInButton(
+            onPressed: _isLoading ? null : _handleGoogleLogin,
+          ),
+          const SizedBox(height: AppSpacing.xxl),
+
+          // Sign Up Link
+          Center(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Hesabın yok mu? ',
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: AppColors.textSecondaryLight,
+                  ),
+                ),
+                TextButton(
+                  onPressed: _isLoading ? null : _goToRegister,
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: Text(
+                    'Kayıt Ol',
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -177,7 +251,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     if (error != null) {
       if (mounted) {
-        _showErrorSnackBar(error);
+        AppToast.error(context, error);
       }
     } else {
       if (mounted) {
@@ -189,16 +263,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> _handleGoogleLogin() async {
     setState(() => _isLoading = true);
 
-    final error = await ref.read(authControllerProvider.notifier).signInWithGoogle();
+    final error =
+        await ref.read(authControllerProvider.notifier).signInWithGoogle();
 
     setState(() => _isLoading = false);
 
     if (error != null) {
       if (mounted) {
-        _showErrorSnackBar(error);
+        AppToast.error(context, error);
       }
     } else {
-      // Success - navigate to documents
       if (mounted) {
         context.go(RouteNames.documents);
       }
@@ -214,125 +288,66 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     context.go(RouteNames.documents);
   }
 
-  void _showErrorSnackBar(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.error_outline, color: Colors.white),
-            const SizedBox(width: 12),
-            Expanded(child: Text(message)),
-          ],
-        ),
-        backgroundColor: Colors.red[700],
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-    );
-  }
+  Future<void> _showForgotPasswordDialog() async {
+    final emailController = TextEditingController(text: _emailController.text);
 
-  void _showForgotPasswordDialog() {
-    final emailController = TextEditingController();
-
-    showDialog(
+    await AppModal.show<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Şifre Sıfırlama'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'E-posta adresinize şifre sıfırlama bağlantısı göndereceğiz.',
-              style: TextStyle(fontSize: 14),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: emailController,
-              decoration: const InputDecoration(
-                labelText: 'E-posta',
-                prefixIcon: Icon(Icons.email_outlined),
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.emailAddress,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('İptal'),
-          ),
-          FilledButton(
-            onPressed: () async {
-              final email = emailController.text.trim();
-              if (email.isEmpty || !email.contains('@')) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Geçerli bir e-posta girin')),
-                );
-                return;
-              }
-
-              final error = await ref
-                  .read(authControllerProvider.notifier)
-                  .resetPassword(email);
-
-              if (mounted) {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      error ?? 'Şifre sıfırlama e-postası gönderildi',
-                    ),
-                    backgroundColor: error != null ? Colors.red : Colors.green,
-                  ),
-                );
-              }
-            },
-            child: const Text('Gönder'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SocialLoginButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback? onPressed;
-
-  const _SocialLoginButton({
-    required this.icon,
-    required this.label,
-    this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return OutlinedButton(
-      onPressed: onPressed,
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
-        side: BorderSide(color: Colors.grey[300]!),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      title: 'Şifre Sıfırlama',
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 20, color: Colors.grey[700]),
-          const SizedBox(width: 10),
           Text(
-            label,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: Color(0xFF1A1A1A),
+            'E-posta adresinize şifre sıfırlama bağlantısı göndereceğiz.',
+            style: AppTypography.bodyMedium.copyWith(
+              color: AppColors.textSecondaryLight,
             ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          AppTextField(
+            controller: emailController,
+            label: 'E-posta',
+            hint: 'ornek@email.com',
+            prefixIcon: Icons.email_outlined,
+            keyboardType: TextInputType.emailAddress,
+            validator: Validators.email,
           ),
         ],
       ),
+      actions: [
+        AppButton(
+          label: 'İptal',
+          variant: AppButtonVariant.text,
+          onPressed: () => Navigator.pop(context, false),
+        ),
+        AppButton(
+          label: 'Gönder',
+          onPressed: () async {
+            final email = emailController.text.trim();
+            if (email.isEmpty || !email.contains('@')) {
+              AppToast.error(context, 'Geçerli bir e-posta girin');
+              return;
+            }
+
+            final error = await ref
+                .read(authControllerProvider.notifier)
+                .resetPassword(email);
+
+            if (mounted) {
+              Navigator.pop(context, true);
+              if (error != null) {
+                AppToast.error(context, error);
+              } else {
+                AppToast.success(
+                    context, 'Şifre sıfırlama e-postası gönderildi');
+              }
+            }
+          },
+        ),
+      ],
     );
+
+    emailController.dispose();
   }
 }
