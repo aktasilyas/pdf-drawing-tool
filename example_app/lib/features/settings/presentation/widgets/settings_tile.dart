@@ -1,5 +1,11 @@
+/// StarNote Settings Tile - Design system list tile for settings
+library;
+
 import 'package:flutter/material.dart';
 
+import 'package:example_app/core/theme/index.dart';
+
+/// Settings list tile widget
 class SettingsTile extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -22,33 +28,48 @@ class SettingsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    
-    return ListTile(
-      leading: Icon(
-        icon,
-        color: enabled ? colorScheme.onSurface : colorScheme.outline,
-      ),
-      title: Text(
-        title,
-        style: TextStyle(
-          color: enabled ? colorScheme.onSurface : colorScheme.outline,
+    final textColor = enabled ? AppColors.textPrimaryLight : AppColors.textTertiaryLight;
+    final subtitleColor = enabled ? AppColors.textSecondaryLight : AppColors.textTertiaryLight;
+    final iconColor = enabled ? AppColors.textSecondaryLight : AppColors.textTertiaryLight;
+
+    return InkWell(
+      onTap: enabled ? onTap : null,
+      child: Container(
+        constraints: const BoxConstraints(minHeight: AppSpacing.minTouchTarget),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.md,
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: AppIconSize.md, color: iconColor),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    title,
+                    style: AppTypography.titleMedium.copyWith(color: textColor),
+                  ),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: AppSpacing.xxs),
+                    Text(
+                      subtitle!,
+                      style: AppTypography.caption.copyWith(color: subtitleColor),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            if (trailing != null)
+              trailing!
+            else if (showArrow && onTap != null)
+              const Icon(Icons.chevron_right, color: AppColors.textTertiaryLight),
+          ],
         ),
       ),
-      subtitle: subtitle != null
-          ? Text(
-              subtitle!,
-              style: TextStyle(
-                color: enabled ? colorScheme.onSurfaceVariant : colorScheme.outline,
-                fontSize: 13,
-              ),
-            )
-          : null,
-      trailing: trailing ?? (showArrow && onTap != null
-          ? Icon(Icons.chevron_right, color: colorScheme.outline)
-          : null),
-      onTap: enabled ? onTap : null,
-      enabled: enabled,
     );
   }
 }

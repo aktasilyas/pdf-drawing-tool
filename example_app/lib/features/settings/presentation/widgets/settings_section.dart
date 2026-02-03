@@ -1,5 +1,12 @@
+/// StarNote Settings Section - Design system section wrapper
+library;
+
 import 'package:flutter/material.dart';
 
+import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/core/widgets/index.dart';
+
+/// Settings section with header and card wrapper
 class SettingsSection extends StatelessWidget {
   final String title;
   final List<Widget> children;
@@ -15,19 +22,42 @@ class SettingsSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        AppSectionHeader(
+          title: title,
+          padding: const EdgeInsets.only(
+            left: AppSpacing.lg,
+            right: AppSpacing.lg,
+            bottom: AppSpacing.sm,
+          ),
+        ),
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          child: Text(
-            title,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Theme.of(context).primaryColor,
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          child: AppCard(
+            variant: AppCardVariant.filled,
+            padding: EdgeInsets.zero,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: _buildChildren(),
             ),
           ),
         ),
-        ...children,
       ],
     );
+  }
+
+  List<Widget> _buildChildren() {
+    final result = <Widget>[];
+    for (int i = 0; i < children.length; i++) {
+      result.add(children[i]);
+      if (i < children.length - 1) {
+        result.add(const Divider(
+          height: 1,
+          thickness: 1,
+          color: AppColors.outlineLight,
+          indent: AppSpacing.lg,
+        ));
+      }
+    }
+    return result;
   }
 }

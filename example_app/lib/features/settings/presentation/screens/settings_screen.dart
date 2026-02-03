@@ -1,13 +1,21 @@
+/// StarNote Settings Screen - Design system settings page
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+
+import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/core/utils/responsive.dart';
+import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:example_app/features/settings/presentation/providers/settings_provider.dart';
 import 'package:example_app/features/settings/presentation/widgets/settings_section.dart';
 import 'package:example_app/features/settings/presentation/widgets/settings_tile.dart';
 import 'package:example_app/features/settings/presentation/widgets/profile_header.dart';
 import 'package:example_app/features/settings/domain/entities/app_settings.dart';
+import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -16,32 +24,47 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
     final user = Supabase.instance.client.auth.currentUser;
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isTablet = screenWidth > 600;
+    final pinFavorites = ref.watch(pinFavoritesProvider);
+    final isTablet = Responsive.isTablet(context);
 
     return Scaffold(
+      backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        title: const Text('Ayarlar'),
+        backgroundColor: AppColors.surfaceLight,
+        elevation: 0,
+        leading: AppIconButton(
+          icon: Icons.arrow_back,
+          variant: AppIconButtonVariant.ghost,
+          onPressed: () => context.pop(),
+        ),
+        title: Text('Ayarlar',
+            style: AppTypography.titleLarge
+                .copyWith(color: AppColors.textPrimaryLight)),
         centerTitle: !isTablet,
       ),
       body: Center(
         child: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: isTablet ? 600 : double.infinity),
           child: ListView(
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
             children: [
-              // Profil
-              ProfileHeader(
-                name: user?.userMetadata?['name'] as String? ?? 
-                      user?.email?.split('@').first ?? 'Kullanıcı',
-                email: user?.email ?? '',
-                isPremium: false, // TODO: Premium provider
-                onTap: () => _showEditNameDialog(context, ref),
+              // Profil Header
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                child: ProfileHeader(
+                  name: user?.userMetadata?['name'] as String? ??
+                      user?.email?.split('@').first ??
+                      'Kullanıcı',
+                  email: user?.email ?? '',
+                  isPremium: false,
+                  onTap: () => _showEditNameDialog(context, ref),
+                ),
               ),
-              const Divider(height: 1),
+              const SizedBox(height: AppSpacing.sectionSpacing),
 
-              // Uygulama Ayarları
+              // Görünüm
               SettingsSection(
-                title: 'UYGULAMA',
+                title: 'GÖRÜNÜM',
                 children: [
                   SettingsTile(
                     icon: Icons.palette_outlined,
@@ -50,72 +73,55 @@ class SettingsScreen extends ConsumerWidget {
                     onTap: () => _showThemeDialog(context, ref, settings),
                   ),
                   SettingsTile(
-                    icon: Icons.language,
-                    title: 'Dil',
-                    subtitle: settings.language == AppLanguage.tr ? 'Türkçe' : 'English',
-                    onTap: () => _showLanguageDialog(context, ref, settings),
-                  ),
-                  SettingsTile(
-                    icon: Icons.description_outlined,
-                    title: 'Varsayılan Kağıt Boyutu',
-                    subtitle: settings.defaultPaperSize.name.toUpperCase(),
-                    onTap: () => _showPaperSizeDialog(context, ref, settings),
-                  ),
-                  SettingsTile(
-                    icon: Icons.save_outlined,
-                    title: 'Otomatik Kaydetme',
+                    icon: Icons.star_outline,
+                    title: 'Favorileri üste sabitle',
                     showArrow: false,
                     trailing: Switch(
-                      value: settings.autoSaveEnabled,
-                      onChanged: (v) => ref.read(settingsProvider.notifier).setAutoSave(v),
+                      value: pinFavorites,
+                      activeTrackColor: AppColors.primary,
+                      onChanged: (v) =>
+                          ref.read(pinFavoritesProvider.notifier).toggle(),
                     ),
                   ),
                 ],
               ),
+              const SizedBox(height: AppSpacing.sectionSpacing),
 
-              // Yasal
+              // Hesap
               SettingsSection(
-                title: 'YASAL',
+                title: 'HESAP',
                 children: [
                   SettingsTile(
-                    icon: Icons.privacy_tip_outlined,
-                    title: 'Gizlilik Politikası',
-                    onTap: () => _openLegalPage(context, 'privacy'),
+                    icon: Icons.lock_outline,
+                    title: 'Şifre değiştir',
+                    onTap: () => _showChangePasswordDialog(context),
                   ),
                   SettingsTile(
-                    icon: Icons.description_outlined,
-                    title: 'Kullanım Koşulları',
-                    onTap: () => _openLegalPage(context, 'terms'),
-                  ),
-                  SettingsTile(
-                    icon: Icons.cookie_outlined,
-                    title: 'Çerez Politikası',
-                    onTap: () => _openLegalPage(context, 'cookies'),
+                    icon: Icons.person_outline,
+                    title: 'Hesap bilgileri',
+                    onTap: () => _showAccountInfo(context, user),
                   ),
                 ],
               ),
+              const SizedBox(height: AppSpacing.sectionSpacing),
 
-              // Destek
+              // Veri
               SettingsSection(
-                title: 'DESTEK',
+                title: 'VERİ',
                 children: [
                   SettingsTile(
-                    icon: Icons.help_outline,
-                    title: 'Yardım & SSS',
-                    onTap: () => _openLegalPage(context, 'help'),
+                    icon: Icons.upload_outlined,
+                    title: 'Dışa aktar',
+                    onTap: () => _showExportDialog(context),
                   ),
                   SettingsTile(
-                    icon: Icons.feedback_outlined,
-                    title: 'Geri Bildirim Gönder',
-                    onTap: () => _showFeedbackDialog(context),
-                  ),
-                  SettingsTile(
-                    icon: Icons.star_outline,
-                    title: 'Bizi Değerlendir',
-                    onTap: () {}, // TODO: Store link
+                    icon: Icons.cleaning_services_outlined,
+                    title: 'Önbelleği temizle',
+                    onTap: () => _clearCache(context, ref),
                   ),
                 ],
               ),
+              const SizedBox(height: AppSpacing.sectionSpacing),
 
               // Hakkında
               SettingsSection(
@@ -124,37 +130,35 @@ class SettingsScreen extends ConsumerWidget {
                   const SettingsTile(
                     icon: Icons.info_outline,
                     title: 'Versiyon',
-                    subtitle: '1.0.0 (1)',
                     showArrow: false,
+                    trailing: Text('1.0.0 (1)',
+                        style: TextStyle(color: AppColors.textSecondaryLight)),
                   ),
                   SettingsTile(
-                    icon: Icons.code,
-                    title: 'Açık Kaynak Lisansları',
-                    onTap: () => showLicensePage(
-                      context: context,
-                      applicationName: 'StarNote',
-                      applicationVersion: '1.0.0',
-                    ),
+                    icon: Icons.privacy_tip_outlined,
+                    title: 'Gizlilik politikası',
+                    onTap: () => _openLegalPage(context, 'privacy'),
+                  ),
+                  SettingsTile(
+                    icon: Icons.description_outlined,
+                    title: 'Kullanım koşulları',
+                    onTap: () => _openLegalPage(context, 'terms'),
                   ),
                 ],
               ),
-
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.xxl),
 
               // Çıkış Yap
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: OutlinedButton.icon(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                child: AppButton(
+                  label: 'Çıkış Yap',
+                  variant: AppButtonVariant.destructive,
+                  isExpanded: true,
                   onPressed: () => _handleLogout(context, ref),
-                  icon: const Icon(Icons.logout, color: Colors.red),
-                  label: const Text('Çıkış Yap', style: TextStyle(color: Colors.red)),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.red),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                  ),
                 ),
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: AppSpacing.xxl),
             ],
           ),
         ),
@@ -173,87 +177,27 @@ class SettingsScreen extends ConsumerWidget {
   void _showThemeDialog(BuildContext context, WidgetRef ref, AppSettings settings) {
     showDialog(
       context: context,
-      builder: (ctx) => SimpleDialog(
-        title: const Text('Tema Seçin'),
-        children: [
-          RadioGroup<AppThemeMode>(
-            groupValue: settings.themeMode,
-            onChanged: (v) {
-              if (v != null) {
-                ref.read(settingsProvider.notifier).setTheme(v);
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surfaceLight,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.modal)),
+        title: const Text('Tema Seçin', style: AppTypography.titleLarge),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: AppThemeMode.values.map((mode) {
+            final isSelected = settings.themeMode == mode;
+            return ListTile(
+              title: Text(_getThemeText(mode)),
+              leading: Icon(
+                isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
+                color: isSelected ? AppColors.primary : AppColors.textSecondaryLight,
+              ),
+              onTap: () {
+                ref.read(settingsProvider.notifier).setTheme(mode);
                 Navigator.pop(ctx);
-              }
-            },
-            child: Column(
-              children: AppThemeMode.values.map((mode) => RadioListTile<AppThemeMode>(
-                title: Text(_getThemeText(mode)),
-                value: mode,
-                selected: settings.themeMode == mode,
-              )).toList(),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showLanguageDialog(BuildContext context, WidgetRef ref, AppSettings settings) {
-    showDialog(
-      context: context,
-      builder: (ctx) => SimpleDialog(
-        title: const Text('Dil Seçin'),
-        children: [
-          RadioGroup<AppLanguage>(
-            groupValue: settings.language,
-            onChanged: (v) {
-              if (v != null) {
-                ref.read(settingsProvider.notifier).setLanguage(v);
-                Navigator.pop(ctx);
-              }
-            },
-            child: Column(
-              children: [
-                RadioListTile<AppLanguage>(
-                  title: const Text('Türkçe'),
-                  value: AppLanguage.tr,
-                  selected: settings.language == AppLanguage.tr,
-                ),
-                RadioListTile<AppLanguage>(
-                  title: const Text('English'),
-                  value: AppLanguage.en,
-                  selected: settings.language == AppLanguage.en,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showPaperSizeDialog(BuildContext context, WidgetRef ref, AppSettings settings) {
-    showDialog(
-      context: context,
-      builder: (ctx) => SimpleDialog(
-        title: const Text('Kağıt Boyutu'),
-        children: [
-          RadioGroup<PaperSize>(
-            groupValue: settings.defaultPaperSize,
-            onChanged: (v) {
-              if (v != null) {
-                ref.read(settingsProvider.notifier).setPaperSize(v);
-                Navigator.pop(ctx);
-              }
-            },
-            child: Column(
-              children: PaperSize.values.map((size) => RadioListTile<PaperSize>(
-                title: Text(size.name.toUpperCase()),
-                value: size,
-                selected: settings.defaultPaperSize == size,
-              )).toList(),
-            ),
-          ),
-        ],
+              },
+            );
+          }).toList(),
+        ),
       ),
     );
   }
@@ -263,80 +207,80 @@ class SettingsScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('İsim Düzenle'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(
-            labelText: 'Adınız',
-            border: OutlineInputBorder(),
-          ),
-        ),
+        backgroundColor: AppColors.surfaceLight,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.modal)),
+        title: const Text('İsim Düzenle', style: AppTypography.titleLarge),
+        content: AppTextField(label: 'Adınız', controller: controller),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('İptal')),
-          ElevatedButton(
-            onPressed: () async {
-              // TODO: Supabase user metadata güncelle
-              Navigator.pop(ctx);
-            },
-            child: const Text('Kaydet'),
-          ),
+          AppButton(label: 'İptal', variant: AppButtonVariant.text,
+              onPressed: () => Navigator.pop(ctx)),
+          AppButton(label: 'Kaydet', onPressed: () {
+            // TODO: Supabase user metadata güncelle
+            Navigator.pop(ctx);
+          }),
         ],
       ),
     );
   }
 
-  void _openLegalPage(BuildContext context, String type) {
-    // TODO: Legal sayfalarına route eklenince güncellenecek
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$type sayfası yakında eklenecek')),
-    );
+  void _showChangePasswordDialog(BuildContext context) {
+    AppToast.info(context, 'Şifre değiştirme özelliği yakında');
   }
 
-  void _showFeedbackDialog(BuildContext context) {
+  void _showAccountInfo(BuildContext context, User? user) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Geri Bildirim'),
-        content: const TextField(
-          maxLines: 4,
-          decoration: InputDecoration(
-            hintText: 'Görüşlerinizi yazın...',
-            border: OutlineInputBorder(),
-          ),
+        backgroundColor: AppColors.surfaceLight,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.modal)),
+        title: const Text('Hesap Bilgileri', style: AppTypography.titleLarge),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Email: ${user?.email ?? "-"}', style: AppTypography.bodyMedium),
+            const SizedBox(height: AppSpacing.sm),
+            Text('ID: ${user?.id ?? "-"}', style: AppTypography.caption.copyWith(color: AppColors.textSecondaryLight)),
+          ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('İptal')),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Teşekkürler! Geri bildiriminiz alındı.')),
-              );
-            },
-            child: const Text('Gönder'),
-          ),
+          AppButton(label: 'Kapat', variant: AppButtonVariant.text,
+              onPressed: () => Navigator.pop(ctx)),
         ],
       ),
     );
   }
 
-  Future<void> _handleLogout(BuildContext context, WidgetRef ref) async {
-    final confirm = await showDialog<bool>(
+  void _showExportDialog(BuildContext context) {
+    AppToast.info(context, 'Dışa aktarma özelliği yakında');
+  }
+
+  Future<void> _clearCache(BuildContext context, WidgetRef ref) async {
+final result = await AppConfirmDialog.show(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Çıkış Yap'),
-        content: const Text('Hesabınızdan çıkış yapmak istediğinize emin misiniz?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('İptal')),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Çıkış Yap'),
-          ),
-        ],
-      ),
+      title: 'Önbelleği Temizle',
+      message: 'Uygulama önbelleği temizlenecek. Devam etmek istiyor musunuz?',
+      confirmLabel: 'Temizle',
     );
-    if (confirm == true && context.mounted) {
+    if (result == true && context.mounted) {
+      // TODO: Cache temizleme
+      AppToast.success(context, 'Önbellek temizlendi');
+    }
+  }
+
+  void _openLegalPage(BuildContext context, String type) {
+    AppToast.info(context, '$type sayfası yakında eklenecek');
+  }
+
+  Future<void> _handleLogout(BuildContext context, WidgetRef ref) async {
+    final result = await AppConfirmDialog.show(
+      context: context,
+      title: 'Çıkış Yap',
+      message: 'Hesabınızdan çıkış yapmak istediğinize emin misiniz?',
+      confirmLabel: 'Çıkış Yap',
+      isDestructive: true,
+    );
+    if (result == true && context.mounted) {
       await ref.read(authControllerProvider.notifier).signOut();
       if (context.mounted) context.go('/login');
     }

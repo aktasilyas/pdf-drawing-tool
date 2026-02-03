@@ -1,5 +1,12 @@
+/// StarNote Profile Header - Design system profile card
+library;
+
 import 'package:flutter/material.dart';
 
+import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/core/widgets/index.dart';
+
+/// Profile header widget for settings screen
 class ProfileHeader extends StatelessWidget {
   final String name;
   final String email;
@@ -18,87 +25,77 @@ class ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isTablet = screenWidth > 600;
+    final initials = name.isNotEmpty ? name[0].toUpperCase() : 'U';
 
-    return InkWell(
+    return AppCard(
+      variant: AppCardVariant.elevated,
       onTap: onTap,
-      child: Padding(
-        padding: EdgeInsets.all(isTablet ? 24 : 16),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: isTablet ? 40 : 32,
-              backgroundColor: const Color(0xFF6366F1),
-              backgroundImage: photoUrl != null ? NetworkImage(photoUrl!) : null,
-              child: photoUrl == null
-                  ? Text(
-                      name.isNotEmpty ? name[0].toUpperCase() : 'U',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: isTablet ? 32 : 24,
-                        fontWeight: FontWeight.bold,
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Row(
+        children: [
+          AppAvatar(
+            imageUrl: photoUrl,
+            initials: initials,
+            size: AppAvatarSize.large,
+            backgroundColor: AppColors.primary,
+          ),
+          const SizedBox(width: AppSpacing.lg),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        name,
+                        style: AppTypography.headlineMedium.copyWith(
+                          color: AppColors.textPrimaryLight,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    )
-                  : null,
-            ),
-            SizedBox(width: isTablet ? 20 : 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Flexible(
+                    ),
+                    if (isPremium) ...[
+                      const SizedBox(width: AppSpacing.sm),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.sm,
+                          vertical: AppSpacing.xxs,
+                        ),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [AppColors.primary, AppColors.primaryDark],
+                          ),
+                          borderRadius: BorderRadius.circular(AppRadius.full),
+                        ),
                         child: Text(
-                          name,
-                          style: TextStyle(
-                            fontSize: isTablet ? 20 : 18,
+                          'PRO',
+                          style: AppTypography.caption.copyWith(
+                            color: AppColors.onPrimary,
                             fontWeight: FontWeight.bold,
                           ),
-                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      if (isPremium) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
-                            ),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Text(
-                            'PRO',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
                     ],
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.xxs),
+                Text(
+                  email,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: AppColors.textSecondaryLight,
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    email,
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: isTablet ? 15 : 14,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
-            Icon(Icons.chevron_right, color: Colors.grey[400]),
-          ],
-        ),
+          ),
+          const Icon(
+            Icons.chevron_right,
+            color: AppColors.textTertiaryLight,
+          ),
+        ],
       ),
     );
   }
