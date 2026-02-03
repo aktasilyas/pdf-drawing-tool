@@ -44,7 +44,8 @@ class SettingsScreen extends ConsumerWidget {
       ),
       body: Center(
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: isTablet ? 600 : double.infinity),
+          constraints:
+              BoxConstraints(maxWidth: isTablet ? 600 : double.infinity),
           child: ListView(
             padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
             children: [
@@ -168,18 +169,23 @@ class SettingsScreen extends ConsumerWidget {
 
   String _getThemeText(AppThemeMode mode) {
     switch (mode) {
-      case AppThemeMode.light: return 'Açık';
-      case AppThemeMode.dark: return 'Koyu';
-      case AppThemeMode.system: return 'Sistem';
+      case AppThemeMode.light:
+        return 'Açık';
+      case AppThemeMode.dark:
+        return 'Koyu';
+      case AppThemeMode.system:
+        return 'Sistem';
     }
   }
 
-  void _showThemeDialog(BuildContext context, WidgetRef ref, AppSettings settings) {
+  void _showThemeDialog(
+      BuildContext context, WidgetRef ref, AppSettings settings) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surfaceLight,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.modal)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.modal)),
         title: const Text('Tema Seçin', style: AppTypography.titleLarge),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -188,8 +194,12 @@ class SettingsScreen extends ConsumerWidget {
             return ListTile(
               title: Text(_getThemeText(mode)),
               leading: Icon(
-                isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
-                color: isSelected ? AppColors.primary : AppColors.textSecondaryLight,
+                isSelected
+                    ? Icons.radio_button_checked
+                    : Icons.radio_button_off,
+                color: isSelected
+                    ? AppColors.primary
+                    : AppColors.textSecondaryLight,
               ),
               onTap: () {
                 ref.read(settingsProvider.notifier).setTheme(mode);
@@ -208,16 +218,21 @@ class SettingsScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surfaceLight,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.modal)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.modal)),
         title: const Text('İsim Düzenle', style: AppTypography.titleLarge),
         content: AppTextField(label: 'Adınız', controller: controller),
         actions: [
-          AppButton(label: 'İptal', variant: AppButtonVariant.text,
+          AppButton(
+              label: 'İptal',
+              variant: AppButtonVariant.text,
               onPressed: () => Navigator.pop(ctx)),
-          AppButton(label: 'Kaydet', onPressed: () {
-            // TODO: Supabase user metadata güncelle
-            Navigator.pop(ctx);
-          }),
+          AppButton(
+              label: 'Kaydet',
+              onPressed: () {
+                // TODO: Supabase user metadata güncelle
+                Navigator.pop(ctx);
+              }),
         ],
       ),
     );
@@ -232,19 +247,25 @@ class SettingsScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surfaceLight,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.modal)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.modal)),
         title: const Text('Hesap Bilgileri', style: AppTypography.titleLarge),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Email: ${user?.email ?? "-"}', style: AppTypography.bodyMedium),
+            Text('Email: ${user?.email ?? "-"}',
+                style: AppTypography.bodyMedium),
             const SizedBox(height: AppSpacing.sm),
-            Text('ID: ${user?.id ?? "-"}', style: AppTypography.caption.copyWith(color: AppColors.textSecondaryLight)),
+            Text('ID: ${user?.id ?? "-"}',
+                style: AppTypography.caption
+                    .copyWith(color: AppColors.textSecondaryLight)),
           ],
         ),
         actions: [
-          AppButton(label: 'Kapat', variant: AppButtonVariant.text,
+          AppButton(
+              label: 'Kapat',
+              variant: AppButtonVariant.text,
               onPressed: () => Navigator.pop(ctx)),
         ],
       ),
@@ -256,7 +277,7 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Future<void> _clearCache(BuildContext context, WidgetRef ref) async {
-final result = await AppConfirmDialog.show(
+    final result = await AppConfirmDialog.show(
       context: context,
       title: 'Önbelleği Temizle',
       message: 'Uygulama önbelleği temizlenecek. Devam etmek istiyor musunuz?',
