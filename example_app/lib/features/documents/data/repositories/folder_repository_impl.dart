@@ -24,17 +24,23 @@ class FolderRepositoryImpl implements FolderRepository {
   Future<Either<Failure, List<Folder>>> getFolders({String? parentId}) async {
     try {
       final folders = await _localDatasource.getFolders(parentId: parentId);
-      final documents = await _documentDatasource.getAllDocuments(); // Get ALL documents
-      
+      final documents = await _documentDatasource.getAllDocuments();
+
       // Calculate document count for each folder
       final entities = folders.map((model) {
-        final docCount = documents.where((doc) => doc.folderId == model.id && !doc.isInTrash).length;
+        final docCount = documents
+            .where((doc) => doc.folderId == model.id && !doc.isInTrash)
+            .length;
         return model.copyWith(documentCount: docCount).toEntity();
       }).toList();
-      
-      // Sort by name
-      entities.sort((a, b) => a.name.compareTo(b.name));
-      
+
+      // Sort by sortOrder first, then by name
+      entities.sort((a, b) {
+        final orderCompare = a.sortOrder.compareTo(b.sortOrder);
+        if (orderCompare != 0) return orderCompare;
+        return a.name.compareTo(b.name);
+      });
+
       return Right(entities);
     } on CacheException catch (e) {
       return Left(CacheFailure(e.message));
@@ -62,6 +68,17 @@ class FolderRepositoryImpl implements FolderRepository {
     int? colorValue,
   }) async {
     try {
+      // 2 seviye max kuralı: Parent klasör zaten alt klasörse engelle
+      if (parentId != null) {
+        final parentFolder = await _localDatasource.getFolder(parentId);
+        if (parentFolder.parentId != null) {
+          // Parent zaten bir alt klasör - 3. seviye yasak
+          return const Left(
+            ValidationFailure('Alt klasörlerin altına klasör oluşturulamaz'),
+          );
+        }
+      }
+
       final folder = FolderModel(
         id: _uuid.v4(),
         name: name,
@@ -85,12 +102,14 @@ class FolderRepositoryImpl implements FolderRepository {
     required String id,
     String? name,
     int? colorValue,
+    int? sortOrder,
   }) async {
     try {
       final folder = await _localDatasource.getFolder(id);
       final updated = folder.copyWith(
         name: name,
         colorValue: colorValue,
+        sortOrder: sortOrder,
       );
 
       final result = await _localDatasource.updateFolder(updated);
@@ -111,7 +130,7 @@ class FolderRepositoryImpl implements FolderRepository {
       // TODO: If deleteContents is false, check if folder has documents
       // and return error if it does. This will be implemented when
       // we have proper folder-document relationship tracking.
-      
+
       await _localDatasource.deleteFolder(id);
       return const Right(null);
     } on CacheException catch (e) {
@@ -128,17 +147,38 @@ class FolderRepositoryImpl implements FolderRepository {
   ) async {
     try {
       final folder = await _localDatasource.getFolder(id);
-      
-      // Check for circular reference
+
       if (newParentId != null) {
+        // Check for circular reference
         final isCircular = await _checkCircularReference(id, newParentId);
         if (isCircular) {
           return const Left(
             ValidationFailure('Klasör kendi alt klasörüne taşınamaz'),
           );
         }
+
+        // 2 seviye max kuralı: Hedef klasör zaten alt klasörse engelle
+        final targetFolder = await _localDatasource.getFolder(newParentId);
+        if (targetFolder.parentId != null) {
+          return const Left(
+            ValidationFailure('Alt klasörlerin altına klasör taşınamaz'),
+          );
+        }
+
+        // Taşınan klasörün alt klasörleri varsa ve hedef root değilse engelle
+        if (folder.parentId == null) {
+          // Root klasör taşınıyor - alt klasörleri var mı kontrol et
+          final subfolders = await _localDatasource.getFolders(parentId: id);
+          if (subfolders.isNotEmpty) {
+            return const Left(
+              ValidationFailure(
+                'Alt klasörleri olan bir klasör başka klasörün altına taşınamaz',
+              ),
+            );
+          }
+        }
       }
-      
+
       final updated = folder.copyWith(parentId: newParentId);
       await _localDatasource.updateFolder(updated);
       return const Right(null);
@@ -153,10 +193,14 @@ class FolderRepositoryImpl implements FolderRepository {
   Stream<List<Folder>> watchFolders({String? parentId}) {
     return _localDatasource.watchFolders(parentId: parentId).map((folders) {
       final entities = folders.map((model) => model.toEntity()).toList();
-      
-      // Sort by name
-      entities.sort((a, b) => a.name.compareTo(b.name));
-      
+
+      // Sort by sortOrder first, then by name
+      entities.sort((a, b) {
+        final orderCompare = a.sortOrder.compareTo(b.sortOrder);
+        if (orderCompare != 0) return orderCompare;
+        return a.name.compareTo(b.name);
+      });
+
       return entities;
     });
   }
@@ -187,7 +231,7 @@ class FolderRepositoryImpl implements FolderRepository {
   ) async {
     try {
       String? currentId = newParentId;
-      
+
       while (currentId != null) {
         if (currentId == folderId) {
           return true;
@@ -195,7 +239,7 @@ class FolderRepositoryImpl implements FolderRepository {
         final folder = await _localDatasource.getFolder(currentId);
         currentId = folder.parentId;
       }
-      
+
       return false;
     } catch (_) {
       return false;

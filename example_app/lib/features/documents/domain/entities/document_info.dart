@@ -14,6 +14,7 @@ class DocumentInfo extends Equatable {
   final int pageCount;
   final bool isFavorite;
   final bool isInTrash;
+  final DateTime? deletedAt;
   final SyncState syncState;
   final String paperColor;
   final bool isPortrait;
@@ -34,6 +35,7 @@ class DocumentInfo extends Equatable {
     this.pageCount = 1,
     this.isFavorite = false,
     this.isInTrash = false,
+    this.deletedAt,
     this.syncState = SyncState.local,
     this.paperColor = 'Sarı kağıt',
     this.isPortrait = true,
@@ -55,6 +57,7 @@ class DocumentInfo extends Equatable {
     int? pageCount,
     bool? isFavorite,
     bool? isInTrash,
+    DateTime? deletedAt,
     SyncState? syncState,
     String? paperColor,
     bool? isPortrait,
@@ -75,6 +78,7 @@ class DocumentInfo extends Equatable {
       pageCount: pageCount ?? this.pageCount,
       isFavorite: isFavorite ?? this.isFavorite,
       isInTrash: isInTrash ?? this.isInTrash,
+      deletedAt: deletedAt ?? this.deletedAt,
       syncState: syncState ?? this.syncState,
       paperColor: paperColor ?? this.paperColor,
       isPortrait: isPortrait ?? this.isPortrait,
@@ -98,6 +102,7 @@ class DocumentInfo extends Equatable {
         pageCount,
         isFavorite,
         isInTrash,
+        deletedAt,
         syncState,
         paperColor,
         isPortrait,

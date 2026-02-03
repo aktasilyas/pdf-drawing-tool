@@ -1,45 +1,74 @@
+/// StarNote Documents Empty States
+///
+/// Çeşitli bölümler için boş durum widget'ları.
+/// Tüm empty state'ler AppEmptyState widget'ını kullanır.
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 
-/// Empty state widget when no documents exist
+/// Tüm Notlar bölümü boş durumu
 class DocumentsEmptyState extends StatelessWidget {
   const DocumentsEmptyState({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.note_add_outlined,
-            size: 64,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Henüz belge yok',
-            style: TextStyle(
-              fontSize: 18,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Yeni bir belge oluşturmak için "Yeni" butonuna tıklayın',
-            style: TextStyle(
-              fontSize: 14,
-              color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-            ),
-          ),
-        ],
-      ),
+    return const AppEmptyState(
+      icon: Icons.description_outlined,
+      title: 'Henüz not yok',
+      description: 'Yeni bir not oluşturmak için "+" butonuna tıklayın',
     );
   }
 }
 
-/// Empty state widget when search returns no results
+/// Favoriler bölümü boş durumu
+class FavoritesEmptyState extends StatelessWidget {
+  const FavoritesEmptyState({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const AppEmptyState(
+      icon: Icons.star_outline,
+      title: 'Favori not yok',
+      description:
+          'Notlarınızı favorilere eklemek için yıldız ikonuna tıklayın',
+    );
+  }
+}
+
+/// Klasör bölümü boş durumu
+class FolderEmptyState extends StatelessWidget {
+  const FolderEmptyState({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const AppEmptyState(
+      icon: Icons.folder_open,
+      title: 'Bu klasör boş',
+      description: 'Notlarınızı buraya taşıyın veya yeni not oluşturun',
+    );
+  }
+}
+
+/// Çöp Kutusu bölümü boş durumu
+class TrashEmptyState extends StatelessWidget {
+  const TrashEmptyState({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const AppEmptyState(
+      icon: Icons.delete_outline,
+      title: 'Çöp kutusu boş',
+      description: 'Silinen notlar burada görünecek',
+    );
+  }
+}
+
+/// Arama sonucu boş durumu
 class DocumentsEmptySearchResult extends ConsumerWidget {
   final String query;
 
@@ -51,47 +80,41 @@ class DocumentsEmptySearchResult extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Center(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xxl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.search_off,
-              size: 48,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              size: AppIconSize.emptyState,
+              color: AppColors.textSecondaryLight,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppSpacing.xl),
             Text(
               'Sonuç bulunamadı',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              style: AppTypography.headlineSmall.copyWith(
+                color: AppColors.textPrimaryLight,
               ),
+              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 6),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                '"$query" için eşleşen belge bulunamadı',
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              '"$query" için eşleşen not bulunamadı',
+              style: AppTypography.bodyMedium.copyWith(
+                color: AppColors.textSecondaryLight,
               ),
+              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 16),
-            TextButton.icon(
+            const SizedBox(height: AppSpacing.xl),
+            AppButton(
+              label: 'Aramayı temizle',
+              variant: AppButtonVariant.outline,
+              size: AppButtonSize.medium,
+              leadingIcon: Icons.clear,
               onPressed: () {
                 ref.read(searchQueryProvider.notifier).state = '';
               },
-              icon: const Icon(Icons.clear, size: 18),
-              label: const Text('Aramayı temizle'),
             ),
           ],
         ),
@@ -100,31 +123,16 @@ class DocumentsEmptySearchResult extends ConsumerWidget {
   }
 }
 
-/// Coming soon placeholder for features under development
+/// Yakında gelecek özellikler için placeholder
 class DocumentsComingSoon extends StatelessWidget {
   const DocumentsComingSoon({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.construction,
-            size: 64,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Yakında',
-            style: TextStyle(
-              fontSize: 18,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
+    return const AppEmptyState(
+      icon: Icons.construction_outlined,
+      title: 'Yakında',
+      description: 'Bu özellik üzerinde çalışıyoruz',
     );
   }
 }

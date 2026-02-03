@@ -21,6 +21,7 @@ abstract class FolderRepository {
     required String id,
     String? name,
     int? colorValue,
+    int? sortOrder,
   });
 
   /// Delete folder (and optionally contents)

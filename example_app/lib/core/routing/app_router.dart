@@ -1,5 +1,5 @@
 /// App router configuration using GoRouter.
-/// 
+///
 /// Routes are organized by feature:
 /// - Auth routes (login, register)
 /// - Document routes (list, folder, favorites)
@@ -15,6 +15,7 @@ import 'package:example_app/features/auth/presentation/screens/splash_screen.dar
 import 'package:example_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:example_app/features/auth/presentation/screens/register_screen.dart';
 import 'package:example_app/features/documents/presentation/screens/documents_screen.dart';
+import 'package:example_app/features/documents/presentation/screens/manage_folders_screen.dart';
 import 'package:example_app/features/documents/presentation/screens/template_selection_screen.dart';
 import 'package:example_app/features/editor/presentation/screens/editor_screen.dart';
 import 'package:example_app/features/settings/settings.dart';
@@ -43,7 +44,8 @@ final appRouter = GoRouter(
     GoRoute(
       path: RouteNames.forgotPassword,
       name: 'forgotPassword',
-      builder: (context, state) => const _PlaceholderScreen(title: 'Forgot Password'),
+      builder: (context, state) =>
+          const _PlaceholderScreen(title: 'Forgot Password'),
     ),
 
     // Document routes
@@ -75,6 +77,11 @@ final appRouter = GoRouter(
       path: RouteNames.trash,
       name: 'trash',
       builder: (context, state) => const _PlaceholderScreen(title: 'Trash'),
+    ),
+    GoRoute(
+      path: '/manage-folders',
+      name: 'manageFolders',
+      builder: (context, state) => const ManageFoldersScreen(),
     ),
 
     // Editor routes
@@ -121,17 +128,18 @@ final appRouter = GoRouter(
     GoRoute(
       path: RouteNames.subscription,
       name: 'subscription',
-      builder: (context, state) => const _PlaceholderScreen(title: 'Subscription'),
+      builder: (context, state) =>
+          const _PlaceholderScreen(title: 'Subscription'),
     ),
   ],
-  
+
   // Error handling
   errorBuilder: (context, state) => Scaffold(
     body: Center(
       child: Text('Sayfa bulunamadı: ${state.uri}'),
     ),
   ),
-  
+
   // Redirect logic for auth
   redirect: (context, state) {
     // TODO: Implement auth redirect logic when auth provider is ready

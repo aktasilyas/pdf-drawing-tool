@@ -19,7 +19,8 @@ final foldersProvider = FutureProvider<List<Folder>>((ref) async {
 });
 
 // Folder by ID
-final folderByIdProvider = FutureProvider.family<Folder?, String>((ref, folderId) async {
+final folderByIdProvider =
+    FutureProvider.family<Folder?, String>((ref, folderId) async {
   final repository = ref.watch(folderRepositoryProvider);
   final result = await repository.getFolder(folderId);
   return result.fold(
@@ -28,8 +29,20 @@ final folderByIdProvider = FutureProvider.family<Folder?, String>((ref, folderId
   );
 });
 
+// Folder path (breadcrumb) - root'tan hedef klasöre kadar path
+final folderPathProvider =
+    FutureProvider.family<List<Folder>, String>((ref, folderId) async {
+  final repository = ref.watch(folderRepositoryProvider);
+  final result = await repository.getFolderPath(folderId);
+  return result.fold(
+    (failure) => <Folder>[],
+    (folders) => folders,
+  );
+});
+
 // Subfolders (folders with specific parent)
-final subfoldersProvider = FutureProvider.family<List<Folder>, String?>((ref, parentId) async {
+final subfoldersProvider =
+    FutureProvider.family<List<Folder>, String?>((ref, parentId) async {
   final repository = ref.watch(folderRepositoryProvider);
   final result = await repository.getFolders(parentId: parentId);
   return result.fold(
@@ -68,7 +81,8 @@ class FoldersController extends StateNotifier<AsyncValue<void>> {
   final FolderRepository _repository;
   final Ref _ref;
 
-  FoldersController(this._repository, this._ref) : super(const AsyncValue.data(null));
+  FoldersController(this._repository, this._ref)
+      : super(const AsyncValue.data(null));
 
   Future<String?> createFolder({
     required String name,
@@ -106,13 +120,23 @@ class FoldersController extends StateNotifier<AsyncValue<void>> {
   }
 
   Future<bool> updateFolderColor(String folderId, int colorValue) async {
-    final result = await _repository.updateFolder(id: folderId, colorValue: colorValue);
+    final result =
+        await _repository.updateFolder(id: folderId, colorValue: colorValue);
     return result.fold(
       (failure) => false,
       (_) {
         _invalidateFolders();
         return true;
       },
+    );
+  }
+
+  Future<bool> updateSortOrder(String folderId, int sortOrder) async {
+    final result =
+        await _repository.updateFolder(id: folderId, sortOrder: sortOrder);
+    return result.fold(
+      (failure) => false,
+      (_) => true,
     );
   }
 
@@ -147,7 +171,8 @@ class FoldersController extends StateNotifier<AsyncValue<void>> {
   }
 }
 
-final foldersControllerProvider = StateNotifierProvider<FoldersController, AsyncValue<void>>((ref) {
+final foldersControllerProvider =
+    StateNotifierProvider<FoldersController, AsyncValue<void>>((ref) {
   final repository = ref.watch(folderRepositoryProvider);
   return FoldersController(repository, ref);
 });

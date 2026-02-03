@@ -5,6 +5,7 @@ class FolderModel {
   final String name;
   final String? parentId;
   final int colorValue;
+  final int sortOrder;
   final DateTime createdAt;
   final int documentCount;
 
@@ -13,6 +14,7 @@ class FolderModel {
     required this.name,
     this.parentId,
     this.colorValue = 0xFF2196F3,
+    this.sortOrder = 0,
     required this.createdAt,
     this.documentCount = 0,
   });
@@ -23,6 +25,7 @@ class FolderModel {
       name: json['name'] as String,
       parentId: json['parent_id'] as String?,
       colorValue: json['color_value'] as int? ?? 0xFF2196F3,
+      sortOrder: json['sort_order'] as int? ?? 0,
       createdAt: DateTime.parse(json['created_at'] as String),
       documentCount: json['document_count'] as int? ?? 0,
     );
@@ -33,6 +36,7 @@ class FolderModel {
         'name': name,
         'parent_id': parentId,
         'color_value': colorValue,
+        'sort_order': sortOrder,
         'created_at': createdAt.toIso8601String(),
         'document_count': documentCount,
       };
@@ -42,6 +46,7 @@ class FolderModel {
         name: name,
         parentId: parentId,
         colorValue: colorValue,
+        sortOrder: sortOrder,
         createdAt: createdAt,
         documentCount: documentCount,
       );
@@ -51,6 +56,7 @@ class FolderModel {
         name: entity.name,
         parentId: entity.parentId,
         colorValue: entity.colorValue,
+        sortOrder: entity.sortOrder,
         createdAt: entity.createdAt,
         documentCount: entity.documentCount,
       );
@@ -60,6 +66,7 @@ class FolderModel {
     String? name,
     String? parentId,
     int? colorValue,
+    int? sortOrder,
     DateTime? createdAt,
     int? documentCount,
   }) {
@@ -68,6 +75,7 @@ class FolderModel {
       name: name ?? this.name,
       parentId: parentId ?? this.parentId,
       colorValue: colorValue ?? this.colorValue,
+      sortOrder: sortOrder ?? this.sortOrder,
       createdAt: createdAt ?? this.createdAt,
       documentCount: documentCount ?? this.documentCount,
     );

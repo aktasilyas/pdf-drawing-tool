@@ -31,7 +31,8 @@ final selectedDocumentsProvider = StateProvider<Set<String>>((ref) => {});
 final selectedFoldersProvider = StateProvider<Set<String>>((ref) => {});
 
 // View mode (grid/list) with persistence
-final viewModeProvider = StateNotifierProvider<ViewModeNotifier, ViewMode>((ref) {
+final viewModeProvider =
+    StateNotifierProvider<ViewModeNotifier, ViewMode>((ref) {
   return ViewModeNotifier();
 });
 
@@ -60,7 +61,8 @@ class ViewModeNotifier extends StateNotifier<ViewMode> {
 }
 
 // Sort option (date/name/size) with persistence
-final sortOptionProvider = StateNotifierProvider<SortOptionNotifier, SortOption>((ref) {
+final sortOptionProvider =
+    StateNotifierProvider<SortOptionNotifier, SortOption>((ref) {
   return SortOptionNotifier();
 });
 
@@ -89,7 +91,8 @@ class SortOptionNotifier extends StateNotifier<SortOption> {
 }
 
 // Sort direction (ascending/descending) with persistence
-final sortDirectionProvider = StateNotifierProvider<SortDirectionNotifier, SortDirection>((ref) {
+final sortDirectionProvider =
+    StateNotifierProvider<SortDirectionNotifier, SortDirection>((ref) {
   return SortDirectionNotifier();
 });
 
@@ -117,8 +120,41 @@ class SortDirectionNotifier extends StateNotifier<SortDirection> {
   }
 }
 
+// Pin favorites to top with persistence
+final pinFavoritesProvider =
+    StateNotifierProvider<PinFavoritesNotifier, bool>((ref) {
+  return PinFavoritesNotifier();
+});
+
+class PinFavoritesNotifier extends StateNotifier<bool> {
+  PinFavoritesNotifier() : super(false) {
+    _loadInitial();
+  }
+
+  Future<void> _loadInitial() async {
+    final prefs = await SharedPreferences.getInstance();
+    final value = prefs.getBool(StorageKeys.pinFavoritesToTop);
+    if (value != null) {
+      state = value;
+    }
+  }
+
+  Future<void> toggle() async {
+    state = !state;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(StorageKeys.pinFavoritesToTop, state);
+  }
+
+  Future<void> set(bool value) async {
+    state = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(StorageKeys.pinFavoritesToTop, value);
+  }
+}
+
 // Documents list
-final documentsProvider = FutureProvider.family<List<DocumentInfo>, String?>((ref, folderId) async {
+final documentsProvider =
+    FutureProvider.family<List<DocumentInfo>, String?>((ref, folderId) async {
   final repository = ref.watch(documentRepositoryProvider);
   final result = await repository.getDocuments(folderId: folderId);
   return result.fold(
@@ -128,7 +164,8 @@ final documentsProvider = FutureProvider.family<List<DocumentInfo>, String?>((re
 });
 
 // Favorite documents
-final favoriteDocumentsProvider = FutureProvider<List<DocumentInfo>>((ref) async {
+final favoriteDocumentsProvider =
+    FutureProvider<List<DocumentInfo>>((ref) async {
   final repository = ref.watch(documentRepositoryProvider);
   final result = await repository.getFavorites();
   return result.fold(
@@ -161,7 +198,7 @@ final trashDocumentsProvider = FutureProvider<List<DocumentInfo>>((ref) async {
 final searchResultsProvider = FutureProvider<List<DocumentInfo>>((ref) async {
   final query = ref.watch(searchQueryProvider);
   if (query.isEmpty) return [];
-  
+
   final repository = ref.watch(documentRepositoryProvider);
   final result = await repository.search(query);
   return result.fold(
@@ -175,7 +212,8 @@ class DocumentsController extends StateNotifier<AsyncValue<void>> {
   final DocumentRepository _repository;
   final Ref _ref;
 
-  DocumentsController(this._repository, this._ref) : super(const AsyncValue.data(null));
+  DocumentsController(this._repository, this._ref)
+      : super(const AsyncValue.data(null));
 
   Future<String?> createDocument({
     required String title,
@@ -224,7 +262,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>> {
     required int pageCount,
   }) async {
     state = const AsyncValue.loading();
-    
+
     try {
       // 1. İlk olarak doküman oluştur (blank template ile)
       final result = await _repository.createDocument(
@@ -235,7 +273,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>> {
         isPortrait: true,
         documentType: documentType,
       );
-      
+
       return result.fold(
         (failure) {
           state = AsyncValue.error(failure, StackTrace.current);
@@ -246,7 +284,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>> {
           // Bu sayede int/double/String karışıklığı önlenir
           final jsonString = jsonEncode(pages);
           final normalizedPages = jsonDecode(jsonString) as List;
-          
+
           // 3. V2 format için complete document structure oluştur
           final now = DateTime.now();
           final content = {
@@ -270,13 +308,13 @@ class DocumentsController extends StateNotifier<AsyncValue<void>> {
             'createdAt': document.createdAt.toIso8601String(),
             'updatedAt': now.toIso8601String(),
           };
-          
+
           final saveResult = await _repository.saveDocumentContent(
             id: document.id,
             content: content,
             pageCount: pageCount,
           );
-          
+
           return saveResult.fold(
             (failure) {
               state = AsyncValue.error(failure, StackTrace.current);
@@ -348,7 +386,8 @@ class DocumentsController extends StateNotifier<AsyncValue<void>> {
   }
 
   Future<bool> renameDocument(String documentId, String newTitle) async {
-    final result = await _repository.updateDocument(id: documentId, title: newTitle);
+    final result =
+        await _repository.updateDocument(id: documentId, title: newTitle);
     return result.fold(
       (failure) => false,
       (_) {
@@ -510,7 +549,8 @@ class DocumentsController extends StateNotifier<AsyncValue<void>> {
   }
 
   // Move documents to folder (bulk)
-  Future<bool> moveDocumentsToFolder(List<String> docIds, String? folderId) async {
+  Future<bool> moveDocumentsToFolder(
+      List<String> docIds, String? folderId) async {
     state = const AsyncLoading();
     try {
       for (final id in docIds) {
@@ -535,7 +575,8 @@ class DocumentsController extends StateNotifier<AsyncValue<void>> {
   }
 }
 
-final documentsControllerProvider = StateNotifierProvider<DocumentsController, AsyncValue<void>>((ref) {
+final documentsControllerProvider =
+    StateNotifierProvider<DocumentsController, AsyncValue<void>>((ref) {
   final repository = ref.watch(documentRepositoryProvider);
   return DocumentsController(repository, ref);
 });

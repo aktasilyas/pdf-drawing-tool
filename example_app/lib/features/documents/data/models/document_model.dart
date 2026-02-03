@@ -12,6 +12,7 @@ class DocumentModel {
   final int pageCount;
   final bool isFavorite;
   final bool isInTrash;
+  final DateTime? deletedAt;
   final int syncState;
   final String paperColor;
   final bool isPortrait;
@@ -32,6 +33,7 @@ class DocumentModel {
     this.pageCount = 1,
     this.isFavorite = false,
     this.isInTrash = false,
+    this.deletedAt,
     this.syncState = 0,
     this.paperColor = 'Sarı kağıt',
     this.isPortrait = true,
@@ -54,6 +56,9 @@ class DocumentModel {
       pageCount: json['page_count'] as int? ?? 1,
       isFavorite: json['is_favorite'] as bool? ?? false,
       isInTrash: json['is_in_trash'] as bool? ?? false,
+      deletedAt: json['deleted_at'] != null
+          ? DateTime.parse(json['deleted_at'] as String)
+          : null,
       syncState: json['sync_state'] as int? ?? 0,
       paperColor: json['paper_color'] as String? ?? 'Sarı kağıt',
       isPortrait: json['is_portrait'] as bool? ?? true,
@@ -76,6 +81,7 @@ class DocumentModel {
         'page_count': pageCount,
         'is_favorite': isFavorite,
         'is_in_trash': isInTrash,
+        'deleted_at': deletedAt?.toIso8601String(),
         'sync_state': syncState,
         'paper_color': paperColor,
         'is_portrait': isPortrait,
@@ -105,6 +111,7 @@ class DocumentModel {
         pageCount: pageCount,
         isFavorite: isFavorite,
         isInTrash: isInTrash,
+        deletedAt: deletedAt,
         syncState: SyncState.values[syncState],
         paperColor: paperColor,
         isPortrait: isPortrait,
@@ -126,6 +133,7 @@ class DocumentModel {
         pageCount: entity.pageCount,
         isFavorite: entity.isFavorite,
         isInTrash: entity.isInTrash,
+        deletedAt: entity.deletedAt,
         syncState: entity.syncState.index,
         paperColor: entity.paperColor,
         isPortrait: entity.isPortrait,
@@ -147,6 +155,7 @@ class DocumentModel {
     int? pageCount,
     bool? isFavorite,
     bool? isInTrash,
+    DateTime? deletedAt,
     int? syncState,
     String? paperColor,
     bool? isPortrait,
@@ -167,6 +176,7 @@ class DocumentModel {
       pageCount: pageCount ?? this.pageCount,
       isFavorite: isFavorite ?? this.isFavorite,
       isInTrash: isInTrash ?? this.isInTrash,
+      deletedAt: deletedAt ?? this.deletedAt,
       syncState: syncState ?? this.syncState,
       paperColor: paperColor ?? this.paperColor,
       isPortrait: isPortrait ?? this.isPortrait,

@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/core/utils/responsive.dart';
+import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
 import 'package:example_app/features/documents/domain/entities/sort_option.dart';
 import 'package:example_app/features/documents/domain/entities/view_mode.dart';
 import 'package:example_app/features/documents/domain/entities/folder.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
-import 'package:example_app/features/documents/presentation/widgets/sidebar.dart';
+import 'package:example_app/features/documents/presentation/widgets/documents_sidebar.dart';
+import 'package:example_app/features/documents/presentation/widgets/breadcrumb_navigation.dart';
 import 'package:example_app/features/documents/presentation/widgets/document_card.dart';
 import 'package:example_app/features/documents/presentation/widgets/folder_card.dart';
 import 'package:example_app/features/documents/presentation/widgets/documents_header.dart';
@@ -45,7 +50,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     final sortOption = ref.watch(sortOptionProvider);
     final sortDirection = ref.watch(sortDirectionProvider);
     final sorted = List<DocumentInfo>.from(documents);
-    
+
     switch (sortOption) {
       case SortOption.date:
         sorted.sort((a, b) => sortDirection == SortDirection.descending
@@ -63,67 +68,67 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
             : a.pageCount.compareTo(b.pageCount));
         break;
     }
-    
+
     return sorted;
   }
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final isMobile = screenWidth < 600;
+    final isPhone = Responsive.isPhone(context);
 
     return Scaffold(
-      drawer: isMobile ? _buildSidebarDrawer() : null,
-      body: isMobile
-          ? _buildMobileLayout()
-          : _buildDesktopLayout(),
+      backgroundColor: AppColors.backgroundLight,
+      drawer: isPhone ? _buildSidebarDrawer() : null,
+      body: SafeArea(
+        child: isPhone ? _buildMobileLayout() : _buildDesktopLayout(),
+      ),
     );
   }
 
   // Mobile layout - no persistent sidebar, use drawer
   Widget _buildMobileLayout() {
     return GestureDetector(
-      onTap: () {
-        // Dismiss keyboard when tapping outside
-        FocusScope.of(context).unfocus();
-      },
+      onTap: () => FocusScope.of(context).unfocus(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Mobile header with hamburger menu
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(AppSpacing.lg),
             child: Builder(
               builder: (context) => Row(
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.menu),
-                    onPressed: () {
-                      Scaffold.of(context).openDrawer();
-                    },
+                  AppIconButton(
+                    icon: Icons.menu,
+                    variant: AppIconButtonVariant.ghost,
+                    tooltip: 'Menü',
+                    onPressed: () => Scaffold.of(context).openDrawer(),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Text(
                       _getSectionTitle(),
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).colorScheme.onSurface,
+                      style: AppTypography.headlineMedium.copyWith(
+                        color: AppColors.textPrimaryLight,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.settings_outlined),
-                    onPressed: () {
-                      context.push('/settings');
-                    },
+                  AppIconButton(
+                    icon: Icons.settings_outlined,
+                    variant: AppIconButtonVariant.ghost,
+                    tooltip: 'Ayarlar',
+                    onPressed: () => context.push('/settings'),
                   ),
                 ],
               ),
             ),
           ),
+
+          // Breadcrumb (only when inside a folder)
+          if (_selectedSection == SidebarSection.folder &&
+              _selectedFolderId != null)
+            _buildBreadcrumb(),
 
           // Header
           DocumentsHeader(
@@ -140,20 +145,9 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
           ),
 
           // Divider
-          Container(
-            height: 1,
-            margin: const EdgeInsets.symmetric(vertical: 12),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Theme.of(context).dividerColor.withValues(alpha: 0.0),
-                  Theme.of(context).dividerColor.withValues(alpha: 0.3),
-                  Theme.of(context).dividerColor.withValues(alpha: 0.3),
-                  Theme.of(context).dividerColor.withValues(alpha: 0.0),
-                ],
-                stops: const [0.0, 0.1, 0.9, 1.0],
-              ),
-            ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
+            child: AppDivider(),
           ),
 
           // Document grid
@@ -165,20 +159,19 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     );
   }
 
-  // Desktop layout - persistent sidebar
+  // Desktop/Tablet layout - persistent sidebar
   Widget _buildDesktopLayout() {
     return Row(
       children: [
         // Sidebar
-        Sidebar(
+        DocumentsSidebar(
           selectedSection: _selectedSection,
           selectedFolderId: _selectedFolderId,
           onSectionChanged: (section) {
             setState(() {
               _selectedSection = section;
-              _selectedFolderId = null; // Clear folder selection
+              _selectedFolderId = null;
             });
-            // Update current folder provider
             ref.read(currentFolderIdProvider.notifier).state = null;
           },
           onFolderSelected: (folderId) {
@@ -186,7 +179,6 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
               _selectedSection = SidebarSection.folder;
               _selectedFolderId = folderId;
             });
-            // Update current folder provider
             ref.read(currentFolderIdProvider.notifier).state = folderId;
           },
           onCreateFolder: _showCreateFolderDialog,
@@ -195,81 +187,51 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
         // Vertical divider
         Container(
           width: 1,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Theme.of(context).dividerColor.withValues(alpha: 0.0),
-                Theme.of(context).dividerColor.withValues(alpha: 0.5),
-                Theme.of(context).dividerColor.withValues(alpha: 0.5),
-                Theme.of(context).dividerColor.withValues(alpha: 0.0),
-              ],
-              stops: const [0.0, 0.1, 0.9, 1.0],
-            ),
-          ),
+          color: AppColors.outlineLight,
         ),
 
         // Main content
         Expanded(
           child: GestureDetector(
-            onTap: () {
-              // Dismiss keyboard when tapping outside
-              FocusScope.of(context).unfocus();
-            },
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Settings icon (top right)
-                Align(
-                  alignment: Alignment.topRight,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: IconButton(
-                      icon: const Icon(Icons.settings_outlined),
-                      onPressed: () {
-                        context.push('/settings');
-                      },
-                    ),
+            onTap: () => FocusScope.of(context).unfocus(),
+            child: Container(
+              color: AppColors.backgroundLight,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // Breadcrumb (only when inside a folder)
+                  if (_selectedSection == SidebarSection.folder &&
+                      _selectedFolderId != null)
+                    _buildBreadcrumb(),
+
+                  // Header
+                  DocumentsHeader(
+                    title: _getSectionTitle(),
+                    newButtonKey: _addButtonKey,
+                    onNewPressed: _showNewDocumentDialog,
+                    sortOption: ref.watch(sortOptionProvider),
+                    onSortChanged: (option) {
+                      ref.read(sortOptionProvider.notifier).set(option);
+                    },
+                    allDocumentIds: _getCurrentDocumentIds(),
+                    allFolderIds: _getCurrentFolderIds(),
+                    isTrashSection: _selectedSection == SidebarSection.trash,
                   ),
-                ),
 
-                // Header
-                DocumentsHeader(
-                  title: _getSectionTitle(),
-                  newButtonKey: _addButtonKey,
-                  onNewPressed: _showNewDocumentDialog,
-                  sortOption: ref.watch(sortOptionProvider),
-                  onSortChanged: (option) {
-                    ref.read(sortOptionProvider.notifier).set(option);
-                  },
-                  allDocumentIds: _getCurrentDocumentIds(),
-                  allFolderIds: _getCurrentFolderIds(),
-                  isTrashSection: _selectedSection == SidebarSection.trash,
-                ),
-
-                // Divider
-                Container(
-                  height: 1,
-                  margin: const EdgeInsets.symmetric(vertical: 12),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Theme.of(context).dividerColor.withValues(alpha: 0.0),
-                        Theme.of(context).dividerColor.withValues(alpha: 0.3),
-                        Theme.of(context).dividerColor.withValues(alpha: 0.3),
-                        Theme.of(context).dividerColor.withValues(alpha: 0.0),
-                      ],
-                      stops: const [0.0, 0.1, 0.9, 1.0],
-                    ),
+                  // Divider
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
+                    child: AppDivider(),
                   ),
-                ),
 
-                // Document grid
-                Expanded(
-                  child: _buildDocumentGrid(),
-                ),
-              ],
+                  // Document grid
+                  Expanded(
+                    child: _buildDocumentGrid(),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -280,32 +242,96 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
   // Sidebar drawer for mobile
   Widget _buildSidebarDrawer() {
     return Drawer(
-      child: Sidebar(
-        selectedSection: _selectedSection,
-        selectedFolderId: _selectedFolderId,
-        onSectionChanged: (section) {
-          setState(() {
-            _selectedSection = section;
-            _selectedFolderId = null;
-          });
-          // Update current folder provider
-          ref.read(currentFolderIdProvider.notifier).state = null;
-          Navigator.pop(context); // Close drawer after selection
-        },
-        onFolderSelected: (folderId) {
-          setState(() {
-            _selectedSection = SidebarSection.folder;
-            _selectedFolderId = folderId;
-          });
-          // Update current folder provider
-          ref.read(currentFolderIdProvider.notifier).state = folderId;
-          Navigator.pop(context);
-        },
-        onCreateFolder: () {
-          Navigator.pop(context); // Close drawer first
-          _showCreateFolderDialog();
-        },
+      backgroundColor: AppColors.surfaceLight,
+      child: SafeArea(
+        child: DocumentsSidebar(
+          selectedSection: _selectedSection,
+          selectedFolderId: _selectedFolderId,
+          onSectionChanged: (section) {
+            setState(() {
+              _selectedSection = section;
+              _selectedFolderId = null;
+            });
+            ref.read(currentFolderIdProvider.notifier).state = null;
+            Navigator.pop(context);
+          },
+          onFolderSelected: (folderId) {
+            setState(() {
+              _selectedSection = SidebarSection.folder;
+              _selectedFolderId = folderId;
+            });
+            ref.read(currentFolderIdProvider.notifier).state = folderId;
+            Navigator.pop(context);
+          },
+          onCreateFolder: () {
+            Navigator.pop(context);
+            _showCreateFolderDialog();
+          },
+        ),
       ),
+    );
+  }
+
+  // Breadcrumb navigation for folder path
+  Widget _buildBreadcrumb() {
+    if (_selectedFolderId == null) return const SizedBox.shrink();
+
+    final folderPathAsync = ref.watch(folderPathProvider(_selectedFolderId!));
+
+    return folderPathAsync.when(
+      data: (folders) {
+        if (folders.isEmpty) return const SizedBox.shrink();
+
+        // Build breadcrumb items: Root + folder path
+        final items = <BreadcrumbItem>[
+          const BreadcrumbItem(folderId: null, label: 'Belgelerim'),
+          ...folders.map(
+            (f) => BreadcrumbItem(folderId: f.id, label: f.name),
+          ),
+        ];
+
+        return BreadcrumbNavigation(
+          items: items,
+          onItemTap: (item) {
+            if (item.folderId == null) {
+              // Navigate to root (documents)
+              setState(() {
+                _selectedSection = SidebarSection.documents;
+                _selectedFolderId = null;
+              });
+              ref.read(currentFolderIdProvider.notifier).state = null;
+            } else {
+              // Navigate to specific folder
+              setState(() {
+                _selectedSection = SidebarSection.folder;
+                _selectedFolderId = item.folderId;
+              });
+              ref.read(currentFolderIdProvider.notifier).state = item.folderId;
+            }
+          },
+          onBackPressed: () {
+            // Go one level up
+            if (folders.length > 1) {
+              // Go to parent folder
+              final parentFolder = folders[folders.length - 2];
+              setState(() {
+                _selectedFolderId = parentFolder.id;
+              });
+              ref.read(currentFolderIdProvider.notifier).state =
+                  parentFolder.id;
+            } else {
+              // Go to root
+              setState(() {
+                _selectedSection = SidebarSection.documents;
+                _selectedFolderId = null;
+              });
+              ref.read(currentFolderIdProvider.notifier).state = null;
+            }
+          },
+        );
+      },
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
     );
   }
 
@@ -374,9 +400,10 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
         // Apply search filter (same as displayed documents)
         var filteredDocs = docs;
         if (searchQuery.isNotEmpty) {
-          filteredDocs = docs.where((doc) => 
-            doc.title.toLowerCase().contains(searchQuery.toLowerCase())
-          ).toList();
+          filteredDocs = docs
+              .where((doc) =>
+                  doc.title.toLowerCase().contains(searchQuery.toLowerCase()))
+              .toList();
         }
         return filteredDocs.map((d) => d.id).toList();
       },
@@ -388,29 +415,31 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
   List<String> _getCurrentFolderIds() {
     final foldersAsync = ref.watch(foldersProvider);
     final searchQuery = ref.watch(searchQueryProvider);
-    
+
     return foldersAsync.when(
       data: (folders) {
         List<Folder> visibleFolders;
-        
+
         if (_selectedSection == SidebarSection.documents) {
           // In documents section: show only root folders
           visibleFolders = folders.where((f) => f.parentId == null).toList();
         } else if (_selectedSection == SidebarSection.folder) {
           // In folder section: show subfolders of current folder
-          visibleFolders = folders.where((f) => f.parentId == _selectedFolderId).toList();
+          visibleFolders =
+              folders.where((f) => f.parentId == _selectedFolderId).toList();
         } else {
           // Other sections: no folders
           return <String>[];
         }
-        
+
         // Apply search filter
         if (searchQuery.isNotEmpty) {
-          visibleFolders = visibleFolders.where((folder) => 
-            folder.name.toLowerCase().contains(searchQuery.toLowerCase())
-          ).toList();
+          visibleFolders = visibleFolders
+              .where((folder) =>
+                  folder.name.toLowerCase().contains(searchQuery.toLowerCase()))
+              .toList();
         }
-        
+
         return visibleFolders.map((f) => f.id).toList();
       },
       loading: () => <String>[],
@@ -421,14 +450,15 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
   Widget _buildDocumentsWithFolders() {
     final foldersAsync = ref.watch(foldersProvider);
     final documentsAsync = ref.watch(documentsProvider(null));
-    
+
     return foldersAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
+            Icon(Icons.error_outline,
+                size: 48, color: Theme.of(context).colorScheme.error),
             const SizedBox(height: 16),
             Text('Hata: $error'),
           ],
@@ -441,7 +471,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
+                Icon(Icons.error_outline,
+                    size: 48, color: Theme.of(context).colorScheme.error),
                 const SizedBox(height: 16),
                 Text('Hata: $error'),
               ],
@@ -452,18 +483,23 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
             final searchQuery = ref.watch(searchQueryProvider);
             final filteredDocs = searchQuery.isEmpty
                 ? documents
-                : documents.where((doc) => 
-                    doc.title.toLowerCase().contains(searchQuery.toLowerCase())
-                  ).toList();
-            
+                : documents
+                    .where((doc) => doc.title
+                        .toLowerCase()
+                        .contains(searchQuery.toLowerCase()))
+                    .toList();
+
             // Filter folders: only root level folders in documents section
-            var filteredFolders = folders.where((f) => f.parentId == null).toList();
+            var filteredFolders =
+                folders.where((f) => f.parentId == null).toList();
             if (searchQuery.isNotEmpty) {
-              filteredFolders = filteredFolders.where((folder) => 
-                folder.name.toLowerCase().contains(searchQuery.toLowerCase())
-              ).toList();
+              filteredFolders = filteredFolders
+                  .where((folder) => folder.name
+                      .toLowerCase()
+                      .contains(searchQuery.toLowerCase()))
+                  .toList();
             }
-            
+
             // Show empty state if both are empty
             if (filteredFolders.isEmpty && filteredDocs.isEmpty) {
               if (searchQuery.isNotEmpty) {
@@ -471,7 +507,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
               }
               return const DocumentsEmptyState();
             }
-            
+
             // Build combined grid/list with folders first
             return _buildCombinedView(filteredFolders, filteredDocs);
           },
@@ -484,14 +520,15 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
   Widget _buildFolderContents(String? folderId) {
     final foldersAsync = ref.watch(foldersProvider);
     final documentsAsync = ref.watch(documentsProvider(folderId));
-    
+
     return foldersAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
+            Icon(Icons.error_outline,
+                size: 48, color: Theme.of(context).colorScheme.error),
             const SizedBox(height: 16),
             Text('Hata: $error'),
           ],
@@ -504,7 +541,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
+                Icon(Icons.error_outline,
+                    size: 48, color: Theme.of(context).colorScheme.error),
                 const SizedBox(height: 16),
                 Text('Hata: $error'),
               ],
@@ -515,18 +553,23 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
             final searchQuery = ref.watch(searchQueryProvider);
             final filteredDocs = searchQuery.isEmpty
                 ? documents
-                : documents.where((doc) => 
-                    doc.title.toLowerCase().contains(searchQuery.toLowerCase())
-                  ).toList();
-            
+                : documents
+                    .where((doc) => doc.title
+                        .toLowerCase()
+                        .contains(searchQuery.toLowerCase()))
+                    .toList();
+
             // Filter folders: only subfolders of current folder
-            var subfolders = allFolders.where((f) => f.parentId == folderId).toList();
+            var subfolders =
+                allFolders.where((f) => f.parentId == folderId).toList();
             if (searchQuery.isNotEmpty) {
-              subfolders = subfolders.where((folder) => 
-                folder.name.toLowerCase().contains(searchQuery.toLowerCase())
-              ).toList();
+              subfolders = subfolders
+                  .where((folder) => folder.name
+                      .toLowerCase()
+                      .contains(searchQuery.toLowerCase()))
+                  .toList();
             }
-            
+
             // Show empty state if both are empty
             if (subfolders.isEmpty && filteredDocs.isEmpty) {
               if (searchQuery.isNotEmpty) {
@@ -550,7 +593,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                 ),
               );
             }
-            
+
             // Build combined grid/list with subfolders first
             return _buildCombinedView(subfolders, filteredDocs);
           },
@@ -559,9 +602,10 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     );
   }
 
-  Widget _buildCombinedView(List<Folder> folders, List<DocumentInfo> documents) {
+  Widget _buildCombinedView(
+      List<Folder> folders, List<DocumentInfo> documents) {
     final viewMode = ref.watch(viewModeProvider);
-    
+
     if (viewMode == ViewMode.grid) {
       return _buildCombinedGridView(folders, documents);
     } else {
@@ -569,22 +613,23 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     }
   }
 
-  Widget _buildCombinedGridView(List<Folder> folders, List<DocumentInfo> documents) {
+  Widget _buildCombinedGridView(
+      List<Folder> folders, List<DocumentInfo> documents) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
         final cardWidth = width < 600 ? 160.0 : 180.0;
         final spacing = width < 600 ? 16.0 : 24.0;
         final padding = width < 600 ? 16.0 : 32.0;
-        
+
         // Selection state
         final isSelectionMode = ref.watch(selectionModeProvider);
         final selectedDocuments = ref.watch(selectedDocumentsProvider);
         final selectedFolders = ref.watch(selectedFoldersProvider);
-        
+
         // Sort documents using helper method
         final sortedDocs = _sortDocuments(documents);
-        
+
         return Padding(
           padding: EdgeInsets.symmetric(horizontal: padding),
           child: GridView.builder(
@@ -600,7 +645,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
               if (index < folders.length) {
                 final folder = folders[index];
                 final isSelected = selectedFolders.contains(folder.id);
-                
+
                 return FolderCard(
                   folder: folder,
                   isSelectionMode: isSelectionMode,
@@ -608,19 +653,21 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                   onTap: () {
                     // Re-read current state to avoid closure issue
                     final currentSelection = ref.read(selectedFoldersProvider);
-                    final isCurrentlySelected = currentSelection.contains(folder.id);
-                    
+                    final isCurrentlySelected =
+                        currentSelection.contains(folder.id);
+
                     if (isSelectionMode) {
                       // Toggle folder selection
                       final newSelection = Set<String>.from(currentSelection);
-                      
+
                       if (isCurrentlySelected) {
                         newSelection.remove(folder.id);
                       } else {
                         newSelection.add(folder.id);
                       }
-                      
-                      ref.read(selectedFoldersProvider.notifier).state = newSelection;
+
+                      ref.read(selectedFoldersProvider.notifier).state =
+                          newSelection;
                     } else {
                       // Navigate into folder
                       setState(() {
@@ -628,7 +675,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                         _selectedFolderId = folder.id;
                       });
                       // Update current folder provider
-                      ref.read(currentFolderIdProvider.notifier).state = folder.id;
+                      ref.read(currentFolderIdProvider.notifier).state =
+                          folder.id;
                     }
                   },
                   onMorePressed: () {
@@ -636,12 +684,12 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                   },
                 );
               }
-              
+
               // Then show documents
               final docIndex = index - folders.length;
               final doc = sortedDocs[docIndex];
               final isSelected = selectedDocuments.contains(doc.id);
-              
+
               return DocumentCard(
                 document: doc,
                 isSelectionMode: isSelectionMode,
@@ -655,7 +703,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                     } else {
                       newSelection.add(doc.id);
                     }
-                    ref.read(selectedDocumentsProvider.notifier).state = newSelection;
+                    ref.read(selectedDocumentsProvider.notifier).state =
+                        newSelection;
                   } else {
                     _openDocument(doc.id);
                   }
@@ -669,14 +718,15 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     );
   }
 
-  Widget _buildCombinedListView(List<Folder> folders, List<DocumentInfo> documents) {
+  Widget _buildCombinedListView(
+      List<Folder> folders, List<DocumentInfo> documents) {
     // Selection state
     final isSelectionMode = ref.watch(selectionModeProvider);
     final selectedFolders = ref.watch(selectedFoldersProvider);
-    
+
     // Sort documents using helper method
     final sortedDocs = _sortDocuments(documents);
-    
+
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
       itemCount: folders.length + sortedDocs.length,
@@ -685,7 +735,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
         if (index < folders.length) {
           final folder = folders[index];
           final isSelected = selectedFolders.contains(folder.id);
-          
+
           return Card(
             margin: const EdgeInsets.only(bottom: 8),
             shape: RoundedRectangleBorder(
@@ -746,19 +796,21 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
               onTap: () {
                 // Re-read current state to avoid closure issue
                 final currentSelection = ref.read(selectedFoldersProvider);
-                final isCurrentlySelected = currentSelection.contains(folder.id);
-                
+                final isCurrentlySelected =
+                    currentSelection.contains(folder.id);
+
                 if (isSelectionMode) {
                   // Toggle folder selection
                   final newSelection = Set<String>.from(currentSelection);
-                  
+
                   if (isCurrentlySelected) {
                     newSelection.remove(folder.id);
                   } else {
                     newSelection.add(folder.id);
                   }
-                  
-                  ref.read(selectedFoldersProvider.notifier).state = newSelection;
+
+                  ref.read(selectedFoldersProvider.notifier).state =
+                      newSelection;
                 } else {
                   // Navigate into folder
                   setState(() {
@@ -772,7 +824,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
             ),
           );
         }
-        
+
         // Then show documents
         final docIndex = index - folders.length;
         final doc = sortedDocs[docIndex];
@@ -781,14 +833,16 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     );
   }
 
-  Widget _buildDocumentGridContent(AsyncValue<List<DocumentInfo>> documentsAsync) {
+  Widget _buildDocumentGridContent(
+      AsyncValue<List<DocumentInfo>> documentsAsync) {
     return documentsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
+            Icon(Icons.error_outline,
+                size: 48, color: Theme.of(context).colorScheme.error),
             const SizedBox(height: 16),
             Text('Hata: $error'),
           ],
@@ -807,9 +861,10 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
         // Filter by search query
         final filtered = searchQuery.isEmpty
             ? sorted
-            : sorted.where((doc) => 
-                doc.title.toLowerCase().contains(searchQuery.toLowerCase())
-              ).toList();
+            : sorted
+                .where((doc) =>
+                    doc.title.toLowerCase().contains(searchQuery.toLowerCase()))
+                .toList();
 
         // Show empty search result if filtered is empty but search is active
         if (filtered.isEmpty && searchQuery.isNotEmpty) {
@@ -833,7 +888,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
         final cardWidth = width < 600 ? 160.0 : 180.0;
         final spacing = width < 600 ? 16.0 : 24.0;
         final padding = width < 600 ? 16.0 : 32.0;
-        
+
         return Padding(
           padding: EdgeInsets.symmetric(horizontal: padding),
           child: GridView.builder(
@@ -865,7 +920,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
       builder: (context, constraints) {
         final width = constraints.maxWidth;
         final padding = width < 600 ? 16.0 : 32.0;
-        
+
         return Padding(
           padding: EdgeInsets.symmetric(horizontal: padding),
           child: ListView.builder(
@@ -885,7 +940,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     final isSelectionMode = ref.watch(selectionModeProvider);
     final selectedDocuments = ref.watch(selectedDocumentsProvider);
     final isSelected = selectedDocuments.contains(doc.id);
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       shape: RoundedRectangleBorder(
@@ -973,7 +1028,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                       children: [
                         // Thumbnail
                         _buildListThumbnail(doc),
-                        
+
                         // Page count badge
                         if (doc.pageCount > 1)
                           Positioned(
@@ -1002,9 +1057,9 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                     ),
                   ),
                 ),
-              
+
               const SizedBox(width: 12),
-              
+
               // Document info
               Expanded(
                 child: Column(
@@ -1031,27 +1086,27 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                   ],
                 ),
               ),
-              
+
               // Favorite star and chevron (hidden in selection mode)
               if (!isSelectionMode)
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (doc.isFavorite)
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: Icon(
-                        Icons.star,
-                        size: 18,
-                        color: Theme.of(context).colorScheme.primary,
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: Icon(
+                          Icons.star,
+                          size: 18,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                       ),
+                    Icon(
+                      Icons.chevron_right,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
-                  Icon(
-                    Icons.chevron_right,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ],
-              ),
+                  ],
+                ),
             ],
           ),
         ),
@@ -1073,7 +1128,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
         );
       }
     }
-    
+
     // Template pattern preview (same as DocumentCard)
     // Notebook için spiral defter görünümü
     if (doc.documentType == core.DocumentType.notebook) {
@@ -1127,7 +1182,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
         ],
       );
     }
-    
+
     // Diğer tipler için basit pattern
     return CustomPaint(
       painter: DocumentThumbnailPainter(doc.templateId),
@@ -1159,7 +1214,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final difference = now.difference(date);
-    
+
     if (difference.inDays == 0) {
       return 'Bugün ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
     } else if (difference.inDays == 1) {
@@ -1219,7 +1274,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
           ref.read(currentPdfFilePathProvider.notifier).state = pdfFilePath;
           ref.read(totalPdfPagesProvider.notifier).state = pdfPages.length;
           ref.read(visiblePdfPageProvider.notifier).state = 0;
-          
+
           // PREFETCH YOK - Canvas açılınca kendi render edecek
         }
 
@@ -1238,7 +1293,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
   void _showDocumentMenu(DocumentInfo document) {
     // Different menu for trash section
     final isTrash = _selectedSection == SidebarSection.trash;
-    
+
     if (isTrash) {
       _showTrashDocumentMenu(document);
     } else {
@@ -1261,7 +1316,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
               title: const Text('Kurtar'),
               onTap: () async {
                 Navigator.pop(context);
-                final controller = ref.read(documentsControllerProvider.notifier);
+                final controller =
+                    ref.read(documentsControllerProvider.notifier);
                 final result = await controller.restoreFromTrash(document.id);
                 if (mounted) {
                   if (result) {
@@ -1286,10 +1342,11 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
             const Divider(),
             ListTile(
               leading: Icon(Icons.delete_forever, color: Colors.red.shade400),
-              title: Text('Kalıcı Sil', style: TextStyle(color: Colors.red.shade400)),
+              title: Text('Kalıcı Sil',
+                  style: TextStyle(color: Colors.red.shade400)),
               onTap: () async {
                 Navigator.pop(context);
-                
+
                 // Show confirmation dialog
                 final confirmed = await showDialog<bool>(
                   context: context,
@@ -1315,7 +1372,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                 );
 
                 if (confirmed == true && mounted) {
-                  final controller = ref.read(documentsControllerProvider.notifier);
+                  final controller =
+                      ref.read(documentsControllerProvider.notifier);
                   await controller.permanentlyDeleteDocument(document.id);
                 }
               },
@@ -1350,7 +1408,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
               title: const Text('Çoğalt'),
               onTap: () async {
                 Navigator.pop(context);
-                final controller = ref.read(documentsControllerProvider.notifier);
+                final controller =
+                    ref.read(documentsControllerProvider.notifier);
                 final result = await controller.duplicateDocument(document.id);
                 if (mounted) {
                   if (result) {
@@ -1377,23 +1436,23 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
               title: const Text('Taşı'),
               onTap: () async {
                 Navigator.pop(context);
-                
+
                 // Save scaffold messenger before async gap
                 final messenger = ScaffoldMessenger.of(context);
-                
+
                 final result = await showDialog<bool>(
                   context: context,
                   builder: (context) => MoveToFolderDialog(
                     documentIds: [document.id],
                   ),
                 );
-                
+
                 // Refresh providers and show success message if moved
                 if (result == true) {
                   // Refresh providers to update folder counts and document lists
                   ref.invalidate(foldersProvider);
                   ref.invalidate(documentsProvider);
-                  
+
                   messenger.showSnackBar(
                     const SnackBar(
                       content: Text('Belge taşındı'),
@@ -1418,10 +1477,13 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
             const Divider(),
             ListTile(
               leading: Icon(Icons.delete_outline, color: Colors.red.shade400),
-              title: Text('Çöpe Taşı', style: TextStyle(color: Colors.red.shade400)),
+              title: Text('Çöpe Taşı',
+                  style: TextStyle(color: Colors.red.shade400)),
               onTap: () {
                 Navigator.pop(context);
-                ref.read(documentsControllerProvider.notifier).moveToTrash(document.id);
+                ref
+                    .read(documentsControllerProvider.notifier)
+                    .moveToTrash(document.id);
               },
             ),
             const SizedBox(height: 8),
@@ -1491,22 +1553,22 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
               title: const Text('Taşı'),
               onTap: () async {
                 Navigator.pop(context);
-                
+
                 // Save scaffold messenger before async gap
                 final messenger = ScaffoldMessenger.of(context);
-                
+
                 final result = await showDialog<bool>(
                   context: context,
                   builder: (context) => MoveToFolderDialog(
                     folderIds: [folder.id],
                   ),
                 );
-                
+
                 // Refresh providers if moved
                 if (result == true) {
                   ref.invalidate(foldersProvider);
                   ref.invalidate(documentsProvider);
-                  
+
                   messenger.showSnackBar(
                     const SnackBar(
                       content: Text('Klasör taşındı'),
@@ -1530,7 +1592,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
               title: Text('Sil', style: TextStyle(color: Colors.red.shade400)),
               onTap: () async {
                 Navigator.pop(context);
-                
+
                 // Show confirmation dialog
                 final confirmed = await showDialog<bool>(
                   context: context,
@@ -1556,11 +1618,12 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                     ],
                   ),
                 );
-                
+
                 if (confirmed == true && mounted) {
-                  final controller = ref.read(foldersControllerProvider.notifier);
+                  final controller =
+                      ref.read(foldersControllerProvider.notifier);
                   final success = await controller.deleteFolder(folder.id);
-                  
+
                   if (mounted) {
                     if (success) {
                       // If we're in the deleted folder, go back to documents
@@ -1571,7 +1634,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                         });
                         ref.read(currentFolderIdProvider.notifier).state = null;
                       }
-                      
+
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text('Klasör silindi'),
@@ -1623,17 +1686,20 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
             onPressed: () async {
               final newName = controller.text.trim();
               controller.dispose();
-              
+
               if (newName.isNotEmpty && newName != folder.name) {
                 Navigator.pop(context);
-                final folderController = ref.read(foldersControllerProvider.notifier);
-                final success = await folderController.renameFolder(folder.id, newName);
-                
+                final folderController =
+                    ref.read(foldersControllerProvider.notifier);
+                final success =
+                    await folderController.renameFolder(folder.id, newName);
+
                 if (mounted) {
                   if (success) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Klasör "$newName" olarak yeniden adlandırıldı'),
+                        content: Text(
+                            'Klasör "$newName" olarak yeniden adlandırıldı'),
                         behavior: SnackBarBehavior.floating,
                       ),
                     );
@@ -1668,4 +1734,3 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     );
   }
 }
-

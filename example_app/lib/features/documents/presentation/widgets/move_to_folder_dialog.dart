@@ -1,5 +1,11 @@
+/// StarNote Move to Folder Dialog - Design system dialog
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/documents/domain/entities/folder.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
@@ -8,13 +14,7 @@ import 'package:example_app/features/documents/presentation/providers/documents_
 class MoveToFolderDialog extends ConsumerStatefulWidget {
   final List<String> documentIds;
   final List<String> folderIds;
-
-  const MoveToFolderDialog({
-    super.key,
-    this.documentIds = const [],
-    this.folderIds = const [],
-  });
-
+  const MoveToFolderDialog({super.key, this.documentIds = const [], this.folderIds = const []});
   @override
   ConsumerState<MoveToFolderDialog> createState() => _MoveToFolderDialogState();
 }
@@ -30,420 +30,159 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
     super.dispose();
   }
 
+  bool get _isFolderMode => widget.documentIds.isEmpty && widget.folderIds.isEmpty;
+  bool get _isMovingFolder => widget.folderIds.isNotEmpty;
+
   @override
   Widget build(BuildContext context) {
     final foldersAsync = ref.watch(foldersProvider);
-    final theme = Theme.of(context);
-    final isFolderManagementMode = widget.documentIds.isEmpty && widget.folderIds.isEmpty;
-    final isMovingFolder = widget.folderIds.isNotEmpty;
-
     return GestureDetector(
-      onTap: () {
-        // Dismiss keyboard when tapping outside
-        FocusScope.of(context).unfocus();
-      },
-      child: MediaQuery.removeViewInsets(
-        removeBottom: true,
-        context: context,
-        child: Dialog(
-          child: GestureDetector(
-            onTap: () {}, // Prevent dialog from closing when tapped
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                maxWidth: 500,
-                maxHeight: 600,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Header
-                  Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      children: [
-                        Text(
-                          isFolderManagementMode 
-                              ? 'Klasör Yönetimi' 
-                              : isMovingFolder
-                                  ? 'Klasörü Taşı'
-                                  : 'Klasöre Taşı',
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const Spacer(),
-                        IconButton(
-                          icon: const Icon(Icons.close),
-                          onPressed: () => Navigator.pop(context),
-                          tooltip: 'Kapat',
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
-                        ),
-                      ],
-                    ),
-                  ),
-                  
-                  // New folder section (moved to top)
-                  if (_isCreatingFolder) ...[
-                    const Divider(height: 1),
-                    _buildNewFolderSection(),
-                  ],
-                  
-                  const Divider(height: 1),
-
-                  // Folder list or loading/error - flexible
-                  Flexible(
-                    child: foldersAsync.when(
-                      data: (folders) => _buildFolderList(folders),
-                      loading: () => const Center(child: CircularProgressIndicator()),
-                      error: (error, stack) => Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.error_outline, size: 48, color: Colors.red),
-                              const SizedBox(height: 16),
-                              Text('Klasörler yüklenemedi: $error'),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const Divider(height: 1),
-
-                  // Bottom actions (always visible)
-                  Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Row(
-                      children: [
-                        // New Folder button
-                        if (!_isCreatingFolder)
-                          TextButton.icon(
-                            onPressed: () {
-                              setState(() => _isCreatingFolder = true);
-                            },
-                            icon: const Icon(Icons.create_new_folder, size: 18),
-                            label: const Text('Yeni Klasör'),
-                            style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            ),
-                          ),
-                        const Spacer(),
-
-                        // Cancel/Done button
-                        if (isFolderManagementMode)
-                          FilledButton(
-                            onPressed: () => Navigator.pop(context, true),
-                            style: FilledButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            ),
-                            child: const Text('Bitti'),
-                          )
-                        else ...[
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text('İptal'),
-                            style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          // Move button
-                          FilledButton(
-                            onPressed: _selectedFolderId != null ? _handleMove : null,
-                            style: FilledButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            ),
-                            child: const Text('Taşı'),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Dialog(
+        backgroundColor: AppColors.surfaceLight,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.card)),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            _buildHeader(),
+            if (_isCreatingFolder) _buildNewFolderSection(),
+            const AppDivider(),
+            Flexible(child: foldersAsync.when(
+              data: _buildFolderList,
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, _) => _buildError(e),
+            )),
+            const AppDivider(),
+            _buildActions(),
+          ]),
         ),
       ),
     );
   }
 
-  Widget _buildFolderList(List<Folder> folders) {
-    final isFolderManagementMode = widget.documentIds.isEmpty && widget.folderIds.isEmpty;
-    final isMovingFolder = widget.folderIds.isNotEmpty;
-    
-    // Filter out folders that can't be selected when moving a folder
-    List<Folder> availableFolders = folders;
-    if (isMovingFolder && widget.folderIds.isNotEmpty) {
-      final movingFolderId = widget.folderIds.first;
-      // Exclude the folder being moved and its descendants
-      availableFolders = folders.where((folder) {
-        // Can't move into itself
-        if (folder.id == movingFolderId) return false;
-        // Can't move into its own descendants (check parentId chain)
-        // For now, simple check: exclude if parentId is the moving folder
-        if (folder.parentId == movingFolderId) return false;
-        return true;
-      }).toList();
-    }
-    
-    if (availableFolders.isEmpty && !isMovingFolder) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.folder_outlined,
-              size: 64,
-              color: Theme.of(context).colorScheme.outline,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Henüz klasör yok',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              isFolderManagementMode
-                  ? '"Yeni Klasör" butonuna tıklayarak\nklasör oluşturabilirsiniz'
-                  : 'Yeni klasör oluşturarak başlayın',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ],
-        ),
-      );
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: availableFolders.length + 1, // +1 for "Root" option
-      itemBuilder: (context, index) {
-        // First item: "Belgeler" (Root - no folder)
-        if (index == 0) {
-          final isSelected = _selectedFolderId == null;
-          return ListTile(
-            leading: Icon(
-              Icons.home_outlined,
-              color: isSelected
-                  ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-            title: Text(
-              isMovingFolder ? 'Ana Klasörler' : 'Belgeler (Klasörsüz)',
-              style: TextStyle(
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color: isSelected
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.onSurface,
-              ),
-            ),
-            trailing: isSelected
-                ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary)
-                : null,
-            selected: isSelected,
-            onTap: () {
-              setState(() => _selectedFolderId = null);
-            },
-          );
-        }
-
-        // Folder items
-        final folder = availableFolders[index - 1];
-        final isSelected = _selectedFolderId == folder.id;
-        
-        return ListTile(
-          leading: Icon(
-            Icons.folder,
-            color: isSelected
-                ? Theme.of(context).colorScheme.primary
-                : Color(folder.colorValue),
-          ),
-          title: Text(folder.name),
-          subtitle: Text('${folder.documentCount} belge'),
-          trailing: isSelected
-              ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary)
-              : null,
-          selected: isSelected,
-          onTap: () {
-            setState(() => _selectedFolderId = folder.id);
-          },
-        );
-      },
+  Widget _buildHeader() {
+    final title = _isFolderMode ? 'Klasör Yönetimi' : _isMovingFolder ? 'Klasörü Taşı' : 'Klasöre Taşı';
+    return Padding(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Row(children: [
+        Text(title, style: AppTypography.titleLarge.copyWith(color: AppColors.textPrimaryLight, fontWeight: FontWeight.bold)),
+        const Spacer(),
+        AppIconButton(icon: Icons.close, variant: AppIconButtonVariant.ghost, size: AppIconButtonSize.small, onPressed: () => Navigator.pop(context)),
+      ]),
     );
   }
 
   Widget _buildNewFolderSection() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      color: Theme.of(context).colorScheme.surfaceContainerHighest,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.create_new_folder, size: 16),
-              const SizedBox(width: 6),
-              Text(
-                'Yeni Klasör',
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _newFolderController,
-                  decoration: const InputDecoration(
-                    labelText: 'Klasör Adı',
-                    border: OutlineInputBorder(),
-                    isDense: true,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  ),
-                  style: const TextStyle(fontSize: 14),
-                  autofocus: true,
-                  onSubmitted: (_) => _handleCreateFolder(),
-                ),
-              ),
-              const SizedBox(width: 6),
-              FilledButton(
-                onPressed: _handleCreateFolder,
-                style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  minimumSize: const Size(0, 32),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: const Text('Oluştur', style: TextStyle(fontSize: 13)),
-              ),
-              const SizedBox(width: 4),
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    _isCreatingFolder = false;
-                    _newFolderController.clear();
-                  });
-                },
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-                  minimumSize: const Size(0, 32),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: const Text('İptal', style: TextStyle(fontSize: 13)),
-              ),
-            ],
-          ),
-        ],
-      ),
+      padding: const EdgeInsets.all(AppSpacing.md),
+      color: AppColors.surfaceVariantLight,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, mainAxisSize: MainAxisSize.min, children: [
+        Row(children: [
+          const Icon(Icons.create_new_folder, size: AppIconSize.sm, color: AppColors.textSecondaryLight),
+          const SizedBox(width: AppSpacing.sm),
+          Text('Yeni Klasör', style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.bold)),
+        ]),
+        const SizedBox(height: AppSpacing.sm),
+        Row(children: [
+          Expanded(child: TextField(
+            controller: _newFolderController, autofocus: true,
+            decoration: InputDecoration(
+              labelText: 'Klasör Adı',
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.sm)),
+              isDense: true,
+              contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+            ),
+            onSubmitted: (_) => _handleCreateFolder(),
+          )),
+          const SizedBox(width: AppSpacing.sm),
+          AppButton(label: 'Oluştur', size: AppButtonSize.small, onPressed: _handleCreateFolder),
+          const SizedBox(width: AppSpacing.xs),
+          AppButton(label: 'İptal', variant: AppButtonVariant.ghost, size: AppButtonSize.small, onPressed: () => setState(() { _isCreatingFolder = false; _newFolderController.clear(); })),
+        ]),
+      ]),
     );
   }
 
+  Widget _buildFolderList(List<Folder> folders) {
+    var available = folders;
+    if (_isMovingFolder && widget.folderIds.isNotEmpty) {
+      final id = widget.folderIds.first;
+      available = folders.where((f) => f.id != id && f.parentId != id).toList();
+    }
+    if (available.isEmpty && !_isMovingFolder) {
+      return const AppEmptyState(icon: Icons.folder_outlined, title: 'Henüz klasör yok', description: 'Yeni klasör oluşturarak başlayın');
+    }
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+      itemCount: available.length + 1,
+      itemBuilder: (ctx, i) => i == 0 ? _buildRootOption() : _buildFolderOption(available[i - 1]),
+    );
+  }
+
+  Widget _buildRootOption() {
+    final sel = _selectedFolderId == null;
+    return ListTile(
+      leading: Icon(Icons.home_outlined, color: sel ? AppColors.primary : AppColors.textSecondaryLight),
+      title: Text(_isMovingFolder ? 'Ana Klasörler' : 'Belgeler (Klasörsüz)',
+          style: AppTypography.bodyLarge.copyWith(fontWeight: sel ? FontWeight.w600 : FontWeight.normal, color: sel ? AppColors.primary : AppColors.textPrimaryLight)),
+      trailing: sel ? const Icon(Icons.check, color: AppColors.primary) : null,
+      onTap: () => setState(() => _selectedFolderId = null),
+    );
+  }
+
+  Widget _buildFolderOption(Folder folder) {
+    final sel = _selectedFolderId == folder.id;
+    return ListTile(
+      leading: Icon(Icons.folder, color: sel ? AppColors.primary : Color(folder.colorValue)),
+      title: Text(folder.name, style: AppTypography.bodyLarge.copyWith(color: sel ? AppColors.primary : AppColors.textPrimaryLight)),
+      subtitle: Text('${folder.documentCount} belge', style: AppTypography.caption.copyWith(color: AppColors.textSecondaryLight)),
+      trailing: sel ? const Icon(Icons.check, color: AppColors.primary) : null,
+      onTap: () => setState(() => _selectedFolderId = folder.id),
+    );
+  }
+
+  Widget _buildError(Object error) => Center(
+    child: Padding(padding: const EdgeInsets.all(AppSpacing.lg), child: Column(mainAxisSize: MainAxisSize.min, children: [
+      const Icon(Icons.error_outline, size: AppIconSize.emptyState, color: AppColors.error),
+      const SizedBox(height: AppSpacing.lg),
+      Text('Klasörler yüklenemedi: $error', style: AppTypography.bodyMedium),
+    ])),
+  );
+
+  Widget _buildActions() => Padding(
+    padding: const EdgeInsets.all(AppSpacing.md),
+    child: Row(children: [
+      if (!_isCreatingFolder) AppButton(label: 'Yeni Klasör', leadingIcon: Icons.create_new_folder, variant: AppButtonVariant.ghost, size: AppButtonSize.small, onPressed: () => setState(() => _isCreatingFolder = true)),
+      const Spacer(),
+      if (_isFolderMode) AppButton(label: 'Bitti', onPressed: () => Navigator.pop(context, true))
+      else ...[
+        AppButton(label: 'İptal', variant: AppButtonVariant.ghost, onPressed: () => Navigator.pop(context)),
+        const SizedBox(width: AppSpacing.sm),
+        AppButton(label: 'Taşı', onPressed: _selectedFolderId != null ? _handleMove : null),
+      ],
+    ]),
+  );
+
   Future<void> _handleCreateFolder() async {
     final name = _newFolderController.text.trim();
-    if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Klasör adı boş olamaz'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
-    }
-
-    final controller = ref.read(foldersControllerProvider.notifier);
-    final folderId = await controller.createFolder(name: name);
-
-    if (folderId != null && mounted) {
-      // Refresh folders provider to show the new folder
+    if (name.isEmpty) { AppToast.error(context, 'Klasör adı boş olamaz'); return; }
+    final id = await ref.read(foldersControllerProvider.notifier).createFolder(name: name);
+    if (id != null && mounted) {
       ref.invalidate(foldersProvider);
-      
-      setState(() {
-        _selectedFolderId = folderId;
-        _isCreatingFolder = false;
-        _newFolderController.clear();
-      });
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Klasör "$name" oluşturuldu'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    } else if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Klasör oluşturulamadı'),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
+      setState(() { _selectedFolderId = id; _isCreatingFolder = false; _newFolderController.clear(); });
+      AppToast.success(context, 'Klasör "$name" oluşturuldu');
+    } else if (mounted) { AppToast.error(context, 'Klasör oluşturulamadı'); }
   }
 
   Future<void> _handleMove() async {
-    bool documentsSuccess = true;
-    bool foldersSuccess = true;
-    
-    // Move documents if any
+    bool success = true;
     if (widget.documentIds.isNotEmpty) {
-      final docController = ref.read(documentsControllerProvider.notifier);
-      documentsSuccess = await docController.moveDocumentsToFolder(
-        widget.documentIds,
-        _selectedFolderId,
-      );
+      success = await ref.read(documentsControllerProvider.notifier).moveDocumentsToFolder(widget.documentIds, _selectedFolderId);
     }
-    
-    // Move folders if any
-    if (widget.folderIds.isNotEmpty) {
-      final folderController = ref.read(foldersControllerProvider.notifier);
-      for (final folderId in widget.folderIds) {
-        final folderSuccess = await folderController.moveFolder(
-          folderId: folderId,
-          newParentId: _selectedFolderId,
-        );
-        if (!folderSuccess) {
-          foldersSuccess = false;
-          break;
-        }
-      }
+    if (widget.folderIds.isNotEmpty && success) {
+      final ctrl = ref.read(foldersControllerProvider.notifier);
+      for (final fid in widget.folderIds) { success = await ctrl.moveFolder(folderId: fid, newParentId: _selectedFolderId); if (!success) break; }
     }
-
-    final success = documentsSuccess && foldersSuccess;
-
-    if (mounted) {
-      if (success) {
-        // Just close the dialog with success result
-        // Parent will handle refresh and snackbar
-        Navigator.pop(context, true);
-      } else {
-        String errorMessage = 'Taşıma başarısız';
-        if (!documentsSuccess && !foldersSuccess) {
-          errorMessage = 'Belgeler ve klasörler taşınamadı';
-        } else if (!documentsSuccess) {
-          errorMessage = 'Belgeler taşınamadı';
-        } else if (!foldersSuccess) {
-          errorMessage = 'Klasörler taşınamadı';
-        }
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    }
+    if (mounted) { success ? Navigator.pop(context, true) : AppToast.error(context, 'Taşıma başarısız'); }
   }
 }

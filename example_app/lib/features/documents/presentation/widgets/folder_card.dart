@@ -1,7 +1,17 @@
-import 'package:flutter/material.dart';
-import 'package:example_app/features/documents/domain/entities/folder.dart';
+/// StarNote Folder Card
+///
+/// Klasör kartı widget'ı. AppCard (filled variant) kullanır.
+library;
 
-class FolderCard extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/core/widgets/index.dart';
+import 'package:example_app/features/documents/domain/entities/folder.dart';
+import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
+
+class FolderCard extends ConsumerWidget {
   final Folder folder;
   final VoidCallback onTap;
   final VoidCallback? onMorePressed;
@@ -18,120 +28,98 @@ class FolderCard extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: isSelected
-              ? Theme.of(context).colorScheme.primary
-              : Theme.of(context).colorScheme.outlineVariant,
-          width: isSelected ? 2 : 1,
-        ),
-      ),
+  Widget build(BuildContext context, WidgetRef ref) {
+    return AppCard(
+      variant: AppCardVariant.filled,
+      isSelected: isSelected,
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      onTap: onTap,
+      onLongPress: () {
+        if (!isSelectionMode) {
+          ref.read(selectionModeProvider.notifier).state = true;
+          ref.read(selectedFoldersProvider.notifier).state = {folder.id};
+        }
+      },
       child: Stack(
         children: [
-          InkWell(
-            onTap: onTap,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Folder icon and more button
+              Row(
                 children: [
-                  // Folder Icon and More button
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.folder,
-                        size: 48,
-                        color: Color(folder.colorValue),
-                      ),
-                      const Spacer(),
-                      if (!isSelectionMode && onMorePressed != null)
-                        IconButton(
-                          icon: const Icon(Icons.more_vert, size: 20),
-                          onPressed: onMorePressed,
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
-                          tooltip: 'Daha fazla',
-                        ),
-                    ],
+                  Icon(
+                    Icons.folder,
+                    size: AppIconSize.xl + AppIconSize.lg,
+                    color: Color(folder.colorValue),
                   ),
-                  
-                  const SizedBox(height: 12),
-                  
-                  // Folder name
-                  Text(
-                    folder.name,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  
-                  const SizedBox(height: 4),
-                  
-                  // Document count
-                  Text(
-                    '${folder.documentCount} belge',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                  ),
+                  const Spacer(),
+                  if (!isSelectionMode && onMorePressed != null)
+                    AppIconButton(
+                      icon: Icons.more_vert,
+                      variant: AppIconButtonVariant.ghost,
+                      size: AppIconButtonSize.small,
+                      tooltip: 'Daha fazla',
+                      onPressed: onMorePressed,
+                    ),
                 ],
               ),
-            ),
+              const SizedBox(height: AppSpacing.md),
+              // Folder name
+              Text(
+                folder.name,
+                style: AppTypography.titleMedium.copyWith(
+                  color: AppColors.textPrimaryLight,
+                  fontWeight: FontWeight.w600,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              // Document count
+              Text(
+                '${folder.documentCount} belge',
+                style: AppTypography.caption.copyWith(
+                  color: AppColors.textSecondaryLight,
+                ),
+              ),
+            ],
           ),
-          
-          // Selection indicator
+          // Selection checkbox
           if (isSelectionMode)
             Positioned(
-              top: 8,
-              right: 8,
-              child: IgnorePointer(
-                child: Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: isSelected
-                        ? Theme.of(context).colorScheme.primary
-                        : Colors.white,
-                    border: Border.all(
-                      color: isSelected
-                          ? Theme.of(context).colorScheme.primary
-                          : Colors.grey.shade400,
-                      width: 2,
-                    ),
-                  ),
-                  child: isSelected
-                      ? Icon(
-                          Icons.check,
-                          size: 16,
-                          color: Theme.of(context).colorScheme.onPrimary,
-                        )
-                      : null,
-                ),
-              ),
-            ),
-          
-          // Selection overlay
-          if (isSelected)
-            Positioned.fill(
-              child: IgnorePointer(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.08),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
+              top: 0,
+              right: 0,
+              child: _SelectionCheckbox(isSelected: isSelected),
             ),
         ],
       ),
+    );
+  }
+}
+
+/// Selection checkbox widget
+class _SelectionCheckbox extends StatelessWidget {
+  final bool isSelected;
+
+  const _SelectionCheckbox({required this.isSelected});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 24,
+      height: 24,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: isSelected ? AppColors.primary : AppColors.surfaceLight,
+        border: Border.all(
+          color: isSelected ? AppColors.primary : AppColors.outlineLight,
+          width: 2,
+        ),
+      ),
+      child: isSelected
+          ? const Icon(Icons.check, size: 16, color: AppColors.onPrimary)
+          : null,
     );
   }
 }
