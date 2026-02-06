@@ -23,10 +23,12 @@ class TemplateSelectionScreen extends ConsumerStatefulWidget {
   const TemplateSelectionScreen({super.key});
 
   @override
-  ConsumerState<TemplateSelectionScreen> createState() => _TemplateSelectionScreenState();
+  ConsumerState<TemplateSelectionScreen> createState() =>
+      _TemplateSelectionScreenState();
 }
 
-class _TemplateSelectionScreenState extends ConsumerState<TemplateSelectionScreen> {
+class _TemplateSelectionScreenState
+    extends ConsumerState<TemplateSelectionScreen> {
   String _title = '';
   bool _hasCover = true;
   PaperSize _paperSize = PaperSize.a4;
@@ -39,17 +41,27 @@ class _TemplateSelectionScreenState extends ConsumerState<TemplateSelectionScree
   @override
   void initState() {
     super.initState();
-    _template = TemplateRegistry.getByCategory(TemplateCategory.basic).firstOrNull;
+    _template =
+        TemplateRegistry.getByCategory(TemplateCategory.basic).firstOrNull;
   }
 
   @override
   Widget build(BuildContext context) {
     final isTablet = Responsive.isTablet(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Theme-aware colors
+    final backgroundColor =
+        isDark ? AppColors.backgroundDark : AppColors.backgroundLight;
+    final surfaceColor =
+        isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+    final textPrimary =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.surfaceLight,
+        backgroundColor: surfaceColor,
         elevation: 0,
         leading: AppButton(
           label: 'İptal',
@@ -59,7 +71,7 @@ class _TemplateSelectionScreenState extends ConsumerState<TemplateSelectionScree
         leadingWidth: 80,
         title: Text('Yeni not oluştur',
             style: AppTypography.titleMedium.copyWith(
-              color: AppColors.textPrimaryLight,
+              color: textPrimary,
               fontWeight: FontWeight.w600,
             )),
         centerTitle: true,
@@ -79,10 +91,11 @@ class _TemplateSelectionScreenState extends ConsumerState<TemplateSelectionScree
           _buildPreviewSection(isTablet),
           const AppDivider(),
           _buildSectionHeader(),
-          if (!_isSelectingCover) TemplateCategoryTabs(
-            selectedCategory: _category,
-            onCategorySelected: (c) => setState(() => _category = c),
-          ),
+          if (!_isSelectingCover)
+            TemplateCategoryTabs(
+              selectedCategory: _category,
+              onCategorySelected: (c) => setState(() => _category = c),
+            ),
           const SizedBox(height: AppSpacing.xs),
           Expanded(
             child: _isSelectingCover && _hasCover
@@ -190,28 +203,36 @@ class _TemplateSelectionScreenState extends ConsumerState<TemplateSelectionScree
           ],
         ),
         // Format picker
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text('Format', style: AppTypography.caption),
-            GestureDetector(
-              onTap: _showFormatPicker,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    '${_paperSize.isLandscape ? "Yatay" : "Dikey"}, ${_getPresetName(_paperSize.preset)}',
-                    style: AppTypography.caption.copyWith(
-                      color: AppColors.textSecondaryLight,
-                    ),
+        Builder(
+          builder: (context) {
+            final isDark = Theme.of(context).brightness == Brightness.dark;
+            final textSecondary = isDark
+                ? AppColors.textSecondaryDark
+                : AppColors.textSecondaryLight;
+
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Format', style: AppTypography.caption),
+                GestureDetector(
+                  onTap: _showFormatPicker,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '${_paperSize.isLandscape ? "Yatay" : "Dikey"}, ${_getPresetName(_paperSize.preset)}',
+                        style: AppTypography.caption
+                            .copyWith(color: textSecondary),
+                      ),
+                      const SizedBox(width: AppSpacing.xxs),
+                      Icon(Icons.keyboard_arrow_down,
+                          size: AppIconSize.sm, color: textSecondary),
+                    ],
                   ),
-                  const SizedBox(width: AppSpacing.xxs),
-                  const Icon(Icons.keyboard_arrow_down,
-                      size: AppIconSize.sm, color: AppColors.textSecondaryLight),
-                ],
-              ),
-            ),
-          ],
+                ),
+              ],
+            );
+          },
         ),
       ],
     );
@@ -227,7 +248,8 @@ class _TemplateSelectionScreenState extends ConsumerState<TemplateSelectionScree
         children: [
           Text(
             _isSelectingCover ? 'Kapak' : 'Şablon',
-            style: AppTypography.titleMedium.copyWith(fontWeight: FontWeight.w600),
+            style:
+                AppTypography.titleMedium.copyWith(fontWeight: FontWeight.w600),
           ),
           const Spacer(),
           if (!_isSelectingCover)
@@ -249,26 +271,41 @@ class _TemplateSelectionScreenState extends ConsumerState<TemplateSelectionScree
 
   String _getPresetName(PaperSizePreset preset) {
     switch (preset) {
-      case PaperSizePreset.a4: return 'A4';
-      case PaperSizePreset.a5: return 'A5';
-      case PaperSizePreset.a6: return 'A6';
-      case PaperSizePreset.letter: return 'Letter';
-      case PaperSizePreset.legal: return 'Legal';
-      case PaperSizePreset.square: return 'Kare';
-      case PaperSizePreset.widescreen: return 'Geniş';
-      case PaperSizePreset.custom: return 'Özel';
+      case PaperSizePreset.a4:
+        return 'A4';
+      case PaperSizePreset.a5:
+        return 'A5';
+      case PaperSizePreset.a6:
+        return 'A6';
+      case PaperSizePreset.letter:
+        return 'Letter';
+      case PaperSizePreset.legal:
+        return 'Legal';
+      case PaperSizePreset.square:
+        return 'Kare';
+      case PaperSizePreset.widescreen:
+        return 'Geniş';
+      case PaperSizePreset.custom:
+        return 'Özel';
     }
   }
 
   String _mapColorToName(int color) {
     switch (color) {
-      case 0xFFFFFFFF: return 'Beyaz kağıt';
-      case 0xFF1A1A1A: return 'Siyah kağıt';
-      case 0xFFFFF8E7: return 'Krem kağıt';
-      case 0xFFF5F5F5: return 'Gri kağıt';
-      case 0xFFE8F5E9: return 'Yeşil kağıt';
-      case 0xFFE3F2FD: return 'Mavi kağıt';
-      default: return 'Beyaz kağıt';
+      case 0xFFFFFFFF:
+        return 'Beyaz kağıt';
+      case 0xFF1A1A1A:
+        return 'Siyah kağıt';
+      case 0xFFFFF8E7:
+        return 'Krem kağıt';
+      case 0xFFF5F5F5:
+        return 'Gri kağıt';
+      case 0xFFE8F5E9:
+        return 'Yeşil kağıt';
+      case 0xFFE3F2FD:
+        return 'Mavi kağıt';
+      default:
+        return 'Beyaz kağıt';
     }
   }
 

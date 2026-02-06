@@ -1,6 +1,8 @@
 /// StarNote Design System - AppSearchField Component
 ///
-/// Debounce destekli arama input'u.
+/// Modern, debounce destekli arama input'u.
+/// Default: border yok, sadece fill color.
+/// Focus: 1.5px primary border.
 ///
 /// Kullanım:
 /// ```dart
@@ -18,9 +20,12 @@ import 'package:flutter/material.dart';
 
 import 'package:example_app/core/theme/index.dart';
 
-/// StarNote arama field komponenti.
+/// StarNote modern arama field komponenti.
 ///
-/// Search icon, clear button ve debounce destekler.
+/// Modern minimal tasarım:
+/// - Default: filled, border yok
+/// - Focus: 1.5px primary border
+/// - Min height: 48dp
 class AppSearchField extends StatefulWidget {
   /// Placeholder metni.
   final String hint;
@@ -48,14 +53,18 @@ class AppSearchField extends StatefulWidget {
 
 class _AppSearchFieldState extends State<AppSearchField> {
   late final TextEditingController _controller;
+  late final FocusNode _focusNode;
   Timer? _debounceTimer;
   bool _hasText = false;
+  bool _isFocused = false;
 
   @override
   void initState() {
     super.initState();
     _controller = TextEditingController();
     _controller.addListener(_onTextChanged);
+    _focusNode = FocusNode();
+    _focusNode.addListener(_onFocusChange);
   }
 
   @override
@@ -63,7 +72,13 @@ class _AppSearchFieldState extends State<AppSearchField> {
     _debounceTimer?.cancel();
     _controller.removeListener(_onTextChanged);
     _controller.dispose();
+    _focusNode.removeListener(_onFocusChange);
+    _focusNode.dispose();
     super.dispose();
+  }
+
+  void _onFocusChange() {
+    setState(() => _isFocused = _focusNode.hasFocus);
   }
 
   void _onTextChanged() {
@@ -87,49 +102,67 @@ class _AppSearchFieldState extends State<AppSearchField> {
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      controller: _controller,
-      style: AppTypography.bodyMedium.copyWith(
-        color: AppColors.textPrimaryLight,
-      ),
-      decoration: InputDecoration(
-        hintText: widget.hint,
-        hintStyle: AppTypography.bodyMedium.copyWith(
-          color: AppColors.textTertiaryLight,
-        ),
-        prefixIcon: const Icon(
-          Icons.search,
-          size: AppIconSize.md,
-          color: AppColors.textSecondaryLight,
-        ),
-        suffixIcon: _hasText
-            ? IconButton(
-                onPressed: _onClear,
-                icon: const Icon(
-                  Icons.close,
-                  size: AppIconSize.md,
-                  color: AppColors.textSecondaryLight,
-                ),
-                splashRadius: AppSpacing.lg,
-              )
-            : null,
-        filled: true,
-        fillColor: AppColors.surfaceVariantLight,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.lg,
-          vertical: AppSpacing.md,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppRadius.textField),
-          borderSide: BorderSide.none,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppRadius.textField),
-          borderSide: const BorderSide(color: AppColors.outlineLight),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(AppRadius.textField),
-          borderSide: const BorderSide(color: AppColors.primary, width: 2),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Theme-aware colors
+    final fillColor =
+        isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariantLight;
+    final textColor =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final hintColor =
+        isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight;
+    final iconColor = _isFocused
+        ? AppColors.primary
+        : (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight);
+
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 48),
+      child: TextField(
+        controller: _controller,
+        focusNode: _focusNode,
+        style: AppTypography.bodyMedium.copyWith(color: textColor),
+        decoration: InputDecoration(
+          hintText: widget.hint,
+          hintStyle: AppTypography.bodyMedium.copyWith(color: hintColor),
+          prefixIcon: Icon(
+            Icons.search,
+            size: AppIconSize.md,
+            color: iconColor,
+          ),
+          suffixIcon: _hasText
+              ? IconButton(
+                  onPressed: _onClear,
+                  icon: Icon(
+                    Icons.close,
+                    size: AppIconSize.md,
+                    color: isDark
+                        ? AppColors.textSecondaryDark
+                        : AppColors.textSecondaryLight,
+                  ),
+                  splashRadius: AppSpacing.lg,
+                )
+              : null,
+          filled: true,
+          fillColor: fillColor,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: 14, // 14dp vertical padding
+          ),
+          // Default: border yok
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppRadius.textField),
+            borderSide: BorderSide.none,
+          ),
+          // Enabled: border yok (modern minimal)
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppRadius.textField),
+            borderSide: BorderSide.none,
+          ),
+          // Focus: 1.5px primary border
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(AppRadius.textField),
+            borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+          ),
         ),
       ),
     );

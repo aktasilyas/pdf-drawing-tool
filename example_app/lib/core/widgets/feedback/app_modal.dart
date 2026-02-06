@@ -1,7 +1,12 @@
 /// StarNote Design System - AppModal Component
 ///
-/// Responsive modal komponenti.
+/// Responsive, keyboard-safe modal komponenti.
 /// Phone: Bottom sheet, Tablet: Center dialog.
+///
+/// Features:
+/// - Keyboard açılınca yukarı kayar (viewInsets)
+/// - isScrollControlled: true
+/// - Dark theme uyumlu
 ///
 /// Kullanım:
 /// ```dart
@@ -23,12 +28,13 @@ import 'package:example_app/core/theme/index.dart';
 /// StarNote responsive modal komponenti.
 ///
 /// Phone'da bottom sheet, tablet'te center dialog olarak gösterilir.
+/// Keyboard-safe: klavye açılınca modal yukarı kayar.
 class AppModal {
   /// Modal göster.
   ///
   /// Breakpoint: 600px
-  /// - < 600px: Bottom sheet (drag handle, rounded top)
-  /// - >= 600px: Center dialog (max-width 560px, rounded all)
+  /// - < 600px: Bottom sheet (drag handle, rounded top, keyboard-safe)
+  /// - >= 600px: Center dialog (max-width 560px, rounded all, scrollable)
   static Future<T?> show<T>({
     required BuildContext context,
     required String title,
@@ -69,12 +75,16 @@ class AppModal {
     required bool isDismissible,
     required bool showCloseButton,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor =
+        isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+
     return showModalBottomSheet<T>(
       context: context,
       isDismissible: isDismissible,
       enableDrag: isDismissible,
-      isScrollControlled: true,
-      backgroundColor: AppColors.surfaceLight,
+      isScrollControlled: true, // ✅ Keyboard-safe
+      backgroundColor: surfaceColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(AppRadius.bottomSheet),
@@ -97,11 +107,15 @@ class AppModal {
     required bool isDismissible,
     required bool showCloseButton,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor =
+        isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+
     return showDialog<T>(
       context: context,
       barrierDismissible: isDismissible,
       builder: (context) => Dialog(
-        backgroundColor: AppColors.surfaceLight,
+        backgroundColor: surfaceColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.modal),
         ),
@@ -138,8 +152,17 @@ class _BottomSheetContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final textSecondary =
+        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+    final handleColor =
+        isDark ? AppColors.outlineVariantDark : AppColors.outlineVariantLight;
+
     return SafeArea(
       child: Padding(
+        // ✅ Keyboard-safe: klavye açılınca modal yukarı kayar
         padding: EdgeInsets.only(
           bottom: MediaQuery.of(context).viewInsets.bottom,
         ),
@@ -154,7 +177,7 @@ class _BottomSheetContent extends StatelessWidget {
                 height: AppSpacing.xs,
                 margin: const EdgeInsets.only(top: AppSpacing.sm),
                 decoration: BoxDecoration(
-                  color: AppColors.outlineVariantLight,
+                  color: handleColor,
                   borderRadius: BorderRadius.circular(AppRadius.full),
                 ),
               ),
@@ -169,24 +192,24 @@ class _BottomSheetContent extends StatelessWidget {
                     child: Text(
                       title,
                       style: AppTypography.headlineSmall.copyWith(
-                        color: AppColors.textPrimaryLight,
+                        color: textPrimary,
                       ),
                     ),
                   ),
                   if (showCloseButton)
                     IconButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.close,
                         size: AppIconSize.lg,
-                        color: AppColors.textSecondaryLight,
+                        color: textSecondary,
                       ),
                     ),
                 ],
               ),
             ),
             const SizedBox(height: AppSpacing.lg),
-            // Content
+            // Content (scrollable)
             Flexible(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
@@ -240,6 +263,12 @@ class _DialogContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final textSecondary =
+        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.xl),
       child: Column(
@@ -253,23 +282,23 @@ class _DialogContent extends StatelessWidget {
                 child: Text(
                   title,
                   style: AppTypography.headlineSmall.copyWith(
-                    color: AppColors.textPrimaryLight,
+                    color: textPrimary,
                   ),
                 ),
               ),
               if (showCloseButton)
                 IconButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.close,
                     size: AppIconSize.lg,
-                    color: AppColors.textSecondaryLight,
+                    color: textSecondary,
                   ),
                 ),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
-          // Content
+          // Content (scrollable - keyboard-safe)
           Flexible(
             child: SingleChildScrollView(
               child: content,

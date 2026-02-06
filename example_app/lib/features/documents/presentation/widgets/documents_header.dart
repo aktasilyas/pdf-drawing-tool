@@ -3,6 +3,7 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/index.dart';
@@ -70,6 +71,10 @@ class DocumentsHeader extends ConsumerWidget {
   }
 
   Widget _buildTrashInfo(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textSecondary =
+        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
@@ -90,9 +95,7 @@ class DocumentsHeader extends ConsumerWidget {
           Expanded(
             child: Text(
               'Silinen notlar 30 gün sonra kalıcı olarak silinir',
-              style: AppTypography.caption.copyWith(
-                color: AppColors.textSecondaryLight,
-              ),
+              style: AppTypography.caption.copyWith(color: textSecondary),
             ),
           ),
           if (onEmptyTrash != null && allDocumentIds.isNotEmpty)
@@ -108,9 +111,12 @@ class DocumentsHeader extends ConsumerWidget {
   }
 
   Widget _buildHeaderRow(BuildContext context, WidgetRef ref, bool isPhone) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final viewMode = ref.watch(viewModeProvider);
     final sortDirection = ref.watch(sortDirectionProvider);
     final pinFavorites = ref.watch(pinFavoritesProvider);
+    final textPrimary =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
 
     return Row(
       children: [
@@ -121,7 +127,7 @@ class DocumentsHeader extends ConsumerWidget {
             style: (isPhone
                     ? AppTypography.headlineMedium
                     : AppTypography.headlineLarge)
-                .copyWith(color: AppColors.textPrimaryLight),
+                .copyWith(color: textPrimary),
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -171,6 +177,16 @@ class DocumentsHeader extends ConsumerWidget {
             ref.read(selectionModeProvider.notifier).state = true;
           },
         ),
+        // Settings button (tablet only - phone has it in mobile header)
+        if (!isPhone) ...[
+          const SizedBox(width: AppSpacing.xs),
+          AppIconButton(
+            icon: Icons.settings_outlined,
+            variant: AppIconButtonVariant.ghost,
+            tooltip: 'Ayarlar',
+            onPressed: () => context.push('/settings'),
+          ),
+        ],
       ],
     );
   }
@@ -205,8 +221,14 @@ class _SortPopupButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textSecondary =
+        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+    final textPrimary =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+
     return PopupMenuButton<String>(
-      icon: const Icon(Icons.sort, size: AppIconSize.lg),
+      icon: Icon(Icons.sort, size: AppIconSize.lg, color: textSecondary),
       tooltip: 'Sıralama',
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.card),
@@ -221,9 +243,12 @@ class _SortPopupButton extends StatelessWidget {
         }
       },
       itemBuilder: (context) => [
-        _buildSortItem('date', 'Tarihe göre', sortOption == SortOption.date),
-        _buildSortItem('name', 'İsme göre', sortOption == SortOption.name),
-        _buildSortItem('size', 'Boyuta göre', sortOption == SortOption.size),
+        _buildSortItem(
+            context, 'date', 'Tarihe göre', sortOption == SortOption.date),
+        _buildSortItem(
+            context, 'name', 'İsme göre', sortOption == SortOption.name),
+        _buildSortItem(
+            context, 'size', 'Boyuta göre', sortOption == SortOption.size),
         const PopupMenuDivider(),
         PopupMenuItem(
           value: 'direction',
@@ -234,7 +259,7 @@ class _SortPopupButton extends StatelessWidget {
                     ? Icons.arrow_downward
                     : Icons.arrow_upward,
                 size: AppIconSize.md,
-                color: AppColors.textSecondaryLight,
+                color: textSecondary,
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
@@ -242,7 +267,7 @@ class _SortPopupButton extends StatelessWidget {
                   sortDirection == SortDirection.descending
                       ? 'Yeniden eskiye'
                       : 'Eskiden yeniye',
-                  style: AppTypography.bodyMedium,
+                  style: AppTypography.bodyMedium.copyWith(color: textPrimary),
                 ),
               ),
             ],
@@ -256,15 +281,13 @@ class _SortPopupButton extends StatelessWidget {
               Icon(
                 pinFavorites ? Icons.push_pin : Icons.push_pin_outlined,
                 size: AppIconSize.md,
-                color: pinFavorites
-                    ? AppColors.accent
-                    : AppColors.textSecondaryLight,
+                color: pinFavorites ? AppColors.accent : textSecondary,
               ),
               const SizedBox(width: AppSpacing.md),
-              const Expanded(
+              Expanded(
                 child: Text(
                   'Favorileri üste sabitle',
-                  style: AppTypography.bodyMedium,
+                  style: AppTypography.bodyMedium.copyWith(color: textPrimary),
                 ),
               ),
               if (pinFavorites)
@@ -278,7 +301,11 @@ class _SortPopupButton extends StatelessWidget {
   }
 
   PopupMenuItem<String> _buildSortItem(
-      String value, String label, bool isSelected) {
+      BuildContext context, String value, String label, bool isSelected) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+
     return PopupMenuItem(
       value: value,
       child: Row(
@@ -291,7 +318,8 @@ class _SortPopupButton extends StatelessWidget {
                 : null,
           ),
           const SizedBox(width: AppSpacing.md),
-          Text(label, style: AppTypography.bodyMedium),
+          Text(label,
+              style: AppTypography.bodyMedium.copyWith(color: textPrimary)),
         ],
       ),
     );

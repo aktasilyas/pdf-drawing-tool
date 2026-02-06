@@ -37,34 +37,48 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor =
+        isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
     final foldersAsync = ref.watch(foldersProvider);
+
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Dialog(
-        backgroundColor: AppColors.surfaceLight,
+        backgroundColor: surfaceColor,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.card)),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 500, maxHeight: 600),
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            _buildHeader(),
-            if (_isCreatingFolder) _buildNewFolderSection(),
-            const AppDivider(),
-            Flexible(
+          // Keyboard-safe: SingleChildScrollView wrap
+          child: SingleChildScrollView(
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              _buildHeader(context),
+              if (_isCreatingFolder) _buildNewFolderSection(context),
+              const AppDivider(),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 400),
                 child: foldersAsync.when(
-              data: _buildFolderList,
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => _buildError(e),
-            )),
-            const AppDivider(),
-            _buildActions(),
-          ]),
+                  data: (folders) => _buildFolderList(context, folders),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (e, _) => _buildError(e),
+                ),
+              ),
+              const AppDivider(),
+              _buildActions(),
+            ]),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+
     final title = _isFolderMode
         ? 'Klasör Yönetimi'
         : _isMovingFolder
@@ -74,9 +88,8 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Row(children: [
         Text(title,
-            style: AppTypography.titleLarge.copyWith(
-                color: AppColors.textPrimaryLight,
-                fontWeight: FontWeight.bold)),
+            style: AppTypography.titleLarge
+                .copyWith(color: textPrimary, fontWeight: FontWeight.bold)),
         const Spacer(),
         AppIconButton(
             icon: Icons.close,
@@ -87,17 +100,23 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
     );
   }
 
-  Widget _buildNewFolderSection() {
+  Widget _buildNewFolderSection(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceVariant =
+        isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariantLight;
+    final textSecondary =
+        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
-      color: AppColors.surfaceVariantLight,
+      color: surfaceVariant,
       child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: [
             Row(children: [
-              const Icon(Icons.create_new_folder,
-                  size: AppIconSize.sm, color: AppColors.textSecondaryLight),
+              Icon(Icons.create_new_folder,
+                  size: AppIconSize.sm, color: textSecondary),
               const SizedBox(width: AppSpacing.sm),
               Text('Yeni Klasör',
                   style: AppTypography.labelLarge
@@ -138,7 +157,7 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
     );
   }
 
-  Widget _buildFolderList(List<Folder> folders) {
+  Widget _buildFolderList(BuildContext context, List<Folder> folders) {
     var available = folders;
     if (_isMovingFolder && widget.folderIds.isNotEmpty) {
       final id = widget.folderIds.first;
@@ -151,38 +170,51 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
           description: 'Yeni klasör oluşturarak başlayın');
     }
     return ListView.builder(
+      shrinkWrap: true,
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       itemCount: available.length + 1,
-      itemBuilder: (ctx, i) =>
-          i == 0 ? _buildRootOption() : _buildFolderOption(available[i - 1]),
+      itemBuilder: (ctx, i) => i == 0
+          ? _buildRootOption(context)
+          : _buildFolderOption(context, available[i - 1]),
     );
   }
 
-  Widget _buildRootOption() {
+  Widget _buildRootOption(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final textSecondary =
+        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+
     final sel = _selectedFolderId == null;
     return ListTile(
       leading: Icon(Icons.home_outlined,
-          color: sel ? AppColors.primary : AppColors.textSecondaryLight),
+          color: sel ? AppColors.primary : textSecondary),
       title: Text(_isMovingFolder ? 'Ana Klasörler' : 'Belgeler (Klasörsüz)',
           style: AppTypography.bodyLarge.copyWith(
               fontWeight: sel ? FontWeight.w600 : FontWeight.normal,
-              color: sel ? AppColors.primary : AppColors.textPrimaryLight)),
+              color: sel ? AppColors.primary : textPrimary)),
       trailing: sel ? const Icon(Icons.check, color: AppColors.primary) : null,
       onTap: () => setState(() => _selectedFolderId = null),
     );
   }
 
-  Widget _buildFolderOption(Folder folder) {
+  Widget _buildFolderOption(BuildContext context, Folder folder) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final textSecondary =
+        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+
     final sel = _selectedFolderId == folder.id;
     return ListTile(
       leading: Icon(Icons.folder,
           color: sel ? AppColors.primary : Color(folder.colorValue)),
       title: Text(folder.name,
-          style: AppTypography.bodyLarge.copyWith(
-              color: sel ? AppColors.primary : AppColors.textPrimaryLight)),
+          style: AppTypography.bodyLarge
+              .copyWith(color: sel ? AppColors.primary : textPrimary)),
       subtitle: Text('${folder.documentCount} belge',
-          style: AppTypography.caption
-              .copyWith(color: AppColors.textSecondaryLight)),
+          style: AppTypography.caption.copyWith(color: textSecondary)),
       trailing: sel ? const Icon(Icons.check, color: AppColors.primary) : null,
       onTap: () => setState(() => _selectedFolderId = folder.id),
     );

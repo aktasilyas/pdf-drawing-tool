@@ -45,10 +45,10 @@ class DocumentCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(child: _buildThumbnailCard()),
+          Expanded(child: _buildThumbnailCard(context)),
           Padding(
             padding: const EdgeInsets.only(top: AppSpacing.xs),
-            child: _buildInfoSection(),
+            child: _buildInfoSection(context),
           ),
         ],
       ),
@@ -64,13 +64,17 @@ class DocumentCard extends ConsumerWidget {
     }
   }
 
-  Widget _buildThumbnailCard() {
+  Widget _buildThumbnailCard(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final outlineColor =
+        isDark ? AppColors.outlineDark : AppColors.outlineLight;
+
     return Container(
       decoration: BoxDecoration(
         color: DocumentPaperColors.fromName(document.paperColor),
         borderRadius: BorderRadius.circular(AppRadius.sm),
         border: Border.all(
-          color: isSelected ? AppColors.primary : AppColors.outlineLight,
+          color: isSelected ? AppColors.primary : outlineColor,
           width: isSelected ? 2 : 1,
         ),
         boxShadow: isSelected ? null : AppShadows.sm,
@@ -79,7 +83,7 @@ class DocumentCard extends ConsumerWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(AppRadius.sm - 1),
-            child: _buildThumbnail(),
+            child: _buildThumbnail(context),
           ),
           if (isSelectionMode && isSelected) _buildSelectionOverlay(),
           if (isSelectionMode)
@@ -125,7 +129,15 @@ class DocumentCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildInfoSection() {
+  Widget _buildInfoSection(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final textSecondary =
+        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+    final textTertiary =
+        isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight;
+
     return GestureDetector(
       onTap: onMorePressed,
       child: Row(
@@ -136,34 +148,30 @@ class DocumentCard extends ConsumerWidget {
               children: [
                 Text(
                   document.title,
-                  style: AppTypography.titleMedium.copyWith(
-                    color: AppColors.textPrimaryLight,
-                  ),
+                  style: AppTypography.titleMedium.copyWith(color: textPrimary),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: AppSpacing.xxs),
                 Text(
                   DocumentDateFormatter.format(document.updatedAt),
-                  style: AppTypography.caption.copyWith(
-                    color: AppColors.textSecondaryLight,
-                  ),
+                  style: AppTypography.caption.copyWith(color: textSecondary),
                 ),
               ],
             ),
           ),
           if (onMorePressed != null)
-            const Icon(
+            Icon(
               Icons.keyboard_arrow_down,
               size: AppIconSize.md,
-              color: AppColors.textTertiaryLight,
+              color: textTertiary,
             ),
         ],
       ),
     );
   }
 
-  Widget _buildThumbnail() {
+  Widget _buildThumbnail(BuildContext context) {
     if (document.hasCover && document.coverId != null) {
       final cover = core.CoverRegistry.byId(document.coverId!);
       if (cover != null) {
@@ -179,10 +187,10 @@ class DocumentCard extends ConsumerWidget {
         document.documentType == core.DocumentType.image) {
       return DocumentPreview(document: document);
     }
-    return _buildTemplatePlaceholder();
+    return _buildTemplatePlaceholder(context);
   }
 
-  Widget _buildTemplatePlaceholder() {
+  Widget _buildTemplatePlaceholder(BuildContext context) {
     if (document.documentType == core.DocumentType.notebook) {
       return Stack(
         children: [
@@ -190,7 +198,7 @@ class DocumentCard extends ConsumerWidget {
             painter: DocumentThumbnailPainter(document.templateId),
             size: Size.infinite,
           ),
-          _buildSpiralBinding(),
+          _buildSpiralBinding(context),
         ],
       );
     }
@@ -200,7 +208,13 @@ class DocumentCard extends ConsumerWidget {
     );
   }
 
-  Widget _buildSpiralBinding() {
+  Widget _buildSpiralBinding(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final textTertiary =
+        isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight;
+
     return Positioned(
       left: 0,
       top: 0,
@@ -210,7 +224,7 @@ class DocumentCard extends ConsumerWidget {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              AppColors.textPrimaryLight.withValues(alpha: 0.08),
+              textPrimary.withValues(alpha: 0.08),
               Colors.transparent,
             ],
           ),
@@ -223,9 +237,9 @@ class DocumentCard extends ConsumerWidget {
               width: 5,
               height: 5,
               margin: const EdgeInsets.only(left: 3),
-              decoration: const BoxDecoration(
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.textTertiaryLight,
+                color: textTertiary,
               ),
             ),
           ),

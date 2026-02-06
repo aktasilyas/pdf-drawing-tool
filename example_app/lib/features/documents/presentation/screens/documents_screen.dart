@@ -19,7 +19,7 @@ import 'package:example_app/features/documents/presentation/widgets/documents_he
 import 'package:example_app/features/documents/presentation/widgets/new_document_dialog.dart';
 import 'package:example_app/features/documents/presentation/widgets/move_to_folder_dialog.dart';
 import 'package:example_app/features/documents/presentation/widgets/documents_empty_states.dart';
-import 'package:example_app/features/documents/presentation/widgets/document_thumbnail_painter.dart';
+import 'package:example_app/features/documents/presentation/widgets/document_card_helpers.dart';
 import 'package:example_app/features/editor/presentation/providers/editor_provider.dart';
 import 'package:drawing_ui/drawing_ui.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
@@ -75,9 +75,11 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
   @override
   Widget build(BuildContext context) {
     final isPhone = Responsive.isPhone(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor:
+          isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
       drawer: isPhone ? _buildSidebarDrawer() : null,
       body: SafeArea(
         child: isPhone ? _buildMobileLayout() : _buildDesktopLayout(),
@@ -93,36 +95,43 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Mobile header with hamburger menu
-          Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Builder(
-              builder: (context) => Row(
-                children: [
-                  AppIconButton(
-                    icon: Icons.menu,
-                    variant: AppIconButtonVariant.ghost,
-                    tooltip: 'Menü',
-                    onPressed: () => Scaffold.of(context).openDrawer(),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: Text(
-                      _getSectionTitle(),
-                      style: AppTypography.headlineMedium.copyWith(
-                        color: AppColors.textPrimaryLight,
-                      ),
-                      overflow: TextOverflow.ellipsis,
+          Builder(
+            builder: (ctx) {
+              final isDark = Theme.of(ctx).brightness == Brightness.dark;
+              final textPrimary = isDark
+                  ? AppColors.textPrimaryDark
+                  : AppColors.textPrimaryLight;
+              return Padding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Row(
+                  children: [
+                    AppIconButton(
+                      icon: Icons.menu,
+                      variant: AppIconButtonVariant.ghost,
+                      tooltip: 'Menü',
+                      onPressed: () => Scaffold.of(ctx).openDrawer(),
                     ),
-                  ),
-                  AppIconButton(
-                    icon: Icons.settings_outlined,
-                    variant: AppIconButtonVariant.ghost,
-                    tooltip: 'Ayarlar',
-                    onPressed: () => context.push('/settings'),
-                  ),
-                ],
-              ),
-            ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Expanded(
+                      child: Text(
+                        _getSectionTitle(),
+                        style: AppTypography.headlineMedium.copyWith(
+                          color: textPrimary,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    // Settings icon in mobile header
+                    AppIconButton(
+                      icon: Icons.settings_outlined,
+                      variant: AppIconButtonVariant.ghost,
+                      tooltip: 'Ayarlar',
+                      onPressed: () => ctx.push('/settings'),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
 
           // Breadcrumb (only when inside a folder)
@@ -161,12 +170,17 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
 
   // Desktop/Tablet layout - persistent sidebar
   Widget _buildDesktopLayout() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       children: [
         // Sidebar
         DocumentsSidebar(
           selectedSection: _selectedSection,
           selectedFolderId: _selectedFolderId,
+          isDrawer: false, // Tablet sidebar mode
+          onCollapse: () {
+            // TODO: Implement sidebar collapse animation
+          },
           onSectionChanged: (section) {
             setState(() {
               _selectedSection = section;
@@ -187,7 +201,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
         // Vertical divider
         Container(
           width: 1,
-          color: AppColors.outlineLight,
+          color: isDark ? AppColors.outlineDark : AppColors.outlineLight,
         ),
 
         // Main content
@@ -195,7 +209,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
           child: GestureDetector(
             onTap: () => FocusScope.of(context).unfocus(),
             child: Container(
-              color: AppColors.backgroundLight,
+              color:
+                  isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -241,12 +256,15 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
 
   // Sidebar drawer for mobile
   Widget _buildSidebarDrawer() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Drawer(
-      backgroundColor: AppColors.surfaceLight,
+      backgroundColor: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
       child: SafeArea(
         child: DocumentsSidebar(
           selectedSection: _selectedSection,
           selectedFolderId: _selectedFolderId,
+          isDrawer: true, // Phone drawer mode
+          onCollapse: () => Navigator.pop(context), // Close drawer
           onSectionChanged: (section) {
             setState(() {
               _selectedSection = section;
@@ -729,118 +747,216 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     );
   }
 
+  /// Modern combined list view (Notion/Apple Notes tarzı)
   Widget _buildCombinedListView(
       List<Folder> folders, List<DocumentInfo> documents) {
-    // Selection state
-    final isSelectionMode = ref.watch(selectionModeProvider);
-    final selectedFolders = ref.watch(selectedFoldersProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isPhone = Responsive.isPhone(context);
+    final padding = isPhone ? AppSpacing.md : AppSpacing.lg;
+    final textTertiary =
+        isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight;
 
     // Sort documents using helper method
     final sortedDocs = _sortDocuments(documents);
 
+    // Calculate total items including section headers
+    final hasFolders = folders.isNotEmpty;
+    final hasDocs = sortedDocs.isNotEmpty;
+    int totalItems = folders.length + sortedDocs.length;
+    if (hasFolders) totalItems++; // Folders header
+    if (hasDocs) totalItems++; // Documents header
+
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-      itemCount: folders.length + sortedDocs.length,
+      padding:
+          EdgeInsets.symmetric(horizontal: padding, vertical: AppSpacing.sm),
+      itemCount: totalItems,
       itemBuilder: (context, index) {
-        // Show folders first
-        if (index < folders.length) {
-          final folder = folders[index];
-          final isSelected = selectedFolders.contains(folder.id);
+        int currentIndex = index;
 
-          return Card(
-            margin: const EdgeInsets.only(bottom: 8),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-              side: isSelected
-                  ? BorderSide(
-                      color: Theme.of(context).colorScheme.primary,
-                      width: 2,
-                    )
-                  : BorderSide.none,
+        // Folders section header
+        if (hasFolders && currentIndex == 0) {
+          return Padding(
+            padding: const EdgeInsets.only(
+              left: AppSpacing.sm,
+              top: AppSpacing.sm,
+              bottom: AppSpacing.xs,
             ),
-            color: isSelected
-                ? Theme.of(context).colorScheme.primary.withOpacity(0.08)
-                : null,
-            child: ListTile(
-              leading: isSelectionMode
-                  ? Container(
-                      width: 24,
-                      height: 24,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: isSelected
-                            ? Theme.of(context).colorScheme.primary
-                            : Colors.white,
-                        border: Border.all(
-                          color: isSelected
-                              ? Theme.of(context).colorScheme.primary
-                              : Colors.grey.shade400,
-                          width: 2,
-                        ),
-                      ),
-                      child: isSelected
-                          ? Icon(
-                              Icons.check,
-                              size: 16,
-                              color: Theme.of(context).colorScheme.onPrimary,
-                            )
-                          : null,
-                    )
-                  : Icon(
-                      Icons.folder,
-                      size: 40,
-                      color: Color(folder.colorValue),
-                    ),
-              title: Text(
-                folder.name,
-                style: const TextStyle(fontWeight: FontWeight.w600),
+            child: Text(
+              'Klasörler',
+              style: AppTypography.caption.copyWith(
+                color: textTertiary,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
               ),
-              subtitle: Text('${folder.documentCount} belge'),
-              trailing: isSelectionMode
-                  ? null
-                  : IconButton(
-                      icon: const Icon(Icons.more_vert),
-                      onPressed: () {
-                        _showFolderMenu(folder);
-                      },
-                    ),
-              onTap: () {
-                // Re-read current state to avoid closure issue
-                final currentSelection = ref.read(selectedFoldersProvider);
-                final isCurrentlySelected =
-                    currentSelection.contains(folder.id);
-
-                if (isSelectionMode) {
-                  // Toggle folder selection
-                  final newSelection = Set<String>.from(currentSelection);
-
-                  if (isCurrentlySelected) {
-                    newSelection.remove(folder.id);
-                  } else {
-                    newSelection.add(folder.id);
-                  }
-
-                  ref.read(selectedFoldersProvider.notifier).state =
-                      newSelection;
-                } else {
-                  // Navigate into folder
-                  setState(() {
-                    _selectedSection = SidebarSection.folder;
-                    _selectedFolderId = folder.id;
-                  });
-                  // Update current folder provider
-                  ref.read(currentFolderIdProvider.notifier).state = folder.id;
-                }
-              },
             ),
           );
         }
 
-        // Then show documents
-        final docIndex = index - folders.length;
-        final doc = sortedDocs[docIndex];
-        return _buildListTile(doc);
+        // Adjust index for folders header
+        if (hasFolders) currentIndex--;
+
+        // Folder items
+        if (currentIndex < folders.length) {
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 2),
+            child: _buildFolderListTile(folders[currentIndex], isDark),
+          );
+        }
+        currentIndex -= folders.length;
+
+        // Documents section header
+        if (hasDocs && currentIndex == 0) {
+          return Padding(
+            padding: EdgeInsets.only(
+              left: AppSpacing.sm,
+              top: hasFolders ? AppSpacing.lg : AppSpacing.sm,
+              bottom: AppSpacing.xs,
+            ),
+            child: Text(
+              'Belgeler',
+              style: AppTypography.caption.copyWith(
+                color: textTertiary,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+              ),
+            ),
+          );
+        }
+
+        // Adjust index for documents header
+        if (hasDocs) currentIndex--;
+
+        // Document items
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 2),
+          child: _buildListTile(sortedDocs[currentIndex]),
+        );
       },
+    );
+  }
+
+  /// Modern folder list tile (~56dp yükseklik)
+  Widget _buildFolderListTile(Folder folder, bool isDark) {
+    final isSelectionMode = ref.watch(selectionModeProvider);
+    final selectedFolders = ref.watch(selectedFoldersProvider);
+    final isSelected = selectedFolders.contains(folder.id);
+
+    // Theme-aware colors
+    final textPrimary =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final textTertiary =
+        isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight;
+    final surfaceColor =
+        isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+    final hoverColor =
+        isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariantLight;
+
+    return Material(
+      color: surfaceColor,
+      child: InkWell(
+        onTap: () {
+          final currentSelection = ref.read(selectedFoldersProvider);
+          final isCurrentlySelected = currentSelection.contains(folder.id);
+
+          if (isSelectionMode) {
+            final newSelection = Set<String>.from(currentSelection);
+            if (isCurrentlySelected) {
+              newSelection.remove(folder.id);
+            } else {
+              newSelection.add(folder.id);
+            }
+            ref.read(selectedFoldersProvider.notifier).state = newSelection;
+          } else {
+            setState(() {
+              _selectedSection = SidebarSection.folder;
+              _selectedFolderId = folder.id;
+            });
+            ref.read(currentFolderIdProvider.notifier).state = folder.id;
+          }
+        },
+        onLongPress: () {
+          if (!isSelectionMode) {
+            ref.read(selectionModeProvider.notifier).state = true;
+            ref.read(selectedFoldersProvider.notifier).state = {folder.id};
+          } else {
+            _showFolderMenu(folder);
+          }
+        },
+        hoverColor: hoverColor,
+        splashColor: hoverColor,
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        child: Container(
+          height: 52,
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+          child: Row(
+            children: [
+              // Selection checkbox OR Folder icon with background
+              if (isSelectionMode)
+                _buildSelectionCheckbox(isSelected, isDark)
+              else
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: Color(folder.colorValue).withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
+                  ),
+                  child: Icon(
+                    Icons.folder_rounded,
+                    size: 20,
+                    color: Color(folder.colorValue),
+                  ),
+                ),
+
+              const SizedBox(width: AppSpacing.md),
+
+              // Folder name
+              Expanded(
+                child: Text(
+                  folder.name,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: textPrimary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+
+              // Document count badge
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm,
+                  vertical: 2,
+                ),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? AppColors.surfaceVariantDark
+                      : AppColors.surfaceVariantLight,
+                  borderRadius: BorderRadius.circular(AppRadius.full),
+                ),
+                child: Text(
+                  '${folder.documentCount}',
+                  style: AppTypography.caption.copyWith(
+                    color: textTertiary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+
+              // Chevron (hidden in selection mode)
+              if (!isSelectionMode) ...[
+                const SizedBox(width: AppSpacing.xs),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 20,
+                  color: textTertiary,
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -946,30 +1062,28 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     );
   }
 
-  // Build document list tile
+  /// Modern document list tile (Notion/Apple Notes tarzı)
   Widget _buildListTile(DocumentInfo doc) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isSelectionMode = ref.watch(selectionModeProvider);
     final selectedDocuments = ref.watch(selectedDocumentsProvider);
     final isSelected = selectedDocuments.contains(doc.id);
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: isSelected
-            ? BorderSide(
-                color: Theme.of(context).colorScheme.primary,
-                width: 2,
-              )
-            : BorderSide.none,
-      ),
-      color: isSelected
-          ? Theme.of(context).colorScheme.primary.withOpacity(0.08)
-          : null,
+    // Theme-aware colors
+    final textPrimary =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final textTertiary =
+        isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight;
+    final surfaceColor =
+        isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+    final hoverColor =
+        isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariantLight;
+
+    return Material(
+      color: surfaceColor,
       child: InkWell(
         onTap: () {
           if (isSelectionMode) {
-            // Toggle selection
             final newSelection = Set<String>.from(selectedDocuments);
             if (isSelected) {
               newSelection.remove(doc.id);
@@ -981,142 +1095,79 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
             _openDocument(doc.id);
           }
         },
-        onLongPress: () => _showDocumentMenu(doc),
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
+        onLongPress: () {
+          if (!isSelectionMode) {
+            ref.read(selectionModeProvider.notifier).state = true;
+            ref.read(selectedDocumentsProvider.notifier).state = {doc.id};
+          } else {
+            _showDocumentMenu(doc);
+          }
+        },
+        hoverColor: hoverColor,
+        splashColor: hoverColor,
+        borderRadius: BorderRadius.circular(AppRadius.sm),
+        child: Container(
+          height: 64,
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
           child: Row(
             children: [
-              // Selection checkbox or thumbnail
+              // Selection checkbox OR Thumbnail
               if (isSelectionMode)
-                Container(
-                  width: 24,
-                  height: 24,
-                  margin: const EdgeInsets.only(right: 12),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: isSelected
-                        ? Theme.of(context).colorScheme.primary
-                        : Colors.white,
-                    border: Border.all(
-                      color: isSelected
-                          ? Theme.of(context).colorScheme.primary
-                          : Colors.grey.shade400,
-                      width: 2,
-                    ),
-                  ),
-                  child: isSelected
-                      ? Icon(
-                          Icons.check,
-                          size: 16,
-                          color: Theme.of(context).colorScheme.onPrimary,
-                        )
-                      : null,
-                )
+                _buildSelectionCheckbox(isSelected, isDark)
               else
-                // Thumbnail preview
-                Container(
-                  width: 64,
-                  height: 85,
-                  decoration: BoxDecoration(
-                    color: _getPaperColor(doc.paperColor),
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(
-                      color: const Color(0xFFE0E0E0),
-                      width: 1,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 3,
-                        offset: const Offset(0, 1),
-                      ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(5),
-                    child: Stack(
-                      children: [
-                        // Thumbnail
-                        _buildListThumbnail(doc),
+                _buildCompactThumbnail(doc, isDark),
 
-                        // Page count badge
-                        if (doc.pageCount > 1)
-                          Positioned(
-                            bottom: 3,
-                            right: 3,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 4,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.black.withValues(alpha: 0.7),
-                                borderRadius: BorderRadius.circular(3),
-                              ),
-                              child: Text(
-                                '${doc.pageCount}',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 8,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-
-              const SizedBox(width: 12),
+              const SizedBox(width: AppSpacing.md),
 
               // Document info
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    // Title
                     Text(
                       doc.title,
-                      style: TextStyle(
-                        fontSize: 16,
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: textPrimary,
                         fontWeight: FontWeight.w500,
-                        color: Theme.of(context).colorScheme.onSurface,
                       ),
-                      maxLines: 2,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
+                    // Date + page count
                     Text(
-                      _formatDate(doc.updatedAt),
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
+                      doc.pageCount > 1
+                          ? '${DocumentDateFormatter.format(doc.updatedAt)} · ${doc.pageCount} sayfa'
+                          : DocumentDateFormatter.format(doc.updatedAt),
+                      style:
+                          AppTypography.caption.copyWith(color: textTertiary),
                     ),
                   ],
                 ),
               ),
 
-              // Favorite star and chevron (hidden in selection mode)
-              if (!isSelectionMode)
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (doc.isFavorite)
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: Icon(
-                          Icons.star,
-                          size: 18,
-                          color: Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
-                    Icon(
-                      Icons.chevron_right,
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+              // Favorite star (hidden in selection mode)
+              if (!isSelectionMode && doc.isFavorite)
+                Padding(
+                  padding: const EdgeInsets.only(right: AppSpacing.xs),
+                  child: GestureDetector(
+                    onTap: () => _toggleFavorite(doc.id),
+                    child: const Icon(
+                      Icons.star_rounded,
+                      size: 18,
+                      color: AppColors.accent,
                     ),
-                  ],
+                  ),
+                ),
+
+              // Chevron (hidden in selection mode)
+              if (!isSelectionMode)
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 20,
+                  color: textTertiary,
                 ),
             ],
           ),
@@ -1125,80 +1176,123 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     );
   }
 
-  // Build thumbnail for list view (compact version)
-  Widget _buildListThumbnail(DocumentInfo doc) {
-    // Cover preview if available (without title overlay for list view)
-    if (doc.hasCover && doc.coverId != null) {
-      final cover = core.CoverRegistry.byId(doc.coverId!);
-      if (cover != null) {
-        return CoverPreviewWidget(
-          cover: cover,
-          title: '', // List view'da kapak üzerinde başlık gösterme
-          width: double.infinity,
-          height: double.infinity,
-        );
-      }
-    }
+  /// Selection checkbox widget
+  Widget _buildSelectionCheckbox(bool isSelected, bool isDark) {
+    final outlineColor =
+        isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight;
 
-    // Template pattern preview (same as DocumentCard)
-    // Notebook için spiral defter görünümü
-    if (doc.documentType == core.DocumentType.notebook) {
-      return Stack(
-        children: [
-          // Template pattern
-          CustomPaint(
-            painter: DocumentThumbnailPainter(doc.templateId),
-            size: Size.infinite,
+    return Container(
+      width: 36,
+      height: 44,
+      alignment: Alignment.center,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        width: 24,
+        height: 24,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: isSelected ? AppColors.primary : Colors.transparent,
+          border: Border.all(
+            color: isSelected ? AppColors.primary : outlineColor,
+            width: 1.5,
           ),
-          // Spiral binding effect (left side)
-          Positioned(
-            left: 0,
-            top: 0,
-            bottom: 0,
-            child: Container(
-              width: 12,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: [
-                    Colors.black.withValues(alpha: 0.1),
-                    Colors.transparent,
-                  ],
-                ),
-              ),
+        ),
+        child: isSelected
+            ? const Icon(
+                Icons.check_rounded,
+                size: 16,
+                color: AppColors.onPrimary,
+              )
+            : null,
+      ),
+    );
+  }
+
+  /// Compact thumbnail for list view (40x48, rounded 6dp)
+  Widget _buildCompactThumbnail(DocumentInfo doc, bool isDark) {
+    final paperColor = _getPaperColor(doc.paperColor);
+    final isNotebook = doc.documentType == core.DocumentType.notebook;
+    final lineColor = isDark
+        ? Colors.grey.withValues(alpha: 0.2)
+        : Colors.grey.withValues(alpha: 0.15);
+
+    return Container(
+      width: 40,
+      height: 48,
+      decoration: BoxDecoration(
+        color: paperColor,
+        borderRadius: BorderRadius.circular(6),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.12),
+            blurRadius: 3,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          // Paper lines pattern
+          Positioned.fill(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 8, left: 6, right: 4),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: List.generate(
-                  6,
-                  (index) => Container(
-                    width: 4,
-                    height: 4,
-                    margin: const EdgeInsets.only(left: 2),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.grey[400],
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.2),
-                          blurRadius: 1,
-                        ),
-                      ],
-                    ),
+                  5,
+                  (i) => Container(
+                    height: 1,
+                    margin: const EdgeInsets.only(bottom: 6),
+                    color: lineColor,
                   ),
                 ),
               ),
             ),
           ),
+          // Notebook spiral binding
+          if (isNotebook)
+            Positioned(
+              left: 0,
+              top: 4,
+              bottom: 4,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: List.generate(
+                  5,
+                  (i) => Container(
+                    width: 3,
+                    height: 3,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isDark ? Colors.grey[600] : Colors.grey[400],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          // Cover overlay if has cover
+          if (doc.hasCover && doc.coverId != null)
+            Positioned.fill(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: _buildCoverThumbnail(doc),
+              ),
+            ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCoverThumbnail(DocumentInfo doc) {
+    final cover = core.CoverRegistry.byId(doc.coverId!);
+    if (cover != null) {
+      return CoverPreviewWidget(
+        cover: cover,
+        title: '',
+        width: 40,
+        height: 48,
       );
     }
-
-    // Diğer tipler için basit pattern
-    return CustomPaint(
-      painter: DocumentThumbnailPainter(doc.templateId),
-      size: Size.infinite,
-    );
+    return const SizedBox.shrink();
   }
 
   Color _getPaperColor(String paperColor) {
@@ -1350,7 +1444,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                 }
               },
             ),
-            const Divider(),
+            const AppDivider(),
             ListTile(
               leading: Icon(Icons.delete_forever, color: Colors.red.shade400),
               title: Text('Kalıcı Sil',
@@ -1485,7 +1579,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                 _toggleFavorite(document.id);
               },
             ),
-            const Divider(),
+            const AppDivider(),
             ListTile(
               leading: Icon(Icons.delete_outline, color: Colors.red.shade400),
               title: Text('Çöpe Taşı',
@@ -1597,7 +1691,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
                 _showFolderColorPicker(folder);
               },
             ),
-            const Divider(),
+            const AppDivider(),
             ListTile(
               leading: Icon(Icons.delete_outline, color: Colors.red.shade400),
               title: Text('Sil', style: TextStyle(color: Colors.red.shade400)),

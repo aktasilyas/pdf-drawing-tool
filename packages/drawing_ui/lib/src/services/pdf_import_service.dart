@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:path_provider/path_provider.dart';
 import 'pdf_loader.dart';
@@ -316,7 +316,13 @@ class PDFImportService {
     return batchSize > totalPages ? totalPages : batchSize;
   }
 
-  /// Imports PDF from file path.
+  /// Maximum number of pages allowed for import.
+  static const int maxPageCount = 500;
+
+  /// Imports PDF from file path with lazy loading.
+  ///
+  /// Copies the source PDF to app storage, then extracts page dimensions
+  /// without rendering. Pages are rendered on-demand when displayed.
   Future<PDFImportServiceResult> importFromFile({
     required String filePath,
     required PDFImportConfig config,
@@ -328,31 +334,88 @@ class PDFImportService {
     }
 
     try {
-      // Load PDF
       _updateState(PDFImportState.loadingPDF);
-      final document = await _loader.loadFromFile(filePath);
+
+      // 1. PDF'i app storage'a kopyala (orijinal dosya silinebilir)
+      final appDir = await getApplicationDocumentsDirectory();
+      final pdfDir = Directory('${appDir.path}/pdfs');
+      if (!await pdfDir.exists()) {
+        await pdfDir.create(recursive: true);
+      }
+
+      final pdfId = 'pdf_${DateTime.now().millisecondsSinceEpoch}';
+      final pdfFile = File('${pdfDir.path}/$pdfId.pdf');
+      await File(filePath).copy(pdfFile.path);
+
+      // 2. Kopyalanan PDF'i aç (orijinal bytes RAM'de tutulmaz)
+      final document = await _loader.loadFromFile(pdfFile.path);
 
       // Validate config
       if (!config.isValid(totalPages: document.pagesCount)) {
+        await _loader.disposeDocument(document);
         throw ArgumentError('Invalid import configuration');
       }
 
-      // Determine pages to import
+      // Page count limit
       final pageNumbers = _getPageNumbers(config, document.pagesCount);
+      if (pageNumbers.length > maxPageCount) {
+        await _loader.disposeDocument(document);
+        return PDFImportServiceResult.error(
+          'PDF çok fazla sayfa içeriyor (${pageNumbers.length}). '
+          'Maksimum $maxPageCount sayfa destekleniyor.',
+        );
+      }
+
       _totalPages = pageNumbers.length;
       _processedPages = 0;
       _updateProgress(0.0);
 
-      // Convert pages
+      // 3. Sayfa boyutlarını oku (render yok - sadece metadata)
       _updateState(PDFImportState.convertingPages);
-      final pages = await _convertPages(
-        document,
-        pageNumbers,
-        config,
-      );
+      final pages = <Page>[];
 
-      // Cleanup
+      for (final pageNumber in pageNumbers) {
+        PdfPage? pdfPage;
+        try {
+          pdfPage = await document.getPage(pageNumber);
+
+          final page = Page(
+            id: 'page_${DateTime.now().millisecondsSinceEpoch}_$pageNumber',
+            index: pageNumber - 1,
+            size: PageSize(width: pdfPage.width, height: pdfPage.height),
+            background: PageBackground.pdfLazy(
+              pageIndex: pageNumber,
+              pdfFilePath: pdfFile.path,
+            ),
+            layers: [Layer.empty('Layer 1')],
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          );
+
+          pages.add(page);
+        } catch (e) {
+          debugPrint('Warning: Could not load PDF page $pageNumber: $e');
+          // Bozuk sayfayı atla, devam et
+        } finally {
+          try {
+            await pdfPage?.close();
+          } catch (_) {}
+        }
+
+        _processedPages++;
+        _updateProgress(calculateProgress(
+          processedPages: _processedPages,
+          totalPages: _totalPages,
+        ));
+      }
+
       await _loader.disposeDocument(document);
+
+      if (pages.isEmpty) {
+        return PDFImportServiceResult.error(
+          'PDF sayfaları okunamadı. Dosya bozuk olabilir.',
+        );
+      }
 
       _updateState(PDFImportState.completed);
       return PDFImportServiceResult.success(pages);
@@ -380,65 +443,91 @@ class PDFImportService {
       // ═══════════════════════════════════════════════════════════════════
       if (useLazyLoading) {
         _updateState(PDFImportState.loadingPDF);
-        
+
         // 1. PDF'i cihaza kaydet
         final appDir = await getApplicationDocumentsDirectory();
         final pdfDir = Directory('${appDir.path}/pdfs');
         if (!await pdfDir.exists()) {
           await pdfDir.create(recursive: true);
         }
-        
+
         final pdfId = 'pdf_${DateTime.now().millisecondsSinceEpoch}';
         final pdfFile = File('${pdfDir.path}/$pdfId.pdf');
         await pdfFile.writeAsBytes(bytes);
-        
-        // 2. PDF'i aç ve sayfa bilgilerini al
-        final document = await _loader.loadFromBytes(bytes);
-        
+
+        // 2. Dosyadan aç (bytes'ı tekrar RAM'e yüklemeden)
+        final document = await _loader.loadFromFile(pdfFile.path);
+
         // Validate config
         if (!config.isValid(totalPages: document.pagesCount)) {
+          await _loader.disposeDocument(document);
           throw ArgumentError('Invalid import configuration');
         }
-        
+
         // Determine pages to import
         final pageNumbers = _getPageNumbers(config, document.pagesCount);
+
+        // Page count limit
+        if (pageNumbers.length > maxPageCount) {
+          await _loader.disposeDocument(document);
+          return PDFImportServiceResult.error(
+            'PDF çok fazla sayfa içeriyor (${pageNumbers.length}). '
+            'Maksimum $maxPageCount sayfa destekleniyor.',
+          );
+        }
+
         _totalPages = pageNumbers.length;
         _processedPages = 0;
         _updateProgress(0.0);
-        
+
         _updateState(PDFImportState.convertingPages);
-        
+
         final pages = <Page>[];
-        
+
         for (final pageNumber in pageNumbers) {
-          final pdfPage = await document.getPage(pageNumber);
-          
-          // Sadece boyut bilgisi + dosya yolu kaydet, RENDER YOK
-          final page = Page(
-            id: 'page_${DateTime.now().millisecondsSinceEpoch}_$pageNumber',
-            index: pageNumber - 1,
-            size: PageSize(width: pdfPage.width, height: pdfPage.height),
-            background: PageBackground.pdfLazy(
-              pageIndex: pageNumber,
-              pdfFilePath: pdfFile.path,
-            ),
-            layers: [Layer.empty('Layer 1')],
-            createdAt: DateTime.now(),
-            updatedAt: DateTime.now(),
-          );
-          
-          pages.add(page);
-          await pdfPage.close();
-          
+          PdfPage? pdfPage;
+          try {
+            pdfPage = await document.getPage(pageNumber);
+
+            // Sadece boyut bilgisi + dosya yolu kaydet, RENDER YOK
+            final page = Page(
+              id: 'page_${DateTime.now().millisecondsSinceEpoch}_$pageNumber',
+              index: pageNumber - 1,
+              size: PageSize(width: pdfPage.width, height: pdfPage.height),
+              background: PageBackground.pdfLazy(
+                pageIndex: pageNumber,
+                pdfFilePath: pdfFile.path,
+              ),
+              layers: [Layer.empty('Layer 1')],
+              createdAt: DateTime.now(),
+              updatedAt: DateTime.now(),
+            );
+
+            pages.add(page);
+          } catch (e) {
+            debugPrint('Warning: Could not load PDF page $pageNumber: $e');
+            // Bozuk sayfayı atla, devam et
+          } finally {
+            try {
+              await pdfPage?.close();
+            } catch (_) {}
+          }
+
           _processedPages++;
           _updateProgress(calculateProgress(
             processedPages: _processedPages,
             totalPages: _totalPages,
           ));
         }
-        
+
         await _loader.disposeDocument(document);
-        
+
+        if (pages.isEmpty) {
+          return PDFImportServiceResult.error(
+            'PDF sayfaları okunamadı. Dosya bozuk olabilir.',
+          );
+        }
+
         _updateState(PDFImportState.completed);
         return PDFImportServiceResult.success(pages);
       }

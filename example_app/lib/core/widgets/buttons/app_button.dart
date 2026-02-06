@@ -1,6 +1,7 @@
 /// StarNote Design System - AppButton Component
 ///
-/// Ana buton komponenti. 5 variant ve 3 size destekler.
+/// Modern, flat buton komponenti. 5 variant ve 3 size destekler.
+/// Rounded, flat, modern tasarım.
 ///
 /// Kullanım:
 /// ```dart
@@ -19,19 +20,19 @@ import 'package:example_app/core/theme/index.dart';
 
 /// Buton varyantları.
 enum AppButtonVariant {
-  /// Ana aksiyon butonu - Primary renk
+  /// Ana aksiyon butonu - Primary renk, flat
   primary,
 
-  /// İkincil aksiyon butonu - Surface renk
+  /// İkincil aksiyon butonu - SurfaceVariant renk
   secondary,
 
-  /// Kenarlıklı buton - Transparent arka plan
+  /// Kenarlıklı buton - 1px outline, transparent bg
   outline,
 
   /// Sadece metin butonu - Minimal stil
   text,
 
-  /// Tehlikeli aksiyon butonu - Error renk
+  /// Tehlikeli aksiyon butonu - Error renk, beyaz text
   destructive,
 }
 
@@ -47,10 +48,14 @@ enum AppButtonSize {
   large,
 }
 
-/// StarNote ana buton komponenti.
+/// StarNote modern buton komponenti.
 ///
-/// 5 farklı variant ve 3 farklı boyut destekler.
-/// Loading state, icon ve expanded özellikleri mevcut.
+/// Modern tasarım kuralları:
+/// - Border radius: AppRadius.md (10) — soft rectangle
+/// - Elevation: default 0, press 1
+/// - Font weight: w600 (Material default w500 değil)
+/// - Letter spacing: 0 (Material default 1.25 kaldırıldı)
+/// - Subtle ripple effect
 class AppButton extends StatelessWidget {
   /// Buton üzerindeki metin.
   final String label;
@@ -99,13 +104,15 @@ class AppButton extends StatelessWidget {
       child: SizedBox(
         height: specs.height,
         width: isExpanded ? double.infinity : null,
-        child: _buildButton(specs, isDisabled),
+        child: _buildButton(context, specs, isDisabled),
       ),
     );
   }
 
-  Widget _buildButton(_ButtonSpecs specs, bool isDisabled) {
+  Widget _buildButton(
+      BuildContext context, _ButtonSpecs specs, bool isDisabled) {
     final child = _buildContent(specs);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     switch (variant) {
       case AppButtonVariant.primary:
@@ -118,14 +125,14 @@ class AppButton extends StatelessWidget {
       case AppButtonVariant.secondary:
         return ElevatedButton(
           onPressed: isDisabled ? null : onPressed,
-          style: _secondaryStyle(specs),
+          style: _secondaryStyle(specs, isDark),
           child: child,
         );
 
       case AppButtonVariant.outline:
         return OutlinedButton(
           onPressed: isDisabled ? null : onPressed,
-          style: _outlineStyle(specs),
+          style: _outlineStyle(specs, isDark),
           child: child,
         );
 
@@ -169,7 +176,8 @@ class AppButton extends StatelessWidget {
         label,
         style: TextStyle(
           fontSize: specs.fontSize,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w600, // w500 → w600 (daha modern)
+          letterSpacing: 0, // Material default 1.25 kaldırıldı
         ),
       ),
     );
@@ -224,51 +232,104 @@ class AppButton extends StatelessWidget {
     }
   }
 
+  /// Primary: Flat renk, shadow yok (default), press'te çok hafif elevation
   ButtonStyle _primaryStyle(_ButtonSpecs specs) => ElevatedButton.styleFrom(
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.onPrimary,
         elevation: 0,
+        shadowColor: AppColors.primary.withValues(alpha: 0.3),
         padding: EdgeInsets.symmetric(horizontal: specs.horizontalPadding),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.button),
         ),
+        splashFactory: InkRipple.splashFactory,
+      ).copyWith(
+        elevation: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.pressed)) return 1;
+          return 0;
+        }),
+        backgroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.pressed)) {
+            return AppColors.primaryDark;
+          }
+          return AppColors.primary;
+        }),
       );
 
-  ButtonStyle _secondaryStyle(_ButtonSpecs specs) => ElevatedButton.styleFrom(
-        backgroundColor: AppColors.surfaceVariantLight,
-        foregroundColor: AppColors.textPrimaryLight,
+  /// Secondary: surfaceVariant bg, textPrimary renk
+  ButtonStyle _secondaryStyle(_ButtonSpecs specs, bool isDark) =>
+      ElevatedButton.styleFrom(
+        backgroundColor: isDark
+            ? AppColors.surfaceVariantDark
+            : AppColors.surfaceVariantLight,
+        foregroundColor:
+            isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
         elevation: 0,
         padding: EdgeInsets.symmetric(horizontal: specs.horizontalPadding),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.button),
         ),
+        splashFactory: InkRipple.splashFactory,
+      ).copyWith(
+        elevation: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.pressed)) return 1;
+          return 0;
+        }),
       );
 
-  ButtonStyle _outlineStyle(_ButtonSpecs specs) => OutlinedButton.styleFrom(
-        foregroundColor: AppColors.primary,
-        padding: EdgeInsets.symmetric(horizontal: specs.horizontalPadding),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(AppRadius.button),
-        ),
-        side: const BorderSide(color: AppColors.primary),
-      );
+  /// Outline: 1px border, transparent bg, hover/press'te hafif fill
+  ButtonStyle _outlineStyle(_ButtonSpecs specs, bool isDark) {
+    final outlineColor =
+        isDark ? AppColors.outlineDark : AppColors.outlineLight;
+    final hoverFill =
+        isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariantLight;
 
+    return OutlinedButton.styleFrom(
+      foregroundColor: AppColors.primary,
+      backgroundColor: Colors.transparent,
+      padding: EdgeInsets.symmetric(horizontal: specs.horizontalPadding),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.button),
+      ),
+      side: BorderSide(color: outlineColor),
+      splashFactory: InkRipple.splashFactory,
+    ).copyWith(
+      backgroundColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.pressed) ||
+            states.contains(WidgetState.hovered)) {
+          return hoverFill;
+        }
+        return Colors.transparent;
+      }),
+    );
+  }
+
+  /// Text: arka plan yok, border yok, sadece text + ripple
   ButtonStyle _textStyle(_ButtonSpecs specs) => TextButton.styleFrom(
         foregroundColor: AppColors.primary,
         padding: EdgeInsets.symmetric(horizontal: specs.horizontalPadding),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.button),
         ),
+        splashFactory: InkRipple.splashFactory,
       );
 
+  /// Destructive: flat error renk, beyaz text
   ButtonStyle _destructiveStyle(_ButtonSpecs specs) => ElevatedButton.styleFrom(
         backgroundColor: AppColors.error,
         foregroundColor: AppColors.onError,
         elevation: 0,
+        shadowColor: AppColors.error.withValues(alpha: 0.3),
         padding: EdgeInsets.symmetric(horizontal: specs.horizontalPadding),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.button),
         ),
+        splashFactory: InkRipple.splashFactory,
+      ).copyWith(
+        elevation: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.pressed)) return 1;
+          return 0;
+        }),
       );
 }
 

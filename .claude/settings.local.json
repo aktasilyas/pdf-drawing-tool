@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs -I {} bash -c 'echo \"\"=== {} ===\"\" && cat \"\"{}\"\"')",
+      "Bash(flutter analyze:*)",
+      "Bash(/mnt/c/Users/aktas/flutter/bin/flutter analyze --no-pub)",
+      "Bash(/mnt/c/Users/aktas/flutter/bin/flutter.bat analyze:*)",
+      "Bash(cmd.exe /c \"flutter analyze --no-pub\")",
+      "Bash(cmd.exe /c \"flutter analyze lib/features/documents/presentation/widgets/folder_card.dart --no-pub\")",
+      "Bash(/bin/bash -c \"cd /mnt/c/Users/aktas/source/repos/starnote_drawing_workspace/example_app && flutter analyze 2>&1\")",
+      "Bash(cmd.exe /c \"cd /d C:\\\\Users\\\\aktas\\\\source\\\\repos\\\\starnote_drawing_workspace\\\\example_app && flutter analyze\")",
+      "Bash(git -C /mnt/c/Users/aktas/source/repos/starnote_drawing_workspace diff main..feature/design-system-phase0 --stat)",
+      "Bash(git --git-dir=/mnt/c/Users/aktas/source/repos/starnote_drawing_workspace/.git --work-tree=/mnt/c/Users/aktas/source/repos/starnote_drawing_workspace branch -a)",
+      "Bash(git --git-dir=/mnt/c/Users/aktas/source/repos/starnote_drawing_workspace/.git --work-tree=/mnt/c/Users/aktas/source/repos/starnote_drawing_workspace diff main..feature/design-system-phase0 --stat)",
+      "Bash(git --git-dir=/mnt/c/Users/aktas/source/repos/starnote_drawing_workspace/.git --work-tree=/mnt/c/Users/aktas/source/repos/starnote_drawing_workspace log main..feature/design-system-phase0 --oneline -- example_app/lib/core/theme/tokens/app_colors.dart example_app/lib/core/widgets/layout/app_card.dart example_app/lib/core/widgets/feedback/app_empty_state.dart example_app/lib/features/documents/presentation/widgets/folder_card.dart example_app/lib/features/documents/presentation/widgets/document_card_helpers.dart example_app/lib/features/documents/presentation/widgets/selection_mode_header.dart example_app/lib/features/documents/presentation/widgets/documents_empty_states.dart example_app/lib/features/documents/presentation/widgets/breadcrumb_navigation.dart)",
+      "Bash(git -C \"c:/Users/aktas/source/repos/starnote_drawing_workspace\" diff --stat)",
+      "Bash(git -C \"c:/Users/aktas/source/repos/starnote_drawing_workspace\" diff example_app/lib/core/theme/tokens/app_colors.dart)",
+      "Bash(cmd.exe /c \"cd /d C:\\\\Users\\\\aktas\\\\source\\\\repos\\\\starnote_drawing_workspace\\\\example_app && flutter test test/core/widgets/layout/app_card_test.dart\")",
+      "Bash(cmd.exe:*)",
+      "Bash(git config:*)",
+      "Bash(git -C /mnt/c/Users/aktas/source/repos/starnote_drawing_workspace status)",
+      "Bash(git -C /mnt/c/Users/aktas/source/repos/starnote_drawing_workspace diff --stat)",
+      "Bash(git -C /mnt/c/Users/aktas/source/repos/starnote_drawing_workspace log --oneline -5)",
+      "Bash(git -C /mnt/c/Users/aktas/source/repos/starnote_drawing_workspace diff -- example_app/lib/core/theme/tokens/app_colors.dart example_app/lib/core/widgets/layout/app_card.dart example_app/lib/core/widgets/feedback/app_empty_state.dart example_app/lib/features/documents/presentation/widgets/folder_card.dart example_app/lib/features/documents/presentation/widgets/document_card_helpers.dart example_app/lib/features/documents/presentation/widgets/selection_mode_header.dart example_app/lib/features/documents/presentation/widgets/documents_empty_states.dart example_app/lib/features/documents/presentation/widgets/breadcrumb_navigation.dart CLAUDE.md)",
+      "Bash(git -C /mnt/c/Users/aktas/source/repos/starnote_drawing_workspace status -- CLAUDE.md example_app/lib/ example_app/test/)",
+      "Bash(git -C /mnt/c/Users/aktas/source/repos/starnote_drawing_workspace add CLAUDE.md example_app/lib/core/theme/tokens/app_colors.dart example_app/lib/core/widgets/layout/app_card.dart example_app/lib/core/widgets/feedback/app_empty_state.dart example_app/lib/features/documents/presentation/widgets/folder_card.dart example_app/lib/features/documents/presentation/widgets/document_card_helpers.dart example_app/lib/features/documents/presentation/widgets/selection_mode_header.dart example_app/lib/features/documents/presentation/widgets/documents_empty_states.dart example_app/lib/features/documents/presentation/widgets/breadcrumb_navigation.dart example_app/test/core/widgets/layout/app_card_test.dart example_app/test/core/widgets/feedback/app_empty_state_test.dart example_app/test/features/documents/presentation/widgets/folder_card_test.dart)",
+      "Bash(git -C /mnt/c/Users/aktas/source/repos/starnote_drawing_workspace diff --cached --stat)",
+      "Bash(git -C /mnt/c/Users/aktas/source/repos/starnote_drawing_workspace commit -m \"$\\(cat <<''EOF''\nfix\\(theme\\): make Documents screen widgets dark-theme-aware\n\nFix 11 critical dark theme issues where widgets hardcoded Light color\ntokens, making them invisible or broken in dark mode. All widgets now\nread Theme.of\\(context\\).brightness and select appropriate dark/light\nAppColors variants. Also fix outlineDark token value to match spec\n\\(0xFF2C2C2C\\), add AppColors.paperCream token, and fix breadcrumb back\nbutton touch target to 48dp minimum. Includes widget tests for AppCard,\nAppEmptyState, and FolderCard verifying both themes.\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git -C /mnt/c/Users/aktas/source/repos/starnote_drawing_workspace status --short)",
+      "Bash(dart analyze:*)",
+      "Bash(/home/aktas/.pub-cache/bin/dart analyze lib/src/providers/pdf_render_provider.dart)",
+      "Bash(/mnt/c/Users/aktas/flutter/bin/dart analyze:*)",
+      "Bash(git status:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git diff:*)",
+      "Bash(git reset:*)",
+      "Bash(git checkout:*)"
+    ]
+  }
+}

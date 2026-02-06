@@ -185,20 +185,35 @@ void _createWhiteboard(BuildContext context) async {
 }
 
 void _importPdf(BuildContext context) async {
-  // 1. PDF dosyası seç
+  // 1. PDF dosyası seç (withData: false - RAM'e yüklemeden sadece yol al)
   final result = await FilePicker.platform.pickFiles(
     type: FileType.custom,
     allowedExtensions: ['pdf'],
-    withData: true,
+    withData: false,
   );
 
   if (result == null || result.files.isEmpty) return;
 
   final file = result.files.first;
-  if (file.bytes == null) {
+  final filePath = file.path;
+  if (filePath == null || filePath.isEmpty) {
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('PDF dosyası okunamadı')),
+    );
+    return;
+  }
+
+  // Dosya boyutu kontrolü (max 200MB)
+  const maxFileSizeBytes = 200 * 1024 * 1024;
+  if (file.size > maxFileSizeBytes) {
+    if (!context.mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('PDF dosyası çok büyük! Maksimum boyut: 200MB'),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+      ),
     );
     return;
   }
@@ -227,29 +242,39 @@ void _importPdf(BuildContext context) async {
     ),
   );
 
+  // Save references before async gap
+  final messenger = ScaffoldMessenger.of(context);
+  final router = GoRouter.of(context);
+
+  // Track dialog state to prevent double-pop crash
+  bool isDialogOpen = true;
+  void closeLoadingDialog() {
+    if (isDialogOpen && context.mounted) {
+      isDialogOpen = false;
+      Navigator.of(context, rootNavigator: true).pop();
+    }
+  }
+
+  PDFImportService? importService;
   try {
-    // 3. PDF Import Service kullan
-    final importService = PDFImportService();
-    final importResult = await importService.importFromBytes(
-      bytes: file.bytes!,
+    // 3. PDF Import Service kullan (dosya yolu ile - RAM tasarrufu)
+    importService = PDFImportService();
+    final importResult = await importService.importFromFile(
+      filePath: filePath,
       config: PDFImportConfig.all(),
     );
 
     // Loading dialog kapat
-    if (context.mounted) {
-      Navigator.of(context, rootNavigator: true).pop();
-    }
+    closeLoadingDialog();
 
     if (!importResult.isSuccess) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(importResult.errorMessage ?? 'PDF import başarısız'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
+      messenger.showSnackBar(
+        SnackBar(
+          content: Text(importResult.errorMessage ?? 'PDF import başarısız'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
       return;
     }
 
@@ -282,15 +307,15 @@ void _importPdf(BuildContext context) async {
       if (importResult.pages.isNotEmpty) {
         final firstPage = importResult.pages.first;
         if (firstPage.background.pdfFilePath != null) {
-          container.read(currentPdfFilePathProvider.notifier).state = 
+          container.read(currentPdfFilePathProvider.notifier).state =
               firstPage.background.pdfFilePath!;
-          container.read(totalPdfPagesProvider.notifier).state = 
+          container.read(totalPdfPagesProvider.notifier).state =
               importResult.pages.length;
           container.read(visiblePdfPageProvider.notifier).state = 0;
         }
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
+      messenger.showSnackBar(
         SnackBar(
           content: Text('$title açılıyor (${importResult.pages.length} sayfa)'),
           behavior: SnackBarBehavior.floating,
@@ -298,22 +323,22 @@ void _importPdf(BuildContext context) async {
         ),
       );
 
-      context.push(RouteNames.editorPath(documentId));
+      router.push(RouteNames.editorPath(documentId));
     }
   } catch (e) {
-    // Loading dialog'u kapat (eğer açıksa)
-    if (context.mounted) {
-      Navigator.of(context, rootNavigator: true).pop();
-      
-      // Hata mesajı göster
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Hata: ${e.toString()}'),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-    }
+    // Loading dialog'u kapat (sadece henüz kapatılmadıysa)
+    closeLoadingDialog();
+
+    // Hata mesajı göster
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text('PDF yüklenirken hata: ${e.toString()}'),
+        backgroundColor: Colors.red,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  } finally {
+    importService?.dispose();
   }
 }
 

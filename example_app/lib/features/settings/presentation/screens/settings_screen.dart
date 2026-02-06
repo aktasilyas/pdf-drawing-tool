@@ -26,11 +26,20 @@ class SettingsScreen extends ConsumerWidget {
     final user = Supabase.instance.client.auth.currentUser;
     final pinFavorites = ref.watch(pinFavoritesProvider);
     final isTablet = Responsive.isTablet(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Theme-aware colors
+    final backgroundColor =
+        isDark ? AppColors.backgroundDark : AppColors.backgroundLight;
+    final surfaceColor =
+        isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+    final textPrimary =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
 
     return Scaffold(
-      backgroundColor: AppColors.backgroundLight,
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.surfaceLight,
+        backgroundColor: surfaceColor,
         elevation: 0,
         leading: AppIconButton(
           icon: Icons.arrow_back,
@@ -38,8 +47,7 @@ class SettingsScreen extends ConsumerWidget {
           onPressed: () => context.pop(),
         ),
         title: Text('Ayarlar',
-            style: AppTypography.titleLarge
-                .copyWith(color: AppColors.textPrimaryLight)),
+            style: AppTypography.titleLarge.copyWith(color: textPrimary)),
         centerTitle: !isTablet,
       ),
       body: Center(
@@ -128,12 +136,15 @@ class SettingsScreen extends ConsumerWidget {
               SettingsSection(
                 title: 'HAKKINDA',
                 children: [
-                  const SettingsTile(
+                  SettingsTile(
                     icon: Icons.info_outline,
                     title: 'Versiyon',
                     showArrow: false,
                     trailing: Text('1.0.0 (1)',
-                        style: TextStyle(color: AppColors.textSecondaryLight)),
+                        style: TextStyle(
+                            color: isDark
+                                ? AppColors.textSecondaryDark
+                                : AppColors.textSecondaryLight)),
                   ),
                   SettingsTile(
                     icon: Icons.privacy_tip_outlined,
@@ -180,26 +191,34 @@ class SettingsScreen extends ConsumerWidget {
 
   void _showThemeDialog(
       BuildContext context, WidgetRef ref, AppSettings settings) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor =
+        isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+    final textPrimary =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final textSecondary =
+        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surfaceLight,
+        backgroundColor: surfaceColor,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.modal)),
-        title: const Text('Tema Seçin', style: AppTypography.titleLarge),
+        title: Text('Tema Seçin',
+            style: AppTypography.titleLarge.copyWith(color: textPrimary)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: AppThemeMode.values.map((mode) {
             final isSelected = settings.themeMode == mode;
             return ListTile(
-              title: Text(_getThemeText(mode)),
+              title: Text(_getThemeText(mode),
+                  style: TextStyle(color: textPrimary)),
               leading: Icon(
                 isSelected
                     ? Icons.radio_button_checked
                     : Icons.radio_button_off,
-                color: isSelected
-                    ? AppColors.primary
-                    : AppColors.textSecondaryLight,
+                color: isSelected ? AppColors.primary : textSecondary,
               ),
               onTap: () {
                 ref.read(settingsProvider.notifier).setTheme(mode);
@@ -213,14 +232,21 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   void _showEditNameDialog(BuildContext context, WidgetRef ref) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor =
+        isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+    final textPrimary =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+
     final controller = TextEditingController();
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surfaceLight,
+        backgroundColor: surfaceColor,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.modal)),
-        title: const Text('İsim Düzenle', style: AppTypography.titleLarge),
+        title: Text('İsim Düzenle',
+            style: AppTypography.titleLarge.copyWith(color: textPrimary)),
         content: AppTextField(label: 'Adınız', controller: controller),
         actions: [
           AppButton(
@@ -243,23 +269,31 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   void _showAccountInfo(BuildContext context, User? user) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor =
+        isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+    final textPrimary =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final textSecondary =
+        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColors.surfaceLight,
+        backgroundColor: surfaceColor,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.modal)),
-        title: const Text('Hesap Bilgileri', style: AppTypography.titleLarge),
+        title: Text('Hesap Bilgileri',
+            style: AppTypography.titleLarge.copyWith(color: textPrimary)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Email: ${user?.email ?? "-"}',
-                style: AppTypography.bodyMedium),
+                style: AppTypography.bodyMedium.copyWith(color: textPrimary)),
             const SizedBox(height: AppSpacing.sm),
             Text('ID: ${user?.id ?? "-"}',
-                style: AppTypography.caption
-                    .copyWith(color: AppColors.textSecondaryLight)),
+                style: AppTypography.caption.copyWith(color: textSecondary)),
           ],
         ),
         actions: [

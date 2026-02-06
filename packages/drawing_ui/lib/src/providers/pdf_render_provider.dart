@@ -1,12 +1,16 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:drawing_ui/src/services/pdf_page_renderer.dart';
 
 /// Cache limits - MEMORY OPTİMİZE
-const int maxCachePages = 10;  // 30'dan 10'a düşür
-const int maxCacheSizeBytes = 50 * 1024 * 1024; // 100MB'dan 50MB'a düşür
+const int maxCachePages = 10;
+const int maxCacheSizeBytes = 50 * 1024 * 1024; // 50MB
+
+/// Maximum concurrent PDF render operations
+const int _maxConcurrentRenders = 2;
 
 // =============================================================================
 // CACHES
@@ -88,56 +92,61 @@ class ZoomBasedRenderNotifier extends StateNotifier<double> {
     }
     
     _currentlyRendering.add(qualityKey);
-    
+
+    if (!_canStartRender) return;
+    _activeRenderCount++;
+
+    PdfDocument? document;
+    PdfPage? page;
     try {
       final parts = cacheKey.split('|');
       if (parts.length != 2) return;
-      
+
       final filePath = parts[0];
       final pageNumber = int.tryParse(parts[1]);
       if (pageNumber == null) return;
-      
-      final document = await PdfDocument.openFile(filePath);
-      final page = await document.getPage(pageNumber);
-      
+
+      // Check file existence before opening
+      final file = File(filePath);
+      if (!await file.exists()) {
+        debugPrint('PDF file not found: $filePath');
+        return;
+      }
+
+      document = await PdfDocument.openFile(filePath);
+      page = await document.getPage(pageNumber);
+
       final renderer = PDFPageRenderer();
       final renderOptions = PDFRenderOptions(
         quality: quality >= 2.5 ? RenderQuality.high : RenderQuality.medium,
         devicePixelRatio: quality,
       );
-      
+
       final dpi = renderer.getRecommendedDPI(
         renderOptions.quality,
         renderOptions.devicePixelRatio,
       );
-      
+
       final width = renderer.calculateRenderWidth(pageWidth: page.width, dpi: dpi);
       final height = renderer.calculateRenderHeight(pageHeight: page.height, dpi: dpi);
-      
+
       final pageImage = await page.render(
         width: width,
         height: height,
         format: PdfPageImageFormat.png,
       );
-      
-      await page.close();
-      await document.close();
-      
+
       if (pageImage?.bytes != null) {
-        // ignore: unnecessary_non_null_assertion
         final bytes = pageImage!.bytes!;
-        
-        // Cache'e ekle
+
+        // Cache'e ekle (boyut limitli)
+        _addToCache(ref, qualityKey, bytes);
+
+        // Aynı sayfanın eski kalitelerini temizle
         ref.read(pdfPageCacheProvider.notifier).update((state) {
           final newState = Map<String, Uint8List>.from(state);
-          
-          // ✅ Yeni kaliteyi ekle
-          newState[qualityKey] = bytes;
-          
-          // 🧹 Aynı sayfanın ESKİ kalitelerini temizle (RAM tasarrufu)
           final keysToRemove = <String>[];
           for (final key in newState.keys) {
-            // Aynı sayfa mı? (base cacheKey ile başlıyor mu)
             if (key.startsWith(cacheKey) && key != qualityKey && key.contains('@')) {
               keysToRemove.add(key);
             }
@@ -145,17 +154,18 @@ class ZoomBasedRenderNotifier extends StateNotifier<double> {
           for (final key in keysToRemove) {
             newState.remove(key);
           }
-          
           return newState;
         });
-        
-        // 🔄 UI'ı zorla güncelle - state değişimi tetikle
+
         state = quality;
       }
     } catch (e) {
-      debugPrint('ERROR: HQ Render error - $e');
+      debugPrint('PDF render error: $e');
     } finally {
+      try { await page?.close(); } catch (_) {}
+      try { await document?.close(); } catch (_) {}
       _currentlyRendering.remove(qualityKey);
+      _activeRenderCount--;
     }
   }
   
@@ -171,6 +181,12 @@ class ZoomBasedRenderNotifier extends StateNotifier<double> {
 // =============================================================================
 
 final _currentlyRendering = <String>{};
+
+/// Tracks active render count for concurrency limiting
+int _activeRenderCount = 0;
+
+/// Whether a new render can start (respects concurrency limit)
+bool get _canStartRender => _activeRenderCount < _maxConcurrentRenders;
 
 // =============================================================================
 // THUMBNAIL RENDER (Low resolution)
@@ -189,6 +205,8 @@ Future<Uint8List?> renderThumbnail(
   }
   _currentlyRendering.add(thumbKey);
 
+  PdfDocument? document;
+  PdfPage? page;
   try {
     final parts = cacheKey.split('|');
     if (parts.length != 2) return null;
@@ -197,9 +215,15 @@ Future<Uint8List?> renderThumbnail(
     final pageNumber = int.tryParse(parts[1]);
     if (pageNumber == null) return null;
 
-    // Her render için yeni document aç (thread-safe)
-    final document = await PdfDocument.openFile(filePath);
-    final page = await document.getPage(pageNumber);
+    // Check file existence before opening
+    final file = File(filePath);
+    if (!await file.exists()) {
+      debugPrint('PDF file not found: $filePath');
+      return null;
+    }
+
+    document = await PdfDocument.openFile(filePath);
+    page = await document.getPage(pageNumber);
 
     final aspectRatio = page.width / page.height;
     final thumbWidth = aspectRatio > 1 ? 120.0 : 100.0;
@@ -211,11 +235,7 @@ Future<Uint8List?> renderThumbnail(
       format: PdfPageImageFormat.png,
     );
 
-    await page.close();
-    await document.close();
-
     if (pageImage?.bytes != null) {
-      // ignore: unnecessary_non_null_assertion
       final bytes = pageImage!.bytes!;
       container.read(pdfThumbnailCacheProvider.notifier).update((state) {
         final newState = Map<String, Uint8List>.from(state);
@@ -229,9 +249,11 @@ Future<Uint8List?> renderThumbnail(
     }
     return null;
   } catch (e) {
-    debugPrint('ERROR: Thumbnail render error - $e');
+    debugPrint('PDF render error: $e');
     return null;
   } finally {
+    try { await page?.close(); } catch (_) {}
+    try { await document?.close(); } catch (_) {}
     _currentlyRendering.remove(thumbKey);
   }
 }
@@ -261,26 +283,42 @@ Future<Uint8List?> _renderSinglePage(Ref ref, String cacheKey) async {
     }
   }
 
-  // 3. Start render
-  _currentlyRendering.add(cacheKey);
+  // 3. Concurrency limit check
+  if (!_canStartRender) {
+    // Kuyrukta bekle - max 3 saniye
+    for (var i = 0; i < 30; i++) {
+      await Future.delayed(const Duration(milliseconds: 100));
+      if (_canStartRender) break;
+      // Cache dolmuş olabilir
+      final retryCache = ref.read(pdfPageCacheProvider);
+      if (retryCache.containsKey(cacheKey)) return retryCache[cacheKey];
+    }
+    if (!_canStartRender) return null;
+  }
 
+  // 4. Start render
+  _currentlyRendering.add(cacheKey);
+  _activeRenderCount++;
+
+  PdfDocument? document;
+  PdfPage? page;
   try {
     final parts = cacheKey.split('|');
-    if (parts.length != 2) {
-      _currentlyRendering.remove(cacheKey);
-      return null;
-    }
+    if (parts.length != 2) return null;
 
     final filePath = parts[0];
     final pageNumber = int.tryParse(parts[1]);
-    if (pageNumber == null) {
-      _currentlyRendering.remove(cacheKey);
+    if (pageNumber == null) return null;
+
+    // Check file existence before opening
+    final file = File(filePath);
+    if (!await file.exists()) {
+      debugPrint('PDF file not found: $filePath');
       return null;
     }
 
-    // Her render için yeni document aç (thread-safe)
-    final document = await PdfDocument.openFile(filePath);
-    final page = await document.getPage(pageNumber);
+    document = await PdfDocument.openFile(filePath);
+    page = await document.getPage(pageNumber);
 
     final renderer = PDFPageRenderer();
     const renderOptions = PDFRenderOptions(
@@ -304,23 +342,21 @@ Future<Uint8List?> _renderSinglePage(Ref ref, String cacheKey) async {
       format: PdfPageImageFormat.png,
     );
 
-    await page.close();
-    await document.close();
-
     if (pageImage?.bytes != null) {
-      // ignore: unnecessary_non_null_assertion
       final bytes = pageImage!.bytes!;
       _addToCache(ref, cacheKey, bytes);
-      _currentlyRendering.remove(cacheKey);
       return bytes;
     }
 
-    _currentlyRendering.remove(cacheKey);
     return null;
   } catch (e) {
-    debugPrint('ERROR: Render error: $cacheKey - $e');
-    _currentlyRendering.remove(cacheKey);
+    debugPrint('PDF render error: $e');
     return null;
+  } finally {
+    try { await page?.close(); } catch (_) {}
+    try { await document?.close(); } catch (_) {}
+    _currentlyRendering.remove(cacheKey);
+    _activeRenderCount--;
   }
 }
 

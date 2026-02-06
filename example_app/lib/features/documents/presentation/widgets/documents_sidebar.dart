@@ -21,6 +21,8 @@ class DocumentsSidebar extends ConsumerWidget {
   final String? selectedFolderId;
   final ValueChanged<String>? onFolderSelected;
   final VoidCallback? onCreateFolder;
+  final VoidCallback? onCollapse; // Sidebar collapse/close callback
+  final bool isDrawer; // true = phone drawer, false = tablet sidebar
 
   const DocumentsSidebar({
     super.key,
@@ -29,6 +31,8 @@ class DocumentsSidebar extends ConsumerWidget {
     this.selectedFolderId,
     this.onFolderSelected,
     this.onCreateFolder,
+    this.onCollapse,
+    this.isDrawer = false,
   });
 
   @override
@@ -48,7 +52,8 @@ class DocumentsSidebar extends ConsumerWidget {
                 horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
             child: AppSearchField(
               hint: 'Ara...',
-              onChanged: (q) => ref.read(searchQueryProvider.notifier).state = q,
+              onChanged: (q) =>
+                  ref.read(searchQueryProvider.notifier).state = q,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -71,7 +76,8 @@ class DocumentsSidebar extends ConsumerWidget {
                     isSelected: selectedSection == SidebarSection.favorites,
                     onTap: () => onSectionChanged(SidebarSection.favorites),
                     iconColor: selectedSection == SidebarSection.favorites
-                        ? AppColors.accent : null,
+                        ? AppColors.accent
+                        : null,
                   ),
                   SidebarItem(
                     icon: Icons.delete_outline,
@@ -85,12 +91,12 @@ class DocumentsSidebar extends ConsumerWidget {
                     child: AppDivider(),
                   ),
                   _buildFoldersHeader(context),
-                  _buildFoldersList(foldersAsync),
+                  _buildFoldersList(context, foldersAsync),
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
                     child: AppDivider(),
                   ),
-                  _buildTagsPlaceholder(),
+                  _buildTagsPlaceholder(context),
                   const SizedBox(height: AppSpacing.xl),
                 ],
               ),
@@ -102,13 +108,18 @@ class DocumentsSidebar extends ConsumerWidget {
   }
 
   Widget _buildHeader(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(
           AppSpacing.lg, AppSpacing.xl, AppSpacing.md, AppSpacing.md),
       child: Row(
         children: [
           Container(
-            width: 36, height: 36,
+            width: 36,
+            height: 36,
             decoration: BoxDecoration(
               color: AppColors.primary,
               borderRadius: BorderRadius.circular(AppRadius.sm),
@@ -118,18 +129,23 @@ class DocumentsSidebar extends ConsumerWidget {
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
-            child: Text('StarNote',
+            child: Text(
+              'StarNote',
               style: AppTypography.headlineMedium.copyWith(
-                  color: AppColors.textPrimaryLight, fontWeight: FontWeight.w700),
+                color: textPrimary,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
-          AppIconButton(
-            icon: Icons.settings_outlined,
-            variant: AppIconButtonVariant.ghost,
-            size: AppIconButtonSize.small,
-            tooltip: 'Ayarlar',
-            onPressed: () => context.push('/settings'),
-          ),
+          // Collapse/Close button instead of Settings
+          if (onCollapse != null)
+            AppIconButton(
+              icon: isDrawer ? Icons.close : Icons.chevron_left,
+              variant: AppIconButtonVariant.ghost,
+              size: AppIconButtonSize.small,
+              tooltip: isDrawer ? 'Kapat' : 'Daralt',
+              onPressed: onCollapse,
+            ),
         ],
       ),
     );
@@ -151,7 +167,8 @@ class DocumentsSidebar extends ConsumerWidget {
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             child: Text('Yönet',
-              style: AppTypography.caption.copyWith(color: AppColors.primary)),
+                style:
+                    AppTypography.caption.copyWith(color: AppColors.primary)),
           ),
           AppIconButton(
             icon: Icons.add,
@@ -165,7 +182,12 @@ class DocumentsSidebar extends ConsumerWidget {
     );
   }
 
-  Widget _buildFoldersList(AsyncValue<List<dynamic>> foldersAsync) {
+  Widget _buildFoldersList(
+      BuildContext context, AsyncValue<List<dynamic>> foldersAsync) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final tertiaryColor =
+        isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight;
+
     return foldersAsync.when(
       data: (folders) {
         final rootFolders = folders.where((f) => f.parentId == null).toList();
@@ -174,15 +196,16 @@ class DocumentsSidebar extends ConsumerWidget {
             padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
             child: Text('Klasör yok',
-                style: AppTypography.caption
-                    .copyWith(color: AppColors.textTertiaryLight)),
+                style: AppTypography.caption.copyWith(color: tertiaryColor)),
           );
         }
         final widgets = <Widget>[];
         for (final folder in rootFolders) {
-          widgets.add(_buildFolderItem(folder, false));
+          widgets.add(_buildFolderItem(context, folder, false));
           final subs = folders.where((f) => f.parentId == folder.id).toList();
-          for (final sub in subs) widgets.add(_buildFolderItem(sub, true));
+          for (final sub in subs) {
+            widgets.add(_buildFolderItem(context, sub, true));
+          }
         }
         return Column(mainAxisSize: MainAxisSize.min, children: widgets);
       },
@@ -190,7 +213,8 @@ class DocumentsSidebar extends ConsumerWidget {
         padding: EdgeInsets.all(AppSpacing.lg),
         child: Center(
           child: SizedBox(
-              width: 20, height: 20,
+              width: 20,
+              height: 20,
               child: CircularProgressIndicator(strokeWidth: 2)),
         ),
       ),
@@ -198,9 +222,13 @@ class DocumentsSidebar extends ConsumerWidget {
     );
   }
 
-  Widget _buildFolderItem(dynamic folder, bool isSub) {
+  Widget _buildFolderItem(BuildContext context, dynamic folder, bool isSub) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isSel = selectedSection == SidebarSection.folder &&
         selectedFolderId == folder.id;
+    final tertiaryColor =
+        isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight;
+
     return SidebarItem(
       icon: Icons.folder_outlined,
       selectedIcon: Icons.folder,
@@ -209,13 +237,17 @@ class DocumentsSidebar extends ConsumerWidget {
       isSubfolder: isSub,
       iconColor: Color(folder.colorValue),
       trailing: Text('${folder.documentCount}',
-        style: AppTypography.caption.copyWith(
-            color: isSel ? AppColors.primary : AppColors.textTertiaryLight)),
+          style: AppTypography.caption
+              .copyWith(color: isSel ? AppColors.primary : tertiaryColor)),
       onTap: () => onFolderSelected?.call(folder.id),
     );
   }
 
-  Widget _buildTagsPlaceholder() {
+  Widget _buildTagsPlaceholder(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final tertiaryColor =
+        isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -229,12 +261,11 @@ class DocumentsSidebar extends ConsumerWidget {
               horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
           child: Row(
             children: [
-              const Icon(Icons.label_outline,
-                  size: AppIconSize.md, color: AppColors.textTertiaryLight),
+              Icon(Icons.label_outline,
+                  size: AppIconSize.md, color: tertiaryColor),
               const SizedBox(width: AppSpacing.sm),
               Text('Yakında...',
-                  style: AppTypography.caption
-                      .copyWith(color: AppColors.textTertiaryLight)),
+                  style: AppTypography.caption.copyWith(color: tertiaryColor)),
             ],
           ),
         ),
