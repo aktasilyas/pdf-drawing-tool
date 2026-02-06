@@ -79,22 +79,28 @@ class DocumentsEmptySearchResult extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xxl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            Icon(
               Icons.search_off,
               size: AppIconSize.emptyState,
-              color: AppColors.textSecondaryLight,
+              color: isDark
+                  ? AppColors.textSecondaryDark
+                  : AppColors.textSecondaryLight,
             ),
             const SizedBox(height: AppSpacing.xl),
             Text(
               'Sonuç bulunamadı',
               style: AppTypography.headlineSmall.copyWith(
-                color: AppColors.textPrimaryLight,
+                color: isDark
+                    ? AppColors.textPrimaryDark
+                    : AppColors.textPrimaryLight,
               ),
               textAlign: TextAlign.center,
             ),
@@ -102,7 +108,9 @@ class DocumentsEmptySearchResult extends ConsumerWidget {
             Text(
               '"$query" için eşleşen not bulunamadı',
               style: AppTypography.bodyMedium.copyWith(
-                color: AppColors.textSecondaryLight,
+                color: isDark
+                    ? AppColors.textSecondaryDark
+                    : AppColors.textSecondaryLight,
               ),
               textAlign: TextAlign.center,
             ),

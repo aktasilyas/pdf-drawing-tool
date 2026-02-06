@@ -29,6 +29,7 @@ class SelectionModeHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final isPhone = Responsive.isPhone(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final selectedDocs = ref.watch(selectedDocumentsProvider);
     final selectedFolders = ref.watch(selectedFoldersProvider);
     final hasSelection = selectedDocs.isNotEmpty || selectedFolders.isNotEmpty;
@@ -54,7 +55,9 @@ class SelectionModeHeader extends ConsumerWidget {
             child: Text(
               '$totalSelected seçildi',
               style: AppTypography.titleMedium.copyWith(
-                color: AppColors.textPrimaryLight,
+                color: isDark
+                    ? AppColors.textPrimaryDark
+                    : AppColors.textPrimaryLight,
               ),
             ),
           ),
@@ -188,6 +191,7 @@ class _SelectAllButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final selectedDocs = ref.watch(selectedDocumentsProvider);
     final selectedFolders = ref.watch(selectedFoldersProvider);
 
@@ -214,12 +218,16 @@ class _SelectAllButton extends ConsumerWidget {
       icon: Icon(
         allSelected ? Icons.check_box : Icons.check_box_outline_blank,
         size: AppIconSize.md,
-        color: AppColors.textSecondaryLight,
+        color: isDark
+            ? AppColors.textSecondaryDark
+            : AppColors.textSecondaryLight,
       ),
       label: Text(
         'Tümü',
         style: AppTypography.labelMedium.copyWith(
-          color: AppColors.textSecondaryLight,
+          color: isDark
+              ? AppColors.textSecondaryDark
+              : AppColors.textSecondaryLight,
         ),
       ),
     );

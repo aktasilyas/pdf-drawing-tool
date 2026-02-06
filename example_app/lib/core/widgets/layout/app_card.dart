@@ -63,9 +63,10 @@ class AppCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final effectivePadding = padding ?? const EdgeInsets.all(AppSpacing.lg);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      decoration: _buildDecoration(),
+      decoration: _buildDecoration(isDark),
       child: Material(
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(AppRadius.card),
@@ -82,11 +83,11 @@ class AppCard extends StatelessWidget {
     );
   }
 
-  BoxDecoration _buildDecoration() {
+  BoxDecoration _buildDecoration(bool isDark) {
     switch (variant) {
       case AppCardVariant.elevated:
         return BoxDecoration(
-          color: AppColors.surfaceLight,
+          color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
           borderRadius: BorderRadius.circular(AppRadius.card),
           border: isSelected
               ? Border.all(color: AppColors.primary, width: 2)
@@ -96,7 +97,9 @@ class AppCard extends StatelessWidget {
 
       case AppCardVariant.filled:
         return BoxDecoration(
-          color: AppColors.surfaceVariantLight,
+          color: isDark
+              ? AppColors.surfaceVariantDark
+              : AppColors.surfaceVariantLight,
           borderRadius: BorderRadius.circular(AppRadius.card),
           border: isSelected
               ? Border.all(color: AppColors.primary, width: 2)
@@ -105,10 +108,12 @@ class AppCard extends StatelessWidget {
 
       case AppCardVariant.outlined:
         return BoxDecoration(
-          color: AppColors.surfaceLight,
+          color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
           borderRadius: BorderRadius.circular(AppRadius.card),
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.outlineLight,
+            color: isSelected
+                ? AppColors.primary
+                : (isDark ? AppColors.outlineDark : AppColors.outlineLight),
             width: isSelected ? 2 : 1,
           ),
         );

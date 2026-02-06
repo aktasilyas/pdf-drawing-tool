@@ -130,11 +130,18 @@ abstract class AppColors {
   /// Dark tema disabled metin rengi
   static const Color textDisabledDark = Color(0xFF4B5563);
 
-  /// Dark tema border/divider rengi
+  /// Dark tema border/divider rengi (very subtle)
   static const Color outlineDark = Color(0xFF2C2C2C);
 
-  /// Dark tema alternatif border rengi
+  /// Dark tema alternatif border rengi (subtle)
   static const Color outlineVariantDark = Color(0xFF404040);
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // PAPER COLORS
+  // ══════════════════════════════════════════════════════════════════════════
+
+  /// Krem/sarı kağıt rengi
+  static const Color paperCream = Color(0xFFFFFDE7);
 
   // ══════════════════════════════════════════════════════════════════════════
   // FOLDER COLORS (12)

@@ -29,6 +29,8 @@ class FolderCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return AppCard(
       variant: AppCardVariant.filled,
       isSelected: isSelected,
@@ -69,7 +71,9 @@ class FolderCard extends ConsumerWidget {
               Text(
                 folder.name,
                 style: AppTypography.titleMedium.copyWith(
-                  color: AppColors.textPrimaryLight,
+                  color: isDark
+                      ? AppColors.textPrimaryDark
+                      : AppColors.textPrimaryLight,
                   fontWeight: FontWeight.w600,
                 ),
                 maxLines: 2,
@@ -80,7 +84,9 @@ class FolderCard extends ConsumerWidget {
               Text(
                 '${folder.documentCount} belge',
                 style: AppTypography.caption.copyWith(
-                  color: AppColors.textSecondaryLight,
+                  color: isDark
+                      ? AppColors.textSecondaryDark
+                      : AppColors.textSecondaryLight,
                 ),
               ),
             ],
@@ -90,7 +96,10 @@ class FolderCard extends ConsumerWidget {
             Positioned(
               top: 0,
               right: 0,
-              child: _SelectionCheckbox(isSelected: isSelected),
+              child: _SelectionCheckbox(
+                isSelected: isSelected,
+                isDark: isDark,
+              ),
             ),
         ],
       ),
@@ -101,8 +110,12 @@ class FolderCard extends ConsumerWidget {
 /// Selection checkbox widget
 class _SelectionCheckbox extends StatelessWidget {
   final bool isSelected;
+  final bool isDark;
 
-  const _SelectionCheckbox({required this.isSelected});
+  const _SelectionCheckbox({
+    required this.isSelected,
+    required this.isDark,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -111,9 +124,13 @@ class _SelectionCheckbox extends StatelessWidget {
       height: 24,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: isSelected ? AppColors.primary : AppColors.surfaceLight,
+        color: isSelected
+            ? AppColors.primary
+            : (isDark ? AppColors.surfaceDark : AppColors.surfaceLight),
         border: Border.all(
-          color: isSelected ? AppColors.primary : AppColors.outlineLight,
+          color: isSelected
+              ? AppColors.primary
+              : (isDark ? AppColors.outlineDark : AppColors.outlineLight),
           width: 2,
         ),
       ),

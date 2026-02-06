@@ -119,19 +119,23 @@ class _BackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onPressed,
         borderRadius: BorderRadius.circular(AppRadius.sm),
         child: Container(
-          width: 32,
-          height: 32,
+          width: AppSpacing.minTouchTarget,
+          height: AppSpacing.minTouchTarget,
           alignment: Alignment.center,
-          child: const Icon(
+          child: Icon(
             Icons.arrow_back,
             size: AppIconSize.md,
-            color: AppColors.textSecondaryLight,
+            color: isDark
+                ? AppColors.textSecondaryDark
+                : AppColors.textSecondaryLight,
           ),
         ),
       ),
@@ -145,12 +149,16 @@ class _Separator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
       child: Icon(
         Icons.chevron_right,
         size: 16,
-        color: AppColors.textTertiaryLight,
+        color: isDark
+            ? AppColors.textTertiaryDark
+            : AppColors.textTertiaryLight,
       ),
     );
   }
@@ -170,6 +178,8 @@ class _BreadcrumbItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -184,8 +194,12 @@ class _BreadcrumbItemWidget extends StatelessWidget {
             item.label,
             style: AppTypography.bodyMedium.copyWith(
               color: isActive
-                  ? AppColors.textPrimaryLight
-                  : AppColors.textSecondaryLight,
+                  ? (isDark
+                      ? AppColors.textPrimaryDark
+                      : AppColors.textPrimaryLight)
+                  : (isDark
+                      ? AppColors.textSecondaryDark
+                      : AppColors.textSecondaryLight),
               fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
             ),
           ),

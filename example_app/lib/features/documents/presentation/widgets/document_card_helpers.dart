@@ -14,14 +14,20 @@ class DocumentSelectionCheckbox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       width: 24,
       height: 24,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: isSelected ? AppColors.primary : AppColors.surfaceLight,
+        color: isSelected
+            ? AppColors.primary
+            : (isDark ? AppColors.surfaceDark : AppColors.surfaceLight),
         border: Border.all(
-          color: isSelected ? AppColors.primary : AppColors.outlineLight,
+          color: isSelected
+              ? AppColors.primary
+              : (isDark ? AppColors.outlineDark : AppColors.outlineLight),
           width: 2,
         ),
       ),
@@ -45,18 +51,25 @@ class DocumentFavoriteButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.xs),
         decoration: BoxDecoration(
-          color: AppColors.surfaceLight.withValues(alpha: 0.9),
+          color: (isDark ? AppColors.surfaceDark : AppColors.surfaceLight)
+              .withValues(alpha: 0.9),
           shape: BoxShape.circle,
         ),
         child: Icon(
           isFavorite ? Icons.star : Icons.star_outline,
           size: AppIconSize.sm,
-          color: isFavorite ? AppColors.accent : AppColors.textTertiaryLight,
+          color: isFavorite
+              ? AppColors.accent
+              : (isDark
+                  ? AppColors.textTertiaryDark
+                  : AppColors.textTertiaryLight),
         ),
       ),
     );
@@ -70,19 +83,22 @@ class DocumentPageCountBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
         vertical: AppSpacing.xxs,
       ),
       decoration: BoxDecoration(
-        color: AppColors.textPrimaryLight.withValues(alpha: 0.7),
+        color: (isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight)
+            .withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(AppRadius.xs),
       ),
       child: Text(
         '$count sayfa',
         style: AppTypography.caption.copyWith(
-          color: AppColors.surfaceLight,
+          color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
           fontSize: 9,
         ),
       ),
@@ -130,14 +146,14 @@ class DocumentPaperColors {
         return AppColors.surfaceLight;
       case 'Sarı kağıt':
       case 'Krem kağıt':
-        return const Color(0xFFFFFDE7);
+        return AppColors.paperCream;
       case 'Gri kağıt':
       case 'Açık Gri':
         return AppColors.surfaceVariantLight;
       case 'Siyah kağıt':
         return AppColors.surfaceDark;
       default:
-        return const Color(0xFFFFFDE7);
+        return AppColors.paperCream;
     }
   }
 }
