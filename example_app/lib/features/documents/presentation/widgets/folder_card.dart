@@ -43,16 +43,18 @@ class FolderCard extends ConsumerWidget {
         }
       },
       child: Stack(
+        clipBehavior: Clip.hardEdge,
         children: [
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: [
               // Folder icon and more button
               Row(
                 children: [
                   Icon(
                     Icons.folder,
-                    size: AppIconSize.xl + AppIconSize.lg,
+                    size: AppIconSize.xxl,
                     color: Color(folder.colorValue),
                   ),
                   const Spacer(),
@@ -66,18 +68,20 @@ class FolderCard extends ConsumerWidget {
                     ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.sm),
               // Folder name
-              Text(
-                folder.name,
-                style: AppTypography.titleMedium.copyWith(
-                  color: isDark
-                      ? AppColors.textPrimaryDark
-                      : AppColors.textPrimaryLight,
-                  fontWeight: FontWeight.w600,
+              Flexible(
+                child: Text(
+                  folder.name,
+                  style: AppTypography.titleMedium.copyWith(
+                    color: isDark
+                        ? AppColors.textPrimaryDark
+                        : AppColors.textPrimaryLight,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
               ),
               const SizedBox(height: AppSpacing.xs),
               // Document count

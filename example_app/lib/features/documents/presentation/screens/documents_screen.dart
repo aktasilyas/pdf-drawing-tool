@@ -630,15 +630,26 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
         // Sort documents using helper method
         final sortedDocs = _sortDocuments(documents);
 
+        // On phones, fix 2 columns to prevent tiny cells that overflow
+        final isPhone = width < 600;
+        final gridDelegate = isPhone
+            ? SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: spacing,
+                crossAxisSpacing: spacing,
+                childAspectRatio: 0.75,
+              )
+            : SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: cardWidth,
+                mainAxisSpacing: spacing,
+                crossAxisSpacing: spacing,
+                childAspectRatio: 0.75,
+              );
+
         return Padding(
           padding: EdgeInsets.symmetric(horizontal: padding),
           child: GridView.builder(
-            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: cardWidth,
-              mainAxisSpacing: spacing,
-              crossAxisSpacing: spacing,
-              childAspectRatio: 0.75,
-            ),
+            gridDelegate: gridDelegate,
             itemCount: folders.length + sortedDocs.length,
             itemBuilder: (context, index) {
               // Show folders first

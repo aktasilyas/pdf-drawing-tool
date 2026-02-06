@@ -57,7 +57,7 @@ class _ManageFoldersScreenState extends ConsumerState<ManageFoldersScreen> {
       ),
       body: foldersAsync.when(
         data: (folders) {
-          if (_orderedFolders.isEmpty) {
+          if (!_hasChanges) {
             _orderedFolders = _buildOrderedList(folders);
           }
           return _buildContent();
@@ -185,7 +185,6 @@ class _ManageFoldersScreenState extends ConsumerState<ManageFoldersScreen> {
           .read(foldersControllerProvider.notifier)
           .renameFolder(folder.id, result);
       ref.invalidate(foldersProvider);
-      _orderedFolders = [];
     }
   }
 
@@ -199,7 +198,6 @@ class _ManageFoldersScreenState extends ConsumerState<ManageFoldersScreen> {
           .read(foldersControllerProvider.notifier)
           .updateFolderColor(folder.id, result);
       ref.invalidate(foldersProvider);
-      _orderedFolders = [];
     }
   }
 
@@ -232,7 +230,6 @@ class _ManageFoldersScreenState extends ConsumerState<ManageFoldersScreen> {
           .read(foldersControllerProvider.notifier)
           .createFolder(name: result, parentId: parent.id);
       ref.invalidate(foldersProvider);
-      _orderedFolders = [];
     }
   }
 
@@ -250,7 +247,6 @@ class _ManageFoldersScreenState extends ConsumerState<ManageFoldersScreen> {
           .read(foldersControllerProvider.notifier)
           .deleteFolder(folder.id);
       ref.invalidate(foldersProvider);
-      _orderedFolders = [];
       if (mounted) AppToast.success(context, 'Klasör silindi');
     }
   }
@@ -295,7 +291,6 @@ class _ManageFoldersScreenState extends ConsumerState<ManageFoldersScreen> {
           .read(foldersControllerProvider.notifier)
           .createFolder(name: result);
       ref.invalidate(foldersProvider);
-      _orderedFolders = [];
     }
   }
 }
