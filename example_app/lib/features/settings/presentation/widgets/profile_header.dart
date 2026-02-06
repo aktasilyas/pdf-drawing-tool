@@ -26,6 +26,13 @@ class ProfileHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final initials = name.isNotEmpty ? name[0].toUpperCase() : 'U';
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final textSecondary =
+        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+    final textTertiary =
+        isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight;
 
     return AppCard(
       variant: AppCardVariant.elevated,
@@ -50,7 +57,7 @@ class ProfileHeader extends StatelessWidget {
                       child: Text(
                         name,
                         style: AppTypography.headlineMedium.copyWith(
-                          color: AppColors.textPrimaryLight,
+                          color: textPrimary,
                           fontWeight: FontWeight.w600,
                         ),
                         overflow: TextOverflow.ellipsis,
@@ -84,16 +91,16 @@ class ProfileHeader extends StatelessWidget {
                 Text(
                   email,
                   style: AppTypography.bodyMedium.copyWith(
-                    color: AppColors.textSecondaryLight,
+                    color: textSecondary,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
           ),
-          const Icon(
+          Icon(
             Icons.chevron_right,
-            color: AppColors.textTertiaryLight,
+            color: textTertiary,
           ),
         ],
       ),

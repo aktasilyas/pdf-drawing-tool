@@ -28,9 +28,16 @@ class SettingsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textColor = enabled ? AppColors.textPrimaryLight : AppColors.textTertiaryLight;
-    final subtitleColor = enabled ? AppColors.textSecondaryLight : AppColors.textTertiaryLight;
-    final iconColor = enabled ? AppColors.textSecondaryLight : AppColors.textTertiaryLight;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = enabled
+        ? (isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight)
+        : (isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight);
+    final subtitleColor = enabled
+        ? (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)
+        : (isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight);
+    final iconColor = enabled
+        ? (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)
+        : (isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight);
 
     return InkWell(
       onTap: enabled ? onTap : null,
@@ -66,7 +73,10 @@ class SettingsTile extends StatelessWidget {
             if (trailing != null)
               trailing!
             else if (showArrow && onTap != null)
-              const Icon(Icons.chevron_right, color: AppColors.textTertiaryLight),
+              Icon(Icons.chevron_right,
+                  color: isDark
+                      ? AppColors.textTertiaryDark
+                      : AppColors.textTertiaryLight),
           ],
         ),
       ),

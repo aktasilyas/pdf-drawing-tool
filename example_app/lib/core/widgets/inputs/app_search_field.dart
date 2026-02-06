@@ -39,11 +39,16 @@ class AppSearchField extends StatefulWidget {
   /// Debounce süresi.
   final Duration debounceDuration;
 
+  /// External text value to sync with (e.g. from a provider).
+  /// When this changes externally, the text field updates accordingly.
+  final String? text;
+
   const AppSearchField({
     this.hint = 'Ara...',
     this.onChanged,
     this.onClear,
     this.debounceDuration = const Duration(milliseconds: 300),
+    this.text,
     super.key,
   });
 
@@ -65,6 +70,18 @@ class _AppSearchFieldState extends State<AppSearchField> {
     _controller.addListener(_onTextChanged);
     _focusNode = FocusNode();
     _focusNode.addListener(_onFocusChange);
+  }
+
+  @override
+  void didUpdateWidget(covariant AppSearchField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Sync controller with external text without triggering onChanged loop
+    if (widget.text != null && widget.text != _controller.text) {
+      _controller.removeListener(_onTextChanged);
+      _controller.text = widget.text!;
+      _hasText = _controller.text.isNotEmpty;
+      _controller.addListener(_onTextChanged);
+    }
   }
 
   @override

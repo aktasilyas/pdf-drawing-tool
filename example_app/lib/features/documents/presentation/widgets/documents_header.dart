@@ -136,7 +136,7 @@ class DocumentsHeader extends ConsumerWidget {
           AppIconButton(
             key: newButtonKey,
             icon: Icons.add,
-            variant: AppIconButtonVariant.filled,
+            variant: AppIconButtonVariant.ghost,
             tooltip: 'Yeni Belge',
             onPressed: onNewPressed,
           ),
@@ -192,8 +192,10 @@ class DocumentsHeader extends ConsumerWidget {
   }
 
   Widget _buildSearchField(WidgetRef ref) {
+    final searchQuery = ref.watch(searchQueryProvider);
     return AppSearchField(
       hint: 'Belgelerde ara...',
+      text: searchQuery,
       onChanged: (query) {
         ref.read(searchQueryProvider.notifier).state = query;
       },

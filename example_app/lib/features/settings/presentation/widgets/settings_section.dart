@@ -19,6 +19,8 @@ class SettingsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -37,7 +39,7 @@ class SettingsSection extends StatelessWidget {
             padding: EdgeInsets.zero,
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              children: _buildChildren(),
+              children: _buildChildren(isDark),
             ),
           ),
         ),
@@ -45,15 +47,15 @@ class SettingsSection extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildChildren() {
+  List<Widget> _buildChildren(bool isDark) {
     final result = <Widget>[];
     for (int i = 0; i < children.length; i++) {
       result.add(children[i]);
       if (i < children.length - 1) {
-        result.add(const Divider(
+        result.add(Divider(
           height: 1,
           thickness: 1,
-          color: AppColors.outlineLight,
+          color: isDark ? AppColors.outlineDark : AppColors.outlineLight,
           indent: AppSpacing.lg,
         ));
       }

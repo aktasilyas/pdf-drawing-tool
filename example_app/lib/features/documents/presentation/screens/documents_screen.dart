@@ -20,6 +20,8 @@ import 'package:example_app/features/documents/presentation/widgets/new_document
 import 'package:example_app/features/documents/presentation/widgets/move_to_folder_dialog.dart';
 import 'package:example_app/features/documents/presentation/widgets/documents_empty_states.dart';
 import 'package:example_app/features/documents/presentation/widgets/document_card_helpers.dart';
+import 'package:example_app/features/documents/presentation/widgets/document_preview.dart';
+import 'package:example_app/features/documents/presentation/widgets/document_thumbnail_painter.dart';
 import 'package:example_app/features/editor/presentation/providers/editor_provider.dart';
 import 'package:drawing_ui/drawing_ui.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
@@ -35,6 +37,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
   final GlobalKey _addButtonKey = GlobalKey();
   SidebarSection _selectedSection = SidebarSection.documents;
   String? _selectedFolderId; // For folder filtering
+  bool _isSidebarCollapsed = false; // Tablet sidebar collapse state
 
   @override
   void dispose() {
@@ -173,36 +176,49 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Row(
       children: [
-        // Sidebar
-        DocumentsSidebar(
-          selectedSection: _selectedSection,
-          selectedFolderId: _selectedFolderId,
-          isDrawer: false, // Tablet sidebar mode
-          onCollapse: () {
-            // TODO: Implement sidebar collapse animation
-          },
-          onSectionChanged: (section) {
-            setState(() {
-              _selectedSection = section;
-              _selectedFolderId = null;
-            });
-            ref.read(currentFolderIdProvider.notifier).state = null;
-          },
-          onFolderSelected: (folderId) {
-            setState(() {
-              _selectedSection = SidebarSection.folder;
-              _selectedFolderId = folderId;
-            });
-            ref.read(currentFolderIdProvider.notifier).state = folderId;
-          },
-          onCreateFolder: _showCreateFolderDialog,
+        // Sidebar with collapse animation
+        // OverflowBox keeps child at full width so content doesn't
+        // squeeze during the width animation, preventing layout overflow.
+        AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeInOut,
+          width: _isSidebarCollapsed ? 0 : AppSpacing.sidebarWidth,
+          clipBehavior: Clip.hardEdge,
+          decoration: const BoxDecoration(),
+          child: OverflowBox(
+            maxWidth: AppSpacing.sidebarWidth,
+            minWidth: AppSpacing.sidebarWidth,
+            alignment: Alignment.centerLeft,
+            child: DocumentsSidebar(
+              selectedSection: _selectedSection,
+              selectedFolderId: _selectedFolderId,
+              isDrawer: false,
+              onCollapse: () => setState(() => _isSidebarCollapsed = true),
+              onSectionChanged: (section) {
+                setState(() {
+                  _selectedSection = section;
+                  _selectedFolderId = null;
+                });
+                ref.read(currentFolderIdProvider.notifier).state = null;
+              },
+              onFolderSelected: (folderId) {
+                setState(() {
+                  _selectedSection = SidebarSection.folder;
+                  _selectedFolderId = folderId;
+                });
+                ref.read(currentFolderIdProvider.notifier).state = folderId;
+              },
+              onCreateFolder: _showCreateFolderDialog,
+            ),
+          ),
         ),
 
-        // Vertical divider
-        Container(
-          width: 1,
-          color: isDark ? AppColors.outlineDark : AppColors.outlineLight,
-        ),
+        // Vertical divider (hidden when collapsed)
+        if (!_isSidebarCollapsed)
+          Container(
+            width: 1,
+            color: isDark ? AppColors.outlineDark : AppColors.outlineLight,
+          ),
 
         // Main content
         Expanded(
@@ -214,7 +230,23 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: AppSpacing.lg),
+                  // Expand button + spacing when sidebar is collapsed
+                  Padding(
+                    padding: const EdgeInsets.only(
+                        left: AppSpacing.sm, top: AppSpacing.lg),
+                    child: Row(
+                      children: [
+                        if (_isSidebarCollapsed)
+                          AppIconButton(
+                            icon: Icons.menu,
+                            variant: AppIconButtonVariant.ghost,
+                            tooltip: 'Kenar çubuğunu aç',
+                            onPressed: () =>
+                                setState(() => _isSidebarCollapsed = false),
+                          ),
+                      ],
+                    ),
+                  ),
 
                   // Breadcrumb (only when inside a folder)
                   if (_selectedSection == SidebarSection.folder &&
@@ -1209,12 +1241,12 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
   }
 
   /// Compact thumbnail for list view (40x48, rounded 6dp)
+  ///
+  /// Uses same thumbnail logic as DocumentCard: cover > PDF/image > template.
   Widget _buildCompactThumbnail(DocumentInfo doc, bool isDark) {
-    final paperColor = _getPaperColor(doc.paperColor);
-    final isNotebook = doc.documentType == core.DocumentType.notebook;
-    final lineColor = isDark
-        ? Colors.grey.withValues(alpha: 0.2)
-        : Colors.grey.withValues(alpha: 0.15);
+    final paperColor = DocumentPaperColors.fromName(doc.paperColor);
+    final outlineColor =
+        isDark ? AppColors.outlineDark : AppColors.outlineLight;
 
     return Container(
       width: 40,
@@ -1222,6 +1254,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
       decoration: BoxDecoration(
         color: paperColor,
         borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: outlineColor, width: 0.5),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.12),
@@ -1230,90 +1263,66 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
           ),
         ],
       ),
-      child: Stack(
-        children: [
-          // Paper lines pattern
-          Positioned.fill(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 8, left: 6, right: 4),
-              child: Column(
-                children: List.generate(
-                  5,
-                  (i) => Container(
-                    height: 1,
-                    margin: const EdgeInsets.only(bottom: 6),
-                    color: lineColor,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          // Notebook spiral binding
-          if (isNotebook)
-            Positioned(
-              left: 0,
-              top: 4,
-              bottom: 4,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: List.generate(
-                  5,
-                  (i) => Container(
-                    width: 3,
-                    height: 3,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: isDark ? Colors.grey[600] : Colors.grey[400],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          // Cover overlay if has cover
-          if (doc.hasCover && doc.coverId != null)
-            Positioned.fill(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(6),
-                child: _buildCoverThumbnail(doc),
-              ),
-            ),
-        ],
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(5.5),
+        child: _buildCompactThumbnailContent(doc),
       ),
     );
   }
 
-  Widget _buildCoverThumbnail(DocumentInfo doc) {
-    final cover = core.CoverRegistry.byId(doc.coverId!);
-    if (cover != null) {
-      return CoverPreviewWidget(
-        cover: cover,
-        title: '',
-        width: 40,
-        height: 48,
-      );
+  /// Builds actual content for compact thumbnail (same priority as DocumentCard)
+  Widget _buildCompactThumbnailContent(DocumentInfo doc) {
+    // 1. Cover
+    if (doc.hasCover && doc.coverId != null) {
+      final cover = core.CoverRegistry.byId(doc.coverId!);
+      if (cover != null) {
+        return CoverPreviewWidget(
+          cover: cover,
+          title: '',
+          width: 40,
+          height: 48,
+        );
+      }
     }
-    return const SizedBox.shrink();
+    // 2. PDF / Image preview
+    if (doc.documentType == core.DocumentType.pdf ||
+        doc.documentType == core.DocumentType.image) {
+      return DocumentPreview(document: doc);
+    }
+    // 3. Template pattern + notebook binding
+    return Stack(
+      children: [
+        CustomPaint(
+          painter: DocumentThumbnailPainter(doc.templateId),
+          size: const Size(40, 48),
+        ),
+        if (doc.documentType == core.DocumentType.notebook)
+          _buildCompactSpiralBinding(),
+      ],
+    );
   }
 
-  Color _getPaperColor(String paperColor) {
-    switch (paperColor) {
-      case 'Beyaz kağıt':
-        return const Color(0xFFFFFFFF);
-      case 'Sarı kağıt':
-      case 'Krem kağıt':
-        return const Color(0xFFFFFDE7);
-      case 'Gri kağıt':
-      case 'Açık Gri':
-        return const Color(0xFFF5F5F5);
-      case 'Siyah kağıt':
-        return const Color(0xFF212121);
-      case 'Açık Yeşil':
-        return const Color(0xFFE8F5E9);
-      case 'Açık Mavi':
-        return const Color(0xFFE3F2FD);
-      default:
-        return const Color(0xFFFFFDE7);
-    }
+  Widget _buildCompactSpiralBinding() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Positioned(
+      left: 0,
+      top: 4,
+      bottom: 4,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: List.generate(
+          5,
+          (i) => Container(
+            width: 3,
+            height: 3,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isDark ? Colors.grey[600] : Colors.grey[400],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   String _formatDate(DateTime date) {

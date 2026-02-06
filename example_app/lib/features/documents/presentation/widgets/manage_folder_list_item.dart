@@ -30,6 +30,8 @@ class ManageFolderListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isSub = folder.isSubfolder;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       margin: EdgeInsets.only(
         left: isSub ? AppSpacing.xxl : AppSpacing.lg,
@@ -37,9 +39,10 @@ class ManageFolderListItem extends StatelessWidget {
         bottom: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: AppColors.surfaceLight,
+        color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
         borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: AppColors.outlineLight),
+        border: Border.all(
+            color: isDark ? AppColors.outlineDark : AppColors.outlineLight),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(
@@ -57,7 +60,9 @@ class ManageFolderListItem extends StatelessWidget {
         title: Text(
           folder.name,
           style: AppTypography.titleMedium.copyWith(
-            color: AppColors.textPrimaryLight,
+            color: isDark
+                ? AppColors.textPrimaryDark
+                : AppColors.textPrimaryLight,
           ),
         ),
         trailing: Row(
@@ -65,15 +70,19 @@ class ManageFolderListItem extends StatelessWidget {
           children: [
             ReorderableDragStartListener(
               index: index,
-              child: const Padding(
-                padding: EdgeInsets.all(AppSpacing.sm),
-                child:
-                    Icon(Icons.drag_handle, color: AppColors.textTertiaryLight),
+              child: Padding(
+                padding: const EdgeInsets.all(AppSpacing.sm),
+                child: Icon(Icons.drag_handle,
+                    color: isDark
+                        ? AppColors.textTertiaryDark
+                        : AppColors.textTertiaryLight),
               ),
             ),
             PopupMenuButton<String>(
-              icon: const Icon(Icons.more_vert,
-                  color: AppColors.textSecondaryLight),
+              icon: Icon(Icons.more_vert,
+                  color: isDark
+                      ? AppColors.textSecondaryDark
+                      : AppColors.textSecondaryLight),
               onSelected: (value) {
                 switch (value) {
                   case 'rename':

@@ -51,16 +51,15 @@ class SelectionModeHeader extends ConsumerWidget {
           ),
           const SizedBox(width: AppSpacing.sm),
           // Selection count
-          Expanded(
-            child: Text(
-              '$totalSelected seçildi',
-              style: AppTypography.titleMedium.copyWith(
-                color: isDark
-                    ? AppColors.textPrimaryDark
-                    : AppColors.textPrimaryLight,
-              ),
+          Text(
+            '$totalSelected seçildi',
+            style: AppTypography.titleMedium.copyWith(
+              color: isDark
+                  ? AppColors.textPrimaryDark
+                  : AppColors.textPrimaryLight,
             ),
           ),
+          const SizedBox(width: AppSpacing.sm),
           // Select all button
           _SelectAllButton(
             allDocumentIds: allDocumentIds,
@@ -95,6 +94,7 @@ class SelectionModeHeader extends ConsumerWidget {
                 ? () => _deleteSelected(context, ref, selectedDocs)
                 : null,
           ),
+          const Spacer(),
         ],
       ),
     );
