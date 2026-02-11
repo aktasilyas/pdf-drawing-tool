@@ -33,7 +33,7 @@ class Folder extends Equatable {
   Folder copyWith({
     String? id,
     String? name,
-    String? parentId,
+    Object? parentId = _sentinel,
     int? colorValue,
     int? sortOrder,
     DateTime? createdAt,
@@ -42,13 +42,17 @@ class Folder extends Equatable {
     return Folder(
       id: id ?? this.id,
       name: name ?? this.name,
-      parentId: parentId ?? this.parentId,
+      parentId: parentId == _sentinel
+          ? this.parentId
+          : parentId as String?,
       colorValue: colorValue ?? this.colorValue,
       sortOrder: sortOrder ?? this.sortOrder,
       createdAt: createdAt ?? this.createdAt,
       documentCount: documentCount ?? this.documentCount,
     );
   }
+
+  static const _sentinel = Object();
 
   @override
   List<Object?> get props => [

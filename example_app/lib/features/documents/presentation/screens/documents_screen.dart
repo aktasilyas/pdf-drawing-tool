@@ -62,17 +62,21 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
   }
 
   Widget _buildMobileLayout() {
+    final isInFolder = _selectedSection == SidebarSection.folder &&
+        _selectedFolderId != null;
+
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _MobileHeader(
-            title: getSectionTitle(ref, _selectedSection, _selectedFolderId),
+            title: isInFolder
+                ? 'Belgeler'
+                : getSectionTitle(ref, _selectedSection, _selectedFolderId),
             onSettingsTap: () => context.push('/settings'),
           ),
-          if (_selectedSection == SidebarSection.folder &&
-              _selectedFolderId != null)
+          if (isInFolder)
             buildBreadcrumb(
               _selectedFolderId,
               _navigateToRoot,

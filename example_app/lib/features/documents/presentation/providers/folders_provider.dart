@@ -170,6 +170,8 @@ class FoldersController extends StateNotifier<AsyncValue<void>> {
   void _invalidateFolders() {
     _ref.invalidate(foldersProvider);
     _ref.invalidate(folderTreeProvider);
+    _ref.invalidate(folderPathProvider);
+    _ref.invalidate(folderByIdProvider);
   }
 
   void _invalidateDocuments() {
