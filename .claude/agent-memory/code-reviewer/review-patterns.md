@@ -24,3 +24,14 @@
 - `AppShadows.sm` uses black opacity shadows -- nearly invisible on dark backgrounds
 - Suggestion: suppress shadows or use border-based elevation in dark mode
 - Not a blocker, but worth noting in future reviews
+
+## Barrel Export Issues (Issue 12-17 era)
+- `documents.dart` barrel only exports original files, not refactored split files
+- No `index.dart` exists for `presentation/widgets/` or `presentation/screens/`
+- New files use direct path imports like `import '...widgets/document_card.dart'` instead of barrel
+- Pre-existing files (sidebar.dart, empty_state.dart, document_context_menu.dart, document_grid.dart) were never tokenized for spacing
+
+## Colors.red Pattern
+- `Colors.red` / `Colors.red.shade400` used extensively for destructive actions (delete buttons, error snackbars)
+- Should define `AppColors.destructive` / `AppColors.error` tokens and migrate
+- Found in: documents_menus.dart, folder_menus.dart, new_document_importers.dart

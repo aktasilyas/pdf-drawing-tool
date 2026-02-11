@@ -36,7 +36,9 @@
       "Bash(git diff:*)",
       "Bash(git reset:*)",
       "Bash(git checkout:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(git merge:*)",
+      "Bash(wc:*)"
     ]
   }
 }
