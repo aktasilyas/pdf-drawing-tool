@@ -1,76 +1,65 @@
 # HANDOFF.md - StarNote Project Handoff Document
 
-> **Son Güncelleme:** 2025-01-26
+> **Son Güncelleme:** 2026-02-11
 > **Amaç:** Yeni chat session'ında kaldığımız yerden devam etmek için özet
-> **Durum:** Phase 4E - Enhancement & Cleanup (PDF Performans Optimizasyonu ✅ Tamamlandı)
+> **Durum:** UI Refactor & Cleanup (Issue 12-17)
 
 ---
 
-## ✅ BUGÜN TAMAMLANAN: PDF Performans Optimizasyonu
+## ✅ TAMAMLANAN: Dark Theme & PDF Fixes
 
-### Yapılan İyileştirmeler
+### Issue 1-11: Dark Theme Fix
+| İyileştirme | Dosya | Açıklama |
+|-------------|-------|----------|
+| AppColors tokens | Tüm widgetlar | Dark theme-aware color usage |
+| Theme-sensitive icons | Documents, Settings | Icons adapt to theme |
+| Widget updates | 50+ widgets | Proper theme context usage |
 
-| Optimizasyon | Dosya | Açıklama |
-|--------------|-------|----------|
-| Prefetch sistemi (±2 sayfa) | `pdf_render_provider.dart`, `pdf_prefetch_provider.dart` | Adjacent sayfalar arka planda yükleniyor |
-| Cache limitleri | `pdf_render_provider.dart` | 10 sayfa, 50MB limit |
-| Thumbnail ayrı cache | `pdf_render_provider.dart` | 100x150px, ayrı cache |
-| Duplicate render önleme | `pdf_render_provider.dart` | `_currentlyRendering` Set ile |
-| Zoom-based adaptive quality | `pdf_render_provider.dart` | 1.5x/2.0x/2.5x kalite seviyeleri |
-| Page navigator sync | `editor_screen.dart` | Tüm provider'lar invalidate ediliyor |
-| Smooth page navigator animation | `drawing_screen.dart` | TweenAnimationBuilder ile |
+### PDF Thumbnail Fix ✅
+- PDF thumbnail rendering sorunları çözüldü
+- Dark theme support eklendi
+- Performance optimizasyonları
 
-### Değiştirilen Dosyalar
-
-```
-packages/drawing_ui/lib/src/providers/
-├── pdf_render_provider.dart      # ✅ Tamamen yeniden yazıldı
-└── pdf_prefetch_provider.dart    # ✅ Prefetch devre dışı
-
-example_app/lib/features/editor/presentation/screens/
-└── editor_screen.dart            # ✅ _handleBack güncellendi
-
-packages/drawing_ui/lib/src/screens/
-└── drawing_screen.dart           # ✅ Page navigator animasyonu
-```
-
-### Performans Sonuçları
-
-| Metrik | Önce | Sonra |
-|--------|------|-------|
-| İlk sayfa açılış | 15-20 sn | 4-5 sn |
-| Adjacent sayfa | 20-30 sn | Anında (cache'den) |
-| RAM kullanımı | 777 MB | ~200-300 MB |
-| Zoom kalite | Sabit bulanık | Adaptive (1.5x-2.5x) |
-
-### Önemli Notlar
-
-1. **PdfDocument Singleton ÇALIŞMIYOR** - pdfx kütüphanesi aynı anda birden fazla `getPage()` desteklemiyor. Her render için ayrı document açılıp kapatılıyor.
-
-2. **Zoom Quality Sistemi:**
-   - Zoom ≤1.3 → 1.5x kalite
-   - Zoom 1.3-2.0 → 2.0x kalite  
-   - Zoom >2.0 → 2.5x kalite
-   - Debounce: 150ms
-   - Eski kaliteler otomatik temizleniyor (RAM tasarrufu)
-
-3. **Prefetch Mantığı:**
-   - Sayfa değişince sadece görünen sayfa render edilir
-   - 500ms sonra ±2 adjacent sayfa prefetch başlar
-   - Agresif prefetch DEVRE DIŞI (performans sorunu)
+### Settings Dark Theme Fix ✅
+- Settings screen tamamen dark theme uyumlu
+- Tüm settings widgets theme-responsive
+- AppColors tokens uygulandı
 
 ---
 
-## 🔴 BİLİNEN SORUNLAR
+## 🎯 AKTİF: Issue 12-17 File Splitting & Cleanup
 
-### 1. RenderFlex Overflow
-```
-A RenderFlex overflowed by 86 pixels on the right.
-```
-Page navigator veya toolbar'da layout sorunu var. Kritik değil ama düzeltilmeli.
+### Hedef
+300 satır kuralını sağlamak için büyük dosyaları bölmek ve design token kullanımını yaygınlaştırmak.
 
-### 2. InteractiveViewer Entegrasyonu (Beklemede)
-Zoom/pan sistemi çalışıyor ama HANDOFF.md'deki InteractiveViewer refactor'ı henüz yapılmadı. Mevcut sistem stabil.
+### Görevler
+
+#### Issue 12: documents_screen.dart (1831 satır) 🔴
+- Grid view logic'i ayrı dosyaya
+- List view logic'i ayrı dosyaya
+- Helper methods extraction
+- Hedef: <300 satır per file
+
+#### Issue 13: new_document_dialog.dart (451 satır) 🔴
+- Format picker ayrı component
+- Template selection logic extraction
+- Dialog state management separation
+
+#### Issue 14: Modal keyboard overflow fix 🔴
+- Keyboard overlap sorunlarını çöz
+- Dialogs ve bottom sheets için
+
+#### Issue 15: Grid hardcoded spacing → AppSpacing 🔴
+- Magic numbers'ı AppSpacing tokens ile değiştir
+- Grid components update
+
+#### Issue 16: Sidebar AppColors tokens 🔴
+- Sidebar'da hardcoded color kullanımını kaldır
+- AppColors tokens uygula
+
+#### Issue 17: List tile magic numbers 🔴
+- List tile'larda magic numbers kaldır
+- Design tokens kullan
 
 ---
 
@@ -102,22 +91,31 @@ Zoom/pan sistemi çalışıyor ama HANDOFF.md'deki InteractiveViewer refactor'ı
 | Sync | ✅ | Offline-first |
 | Editor | ✅ | DrawingScreen wrapper |
 
+### Design System
+| Component | Durum | Açıklama |
+|-----------|-------|----------|
+| Design Tokens | ✅ | AppColors, AppSpacing, AppTypography, etc. |
+| Core Widgets | ✅ | Buttons, Inputs, Feedback, Layout |
+| Dark Theme | ✅ | Full dark mode support |
+| Responsive | ✅ | Phone/Tablet layouts |
+
 ---
 
-## 📁 Kritik Dosyalar (PDF Performans)
+## 📁 Kritik Dosyalar
 
 ```
-packages/drawing_ui/lib/src/
-├── providers/
-│   ├── pdf_render_provider.dart          # Ana render + cache + zoom quality
-│   └── pdf_prefetch_provider.dart        # Prefetch (şu an devre dışı)
-├── canvas/
-│   └── drawing_canvas.dart               # PDF background widget
-└── widgets/
-    └── page_thumbnail.dart               # Thumbnail render
+docs/
+├── DESIGN_SYSTEM_MASTER_PLAN.md     # Design system spec
+├── FOLDER_SYSTEM_SPEC.md            # Folder hierarchy spec
+└── CURRENT_STATUS.md                # Quick status reference
 
-example_app/lib/features/editor/presentation/screens/
-└── editor_screen.dart                    # Provider invalidation
+example_app/lib/
+├── core/
+│   ├── theme/tokens/                # Design tokens
+│   └── widgets/                     # Component library
+└── features/
+    ├── documents/                   # Document management
+    └── settings/                    # App settings
 ```
 
 ---
@@ -128,6 +126,7 @@ example_app/lib/features/editor/presentation/screens/
 - Flutter + Riverpod
 - pdfx (import/render) + pdf (export)
 - Supabase (auth/sync)
+- Drift (SQLite local storage)
 
 ---
 
@@ -136,25 +135,25 @@ example_app/lib/features/editor/presentation/screens/
 ```
 StarNote projesine devam ediyoruz. HANDOFF.md dosyasını paylaşıyorum.
 
-SON DURUM: PDF Performans Optimizasyonu tamamlandı.
-- Prefetch sistemi (±2 sayfa)
-- Zoom-based adaptive quality
-- Cache limitleri optimize
+SON DURUM: Dark theme ve PDF thumbnail fixes tamamlandı ✅
 
 SIRADA NE VAR:
-1. RenderFlex overflow hatası (minor)
-2. InteractiveViewer refactor (optional)
-3. Diğer Phase 4E görevleri
+Issue 12-17: File splitting & design token cleanup
+- documents_screen.dart bölme (1831 satır)
+- new_document_dialog.dart bölme (451 satır)
+- Modal keyboard overflow fix
+- AppSpacing ve AppColors token uygulaması
 ```
 
 ---
 
 ## ⚠️ Dikkat Edilecekler
 
-1. **pdfx Sınırlamaları** - Singleton pattern çalışmıyor, her render için yeni document
-2. **Cache Limitleri** - 10 sayfa / 50MB aşılmamalı (RAM için)
-3. **Zoom Quality** - 3.0x yerine 2.5x max (performans için)
-4. **Prefetch** - Agresif prefetch kapalı, sadece ±2 sayfa
+1. **Max 300 satır kuralı** - Her dosya 300 satırı geçmemeli
+2. **Barrel exports** - Sadece index.dart'tan import
+3. **Design tokens** - Hardcoded değerler yasak
+4. **Dark theme** - Tüm widgetlar theme-aware olmalı
+5. **flutter analyze** - Her commit öncesi çalıştır
 
 ---
 
@@ -166,4 +165,4 @@ SIRADA NE VAR:
 
 ---
 
-*StarNote - Phase 4E PDF Performans Optimizasyonu ✅ Tamamlandı*
+*StarNote - UI Refactor & Cleanup Phase*
