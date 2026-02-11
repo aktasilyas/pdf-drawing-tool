@@ -86,8 +86,8 @@ Widget _buildDeleteFolderTile(
   VoidCallback? onDeleted,
 ) {
   return ListTile(
-    leading: Icon(Icons.delete_outline, color: Colors.red.shade400),
-    title: Text('Sil', style: TextStyle(color: Colors.red.shade400)),
+    leading: Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.error),
+    title: Text('Sil', style: TextStyle(color: Theme.of(context).colorScheme.error)),
     onTap: () async {
       Navigator.pop(context);
       final confirmed = await showDialog<bool>(
@@ -108,7 +108,9 @@ Widget _buildDeleteFolderTile(
             ),
             FilledButton(
               onPressed: () => Navigator.pop(ctx, true),
-              style: FilledButton.styleFrom(backgroundColor: Colors.red),
+              style: FilledButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.error,
+              ),
               child: const Text('Sil'),
             ),
           ],
@@ -128,9 +130,9 @@ Widget _buildDeleteFolderTile(
             );
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Klasör silinemedi'),
-                backgroundColor: Colors.red,
+              SnackBar(
+                content: const Text('Klasör silinemedi'),
+                backgroundColor: Theme.of(context).colorScheme.error,
                 behavior: SnackBarBehavior.floating,
               ),
             );
@@ -188,7 +190,9 @@ void _showRenameFolderDialog(
                           ? 'Klasör "$newName" olarak yeniden adlandırıldı'
                           : 'Klasör adı değiştirilemedi',
                     ),
-                    backgroundColor: success ? null : Colors.red,
+                    backgroundColor: success
+                        ? null
+                        : Theme.of(context).colorScheme.error,
                     behavior: SnackBarBehavior.floating,
                   ),
                 );

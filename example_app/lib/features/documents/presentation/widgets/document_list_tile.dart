@@ -217,7 +217,6 @@ class _CompactSpiralBinding extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Positioned(
       left: 0,
       top: 4,
@@ -231,7 +230,7 @@ class _CompactSpiralBinding extends StatelessWidget {
             height: 3,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: isDark ? Colors.grey[600] : Colors.grey[400],
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ),

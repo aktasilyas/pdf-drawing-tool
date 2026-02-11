@@ -51,7 +51,7 @@ void _showTrashDocumentMenu(
                     content: Text(
                       result ? 'Belge geri yüklendi' : 'Belge geri yüklenemedi',
                     ),
-                    backgroundColor: result ? null : Colors.red,
+                    backgroundColor: result ? null : Theme.of(context).colorScheme.error,
                     behavior: SnackBarBehavior.floating,
                   ),
                 );
@@ -60,10 +60,10 @@ void _showTrashDocumentMenu(
           ),
           const AppDivider(),
           ListTile(
-            leading: Icon(Icons.delete_forever, color: Colors.red.shade400),
+            leading: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
             title: Text(
               'Kalıcı Sil',
-              style: TextStyle(color: Colors.red.shade400),
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
             onTap: () async {
               Navigator.pop(ctx);
@@ -141,7 +141,7 @@ void _showNormalDocumentMenu(
                     content: Text(
                       result ? 'Belge çoğaltıldı' : 'Belge çoğaltılamadı',
                     ),
-                    backgroundColor: result ? null : Colors.red,
+                    backgroundColor: result ? null : Theme.of(context).colorScheme.error,
                     behavior: SnackBarBehavior.floating,
                   ),
                 );
@@ -191,10 +191,10 @@ void _showNormalDocumentMenu(
           const AppDivider(),
           ListTile(
             leading:
-                Icon(Icons.delete_outline, color: Colors.red.shade400),
+                Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.error),
             title: Text(
               'Çöpe Taşı',
-              style: TextStyle(color: Colors.red.shade400),
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
             ),
             onTap: () {
               Navigator.pop(ctx);

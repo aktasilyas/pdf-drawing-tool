@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:example_app/core/theme/index.dart';
+
 class EmptyState extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -19,7 +21,7 @@ class EmptyState extends StatelessWidget {
     final theme = Theme.of(context);
     
     return Padding(
-      padding: const EdgeInsets.all(32.0),
+      padding: const EdgeInsets.all(AppSpacing.xxl),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -28,9 +30,9 @@ class EmptyState extends StatelessWidget {
             size: 80,
             color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
           ),
-          
-          const SizedBox(height: 16),
-          
+
+          const SizedBox(height: AppSpacing.lg),
+
           Text(
             title,
             style: theme.textTheme.titleLarge?.copyWith(
@@ -38,9 +40,9 @@ class EmptyState extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
-          
-          const SizedBox(height: 8),
-          
+
+          const SizedBox(height: AppSpacing.sm),
+
           Text(
             description,
             style: theme.textTheme.bodyMedium?.copyWith(
@@ -48,9 +50,9 @@ class EmptyState extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
-          
+
           if (action != null) ...[
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.xl),
             action!,
           ],
         ],

@@ -36,9 +36,9 @@ Future<void> importPdf(BuildContext context) async {
   if (file.size > maxFileSizeBytes) {
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('PDF dosyası çok büyük! Maksimum boyut: 200MB'),
-        backgroundColor: Colors.red,
+      SnackBar(
+        content: const Text('PDF dosyası çok büyük! Maksimum boyut: 200MB'),
+        backgroundColor: Theme.of(context).colorScheme.error,
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -97,7 +97,7 @@ Future<void> importPdf(BuildContext context) async {
       messenger.showSnackBar(
         SnackBar(
           content: Text(importResult.errorMessage ?? 'PDF import başarısız'),
-          backgroundColor: Colors.red,
+          backgroundColor: Theme.of(context).colorScheme.error,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -157,7 +157,7 @@ Future<void> importPdf(BuildContext context) async {
     messenger.showSnackBar(
       SnackBar(
         content: Text('PDF yüklenirken hata: ${e.toString()}'),
-        backgroundColor: Colors.red,
+        backgroundColor: Theme.of(context).colorScheme.error,
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -291,7 +291,7 @@ Future<void> importImage(BuildContext context) async {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Hata: ${e.toString()}'),
-          backgroundColor: Colors.red,
+          backgroundColor: Theme.of(context).colorScheme.error,
           behavior: SnackBarBehavior.floating,
         ),
       );

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
 import 'package:example_app/features/documents/presentation/widgets/document_card.dart';
 import 'package:example_app/features/documents/presentation/widgets/empty_state.dart';
@@ -36,12 +38,12 @@ class DocumentGrid extends StatelessWidget {
     }
 
     return GridView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
         maxCrossAxisExtent: 200,
         childAspectRatio: 0.7,
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
+        crossAxisSpacing: AppSpacing.lg,
+        mainAxisSpacing: AppSpacing.lg,
       ),
       itemCount: documents.length,
       itemBuilder: (context, index) {
