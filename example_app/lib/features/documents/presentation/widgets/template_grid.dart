@@ -27,7 +27,7 @@ class TemplateGridView extends StatelessWidget {
   Widget build(BuildContext context) {
     final templates = TemplateRegistry.getByCategory(category);
     final isPhone = Responsive.isPhone(context);
-    final crossAxisCount = isPhone ? 4 : 8;
+    final crossAxisCount = isPhone ? 3 : 5;
 
     return GridView.builder(
       padding: const EdgeInsets.symmetric(
@@ -71,6 +71,12 @@ class _TemplateGridItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final outlineColor =
+        isDark ? AppColors.outlineDark : AppColors.outlineLight;
+    final textSecondary =
+        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -80,7 +86,7 @@ class _TemplateGridItem extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(AppRadius.sm),
                 border: Border.all(
-                  color: isSelected ? AppColors.primary : AppColors.outlineLight,
+                  color: isSelected ? AppColors.primary : outlineColor,
                   width: isSelected ? 2 : 1,
                 ),
               ),
@@ -119,7 +125,7 @@ class _TemplateGridItem extends StatelessWidget {
           Text(
             template.name,
             style: AppTypography.caption.copyWith(
-              color: isSelected ? AppColors.primary : AppColors.textSecondaryLight,
+              color: isSelected ? AppColors.primary : textSecondary,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
             ),
             textAlign: TextAlign.center,

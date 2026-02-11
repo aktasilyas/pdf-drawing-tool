@@ -197,7 +197,14 @@ class CompactDocumentThumbnail extends StatelessWidget {
     }
     if (document.documentType == core.DocumentType.pdf ||
         document.documentType == core.DocumentType.image) {
-      return DocumentPreview(document: document);
+      return SizedBox(
+        width: 40,
+        height: 52,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: DocumentPreview(document: document),
+        ),
+      );
     }
     return Stack(
       children: [

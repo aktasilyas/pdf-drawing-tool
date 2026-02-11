@@ -14,9 +14,11 @@ class FormatPickerSheet extends StatelessWidget {
   const FormatPickerSheet({super.key, required this.currentSize});
 
   static Future<PaperSize?> show(BuildContext context, PaperSize currentSize) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return showModalBottomSheet<PaperSize>(
       context: context,
-      backgroundColor: AppColors.surfaceLight,
+      backgroundColor:
+          isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(AppRadius.bottomSheet),
@@ -28,6 +30,10 @@ class FormatPickerSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textSecondary =
+        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
@@ -35,12 +41,13 @@ class FormatPickerSheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Format Seç', style: AppTypography.titleMedium),
+            const Text('Format Sec', style: AppTypography.titleMedium),
             const SizedBox(height: AppSpacing.md),
 
             // Orientation
-            Text('Yön:', style: AppTypography.labelMedium.copyWith(
-                color: AppColors.textSecondaryLight)),
+            Text('Yon:',
+                style: AppTypography.labelMedium
+                    .copyWith(color: textSecondary)),
             const SizedBox(height: AppSpacing.sm),
             Row(
               children: [
@@ -48,22 +55,25 @@ class FormatPickerSheet extends StatelessWidget {
                   label: 'Dikey',
                   icon: Icons.crop_portrait,
                   isSelected: !currentSize.isLandscape,
-                  onTap: () => Navigator.pop(context, currentSize.portrait),
+                  onTap: () =>
+                      Navigator.pop(context, currentSize.portrait),
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 _OrientationChip(
                   label: 'Yatay',
                   icon: Icons.crop_landscape,
                   isSelected: currentSize.isLandscape,
-                  onTap: () => Navigator.pop(context, currentSize.landscape),
+                  onTap: () =>
+                      Navigator.pop(context, currentSize.landscape),
                 ),
               ],
             ),
             const SizedBox(height: AppSpacing.lg),
 
             // Size
-            Text('Boyut:', style: AppTypography.labelMedium.copyWith(
-                color: AppColors.textSecondaryLight)),
+            Text('Boyut:',
+                style: AppTypography.labelMedium
+                    .copyWith(color: textSecondary)),
             const SizedBox(height: AppSpacing.sm),
             Wrap(
               spacing: AppSpacing.sm,
@@ -83,7 +93,9 @@ class FormatPickerSheet extends StatelessWidget {
                     final newSize = PaperSize.fromPreset(preset);
                     Navigator.pop(
                       context,
-                      currentSize.isLandscape ? newSize.landscape : newSize,
+                      currentSize.isLandscape
+                          ? newSize.landscape
+                          : newSize,
                     );
                   },
                 );
@@ -104,8 +116,8 @@ class FormatPickerSheet extends StatelessWidget {
       case PaperSizePreset.letter: return 'Letter';
       case PaperSizePreset.legal: return 'Legal';
       case PaperSizePreset.square: return 'Kare';
-      case PaperSizePreset.widescreen: return 'Geniş';
-      case PaperSizePreset.custom: return 'Özel';
+      case PaperSizePreset.widescreen: return 'Genis';
+      case PaperSizePreset.custom: return 'Ozel';
     }
   }
 }
@@ -125,6 +137,15 @@ class _OrientationChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceVariant = isDark
+        ? AppColors.surfaceVariantDark
+        : AppColors.surfaceVariantLight;
+    final outlineColor =
+        isDark ? AppColors.outlineDark : AppColors.outlineLight;
+    final textPrimary =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -133,22 +154,23 @@ class _OrientationChip extends StatelessWidget {
           vertical: AppSpacing.sm,
         ),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : AppColors.surfaceVariantLight,
+          color: isSelected ? AppColors.primary : surfaceVariant,
           borderRadius: BorderRadius.circular(AppRadius.sm),
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.outlineLight,
+            color: isSelected ? AppColors.primary : outlineColor,
           ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(icon, size: AppIconSize.sm,
-                color: isSelected ? AppColors.onPrimary : AppColors.textPrimaryLight),
+                color: isSelected ? AppColors.onPrimary : textPrimary),
             const SizedBox(width: AppSpacing.xs),
             Text(label,
                 style: AppTypography.labelMedium.copyWith(
-                  color: isSelected ? AppColors.onPrimary : AppColors.textPrimaryLight,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                  color: isSelected ? AppColors.onPrimary : textPrimary,
+                  fontWeight:
+                      isSelected ? FontWeight.w600 : FontWeight.normal,
                 )),
           ],
         ),

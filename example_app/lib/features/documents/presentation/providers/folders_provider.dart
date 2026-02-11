@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:get_it/get_it.dart';
 import 'package:example_app/features/documents/domain/entities/folder.dart';
 import 'package:example_app/features/documents/domain/repositories/folder_repository.dart';
+import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 
 // Repository provider using GetIt
 final folderRepositoryProvider = Provider<FolderRepository>((ref) {
@@ -160,6 +161,7 @@ class FoldersController extends StateNotifier<AsyncValue<void>> {
       (failure) => false,
       (_) {
         _invalidateFolders();
+        _invalidateDocuments();
         return true;
       },
     );
@@ -168,6 +170,11 @@ class FoldersController extends StateNotifier<AsyncValue<void>> {
   void _invalidateFolders() {
     _ref.invalidate(foldersProvider);
     _ref.invalidate(folderTreeProvider);
+  }
+
+  void _invalidateDocuments() {
+    _ref.invalidate(documentsProvider);
+    _ref.invalidate(trashDocumentsProvider);
   }
 }
 
