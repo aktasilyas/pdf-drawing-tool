@@ -82,6 +82,9 @@ class DocumentsCombinedGridView extends ConsumerWidget {
                 isSelectionMode: isSelectionMode,
                 isSelected: isSelected,
                 onTap: () => onDocumentTap(doc),
+                onFavoriteToggle: () => ref
+                    .read(documentsControllerProvider.notifier)
+                    .toggleFavorite(doc.id),
                 onMorePressed: () => onDocumentMore(doc),
               );
             },

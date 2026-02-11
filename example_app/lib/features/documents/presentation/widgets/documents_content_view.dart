@@ -201,7 +201,7 @@ class _SimpleDocumentList extends ConsumerWidget {
           return DocumentsEmptySearchResult(query: searchQuery);
         }
         if (viewMode == ViewMode.grid) {
-          return _buildSimpleGrid(filtered);
+          return _buildSimpleGrid(ref, filtered);
         }
         return DocumentsCombinedListView(
           folders: const [],
@@ -215,7 +215,7 @@ class _SimpleDocumentList extends ConsumerWidget {
     );
   }
 
-  Widget _buildSimpleGrid(List<DocumentInfo> documents) {
+  Widget _buildSimpleGrid(WidgetRef ref, List<DocumentInfo> documents) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
@@ -237,6 +237,9 @@ class _SimpleDocumentList extends ConsumerWidget {
               return DocumentCard(
                 document: doc,
                 onTap: () => onDocumentTap(doc),
+                onFavoriteToggle: () => ref
+                    .read(documentsControllerProvider.notifier)
+                    .toggleFavorite(doc.id),
                 onMorePressed: () => onDocumentMore(doc),
               );
             },
