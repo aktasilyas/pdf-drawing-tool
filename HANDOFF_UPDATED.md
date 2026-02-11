@@ -1,183 +1,86 @@
 # HANDOFF.md - StarNote Project Handoff Document
 
-> **Son Güncelleme:** 2025-01-31
+> **Son Güncelleme:** 2025-02-11
 > **Amaç:** Yeni chat session'ında kaldığımız yerden devam etmek için özet
-> **Durum:** Document Liste İyileştirmeleri - Aktif
+> **Durum:** Dark Theme Fix & UI İyileştirmeleri - Aktif
 
 ---
 
-## 🎯 AKTİF GÖREV: Document Liste İyileştirmeleri
+## 🛠️ DEVELOPMENT SETUP: Claude Code Multi-Agent
 
-### Şimdi Yapılacaklar
+### Kurulu Sistem
+- **Claude Code CLI:** v2.1.34
+- **Model:** Opus 4.6 (Claude Max)
+- **Workspace:** `/mnt/c/Users/aktas/source/repos/starnote_drawing_workspace`
 
-| Görev | Öncelik | Tahmini Süre |
-|-------|---------|--------------|
-| Grid/List view toggle | 🔴 Yüksek | 2-3 saat |
-| Sıralama (Tarih, İsim) | 🔴 Yüksek | 2-3 saat |
-| Arama çubuğu (Başlık) | 🟡 Orta | 3-4 saat |
-| View tercih kaydetme | 🟢 Düşük | 1 saat |
-| Arama geçmişi | 🟢 Düşük | 2 saat |
+### 4 Agent Tanımlı (.claude/agents/)
 
----
+| Agent | Model | Rol | Tools |
+|-------|-------|-----|-------|
+| `senior-architect` | opus | Mimari tasarım, analiz, ADR | Read, Grep, Glob, Bash |
+| `flutter-developer` | sonnet | Implementation, UI, state | Read, Write, Edit, Bash, Glob, Grep |
+| `qa-engineer` | sonnet | Test yazma, coverage | Read, Write, Edit, Bash, Glob, Grep |
+| `code-reviewer` | opus | Kod review, quality check | Read, Grep, Glob, Bash |
 
-## ✅ TAMAMLANAN: Template Selection System
+### Agent Kullanımı
+```bash
+# Terminalde
+@senior-architect [görev açıklaması]
+@flutter-developer [görev açıklaması]
+@qa-engineer [görev açıklaması]
+@code-reviewer [görev açıklaması]
 
-### Tamamlanan Adımlar
-
-| Adım | Dosya/Konum | Durum |
-|------|-------------|-------|
-| T1: Core Models | `drawing_core/lib/src/models/` | ✅ |
-| - TemplateCategory enum | `template_category.dart` | ✅ |
-| - TemplatePattern enum | `template_pattern.dart` | ✅ |
-| - Template model | `template.dart` | ✅ |
-| - PaperSize model | `paper_size.dart` | ✅ |
-| - TemplateRegistry | `services/template_registry.dart` | ✅ |
-| T2: Pattern Painters | `drawing_ui/lib/src/painters/` | ✅ |
-| - TemplatePatternPainter | `template_pattern_painter.dart` | ✅ |
-| - Special patterns (isometric, hex, cornell, music) | ✅ |
-| T3: Template Selection UI | `example_app/` | ✅ |
-| - TemplateSelectionScreen (full page) | ✅ |
-| - Kapak/Kağıt önizleme | ✅ |
-| - Kategori sekmeleri | ✅ |
-| - Template grid (responsive 3/6 kolon) | ✅ |
-| - Kağıt renk seçici | ✅ |
-| - Cover model & CoverRegistry | ✅ |
-| - CoverPreviewWidget | ✅ |
-| - Kapak grid entegrasyonu | ✅ |
-| - Format seçici (Boyut + Yön) | ✅ |
-| - Kapak toggle switch | ✅ |
-| - Doküman oluşturma (Kapak + Kağıt kayıt) | ✅ |
-| - Çizim ekranı entegrasyonu | ✅ |
-| - Documents ekranı kapak preview | ✅ |
-
-### Session 2025-01-31: Performance & UX İyileştirmeleri ✅
-
-| İyileştirme | Açıklama | Durum |
-|-------------|----------|-------|
-| Google Sign-In Debug Logs | Auth provider detaylı log'lar geri getirildi | ✅ |
-| Pattern Rendering Performance | Picture caching ile 50-100x hızlanma | ✅ |
-| RepaintBoundary Optimization | Pattern'lar izole edildi | ✅ |
-| Whiteboard Direct Access | Template selection atlanıyor | ✅ |
-| Whiteboard Zoom Range | %5'e kadar zoom out (önceden %25) | ✅ |
-| Dynamic Zoom Limits | CanvasMode bazlı zoom limitleri | ✅ |
-| Quick Note Template | Thin_lined (6mm) default | ✅ |
-| Logger Utility | Consistent logging sistemi | ✅ |
-
----
-
-## 📁 Yeni Oluşturulan Dosyalar (Template Sistemi)
-
-### drawing_core
-```
-lib/src/models/
-├── template_category.dart     ← TemplateCategory enum (6 kategori)
-├── template_pattern.dart      ← TemplatePattern enum (16 pattern)
-├── template.dart              ← Template model
-├── paper_size.dart            ← PaperSize model (A4, A5, Letter vb.)
-├── cover.dart                 ← Cover model (kapak)
-
-lib/src/services/
-├── template_registry.dart     ← 16 template tanımı
-├── cover_registry.dart        ← 10 kapak tanımı (6 free, 4 premium)
-```
-
-### drawing_ui
-```
-lib/src/painters/
-├── template_pattern_painter.dart  ← Tüm pattern'ları çizen painter
-
-lib/src/widgets/
-├── template_preview_widget.dart   ← Template önizleme
-├── cover_preview_widget.dart      ← Kapak önizleme (başlık gösterimli)
-├── template_picker/               ← (kullanılmıyor olabilir, kontrol et)
-```
-
-### example_app
-```
-lib/features/documents/presentation/screens/
-├── template_selection_screen.dart  ← Ana şablon seçim sayfası (YENİ)
-
-lib/features/documents/presentation/widgets/
-├── new_document_dialog.dart        ← SİLİNDİ (eski sistem)
+# Mevcut agent'ları görme
+/agents
 ```
 
 ---
 
-## 🎨 Template Sistemi Özellikleri
+## 🎯 AKTİF GÖREV: UI Fix'ler (Dark Theme + UX)
 
-### Şablonlar (16 adet)
-- **Basic (Free):** Boş, Çizgili, Kareli, Küçük Kareli, Noktalı, Cornell
-- **Productivity (Premium):** Yapılacaklar, Toplantı, Günlük Plan, Haftalık Plan
-- **Creative (Premium):** Storyboard, Nota Kağıdı, El Yazısı
-- **Special (Premium):** İzometrik, Altıgen, Kaligrafi
+### ✅ Tamamlanan (Commit: a0ca9ad)
+**Commit mesajı:** `fix(theme): make Documents screen widgets dark-theme-aware`
 
-### Kapaklar (10 adet)
-- **Free (Solid):** Siyah, Lacivert, Bordo, Koyu Yeşil, Kahverengi, Gri
-- **Premium (Gradient):** Gün Batımı, Okyanus, Orman, Mor
+| Fix | Dosya | Açıklama |
+|-----|-------|----------|
+| ✅ Issue 1 | `app_card.dart` | Theme-aware renkler |
+| ✅ Issue 2-3 | `folder_card.dart` | Text/checkbox düzeltildi |
+| ✅ Issue 4-6 | `document_card_helpers.dart` | Tüm helper'lar düzeltildi |
+| ✅ Issue 7 | `selection_mode_header.dart` | Dark mode görünür |
+| ✅ Issue 8 | `app_empty_state.dart` | Theme-aware renkler |
+| ✅ Issue 9 | `documents_empty_states.dart` | Düzeltildi |
+| ✅ Issue 10 | `breadcrumb_navigation.dart` | Düzeltildi |
+| ✅ Issue 11 | `app_colors.dart` | outlineDark 0xFF2C2C2C |
+| ✅ Tests | 3 yeni test dosyası | 49 test eklendi |
 
-### Kağıt Renkleri (6 adet)
-- Beyaz, Siyah, Krem, Açık Gri, Açık Yeşil, Açık Mavi
+### 🔴 Tablet Test Sorunları (Yeni Bulunan)
 
-### Kağıt Boyutları
-- A4, A5, A6, Letter, Legal, Kare, Geniş (16:9)
-- Dikey/Yatay yön desteği
+| Sorun | Öncelik | Açıklama |
+|-------|---------|----------|
+| PDF Thumbnail | 🔴 Yüksek | Documents ekranında PDF kapak görüntüsü görünmüyor |
+| Settings Dark Theme | 🔴 Yüksek | Ayarlar ekranında yazılar okunmuyor |
 
----
+### 🟡 Bekleyen Issue'lar (12-17)
 
-## 📱 UI Tasarımı (GoodNotes/Notability tarzı)
-
-```
-┌────────────────────────────────────────────────────────────────┐
-│ İptal              Yeni not oluştur              [Oluştur]     │
-├────────────────────────────────────────────────────────────────┤
-│  ┌─────────┐  ┌─────────┐  │ Not için bir başlık girin        │
-│  │ KAPAK   │  │ KAĞIT   │  │ Etiket: [+]                      │
-│  │ preview │  │ preview │  │ Kapak: [toggle]                  │
-│  └─────────┘  └─────────┘  │ Format: Dikey, A4 [▼]            │
-│     Kapak       Kağıt      │                                   │
-├────────────────────────────────────────────────────────────────┤
-│ Şablon    Renk: ⚪⚫🟤⚪🟢🔵                                   │
-├────────────────────────────────────────────────────────────────┤
-│ [Taban] [Çalışma] [Plan] [Yaşam] ...                          │
-├────────────────────────────────────────────────────────────────┤
-│ ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐ ┌───┐                          │
-│ │Boş│ │///│ │###│ │...│ │   │ │   │   ← 6 kolon (tablet)     │
-│ └───┘ └───┘ └───┘ └───┘ └───┘ └───┘      3 kolon (phone)      │
-│                                                                │
-└────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## ✅ Önceki Tamamlanan Fazlar
-
-### Drawing Library (packages/)
-| Phase | Durum | Açıklama |
+| Issue | Dosya | Açıklama |
 |-------|-------|----------|
-| Phase 0-4D | ✅ | Temel çizim motoru (738 test) |
-| Phase 4E | ✅ | PDF Performans Optimizasyonu |
-| Phase 5A-5F | ✅ | PDF Import/Export, Multi-page |
-
-### App Feature Modülleri
-| Modül | Durum | Açıklama |
-|-------|-------|----------|
-| Auth | ✅ | Supabase Auth + Google Sign-In |
-| Premium | ✅ | RevenueCat |
-| Documents | 🔄 | Template sistemi devam ediyor |
-| Settings | ✅ | Theme (dark/light), preferences |
-| Sync | ✅ | Offline-first |
-| Editor | ✅ | DrawingScreen wrapper |
+| 12 | `documents_screen.dart` | 1831 satır → 300 satır parçalara böl |
+| 13 | `new_document_dialog.dart` | 451 satır → böl |
+| 14 | Modal'lar | Keyboard overflow - viewInsets padding |
+| 15 | Grid view | Hardcoded spacing → AppSpacing.* |
+| 16 | `sidebar.dart` | colorScheme → AppColors tokens |
+| 17 | List tiles | Magic numbers (52, 64) → AppSpacing.* |
 
 ---
 
-## 🛠 Teknoloji Stack
+## 📋 SIRADAKI ADIMLAR
 
-- **Paketler:** drawing_core (pure Dart) + drawing_ui (Flutter)
-- **State:** Riverpod
-- **PDF:** pdfx (import/render) + pdf (export)
-- **Backend:** Supabase (auth/sync)
-- **Premium:** RevenueCat
-- **Routing:** go_router
+1. **PDF Thumbnail düzelt** - @flutter-developer
+2. **Settings dark theme düzelt** - @flutter-developer
+3. **Tablet test tekrar** - Manuel
+4. **Issue 12-17 düzelt** - @flutter-developer
+5. **Code review** - @code-reviewer
+6. **Final commit**
 
 ---
 
@@ -186,42 +89,109 @@ lib/features/documents/presentation/widgets/
 ```
 StarNote projesine devam ediyoruz. HANDOFF.md dosyasını paylaşıyorum.
 
-SON DURUM: Template Selection System ✅ TAMAMLANDI
+SETUP: Claude Code CLI ile multi-agent workflow kullanıyoruz.
+- 4 agent tanımlı: senior-architect, flutter-developer, qa-engineer, code-reviewer
+- Agent'ları @agent-name ile çağır
 
-AKTIF GÖREV: Document Liste İyileştirmeleri
-- Grid/List view toggle
-- Sıralama (Tarih, İsim, Boyut)
-- Arama çubuğu (Başlık bazlı)
-- View tercih kaydetme (SharedPreferences)
+SON DURUM: Dark theme fix'leri (Issue 1-11) tamamlandı ve commit edildi.
 
-SIRADA:
-1. Grid/List view toggle butonu ekle
-2. Sıralama dropdown (Tarihe göre, İsme göre)
-3. Arama çubuğu implementation
-4. Görünüm tercihi kaydetme
-5. Filtreleme seçenekleri (opsiyonel)
+AKTİF SORUNLAR (Tablet test):
+1. PDF thumbnail görünmüyor (Documents ekranı)
+2. Settings ekranında dark theme'da yazılar okunmuyor
 
-ROL: Sen Senior Architect Developer, Cursor Senior Flutter Developer
+BEKLEYEN:
+- Issue 12-17 (file splitting, hardcoded spacing)
+
+İLK GÖREV:
+@flutter-developer Tablet testinde 2 sorun buldum:
+1. Documents ekranında PDF kapak görüntüsü (thumbnail) görünmüyor
+2. Settings ekranında dark tema'da yazılar okunmuyor - hardcoded renkler var
+İkisini de düzelt, sonra flutter analyze çalıştır.
+```
+
+---
+
+## 📁 Proje Yapısı (Özet)
+
+```
+starnote_drawing_workspace/
+├── .claude/
+│   ├── CLAUDE.md              # Proje kuralları (tüm agent'lar okur)
+│   ├── agents/                # Agent tanımları
+│   │   ├── senior-architect.md
+│   │   ├── flutter-developer.md
+│   │   ├── qa-engineer.md
+│   │   └── code-reviewer.md
+│   └── agent-memory/          # Agent hafızası
+├── example_app/               # Ana uygulama
+├── packages/
+│   ├── drawing_core/          # Pure Dart çizim motoru
+│   └── drawing_ui/            # Flutter widget'ları
+└── docs/
+    └── DESIGN_SYSTEM_MASTER_PLAN.md
 ```
 
 ---
 
 ## ⚠️ Önemli Kurallar
 
-1. **Tema:** Hardcoded renk YASAK, Theme.of(context).colorScheme kullan
-2. **Responsive:** LayoutBuilder ile phone/tablet ayrımı (600px breakpoint)
-3. **Test:** Her değişiklik sonrası `flutter analyze && flutter test`
-4. **Branch:** feature/templates-picker (aktif)
-5. **Cursor:** Küçük adımlarla ilerle, her adım sonrası test
+1. **Tema:** Hardcoded renk YASAK → `AppColors.*` veya `Theme.of(context).colorScheme.*`
+2. **Spacing:** Hardcoded değer YASAK → `AppSpacing.*`
+3. **Dosya limiti:** Max 300 satır per file
+4. **Touch target:** Min 48x48dp
+5. **Import:** Barrel exports kullan, relative import YASAK
+6. **Test:** Her değişiklik sonrası `flutter analyze`
+7. **Flutter çalıştırma (WSL):** `cmd.exe /c "flutter run"`
+
+---
+
+## 🛠 VS Code Workflow
+
+### Terminal Setup
+1. **Tab 1 - Claude Code:**
+   ```bash
+   wsl
+   source ~/.bashrc
+   cd /mnt/c/Users/aktas/source/repos/starnote_drawing_workspace
+   claude
+   ```
+
+2. **Tab 2 - Flutter Run:**
+   ```bash
+   cd example_app
+   cmd.exe /c "flutter run"
+   ```
+
+### Sağ Panel
+- Claude Code extension kullanılabilir
+- `@agent-name` syntax çalışır
+
+---
+
+## ✅ Önceki Tamamlanan Fazlar
+
+### Design System (Phase 0-9) ✅
+- Design tokens (colors, spacing, typography)
+- Core components (buttons, inputs, feedback)
+- Responsive system
+- Auth screens
+- Documents screen (folder system, breadcrumb)
+- Settings screen
+- Template selection
+
+### Drawing Library ✅
+- Phase 0-4D: Temel çizim motoru (738 test)
+- Phase 4E: PDF Performans Optimizasyonu
+- Phase 5A-5F: PDF Import/Export, Multi-page
 
 ---
 
 ## 📊 Test Durumu
 
-- 738+ test mevcut
-- %92 coverage
-- Yeni template testleri eklendi
+- 738+ mevcut test
+- 49 yeni dark theme testi eklendi
+- flutter analyze: 17 pre-existing info/warning (bizim değişikliklerden değil)
 
 ---
 
-*StarNote - Template Selection System 🔄 Devam Ediyor*
+*StarNote - Multi-Agent Development Workflow 🚀*
