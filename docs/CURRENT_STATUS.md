@@ -9,11 +9,11 @@
 
 | Key | Value |
 |-----|-------|
-| **Current Phase** | UI Refactor & Cleanup |
-| **Current Module** | Issue 12-17 File Splitting |
-| **Last Commit** | b19db74 fix(theme): complete PDF thumbnail and settings dark theme fixes |
+| **Current Phase** | Phase 10 - Drawing/Editor Screen |
+| **Current Module** | UI Refactor & Cleanup Complete |
+| **Last Commit** | refactor(documents): issues 13-17 cleanup |
 | **Branch** | main |
-| **Next Task** | Issue 12 - documents_screen.dart bölme |
+| **Next Task** | Phase 10 - Drawing/Editor Screen implementation |
 
 ---
 
@@ -32,29 +32,26 @@
 - Settings screen fully dark-theme-aware
 - All settings widgets theme-responsive
 
----
+✅ **Issue 12: documents_screen.dart split** (1831 → 9 files, all <300 lines)
+- documents_screen.dart (298), documents_screen_helpers.dart (234)
+- documents_content_view.dart (273), documents_combined_grid.dart (91)
+- documents_list_view.dart (256), document_list_tile.dart (241)
+- documents_menus.dart (251), folder_menus.dart (198)
+- documents_error_views.dart (52)
 
-## Pending Tasks (Issue 12-17)
+✅ **Issue 13: new_document_dialog.dart split** (475 → 184 + 300 lines)
+- new_document_dialog.dart: dropdown menu, quick creators
+- new_document_importers.dart: PDF/image import logic
 
-🔴 **Issue 12: documents_screen.dart** (1831 lines → 300 lines)
-- Split into multiple files following clean architecture
-- Extract grid view, list view, and helper methods
+✅ **Issue 14: Modal keyboard overflow fix**
+- SingleChildScrollView + insetPadding in rename dialogs
 
-🔴 **Issue 13: new_document_dialog.dart** (451 lines)
-- Split dialog logic into separate components
-- Extract format picker and template logic
+✅ **Issue 15+17: Hardcoded spacing → AppSpacing tokens**
+- documents_combined_grid.dart, document_list_tile.dart
+- documents_menus.dart, folder_menus.dart
 
-🔴 **Issue 14: Modal keyboard overflow fix**
-- Fix keyboard overlap in modals and dialogs
-
-🔴 **Issue 15: Grid hardcoded spacing → AppSpacing**
-- Replace all magic numbers with AppSpacing tokens
-
-🔴 **Issue 16: Sidebar AppColors tokens**
-- Apply design system tokens to sidebar components
-
-🔴 **Issue 17: List tile magic numbers**
-- Replace hardcoded values with design tokens
+✅ **Issue 16: Sidebar AppColors tokens**
+- Already properly using design system tokens
 
 ---
 
@@ -72,8 +69,8 @@
 ## Notes
 
 - All Phase 0-9 complete
-- Phase 10 (Drawing/Editor Screen) is next after cleanup
-- Focus on file splitting and design token consistency
+- Issues 12-17 (UI Refactor & Cleanup) complete
+- Phase 10 (Drawing/Editor Screen) is next
 - Max 300 lines per file rule applies strictly
 
 ---

@@ -71,7 +71,7 @@ class DocumentListTile extends ConsumerWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpacing.xs),
                     Text(
                       document.pageCount > 1
                           ? '${DocumentDateFormatter.format(document.updatedAt)} · ${document.pageCount} sayfa'

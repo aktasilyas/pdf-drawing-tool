@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/documents/domain/entities/folder.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
@@ -71,7 +72,7 @@ void showFolderMenu(
           ),
           const AppDivider(),
           _buildDeleteFolderTile(context, ref, folder, onDeleted),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
         ],
       ),
     ),
@@ -150,10 +151,16 @@ void _showRenameFolderDialog(
     context: context,
     builder: (ctx) => AlertDialog(
       title: const Text('Klasörü Yeniden Adlandır'),
-      content: TextField(
-        controller: controller,
-        autofocus: true,
-        decoration: const InputDecoration(labelText: 'Klasör Adı'),
+      insetPadding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.xl,
+        vertical: AppSpacing.xl,
+      ),
+      content: SingleChildScrollView(
+        child: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: const InputDecoration(labelText: 'Klasör Adı'),
+        ),
       ),
       actions: [
         TextButton(

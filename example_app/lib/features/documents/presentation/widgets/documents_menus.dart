@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
@@ -96,7 +97,7 @@ void _showTrashDocumentMenu(
               }
             },
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
         ],
       ),
     ),
@@ -202,7 +203,7 @@ void _showNormalDocumentMenu(
                   .moveToTrash(document.id);
             },
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
         ],
       ),
     ),
@@ -220,13 +221,19 @@ void showRenameDocumentDialog(
     context: context,
     builder: (ctx) => AlertDialog(
       title: const Text('Yeniden Adlandır'),
-      content: TextField(
-        controller: controller,
-        decoration: const InputDecoration(
-          labelText: 'Belge Adı',
-          border: OutlineInputBorder(),
+      insetPadding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.xl,
+        vertical: AppSpacing.xl,
+      ),
+      content: SingleChildScrollView(
+        child: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            labelText: 'Belge Adı',
+            border: OutlineInputBorder(),
+          ),
+          autofocus: true,
         ),
-        autofocus: true,
       ),
       actions: [
         TextButton(

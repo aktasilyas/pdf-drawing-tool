@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
 import 'package:example_app/features/documents/domain/entities/folder.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
@@ -31,9 +32,10 @@ class DocumentsCombinedGridView extends ConsumerWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
+        // Card width constants for grid layout
         final cardWidth = width < 600 ? 160.0 : 180.0;
-        final spacing = width < 600 ? 16.0 : 24.0;
-        final padding = width < 600 ? 16.0 : 32.0;
+        final spacing = width < 600 ? AppSpacing.lg.toDouble() : AppSpacing.xl.toDouble();
+        final padding = width < 600 ? AppSpacing.lg.toDouble() : AppSpacing.xxl.toDouble();
         final isPhone = width < 600;
 
         final isSelectionMode = ref.watch(selectionModeProvider);
