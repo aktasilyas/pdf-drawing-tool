@@ -50,8 +50,8 @@ class TemplatePreviewSection extends StatelessWidget {
   }
 
   Widget _buildTabletLayout(BuildContext context) {
-    const baseW = 85.0;
-    const baseH = 120.0;
+    const baseW = 110.0;
+    const baseH = 155.0;
     final previewW = paperSize.isLandscape ? baseH : baseW;
     final previewH = paperSize.isLandscape ? baseW : baseH;
 
