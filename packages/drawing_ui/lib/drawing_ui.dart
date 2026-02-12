@@ -17,6 +17,7 @@ export 'src/theme/drawing_colors.dart';
 // Screens
 export 'src/screens/drawing_screen.dart';
 export 'src/screens/drawing_screen_panels.dart';
+export 'src/screens/drawing_screen_layout.dart';
 
 // Canvas
 export 'src/canvas/mock_canvas.dart';

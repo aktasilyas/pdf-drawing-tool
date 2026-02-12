@@ -18,6 +18,7 @@ class TopNavigationBar extends ConsumerWidget {
     this.onHomePressed,
     this.onTitlePressed,
     this.onBackPressed,
+    this.compact = false,
   });
 
   /// Document title to display.
@@ -31,6 +32,9 @@ class TopNavigationBar extends ConsumerWidget {
 
   /// Callback when back button is pressed.
   final VoidCallback? onBackPressed;
+
+  /// Whether to use compact mode (phone) - shows minimal buttons.
+  final bool compact;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -48,106 +52,86 @@ class TopNavigationBar extends ConsumerWidget {
           ),
         ),
       ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          // Küçük ekranlarda daha az buton göster
-          final isSmallScreen = constraints.maxWidth < 500;
-          
-          return Row(
-            children: [
-              // Left - Home and Document Title
-              _NavButton(
-                icon: Icons.home_rounded,
-                tooltip: 'Ana Sayfa',
-                onPressed: onHomePressed ?? () => _showPlaceholder(context, 'Ana Sayfa'),
-              ),
-              const SizedBox(width: 8),
-              // Document title - Constrained width to prevent overflow
-              Flexible(
-                child: GestureDetector(
-                  onTap: onTitlePressed ?? () => _showPlaceholder(context, 'Belge Menüsü'),
-                  child: Container(
-                    constraints: const BoxConstraints(maxWidth: 300), // Max 300px
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: theme.panelBorderColor.withValues(alpha: 30.0 / 255.0),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Flexible(
-                          child: Text(
-                            documentTitle ?? 'İsimsiz Not',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: theme.toolbarIconColor,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Icon(
-                          Icons.keyboard_arrow_down,
-                          size: 18,
-                          color: theme.toolbarIconColor,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
-              // Center - Spacer
-              const Expanded(child: SizedBox()),
-
-              // Right actions - responsive
-              if (!isSmallScreen) ...[
-                _NavButton(
-                  icon: Icons.menu_book_outlined,
-                  tooltip: 'Okuyucu modu',
-                  onPressed: () => _showPlaceholder(context, 'Okuyucu modu'),
-                ),
-              ],
-              _NavButton(
-                icon: Icons.layers_outlined,
-                tooltip: 'Katmanlar',
-                onPressed: () => _showPlaceholder(context, 'Katmanlar'),
-              ),
-              _NavButton(
-                icon: gridVisible ? Icons.grid_on : Icons.grid_off,
-                tooltip: gridVisible ? 'Izgarayı gizle' : 'Izgarayı göster',
-                isActive: gridVisible,
-                onPressed: () {
-                  ref.read(gridVisibilityProvider.notifier).state = !gridVisible;
-                },
-              ),
-              if (!isSmallScreen) ...[
-                _NavButton(
-                  icon: Icons.upload_file,
-                  tooltip: 'PDF İçe Aktar',
-                  onPressed: () => _showPDFImportDialog(context, ref),
-                ),
-                _NavButton(
-                  icon: Icons.picture_as_pdf,
-                  tooltip: 'PDF Olarak Dışa Aktar',
-                  onPressed: () => _showPDFExportDialog(context, ref),
-                ),
-              ],
-              _NavButton(
-                icon: Icons.more_horiz,
-                tooltip: 'Daha fazla',
-                onPressed: () => _showPlaceholder(context, 'Daha fazla'),
-              ),
-              const SizedBox(width: 4),
-            ],
-          );
-        },
-      ),
+      child: compact
+          ? _buildCompactLayout(theme)
+          : _buildFullLayout(context, ref, theme, gridVisible),
     );
   }
+
+  /// Build compact layout (phone) - minimal buttons only.
+  Widget _buildCompactLayout(DrawingTheme theme) => Row(children: [
+        _NavButton(icon: Icons.home_rounded, tooltip: 'Ana Sayfa', onPressed: onHomePressed ?? () {}),
+        const SizedBox(width: 8),
+        Expanded(
+          child: GestureDetector(
+            onTap: onTitlePressed ?? () {},
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: theme.panelBorderColor.withValues(alpha: 30.0 / 255.0),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(mainAxisSize: MainAxisSize.min, children: [
+                Flexible(
+                  child: Text(documentTitle ?? 'İsimsiz Not',
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: theme.toolbarIconColor),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis),
+                ),
+                const SizedBox(width: 4),
+                Icon(Icons.keyboard_arrow_down, size: 18, color: theme.toolbarIconColor),
+              ]),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        _NavButton(icon: Icons.ios_share, tooltip: 'Paylaş', onPressed: () {}),
+        _NavButton(icon: Icons.more_vert, tooltip: 'Daha fazla', onPressed: () {}),
+        const SizedBox(width: 4),
+      ]);
+
+  /// Build full layout (tablet/desktop) - all buttons visible.
+  Widget _buildFullLayout(BuildContext context, WidgetRef ref, DrawingTheme theme, bool gridVisible) =>
+      LayoutBuilder(builder: (context, constraints) {
+        final isSmallScreen = constraints.maxWidth < 500;
+        return Row(children: [
+          _NavButton(icon: Icons.home_rounded, tooltip: 'Ana Sayfa', onPressed: onHomePressed ?? () => _showPlaceholder(context, 'Ana Sayfa')),
+          const SizedBox(width: 8),
+          Flexible(
+            child: GestureDetector(
+              onTap: onTitlePressed ?? () => _showPlaceholder(context, 'Belge Menüsü'),
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 300),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(color: theme.panelBorderColor.withValues(alpha: 30.0 / 255.0), borderRadius: BorderRadius.circular(16)),
+                child: Row(mainAxisSize: MainAxisSize.min, children: [
+                  Flexible(
+                      child: Text(documentTitle ?? 'İsimsiz Not',
+                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: theme.toolbarIconColor),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis)),
+                  const SizedBox(width: 4),
+                  Icon(Icons.keyboard_arrow_down, size: 18, color: theme.toolbarIconColor),
+                ]),
+              ),
+            ),
+          ),
+          const Expanded(child: SizedBox()),
+          if (!isSmallScreen) _NavButton(icon: Icons.menu_book_outlined, tooltip: 'Okuyucu modu', onPressed: () => _showPlaceholder(context, 'Okuyucu modu')),
+          _NavButton(icon: Icons.layers_outlined, tooltip: 'Katmanlar', onPressed: () => _showPlaceholder(context, 'Katmanlar')),
+          _NavButton(
+              icon: gridVisible ? Icons.grid_on : Icons.grid_off,
+              tooltip: gridVisible ? 'Izgarayı gizle' : 'Izgarayı göster',
+              isActive: gridVisible,
+              onPressed: () => ref.read(gridVisibilityProvider.notifier).state = !gridVisible),
+          if (!isSmallScreen) ...[
+            _NavButton(icon: Icons.upload_file, tooltip: 'PDF İçe Aktar', onPressed: () => _showPDFImportDialog(context, ref)),
+            _NavButton(icon: Icons.picture_as_pdf, tooltip: 'PDF Olarak Dışa Aktar', onPressed: () => _showPDFExportDialog(context, ref)),
+          ],
+          _NavButton(icon: Icons.more_horiz, tooltip: 'Daha fazla', onPressed: () => _showPlaceholder(context, 'Daha fazla')),
+          const SizedBox(width: 4),
+        ]);
+      });
 
   void _showPlaceholder(BuildContext context, String feature) {
     ScaffoldMessenger.of(context).showSnackBar(
