@@ -123,8 +123,30 @@ class _ToolBarState extends ConsumerState<ToolBar> {
     // Görünür araçları al ve kalem araçlarını grupla
     final visibleTools = _getGroupedVisibleTools(toolbarConfig, currentTool);
 
+    return _buildExpandedLayout(
+      context: context,
+      theme: theme,
+      canUndo: canUndo,
+      canRedo: canRedo,
+      currentTool: currentTool,
+      visibleTools: visibleTools,
+    );
+  }
+
+  /// Expanded toolbar layout — full horizontal bar with all sections visible.
+  ///
+  /// Used for >=840px screens (tablet landscape).
+  /// Future: medium and compact layouts will be added as separate methods.
+  Widget _buildExpandedLayout({
+    required BuildContext context,
+    required DrawingTheme theme,
+    required bool canUndo,
+    required bool canRedo,
+    required ToolType currentTool,
+    required List<ToolType> visibleTools,
+  }) {
     return Container(
-      height: 46, // Normal yükseklik
+      height: 46,
       decoration: BoxDecoration(
         color: theme.toolbarBackground,
         border: Border(
@@ -138,11 +160,11 @@ class _ToolBarState extends ConsumerState<ToolBar> {
         builder: (context, constraints) {
           // Küçük ekranlarda QuickAccessRow'u gizle
           final showQuickAccess = constraints.maxWidth > 500;
-          
+
           return Row(
             children: [
               const SizedBox(width: 4),
-              
+
               // Sidebar toggle button (GoodNotes style - leftmost)
               if (widget.showSidebarButton) ...[
                 IconButton(
@@ -191,7 +213,7 @@ class _ToolBarState extends ConsumerState<ToolBar> {
                         final isSelected = _isToolSelected(tool, currentTool);
                         final hasPanel = _toolsWithPanel.contains(tool);
 
-                        // Get GlobalKey for this tool button (for anchored panel positioning)
+                        // Get GlobalKey for this tool button
                         // Pen tools share a single key, same for highlighters
                         final GlobalKey? buttonKey;
                         if (isPenGroup) {
@@ -203,14 +225,13 @@ class _ToolBarState extends ConsumerState<ToolBar> {
                         }
 
                         Widget toolButton = ToolButton(
-                          key: buttonKey, // Use GlobalKey for positioning
+                          key: buttonKey,
                           toolType: tool,
                           isSelected: isSelected,
                           buttonKey: _toolButtonKeys[tool],
                           onPressed: () => _onToolPressed(tool),
                           onPanelTap: hasPanel ? () => _onPanelTap(tool) : null,
                           hasPanel: hasPanel,
-                          // Kalem grubu için aktif kalem ikonunu göster
                           customIcon: isPenGroup && _isPenTool(currentTool)
                               ? ToolButton.getIconForTool(currentTool)
                               : null,
@@ -221,7 +242,7 @@ class _ToolBarState extends ConsumerState<ToolBar> {
                           child: toolButton,
                         );
                       }),
-                      // ⚙️ SETTINGS BUTTON - After all tools (inside scrollable area)
+                      // Settings button - after all tools (inside scrollable)
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 2),
                         child: GestureDetector(

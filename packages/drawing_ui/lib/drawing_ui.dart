@@ -48,6 +48,8 @@ export 'src/toolbar/tool_bar.dart';
 export 'src/toolbar/tool_button.dart';
 export 'src/toolbar/quick_access_row.dart';
 export 'src/toolbar/toolbar_widgets.dart';
+export 'src/toolbar/toolbar_layout_mode.dart';
+export 'src/toolbar/adaptive_toolbar.dart';
 
 // Note: drawing_toolbar.dart and right_action_buttons.dart deprecated
 // Actions moved to TopNavigationBar

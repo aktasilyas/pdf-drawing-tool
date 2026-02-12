@@ -220,8 +220,8 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                     onTitlePressed: widget.onTitlePressed,
                   ),
 
-                  // Row 2: Tool bar (full width, hamburger icon ile)
-                  ToolBar(
+                  // Row 2: Adaptive toolbar (responsive layout)
+                  AdaptiveToolbar(
                     onUndoPressed: _onUndoPressed,
                     onRedoPressed: _onRedoPressed,
                     onSettingsPressed: _onSettingsPressed,
@@ -229,7 +229,6 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                     toolButtonKeys: _toolButtonKeys,
                     penGroupButtonKey: _penGroupButtonKey,
                     highlighterGroupButtonKey: _highlighterGroupButtonKey,
-                    // Hamburger button (GoodNotes style)
                     showSidebarButton: ref.watch(pageCountProvider) > 1,
                     isSidebarOpen: _isSidebarOpen,
                     onSidebarToggle: _toggleSidebar,

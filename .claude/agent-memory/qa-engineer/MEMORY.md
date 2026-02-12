@@ -81,8 +81,36 @@ cmd.exe /c "cd /d C:\\Users\\aktas\\source\\repos\\starnote_drawing_workspace\\e
 - Selection checkbox selected: primary background and border
 
 ## Test Coverage Achieved
+
+### Core Widgets
 - AppCard: 20 tests (all 3 variants, light/dark themes, selected states)
 - AppEmptyState: 12 tests (light/dark themes, all parameters, minimal params)
 - FolderCard: 17 tests (light/dark themes, selection checkbox, interactions)
 
-Total: 49 tests, all passing
+### Documents Feature (Refactor - Feb 2025)
+- documents_error_views_test.dart: 4 tests
+- documents_empty_states_test.dart: 6 tests
+- document_list_tile_test.dart: 4 tests
+- documents_header_test.dart: 5 tests
+- documents_content_view_test.dart: 4 tests
+- documents_combined_grid_test.dart: 4 tests
+- documents_list_view_test.dart: 5 tests
+
+Total: 81 tests, all passing
+
+## Entity Structure Reference (for tests)
+
+### DocumentInfo
+- Use `title` not `name`
+- Required: id, title, createdAt, updatedAt, templateId
+- Use `updatedAt` not `modifiedAt`
+- No `coverColor` field
+
+### Folder
+- Use `colorValue` not `color`
+- Required: id, name, createdAt
+- Optional: parentId, documentCount, sortOrder
+
+### SortOption enum
+- Values: `date`, `name`, `size`
+- NOT: `modifiedDate`, `createdDate`

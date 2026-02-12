@@ -38,7 +38,10 @@
       "Bash(git checkout:*)",
       "Bash(ls:*)",
       "Bash(git merge:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(xargs:*)",
+      "Bash(git branch:*)",
+      "Bash(git stash:*)"
     ]
   }
 }
