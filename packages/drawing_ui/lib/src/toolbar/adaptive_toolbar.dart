@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
 import 'package:drawing_ui/src/models/models.dart';
+import 'package:drawing_ui/src/toolbar/medium_toolbar.dart';
 import 'package:drawing_ui/src/toolbar/tool_bar.dart';
 
-/// Adaptive toolbar wrapper that delegates to the appropriate toolbar layout
-/// based on available screen width.
+/// Adaptive toolbar that switches layout based on available width.
 ///
-/// Currently delegates directly to [ToolBar] (expanded mode).
-/// Future phases will add LayoutBuilder-based switching between
-/// expanded, medium, and compact toolbar layouts.
+/// - >=840px: [ToolBar] (expanded — full horizontal, all sections visible)
+/// - 600-839px: [MediumToolbar] (compact horizontal, overflow menu)
+/// - <600px: [SizedBox.shrink] (compact bottom bar — future phase)
 class AdaptiveToolbar extends StatelessWidget {
   const AdaptiveToolbar({
     super.key,
@@ -54,21 +54,51 @@ class AdaptiveToolbar extends StatelessWidget {
   /// Whether sidebar is currently open.
   final bool isSidebarOpen;
 
+  /// Expanded layout breakpoint (>=840px).
+  static const _expandedBreakpoint = 840.0;
+
+  /// Medium layout breakpoint (>=600px).
+  static const _mediumBreakpoint = 600.0;
+
   @override
   Widget build(BuildContext context) {
-    // Phase M1.1: Direct passthrough to ToolBar (expanded mode).
-    // Future: LayoutBuilder will switch between expanded/medium/compact.
-    return ToolBar(
-      onUndoPressed: onUndoPressed,
-      onRedoPressed: onRedoPressed,
-      onSettingsPressed: onSettingsPressed,
-      settingsButtonKey: settingsButtonKey,
-      toolButtonKeys: toolButtonKeys,
-      penGroupButtonKey: penGroupButtonKey,
-      highlighterGroupButtonKey: highlighterGroupButtonKey,
-      onSidebarToggle: onSidebarToggle,
-      showSidebarButton: showSidebarButton,
-      isSidebarOpen: isSidebarOpen,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+
+        if (width >= _expandedBreakpoint) {
+          return ToolBar(
+            onUndoPressed: onUndoPressed,
+            onRedoPressed: onRedoPressed,
+            onSettingsPressed: onSettingsPressed,
+            settingsButtonKey: settingsButtonKey,
+            toolButtonKeys: toolButtonKeys,
+            penGroupButtonKey: penGroupButtonKey,
+            highlighterGroupButtonKey: highlighterGroupButtonKey,
+            onSidebarToggle: onSidebarToggle,
+            showSidebarButton: showSidebarButton,
+            isSidebarOpen: isSidebarOpen,
+          );
+        }
+
+        if (width >= _mediumBreakpoint) {
+          return MediumToolbar(
+            onUndoPressed: onUndoPressed,
+            onRedoPressed: onRedoPressed,
+            onSettingsPressed: onSettingsPressed,
+            settingsButtonKey: settingsButtonKey,
+            toolButtonKeys: toolButtonKeys,
+            penGroupButtonKey: penGroupButtonKey,
+            highlighterGroupButtonKey: highlighterGroupButtonKey,
+            onSidebarToggle: onSidebarToggle,
+            showSidebarButton: showSidebarButton,
+            isSidebarOpen: isSidebarOpen,
+          );
+        }
+
+        // Compact (<600px): Future phase — bottom bar widget
+        return const SizedBox.shrink();
+      },
     );
   }
 }

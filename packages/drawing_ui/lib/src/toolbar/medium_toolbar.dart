@@ -1,0 +1,300 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:drawing_ui/src/models/models.dart';
+import 'package:drawing_ui/src/providers/providers.dart';
+import 'package:drawing_ui/src/theme/theme.dart';
+import 'package:drawing_ui/src/toolbar/quick_access_row.dart';
+import 'package:drawing_ui/src/toolbar/tool_button.dart';
+import 'package:drawing_ui/src/toolbar/toolbar_overflow_menu.dart';
+import 'package:drawing_ui/src/toolbar/toolbar_widgets.dart';
+
+/// Medium toolbar layout for 600-839px screens (tablet portrait).
+///
+/// Shows: undo/redo | first 6 tools | settings | overflow menu
+/// Below: collapsible quick access row (toggle with chevron).
+/// Reuses [ToolButton], [ToolbarUndoRedoButtons], [QuickAccessRow].
+class MediumToolbar extends ConsumerStatefulWidget {
+  const MediumToolbar({
+    super.key,
+    this.onUndoPressed,
+    this.onRedoPressed,
+    this.onSettingsPressed,
+    this.settingsButtonKey,
+    this.toolButtonKeys,
+    this.penGroupButtonKey,
+    this.highlighterGroupButtonKey,
+    this.onSidebarToggle,
+    this.showSidebarButton = false,
+    this.isSidebarOpen = false,
+  });
+
+  final VoidCallback? onUndoPressed;
+  final VoidCallback? onRedoPressed;
+  final VoidCallback? onSettingsPressed;
+  final GlobalKey? settingsButtonKey;
+  final Map<ToolType, GlobalKey>? toolButtonKeys;
+  final GlobalKey? penGroupButtonKey;
+  final GlobalKey? highlighterGroupButtonKey;
+  final VoidCallback? onSidebarToggle;
+  final bool showSidebarButton;
+  final bool isSidebarOpen;
+
+  @override
+  ConsumerState<MediumToolbar> createState() => _MediumToolbarState();
+}
+
+class _MediumToolbarState extends ConsumerState<MediumToolbar> {
+  static const _maxVisibleTools = 6;
+
+  final Map<ToolType, GlobalKey> _toolButtonKeys = {};
+  bool _showQuickAccess = false;
+
+  /// Pen tool types (grouped as one button).
+  static const _penTools = [
+    ToolType.pencil, ToolType.hardPencil, ToolType.ballpointPen,
+    ToolType.gelPen, ToolType.dashedPen, ToolType.brushPen,
+    ToolType.rulerPen,
+  ];
+
+  /// Highlighter tool types (grouped as one button).
+  static const _highlighterTools = [
+    ToolType.highlighter, ToolType.neonHighlighter,
+  ];
+
+  /// Tools that have a settings panel.
+  static const _toolsWithPanel = {
+    ToolType.pencil, ToolType.hardPencil, ToolType.ballpointPen,
+    ToolType.gelPen, ToolType.dashedPen, ToolType.brushPen,
+    ToolType.neonHighlighter, ToolType.highlighter,
+    ToolType.pixelEraser, ToolType.strokeEraser, ToolType.lassoEraser,
+    ToolType.shapes, ToolType.sticker, ToolType.image,
+    ToolType.laserPointer, ToolType.selection,
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    for (final tool in ToolType.values) {
+      _toolButtonKeys[tool] = GlobalKey();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = DrawingTheme.of(context);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _buildMainRow(theme),
+        if (_showQuickAccess) _buildQuickAccessRow(theme),
+      ],
+    );
+  }
+
+  Widget _buildMainRow(DrawingTheme theme) {
+    final currentTool = ref.watch(currentToolProvider);
+    final toolbarConfig = ref.watch(toolbarConfigProvider);
+    final canUndo = ref.watch(canUndoProvider);
+    final canRedo = ref.watch(canRedoProvider);
+
+    final allTools = _getGroupedVisibleTools(toolbarConfig, currentTool);
+    final visibleTools = allTools.take(_maxVisibleTools).toList();
+    final hiddenTools = allTools.skip(_maxVisibleTools).toList();
+    return Container(
+      height: 46,
+      decoration: BoxDecoration(
+        color: theme.toolbarBackground,
+        border: Border(
+          bottom: BorderSide(
+            color: theme.panelBorderColor.withValues(alpha: 80.0 / 255.0),
+            width: 0.5,
+          ),
+        ),
+      ),
+      child: Row(
+        children: [
+          const SizedBox(width: 4),
+
+          // Sidebar toggle
+          if (widget.showSidebarButton) ...[
+            IconButton(
+              icon: Icon(
+                widget.isSidebarOpen ? Icons.menu_open : Icons.menu,
+                size: 22,
+              ),
+              onPressed: widget.onSidebarToggle,
+              tooltip: 'Sayfalar',
+              padding: const EdgeInsets.all(10),
+              constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+            ),
+            Container(
+              width: 1,
+              height: 28,
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              color: theme.panelBorderColor.withValues(alpha: 60.0 / 255.0),
+            ),
+          ],
+
+          // Undo/Redo
+          ToolbarUndoRedoButtons(
+            canUndo: canUndo,
+            canRedo: canRedo,
+            onUndo: widget.onUndoPressed,
+            onRedo: widget.onRedoPressed,
+          ),
+
+          const ToolbarVerticalDivider(),
+
+          // Visible tools (first 6)
+          ...visibleTools.map((tool) => _buildToolButton(tool, currentTool)),
+
+          // Settings button
+          _buildSettingsButton(theme),
+
+          // Overflow menu (if hidden tools exist)
+          if (hiddenTools.isNotEmpty)
+            ToolbarOverflowMenu(hiddenTools: hiddenTools),
+
+          const Spacer(),
+
+          // Quick access toggle
+          _buildQuickAccessToggle(theme),
+
+          const SizedBox(width: 4),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildToolButton(ToolType tool, ToolType currentTool) {
+    final isPenGroup = _penTools.contains(tool);
+    final isHighlighterGroup = _highlighterTools.contains(tool);
+    final isSelected = _isToolSelected(tool, currentTool);
+    final hasPanel = _toolsWithPanel.contains(tool);
+
+    final GlobalKey? buttonKey;
+    if (isPenGroup) {
+      buttonKey = widget.penGroupButtonKey;
+    } else if (isHighlighterGroup) {
+      buttonKey = widget.highlighterGroupButtonKey;
+    } else {
+      buttonKey = widget.toolButtonKeys?[tool];
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 2),
+      child: ToolButton(
+        key: buttonKey,
+        toolType: tool,
+        isSelected: isSelected,
+        buttonKey: _toolButtonKeys[tool],
+        onPressed: () => _onToolPressed(tool),
+        onPanelTap: hasPanel ? () => _onPanelTap(tool) : null,
+        hasPanel: hasPanel,
+        customIcon: isPenGroup && _penTools.contains(currentTool)
+            ? ToolButton.getIconForTool(currentTool)
+            : null,
+      ),
+    );
+  }
+
+  Widget _buildSettingsButton(DrawingTheme theme) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        final current = ref.read(activePanelProvider);
+        ref.read(activePanelProvider.notifier).state =
+            current == ToolType.toolbarSettings ? null : ToolType.toolbarSettings;
+      },
+      child: Container(
+        key: widget.settingsButtonKey,
+        width: 40, height: 40,
+        margin: const EdgeInsets.symmetric(horizontal: 2),
+        decoration: BoxDecoration(
+          color: theme.toolbarBackground,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(Icons.settings, size: 20, color: theme.toolbarIconColor),
+      ),
+    );
+  }
+
+  Widget _buildQuickAccessToggle(DrawingTheme theme) {
+    return GestureDetector(
+      onTap: () => setState(() => _showQuickAccess = !_showQuickAccess),
+      child: Container(
+        width: 40, height: 40,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          color: _showQuickAccess
+              ? theme.toolbarIconSelectedColor.withValues(alpha: 0.1)
+              : Colors.transparent,
+        ),
+        child: Icon(
+          _showQuickAccess ? Icons.expand_less : Icons.expand_more,
+          size: 20, color: theme.toolbarIconColor,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickAccessRow(DrawingTheme theme) {
+    return Container(
+      height: 40,
+      decoration: BoxDecoration(
+        color: theme.toolbarBackground,
+        border: Border(
+          bottom: BorderSide(
+            color: theme.panelBorderColor.withValues(alpha: 80.0 / 255.0),
+            width: 0.5,
+          ),
+        ),
+      ),
+      child: const Center(child: QuickAccessRow()),
+    );
+  }
+
+  List<ToolType> _getGroupedVisibleTools(
+      ToolbarConfig config, ToolType currentTool) {
+    final visibleTools =
+        config.visibleTools.map((tc) => tc.toolType).toList();
+    final result = <ToolType>[];
+    bool penAdded = false, highlighterAdded = false;
+    for (final tool in visibleTools) {
+      if (_penTools.contains(tool)) {
+        if (!penAdded) {
+          result.add(_penTools.contains(currentTool)
+              ? currentTool : ToolType.ballpointPen);
+          penAdded = true;
+        }
+      } else if (_highlighterTools.contains(tool)) {
+        if (!highlighterAdded) {
+          result.add(_highlighterTools.contains(currentTool)
+              ? currentTool : ToolType.highlighter);
+          highlighterAdded = true;
+        }
+      } else {
+        result.add(tool);
+      }
+    }
+    return result;
+  }
+
+  bool _isToolSelected(ToolType tool, ToolType currentTool) {
+    if (_penTools.contains(tool) && _penTools.contains(currentTool)) return true;
+    if (_highlighterTools.contains(tool) &&
+        _highlighterTools.contains(currentTool)) return true;
+    return tool == currentTool;
+  }
+
+  void _onToolPressed(ToolType tool) {
+    ref.read(currentToolProvider.notifier).state = tool;
+    ref.read(activePanelProvider.notifier).state = null;
+  }
+
+  void _onPanelTap(ToolType tool) {
+    final active = ref.read(activePanelProvider);
+    ref.read(activePanelProvider.notifier).state = active == tool ? null : tool;
+  }
+}
