@@ -1,88 +1,94 @@
 # HANDOFF.md - StarNote Project Handoff Document
 
-> **Son Güncelleme:** 2026-02-11
-> **Amaç:** Yeni chat session'ında kaldığımız yerden devam etmek için özet
-> **Durum:** UI Refactor & Cleanup (Issue 12-17)
+> **Son Guncelleme:** 2026-02-12
+> **Amac:** Yeni chat session'inda kaldigimiz yerden devam etmek icin ozet
+> **Durum:** App UI Polish & Bug Fixes ✅ Complete
 
 ---
 
 ## ✅ TAMAMLANAN: Dark Theme & PDF Fixes
 
 ### Issue 1-11: Dark Theme Fix
-| İyileştirme | Dosya | Açıklama |
+| Iyilestirme | Dosya | Aciklama |
 |-------------|-------|----------|
-| AppColors tokens | Tüm widgetlar | Dark theme-aware color usage |
+| AppColors tokens | Tum widgetlar | Dark theme-aware color usage |
 | Theme-sensitive icons | Documents, Settings | Icons adapt to theme |
 | Widget updates | 50+ widgets | Proper theme context usage |
 
 ### PDF Thumbnail Fix ✅
-- PDF thumbnail rendering sorunları çözüldü
+- PDF thumbnail rendering sorunlari cozuldu
 - Dark theme support eklendi
-- Performance optimizasyonları
+- Performance optimizasyonlari
 
 ### Settings Dark Theme Fix ✅
 - Settings screen tamamen dark theme uyumlu
-- Tüm settings widgets theme-responsive
-- AppColors tokens uygulandı
+- Tum settings widgets theme-responsive
+- AppColors tokens uygulandi
 
 ---
 
-## 🎯 AKTİF: Issue 12-17 File Splitting & Cleanup
+## ✅ TAMAMLANAN: Issue 12-17 File Splitting & Cleanup
 
-### Hedef
-300 satır kuralını sağlamak için büyük dosyaları bölmek ve design token kullanımını yaygınlaştırmak.
+### Issue 12: documents_screen.dart (1831 satir) ✅
+- 9 dosyaya bolundu, hepsi <300 satir
 
-### Görevler
+### Issue 13: new_document_dialog.dart (451 satir) ✅
+- new_document_dialog.dart + new_document_importers.dart
 
-#### Issue 12: documents_screen.dart (1831 satır) 🔴
-- Grid view logic'i ayrı dosyaya
-- List view logic'i ayrı dosyaya
-- Helper methods extraction
-- Hedef: <300 satır per file
+### Issue 14: Modal keyboard overflow fix ✅
+- SingleChildScrollView + insetPadding
 
-#### Issue 13: new_document_dialog.dart (451 satır) 🔴
-- Format picker ayrı component
-- Template selection logic extraction
-- Dialog state management separation
+### Issue 15: Grid hardcoded spacing → AppSpacing ✅
+- Tum magic numbers design tokens ile degistirildi
 
-#### Issue 14: Modal keyboard overflow fix 🔴
-- Keyboard overlap sorunlarını çöz
-- Dialogs ve bottom sheets için
+### Issue 16: Sidebar AppColors tokens ✅
+- Zaten dogru kullanimda
 
-#### Issue 15: Grid hardcoded spacing → AppSpacing 🔴
-- Magic numbers'ı AppSpacing tokens ile değiştir
-- Grid components update
+### Issue 17: List tile magic numbers ✅
+- Design tokens uygulandi
 
-#### Issue 16: Sidebar AppColors tokens 🔴
-- Sidebar'da hardcoded color kullanımını kaldır
-- AppColors tokens uygula
+---
 
-#### Issue 17: List tile magic numbers 🔴
-- List tile'larda magic numbers kaldır
-- Design tokens kullan
+## ✅ TAMAMLANAN: Bug Fixes & Polish
+
+| Bug | Cozum | Commit |
+|-----|-------|--------|
+| Favori yildiz gesture conflict | onFavoriteToggle callback wired | 87faadd |
+| List view thumbnail tasma | LayoutBuilder ile dinamik dot sayisi | 5542e17 |
+| Template dark theme | isDark ternaries, tablet preview buyutme | 5542e17 |
+| Folder path display | copyWith nullable parentId fix | 77bf565 |
+| Code review findings | Barrel exports, hardcoded values | c627a8d |
+| Branch temizligi | 29 eski branch silindi | - |
+
+---
+
+## 🎯 AKTIF GOREV: Final test + GitHub push
+
+- [ ] Tablet final test
+- [ ] GitHub push (hesap sorunu cozulunce)
 
 ---
 
 ## 🎉 PROJE DURUMU
 
-**Proje:** StarNote - Flutter drawing/note-taking uygulaması
-**Yapı:** pub.dev kütüphanesi (packages/) + uygulama (example_app/)
-**Sahip:** İlyas Aktaş (Product Owner)
+**Proje:** StarNote - Flutter drawing/note-taking uygulamasi
+**Yapi:** pub.dev kutuphanesi (packages/) + uygulama (example_app/)
+**Sahip:** Ilyas Aktas (Product Owner)
 **Mimar:** Claude Opus
 
 ---
 
-## ✅ Tamamlanan İşler
+## ✅ Tamamlanan Isler
 
 ### Drawing Library (packages/)
-| Phase | Durum | Açıklama |
+| Phase | Durum | Aciklama |
 |-------|-------|----------|
-| Phase 0-4D | ✅ | Temel çizim motoru (738 test) |
+| Phase 0-4D | ✅ | Temel cizim motoru (738 test) |
 | Phase 4E | ✅ | PDF Performans Optimizasyonu |
 | Phase 5A-5F | ✅ | PDF Import/Export, Multi-page |
 
-### App Feature Modülleri
-| Modül | Durum | Açıklama |
+### App Feature Modulleri
+| Modul | Durum | Aciklama |
 |-------|-------|----------|
 | Auth | ✅ | Supabase Auth |
 | Premium | ✅ | RevenueCat |
@@ -92,12 +98,21 @@
 | Editor | ✅ | DrawingScreen wrapper |
 
 ### Design System
-| Component | Durum | Açıklama |
+| Component | Durum | Aciklama |
 |-----------|-------|----------|
 | Design Tokens | ✅ | AppColors, AppSpacing, AppTypography, etc. |
 | Core Widgets | ✅ | Buttons, Inputs, Feedback, Layout |
 | Dark Theme | ✅ | Full dark mode support |
 | Responsive | ✅ | Phone/Tablet layouts |
+
+---
+
+## Siradaki (Ileri Asama)
+
+- Template ekrani mobile UX iyilestirme
+- Advanced color picker redesign
+- Toolbar customization
+- Phase 10: Drawing/Editor Screen implementation
 
 ---
 
@@ -120,40 +135,31 @@ example_app/lib/
 
 ---
 
-## 🛠 Teknoloji Stack
-
-- drawing_core (pure Dart) + drawing_ui (Flutter)
-- Flutter + Riverpod
-- pdfx (import/render) + pdf (export)
-- Supabase (auth/sync)
-- Drift (SQLite local storage)
-
----
-
-## 🚀 Yeni Chat'te Başlarken
-
-```
-StarNote projesine devam ediyoruz. HANDOFF.md dosyasını paylaşıyorum.
-
-SON DURUM: Dark theme ve PDF thumbnail fixes tamamlandı ✅
-
-SIRADA NE VAR:
-Issue 12-17: File splitting & design token cleanup
-- documents_screen.dart bölme (1831 satır)
-- new_document_dialog.dart bölme (451 satır)
-- Modal keyboard overflow fix
-- AppSpacing ve AppColors token uygulaması
-```
-
----
-
 ## ⚠️ Dikkat Edilecekler
 
-1. **Max 300 satır kuralı** - Her dosya 300 satırı geçmemeli
+1. **Max 300 satir kurali** - Her dosya 300 satiri gecmemeli
 2. **Barrel exports** - Sadece index.dart'tan import
-3. **Design tokens** - Hardcoded değerler yasak
-4. **Dark theme** - Tüm widgetlar theme-aware olmalı
-5. **flutter analyze** - Her commit öncesi çalıştır
+3. **Design tokens** - Hardcoded degerler yasak
+4. **Dark theme** - Tum widgetlar theme-aware olmali
+5. **flutter analyze** - Her commit oncesi calistir
+
+---
+
+## 🚀 Yeni Chat'te Baslarken
+
+```
+StarNote projesine devam ediyoruz. HANDOFF.md dosyasini paylasiyorum.
+
+SON DURUM: UI Polish & Bug Fixes sprint'i tamamlandi ✅
+- Dark theme, PDF, Settings fixes ✅
+- Issue 12-17 file splitting & cleanup ✅
+- Bug fixes (favori, thumbnail, template dark theme) ✅
+- Branch temizligi (29 branch silindi) ✅
+
+SIRADA NE VAR:
+- Tablet final test + GitHub push
+- Phase 10: Drawing/Editor Screen implementation
+```
 
 ---
 
@@ -161,8 +167,8 @@ Issue 12-17: File splitting & design token cleanup
 
 - 738+ test mevcut
 - %92 coverage
-- `flutter analyze && flutter test` her değişiklik sonrası
+- `flutter analyze && flutter test` her degisiklik sonrasi
 
 ---
 
-*StarNote - UI Refactor & Cleanup Phase*
+*StarNote - App UI Polish & Bug Fixes Sprint Complete*

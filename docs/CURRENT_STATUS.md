@@ -9,15 +9,15 @@
 
 | Key | Value |
 |-----|-------|
-| **Current Phase** | Phase 10 - Drawing/Editor Screen |
-| **Current Module** | UI Refactor & Cleanup Complete |
-| **Last Commit** | refactor(documents): issues 13-17 cleanup |
+| **Current Phase** | App UI Polish & Bug Fixes |
+| **Current Module** | Template Modernization ✅ Complete |
+| **Last Commit** | 5542e17 fix: dark theme colors and cover preview overflow |
 | **Branch** | main |
-| **Next Task** | Phase 10 - Drawing/Editor Screen implementation |
+| **Next Task** | Tablet final test + GitHub push |
 
 ---
 
-## Completed Tasks
+## Completed Tasks (This Sprint)
 
 ✅ **Dark Theme Fix (Issue 1-11):**
 - All widgets and screens dark-theme-aware
@@ -53,6 +53,34 @@
 ✅ **Issue 16: Sidebar AppColors tokens**
 - Already properly using design system tokens
 
+✅ **Bug Fix: Favori yildiz gesture conflict**
+- onFavoriteToggle callback wired in all DocumentCard usages
+
+✅ **Bug Fix: List view thumbnail tasma**
+- Cover preview overflow fixed with LayoutBuilder
+
+✅ **Bug Fix: Klasor silme → belgeler cope tasinmiyor**
+- Folder deletion now moves documents to trash
+
+✅ **Bug Fix: Template ekrani dark theme + responsive**
+- Hardcoded AppColors.outlineLight/textSecondaryLight → isDark ternaries
+- Tablet preview enlarged (85x120 → 110x155)
+
+✅ **Code Review: Barrel exports, hardcoded values**
+- All review findings resolved
+
+✅ **Branch temizligi: 29 eski branch silindi**
+- Only 4 worktree branches remain
+
+---
+
+## Pending
+
+- [ ] GitHub push (hesap sorunu cozulunce)
+- [ ] Tablet final test
+- [ ] Advanced color picker redesign (ileri asama)
+- [ ] Toolbar customization (ileri asama)
+
 ---
 
 ## Important Files
@@ -70,9 +98,9 @@
 
 - All Phase 0-9 complete
 - Issues 12-17 (UI Refactor & Cleanup) complete
-- Phase 10 (Drawing/Editor Screen) is next
+- All dark theme and bug fix issues resolved
 - Max 300 lines per file rule applies strictly
 
 ---
 
-*Last updated: 2026-02-11*
+*Last updated: 2026-02-12*
