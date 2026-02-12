@@ -52,6 +52,8 @@ export 'src/toolbar/toolbar_layout_mode.dart';
 export 'src/toolbar/adaptive_toolbar.dart';
 export 'src/toolbar/medium_toolbar.dart';
 export 'src/toolbar/toolbar_overflow_menu.dart';
+export 'src/toolbar/compact_bottom_bar.dart';
+export 'src/toolbar/compact_tool_panel_sheet.dart';
 
 // Note: drawing_toolbar.dart and right_action_buttons.dart deprecated
 // Actions moved to TopNavigationBar

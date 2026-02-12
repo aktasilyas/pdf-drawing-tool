@@ -2,6 +2,8 @@
 library;
 
 export 'adaptive_toolbar.dart';
+export 'compact_bottom_bar.dart';
+export 'compact_tool_panel_sheet.dart';
 export 'medium_toolbar.dart';
 export 'quick_access_row.dart';
 export 'tool_bar.dart';

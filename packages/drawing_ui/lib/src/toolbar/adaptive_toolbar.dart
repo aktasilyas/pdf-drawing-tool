@@ -60,6 +60,15 @@ class AdaptiveToolbar extends StatelessWidget {
   /// Medium layout breakpoint (>=600px).
   static const _mediumBreakpoint = 600.0;
 
+  /// Returns true if compact mode should be used (phone layout).
+  /// When true, DrawingScreen should:
+  /// 1. Hide this toolbar (renders SizedBox.shrink)
+  /// 2. Show CompactBottomBar at bottom
+  /// 3. Use showToolPanelSheet for panels instead of AnchoredPanel
+  static bool shouldUseCompactMode(BuildContext context) {
+    return MediaQuery.of(context).size.width < _mediumBreakpoint;
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(

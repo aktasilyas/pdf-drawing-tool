@@ -201,12 +201,23 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
     // Responsive: Tablet/Desktop vs Mobile
     final screenWidth = MediaQuery.of(context).size.width;
     final isTabletOrDesktop = screenWidth >= 600;
+    final isCompactMode = screenWidth < 600;
     final showSidebar = _isSidebarOpen && ref.watch(pageCountProvider) > 1;
 
     return DrawingThemeProvider(
       theme: drawingTheme,
       child: Scaffold(
         backgroundColor: scaffoldBgColor,
+        // Phone: bottom bar
+        bottomNavigationBar: isCompactMode
+            ? CompactBottomBar(
+                onUndoPressed: _onUndoPressed,
+                onRedoPressed: _onRedoPressed,
+                onPanelRequested: (tool) {
+                  showToolPanelSheet(context: context, tool: tool);
+                },
+              )
+            : null,
         body: SafeArea(
           child: Stack(
             children: [
@@ -262,6 +273,12 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                   ),
                 ],
               ),
+
+              // Panel overlay (only tablet/desktop - phone uses bottom sheets)
+              if (!isCompactMode) ...[
+                // AnchoredPanel overlay is controlled by _panelController
+                // Nothing to add here - _handlePanelChange already manages it
+              ],
 
               // Mobile backdrop (tap to close) - ÖNCE
               if (!isTabletOrDesktop && showSidebar)
@@ -377,11 +394,20 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
 
   /// Handle panel state changes - show/hide overlay
   void _handlePanelChange(ToolType? panel) {
+    // In compact mode, panels are shown as bottom sheets instead of overlays
+    final isCompactMode = MediaQuery.of(context).size.width < 600;
+
+    if (isCompactMode) {
+      // Compact mode: don't use AnchoredPanel overlay
+      // Panels are shown via CompactBottomBar's onPanelRequested callback
+      return;
+    }
+
     if (panel == null) {
       // Close panel
       _panelController.hide();
     } else if (panel != ToolType.panZoom) {
-      // Show panel as overlay
+      // Show panel as overlay (tablet/desktop only)
       // Get the appropriate GlobalKey for this panel's button
       // Pen tools share a single button, same for highlighters
       final GlobalKey anchorKey;
