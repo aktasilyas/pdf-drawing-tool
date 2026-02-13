@@ -63,7 +63,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
 
   void _recalculateCanvasTransform() {
     final size = MediaQuery.of(context).size;
-    final isTablet = size.width >= 600;
+    final isTablet = size.width >= ToolbarLayoutMode.compactBreakpoint;
     final showSidebar = _isSidebarOpen && ref.read(pageCountProvider) > 1;
     final sidebarWidth = (isTablet && showSidebar) ? 140.0 : 0.0;
     final viewportSize = Size(size.width - sidebarWidth, size.height);
@@ -108,7 +108,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
     final colorScheme = materialTheme.colorScheme;
     final isDark = materialTheme.brightness == Brightness.dark;
     final screenWidth = MediaQuery.of(context).size.width;
-    final isCompactMode = screenWidth < 600;
+    final isCompactMode = screenWidth < ToolbarLayoutMode.compactBreakpoint;
     final showSidebar = _isSidebarOpen && ref.watch(pageCountProvider) > 1;
 
     final scaffoldBgColor = canvasMode.isInfinite

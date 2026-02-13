@@ -13,6 +13,8 @@ import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/widgets/widgets.dart';
 import 'package:drawing_ui/src/services/thumbnail_cache.dart';
 import 'package:drawing_ui/src/screens/drawing_screen_panels.dart';
+import 'package:drawing_ui/src/toolbar/tool_groups.dart';
+import 'package:drawing_ui/src/toolbar/toolbar_layout_mode.dart';
 
 /// Build the canvas area with all layers.
 Widget buildDrawingCanvasArea({
@@ -183,29 +185,29 @@ class AskAIButton extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
-        onTap: onTap,
-        child: Container(
-          width: 56,
-          height: 56,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(28),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF6366F1).withValues(alpha: 80.0 / 255.0),
-                blurRadius: 16,
-                offset: const Offset(0, 4),
-              ),
-            ],
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 56, height: 56,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [colorScheme.primary, colorScheme.primary.withValues(alpha: 0.8)],
+            begin: Alignment.topLeft, end: Alignment.bottomRight,
           ),
-          child: const Icon(Icons.auto_awesome, color: Colors.white, size: 24),
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: [
+            BoxShadow(
+              color: colorScheme.primary.withValues(alpha: 80.0 / 255.0),
+              blurRadius: 16, offset: const Offset(0, 4),
+            ),
+          ],
         ),
-      );
+        child: Icon(Icons.auto_awesome, color: colorScheme.onPrimary, size: 24),
+      ),
+    );
+  }
 }
 
 /// Zoom indicator shown in center while zooming.
@@ -252,15 +254,15 @@ void handlePanelChange({
   required GlobalKey settingsButtonKey,
   required VoidCallback onClosePanel,
 }) {
-  if (MediaQuery.of(context).size.width < 600) return;
+  if (MediaQuery.of(context).size.width < ToolbarLayoutMode.compactBreakpoint) return;
   if (panel == null) {
     panelController.hide();
   } else if (panel != ToolType.panZoom) {
     final anchorKey = panel == ToolType.toolbarSettings
         ? settingsButtonKey
-        : drawingScreenPenTools.contains(panel)
+        : penToolsSet.contains(panel)
             ? penGroupButtonKey
-            : drawingScreenHighlighterTools.contains(panel)
+            : highlighterToolsSet.contains(panel)
                 ? highlighterGroupButtonKey
                 : toolButtonKeys[panel] ?? GlobalKey();
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -277,20 +279,21 @@ void handlePanelChange({
 }
 
 /// Open AI panel as bottom sheet.
-void openAIPanel(BuildContext context) => showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.6,
-        maxChildSize: 0.9,
-        minChildSize: 0.3,
-        builder: (context, scrollController) => Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-          ),
-          child: AIAssistantPanel(onClose: () => Navigator.pop(context)),
+void openAIPanel(BuildContext context) {
+  final surface = Theme.of(context).colorScheme.surface;
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (context) => DraggableScrollableSheet(
+      initialChildSize: 0.6, maxChildSize: 0.9, minChildSize: 0.3,
+      builder: (context, scrollController) => Container(
+        decoration: BoxDecoration(
+          color: surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
         ),
+        child: AIAssistantPanel(onClose: () => Navigator.pop(context)),
       ),
-    );
+    ),
+  );
+}

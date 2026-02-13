@@ -6,6 +6,7 @@ import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/toolbar/quick_access_row.dart';
 import 'package:drawing_ui/src/toolbar/tool_button.dart';
+import 'package:drawing_ui/src/toolbar/tool_groups.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_overflow_menu.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_widgets.dart';
 
@@ -49,28 +50,6 @@ class _MediumToolbarState extends ConsumerState<MediumToolbar> {
 
   final Map<ToolType, GlobalKey> _toolButtonKeys = {};
   bool _showQuickAccess = false;
-
-  /// Pen tool types (grouped as one button).
-  static const _penTools = [
-    ToolType.pencil, ToolType.hardPencil, ToolType.ballpointPen,
-    ToolType.gelPen, ToolType.dashedPen, ToolType.brushPen,
-    ToolType.rulerPen,
-  ];
-
-  /// Highlighter tool types (grouped as one button).
-  static const _highlighterTools = [
-    ToolType.highlighter, ToolType.neonHighlighter,
-  ];
-
-  /// Tools that have a settings panel.
-  static const _toolsWithPanel = {
-    ToolType.pencil, ToolType.hardPencil, ToolType.ballpointPen,
-    ToolType.gelPen, ToolType.dashedPen, ToolType.brushPen,
-    ToolType.neonHighlighter, ToolType.highlighter,
-    ToolType.pixelEraser, ToolType.strokeEraser, ToolType.lassoEraser,
-    ToolType.shapes, ToolType.sticker, ToolType.image,
-    ToolType.laserPointer, ToolType.selection,
-  };
 
   @override
   void initState() {
@@ -126,7 +105,7 @@ class _MediumToolbarState extends ConsumerState<MediumToolbar> {
               onPressed: widget.onSidebarToggle,
               tooltip: 'Sayfalar',
               padding: const EdgeInsets.all(10),
-              constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
             ),
             Container(
               width: 1,
@@ -168,10 +147,10 @@ class _MediumToolbarState extends ConsumerState<MediumToolbar> {
   }
 
   Widget _buildToolButton(ToolType tool, ToolType currentTool) {
-    final isPenGroup = _penTools.contains(tool);
-    final isHighlighterGroup = _highlighterTools.contains(tool);
+    final isPenGroup = penTools.contains(tool);
+    final isHighlighterGroup = highlighterTools.contains(tool);
     final isSelected = _isToolSelected(tool, currentTool);
-    final hasPanel = _toolsWithPanel.contains(tool);
+    final hasPanel = toolsWithPanel.contains(tool);
 
     final GlobalKey? buttonKey;
     if (isPenGroup) {
@@ -192,7 +171,7 @@ class _MediumToolbarState extends ConsumerState<MediumToolbar> {
         onPressed: () => _onToolPressed(tool),
         onPanelTap: hasPanel ? () => _onPanelTap(tool) : null,
         hasPanel: hasPanel,
-        customIcon: isPenGroup && _penTools.contains(currentTool)
+        customIcon: isPenGroup && penTools.contains(currentTool)
             ? ToolButton.getIconForTool(currentTool)
             : null,
       ),
@@ -209,7 +188,7 @@ class _MediumToolbarState extends ConsumerState<MediumToolbar> {
       },
       child: Container(
         key: widget.settingsButtonKey,
-        width: 40, height: 40,
+        width: 48, height: 48,
         margin: const EdgeInsets.symmetric(horizontal: 2),
         decoration: BoxDecoration(
           color: theme.toolbarBackground,
@@ -224,7 +203,7 @@ class _MediumToolbarState extends ConsumerState<MediumToolbar> {
     return GestureDetector(
       onTap: () => setState(() => _showQuickAccess = !_showQuickAccess),
       child: Container(
-        width: 40, height: 40,
+        width: 48, height: 48,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           color: _showQuickAccess
@@ -262,15 +241,15 @@ class _MediumToolbarState extends ConsumerState<MediumToolbar> {
     final result = <ToolType>[];
     bool penAdded = false, highlighterAdded = false;
     for (final tool in visibleTools) {
-      if (_penTools.contains(tool)) {
+      if (penTools.contains(tool)) {
         if (!penAdded) {
-          result.add(_penTools.contains(currentTool)
+          result.add(penTools.contains(currentTool)
               ? currentTool : ToolType.ballpointPen);
           penAdded = true;
         }
-      } else if (_highlighterTools.contains(tool)) {
+      } else if (highlighterTools.contains(tool)) {
         if (!highlighterAdded) {
-          result.add(_highlighterTools.contains(currentTool)
+          result.add(highlighterTools.contains(currentTool)
               ? currentTool : ToolType.highlighter);
           highlighterAdded = true;
         }
@@ -282,9 +261,9 @@ class _MediumToolbarState extends ConsumerState<MediumToolbar> {
   }
 
   bool _isToolSelected(ToolType tool, ToolType currentTool) {
-    if (_penTools.contains(tool) && _penTools.contains(currentTool)) return true;
-    if (_highlighterTools.contains(tool) &&
-        _highlighterTools.contains(currentTool)) return true;
+    if (penTools.contains(tool) && penTools.contains(currentTool)) return true;
+    if (highlighterTools.contains(tool) &&
+        highlighterTools.contains(currentTool)) return true;
     return tool == currentTool;
   }
 

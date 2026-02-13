@@ -5,6 +5,7 @@ import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/toolbar/tool_button.dart';
 import 'package:drawing_ui/src/toolbar/quick_access_row.dart';
+import 'package:drawing_ui/src/toolbar/tool_groups.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_widgets.dart';
 
 /// Tool bar (Row 2) - Drawing tools and quick access.
@@ -66,43 +67,6 @@ class ToolBar extends ConsumerStatefulWidget {
 
 class _ToolBarState extends ConsumerState<ToolBar> {
   final Map<ToolType, GlobalKey> _toolButtonKeys = {};
-
-  /// Kalem araçları (tek ikon olarak grupla) - panel'de hepsi görünür
-  static const _penTools = [
-    ToolType.pencil,
-    ToolType.hardPencil,
-    ToolType.ballpointPen,
-    ToolType.gelPen,
-    ToolType.dashedPen,
-    ToolType.brushPen,
-    ToolType.rulerPen,
-  ];
-
-  /// Fosforlu kalem araçları (ayrı ikon) - panel'de görünür
-  static const _highlighterTools = [
-    ToolType.highlighter,
-    ToolType.neonHighlighter,
-  ];
-
-  /// Panel'i olan araçlar
-  static const _toolsWithPanel = {
-    ToolType.pencil,
-    ToolType.hardPencil,
-    ToolType.ballpointPen,
-    ToolType.gelPen,
-    ToolType.dashedPen,
-    ToolType.brushPen,
-    ToolType.neonHighlighter,
-    ToolType.highlighter,
-    ToolType.pixelEraser,
-    ToolType.strokeEraser,
-    ToolType.lassoEraser,
-    ToolType.shapes,
-    ToolType.sticker,
-    ToolType.image,
-    ToolType.laserPointer,
-    ToolType.selection,
-  };
 
   @override
   void initState() {
@@ -176,8 +140,8 @@ class _ToolBarState extends ConsumerState<ToolBar> {
                   tooltip: 'Sayfalar',
                   padding: const EdgeInsets.all(10),
                   constraints: const BoxConstraints(
-                    minWidth: 40,
-                    minHeight: 40,
+                    minWidth: 48,
+                    minHeight: 48,
                   ),
                 ),
                 Container(
@@ -208,10 +172,10 @@ class _ToolBarState extends ConsumerState<ToolBar> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       ...visibleTools.map((tool) {
-                        final isPenGroup = _isPenTool(tool);
-                        final isHighlighterGroup = _isHighlighterTool(tool);
+                        final isPenGroup = _isPen(tool);
+                        final isHighlighterGroup = _isHighlighter(tool);
                         final isSelected = _isToolSelected(tool, currentTool);
-                        final hasPanel = _toolsWithPanel.contains(tool);
+                        final hasPanel = toolsWithPanel.contains(tool);
 
                         // Get GlobalKey for this tool button
                         // Pen tools share a single key, same for highlighters
@@ -232,7 +196,7 @@ class _ToolBarState extends ConsumerState<ToolBar> {
                           onPressed: () => _onToolPressed(tool),
                           onPanelTap: hasPanel ? () => _onPanelTap(tool) : null,
                           hasPanel: hasPanel,
-                          customIcon: isPenGroup && _isPenTool(currentTool)
+                          customIcon: isPenGroup && _isPen(currentTool)
                               ? ToolButton.getIconForTool(currentTool)
                               : null,
                         );
@@ -257,8 +221,8 @@ class _ToolBarState extends ConsumerState<ToolBar> {
                           },
                           child: Container(
                             key: widget.settingsButtonKey,
-                            width: 40,
-                            height: 40,
+                            width: 48,
+                            height: 48,
                             decoration: BoxDecoration(
                               color: theme.toolbarBackground,
                               borderRadius: BorderRadius.circular(8),
@@ -306,10 +270,10 @@ class _ToolBarState extends ConsumerState<ToolBar> {
     bool highlighterGroupAdded = false;
 
     for (final tool in visibleTools) {
-      if (_isPenTool(tool)) {
+      if (_isPen(tool)) {
         if (!penGroupAdded) {
           // Aktif kalem aracını ekle, yoksa ballpointPen
-          if (_isPenTool(currentTool)) {
+          if (_isPen(currentTool)) {
             result.add(currentTool);
           } else {
             result.add(ToolType.ballpointPen);
@@ -317,10 +281,10 @@ class _ToolBarState extends ConsumerState<ToolBar> {
           penGroupAdded = true;
         }
         // Diğer kalem araçlarını atla
-      } else if (_isHighlighterTool(tool)) {
+      } else if (_isHighlighter(tool)) {
         if (!highlighterGroupAdded) {
           // Aktif fosforlu aracını ekle, yoksa highlighter
-          if (_isHighlighterTool(currentTool)) {
+          if (_isHighlighter(currentTool)) {
             result.add(currentTool);
           } else {
             result.add(ToolType.highlighter);
@@ -338,22 +302,22 @@ class _ToolBarState extends ConsumerState<ToolBar> {
 
   bool _isToolSelected(ToolType tool, ToolType currentTool) {
     // Kalem grubu için: herhangi bir kalem aracı seçiliyse grup seçili
-    if (_isPenTool(tool) && _isPenTool(currentTool)) {
+    if (_isPen(tool) && _isPen(currentTool)) {
       return true;
     }
     // Fosforlu grubu için: herhangi bir fosforlu aracı seçiliyse grup seçili
-    if (_isHighlighterTool(tool) && _isHighlighterTool(currentTool)) {
+    if (_isHighlighter(tool) && _isHighlighter(currentTool)) {
       return true;
     }
     return tool == currentTool;
   }
 
-  bool _isPenTool(ToolType tool) {
-    return _penTools.contains(tool);
+  bool _isPen(ToolType tool) {
+    return penTools.contains(tool);
   }
 
-  bool _isHighlighterTool(ToolType tool) {
-    return _highlighterTools.contains(tool);
+  bool _isHighlighter(ToolType tool) {
+    return highlighterTools.contains(tool);
   }
 
   void _onToolPressed(ToolType tool) {

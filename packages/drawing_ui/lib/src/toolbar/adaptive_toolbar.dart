@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/toolbar/medium_toolbar.dart';
 import 'package:drawing_ui/src/toolbar/tool_bar.dart';
+import 'package:drawing_ui/src/toolbar/toolbar_layout_mode.dart';
 
 /// Adaptive toolbar that switches layout based on available width.
 ///
@@ -54,19 +55,13 @@ class AdaptiveToolbar extends StatelessWidget {
   /// Whether sidebar is currently open.
   final bool isSidebarOpen;
 
-  /// Expanded layout breakpoint (>=840px).
-  static const _expandedBreakpoint = 840.0;
-
-  /// Medium layout breakpoint (>=600px).
-  static const _mediumBreakpoint = 600.0;
-
   /// Returns true if compact mode should be used (phone layout).
   /// When true, DrawingScreen should:
   /// 1. Hide this toolbar (renders SizedBox.shrink)
   /// 2. Show CompactBottomBar at bottom
   /// 3. Use showToolPanelSheet for panels instead of AnchoredPanel
   static bool shouldUseCompactMode(BuildContext context) {
-    return MediaQuery.of(context).size.width < _mediumBreakpoint;
+    return MediaQuery.of(context).size.width < ToolbarLayoutMode.compactBreakpoint;
   }
 
   @override
@@ -75,7 +70,7 @@ class AdaptiveToolbar extends StatelessWidget {
       builder: (context, constraints) {
         final width = constraints.maxWidth;
 
-        if (width >= _expandedBreakpoint) {
+        if (width >= ToolbarLayoutMode.expandedBreakpoint) {
           return ToolBar(
             onUndoPressed: onUndoPressed,
             onRedoPressed: onRedoPressed,
@@ -90,7 +85,7 @@ class AdaptiveToolbar extends StatelessWidget {
           );
         }
 
-        if (width >= _mediumBreakpoint) {
+        if (width >= ToolbarLayoutMode.compactBreakpoint) {
           return MediumToolbar(
             onUndoPressed: onUndoPressed,
             onRedoPressed: onRedoPressed,

@@ -20,5 +20,11 @@ enum ToolbarLayoutMode {
   ///
   /// Shows: undo/redo | active tool group (max 5) | more button
   /// All panels open as bottom sheets
-  compact,
+  compact;
+
+  /// Breakpoint below which compact (phone) layout is used.
+  static const double compactBreakpoint = 600;
+
+  /// Breakpoint at or above which expanded (tablet landscape) layout is used.
+  static const double expandedBreakpoint = 840;
 }

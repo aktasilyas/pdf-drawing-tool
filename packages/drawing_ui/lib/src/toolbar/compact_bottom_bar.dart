@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/toolbar/tool_button.dart';
+import 'package:drawing_ui/src/toolbar/tool_groups.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_widgets.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_overflow_menu.dart';
 
@@ -33,43 +34,6 @@ class CompactBottomBar extends ConsumerStatefulWidget {
 }
 
 class _CompactBottomBarState extends ConsumerState<CompactBottomBar> {
-  /// Pen tool types (grouped as one button).
-  static const _penTools = [
-    ToolType.pencil,
-    ToolType.hardPencil,
-    ToolType.ballpointPen,
-    ToolType.gelPen,
-    ToolType.dashedPen,
-    ToolType.brushPen,
-    ToolType.rulerPen,
-  ];
-
-  /// Highlighter tool types (grouped as one button).
-  static const _highlighterTools = [
-    ToolType.highlighter,
-    ToolType.neonHighlighter,
-  ];
-
-  /// Tools that have a settings panel.
-  static const _toolsWithPanel = {
-    ToolType.pencil,
-    ToolType.hardPencil,
-    ToolType.ballpointPen,
-    ToolType.gelPen,
-    ToolType.dashedPen,
-    ToolType.brushPen,
-    ToolType.neonHighlighter,
-    ToolType.highlighter,
-    ToolType.pixelEraser,
-    ToolType.strokeEraser,
-    ToolType.lassoEraser,
-    ToolType.shapes,
-    ToolType.sticker,
-    ToolType.image,
-    ToolType.laserPointer,
-    ToolType.selection,
-  };
-
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
@@ -143,10 +107,10 @@ class _CompactBottomBarState extends ConsumerState<CompactBottomBar> {
   }
 
   Widget _buildToolButton(ToolType tool, ToolType currentTool) {
-    final isPenGroup = _penTools.contains(tool);
-    final isHighlighterGroup = _highlighterTools.contains(tool);
+    final isPenGroup = penTools.contains(tool);
+    final isHighlighterGroup = highlighterTools.contains(tool);
     final isSelected = _isToolSelected(tool, currentTool);
-    final hasPanel = _toolsWithPanel.contains(tool);
+    final hasPanel = toolsWithPanel.contains(tool);
 
     return ToolButton(
       toolType: tool,
@@ -154,9 +118,9 @@ class _CompactBottomBarState extends ConsumerState<CompactBottomBar> {
       onPressed: () => _onToolPressed(tool),
       onPanelTap: hasPanel ? () => _onPanelTap(tool) : null,
       hasPanel: hasPanel,
-      customIcon: isPenGroup && _penTools.contains(currentTool)
+      customIcon: isPenGroup && penTools.contains(currentTool)
           ? ToolButton.getIconForTool(currentTool)
-          : isHighlighterGroup && _highlighterTools.contains(currentTool)
+          : isHighlighterGroup && highlighterTools.contains(currentTool)
               ? ToolButton.getIconForTool(currentTool)
               : null,
     );
@@ -171,16 +135,16 @@ class _CompactBottomBarState extends ConsumerState<CompactBottomBar> {
     bool highlighterAdded = false;
 
     for (final tool in visibleTools) {
-      if (_penTools.contains(tool)) {
+      if (penTools.contains(tool)) {
         if (!penAdded) {
-          result.add(_penTools.contains(currentTool)
+          result.add(penTools.contains(currentTool)
               ? currentTool
               : ToolType.ballpointPen);
           penAdded = true;
         }
-      } else if (_highlighterTools.contains(tool)) {
+      } else if (highlighterTools.contains(tool)) {
         if (!highlighterAdded) {
-          result.add(_highlighterTools.contains(currentTool)
+          result.add(highlighterTools.contains(currentTool)
               ? currentTool
               : ToolType.highlighter);
           highlighterAdded = true;
@@ -194,11 +158,11 @@ class _CompactBottomBarState extends ConsumerState<CompactBottomBar> {
 
   /// Check if tool is selected (handles group selection).
   bool _isToolSelected(ToolType tool, ToolType currentTool) {
-    if (_penTools.contains(tool) && _penTools.contains(currentTool)) {
+    if (penTools.contains(tool) && penTools.contains(currentTool)) {
       return true;
     }
-    if (_highlighterTools.contains(tool) &&
-        _highlighterTools.contains(currentTool)) {
+    if (highlighterTools.contains(tool) &&
+        highlighterTools.contains(currentTool)) {
       return true;
     }
     return tool == currentTool;
@@ -209,7 +173,7 @@ class _CompactBottomBarState extends ConsumerState<CompactBottomBar> {
     final currentTool = ref.read(currentToolProvider);
     if (currentTool == tool) {
       // Same tool pressed - open panel if it has one
-      if (_toolsWithPanel.contains(tool)) {
+      if (toolsWithPanel.contains(tool)) {
         widget.onPanelRequested?.call(tool);
       }
     } else {

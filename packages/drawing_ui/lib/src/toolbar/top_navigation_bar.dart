@@ -207,8 +207,8 @@ class _NavButton extends StatelessWidget {
           onTap: onPressed,
           borderRadius: BorderRadius.circular(6),
           child: Container(
-            width: 32,
-            height: 32,
+            width: 48,
+            height: 48,
             margin: const EdgeInsets.symmetric(horizontal: 1),
             decoration: BoxDecoration(
               color: isActive
