@@ -2,28 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/panels/panels.dart';
-import 'package:drawing_ui/src/toolbar/tool_groups.dart';
-import 'package:drawing_ui/src/widgets/anchored_panel.dart';
-
-/// Determine panel alignment based on tool's position in toolbar.
-AnchorAlignment resolvePanelAlignment(ToolType tool) {
-  const rightTools = {
-    ToolType.laserPointer,
-  };
-
-  if (penToolsSet.contains(tool)) {
-    return AnchorAlignment.left;
-  }
-  if (rightTools.contains(tool)) {
-    return AnchorAlignment.right;
-  }
-  return AnchorAlignment.center;
-}
 
 /// Build the active tool panel widget.
 Widget buildActivePanel({
   required ToolType panel,
-  required VoidCallback onClose,
 }) {
   switch (panel) {
     case ToolType.pencil:
@@ -60,7 +42,7 @@ Widget buildActivePanel({
       return const LaserPointerPanel();
 
     case ToolType.text:
-      return _TextToolPanel(onClose: onClose);
+      return const _TextToolPanel();
 
     case ToolType.panZoom:
       return const SizedBox.shrink();
@@ -72,15 +54,12 @@ Widget buildActivePanel({
 
 /// Simple text tool panel (placeholder).
 class _TextToolPanel extends StatelessWidget {
-  const _TextToolPanel({this.onClose});
-
-  final VoidCallback? onClose;
+  const _TextToolPanel();
 
   @override
   Widget build(BuildContext context) {
     return ToolPanel(
       title: 'Text',
-      onClose: onClose,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

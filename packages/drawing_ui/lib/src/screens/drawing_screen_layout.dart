@@ -246,7 +246,7 @@ class ZoomIndicator extends StatelessWidget {
 void handlePanelChange({
   required BuildContext context,
   required ToolType? panel,
-  required AnchoredPanelController panelController,
+  required PopoverController panelController,
   required Map<ToolType, GlobalKey> toolButtonKeys,
   required GlobalKey penGroupButtonKey,
   required GlobalKey highlighterGroupButtonKey,
@@ -268,10 +268,8 @@ void handlePanelChange({
       panelController.show(
         context: context,
         anchorKey: anchorKey,
-        alignment: resolvePanelAlignment(panel),
-        verticalOffset: 8,
-        onBarrierTap: onClosePanel,
-        child: buildActivePanel(panel: panel, onClose: onClosePanel),
+        onDismiss: onClosePanel,
+        child: buildActivePanel(panel: panel),
       );
     });
   }

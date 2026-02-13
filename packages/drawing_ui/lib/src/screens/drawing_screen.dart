@@ -35,7 +35,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
   final GlobalKey _penGroupButtonKey = GlobalKey();
   final GlobalKey _highlighterGroupButtonKey = GlobalKey();
   final GlobalKey _settingsButtonKey = GlobalKey();
-  final AnchoredPanelController _panelController = AnchoredPanelController();
+  final PopoverController _panelController = PopoverController();
   final ThumbnailCache _thumbnailCache = ThumbnailCache(maxSize: 20);
   Offset _penBoxPosition = const Offset(12, 12);
   bool _isSidebarOpen = false;
