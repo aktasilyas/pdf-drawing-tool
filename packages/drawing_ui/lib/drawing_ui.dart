@@ -24,6 +24,7 @@ export 'src/canvas/mock_canvas.dart';
 export 'src/canvas/drawing_canvas.dart';
 export 'src/canvas/stroke_painter.dart';
 export 'src/canvas/infinite_background_painter.dart';
+export 'src/canvas/canvas_color_scheme.dart';
 
 // Painters
 export 'src/painters/template_pattern_painter.dart';
