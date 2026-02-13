@@ -45,6 +45,13 @@ customIcon: isPenGroup && _penTools.contains(currentTool)
 - Always use barrel exports: `toolbar/toolbar.dart` not direct file paths
 - Avoid unused imports - analyzer will warn
 - DrawingTheme imported from `theme/theme.dart` barrel
+- `starnote_icons.dart` is re-exported by `theme/theme.dart` -- do NOT add both imports
+
+## Icon System
+- All icons use `PhosphorIcon` widget + `StarNoteIcons.*` constants
+- Never use Material `Icons.*` (exception: `Icons.format_bold/italic/underlined`)
+- Use `StarNoteIcons.iconForTool(ToolType)` for tool-to-icon mapping
+- `PhosphorIcon` is NOT const-compatible; remove `const` when replacing `const Icon(Icons.*)`
 
 ## Reader Mode (Phase M3 Adim 4)
 - `readerModeProvider`: Simple `StateProvider<bool>`, not persisted

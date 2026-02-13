@@ -20,6 +20,7 @@ export 'panel_overlay.dart';
 export 'pdf_export_dialog.dart';
 export 'pdf_import_dialog.dart';
 export 'pen_icon_widget.dart';
+export 'popover_panel.dart';
 export 'reorderable_tool_list.dart';
 export 'selection_handles.dart';
 export 'text_context_menu.dart';
