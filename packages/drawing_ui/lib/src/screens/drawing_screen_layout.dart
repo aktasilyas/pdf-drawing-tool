@@ -29,6 +29,7 @@ Widget buildDrawingCanvasArea({
   required VoidCallback onClosePanel,
   required VoidCallback onOpenAIPanel,
   CanvasColorScheme? colorScheme,
+  bool isReadOnly = false,
 }) {
   return ClipRect(
     child: Stack(
@@ -47,8 +48,13 @@ Widget buildDrawingCanvasArea({
             ),
           ),
         ),
-        Positioned.fill(child: DrawingCanvas(canvasMode: canvasMode)),
-        if (ref.watch(activePanelProvider) != null)
+        Positioned.fill(
+          child: DrawingCanvas(
+            canvasMode: canvasMode,
+            isReadOnly: isReadOnly,
+          ),
+        ),
+        if (!isReadOnly && ref.watch(activePanelProvider) != null)
           Positioned.fill(
             child: GestureDetector(
               behavior: HitTestBehavior.translucent,
@@ -56,22 +62,24 @@ Widget buildDrawingCanvasArea({
               child: const SizedBox.expand(),
             ),
           ),
-        Positioned(
-          left: penBoxPosition.dx,
-          top: penBoxPosition.dy,
-          child: FloatingPenBox(
-            position: penBoxPosition,
-            onPositionChanged: (delta) {
-              final newPosition = penBoxPosition + delta;
-              final clampedPosition = Offset(
-                newPosition.dx.clamp(0, MediaQuery.of(context).size.width - 60),
-                newPosition.dy.clamp(0, MediaQuery.of(context).size.height - 200),
-              );
-              onPenBoxPositionChanged(clampedPosition);
-            },
+        if (!isReadOnly)
+          Positioned(
+            left: penBoxPosition.dx,
+            top: penBoxPosition.dy,
+            child: FloatingPenBox(
+              position: penBoxPosition,
+              onPositionChanged: (delta) {
+                final newPosition = penBoxPosition + delta;
+                final clampedPosition = Offset(
+                  newPosition.dx.clamp(0, MediaQuery.of(context).size.width - 60),
+                  newPosition.dy.clamp(0, MediaQuery.of(context).size.height - 200),
+                );
+                onPenBoxPositionChanged(clampedPosition);
+              },
+            ),
           ),
-        ),
-        Positioned(right: 16, bottom: 16, child: AskAIButton(onTap: onOpenAIPanel)),
+        if (!isReadOnly)
+          Positioned(right: 16, bottom: 16, child: AskAIButton(onTap: onOpenAIPanel)),
         if (ref.watch(isZoomingProvider))
           Center(child: ZoomIndicator(zoomPercentage: ref.watch(zoomPercentageProvider))),
       ],

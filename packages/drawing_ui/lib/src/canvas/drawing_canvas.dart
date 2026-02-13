@@ -59,11 +59,15 @@ class DrawingCanvas extends ConsumerStatefulWidget {
   /// Canvas mode configuration (determines behavior)
   final core.CanvasMode? canvasMode;
 
+  /// When true, drawing gestures are disabled but pan/zoom remains active.
+  final bool isReadOnly;
+
   const DrawingCanvas({
     super.key,
     this.width = double.infinity,
     this.height = double.infinity,
     this.canvasMode,
+    this.isReadOnly = false,
   });
 
   @override
@@ -583,9 +587,10 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
     }
 
     // Enable pointer events for drawing tools, selection tool, shape tool, and text tool
+    // In read-only mode, all drawing pointer events are disabled (pan/zoom still works)
     final isTextTool = currentTool == ToolType.text;
-    final enablePointerEvents =
-        isDrawingTool || isSelectionTool || isShapeTool || isTextTool;
+    final enablePointerEvents = !widget.isReadOnly &&
+        (isDrawingTool || isSelectionTool || isShapeTool || isTextTool);
 
     return LayoutBuilder(
       builder: (context, constraints) {

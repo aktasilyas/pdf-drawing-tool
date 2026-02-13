@@ -46,7 +46,21 @@ customIcon: isPenGroup && _penTools.contains(currentTool)
 - Avoid unused imports - analyzer will warn
 - DrawingTheme imported from `theme/theme.dart` barrel
 
+## Reader Mode (Phase M3 Adim 4)
+- `readerModeProvider`: Simple `StateProvider<bool>`, not persisted
+- Drawing disabled via `isReadOnly` flag on `DrawingCanvas` -> sets `enablePointerEvents = false`
+- Pan/zoom always active: `GestureDetector.onScale*` handlers are not gated by `enablePointerEvents`
+- Toolbar hidden with `AnimatedSize(duration: 200ms, curve: easeInOut)` wrapping `AdaptiveToolbar`
+- "Salt okunur" badge: `secondaryContainer` color, `onSecondaryContainer` text, 12px border radius
+- Grid toggle hidden in reader mode, sidebar still accessible
+
+## Key File Line Counts (watch 300 limit)
+- `drawing_screen.dart`: ~286 lines (very close to limit)
+- `top_navigation_bar.dart`: ~262 lines
+- `drawing_screen_layout.dart`: ~303 lines (slightly over, was pre-existing)
+
 ## Testing Notes
 - Pre-existing failures: ~45 tests (PDF, canvas, toolbar icon matching) - expected
+- Pre-existing warnings: 3 unnecessary_non_null_assertion in pdf_render_provider.dart
 - New tests should verify responsive behavior at different breakpoints
-- Analyze before commit: `dart analyze packages/drawing_ui/lib/src/...`
+- Analyze before commit: `cmd.exe /c "cd /d C:\Users\aktas\source\repos\starnote_drawing_workspace && dart analyze packages/drawing_ui"`

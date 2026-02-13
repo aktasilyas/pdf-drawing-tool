@@ -50,6 +50,7 @@ class TopNavigationBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
+    final isReaderMode = ref.watch(readerModeProvider);
 
     return Container(
       height: 48,
@@ -65,8 +66,8 @@ class TopNavigationBar extends ConsumerWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4),
         child: compact
-            ? _buildCompactLayout(context, ref, colorScheme)
-            : _buildFullLayout(context, ref, colorScheme),
+            ? _buildCompactLayout(context, ref, colorScheme, isReaderMode)
+            : _buildFullLayout(context, ref, colorScheme, isReaderMode),
       ),
     );
   }
@@ -76,6 +77,7 @@ class TopNavigationBar extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     ColorScheme colorScheme,
+    bool isReaderMode,
   ) {
     return Row(
       children: [
@@ -85,11 +87,23 @@ class TopNavigationBar extends ConsumerWidget {
           onPressed: onHomePressed ?? () {},
         ),
         const SizedBox(width: 4),
+        if (isReaderMode) _buildReaderBadge(colorScheme),
+        if (isReaderMode) const SizedBox(width: 4),
         Expanded(child: _buildDocumentTitle(colorScheme)),
         const SizedBox(width: 4),
         StarNoteNavButton(
+          icon: isReaderMode
+              ? StarNoteIcons.readerModeActive
+              : StarNoteIcons.readerMode,
+          tooltip: isReaderMode ? 'Duzenleme Modu' : 'Okuyucu Modu',
+          onPressed: () {
+            ref.read(readerModeProvider.notifier).state = !isReaderMode;
+          },
+          isActive: isReaderMode,
+        ),
+        StarNoteNavButton(
           icon: StarNoteIcons.exportIcon,
-          tooltip: 'Dışa Aktar',
+          tooltip: 'Disa Aktar',
           onPressed: () => showExportMenu(context, ref),
         ),
         StarNoteNavButton(
@@ -106,13 +120,14 @@ class TopNavigationBar extends ConsumerWidget {
     BuildContext context,
     WidgetRef ref,
     ColorScheme colorScheme,
+    bool isReaderMode,
   ) {
     final gridVisible = ref.watch(gridVisibilityProvider);
     final pageCount = ref.watch(pageCountProvider);
 
     return Row(
       children: [
-        // ── Left: Home + Sidebar + Title ──
+        // -- Left: Home + Sidebar + Title --
         StarNoteNavButton(
           icon: StarNoteIcons.home,
           tooltip: 'Ana Sayfa',
@@ -132,28 +147,38 @@ class TopNavigationBar extends ConsumerWidget {
         const SizedBox(width: 4),
         Flexible(child: _buildDocumentTitle(colorScheme)),
 
-        // ── Center spacer ──
+        if (isReaderMode) ...[
+          const SizedBox(width: 8),
+          _buildReaderBadge(colorScheme),
+        ],
+
+        // -- Center spacer --
         const Expanded(child: SizedBox()),
 
-        // ── Right: Reader(disabled) + Grid + Export + More ──
+        // -- Right: Reader + Grid (hidden in reader mode) + Export + More --
         StarNoteNavButton(
-          icon: StarNoteIcons.readerMode,
-          tooltip: 'Okuyucu Modu',
-          onPressed: () {},
-          isDisabled: true,
+          icon: isReaderMode
+              ? StarNoteIcons.readerModeActive
+              : StarNoteIcons.readerMode,
+          tooltip: isReaderMode ? 'Duzenleme Modu' : 'Okuyucu Modu',
+          onPressed: () {
+            ref.read(readerModeProvider.notifier).state = !isReaderMode;
+          },
+          isActive: isReaderMode,
         ),
 
-        StarNoteNavButton(
-          icon: gridVisible ? StarNoteIcons.gridOn : StarNoteIcons.gridOff,
-          tooltip: gridVisible ? 'Kılavuzu Gizle' : 'Kılavuzu Göster',
-          onPressed: () =>
-              ref.read(gridVisibilityProvider.notifier).state = !gridVisible,
-          isActive: gridVisible,
-        ),
+        if (!isReaderMode)
+          StarNoteNavButton(
+            icon: gridVisible ? StarNoteIcons.gridOn : StarNoteIcons.gridOff,
+            tooltip: gridVisible ? 'Kilavuzu Gizle' : 'Kilavuzu Goster',
+            onPressed: () =>
+                ref.read(gridVisibilityProvider.notifier).state = !gridVisible,
+            isActive: gridVisible,
+          ),
 
         StarNoteNavButton(
           icon: StarNoteIcons.exportIcon,
-          tooltip: 'Dışa Aktar',
+          tooltip: 'Disa Aktar',
           onPressed: () => showExportMenu(context, ref),
         ),
 
@@ -163,6 +188,36 @@ class TopNavigationBar extends ConsumerWidget {
           onPressed: () => showMoreMenu(context, ref),
         ),
       ],
+    );
+  }
+
+  /// "Salt okunur" badge shown in reader mode.
+  Widget _buildReaderBadge(ColorScheme colorScheme) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: colorScheme.secondaryContainer,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          PhosphorIcon(
+            StarNoteIcons.readerMode,
+            size: 14,
+            color: colorScheme.onSecondaryContainer,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            'Salt okunur',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: colorScheme.onSecondaryContainer,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

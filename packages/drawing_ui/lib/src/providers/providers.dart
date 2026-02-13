@@ -36,3 +36,4 @@ export 'pdf_render_provider.dart'
 
 export 'pdf_prefetch_provider.dart';
 export 'canvas_dark_mode_provider.dart';
+export 'reader_mode_provider.dart';

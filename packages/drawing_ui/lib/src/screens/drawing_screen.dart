@@ -108,6 +108,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
       }
     });
 
+    final isReaderMode = ref.watch(readerModeProvider);
     final currentPage = ref.watch(currentPageProvider);
     final transform = ref.watch(canvasTransformProvider);
     final canvasMode = widget.canvasMode ?? const core.CanvasMode(isInfinite: true);
@@ -138,7 +139,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
       child: Scaffold(
         backgroundColor: scaffoldBgColor,
         // Phone: bottom bar
-        bottomNavigationBar: isCompactMode
+        bottomNavigationBar: isCompactMode && !isReaderMode
             ? CompactBottomBar(
                 onUndoPressed: _onUndoPressed,
                 onRedoPressed: _onRedoPressed,
@@ -160,14 +161,21 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                     isSidebarOpen: _isSidebarOpen,
                     compact: isCompactMode,
                   ),
-                  AdaptiveToolbar(
-                    onUndoPressed: _onUndoPressed,
-                    onRedoPressed: _onRedoPressed,
-                    onSettingsPressed: _onSettingsPressed,
-                    settingsButtonKey: _settingsButtonKey,
-                    toolButtonKeys: _toolButtonKeys,
-                    penGroupButtonKey: _penGroupButtonKey,
-                    highlighterGroupButtonKey: _highlighterGroupButtonKey,
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeInOut,
+                    child: isReaderMode
+                        ? const SizedBox.shrink()
+                        : AdaptiveToolbar(
+                            onUndoPressed: _onUndoPressed,
+                            onRedoPressed: _onRedoPressed,
+                            onSettingsPressed: _onSettingsPressed,
+                            settingsButtonKey: _settingsButtonKey,
+                            toolButtonKeys: _toolButtonKeys,
+                            penGroupButtonKey: _penGroupButtonKey,
+                            highlighterGroupButtonKey:
+                                _highlighterGroupButtonKey,
+                          ),
                   ),
                   Expanded(
                     child: Row(
@@ -203,6 +211,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                             onClosePanel: _closePanel,
                             onOpenAIPanel: () => openAIPanel(context),
                             colorScheme: ref.watch(canvasColorSchemeProvider),
+                            isReadOnly: isReaderMode,
                           ),
                         ),
                       ],
