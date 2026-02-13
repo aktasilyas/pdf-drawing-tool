@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:drawing_core/drawing_core.dart';
-import 'package:drawing_ui/src/widgets/template_picker/template_grid.dart';
-import 'package:drawing_ui/src/widgets/template_picker/template_card.dart';
+import 'package:drawing_ui/drawing_ui.dart';
 
 void main() {
   group('TemplateGrid', () {
@@ -188,7 +187,10 @@ void main() {
       );
 
       // Find the selected card by checking for the checkmark icon
-      expect(find.byIcon(Icons.check_rounded), findsOneWidget);
+      final checkIcon = find.byWidgetPredicate(
+        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.check,
+      );
+      expect(checkIcon, findsOneWidget);
     });
 
     testWidgets('uses isPremium by default for lock state', (tester) async {
@@ -204,7 +206,10 @@ void main() {
       );
 
       // Premium template should show lock icon
-      expect(find.byIcon(Icons.lock_rounded), findsOneWidget);
+      final lockIcon = find.byWidgetPredicate(
+        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.lock,
+      );
+      expect(lockIcon, findsOneWidget);
     });
 
     testWidgets('uses custom isLocked callback when provided', (tester) async {
@@ -221,7 +226,10 @@ void main() {
       );
 
       // Only first template should be locked
-      expect(find.byIcon(Icons.lock_rounded), findsOneWidget);
+      final lockIcon = find.byWidgetPredicate(
+        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.lock,
+      );
+      expect(lockIcon, findsOneWidget);
     });
 
     testWidgets('handles empty template list', (tester) async {
@@ -376,7 +384,10 @@ void main() {
         ),
       );
 
-      expect(find.byIcon(Icons.check_rounded), findsNothing);
+      final checkIcon = find.byWidgetPredicate(
+        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.check,
+      );
+      expect(checkIcon, findsNothing);
     });
   });
 }

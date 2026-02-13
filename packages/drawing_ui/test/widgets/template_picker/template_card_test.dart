@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:drawing_core/drawing_core.dart';
-import 'package:drawing_ui/src/widgets/template_picker/template_card.dart';
+import 'package:drawing_ui/drawing_ui.dart';
 
 void main() {
   group('TemplateCard', () {
@@ -47,7 +47,10 @@ void main() {
       );
 
       // Check for checkmark icon (selection indicator)
-      expect(find.byIcon(Icons.check_rounded), findsOneWidget);
+      final checkIcon = find.byWidgetPredicate(
+        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.check,
+      );
+      expect(checkIcon, findsOneWidget);
     });
 
     testWidgets('hides checkmark when not selected', (tester) async {
@@ -62,7 +65,10 @@ void main() {
         ),
       );
 
-      expect(find.byIcon(Icons.check_rounded), findsNothing);
+      final checkIcon = find.byWidgetPredicate(
+        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.check,
+      );
+      expect(checkIcon, findsNothing);
     });
 
     testWidgets('shows lock icon when locked', (tester) async {
@@ -77,7 +83,10 @@ void main() {
         ),
       );
 
-      expect(find.byIcon(Icons.lock_rounded), findsOneWidget);
+      final lockIcon = find.byWidgetPredicate(
+        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.lock,
+      );
+      expect(lockIcon, findsOneWidget);
     });
 
     testWidgets('hides lock icon when not locked', (tester) async {
@@ -92,7 +101,10 @@ void main() {
         ),
       );
 
-      expect(find.byIcon(Icons.lock_rounded), findsNothing);
+      final lockIcon = find.byWidgetPredicate(
+        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.lock,
+      );
+      expect(lockIcon, findsNothing);
     });
 
     testWidgets('calls onTap when tapped', (tester) async {
@@ -231,8 +243,14 @@ void main() {
         ),
       );
 
-      expect(find.byIcon(Icons.check_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.lock_rounded), findsOneWidget);
+      final checkIcon = find.byWidgetPredicate(
+        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.check,
+      );
+      final lockIcon = find.byWidgetPredicate(
+        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.lock,
+      );
+      expect(checkIcon, findsOneWidget);
+      expect(lockIcon, findsOneWidget);
     });
 
     testWidgets('uses theme colors correctly', (tester) async {
@@ -277,7 +295,10 @@ void main() {
         ),
       );
 
-      expect(find.byIcon(Icons.lock_rounded), findsOneWidget);
+      final lockIcon = find.byWidgetPredicate(
+        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.lock,
+      );
+      expect(lockIcon, findsOneWidget);
     });
   });
 }

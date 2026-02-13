@@ -193,7 +193,9 @@ class TopNavigationBar extends ConsumerWidget {
 
   /// "Salt okunur" badge shown in reader mode.
   Widget _buildReaderBadge(ColorScheme colorScheme) {
-    return Container(
+    return Semantics(
+      label: 'Salt okunur mod aktif',
+      child: Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: colorScheme.secondaryContainer,
@@ -218,42 +220,53 @@ class TopNavigationBar extends ConsumerWidget {
           ),
         ],
       ),
+    ),
     );
   }
 
   /// Document title pill with caret-down icon.
   Widget _buildDocumentTitle(ColorScheme colorScheme) {
-    return GestureDetector(
-      onTap: onTitlePressed,
-      child: Container(
-        constraints: const BoxConstraints(maxWidth: 300),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: colorScheme.onSurface.withValues(alpha: 0.06),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Flexible(
-              child: Text(
-                documentTitle ?? 'İsimsiz Not',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: colorScheme.onSurface,
+    return Tooltip(
+      message: 'Doküman Seçenekleri',
+      child: Semantics(
+        label: documentTitle ?? 'İsimsiz Not',
+        button: true,
+        child: GestureDetector(
+          onTap: onTitlePressed,
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 300),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 6,
+            ),
+            decoration: BoxDecoration(
+              color: colorScheme.onSurface.withValues(alpha: 0.06),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: Text(
+                    documentTitle ?? 'İsimsiz Not',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: colorScheme.onSurface,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+                const SizedBox(width: 4),
+                PhosphorIcon(
+                  StarNoteIcons.caretDown,
+                  size: 14,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ],
             ),
-            const SizedBox(width: 4),
-            PhosphorIcon(
-              StarNoteIcons.caretDown,
-              size: 14,
-              color: colorScheme.onSurfaceVariant,
-            ),
-          ],
+          ),
         ),
       ),
     );

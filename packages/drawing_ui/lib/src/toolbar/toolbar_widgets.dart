@@ -79,23 +79,28 @@ class ToolbarIconButton extends StatelessWidget {
 
     return Tooltip(
       message: tooltip,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: enabled ? onPressed : null,
-          borderRadius: BorderRadius.circular(8),
-          child: Container(
-            width: 36,
-            height: 36,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: PhosphorIcon(
-              icon,
-              size: StarNoteIcons.actionSize,
-              color: enabled
-                  ? colorScheme.onSurfaceVariant
-                  : colorScheme.onSurface.withValues(alpha: 0.25),
+      child: Semantics(
+        label: tooltip,
+        button: true,
+        enabled: enabled,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: enabled ? onPressed : null,
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: PhosphorIcon(
+                icon,
+                size: StarNoteIcons.actionSize,
+                color: enabled
+                    ? colorScheme.onSurfaceVariant
+                    : colorScheme.onSurface.withValues(alpha: 0.25),
+              ),
             ),
           ),
         ),

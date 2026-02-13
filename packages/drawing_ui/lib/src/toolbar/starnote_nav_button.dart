@@ -61,28 +61,42 @@ class StarNoteNavButton extends StatelessWidget {
 
     return Tooltip(
       message: tooltip,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: isDisabled ? null : onPressed,
-          borderRadius: BorderRadius.circular(8),
-          child: Container(
-            width: size,
-            height: size,
-            margin: const EdgeInsets.symmetric(horizontal: 2),
-            decoration: BoxDecoration(
-              color: bgColor,
-              borderRadius: BorderRadius.circular(8),
+      child: Semantics(
+        label: tooltip,
+        button: true,
+        enabled: !isDisabled,
+        selected: isActive,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: isDisabled ? null : onPressed,
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              width: size,
+              height: size,
+              margin: const EdgeInsets.symmetric(horizontal: 2),
+              decoration: BoxDecoration(
+                color: bgColor,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: badge != null
+                  ? Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        PhosphorIcon(
+                          icon,
+                          size: effectiveIconSize,
+                          color: iconColor,
+                        ),
+                        Positioned(top: 4, right: 4, child: badge!),
+                      ],
+                    )
+                  : PhosphorIcon(
+                      icon,
+                      size: effectiveIconSize,
+                      color: iconColor,
+                    ),
             ),
-            child: badge != null
-                ? Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      PhosphorIcon(icon, size: effectiveIconSize, color: iconColor),
-                      Positioned(top: 4, right: 4, child: badge!),
-                    ],
-                  )
-                : PhosphorIcon(icon, size: effectiveIconSize, color: iconColor),
           ),
         ),
       ),

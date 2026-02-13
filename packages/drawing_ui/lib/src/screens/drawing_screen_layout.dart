@@ -1,11 +1,10 @@
 /// Layout builders and helpers for the drawing screen.
-///
-/// Contains top-level functions for building canvas area and sidebar,
-/// extracted from DrawingScreen to keep file under 300 lines.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
 import 'package:drawing_ui/src/models/models.dart';
+import 'package:drawing_ui/src/theme/starnote_icons.dart';
 import 'package:drawing_ui/src/canvas/canvas.dart';
 import 'package:drawing_ui/src/canvas/canvas_color_scheme.dart';
 import 'package:drawing_ui/src/canvas/infinite_background_painter.dart';
@@ -195,7 +194,7 @@ Widget _buildAddPageButton(BuildContext context, WidgetRef ref) {
             borderRadius: BorderRadius.circular(8),
             border: Border.all(color: colorScheme.outlineVariant, width: 1),
           ),
-          child: Center(child: Icon(Icons.add, size: w < 50 ? 16 : 20, color: colorScheme.primary)),
+          child: Center(child: PhosphorIcon(StarNoteIcons.plus, size: w < 50 ? 16 : 20, color: colorScheme.primary)),
         ),
       ),
     );
@@ -219,7 +218,7 @@ class AskAIButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(28),
           boxShadow: [BoxShadow(color: cs.primary.withValues(alpha: 80.0 / 255.0), blurRadius: 16, offset: const Offset(0, 4))],
         ),
-        child: Icon(Icons.auto_awesome, color: cs.onPrimary, size: 24),
+        child: PhosphorIcon(StarNoteIcons.sparkle, color: cs.onPrimary, size: 24),
       ),
     );
   }

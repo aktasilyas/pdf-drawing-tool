@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:drawing_core/drawing_core.dart';
-import 'package:drawing_ui/src/widgets/template_picker/template_picker.dart';
-import 'package:drawing_ui/src/widgets/template_picker/category_tabs.dart';
-import 'package:drawing_ui/src/widgets/template_picker/template_grid.dart';
-import 'package:drawing_ui/src/widgets/template_picker/paper_size_picker.dart';
-import 'package:drawing_ui/src/widgets/template_picker/template_card.dart';
+import 'package:drawing_ui/drawing_ui.dart';
 
 void main() {
   group('TemplatePicker', () {
@@ -138,7 +134,7 @@ void main() {
 
       expect(find.text('Şablon Seç'), findsOneWidget);
 
-      await tester.tap(find.byIcon(Icons.close_rounded));
+      await tester.tap(find.byIcon(StarNoteIcons.close));
       await tester.pumpAndSettle();
 
       expect(find.text('Şablon Seç'), findsNothing);
@@ -303,7 +299,7 @@ void main() {
         ),
       );
 
-      expect(find.byIcon(Icons.close_rounded), findsOneWidget);
+      expect(find.byIcon(StarNoteIcons.close), findsOneWidget);
     });
 
     testWidgets('has confirm button in bottom bar', (tester) async {
@@ -315,7 +311,14 @@ void main() {
         ),
       );
 
-      expect(find.widgetWithText(FilledButton, 'Oluştur'), findsOneWidget);
+      // FilledButton.icon creates multiple widgets, find by the button text
+      expect(find.text('Oluştur'), findsOneWidget);
+
+      // Verify it has an icon (plus icon from StarNoteIcons)
+      final plusIcon = find.byWidgetPredicate(
+        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.plus,
+      );
+      expect(plusIcon, findsOneWidget);
     });
   });
 

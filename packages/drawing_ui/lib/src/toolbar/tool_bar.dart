@@ -86,10 +86,6 @@ class _ToolBarState extends ConsumerState<ToolBar> {
     );
   }
 
-  /// Expanded toolbar layout — full horizontal bar with all sections visible.
-  ///
-  /// Used for >=840px screens (tablet landscape).
-  /// Future: medium and compact layouts will be added as separate methods.
   Widget _buildExpandedLayout({
     required BuildContext context,
     required DrawingTheme theme,
@@ -138,13 +134,13 @@ class _ToolBarState extends ConsumerState<ToolBar> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       ...visibleTools.map((tool) {
-                        final isPenGroup = _isPen(tool);
-                        final isHighlighterGroup = _isHighlighter(tool);
-                        final isSelected = _isToolSelected(tool, currentTool);
+                        final isPenGroup = penTools.contains(tool);
+                        final isHighlighterGroup =
+                            highlighterTools.contains(tool);
+                        final isSelected =
+                            _isToolSelected(tool, currentTool);
                         final hasPanel = toolsWithPanel.contains(tool);
 
-                        // Get GlobalKey for this tool button
-                        // Pen tools share a single key, same for highlighters
                         final GlobalKey? buttonKey;
                         if (isPenGroup) {
                           buttonKey = widget.penGroupButtonKey;
@@ -160,9 +156,11 @@ class _ToolBarState extends ConsumerState<ToolBar> {
                           isSelected: isSelected,
                           buttonKey: _toolButtonKeys[tool],
                           onPressed: () => _onToolPressed(tool),
-                          onPanelTap: hasPanel ? () => _onPanelTap(tool) : null,
+                          onPanelTap:
+                              hasPanel ? () => _onPanelTap(tool) : null,
                           hasPanel: hasPanel,
-                          customIcon: isPenGroup && _isPen(currentTool)
+                          customIcon: isPenGroup &&
+                                  penTools.contains(currentTool)
                               ? ToolButton.getIconForTool(currentTool)
                               : null,
                         );
@@ -175,28 +173,36 @@ class _ToolBarState extends ConsumerState<ToolBar> {
                       // Settings button - after all tools (inside scrollable)
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 2),
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: () {
-                            final current = ref.read(activePanelProvider);
-                            if (current == ToolType.toolbarSettings) {
-                              ref.read(activePanelProvider.notifier).state = null;
-                            } else {
-                              ref.read(activePanelProvider.notifier).state = ToolType.toolbarSettings;
-                            }
-                          },
-                          child: Container(
-                            key: widget.settingsButtonKey,
-                            width: 48,
-                            height: 48,
-                            decoration: BoxDecoration(
-                              color: theme.toolbarBackground,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: PhosphorIcon(
-                              StarNoteIcons.settings,
-                              size: StarNoteIcons.actionSize,
-                              color: theme.toolbarIconColor,
+                        child: Tooltip(
+                          message: 'Araç Çubuğu Ayarları',
+                          child: Semantics(
+                            label: 'Araç Çubuğu Ayarları',
+                            button: true,
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () {
+                                final current = ref.read(activePanelProvider);
+                                if (current == ToolType.toolbarSettings) {
+                                  ref.read(activePanelProvider.notifier).state = null;
+                                } else {
+                                  ref.read(activePanelProvider.notifier).state = ToolType.toolbarSettings;
+                                }
+                              },
+                              child: Container(
+                                key: widget.settingsButtonKey,
+                                width: 48,
+                                height: 48,
+                                decoration: BoxDecoration(
+                                  color: theme.toolbarBackground,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: PhosphorIcon(
+                                  StarNoteIcons.settings,
+                                  size: StarNoteIcons.actionSize,
+                                  color: theme.toolbarIconColor,
+                                  semanticLabel: 'Araç Çubuğu Ayarları',
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -225,65 +231,39 @@ class _ToolBarState extends ConsumerState<ToolBar> {
     );
   }
 
-  /// Görünür araçları al, kalem ve fosforlu araçları ayrı grupla
-  List<ToolType> _getGroupedVisibleTools(ToolbarConfig config, ToolType currentTool) {
-    final visibleTools = config.visibleTools
-        .map((toolConfig) => toolConfig.toolType)
-        .toList();
-
+  List<ToolType> _getGroupedVisibleTools(
+      ToolbarConfig config, ToolType currentTool) {
+    final visibleTools =
+        config.visibleTools.map((tc) => tc.toolType).toList();
     final result = <ToolType>[];
-    bool penGroupAdded = false;
-    bool highlighterGroupAdded = false;
-
+    bool penAdded = false, highlighterAdded = false;
     for (final tool in visibleTools) {
-      if (_isPen(tool)) {
-        if (!penGroupAdded) {
-          // Aktif kalem aracını ekle, yoksa ballpointPen
-          if (_isPen(currentTool)) {
-            result.add(currentTool);
-          } else {
-            result.add(ToolType.ballpointPen);
-          }
-          penGroupAdded = true;
+      if (penTools.contains(tool)) {
+        if (!penAdded) {
+          result.add(penTools.contains(currentTool)
+              ? currentTool
+              : ToolType.ballpointPen);
+          penAdded = true;
         }
-        // Diğer kalem araçlarını atla
-      } else if (_isHighlighter(tool)) {
-        if (!highlighterGroupAdded) {
-          // Aktif fosforlu aracını ekle, yoksa highlighter
-          if (_isHighlighter(currentTool)) {
-            result.add(currentTool);
-          } else {
-            result.add(ToolType.highlighter);
-          }
-          highlighterGroupAdded = true;
+      } else if (highlighterTools.contains(tool)) {
+        if (!highlighterAdded) {
+          result.add(highlighterTools.contains(currentTool)
+              ? currentTool
+              : ToolType.highlighter);
+          highlighterAdded = true;
         }
-        // Diğer fosforlu araçlarını atla
       } else {
         result.add(tool);
       }
     }
-
     return result;
   }
 
   bool _isToolSelected(ToolType tool, ToolType currentTool) {
-    // Kalem grubu için: herhangi bir kalem aracı seçiliyse grup seçili
-    if (_isPen(tool) && _isPen(currentTool)) {
-      return true;
-    }
-    // Fosforlu grubu için: herhangi bir fosforlu aracı seçiliyse grup seçili
-    if (_isHighlighter(tool) && _isHighlighter(currentTool)) {
-      return true;
-    }
+    if (penTools.contains(tool) && penTools.contains(currentTool)) return true;
+    if (highlighterTools.contains(tool) &&
+        highlighterTools.contains(currentTool)) return true;
     return tool == currentTool;
-  }
-
-  bool _isPen(ToolType tool) {
-    return penTools.contains(tool);
-  }
-
-  bool _isHighlighter(ToolType tool) {
-    return highlighterTools.contains(tool);
   }
 
   void _onToolPressed(ToolType tool) {
@@ -291,14 +271,9 @@ class _ToolBarState extends ConsumerState<ToolBar> {
     ref.read(activePanelProvider.notifier).state = null;
   }
 
-  /// Chevron'a tıklayınca panel aç/kapat
   void _onPanelTap(ToolType tool) {
-    final activePanel = ref.read(activePanelProvider);
-    if (activePanel == tool) {
-      ref.read(activePanelProvider.notifier).state = null;
-    } else {
-      ref.read(activePanelProvider.notifier).state = tool;
-    }
+    final active = ref.read(activePanelProvider);
+    ref.read(activePanelProvider.notifier).state = active == tool ? null : tool;
   }
 
   GlobalKey? getToolButtonKey(ToolType tool) => _toolButtonKeys[tool];

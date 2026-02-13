@@ -34,7 +34,6 @@ class ToolPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = DrawingTheme.of(context);
     final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Yatay/dikey ekrana göre maxHeight ayarla
     final screenSize = MediaQuery.of(context).size;
@@ -51,7 +50,7 @@ class ToolPanel extends StatelessWidget {
           maxHeight: maxPanelHeight,
         ),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1C1C1E) : colorScheme.surface,
+          color: colorScheme.surface,
           borderRadius: BorderRadius.circular(theme.panelBorderRadius),
           boxShadow: [
             // Main shadow
@@ -209,20 +208,20 @@ class PanelSection extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: Colors.orange.withValues(alpha: 0.15),
+                  color: colorScheme.tertiary.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(4),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    PhosphorIcon(StarNoteIcons.lock, size: 10, color: Colors.orange),
-                    SizedBox(width: 2),
+                    PhosphorIcon(StarNoteIcons.lock, size: 10, color: colorScheme.tertiary),
+                    const SizedBox(width: 2),
                     Text(
                       'PRO',
                       style: TextStyle(
                         fontSize: 9,
                         fontWeight: FontWeight.w700,
-                        color: Colors.orange,
+                        color: colorScheme.tertiary,
                       ),
                     ),
                   ],
@@ -271,18 +270,18 @@ class _LockedSectionOverlay extends StatelessWidget {
                 color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const Center(
+              child: Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    PhosphorIcon(StarNoteIcons.lock, color: Colors.orange, size: 24),
-                    SizedBox(height: 4),
+                    PhosphorIcon(StarNoteIcons.lock, color: colorScheme.tertiary, size: 24),
+                    const SizedBox(height: 4),
                     Text(
                       'Premium',
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
-                        color: Colors.orange,
+                        color: colorScheme.tertiary,
                       ),
                     ),
                   ],

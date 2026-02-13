@@ -171,23 +171,25 @@ class _PremiumBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.amber.withValues(alpha: 0.15),
+        color: colorScheme.tertiary.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: const Row(
+      child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          PhosphorIcon(StarNoteIcons.sparkle, size: 14, color: Colors.amber),
-          SizedBox(width: 4),
+          PhosphorIcon(StarNoteIcons.sparkle, size: 14, color: colorScheme.tertiary),
+          const SizedBox(width: 4),
           Text(
             'Pro',
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: Colors.amber,
+              color: colorScheme.tertiary,
             ),
           ),
         ],
@@ -464,23 +466,25 @@ class _PremiumNotice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.amber.withValues(alpha: 0.15),
+        color: colorScheme.tertiary.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.amber.withValues(alpha: 0.3)),
+        border: Border.all(color: colorScheme.tertiary.withValues(alpha: 0.3)),
       ),
-      child: const Row(
+      child: Row(
         children: [
-          PhosphorIcon(StarNoteIcons.info, size: 18, color: Colors.amber),
-          SizedBox(width: 8),
+          PhosphorIcon(StarNoteIcons.info, size: 18, color: colorScheme.tertiary),
+          const SizedBox(width: 8),
           Expanded(
             child: Text(
               'AI features are limited in free plan. Upgrade for unlimited access.',
               style: TextStyle(
                 fontSize: 12,
-                color: Colors.amber,
+                color: colorScheme.tertiary,
               ),
             ),
           ),

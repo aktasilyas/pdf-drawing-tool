@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:drawing_core/drawing_core.dart';
-import 'package:drawing_ui/src/widgets/template_picker/category_tabs.dart';
+import 'package:drawing_ui/drawing_ui.dart';
 
 void main() {
   group('CategoryTabs', () {
@@ -137,9 +137,11 @@ void main() {
         ),
       );
 
-      // Premium categories should show premium icon when not selected
-      // Find premium icons (at least one should exist)
-      expect(find.byIcon(Icons.workspace_premium_rounded), findsWidgets);
+      // Premium categories should show crown icon when not selected
+      final crownIcon = find.byWidgetPredicate(
+        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.crown,
+      );
+      expect(crownIcon, findsWidgets);
     });
 
     testWidgets('hides premium icon when category is selected', (tester) async {
@@ -274,9 +276,12 @@ void main() {
         ),
       );
 
-      // Check premium categories exist by verifying premium icons
+      // Check premium categories exist by verifying crown icons
       if (TemplateCategory.values.any((c) => c.isPremium)) {
-        expect(find.byIcon(Icons.workspace_premium_rounded), findsWidgets);
+        final crownIcon = find.byWidgetPredicate(
+          (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.crown,
+        );
+        expect(crownIcon, findsWidgets);
       }
     });
 

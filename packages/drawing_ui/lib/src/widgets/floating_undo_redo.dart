@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/providers/history_provider.dart';
+import 'package:drawing_ui/src/theme/starnote_icons.dart';
 
 /// Floating undo/redo pill button (GoodNotes style)
 /// Positioned at top-left of canvas, above content
@@ -11,13 +13,14 @@ class FloatingUndoRedo extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final canUndo = ref.watch(canUndoProvider);
     final canRedo = ref.watch(canRedoProvider);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Positioned(
       top: 16,
       left: 16,
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colorScheme.surface,
           borderRadius: BorderRadius.circular(22),
           boxShadow: [
             BoxShadow(
@@ -30,22 +33,21 @@ class FloatingUndoRedo extends ConsumerWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Undo button
             _UndoRedoButton(
-              icon: Icons.undo_rounded,
+              icon: StarNoteIcons.undo,
+              tooltip: 'Geri al',
               enabled: canUndo,
               onPressed: () => ref.read(historyManagerProvider.notifier).undo(),
               isFirst: true,
             ),
-            // Divider
             Container(
               width: 1,
               height: 24,
-              color: Colors.grey.shade200,
+              color: colorScheme.outlineVariant,
             ),
-            // Redo button
             _UndoRedoButton(
-              icon: Icons.redo_rounded,
+              icon: StarNoteIcons.redo,
+              tooltip: 'İleri al',
               enabled: canRedo,
               onPressed: () => ref.read(historyManagerProvider.notifier).redo(),
               isFirst: false,
@@ -58,13 +60,15 @@ class FloatingUndoRedo extends ConsumerWidget {
 }
 
 class _UndoRedoButton extends StatelessWidget {
-  final IconData icon;
+  final PhosphorIconData icon;
+  final String tooltip;
   final bool enabled;
   final VoidCallback onPressed;
   final bool isFirst;
 
   const _UndoRedoButton({
     required this.icon,
+    required this.tooltip,
     required this.enabled,
     required this.onPressed,
     required this.isFirst,
@@ -72,20 +76,32 @@ class _UndoRedoButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: enabled ? onPressed : null,
-        borderRadius: BorderRadius.horizontal(
-          left: isFirst ? const Radius.circular(22) : Radius.zero,
-          right: isFirst ? Radius.zero : const Radius.circular(22),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          child: Icon(
-            icon,
-            size: 20,
-            color: enabled ? Colors.grey.shade700 : Colors.grey.shade300,
+    final colorScheme = Theme.of(context).colorScheme;
+    return Tooltip(
+      message: tooltip,
+      child: Semantics(
+        label: tooltip,
+        button: true,
+        enabled: enabled,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: enabled ? onPressed : null,
+            borderRadius: BorderRadius.horizontal(
+              left: isFirst ? const Radius.circular(22) : Radius.zero,
+              right: isFirst ? Radius.zero : const Radius.circular(22),
+            ),
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              child: PhosphorIcon(
+                icon,
+                size: 20,
+                color: enabled
+                    ? colorScheme.onSurface
+                    : colorScheme.onSurface.withValues(alpha: 0.25),
+              ),
+            ),
           ),
         ),
       ),

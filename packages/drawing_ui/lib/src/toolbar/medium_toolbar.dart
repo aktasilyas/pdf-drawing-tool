@@ -154,40 +154,66 @@ class _MediumToolbarState extends ConsumerState<MediumToolbar> {
   }
 
   Widget _buildSettingsButton(DrawingTheme theme) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () {
-        final current = ref.read(activePanelProvider);
-        ref.read(activePanelProvider.notifier).state =
-            current == ToolType.toolbarSettings ? null : ToolType.toolbarSettings;
-      },
-      child: Container(
-        key: widget.settingsButtonKey,
-        width: 48, height: 48,
-        margin: const EdgeInsets.symmetric(horizontal: 2),
-        decoration: BoxDecoration(
-          color: theme.toolbarBackground,
-          borderRadius: BorderRadius.circular(8),
+    return Tooltip(
+      message: 'Araç Çubuğu Ayarları',
+      child: Semantics(
+        label: 'Araç Çubuğu Ayarları',
+        button: true,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () {
+            final current = ref.read(activePanelProvider);
+            ref.read(activePanelProvider.notifier).state =
+                current == ToolType.toolbarSettings
+                    ? null
+                    : ToolType.toolbarSettings;
+          },
+          child: Container(
+            key: widget.settingsButtonKey,
+            width: 48, height: 48,
+            margin: const EdgeInsets.symmetric(horizontal: 2),
+            decoration: BoxDecoration(
+              color: theme.toolbarBackground,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: PhosphorIcon(
+              StarNoteIcons.settings,
+              size: StarNoteIcons.actionSize,
+              color: theme.toolbarIconColor,
+              semanticLabel: 'Araç Çubuğu Ayarları',
+            ),
+          ),
         ),
-        child: PhosphorIcon(StarNoteIcons.settings, size: StarNoteIcons.actionSize, color: theme.toolbarIconColor),
       ),
     );
   }
 
   Widget _buildQuickAccessToggle(DrawingTheme theme) {
-    return GestureDetector(
-      onTap: () => setState(() => _showQuickAccess = !_showQuickAccess),
-      child: Container(
-        width: 48, height: 48,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          color: _showQuickAccess
-              ? theme.toolbarIconSelectedColor.withValues(alpha: 0.1)
-              : Colors.transparent,
-        ),
-        child: PhosphorIcon(
-          _showQuickAccess ? StarNoteIcons.caretUp : StarNoteIcons.caretDown,
-          size: StarNoteIcons.actionSize, color: theme.toolbarIconColor,
+    final label =
+        _showQuickAccess ? 'Hızlı Erişimi Gizle' : 'Hızlı Erişimi Göster';
+    return Tooltip(
+      message: label,
+      child: Semantics(
+        label: label,
+        button: true,
+        child: GestureDetector(
+          onTap: () => setState(() => _showQuickAccess = !_showQuickAccess),
+          child: Container(
+            width: 48, height: 48,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              color: _showQuickAccess
+                  ? theme.toolbarIconSelectedColor.withValues(alpha: 0.1)
+                  : Colors.transparent,
+            ),
+            child: PhosphorIcon(
+              _showQuickAccess
+                  ? StarNoteIcons.caretUp
+                  : StarNoteIcons.caretDown,
+              size: StarNoteIcons.actionSize,
+              color: theme.toolbarIconColor,
+            ),
+          ),
         ),
       ),
     );

@@ -23,6 +23,8 @@ import 'package:drawing_ui/src/providers/page_provider.dart';
 import 'package:drawing_ui/src/providers/drawing_providers.dart';
 import 'package:drawing_ui/src/providers/pdf_render_provider.dart';
 import 'package:drawing_ui/src/providers/canvas_dark_mode_provider.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:drawing_ui/src/theme/starnote_icons.dart';
 import 'package:drawing_ui/src/widgets/widgets.dart';
 
 // =============================================================================
@@ -360,6 +362,8 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
 
   /// PDF yükleniyor widget'ı (minimal - kullanıcıyı rahatsız etmez)
   Widget _buildPdfLoading(core.Page page) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
       width: page.size.width,
       height: page.size.height,
@@ -370,7 +374,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
           height: 32,
           child: CircularProgressIndicator(
             strokeWidth: 3,
-            color: Colors.grey[300],
+            color: colorScheme.outlineVariant,
           ),
         ),
       ),
@@ -379,11 +383,13 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
 
   /// PDF placeholder widget'ı
   Widget _buildPdfPlaceholder(core.Page page) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
       width: page.size.width,
       height: page.size.height,
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: colorScheme.surfaceContainerLowest,
         // Gölge ekle
         boxShadow: [
           BoxShadow(
@@ -398,11 +404,11 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.picture_as_pdf, size: 40, color: Colors.grey[400]),
+            PhosphorIcon(StarNoteIcons.pdfFile, size: 40, color: colorScheme.outlineVariant),
             const SizedBox(height: 8),
             Text(
               'PDF Sayfası',
-              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
             ),
           ],
         ),
@@ -412,11 +418,13 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
 
   /// PDF hata widget'ı
   Widget _buildPdfError(core.Page page, String error) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
       width: page.size.width,
       height: page.size.height,
       decoration: BoxDecoration(
-        color: Colors.red[50],
+        color: colorScheme.errorContainer,
         // Gölge ekle
         boxShadow: [
           BoxShadow(
@@ -433,16 +441,16 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error_outline, size: 40, color: Colors.red),
+              PhosphorIcon(StarNoteIcons.warningCircle, size: 40, color: colorScheme.error),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 'PDF Yüklenemedi',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: colorScheme.onErrorContainer),
               ),
               const SizedBox(height: 4),
               Text(
                 error,
-                style: const TextStyle(fontSize: 10, color: Colors.black54),
+                style: TextStyle(fontSize: 10, color: colorScheme.onErrorContainer),
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -946,7 +954,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                     padding: const EdgeInsets.symmetric(
                         horizontal: 16, vertical: 10),
                     decoration: BoxDecoration(
-                      color: Colors.blue.shade700,
+                      color: Theme.of(context).colorScheme.primary,
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
@@ -959,7 +967,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.touch_app,
+                        const PhosphorIcon(StarNoteIcons.touchApp,
                             color: Colors.white, size: 18),
                         const SizedBox(width: 8),
                         const Text(
@@ -977,7 +985,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                               color: Colors.white.withValues(alpha: 0.2),
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.close,
+                            child: const PhosphorIcon(StarNoteIcons.close,
                                 color: Colors.white, size: 16),
                           ),
                         ),

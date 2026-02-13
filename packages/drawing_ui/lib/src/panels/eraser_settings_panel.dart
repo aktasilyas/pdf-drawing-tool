@@ -354,13 +354,13 @@ class _EraserModeOption extends StatelessWidget {
                   color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
                 ),
                 if (isPremium)
-                  const Positioned(
+                  Positioned(
                     top: -2,
                     right: -2,
                     child: PhosphorIcon(
                       StarNoteIcons.lock,
                       size: 9,
-                      color: Colors.orange,
+                      color: colorScheme.tertiary,
                     ),
                   ),
               ],

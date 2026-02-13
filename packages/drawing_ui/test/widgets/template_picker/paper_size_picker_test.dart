@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:drawing_core/drawing_core.dart';
-import 'package:drawing_ui/src/widgets/template_picker/paper_size_picker.dart';
+import 'package:drawing_ui/drawing_ui.dart';
 
 void main() {
   group('PaperSizePicker', () {
@@ -48,7 +48,10 @@ void main() {
         ),
       );
 
-      expect(find.byIcon(Icons.crop_portrait_rounded), findsOneWidget);
+      final orientationIcon = find.byWidgetPredicate(
+        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.orientationPortrait,
+      );
+      expect(orientationIcon, findsOneWidget);
     });
 
     testWidgets('hides orientation toggle when showLandscapeToggle is false', (tester) async {
@@ -64,8 +67,14 @@ void main() {
         ),
       );
 
-      expect(find.byIcon(Icons.crop_portrait_rounded), findsNothing);
-      expect(find.byIcon(Icons.crop_landscape_rounded), findsNothing);
+      final portraitIcon = find.byWidgetPredicate(
+        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.orientationPortrait,
+      );
+      final landscapeIcon = find.byWidgetPredicate(
+        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.orientationLandscape,
+      );
+      expect(portraitIcon, findsNothing);
+      expect(landscapeIcon, findsNothing);
     });
 
     testWidgets('shows portrait icon for portrait orientation', (tester) async {
@@ -80,8 +89,14 @@ void main() {
         ),
       );
 
-      expect(find.byIcon(Icons.crop_portrait_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.crop_landscape_rounded), findsNothing);
+      final portraitIcon = find.byWidgetPredicate(
+        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.orientationPortrait,
+      );
+      final landscapeIcon = find.byWidgetPredicate(
+        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.orientationLandscape,
+      );
+      expect(portraitIcon, findsOneWidget);
+      expect(landscapeIcon, findsNothing);
     });
 
     testWidgets('shows landscape icon for landscape orientation', (tester) async {
@@ -96,8 +111,14 @@ void main() {
         ),
       );
 
-      expect(find.byIcon(Icons.crop_landscape_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.crop_portrait_rounded), findsNothing);
+      final landscapeIcon = find.byWidgetPredicate(
+        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.orientationLandscape,
+      );
+      final portraitIcon = find.byWidgetPredicate(
+        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.orientationPortrait,
+      );
+      expect(landscapeIcon, findsOneWidget);
+      expect(portraitIcon, findsNothing);
     });
 
     testWidgets('calls onSizeSelected when preset changes', (tester) async {
@@ -174,7 +195,10 @@ void main() {
       );
 
       // Tap orientation toggle
-      await tester.tap(find.byIcon(Icons.crop_portrait_rounded));
+      final orientationIcon = find.byWidgetPredicate(
+        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.orientationPortrait,
+      );
+      await tester.tap(orientationIcon);
       await tester.pumpAndSettle();
 
       expect(newSize, isNotNull);
@@ -199,7 +223,10 @@ void main() {
       );
 
       // Tap orientation toggle
-      await tester.tap(find.byIcon(Icons.crop_landscape_rounded));
+      final orientationIcon = find.byWidgetPredicate(
+        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.orientationLandscape,
+      );
+      await tester.tap(orientationIcon);
       await tester.pumpAndSettle();
 
       expect(newSize, isNotNull);
@@ -313,9 +340,12 @@ void main() {
         ),
       );
 
+      final orientationIcon = find.byWidgetPredicate(
+        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.orientationPortrait,
+      );
       final container = tester.widget<Container>(
         find.ancestor(
-          of: find.byIcon(Icons.crop_portrait_rounded),
+          of: orientationIcon,
           matching: find.byType(Container),
         ).first,
       );

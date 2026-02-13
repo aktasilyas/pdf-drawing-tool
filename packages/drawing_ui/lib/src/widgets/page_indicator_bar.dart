@@ -57,7 +57,7 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
       child: FadeTransition(
         opacity: _fade,
         child: Container(
-          height: 36,
+          height: 48,
           margin: const EdgeInsets.only(bottom: 8),
           child: Center(child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
@@ -67,16 +67,23 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
               boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 8, offset: const Offset(0, 2))],
             ),
             child: Row(mainAxisSize: MainAxisSize.min, children: [
-              _NavArrow(icon: StarNoteIcons.chevronLeft, onTap: canPrev ? () { ref.read(pageManagerProvider.notifier).previousPage(); _showBar(); } : null),
-              GestureDetector(
-                onTap: () => _showGoToPageDialog(context, ref, pageCount),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Text('Sayfa ${currentIndex + 1} / $pageCount',
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: cs.onSurface)),
+              _NavArrow(icon: StarNoteIcons.chevronLeft, tooltip: 'Önceki Sayfa', onTap: canPrev ? () { ref.read(pageManagerProvider.notifier).previousPage(); _showBar(); } : null),
+              Tooltip(
+                message: 'Sayfaya Git',
+                child: Semantics(
+                  label: 'Sayfa ${currentIndex + 1} / $pageCount, Sayfaya gitmek için dokunun',
+                  button: true,
+                  child: GestureDetector(
+                    onTap: () => _showGoToPageDialog(context, ref, pageCount),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Text('Sayfa ${currentIndex + 1} / $pageCount',
+                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: cs.onSurface)),
+                    ),
+                  ),
                 ),
               ),
-              _NavArrow(icon: StarNoteIcons.chevronRight, onTap: canNext ? () { ref.read(pageManagerProvider.notifier).nextPage(); _showBar(); } : null),
+              _NavArrow(icon: StarNoteIcons.chevronRight, tooltip: 'Sonraki Sayfa', onTap: canNext ? () { ref.read(pageManagerProvider.notifier).nextPage(); _showBar(); } : null),
             ]),
           )),
         ),
@@ -111,20 +118,29 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
 
 /// Small circular navigation arrow for page indicator.
 class _NavArrow extends StatelessWidget {
-  const _NavArrow({required this.icon, required this.onTap});
+  const _NavArrow({required this.icon, required this.onTap, required this.tooltip});
   final PhosphorIconData icon;
   final VoidCallback? onTap;
+  final String tooltip;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap, borderRadius: BorderRadius.circular(14),
-        child: SizedBox(width: 28, height: 28, child: Center(
-          child: PhosphorIcon(icon, size: 16, color: onTap != null ? cs.onSurface : cs.onSurface.withValues(alpha: 0.25)),
-        )),
+    return Tooltip(
+      message: tooltip,
+      child: Semantics(
+        label: tooltip,
+        button: true,
+        enabled: onTap != null,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap, borderRadius: BorderRadius.circular(24),
+            child: SizedBox(width: 48, height: 48, child: Center(
+              child: PhosphorIcon(icon, size: 16, color: onTap != null ? cs.onSurface : cs.onSurface.withValues(alpha: 0.25)),
+            )),
+          ),
+        ),
       ),
     );
   }
