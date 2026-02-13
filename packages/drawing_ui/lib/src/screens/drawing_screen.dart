@@ -196,6 +196,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                             onPenBoxPositionChanged: (p) => setState(() => _penBoxPosition = p),
                             onClosePanel: _closePanel,
                             onOpenAIPanel: () => openAIPanel(context),
+                            colorScheme: ref.watch(canvasColorSchemeProvider),
                           ),
                         ),
                       ],

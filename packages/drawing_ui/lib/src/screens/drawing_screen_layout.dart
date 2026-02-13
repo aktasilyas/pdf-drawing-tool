@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/canvas/canvas.dart';
+import 'package:drawing_ui/src/canvas/canvas_color_scheme.dart';
 import 'package:drawing_ui/src/canvas/infinite_background_painter.dart';
 import 'package:drawing_ui/src/panels/panels.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
@@ -27,6 +28,7 @@ Widget buildDrawingCanvasArea({
   required ValueChanged<Offset> onPenBoxPositionChanged,
   required VoidCallback onClosePanel,
   required VoidCallback onOpenAIPanel,
+  CanvasColorScheme? colorScheme,
 }) {
   return ClipRect(
     child: Stack(
@@ -39,6 +41,7 @@ Widget buildDrawingCanvasArea({
                 background: currentPage.background,
                 zoom: transform.zoom,
                 offset: transform.offset,
+                colorScheme: colorScheme,
               ),
               size: Size.infinite,
             ),

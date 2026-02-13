@@ -1,6 +1,7 @@
 import 'dart:ui' show PointMode;
 import 'package:flutter/material.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/canvas/canvas_color_scheme.dart';
 import 'package:drawing_ui/src/painters/template_pattern_painter.dart';
 
 // =============================================================================
@@ -14,23 +15,29 @@ class InfiniteBackgroundPainter extends CustomPainter {
   final PageBackground background;
   final double zoom;
   final Offset offset;
+  final CanvasColorScheme? colorScheme;
 
   const InfiniteBackgroundPainter({
     required this.background,
     this.zoom = 1.0,
     this.offset = Offset.zero,
+    this.colorScheme,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     // 1. Arka plan rengi (tüm ekran)
-    final bgPaint = Paint()..color = Color(background.color);
+    final bgColor = colorScheme?.effectiveBackground(background.color)
+        ?? Color(background.color);
+    final bgPaint = Paint()..color = bgColor;
     canvas.drawRect(Offset.zero & size, bgPaint);
 
     // 2. Pattern çiz (tüm ekranı kaplar)
-    final lineColor = background.lineColor ?? 0xFFE0E0E0;
+    final rawLineColor = background.lineColor ?? 0xFFE0E0E0;
+    final lineColor = colorScheme?.effectiveLineColor(background.lineColor)
+        ?? Color(rawLineColor);
     final linePaint = Paint()
-      ..color = Color(lineColor)
+      ..color = lineColor
       ..strokeWidth = 0.5
       ..isAntiAlias = true;
 
@@ -48,7 +55,13 @@ class InfiniteBackgroundPainter extends CustomPainter {
         break;
 
       case BackgroundType.dotted:
-        _drawInfiniteDots(canvas, size, linePaint, (background.gridSpacing ?? 20.0) * zoom);
+        final dotColor = colorScheme?.effectiveDotColor(background.lineColor)
+            ?? lineColor;
+        final dotPaint = Paint()
+          ..color = dotColor
+          ..strokeWidth = 0.5
+          ..isAntiAlias = true;
+        _drawInfiniteDots(canvas, size, dotPaint, (background.gridSpacing ?? 20.0) * zoom);
         break;
 
       case BackgroundType.pdf:
@@ -69,7 +82,7 @@ class InfiniteBackgroundPainter extends CustomPainter {
               pattern: background.templatePattern!,
               spacingMm: spacingMm,
               lineWidth: (background.templateLineWidth ?? 0.5) * zoom,
-              lineColor: Color(lineColor),
+              lineColor: lineColor,
               backgroundColor: Colors.transparent,
               pageSize: size,
             );
@@ -187,6 +200,7 @@ class InfiniteBackgroundPainter extends CustomPainter {
   bool shouldRepaint(covariant InfiniteBackgroundPainter oldDelegate) {
     return oldDelegate.background != background ||
         oldDelegate.zoom != zoom ||
-        oldDelegate.offset != offset;
+        oldDelegate.offset != offset ||
+        oldDelegate.colorScheme != colorScheme;
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/canvas/canvas_color_scheme.dart';
 import 'package:drawing_ui/src/painters/template_pattern_painter.dart';
 
 // =============================================================================
@@ -12,22 +13,28 @@ import 'package:drawing_ui/src/painters/template_pattern_painter.dart';
 class DynamicBackgroundPainter extends CustomPainter {
   final PageBackground background;
   final ui.Image? pdfImage;
+  final CanvasColorScheme? colorScheme;
 
   const DynamicBackgroundPainter({
     required this.background,
     this.pdfImage,
+    this.colorScheme,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     // 1. Fill background color
-    final bgPaint = Paint()..color = Color(background.color);
+    final bgColor = colorScheme?.effectiveBackground(background.color)
+        ?? Color(background.color);
+    final bgPaint = Paint()..color = bgColor;
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), bgPaint);
 
     // 2. Draw pattern based on type
-    final lineColor = background.lineColor ?? 0xFFE0E0E0;
+    final rawLineColor = background.lineColor ?? 0xFFE0E0E0;
+    final lineColor = colorScheme?.effectiveLineColor(background.lineColor)
+        ?? Color(rawLineColor);
     final linePaint = Paint()
-      ..color = Color(lineColor)
+      ..color = lineColor
       ..strokeWidth = 0.5
       ..isAntiAlias = true;
 
@@ -45,7 +52,13 @@ class DynamicBackgroundPainter extends CustomPainter {
         break;
 
       case BackgroundType.dotted:
-        _drawDots(canvas, size, linePaint, background.gridSpacing ?? 20.0);
+        final dotColor = colorScheme?.effectiveDotColor(background.lineColor)
+            ?? lineColor;
+        final dotLinePaint = Paint()
+          ..color = dotColor
+          ..strokeWidth = 0.5
+          ..isAntiAlias = true;
+        _drawDots(canvas, size, dotLinePaint, background.gridSpacing ?? 20.0);
         break;
 
       case BackgroundType.pdf:
@@ -62,7 +75,7 @@ class DynamicBackgroundPainter extends CustomPainter {
             pattern: background.templatePattern!,
             spacingMm: background.templateSpacingMm ?? 8.0,
             lineWidth: background.templateLineWidth ?? 0.5,
-            lineColor: Color(lineColor),
+            lineColor: lineColor,
             backgroundColor: Colors.transparent, // Already painted above
             pageSize: size,
           );
@@ -119,7 +132,9 @@ class DynamicBackgroundPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant DynamicBackgroundPainter oldDelegate) {
-    return oldDelegate.background != background || oldDelegate.pdfImage != pdfImage;
+    return oldDelegate.background != background ||
+        oldDelegate.pdfImage != pdfImage ||
+        oldDelegate.colorScheme != colorScheme;
   }
 }
 
