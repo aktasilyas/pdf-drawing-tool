@@ -1,7 +1,9 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart' hide Page;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/theme/starnote_icons.dart';
 import 'package:drawing_ui/src/services/thumbnail_cache.dart';
 import 'package:drawing_ui/src/services/thumbnail_generator.dart';
 import 'package:drawing_ui/src/providers/pdf_render_provider.dart'
@@ -233,8 +235,8 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
+            PhosphorIcon(
+              StarNoteIcons.warningCircle,
               size: 32,
               color: colorScheme.error.withValues(alpha: 0.7),
             ),
@@ -258,8 +260,8 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
       errorBuilder: (context, error, stackTrace) {
         final colorScheme = Theme.of(context).colorScheme;
         return Center(
-          child: Icon(
-            Icons.broken_image,
+          child: PhosphorIcon(
+            StarNoteIcons.brokenImage,
             size: 32,
             color: colorScheme.error.withValues(alpha: 0.7),
           ),
@@ -300,8 +302,8 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
         return Container(
           color: Colors.grey[200],
           child: Center(
-            child: Icon(
-              Icons.picture_as_pdf,
+            child: PhosphorIcon(
+              StarNoteIcons.pdfFile,
               size: 24,
               color: Colors.grey[400],
             ),

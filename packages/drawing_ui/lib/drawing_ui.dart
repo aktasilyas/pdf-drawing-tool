@@ -55,6 +55,7 @@ export 'src/toolbar/top_nav_menus.dart';
 export 'src/toolbar/tool_bar.dart';
 export 'src/toolbar/tool_button.dart';
 export 'src/toolbar/quick_access_row.dart';
+export 'src/toolbar/quick_thickness_chips.dart';
 export 'src/toolbar/toolbar_widgets.dart';
 export 'src/toolbar/toolbar_layout_mode.dart';
 export 'src/toolbar/adaptive_toolbar.dart';

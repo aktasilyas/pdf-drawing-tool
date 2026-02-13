@@ -1,6 +1,8 @@
 /// Shared UI components for the color picker.
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:drawing_ui/src/theme/starnote_icons.dart';
 
 /// HSV Picker Box - 160x160 gradient for color selection
 class HSVPickerBox extends StatefulWidget {
@@ -344,10 +346,10 @@ class _HexOpacityInputState extends State<HexOpacityInput> {
             color: const Color(0xFF2D2D2D),
             borderRadius: BorderRadius.circular(8),
           ),
-          child: const Icon(
-            Icons.colorize,
+          child: PhosphorIcon(
+            StarNoteIcons.colorize,
             size: 18,
-            color: Color(0xFF4FC3F7),
+            color: const Color(0xFF4FC3F7),
           ),
         ),
         const SizedBox(width: 8),
@@ -462,8 +464,8 @@ class _HexOpacityInputState extends State<HexOpacityInput> {
               color: const Color(0xFF4FC3F7),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Icon(
-              Icons.add,
+            child: PhosphorIcon(
+              StarNoteIcons.plus,
               size: 20,
               color: Colors.white,
             ),

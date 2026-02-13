@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/theme/starnote_icons.dart';
 import 'package:drawing_ui/src/widgets/template_picker/category_tabs.dart';
 import 'package:drawing_ui/src/widgets/template_picker/template_grid.dart';
 import 'package:drawing_ui/src/widgets/template_picker/paper_size_picker.dart';
@@ -182,8 +184,8 @@ class _TemplatePickerState extends State<TemplatePicker> {
               const Spacer(),
               IconButton(
                 onPressed: () => Navigator.of(context).pop(),
-                icon: Icon(
-                  Icons.close_rounded,
+                icon: PhosphorIcon(
+                  StarNoteIcons.close,
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),
@@ -355,7 +357,7 @@ class _TemplatePickerState extends State<TemplatePicker> {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              icon: const Icon(Icons.add_rounded, size: 20),
+              icon: PhosphorIcon(StarNoteIcons.plus, size: 20),
               label: const Text(
                 'Oluştur',
                 style: TextStyle(
@@ -482,8 +484,8 @@ class _ColorButton extends StatelessWidget {
                   ),
                 ),
                 child: isSelected
-                    ? Icon(
-                        Icons.check,
+                    ? PhosphorIcon(
+                        StarNoteIcons.check,
                         color: presetColor.computeLuminance() > 0.5
                             ? Colors.black
                             : Colors.white,

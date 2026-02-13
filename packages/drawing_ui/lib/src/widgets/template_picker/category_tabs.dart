@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/theme/starnote_icons.dart';
 
 /// Kategori sekmeleri - responsive, horizontal scroll
 class CategoryTabs extends StatelessWidget {
@@ -97,8 +99,8 @@ class _CategoryChip extends StatelessWidget {
             ),
             if (isPremium && !isSelected) ...[
               const SizedBox(width: 4),
-              Icon(
-                Icons.workspace_premium_rounded,
+              PhosphorIcon(
+                StarNoteIcons.crown,
                 size: 14,
                 color: colorScheme.tertiary,
               ),

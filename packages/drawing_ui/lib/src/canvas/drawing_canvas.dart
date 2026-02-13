@@ -967,7 +967,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const PhosphorIcon(StarNoteIcons.touchApp,
+                        PhosphorIcon(StarNoteIcons.touchApp,
                             color: Colors.white, size: 18),
                         const SizedBox(width: 8),
                         const Text(

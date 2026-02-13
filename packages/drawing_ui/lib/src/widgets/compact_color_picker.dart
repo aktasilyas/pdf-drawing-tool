@@ -1,6 +1,8 @@
 /// Compact color picker with tabs and HSV controls.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:drawing_ui/src/theme/starnote_icons.dart';
 import 'package:drawing_ui/src/providers/recent_colors_provider.dart';
 import 'package:drawing_ui/src/widgets/color_picker_widgets.dart';
 import 'package:drawing_ui/src/widgets/color_presets.dart';
@@ -136,8 +138,8 @@ class _CompactColorPickerState extends State<CompactColorPicker>
                     color: isDark ? colorScheme.surfaceContainerHigh : colorScheme.surfaceContainerHighest,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    Icons.close,
+                  child: PhosphorIcon(
+                    StarNoteIcons.close,
                     size: 16,
                     color: colorScheme.onSurface,
                   ),

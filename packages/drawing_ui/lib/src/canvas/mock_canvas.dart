@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
@@ -28,7 +29,7 @@ class MockCanvas extends ConsumerWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
+                PhosphorIcon(
                   _getToolIcon(currentTool),
                   size: 48,
                   color: Colors.grey.shade300,
@@ -70,49 +71,8 @@ class MockCanvas extends ConsumerWidget {
     );
   }
 
-  IconData _getToolIcon(ToolType tool) {
-    switch (tool) {
-      case ToolType.pencil:
-        return Icons.edit_outlined;
-      case ToolType.hardPencil:
-        return Icons.create;
-      case ToolType.ballpointPen:
-        return Icons.edit;
-      case ToolType.gelPen:
-        return Icons.edit;
-      case ToolType.dashedPen:
-        return Icons.timeline;
-      case ToolType.brushPen:
-        return Icons.brush;
-      case ToolType.neonHighlighter:
-        return Icons.flash_on;
-      case ToolType.highlighter:
-        return Icons.highlight;
-      case ToolType.rulerPen:
-        return Icons.gesture;
-      case ToolType.pixelEraser:
-        return Icons.auto_fix_normal;
-      case ToolType.strokeEraser:
-        return Icons.cleaning_services;
-      case ToolType.lassoEraser:
-        return Icons.gesture;
-      case ToolType.shapes:
-        return Icons.crop_square;
-      case ToolType.text:
-        return Icons.text_fields;
-      case ToolType.sticker:
-        return Icons.emoji_emotions;
-      case ToolType.image:
-        return Icons.image;
-      case ToolType.selection:
-        return Icons.select_all;
-      case ToolType.panZoom:
-        return Icons.pan_tool;
-      case ToolType.laserPointer:
-        return Icons.highlight_alt;
-      case ToolType.toolbarSettings:
-        return Icons.tune;
-    }
+  PhosphorIconData _getToolIcon(ToolType tool) {
+    return StarNoteIcons.iconForTool(tool);
   }
 }
 

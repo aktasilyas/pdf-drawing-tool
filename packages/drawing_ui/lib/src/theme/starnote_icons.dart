@@ -123,6 +123,18 @@ abstract final class StarNoteIcons {
   static const hourglass = PhosphorIconsLight.hourglassSimple;
   static const send = PhosphorIconsLight.paperPlaneRight;
   static const refresh = PhosphorIconsLight.arrowCounterClockwise;
+  static const warningCircle = PhosphorIconsLight.warningCircle;
+  static const touchApp = PhosphorIconsLight.handTap;
+  static const addCircle = PhosphorIconsLight.plusCircle;
+  static const crown = PhosphorIconsLight.crown;
+  static const brokenImage = PhosphorIconsLight.imageBroken;
+  static const uploadFile = PhosphorIconsLight.uploadSimple;
+  static const colorize = PhosphorIconsLight.eyedropperSample;
+  static const move = PhosphorIconsLight.arrowsOutCardinal;
+  static const dragHandle = PhosphorIconsLight.dotsSixVertical;
+  static const editPencil = PhosphorIconsLight.pencilSimpleLine;
+  static const orientationPortrait = PhosphorIconsLight.deviceMobile;
+  static const orientationLandscape = PhosphorIconsLight.deviceTabletSpeaker;
 
   // ═══════════════════════════════════════════
   // Page & Document Icons

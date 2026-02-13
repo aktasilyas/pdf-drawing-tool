@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:drawing_ui/src/theme/starnote_icons.dart';
 import 'package:drawing_ui/src/services/pdf_exporter.dart';
 
 /// Configuration for PDF export.
@@ -165,8 +167,8 @@ class _PDFExportDialogState extends State<PDFExportDialog> {
                 ),
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.error_outline,
+                    PhosphorIcon(
+                      StarNoteIcons.warningCircle,
                       color: Theme.of(context).colorScheme.error,
                     ),
                     const SizedBox(width: 12),

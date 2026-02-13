@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart' hide Page;
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/theme/starnote_icons.dart';
 import 'package:drawing_ui/src/services/thumbnail_cache.dart';
 import 'package:drawing_ui/src/widgets/page_thumbnail.dart';
 
@@ -113,7 +115,7 @@ class _PageNavigatorState extends State<PageNavigator> {
           children: [
             if (widget.onDuplicatePage != null)
               ListTile(
-                leading: Icon(Icons.content_copy, color: colorScheme.onSurface),
+                leading: PhosphorIcon(StarNoteIcons.copy, color: colorScheme.onSurface),
                 title: Text('Duplicate Page', style: TextStyle(color: colorScheme.onSurface)),
                 onTap: () {
                   Navigator.pop(context);
@@ -122,7 +124,7 @@ class _PageNavigatorState extends State<PageNavigator> {
               ),
             if (widget.onDeletePage != null)
               ListTile(
-                leading: Icon(Icons.delete, color: colorScheme.error),
+                leading: PhosphorIcon(StarNoteIcons.trash, color: colorScheme.error),
                 title: Text('Delete Page', style: TextStyle(color: colorScheme.error)),
                 onTap: () {
                   Navigator.pop(context);
@@ -281,8 +283,8 @@ class _PageNavigatorState extends State<PageNavigator> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.add,
+              PhosphorIcon(
+                StarNoteIcons.plus,
                 size: 32,
                 color: colorScheme.onSurfaceVariant,
               ),

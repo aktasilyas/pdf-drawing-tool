@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/models/models.dart';
+import 'package:drawing_ui/src/theme/starnote_icons.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/widgets/pen_icon_widget.dart';
 
@@ -97,8 +99,8 @@ class _FloatingPenBoxState extends ConsumerState<FloatingPenBox> {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            Icon(
-              Icons.brush_outlined,
+            PhosphorIcon(
+              StarNoteIcons.paintBrush,
               size: 18,
               color: colorScheme.onSurfaceVariant,
             ),
@@ -188,8 +190,8 @@ class _FloatingPenBoxState extends ConsumerState<FloatingPenBox> {
         children: [
           GestureDetector(
             onTap: () => setState(() => _isEditMode = !_isEditMode),
-            child: Icon(
-              _isEditMode ? Icons.check : Icons.edit_outlined,
+            child: PhosphorIcon(
+              _isEditMode ? StarNoteIcons.check : StarNoteIcons.editPencil,
               size: 14,
               color: _isEditMode ? colorScheme.primary : colorScheme.onSurfaceVariant,
             ),
@@ -200,8 +202,8 @@ class _FloatingPenBoxState extends ConsumerState<FloatingPenBox> {
               _isExpanded = false;
               _isEditMode = false;
             }),
-            child: Icon(
-              Icons.keyboard_arrow_up,
+            child: PhosphorIcon(
+              StarNoteIcons.caretUp,
               size: 16,
               color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
             ),
@@ -221,8 +223,8 @@ class _FloatingPenBoxState extends ConsumerState<FloatingPenBox> {
         children: [
           GestureDetector(
             onTap: () => setState(() => _isEditMode = !_isEditMode),
-            child: Icon(
-              _isEditMode ? Icons.check : Icons.edit_outlined,
+            child: PhosphorIcon(
+              _isEditMode ? StarNoteIcons.check : StarNoteIcons.editPencil,
               size: 14,
               color: _isEditMode ? colorScheme.primary : colorScheme.onSurfaceVariant,
             ),
@@ -233,8 +235,8 @@ class _FloatingPenBoxState extends ConsumerState<FloatingPenBox> {
               _isExpanded = false;
               _isEditMode = false;
             }),
-            child: Icon(
-              Icons.keyboard_arrow_left,
+            child: PhosphorIcon(
+              StarNoteIcons.chevronLeft,
               size: 16,
               color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
             ),
@@ -347,7 +349,7 @@ class _VerticalPenSlot extends StatelessWidget {
                       color: Theme.of(context).colorScheme.error,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.remove, size: 10, color: Colors.white),
+                    child: PhosphorIcon(StarNoteIcons.minus, size: 10, color: Colors.white),
                   ),
                 ),
               ),
@@ -436,7 +438,7 @@ class _HorizontalPenSlot extends StatelessWidget {
                       color: Theme.of(context).colorScheme.error,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.remove, size: 10, color: Colors.white),
+                    child: PhosphorIcon(StarNoteIcons.minus, size: 10, color: Colors.white),
                   ),
                 ),
               ),

@@ -1,5 +1,7 @@
 /// Panel builders and helpers for the drawing screen.
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:drawing_ui/src/theme/starnote_icons.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/panels/panels.dart';
 import 'package:drawing_ui/src/toolbar/tool_groups.dart';
@@ -143,7 +145,7 @@ class _LaserPointerPanel extends StatelessWidget {
                 Expanded(
                   child: _ModeButton(
                     label: 'Dot',
-                    icon: Icons.fiber_manual_record,
+                    icon: StarNoteIcons.circle,
                     isSelected: true,
                     onTap: () {},
                   ),
@@ -152,7 +154,7 @@ class _LaserPointerPanel extends StatelessWidget {
                 Expanded(
                   child: _ModeButton(
                     label: 'Trail',
-                    icon: Icons.gesture,
+                    icon: StarNoteIcons.selection,
                     isSelected: false,
                     onTap: () {},
                   ),
@@ -230,7 +232,7 @@ class _ModeButton extends StatelessWidget {
   });
 
   final String label;
-  final IconData icon;
+  final PhosphorIconData icon;
   final bool isSelected;
   final VoidCallback onTap;
 
@@ -249,7 +251,7 @@ class _ModeButton extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Icon(icon, color: isSelected ? Colors.blue : Colors.grey),
+            PhosphorIcon(icon, color: isSelected ? Colors.blue : Colors.grey),
             const SizedBox(height: 4),
             Text(
               label,

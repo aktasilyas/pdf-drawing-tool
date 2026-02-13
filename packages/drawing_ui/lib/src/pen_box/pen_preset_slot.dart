@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/widgets/pen_icon_widget.dart';
@@ -135,8 +136,8 @@ class PenPresetSlot extends StatelessWidget {
           ),
         ),
         child: Center(
-          child: Icon(
-            Icons.add,
+          child: PhosphorIcon(
+            StarNoteIcons.plus,
             size: slotSize * 0.4,
             color: colorScheme.onSurfaceVariant,
           ),
@@ -197,8 +198,8 @@ class CompactPenPreview extends StatelessWidget {
               : colorScheme.surfaceContainerHighest,
           shape: BoxShape.circle,
         ),
-        child: Icon(
-          Icons.add,
+        child: PhosphorIcon(
+          StarNoteIcons.plus,
           size: size * 0.5,
           color: colorScheme.onSurfaceVariant,
         ),

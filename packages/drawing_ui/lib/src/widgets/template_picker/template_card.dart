@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/theme/starnote_icons.dart';
 import 'package:drawing_ui/src/widgets/template_preview_widget.dart';
 
 class TemplateCard extends StatelessWidget {
@@ -63,8 +65,8 @@ class TemplateCard extends StatelessWidget {
                     color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.9),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: Icon(
-                    Icons.lock_rounded,
+                  child: PhosphorIcon(
+                    StarNoteIcons.lock,
                     size: 14,
                     color: colorScheme.onSurfaceVariant,
                   ),
@@ -113,8 +115,8 @@ class TemplateCard extends StatelessWidget {
                     color: colorScheme.primary,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    Icons.check_rounded,
+                  child: PhosphorIcon(
+                    StarNoteIcons.check,
                     size: 12,
                     color: colorScheme.onPrimary,
                   ),

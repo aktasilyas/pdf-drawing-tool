@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 
 /// A single color selection chip.
@@ -83,8 +84,8 @@ class ColorChip extends StatelessWidget {
                   : null,
             ),
             child: isSelected
-                ? Icon(
-                    Icons.check,
+                ? PhosphorIcon(
+                    StarNoteIcons.check,
                     size: chipSize * 0.5,
                     color: color.computeLuminance() > 0.5
                         ? Colors.black87

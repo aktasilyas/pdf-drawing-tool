@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/pen_box/pen_preset_slot.dart';
@@ -145,8 +146,8 @@ class _AddPresetButton extends StatelessWidget {
             style: BorderStyle.solid,
           ),
         ),
-        child: Icon(
-          Icons.add,
+        child: PhosphorIcon(
+          StarNoteIcons.plus,
           color: colorScheme.onSurfaceVariant,
           size: 20,
         ),
@@ -196,7 +197,7 @@ class _PresetOptionsSheet extends ConsumerWidget {
           if (!preset.isEmpty) ...[
             _buildOptionTile(
               context: context,
-              icon: Icons.edit_outlined,
+              icon: StarNoteIcons.editPencil,
               label: 'Düzenle',
               color: colorScheme.primary,
               onTap: () {
@@ -207,7 +208,7 @@ class _PresetOptionsSheet extends ConsumerWidget {
             const SizedBox(height: 4),
             _buildOptionTile(
               context: context,
-              icon: Icons.delete_outline,
+              icon: StarNoteIcons.trash,
               label: 'Sil',
               color: colorScheme.error,
               onTap: () {
@@ -219,7 +220,7 @@ class _PresetOptionsSheet extends ConsumerWidget {
           if (preset.isEmpty)
             _buildOptionTile(
               context: context,
-              icon: Icons.add_circle_outline,
+              icon: StarNoteIcons.addCircle,
               label: 'Mevcut Ayarları Ekle',
               color: colorScheme.primary,
               onTap: () {
@@ -245,7 +246,7 @@ class _PresetOptionsSheet extends ConsumerWidget {
   
   Widget _buildOptionTile({
     required BuildContext context,
-    required IconData icon,
+    required PhosphorIconData icon,
     required String label,
     required Color color,
     required VoidCallback onTap,
@@ -274,7 +275,7 @@ class _PresetOptionsSheet extends ConsumerWidget {
                   color: color.withValues(alpha: isDark ? 0.2 : 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Icon(
+                child: PhosphorIcon(
                   icon,
                   color: color,
                   size: 20,
@@ -291,8 +292,8 @@ class _PresetOptionsSheet extends ConsumerWidget {
                   ),
                 ),
               ),
-              Icon(
-                Icons.chevron_right,
+              PhosphorIcon(
+                StarNoteIcons.chevronRight,
                 color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                 size: 20,
               ),

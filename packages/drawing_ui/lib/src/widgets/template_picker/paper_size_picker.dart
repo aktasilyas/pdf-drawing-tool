@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/theme/starnote_icons.dart';
 
 /// Kağıt boyutu seçici - dropdown style
 class PaperSizePicker extends StatelessWidget {
@@ -57,8 +59,9 @@ class PaperSizePicker extends StatelessWidget {
           child: DropdownButtonHideUnderline(
             child: DropdownButton<PaperSizePreset>(
               value: selectedSize.preset,
-              icon: Icon(
-                Icons.keyboard_arrow_down_rounded,
+              icon: PhosphorIcon(
+                StarNoteIcons.caretDown,
+                size: 18,
                 color: colorScheme.onSurfaceVariant,
               ),
               style: theme.textTheme.bodyMedium?.copyWith(
@@ -126,10 +129,10 @@ class _OrientationToggle extends StatelessWidget {
             color: colorScheme.outline.withValues(alpha: 0.2),
           ),
         ),
-        child: Icon(
-          isLandscape 
-              ? Icons.crop_landscape_rounded 
-              : Icons.crop_portrait_rounded,
+        child: PhosphorIcon(
+          isLandscape
+              ? StarNoteIcons.orientationLandscape
+              : StarNoteIcons.orientationPortrait,
           size: 20,
           color: colorScheme.onSurfaceVariant,
         ),
