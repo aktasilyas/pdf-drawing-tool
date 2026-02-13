@@ -50,6 +50,28 @@ Group tests by:
 
 Use snake_case for test names: `should_expectedBehavior_when_condition`
 
+### Testing Responsive/Adaptive Widgets
+For widgets using LayoutBuilder with breakpoints:
+```dart
+// Set window size to test specific breakpoint
+tester.view.physicalSize = const Size(840, 600);
+tester.view.devicePixelRatio = 1.0;
+addTearDown(tester.view.resetPhysicalSize);
+
+// Then test the widget normally
+await tester.pumpWidget(...);
+```
+
+When testing icons that appear multiple times (e.g., expand_more in multiple places):
+```dart
+// Use byWidgetPredicate to filter by size or other properties
+final chevronIcon = find.byWidgetPredicate(
+  (widget) => widget is Icon &&
+              widget.icon == Icons.expand_more &&
+              widget.size == 20,
+);
+```
+
 ## Flutter Test Commands
 
 Run specific test file:
@@ -96,7 +118,16 @@ cmd.exe /c "cd /d C:\\Users\\aktas\\source\\repos\\starnote_drawing_workspace\\e
 - documents_combined_grid_test.dart: 4 tests
 - documents_list_view_test.dart: 5 tests
 
-Total: 81 tests, all passing
+### Drawing UI - Responsive Toolbar (Phase M1 - Feb 2025)
+- responsive_toolbar_test.dart: 21 tests
+  - ToolbarLayoutMode enum: 2 tests
+  - AdaptiveToolbar breakpoints: 4 tests
+  - MediumToolbar: 6 tests
+  - CompactBottomBar: 5 tests
+  - ToolbarOverflowMenu: 2 tests
+  - TopNavigationBar compact mode: 3 tests
+
+Total: 102 tests, all passing
 
 ## Entity Structure Reference (for tests)
 

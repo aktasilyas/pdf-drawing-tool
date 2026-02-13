@@ -27,3 +27,8 @@
 - AppSpacing: xxs=2, xs=4, sm=8, md=12, lg=16, xl=24, xxl=32, xxxl=48, huge=64
 - AppRadius: xs=4, sm=8, md=10, lg=12, xl=16, xxl=20, card=12, modal=16
 - AppSpacing.minTouchTarget = 48
+
+## drawing_ui Package Notes
+- Library package has its own `DrawingTheme` -- no access to example_app's AppColors/AppSpacing
+- Tool group lists (penTools, highlighterTools, toolsWithPanel) duplicated 4x -- needs centralization
+- Responsive breakpoints: 840=expanded, 600=medium, <600=compact -- should be public constants
