@@ -156,6 +156,8 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                     documentTitle: widget.documentTitle,
                     onHomePressed: widget.onHomePressed,
                     onTitlePressed: widget.onTitlePressed,
+                    onSidebarToggle: _toggleSidebar,
+                    isSidebarOpen: _isSidebarOpen,
                     compact: isCompactMode,
                   ),
                   AdaptiveToolbar(
@@ -166,9 +168,6 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                     toolButtonKeys: _toolButtonKeys,
                     penGroupButtonKey: _penGroupButtonKey,
                     highlighterGroupButtonKey: _highlighterGroupButtonKey,
-                    showSidebarButton: ref.watch(pageCountProvider) > 1,
-                    isSidebarOpen: _isSidebarOpen,
-                    onSidebarToggle: _toggleSidebar,
                   ),
                   Expanded(
                     child: Row(

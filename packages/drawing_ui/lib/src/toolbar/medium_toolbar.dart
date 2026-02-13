@@ -26,9 +26,6 @@ class MediumToolbar extends ConsumerStatefulWidget {
     this.toolButtonKeys,
     this.penGroupButtonKey,
     this.highlighterGroupButtonKey,
-    this.onSidebarToggle,
-    this.showSidebarButton = false,
-    this.isSidebarOpen = false,
   });
 
   final VoidCallback? onUndoPressed;
@@ -38,9 +35,6 @@ class MediumToolbar extends ConsumerStatefulWidget {
   final Map<ToolType, GlobalKey>? toolButtonKeys;
   final GlobalKey? penGroupButtonKey;
   final GlobalKey? highlighterGroupButtonKey;
-  final VoidCallback? onSidebarToggle;
-  final bool showSidebarButton;
-  final bool isSidebarOpen;
 
   @override
   ConsumerState<MediumToolbar> createState() => _MediumToolbarState();
@@ -95,26 +89,6 @@ class _MediumToolbarState extends ConsumerState<MediumToolbar> {
       child: Row(
         children: [
           const SizedBox(width: 4),
-
-          // Sidebar toggle
-          if (widget.showSidebarButton) ...[
-            IconButton(
-              icon: PhosphorIcon(
-                widget.isSidebarOpen ? StarNoteIcons.sidebarActive : StarNoteIcons.sidebar,
-                size: StarNoteIcons.toolSize,
-              ),
-              onPressed: widget.onSidebarToggle,
-              tooltip: 'Sayfalar',
-              padding: const EdgeInsets.all(10),
-              constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
-            ),
-            Container(
-              width: 1,
-              height: 28,
-              margin: const EdgeInsets.symmetric(horizontal: 4),
-              color: theme.panelBorderColor.withValues(alpha: 60.0 / 255.0),
-            ),
-          ],
 
           // Undo/Redo
           ToolbarUndoRedoButtons(

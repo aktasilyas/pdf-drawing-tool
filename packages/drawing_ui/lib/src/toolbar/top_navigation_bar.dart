@@ -1,24 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
-import 'package:drawing_ui/src/widgets/pdf_import_dialog.dart';
-import 'package:drawing_ui/src/widgets/pdf_export_dialog.dart';
+import 'package:drawing_ui/src/toolbar/starnote_nav_button.dart';
+import 'package:drawing_ui/src/toolbar/top_nav_menus.dart';
 
-/// Top navigation bar (Row 1) - Navigation and document actions.
+/// Top navigation bar (Row 1) — Navigation and document actions.
 ///
-/// Contains:
-/// - Left: Home button and document title
-/// - Center: Document tabs (when multiple documents)
-/// - Right: Layers, Export, Grid, Settings, More buttons
+/// Layout (full):
+/// ```
+/// [Home] [Sidebar] [Title ▼]  ···spacer···  [Reader] [Grid] [Export] [More]
+/// ```
+///
+/// Layout (compact / phone):
+/// ```
+/// [Home] [Title ▼]  ···spacer···  [Export] [More]
+/// ```
 class TopNavigationBar extends ConsumerWidget {
   const TopNavigationBar({
     super.key,
     this.documentTitle,
     this.onHomePressed,
     this.onTitlePressed,
-    this.onBackPressed,
+    this.onSidebarToggle,
+    this.isSidebarOpen = false,
     this.compact = false,
   });
 
@@ -28,248 +35,168 @@ class TopNavigationBar extends ConsumerWidget {
   /// Callback when home button is pressed.
   final VoidCallback? onHomePressed;
 
-  /// Callback when document title is pressed (opens menu).
+  /// Callback when document title is pressed.
   final VoidCallback? onTitlePressed;
 
-  /// Callback when back button is pressed.
-  final VoidCallback? onBackPressed;
+  /// Callback when sidebar toggle is pressed.
+  final VoidCallback? onSidebarToggle;
 
-  /// Whether to use compact mode (phone) - shows minimal buttons.
+  /// Whether the sidebar is currently open.
+  final bool isSidebarOpen;
+
+  /// Whether to use compact mode (phone) — minimal buttons.
   final bool compact;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = DrawingTheme.of(context);
-    final gridVisible = ref.watch(gridVisibilityProvider);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
       height: 48,
       decoration: BoxDecoration(
-        color: theme.toolbarBackground,
+        color: colorScheme.surface,
         border: Border(
           bottom: BorderSide(
-            color: theme.panelBorderColor.withValues(alpha: 50.0 / 255.0),
+            color: colorScheme.outlineVariant,
             width: 0.5,
           ),
         ),
       ),
-      child: compact
-          ? _buildCompactLayout(theme)
-          : _buildFullLayout(context, ref, theme, gridVisible),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: compact
+            ? _buildCompactLayout(context, ref, colorScheme)
+            : _buildFullLayout(context, ref, colorScheme),
+      ),
     );
   }
 
-  /// Build compact layout (phone) - minimal buttons only.
-  Widget _buildCompactLayout(DrawingTheme theme) => Row(children: [
-        _NavButton(icon: StarNoteIcons.home, tooltip: 'Ana Sayfa', onPressed: onHomePressed ?? () {}),
-        const SizedBox(width: 8),
-        Expanded(
-          child: GestureDetector(
-            onTap: onTitlePressed ?? () {},
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: theme.panelBorderColor.withValues(alpha: 30.0 / 255.0),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Row(mainAxisSize: MainAxisSize.min, children: [
-                Flexible(
-                  child: Text(documentTitle ?? 'İsimsiz Not',
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: theme.toolbarIconColor),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis),
-                ),
-                const SizedBox(width: 4),
-                PhosphorIcon(StarNoteIcons.caretDown, size: StarNoteIcons.navSize, color: theme.toolbarIconColor),
-              ]),
-            ),
-          ),
+  /// Compact layout (phone <600px): Home + Title + Export + More.
+  Widget _buildCompactLayout(
+    BuildContext context,
+    WidgetRef ref,
+    ColorScheme colorScheme,
+  ) {
+    return Row(
+      children: [
+        StarNoteNavButton(
+          icon: StarNoteIcons.home,
+          tooltip: 'Ana Sayfa',
+          onPressed: onHomePressed ?? () {},
         ),
-        const SizedBox(width: 8),
-        _NavButton(icon: StarNoteIcons.share, tooltip: 'Paylaş', onPressed: () {}),
-        _NavButton(icon: StarNoteIcons.moreVert, tooltip: 'Daha fazla', onPressed: () {}),
         const SizedBox(width: 4),
-      ]);
-
-  /// Build full layout (tablet/desktop) - all buttons visible.
-  Widget _buildFullLayout(BuildContext context, WidgetRef ref, DrawingTheme theme, bool gridVisible) =>
-      LayoutBuilder(builder: (context, constraints) {
-        final isSmallScreen = constraints.maxWidth < 500;
-        return Row(children: [
-          _NavButton(icon: StarNoteIcons.home, tooltip: 'Ana Sayfa', onPressed: onHomePressed ?? () => _showPlaceholder(context, 'Ana Sayfa')),
-          const SizedBox(width: 8),
-          Flexible(
-            child: GestureDetector(
-              onTap: onTitlePressed ?? () => _showPlaceholder(context, 'Belge Menüsü'),
-              child: Container(
-                constraints: const BoxConstraints(maxWidth: 300),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(color: theme.panelBorderColor.withValues(alpha: 30.0 / 255.0), borderRadius: BorderRadius.circular(16)),
-                child: Row(mainAxisSize: MainAxisSize.min, children: [
-                  Flexible(
-                      child: Text(documentTitle ?? 'İsimsiz Not',
-                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: theme.toolbarIconColor),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis)),
-                  const SizedBox(width: 4),
-                  PhosphorIcon(StarNoteIcons.caretDown, size: StarNoteIcons.navSize, color: theme.toolbarIconColor),
-                ]),
-              ),
-            ),
-          ),
-          const Expanded(child: SizedBox()),
-          if (!isSmallScreen) _NavButton(icon: StarNoteIcons.readerMode, tooltip: 'Okuyucu modu', onPressed: () => _showPlaceholder(context, 'Okuyucu modu')),
-          _NavButton(icon: StarNoteIcons.layers, tooltip: 'Katmanlar', onPressed: () => _showPlaceholder(context, 'Katmanlar')),
-          _NavButton(
-              icon: gridVisible ? StarNoteIcons.gridOn : StarNoteIcons.gridOff,
-              tooltip: gridVisible ? 'Izgarayı gizle' : 'Izgarayı göster',
-              isActive: gridVisible,
-              onPressed: () => ref.read(gridVisibilityProvider.notifier).state = !gridVisible),
-          if (!isSmallScreen) ...[
-            _NavButton(icon: StarNoteIcons.exportIcon, tooltip: 'PDF İçe Aktar', onPressed: () => _showPDFImportDialog(context, ref)),
-            _NavButton(icon: StarNoteIcons.pdfFile, tooltip: 'PDF Olarak Dışa Aktar', onPressed: () => _showPDFExportDialog(context, ref)),
-          ],
-          _NavButton(icon: StarNoteIcons.more, tooltip: 'Daha fazla', onPressed: () => _showPlaceholder(context, 'Daha fazla')),
-          const SizedBox(width: 4),
-        ]);
-      });
-
-  void _showPlaceholder(BuildContext context, String feature) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$feature - Yakında eklenecek'),
-        duration: const Duration(seconds: 1),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-  }
-
-  void _showPDFImportDialog(BuildContext context, WidgetRef ref) {
-    showDialog(
-      context: context,
-      builder: (context) => PDFImportDialog(
-        onImportComplete: (result) {
-          if (result.isSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('${result.pageCount} sayfa içe aktarıldı'),
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          }
-        },
-      ),
-    );
-  }
-
-  void _showPDFExportDialog(BuildContext context, WidgetRef ref) {
-    final pageCount = ref.read(pageCountProvider);
-
-    showDialog(
-      context: context,
-      builder: (context) => PDFExportDialog(
-        totalPages: pageCount,
-        onExport: (config) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('PDF dışa aktarılıyor...'),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-/// Navigation button for the top bar.
-class _NavButton extends StatelessWidget {
-  const _NavButton({
-    required this.icon,
-    required this.tooltip,
-    required this.onPressed,
-    this.isActive = false,
-  });
-
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback onPressed;
-  final bool isActive;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = DrawingTheme.of(context);
-
-    return Tooltip(
-      message: tooltip,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onPressed,
-          borderRadius: BorderRadius.circular(6),
-          child: Container(
-            width: 48,
-            height: 48,
-            margin: const EdgeInsets.symmetric(horizontal: 1),
-            decoration: BoxDecoration(
-              color: isActive
-                  ? theme.toolbarIconSelectedColor.withValues(alpha: 25.0 / 255.0)
-                  : Colors.transparent,
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: PhosphorIcon(
-              icon,
-              size: StarNoteIcons.navSize,
-              color: isActive
-                  ? theme.toolbarIconSelectedColor
-                  : theme.toolbarIconColor,
-            ),
-          ),
+        Expanded(child: _buildDocumentTitle(colorScheme)),
+        const SizedBox(width: 4),
+        StarNoteNavButton(
+          icon: StarNoteIcons.exportIcon,
+          tooltip: 'Dışa Aktar',
+          onPressed: () => showExportMenu(context, ref),
         ),
-      ),
+        StarNoteNavButton(
+          icon: StarNoteIcons.more,
+          tooltip: 'Daha Fazla',
+          onPressed: () => showMoreMenu(context, ref),
+        ),
+      ],
     );
   }
-}
 
-/// Document tabs in the center of the navigation bar.
-// ignore: unused_element
-class _DocumentTabs extends StatelessWidget {
-  const _DocumentTabs();
+  /// Full layout (tablet/desktop >=600px): all buttons visible.
+  Widget _buildFullLayout(
+    BuildContext context,
+    WidgetRef ref,
+    ColorScheme colorScheme,
+  ) {
+    final gridVisible = ref.watch(gridVisibilityProvider);
+    final pageCount = ref.watch(pageCountProvider);
 
-  @override
-  Widget build(BuildContext context) {
-    final theme = DrawingTheme.of(context);
+    return Row(
+      children: [
+        // ── Left: Home + Sidebar + Title ──
+        StarNoteNavButton(
+          icon: StarNoteIcons.home,
+          tooltip: 'Ana Sayfa',
+          onPressed: onHomePressed ?? () {},
+        ),
 
-    return Center(
+        if (pageCount > 1)
+          StarNoteNavButton(
+            icon: isSidebarOpen
+                ? StarNoteIcons.sidebarActive
+                : StarNoteIcons.sidebar,
+            tooltip: 'Sayfa Paneli',
+            onPressed: onSidebarToggle ?? () {},
+            isActive: isSidebarOpen,
+          ),
+
+        const SizedBox(width: 4),
+        Flexible(child: _buildDocumentTitle(colorScheme)),
+
+        // ── Center spacer ──
+        const Expanded(child: SizedBox()),
+
+        // ── Right: Reader(disabled) + Grid + Export + More ──
+        StarNoteNavButton(
+          icon: StarNoteIcons.readerMode,
+          tooltip: 'Okuyucu Modu',
+          onPressed: () {},
+          isDisabled: true,
+        ),
+
+        StarNoteNavButton(
+          icon: gridVisible ? StarNoteIcons.gridOn : StarNoteIcons.gridOff,
+          tooltip: gridVisible ? 'Kılavuzu Gizle' : 'Kılavuzu Göster',
+          onPressed: () =>
+              ref.read(gridVisibilityProvider.notifier).state = !gridVisible,
+          isActive: gridVisible,
+        ),
+
+        StarNoteNavButton(
+          icon: StarNoteIcons.exportIcon,
+          tooltip: 'Dışa Aktar',
+          onPressed: () => showExportMenu(context, ref),
+        ),
+
+        StarNoteNavButton(
+          icon: StarNoteIcons.more,
+          tooltip: 'Daha Fazla',
+          onPressed: () => showMoreMenu(context, ref),
+        ),
+      ],
+    );
+  }
+
+  /// Document title pill with caret-down icon.
+  Widget _buildDocumentTitle(ColorScheme colorScheme) {
+    return GestureDetector(
+      onTap: onTitlePressed,
       child: Container(
-        height: 32,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        constraints: const BoxConstraints(maxWidth: 300),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
-          color: theme.panelBorderColor.withValues(alpha: 30.0 / 255.0),
+          color: colorScheme.onSurface.withValues(alpha: 0.06),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            PhosphorIcon(
-              StarNoteIcons.page,
-              size: 16,
-              color: theme.toolbarIconColor,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              'İsimsiz not',
-              style: TextStyle(
-                fontSize: 13,
-                color: theme.toolbarIconColor,
-                fontWeight: FontWeight.w500,
+            Flexible(
+              child: Text(
+                documentTitle ?? 'İsimsiz Not',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: colorScheme.onSurface,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
             const SizedBox(width: 4),
             PhosphorIcon(
               StarNoteIcons.caretDown,
-              size: 16,
-              color: theme.toolbarIconColor,
+              size: 14,
+              color: colorScheme.onSurfaceVariant,
             ),
           ],
         ),

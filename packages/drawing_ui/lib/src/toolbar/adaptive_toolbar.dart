@@ -20,9 +20,6 @@ class AdaptiveToolbar extends StatelessWidget {
     this.toolButtonKeys,
     this.penGroupButtonKey,
     this.highlighterGroupButtonKey,
-    this.onSidebarToggle,
-    this.showSidebarButton = false,
-    this.isSidebarOpen = false,
   });
 
   /// Callback when undo is pressed.
@@ -45,15 +42,6 @@ class AdaptiveToolbar extends StatelessWidget {
 
   /// Single GlobalKey for highlighter group button.
   final GlobalKey? highlighterGroupButtonKey;
-
-  /// Callback when sidebar toggle is pressed.
-  final VoidCallback? onSidebarToggle;
-
-  /// Whether to show sidebar toggle button.
-  final bool showSidebarButton;
-
-  /// Whether sidebar is currently open.
-  final bool isSidebarOpen;
 
   /// Returns true if compact mode should be used (phone layout).
   /// When true, DrawingScreen should:
@@ -79,9 +67,6 @@ class AdaptiveToolbar extends StatelessWidget {
             toolButtonKeys: toolButtonKeys,
             penGroupButtonKey: penGroupButtonKey,
             highlighterGroupButtonKey: highlighterGroupButtonKey,
-            onSidebarToggle: onSidebarToggle,
-            showSidebarButton: showSidebarButton,
-            isSidebarOpen: isSidebarOpen,
           );
         }
 
@@ -94,9 +79,6 @@ class AdaptiveToolbar extends StatelessWidget {
             toolButtonKeys: toolButtonKeys,
             penGroupButtonKey: penGroupButtonKey,
             highlighterGroupButtonKey: highlighterGroupButtonKey,
-            onSidebarToggle: onSidebarToggle,
-            showSidebarButton: showSidebarButton,
-            isSidebarOpen: isSidebarOpen,
           );
         }
 

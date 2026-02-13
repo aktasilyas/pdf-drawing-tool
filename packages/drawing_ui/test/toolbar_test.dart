@@ -90,9 +90,10 @@ void main() {
     testWidgets('renders right action buttons', (tester) async {
       await tester.pumpWidget(createTopNavBarWidget());
 
-      // Verify right action buttons exist
-      expect(find.byIcon(StarNoteIcons.layers), findsOneWidget);
+      // Verify right action buttons exist (full layout)
+      expect(find.byIcon(StarNoteIcons.readerMode), findsOneWidget);
       expect(find.byIcon(StarNoteIcons.gridOn), findsOneWidget);
+      expect(find.byIcon(StarNoteIcons.exportIcon), findsOneWidget);
       expect(find.byIcon(StarNoteIcons.more), findsOneWidget);
     });
 

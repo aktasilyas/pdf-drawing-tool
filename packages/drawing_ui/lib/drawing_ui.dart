@@ -49,7 +49,9 @@ export 'src/widgets/widgets.dart';
 export 'src/widgets/template_picker/template_picker_widgets.dart';
 
 // Toolbar (Two-row layout)
+export 'src/toolbar/starnote_nav_button.dart';
 export 'src/toolbar/top_navigation_bar.dart';
+export 'src/toolbar/top_nav_menus.dart';
 export 'src/toolbar/tool_bar.dart';
 export 'src/toolbar/tool_button.dart';
 export 'src/toolbar/quick_access_row.dart';
