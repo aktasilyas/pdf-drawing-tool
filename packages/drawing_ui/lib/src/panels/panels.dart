@@ -11,3 +11,4 @@ export 'toolbar_editor_panel.dart';
 export 'toolbar_settings_panel.dart';
 export 'lasso_selection_panel.dart';
 export 'laser_pointer_panel.dart';
+export 'pen_type_picker.dart';

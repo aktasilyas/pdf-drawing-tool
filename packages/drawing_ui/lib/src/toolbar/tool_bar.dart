@@ -267,13 +267,39 @@ class _ToolBarState extends ConsumerState<ToolBar> {
   }
 
   void _onToolPressed(ToolType tool) {
+    // Pen group tap → open picker
+    if (penToolsSet.contains(tool)) {
+      final currentTool = ref.read(currentToolProvider);
+      final activePanel = ref.read(activePanelProvider);
+      // If this pen is already active and panel open → close
+      if (penToolsSet.contains(currentTool) &&
+          penToolsSet.contains(activePanel)) {
+        ref.read(activePanelProvider.notifier).state = null;
+        ref.read(penPickerModeProvider.notifier).state = false;
+        return;
+      }
+      if (currentTool != tool) {
+        ref.read(currentToolProvider.notifier).state = tool;
+      }
+      ref.read(penPickerModeProvider.notifier).state = true;
+      ref.read(activePanelProvider.notifier).state = tool;
+      return;
+    }
+
     ref.read(currentToolProvider.notifier).state = tool;
     ref.read(activePanelProvider.notifier).state = null;
   }
 
   void _onPanelTap(ToolType tool) {
     final active = ref.read(activePanelProvider);
-    ref.read(activePanelProvider.notifier).state = active == tool ? null : tool;
+    if (active == tool) {
+      ref.read(activePanelProvider.notifier).state = null;
+      ref.read(penPickerModeProvider.notifier).state = false;
+    } else {
+      // Long press: skip picker, direct settings
+      ref.read(penPickerModeProvider.notifier).state = false;
+      ref.read(activePanelProvider.notifier).state = tool;
+    }
   }
 
   GlobalKey? getToolButtonKey(ToolType tool) => _toolButtonKeys[tool];

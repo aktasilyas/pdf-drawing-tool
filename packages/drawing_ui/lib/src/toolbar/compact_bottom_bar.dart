@@ -180,11 +180,13 @@ class _CompactBottomBarState extends ConsumerState<CompactBottomBar> {
       // Different tool - select it
       ref.read(currentToolProvider.notifier).state = tool;
       ref.read(activePanelProvider.notifier).state = null;
+      ref.read(penPickerModeProvider.notifier).state = false;
     }
   }
 
   /// Handle panel chevron tap.
   void _onPanelTap(ToolType tool) {
+    ref.read(penPickerModeProvider.notifier).state = false;
     widget.onPanelRequested?.call(tool);
   }
 }

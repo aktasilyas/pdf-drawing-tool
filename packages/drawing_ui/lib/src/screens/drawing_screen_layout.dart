@@ -252,6 +252,8 @@ void handlePanelChange({
   required GlobalKey highlighterGroupButtonKey,
   required GlobalKey settingsButtonKey,
   required VoidCallback onClosePanel,
+  bool isPenPickerMode = false,
+  ValueChanged<ToolType>? onPenSelected,
 }) {
   if (MediaQuery.of(context).size.width < ToolbarLayoutMode.compactBreakpoint) return;
   if (panel == null) {
@@ -264,12 +266,18 @@ void handlePanelChange({
             : highlighterToolsSet.contains(panel)
                 ? highlighterGroupButtonKey
                 : toolButtonKeys[panel] ?? GlobalKey();
+    final isPicker = isPenPickerMode && penToolsSet.contains(panel);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       panelController.show(
         context: context,
         anchorKey: anchorKey,
         onDismiss: onClosePanel,
-        child: buildActivePanel(panel: panel),
+        maxWidth: isPicker ? 220 : 280,
+        child: buildActivePanel(
+          panel: panel,
+          isPenPickerMode: isPenPickerMode,
+          onPenSelected: onPenSelected,
+        ),
       );
     });
   }
