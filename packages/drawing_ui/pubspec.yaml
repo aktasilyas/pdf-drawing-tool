@@ -20,6 +20,7 @@ dependencies:
       url: https://github.com/aktasilyas/flutter_pen_toolbar.git
       ref: main
   flex_color_picker: ^3.8.0
+  phosphor_flutter: ^2.1.0
   pdfx: ^2.6.0  # PDF rendering and import
   pdf: ^3.10.8  # PDF creation and export
   path_provider: ^2.1.0  # For storing PDF files locally

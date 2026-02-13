@@ -28,6 +28,10 @@ class PaperColorPalette extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final outlineColor =
+        isDark ? AppColors.outlineDark : AppColors.outlineLight;
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: paperColors.map((color) {
@@ -42,7 +46,7 @@ class PaperColorPalette extends StatelessWidget {
               color: Color(color),
               shape: BoxShape.circle,
               border: Border.all(
-                color: isSelected ? AppColors.primary : AppColors.outlineLight,
+                color: isSelected ? AppColors.primary : outlineColor,
                 width: isSelected ? 2 : 1,
               ),
               boxShadow: (color == 0xFFFFFFFF || color == 0xFFF5F5F5)

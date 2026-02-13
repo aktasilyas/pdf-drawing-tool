@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
+import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/widgets/color_presets.dart';
 import 'package:drawing_ui/src/widgets/compact_slider.dart';
 import 'package:drawing_ui/src/widgets/unified_color_picker.dart';
@@ -137,7 +138,7 @@ class _LaserModeSelector extends StatelessWidget {
         Expanded(
           child: _LaserModeOption(
             mode: LaserMode.line,
-            icon: Icons.show_chart,
+            icon: StarNoteIcons.chartLine,
             label: 'Çizgi',
             isSelected: selectedMode == LaserMode.line,
             onTap: () => onModeSelected(LaserMode.line),
@@ -147,7 +148,7 @@ class _LaserModeSelector extends StatelessWidget {
         Expanded(
           child: _LaserModeOption(
             mode: LaserMode.dot,
-            icon: Icons.fiber_manual_record,
+            icon: StarNoteIcons.circle,
             label: 'Nokta',
             isSelected: selectedMode == LaserMode.dot,
             onTap: () => onModeSelected(LaserMode.dot),

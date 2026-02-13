@@ -184,20 +184,27 @@ class CoverPreviewWidget extends StatelessWidget {
             ],
           ),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: List.generate(
-            8,
-            (index) => Container(
-              width: 6,
-              height: 6,
-              margin: const EdgeInsets.only(left: 3),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.3),
-                shape: BoxShape.circle,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final dotSize = 6.0;
+            final minSpacing = 4.0;
+            final maxDots = (constraints.maxHeight / (dotSize + minSpacing)).floor().clamp(0, 8);
+            return Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: List.generate(
+                maxDots,
+                (index) => Container(
+                  width: dotSize,
+                  height: dotSize,
+                  margin: const EdgeInsets.only(left: 3),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.3),
+                    shape: BoxShape.circle,
+                  ),
+                ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
     );

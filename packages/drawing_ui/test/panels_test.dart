@@ -26,7 +26,7 @@ void main() {
       );
 
       expect(find.text('Test Panel'), findsOneWidget);
-      expect(find.byIcon(Icons.close), findsOneWidget);
+      expect(find.byIcon(StarNoteIcons.close), findsOneWidget);
       expect(find.text('Content'), findsOneWidget);
     });
 
@@ -48,7 +48,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byIcon(Icons.close));
+      await tester.tap(find.byIcon(StarNoteIcons.close));
       expect(closed, isTrue);
     });
   });
@@ -70,7 +70,7 @@ void main() {
         ),
       );
 
-      expect(find.byIcon(Icons.lock), findsWidgets);
+      expect(find.byIcon(StarNoteIcons.lock), findsWidgets);
       expect(find.text('Premium'), findsOneWidget);
     });
 
@@ -264,7 +264,7 @@ void main() {
 
       // Lasso mode should have lock indicator
       // (Implementation marks it as premium)
-      expect(find.byIcon(Icons.lock), findsWidgets);
+      expect(find.byIcon(StarNoteIcons.lock), findsWidgets);
     });
 
     testWidgets('has clear page button', (tester) async {
@@ -305,7 +305,7 @@ void main() {
       );
 
       expect(find.byType(TextField), findsOneWidget);
-      expect(find.byIcon(Icons.send), findsOneWidget);
+      expect(find.byIcon(StarNoteIcons.send), findsOneWidget);
     });
 
     testWidgets('shows premium badge', (tester) async {
@@ -325,7 +325,7 @@ void main() {
       );
 
       expect(find.text('Pro'), findsOneWidget);
-      expect(find.byIcon(Icons.auto_awesome), findsWidgets);
+      expect(find.byIcon(StarNoteIcons.sparkle), findsWidgets);
     });
 
     testWidgets('has quick suggestions', (tester) async {

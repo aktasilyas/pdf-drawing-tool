@@ -39,19 +39,15 @@ class DocumentCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return GestureDetector(
-      onTap: onTap,
-      onLongPress: () => _handleLongPress(ref),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(child: _buildThumbnailCard(context)),
-          Padding(
-            padding: const EdgeInsets.only(top: AppSpacing.xs),
-            child: _buildInfoSection(context),
-          ),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(child: _buildThumbnailCard(context, ref)),
+        Padding(
+          padding: const EdgeInsets.only(top: AppSpacing.xs),
+          child: _buildInfoSection(context),
+        ),
+      ],
     );
   }
 
@@ -64,7 +60,7 @@ class DocumentCard extends ConsumerWidget {
     }
   }
 
-  Widget _buildThumbnailCard(BuildContext context) {
+  Widget _buildThumbnailCard(BuildContext context, WidgetRef ref) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final outlineColor =
         isDark ? AppColors.outlineDark : AppColors.outlineLight;
@@ -81,9 +77,17 @@ class DocumentCard extends ConsumerWidget {
       ),
       child: Stack(
         children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(AppRadius.sm - 1),
-            child: _buildThumbnail(context),
+          // Thumbnail with card tap gesture (below favorite button)
+          Positioned.fill(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: onTap,
+              onLongPress: () => _handleLongPress(ref),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(AppRadius.sm - 1),
+                child: _buildThumbnail(context),
+              ),
+            ),
           ),
           if (isSelectionMode && isSelected) _buildSelectionOverlay(),
           if (isSelectionMode)
@@ -92,6 +96,7 @@ class DocumentCard extends ConsumerWidget {
               left: AppSpacing.sm,
               child: DocumentSelectionCheckbox(isSelected: isSelected),
             ),
+          // Favorite button on top (hit-test priority over card tap)
           if (!isSelectionMode)
             Positioned(
               top: AppSpacing.sm,

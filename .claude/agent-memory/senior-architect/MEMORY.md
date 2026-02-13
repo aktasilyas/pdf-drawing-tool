@@ -32,3 +32,21 @@
 ## File line counts to watch
 - documents_screen.dart: ~1831 lines (critical violation)
 - new_document_dialog.dart: ~451 lines (violation)
+
+## Architecture Bugs Found (2026-02-11)
+
+### BUG: Folder Deletion Does Not Trash Documents
+- `FolderRepositoryImpl.deleteFolder()` only calls `_localDatasource.deleteFolder(id)`
+- No code to move documents to trash or handle sub-folders
+- Data layer uses SharedPreferences (NOT Drift), so no SQL cascade support
+- Fix requires: query docs by folderId, set isInTrash=true, handle sub-folders recursively
+
+### BUG: GestureDetector Hierarchy in DocumentCard
+- Outer GestureDetector wraps entire card with `onTap: onTap` (opens document)
+- Inner DocumentFavoriteButton also has GestureDetector but loses gesture arena
+- Need `behavior: HitTestBehavior.opaque` or switch to InkWell/IconButton
+
+### Data Layer: SharedPreferences-based (not Drift)
+- Despite app_database.dart having Drift tables, actual data stored in SharedPreferences
+- FolderLocalDatasource and DocumentLocalDatasource both use SharedPreferences JSON
+- No SQL cascade/foreign key support -- all relationships managed in code

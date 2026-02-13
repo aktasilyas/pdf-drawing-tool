@@ -24,3 +24,22 @@
 - `AppShadows.sm` uses black opacity shadows -- nearly invisible on dark backgrounds
 - Suggestion: suppress shadows or use border-based elevation in dark mode
 - Not a blocker, but worth noting in future reviews
+
+## Barrel Export Issues (Issue 12-17 era)
+- `documents.dart` barrel only exports original files, not refactored split files
+- No `index.dart` exists for `presentation/widgets/` or `presentation/screens/`
+- New files use direct path imports like `import '...widgets/document_card.dart'` instead of barrel
+- Pre-existing files (sidebar.dart, empty_state.dart, document_context_menu.dart, document_grid.dart) were never tokenized for spacing
+
+## Colors.red Pattern
+- `Colors.red` / `Colors.red.shade400` used extensively for destructive actions (delete buttons, error snackbars)
+- Should define `AppColors.destructive` / `AppColors.error` tokens and migrate
+- Found in: documents_menus.dart, folder_menus.dart, new_document_importers.dart
+
+## drawing_ui Package Patterns (Phase M1)
+- `drawing_ui` is a library package -- it does NOT have access to `example_app` tokens (AppColors, AppSpacing, etc.)
+- Uses its own `DrawingTheme` system (`DrawingTheme.of(context)`) for toolbar colors
+- Some widgets (`CompactBottomBar`) use Material `colorScheme` directly while others use `DrawingTheme` -- inconsistency
+- Pen/highlighter/toolsWithPanel lists are duplicated in: tool_bar.dart, medium_toolbar.dart, compact_bottom_bar.dart, drawing_screen_panels.dart
+- Breakpoints 600/840 scattered across multiple files; should be centralized
+- _NavButton in top_navigation_bar.dart is 32x32dp -- major touch target violation

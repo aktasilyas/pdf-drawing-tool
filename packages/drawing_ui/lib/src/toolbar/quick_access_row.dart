@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
@@ -94,7 +95,7 @@ class QuickColorChips extends ConsumerWidget {
                 shape: BoxShape.circle,
                 border: Border.all(color: Colors.grey.shade300, width: 0.5),
               ),
-              child: const Icon(Icons.more_horiz, size: 14, color: Color(0xFF666666)),
+              child: PhosphorIcon(StarNoteIcons.more, size: 14, color: const Color(0xFF666666)),
             ),
           ),
         ),
@@ -187,8 +188,8 @@ class _QuickColorChip extends StatelessWidget {
               : null,
         ),
         child: isSelected
-            ? Icon(
-                Icons.check,
+            ? PhosphorIcon(
+                StarNoteIcons.check,
                 size: 12,
                 color: color.computeLuminance() > 0.5 ? Colors.black : Colors.white,
               )

@@ -127,16 +127,38 @@ class FolderRepositoryImpl implements FolderRepository {
     bool deleteContents = false,
   }) async {
     try {
-      // TODO: If deleteContents is false, check if folder has documents
-      // and return error if it does. This will be implemented when
-      // we have proper folder-document relationship tracking.
+      // Move all documents in this folder to trash
+      await _moveDocumentsToTrash(id);
 
+      // Recursively handle subfolders
+      final subfolders = await _localDatasource.getFolders(parentId: id);
+      for (final subfolder in subfolders) {
+        await _moveDocumentsToTrash(subfolder.id);
+        await _localDatasource.deleteFolder(subfolder.id);
+      }
+
+      // Delete the folder itself
       await _localDatasource.deleteFolder(id);
       return const Right(null);
     } on CacheException catch (e) {
       return Left(CacheFailure(e.message));
     } catch (e) {
       return Left(CacheFailure('Failed to delete folder: $e'));
+    }
+  }
+
+  /// Moves all non-trashed documents in a folder to trash.
+  Future<void> _moveDocumentsToTrash(String folderId) async {
+    final allDocs = await _documentDatasource.getAllDocuments();
+    final folderDocs = allDocs.where(
+      (doc) => doc.folderId == folderId && !doc.isInTrash,
+    );
+    for (final doc in folderDocs) {
+      final updated = doc.copyWith(
+        isInTrash: true,
+        deletedAt: DateTime.now(),
+      );
+      await _documentDatasource.updateDocument(updated);
     }
   }
 

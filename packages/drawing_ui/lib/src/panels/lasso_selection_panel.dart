@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
+import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/panels/tool_panel.dart';
 
 /// Settings panel for the lasso (kement) selection tool.
@@ -95,7 +96,7 @@ class _CompactModeSelector extends StatelessWidget {
         children: [
           Expanded(
             child: _ModeButton(
-              icon: Icons.gesture,
+              icon: StarNoteIcons.selection,
               label: 'Serbest',
               isSelected: selectedMode == LassoMode.freeform,
               onTap: () => onModeSelected(LassoMode.freeform),
@@ -103,7 +104,7 @@ class _CompactModeSelector extends StatelessWidget {
           ),
           Expanded(
             child: _ModeButton(
-              icon: Icons.crop_square,
+              icon: StarNoteIcons.shapes,
               label: 'Dikdörtgen',
               isSelected: selectedMode == LassoMode.rectangle,
               onTap: () => onModeSelected(LassoMode.rectangle),
@@ -193,14 +194,14 @@ class _SelectableTypesGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final types = [
-      (SelectableType.handwriting, 'El yazısı', Icons.edit),
-      (SelectableType.shape, 'Şekil', Icons.category_outlined),
-      (SelectableType.imageSticker, 'Resim', Icons.image_outlined),
-      (SelectableType.highlighter, 'Vurgulayıcı', Icons.highlight),
-      (SelectableType.textBox, 'Metin', Icons.text_fields),
-      (SelectableType.tape, 'Bant', Icons.straighten),
-      (SelectableType.link, 'Link', Icons.link),
-      (SelectableType.label, 'Etiket', Icons.label_outline),
+      (SelectableType.handwriting, 'El yazısı', StarNoteIcons.pencil),
+      (SelectableType.shape, 'Şekil', StarNoteIcons.shapes),
+      (SelectableType.imageSticker, 'Resim', StarNoteIcons.image),
+      (SelectableType.highlighter, 'Vurgulayıcı', StarNoteIcons.highlighter),
+      (SelectableType.textBox, 'Metin', StarNoteIcons.textT),
+      (SelectableType.tape, 'Bant', StarNoteIcons.ruler),
+      (SelectableType.link, 'Link', StarNoteIcons.link),
+      (SelectableType.label, 'Etiket', StarNoteIcons.tag),
     ];
 
     return Wrap(

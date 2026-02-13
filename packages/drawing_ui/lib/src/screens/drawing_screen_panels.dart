@@ -2,24 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/panels/panels.dart';
+import 'package:drawing_ui/src/toolbar/tool_groups.dart';
 import 'package:drawing_ui/src/widgets/anchored_panel.dart';
-
-/// Pen tools that share the same anchor.
-const Set<ToolType> drawingScreenPenTools = {
-  ToolType.pencil,
-  ToolType.hardPencil,
-  ToolType.ballpointPen,
-  ToolType.gelPen,
-  ToolType.dashedPen,
-  ToolType.brushPen,
-  ToolType.rulerPen,
-};
-
-/// Highlighter tools that share the same anchor.
-const Set<ToolType> drawingScreenHighlighterTools = {
-  ToolType.highlighter,
-  ToolType.neonHighlighter,
-};
 
 /// Determine panel alignment based on tool's position in toolbar.
 AnchorAlignment resolvePanelAlignment(ToolType tool) {
@@ -27,7 +11,7 @@ AnchorAlignment resolvePanelAlignment(ToolType tool) {
     ToolType.laserPointer,
   };
 
-  if (drawingScreenPenTools.contains(tool)) {
+  if (penToolsSet.contains(tool)) {
     return AnchorAlignment.left;
   }
   if (rightTools.contains(tool)) {

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
+import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/widgets/color_presets.dart';
 import 'package:drawing_ui/src/widgets/compact_slider.dart';
 import 'package:drawing_ui/src/widgets/compact_toggle.dart';
@@ -446,7 +448,7 @@ class _CompactAddButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.add, size: 14, color: colorScheme.onSurfaceVariant),
+            PhosphorIcon(StarNoteIcons.plus, size: 14, color: colorScheme.onSurfaceVariant),
             const SizedBox(width: 6),
             Text('Kalem kutusuna ekle',
                 style: TextStyle(

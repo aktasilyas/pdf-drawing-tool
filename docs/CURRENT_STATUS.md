@@ -9,15 +9,15 @@
 
 | Key | Value |
 |-----|-------|
-| **Current Phase** | UI Refactor & Cleanup |
-| **Current Module** | Issue 12-17 File Splitting |
-| **Last Commit** | b19db74 fix(theme): complete PDF thumbnail and settings dark theme fixes |
+| **Current Phase** | App UI Polish & Bug Fixes |
+| **Current Module** | Template Modernization ✅ Complete |
+| **Last Commit** | 5542e17 fix: dark theme colors and cover preview overflow |
 | **Branch** | main |
-| **Next Task** | Issue 12 - documents_screen.dart bölme |
+| **Next Task** | Tablet final test + GitHub push |
 
 ---
 
-## Completed Tasks
+## Completed Tasks (This Sprint)
 
 ✅ **Dark Theme Fix (Issue 1-11):**
 - All widgets and screens dark-theme-aware
@@ -32,29 +32,54 @@
 - Settings screen fully dark-theme-aware
 - All settings widgets theme-responsive
 
+✅ **Issue 12: documents_screen.dart split** (1831 → 9 files, all <300 lines)
+- documents_screen.dart (298), documents_screen_helpers.dart (234)
+- documents_content_view.dart (273), documents_combined_grid.dart (91)
+- documents_list_view.dart (256), document_list_tile.dart (241)
+- documents_menus.dart (251), folder_menus.dart (198)
+- documents_error_views.dart (52)
+
+✅ **Issue 13: new_document_dialog.dart split** (475 → 184 + 300 lines)
+- new_document_dialog.dart: dropdown menu, quick creators
+- new_document_importers.dart: PDF/image import logic
+
+✅ **Issue 14: Modal keyboard overflow fix**
+- SingleChildScrollView + insetPadding in rename dialogs
+
+✅ **Issue 15+17: Hardcoded spacing → AppSpacing tokens**
+- documents_combined_grid.dart, document_list_tile.dart
+- documents_menus.dart, folder_menus.dart
+
+✅ **Issue 16: Sidebar AppColors tokens**
+- Already properly using design system tokens
+
+✅ **Bug Fix: Favori yildiz gesture conflict**
+- onFavoriteToggle callback wired in all DocumentCard usages
+
+✅ **Bug Fix: List view thumbnail tasma**
+- Cover preview overflow fixed with LayoutBuilder
+
+✅ **Bug Fix: Klasor silme → belgeler cope tasinmiyor**
+- Folder deletion now moves documents to trash
+
+✅ **Bug Fix: Template ekrani dark theme + responsive**
+- Hardcoded AppColors.outlineLight/textSecondaryLight → isDark ternaries
+- Tablet preview enlarged (85x120 → 110x155)
+
+✅ **Code Review: Barrel exports, hardcoded values**
+- All review findings resolved
+
+✅ **Branch temizligi: 29 eski branch silindi**
+- Only 4 worktree branches remain
+
 ---
 
-## Pending Tasks (Issue 12-17)
+## Pending
 
-🔴 **Issue 12: documents_screen.dart** (1831 lines → 300 lines)
-- Split into multiple files following clean architecture
-- Extract grid view, list view, and helper methods
-
-🔴 **Issue 13: new_document_dialog.dart** (451 lines)
-- Split dialog logic into separate components
-- Extract format picker and template logic
-
-🔴 **Issue 14: Modal keyboard overflow fix**
-- Fix keyboard overlap in modals and dialogs
-
-🔴 **Issue 15: Grid hardcoded spacing → AppSpacing**
-- Replace all magic numbers with AppSpacing tokens
-
-🔴 **Issue 16: Sidebar AppColors tokens**
-- Apply design system tokens to sidebar components
-
-🔴 **Issue 17: List tile magic numbers**
-- Replace hardcoded values with design tokens
+- [ ] GitHub push (hesap sorunu cozulunce)
+- [ ] Tablet final test
+- [ ] Advanced color picker redesign (ileri asama)
+- [ ] Toolbar customization (ileri asama)
 
 ---
 
@@ -72,10 +97,10 @@
 ## Notes
 
 - All Phase 0-9 complete
-- Phase 10 (Drawing/Editor Screen) is next after cleanup
-- Focus on file splitting and design token consistency
+- Issues 12-17 (UI Refactor & Cleanup) complete
+- All dark theme and bug fix issues resolved
 - Max 300 lines per file rule applies strictly
 
 ---
 
-*Last updated: 2026-02-11*
+*Last updated: 2026-02-12*

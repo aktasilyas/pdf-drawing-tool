@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/canvas/canvas_color_scheme.dart';
 import 'package:drawing_ui/src/painters/template_pattern_painter.dart';
 
 /// Sayfa içi arka plan pattern çizici (LIMITED mod için).
@@ -10,19 +11,24 @@ import 'package:drawing_ui/src/painters/template_pattern_painter.dart';
 /// PERFORMANCE: Uses Picture caching to avoid redrawing patterns
 class PageBackgroundPatternPainter extends CustomPainter {
   final PageBackground background;
-  
+  final CanvasColorScheme? colorScheme;
+
   // Static cache for pattern pictures
   static final Map<String, ui.Picture> _pictureCache = {};
   static const int _maxCacheSize = 20;
 
-  const PageBackgroundPatternPainter({required this.background});
+  const PageBackgroundPatternPainter({
+    required this.background,
+    this.colorScheme,
+  });
   
   /// Generate cache key from background properties
   String _getCacheKey(Size size) {
     return '${background.type}_${background.lineColor}_'
         '${background.gridSpacing}_${background.lineSpacing}_'
         '${background.templatePattern}_${background.templateSpacingMm}_'
-        '${background.coverId}_${size.width}_${size.height}';
+        '${background.coverId}_${size.width}_${size.height}_'
+        '${colorScheme?.hashCode}';
   }
 
   @override
@@ -59,9 +65,11 @@ class PageBackgroundPatternPainter extends CustomPainter {
   }
   
   void _drawPattern(Canvas canvas, Size size) {
-    final lineColor = background.lineColor ?? 0xFFE0E0E0;
+    final rawLineColor = background.lineColor ?? 0xFFE0E0E0;
+    final lineColor = colorScheme?.effectiveLineColor(background.lineColor)
+        ?? Color(rawLineColor);
     final linePaint = Paint()
-      ..color = Color(lineColor)
+      ..color = lineColor
       ..strokeWidth = 0.5
       ..isAntiAlias = true;
 
@@ -79,7 +87,9 @@ class PageBackgroundPatternPainter extends CustomPainter {
         break;
 
       case BackgroundType.dotted:
-        _drawDots(canvas, size, background.gridSpacing ?? 20.0, Color(lineColor));
+        final dotColor = colorScheme?.effectiveDotColor(background.lineColor)
+            ?? lineColor;
+        _drawDots(canvas, size, background.gridSpacing ?? 20.0, dotColor);
         break;
 
       case BackgroundType.pdf:
@@ -93,7 +103,7 @@ class PageBackgroundPatternPainter extends CustomPainter {
             pattern: background.templatePattern!,
             spacingMm: background.templateSpacingMm ?? 8.0,
             lineWidth: background.templateLineWidth ?? 0.5,
-            lineColor: Color(lineColor),
+            lineColor: lineColor,
             backgroundColor: Colors.transparent, // Already painted by canvas
             pageSize: size,
           );
@@ -221,6 +231,7 @@ class PageBackgroundPatternPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant PageBackgroundPatternPainter oldDelegate) {
-    return oldDelegate.background != background;
+    return oldDelegate.background != background ||
+        oldDelegate.colorScheme != colorScheme;
   }
 }

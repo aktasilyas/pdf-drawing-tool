@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
+import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/widgets/reorderable_tool_list.dart';
 import 'package:drawing_ui/src/models/toolbar_config.dart';
 
@@ -74,7 +76,7 @@ class ToolbarSettingsPanel extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: Row(
         children: [
-          Icon(Icons.settings, size: 16, color: colorScheme.onSurfaceVariant),
+          PhosphorIcon(StarNoteIcons.settings, size: StarNoteIcons.panelSize, color: colorScheme.onSurfaceVariant),
           const SizedBox(width: 6),
           Expanded(
             child: Text(
@@ -88,7 +90,7 @@ class ToolbarSettingsPanel extends ConsumerWidget {
             ),
           ),
           IconButton(
-            icon: Icon(Icons.close, size: 16, color: colorScheme.onSurfaceVariant),
+            icon: PhosphorIcon(StarNoteIcons.close, size: StarNoteIcons.panelSize, color: colorScheme.onSurfaceVariant),
             onPressed: () {
               if (onClose != null) {
                 onClose!();
@@ -202,7 +204,7 @@ class ToolbarSettingsPanel extends ConsumerWidget {
         height: 32,
         child: OutlinedButton.icon(
           onPressed: () => _showResetConfirmation(context, ref),
-          icon: const Icon(Icons.restore, size: 14),
+          icon: PhosphorIcon(StarNoteIcons.rotate, size: 14),
           label: const Text(
             'Varsayılana Sıfırla',
             style: TextStyle(fontSize: 11),

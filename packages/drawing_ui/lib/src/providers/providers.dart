@@ -35,3 +35,4 @@ export 'pdf_render_provider.dart'
         pdfRenderQueueProvider;
 
 export 'pdf_prefetch_provider.dart';
+export 'canvas_dark_mode_provider.dart';

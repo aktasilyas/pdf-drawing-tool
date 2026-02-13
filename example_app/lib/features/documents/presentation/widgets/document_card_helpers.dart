@@ -53,23 +53,30 @@ class DocumentFavoriteButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.xs),
-        decoration: BoxDecoration(
-          color: (isDark ? AppColors.surfaceDark : AppColors.surfaceLight)
-              .withValues(alpha: 0.9),
-          shape: BoxShape.circle,
-        ),
-        child: Icon(
-          isFavorite ? Icons.star : Icons.star_outline,
-          size: AppIconSize.sm,
-          color: isFavorite
-              ? AppColors.accent
-              : (isDark
-                  ? AppColors.textTertiaryDark
-                  : AppColors.textTertiaryLight),
+    return SizedBox(
+      width: 48,
+      height: 48,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.all(AppSpacing.xs),
+            decoration: BoxDecoration(
+              color: (isDark ? AppColors.surfaceDark : AppColors.surfaceLight)
+                  .withValues(alpha: 0.9),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              isFavorite ? Icons.star : Icons.star_outline,
+              size: AppIconSize.sm,
+              color: isFavorite
+                  ? AppColors.accent
+                  : (isDark
+                      ? AppColors.textTertiaryDark
+                      : AppColors.textTertiaryLight),
+            ),
+          ),
         ),
       ),
     );

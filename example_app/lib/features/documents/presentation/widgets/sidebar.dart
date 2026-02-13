@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
 
 enum SidebarSection {
@@ -112,7 +114,10 @@ class Sidebar extends ConsumerWidget {
                       
                       if (rootFolders.isEmpty) {
                         return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: AppSpacing.xl,
+                            vertical: AppSpacing.sm,
+                          ),
                           child: Text(
                             'Klasör yok',
                             style: Theme.of(context).textTheme.bodySmall?.copyWith(
@@ -223,17 +228,23 @@ class _SidebarItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+      padding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.xxs,
+      ),
       child: Material(
-        color: isSelected 
-            ? colorScheme.primaryContainer 
+        color: isSelected
+            ? colorScheme.primaryContainer
             : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(8),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            padding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: 10,
+            ),
             child: Row(
               children: [
                 Icon(

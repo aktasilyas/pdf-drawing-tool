@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/panels/tool_panel.dart';
+import 'package:drawing_ui/src/theme/theme.dart';
 
 /// Settings panel for the image insertion tool.
 ///
@@ -28,7 +30,7 @@ class ImagePanel extends ConsumerWidget {
             children: [
               Expanded(
                 child: _ImageSourceButton(
-                  icon: Icons.photo_library,
+                  icon: StarNoteIcons.images,
                   label: 'Albüm',
                   onTap: () => _pickFromAlbum(context),
                 ),
@@ -36,7 +38,7 @@ class ImagePanel extends ConsumerWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: _ImageSourceButton(
-                  icon: Icons.camera_alt,
+                  icon: StarNoteIcons.camera,
                   label: 'Kamera',
                   onTap: () => _takePhoto(context),
                 ),
@@ -125,7 +127,7 @@ class _CompactLockedSection extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const Icon(Icons.cloud, size: 14, color: Colors.grey),
+            PhosphorIcon(StarNoteIcons.cloud, size: 14, color: Colors.grey),
             const SizedBox(width: 6),
             Text(
               title,
@@ -135,7 +137,7 @@ class _CompactLockedSection extends StatelessWidget {
               ),
             ),
             const Spacer(),
-            const Icon(Icons.lock, size: 12, color: Colors.orange),
+            PhosphorIcon(StarNoteIcons.lock, size: 12, color: Colors.orange),
           ],
         ),
       ),
@@ -215,8 +217,8 @@ class _RecentImagesGrid extends StatelessWidget {
               borderRadius: BorderRadius.circular(6),
             ),
             child: Center(
-              child: Icon(
-                Icons.image,
+              child: PhosphorIcon(
+                StarNoteIcons.image,
                 size: 20,
                 color: Colors.white.withValues(alpha: 0.7),
               ),

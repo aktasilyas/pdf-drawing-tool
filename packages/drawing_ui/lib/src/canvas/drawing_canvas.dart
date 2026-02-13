@@ -22,6 +22,7 @@ import 'package:drawing_ui/src/providers/text_provider.dart';
 import 'package:drawing_ui/src/providers/page_provider.dart';
 import 'package:drawing_ui/src/providers/drawing_providers.dart';
 import 'package:drawing_ui/src/providers/pdf_render_provider.dart';
+import 'package:drawing_ui/src/providers/canvas_dark_mode_provider.dart';
 import 'package:drawing_ui/src/widgets/widgets.dart';
 
 // =============================================================================
@@ -537,6 +538,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
 
     // Current page (LIMITED mod için)
     final currentPage = ref.watch(currentPageProvider);
+    final colorScheme = ref.watch(canvasColorSchemeProvider);
 
     // Listen to page changes - reset initialization and trigger prefetch
     ref.listen<core.Page>(currentPageProvider, (previous, current) {
@@ -718,8 +720,8 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                                         width: currentPage.size.width,
                                         height: currentPage.size.height,
                                         decoration: BoxDecoration(
-                                          color:
-                                              Color(currentPage.background.color),
+                                          color: colorScheme.effectiveBackground(
+                                              currentPage.background.color),
                                           border: canvasMode.pageBorderWidth > 0
                                               ? Border.all(
                                                   color: Color(
@@ -731,6 +733,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                                         child: CustomPaint(
                                           painter: PageBackgroundPatternPainter(
                                             background: currentPage.background,
+                                            colorScheme: colorScheme,
                                           ),
                                           size: Size(currentPage.size.width,
                                               currentPage.size.height),

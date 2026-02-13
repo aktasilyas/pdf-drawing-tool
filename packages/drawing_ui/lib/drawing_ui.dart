@@ -13,16 +13,22 @@ export 'src/models/tool_type.dart';
 // Theme
 export 'src/theme/drawing_theme.dart';
 export 'src/theme/drawing_colors.dart';
+export 'src/theme/starnote_icons.dart';
+
+// Re-export phosphor_flutter for PhosphorIcon widget
+export 'package:phosphor_flutter/phosphor_flutter.dart';
 
 // Screens
 export 'src/screens/drawing_screen.dart';
 export 'src/screens/drawing_screen_panels.dart';
+export 'src/screens/drawing_screen_layout.dart';
 
 // Canvas
 export 'src/canvas/mock_canvas.dart';
 export 'src/canvas/drawing_canvas.dart';
 export 'src/canvas/stroke_painter.dart';
 export 'src/canvas/infinite_background_painter.dart';
+export 'src/canvas/canvas_color_scheme.dart';
 
 // Painters
 export 'src/painters/template_pattern_painter.dart';
@@ -43,11 +49,20 @@ export 'src/widgets/widgets.dart';
 export 'src/widgets/template_picker/template_picker_widgets.dart';
 
 // Toolbar (Two-row layout)
+export 'src/toolbar/starnote_nav_button.dart';
 export 'src/toolbar/top_navigation_bar.dart';
+export 'src/toolbar/top_nav_menus.dart';
 export 'src/toolbar/tool_bar.dart';
 export 'src/toolbar/tool_button.dart';
 export 'src/toolbar/quick_access_row.dart';
 export 'src/toolbar/toolbar_widgets.dart';
+export 'src/toolbar/toolbar_layout_mode.dart';
+export 'src/toolbar/adaptive_toolbar.dart';
+export 'src/toolbar/medium_toolbar.dart';
+export 'src/toolbar/toolbar_overflow_menu.dart';
+export 'src/toolbar/compact_bottom_bar.dart';
+export 'src/toolbar/compact_tool_panel_sheet.dart';
+export 'src/toolbar/tool_groups.dart';
 
 // Note: drawing_toolbar.dart and right_action_buttons.dart deprecated
 // Actions moved to TopNavigationBar

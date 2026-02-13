@@ -179,7 +179,7 @@ void main() {
       );
 
       // Find close button
-      final closeButton = find.byIcon(Icons.close);
+      final closeButton = find.byIcon(StarNoteIcons.close);
       expect(closeButton, findsOneWidget);
 
       await tester.tap(closeButton);
