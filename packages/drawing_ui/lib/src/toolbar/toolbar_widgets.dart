@@ -1,7 +1,7 @@
 /// Shared widgets for the toolbar UI.
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'package:drawing_ui/src/theme/theme.dart';
+import 'package:drawing_ui/src/theme/starnote_icons.dart';
 
 /// Undo/Redo button group for toolbar.
 class ToolbarUndoRedoButtons extends StatelessWidget {
@@ -47,13 +47,13 @@ class ToolbarVerticalDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = DrawingTheme.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
       width: 1,
       height: 32,
       margin: const EdgeInsets.symmetric(horizontal: 8),
-      color: theme.panelBorderColor,
+      color: colorScheme.outlineVariant,
     );
   }
 }
@@ -75,7 +75,7 @@ class ToolbarIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = DrawingTheme.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Tooltip(
       message: tooltip,
@@ -94,8 +94,8 @@ class ToolbarIconButton extends StatelessWidget {
               icon,
               size: StarNoteIcons.actionSize,
               color: enabled
-                  ? theme.toolbarIconColor
-                  : theme.toolbarIconColor.withValues(alpha: 100.0 / 255.0),
+                  ? colorScheme.onSurfaceVariant
+                  : colorScheme.onSurface.withValues(alpha: 0.25),
             ),
           ),
         ),

@@ -99,7 +99,7 @@ class _ToolBarState extends ConsumerState<ToolBar> {
     required List<ToolType> visibleTools,
   }) {
     return Container(
-      height: 46,
+      height: 48,
       decoration: BoxDecoration(
         color: theme.toolbarBackground,
         border: Border(

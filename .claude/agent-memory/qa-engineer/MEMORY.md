@@ -41,6 +41,26 @@ ProviderScope(
 )
 ```
 
+### Testing StateNotifierProviders with ProviderContainer
+For StateNotifierProvider (not StateProvider), use ProviderContainer with overrides:
+```dart
+final container = ProviderContainer(
+  overrides: [
+    sharedPreferencesProvider.overrideWithValue(null),
+    platformBrightnessProvider.overrideWith((ref) => Brightness.dark),
+  ],
+);
+addTearDown(container.dispose);
+
+// Change state via notifier
+container.read(provider.notifier).setMode(value);
+
+// Read state
+final state = container.read(provider);
+```
+
+Cannot use `.overrideWith((ref) => value)` on StateNotifierProvider - must override with notifier or use container.read(provider.notifier) to change state.
+
 ### Test Organization
 Group tests by:
 1. Theme (Light/Dark)
@@ -127,7 +147,13 @@ cmd.exe /c "cd /d C:\\Users\\aktas\\source\\repos\\starnote_drawing_workspace\\e
   - ToolbarOverflowMenu: 2 tests
   - TopNavigationBar compact mode: 3 tests
 
-Total: 102 tests, all passing
+### Drawing UI - Canvas Dark Mode (Phase M1 - Feb 2025)
+- canvas_dark_mode_test.dart: 10 tests
+  - canvasColorSchemeProvider with different modes: 4 tests
+  - CanvasColorScheme effective color methods: 3 tests
+  - Painter colorScheme support: 3 tests
+
+Total: 112 tests, all passing
 
 ## Entity Structure Reference (for tests)
 

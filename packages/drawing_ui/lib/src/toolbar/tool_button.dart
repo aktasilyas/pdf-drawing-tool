@@ -3,10 +3,13 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 
-/// A button for selecting a tool in the toolbar.
+/// A tool button with GoodNotes-style selection indicator.
 ///
-/// Displays an icon and handles selection state with visual feedback.
-/// If the tool has a panel, shows a small chevron indicator when selected.
+/// Selected state: [colorScheme.primary] pill background + white icon.
+/// Deselected state: transparent background + [colorScheme.onSurfaceVariant] icon.
+///
+/// If the tool is already selected and has a panel, tapping opens the panel.
+/// Otherwise, tapping selects the tool.
 class ToolButton extends StatelessWidget {
   const ToolButton({
     super.key,
@@ -18,6 +21,7 @@ class ToolButton extends StatelessWidget {
     this.buttonKey,
     this.hasPanel = false,
     this.customIcon,
+    this.compact = false,
   });
 
   /// The type of tool this button represents.
@@ -26,46 +30,55 @@ class ToolButton extends StatelessWidget {
   /// Whether this tool is currently selected.
   final bool isSelected;
 
-  /// Callback when the button is pressed.
+  /// Callback when the button is pressed (selects tool).
   final VoidCallback onPressed;
 
-  /// Callback when the panel chevron is tapped.
+  /// Callback when a selected tool with panel is tapped again.
   final VoidCallback? onPanelTap;
 
   /// Whether the button is enabled.
   final bool enabled;
 
-  /// Optional key for the button (used for anchoring panels).
+  /// Optional key for the button (for anchored panel positioning).
   final GlobalKey? buttonKey;
 
   /// Whether this tool has a settings panel.
   final bool hasPanel;
 
-  /// Custom icon to override default.
+  /// Custom icon to override the default tool icon.
   final IconData? customIcon;
+
+  /// Whether to use compact sizing (phone layout).
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
-    final theme = DrawingTheme.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
 
-    final iconColor = !enabled
-        ? theme.toolbarIconDisabledColor
-        : isSelected
-            ? theme.toolbarIconSelectedColor
-            : theme.toolbarIconColor;
+    final buttonSize = compact ? 36.0 : 40.0;
+    final iconSize = compact ? 20.0 : StarNoteIcons.toolSize;
 
-    final bgColor = isSelected
-        ? theme.toolbarIconSelectedColor.withValues(alpha: 0.1)
-        : Colors.transparent;
+    final Color bgColor;
+    final Color iconColor;
 
-    // Show chevron when selected AND has panel
-    final showChevron = isSelected && hasPanel && onPanelTap != null;
+    if (!enabled) {
+      bgColor = Colors.transparent;
+      iconColor = colorScheme.onSurface.withValues(alpha: 0.25);
+    } else if (isSelected) {
+      bgColor = colorScheme.primary;
+      iconColor = colorScheme.onPrimary;
+    } else {
+      bgColor = Colors.transparent;
+      iconColor = colorScheme.onSurfaceVariant;
+    }
+
+    final iconData =
+        customIcon ?? StarNoteIcons.iconForTool(toolType, active: isSelected);
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: enabled
           ? () {
-              // Eğer zaten seçiliyse ve panel varsa, panel aç
               if (isSelected && hasPanel && onPanelTap != null) {
                 onPanelTap!();
               } else {
@@ -75,172 +88,21 @@ class ToolButton extends StatelessWidget {
           : null,
       child: Container(
         key: buttonKey,
-        width: theme.toolButtonSize,
-        height: theme.toolButtonSize,
+        width: buttonSize,
+        height: buttonSize,
         decoration: BoxDecoration(
           color: bgColor,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(10),
         ),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            // Ana ikon - chevron varsa biraz yukarı kaydır
-            Padding(
-              padding: EdgeInsets.only(bottom: showChevron ? 4 : 0),
-              child: _buildIcon(
-                theme: theme,
-                iconColor: iconColor,
-                showChevron: showChevron,
-              ),
-            ),
-            // Chevron indicator - alt kısımda
-            if (showChevron)
-              Positioned(
-                bottom: 2,
-                child: PhosphorIcon(
-                  StarNoteIcons.caretDown,
-                  size: 10,
-                  color: theme.toolbarIconSelectedColor,
-                ),
-              ),
-          ],
+        child: Center(
+          child: PhosphorIcon(iconData, size: iconSize, color: iconColor),
         ),
       ),
     );
   }
 
-  /// Gets the appropriate icon for a tool type.
+  /// Returns the default icon for a given [ToolType].
   static IconData getIconForTool(ToolType type) {
     return StarNoteIcons.iconForTool(type);
-  }
-
-  /// Build the appropriate icon widget based on tool type.
-  Widget _buildIcon({
-    required DrawingTheme theme,
-    required Color iconColor,
-    required bool showChevron,
-  }) {
-    final iconData =
-        customIcon ?? StarNoteIcons.iconForTool(toolType, active: isSelected);
-    return PhosphorIcon(
-      iconData,
-      size: showChevron ? theme.toolIconSize - 2 : theme.toolIconSize,
-      color: iconColor,
-    );
-  }
-}
-
-/// Undo button for the toolbar.
-class UndoButton extends StatelessWidget {
-  const UndoButton({
-    super.key,
-    required this.enabled,
-    required this.onPressed,
-  });
-
-  /// Whether undo is available.
-  final bool enabled;
-
-  /// Callback when pressed.
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = DrawingTheme.of(context);
-    final color = enabled
-        ? theme.toolbarIconColor
-        : theme.toolbarIconDisabledColor;
-
-    return GestureDetector(
-      onTap: enabled ? onPressed : null,
-      child: Container(
-        width: 34,
-        height: 34,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: PhosphorIcon(
-          StarNoteIcons.undo,
-          size: StarNoteIcons.actionSize,
-          color: color,
-        ),
-      ),
-    );
-  }
-}
-
-/// Redo button for the toolbar.
-class RedoButton extends StatelessWidget {
-  const RedoButton({
-    super.key,
-    required this.enabled,
-    required this.onPressed,
-  });
-
-  /// Whether redo is available.
-  final bool enabled;
-
-  /// Callback when pressed.
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = DrawingTheme.of(context);
-    final color = enabled
-        ? theme.toolbarIconColor
-        : theme.toolbarIconDisabledColor;
-
-    return GestureDetector(
-      onTap: enabled ? onPressed : null,
-      child: Container(
-        width: 34,
-        height: 34,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: PhosphorIcon(
-          StarNoteIcons.redo,
-          size: StarNoteIcons.actionSize,
-          color: color,
-        ),
-      ),
-    );
-  }
-}
-
-/// Settings button for the toolbar.
-class SettingsButton extends StatelessWidget {
-  const SettingsButton({
-    super.key,
-    required this.onPressed,
-    this.buttonKey,
-  });
-
-  /// Callback when pressed.
-  final VoidCallback onPressed;
-
-  /// Optional key for anchoring.
-  final GlobalKey? buttonKey;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = DrawingTheme.of(context);
-
-    return GestureDetector(
-      onTap: onPressed,
-      child: Container(
-        key: buttonKey,
-        width: 34,
-        height: 34,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: PhosphorIcon(
-          StarNoteIcons.settings,
-          size: StarNoteIcons.actionSize,
-          color: theme.toolbarIconColor,
-        ),
-      ),
-    );
   }
 }
