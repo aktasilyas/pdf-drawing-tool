@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
@@ -132,9 +133,9 @@ class _ToolBarState extends ConsumerState<ToolBar> {
               // Sidebar toggle button (GoodNotes style - leftmost)
               if (widget.showSidebarButton) ...[
                 IconButton(
-                  icon: Icon(
-                    widget.isSidebarOpen ? Icons.menu_open : Icons.menu,
-                    size: 22,
+                  icon: PhosphorIcon(
+                    widget.isSidebarOpen ? StarNoteIcons.sidebarActive : StarNoteIcons.sidebar,
+                    size: StarNoteIcons.toolSize,
                   ),
                   onPressed: widget.onSidebarToggle,
                   tooltip: 'Sayfalar',
@@ -227,9 +228,9 @@ class _ToolBarState extends ConsumerState<ToolBar> {
                               color: theme.toolbarBackground,
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Icon(
-                              Icons.settings,
-                              size: 20,
+                            child: PhosphorIcon(
+                              StarNoteIcons.settings,
+                              size: StarNoteIcons.actionSize,
                               color: theme.toolbarIconColor,
                             ),
                           ),

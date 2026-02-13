@@ -13,6 +13,10 @@ export 'src/models/tool_type.dart';
 // Theme
 export 'src/theme/drawing_theme.dart';
 export 'src/theme/drawing_colors.dart';
+export 'src/theme/starnote_icons.dart';
+
+// Re-export phosphor_flutter for PhosphorIcon widget
+export 'package:phosphor_flutter/phosphor_flutter.dart';
 
 // Screens
 export 'src/screens/drawing_screen.dart';

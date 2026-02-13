@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:drawing_ui/src/panels/toolbar_settings_panel.dart';
-import 'package:drawing_ui/src/providers/toolbar_config_provider.dart';
+import 'package:drawing_ui/drawing_ui.dart';
 
 void main() {
   late SharedPreferences prefs;
@@ -43,7 +42,7 @@ void main() {
     await tester.pumpWidget(createTestWidget());
     await tester.pumpAndSettle();
 
-    expect(find.byIcon(Icons.settings), findsOneWidget);
+    expect(find.byIcon(StarNoteIcons.settings), findsOneWidget);
     expect(find.text('Araç Çubuğu Ayarları'), findsOneWidget);
   });
 
@@ -67,6 +66,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.widgetWithText(OutlinedButton, 'Varsayılana Sıfırla'), findsOneWidget);
-    expect(find.byIcon(Icons.restore), findsOneWidget);
+    expect(find.byIcon(StarNoteIcons.rotate), findsOneWidget);
   });
 }

@@ -1,5 +1,6 @@
 /// Shared widgets for the toolbar UI.
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 
 /// Undo/Redo button group for toolbar.
@@ -23,14 +24,14 @@ class ToolbarUndoRedoButtons extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         ToolbarIconButton(
-          icon: Icons.undo,
+          icon: StarNoteIcons.undo,
           tooltip: 'Geri al',
           enabled: canUndo,
           onPressed: onUndo,
         ),
         const SizedBox(width: 4),
         ToolbarIconButton(
-          icon: Icons.redo,
+          icon: StarNoteIcons.redo,
           tooltip: 'İleri al',
           enabled: canRedo,
           onPressed: onRedo,
@@ -89,9 +90,9 @@ class ToolbarIconButton extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
+            child: PhosphorIcon(
               icon,
-              size: 20,
+              size: StarNoteIcons.actionSize,
               color: enabled
                   ? theme.toolbarIconColor
                   : theme.toolbarIconColor.withValues(alpha: 100.0 / 255.0),

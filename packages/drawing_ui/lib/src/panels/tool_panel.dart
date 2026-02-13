@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 
 /// Base container for tool settings panels.
@@ -149,9 +150,9 @@ class _PanelHeader extends StatelessWidget {
                     color: isDark ? colorScheme.surfaceContainerHigh : colorScheme.surfaceContainerHighest,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    Icons.close,
-                    size: 18,
+                  child: PhosphorIcon(
+                    StarNoteIcons.close,
+                    size: StarNoteIcons.panelSize,
                     color: colorScheme.onSurfaceVariant,
                   ),
                 ),
@@ -214,7 +215,7 @@ class PanelSection extends StatelessWidget {
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.lock, size: 10, color: Colors.orange),
+                    PhosphorIcon(StarNoteIcons.lock, size: 10, color: Colors.orange),
                     SizedBox(width: 2),
                     Text(
                       'PRO',
@@ -274,7 +275,7 @@ class _LockedSectionOverlay extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.lock, color: Colors.orange, size: 24),
+                    PhosphorIcon(StarNoteIcons.lock, color: Colors.orange, size: 24),
                     SizedBox(height: 4),
                     Text(
                       'Premium',

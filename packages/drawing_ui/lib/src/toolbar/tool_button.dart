@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 
@@ -53,7 +54,7 @@ class ToolButton extends StatelessWidget {
             ? theme.toolbarIconSelectedColor
             : theme.toolbarIconColor;
 
-    final bgColor = isSelected 
+    final bgColor = isSelected
         ? theme.toolbarIconSelectedColor.withValues(alpha: 0.1)
         : Colors.transparent;
 
@@ -75,7 +76,7 @@ class ToolButton extends StatelessWidget {
       child: Container(
         key: buttonKey,
         width: theme.toolButtonSize,
-        height: theme.toolButtonSize, // Sabit yükseklik
+        height: theme.toolButtonSize,
         decoration: BoxDecoration(
           color: bgColor,
           borderRadius: BorderRadius.circular(8),
@@ -96,8 +97,8 @@ class ToolButton extends StatelessWidget {
             if (showChevron)
               Positioned(
                 bottom: 2,
-                child: Icon(
-                  Icons.expand_more,
+                child: PhosphorIcon(
+                  StarNoteIcons.caretDown,
                   size: 10,
                   color: theme.toolbarIconSelectedColor,
                 ),
@@ -110,51 +111,8 @@ class ToolButton extends StatelessWidget {
 
   /// Gets the appropriate icon for a tool type.
   static IconData getIconForTool(ToolType type) {
-    switch (type) {
-      case ToolType.pencil:
-        return Icons.edit_outlined;
-      case ToolType.hardPencil:
-        return Icons.create;
-      case ToolType.ballpointPen:
-        return Icons.edit;
-      case ToolType.gelPen:
-        return Icons.edit;
-      case ToolType.dashedPen:
-        return Icons.timeline;
-      case ToolType.brushPen:
-        return Icons.brush;
-      case ToolType.neonHighlighter:
-        return Icons.flash_on;
-      case ToolType.highlighter:
-        return Icons.highlight;
-      case ToolType.rulerPen:
-        return Icons.straighten; // Ruler icon for straight lines
-      case ToolType.pixelEraser:
-        return Icons.auto_fix_normal;
-      case ToolType.strokeEraser:
-        return Icons.cleaning_services;
-      case ToolType.lassoEraser:
-        return Icons.gesture;
-      case ToolType.shapes:
-        return Icons.crop_square;
-      case ToolType.text:
-        return Icons.text_fields;
-      case ToolType.sticker:
-        return Icons.emoji_emotions;
-      case ToolType.image:
-        return Icons.image;
-      case ToolType.selection:
-        return Icons.select_all;
-      case ToolType.panZoom:
-        return Icons.pan_tool;
-      case ToolType.laserPointer:
-        return Icons.highlight_alt;
-      case ToolType.toolbarSettings:
-        return Icons.tune;
-    }
+    return StarNoteIcons.iconForTool(type);
   }
-
-  IconData _getIconForTool(ToolType type) => getIconForTool(type);
 
   /// Build the appropriate icon widget based on tool type.
   Widget _buildIcon({
@@ -162,9 +120,10 @@ class ToolButton extends StatelessWidget {
     required Color iconColor,
     required bool showChevron,
   }) {
-    // Always use Material icon in toolbar
-    return Icon(
-      customIcon ?? _getIconForTool(toolType),
+    final iconData =
+        customIcon ?? StarNoteIcons.iconForTool(toolType, active: isSelected);
+    return PhosphorIcon(
+      iconData,
       size: showChevron ? theme.toolIconSize - 2 : theme.toolIconSize,
       color: iconColor,
     );
@@ -187,8 +146,10 @@ class UndoButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const enabledColor = Color(0xFF666666);
-    const disabledColor = Color(0xFFCCCCCC);
+    final theme = DrawingTheme.of(context);
+    final color = enabled
+        ? theme.toolbarIconColor
+        : theme.toolbarIconDisabledColor;
 
     return GestureDetector(
       onTap: enabled ? onPressed : null,
@@ -198,10 +159,10 @@ class UndoButton extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(6),
         ),
-        child: Icon(
-          Icons.undo,
-          size: 18,
-          color: enabled ? enabledColor : disabledColor,
+        child: PhosphorIcon(
+          StarNoteIcons.undo,
+          size: StarNoteIcons.actionSize,
+          color: color,
         ),
       ),
     );
@@ -224,8 +185,10 @@ class RedoButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const enabledColor = Color(0xFF666666);
-    const disabledColor = Color(0xFFCCCCCC);
+    final theme = DrawingTheme.of(context);
+    final color = enabled
+        ? theme.toolbarIconColor
+        : theme.toolbarIconDisabledColor;
 
     return GestureDetector(
       onTap: enabled ? onPressed : null,
@@ -235,10 +198,10 @@ class RedoButton extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(6),
         ),
-        child: Icon(
-          Icons.redo,
-          size: 18,
-          color: enabled ? enabledColor : disabledColor,
+        child: PhosphorIcon(
+          StarNoteIcons.redo,
+          size: StarNoteIcons.actionSize,
+          color: color,
         ),
       ),
     );
@@ -261,7 +224,7 @@ class SettingsButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const iconColor = Color(0xFF666666);
+    final theme = DrawingTheme.of(context);
 
     return GestureDetector(
       onTap: onPressed,
@@ -272,10 +235,10 @@ class SettingsButton extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(6),
         ),
-        child: const Icon(
-          Icons.settings,
-          size: 18,
-          color: iconColor,
+        child: PhosphorIcon(
+          StarNoteIcons.settings,
+          size: StarNoteIcons.actionSize,
+          color: theme.toolbarIconColor,
         ),
       ),
     );

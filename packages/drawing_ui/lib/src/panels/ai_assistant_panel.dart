@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/panels/tool_panel.dart';
+import 'package:drawing_ui/src/theme/theme.dart';
 
 /// MOCK AI responses for demonstration.
 const _mockAIResponses = [
@@ -178,7 +180,7 @@ class _PremiumBadge extends StatelessWidget {
       child: const Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.auto_awesome, size: 14, color: Colors.amber),
+          PhosphorIcon(StarNoteIcons.sparkle, size: 14, color: Colors.amber),
           SizedBox(width: 4),
           Text(
             'Pro',
@@ -221,8 +223,8 @@ class _SelectionIndicator extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(
-            hasSelection ? Icons.check_circle : Icons.info_outline,
+          PhosphorIcon(
+            hasSelection ? StarNoteIcons.checkCircle : StarNoteIcons.info,
             size: 20,
             color: hasSelection ? colorScheme.primary : colorScheme.outline,
           ),
@@ -295,8 +297,8 @@ class _QuestionInput extends StatelessWidget {
               color: isLoading ? colorScheme.outline : colorScheme.primary,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
-              isLoading ? Icons.hourglass_empty : Icons.send,
+            child: PhosphorIcon(
+              isLoading ? StarNoteIcons.hourglass : StarNoteIcons.send,
               color: colorScheme.onPrimary,
               size: 20,
             ),
@@ -419,7 +421,7 @@ class _ResponseArea extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.auto_awesome, size: 16, color: colorScheme.primary),
+              PhosphorIcon(StarNoteIcons.sparkle, size: 16, color: colorScheme.primary),
               const SizedBox(width: 8),
               Text(
                 'AI Response',
@@ -432,12 +434,12 @@ class _ResponseArea extends StatelessWidget {
               const Spacer(),
               GestureDetector(
                 onTap: onCopy,
-                child: Icon(Icons.copy, size: 18, color: colorScheme.primary),
+                child: PhosphorIcon(StarNoteIcons.copy, size: 18, color: colorScheme.primary),
               ),
               const SizedBox(width: 12),
               GestureDetector(
                 onTap: onRetry,
-                child: Icon(Icons.refresh, size: 18, color: colorScheme.primary),
+                child: PhosphorIcon(StarNoteIcons.refresh, size: 18, color: colorScheme.primary),
               ),
             ],
           ),
@@ -471,7 +473,7 @@ class _PremiumNotice extends StatelessWidget {
       ),
       child: const Row(
         children: [
-          Icon(Icons.info_outline, size: 18, color: Colors.amber),
+          PhosphorIcon(StarNoteIcons.info, size: 18, color: Colors.amber),
           SizedBox(width: 8),
           Expanded(
             child: Text(

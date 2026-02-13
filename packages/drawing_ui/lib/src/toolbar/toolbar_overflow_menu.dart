@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
-import 'package:drawing_ui/src/toolbar/tool_button.dart';
 
 /// Overflow menu for tools that don't fit in the medium toolbar.
 ///
@@ -28,9 +28,9 @@ class ToolbarOverflowMenu extends ConsumerWidget {
     final hasSelectedHidden = hiddenTools.contains(currentTool);
 
     return PopupMenuButton<ToolType>(
-      icon: Icon(
-        Icons.more_vert,
-        size: 20,
+      icon: PhosphorIcon(
+        StarNoteIcons.moreVert,
+        size: StarNoteIcons.actionSize,
         color: hasSelectedHidden
             ? theme.toolbarIconSelectedColor
             : theme.toolbarIconColor,
@@ -53,9 +53,9 @@ class ToolbarOverflowMenu extends ConsumerWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                ToolButton.getIconForTool(tool),
-                size: 20,
+              PhosphorIcon(
+                StarNoteIcons.iconForTool(tool, active: isSelected),
+                size: StarNoteIcons.actionSize,
                 color: isSelected
                     ? theme.toolbarIconSelectedColor
                     : theme.toolbarIconColor,

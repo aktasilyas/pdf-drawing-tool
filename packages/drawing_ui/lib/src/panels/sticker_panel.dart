@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/panels/tool_panel.dart';
+import 'package:drawing_ui/src/theme/theme.dart';
 
 /// MOCK sticker categories for UI display - Turkish.
 const _mockStickerCategories = [
@@ -105,7 +107,7 @@ class _StickerPanelState extends ConsumerState<StickerPanel>
           // Insert button - compact
           _CompactActionButton(
             label: 'Çıkartma Ekle',
-            icon: Icons.add,
+            icon: StarNoteIcons.plus,
             enabled: _selectedStickerIndex >= 0,
             onPressed: () {
               // MOCK: Would insert sticker
@@ -149,7 +151,7 @@ class _CompactLockedSection extends StatelessWidget {
         ),
         child: Row(
           children: [
-            const Icon(Icons.lock, size: 14, color: Colors.orange),
+            PhosphorIcon(StarNoteIcons.lock, size: 14, color: Colors.orange),
             const SizedBox(width: 6),
             Text(
               title,
@@ -159,7 +161,7 @@ class _CompactLockedSection extends StatelessWidget {
               ),
             ),
             const Spacer(),
-            const Icon(Icons.chevron_right, size: 16, color: Color(0xFF999999)),
+            PhosphorIcon(StarNoteIcons.chevronRight, size: 16, color: const Color(0xFF999999)),
           ],
         ),
       ),

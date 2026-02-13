@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
 import 'package:drawing_ui/src/providers/providers.dart';
+import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/widgets/compact_toggle.dart';
 import 'package:drawing_ui/src/panels/tool_panel.dart';
 
@@ -85,7 +87,7 @@ class EraserSettingsPanel extends ConsumerWidget {
           // Clear page button (destructive action)
           _CompactActionButton(
             label: 'Sayfayı Temizle',
-            icon: Icons.delete_outline,
+            icon: StarNoteIcons.trash,
             isDestructive: true,
             onPressed: () => _showClearConfirmation(context, ref),
           ),
@@ -273,7 +275,7 @@ class _EraserModeSelector extends StatelessWidget {
         Expanded(
           child: _EraserModeOption(
             mode: EraserMode.pixel,
-            icon: Icons.auto_fix_normal,
+            icon: StarNoteIcons.sparkle,
             label: 'Piksel',
             isSelected: selectedMode == EraserMode.pixel,
             onTap: () => onModeSelected(EraserMode.pixel),
@@ -283,7 +285,7 @@ class _EraserModeSelector extends StatelessWidget {
         Expanded(
           child: _EraserModeOption(
             mode: EraserMode.stroke,
-            icon: Icons.cleaning_services,
+            icon: StarNoteIcons.broom,
             label: 'Çizgi',
             isSelected: selectedMode == EraserMode.stroke,
             onTap: () => onModeSelected(EraserMode.stroke),
@@ -293,7 +295,7 @@ class _EraserModeSelector extends StatelessWidget {
         Expanded(
           child: _EraserModeOption(
             mode: EraserMode.lasso,
-            icon: Icons.gesture,
+            icon: StarNoteIcons.selection,
             label: 'Kement',
             isSelected: selectedMode == EraserMode.lasso,
             onTap: () => onModeSelected(EraserMode.lasso),
@@ -355,8 +357,8 @@ class _EraserModeOption extends StatelessWidget {
                   const Positioned(
                     top: -2,
                     right: -2,
-                    child: Icon(
-                      Icons.lock,
+                    child: PhosphorIcon(
+                      StarNoteIcons.lock,
                       size: 9,
                       color: Colors.orange,
                     ),

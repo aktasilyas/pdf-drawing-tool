@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/widgets/pdf_import_dialog.dart';
@@ -60,7 +61,7 @@ class TopNavigationBar extends ConsumerWidget {
 
   /// Build compact layout (phone) - minimal buttons only.
   Widget _buildCompactLayout(DrawingTheme theme) => Row(children: [
-        _NavButton(icon: Icons.home_rounded, tooltip: 'Ana Sayfa', onPressed: onHomePressed ?? () {}),
+        _NavButton(icon: StarNoteIcons.home, tooltip: 'Ana Sayfa', onPressed: onHomePressed ?? () {}),
         const SizedBox(width: 8),
         Expanded(
           child: GestureDetector(
@@ -79,14 +80,14 @@ class TopNavigationBar extends ConsumerWidget {
                       overflow: TextOverflow.ellipsis),
                 ),
                 const SizedBox(width: 4),
-                Icon(Icons.keyboard_arrow_down, size: 18, color: theme.toolbarIconColor),
+                PhosphorIcon(StarNoteIcons.caretDown, size: StarNoteIcons.navSize, color: theme.toolbarIconColor),
               ]),
             ),
           ),
         ),
         const SizedBox(width: 8),
-        _NavButton(icon: Icons.ios_share, tooltip: 'Paylaş', onPressed: () {}),
-        _NavButton(icon: Icons.more_vert, tooltip: 'Daha fazla', onPressed: () {}),
+        _NavButton(icon: StarNoteIcons.share, tooltip: 'Paylaş', onPressed: () {}),
+        _NavButton(icon: StarNoteIcons.moreVert, tooltip: 'Daha fazla', onPressed: () {}),
         const SizedBox(width: 4),
       ]);
 
@@ -95,7 +96,7 @@ class TopNavigationBar extends ConsumerWidget {
       LayoutBuilder(builder: (context, constraints) {
         final isSmallScreen = constraints.maxWidth < 500;
         return Row(children: [
-          _NavButton(icon: Icons.home_rounded, tooltip: 'Ana Sayfa', onPressed: onHomePressed ?? () => _showPlaceholder(context, 'Ana Sayfa')),
+          _NavButton(icon: StarNoteIcons.home, tooltip: 'Ana Sayfa', onPressed: onHomePressed ?? () => _showPlaceholder(context, 'Ana Sayfa')),
           const SizedBox(width: 8),
           Flexible(
             child: GestureDetector(
@@ -111,24 +112,24 @@ class TopNavigationBar extends ConsumerWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis)),
                   const SizedBox(width: 4),
-                  Icon(Icons.keyboard_arrow_down, size: 18, color: theme.toolbarIconColor),
+                  PhosphorIcon(StarNoteIcons.caretDown, size: StarNoteIcons.navSize, color: theme.toolbarIconColor),
                 ]),
               ),
             ),
           ),
           const Expanded(child: SizedBox()),
-          if (!isSmallScreen) _NavButton(icon: Icons.menu_book_outlined, tooltip: 'Okuyucu modu', onPressed: () => _showPlaceholder(context, 'Okuyucu modu')),
-          _NavButton(icon: Icons.layers_outlined, tooltip: 'Katmanlar', onPressed: () => _showPlaceholder(context, 'Katmanlar')),
+          if (!isSmallScreen) _NavButton(icon: StarNoteIcons.readerMode, tooltip: 'Okuyucu modu', onPressed: () => _showPlaceholder(context, 'Okuyucu modu')),
+          _NavButton(icon: StarNoteIcons.layers, tooltip: 'Katmanlar', onPressed: () => _showPlaceholder(context, 'Katmanlar')),
           _NavButton(
-              icon: gridVisible ? Icons.grid_on : Icons.grid_off,
+              icon: gridVisible ? StarNoteIcons.gridOn : StarNoteIcons.gridOff,
               tooltip: gridVisible ? 'Izgarayı gizle' : 'Izgarayı göster',
               isActive: gridVisible,
               onPressed: () => ref.read(gridVisibilityProvider.notifier).state = !gridVisible),
           if (!isSmallScreen) ...[
-            _NavButton(icon: Icons.upload_file, tooltip: 'PDF İçe Aktar', onPressed: () => _showPDFImportDialog(context, ref)),
-            _NavButton(icon: Icons.picture_as_pdf, tooltip: 'PDF Olarak Dışa Aktar', onPressed: () => _showPDFExportDialog(context, ref)),
+            _NavButton(icon: StarNoteIcons.exportIcon, tooltip: 'PDF İçe Aktar', onPressed: () => _showPDFImportDialog(context, ref)),
+            _NavButton(icon: StarNoteIcons.pdfFile, tooltip: 'PDF Olarak Dışa Aktar', onPressed: () => _showPDFExportDialog(context, ref)),
           ],
-          _NavButton(icon: Icons.more_horiz, tooltip: 'Daha fazla', onPressed: () => _showPlaceholder(context, 'Daha fazla')),
+          _NavButton(icon: StarNoteIcons.more, tooltip: 'Daha fazla', onPressed: () => _showPlaceholder(context, 'Daha fazla')),
           const SizedBox(width: 4),
         ]);
       });
@@ -216,9 +217,9 @@ class _NavButton extends StatelessWidget {
                   : Colors.transparent,
               borderRadius: BorderRadius.circular(6),
             ),
-            child: Icon(
+            child: PhosphorIcon(
               icon,
-              size: 18,
+              size: StarNoteIcons.navSize,
               color: isActive
                   ? theme.toolbarIconSelectedColor
                   : theme.toolbarIconColor,
@@ -250,8 +251,8 @@ class _DocumentTabs extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              Icons.description_outlined,
+            PhosphorIcon(
+              StarNoteIcons.page,
               size: 16,
               color: theme.toolbarIconColor,
             ),
@@ -265,8 +266,8 @@ class _DocumentTabs extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 4),
-            Icon(
-              Icons.keyboard_arrow_down,
+            PhosphorIcon(
+              StarNoteIcons.caretDown,
               size: 16,
               color: theme.toolbarIconColor,
             ),

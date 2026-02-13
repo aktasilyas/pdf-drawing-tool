@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
@@ -98,9 +99,9 @@ class _MediumToolbarState extends ConsumerState<MediumToolbar> {
           // Sidebar toggle
           if (widget.showSidebarButton) ...[
             IconButton(
-              icon: Icon(
-                widget.isSidebarOpen ? Icons.menu_open : Icons.menu,
-                size: 22,
+              icon: PhosphorIcon(
+                widget.isSidebarOpen ? StarNoteIcons.sidebarActive : StarNoteIcons.sidebar,
+                size: StarNoteIcons.toolSize,
               ),
               onPressed: widget.onSidebarToggle,
               tooltip: 'Sayfalar',
@@ -194,7 +195,7 @@ class _MediumToolbarState extends ConsumerState<MediumToolbar> {
           color: theme.toolbarBackground,
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Icon(Icons.settings, size: 20, color: theme.toolbarIconColor),
+        child: PhosphorIcon(StarNoteIcons.settings, size: StarNoteIcons.actionSize, color: theme.toolbarIconColor),
       ),
     );
   }
@@ -210,9 +211,9 @@ class _MediumToolbarState extends ConsumerState<MediumToolbar> {
               ? theme.toolbarIconSelectedColor.withValues(alpha: 0.1)
               : Colors.transparent,
         ),
-        child: Icon(
-          _showQuickAccess ? Icons.expand_less : Icons.expand_more,
-          size: 20, color: theme.toolbarIconColor,
+        child: PhosphorIcon(
+          _showQuickAccess ? StarNoteIcons.caretUp : StarNoteIcons.caretDown,
+          size: StarNoteIcons.actionSize, color: theme.toolbarIconColor,
         ),
       ),
     );

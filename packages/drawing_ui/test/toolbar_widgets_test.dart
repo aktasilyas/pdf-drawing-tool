@@ -36,8 +36,8 @@ void main() {
         buildTestWidget(const MediumToolbar(), width: 700),
       );
 
-      expect(find.byIcon(Icons.undo), findsOneWidget);
-      expect(find.byIcon(Icons.redo), findsOneWidget);
+      expect(find.byIcon(StarNoteIcons.undo), findsOneWidget);
+      expect(find.byIcon(StarNoteIcons.redo), findsOneWidget);
     });
 
     testWidgets('shows_settings_button', (tester) async {
@@ -45,7 +45,7 @@ void main() {
         buildTestWidget(const MediumToolbar(), width: 700),
       );
 
-      expect(find.byIcon(Icons.settings), findsOneWidget);
+      expect(find.byIcon(StarNoteIcons.settings), findsOneWidget);
     });
 
     testWidgets('shows_quick_access_toggle_chevron', (tester) async {
@@ -53,7 +53,7 @@ void main() {
         buildTestWidget(const MediumToolbar(), width: 700),
       );
 
-      expect(find.byIcon(Icons.expand_more), findsWidgets);
+      expect(find.byIcon(StarNoteIcons.caretDown), findsWidgets);
     });
 
     testWidgets('quick_access_row_toggles_on_chevron_tap', (tester) async {
@@ -65,8 +65,8 @@ void main() {
 
       final chevronIcon = find.byWidgetPredicate(
         (widget) =>
-            widget is Icon &&
-            widget.icon == Icons.expand_more &&
+            widget is PhosphorIcon &&
+            widget.icon == StarNoteIcons.caretDown &&
             widget.size == 20,
       );
       expect(chevronIcon, findsOneWidget);
@@ -77,8 +77,8 @@ void main() {
       expect(find.byType(QuickAccessRow), findsOneWidget);
       final expandLessIcon = find.byWidgetPredicate(
         (widget) =>
-            widget is Icon &&
-            widget.icon == Icons.expand_less &&
+            widget is PhosphorIcon &&
+            widget.icon == StarNoteIcons.caretUp &&
             widget.size == 20,
       );
       expect(expandLessIcon, findsOneWidget);
@@ -114,8 +114,8 @@ void main() {
         buildTestWidget(const CompactBottomBar(), width: 400),
       );
 
-      expect(find.byIcon(Icons.undo), findsOneWidget);
-      expect(find.byIcon(Icons.redo), findsOneWidget);
+      expect(find.byIcon(StarNoteIcons.undo), findsOneWidget);
+      expect(find.byIcon(StarNoteIcons.redo), findsOneWidget);
     });
 
     testWidgets('shows_max_5_tool_buttons', (tester) async {
@@ -178,7 +178,7 @@ void main() {
         ),
       );
 
-      expect(find.byIcon(Icons.more_vert), findsOneWidget);
+      expect(find.byIcon(StarNoteIcons.moreVert), findsOneWidget);
       expect(find.byType(PopupMenuButton<ToolType>), findsOneWidget);
     });
 
@@ -192,7 +192,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byIcon(Icons.more_vert));
+      await tester.tap(find.byIcon(StarNoteIcons.moreVert));
       await tester.pumpAndSettle();
 
       expect(find.text('Şekiller'), findsOneWidget);

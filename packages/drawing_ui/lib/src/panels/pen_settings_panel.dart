@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
+import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/widgets/color_presets.dart';
 import 'package:drawing_ui/src/widgets/compact_slider.dart';
 import 'package:drawing_ui/src/widgets/unified_color_picker.dart';
@@ -106,7 +107,7 @@ class PenSettingsPanel extends ConsumerWidget {
           // Add to pen box button (compact)
           _CompactActionButton(
             label: 'Kalem kutusuna ekle',
-            icon: Icons.add,
+            icon: StarNoteIcons.plus,
             onPressed: () => _addToPenBox(context, ref, settings),
           ),
         ],
