@@ -35,10 +35,7 @@ Widget buildActivePanel({
     case ToolType.dashedPen:
     case ToolType.brushPen:
     case ToolType.rulerPen:
-      return PenSettingsPanel(
-        toolType: panel,
-        onClose: onClose,
-      );
+      return PenSettingsPanel(toolType: panel);
 
     case ToolType.highlighter:
     case ToolType.neonHighlighter:

@@ -4,527 +4,293 @@ import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
-import 'package:drawing_ui/src/widgets/color_presets.dart';
-import 'package:drawing_ui/src/widgets/compact_slider.dart';
 import 'package:drawing_ui/src/widgets/unified_color_picker.dart';
+import 'package:drawing_ui/src/widgets/color_presets.dart';
 import 'package:drawing_ui/src/widgets/pen_icon_widget.dart';
-import 'package:drawing_ui/src/panels/tool_panel.dart';
 
-/// Settings panel for pen tools (ballpoint, fountain, pencil, brush).
+Color _darkenColor(Color c, double amt) {
+  final h = HSLColor.fromColor(c);
+  return h.withLightness((h.lightness * (1 - amt)).clamp(0.0, 1.0)).toColor();
+}
+
+/// Pen settings content for popover panel.
 ///
-/// Allows configuring thickness, stabilization, color, and nib shape.
-/// All changes update MOCK state only - no real drawing effect.
+/// Designed for PopoverPanel — no ToolPanel wrapper needed.
 class PenSettingsPanel extends ConsumerWidget {
-  const PenSettingsPanel({
-    super.key,
-    required this.toolType,
-    this.onClose,
-  });
-
-  /// The type of pen tool being configured.
+  const PenSettingsPanel({super.key, required this.toolType});
   final ToolType toolType;
-
-  /// Callback when panel is closed.
-  final VoidCallback? onClose;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentTool = ref.watch(currentToolProvider);
-    // Aktif kalem tipine göre settings al (değişime duyarlı)
-    final activePenTool = _isPenTool(currentTool) ? currentTool : toolType;
-    final settings = ref.watch(penSettingsProvider(activePenTool));
-
-    return ToolPanel(
-      title: _getTurkishTitle(activePenTool),
-      onClose: onClose,
+    final active = _isPenTool(currentTool) ? currentTool : toolType;
+    final s = ref.watch(penSettingsProvider(active));
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.all(12),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Live stroke preview (compact)
+          Text(_title(active), style: TextStyle(
+            fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSurface)),
+          const SizedBox(height: 10),
           _LiveStrokePreview(
-            color: settings.color,
-            thickness: settings.thickness,
-            toolType: activePenTool,
-          ),
-          const SizedBox(height: 8),
-
-          // Pen type selector (compact)
+              color: s.color, thickness: s.thickness, toolType: active),
+          const SizedBox(height: 12),
           _PenTypeSelector(
-            selectedType: currentTool,
-            selectedColor: settings.color,
-            onTypeSelected: (type) {
-              ref.read(currentToolProvider.notifier).state = type;
-            },
+            selectedType: currentTool, selectedColor: s.color,
+            onTypeSelected: (t) =>
+                ref.read(currentToolProvider.notifier).state = t,
           ),
-          const SizedBox(height: 10),
-
-          // Thickness slider (compact) - dynamic range based on tool
-          CompactSlider(
-            title: 'Kalınlık',
-            value: settings.thickness.clamp(_getMinThickness(activePenTool),
-                _getMaxThickness(activePenTool)),
-            min: _getMinThickness(activePenTool),
-            max: _getMaxThickness(activePenTool),
-            label: '${settings.thickness.toStringAsFixed(1)}mm',
-            activeColor: settings.color,
-            onChanged: (value) {
-              ref
-                  .read(penSettingsProvider(activePenTool).notifier)
-                  .setThickness(value);
-            },
+          const SizedBox(height: 12),
+          _GoodNotesSlider(
+            label: 'KALINLIK', activeColor: s.color,
+            value: s.thickness.clamp(_minTh(active), _maxTh(active)),
+            min: _minTh(active), max: _maxTh(active),
+            displayValue: '${s.thickness.toStringAsFixed(1)}mm',
+            onChanged: (v) => ref.read(
+                penSettingsProvider(active).notifier).setThickness(v),
           ),
           const SizedBox(height: 8),
-
-          // Stabilization slider (compact)
-          CompactSlider(
-            title: 'Sabitleme',
-            value: settings.stabilization,
-            min: 0.0,
-            max: 1.0,
-            label: '${(settings.stabilization * 100).round()}%',
-            onChanged: (value) {
-              ref
-                  .read(penSettingsProvider(activePenTool).notifier)
-                  .setStabilization(value);
-            },
+          _GoodNotesSlider(
+            label: 'SABİTLEME', activeColor: cs.primary,
+            value: s.stabilization, min: 0, max: 1,
+            displayValue: '${(s.stabilization * 100).round()}%',
+            onChanged: (v) => ref.read(
+                penSettingsProvider(active).notifier).setStabilization(v),
+          ),
+          const SizedBox(height: 12),
+          // Color section inline
+          Text('RENK', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
+              color: cs.onSurfaceVariant, letterSpacing: 0.5)),
+          const SizedBox(height: 6),
+          UnifiedColorPicker(
+            selectedColor: s.color,
+            onColorSelected: (c) => ref.read(
+                penSettingsProvider(active).notifier).setColor(c),
+            quickColors: ColorSets.quickAccess,
+            colorSets: ColorSets.all, chipSize: 24, spacing: 6,
           ),
           const SizedBox(height: 10),
-
-          // Compact color row (6 colors + more on double tap)
-          Builder(
-            builder: (context) {
-              final notifier = ref.read(penSettingsProvider(activePenTool).notifier);
-              return _CompactColorRow(
-                selectedColor: settings.color,
-                onColorSelected: (color) {
-                  notifier.setColor(color);
-                },
-              );
-            },
-          ),
-          const SizedBox(height: 10),
-
-          // Add to pen box button (compact)
-          _CompactActionButton(
-            label: 'Kalem kutusuna ekle',
-            icon: StarNoteIcons.plus,
-            onPressed: () => _addToPenBox(context, ref, settings),
+          SizedBox(
+            width: double.infinity, height: 36,
+            child: OutlinedButton.icon(
+              onPressed: () => _addToPenBox(context, ref, s),
+              icon: Icon(StarNoteIcons.plus, size: 16),
+              label: const Text('Kalem kutusuna ekle',
+                  style: TextStyle(fontSize: 13)),
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: cs.outline.withValues(alpha: 0.5)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  /// Pen tool check
-  bool _isPenTool(ToolType tool) {
-    return const [
-      ToolType.pencil,
-      ToolType.hardPencil,
-      ToolType.ballpointPen,
-      ToolType.gelPen,
-      ToolType.dashedPen,
-      ToolType.brushPen,
-      ToolType.rulerPen,
-    ].contains(tool);
-  }
+  bool _isPenTool(ToolType t) => const [
+    ToolType.pencil, ToolType.hardPencil, ToolType.ballpointPen,
+    ToolType.gelPen, ToolType.dashedPen, ToolType.brushPen, ToolType.rulerPen,
+  ].contains(t);
 
-  String _getTurkishTitle(ToolType type) {
-    // Use PenType config for display name
-    final penType = type.penType;
-    if (penType != null) {
-      return penType.config.displayNameTr;
-    }
-    return 'Kalem';
-  }
+  String _title(ToolType t) => t.penType?.config.displayNameTr ?? 'Kalem';
+  double _minTh(ToolType t) => t.penType?.config.minThickness ?? 0.1;
+  double _maxTh(ToolType t) => t.penType?.config.maxThickness ?? 20.0;
 
-  double _getMinThickness(ToolType type) {
-    // Use PenType config for min thickness
-    final penType = type.penType;
-    if (penType != null) {
-      return penType.config.minThickness;
-    }
-    return 0.1;
-  }
-
-  double _getMaxThickness(ToolType type) {
-    // Use PenType config for max thickness
-    final penType = type.penType;
-    if (penType != null) {
-      return penType.config.maxThickness;
-    }
-    return 20.0;
-  }
-
-  void _addToPenBox(BuildContext context, WidgetRef ref, PenSettings settings) {
+  void _addToPenBox(BuildContext ctx, WidgetRef ref, PenSettings s) {
     final presets = ref.read(penBoxPresetsProvider);
-    // Güncel seçili kalem tipini al (popup'ta değişmiş olabilir)
-    final currentTool = ref.read(currentToolProvider);
-    // Güncel kalem tipinin ayarlarını al
-    final currentSettings = ref.read(penSettingsProvider(currentTool));
-
-    // Duplicate kontrolü - aynı tool, renk ve kalınlık varsa ekleme
-    final isDuplicate = presets.any((p) =>
-        !p.isEmpty &&
-        p.toolType == currentTool &&
-        p.color.toARGB32() == currentSettings.color.toARGB32() &&
-        (p.thickness - currentSettings.thickness).abs() < 0.1);
-
-    if (isDuplicate) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+    final tool = ref.read(currentToolProvider);
+    final cur = ref.read(penSettingsProvider(tool));
+    if (presets.any((p) => !p.isEmpty && p.toolType == tool &&
+        p.color.toARGB32() == cur.color.toARGB32() &&
+        (p.thickness - cur.thickness).abs() < 0.1)) {
+      ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(
           content: Text('Bu kalem zaten kalem kutusunda mevcut'),
-          duration: Duration(seconds: 2),
-        ),
-      );
+          duration: Duration(seconds: 2)));
       return;
     }
-
-    final newPreset = PenPreset(
+    ref.read(penBoxPresetsProvider.notifier).addPreset(PenPreset(
       id: 'preset_${DateTime.now().millisecondsSinceEpoch}',
-      toolType: currentTool,
-      color: currentSettings.color,
-      thickness: currentSettings.thickness,
-      nibShape: currentSettings.nibShape,
-    );
-    ref.read(penBoxPresetsProvider.notifier).addPreset(newPreset);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
+      toolType: tool, color: cur.color,
+      thickness: cur.thickness, nibShape: cur.nibShape,
+    ));
+    ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(
         content: Text('Kalem kutusuna eklendi'),
-        duration: Duration(seconds: 1),
-      ),
-    );
+        duration: Duration(seconds: 1)));
   }
 }
 
-/// Live stroke preview showing current pen settings (compact).
+/// GoodNotes-style slider: uppercase label + value + compact slider.
+class _GoodNotesSlider extends StatelessWidget {
+  const _GoodNotesSlider({
+    required this.label, required this.value, required this.min,
+    required this.max, required this.displayValue,
+    required this.activeColor, required this.onChanged,
+  });
+  final String label;
+  final double value, min, max;
+  final String displayValue;
+  final Color activeColor;
+  final ValueChanged<double> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Column(mainAxisSize: MainAxisSize.min, children: [
+      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+        Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
+            color: cs.onSurfaceVariant, letterSpacing: 0.5)),
+        Text(displayValue, style: TextStyle(fontSize: 12,
+            fontWeight: FontWeight.w500, color: cs.onSurface)),
+      ]),
+      const SizedBox(height: 2),
+      SizedBox(height: 28, child: SliderTheme(
+        data: SliderThemeData(
+          trackHeight: 4,
+          thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+          overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
+          activeTrackColor: activeColor,
+          inactiveTrackColor: cs.surfaceContainerHighest,
+          thumbColor: activeColor,
+        ),
+        child: Slider(value: value.clamp(min, max), min: min, max: max,
+            onChanged: onChanged),
+      )),
+    ]);
+  }
+}
+
+/// Live stroke preview — 50dp height sine wave.
 class _LiveStrokePreview extends StatelessWidget {
   const _LiveStrokePreview({
-    required this.color,
-    required this.thickness,
-    required this.toolType,
+    required this.color, required this.thickness, required this.toolType,
   });
-
   final Color color;
   final double thickness;
   final ToolType toolType;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
     return Container(
-      width: double.infinity,
-      height: 28,
+      width: double.infinity, height: 50,
       decoration: BoxDecoration(
-        color: isDark ? colorScheme.surfaceContainerHigh : colorScheme.surfaceContainerLowest,
+        color: isDark ? cs.surfaceContainerHigh : cs.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.3), width: 0.5),
+        border: Border.all(color: cs.outline.withValues(alpha: 0.3), width: 0.5),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(5),
-        child: CustomPaint(
-          size: const Size(double.infinity, 28),
-          painter: _StrokePreviewPainter(
-            color: color,
-            thickness: thickness,
-            toolType: toolType,
-            isDarkMode: isDark,
-          ),
-        ),
+        child: CustomPaint(size: const Size(double.infinity, 50),
+          painter: _StrokePainter(color, thickness, toolType, isDark)),
       ),
     );
   }
 }
 
-/// Painter for stroke preview (compact).
-class _StrokePreviewPainter extends CustomPainter {
-  _StrokePreviewPainter({
-    required this.color,
-    required this.thickness,
-    required this.toolType,
-    required this.isDarkMode,
-  });
-
+class _StrokePainter extends CustomPainter {
+  _StrokePainter(this.color, this.thickness, this.toolType, this.isDark);
   final Color color;
   final double thickness;
   final ToolType toolType;
-  final bool isDarkMode;
+  final bool isDark;
 
   @override
   void paint(Canvas canvas, Size size) {
-    // In dark mode, make colors darker for better visibility
-    final displayColor = isDarkMode ? _darkenColor(color, 0.3) : color;
-    
     final paint = Paint()
-      ..color = displayColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = thickness * 1.5
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-
-    final path = Path();
-    final startY = size.height / 2;
-    path.moveTo(16, startY);
-
-    // Compact wave pattern
+      ..color = isDark ? _darkenColor(color, 0.3) : color
+      ..style = PaintingStyle.stroke..strokeWidth = thickness * 1.5
+      ..strokeCap = StrokeCap.round..strokeJoin = StrokeJoin.round;
+    final path = Path()..moveTo(16, size.height / 2);
     for (var x = 16.0; x < size.width - 16; x += 24) {
-      final amplitude = 8.0;
-      path.quadraticBezierTo(x + 6, startY - amplitude, x + 12, startY);
-      path.quadraticBezierTo(x + 18, startY + amplitude, x + 24, startY);
+      path.quadraticBezierTo(x + 6, size.height / 2 - 10, x + 12, size.height / 2);
+      path.quadraticBezierTo(x + 18, size.height / 2 + 10, x + 24, size.height / 2);
     }
-
     canvas.drawPath(path, paint);
   }
 
   @override
-  bool shouldRepaint(_StrokePreviewPainter oldDelegate) {
-    return color != oldDelegate.color ||
-        thickness != oldDelegate.thickness ||
-        toolType != oldDelegate.toolType ||
-        isDarkMode != oldDelegate.isDarkMode;
-  }
-  
-  /// Darken a color by reducing its lightness in HSL color space
-  Color _darkenColor(Color color, double amount) {
-    final hslColor = HSLColor.fromColor(color);
-    final darkerColor = hslColor.withLightness(
-      (hslColor.lightness * (1 - amount)).clamp(0.0, 1.0),
-    );
-    return darkerColor.toColor();
-  }
+  bool shouldRepaint(_StrokePainter o) =>
+      color != o.color || thickness != o.thickness ||
+      toolType != o.toolType || isDark != o.isDark;
 }
 
-/// Selector for pen types - GoodNotes/Fenci style toolbar.
-/// Pens are vertical, tip UP, bottom clipped by container.
-/// Selected pen rises up to show more body.
+/// Pen type selector row.
 class _PenTypeSelector extends StatelessWidget {
   const _PenTypeSelector({
-    required this.selectedType,
-    required this.selectedColor,
+    required this.selectedType, required this.selectedColor,
     required this.onTypeSelected,
   });
-
   final ToolType selectedType;
   final Color selectedColor;
   final ValueChanged<ToolType> onTypeSelected;
-
-  static const _penTypes = [
-    ToolType.pencil,
-    ToolType.hardPencil,
-    ToolType.ballpointPen,
-    ToolType.gelPen,
-    ToolType.dashedPen,
-    ToolType.brushPen,
-    ToolType.rulerPen,
-  ];
+  static const _types = [ToolType.pencil, ToolType.hardPencil,
+    ToolType.ballpointPen, ToolType.gelPen, ToolType.dashedPen,
+    ToolType.brushPen, ToolType.rulerPen];
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+    final cs = Theme.of(context).colorScheme;
+    final dk = Theme.of(context).brightness == Brightness.dark;
     return Container(
       height: 44,
       decoration: BoxDecoration(
-        color: isDark ? colorScheme.surfaceContainerHigh : colorScheme.surface,
+        color: dk ? cs.surfaceContainerHigh : cs.surface,
         borderRadius: BorderRadius.circular(10),
-        border: isDark ? Border.all(color: colorScheme.outline.withValues(alpha: 0.3), width: 0.5) : null,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: (isDark ? 25 : 15) / 255.0),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: dk ? Border.all(
+            color: cs.outline.withValues(alpha: 0.3), width: 0.5) : null,
+        boxShadow: [BoxShadow(
+          color: Colors.black.withValues(alpha: (dk ? 25 : 15) / 255.0),
+          blurRadius: 6, offset: const Offset(0, 2))],
       ),
-      // ÖNEMLİ: clipBehavior ile taşan kısımları kes
       clipBehavior: Clip.hardEdge,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: _penTypes.map((type) {
-          final isSelected = type == selectedType;
-          return _PenSlot(
-            type: type,
-            isSelected: isSelected,
-            selectedColor: selectedColor,
-            onTap: () => onTypeSelected(type),
-          );
-        }).toList(),
+        children: [for (final t in _types) _PenSlot(
+          type: t, isSelected: t == selectedType,
+          selColor: selectedColor, onTap: () => onTypeSelected(t))],
       ),
     );
   }
 }
 
-/// Single pen slot with proper clipping and animation.
-/// Pen is taller than visible area, bottom gets clipped.
-/// Selected pen rises up to reveal more of the body.
 class _PenSlot extends StatelessWidget {
   const _PenSlot({
-    required this.type,
-    required this.isSelected,
-    required this.selectedColor,
-    required this.onTap,
+    required this.type, required this.isSelected,
+    required this.selColor, required this.onTap,
   });
-
   final ToolType type;
   final bool isSelected;
-  final Color selectedColor;
+  final Color selColor;
   final VoidCallback onTap;
 
-  // Pen dimensions - kompakt
-  static const double _penHeight = 56; // Kalem tam yüksekliği
-  static const double _slotHeight = 44; // Görünür alan (container height)
-  static const double _slotWidth = 32; // Her slot genişliği
-
-  // Vertical offsets (negative = pen moves UP, showing more body)
-  static const double _selectedTopOffset = -6; // Seçili: yukarı çık
-  static const double _unselectedTopOffset = 4; // Seçili değil: aşağıda kal
-
   @override
   Widget build(BuildContext context) {
-    final displayName = type.penType?.config.displayNameTr ?? type.displayName;
-    final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    // In dark mode, make selected color darker for better visibility
-    final displayColor = isSelected && isDark 
-        ? _darkenColor(selectedColor, 0.3) 
-        : selectedColor;
-
+    final cs = Theme.of(context).colorScheme;
+    final dk = Theme.of(context).brightness == Brightness.dark;
+    final c = isSelected && dk ? _darkenColor(selColor, 0.3) : selColor;
     return Tooltip(
-      message: displayName,
-      child: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: SizedBox(
-          width: _slotWidth,
-          height: _slotHeight,
-          // ClipRect - kalem taşmasını keser
-          child: ClipRect(
-            child: OverflowBox(
-              maxHeight: _penHeight + 20, // Animasyon için ekstra alan
-              alignment: Alignment.topCenter,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.easeOutCubic,
-                height: _penHeight,
-                margin: EdgeInsets.only(
-                  top: isSelected
-                      ? _selectedTopOffset + 10
-                      : _unselectedTopOffset + 10,
-                ),
-                child: ToolPenIcon(
-                  toolType: type,
-                  color: isSelected 
-                      ? displayColor 
-                      : (isDark ? colorScheme.onSurface.withValues(alpha: 0.6) : colorScheme.onSurfaceVariant),
-                  isSelected: false, // Selection handled by color
-                  size: _penHeight,
-                  orientation: PenOrientation.vertical,
-                ),
-              ),
+      message: type.penType?.config.displayNameTr ?? type.displayName,
+      child: GestureDetector(onTap: onTap, behavior: HitTestBehavior.opaque,
+        child: SizedBox(width: 32, height: 44, child: ClipRect(
+          child: OverflowBox(maxHeight: 76, alignment: Alignment.topCenter,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOutCubic, height: 56,
+              margin: EdgeInsets.only(top: isSelected ? 4 : 14),
+              child: ToolPenIcon(toolType: type, size: 56,
+                orientation: PenOrientation.vertical, isSelected: false,
+                color: isSelected ? c
+                    : (dk ? cs.onSurface.withValues(alpha: 0.6)
+                        : cs.onSurfaceVariant)),
             ),
           ),
-        ),
-      ),
-    );
-  }
-  
-  /// Darken a color by reducing its lightness in HSL color space
-  Color _darkenColor(Color color, double amount) {
-    final hslColor = HSLColor.fromColor(color);
-    final darkerColor = hslColor.withLightness(
-      (hslColor.lightness * (1 - amount)).clamp(0.0, 1.0),
-    );
-    return darkerColor.toColor();
-  }
-}
-
-// _CompactSliderSection removed - using shared CompactSlider widget
-
-/// Compact color row using unified color system.
-class _CompactColorRow extends StatelessWidget {
-  const _CompactColorRow({
-    required this.selectedColor,
-    required this.onColorSelected,
-  });
-
-  final Color selectedColor;
-  final ValueChanged<Color> onColorSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Renk',
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-            color: colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: 6),
-        UnifiedColorPicker(
-          selectedColor: selectedColor,
-          onColorSelected: onColorSelected,
-          quickColors: ColorSets.quickAccess,
-          colorSets: ColorSets.all,
-          chipSize: 24.0,
-          spacing: 6.0,
-        ),
-      ],
-    );
-  }
-}
-
-/// Compact action button.
-class _CompactActionButton extends StatelessWidget {
-  const _CompactActionButton({
-    required this.label,
-    required this.onPressed,
-    this.icon,
-  });
-
-  final String label;
-  final VoidCallback onPressed;
-  final IconData? icon;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    
-    return GestureDetector(
-      onTap: onPressed,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerLowest,
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (icon != null) ...[
-              Icon(icon, size: 12, color: colorScheme.onSurfaceVariant),
-              const SizedBox(width: 4),
-            ],
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
+        )),
       ),
     );
   }

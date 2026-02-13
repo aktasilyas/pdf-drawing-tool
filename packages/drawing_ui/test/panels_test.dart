@@ -105,7 +105,6 @@ void main() {
                   child: SingleChildScrollView(
                     child: PenSettingsPanel(
                       toolType: ToolType.ballpointPen,
-                      onClose: () {},
                     ),
                   ),
                 ),
@@ -131,7 +130,6 @@ void main() {
                   child: SingleChildScrollView(
                     child: PenSettingsPanel(
                       toolType: ToolType.gelPen,
-                      onClose: () {},
                     ),
                   ),
                 ),
@@ -157,7 +155,6 @@ void main() {
                   child: SingleChildScrollView(
                     child: PenSettingsPanel(
                       toolType: ToolType.pencil,
-                      onClose: () {},
                     ),
                   ),
                 ),
@@ -182,7 +179,6 @@ void main() {
                   child: SingleChildScrollView(
                     child: PenSettingsPanel(
                       toolType: ToolType.ballpointPen,
-                      onClose: () {},
                     ),
                   ),
                 ),
@@ -208,7 +204,6 @@ void main() {
                   child: SingleChildScrollView(
                     child: PenSettingsPanel(
                       toolType: ToolType.ballpointPen,
-                      onClose: () {},
                     ),
                   ),
                 ),
