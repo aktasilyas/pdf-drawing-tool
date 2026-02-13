@@ -54,10 +54,18 @@ customIcon: isPenGroup && _penTools.contains(currentTool)
 - "Salt okunur" badge: `secondaryContainer` color, `onSecondaryContainer` text, 12px border radius
 - Grid toggle hidden in reader mode, sidebar still accessible
 
+## Page Indicator Bar (Phase M3 Adim 5)
+- `page_indicator_bar.dart`: 131 lines (max 150 enforced)
+- Auto-hide: `AnimationController` + `Timer` + `FadeTransition`
+- `ref.listen` inside `build()` to show bar on page changes
+- Swipe in reader mode: GestureDetector wrapping canvasStack in `buildDrawingCanvasArea`
+- Velocity threshold: 300 (left swipe = next, right swipe = previous)
+- Single-page: returns `SizedBox.shrink()`
+
 ## Key File Line Counts (watch 300 limit)
 - `drawing_screen.dart`: ~286 lines (very close to limit)
 - `top_navigation_bar.dart`: ~262 lines
-- `drawing_screen_layout.dart`: ~303 lines (slightly over, was pre-existing)
+- `drawing_screen_layout.dart`: ~299 lines (trimmed from 336 by condensing widget code)
 
 ## Testing Notes
 - Pre-existing failures: ~45 tests (PDF, canvas, toolbar icon matching) - expected

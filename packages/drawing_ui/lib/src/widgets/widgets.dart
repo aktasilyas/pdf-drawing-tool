@@ -12,6 +12,7 @@ export 'color_chips_grid.dart';
 export 'eraser_cursor_widget.dart';
 export 'floating_pen_box.dart';
 export 'floating_undo_redo.dart';
+export 'page_indicator_bar.dart';
 export 'page_navigator.dart';
 export 'page_thumbnail.dart';
 export 'panel_arrow.dart';

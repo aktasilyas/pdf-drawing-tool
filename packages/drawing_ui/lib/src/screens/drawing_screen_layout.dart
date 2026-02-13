@@ -31,7 +31,9 @@ Widget buildDrawingCanvasArea({
   CanvasColorScheme? colorScheme,
   bool isReadOnly = false,
 }) {
-  return ClipRect(
+  const double swipeVelocityThreshold = 300;
+
+  final canvasStack = ClipRect(
     child: Stack(
       clipBehavior: Clip.hardEdge,
       children: [
@@ -82,9 +84,33 @@ Widget buildDrawingCanvasArea({
           Positioned(right: 16, bottom: 16, child: AskAIButton(onTap: onOpenAIPanel)),
         if (ref.watch(isZoomingProvider))
           Center(child: ZoomIndicator(zoomPercentage: ref.watch(zoomPercentageProvider))),
+        // Floating page indicator bar
+        const Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          child: PageIndicatorBar(),
+        ),
       ],
     ),
   );
+
+  // In reader mode, wrap with horizontal swipe for page navigation
+  if (isReadOnly) {
+    return GestureDetector(
+      onHorizontalDragEnd: (details) {
+        final velocity = details.primaryVelocity ?? 0;
+        if (velocity < -swipeVelocityThreshold) {
+          ref.read(pageManagerProvider.notifier).nextPage();
+        } else if (velocity > swipeVelocityThreshold) {
+          ref.read(pageManagerProvider.notifier).previousPage();
+        }
+      },
+      child: canvasStack,
+    );
+  }
+
+  return canvasStack;
 }
 
 /// Build the page navigator sidebar.
@@ -116,10 +142,9 @@ Widget buildPageSidebar({required BuildContext context, required WidgetRef ref, 
 
 /// Build a single thumbnail item.
 Widget _buildThumbnailItem(BuildContext context, WidgetRef ref, dynamic pageManager,
-    ThumbnailCache thumbnailCache, int index, ColorScheme colorScheme, bool isDark) {
+    ThumbnailCache thumbnailCache, int index, ColorScheme cs, bool isDark) {
   final page = pageManager.pages[index];
-  final isSelected = index == pageManager.currentIndex;
-
+  final sel = index == pageManager.currentIndex;
   return Padding(
     padding: const EdgeInsets.only(bottom: 20),
     child: GestureDetector(
@@ -134,29 +159,16 @@ Widget _buildThumbnailItem(BuildContext context, WidgetRef ref, dynamic pageMana
         Container(
           height: 152,
           decoration: BoxDecoration(
-            color: isDark ? colorScheme.surfaceContainer : colorScheme.surface,
-            borderRadius: BorderRadius.circular(8),
-            border:
-                Border.all(color: isSelected ? colorScheme.primary : colorScheme.outlineVariant, width: isSelected ? 2 : 1),
-            boxShadow: [
-              BoxShadow(
-                  color: Colors.black.withValues(alpha: isSelected ? 0.12 : 0.06),
-                  blurRadius: isSelected ? 8 : 4,
-                  offset: Offset(0, isSelected ? 2 : 1)),
-            ],
+            color: isDark ? cs.surfaceContainer : cs.surface, borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: sel ? cs.primary : cs.outlineVariant, width: sel ? 2 : 1),
+            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: sel ? 0.12 : 0.06), blurRadius: sel ? 8 : 4, offset: Offset(0, sel ? 2 : 1))],
           ),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(7),
-            child: PageThumbnail(page: page, cache: thumbnailCache, width: 116, height: 152, isSelected: isSelected, showPageNumber: false),
-          ),
+          child: ClipRRect(borderRadius: BorderRadius.circular(7),
+            child: PageThumbnail(page: page, cache: thumbnailCache, width: 116, height: 152, isSelected: sel, showPageNumber: false)),
         ),
         const SizedBox(height: 6),
-        Text('${index + 1}',
-            style: TextStyle(
-                fontSize: 12,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
-                letterSpacing: -0.2)),
+        Text('${index + 1}', style: TextStyle(fontSize: 12, fontWeight: sel ? FontWeight.w600 : FontWeight.w400,
+            color: sel ? cs.primary : cs.onSurfaceVariant, letterSpacing: -0.2)),
       ]),
     ),
   );
@@ -197,25 +209,17 @@ class AskAIButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final cs = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: 56, height: 56,
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [colorScheme.primary, colorScheme.primary.withValues(alpha: 0.8)],
-            begin: Alignment.topLeft, end: Alignment.bottomRight,
-          ),
+          gradient: LinearGradient(colors: [cs.primary, cs.primary.withValues(alpha: 0.8)], begin: Alignment.topLeft, end: Alignment.bottomRight),
           borderRadius: BorderRadius.circular(28),
-          boxShadow: [
-            BoxShadow(
-              color: colorScheme.primary.withValues(alpha: 80.0 / 255.0),
-              blurRadius: 16, offset: const Offset(0, 4),
-            ),
-          ],
+          boxShadow: [BoxShadow(color: cs.primary.withValues(alpha: 80.0 / 255.0), blurRadius: 16, offset: const Offset(0, 4))],
         ),
-        child: Icon(Icons.auto_awesome, color: colorScheme.onPrimary, size: 24),
+        child: Icon(Icons.auto_awesome, color: cs.onPrimary, size: 24),
       ),
     );
   }
@@ -228,30 +232,15 @@ class ZoomIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => IgnorePointer(
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.7),
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.3),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Text(
-            zoomPercentage,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 28,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 1,
-            ),
-          ),
-        ),
-      );
+    child: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.7), borderRadius: BorderRadius.circular(12),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4))],
+      ),
+      child: Text(zoomPercentage, style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w600, letterSpacing: 1)),
+    ),
+  );
 }
 
 /// Handle panel state changes - show/hide overlay.
