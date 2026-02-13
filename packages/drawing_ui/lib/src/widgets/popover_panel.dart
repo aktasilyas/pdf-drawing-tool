@@ -144,7 +144,10 @@ class _PopoverOverlayState extends State<_PopoverOverlay>
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(16),
-                      child: widget.child,
+                      child: Material(
+                        type: MaterialType.transparency,
+                        child: widget.child,
+                      ),
                     ),
                   ),
                 ],
