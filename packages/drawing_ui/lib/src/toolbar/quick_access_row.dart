@@ -9,7 +9,7 @@ import 'package:drawing_ui/src/widgets/unified_color_picker.dart';
 
 /// Quick access row for changing color and thickness without opening panels.
 ///
-/// Shows 5 color chips and 3 thickness dots.
+/// Shows 5 color chips (24dp) and 3 thickness line previews.
 /// Only visible when a drawing tool (pen/highlighter) is selected.
 class QuickAccessRow extends ConsumerWidget {
   const QuickAccessRow({super.key});
@@ -18,38 +18,36 @@ class QuickAccessRow extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final currentTool = ref.watch(currentToolProvider);
 
-    // Only show for drawing tools
     if (!_isDrawingTool(currentTool)) {
       return const SizedBox.shrink();
     }
 
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Quick colors
         QuickColorChips(currentTool: currentTool),
         const SizedBox(width: 6),
-        // Separator
         Container(
           width: 1,
           height: 20,
-          color: Colors.grey.shade300,
+          color: colorScheme.outlineVariant,
         ),
         const SizedBox(width: 6),
-        // Quick thickness
-        QuickThicknessDots(currentTool: currentTool),
+        QuickThicknessChips(currentTool: currentTool),
       ],
     );
   }
 
   bool _isDrawingTool(ToolType tool) {
-    // Use the isPenTool getter from ToolType
-    // Note: neonHighlighter.isPenTool returns true, so it's covered
-    return tool.isPenTool || tool == ToolType.highlighter || tool == ToolType.neonHighlighter;
+    return tool.isPenTool ||
+        tool == ToolType.highlighter ||
+        tool == ToolType.neonHighlighter;
   }
 }
 
-/// Quick color selection chips.
+/// Quick color selection chips (24dp circles).
 class QuickColorChips extends ConsumerWidget {
   const QuickColorChips({
     super.key,
@@ -60,8 +58,9 @@ class QuickColorChips extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Vurgulayıcı için farklı renkler kullan
-    final isHighlighter = currentTool == ToolType.highlighter || currentTool == ToolType.neonHighlighter;
+    final colorScheme = Theme.of(context).colorScheme;
+    final isHighlighter = currentTool == ToolType.highlighter ||
+        currentTool == ToolType.neonHighlighter;
     final colors = isHighlighter
         ? ColorSets.highlighter.take(5).toList()
         : ColorSets.quickAccess.take(5).toList();
@@ -73,7 +72,7 @@ class QuickColorChips extends ConsumerWidget {
         ...colors.map((color) {
           final isSelected = _colorsMatch(color, selectedColor);
           return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2),
+            padding: const EdgeInsets.symmetric(horizontal: 3),
             child: _QuickColorChip(
               color: color,
               isSelected: isSelected,
@@ -82,20 +81,27 @@ class QuickColorChips extends ConsumerWidget {
             ),
           );
         }),
-        // "Daha fazla" butonu
+        // "More colors" button
         Padding(
           padding: const EdgeInsets.only(left: 4),
           child: GestureDetector(
             onTap: () => _showColorPalette(context, ref, selectedColor),
             child: Container(
-              width: 22,
-              height: 22,
+              width: 24,
+              height: 24,
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: colorScheme.surfaceContainerHighest,
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.grey.shade300, width: 0.5),
+                border: Border.all(
+                  color: colorScheme.outlineVariant,
+                  width: 0.5,
+                ),
               ),
-              child: PhosphorIcon(StarNoteIcons.more, size: 14, color: const Color(0xFF666666)),
+              child: PhosphorIcon(
+                StarNoteIcons.more,
+                size: 14,
+                color: colorScheme.onSurfaceVariant,
+              ),
             ),
           ),
         ),
@@ -104,15 +110,16 @@ class QuickColorChips extends ConsumerWidget {
   }
 
   Color _getSelectedColor(WidgetRef ref) {
-    if (currentTool == ToolType.highlighter || currentTool == ToolType.neonHighlighter) {
+    if (currentTool == ToolType.highlighter ||
+        currentTool == ToolType.neonHighlighter) {
       return ref.watch(highlighterSettingsProvider).color;
     }
     return ref.watch(penSettingsProvider(currentTool)).color;
   }
 
   void _setColor(WidgetRef ref, Color color) {
-    if (currentTool == ToolType.highlighter || currentTool == ToolType.neonHighlighter) {
-      // For highlighter, apply alpha for transparency (less for neon)
+    if (currentTool == ToolType.highlighter ||
+        currentTool == ToolType.neonHighlighter) {
       final alpha = currentTool == ToolType.neonHighlighter ? 200 : 128;
       final highlighterColor = color.withValues(alpha: alpha / 255.0);
       ref.read(highlighterSettingsProvider.notifier).setColor(highlighterColor);
@@ -121,8 +128,10 @@ class QuickColorChips extends ConsumerWidget {
     }
   }
 
-  void _showColorPalette(BuildContext context, WidgetRef ref, Color selectedColor) {
-    final isHighlighter = currentTool == ToolType.highlighter || currentTool == ToolType.neonHighlighter;
+  void _showColorPalette(
+      BuildContext context, WidgetRef ref, Color selectedColor) {
+    final isHighlighter = currentTool == ToolType.highlighter ||
+        currentTool == ToolType.neonHighlighter;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -134,21 +143,23 @@ class QuickColorChips extends ConsumerWidget {
           Navigator.pop(ctx);
         },
         colorSets: isHighlighter
-            ? {'Vurgulayıcı': ColorSets.highlighter, 'Pastel': ColorSets.pastel}
+            ? {
+                'Vurgulayıcı': ColorSets.highlighter,
+                'Pastel': ColorSets.pastel,
+              }
             : ColorSets.all,
       ),
     );
   }
 
   bool _colorsMatch(Color a, Color b) {
-    // Compare RGB only (ignore alpha for highlighter comparison)
-    return (a.r * 255.0).round().clamp(0, 255) == (b.r * 255.0).round().clamp(0, 255) && 
-        (a.g * 255.0).round().clamp(0, 255) == (b.g * 255.0).round().clamp(0, 255) && 
-        (a.b * 255.0).round().clamp(0, 255) == (b.b * 255.0).round().clamp(0, 255);
+    return (a.r * 255).round() == (b.r * 255).round() &&
+        (a.g * 255).round() == (b.g * 255).round() &&
+        (a.b * 255).round() == (b.b * 255).round();
   }
 }
 
-/// A single quick color chip.
+/// A single 24dp color chip with selection indicator.
 class _QuickColorChip extends StatelessWidget {
   const _QuickColorChip({
     required this.color,
@@ -164,24 +175,30 @@ class _QuickColorChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return GestureDetector(
       onTap: onTap,
       onDoubleTap: onDoubleTap,
       child: Container(
-        width: 22,
-        height: 22,
+        width: 24,
+        height: 24,
         decoration: BoxDecoration(
           color: color,
           shape: BoxShape.circle,
           border: Border.all(
-            color: isSelected ? Colors.white : Colors.grey.shade300,
-            width: isSelected ? 2 : 0.5,
+            color: isSelected
+                ? colorScheme.primary
+                : color.computeLuminance() > 0.8
+                    ? colorScheme.outlineVariant
+                    : Colors.transparent,
+            width: isSelected ? 2.5 : 1.0,
           ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: color.withValues(alpha: 80.0 / 255.0),
-                    blurRadius: 3,
+                    color: color.withValues(alpha: 0.4),
+                    blurRadius: 4,
                     spreadRadius: 1,
                   ),
                 ]
@@ -191,7 +208,9 @@ class _QuickColorChip extends StatelessWidget {
             ? PhosphorIcon(
                 StarNoteIcons.check,
                 size: 12,
-                color: color.computeLuminance() > 0.5 ? Colors.black : Colors.white,
+                color: color.computeLuminance() > 0.5
+                    ? Colors.black87
+                    : Colors.white,
               )
             : null,
       ),
@@ -199,9 +218,9 @@ class _QuickColorChip extends StatelessWidget {
   }
 }
 
-/// Quick thickness selection dots.
-class QuickThicknessDots extends ConsumerWidget {
-  const QuickThicknessDots({
+/// Quick thickness selection with line preview chips.
+class QuickThicknessChips extends ConsumerWidget {
+  const QuickThicknessChips({
     super.key,
     required this.currentTool,
   });
@@ -210,29 +229,21 @@ class QuickThicknessDots extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = DrawingTheme.of(context);
     final thicknesses = ref.watch(quickThicknessProvider);
     final selectedThickness = _getSelectedThickness(ref);
     final toolColor = _getToolColor(ref);
 
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: thicknesses.asMap().entries.map((entry) {
-        final index = entry.key;
-        final thickness = entry.value;
+      children: thicknesses.map((thickness) {
         final isSelected = _thicknessMatches(thickness, selectedThickness);
 
-        // Scale dot sizes: small, medium, large
-        final dotSize = 8.0 + (index * 4.0); // 8, 12, 16
-
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: _QuickThicknessDot(
-            size: dotSize,
+          padding: const EdgeInsets.symmetric(horizontal: 2),
+          child: _QuickThicknessChip(
             thickness: thickness,
-            color: toolColor,
+            currentColor: toolColor,
             isSelected: isSelected,
-            selectedColor: theme.toolbarIconSelectedColor,
             onTap: () => _setThickness(ref, thickness),
           ),
         );
@@ -240,7 +251,9 @@ class QuickThicknessDots extends ConsumerWidget {
     );
   }
 
-  bool get _isHighlighter => currentTool == ToolType.highlighter || currentTool == ToolType.neonHighlighter;
+  bool get _isHighlighter =>
+      currentTool == ToolType.highlighter ||
+      currentTool == ToolType.neonHighlighter;
 
   double _getSelectedThickness(WidgetRef ref) {
     if (_isHighlighter) {
@@ -258,18 +271,18 @@ class QuickThicknessDots extends ConsumerWidget {
 
   void _setThickness(WidgetRef ref, double thickness) {
     if (_isHighlighter) {
-      // Scale up for highlighter (highlighter is typically thicker)
       final highlighterThickness = thickness * 4;
       ref
           .read(highlighterSettingsProvider.notifier)
           .setThickness(highlighterThickness);
     } else {
-      ref.read(penSettingsProvider(currentTool).notifier).setThickness(thickness);
+      ref
+          .read(penSettingsProvider(currentTool).notifier)
+          .setThickness(thickness);
     }
   }
 
   bool _thicknessMatches(double a, double b) {
-    // For highlighter, compare scaled values
     if (_isHighlighter) {
       return (a * 4 - b).abs() < 0.1;
     }
@@ -277,45 +290,46 @@ class QuickThicknessDots extends ConsumerWidget {
   }
 }
 
-/// A single quick thickness dot.
-class _QuickThicknessDot extends StatelessWidget {
-  const _QuickThicknessDot({
-    required this.size,
+/// A single thickness chip showing a horizontal line preview.
+class _QuickThicknessChip extends StatelessWidget {
+  const _QuickThicknessChip({
     required this.thickness,
-    required this.color,
+    required this.currentColor,
     required this.isSelected,
-    required this.selectedColor,
     required this.onTap,
   });
 
-  final double size;
   final double thickness;
-  final Color color;
+  final Color currentColor;
   final bool isSelected;
-  final Color selectedColor;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    // Map thickness to 1-6dp visual height
+    final visualThickness = (thickness * 0.8).clamp(1.0, 6.0);
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 24,
-        height: 24,
+        width: 28,
+        height: 28,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: isSelected
-              ? Border.all(color: selectedColor, width: 1.5)
-              : null,
-          color: isSelected ? selectedColor.withValues(alpha: 15.0 / 255.0) : Colors.transparent,
+          border: Border.all(
+            color:
+                isSelected ? colorScheme.primary : colorScheme.outlineVariant,
+            width: isSelected ? 2.0 : 1.0,
+          ),
         ),
         child: Center(
           child: Container(
-            width: size * 0.85,
-            height: size * 0.85,
+            width: 14,
+            height: visualThickness,
             decoration: BoxDecoration(
-              color: isSelected ? selectedColor : color.withValues(alpha: 150.0 / 255.0),
-              shape: BoxShape.circle,
+              color: currentColor,
+              borderRadius: BorderRadius.circular(visualThickness / 2),
             ),
           ),
         ),

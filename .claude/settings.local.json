@@ -41,7 +41,9 @@
       "Bash(wc:*)",
       "Bash(xargs:*)",
       "Bash(git branch:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "WebSearch",
+      "WebFetch(domain:pub.dev)"
     ]
   }
 }

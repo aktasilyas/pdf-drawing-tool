@@ -76,7 +76,7 @@ class _MediumToolbarState extends ConsumerState<MediumToolbar> {
     final visibleTools = allTools.take(_maxVisibleTools).toList();
     final hiddenTools = allTools.skip(_maxVisibleTools).toList();
     return Container(
-      height: 46,
+      height: 48,
       decoration: BoxDecoration(
         color: theme.toolbarBackground,
         border: Border(
