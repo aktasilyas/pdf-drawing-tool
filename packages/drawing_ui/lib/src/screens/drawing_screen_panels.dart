@@ -1,7 +1,5 @@
 /// Panel builders and helpers for the drawing screen.
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/panels/panels.dart';
 import 'package:drawing_ui/src/toolbar/tool_groups.dart';
@@ -39,27 +37,27 @@ Widget buildActivePanel({
 
     case ToolType.highlighter:
     case ToolType.neonHighlighter:
-      return HighlighterSettingsPanel(onClose: onClose);
+      return const HighlighterSettingsPanel();
 
     case ToolType.pixelEraser:
     case ToolType.strokeEraser:
     case ToolType.lassoEraser:
-      return EraserSettingsPanel(onClose: onClose);
+      return const EraserSettingsPanel();
 
     case ToolType.shapes:
-      return ShapesSettingsPanel(onClose: onClose);
+      return const ShapesSettingsPanel();
 
     case ToolType.sticker:
-      return StickerPanel(onClose: onClose);
+      return const StickerPanel();
 
     case ToolType.image:
-      return ImagePanel(onClose: onClose);
+      return const ImagePanel();
 
     case ToolType.selection:
-      return LassoSelectionPanel(onClose: onClose);
+      return const LassoSelectionPanel();
 
     case ToolType.laserPointer:
-      return _LaserPointerPanel(onClose: onClose);
+      return const LaserPointerPanel();
 
     case ToolType.text:
       return _TextToolPanel(onClose: onClose);
@@ -68,7 +66,7 @@ Widget buildActivePanel({
       return const SizedBox.shrink();
 
     case ToolType.toolbarSettings:
-      return ToolbarSettingsPanel(onClose: onClose);
+      return const ToolbarSettingsPanel();
   }
 }
 
@@ -121,76 +119,6 @@ class _TextToolPanel extends StatelessWidget {
   }
 }
 
-/// Simple laser pointer panel (placeholder).
-class _LaserPointerPanel extends StatelessWidget {
-  const _LaserPointerPanel({this.onClose});
-
-  final VoidCallback? onClose;
-
-  @override
-  Widget build(BuildContext context) {
-    return ToolPanel(
-      title: 'Laser Pointer',
-      onClose: onClose,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          PanelSection(
-            title: 'MODE',
-            child: Row(
-              children: [
-                Expanded(
-                  child: _ModeButton(
-                    label: 'Dot',
-                    icon: StarNoteIcons.circle,
-                    isSelected: true,
-                    onTap: () {},
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: _ModeButton(
-                    label: 'Trail',
-                    icon: StarNoteIcons.selection,
-                    isSelected: false,
-                    onTap: () {},
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          const PanelSection(
-            title: 'COLOR',
-            child: Row(
-              children: [
-                _ColorDot(color: Colors.red, isSelected: true),
-                const SizedBox(width: 8),
-                _ColorDot(color: Colors.green),
-                const SizedBox(width: 8),
-                _ColorDot(color: Colors.blue),
-                const SizedBox(width: 8),
-                _ColorDot(color: Colors.orange),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          PanelSection(
-            title: 'DURATION',
-            child: Slider(
-              value: 2,
-              min: 0.5,
-              max: 5,
-              divisions: 9,
-              label: '2s',
-              onChanged: (_) {},
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
 /// Simple color dot widget.
 class _ColorDot extends StatelessWidget {
@@ -213,51 +141,6 @@ class _ColorDot extends StatelessWidget {
         border: Border.all(
           color: isSelected ? Colors.blue : Colors.grey.shade300,
           width: isSelected ? 3 : 1,
-        ),
-      ),
-    );
-  }
-}
-
-/// Mode button for laser pointer.
-class _ModeButton extends StatelessWidget {
-  const _ModeButton({
-    required this.label,
-    required this.icon,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final String label;
-  final PhosphorIconData icon;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.blue.shade50 : Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isSelected ? Colors.blue : Colors.grey.shade300,
-          ),
-        ),
-        child: Column(
-          children: [
-            PhosphorIcon(icon, color: isSelected ? Colors.blue : Colors.grey),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                color: isSelected ? Colors.blue : Colors.grey,
-              ),
-            ),
-          ],
         ),
       ),
     );

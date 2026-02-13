@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'package:drawing_ui/src/panels/tool_panel.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 
 /// Settings panel for the image insertion tool.
@@ -9,22 +8,20 @@ import 'package:drawing_ui/src/theme/theme.dart';
 /// Displays recent images and options to add from album or camera.
 /// All interactions are MOCKED - no real image insertion.
 class ImagePanel extends ConsumerWidget {
-  const ImagePanel({
-    super.key,
-    this.onClose,
-  });
-
-  /// Callback when panel is closed.
-  final VoidCallback? onClose;
+  const ImagePanel({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return ToolPanel(
-      title: 'Resim Ekle',
-      onClose: onClose,
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.all(12),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text('Resim Ekle', style: TextStyle(
+            fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSurface)),
+          const SizedBox(height: 10),
           // Source buttons - compact
           Row(
             children: [
@@ -60,7 +57,6 @@ class ImagePanel extends ConsumerWidget {
           _RecentImagesGrid(
             onImageSelected: (index) {
               // MOCK: Would insert image
-              onClose?.call();
             },
           ),
           const SizedBox(height: 12),

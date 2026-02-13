@@ -163,31 +163,6 @@ void main() {
       expect(find.text('2.0s'), findsOneWidget);
     });
 
-    testWidgets('close button calls onClose callback', (tester) async {
-      bool closeCalled = false;
-
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: Scaffold(
-              body: LaserPointerPanel(
-                onClose: () => closeCalled = true,
-              ),
-            ),
-          ),
-        ),
-      );
-
-      // Find close button
-      final closeButton = find.byIcon(StarNoteIcons.close);
-      expect(closeButton, findsOneWidget);
-
-      await tester.tap(closeButton);
-      await tester.pump();
-
-      expect(closeCalled, true);
-    });
-
     testWidgets('can change color via provider', (tester) async {
       late WidgetRef testRef;
       

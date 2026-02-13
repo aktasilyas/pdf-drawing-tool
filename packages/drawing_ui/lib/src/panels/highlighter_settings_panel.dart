@@ -1,463 +1,300 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/widgets/color_presets.dart';
-import 'package:drawing_ui/src/widgets/compact_slider.dart';
 import 'package:drawing_ui/src/widgets/compact_toggle.dart';
 import 'package:drawing_ui/src/widgets/unified_color_picker.dart';
 import 'package:drawing_ui/src/widgets/pen_icon_widget.dart';
-import 'package:drawing_ui/src/panels/tool_panel.dart';
 
-/// Settings panel for the highlighter tools (highlighter + neonHighlighter).
+Color _darkenColor(Color c, double amt) {
+  final h = HSLColor.fromColor(c);
+  return h.withLightness((h.lightness * (1 - amt)).clamp(0.0, 1.0)).toColor();
+}
+
+/// Highlighter settings content for popover panel.
 class HighlighterSettingsPanel extends ConsumerWidget {
-  const HighlighterSettingsPanel({
-    super.key,
-    this.onClose,
-  });
-
-  final VoidCallback? onClose;
-
+  const HighlighterSettingsPanel({super.key});
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(highlighterSettingsProvider);
     final currentTool = ref.watch(currentToolProvider);
     final isNeon = currentTool == ToolType.neonHighlighter;
-
-    return ToolPanel(
-      title: isNeon ? 'Neon Fosforlu' : 'Fosforlu Kalem',
-      onClose: onClose,
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.all(12),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Highlighter type selector
+          Text(isNeon ? 'Neon Fosforlu' : 'Fosforlu Kalem', style: TextStyle(
+            fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSurface)),
+          const SizedBox(height: 10),
           _HighlighterTypeSelector(
-            selectedType: currentTool,
-            selectedColor: settings.color,
-            onTypeSelected: (type) {
-              ref.read(currentToolProvider.notifier).state = type;
-            },
+            selectedType: currentTool, selectedColor: settings.color,
+            onTypeSelected: (t) =>
+                ref.read(currentToolProvider.notifier).state = t,
           ),
           const SizedBox(height: 8),
-
-          // Thickness bar preview (compact)
           _ThicknessBarPreview(
-            color: settings.color,
-            thickness: settings.thickness,
+            color: settings.color, thickness: settings.thickness,
             isNeon: isNeon,
           ),
           const SizedBox(height: 8),
-
-          // Thickness slider (compact)
-          CompactSlider(
-            title: 'Kalınlık',
+          _GoodNotesSlider(
+            label: 'KALINLIK', activeColor: settings.color,
             value: settings.thickness
                 .clamp(isNeon ? 8.0 : 10.0, isNeon ? 30.0 : 40.0),
-            min: isNeon ? 8.0 : 10.0,
-            max: isNeon ? 30.0 : 40.0,
-            label:
+            min: isNeon ? 8.0 : 10.0, max: isNeon ? 30.0 : 40.0,
+            displayValue:
                 '${settings.thickness.clamp(isNeon ? 8.0 : 10.0, isNeon ? 30.0 : 40.0).toStringAsFixed(0)}mm',
-            activeColor: settings.color,
-            onChanged: (value) {
-              ref
-                  .read(highlighterSettingsProvider.notifier)
-                  .setThickness(value);
-            },
+            onChanged: (v) => ref.read(
+                highlighterSettingsProvider.notifier).setThickness(v),
           ),
           const SizedBox(height: 8),
-
-          // Neon-specific: Glow intensity slider
           if (isNeon) ...[
-            CompactSlider(
-              title: 'Parlaklık',
-              value: settings.glowIntensity,
-              min: 0.1,
-              max: 1.0,
-              label: '${(settings.glowIntensity * 100).round()}%',
-              activeColor: settings.color,
-              onChanged: (value) {
-                ref
-                    .read(highlighterSettingsProvider.notifier)
-                    .setGlowIntensity(value);
-              },
+            _GoodNotesSlider(
+              label: 'PARLAKLIK', activeColor: settings.color,
+              value: settings.glowIntensity, min: 0.1, max: 1.0,
+              displayValue: '${(settings.glowIntensity * 100).round()}%',
+              onChanged: (v) => ref.read(
+                  highlighterSettingsProvider.notifier).setGlowIntensity(v),
             ),
             const SizedBox(height: 8),
           ],
-
-          // Straight line toggle (compact)
           CompactToggle(
-            label: 'Düz çizgi',
-            value: settings.straightLineMode,
-            onChanged: (value) {
-              ref
-                  .read(highlighterSettingsProvider.notifier)
-                  .setStraightLineMode(value);
-            },
+            label: 'Düz çizgi', value: settings.straightLineMode,
+            onChanged: (v) => ref.read(
+                highlighterSettingsProvider.notifier).setStraightLineMode(v),
           ),
           const SizedBox(height: 8),
-
-          // Colors (compact)
-          Builder(
-            builder: (context) {
-              final notifier = ref.read(highlighterSettingsProvider.notifier);
-              return _CompactHighlighterColors(
-                selectedColor: settings.color,
-                onColorSelected: (color) {
-                  notifier.setColor(color);
-                },
-                isNeon: isNeon,
-              );
-            },
+          _CompactHighlighterColors(
+            selectedColor: settings.color, isNeon: isNeon,
+            onColorSelected: (c) => ref.read(
+                highlighterSettingsProvider.notifier).setColor(c),
           ),
           const SizedBox(height: 8),
-
-          // Add button (compact)
-          _CompactAddButton(
-            onPressed: () => _addToPenBox(context, ref, settings, isNeon),
+          SizedBox(
+            width: double.infinity, height: 36,
+            child: OutlinedButton.icon(
+              onPressed: () => _addToPenBox(context, ref, settings, isNeon),
+              icon: Icon(StarNoteIcons.plus, size: 16),
+              label: const Text('Kalem kutusuna ekle',
+                  style: TextStyle(fontSize: 13)),
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: cs.outline.withValues(alpha: 0.5)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  void _addToPenBox(BuildContext context, WidgetRef ref,
+  void _addToPenBox(BuildContext ctx, WidgetRef ref,
       HighlighterSettings settings, bool isNeon) {
     final presets = ref.read(penBoxPresetsProvider);
     final toolType = isNeon ? ToolType.neonHighlighter : ToolType.highlighter;
-
-    // Duplicate kontrolü
-    final isDuplicate = presets.any((p) =>
-        !p.isEmpty &&
-        p.toolType == toolType &&
+    if (presets.any((p) => !p.isEmpty && p.toolType == toolType &&
         p.color.toARGB32() == settings.color.toARGB32() &&
-        (p.thickness - settings.thickness).abs() < 0.1);
-
-    if (isDuplicate) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-              'Bu ${isNeon ? "neon fosforlu" : "fosforlu kalem"} zaten kalem kutusunda mevcut'),
-          duration: const Duration(seconds: 2),
-        ),
-      );
+        (p.thickness - settings.thickness).abs() < 0.1)) {
+      ScaffoldMessenger.of(ctx).showSnackBar(SnackBar(
+          content: Text('Bu ${isNeon ? "neon fosforlu" : "fosforlu kalem"}'
+              ' zaten kalem kutusunda mevcut'),
+          duration: const Duration(seconds: 2)));
       return;
     }
-
-    final newPreset = PenPreset(
+    ref.read(penBoxPresetsProvider.notifier).addPreset(PenPreset(
       id: 'preset_${DateTime.now().millisecondsSinceEpoch}',
-      toolType: toolType,
-      color: settings.color,
-      thickness: settings.thickness,
-      nibShape: NibShapeType.rectangle,
-    );
-    ref.read(penBoxPresetsProvider.notifier).addPreset(newPreset);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
+      toolType: toolType, color: settings.color,
+      thickness: settings.thickness, nibShape: NibShapeType.rectangle,
+    ));
+    ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(
         content: Text('Kalem kutusuna eklendi'),
-        duration: Duration(seconds: 1),
-      ),
-    );
+        duration: Duration(seconds: 1)));
   }
 }
 
-/// Highlighter type selector - GoodNotes/Fenci style toolbar.
-/// Pens are vertical, tip UP, bottom clipped by container.
-/// Selected pen rises up to show more body.
-class _HighlighterTypeSelector extends StatelessWidget {
-  const _HighlighterTypeSelector({
-    required this.selectedType,
-    required this.selectedColor,
-    required this.onTypeSelected,
+class _GoodNotesSlider extends StatelessWidget {
+  const _GoodNotesSlider({
+    required this.label, required this.value, required this.min,
+    required this.max, required this.displayValue,
+    required this.activeColor, required this.onChanged,
   });
-
-  final ToolType selectedType;
-  final Color selectedColor;
-  final ValueChanged<ToolType> onTypeSelected;
-
-  static const _highlighterTypes = [
-    ToolType.highlighter,
-    ToolType.neonHighlighter,
-  ];
+  final String label;
+  final double value, min, max;
+  final String displayValue;
+  final Color activeColor;
+  final ValueChanged<double> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+    final cs = Theme.of(context).colorScheme;
+    return Column(mainAxisSize: MainAxisSize.min, children: [
+      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+        Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
+            color: cs.onSurfaceVariant, letterSpacing: 0.5)),
+        Text(displayValue, style: TextStyle(fontSize: 12,
+            fontWeight: FontWeight.w500, color: cs.onSurface)),
+      ]),
+      const SizedBox(height: 2),
+      SizedBox(height: 28, child: SliderTheme(
+        data: SliderThemeData(
+          trackHeight: 4,
+          thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+          overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
+          activeTrackColor: activeColor,
+          inactiveTrackColor: cs.surfaceContainerHighest,
+          thumbColor: activeColor,
+        ),
+        child: Slider(value: value.clamp(min, max), min: min, max: max,
+            onChanged: onChanged),
+      )),
+    ]);
+  }
+}
+
+class _HighlighterTypeSelector extends StatelessWidget {
+  const _HighlighterTypeSelector({
+    required this.selectedType, required this.selectedColor,
+    required this.onTypeSelected,
+  });
+  final ToolType selectedType;
+  final Color selectedColor;
+  final ValueChanged<ToolType> onTypeSelected;
+  static const _types = [ToolType.highlighter, ToolType.neonHighlighter];
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final dk = Theme.of(context).brightness == Brightness.dark;
     return Container(
       height: 44,
       decoration: BoxDecoration(
-        color: isDark ? colorScheme.surfaceContainerHigh : colorScheme.surface,
+        color: dk ? cs.surfaceContainerHigh : cs.surface,
         borderRadius: BorderRadius.circular(10),
-        border: isDark ? Border.all(color: colorScheme.outline.withValues(alpha: 0.3), width: 0.5) : null,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: (isDark ? 25 : 15) / 255.0),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        border: dk ? Border.all(
+            color: cs.outline.withValues(alpha: 0.3), width: 0.5) : null,
+        boxShadow: [BoxShadow(
+          color: Colors.black.withValues(alpha: (dk ? 25 : 15) / 255.0),
+          blurRadius: 6, offset: const Offset(0, 2))],
       ),
       clipBehavior: Clip.hardEdge,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: _highlighterTypes.map((type) {
-          final isSelected = type == selectedType;
-          return _HighlighterSlot(
-            type: type,
-            isSelected: isSelected,
-            selectedColor: selectedColor,
-            onTap: () => onTypeSelected(type),
-          );
-        }).toList(),
+        children: [for (final t in _types) _HighlighterSlot(
+          type: t, isSelected: t == selectedType,
+          selColor: selectedColor, onTap: () => onTypeSelected(t))],
       ),
     );
   }
 }
 
-/// Single highlighter slot with proper clipping and animation.
 class _HighlighterSlot extends StatelessWidget {
   const _HighlighterSlot({
-    required this.type,
-    required this.isSelected,
-    required this.selectedColor,
-    required this.onTap,
+    required this.type, required this.isSelected,
+    required this.selColor, required this.onTap,
   });
-
   final ToolType type;
   final bool isSelected;
-  final Color selectedColor;
+  final Color selColor;
   final VoidCallback onTap;
-
-  // Highlighter dimensions (kompakt)
-  static const double _penHeight = 56;
-  static const double _slotHeight = 44;
-  static const double _slotWidth = 48;
-
-  // Vertical offsets
-  static const double _selectedTopOffset = -6;
-  static const double _unselectedTopOffset = 4;
-
   @override
   Widget build(BuildContext context) {
-    final displayName = type.displayName;
-    final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    // In dark mode, make selected color darker for better visibility
-    final displayColor = isSelected && isDark 
-        ? _darkenColor(selectedColor, 0.3) 
-        : selectedColor;
-
+    final cs = Theme.of(context).colorScheme;
+    final dk = Theme.of(context).brightness == Brightness.dark;
+    final c = isSelected && dk ? _darkenColor(selColor, 0.3) : selColor;
     return Tooltip(
-      message: displayName,
-      child: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: SizedBox(
-          width: _slotWidth,
-          height: _slotHeight,
-          child: ClipRect(
-            child: OverflowBox(
-              maxHeight: _penHeight + 20,
-              alignment: Alignment.topCenter,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.easeOutCubic,
-                height: _penHeight,
-                margin: EdgeInsets.only(
-                  top: isSelected
-                      ? _selectedTopOffset + 10
-                      : _unselectedTopOffset + 10,
-                ),
-                child: ToolPenIcon(
-                  toolType: type,
-                  color: isSelected 
-                      ? displayColor 
-                      : (isDark ? colorScheme.onSurface.withValues(alpha: 0.6) : colorScheme.onSurfaceVariant),
-                  isSelected: false,
-                  size: _penHeight,
-                  orientation: PenOrientation.vertical,
-                ),
-              ),
+      message: type.displayName,
+      child: GestureDetector(onTap: onTap, behavior: HitTestBehavior.opaque,
+        child: SizedBox(width: 48, height: 44, child: ClipRect(
+          child: OverflowBox(maxHeight: 76, alignment: Alignment.topCenter,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOutCubic, height: 56,
+              margin: EdgeInsets.only(top: isSelected ? 4 : 14),
+              child: ToolPenIcon(toolType: type, size: 56,
+                orientation: PenOrientation.vertical, isSelected: false,
+                color: isSelected ? c
+                    : (dk ? cs.onSurface.withValues(alpha: 0.6)
+                        : cs.onSurfaceVariant)),
             ),
           ),
-        ),
+        )),
       ),
     );
   }
-  
-  /// Darken a color by reducing its lightness in HSL color space
-  Color _darkenColor(Color color, double amount) {
-    final hslColor = HSLColor.fromColor(color);
-    final darkerColor = hslColor.withLightness(
-      (hslColor.lightness * (1 - amount)).clamp(0.0, 1.0),
-    );
-    return darkerColor.toColor();
-  }
 }
 
-/// Thickness bar preview (compact).
 class _ThicknessBarPreview extends StatelessWidget {
   const _ThicknessBarPreview({
-    required this.color,
-    required this.thickness,
-    this.isNeon = false,
+    required this.color, required this.thickness, this.isNeon = false,
   });
-
   final Color color;
   final double thickness;
   final bool isNeon;
-
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    // In dark mode, make color darker for better visibility
-    final displayColor = isDark ? _darkenColor(color, 0.3) : color;
-    
+    final cs = Theme.of(context).colorScheme;
+    final dk = Theme.of(context).brightness == Brightness.dark;
+    final dColor = dk ? _darkenColor(color, 0.3) : color;
     return Container(
-      width: double.infinity,
-      height: 28,
+      width: double.infinity, height: 28,
       decoration: BoxDecoration(
-        color: isNeon 
-            ? (isDark ? colorScheme.onSurface : colorScheme.surfaceContainerHighest)
-            : (isDark ? colorScheme.surfaceContainerHigh : colorScheme.surfaceContainerLowest),
+        color: isNeon
+            ? (dk ? cs.onSurface : cs.surfaceContainerHighest)
+            : (dk ? cs.surfaceContainerHigh : cs.surfaceContainerLowest),
         borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.3), width: 0.5),
+        border: Border.all(
+            color: cs.outline.withValues(alpha: 0.3), width: 0.5),
       ),
-      child: Center(
-        child: Container(
-          width: double.infinity,
-          height: (thickness / 3).clamp(4.0, 16.0),
-          margin: const EdgeInsets.symmetric(horizontal: 12),
-          decoration: BoxDecoration(
-            color: displayColor,
-            borderRadius: BorderRadius.circular(2),
-            boxShadow: isNeon
-                ? [
-                    BoxShadow(
-                      color: color.withValues(alpha: 180.0 / 255.0),
-                      blurRadius: 8,
-                      spreadRadius: 2,
-                    ),
-                  ]
-                : null,
-          ),
+      child: Center(child: Container(
+        width: double.infinity, height: (thickness / 3).clamp(4.0, 16.0),
+        margin: const EdgeInsets.symmetric(horizontal: 12),
+        decoration: BoxDecoration(
+          color: dColor, borderRadius: BorderRadius.circular(2),
+          boxShadow: isNeon ? [BoxShadow(
+            color: color.withValues(alpha: 180.0 / 255.0),
+            blurRadius: 8, spreadRadius: 2)] : null,
         ),
-      ),
+      )),
     );
-  }
-  
-  /// Darken a color by reducing its lightness in HSL color space
-  Color _darkenColor(Color color, double amount) {
-    final hslColor = HSLColor.fromColor(color);
-    final darkerColor = hslColor.withLightness(
-      (hslColor.lightness * (1 - amount)).clamp(0.0, 1.0),
-    );
-    return darkerColor.toColor();
   }
 }
 
-// Private widgets removed - using shared CompactSlider and CompactToggle
-
-/// Compact highlighter colors using unified color system.
 class _CompactHighlighterColors extends StatelessWidget {
   const _CompactHighlighterColors({
-    required this.selectedColor,
-    required this.onColorSelected,
+    required this.selectedColor, required this.onColorSelected,
     this.isNeon = false,
   });
-
   final Color selectedColor;
   final ValueChanged<Color> onColorSelected;
   final bool isNeon;
-
-  // Neon renkler (canlı, parlak)
   static const _neonColors = [
-    Color(0xFFFF00FF), // Magenta
-    Color(0xFF00FFFF), // Cyan
-    Color(0xFFFF0080), // Pink
-    Color(0xFF00FF00), // Green
-    Color(0xFFFF8000), // Orange
-    Color(0xFF8000FF), // Purple
+    Color(0xFFFF00FF), Color(0xFF00FFFF), Color(0xFFFF0080),
+    Color(0xFF00FF00), Color(0xFFFF8000), Color(0xFF8000FF),
   ];
-
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Renk',
-          style: TextStyle(
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-            color: colorScheme.onSurfaceVariant,
-          ),
-        ),
-        const SizedBox(height: 6),
-        UnifiedColorPicker(
-          selectedColor: selectedColor,
-          onColorSelected: onColorSelected,
-          quickColors:
-              isNeon ? _neonColors : ColorSets.highlighter.take(6).toList(),
-          colorSets: isNeon
-              ? const {
-                  'Neon': _neonColors,
-                  'Vurgulayıcı': ColorSets.highlighter
-                }
-              : const {
-                  'Vurgulayıcı': ColorSets.highlighter,
-                  'Pastel': ColorSets.pastel
-                },
-          chipSize: 24.0,
-          spacing: 5.0,
-          isHighlighter: true,
-        ),
-      ],
-    );
-  }
-}
-
-/// Compact add button.
-class _CompactAddButton extends StatelessWidget {
-  const _CompactAddButton({required this.onPressed});
-
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    
-    return GestureDetector(
-      onTap: onPressed,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerLowest,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            PhosphorIcon(StarNoteIcons.plus, size: 14, color: colorScheme.onSurfaceVariant),
-            const SizedBox(width: 6),
-            Text('Kalem kutusuna ekle',
-                style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: colorScheme.onSurfaceVariant)),
-          ],
-        ),
+    final cs = Theme.of(context).colorScheme;
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Text('RENK', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
+          color: cs.onSurfaceVariant, letterSpacing: 0.5)),
+      const SizedBox(height: 6),
+      UnifiedColorPicker(
+        selectedColor: selectedColor, onColorSelected: onColorSelected,
+        quickColors:
+            isNeon ? _neonColors : ColorSets.highlighter.take(6).toList(),
+        colorSets: isNeon
+            ? const {'Neon': _neonColors, 'Vurgulayici': ColorSets.highlighter}
+            : const {
+                'Vurgulayici': ColorSets.highlighter,
+                'Pastel': ColorSets.pastel,
+              },
+        chipSize: 24.0, spacing: 5.0, isHighlighter: true,
       ),
-    );
+    ]);
   }
 }

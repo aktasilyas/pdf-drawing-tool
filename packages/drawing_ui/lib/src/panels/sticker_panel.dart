@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'package:drawing_ui/src/panels/tool_panel.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 
 /// MOCK sticker categories for UI display - Turkish.
@@ -19,13 +18,7 @@ const _mockStickerCategories = [
 /// Displays sticker categories and a grid of stickers.
 /// All interactions are MOCKED - no real sticker insertion.
 class StickerPanel extends ConsumerStatefulWidget {
-  const StickerPanel({
-    super.key,
-    this.onClose,
-  });
-
-  /// Callback when panel is closed.
-  final VoidCallback? onClose;
+  const StickerPanel({super.key});
 
   @override
   ConsumerState<StickerPanel> createState() => _StickerPanelState();
@@ -53,13 +46,16 @@ class _StickerPanelState extends ConsumerState<StickerPanel>
 
   @override
   Widget build(BuildContext context) {
-    return ToolPanel(
-      title: 'Çıkartmalar',
-      onClose: widget.onClose,
-      width: 320,
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.all(12),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text('Çıkartmalar', style: TextStyle(
+            fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSurface)),
+          const SizedBox(height: 10),
           // Category tabs - compact
           SizedBox(
             height: 32,
@@ -111,7 +107,6 @@ class _StickerPanelState extends ConsumerState<StickerPanel>
             enabled: _selectedStickerIndex >= 0,
             onPressed: () {
               // MOCK: Would insert sticker
-              widget.onClose?.call();
             },
           ),
         ],

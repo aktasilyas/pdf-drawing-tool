@@ -8,9 +8,7 @@ import 'package:drawing_ui/src/models/toolbar_config.dart';
 
 /// Panel for customizing toolbar appearance and tool order.
 class ToolbarSettingsPanel extends ConsumerWidget {
-  const ToolbarSettingsPanel({super.key, this.onClose});
-
-  final VoidCallback? onClose;
+  const ToolbarSettingsPanel({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -92,11 +90,7 @@ class ToolbarSettingsPanel extends ConsumerWidget {
           IconButton(
             icon: PhosphorIcon(StarNoteIcons.close, size: StarNoteIcons.panelSize, color: colorScheme.onSurfaceVariant),
             onPressed: () {
-              if (onClose != null) {
-                onClose!();
-              } else {
-                ref.read(activePanelProvider.notifier).state = null;
-              }
+              ref.read(activePanelProvider.notifier).state = null;
             },
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),

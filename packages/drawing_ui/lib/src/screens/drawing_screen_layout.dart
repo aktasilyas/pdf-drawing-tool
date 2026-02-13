@@ -291,7 +291,7 @@ void openAIPanel(BuildContext context) {
           color: surface,
           borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
         ),
-        child: AIAssistantPanel(onClose: () => Navigator.pop(context)),
+        child: const AIAssistantPanel(),
       ),
     ),
   );

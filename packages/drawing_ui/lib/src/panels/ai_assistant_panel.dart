@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'package:drawing_ui/src/panels/tool_panel.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 
 /// MOCK AI responses for demonstration.
@@ -50,13 +49,7 @@ class _AIState {
 /// This is a MOCK implementation - no real AI integration.
 /// All responses are simulated for UI demonstration.
 class AIAssistantPanel extends ConsumerStatefulWidget {
-  const AIAssistantPanel({
-    super.key,
-    this.onClose,
-  });
-
-  /// Callback when panel is closed.
-  final VoidCallback? onClose;
+  const AIAssistantPanel({super.key});
 
   @override
   ConsumerState<AIAssistantPanel> createState() => _AIAssistantPanelState();
@@ -75,16 +68,20 @@ class _AIAssistantPanelState extends ConsumerState<AIAssistantPanel> {
 
   @override
   Widget build(BuildContext context) {
-    return ToolPanel(
-      title: 'Ask AI',
-      onClose: widget.onClose,
-      headerActions: [
-        const _PremiumBadge(),
-        const SizedBox(width: 8),
-      ],
+    final cs = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.all(12),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Row(children: [
+            Text('Ask AI', style: TextStyle(
+              fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSurface)),
+            const Spacer(),
+            const _PremiumBadge(),
+          ]),
+          const SizedBox(height: 10),
           // Selection indicator
           _SelectionIndicator(
             hasSelection: true, // MOCK: Always show as having selection
@@ -102,14 +99,15 @@ class _AIAssistantPanelState extends ConsumerState<AIAssistantPanel> {
 
           // Quick suggestions
           if (_response == null && !_isLoading) ...[
-            PanelSection(
-              title: 'SUGGESTIONS',
-              child: _QuickSuggestions(
-                onSuggestionTap: (suggestion) {
-                  _questionController.text = suggestion;
-                  _askAI();
-                },
-              ),
+            Text('SUGGESTIONS', style: TextStyle(fontSize: 11,
+                fontWeight: FontWeight.w600, color: cs.onSurfaceVariant,
+                letterSpacing: 0.5)),
+            const SizedBox(height: 6),
+            _QuickSuggestions(
+              onSuggestionTap: (suggestion) {
+                _questionController.text = suggestion;
+                _askAI();
+              },
             ),
             const SizedBox(height: 16),
           ],

@@ -227,7 +227,7 @@ void main() {
               body: DrawingThemeProvider(
                 theme: const DrawingTheme(),
                 child: SingleChildScrollView(
-                  child: EraserSettingsPanel(onClose: () {}),
+                  child: const EraserSettingsPanel(),
                 ),
               ),
             ),
@@ -249,7 +249,7 @@ void main() {
               body: DrawingThemeProvider(
                 theme: const DrawingTheme(),
                 child: SingleChildScrollView(
-                  child: EraserSettingsPanel(onClose: () {}),
+                  child: const EraserSettingsPanel(),
                 ),
               ),
             ),
@@ -270,7 +270,7 @@ void main() {
               body: DrawingThemeProvider(
                 theme: const DrawingTheme(),
                 child: SingleChildScrollView(
-                  child: EraserSettingsPanel(onClose: () {}),
+                  child: const EraserSettingsPanel(),
                 ),
               ),
             ),
@@ -291,7 +291,7 @@ void main() {
               body: DrawingThemeProvider(
                 theme: const DrawingTheme(),
                 child: SingleChildScrollView(
-                  child: AIAssistantPanel(onClose: () {}),
+                  child: const AIAssistantPanel(),
                 ),
               ),
             ),
@@ -311,7 +311,7 @@ void main() {
               body: DrawingThemeProvider(
                 theme: const DrawingTheme(),
                 child: SingleChildScrollView(
-                  child: AIAssistantPanel(onClose: () {}),
+                  child: const AIAssistantPanel(),
                 ),
               ),
             ),
@@ -331,7 +331,7 @@ void main() {
               body: DrawingThemeProvider(
                 theme: const DrawingTheme(),
                 child: SingleChildScrollView(
-                  child: AIAssistantPanel(onClose: () {}),
+                  child: const AIAssistantPanel(),
                 ),
               ),
             ),
@@ -353,7 +353,7 @@ void main() {
               body: DrawingThemeProvider(
                 theme: const DrawingTheme(),
                 child: SingleChildScrollView(
-                  child: ShapesSettingsPanel(onClose: () {}),
+                  child: const ShapesSettingsPanel(),
                 ),
               ),
             ),
@@ -372,7 +372,7 @@ void main() {
               body: DrawingThemeProvider(
                 theme: const DrawingTheme(),
                 child: SingleChildScrollView(
-                  child: ShapesSettingsPanel(onClose: () {}),
+                  child: const ShapesSettingsPanel(),
                 ),
               ),
             ),
@@ -395,7 +395,7 @@ void main() {
               body: DrawingThemeProvider(
                 theme: const DrawingTheme(),
                 child: SingleChildScrollView(
-                  child: ShapesSettingsPanel(onClose: () {}),
+                  child: const ShapesSettingsPanel(),
                 ),
               ),
             ),
@@ -414,7 +414,7 @@ void main() {
               body: DrawingThemeProvider(
                 theme: const DrawingTheme(),
                 child: SingleChildScrollView(
-                  child: ShapesSettingsPanel(onClose: () {}),
+                  child: const ShapesSettingsPanel(),
                 ),
               ),
             ),
@@ -434,7 +434,7 @@ void main() {
               body: DrawingThemeProvider(
                 theme: const DrawingTheme(),
                 child: SingleChildScrollView(
-                  child: ShapesSettingsPanel(onClose: () {}),
+                  child: const ShapesSettingsPanel(),
                 ),
               ),
             ),

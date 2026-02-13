@@ -205,31 +205,6 @@ void main() {
       expect(find.text('Shape: false'), findsOneWidget);
     });
 
-    testWidgets('close button calls onClose callback', (tester) async {
-      bool closeCalled = false;
-
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: Scaffold(
-              body: LassoSelectionPanel(
-                onClose: () => closeCalled = true,
-              ),
-            ),
-          ),
-        ),
-      );
-
-      // Find close button
-      final closeButton = find.byIcon(StarNoteIcons.close);
-      expect(closeButton, findsOneWidget);
-
-      await tester.tap(closeButton);
-      await tester.pump();
-
-      expect(closeCalled, true);
-    });
-
     testWidgets('renders section title in Turkish', (tester) async {
       await tester.pumpWidget(
         const ProviderScope(

@@ -3,31 +3,27 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
-import 'package:drawing_ui/src/panels/tool_panel.dart';
 
 /// Settings panel for the lasso (kement) selection tool.
 ///
 /// Compact design showing all options without scrolling.
 class LassoSelectionPanel extends ConsumerWidget {
-  const LassoSelectionPanel({
-    super.key,
-    this.onClose,
-  });
-
-  /// Callback when panel is closed.
-  final VoidCallback? onClose;
+  const LassoSelectionPanel({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(lassoSettingsProvider);
+    final cs = Theme.of(context).colorScheme;
 
-    return ToolPanel(
-      title: 'Kement',
-      onClose: onClose,
+    return Padding(
+      padding: const EdgeInsets.all(12),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text('Kement', style: TextStyle(
+            fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSurface)),
+          const SizedBox(height: 10),
           // Compact mode selector
           _CompactModeSelector(
             selectedMode: settings.mode,

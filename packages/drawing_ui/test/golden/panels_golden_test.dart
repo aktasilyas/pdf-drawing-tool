@@ -85,7 +85,7 @@ void main() {
                       width: 320,
                       height: 500,
                       child: SingleChildScrollView(
-                        child: HighlighterSettingsPanel(onClose: () {}),
+                        child: const HighlighterSettingsPanel(),
                       ),
                     ),
                   ),
@@ -117,7 +117,7 @@ void main() {
                       width: 320,
                       height: 600,
                       child: SingleChildScrollView(
-                        child: EraserSettingsPanel(onClose: () {}),
+                        child: const EraserSettingsPanel(),
                       ),
                     ),
                   ),
@@ -149,7 +149,7 @@ void main() {
                       width: 320,
                       height: 600,
                       child: SingleChildScrollView(
-                        child: ShapesSettingsPanel(onClose: () {}),
+                        child: const ShapesSettingsPanel(),
                       ),
                     ),
                   ),
@@ -181,7 +181,7 @@ void main() {
                       width: 320,
                       height: 500,
                       child: SingleChildScrollView(
-                        child: AIAssistantPanel(onClose: () {}),
+                        child: const AIAssistantPanel(),
                       ),
                     ),
                   ),
@@ -213,7 +213,7 @@ void main() {
                       width: 360,
                       height: 500,
                       child: SingleChildScrollView(
-                        child: StickerPanel(onClose: () {}),
+                        child: const StickerPanel(),
                       ),
                     ),
                   ),
@@ -245,7 +245,7 @@ void main() {
                       width: 320,
                       height: 500,
                       child: SingleChildScrollView(
-                        child: ImagePanel(onClose: () {}),
+                        child: const ImagePanel(),
                       ),
                     ),
                   ),
