@@ -41,6 +41,13 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
   bool _isSidebarOpen = false;
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final brightness = MediaQuery.platformBrightnessOf(context);
+    ref.read(platformBrightnessProvider.notifier).state = brightness;
+  }
+
+  @override
   void dispose() {
     _panelController.dispose();
     _thumbnailCache.clear();

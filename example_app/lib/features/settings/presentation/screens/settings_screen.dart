@@ -14,6 +14,7 @@ import 'package:example_app/features/settings/presentation/providers/settings_pr
 import 'package:example_app/features/settings/presentation/widgets/settings_section.dart';
 import 'package:example_app/features/settings/presentation/widgets/settings_tile.dart';
 import 'package:example_app/features/settings/presentation/widgets/profile_header.dart';
+import 'package:example_app/features/settings/presentation/widgets/canvas_theme_setting.dart';
 import 'package:example_app/features/settings/domain/entities/app_settings.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 
@@ -81,6 +82,7 @@ class SettingsScreen extends ConsumerWidget {
                     subtitle: _getThemeText(settings.themeMode),
                     onTap: () => _showThemeDialog(context, ref, settings),
                   ),
+                  const CanvasThemeSetting(),
                   SettingsTile(
                     icon: Icons.star_outline,
                     title: 'Favorileri üste sabitle',
