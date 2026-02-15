@@ -66,12 +66,12 @@ class StarNoteApp extends ConsumerWidget {
       title: 'StarNote',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorSchemeSeed: const Color(0xFF505081),
+        colorSchemeSeed: const Color(0xFF1B2141),
         useMaterial3: true,
         brightness: Brightness.light,
       ),
       darkTheme: ThemeData(
-        colorSchemeSeed: const Color(0xFF505081),
+        colorSchemeSeed: const Color(0xFF1B2141),
         useMaterial3: true,
         brightness: Brightness.dark,
       ),

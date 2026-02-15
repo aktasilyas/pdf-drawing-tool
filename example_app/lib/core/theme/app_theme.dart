@@ -108,28 +108,28 @@ abstract class AppTheme {
         onError: AppColors.onError,
         outline: AppColors.outlineLight,
         outlineVariant: AppColors.outlineVariantLight,
-        shadow: Color(0xFF272757),
+        shadow: Color(0x141B2141),
       );
 
   static ColorScheme get _darkColorScheme => const ColorScheme.dark(
         primary: AppColors.primary,
         onPrimary: AppColors.onPrimary,
-        primaryContainer: AppColors.primaryDark,
+        primaryContainer: AppColors.primaryLight,
         secondary: AppColors.accent,
         onSecondary: AppColors.onAccent,
         surface: AppColors.surfaceDark,
         onSurface: AppColors.textPrimaryDark,
-        surfaceContainerLowest: Color(0xFF0F0E47),
-        surfaceContainerLow: Color(0xFF151450),
-        surfaceContainer: Color(0xFF1A1954),
-        surfaceContainerHigh: Color(0xFF222160),
+        surfaceContainerLowest: Color(0xFF0F1328),
+        surfaceContainerLow: Color(0xFF141836),
+        surfaceContainer: Color(0xFF1B2141),
+        surfaceContainerHigh: Color(0xFF232952),
         surfaceContainerHighest: AppColors.surfaceVariantDark,
         onSurfaceVariant: AppColors.textSecondaryDark,
         error: AppColors.error,
         onError: AppColors.onError,
         outline: AppColors.outlineDark,
         outlineVariant: AppColors.outlineVariantDark,
-        shadow: Color(0xFF050430),
+        shadow: Color(0x291B2141),
       );
 
   // ══════════════════════════════════════════════════════════════════════════

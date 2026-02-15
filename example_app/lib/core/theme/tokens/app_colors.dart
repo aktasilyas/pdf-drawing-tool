@@ -19,32 +19,32 @@ import 'package:flutter/material.dart';
 /// Hardcoded renk kullanımı yasaktır!
 abstract class AppColors {
   // ══════════════════════════════════════════════════════════════════════════
-  // BRAND COLORS — Blue Eclipse
+  // BRAND COLORS — Blue Eclipse v2
   // ══════════════════════════════════════════════════════════════════════════
 
-  /// Ana marka rengi - Midnight Indigo
-  static const Color primary = Color(0xFF505081);
+  /// Ana marka rengi — Koyu Lacivert
+  static const Color primary = Color(0xFF1B2141);
 
-  /// Primary hover state - Lavanta
-  static const Color primaryLight = Color(0xFF8686AC);
+  /// Primary hover — Biraz açık lacivert
+  static const Color primaryLight = Color(0xFF2D3563);
 
-  /// Primary pressed state - Koyu lacivert
-  static const Color primaryDark = Color(0xFF272757);
+  /// Primary pressed — En koyu
+  static const Color primaryDark = Color(0xFF0F1328);
 
-  /// Primary üzerindeki metin/icon rengi
+  /// Primary üzerindeki text/icon
   static const Color onPrimary = Color(0xFFFFFFFF);
 
-  /// Vurgu rengi - Amber Gold
+  /// Vurgu rengi — Accent Blue (butonlar, linkler)
   ///
   /// ⚠️ SINIRLI KULLAN! Sadece:
   /// - Slider thumb
   /// - Toggle switch (aktif)
   /// - Star/Favorite icon
   /// - Önemli badge'ler
-  static const Color accent = Color(0xFFFFB547);
+  static const Color accent = Color(0xFF4A6CF7);
 
-  /// Accent üzerindeki metin/icon rengi
-  static const Color onAccent = Color(0xFF0F0E47);
+  /// Accent üzerindeki text
+  static const Color onAccent = Color(0xFFFFFFFF);
 
   // ══════════════════════════════════════════════════════════════════════════
   // SEMANTIC COLORS
@@ -60,7 +60,7 @@ abstract class AppColors {
   static const Color warning = Color(0xFFFACC15);
 
   /// Warning üzerindeki metin/icon rengi
-  static const Color onWarning = Color(0xFF0F0E47);
+  static const Color onWarning = Color(0xFF1B2141);
 
   /// Hata durumu - Red
   static const Color error = Color(0xFFEF4444);
@@ -68,73 +68,75 @@ abstract class AppColors {
   /// Error üzerindeki metin/icon rengi
   static const Color onError = Color(0xFFFFFFFF);
 
-  /// Bilgi durumu - Primary ile aynı
-  static const Color info = Color(0xFF505081);
+  /// Bilgi durumu - Accent Blue
+  static const Color info = Color(0xFF4A6CF7);
 
   /// Info üzerindeki metin/icon rengi
   static const Color onInfo = Color(0xFFFFFFFF);
 
   // ══════════════════════════════════════════════════════════════════════════
-  // LIGHT THEME — Beyaz + lacivertin açık tonları
+  // LIGHT THEME — Beyaz içerik + açık gri background
   // ══════════════════════════════════════════════════════════════════════════
 
-  /// Arka plan — çok açık lavanta-gri
-  static const Color backgroundLight = Color(0xFFF0F1F8);
+  /// Arka plan — Çok açık soğuk gri
+  static const Color backgroundLight = Color(0xFFF4F5F9);
 
-  /// Yüzey — saf beyaz (card, modal, panel)
+  /// Yüzey — Saf beyaz (card, modal, panel)
   static const Color surfaceLight = Color(0xFFFFFFFF);
 
-  /// Yüzey varyant — açık lavanta
-  static const Color surfaceVariantLight = Color(0xFFE8E9F3);
+  /// Yüzey varyant — Açık gri (search bar, input bg)
+  static const Color surfaceVariantLight = Color(0xFFEEEFF5);
 
-  /// Ana metin — en koyu lacivert
-  static const Color textPrimaryLight = Color(0xFF0F0E47);
+  /// Ana metin — Koyu lacivert
+  static const Color textPrimaryLight = Color(0xFF1B2141);
 
-  /// İkincil metin — orta lacivert
-  static const Color textSecondaryLight = Color(0xFF505081);
+  /// İkincil metin — Gri-mavi
+  static const Color textSecondaryLight = Color(0xFF8E92A4);
 
-  /// Üçüncül metin — açık lavanta
-  static const Color textTertiaryLight = Color(0xFF8686AC);
-
-  /// Disabled metin
-  static const Color textDisabledLight = Color(0xFFB8B9D0);
-
-  /// Border — açık lacivert
-  static const Color outlineLight = Color(0xFFD0D1E3);
-
-  /// Border varyant
-  static const Color outlineVariantLight = Color(0xFFB8B9D0);
-
-  // ══════════════════════════════════════════════════════════════════════════
-  // DARK THEME — Lacivert tonları, SİYAH YOK!
-  // ══════════════════════════════════════════════════════════════════════════
-
-  /// Arka plan — en koyu lacivert (#121212 DEĞİL!)
-  static const Color backgroundDark = Color(0xFF0F0E47);
-
-  /// Yüzey — koyu lacivert (card, modal)
-  static const Color surfaceDark = Color(0xFF1A1954);
-
-  /// Yüzey varyant — orta-koyu lacivert
-  static const Color surfaceVariantDark = Color(0xFF272757);
-
-  /// Ana metin — beyazımsı lavanta
-  static const Color textPrimaryDark = Color(0xFFF0F1F8);
-
-  /// İkincil metin — açık lavanta
-  static const Color textSecondaryDark = Color(0xFF8686AC);
-
-  /// Üçüncül metin — soluk lavanta
-  static const Color textTertiaryDark = Color(0xFF6A6A94);
+  /// Üçüncül metin — Açık gri
+  static const Color textTertiaryLight = Color(0xFFB0B4C3);
 
   /// Disabled metin
-  static const Color textDisabledDark = Color(0xFF4A4A70);
+  static const Color textDisabledLight = Color(0xFFCDD0DB);
 
-  /// Border — lacivert border
-  static const Color outlineDark = Color(0xFF3A3970);
+  /// Border — Çok hafif gri
+  static const Color outlineLight = Color(0xFFE2E4ED);
 
   /// Border varyant
-  static const Color outlineVariantDark = Color(0xFF4A4A7A);
+  static const Color outlineVariantLight = Color(0xFFD0D3DE);
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // DARK THEME — Lacivert çerçeve + BEYAZ card'lar!
+  // Anahtar: Card/panel/modal BEYAZ kalır, sadece
+  // arka plan ve navigation koyu lacivert
+  // ══════════════════════════════════════════════════════════════════════════
+
+  /// Arka plan — Koyu lacivert
+  static const Color backgroundDark = Color(0xFF0F1328);
+
+  /// Yüzey — BEYAZ! (card, modal, panel hep beyaz)
+  static const Color surfaceDark = Color(0xFFFFFFFF);
+
+  /// Yüzey varyant — Lacivert (sidebar, nav, toolbar)
+  static const Color surfaceVariantDark = Color(0xFF1B2141);
+
+  /// Ana metin — Koyu lacivert (beyaz card üzerinde)
+  static const Color textPrimaryDark = Color(0xFF1B2141);
+
+  /// İkincil metin — Gri-mavi
+  static const Color textSecondaryDark = Color(0xFF8E92A4);
+
+  /// Üçüncül metin
+  static const Color textTertiaryDark = Color(0xFFB0B4C3);
+
+  /// Disabled metin
+  static const Color textDisabledDark = Color(0xFFCDD0DB);
+
+  /// Border — Hafif gri (beyaz card üzerinde)
+  static const Color outlineDark = Color(0xFFE2E4ED);
+
+  /// Border varyant
+  static const Color outlineVariantDark = Color(0xFF2D3563);
 
   // ══════════════════════════════════════════════════════════════════════════
   // PAPER COLORS
