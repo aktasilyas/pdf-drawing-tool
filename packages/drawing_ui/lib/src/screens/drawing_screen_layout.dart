@@ -80,6 +80,7 @@ Widget buildDrawingCanvasArea({
             ),
           ),
         if (!isReadOnly) const FloatingUndoRedo(),
+        if (!isReadOnly) const FloatingQuickColors(),
         if (!isReadOnly)
           Positioned(right: 16, bottom: 16, child: AskAIButton(onTap: onOpenAIPanel)),
         if (ref.watch(isZoomingProvider))
