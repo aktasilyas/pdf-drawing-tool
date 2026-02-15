@@ -19,20 +19,20 @@ import 'package:flutter/material.dart';
 /// Hardcoded renk kullanımı yasaktır!
 abstract class AppColors {
   // ══════════════════════════════════════════════════════════════════════════
-  // BRAND COLORS
+  // BRAND COLORS — Blue Eclipse
   // ══════════════════════════════════════════════════════════════════════════
 
-  /// Ana marka rengi - Light Indigo / Creative Blue
-  static const Color primary = Color(0xFF5B7CFF);
+  /// Ana marka rengi - Midnight Indigo
+  static const Color primary = Color(0xFF505081);
 
-  /// Primary hover state
-  static const Color primaryLight = Color(0xFF7B96FF);
+  /// Primary hover state - Lavanta
+  static const Color primaryLight = Color(0xFF8686AC);
 
-  /// Primary pressed state
-  static const Color primaryDark = Color(0xFF4A68E0);
+  /// Primary pressed state - Koyu lacivert
+  static const Color primaryDark = Color(0xFF272757);
 
   /// Primary üzerindeki metin/icon rengi
-  static const Color onPrimary = Colors.white;
+  static const Color onPrimary = Color(0xFFFFFFFF);
 
   /// Vurgu rengi - Amber Gold
   ///
@@ -44,7 +44,7 @@ abstract class AppColors {
   static const Color accent = Color(0xFFFFB547);
 
   /// Accent üzerindeki metin/icon rengi
-  static const Color onAccent = Color(0xFF1B1F2A);
+  static const Color onAccent = Color(0xFF0F0E47);
 
   // ══════════════════════════════════════════════════════════════════════════
   // SEMANTIC COLORS
@@ -54,87 +54,87 @@ abstract class AppColors {
   static const Color success = Color(0xFF4ADE80);
 
   /// Success üzerindeki metin/icon rengi
-  static const Color onSuccess = Colors.white;
+  static const Color onSuccess = Color(0xFFFFFFFF);
 
   /// Uyarı durumu - Yellow
   static const Color warning = Color(0xFFFACC15);
 
   /// Warning üzerindeki metin/icon rengi
-  static const Color onWarning = Color(0xFF1B1F2A);
+  static const Color onWarning = Color(0xFF0F0E47);
 
   /// Hata durumu - Red
   static const Color error = Color(0xFFEF4444);
 
   /// Error üzerindeki metin/icon rengi
-  static const Color onError = Colors.white;
+  static const Color onError = Color(0xFFFFFFFF);
 
   /// Bilgi durumu - Primary ile aynı
-  static const Color info = Color(0xFF5B7CFF);
+  static const Color info = Color(0xFF505081);
 
   /// Info üzerindeki metin/icon rengi
-  static const Color onInfo = Colors.white;
+  static const Color onInfo = Color(0xFFFFFFFF);
 
   // ══════════════════════════════════════════════════════════════════════════
-  // LIGHT THEME COLORS
+  // LIGHT THEME — Beyaz + lacivertin açık tonları
   // ══════════════════════════════════════════════════════════════════════════
 
-  /// Light tema arkaplan - Soft blue-gray (göz yormaz)
-  static const Color backgroundLight = Color(0xFFF5F7FB);
+  /// Arka plan — çok açık lavanta-gri
+  static const Color backgroundLight = Color(0xFFF0F1F8);
 
-  /// Light tema surface - Cards, modals
+  /// Yüzey — saf beyaz (card, modal, panel)
   static const Color surfaceLight = Color(0xFFFFFFFF);
 
-  /// Light tema surface variant - Alternatif yüzey
-  static const Color surfaceVariantLight = Color(0xFFF0F2F5);
+  /// Yüzey varyant — açık lavanta
+  static const Color surfaceVariantLight = Color(0xFFE8E9F3);
 
-  /// Light tema ana metin rengi
-  static const Color textPrimaryLight = Color(0xFF1B1F2A);
+  /// Ana metin — en koyu lacivert
+  static const Color textPrimaryLight = Color(0xFF0F0E47);
 
-  /// Light tema ikincil metin rengi
-  static const Color textSecondaryLight = Color(0xFF6B7280);
+  /// İkincil metin — orta lacivert
+  static const Color textSecondaryLight = Color(0xFF505081);
 
-  /// Light tema üçüncül metin rengi
-  static const Color textTertiaryLight = Color(0xFF9CA3AF);
+  /// Üçüncül metin — açık lavanta
+  static const Color textTertiaryLight = Color(0xFF8686AC);
 
-  /// Light tema disabled metin rengi
-  static const Color textDisabledLight = Color(0xFFD1D5DB);
+  /// Disabled metin
+  static const Color textDisabledLight = Color(0xFFB8B9D0);
 
-  /// Light tema border/divider rengi
-  static const Color outlineLight = Color(0xFFE5E7EB);
+  /// Border — açık lacivert
+  static const Color outlineLight = Color(0xFFD0D1E3);
 
-  /// Light tema alternatif border rengi
-  static const Color outlineVariantLight = Color(0xFFD1D5DB);
+  /// Border varyant
+  static const Color outlineVariantLight = Color(0xFFB8B9D0);
 
   // ══════════════════════════════════════════════════════════════════════════
-  // DARK THEME COLORS
+  // DARK THEME — Lacivert tonları, SİYAH YOK!
   // ══════════════════════════════════════════════════════════════════════════
 
-  /// Dark tema arkaplan - OLED friendly
-  static const Color backgroundDark = Color(0xFF121212);
+  /// Arka plan — en koyu lacivert (#121212 DEĞİL!)
+  static const Color backgroundDark = Color(0xFF0F0E47);
 
-  /// Dark tema surface - Cards, modals
-  static const Color surfaceDark = Color(0xFF1E1E1E);
+  /// Yüzey — koyu lacivert (card, modal)
+  static const Color surfaceDark = Color(0xFF1A1954);
 
-  /// Dark tema surface variant - Alternatif yüzey
-  static const Color surfaceVariantDark = Color(0xFF2A2A2A);
+  /// Yüzey varyant — orta-koyu lacivert
+  static const Color surfaceVariantDark = Color(0xFF272757);
 
-  /// Dark tema ana metin rengi
-  static const Color textPrimaryDark = Color(0xFFF4F4F4);
+  /// Ana metin — beyazımsı lavanta
+  static const Color textPrimaryDark = Color(0xFFF0F1F8);
 
-  /// Dark tema ikincil metin rengi
-  static const Color textSecondaryDark = Color(0xFFA0A0A0);
+  /// İkincil metin — açık lavanta
+  static const Color textSecondaryDark = Color(0xFF8686AC);
 
-  /// Dark tema üçüncül metin rengi
-  static const Color textTertiaryDark = Color(0xFF6B7280);
+  /// Üçüncül metin — soluk lavanta
+  static const Color textTertiaryDark = Color(0xFF6A6A94);
 
-  /// Dark tema disabled metin rengi
-  static const Color textDisabledDark = Color(0xFF4B5563);
+  /// Disabled metin
+  static const Color textDisabledDark = Color(0xFF4A4A70);
 
-  /// Dark tema border/divider rengi (very subtle)
-  static const Color outlineDark = Color(0xFF2C2C2C);
+  /// Border — lacivert border
+  static const Color outlineDark = Color(0xFF3A3970);
 
-  /// Dark tema alternatif border rengi (subtle)
-  static const Color outlineVariantDark = Color(0xFF404040);
+  /// Border varyant
+  static const Color outlineVariantDark = Color(0xFF4A4A7A);
 
   // ══════════════════════════════════════════════════════════════════════════
   // PAPER COLORS

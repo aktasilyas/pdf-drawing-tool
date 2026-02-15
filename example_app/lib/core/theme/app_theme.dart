@@ -108,6 +108,7 @@ abstract class AppTheme {
         onError: AppColors.onError,
         outline: AppColors.outlineLight,
         outlineVariant: AppColors.outlineVariantLight,
+        shadow: Color(0xFF272757),
       );
 
   static ColorScheme get _darkColorScheme => const ColorScheme.dark(
@@ -118,12 +119,17 @@ abstract class AppTheme {
         onSecondary: AppColors.onAccent,
         surface: AppColors.surfaceDark,
         onSurface: AppColors.textPrimaryDark,
+        surfaceContainerLowest: Color(0xFF0F0E47),
+        surfaceContainerLow: Color(0xFF151450),
+        surfaceContainer: Color(0xFF1A1954),
+        surfaceContainerHigh: Color(0xFF222160),
         surfaceContainerHighest: AppColors.surfaceVariantDark,
         onSurfaceVariant: AppColors.textSecondaryDark,
         error: AppColors.error,
         onError: AppColors.onError,
         outline: AppColors.outlineDark,
         outlineVariant: AppColors.outlineVariantDark,
+        shadow: Color(0xFF050430),
       );
 
   // ══════════════════════════════════════════════════════════════════════════
