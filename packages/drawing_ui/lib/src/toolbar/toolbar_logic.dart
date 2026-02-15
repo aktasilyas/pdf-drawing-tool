@@ -1,4 +1,6 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/src/models/models.dart';
+import 'package:drawing_ui/src/providers/drawing_providers.dart';
 import 'package:drawing_ui/src/toolbar/tool_groups.dart';
 
 /// Groups visible tools, collapsing pen and highlighter variants into a single
@@ -45,4 +47,29 @@ bool isToolSelected(ToolType tool, ToolType currentTool) {
     return true;
   }
   return tool == currentTool;
+}
+
+/// Shared tool press handler for all toolbar variants.
+///
+/// Behaviour:
+/// - **First click** (tool not selected): select the tool, close any panel.
+/// - **Second click** (tool already selected): toggle the settings panel.
+void handleToolPressed(WidgetRef ref, ToolType tool) {
+  final currentTool = ref.read(currentToolProvider);
+  final activePanel = ref.read(activePanelProvider);
+  final alreadySelected = isToolSelected(tool, currentTool);
+
+  if (alreadySelected) {
+    // Already selected — toggle panel
+    if (activePanel != null) {
+      ref.read(activePanelProvider.notifier).state = null;
+    } else {
+      // Open panel for the *current* tool (not the group representative)
+      ref.read(activePanelProvider.notifier).state = currentTool;
+    }
+  } else {
+    // First click — just select, no panel
+    ref.read(currentToolProvider.notifier).state = tool;
+    ref.read(activePanelProvider.notifier).state = null;
+  }
 }

@@ -204,24 +204,7 @@ class _MediumToolbarState extends ConsumerState<MediumToolbar> {
     );
   }
 
-  void _onToolPressed(ToolType tool) {
-    if (penToolsSet.contains(tool)) {
-      final currentTool = ref.read(currentToolProvider);
-      final activePanel = ref.read(activePanelProvider);
-      if (penToolsSet.contains(currentTool) &&
-          penToolsSet.contains(activePanel)) {
-        ref.read(activePanelProvider.notifier).state = null;
-        return;
-      }
-      if (currentTool != tool) {
-        ref.read(currentToolProvider.notifier).state = tool;
-      }
-      ref.read(activePanelProvider.notifier).state = tool;
-      return;
-    }
-    ref.read(currentToolProvider.notifier).state = tool;
-    ref.read(activePanelProvider.notifier).state = null;
-  }
+  void _onToolPressed(ToolType tool) => handleToolPressed(ref, tool);
 
   void _onPanelTap(ToolType tool) {
     final active = ref.read(activePanelProvider);

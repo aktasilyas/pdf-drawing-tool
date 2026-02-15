@@ -5,6 +5,7 @@ import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/toolbar/tool_button.dart';
 import 'package:drawing_ui/src/toolbar/tool_groups.dart';
+import 'package:drawing_ui/src/toolbar/toolbar_logic.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_widgets.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_overflow_menu.dart';
 
@@ -109,7 +110,7 @@ class _CompactBottomBarState extends ConsumerState<CompactBottomBar> {
   Widget _buildToolButton(ToolType tool, ToolType currentTool) {
     final isPenGroup = penTools.contains(tool);
     final isHighlighterGroup = highlighterTools.contains(tool);
-    final isSelected = _isToolSelected(tool, currentTool);
+    final isSelected = isToolSelected(tool, currentTool);
     final hasPanel = toolsWithPanel.contains(tool);
 
     return ToolButton(
@@ -156,28 +157,16 @@ class _CompactBottomBarState extends ConsumerState<CompactBottomBar> {
     return result;
   }
 
-  /// Check if tool is selected (handles group selection).
-  bool _isToolSelected(ToolType tool, ToolType currentTool) {
-    if (penTools.contains(tool) && penTools.contains(currentTool)) {
-      return true;
-    }
-    if (highlighterTools.contains(tool) &&
-        highlighterTools.contains(currentTool)) {
-      return true;
-    }
-    return tool == currentTool;
-  }
-
   /// Handle tool button press.
   void _onToolPressed(ToolType tool) {
     final currentTool = ref.read(currentToolProvider);
-    if (currentTool == tool) {
-      // Same tool pressed - open panel if it has one
-      if (toolsWithPanel.contains(tool)) {
-        widget.onPanelRequested?.call(tool);
+    if (isToolSelected(tool, currentTool)) {
+      // Already selected — open panel (bottom sheet) if it has one
+      if (toolsWithPanel.contains(currentTool)) {
+        widget.onPanelRequested?.call(currentTool);
       }
     } else {
-      // Different tool - select it
+      // First click — just select
       ref.read(currentToolProvider.notifier).state = tool;
       ref.read(activePanelProvider.notifier).state = null;
       ref.read(penPickerModeProvider.notifier).state = false;

@@ -31,7 +31,6 @@ Widget buildDrawingCanvasArea({
   bool isReadOnly = false,
 }) {
   const double swipeVelocityThreshold = 300;
-
   final canvasStack = ClipRect(
     child: Stack(
       clipBehavior: Clip.hardEdge,
@@ -55,12 +54,17 @@ Widget buildDrawingCanvasArea({
             isReadOnly: isReadOnly,
           ),
         ),
-        if (!isReadOnly && ref.watch(activePanelProvider) != null)
+        // Always present to prevent Stack position shifting when
+        // activePanelProvider toggles between tool and null.
+        if (!isReadOnly)
           Positioned.fill(
-            child: GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: onClosePanel,
-              child: const SizedBox.expand(),
+            child: IgnorePointer(
+              ignoring: ref.watch(activePanelProvider) == null,
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: onClosePanel,
+                child: const SizedBox.expand(),
+              ),
             ),
           ),
         if (!isReadOnly)
@@ -84,7 +88,12 @@ Widget buildDrawingCanvasArea({
         if (!isReadOnly)
           Positioned(right: 16, bottom: 16, child: AskAIButton(onTap: onOpenAIPanel)),
         if (ref.watch(isZoomingProvider))
-          Center(child: ZoomIndicator(zoomPercentage: ref.watch(zoomPercentageProvider))),
+          Positioned.fill(
+            child: Center(
+              key: const ValueKey('zoom-indicator'),
+              child: ZoomIndicator(zoomPercentage: ref.watch(zoomPercentageProvider)),
+            ),
+          ),
         // Floating page indicator bar
         const Positioned(
           left: 0,
@@ -257,7 +266,8 @@ void handlePanelChange({
   bool isPenPickerMode = false,
   ValueChanged<ToolType>? onPenSelected,
 }) {
-  if (MediaQuery.of(context).size.width < ToolbarLayoutMode.compactBreakpoint) return;
+  final w = MediaQuery.of(context).size.width;
+  if (w < ToolbarLayoutMode.compactBreakpoint) return;
   if (panel == null) {
     panelController.hide();
   } else if (panel != ToolType.panZoom) {
