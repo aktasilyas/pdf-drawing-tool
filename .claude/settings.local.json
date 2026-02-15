@@ -49,7 +49,12 @@
       "Bash(git -C:*)",
       "Bash(git remote set-url:*)",
       "Bash(git push:*)",
-      "Bash(ssh:*)"
+      "Bash(ssh:*)",
+      "Bash(dpkg:*)",
+      "Bash(apt list:*)",
+      "Bash(python3:*)",
+      "Bash(grep:*)",
+      "Bash(echo:*)"
     ]
   }
 }

@@ -918,13 +918,16 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       }
     }
 
-    // Create new text at tap location (only if no text was being edited)
-    final style = ref.read(activeStrokeStyleProvider);
+    // Create new text at tap location using text settings
+    final textSettings = ref.read(textSettingsProvider);
     ref.read(textToolProvider.notifier).startNewText(
           canvasPoint.dx,
           canvasPoint.dy,
-          fontSize: style.thickness * 4, // Font size based on stroke thickness
-          color: style.color,
+          fontSize: textSettings.fontSize,
+          color: textSettings.color,
+          isBold: textSettings.isBold,
+          isItalic: textSettings.isItalic,
+          isUnderline: textSettings.isUnderline,
         );
   }
 
