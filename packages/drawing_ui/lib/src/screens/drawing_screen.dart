@@ -127,21 +127,16 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
         : Color(canvasMode.surroundingAreaColor);
 
     final drawingTheme = DrawingTheme(
-      // Toolbar: koyu lacivert dark'ta, beyaz light'ta
-      toolbarBackground: isDark ? const Color(0xFF1B2141) : colorScheme.surface,
-      toolbarIconColor: isDark ? const Color(0xFF8E92A4) : colorScheme.onSurfaceVariant,
-      toolbarIconSelectedColor: isDark ? const Color(0xFFFFFFFF) : colorScheme.primary,
-      toolbarIconDisabledColor: isDark
-          ? const Color(0xFF4A5070)
-          : colorScheme.onSurface.withValues(alpha: 0.38),
-      // Panel/popover: her iki temada da BEYAZ
-      panelBackground: const Color(0xFFFFFFFF),
-      panelBorderColor: const Color(0xFFE2E4ED),
-      // PenBox: dark'ta lacivert, light'ta beyaz
-      penBoxBackground: isDark ? const Color(0xFF1B2141) : colorScheme.surface,
-      penBoxSlotSelectedColor: isDark
-          ? const Color(0xFF2D3563)
-          : colorScheme.primaryContainer,
+      toolbarBackground: colorScheme.surface,
+      toolbarIconColor: colorScheme.onSurfaceVariant,
+      toolbarIconSelectedColor: colorScheme.primary,
+      toolbarIconDisabledColor: colorScheme.onSurface.withValues(alpha: 0.38),
+      panelBackground: isDark
+          ? colorScheme.surfaceContainerHigh
+          : colorScheme.surface,
+      panelBorderColor: colorScheme.outlineVariant,
+      penBoxBackground: colorScheme.surface,
+      penBoxSlotSelectedColor: colorScheme.primaryContainer,
     );
 
     return DrawingThemeProvider(

@@ -2,68 +2,112 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
+import 'package:drawing_ui/src/models/models.dart';
+import 'package:drawing_ui/src/panels/eraser_preview_painter.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/widgets/compact_toggle.dart';
+import 'package:drawing_ui/src/widgets/goodnotes_slider.dart';
 
-/// Eraser settings content for popover panel.
+/// Eraser settings panel — matches pen/highlighter panel design pattern.
 class EraserSettingsPanel extends ConsumerWidget {
   const EraserSettingsPanel({super.key});
 
+  static const _eraserTools = [
+    ToolType.pixelEraser,
+    ToolType.strokeEraser,
+    ToolType.lassoEraser,
+  ];
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final currentTool = ref.watch(currentToolProvider);
+    final active =
+        _eraserTools.contains(currentTool) ? currentTool : ToolType.pixelEraser;
     final settings = ref.watch(eraserSettingsProvider);
     final showSizeSlider = settings.mode != EraserMode.lasso;
     final cs = Theme.of(context).colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Silgi', style: TextStyle(
-            fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSurface)),
-          const SizedBox(height: 10),
-          _EraserModeSelector(
-            selectedMode: settings.mode,
-            onModeSelected: (m) =>
-                ref.read(eraserSettingsProvider.notifier).setMode(m),
+          // -- Ba\u015fl\u0131k --
+          Text(
+            _titleForMode(active),
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: cs.onSurface,
+            ),
           ),
-          const SizedBox(height: 8),
-          if (showSizeSlider)
-            _GoodNotesSlider(
-              label: 'BOYUT', activeColor: cs.primary,
-              value: settings.size, min: 5.0, max: 100.0,
+          const SizedBox(height: 16),
+
+          // -- Eraser Preview --
+          EraserPreview(mode: settings.mode, size: settings.size),
+          const SizedBox(height: 16),
+
+          // -- Eraser Type Selector --
+          _EraserTypeSelector(
+            selectedType: active,
+            onTypeSelected: (t) {
+              ref.read(currentToolProvider.notifier).state = t;
+              final mode = _toolTypeToMode(t);
+              ref.read(eraserSettingsProvider.notifier).setMode(mode);
+            },
+          ),
+          const SizedBox(height: 20),
+
+          // -- BOYUT slider --
+          if (showSizeSlider) ...[
+            GoodNotesSlider(
+              label: 'BOYUT',
+              value: settings.size.clamp(5.0, 100.0),
+              min: 5.0,
+              max: 100.0,
               displayValue: '${settings.size.round()}px',
+              activeColor: cs.primary,
               onChanged: (v) =>
                   ref.read(eraserSettingsProvider.notifier).setSize(v),
             ),
-          const SizedBox(height: 8),
+            const SizedBox(height: 8),
+          ],
+
+          // -- Toggles --
           CompactToggle(
-            label: 'Basınç hassasiyeti', value: settings.pressureSensitive,
-            onChanged: (v) => ref.read(
-                eraserSettingsProvider.notifier).setPressureSensitive(v),
+            label: 'Bas\u0131n\u00e7 hassasiyeti',
+            value: settings.pressureSensitive,
+            onChanged: (v) => ref
+                .read(eraserSettingsProvider.notifier)
+                .setPressureSensitive(v),
           ),
           CompactToggle(
-            label: 'Sadece vurgulayıcı sil',
+            label: 'Sadece vurgulay\u0131c\u0131 sil',
             value: settings.eraseOnlyHighlighter,
-            onChanged: (v) => ref.read(
-                eraserSettingsProvider.notifier).setEraseOnlyHighlighter(v),
+            onChanged: (v) => ref
+                .read(eraserSettingsProvider.notifier)
+                .setEraseOnlyHighlighter(v),
           ),
           CompactToggle(
-            label: 'Sadece bant sil', value: settings.eraseBandOnly,
-            onChanged: (v) => ref.read(
-                eraserSettingsProvider.notifier).setEraseBandOnly(v),
+            label: 'Sadece bant sil',
+            value: settings.eraseBandOnly,
+            onChanged: (v) =>
+                ref.read(eraserSettingsProvider.notifier).setEraseBandOnly(v),
           ),
           CompactToggle(
-            label: 'Otomatik kaldır', value: settings.autoLift,
+            label: 'Otomatik kald\u0131r',
+            value: settings.autoLift,
             onChanged: (v) =>
                 ref.read(eraserSettingsProvider.notifier).setAutoLift(v),
           ),
           const SizedBox(height: 8),
+
+          // -- Clear page action --
           _CompactActionButton(
-            label: 'Sayfayı Temizle', icon: StarNoteIcons.trash,
+            label: 'Sayfay\u0131 Temizle',
+            icon: StarNoteIcons.trash,
             isDestructive: true,
             onPressed: () => _showClearConfirmation(context, ref),
           ),
@@ -72,22 +116,41 @@ class EraserSettingsPanel extends ConsumerWidget {
     );
   }
 
+  String _titleForMode(ToolType tool) {
+    return switch (tool) {
+      ToolType.pixelEraser => 'Piksel Silgi',
+      ToolType.strokeEraser => '\u00c7izgi Silgisi',
+      ToolType.lassoEraser => 'Kement Silgisi',
+      _ => 'Silgi',
+    };
+  }
+
+  static EraserMode _toolTypeToMode(ToolType t) {
+    return switch (t) {
+      ToolType.pixelEraser => EraserMode.pixel,
+      ToolType.strokeEraser => EraserMode.stroke,
+      ToolType.lassoEraser => EraserMode.lasso,
+      _ => EraserMode.pixel,
+    };
+  }
+
   void _showClearConfirmation(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: cs.surface,
-        title: Text('Sayfayı Temizle?',
+        title: Text('Sayfay\u0131 Temizle?',
             style: TextStyle(color: cs.onSurface)),
         content: Text(
-          'Bu sayfa içeriğini tamamen silecek. Bu işlem geri alınamaz.',
+          'Bu sayfa i\u00e7eri\u011fini tamamen silecek. '
+          'Bu i\u015flem geri al\u0131namaz.',
           style: TextStyle(color: cs.onSurfaceVariant),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('İptal'),
+            child: const Text('\u0130ptal'),
           ),
           TextButton(
             onPressed: () {
@@ -110,52 +173,83 @@ class EraserSettingsPanel extends ConsumerWidget {
   }
 }
 
-/// GoodNotes-style slider: uppercase label + value + compact slider.
-class _GoodNotesSlider extends StatelessWidget {
-  const _GoodNotesSlider({
-    required this.label, required this.value, required this.min,
-    required this.max, required this.displayValue,
-    required this.activeColor, required this.onChanged,
+// ---------------------------------------------------------------------------
+// Eraser Type Selector (matches _HighlighterTypeSelector style)
+// ---------------------------------------------------------------------------
+
+class _EraserTypeSelector extends StatelessWidget {
+  const _EraserTypeSelector({
+    required this.selectedType,
+    required this.onTypeSelected,
   });
-  final String label;
-  final double value, min, max;
-  final String displayValue;
-  final Color activeColor;
-  final ValueChanged<double> onChanged;
+
+  final ToolType selectedType;
+  final ValueChanged<ToolType> onTypeSelected;
+
+  static const _types = [
+    ToolType.pixelEraser,
+    ToolType.strokeEraser,
+    ToolType.lassoEraser,
+  ];
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Column(mainAxisSize: MainAxisSize.min, children: [
-      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
-            color: cs.onSurfaceVariant, letterSpacing: 0.5)),
-        Text(displayValue, style: TextStyle(fontSize: 12,
-            fontWeight: FontWeight.w500, color: cs.onSurface)),
-      ]),
-      const SizedBox(height: 2),
-      SizedBox(height: 28, child: SliderTheme(
-        data: SliderThemeData(
-          trackHeight: 4,
-          thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-          overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
-          activeTrackColor: activeColor,
-          inactiveTrackColor: cs.surfaceContainerHighest,
-          thumbColor: activeColor,
-        ),
-        child: Slider(value: value.clamp(min, max), min: min, max: max,
-            onChanged: onChanged),
-      )),
-    ]);
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: _types.map((t) {
+        final selected = t == selectedType;
+        final icon = _iconFor(t, selected);
+        return GestureDetector(
+          onTap: () => onTypeSelected(t),
+          behavior: HitTestBehavior.opaque,
+          child: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: selected ? cs.primary : Colors.transparent,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              icon,
+              size: 20,
+              color: selected ? cs.onPrimary : cs.onSurfaceVariant,
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  static IconData _iconFor(ToolType type, bool selected) {
+    return switch (type) {
+      ToolType.pixelEraser => selected
+          ? PhosphorIconsRegular.sparkle
+          : PhosphorIconsLight.sparkle,
+      ToolType.strokeEraser => selected
+          ? PhosphorIconsRegular.broom
+          : PhosphorIconsLight.broom,
+      ToolType.lassoEraser => selected
+          ? PhosphorIconsRegular.selection
+          : PhosphorIconsLight.selection,
+      _ => PhosphorIconsLight.eraser,
+    };
   }
 }
 
-/// Compact action button.
+// ---------------------------------------------------------------------------
+// Compact Action Button
+// ---------------------------------------------------------------------------
+
 class _CompactActionButton extends StatelessWidget {
   const _CompactActionButton({
-    required this.label, required this.icon,
-    required this.onPressed, this.isDestructive = false,
+    required this.label,
+    required this.icon,
+    required this.onPressed,
+    this.isDestructive = false,
   });
+
   final String label;
   final IconData icon;
   final VoidCallback onPressed;
@@ -184,86 +278,6 @@ class _CompactActionButton extends StatelessWidget {
               fontSize: 11, fontWeight: FontWeight.w500, color: color)),
           ],
         ),
-      ),
-    );
-  }
-}
-
-/// Selector for eraser modes.
-class _EraserModeSelector extends StatelessWidget {
-  const _EraserModeSelector({
-    required this.selectedMode, required this.onModeSelected,
-  });
-  final EraserMode selectedMode;
-  final ValueChanged<EraserMode> onModeSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(children: [
-      Expanded(child: _EraserModeOption(
-        mode: EraserMode.pixel, icon: StarNoteIcons.sparkle,
-        label: 'Piksel', isSelected: selectedMode == EraserMode.pixel,
-        onTap: () => onModeSelected(EraserMode.pixel),
-      )),
-      const SizedBox(width: 4),
-      Expanded(child: _EraserModeOption(
-        mode: EraserMode.stroke, icon: StarNoteIcons.broom,
-        label: 'Çizgi', isSelected: selectedMode == EraserMode.stroke,
-        onTap: () => onModeSelected(EraserMode.stroke),
-      )),
-      const SizedBox(width: 4),
-      Expanded(child: _EraserModeOption(
-        mode: EraserMode.lasso, icon: StarNoteIcons.selection,
-        label: 'Kement', isSelected: selectedMode == EraserMode.lasso,
-        onTap: () => onModeSelected(EraserMode.lasso), isPremium: true,
-      )),
-    ]);
-  }
-}
-
-/// A single eraser mode option button.
-class _EraserModeOption extends StatelessWidget {
-  const _EraserModeOption({
-    required this.mode, required this.icon, required this.label,
-    required this.isSelected, required this.onTap, this.isPremium = false,
-  });
-  final EraserMode mode;
-  final IconData icon;
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-  final bool isPremium;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? cs.primary.withValues(alpha: 0.1)
-              : cs.surfaceContainerLowest,
-          borderRadius: BorderRadius.circular(5),
-          border: Border.all(
-            color: isSelected ? cs.primary : cs.outlineVariant,
-            width: isSelected ? 1.2 : 1,
-          ),
-        ),
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Stack(children: [
-            Icon(icon, size: 16,
-              color: isSelected ? cs.primary : cs.onSurfaceVariant),
-            if (isPremium) Positioned(top: -2, right: -2,
-              child: PhosphorIcon(StarNoteIcons.lock, size: 9,
-                color: cs.tertiary)),
-          ]),
-          const SizedBox(height: 2),
-          Text(label, style: TextStyle(fontSize: 9,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-            color: isSelected ? cs.primary : cs.onSurfaceVariant)),
-        ]),
       ),
     );
   }
