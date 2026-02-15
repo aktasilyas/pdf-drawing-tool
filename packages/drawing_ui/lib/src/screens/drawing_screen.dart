@@ -88,8 +88,8 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
   @override
   Widget build(BuildContext context) {
     // Listen to activePanel changes
-    final isPenPickerMode = ref.watch(penPickerModeProvider);
     ref.listen<ToolType?>(activePanelProvider, (previous, next) {
+      final isPenPickerMode = ref.read(penPickerModeProvider);
       handlePanelChange(
         context: context,
         panel: next,

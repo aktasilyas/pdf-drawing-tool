@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:drawing_core/drawing_core.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
-import 'package:drawing_ui/src/widgets/pen_icon_widget.dart';
-import 'package:drawing_ui/src/toolbar/tool_groups.dart';
 
-/// Compact pen type picker — first-level popover.
-/// Shows list of pen types. Tap selects pen and triggers onPenSelected.
+/// GoodNotes-style horizontal pen type picker for popover.
 class PenTypePicker extends ConsumerWidget {
   const PenTypePicker({super.key, this.onPenSelected});
 
   final ValueChanged<ToolType>? onPenSelected;
+
+  /// Gösterilecek 5 kalem tipi (sıralı)
+  static const _pickerPens = [
+    ToolType.pencil,        // Kurşun Kalem
+    ToolType.ballpointPen,  // Tükenmez Kalem
+    ToolType.dashedPen,     // Kesik Çizgi
+    ToolType.brushPen,      // Fırça Kalem
+    ToolType.rulerPen,      // Cetvelli Kalem
+  ];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -19,60 +25,63 @@ class PenTypePicker extends ConsumerWidget {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Column(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+      child: Row(
         mainAxisSize: MainAxisSize.min,
-        children: penTools.map((pen) {
-          final isSelected = pen == currentTool;
-          final label = pen.penType?.config.displayNameTr ?? pen.displayName;
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: _pickerPens.map((pen) {
+          final isSelected = pen == currentTool ||
+              (!_pickerPens.contains(currentTool) && pen == ToolType.ballpointPen);
+          final label = _getLabel(pen);
 
-          return InkWell(
-            onTap: () {
-              ref.read(currentToolProvider.notifier).state = pen;
-              onPenSelected?.call(pen);
-            },
-            borderRadius: BorderRadius.circular(8),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              decoration: BoxDecoration(
-                color: isSelected
-                    ? colorScheme.primaryContainer.withValues(alpha: 0.5)
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
+          return Expanded(
+            child: GestureDetector(
+              onTap: () {
+                ref.read(currentToolProvider.notifier).state = pen;
+                onPenSelected?.call(pen);
+              },
+              behavior: HitTestBehavior.opaque,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  SizedBox(
-                    width: 28,
-                    height: 28,
-                    child: ToolPenIcon(
-                      toolType: pen,
+                  // İkon container
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
                       color: isSelected
-                          ? colorScheme.primary
-                          : colorScheme.onSurfaceVariant,
-                      isSelected: isSelected,
-                      size: 24,
-                      orientation: PenOrientation.vertical,
+                          ? colorScheme.primaryContainer
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(12),
+                      border: isSelected
+                          ? Border.all(color: colorScheme.primary, width: 1.5)
+                          : null,
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      label,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight:
-                            isSelected ? FontWeight.w600 : FontWeight.w400,
+                    child: Center(
+                      child: PhosphorIcon(
+                        _getIcon(pen),
+                        size: 22,
                         color: isSelected
                             ? colorScheme.primary
-                            : colorScheme.onSurface,
+                            : colorScheme.onSurfaceVariant,
                       ),
                     ),
                   ),
-                  if (isSelected)
-                    Icon(Icons.check_rounded,
-                        size: 18, color: colorScheme.primary),
+                  const SizedBox(height: 6),
+                  // Label
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                      color: isSelected
+                          ? colorScheme.primary
+                          : colorScheme.onSurfaceVariant,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ],
               ),
             ),
@@ -80,5 +89,27 @@ class PenTypePicker extends ConsumerWidget {
         }).toList(),
       ),
     );
+  }
+
+  static String _getLabel(ToolType type) {
+    switch (type) {
+      case ToolType.pencil: return 'Kurşun\nKalem';
+      case ToolType.ballpointPen: return 'Tükenmez\nKalem';
+      case ToolType.dashedPen: return 'Kesik\nÇizgi';
+      case ToolType.brushPen: return 'Fırça\nKalem';
+      case ToolType.rulerPen: return 'Cetvelli\nKalem';
+      default: return type.displayName;
+    }
+  }
+
+  static PhosphorIconData _getIcon(ToolType type) {
+    switch (type) {
+      case ToolType.pencil: return PhosphorIconsLight.pencilSimple;
+      case ToolType.ballpointPen: return PhosphorIconsLight.pen;
+      case ToolType.dashedPen: return PhosphorIconsLight.penNibStraight;
+      case ToolType.brushPen: return PhosphorIconsLight.paintBrush;
+      case ToolType.rulerPen: return PhosphorIconsLight.ruler;
+      default: return PhosphorIconsLight.pen;
+    }
   }
 }

@@ -272,7 +272,7 @@ void handlePanelChange({
         context: context,
         anchorKey: anchorKey,
         onDismiss: onClosePanel,
-        maxWidth: isPicker ? 220 : 280,
+        maxWidth: isPicker ? 300 : 280,
         child: buildActivePanel(
           panel: panel,
           isPenPickerMode: isPenPickerMode,

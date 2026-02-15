@@ -269,20 +269,20 @@ class _MediumToolbarState extends ConsumerState<MediumToolbar> {
   }
 
   void _onToolPressed(ToolType tool) {
-    // Pen group tap → open picker
+    // Pen group tap → direkt ayar paneli aç
     if (penToolsSet.contains(tool)) {
       final currentTool = ref.read(currentToolProvider);
       final activePanel = ref.read(activePanelProvider);
+      // Panel zaten açıksa kapat
       if (penToolsSet.contains(currentTool) &&
           penToolsSet.contains(activePanel)) {
         ref.read(activePanelProvider.notifier).state = null;
-        ref.read(penPickerModeProvider.notifier).state = false;
         return;
       }
       if (currentTool != tool) {
         ref.read(currentToolProvider.notifier).state = tool;
       }
-      ref.read(penPickerModeProvider.notifier).state = true;
+      // Direkt ayar paneli aç (picker yok)
       ref.read(activePanelProvider.notifier).state = tool;
       return;
     }
@@ -295,9 +295,7 @@ class _MediumToolbarState extends ConsumerState<MediumToolbar> {
     final active = ref.read(activePanelProvider);
     if (active == tool) {
       ref.read(activePanelProvider.notifier).state = null;
-      ref.read(penPickerModeProvider.notifier).state = false;
     } else {
-      ref.read(penPickerModeProvider.notifier).state = false;
       ref.read(activePanelProvider.notifier).state = tool;
     }
   }
