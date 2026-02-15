@@ -220,7 +220,9 @@ class SettingsScreen extends ConsumerWidget {
                 isSelected
                     ? Icons.radio_button_checked
                     : Icons.radio_button_off,
-                color: isSelected ? AppColors.primary : textSecondary,
+                color: isSelected
+                    ? (isDark ? AppColors.accent : AppColors.primary)
+                    : textSecondary,
               ),
               onTap: () {
                 ref.read(settingsProvider.notifier).setTheme(mode);

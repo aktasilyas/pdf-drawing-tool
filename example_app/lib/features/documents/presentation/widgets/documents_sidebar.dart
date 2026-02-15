@@ -42,7 +42,7 @@ class DocumentsSidebar extends ConsumerWidget {
 
     return Container(
       width: AppSpacing.sidebarWidth,
-      color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+      color: isDark ? AppColors.surfaceVariantDark : AppColors.surfaceLight,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -152,6 +152,7 @@ class DocumentsSidebar extends ConsumerWidget {
   }
 
   Widget _buildFoldersHeader(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return AppSectionHeader(
       title: 'Klasörler',
       padding: const EdgeInsets.symmetric(
@@ -167,8 +168,8 @@ class DocumentsSidebar extends ConsumerWidget {
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             child: Text('Yönet',
-                style:
-                    AppTypography.caption.copyWith(color: AppColors.primary)),
+                style: AppTypography.caption.copyWith(
+                    color: isDark ? AppColors.accent : AppColors.primary)),
           ),
           AppIconButton(
             icon: Icons.add,
@@ -237,8 +238,10 @@ class DocumentsSidebar extends ConsumerWidget {
       isSubfolder: isSub,
       iconColor: Color(folder.colorValue),
       trailing: Text('${folder.documentCount}',
-          style: AppTypography.caption
-              .copyWith(color: isSel ? AppColors.primary : tertiaryColor)),
+          style: AppTypography.caption.copyWith(
+              color: isSel
+                  ? (isDark ? AppColors.accent : AppColors.primary)
+                  : tertiaryColor)),
       onTap: () => onFolderSelected?.call(folder.id),
     );
   }

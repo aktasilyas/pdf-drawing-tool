@@ -122,8 +122,9 @@ class _AppSearchFieldState extends State<AppSearchField> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Theme-aware colors
-    final fillColor =
-        isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariantLight;
+    final fillColor = isDark
+        ? AppColors.surfaceContainerHighDark
+        : AppColors.surfaceVariantLight;
     final textColor =
         isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
     final hintColor =

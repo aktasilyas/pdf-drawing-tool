@@ -33,20 +33,21 @@ class SidebarItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    // Dark modda accent (#4A8AF7) kullan — primary (#38434F) koyu bg'de görünmez
+    final selectedColor = isDark ? AppColors.accent : AppColors.primary;
+
     // Theme-aware colors
     final textPrimary =
         isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
     final textSecondary =
         isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
 
-    // Selected background: çok hafif primary tint (bembeyaz değil!)
-    final selectedBg = isDark
-        ? AppColors.primary.withValues(alpha: 0.12)
-        : AppColors.primary.withValues(alpha: 0.08);
+    // Selected background: hafif tint
+    final selectedBg = selectedColor.withValues(alpha: 0.12);
 
     // Icon color: custom veya seçime göre
     final effectiveIconColor = iconColor ??
-        (isSelected ? AppColors.primary : textSecondary);
+        (isSelected ? selectedColor : textSecondary);
 
     final iconSz = isSubfolder ? AppIconSize.sm : AppIconSize.md;
 
@@ -89,7 +90,7 @@ class SidebarItem extends StatelessWidget {
                                 ? AppTypography.bodyMedium
                                 : AppTypography.titleMedium)
                             .copyWith(
-                          color: isSelected ? AppColors.primary : textPrimary,
+                          color: isSelected ? selectedColor : textPrimary,
                           fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                         ),
                         maxLines: 1,
@@ -114,7 +115,7 @@ class SidebarItem extends StatelessWidget {
               child: Container(
                 width: 3,
                 decoration: BoxDecoration(
-                  color: AppColors.primary,
+                  color: selectedColor,
                   borderRadius: BorderRadius.circular(1.5),
                 ),
               ),
