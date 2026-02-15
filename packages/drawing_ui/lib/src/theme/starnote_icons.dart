@@ -92,8 +92,8 @@ abstract final class StarNoteIcons {
   // Action Icons
   // ═══════════════════════════════════════════
 
-  static const undo = PhosphorIconsLight.arrowCounterClockwise;
-  static const redo = PhosphorIconsLight.arrowClockwise;
+  static const undo = PhosphorIconsRegular.arrowBendUpLeft;
+  static const redo = PhosphorIconsRegular.arrowBendUpRight;
   static const close = PhosphorIconsLight.x;
   static const check = PhosphorIconsLight.check;
   static const plus = PhosphorIconsLight.plus;

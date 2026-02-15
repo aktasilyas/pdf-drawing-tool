@@ -108,28 +108,26 @@ abstract class AppTheme {
         onError: AppColors.onError,
         outline: AppColors.outlineLight,
         outlineVariant: AppColors.outlineVariantLight,
-        shadow: Color(0x141B2141),
       );
 
   static ColorScheme get _darkColorScheme => const ColorScheme.dark(
         primary: AppColors.primary,
         onPrimary: AppColors.onPrimary,
-        primaryContainer: AppColors.primaryLight,
+        primaryContainer: AppColors.primaryDark,
         secondary: AppColors.accent,
         onSecondary: AppColors.onAccent,
         surface: AppColors.surfaceDark,
         onSurface: AppColors.textPrimaryDark,
-        surfaceContainerLowest: Color(0xFF0F1328),
-        surfaceContainerLow: Color(0xFF141836),
-        surfaceContainer: Color(0xFF1B2141),
-        surfaceContainerHigh: Color(0xFF232952),
-        surfaceContainerHighest: AppColors.surfaceVariantDark,
+        surfaceContainerLowest: AppColors.backgroundDark,
+        surfaceContainerLow: AppColors.surfaceContainerDark,
+        surfaceContainer: AppColors.surfaceContainerHighDark,
+        surfaceContainerHigh: AppColors.surfaceVariantDark,
+        surfaceContainerHighest: AppColors.outlineVariantDark,
         onSurfaceVariant: AppColors.textSecondaryDark,
         error: AppColors.error,
         onError: AppColors.onError,
         outline: AppColors.outlineDark,
         outlineVariant: AppColors.outlineVariantDark,
-        shadow: Color(0x291B2141),
       );
 
   // ══════════════════════════════════════════════════════════════════════════
@@ -161,7 +159,7 @@ abstract class AppTheme {
 
   static AppBarTheme _appBarTheme({required bool isLight}) => AppBarTheme(
         backgroundColor:
-            isLight ? AppColors.surfaceLight : AppColors.surfaceDark,
+            isLight ? AppColors.surfaceLight : AppColors.surfaceVariantDark,
         foregroundColor:
             isLight ? AppColors.textPrimaryLight : AppColors.textPrimaryDark,
         elevation: 0,
@@ -343,8 +341,8 @@ abstract class AppTheme {
           {required bool isLight}) =>
       BottomNavigationBarThemeData(
         backgroundColor:
-            isLight ? AppColors.surfaceLight : AppColors.surfaceDark,
-        selectedItemColor: AppColors.primary,
+            isLight ? AppColors.surfaceLight : AppColors.surfaceVariantDark,
+        selectedItemColor: AppColors.accent,
         unselectedItemColor: isLight
             ? AppColors.textSecondaryLight
             : AppColors.textSecondaryDark,
@@ -358,9 +356,9 @@ abstract class AppTheme {
           {required bool isLight}) =>
       NavigationRailThemeData(
         backgroundColor:
-            isLight ? AppColors.surfaceLight : AppColors.surfaceDark,
+            isLight ? AppColors.surfaceLight : AppColors.surfaceVariantDark,
         selectedIconTheme: const IconThemeData(
-          color: AppColors.primary,
+          color: AppColors.accent,
           size: AppIconSize.navBar,
         ),
         unselectedIconTheme: IconThemeData(
@@ -370,7 +368,7 @@ abstract class AppTheme {
           size: AppIconSize.navBar,
         ),
         selectedLabelTextStyle: AppTypography.labelMedium.copyWith(
-          color: AppColors.primary,
+          color: AppColors.accent,
         ),
         unselectedLabelTextStyle: AppTypography.labelMedium.copyWith(
           color: isLight
