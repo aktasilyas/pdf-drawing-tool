@@ -1,6 +1,7 @@
 // Panel exports for drawing_ui
 export 'tool_panel.dart';
 export 'pen_settings_panel.dart';
+export 'pen_settings_widgets.dart';
 export 'highlighter_settings_panel.dart';
 export 'eraser_settings_panel.dart';
 export 'shapes_settings_panel.dart';

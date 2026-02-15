@@ -40,6 +40,7 @@ PenSettings _defaultPenSettings(ToolType toolType) {
       stabilization: 0.3, // Default stabilization
       nibShape: _nibShapeFromCore(config.nibShape),
       pressureSensitive: true, // Default pressure sensitivity
+      pressureSensitivity: 0.75,
       textured: config.texture != StrokeTexture.none,
     );
   }
@@ -51,6 +52,7 @@ PenSettings _defaultPenSettings(ToolType toolType) {
     stabilization: 0.3,
     nibShape: NibShapeType.circle,
     pressureSensitive: true,
+    pressureSensitivity: 0.75,
   );
 }
 
@@ -90,6 +92,10 @@ class PenSettingsNotifier extends StateNotifier<PenSettings> {
     state = state.copyWith(pressureSensitive: pressureSensitive);
   }
 
+  void setPressureSensitivity(double pressureSensitivity) {
+    state = state.copyWith(pressureSensitivity: pressureSensitivity);
+  }
+
   void setNibAngle(double nibAngle) {
     state = state.copyWith(nibAngle: nibAngle);
   }
@@ -103,6 +109,7 @@ class PenSettings {
     required this.stabilization,
     required this.nibShape,
     required this.pressureSensitive,
+    this.pressureSensitivity = 0.75,
     this.nibAngle = 0.0,
     this.textured = false,
   });
@@ -112,6 +119,7 @@ class PenSettings {
   final double stabilization;
   final NibShapeType nibShape;
   final bool pressureSensitive;
+  final double pressureSensitivity;
   final double nibAngle;
   final bool textured;
 
@@ -121,6 +129,7 @@ class PenSettings {
     double? stabilization,
     NibShapeType? nibShape,
     bool? pressureSensitive,
+    double? pressureSensitivity,
     double? nibAngle,
     bool? textured,
   }) {
@@ -130,6 +139,7 @@ class PenSettings {
       stabilization: stabilization ?? this.stabilization,
       nibShape: nibShape ?? this.nibShape,
       pressureSensitive: pressureSensitive ?? this.pressureSensitive,
+      pressureSensitivity: pressureSensitivity ?? this.pressureSensitivity,
       nibAngle: nibAngle ?? this.nibAngle,
       textured: textured ?? this.textured,
     );
