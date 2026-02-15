@@ -156,29 +156,17 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
             children: [
               Column(
                 children: [
-                  TopNavigationBar(
+                  AdaptiveToolbar(
+                    onSettingsPressed: _onSettingsPressed,
+                    settingsButtonKey: _settingsButtonKey,
+                    toolButtonKeys: _toolButtonKeys,
+                    penGroupButtonKey: _penGroupButtonKey,
+                    highlighterGroupButtonKey: _highlighterGroupButtonKey,
                     documentTitle: widget.documentTitle,
                     onHomePressed: widget.onHomePressed,
                     onTitlePressed: widget.onTitlePressed,
                     onSidebarToggle: _toggleSidebar,
                     isSidebarOpen: _isSidebarOpen,
-                    compact: isCompactMode,
-                  ),
-                  AnimatedSize(
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeInOut,
-                    child: isReaderMode
-                        ? const SizedBox.shrink()
-                        : AdaptiveToolbar(
-                            onUndoPressed: _onUndoPressed,
-                            onRedoPressed: _onRedoPressed,
-                            onSettingsPressed: _onSettingsPressed,
-                            settingsButtonKey: _settingsButtonKey,
-                            toolButtonKeys: _toolButtonKeys,
-                            penGroupButtonKey: _penGroupButtonKey,
-                            highlighterGroupButtonKey:
-                                _highlighterGroupButtonKey,
-                          ),
                   ),
                   Expanded(
                     child: Row(

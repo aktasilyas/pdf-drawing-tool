@@ -4,29 +4,27 @@ import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/toolbar/medium_toolbar.dart';
 import 'package:drawing_ui/src/toolbar/tool_bar.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_layout_mode.dart';
+import 'package:drawing_ui/src/toolbar/top_navigation_bar.dart';
 
 /// Adaptive toolbar that switches layout based on available width.
 ///
-/// - >=840px: [ToolBar] (expanded — full horizontal, all sections visible)
-/// - 600-839px: [MediumToolbar] (compact horizontal, overflow menu)
-/// - <600px: [SizedBox.shrink] (compact bottom bar — future phase)
+/// - >=840px: [ToolBar] — single-row with nav + tools
+/// - 600-839px: [MediumToolbar] — single-row with nav + tools (overflow menu)
+/// - <600px: [TopNavigationBar] (compact) — nav only, tools on bottom bar
 class AdaptiveToolbar extends StatelessWidget {
   const AdaptiveToolbar({
     super.key,
-    this.onUndoPressed,
-    this.onRedoPressed,
     this.onSettingsPressed,
     this.settingsButtonKey,
     this.toolButtonKeys,
     this.penGroupButtonKey,
     this.highlighterGroupButtonKey,
+    this.documentTitle,
+    this.onHomePressed,
+    this.onTitlePressed,
+    this.onSidebarToggle,
+    this.isSidebarOpen = false,
   });
-
-  /// Callback when undo is pressed.
-  final VoidCallback? onUndoPressed;
-
-  /// Callback when redo is pressed.
-  final VoidCallback? onRedoPressed;
 
   /// Callback when toolbar config is pressed.
   final VoidCallback? onSettingsPressed;
@@ -43,13 +41,18 @@ class AdaptiveToolbar extends StatelessWidget {
   /// Single GlobalKey for highlighter group button.
   final GlobalKey? highlighterGroupButtonKey;
 
+  // Nav parameters (passed through to ToolBar/MediumToolbar/TopNavigationBar)
+  final String? documentTitle;
+  final VoidCallback? onHomePressed;
+  final VoidCallback? onTitlePressed;
+  final VoidCallback? onSidebarToggle;
+  final bool isSidebarOpen;
+
   /// Returns true if compact mode should be used (phone layout).
-  /// When true, DrawingScreen should:
-  /// 1. Hide this toolbar (renders SizedBox.shrink)
-  /// 2. Show CompactBottomBar at bottom
-  /// 3. Use showToolPanelSheet for panels instead of AnchoredPanel
+  /// When true, DrawingScreen should show CompactBottomBar at bottom.
   static bool shouldUseCompactMode(BuildContext context) {
-    return MediaQuery.of(context).size.width < ToolbarLayoutMode.compactBreakpoint;
+    return MediaQuery.of(context).size.width <
+        ToolbarLayoutMode.compactBreakpoint;
   }
 
   @override
@@ -60,30 +63,43 @@ class AdaptiveToolbar extends StatelessWidget {
 
         if (width >= ToolbarLayoutMode.expandedBreakpoint) {
           return ToolBar(
-            onUndoPressed: onUndoPressed,
-            onRedoPressed: onRedoPressed,
             onSettingsPressed: onSettingsPressed,
             settingsButtonKey: settingsButtonKey,
             toolButtonKeys: toolButtonKeys,
             penGroupButtonKey: penGroupButtonKey,
             highlighterGroupButtonKey: highlighterGroupButtonKey,
+            documentTitle: documentTitle,
+            onHomePressed: onHomePressed,
+            onTitlePressed: onTitlePressed,
+            onSidebarToggle: onSidebarToggle,
+            isSidebarOpen: isSidebarOpen,
           );
         }
 
         if (width >= ToolbarLayoutMode.compactBreakpoint) {
           return MediumToolbar(
-            onUndoPressed: onUndoPressed,
-            onRedoPressed: onRedoPressed,
             onSettingsPressed: onSettingsPressed,
             settingsButtonKey: settingsButtonKey,
             toolButtonKeys: toolButtonKeys,
             penGroupButtonKey: penGroupButtonKey,
             highlighterGroupButtonKey: highlighterGroupButtonKey,
+            documentTitle: documentTitle,
+            onHomePressed: onHomePressed,
+            onTitlePressed: onTitlePressed,
+            onSidebarToggle: onSidebarToggle,
+            isSidebarOpen: isSidebarOpen,
           );
         }
 
-        // Compact (<600px): Future phase — bottom bar widget
-        return const SizedBox.shrink();
+        // Compact (<600px): Navigation bar only, tools on bottom bar
+        return TopNavigationBar(
+          documentTitle: documentTitle,
+          onHomePressed: onHomePressed,
+          onTitlePressed: onTitlePressed,
+          onSidebarToggle: onSidebarToggle,
+          isSidebarOpen: isSidebarOpen,
+          compact: true,
+        );
       },
     );
   }

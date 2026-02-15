@@ -79,6 +79,7 @@ Widget buildDrawingCanvasArea({
               },
             ),
           ),
+        if (!isReadOnly) const FloatingUndoRedo(),
         if (!isReadOnly)
           Positioned(right: 16, bottom: 16, child: AskAIButton(onTap: onOpenAIPanel)),
         if (ref.watch(isZoomingProvider))
@@ -272,7 +273,7 @@ void handlePanelChange({
         context: context,
         anchorKey: anchorKey,
         onDismiss: onClosePanel,
-        maxWidth: isPicker ? 300 : 280,
+        maxWidth: isPicker ? 300 : 380,
         child: buildActivePanel(
           panel: panel,
           isPenPickerMode: isPenPickerMode,
@@ -287,16 +288,11 @@ void handlePanelChange({
 void openAIPanel(BuildContext context) {
   final surface = Theme.of(context).colorScheme.surface;
   showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
+    context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
     builder: (context) => DraggableScrollableSheet(
       initialChildSize: 0.6, maxChildSize: 0.9, minChildSize: 0.3,
-      builder: (context, scrollController) => Container(
-        decoration: BoxDecoration(
-          color: surface,
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-        ),
+      builder: (_, __) => Container(
+        decoration: BoxDecoration(color: surface, borderRadius: const BorderRadius.vertical(top: Radius.circular(16))),
         child: const AIAssistantPanel(),
       ),
     ),

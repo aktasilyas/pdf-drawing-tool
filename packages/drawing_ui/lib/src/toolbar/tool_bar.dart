@@ -5,50 +5,51 @@ import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/toolbar/tool_button.dart';
-import 'package:drawing_ui/src/toolbar/quick_access_row.dart';
 import 'package:drawing_ui/src/toolbar/tool_groups.dart';
+import 'package:drawing_ui/src/toolbar/toolbar_logic.dart';
+import 'package:drawing_ui/src/toolbar/toolbar_nav_sections.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_widgets.dart';
+import 'package:drawing_ui/src/toolbar/top_nav_menus.dart';
 
-/// Tool bar (Row 2) - Drawing tools and quick access.
+/// Expanded toolbar (>=840px) — single-row layout combining navigation and
+/// drawing tools.
 ///
-/// Contains:
-/// - Undo/Redo buttons (leftmost)
-/// - Tool selection (scrollable)
-/// - Quick color chips
-/// - Quick thickness dots
-/// - Toolbar config button
+/// Layout (edit mode):
+/// ```
+/// [Nav Left] | [Tools...scroll...Settings] | [Nav Right]
+/// ```
+///
+/// Layout (reader mode):
+/// ```
+/// [Nav Left]  ···spacer···  [Nav Right]
+/// ```
 class ToolBar extends ConsumerStatefulWidget {
   const ToolBar({
     super.key,
-    this.onUndoPressed,
-    this.onRedoPressed,
     this.onSettingsPressed,
     this.settingsButtonKey,
     this.toolButtonKeys,
     this.penGroupButtonKey,
     this.highlighterGroupButtonKey,
+    this.documentTitle,
+    this.onHomePressed,
+    this.onTitlePressed,
+    this.onSidebarToggle,
+    this.isSidebarOpen = false,
   });
 
-  /// Callback when undo is pressed.
-  final VoidCallback? onUndoPressed;
-
-  /// Callback when redo is pressed.
-  final VoidCallback? onRedoPressed;
-
-  /// Callback when toolbar config is pressed.
   final VoidCallback? onSettingsPressed;
-
-  /// GlobalKey for settings button (for anchored panel positioning)
   final GlobalKey? settingsButtonKey;
-
-  /// GlobalKeys for each tool button (for anchored panel positioning)
   final Map<ToolType, GlobalKey>? toolButtonKeys;
-
-  /// Single GlobalKey for pen group button (all pen tools share this)
   final GlobalKey? penGroupButtonKey;
-
-  /// Single GlobalKey for highlighter group button
   final GlobalKey? highlighterGroupButtonKey;
+
+  // Nav parameters
+  final String? documentTitle;
+  final VoidCallback? onHomePressed;
+  final VoidCallback? onTitlePressed;
+  final VoidCallback? onSidebarToggle;
+  final bool isSidebarOpen;
 
   @override
   ConsumerState<ToolBar> createState() => _ToolBarState();
@@ -68,32 +69,10 @@ class _ToolBarState extends ConsumerState<ToolBar> {
   @override
   Widget build(BuildContext context) {
     final theme = DrawingTheme.of(context);
-    final currentTool = ref.watch(currentToolProvider);
-    final toolbarConfig = ref.watch(toolbarConfigProvider);
-    final canUndo = ref.watch(canUndoProvider);
-    final canRedo = ref.watch(canRedoProvider);
+    final isReaderMode = ref.watch(readerModeProvider);
+    final gridVisible = ref.watch(gridVisibilityProvider);
+    final pageCount = ref.watch(pageCountProvider);
 
-    // Görünür araçları al ve kalem araçlarını grupla
-    final visibleTools = _getGroupedVisibleTools(toolbarConfig, currentTool);
-
-    return _buildExpandedLayout(
-      context: context,
-      theme: theme,
-      canUndo: canUndo,
-      canRedo: canRedo,
-      currentTool: currentTool,
-      visibleTools: visibleTools,
-    );
-  }
-
-  Widget _buildExpandedLayout({
-    required BuildContext context,
-    required DrawingTheme theme,
-    required bool canUndo,
-    required bool canRedo,
-    required ToolType currentTool,
-    required List<ToolType> visibleTools,
-  }) {
     return Container(
       height: 48,
       decoration: BoxDecoration(
@@ -105,173 +84,139 @@ class _ToolBarState extends ConsumerState<ToolBar> {
           ),
         ),
       ),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          // Küçük ekranlarda QuickAccessRow'u gizle
-          final showQuickAccess = constraints.maxWidth > 500;
-
-          return Row(
-            children: [
-              const SizedBox(width: 4),
-
-              // Undo/Redo section
-              ToolbarUndoRedoButtons(
-                canUndo: canUndo,
-                canRedo: canRedo,
-                onUndo: widget.onUndoPressed,
-                onRedo: widget.onRedoPressed,
-              ),
-
-              // Divider
-              const ToolbarVerticalDivider(),
-
-              // Tools section (scrollable)
-              Expanded(
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      ...visibleTools.map((tool) {
-                        final isPenGroup = penTools.contains(tool);
-                        final isHighlighterGroup =
-                            highlighterTools.contains(tool);
-                        final isSelected =
-                            _isToolSelected(tool, currentTool);
-                        final hasPanel = toolsWithPanel.contains(tool);
-
-                        final GlobalKey? buttonKey;
-                        if (isPenGroup) {
-                          buttonKey = widget.penGroupButtonKey;
-                        } else if (isHighlighterGroup) {
-                          buttonKey = widget.highlighterGroupButtonKey;
-                        } else {
-                          buttonKey = widget.toolButtonKeys?[tool];
-                        }
-
-                        Widget toolButton = ToolButton(
-                          key: buttonKey,
-                          toolType: tool,
-                          isSelected: isSelected,
-                          buttonKey: _toolButtonKeys[tool],
-                          onPressed: () => _onToolPressed(tool),
-                          onPanelTap:
-                              hasPanel ? () => _onPanelTap(tool) : null,
-                          hasPanel: hasPanel,
-                          customIcon: isPenGroup &&
-                                  penTools.contains(currentTool)
-                              ? ToolButton.getIconForTool(currentTool)
-                              : null,
-                        );
-
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 2),
-                          child: toolButton,
-                        );
-                      }),
-                      // Settings button - after all tools (inside scrollable)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 2),
-                        child: Tooltip(
-                          message: 'Araç Çubuğu Ayarları',
-                          child: Semantics(
-                            label: 'Araç Çubuğu Ayarları',
-                            button: true,
-                            child: GestureDetector(
-                              behavior: HitTestBehavior.opaque,
-                              onTap: () {
-                                final current = ref.read(activePanelProvider);
-                                if (current == ToolType.toolbarSettings) {
-                                  ref.read(activePanelProvider.notifier).state = null;
-                                } else {
-                                  ref.read(activePanelProvider.notifier).state = ToolType.toolbarSettings;
-                                }
-                              },
-                              child: Container(
-                                key: widget.settingsButtonKey,
-                                width: 48,
-                                height: 48,
-                                decoration: BoxDecoration(
-                                  color: theme.toolbarBackground,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: PhosphorIcon(
-                                  StarNoteIcons.settings,
-                                  size: StarNoteIcons.actionSize,
-                                  color: theme.toolbarIconColor,
-                                  semanticLabel: 'Araç Çubuğu Ayarları',
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              // Quick access (conditionally on larger screens)
-              if (showQuickAccess && constraints.maxWidth > 700) ...[
-                const ToolbarVerticalDivider(),
-                const Flexible(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 4),
-                    child: QuickAccessRow(),
-                  ),
-                ),
-              ],
-
-              const SizedBox(width: 4),
-            ],
-          );
-        },
+      child: Row(
+        children: [
+          const SizedBox(width: 4),
+          // Nav left section
+          ToolbarNavLeft(
+            documentTitle: widget.documentTitle,
+            onHomePressed: widget.onHomePressed,
+            onTitlePressed: widget.onTitlePressed,
+            onSidebarToggle: widget.onSidebarToggle,
+            isSidebarOpen: widget.isSidebarOpen,
+            isReaderMode: isReaderMode,
+            pageCount: pageCount,
+          ),
+          // Tools section (hidden in reader mode)
+          if (!isReaderMode) ..._buildToolsSection(theme),
+          // Spacer pushes nav right to the end in reader mode
+          if (isReaderMode) const Expanded(child: SizedBox()),
+          // Nav right section
+          ToolbarNavRight(
+            isReaderMode: isReaderMode,
+            gridVisible: gridVisible,
+            onReaderToggle: () =>
+                ref.read(readerModeProvider.notifier).state = !isReaderMode,
+            onGridToggle: () =>
+                ref.read(gridVisibilityProvider.notifier).state = !gridVisible,
+            onExportPressed: () => showExportMenu(context, ref),
+            onMorePressed: () => showMoreMenu(context, ref),
+          ),
+          const SizedBox(width: 4),
+        ],
       ),
     );
   }
 
-  List<ToolType> _getGroupedVisibleTools(
-      ToolbarConfig config, ToolType currentTool) {
-    final visibleTools =
-        config.visibleTools.map((tc) => tc.toolType).toList();
-    final result = <ToolType>[];
-    bool penAdded = false, highlighterAdded = false;
-    for (final tool in visibleTools) {
-      if (penTools.contains(tool)) {
-        if (!penAdded) {
-          result.add(penTools.contains(currentTool)
-              ? currentTool
-              : ToolType.ballpointPen);
-          penAdded = true;
-        }
-      } else if (highlighterTools.contains(tool)) {
-        if (!highlighterAdded) {
-          result.add(highlighterTools.contains(currentTool)
-              ? currentTool
-              : ToolType.highlighter);
-          highlighterAdded = true;
-        }
-      } else {
-        result.add(tool);
-      }
-    }
-    return result;
+  /// Build scrollable tools + settings button.
+  List<Widget> _buildToolsSection(DrawingTheme theme) {
+    final currentTool = ref.watch(currentToolProvider);
+    final toolbarConfig = ref.watch(toolbarConfigProvider);
+    final visibleTools = getGroupedVisibleTools(toolbarConfig, currentTool);
+
+    return [
+      const ToolbarVerticalDivider(),
+      Expanded(
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              ...visibleTools.map((tool) => _buildToolButton(tool, currentTool)),
+              _buildSettingsButton(theme),
+            ],
+          ),
+        ),
+      ),
+      const ToolbarVerticalDivider(),
+    ];
   }
 
-  bool _isToolSelected(ToolType tool, ToolType currentTool) {
-    if (penTools.contains(tool) && penTools.contains(currentTool)) return true;
-    if (highlighterTools.contains(tool) &&
-        highlighterTools.contains(currentTool)) return true;
-    return tool == currentTool;
+  Widget _buildToolButton(ToolType tool, ToolType currentTool) {
+    final isPenGroup = penTools.contains(tool);
+    final isHighlighterGroup = highlighterTools.contains(tool);
+    final selected = isToolSelected(tool, currentTool);
+    final hasPanel = toolsWithPanel.contains(tool);
+
+    final GlobalKey? buttonKey;
+    if (isPenGroup) {
+      buttonKey = widget.penGroupButtonKey;
+    } else if (isHighlighterGroup) {
+      buttonKey = widget.highlighterGroupButtonKey;
+    } else {
+      buttonKey = widget.toolButtonKeys?[tool];
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 2),
+      child: ToolButton(
+        key: buttonKey,
+        toolType: tool,
+        isSelected: selected,
+        buttonKey: _toolButtonKeys[tool],
+        onPressed: () => _onToolPressed(tool),
+        onPanelTap: hasPanel ? () => _onPanelTap(tool) : null,
+        hasPanel: hasPanel,
+        customIcon: isPenGroup && penTools.contains(currentTool)
+            ? ToolButton.getIconForTool(currentTool)
+            : null,
+      ),
+    );
+  }
+
+  Widget _buildSettingsButton(DrawingTheme theme) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 2),
+      child: Tooltip(
+        message: 'Araç Çubuğu Ayarları',
+        child: Semantics(
+          label: 'Araç Çubuğu Ayarları',
+          button: true,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () {
+              final current = ref.read(activePanelProvider);
+              ref.read(activePanelProvider.notifier).state =
+                  current == ToolType.toolbarSettings
+                      ? null
+                      : ToolType.toolbarSettings;
+            },
+            child: Container(
+              key: widget.settingsButtonKey,
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: theme.toolbarBackground,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: PhosphorIcon(
+                StarNoteIcons.settings,
+                size: StarNoteIcons.actionSize,
+                color: theme.toolbarIconColor,
+                semanticLabel: 'Araç Çubuğu Ayarları',
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   void _onToolPressed(ToolType tool) {
-    // Pen group tap → direkt ayar paneli aç
     if (penToolsSet.contains(tool)) {
       final currentTool = ref.read(currentToolProvider);
       final activePanel = ref.read(activePanelProvider);
-      // Panel zaten açıksa kapat
       if (penToolsSet.contains(currentTool) &&
           penToolsSet.contains(activePanel)) {
         ref.read(activePanelProvider.notifier).state = null;
@@ -280,22 +225,17 @@ class _ToolBarState extends ConsumerState<ToolBar> {
       if (currentTool != tool) {
         ref.read(currentToolProvider.notifier).state = tool;
       }
-      // Direkt ayar paneli aç (picker yok)
       ref.read(activePanelProvider.notifier).state = tool;
       return;
     }
-
     ref.read(currentToolProvider.notifier).state = tool;
     ref.read(activePanelProvider.notifier).state = null;
   }
 
   void _onPanelTap(ToolType tool) {
     final active = ref.read(activePanelProvider);
-    if (active == tool) {
-      ref.read(activePanelProvider.notifier).state = null;
-    } else {
-      ref.read(activePanelProvider.notifier).state = tool;
-    }
+    ref.read(activePanelProvider.notifier).state =
+        active == tool ? null : tool;
   }
 
   GlobalKey? getToolButtonKey(ToolType tool) => _toolButtonKeys[tool];
