@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 
-/// GoodNotes-style slider: uppercase label + value + compact slider.
+/// GoodNotes-style stepped slider with dot tick marks.
+///
+/// Features:
+/// - Uppercase label + percentage value header
+/// - Track with visible dot markers at each step
+/// - Active dots colored [activeColor], inactive grey
+/// - Larger thumb circle
 class GoodNotesSlider extends StatelessWidget {
   const GoodNotesSlider({
     super.key,
@@ -11,6 +17,7 @@ class GoodNotesSlider extends StatelessWidget {
     required this.displayValue,
     required this.activeColor,
     required this.onChanged,
+    this.divisions = 8,
   });
 
   final String label;
@@ -20,6 +27,7 @@ class GoodNotesSlider extends StatelessWidget {
   final String displayValue;
   final Color activeColor;
   final ValueChanged<double> onChanged;
+  final int divisions;
 
   @override
   Widget build(BuildContext context) {
@@ -40,20 +48,24 @@ class GoodNotesSlider extends StatelessWidget {
       ]),
       const SizedBox(height: 2),
       SizedBox(
-        height: 28,
+        height: 32,
         child: SliderTheme(
           data: SliderThemeData(
-            trackHeight: 4,
-            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
+            trackHeight: 3,
+            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 9),
             overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
             activeTrackColor: activeColor,
-            inactiveTrackColor: cs.surfaceContainerHighest,
+            inactiveTrackColor: cs.outlineVariant.withValues(alpha: 0.4),
             thumbColor: activeColor,
+            activeTickMarkColor: activeColor,
+            inactiveTickMarkColor: cs.outlineVariant,
+            tickMarkShape: const RoundSliderTickMarkShape(tickMarkRadius: 4),
           ),
           child: Slider(
             value: value.clamp(min, max),
             min: min,
             max: max,
+            divisions: divisions,
             onChanged: onChanged,
           ),
         ),

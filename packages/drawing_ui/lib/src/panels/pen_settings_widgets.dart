@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:drawing_ui/src/models/models.dart';
+import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 /// Darkens a color by the given amount (0.0 to 1.0).
@@ -122,7 +123,9 @@ class PenTypeSelector extends StatelessWidget {
   }
 }
 
-/// GoodNotes-style pen card: icon top + label bottom.
+/// Pen card matching toolbar selection style:
+/// Selected → primary pill bg + white icon (Regular weight)
+/// Deselected → transparent + grey icon (Light weight)
 class PenCard extends StatelessWidget {
   const PenCard({
     super.key,
@@ -140,79 +143,25 @@ class PenCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final dk = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
-      child: SizedBox(
-        width: 52,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            PhosphorIcon(
-              _icon(type),
-              size: 26,
-              color: isSelected
-                  ? (dk ? darkenColor(selectedColor, 0.3) : selectedColor)
-                  : (dk
-                      ? cs.onSurface.withValues(alpha: 0.5)
-                      : cs.onSurfaceVariant),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              _label(type),
-              style: TextStyle(
-                fontSize: 10,
-                height: 1.2,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                color: isSelected
-                    ? cs.onSurface
-                    : (dk
-                        ? cs.onSurface.withValues(alpha: 0.5)
-                        : cs.onSurfaceVariant),
-              ),
-              textAlign: TextAlign.center,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
+      child: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: isSelected ? cs.primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Center(
+          child: PhosphorIcon(
+            StarNoteIcons.iconForTool(type, active: isSelected),
+            size: StarNoteIcons.toolSize,
+            color: isSelected ? cs.onPrimary : cs.onSurfaceVariant,
+          ),
         ),
       ),
     );
-  }
-
-  static PhosphorIconData _icon(ToolType type) {
-    switch (type) {
-      case ToolType.pencil:
-        return PhosphorIconsLight.pencilSimple;
-      case ToolType.ballpointPen:
-        return PhosphorIconsLight.pen;
-      case ToolType.dashedPen:
-        return PhosphorIconsLight.penNibStraight;
-      case ToolType.brushPen:
-        return PhosphorIconsLight.paintBrush;
-      case ToolType.rulerPen:
-        return PhosphorIconsLight.ruler;
-      default:
-        return PhosphorIconsLight.pen;
-    }
-  }
-
-  static String _label(ToolType type) {
-    switch (type) {
-      case ToolType.pencil:
-        return 'Kurşun\nKalem';
-      case ToolType.ballpointPen:
-        return 'Tükenmez\nKalem';
-      case ToolType.dashedPen:
-        return 'Kesik\nÇizgi';
-      case ToolType.brushPen:
-        return 'Fırça\nKalem';
-      case ToolType.rulerPen:
-        return 'Cetvelli\nKalem';
-      default:
-        return type.displayName;
-    }
   }
 }

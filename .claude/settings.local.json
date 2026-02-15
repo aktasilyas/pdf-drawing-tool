@@ -46,7 +46,10 @@
       "WebFetch(domain:pub.dev)",
       "Bash(git -C /mnt/c/Users/aktas/source/repos/starnote_drawing_workspace diff)",
       "Bash(git -C /mnt/c/Users/aktas/source/repos/starnote_drawing_workspace add packages/drawing_ui/lib/src/widgets/popover_panel.dart)",
-      "Bash(git -C:*)"
+      "Bash(git -C:*)",
+      "Bash(git remote set-url:*)",
+      "Bash(git push:*)",
+      "Bash(ssh:*)"
     ]
   }
 }

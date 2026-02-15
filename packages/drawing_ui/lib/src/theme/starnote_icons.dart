@@ -45,6 +45,8 @@ abstract final class StarNoteIcons {
   static const penActive = PhosphorIconsRegular.pen;
   static const markerCircle = PhosphorIconsLight.markerCircle;
   static const markerCircleActive = PhosphorIconsRegular.markerCircle;
+  static const dashedPen = PhosphorIconsLight.penNibStraight;
+  static const dashedPenActive = PhosphorIconsRegular.penNibStraight;
   static const paintBrush = PhosphorIconsLight.paintBrush;
   static const paintBrushActive = PhosphorIconsRegular.paintBrush;
   static const ruler = PhosphorIconsLight.ruler;
@@ -182,7 +184,7 @@ abstract final class StarNoteIcons {
       ToolType.hardPencil => active ? pencilActive : pencil,
       ToolType.ballpointPen => active ? penActive : pen,
       ToolType.gelPen => active ? markerCircleActive : markerCircle,
-      ToolType.dashedPen => active ? penActive : pen,
+      ToolType.dashedPen => active ? dashedPenActive : dashedPen,
       ToolType.brushPen => active ? paintBrushActive : paintBrush,
       ToolType.rulerPen => active ? rulerActive : ruler,
       ToolType.highlighter ||
