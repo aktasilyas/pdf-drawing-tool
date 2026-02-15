@@ -61,6 +61,9 @@ class TextToolNotifier extends StateNotifier<TextToolState> {
     double y, {
     double fontSize = 16.0,
     int color = 0xFF000000,
+    bool isBold = false,
+    bool isItalic = false,
+    bool isUnderline = false,
   }) {
     final text = TextElement.create(
       text: '',
@@ -68,6 +71,9 @@ class TextToolNotifier extends StateNotifier<TextToolState> {
       y: y,
       fontSize: fontSize,
       color: color,
+      isBold: isBold,
+      isItalic: isItalic,
+      isUnderline: isUnderline,
     );
 
     state = TextToolState(
@@ -154,4 +160,66 @@ final activeLayerTextsProvider = Provider<List<TextElement>>((ref) {
   final document = ref.watch(documentProvider);
   if (document.layers.isEmpty) return [];
   return document.layers[document.activeLayerIndex].texts;
+});
+
+// ---------------------------------------------------------------------------
+// Text Settings (default style for new text elements)
+// ---------------------------------------------------------------------------
+
+/// Persistent settings for the text tool panel.
+class TextSettings {
+  final double fontSize;
+  final int color;
+  final bool isBold;
+  final bool isItalic;
+  final bool isUnderline;
+
+  const TextSettings({
+    this.fontSize = 16.0,
+    this.color = 0xFF000000,
+    this.isBold = false,
+    this.isItalic = false,
+    this.isUnderline = false,
+  });
+
+  TextSettings copyWith({
+    double? fontSize,
+    int? color,
+    bool? isBold,
+    bool? isItalic,
+    bool? isUnderline,
+  }) {
+    return TextSettings(
+      fontSize: fontSize ?? this.fontSize,
+      color: color ?? this.color,
+      isBold: isBold ?? this.isBold,
+      isItalic: isItalic ?? this.isItalic,
+      isUnderline: isUnderline ?? this.isUnderline,
+    );
+  }
+}
+
+class TextSettingsNotifier extends StateNotifier<TextSettings> {
+  TextSettingsNotifier() : super(const TextSettings());
+
+  void setFontSize(double size) =>
+      state = state.copyWith(fontSize: size);
+
+  void setColor(int color) =>
+      state = state.copyWith(color: color);
+
+  void toggleBold() =>
+      state = state.copyWith(isBold: !state.isBold);
+
+  void toggleItalic() =>
+      state = state.copyWith(isItalic: !state.isItalic);
+
+  void toggleUnderline() =>
+      state = state.copyWith(isUnderline: !state.isUnderline);
+}
+
+/// Provider for default text settings.
+final textSettingsProvider =
+    StateNotifierProvider<TextSettingsNotifier, TextSettings>((ref) {
+  return TextSettingsNotifier();
 });

@@ -50,7 +50,7 @@ Widget buildActivePanel({
       return const LaserPointerPanel();
 
     case ToolType.text:
-      return const _TextToolPanel();
+      return const TextSettingsPanel();
 
     case ToolType.panZoom:
       return const SizedBox.shrink();
@@ -60,76 +60,3 @@ Widget buildActivePanel({
   }
 }
 
-/// Simple text tool panel (placeholder).
-class _TextToolPanel extends StatelessWidget {
-  const _TextToolPanel();
-
-  @override
-  Widget build(BuildContext context) {
-    return ToolPanel(
-      title: 'Text',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Tap on the canvas to add a text box.',
-            style: TextStyle(color: Colors.grey),
-          ),
-          const SizedBox(height: 16),
-          PanelSection(
-            title: 'FONT SIZE',
-            child: Slider(
-              value: 16,
-              min: 8,
-              max: 72,
-              onChanged: (_) {},
-            ),
-          ),
-          const SizedBox(height: 16),
-          const PanelSection(
-            title: 'TEXT COLOR',
-            child: Row(
-              children: [
-                _ColorDot(color: Colors.black, isSelected: true),
-                const SizedBox(width: 8),
-                _ColorDot(color: Colors.blue),
-                const SizedBox(width: 8),
-                _ColorDot(color: Colors.red),
-                const SizedBox(width: 8),
-                _ColorDot(color: Colors.green),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-
-/// Simple color dot widget.
-class _ColorDot extends StatelessWidget {
-  const _ColorDot({
-    required this.color,
-    this.isSelected = false,
-  });
-
-  final Color color;
-  final bool isSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 32,
-      height: 32,
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: isSelected ? Colors.blue : Colors.grey.shade300,
-          width: isSelected ? 3 : 1,
-        ),
-      ),
-    );
-  }
-}

@@ -20,7 +20,9 @@ class FloatingQuickColors extends ConsumerWidget {
     final isPen = penToolsSet.contains(currentTool);
     final isHighlighter = highlighterToolsSet.contains(currentTool);
 
-    if (!isPen && !isHighlighter) return const SizedBox.shrink();
+    if (!isPen && !isHighlighter) {
+      return const Positioned(left: 0, top: 0, child: SizedBox.shrink());
+    }
 
     final colors = isPen ? ColorPresets.quickAccess : ColorPresets.highlighter;
     final currentColor = isPen

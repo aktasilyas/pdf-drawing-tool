@@ -74,6 +74,18 @@ customIcon: isPenGroup && _penTools.contains(currentTool)
 - `top_navigation_bar.dart`: ~262 lines
 - `drawing_screen_layout.dart`: ~299 lines (trimmed from 336 by condensing widget code)
 
+## Settings Panel Design Pattern (pen/highlighter/eraser)
+All tool settings panels follow this consistent layout:
+1. `Padding(EdgeInsets.all(16))` outer padding
+2. Title: `fontSize: 16, fontWeight: w600, color: cs.onSurface`
+3. `SizedBox(height: 16)` then Preview: `SizedBox(height: 100)` + `CustomPaint`
+4. `SizedBox(height: 16)` then Type Selector: 40x40 pill cards, `BorderRadius.circular(10)`
+   - Selected: `cs.primary` bg, `cs.onPrimary` icon; Deselected: transparent bg, `cs.onSurfaceVariant` icon
+5. `SizedBox(height: 20)` then `GoodNotesSlider` (shared widget)
+6. `SizedBox(height: 8)` between sliders/toggles, `CompactToggle` (shared widget)
+- CustomPainter logic can be extracted to separate `*_painter.dart` files to stay under 300 lines
+- `PhosphorIconsLight` for deselected, `PhosphorIconsRegular` for selected icon states
+
 ## Testing Notes
 - Pre-existing failures: ~45 tests (PDF, canvas, toolbar icon matching) - expected
 - Pre-existing warnings: 3 unnecessary_non_null_assertion in pdf_render_provider.dart

@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/panels/selection_preview_painter.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 
 /// Settings panel for the lasso (kement) selection tool.
 ///
-/// Compact design showing all options without scrolling.
+/// Matches the eraser/highlighter panel design pattern with preview,
+/// icon-based type selector, and selectable types grid.
 class LassoSelectionPanel extends ConsumerWidget {
   const LassoSelectionPanel({super.key});
 
@@ -16,16 +19,28 @@ class LassoSelectionPanel extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Kement', style: TextStyle(
-            fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSurface)),
-          const SizedBox(height: 10),
-          // Compact mode selector
-          _CompactModeSelector(
+          // -- Title (dynamic based on mode) --
+          Text(
+            _titleForMode(settings.mode),
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: cs.onSurface,
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // -- Selection Preview --
+          SelectionPreview(mode: settings.mode),
+          const SizedBox(height: 16),
+
+          // -- Selection Type Selector (40x40 icon buttons) --
+          _SelectionTypeSelector(
             selectedMode: settings.mode,
             onModeSelected: (mode) {
               ref.read(lassoSettingsProvider.notifier).setMode(mode);
@@ -36,24 +51,21 @@ class LassoSelectionPanel extends ConsumerWidget {
                   selectionType;
             },
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 20),
 
-          // Compact selectable types as chips
-          Builder(
-            builder: (context) {
-              final colorScheme = Theme.of(context).colorScheme;
-              return Text(
-                'Seçilebilir',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: colorScheme.onSurfaceVariant,
-                  letterSpacing: 0.5,
-                ),
-              );
-            },
+          // -- Section label --
+          Text(
+            'SEÇİLEBİLİR',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: cs.onSurfaceVariant,
+              letterSpacing: 0.5,
+            ),
           ),
           const SizedBox(height: 8),
+
+          // -- Selectable types grid --
           _SelectableTypesGrid(
             selectableTypes: settings.selectableTypes,
             onTypeChanged: (type, value) {
@@ -65,11 +77,21 @@ class LassoSelectionPanel extends ConsumerWidget {
       ),
     );
   }
+
+  String _titleForMode(LassoMode mode) {
+    return switch (mode) {
+      LassoMode.freeform => 'Serbest Seçim',
+      LassoMode.rectangle => 'Dikdörtgen Seçim',
+    };
+  }
 }
 
-/// Compact mode selector with two inline buttons.
-class _CompactModeSelector extends StatelessWidget {
-  const _CompactModeSelector({
+// ---------------------------------------------------------------------------
+// Selection Type Selector (matches _EraserTypeSelector style)
+// ---------------------------------------------------------------------------
+
+class _SelectionTypeSelector extends StatelessWidget {
+  const _SelectionTypeSelector({
     required this.selectedMode,
     required this.onModeSelected,
   });
@@ -79,105 +101,50 @@ class _CompactModeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark ? colorScheme.surfaceContainerHigh : colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      padding: const EdgeInsets.all(3),
-      child: Row(
-        children: [
-          Expanded(
-            child: _ModeButton(
-              icon: StarNoteIcons.selection,
-              label: 'Serbest',
-              isSelected: selectedMode == LassoMode.freeform,
-              onTap: () => onModeSelected(LassoMode.freeform),
+    final cs = Theme.of(context).colorScheme;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: LassoMode.values.map((mode) {
+        final selected = mode == selectedMode;
+        final icon = _iconFor(mode, selected);
+        return GestureDetector(
+          onTap: () => onModeSelected(mode),
+          behavior: HitTestBehavior.opaque,
+          child: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: selected ? cs.primary : Colors.transparent,
+              borderRadius: BorderRadius.circular(10),
             ),
-          ),
-          Expanded(
-            child: _ModeButton(
-              icon: StarNoteIcons.shapes,
-              label: 'Dikdörtgen',
-              isSelected: selectedMode == LassoMode.rectangle,
-              onTap: () => onModeSelected(LassoMode.rectangle),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ModeButton extends StatelessWidget {
-  const _ModeButton({
-    required this.icon,
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-        decoration: BoxDecoration(
-          color: isSelected 
-              ? (isDark ? colorScheme.surface : colorScheme.surface) 
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(6),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: (isDark ? 40 : 20) / 255.0),
-                    blurRadius: 4,
-                    offset: const Offset(0, 1),
-                  ),
-                ]
-              : null,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
+            child: Icon(
               icon,
-              size: 16,
-              color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
+              size: 20,
+              color: selected ? cs.onPrimary : cs.onSurfaceVariant,
             ),
-            const SizedBox(width: 4),
-            Flexible(
-              child: Text(
-                label,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                  color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      }).toList(),
     );
+  }
+
+  static IconData _iconFor(LassoMode mode, bool selected) {
+    return switch (mode) {
+      LassoMode.freeform => selected
+          ? PhosphorIconsRegular.selection
+          : PhosphorIconsLight.selection,
+      LassoMode.rectangle => selected
+          ? PhosphorIconsRegular.boundingBox
+          : PhosphorIconsLight.boundingBox,
+    };
   }
 }
 
-/// Compact grid of selectable type chips.
+// ---------------------------------------------------------------------------
+// Selectable Types Grid
+// ---------------------------------------------------------------------------
+
 class _SelectableTypesGrid extends StatelessWidget {
   const _SelectableTypesGrid({
     required this.selectableTypes,
@@ -231,22 +198,24 @@ class _TypeChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
         decoration: BoxDecoration(
-          color: isSelected 
-              ? colorScheme.primaryContainer 
-              : (isDark ? colorScheme.surfaceContainerHigh : colorScheme.surfaceContainerHighest),
+          color: isSelected
+              ? cs.primaryContainer
+              : (isDark
+                  ? cs.surfaceContainerHigh
+                  : cs.surfaceContainerHighest),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected 
-                ? colorScheme.primary.withValues(alpha: 0.5) 
-                : colorScheme.outline.withValues(alpha: 0.3),
+            color: isSelected
+                ? cs.primary.withValues(alpha: 0.5)
+                : cs.outline.withValues(alpha: 0.3),
             width: 1,
           ),
         ),
@@ -256,7 +225,7 @@ class _TypeChip extends StatelessWidget {
             Icon(
               icon,
               size: 14,
-              color: isSelected ? colorScheme.primary : colorScheme.onSurfaceVariant,
+              color: isSelected ? cs.primary : cs.onSurfaceVariant,
             ),
             const SizedBox(width: 4),
             Text(
@@ -264,7 +233,9 @@ class _TypeChip extends StatelessWidget {
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
-                color: isSelected ? colorScheme.onPrimaryContainer : colorScheme.onSurfaceVariant,
+                color: isSelected
+                    ? cs.onPrimaryContainer
+                    : cs.onSurfaceVariant,
               ),
             ),
           ],

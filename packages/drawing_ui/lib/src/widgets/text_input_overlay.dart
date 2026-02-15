@@ -34,6 +34,7 @@ class _TextInputOverlayState extends ConsumerState<TextInputOverlay> {
     super.initState();
     _controller = TextEditingController(text: widget.textElement.text);
     _focusNode = FocusNode();
+    _focusNode.addListener(_onFocusChanged);
 
     // Auto focus
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -48,8 +49,20 @@ class _TextInputOverlayState extends ConsumerState<TextInputOverlay> {
   void dispose() {
     _controller.removeListener(_onTextChanged);
     _controller.dispose();
+    _focusNode.removeListener(_onFocusChanged);
     _focusNode.dispose();
     super.dispose();
+  }
+
+  void _onFocusChanged() {
+    // When focus is lost (keyboard dismissed, tap outside, etc.) save the text
+    if (!_focusNode.hasFocus) {
+      if (_controller.text.trim().isNotEmpty) {
+        widget.onEditingComplete();
+      } else {
+        widget.onCancel();
+      }
+    }
   }
 
   void _onTextChanged() {
@@ -118,7 +131,6 @@ class _TextInputOverlayState extends ConsumerState<TextInputOverlay> {
                 isDense: true,
               ),
               onSubmitted: _onSubmitted,
-              // onTapOutside removed - handled by canvas pointer events
             ),
           ),
         ),
