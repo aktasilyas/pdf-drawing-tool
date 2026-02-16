@@ -21,6 +21,7 @@ dependencies:
       ref: main
   flex_color_picker: ^3.8.0
   phosphor_flutter: ^2.1.0
+  image_picker: ^1.0.0  # Image selection from gallery/camera
   pdfx: ^2.6.0  # PDF rendering and import
   pdf: ^3.10.8  # PDF creation and export
   path_provider: ^2.1.0  # For storing PDF files locally

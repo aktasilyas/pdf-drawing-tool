@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 
 import 'package:drawing_core/src/models/bounding_box.dart';
+import 'package:drawing_core/src/models/image_element.dart';
 import 'package:drawing_core/src/models/shape.dart';
 import 'package:drawing_core/src/models/stroke.dart';
 import 'package:drawing_core/src/models/text_element.dart';
@@ -33,6 +34,11 @@ class Layer extends Equatable {
   /// This list is unmodifiable.
   final List<TextElement> texts;
 
+  /// The image elements contained in this layer.
+  ///
+  /// This list is unmodifiable.
+  final List<ImageElement> images;
+
   /// Whether this layer is visible.
   final bool isVisible;
 
@@ -53,12 +59,14 @@ class Layer extends Equatable {
     required List<Stroke> strokes,
     List<Shape>? shapes,
     List<TextElement>? texts,
+    List<ImageElement>? images,
     this.isVisible = true,
     this.isLocked = false,
     double opacity = 1.0,
   })  : strokes = List.unmodifiable(strokes),
         shapes = List.unmodifiable(shapes ?? const []),
         texts = List.unmodifiable(texts ?? const []),
+        images = List.unmodifiable(images ?? const []),
         opacity = opacity.clamp(0.0, 1.0);
 
   /// Creates an empty layer with a generated ID.
@@ -69,6 +77,7 @@ class Layer extends Equatable {
       strokes: const [],
       shapes: const [],
       texts: const [],
+      images: const [],
     );
   }
 
@@ -77,11 +86,13 @@ class Layer extends Equatable {
     return 'layer_${DateTime.now().microsecondsSinceEpoch}';
   }
 
-  /// Whether this layer has no strokes, shapes, or texts.
-  bool get isEmpty => strokes.isEmpty && shapes.isEmpty && texts.isEmpty;
+  /// Whether this layer has no strokes, shapes, texts, or images.
+  bool get isEmpty =>
+      strokes.isEmpty && shapes.isEmpty && texts.isEmpty && images.isEmpty;
 
-  /// Whether this layer has at least one stroke, shape, or text.
-  bool get isNotEmpty => strokes.isNotEmpty || shapes.isNotEmpty || texts.isNotEmpty;
+  /// Whether this layer has at least one stroke, shape, text, or image.
+  bool get isNotEmpty =>
+      strokes.isNotEmpty || shapes.isNotEmpty || texts.isNotEmpty || images.isNotEmpty;
 
   /// The number of strokes in this layer.
   int get strokeCount => strokes.length;
@@ -91,6 +102,9 @@ class Layer extends Equatable {
 
   /// The number of text elements in this layer.
   int get textCount => texts.length;
+
+  /// The number of image elements in this layer.
+  int get imageCount => images.length;
 
   // ============================================================
   // STROKE METHODS
@@ -106,6 +120,7 @@ class Layer extends Equatable {
       strokes: [...strokes, stroke],
       shapes: shapes,
       texts: texts,
+      images: images,
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -124,6 +139,7 @@ class Layer extends Equatable {
       strokes: newStrokes,
       shapes: shapes,
       texts: texts,
+      images: images,
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -150,6 +166,7 @@ class Layer extends Equatable {
       strokes: newStrokes,
       shapes: shapes,
       texts: texts,
+      images: images,
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -166,6 +183,7 @@ class Layer extends Equatable {
       strokes: const [],
       shapes: const [],
       texts: const [],
+      images: const [],
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -208,6 +226,7 @@ class Layer extends Equatable {
       strokes: strokes,
       shapes: [...shapes, shape],
       texts: texts,
+      images: images,
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -226,6 +245,7 @@ class Layer extends Equatable {
       strokes: strokes,
       shapes: newShapes,
       texts: texts,
+      images: images,
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -252,6 +272,7 @@ class Layer extends Equatable {
       strokes: strokes,
       shapes: newShapes,
       texts: texts,
+      images: images,
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -282,6 +303,7 @@ class Layer extends Equatable {
       strokes: strokes,
       shapes: shapes,
       texts: [...texts, text],
+      images: images,
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -300,6 +322,7 @@ class Layer extends Equatable {
       strokes: strokes,
       shapes: shapes,
       texts: newTexts,
+      images: images,
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -326,6 +349,7 @@ class Layer extends Equatable {
       strokes: strokes,
       shapes: shapes,
       texts: newTexts,
+      images: images,
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -343,6 +367,74 @@ class Layer extends Equatable {
   }
 
   // ============================================================
+  // IMAGE METHODS
+  // ============================================================
+
+  /// Returns a new [Layer] with the given image element added.
+  Layer addImage(ImageElement image) {
+    return Layer(
+      id: id,
+      name: name,
+      strokes: strokes,
+      shapes: shapes,
+      texts: texts,
+      images: [...images, image],
+      isVisible: isVisible,
+      isLocked: isLocked,
+      opacity: opacity,
+    );
+  }
+
+  /// Returns a new [Layer] with the image matching [imageId] removed.
+  Layer removeImage(String imageId) {
+    final newImages = images.where((i) => i.id != imageId).toList();
+    return Layer(
+      id: id,
+      name: name,
+      strokes: strokes,
+      shapes: shapes,
+      texts: texts,
+      images: newImages,
+      isVisible: isVisible,
+      isLocked: isLocked,
+      opacity: opacity,
+    );
+  }
+
+  /// Returns a new [Layer] with the image updated.
+  Layer updateImage(ImageElement image) {
+    final index = images.indexWhere((i) => i.id == image.id);
+    if (index == -1) {
+      return copyWith();
+    }
+
+    final newImages = List<ImageElement>.from(images);
+    newImages[index] = image;
+
+    return Layer(
+      id: id,
+      name: name,
+      strokes: strokes,
+      shapes: shapes,
+      texts: texts,
+      images: newImages,
+      isVisible: isVisible,
+      isLocked: isLocked,
+      opacity: opacity,
+    );
+  }
+
+  /// Returns the image element with the given [id], or null if not found.
+  ImageElement? getImageById(String imageId) {
+    for (final image in images) {
+      if (image.id == imageId) {
+        return image;
+      }
+    }
+    return null;
+  }
+
+  // ============================================================
   // COMMON METHODS
   // ============================================================
 
@@ -353,6 +445,7 @@ class Layer extends Equatable {
     List<Stroke>? strokes,
     List<Shape>? shapes,
     List<TextElement>? texts,
+    List<ImageElement>? images,
     bool? isVisible,
     bool? isLocked,
     double? opacity,
@@ -363,6 +456,7 @@ class Layer extends Equatable {
       strokes: strokes ?? this.strokes,
       shapes: shapes ?? this.shapes,
       texts: texts ?? this.texts,
+      images: images ?? this.images,
       isVisible: isVisible ?? this.isVisible,
       isLocked: isLocked ?? this.isLocked,
       opacity: opacity ?? this.opacity,
@@ -377,6 +471,7 @@ class Layer extends Equatable {
       'strokes': strokes.map((s) => s.toJson()).toList(),
       'shapes': shapes.map((s) => s.toJson()).toList(),
       'texts': texts.map((t) => t.toJson()).toList(),
+      'images': images.map((i) => i.toJson()).toList(),
       'isVisible': isVisible,
       'isLocked': isLocked,
       'opacity': opacity,
@@ -399,6 +494,10 @@ class Layer extends Equatable {
               ?.map((t) => TextElement.fromJson(t as Map<String, dynamic>))
               .toList() ??
           const [],
+      images: (json['images'] as List?)
+              ?.map((i) => ImageElement.fromJson(i as Map<String, dynamic>))
+              .toList() ??
+          const [],
       isVisible: json['isVisible'] as bool? ?? true,
       isLocked: json['isLocked'] as bool? ?? false,
       opacity: (json['opacity'] as num?)?.toDouble() ?? 1.0,
@@ -407,12 +506,12 @@ class Layer extends Equatable {
 
   @override
   List<Object?> get props =>
-      [id, name, strokes, shapes, texts, isVisible, isLocked, opacity];
+      [id, name, strokes, shapes, texts, images, isVisible, isLocked, opacity];
 
   @override
   String toString() {
     return 'Layer(id: $id, name: $name, strokeCount: $strokeCount, '
-        'shapeCount: $shapeCount, textCount: $textCount, isVisible: $isVisible, '
-        'isLocked: $isLocked, opacity: $opacity)';
+        'shapeCount: $shapeCount, textCount: $textCount, imageCount: $imageCount, '
+        'isVisible: $isVisible, isLocked: $isLocked, opacity: $opacity)';
   }
 }

@@ -64,13 +64,28 @@ class PixelEraserTool {
         continue;
       }
 
+      final effectiveTolerance = tolerance + (stroke.style.thickness / 2);
+
+      // Single-point stroke: check distance to the point itself
+      if (stroke.points.length == 1) {
+        final p = stroke.points.first;
+        final distance = _distance(x, y, p.x, p.y);
+        if (distance <= effectiveTolerance) {
+          hits.add(SegmentHit(
+            strokeId: stroke.id,
+            segmentIndex: 0,
+            distance: distance,
+          ));
+        }
+        continue;
+      }
+
       // Check each segment
       for (int i = 0; i < stroke.points.length - 1; i++) {
         final p1 = stroke.points[i];
         final p2 = stroke.points[i + 1];
 
         final distance = _pointToSegmentDistance(x, y, p1.x, p1.y, p2.x, p2.y);
-        final effectiveTolerance = tolerance + (stroke.style.thickness / 2);
 
         if (distance <= effectiveTolerance) {
           hits.add(SegmentHit(

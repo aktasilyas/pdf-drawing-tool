@@ -146,6 +146,7 @@ class _ToolBarState extends ConsumerState<ToolBar> {
   Widget _buildToolButton(ToolType tool, ToolType currentTool) {
     final isPenGroup = penTools.contains(tool);
     final isHighlighterGroup = highlighterTools.contains(tool);
+    final isEraserGroup = eraserTools.contains(tool);
     final selected = isToolSelected(tool, currentTool);
     final hasPanel = toolsWithPanel.contains(tool);
 
@@ -158,6 +159,13 @@ class _ToolBarState extends ConsumerState<ToolBar> {
       buttonKey = widget.toolButtonKeys?[tool];
     }
 
+    IconData? customIcon;
+    if (isPenGroup && penTools.contains(currentTool)) {
+      customIcon = ToolButton.getIconForTool(currentTool);
+    } else if (isEraserGroup && eraserTools.contains(currentTool)) {
+      customIcon = ToolButton.getIconForTool(currentTool);
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2),
       child: ToolButton(
@@ -168,9 +176,7 @@ class _ToolBarState extends ConsumerState<ToolBar> {
         onPressed: () => _onToolPressed(tool),
         onPanelTap: hasPanel ? () => _onPanelTap(tool) : null,
         hasPanel: hasPanel,
-        customIcon: isPenGroup && penTools.contains(currentTool)
-            ? ToolButton.getIconForTool(currentTool)
-            : null,
+        customIcon: customIcon,
       ),
     );
   }

@@ -54,7 +54,9 @@
       "Bash(apt list:*)",
       "Bash(python3:*)",
       "Bash(grep:*)",
-      "Bash(echo:*)"
+      "Bash(echo:*)",
+      "Bash(git pull:*)",
+      "Bash(find:*)"
     ]
   }
 }
