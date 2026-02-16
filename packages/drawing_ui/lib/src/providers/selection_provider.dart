@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
 
@@ -88,4 +89,72 @@ final activeSelectionToolProvider = Provider<SelectionTool>((ref) {
     case SelectionType.rectangle:
       return ref.watch(rectSelectionToolProvider);
   }
+});
+
+// ============================================================
+// SELECTION UI STATE (live move, rotation, context menu)
+// ============================================================
+
+/// UI-layer state for live selection feedback and context menu.
+class SelectionUiState {
+  /// Live drag offset (reset on commit).
+  final Offset moveDelta;
+
+  /// Live rotation angle in radians (reset on commit).
+  final double rotation;
+
+  /// Whether the context menu is visible.
+  final bool showMenu;
+
+  const SelectionUiState({
+    this.moveDelta = Offset.zero,
+    this.rotation = 0.0,
+    this.showMenu = false,
+  });
+
+  /// Whether any live transform is active.
+  bool get hasTransform => moveDelta != Offset.zero || rotation != 0.0;
+
+  SelectionUiState copyWith({
+    Offset? moveDelta,
+    double? rotation,
+    bool? showMenu,
+  }) {
+    return SelectionUiState(
+      moveDelta: moveDelta ?? this.moveDelta,
+      rotation: rotation ?? this.rotation,
+      showMenu: showMenu ?? this.showMenu,
+    );
+  }
+}
+
+/// Notifier for selection UI state.
+class SelectionUiNotifier extends StateNotifier<SelectionUiState> {
+  SelectionUiNotifier() : super(const SelectionUiState());
+
+  void setMoveDelta(Offset delta) {
+    state = state.copyWith(moveDelta: delta, showMenu: false);
+  }
+
+  void setRotation(double angle) {
+    state = state.copyWith(rotation: angle, showMenu: false);
+  }
+
+  void showContextMenu() {
+    state = state.copyWith(showMenu: true);
+  }
+
+  void hideContextMenu() {
+    state = state.copyWith(showMenu: false);
+  }
+
+  void reset() {
+    state = const SelectionUiState();
+  }
+}
+
+/// Provider for selection UI state (live move, rotation, context menu).
+final selectionUiProvider =
+    StateNotifierProvider<SelectionUiNotifier, SelectionUiState>((ref) {
+  return SelectionUiNotifier();
 });

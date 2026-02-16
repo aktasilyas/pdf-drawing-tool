@@ -11,6 +11,9 @@ class ShapePainter extends CustomPainter {
   /// Preview shape (active drawing)
   final Shape? activeShape;
 
+  /// Shape IDs to skip rendering (used during live selection move/rotate).
+  final Set<String> excludedShapeIds;
+
   // Cached paint object (performans için)
   static final Paint _paint = Paint()
     ..strokeCap = StrokeCap.round
@@ -21,12 +24,14 @@ class ShapePainter extends CustomPainter {
   ShapePainter({
     required this.shapes,
     this.activeShape,
+    this.excludedShapeIds = const {},
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     // Committed shapes
     for (final shape in shapes) {
+      if (excludedShapeIds.contains(shape.id)) continue;
       _drawShape(canvas, shape);
     }
 
@@ -262,6 +267,7 @@ class ShapePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant ShapePainter oldDelegate) {
     return oldDelegate.shapes != shapes ||
-        oldDelegate.activeShape != activeShape;
+        oldDelegate.activeShape != activeShape ||
+        !identical(oldDelegate.excludedShapeIds, excludedShapeIds);
   }
 }

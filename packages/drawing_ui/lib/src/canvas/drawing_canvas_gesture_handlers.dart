@@ -35,6 +35,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
   set straightLineStyle(core.StrokeStyle? value);
   Set<String> get erasedShapeIds;
   Set<String> get erasedTextIds;
+  Set<String> get erasedImageIds;
   Map<String, List<int>> get pixelEraseHits;
   List<core.Stroke> get pixelEraseOriginalStrokes;
   Offset? get lastFocalPoint;
@@ -95,6 +96,35 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       return;
     }
 
+    // Handle image move mode regardless of current tool
+    final imgState = ref.read(imagePlacementProvider);
+    if (imgState.isMoving) {
+      final transform = ref.read(canvasTransformProvider);
+      final canvasPoint =
+          (event.localPosition - transform.offset) / transform.zoom;
+      _moveImageTo(canvasPoint.dx, canvasPoint.dy);
+      return;
+    }
+
+    // Close selection context menu if showing
+    final selUi = ref.read(selectionUiProvider);
+    if (selUi.showMenu) {
+      ref.read(selectionUiProvider.notifier).hideContextMenu();
+      return;
+    }
+
+    // Close image context menu if showing (keep selection for resize handles)
+    if (imgState.showMenu) {
+      ref.read(imagePlacementProvider.notifier).hideContextMenu();
+      return;
+    }
+
+    // If an image is selected (resize handles visible) and we're not on image tool,
+    // deselect the image
+    if (imgState.selectedImage != null && toolType != ToolType.image) {
+      ref.read(imagePlacementProvider.notifier).deselectImage();
+    }
+
     // Close text context menu/style popup if showing
     if (textToolState.showMenu) {
       ref.read(textToolProvider.notifier).hideContextMenu();
@@ -135,6 +165,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
 
       if (!isPointInSelection(canvasPoint, selection)) {
         ref.read(selectionProvider.notifier).clearSelection();
+        ref.read(selectionUiProvider.notifier).reset();
       }
     }
 
@@ -142,6 +173,38 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     final stickerState = ref.read(stickerPlacementProvider);
     if (stickerState.isPlacing) {
       _handleStickerPlacement(event);
+      return;
+    }
+
+    // Check if image placement mode is active
+    final imageState = ref.read(imagePlacementProvider);
+    if (imageState.isPlacing) {
+      _handleImagePlacement(event);
+      return;
+    }
+
+    // Image tool selected (no placement) — tap on existing image selects it
+    if (toolType == ToolType.image) {
+      final transform = ref.read(canvasTransformProvider);
+      final canvasPoint =
+          (event.localPosition - transform.offset) / transform.zoom;
+      final currentImgState = ref.read(imagePlacementProvider);
+
+      // If a selected image is showing resize handles, let the handles widget
+      // handle pan/tap events (it runs as GestureDetector inside Transform).
+      if (currentImgState.selectedImage != null && !currentImgState.showMenu) {
+        return;
+      }
+
+      final images = ref.read(activeLayerImagesProvider);
+      for (final image in images.reversed) {
+        if (image.containsPoint(canvasPoint.dx, canvasPoint.dy, 10)) {
+          ref.read(imagePlacementProvider.notifier).selectImage(image);
+          return;
+        }
+      }
+      // Tap on empty area → deselect
+      ref.read(imagePlacementProvider.notifier).deselectImage();
       return;
     }
 
@@ -387,6 +450,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
   void handleSelectionDown(PointerDownEvent event) {
     // Clear any existing selection first
     ref.read(selectionProvider.notifier).clearSelection();
+    ref.read(selectionUiProvider.notifier).reset();
 
     final transform = ref.read(canvasTransformProvider);
     final canvasPoint =
@@ -520,6 +584,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
         eraserTool.startErasing();
         erasedShapeIds.clear();
         erasedTextIds.clear();
+        erasedImageIds.clear();
         eraseAtPoint(event.localPosition);
         break;
 
@@ -612,6 +677,16 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
           ref.read(historyManagerProvider.notifier).execute(command);
         }
         erasedTextIds.clear();
+
+        // Commit erased images
+        for (final imageId in erasedImageIds) {
+          final command = core.RemoveImageCommand(
+            layerIndex: layerIndex,
+            imageId: imageId,
+          );
+          ref.read(historyManagerProvider.notifier).execute(command);
+        }
+        erasedImageIds.clear();
         break;
 
       case EraserMode.lasso:
@@ -625,6 +700,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     final strokes = ref.read(activeLayerStrokesProvider);
     final shapes = ref.read(activeLayerShapesProvider);
     final texts = ref.read(activeLayerTextsProvider);
+    final images = ref.read(activeLayerImagesProvider);
     final settings = ref.read(eraserSettingsProvider);
     final pixelTool = ref.read(pixelEraserToolProvider);
 
@@ -683,6 +759,19 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       }
     }
 
+    // Check images
+    for (final image in images) {
+      if (!erasedImageIds.contains(image.id)) {
+        if (image.containsPoint(
+          canvasPoint.dx,
+          canvasPoint.dy,
+          settings.size / 2,
+        )) {
+          erasedImageIds.add(image.id);
+        }
+      }
+    }
+
     // Update preview provider for visual feedback
     ref.read(pixelEraserPreviewProvider.notifier).state =
         Map<String, List<int>>.from(pixelEraseHits);
@@ -728,11 +817,21 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       ref.read(historyManagerProvider.notifier).execute(command);
     }
 
+    // Commit images
+    for (final imageId in erasedImageIds) {
+      final command = core.RemoveImageCommand(
+        layerIndex: layerIndex,
+        imageId: imageId,
+      );
+      ref.read(historyManagerProvider.notifier).execute(command);
+    }
+
     // Clear tracking
     pixelEraseHits.clear();
     pixelEraseOriginalStrokes.clear();
     erasedShapeIds.clear();
     erasedTextIds.clear();
+    erasedImageIds.clear();
     ref.read(pixelEraserPreviewProvider.notifier).state = {};
   }
 
@@ -773,6 +872,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     final strokes = ref.read(activeLayerStrokesProvider);
     final shapes = ref.read(activeLayerShapesProvider);
     final texts = ref.read(activeLayerTextsProvider);
+    final images = ref.read(activeLayerImagesProvider);
     final eraserTool = ref.read(eraserToolProvider);
     final eraserSettings = ref.read(eraserSettingsProvider);
 
@@ -814,6 +914,19 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
           eraserTool.tolerance,
         )) {
           erasedTextIds.add(text.id);
+        }
+      }
+    }
+
+    // Find images to erase
+    for (final image in images) {
+      if (!erasedImageIds.contains(image.id)) {
+        if (image.containsPoint(
+          canvasPoint.dx,
+          canvasPoint.dy,
+          eraserTool.tolerance,
+        )) {
+          erasedImageIds.add(image.id);
         }
       }
     }
@@ -1182,6 +1295,113 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
   }
 
   // ─────────────────────────────────────────────────────────────────────────
+  // IMAGE PLACEMENT
+  // ─────────────────────────────────────────────────────────────────────────
+
+  void _handleImagePlacement(PointerDownEvent event) {
+    final imageState = ref.read(imagePlacementProvider);
+    final imagePath = imageState.selectedImagePath;
+    if (imagePath == null) return;
+
+    final transform = ref.read(canvasTransformProvider);
+    final canvasPoint =
+        (event.localPosition - transform.offset) / transform.zoom;
+
+    // Default image size on canvas
+    const defaultWidth = 200.0;
+    const defaultHeight = 200.0;
+
+    // Clamp position to page bounds
+    final page = ref.read(currentPageProvider);
+    final maxX = (page.size.width - defaultWidth).clamp(0.0, page.size.width);
+    final maxY =
+        (page.size.height - defaultHeight).clamp(0.0, page.size.height);
+    final clampedX = (canvasPoint.dx - defaultWidth / 2).clamp(0.0, maxX);
+    final clampedY = (canvasPoint.dy - defaultHeight / 2).clamp(0.0, maxY);
+
+    final imageElement = core.ImageElement.create(
+      filePath: imagePath,
+      x: clampedX,
+      y: clampedY,
+      width: defaultWidth,
+      height: defaultHeight,
+    );
+
+    final document = ref.read(documentProvider);
+    final command = core.AddImageCommand(
+      layerIndex: document.activeLayerIndex,
+      imageElement: imageElement,
+    );
+    ref.read(historyManagerProvider.notifier).execute(command);
+
+    // Exit placement mode
+    ref.read(imagePlacementProvider.notifier).placed();
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // IMAGE CONTEXT MENU HANDLERS
+  // ─────────────────────────────────────────────────────────────────────────
+
+  void handleImageDelete() {
+    final imgState = ref.read(imagePlacementProvider);
+    final image = imgState.selectedImage;
+    if (image != null) {
+      final document = ref.read(documentProvider);
+      final command = core.RemoveImageCommand(
+        layerIndex: document.activeLayerIndex,
+        imageId: image.id,
+      );
+      ref.read(historyManagerProvider.notifier).execute(command);
+      ref.read(imagePlacementProvider.notifier).deselectImage();
+    }
+  }
+
+  void handleImageDuplicate() {
+    final imgState = ref.read(imagePlacementProvider);
+    final image = imgState.selectedImage;
+    if (image != null) {
+      final duplicate = core.ImageElement.create(
+        filePath: image.filePath,
+        x: image.x + 40,
+        y: image.y + 40,
+        width: image.width,
+        height: image.height,
+        rotation: image.rotation,
+      );
+      final document = ref.read(documentProvider);
+      final command = core.AddImageCommand(
+        layerIndex: document.activeLayerIndex,
+        imageElement: duplicate,
+      );
+      ref.read(historyManagerProvider.notifier).execute(command);
+      ref.read(imagePlacementProvider.notifier).deselectImage();
+    }
+  }
+
+  void handleImageMove() {
+    final imgState = ref.read(imagePlacementProvider);
+    final image = imgState.selectedImage;
+    if (image != null) {
+      ref.read(imagePlacementProvider.notifier).startMoving(image);
+    }
+  }
+
+  void _moveImageTo(double x, double y) {
+    final imgState = ref.read(imagePlacementProvider);
+    final movingImage = imgState.movingImage;
+    if (movingImage != null) {
+      final movedImage = movingImage.copyWith(x: x, y: y);
+      final document = ref.read(documentProvider);
+      final command = core.UpdateImageCommand(
+        layerIndex: document.activeLayerIndex,
+        newImage: movedImage,
+      );
+      ref.read(historyManagerProvider.notifier).execute(command);
+      ref.read(imagePlacementProvider.notifier).cancelMoving();
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
   // SCALE GESTURE HANDLERS (Two Finger Zoom/Pan)
   // ─────────────────────────────────────────────────────────────────────────
 
@@ -1200,6 +1420,8 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       ref.read(activeSelectionToolProvider).cancelSelection();
       isSelecting = false;
     }
+    // Reset selection UI state (hide menu, cancel live transform)
+    ref.read(selectionUiProvider.notifier).reset();
     if (isDrawingShape) {
       activeShapeTool?.cancelShape();
       activeShapeTool = null;

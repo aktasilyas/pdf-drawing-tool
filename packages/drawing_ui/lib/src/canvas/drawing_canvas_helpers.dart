@@ -32,13 +32,34 @@ mixin DrawingCanvasHelpers<T extends ConsumerStatefulWidget>
     return ref.read(activeStrokeStyleProvider);
   }
 
-  /// Checks if a point is inside the selection bounds.
+  /// Checks if a point is inside the selection interaction area.
+  ///
+  /// This includes:
+  /// - The selection bounds rectangle
+  /// - The rotation handle area (30px above top-center + 20px hit radius)
   bool isPointInSelection(Offset point, core.Selection selection) {
     final bounds = selection.bounds;
-    return point.dx >= bounds.left &&
+
+    // Check inside bounds rectangle
+    if (point.dx >= bounds.left &&
         point.dx <= bounds.right &&
         point.dy >= bounds.top &&
-        point.dy <= bounds.bottom;
+        point.dy <= bounds.bottom) {
+      return true;
+    }
+
+    // Check rotation handle area (30px above top-center, 20px hit radius)
+    const rotHandleDist = 30.0;
+    const hitRadius = 20.0;
+    final cx = (bounds.left + bounds.right) / 2;
+    final rotHandleY = bounds.top - rotHandleDist;
+    final dx = point.dx - cx;
+    final dy = point.dy - rotHandleY;
+    if (dx * dx + dy * dy <= hitRadius * hitRadius) {
+      return true;
+    }
+
+    return false;
   }
 
   /// Apply eraser filters based on settings
