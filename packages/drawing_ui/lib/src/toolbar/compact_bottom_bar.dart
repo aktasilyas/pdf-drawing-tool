@@ -110,8 +110,18 @@ class _CompactBottomBarState extends ConsumerState<CompactBottomBar> {
   Widget _buildToolButton(ToolType tool, ToolType currentTool) {
     final isPenGroup = penTools.contains(tool);
     final isHighlighterGroup = highlighterTools.contains(tool);
+    final isEraserGroup = eraserTools.contains(tool);
     final isSelected = isToolSelected(tool, currentTool);
     final hasPanel = toolsWithPanel.contains(tool);
+
+    IconData? customIcon;
+    if (isPenGroup && penTools.contains(currentTool)) {
+      customIcon = ToolButton.getIconForTool(currentTool);
+    } else if (isHighlighterGroup && highlighterTools.contains(currentTool)) {
+      customIcon = ToolButton.getIconForTool(currentTool);
+    } else if (isEraserGroup && eraserTools.contains(currentTool)) {
+      customIcon = ToolButton.getIconForTool(currentTool);
+    }
 
     return ToolButton(
       toolType: tool,
@@ -119,11 +129,7 @@ class _CompactBottomBarState extends ConsumerState<CompactBottomBar> {
       onPressed: () => _onToolPressed(tool),
       onPanelTap: hasPanel ? () => _onPanelTap(tool) : null,
       hasPanel: hasPanel,
-      customIcon: isPenGroup && penTools.contains(currentTool)
-          ? ToolButton.getIconForTool(currentTool)
-          : isHighlighterGroup && highlighterTools.contains(currentTool)
-              ? ToolButton.getIconForTool(currentTool)
-              : null,
+      customIcon: customIcon,
     );
   }
 
@@ -134,6 +140,7 @@ class _CompactBottomBarState extends ConsumerState<CompactBottomBar> {
     final result = <ToolType>[];
     bool penAdded = false;
     bool highlighterAdded = false;
+    bool eraserAdded = false;
 
     for (final tool in visibleTools) {
       if (penTools.contains(tool)) {
@@ -150,6 +157,13 @@ class _CompactBottomBarState extends ConsumerState<CompactBottomBar> {
               : ToolType.highlighter);
           highlighterAdded = true;
         }
+      } else if (eraserTools.contains(tool)) {
+        if (!eraserAdded) {
+          result.add(eraserTools.contains(currentTool)
+              ? currentTool
+              : ToolType.pixelEraser);
+          eraserAdded = true;
+        }
       } else {
         result.add(tool);
       }
@@ -159,8 +173,9 @@ class _CompactBottomBarState extends ConsumerState<CompactBottomBar> {
 
   /// Handle tool button press.
   void _onToolPressed(ToolType tool) {
-    // Cancel sticker placement if active
+    // Cancel sticker/image placement if active
     ref.read(stickerPlacementProvider.notifier).cancel();
+    ref.read(imagePlacementProvider.notifier).cancel();
 
     final currentTool = ref.read(currentToolProvider);
     if (isToolSelected(tool, currentTool)) {

@@ -17,6 +17,13 @@ const List<ToolType> highlighterTools = [
   ToolType.neonHighlighter,
 ];
 
+/// Eraser tool types (grouped as one button in toolbar).
+const List<ToolType> eraserTools = [
+  ToolType.pixelEraser,
+  ToolType.strokeEraser,
+  ToolType.lassoEraser,
+];
+
 /// Tools that have a settings panel.
 const Set<ToolType> toolsWithPanel = {
   ToolType.pencil,
@@ -52,4 +59,11 @@ const Set<ToolType> penToolsSet = {
 const Set<ToolType> highlighterToolsSet = {
   ToolType.highlighter,
   ToolType.neonHighlighter,
+};
+
+/// Eraser tools as a Set (for anchor resolution in panels).
+const Set<ToolType> eraserToolsSet = {
+  ToolType.pixelEraser,
+  ToolType.strokeEraser,
+  ToolType.lassoEraser,
 };

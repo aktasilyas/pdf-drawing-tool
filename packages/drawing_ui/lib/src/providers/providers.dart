@@ -39,3 +39,4 @@ export 'canvas_dark_mode_provider.dart';
 export 'reader_mode_provider.dart';
 export 'pen_picker_mode_provider.dart';
 export 'sticker_provider.dart';
+export 'image_provider.dart';

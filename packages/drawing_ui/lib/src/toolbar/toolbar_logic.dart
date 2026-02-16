@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/drawing_providers.dart';
 import 'package:drawing_ui/src/providers/sticker_provider.dart';
+import 'package:drawing_ui/src/providers/image_provider.dart';
 import 'package:drawing_ui/src/toolbar/tool_groups.dart';
 
 /// Groups visible tools, collapsing pen and highlighter variants into a single
@@ -14,7 +15,7 @@ List<ToolType> getGroupedVisibleTools(
     ToolbarConfig config, ToolType currentTool) {
   final visibleTools = config.visibleTools.map((tc) => tc.toolType).toList();
   final result = <ToolType>[];
-  bool penAdded = false, highlighterAdded = false;
+  bool penAdded = false, highlighterAdded = false, eraserAdded = false;
   for (final tool in visibleTools) {
     if (penTools.contains(tool)) {
       if (!penAdded) {
@@ -29,6 +30,13 @@ List<ToolType> getGroupedVisibleTools(
             ? currentTool
             : ToolType.highlighter);
         highlighterAdded = true;
+      }
+    } else if (eraserTools.contains(tool)) {
+      if (!eraserAdded) {
+        result.add(eraserTools.contains(currentTool)
+            ? currentTool
+            : ToolType.pixelEraser);
+        eraserAdded = true;
       }
     } else {
       result.add(tool);
@@ -47,6 +55,9 @@ bool isToolSelected(ToolType tool, ToolType currentTool) {
       highlighterTools.contains(currentTool)) {
     return true;
   }
+  if (eraserTools.contains(tool) && eraserTools.contains(currentTool)) {
+    return true;
+  }
   return tool == currentTool;
 }
 
@@ -56,8 +67,9 @@ bool isToolSelected(ToolType tool, ToolType currentTool) {
 /// - **First click** (tool not selected): select the tool, close any panel.
 /// - **Second click** (tool already selected): toggle the settings panel.
 void handleToolPressed(WidgetRef ref, ToolType tool) {
-  // Cancel sticker placement if active
+  // Cancel sticker/image placement if active
   ref.read(stickerPlacementProvider.notifier).cancel();
+  ref.read(imagePlacementProvider.notifier).cancel();
 
   final currentTool = ref.read(currentToolProvider);
   final activePanel = ref.read(activePanelProvider);

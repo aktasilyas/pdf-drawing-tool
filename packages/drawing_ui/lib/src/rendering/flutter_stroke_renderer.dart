@@ -36,6 +36,53 @@ class FlutterStrokeRenderer {
     }
   }
 
+  /// Renders a stroke while skipping [excludedSegments].
+  ///
+  /// A segment at index `i` connects `points[i]` to `points[i+1]`.
+  /// Excluded segments are visually removed, splitting the stroke into
+  /// contiguous sub-paths that are each rendered separately.
+  void renderStrokeExcluding(
+    Canvas canvas,
+    Stroke stroke,
+    Set<int> excludedSegments,
+  ) {
+    if (stroke.isEmpty) return;
+    if (excludedSegments.isEmpty) {
+      renderStroke(canvas, stroke);
+      return;
+    }
+
+    final points = stroke.points;
+    final style = stroke.style;
+    var paint = _createPaint(style);
+    paint = _buildPaintWithGlow(style, paint);
+    final totalSegments = points.length - 1;
+
+    int i = 0;
+    while (i < totalSegments) {
+      // Skip excluded segments
+      if (excludedSegments.contains(i)) {
+        i++;
+        continue;
+      }
+
+      // Collect contiguous non-excluded range
+      final rangeStart = i;
+      while (i < totalSegments && !excludedSegments.contains(i)) {
+        i++;
+      }
+
+      // Render points[rangeStart..i] as a sub-stroke
+      final subPoints = points.sublist(rangeStart, i + 1);
+      var path = _createPath(subPoints, style);
+      if (style.pattern != StrokePattern.solid &&
+          style.dashPattern != null) {
+        path = _createDashedPath(path, style.dashPattern!);
+      }
+      canvas.drawPath(path, paint);
+    }
+  }
+
   /// Renders an active (incomplete) stroke being drawn.
   ///
   /// This is used for live preview while the user is drawing.
