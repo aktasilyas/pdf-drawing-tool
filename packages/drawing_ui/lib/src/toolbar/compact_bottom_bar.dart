@@ -159,6 +159,9 @@ class _CompactBottomBarState extends ConsumerState<CompactBottomBar> {
 
   /// Handle tool button press.
   void _onToolPressed(ToolType tool) {
+    // Cancel sticker placement if active
+    ref.read(stickerPlacementProvider.notifier).cancel();
+
     final currentTool = ref.read(currentToolProvider);
     if (isToolSelected(tool, currentTool)) {
       // Already selected — open panel (bottom sheet) if it has one

@@ -38,15 +38,20 @@ class EditorScreen extends ConsumerWidget {
         ),
       ),
       data: (document) {
-        // Initialize document on EVERY load (not just first time)
+        // Initialize document ONLY on first load (not on every rebuild)
+        // Rebuilds happen on keyboard show/hide, MediaQuery changes, etc.
+        // Re-initializing would overwrite in-memory changes (texts, strokes)
         WidgetsBinding.instance.addPostFrameCallback((_) {
+          final currentDoc = ref.read(documentProvider);
+          if (currentDoc.id == document.id) return; // Already loaded
+
           ref.read(documentProvider.notifier).updateDocument(document);
           ref.read(currentDocumentProvider.notifier).state = document;
           ref.read(pageManagerProvider.notifier).initializeFromDocument(
             document.pages,
             currentIndex: document.currentPageIndex,
           );
-          
+
           // Initialize canvas transform for limited mode (notebook/notepad)
           final canvasMode = document.canvasMode;
           if (!canvasMode.isInfinite) {
@@ -54,7 +59,7 @@ class EditorScreen extends ConsumerWidget {
             final currentPage = document.currentPage;
             if (currentPage != null) {
               final pageSize = Size(currentPage.size.width, currentPage.size.height);
-              
+
               ref.read(canvasTransformProvider.notifier).initializeForPage(
                 viewportSize: screenSize,
                 pageSize: pageSize,

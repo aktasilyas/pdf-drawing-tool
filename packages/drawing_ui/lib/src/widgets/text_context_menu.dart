@@ -9,9 +9,9 @@ class TextContextMenu extends ConsumerWidget {
   final TextElement textElement;
   final double zoom;
   final Offset canvasOffset;
-  final VoidCallback onEdit;
+  final VoidCallback? onEdit;
   final VoidCallback onDelete;
-  final VoidCallback onStyle;
+  final VoidCallback? onStyle;
   final VoidCallback onDuplicate;
   final VoidCallback onMove;
 
@@ -20,9 +20,9 @@ class TextContextMenu extends ConsumerWidget {
     required this.textElement,
     required this.zoom,
     required this.canvasOffset,
-    required this.onEdit,
+    this.onEdit,
     required this.onDelete,
-    required this.onStyle,
+    this.onStyle,
     required this.onDuplicate,
     required this.onMove,
   });
@@ -60,24 +60,28 @@ class TextContextMenu extends ConsumerWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _MenuButton(
-                  icon: StarNoteIcons.editPencil,
-                  tooltip: 'Düzenle',
-                  onTap: onEdit,
-                ),
-                const _MenuDivider(),
+                if (onEdit != null) ...[
+                  _MenuButton(
+                    icon: StarNoteIcons.editPencil,
+                    tooltip: 'Düzenle',
+                    onTap: onEdit!,
+                  ),
+                  const _MenuDivider(),
+                ],
                 _MenuButton(
                   icon: StarNoteIcons.trash,
                   tooltip: 'Sil',
                   onTap: onDelete,
                   color: Colors.red,
                 ),
-                const _MenuDivider(),
-                _MenuButton(
-                  icon: StarNoteIcons.palette,
-                  tooltip: 'Stil',
-                  onTap: onStyle,
-                ),
+                if (onStyle != null) ...[
+                  const _MenuDivider(),
+                  _MenuButton(
+                    icon: StarNoteIcons.palette,
+                    tooltip: 'Stil',
+                    onTap: onStyle!,
+                  ),
+                ],
                 const _MenuDivider(),
                 _MenuButton(
                   icon: StarNoteIcons.copy,

@@ -12,6 +12,9 @@ class TextStylePopup extends StatefulWidget {
   final ValueChanged<TextElement> onStyleChanged;
   final VoidCallback onClose;
 
+  /// When true, only shows size slider (for emoji/sticker editing).
+  final bool stickerMode;
+
   const TextStylePopup({
     super.key,
     required this.textElement,
@@ -19,6 +22,7 @@ class TextStylePopup extends StatefulWidget {
     required this.canvasOffset,
     required this.onStyleChanged,
     required this.onClose,
+    this.stickerMode = false,
   });
 
   @override
@@ -92,9 +96,9 @@ class _TextStylePopupState extends State<TextStylePopup> {
                   padding: const EdgeInsets.fromLTRB(16, 12, 8, 8),
                   child: Row(
                     children: [
-                      const Text(
-                        'Metin Stili',
-                        style: TextStyle(
+                      Text(
+                        widget.stickerMode ? 'Emoji Boyutu' : 'Metin Stili',
+                        style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
@@ -109,29 +113,30 @@ class _TextStylePopupState extends State<TextStylePopup> {
                 ),
                 const Divider(height: 1),
 
-                // Color Section
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Renk',
-                        style: TextStyle(fontSize: 12, color: Color(0xFF666666)),
-                      ),
-                      const SizedBox(height: 8),
-                      UnifiedColorPicker(
-                        selectedColor: _selectedColor,
-                        onColorSelected: (color) {
-                          setState(() => _selectedColor = color);
-                          _updateStyle();
-                        },
-                        chipSize: 28,
-                        spacing: 8,
-                      ),
-                    ],
+                // Color Section (hidden in sticker mode)
+                if (!widget.stickerMode)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Renk',
+                          style: TextStyle(fontSize: 12, color: Color(0xFF666666)),
+                        ),
+                        const SizedBox(height: 8),
+                        UnifiedColorPicker(
+                          selectedColor: _selectedColor,
+                          onColorSelected: (color) {
+                            setState(() => _selectedColor = color);
+                            _updateStyle();
+                          },
+                          chipSize: 28,
+                          spacing: 8,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
 
                 // Font Size Section
                 Padding(
@@ -161,8 +166,8 @@ class _TextStylePopupState extends State<TextStylePopup> {
                         ),
                         child: Slider(
                           value: _fontSize,
-                          min: 8,
-                          max: 72,
+                          min: widget.stickerMode ? 24 : 8,
+                          max: widget.stickerMode ? 200 : 72,
                           onChanged: (value) {
                             setState(() => _fontSize = value);
                             _updateStyle();
@@ -173,7 +178,8 @@ class _TextStylePopupState extends State<TextStylePopup> {
                   ),
                 ),
 
-                // Style Buttons Section
+                // Style Buttons Section (hidden in sticker mode)
+                if (!widget.stickerMode)
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
                   child: Column(

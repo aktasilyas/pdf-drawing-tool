@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/drawing_providers.dart';
+import 'package:drawing_ui/src/providers/sticker_provider.dart';
 import 'package:drawing_ui/src/toolbar/tool_groups.dart';
 
 /// Groups visible tools, collapsing pen and highlighter variants into a single
@@ -55,6 +56,9 @@ bool isToolSelected(ToolType tool, ToolType currentTool) {
 /// - **First click** (tool not selected): select the tool, close any panel.
 /// - **Second click** (tool already selected): toggle the settings panel.
 void handleToolPressed(WidgetRef ref, ToolType tool) {
+  // Cancel sticker placement if active
+  ref.read(stickerPlacementProvider.notifier).cancel();
+
   final currentTool = ref.read(currentToolProvider);
   final activePanel = ref.read(activePanelProvider);
   final alreadySelected = isToolSelected(tool, currentTool);

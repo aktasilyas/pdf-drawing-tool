@@ -86,6 +86,25 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       return;
     }
 
+    // Handle text move mode regardless of current tool
+    if (textToolState.isMoving) {
+      final transform = ref.read(canvasTransformProvider);
+      final canvasPoint =
+          (event.localPosition - transform.offset) / transform.zoom;
+      moveTextTo(canvasPoint.dx, canvasPoint.dy);
+      return;
+    }
+
+    // Close text context menu/style popup if showing
+    if (textToolState.showMenu) {
+      ref.read(textToolProvider.notifier).hideContextMenu();
+      return;
+    }
+    if (textToolState.showStylePopup) {
+      ref.read(textToolProvider.notifier).hideStylePopup();
+      return;
+    }
+
     // Check if selection tool is active
     final isSelectionTool = ref.read(isSelectionToolProvider);
     if (isSelectionTool) {
@@ -117,6 +136,28 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       if (!isPointInSelection(canvasPoint, selection)) {
         ref.read(selectionProvider.notifier).clearSelection();
       }
+    }
+
+    // Check if sticker placement mode is active
+    final stickerState = ref.read(stickerPlacementProvider);
+    if (stickerState.isPlacing) {
+      _handleStickerPlacement(event);
+      return;
+    }
+
+    // Sticker tool selected (no placement) — tap on existing text shows menu
+    if (toolType == ToolType.sticker) {
+      final transform = ref.read(canvasTransformProvider);
+      final canvasPoint =
+          (event.localPosition - transform.offset) / transform.zoom;
+      final texts = ref.read(activeLayerTextsProvider);
+      for (final text in texts.reversed) {
+        if (text.containsPoint(canvasPoint.dx, canvasPoint.dy, 10)) {
+          ref.read(textToolProvider.notifier).showContextMenu(text);
+          return;
+        }
+      }
+      return; // Sticker tool does nothing on empty area without placement
     }
 
     // Check if eraser is active
@@ -151,6 +192,20 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     if (toolType == ToolType.rulerPen) {
       handleStraightLineDown(event);
       return;
+    }
+
+    // Check if tap is on an existing text/sticker — show context menu
+    {
+      final transform = ref.read(canvasTransformProvider);
+      final canvasPoint =
+          (event.localPosition - transform.offset) / transform.zoom;
+      final texts = ref.read(activeLayerTextsProvider);
+      for (final text in texts.reversed) {
+        if (text.containsPoint(canvasPoint.dx, canvasPoint.dy, 10)) {
+          ref.read(textToolProvider.notifier).showContextMenu(text);
+          return;
+        }
+      }
     }
 
     // Drawing mode
@@ -1066,6 +1121,64 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       ref.read(historyManagerProvider.notifier).execute(command);
       ref.read(textToolProvider.notifier).cancelMoving();
     }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // STICKER PLACEMENT
+  // ─────────────────────────────────────────────────────────────────────────
+
+  void _handleStickerPlacement(PointerDownEvent event) {
+    final stickerState = ref.read(stickerPlacementProvider);
+    final emoji = stickerState.selectedEmoji;
+    if (emoji == null) return;
+
+    final textToolState = ref.read(textToolProvider);
+
+    // If context menu is showing, close it
+    if (textToolState.showMenu) {
+      ref.read(textToolProvider.notifier).hideContextMenu();
+      return;
+    }
+
+    // If style popup is showing, close it
+    if (textToolState.showStylePopup) {
+      ref.read(textToolProvider.notifier).hideStylePopup();
+      return;
+    }
+
+    final transform = ref.read(canvasTransformProvider);
+    final canvasPoint =
+        (event.localPosition - transform.offset) / transform.zoom;
+
+    // If text move mode is active, move the element
+    if (textToolState.isMoving) {
+      moveTextTo(canvasPoint.dx, canvasPoint.dy);
+      return;
+    }
+
+    // Check if tap is on an existing text/sticker — show context menu
+    final texts = ref.read(activeLayerTextsProvider);
+    for (final text in texts.reversed) {
+      if (text.containsPoint(canvasPoint.dx, canvasPoint.dy, 10)) {
+        ref.read(textToolProvider.notifier).showContextMenu(text);
+        return;
+      }
+    }
+
+    // Empty area — place new sticker
+    final textElement = core.TextElement.create(
+      text: emoji,
+      x: canvasPoint.dx,
+      y: canvasPoint.dy,
+      fontSize: 48,
+    );
+
+    final document = ref.read(documentProvider);
+    final command = core.AddTextCommand(
+      layerIndex: document.activeLayerIndex,
+      textElement: textElement,
+    );
+    ref.read(historyManagerProvider.notifier).execute(command);
   }
 
   // ─────────────────────────────────────────────────────────────────────────
