@@ -6,7 +6,9 @@ import 'package:drawing_ui/src/canvas/stroke_painter.dart';
 import 'package:drawing_ui/src/canvas/selection_painter.dart';
 import 'package:drawing_ui/src/canvas/shape_painter.dart';
 import 'package:drawing_ui/src/canvas/text_painter.dart';
-import 'package:drawing_ui/src/canvas/pixel_eraser_preview_painter.dart';
+import 'package:drawing_ui/src/canvas/image_painter.dart';
+import 'package:drawing_ui/src/canvas/image_resize_handles.dart';
+import 'package:drawing_ui/src/canvas/selected_elements_painter.dart';
 import 'package:drawing_ui/src/canvas/page_background_painter.dart';
 import 'package:drawing_ui/src/canvas/drawing_canvas_helpers.dart';
 import 'package:drawing_ui/src/canvas/drawing_canvas_gesture_handlers.dart';
@@ -24,6 +26,8 @@ import 'package:drawing_ui/src/providers/drawing_providers.dart';
 import 'package:drawing_ui/src/providers/pdf_render_provider.dart';
 import 'package:drawing_ui/src/providers/canvas_dark_mode_provider.dart';
 import 'package:drawing_ui/src/providers/sticker_provider.dart';
+import 'package:drawing_ui/src/providers/image_provider.dart';
+import 'package:drawing_ui/src/providers/history_provider.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
 import 'package:drawing_ui/src/widgets/widgets.dart';
@@ -161,6 +165,9 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
   /// Text IDs erased in current gesture session.
   final Set<String> _erasedTextIds = {};
 
+  /// Image IDs erased in current gesture session.
+  final Set<String> _erasedImageIds = {};
+
   // ─────────────────────────────────────────────────────────────────────────
   // PIXEL ERASER TRACKING
   // ─────────────────────────────────────────────────────────────────────────
@@ -174,6 +181,9 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
   // ─────────────────────────────────────────────────────────────────────────
   // INITIALIZATION TRACKING
   // ─────────────────────────────────────────────────────────────────────────
+
+  /// Image cache manager for decoded ui.Image objects.
+  final ImageCacheManager _imageCacheManager = ImageCacheManager();
 
   /// Whether canvas has been initialized for limited mode.
   bool _hasInitialized = false;
@@ -213,7 +223,65 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
   @override
   void dispose() {
     _drawingController.dispose();
+    _imageCacheManager.dispose();
     super.dispose();
+  }
+
+  void _handleSelectionDelete(core.Selection selection) {
+    final document = ref.read(documentProvider);
+    final command = core.DeleteSelectionCommand(
+      layerIndex: document.activeLayerIndex,
+      strokeIds: selection.selectedStrokeIds,
+      shapeIds: selection.selectedShapeIds,
+    );
+    ref.read(historyManagerProvider.notifier).execute(command);
+    ref.read(selectionProvider.notifier).clearSelection();
+    ref.read(selectionUiProvider.notifier).reset();
+  }
+
+  void _handleSelectionDuplicate(core.Selection selection) {
+    final document = ref.read(documentProvider);
+    final command = core.DuplicateSelectionCommand(
+      layerIndex: document.activeLayerIndex,
+      strokeIds: selection.selectedStrokeIds,
+      shapeIds: selection.selectedShapeIds,
+    );
+    ref.read(historyManagerProvider.notifier).execute(command);
+    ref.read(selectionUiProvider.notifier).reset();
+    ref.read(selectionProvider.notifier).clearSelection();
+  }
+
+  void _handleSelectionColorChange(core.Selection selection, Color color) {
+    if (selection.selectedStrokeIds.isEmpty) return;
+    final document = ref.read(documentProvider);
+    final command = core.ChangeSelectionStyleCommand(
+      layerIndex: document.activeLayerIndex,
+      strokeIds: selection.selectedStrokeIds,
+      newColor: color.toARGB32(),
+    );
+    ref.read(historyManagerProvider.notifier).execute(command);
+    ref.read(selectionUiProvider.notifier).hideContextMenu();
+  }
+
+  Widget _imageMenuButton(
+      PhosphorIconData icon, String tooltip, VoidCallback onTap, Color? color) {
+    return Tooltip(
+      message: tooltip,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          width: 40,
+          height: 40,
+          alignment: Alignment.center,
+          child: PhosphorIcon(icon, size: 20, color: color ?? Colors.black87),
+        ),
+      ),
+    );
+  }
+
+  Widget _imageMenuDivider() {
+    return Container(width: 1, height: 24, color: Colors.grey[300]);
   }
 
   /// Initialize canvas transform for limited mode (page centering).
@@ -516,6 +584,9 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
   Set<String> get erasedTextIds => _erasedTextIds;
 
   @override
+  Set<String> get erasedImageIds => _erasedImageIds;
+
+  @override
   Map<String, List<int>> get pixelEraseHits => _pixelEraseHits;
 
   @override
@@ -543,6 +614,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
     final currentTool = ref.watch(currentToolProvider);
     final transform = ref.watch(canvasTransformProvider);
     final selection = ref.watch(selectionProvider);
+    final selectionUi = ref.watch(selectionUiProvider);
     final textToolState = ref.watch(textToolProvider);
 
     // Canvas mode configuration
@@ -579,6 +651,25 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
       selectionPreviewPath = ref.read(activeSelectionToolProvider).currentPath;
     }
 
+    // Compute excluded IDs + selected elements for live transform
+    final hasLiveTransform = selectionUi.hasTransform;
+    Set<String> excludedStrokeIds = const {};
+    Set<String> excludedShapeIds = const {};
+    List<core.Stroke> selectedStrokes = const [];
+    List<core.Shape> selectedShapes = const [];
+
+    if (selection != null && hasLiveTransform) {
+      excludedStrokeIds = selection.selectedStrokeIds.toSet();
+      excludedShapeIds = selection.selectedShapeIds.toSet();
+
+      selectedStrokes = strokes
+          .where((s) => excludedStrokeIds.contains(s.id))
+          .toList();
+      selectedShapes = shapes
+          .where((s) => excludedShapeIds.contains(s.id))
+          .toList();
+    }
+
     // Shape preview
     core.Shape? previewShape;
     if (_isDrawingShape && _activeShapeTool != null) {
@@ -595,15 +686,21 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
       straightLinePreviewStyle = _straightLineStyle;
     }
 
+    // Watch images for active layer
+    final images = ref.watch(activeLayerImagesProvider);
+
     // Enable pointer events for drawing tools, selection tool, shape tool, text tool,
-    // and sticker placement mode.
+    // sticker placement mode, image tool, and image placement mode.
     // In read-only mode, all drawing pointer events are disabled (pan/zoom still works)
     final isTextTool = currentTool == ToolType.text;
     final isStickerTool = currentTool == ToolType.sticker;
+    final isImageTool = currentTool == ToolType.image;
     final isStickerPlacing = ref.watch(stickerPlacementProvider).isPlacing;
+    final isImagePlacing = ref.watch(imagePlacementProvider).isPlacing;
     final enablePointerEvents = !widget.isReadOnly &&
         (isDrawingTool || isSelectionTool || isShapeTool || isTextTool ||
-            isStickerTool || isStickerPlacing);
+            isStickerTool || isStickerPlacing ||
+            isImageTool || isImagePlacing);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -766,7 +863,32 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                           ],
 
                           // ─────────────────────────────────────────────────────────
-                          // LAYER 1: Committed Strokes (from DocumentProvider)
+                          // LAYER 1: Committed Images (below strokes)
+                          // ─────────────────────────────────────────────────────────
+                          if (images.isNotEmpty)
+                            Consumer(
+                              builder: (context, ref, _) {
+                                final liveImage = ref.watch(
+                                  imagePlacementProvider
+                                      .select((s) => s.selectedImage),
+                                );
+                                return RepaintBoundary(
+                                  child: CustomPaint(
+                                    size: size,
+                                    painter: ImageElementPainter(
+                                      images: images,
+                                      cacheManager: _imageCacheManager,
+                                      overrideImage: liveImage,
+                                    ),
+                                    isComplex: true,
+                                    willChange: liveImage != null,
+                                  ),
+                                );
+                              },
+                            ),
+
+                          // ─────────────────────────────────────────────────────────
+                          // LAYER 2: Committed Strokes (from DocumentProvider)
                           // ─────────────────────────────────────────────────────────
                           // Repaints when strokes are added/removed via provider
                           RepaintBoundary(
@@ -775,14 +897,16 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                               painter: CommittedStrokesPainter(
                                 strokes: strokes,
                                 renderer: _renderer,
+                                excludedSegments: pixelEraserPreview,
+                                excludedStrokeIds: excludedStrokeIds,
                               ),
                               isComplex: true,
-                              willChange: false,
+                              willChange: pixelEraserPreview.isNotEmpty || hasLiveTransform,
                             ),
                           ),
 
                           // ─────────────────────────────────────────────────────────
-                          // LAYER 2: Committed Shapes + Preview Shape
+                          // LAYER 3: Committed Shapes + Preview Shape
                           // ─────────────────────────────────────────────────────────
                           RepaintBoundary(
                             child: CustomPaint(
@@ -790,9 +914,10 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                               painter: ShapePainter(
                                 shapes: shapes,
                                 activeShape: previewShape,
+                                excludedShapeIds: excludedShapeIds,
                               ),
                               isComplex: true,
-                              willChange: previewShape != null,
+                              willChange: previewShape != null || hasLiveTransform,
                             ),
                           ),
 
@@ -865,6 +990,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                                 selection: selection,
                                 previewPath: selectionPreviewPath,
                                 zoom: transform.zoom,
+                                hasLiveTransform: hasLiveTransform,
                               ),
                               isComplex: false,
                               willChange: true,
@@ -872,17 +998,22 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                           ),
 
                           // ─────────────────────────────────────────────────────────
-                          // LAYER 7: Pixel Eraser Preview
+                          // LAYER 7: Selected Elements with Live Transform
                           // ─────────────────────────────────────────────────────────
-                          if (pixelEraserPreview.isNotEmpty)
+                          if (hasLiveTransform && selection != null)
                             RepaintBoundary(
                               child: CustomPaint(
                                 size: size,
-                                painter: PixelEraserPreviewPainter(
-                                  strokes: strokes,
-                                  affectedSegments: pixelEraserPreview,
+                                painter: SelectedElementsPainter(
+                                  selectedStrokes: selectedStrokes,
+                                  selectedShapes: selectedShapes,
+                                  moveDelta: selectionUi.moveDelta,
+                                  rotation: selectionUi.rotation,
+                                  centerX: (selection.bounds.left + selection.bounds.right) / 2,
+                                  centerY: (selection.bounds.top + selection.bounds.bottom) / 2,
+                                  renderer: _renderer,
                                 ),
-                                isComplex: false,
+                                isComplex: true,
                                 willChange: true,
                               ),
                             ),
@@ -895,6 +1026,20 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                               selection: selection,
                               onSelectionChanged: () => setState(() {}),
                             ),
+
+                          // ─────────────────────────────────────────────────────────
+                          // LAYER 9: Image Resize Handles
+                          // ─────────────────────────────────────────────────────────
+                          Builder(
+                            builder: (context) {
+                              final imgState = ref.watch(imagePlacementProvider);
+                              final selected = imgState.selectedImage;
+                              if (selected == null || imgState.isMoving) {
+                                return const SizedBox.shrink();
+                              }
+                              return ImageResizeHandles(image: selected);
+                            },
+                          ),
                         ],
                       ),
                     ),
@@ -917,6 +1062,84 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                 onDuplicate: handleTextDuplicate,
                 onMove: handleTextMove,
               ),
+
+            // ───────────────────────────────────────────────────────────────────
+            // Selection Context Menu (delete/copy/style)
+            // ───────────────────────────────────────────────────────────────────
+            if (selectionUi.showMenu && selection != null)
+              Builder(
+                builder: (context) {
+                  final centerX = (selection.bounds.left + selection.bounds.right) / 2 *
+                          transform.zoom +
+                      transform.offset.dx;
+                  final screenY = selection.bounds.top * transform.zoom +
+                      transform.offset.dy -
+                      50;
+                  return _SelectionContextMenu(
+                    left: centerX,
+                    top: screenY,
+                    onDelete: () => _handleSelectionDelete(selection),
+                    onDuplicate: () => _handleSelectionDuplicate(selection),
+                    onStyleColor: (color) => _handleSelectionColorChange(selection, color),
+                  );
+                },
+              ),
+
+            // ───────────────────────────────────────────────────────────────────
+            // Image Context Menu (delete/duplicate/move only, no edit/style)
+            // ───────────────────────────────────────────────────────────────────
+            Builder(
+              builder: (context) {
+                final imgState = ref.watch(imagePlacementProvider);
+                if (!imgState.showMenu || imgState.selectedImage == null) {
+                  return const SizedBox.shrink();
+                }
+                final mi = imgState.selectedImage!;
+                // Center menu above image
+                final centerX = (mi.x + mi.width / 2) * transform.zoom +
+                    transform.offset.dx;
+                final screenY = mi.y * transform.zoom + transform.offset.dy - 50;
+                const menuWidth = 81.0; // 40 + 1 + 40
+                return Positioned(
+                  left: centerX - menuWidth / 2,
+                  top: screenY,
+                  child: Listener(
+                    behavior: HitTestBehavior.opaque,
+                    onPointerDown: (_) {},
+                    child: Material(
+                      color: Colors.transparent,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.2),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _imageMenuButton(
+                              StarNoteIcons.trash, 'Sil',
+                              handleImageDelete, Colors.red,
+                            ),
+                            _imageMenuDivider(),
+                            _imageMenuButton(
+                              StarNoteIcons.copy, 'Kopyala',
+                              handleImageDuplicate, null,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
 
             // ───────────────────────────────────────────────────────────────────
             // Text Input Overlay (must be outside gesture handlers)
@@ -1002,6 +1225,65 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
               ),
 
             // ───────────────────────────────────────────────────────────────────
+            // Image Move Mode Indicator
+            // ───────────────────────────────────────────────────────────────────
+            Builder(
+              builder: (context) {
+                final imgState = ref.watch(imagePlacementProvider);
+                if (!imgState.isMoving) return const SizedBox.shrink();
+                return Positioned(
+                  top: 60,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.2),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          PhosphorIcon(StarNoteIcons.touchApp,
+                              color: Colors.white, size: 18),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'Tasimak icin bir yere dokunun',
+                            style: TextStyle(color: Colors.white, fontSize: 14),
+                          ),
+                          const SizedBox(width: 12),
+                          GestureDetector(
+                            onTap: () => ref
+                                .read(imagePlacementProvider.notifier)
+                                .cancelMoving(),
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const PhosphorIcon(StarNoteIcons.close,
+                                  color: Colors.white, size: 16),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+
+            // ───────────────────────────────────────────────────────────────────
             // Sticker Placement Mode Indicator
             // ───────────────────────────────────────────────────────────────────
             Builder(
@@ -1065,6 +1347,68 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
             ),
 
             // ───────────────────────────────────────────────────────────────────
+            // Image Placement Mode Indicator
+            // ───────────────────────────────────────────────────────────────────
+            Builder(
+              builder: (context) {
+                final imageState = ref.watch(imagePlacementProvider);
+                if (!imageState.isPlacing) {
+                  return const SizedBox.shrink();
+                }
+                return Positioned(
+                  top: 60,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.2),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          PhosphorIcon(StarNoteIcons.image,
+                              color: Colors.white, size: 18),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'Resmi yerlesirmek icin dokunun',
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 14),
+                          ),
+                          const SizedBox(width: 12),
+                          GestureDetector(
+                            onTap: () => ref
+                                .read(imagePlacementProvider.notifier)
+                                .cancel(),
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.close,
+                                  color: Colors.white, size: 16),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+
+            // ───────────────────────────────────────────────────────────────────
             // Eraser Cursor Overlay (using screen coordinates)
             // ───────────────────────────────────────────────────────────────────
             if (isEraserTool)
@@ -1076,6 +1420,141 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
           ],
         );
       },
+    );
+  }
+}
+
+// =============================================================================
+// SELECTION CONTEXT MENU
+// =============================================================================
+
+/// Floating context menu for selection actions (delete, copy, style).
+class _SelectionContextMenu extends StatelessWidget {
+  final double left;
+  final double top;
+  final VoidCallback onDelete;
+  final VoidCallback onDuplicate;
+  final ValueChanged<Color> onStyleColor;
+
+  static const _quickColors = [
+    Color(0xFF000000),
+    Color(0xFFE53935),
+    Color(0xFF1E88E5),
+    Color(0xFF43A047),
+    Color(0xFFFB8C00),
+    Color(0xFF8E24AA),
+  ];
+
+  const _SelectionContextMenu({
+    required this.left,
+    required this.top,
+    required this.onDelete,
+    required this.onDuplicate,
+    required this.onStyleColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      left: left - 100,
+      top: top,
+      child: Listener(
+        behavior: HitTestBehavior.opaque,
+        onPointerDown: (_) {},
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _menuButton(
+                      StarNoteIcons.trash,
+                      'Sil',
+                      onDelete,
+                      Colors.red,
+                    ),
+                    _divider(),
+                    _menuButton(
+                      StarNoteIcons.copy,
+                      'Kopyala',
+                      onDuplicate,
+                      null,
+                    ),
+                  ],
+                ),
+                // Quick color row
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 4,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: _quickColors
+                        .map((c) => _colorDot(c))
+                        .toList(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _menuButton(
+    PhosphorIconData icon,
+    String tooltip,
+    VoidCallback onTap,
+    Color? color,
+  ) {
+    return Tooltip(
+      message: tooltip,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          width: 40,
+          height: 40,
+          alignment: Alignment.center,
+          child: PhosphorIcon(icon, size: 20, color: color ?? Colors.black87),
+        ),
+      ),
+    );
+  }
+
+  Widget _divider() {
+    return Container(width: 1, height: 24, color: Colors.grey[300]);
+  }
+
+  Widget _colorDot(Color color) {
+    return GestureDetector(
+      onTap: () => onStyleColor(color),
+      child: Container(
+        width: 24,
+        height: 24,
+        margin: const EdgeInsets.symmetric(horizontal: 2),
+        decoration: BoxDecoration(
+          color: color,
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.grey[300]!, width: 1),
+        ),
+      ),
     );
   }
 }

@@ -99,7 +99,6 @@ void main() {
 
     testWidgets('accepts optional callbacks', (tester) async {
       bool changedCalled = false;
-      bool deletedCalled = false;
 
       await tester.pumpWidget(
         ProviderScope(
@@ -108,7 +107,6 @@ void main() {
               body: SelectionHandles(
                 selection: testSelection,
                 onSelectionChanged: () => changedCalled = true,
-                onSelectionDeleted: () => deletedCalled = true,
               ),
             ),
           ),
@@ -120,10 +118,8 @@ void main() {
       );
 
       expect(widget.onSelectionChanged, isNotNull);
-      expect(widget.onSelectionDeleted, isNotNull);
-      // Callbacks not called yet (just testing presence)
+      // Callback not called yet (just testing presence)
       expect(changedCalled, isFalse);
-      expect(deletedCalled, isFalse);
     });
   });
 

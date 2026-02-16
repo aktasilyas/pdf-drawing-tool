@@ -18,6 +18,13 @@ class CommittedStrokesPainter extends CustomPainter {
   /// The list of completed strokes to render.
   final List<Stroke> strokes;
 
+  /// Segments to visually exclude during pixel eraser gesture.
+  /// Maps stroke ID → list of segment indices to hide.
+  final Map<String, List<int>> excludedSegments;
+
+  /// Stroke IDs to completely skip rendering (used during live selection move/rotate).
+  final Set<String> excludedStrokeIds;
+
   final FlutterStrokeRenderer _renderer;
   final int _strokeCount;
   final int _totalPointCount;
@@ -26,34 +33,55 @@ class CommittedStrokesPainter extends CustomPainter {
   ///
   /// [strokes] - The list of completed strokes to render.
   /// [renderer] - Optional renderer instance for reuse.
+  /// [excludedSegments] - Segments to visually skip (pixel eraser preview).
+  /// [excludedStrokeIds] - Stroke IDs to skip entirely (selection live transform).
   CommittedStrokesPainter({
     required this.strokes,
     FlutterStrokeRenderer? renderer,
+    this.excludedSegments = const {},
+    this.excludedStrokeIds = const {},
   })  : _renderer = renderer ?? FlutterStrokeRenderer(),
         _strokeCount = strokes.length,
         _totalPointCount = strokes.fold(0, (sum, s) => sum + s.pointCount);
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Early exit for empty strokes - avoid unnecessary work
     if (strokes.isEmpty) return;
 
-    _renderer.renderStrokes(canvas, strokes);
+    if (excludedSegments.isEmpty && excludedStrokeIds.isEmpty) {
+      _renderer.renderStrokes(canvas, strokes);
+      return;
+    }
+
+    // Render strokes, skipping excluded IDs and segments
+    for (final stroke in strokes) {
+      if (excludedStrokeIds.contains(stroke.id)) continue;
+
+      final excluded = excludedSegments[stroke.id];
+      if (excluded != null && excluded.isNotEmpty) {
+        _renderer.renderStrokeExcluding(canvas, stroke, excluded.toSet());
+      } else {
+        _renderer.renderStroke(canvas, stroke);
+      }
+    }
   }
 
   @override
   bool shouldRepaint(covariant CommittedStrokesPainter oldDelegate) {
-    // Quick check: different stroke count means definitely repaint
-    if (oldDelegate._strokeCount != _strokeCount) return true;
+    // Excluded segments changed → repaint (pixel eraser live feedback)
+    if (!identical(oldDelegate.excludedSegments, excludedSegments)) {
+      return true;
+    }
 
-    // Quick check: different total point count means definitely repaint
+    // Excluded stroke IDs changed → repaint (selection live transform)
+    if (!identical(oldDelegate.excludedStrokeIds, excludedStrokeIds)) {
+      return true;
+    }
+
+    if (oldDelegate._strokeCount != _strokeCount) return true;
     if (oldDelegate._totalPointCount != _totalPointCount) return true;
 
-    // If counts are same, check if stroke objects actually changed
-    // This handles move/transform operations where coordinates change
-    // but counts stay the same
     if (!identical(oldDelegate.strokes, strokes)) {
-      // Check if any stroke is different (using Equatable comparison)
       for (int i = 0; i < strokes.length; i++) {
         if (oldDelegate.strokes[i] != strokes[i]) {
           return true;
