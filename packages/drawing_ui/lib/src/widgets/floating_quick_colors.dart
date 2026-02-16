@@ -19,18 +19,27 @@ class FloatingQuickColors extends ConsumerWidget {
     final currentTool = ref.watch(currentToolProvider);
     final isPen = penToolsSet.contains(currentTool);
     final isHighlighter = highlighterToolsSet.contains(currentTool);
+    final isLaser = currentTool == ToolType.laserPointer;
 
-    if (!isPen && !isHighlighter) {
+    if (!isPen && !isHighlighter && !isLaser) {
       return const Positioned(left: 0, top: 0, child: SizedBox.shrink());
     }
 
-    final colors = isPen ? ColorPresets.quickAccess : ColorPresets.highlighter;
-    final currentColor = isPen
-        ? ref.watch(penSettingsProvider(currentTool)).color
-        : ref.watch(highlighterSettingsProvider).color;
-    final currentThickness = isPen
-        ? ref.watch(penSettingsProvider(currentTool)).thickness
-        : ref.watch(highlighterSettingsProvider).thickness;
+    final colors = isLaser
+        ? ColorSets.laser
+        : isPen
+            ? ColorPresets.quickAccess
+            : ColorPresets.highlighter;
+    final currentColor = isLaser
+        ? ref.watch(laserSettingsProvider).color
+        : isPen
+            ? ref.watch(penSettingsProvider(currentTool)).color
+            : ref.watch(highlighterSettingsProvider).color;
+    final currentThickness = isLaser
+        ? ref.watch(laserSettingsProvider).thickness
+        : isPen
+            ? ref.watch(penSettingsProvider(currentTool)).thickness
+            : ref.watch(highlighterSettingsProvider).thickness;
     final thicknesses = ref.watch(quickThicknessProvider);
 
     final colorScheme = Theme.of(context).colorScheme;
@@ -99,7 +108,9 @@ class FloatingQuickColors extends ConsumerWidget {
               isHighlighter: isHighlighter,
               onColorSelected: (color) {
                 // Color picker returns color with user-chosen opacity
-                if (isPen) {
+                if (isLaser) {
+                  ref.read(laserSettingsProvider.notifier).setColor(color);
+                } else if (isPen) {
                   ref.read(penSettingsProvider(currentTool).notifier)
                       .setColor(color);
                 } else {
@@ -127,7 +138,9 @@ class FloatingQuickColors extends ConsumerWidget {
   void _onThicknessTap(
     WidgetRef ref, double thickness, ToolType tool, bool isPen,
   ) {
-    if (isPen) {
+    if (tool == ToolType.laserPointer) {
+      ref.read(laserSettingsProvider.notifier).setThickness(thickness);
+    } else if (isPen) {
       ref.read(penSettingsProvider(tool).notifier).setThickness(thickness);
     } else {
       ref.read(highlighterSettingsProvider.notifier).setThickness(thickness);
@@ -137,7 +150,9 @@ class FloatingQuickColors extends ConsumerWidget {
   void _onQuickColorTap(
     WidgetRef ref, Color color, ToolType tool, bool isPen,
   ) {
-    if (isPen) {
+    if (tool == ToolType.laserPointer) {
+      ref.read(laserSettingsProvider.notifier).setColor(color);
+    } else if (isPen) {
       ref.read(penSettingsProvider(tool).notifier).setColor(color);
     } else {
       // Apply standard highlighter transparency for quick colors

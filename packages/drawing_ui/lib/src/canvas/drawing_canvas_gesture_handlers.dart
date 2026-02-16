@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
 import 'package:drawing_core/drawing_core.dart' show BackgroundType;
 import 'package:drawing_ui/src/canvas/stroke_painter.dart';
+import 'package:drawing_ui/src/canvas/laser_controller.dart';
 import 'package:drawing_ui/src/canvas/drawing_canvas_helpers.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/providers/pdf_render_provider.dart';
@@ -42,6 +43,9 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
   set lastFocalPoint(Offset? value);
   double? get lastScale;
   set lastScale(double? value);
+  LaserController get laserController;
+  bool get isLaserDrawing;
+  set isLaserDrawing(bool value);
 
   /// Minimum distance between points to avoid excessive point creation.
   static const double minPointDistance = 1.0;
@@ -223,6 +227,12 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       return; // Sticker tool does nothing on empty area without placement
     }
 
+    // Laser pointer tool
+    if (toolType == ToolType.laserPointer) {
+      handleLaserDown(event);
+      return;
+    }
+
     // Check if eraser is active
     final isEraser = ref.read(isEraserToolProvider);
     if (isEraser) {
@@ -338,6 +348,12 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       return;
     }
 
+    // Laser pointer mode
+    if (isLaserDrawing) {
+      handleLaserMove(event);
+      return;
+    }
+
     // Check if eraser is active
     final isEraser = ref.read(isEraserToolProvider);
     if (isEraser) {
@@ -379,6 +395,12 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     // Straight line mode
     if (isStraightLineDrawing) {
       handleStraightLineUp(event);
+      return;
+    }
+
+    // Laser pointer mode
+    if (isLaserDrawing) {
+      handleLaserUp(event);
       return;
     }
 
@@ -429,6 +451,13 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       straightLineStyle = null;
       isStraightLineDrawing = false;
       setState(() {});
+      return;
+    }
+
+    // Laser pointer mode
+    if (isLaserDrawing) {
+      laserController.cancelStroke();
+      isLaserDrawing = false;
       return;
     }
 
@@ -549,6 +578,49 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     isStraightLineDrawing = false;
 
     setState(() {});
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // LASER POINTER EVENT HANDLERS
+  // ─────────────────────────────────────────────────────────────────────────
+
+  void handleLaserDown(PointerDownEvent event) {
+    final transform = ref.read(canvasTransformProvider);
+    final canvasPoint = transform.screenToCanvas(event.localPosition);
+    final settings = ref.read(laserSettingsProvider);
+
+    laserController.startStroke(
+      canvasPoint,
+      color: settings.color,
+      thickness: settings.thickness,
+      mode: settings.mode,
+    );
+    isLaserDrawing = true;
+    lastPoint = event.localPosition;
+  }
+
+  void handleLaserMove(PointerMoveEvent event) {
+    // Distance filter to avoid excessive points
+    final lastPointValue = lastPoint;
+    if (lastPointValue != null) {
+      final distance = (event.localPosition - lastPointValue).distance;
+      if (distance < minPointDistance) return;
+    }
+
+    final transform = ref.read(canvasTransformProvider);
+    final canvasPoint = transform.screenToCanvas(event.localPosition);
+    laserController.addPoint(canvasPoint);
+    lastPoint = event.localPosition;
+  }
+
+  void handleLaserUp(PointerUpEvent event) {
+    final settings = ref.read(laserSettingsProvider);
+    final fadeDuration = Duration(
+      milliseconds: (settings.duration * 1000).round(),
+    );
+    laserController.endStroke(fadeDuration);
+    isLaserDrawing = false;
+    lastPoint = null;
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -1415,6 +1487,10 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     // Cancel any ongoing operations when zoom/pan starts
     if (drawingController.isDrawing) {
       drawingController.cancelStroke();
+    }
+    if (isLaserDrawing) {
+      laserController.cancelStroke();
+      isLaserDrawing = false;
     }
     if (isSelecting) {
       ref.read(activeSelectionToolProvider).cancelSelection();

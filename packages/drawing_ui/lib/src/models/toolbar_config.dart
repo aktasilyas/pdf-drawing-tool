@@ -85,6 +85,7 @@ class ToolbarConfig {
       ToolType.text,
       ToolType.sticker,
       ToolType.image,
+      ToolType.laserPointer,
     ];
 
     return ToolbarConfig(

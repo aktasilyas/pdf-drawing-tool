@@ -12,6 +12,8 @@ import 'package:drawing_ui/src/canvas/selected_elements_painter.dart';
 import 'package:drawing_ui/src/canvas/page_background_painter.dart';
 import 'package:drawing_ui/src/canvas/drawing_canvas_helpers.dart';
 import 'package:drawing_ui/src/canvas/drawing_canvas_gesture_handlers.dart';
+import 'package:drawing_ui/src/canvas/laser_controller.dart';
+import 'package:drawing_ui/src/canvas/laser_overlay_widget.dart';
 import 'package:drawing_ui/src/rendering/rendering.dart';
 import 'package:drawing_ui/src/models/tool_type.dart';
 import 'package:drawing_ui/src/providers/document_provider.dart';
@@ -94,6 +96,12 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
   /// Controller for managing active stroke state.
   /// Uses ChangeNotifier instead of setState for performance.
   late final DrawingController _drawingController;
+
+  /// Controller for managing temporary laser pointer strokes.
+  late final LaserController _laserController;
+
+  /// Whether a laser drawing operation is in progress.
+  bool _isLaserDrawing = false;
 
   /// Cached renderer instance - shared across all painters.
   final FlutterStrokeRenderer _renderer = FlutterStrokeRenderer();
@@ -208,6 +216,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
   void initState() {
     super.initState();
     _drawingController = DrawingController();
+    _laserController = LaserController();
   }
 
   @override
@@ -223,6 +232,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
   @override
   void dispose() {
     _drawingController.dispose();
+    _laserController.dispose();
     _imageCacheManager.dispose();
     super.dispose();
   }
@@ -593,6 +603,14 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
   List<core.Stroke> get pixelEraseOriginalStrokes => _pixelEraseOriginalStrokes;
 
   @override
+  LaserController get laserController => _laserController;
+
+  @override
+  bool get isLaserDrawing => _isLaserDrawing;
+  @override
+  set isLaserDrawing(bool value) => _isLaserDrawing = value;
+
+  @override
   Offset? get lastFocalPoint => _lastFocalPoint;
   @override
   set lastFocalPoint(Offset? value) => _lastFocalPoint = value;
@@ -697,10 +715,11 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
     final isImageTool = currentTool == ToolType.image;
     final isStickerPlacing = ref.watch(stickerPlacementProvider).isPlacing;
     final isImagePlacing = ref.watch(imagePlacementProvider).isPlacing;
+    final isLaserTool = currentTool == ToolType.laserPointer;
     final enablePointerEvents = !widget.isReadOnly &&
         (isDrawingTool || isSelectionTool || isShapeTool || isTextTool ||
             isStickerTool || isStickerPlacing ||
-            isImageTool || isImagePlacing);
+            isImageTool || isImagePlacing || isLaserTool);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -959,6 +978,14 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                                 );
                               },
                             ),
+                          ),
+
+                          // ─────────────────────────────────────────────────────────
+                          // LAYER 4.5: Laser Pointer Overlay
+                          // ─────────────────────────────────────────────────────────
+                          LaserOverlayWidget(
+                            controller: _laserController,
+                            size: size,
                           ),
 
                           // ─────────────────────────────────────────────────────────
