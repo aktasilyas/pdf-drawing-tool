@@ -136,9 +136,17 @@ class EraserSettingsPanel extends ConsumerWidget {
 
   void _showClearConfirmation(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
+    // Read values before closing panel to avoid ref-after-dispose
+    final document = ref.read(documentProvider);
+    final historyManager = ref.read(historyManagerProvider.notifier);
+
+    // Close the eraser panel so dialog appears on top
+    ref.read(activePanelProvider.notifier).state = null;
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      useRootNavigator: true,
+      builder: (ctx) => AlertDialog(
         backgroundColor: cs.surface,
         title: Text('Sayfay\u0131 Temizle?',
             style: TextStyle(color: cs.onSurface)),
@@ -149,26 +157,22 @@ class EraserSettingsPanel extends ConsumerWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(ctx),
             child: const Text('\u0130ptal'),
           ),
           TextButton(
             onPressed: () {
-              Navigator.pop(context);
-              _clearActivePage(ref);
+              Navigator.pop(ctx);
+              historyManager.execute(
+                core.ClearLayerCommand(
+                    layerIndex: document.activeLayerIndex),
+              );
             },
             style: TextButton.styleFrom(foregroundColor: cs.error),
             child: const Text('Temizle'),
           ),
         ],
       ),
-    );
-  }
-
-  void _clearActivePage(WidgetRef ref) {
-    final document = ref.read(documentProvider);
-    ref.read(historyManagerProvider.notifier).execute(
-      core.ClearLayerCommand(layerIndex: document.activeLayerIndex),
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
+import 'package:drawing_ui/src/providers/providers.dart';
 
 /// MOCK sticker categories for UI display - Turkish.
 const _mockStickerCategories = [
@@ -13,10 +14,30 @@ const _mockStickerCategories = [
   'Semboller',
 ];
 
+/// Returns sticker list for a given category.
+List<String> _getStickersForCategory(String category) {
+  switch (category) {
+    case 'Emoji':
+      return ['😀', '😂', '🥰', '😎', '🤔', '😊', '🙂', '😇', '🤩', '😋', '😜', '🤗'];
+    case 'Hayvanlar':
+      return ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮'];
+    case 'Yiyecek':
+      return ['🍎', '🍕', '🍔', '🌮', '🍣', '🍩', '🍪', '🎂', '🍦', '🍫', '☕', '🧁'];
+    case 'Seyahat':
+      return ['✈️', '🚗', '🚀', '⛵', '🏖️', '🗽', '🏔️', '🌍', '🏰', '🎡', '⛺', '🏝️'];
+    case 'Nesneler':
+      return ['📱', '💻', '📷', '🎮', '🎧', '📚', '✏️', '🔑', '💡', '⌚', '🎁', '🎈'];
+    case 'Semboller':
+      return ['❤️', '⭐', '✨', '💫', '🔥', '💯', '✅', '❌', '⚡', '💪', '👍', '🎉'];
+    default:
+      return ['❓'];
+  }
+}
+
 /// Settings panel for the sticker tool.
 ///
 /// Displays sticker categories and a grid of stickers.
-/// All interactions are MOCKED - no real sticker insertion.
+/// Selecting a sticker enters placement mode - tap the canvas to place it.
 class StickerPanel extends ConsumerStatefulWidget {
   const StickerPanel({super.key});
 
@@ -87,6 +108,10 @@ class _StickerPanelState extends ConsumerState<StickerPanel>
                       _selectedStickerIndex = index;
                     });
                   },
+                  onStickerDoubleTap: (emoji) {
+                    ref.read(stickerPlacementProvider.notifier).selectEmoji(emoji);
+                    ref.read(activePanelProvider.notifier).state = null;
+                  },
                 );
               }).toList(),
             ),
@@ -106,12 +131,23 @@ class _StickerPanelState extends ConsumerState<StickerPanel>
             icon: StarNoteIcons.plus,
             enabled: _selectedStickerIndex >= 0,
             onPressed: () {
-              // MOCK: Would insert sticker
+              final emoji = _getSelectedEmoji();
+              if (emoji == null) return;
+              ref.read(stickerPlacementProvider.notifier).selectEmoji(emoji);
+              ref.read(activePanelProvider.notifier).state = null;
             },
           ),
         ],
       ),
     );
+  }
+
+  String? _getSelectedEmoji() {
+    if (_selectedStickerIndex < 0) return null;
+    final category = _mockStickerCategories[_tabController.index];
+    final stickers = _getStickersForCategory(category);
+    if (_selectedStickerIndex >= stickers.length) return null;
+    return stickers[_selectedStickerIndex];
   }
 
   void _showPremiumPrompt(BuildContext context) {
@@ -216,16 +252,17 @@ class _StickerGrid extends StatelessWidget {
     required this.category,
     required this.selectedIndex,
     required this.onStickerSelected,
+    this.onStickerDoubleTap,
   });
 
   final String category;
   final int selectedIndex;
   final ValueChanged<int> onStickerSelected;
+  final ValueChanged<String>? onStickerDoubleTap;
 
   @override
   Widget build(BuildContext context) {
-    // MOCK: Generate placeholder stickers based on category
-    final stickers = _getMockStickersForCategory(category);
+    final stickers = _getStickersForCategory(category);
 
     return GridView.builder(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -238,6 +275,7 @@ class _StickerGrid extends StatelessWidget {
         final isSelected = index == selectedIndex;
         return GestureDetector(
           onTap: () => onStickerSelected(index),
+          onDoubleTap: () => onStickerDoubleTap?.call(stickers[index]),
           child: Container(
             decoration: BoxDecoration(
               color: isSelected ? const Color(0xFF4A9DFF).withValues(alpha: 0.1) : Colors.grey.shade100,
@@ -259,22 +297,4 @@ class _StickerGrid extends StatelessWidget {
     );
   }
 
-  List<String> _getMockStickersForCategory(String category) {
-    switch (category) {
-      case 'Emoji':
-        return ['😀', '😂', '🥰', '😎', '🤔', '😊', '🙂', '😇', '🤩', '😋', '😜', '🤗'];
-      case 'Hayvanlar':
-        return ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮'];
-      case 'Yiyecek':
-        return ['🍎', '🍕', '🍔', '🌮', '🍣', '🍩', '🍪', '🎂', '🍦', '🍫', '☕', '🧁'];
-      case 'Seyahat':
-        return ['✈️', '🚗', '🚀', '⛵', '🏖️', '🗽', '🏔️', '🌍', '🏰', '🎡', '⛺', '🏝️'];
-      case 'Nesneler':
-        return ['📱', '💻', '📷', '🎮', '🎧', '📚', '✏️', '🔑', '💡', '⌚', '🎁', '🎈'];
-      case 'Semboller':
-        return ['❤️', '⭐', '✨', '💫', '🔥', '💯', '✅', '❌', '⚡', '💪', '👍', '🎉'];
-      default:
-        return ['❓'];
-    }
-  }
 }

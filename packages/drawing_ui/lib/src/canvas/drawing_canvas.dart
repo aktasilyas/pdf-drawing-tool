@@ -23,6 +23,7 @@ import 'package:drawing_ui/src/providers/page_provider.dart';
 import 'package:drawing_ui/src/providers/drawing_providers.dart';
 import 'package:drawing_ui/src/providers/pdf_render_provider.dart';
 import 'package:drawing_ui/src/providers/canvas_dark_mode_provider.dart';
+import 'package:drawing_ui/src/providers/sticker_provider.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
 import 'package:drawing_ui/src/widgets/widgets.dart';
@@ -594,11 +595,15 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
       straightLinePreviewStyle = _straightLineStyle;
     }
 
-    // Enable pointer events for drawing tools, selection tool, shape tool, and text tool
+    // Enable pointer events for drawing tools, selection tool, shape tool, text tool,
+    // and sticker placement mode.
     // In read-only mode, all drawing pointer events are disabled (pan/zoom still works)
     final isTextTool = currentTool == ToolType.text;
+    final isStickerTool = currentTool == ToolType.sticker;
+    final isStickerPlacing = ref.watch(stickerPlacementProvider).isPlacing;
     final enablePointerEvents = !widget.isReadOnly &&
-        (isDrawingTool || isSelectionTool || isShapeTool || isTextTool);
+        (isDrawingTool || isSelectionTool || isShapeTool || isTextTool ||
+            isStickerTool || isStickerPlacing);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -906,9 +911,9 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                 textElement: textToolState.menuText!,
                 zoom: transform.zoom,
                 canvasOffset: transform.offset,
-                onEdit: handleTextEdit,
+                onEdit: isTextTool ? handleTextEdit : handleTextStyle,
                 onDelete: handleTextDelete,
-                onStyle: handleTextStyle,
+                onStyle: isTextTool ? handleTextStyle : null,
                 onDuplicate: handleTextDuplicate,
                 onMove: handleTextMove,
               ),
@@ -939,6 +944,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                 onStyleChanged: handleTextStyleChanged,
                 onClose: () =>
                     ref.read(textToolProvider.notifier).hideStylePopup(),
+                stickerMode: !isTextTool,
               ),
 
             // ───────────────────────────────────────────────────────────────────
@@ -994,6 +1000,69 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                   ),
                 ),
               ),
+
+            // ───────────────────────────────────────────────────────────────────
+            // Sticker Placement Mode Indicator
+            // ───────────────────────────────────────────────────────────────────
+            Builder(
+              builder: (context) {
+                final stickerState = ref.watch(stickerPlacementProvider);
+                if (!stickerState.isPlacing ||
+                    stickerState.selectedEmoji == null) {
+                  return const SizedBox.shrink();
+                }
+                return Positioned(
+                  top: 60,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.2),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(stickerState.selectedEmoji!,
+                              style: const TextStyle(fontSize: 24)),
+                          const SizedBox(width: 8),
+                          const Text(
+                            'Yerleştirmek için dokunun',
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 14),
+                          ),
+                          const SizedBox(width: 12),
+                          GestureDetector(
+                            onTap: () => ref
+                                .read(stickerPlacementProvider.notifier)
+                                .cancel(),
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.close,
+                                  color: Colors.white, size: 16),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
 
             // ───────────────────────────────────────────────────────────────────
             // Eraser Cursor Overlay (using screen coordinates)
