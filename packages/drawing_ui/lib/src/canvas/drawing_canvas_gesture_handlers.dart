@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
@@ -39,6 +41,14 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
   Set<String> get erasedImageIds;
   Map<String, List<int>> get pixelEraseHits;
   List<core.Stroke> get pixelEraseOriginalStrokes;
+  /// Note ID -> set of internal stroke IDs erased in current gesture.
+  Map<String, Set<String>> get erasedNoteStrokeIds;
+  /// Note ID -> set of internal shape IDs erased in current gesture.
+  Map<String, Set<String>> get erasedNoteShapeIds;
+  /// Note ID -> (stroke ID -> segment indices) for pixel erasure inside notes.
+  Map<String, Map<String, List<int>>> get pixelEraseNoteHits;
+  /// Note ID -> original strokes for pixel erasure inside notes.
+  Map<String, List<core.Stroke>> get pixelEraseNoteOriginalStrokes;
   Offset? get lastFocalPoint;
   set lastFocalPoint(Offset? value);
   double? get lastScale;
@@ -46,9 +56,117 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
   LaserController get laserController;
   bool get isLaserDrawing;
   set isLaserDrawing(bool value);
+  core.StickyNote? get drawingInsideNote;
+  set drawingInsideNote(core.StickyNote? value);
 
   /// Minimum distance between points to avoid excessive point creation.
   static const double minPointDistance = 1.0;
+
+  /// Detects if the pointer starts inside a (non-minimized) sticky note
+  /// and stores it for point clamping during the stroke.
+  void _detectDrawingInsideNote(PointerEvent event) {
+    final transform = ref.read(canvasTransformProvider);
+    final cp = transform.screenToCanvas(event.localPosition);
+    final notes = ref.read(activeLayerStickyNotesProvider);
+    drawingInsideNote = null;
+    for (final note in notes.reversed) {
+      if (!note.minimized &&
+          note.containsPoint(cp.dx, cp.dy, 0)) {
+        drawingInsideNote = note;
+        return;
+      }
+    }
+  }
+
+  /// Clamps a drawing point to the sticky note bounds when drawing inside one.
+  core.DrawingPoint _clampToNote(core.DrawingPoint point) {
+    final note = drawingInsideNote;
+    if (note == null) return point;
+    return core.DrawingPoint(
+      x: point.x.clamp(note.x, note.x + note.width),
+      y: point.y.clamp(note.y, note.y + note.height),
+      pressure: point.pressure,
+      tilt: point.tilt,
+      timestamp: point.timestamp,
+    );
+  }
+
+  /// Converts a stroke to relative coordinates and adds it to the sticky note.
+  void _addStrokeToStickyNote(core.Stroke stroke, core.StickyNote note) {
+    final relPoints = stroke.points
+        .map((p) => core.DrawingPoint(
+              x: p.x - note.x,
+              y: p.y - note.y,
+              pressure: p.pressure,
+              tilt: p.tilt,
+              timestamp: p.timestamp,
+            ))
+        .toList();
+    final relStroke = stroke.copyWith(points: relPoints);
+
+    // Get the current note from the document (may have changed)
+    final document = ref.read(documentProvider);
+    final layer = document.layers[document.activeLayerIndex];
+    final currentNote = layer.getStickyNoteById(note.id);
+    if (currentNote == null) return;
+
+    final updated =
+        currentNote.copyWith(strokes: [...currentNote.strokes, relStroke]);
+    final command = core.UpdateStickyNoteCommand(
+      layerIndex: document.activeLayerIndex,
+      newNote: updated,
+    );
+    ref.read(historyManagerProvider.notifier).execute(command);
+
+    // Sync the selected note so overrideNote renders the updated version
+    final placement = ref.read(stickyNotePlacementProvider);
+    if (placement.selectedNote?.id == note.id) {
+      ref
+          .read(stickyNotePlacementProvider.notifier)
+          .updateSelectedNote(updated);
+    }
+  }
+
+  /// Converts a shape to relative coordinates and adds it to the sticky note.
+  void _addShapeToStickyNote(core.Shape shape, core.StickyNote note) {
+    final relShape = shape.copyWith(
+      startPoint: core.DrawingPoint(
+        x: shape.startPoint.x - note.x,
+        y: shape.startPoint.y - note.y,
+        pressure: shape.startPoint.pressure,
+        tilt: shape.startPoint.tilt,
+        timestamp: shape.startPoint.timestamp,
+      ),
+      endPoint: core.DrawingPoint(
+        x: shape.endPoint.x - note.x,
+        y: shape.endPoint.y - note.y,
+        pressure: shape.endPoint.pressure,
+        tilt: shape.endPoint.tilt,
+        timestamp: shape.endPoint.timestamp,
+      ),
+    );
+
+    final document = ref.read(documentProvider);
+    final layer = document.layers[document.activeLayerIndex];
+    final currentNote = layer.getStickyNoteById(note.id);
+    if (currentNote == null) return;
+
+    final updated =
+        currentNote.copyWith(shapes: [...currentNote.shapes, relShape]);
+    final command = core.UpdateStickyNoteCommand(
+      layerIndex: document.activeLayerIndex,
+      newNote: updated,
+    );
+    ref.read(historyManagerProvider.notifier).execute(command);
+
+    // Sync the selected note so overrideNote renders the updated version
+    final placement = ref.read(stickyNotePlacementProvider);
+    if (placement.selectedNote?.id == note.id) {
+      ref
+          .read(stickyNotePlacementProvider.notifier)
+          .updateSelectedNote(updated);
+    }
+  }
 
   // ─────────────────────────────────────────────────────────────────────────
   // POINTER EVENT HANDLERS (Single Finger Drawing)
@@ -123,10 +241,29 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       return;
     }
 
+    // Close sticky note context menu if showing
+    final stickyNoteState = ref.read(stickyNotePlacementProvider);
+    if (stickyNoteState.showMenu) {
+      ref.read(stickyNotePlacementProvider.notifier).hideContextMenu();
+      return;
+    }
+
     // If an image is selected (resize handles visible) and we're not on image tool,
     // deselect the image
     if (imgState.selectedImage != null && toolType != ToolType.image) {
       ref.read(imagePlacementProvider.notifier).deselectImage();
+    }
+
+    // If a sticky note is selected and we're not on stickyNote tool,
+    // minimize and deselect if tapping OUTSIDE the note (allow drawing inside).
+    if (stickyNoteState.selectedNote != null &&
+        toolType != ToolType.stickyNote) {
+      final transform = ref.read(canvasTransformProvider);
+      final cp = transform.screenToCanvas(event.localPosition);
+      if (!stickyNoteState.selectedNote!
+          .containsPoint(cp.dx, cp.dy, 0)) {
+        _minimizeAndDeselectNote(stickyNoteState.selectedNote!);
+      }
     }
 
     // Close text context menu/style popup if showing
@@ -184,6 +321,51 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     final imageState = ref.read(imagePlacementProvider);
     if (imageState.isPlacing) {
       _handleImagePlacement(event);
+      return;
+    }
+
+    // Sticky note tool — tap on existing note selects it
+    if (toolType == ToolType.stickyNote) {
+      final transform = ref.read(canvasTransformProvider);
+      final canvasPoint =
+          (event.localPosition - transform.offset) / transform.zoom;
+      final currentNoteState = ref.read(stickyNotePlacementProvider);
+
+      // If a selected (non-minimized) note is showing resize handles,
+      // check if tap is inside the note → let handles handle it.
+      // If outside → minimize and deselect, then check other notes.
+      if (currentNoteState.selectedNote != null &&
+          !currentNoteState.showMenu &&
+          !currentNoteState.selectedNote!.minimized) {
+        if (currentNoteState.selectedNote!
+            .containsPoint(canvasPoint.dx, canvasPoint.dy, 0)) {
+          return; // Inside note → resize handles handle it
+        }
+        // Outside note → minimize and deselect
+        _minimizeAndDeselectNote(currentNoteState.selectedNote!);
+      }
+
+      final notes = ref.read(activeLayerStickyNotesProvider);
+      for (final note in notes.reversed) {
+        if (note.containsPoint(canvasPoint.dx, canvasPoint.dy, 10)) {
+          if (note.minimized) {
+            // Maximize the note
+            final maximized = note.copyWith(minimized: false);
+            final document = ref.read(documentProvider);
+            final command = core.UpdateStickyNoteCommand(
+              layerIndex: document.activeLayerIndex,
+              newNote: maximized,
+            );
+            ref.read(historyManagerProvider.notifier).execute(command);
+            ref.read(stickyNotePlacementProvider.notifier).selectNote(maximized);
+            return;
+          }
+          ref.read(stickyNotePlacementProvider.notifier).selectNote(note);
+          return;
+        }
+      }
+      // Tap on empty area → deselect
+      ref.read(stickyNotePlacementProvider.notifier).deselectNote();
       return;
     }
 
@@ -281,8 +463,9 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       }
     }
 
-    // Drawing mode
-    final point = createDrawingPoint(event);
+    // Drawing mode — detect sticky note constraint
+    _detectDrawingInsideNote(event);
+    final point = _clampToNote(createDrawingPoint(event));
     final style = getCurrentStyle();
 
     // Get stabilization setting (only for pen tools, not highlighters)
@@ -371,7 +554,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       if (distance < minPointDistance) return;
     }
 
-    final point = createDrawingPoint(event);
+    final point = _clampToNote(createDrawingPoint(event));
     drawingController.addPoint(point);
     lastPoint = event.localPosition;
   }
@@ -416,10 +599,14 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       final stroke = drawingController.endStroke();
 
       if (stroke != null) {
-        // Add stroke via history provider (enables undo/redo)
-        ref.read(historyManagerProvider.notifier).addStroke(stroke);
+        if (drawingInsideNote != null) {
+          _addStrokeToStickyNote(stroke, drawingInsideNote!);
+        } else {
+          ref.read(historyManagerProvider.notifier).addStroke(stroke);
+        }
       }
     }
+    drawingInsideNote = null;
     lastPoint = null;
   }
 
@@ -469,6 +656,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     } else {
       drawingController.cancelStroke();
     }
+    drawingInsideNote = null;
     lastPoint = null;
   }
 
@@ -533,7 +721,8 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
   // ─────────────────────────────────────────────────────────────────────────
 
   void handleStraightLineDown(PointerDownEvent event) {
-    final point = createDrawingPoint(event);
+    _detectDrawingInsideNote(event);
+    final point = _clampToNote(createDrawingPoint(event));
     final style = getCurrentStyle();
 
     straightLineStart = point;
@@ -547,7 +736,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
   void handleStraightLineMove(PointerMoveEvent event) {
     if (!isStraightLineDrawing || straightLineStart == null) return;
 
-    final point = createDrawingPoint(event);
+    final point = _clampToNote(createDrawingPoint(event));
     straightLineEnd = point;
 
     setState(() {}); // Triggers rebuild for real-time preview
@@ -567,8 +756,11 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
         style: style,
       );
 
-      // Add stroke via history provider (enables undo/redo)
-      ref.read(historyManagerProvider.notifier).addStroke(stroke);
+      if (drawingInsideNote != null) {
+        _addStrokeToStickyNote(stroke, drawingInsideNote!);
+      } else {
+        ref.read(historyManagerProvider.notifier).addStroke(stroke);
+      }
     }
 
     // Reset state
@@ -576,6 +768,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     straightLineEnd = null;
     straightLineStyle = null;
     isStraightLineDrawing = false;
+    drawingInsideNote = null;
 
     setState(() {});
   }
@@ -646,6 +839,10 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
         );
         pixelEraseHits.clear();
         pixelEraseOriginalStrokes.clear();
+        erasedNoteStrokeIds.clear();
+        erasedNoteShapeIds.clear();
+        pixelEraseNoteHits.clear();
+        pixelEraseNoteOriginalStrokes.clear();
         ref.read(pixelEraserPreviewProvider.notifier).state = {};
         handlePixelEraseAt(canvasPoint);
         break;
@@ -657,6 +854,10 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
         erasedShapeIds.clear();
         erasedTextIds.clear();
         erasedImageIds.clear();
+        erasedNoteStrokeIds.clear();
+        erasedNoteShapeIds.clear();
+        pixelEraseNoteHits.clear();
+        pixelEraseNoteOriginalStrokes.clear();
         eraseAtPoint(event.localPosition);
         break;
 
@@ -759,6 +960,9 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
           ref.read(historyManagerProvider.notifier).execute(command);
         }
         erasedImageIds.clear();
+
+        // Commit erased note internal strokes/shapes
+        _commitNoteErasures(layerIndex);
         break;
 
       case EraserMode.lasso:
@@ -844,6 +1048,9 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       }
     }
 
+    // Erase inside sticky notes (pixel mode: segment-level tracking)
+    _eraseInsideStickyNotes(canvasPoint, settings.size / 2, isPixelMode: true);
+
     // Update preview provider for visual feedback
     ref.read(pixelEraserPreviewProvider.notifier).state =
         Map<String, List<int>>.from(pixelEraseHits);
@@ -897,6 +1104,9 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       );
       ref.read(historyManagerProvider.notifier).execute(command);
     }
+
+    // Commit note internal erasures
+    _commitNoteErasures(layerIndex);
 
     // Clear tracking
     pixelEraseHits.clear();
@@ -1002,6 +1212,227 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
         }
       }
     }
+
+    // Erase inside sticky notes (relative coordinate check)
+    _eraseInsideStickyNotes(canvasPoint, eraserTool.tolerance);
+  }
+
+  /// Checks if the eraser point hits strokes/shapes inside any sticky note.
+  ///
+  /// When [isPixelMode] is true, uses segment-level tracking via
+  /// [pixelEraseNoteHits] so that only touched segments are removed.
+  /// When false (stroke eraser), removes whole strokes via
+  /// [erasedNoteStrokeIds].
+  void _eraseInsideStickyNotes(
+    Offset canvasPoint,
+    double tolerance, {
+    bool isPixelMode = false,
+  }) {
+    final notes = ref.read(activeLayerStickyNotesProvider);
+    for (final note in notes) {
+      if (note.minimized) continue;
+      if (!note.containsPoint(canvasPoint.dx, canvasPoint.dy, tolerance)) {
+        continue;
+      }
+
+      // Convert to relative coordinates
+      final relX = canvasPoint.dx - note.x;
+      final relY = canvasPoint.dy - note.y;
+
+      // Check internal strokes
+      if (isPixelMode) {
+        _pixelEraseNoteStrokes(note, relX, relY, tolerance);
+      } else {
+        _strokeEraseNoteStrokes(note, relX, relY, tolerance);
+      }
+
+      // Check internal shapes (whole shape removal for both modes)
+      for (final shape in note.shapes) {
+        final noteShapeIds =
+            erasedNoteShapeIds.putIfAbsent(note.id, () => {});
+        if (noteShapeIds.contains(shape.id)) continue;
+        if (shape.containsPoint(relX, relY, tolerance)) {
+          noteShapeIds.add(shape.id);
+        }
+      }
+    }
+  }
+
+  /// Pixel eraser: find individual segments hit inside a sticky note.
+  void _pixelEraseNoteStrokes(
+    core.StickyNote note,
+    double relX,
+    double relY,
+    double tolerance,
+  ) {
+    final pixelTool = ref.read(pixelEraserToolProvider);
+    final settings = ref.read(eraserSettingsProvider);
+
+    final hits = pixelTool.findSegmentsAt(
+      note.strokes,
+      relX,
+      relY,
+      settings.size,
+    );
+
+    for (final hit in hits) {
+      final noteHits =
+          pixelEraseNoteHits.putIfAbsent(note.id, () => {});
+      if (!noteHits.containsKey(hit.strokeId)) {
+        final origStrokes =
+            pixelEraseNoteOriginalStrokes.putIfAbsent(note.id, () => []);
+        final originalStroke = note.strokes.firstWhere(
+          (s) => s.id == hit.strokeId,
+          orElse: () => core.Stroke.create(style: core.StrokeStyle.pen()),
+        );
+        if (originalStroke.id == hit.strokeId) {
+          origStrokes.add(originalStroke);
+        }
+        noteHits[hit.strokeId] = [];
+      }
+      if (!noteHits[hit.strokeId]!.contains(hit.segmentIndex)) {
+        noteHits[hit.strokeId]!.add(hit.segmentIndex);
+      }
+    }
+  }
+
+  /// Stroke eraser: mark whole strokes hit inside a sticky note.
+  void _strokeEraseNoteStrokes(
+    core.StickyNote note,
+    double relX,
+    double relY,
+    double tolerance,
+  ) {
+    for (final stroke in note.strokes) {
+      final noteStrokeIds =
+          erasedNoteStrokeIds.putIfAbsent(note.id, () => {});
+      if (noteStrokeIds.contains(stroke.id)) continue;
+      for (int i = 0; i < stroke.points.length - 1; i++) {
+        final p = stroke.points[i];
+        final dist = _pointDist(relX, relY, p.x, p.y);
+        if (dist <= tolerance + stroke.style.thickness / 2) {
+          noteStrokeIds.add(stroke.id);
+          break;
+        }
+      }
+      // Check last point
+      if (!noteStrokeIds.contains(stroke.id) &&
+          stroke.points.isNotEmpty) {
+        final p = stroke.points.last;
+        final dist = _pointDist(relX, relY, p.x, p.y);
+        if (dist <= tolerance + stroke.style.thickness / 2) {
+          noteStrokeIds.add(stroke.id);
+        }
+      }
+    }
+  }
+
+  /// Commits all erased note strokes/shapes via UpdateStickyNoteCommand.
+  /// Minimizes (if not already) and deselects a sticky note.
+  void _minimizeAndDeselectNote(core.StickyNote note) {
+    if (!note.minimized) {
+      final document = ref.read(documentProvider);
+      final updated = note.copyWith(minimized: true);
+      final command = core.UpdateStickyNoteCommand(
+        layerIndex: document.activeLayerIndex,
+        newNote: updated,
+      );
+      ref.read(historyManagerProvider.notifier).execute(command);
+    }
+    ref.read(stickyNotePlacementProvider.notifier).deselectNote();
+  }
+
+  void _commitNoteErasures(int layerIndex) {
+    // 1) Pixel-level stroke erasures inside notes (split strokes)
+    for (final entry in pixelEraseNoteHits.entries) {
+      final noteId = entry.key;
+      final strokeHits = entry.value;
+      if (strokeHits.isEmpty) continue;
+
+      final origStrokes = pixelEraseNoteOriginalStrokes[noteId];
+      if (origStrokes == null || origStrokes.isEmpty) continue;
+
+      final doc = ref.read(documentProvider);
+      final ly = doc.layers[layerIndex];
+      final note = ly.getStickyNoteById(noteId);
+      if (note == null) continue;
+
+      final splitResult =
+          core.StrokeSplitter.splitStrokes(origStrokes, strokeHits);
+      final affectedIds = strokeHits.keys.toSet();
+      final newStrokes = <core.Stroke>[];
+      for (final stroke in note.strokes) {
+        if (affectedIds.contains(stroke.id)) {
+          final original =
+              origStrokes.where((s) => s.id == stroke.id).firstOrNull;
+          if (original != null) {
+            final pieces = splitResult[original];
+            if (pieces != null) newStrokes.addAll(pieces);
+          }
+        } else {
+          newStrokes.add(stroke);
+        }
+      }
+
+      final updated = note.copyWith(strokes: newStrokes);
+      final command = core.UpdateStickyNoteCommand(
+        layerIndex: layerIndex,
+        newNote: updated,
+      );
+      ref.read(historyManagerProvider.notifier).execute(command);
+    }
+    pixelEraseNoteHits.clear();
+    pixelEraseNoteOriginalStrokes.clear();
+
+    // 2) Whole-stroke erasures inside notes (stroke eraser mode)
+    for (final entry in erasedNoteStrokeIds.entries) {
+      final noteId = entry.key;
+      final strokeIds = entry.value;
+      if (strokeIds.isEmpty) continue;
+
+      final doc = ref.read(documentProvider);
+      final ly = doc.layers[layerIndex];
+      final note = ly.getStickyNoteById(noteId);
+      if (note == null) continue;
+
+      final remaining =
+          note.strokes.where((s) => !strokeIds.contains(s.id)).toList();
+      final updated = note.copyWith(strokes: remaining);
+      final command = core.UpdateStickyNoteCommand(
+        layerIndex: layerIndex,
+        newNote: updated,
+      );
+      ref.read(historyManagerProvider.notifier).execute(command);
+    }
+    erasedNoteStrokeIds.clear();
+
+    // 3) Erased shapes inside notes (same for both modes)
+    for (final entry in erasedNoteShapeIds.entries) {
+      final noteId = entry.key;
+      final shapeIds = entry.value;
+      if (shapeIds.isEmpty) continue;
+
+      final doc = ref.read(documentProvider);
+      final ly = doc.layers[layerIndex];
+      final note = ly.getStickyNoteById(noteId);
+      if (note == null) continue;
+
+      final remaining =
+          note.shapes.where((s) => !shapeIds.contains(s.id)).toList();
+      final updated = note.copyWith(shapes: remaining);
+      final command = core.UpdateStickyNoteCommand(
+        layerIndex: layerIndex,
+        newNote: updated,
+      );
+      ref.read(historyManagerProvider.notifier).execute(command);
+    }
+    erasedNoteShapeIds.clear();
+  }
+
+  double _pointDist(double x1, double y1, double x2, double y2) {
+    final dx = x1 - x2;
+    final dy = y1 - y2;
+    return math.sqrt(dx * dx + dy * dy);
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -1009,6 +1440,8 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
   // ─────────────────────────────────────────────────────────────────────────
 
   void handleShapeDown(PointerDownEvent event) {
+    _detectDrawingInsideNote(event);
+
     final transform = ref.read(canvasTransformProvider);
     final canvasPoint = transform.screenToCanvas(event.localPosition);
 
@@ -1054,11 +1487,13 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
         break;
     }
 
-    activeShapeTool!.startShape(core.DrawingPoint(
+    final clampedPoint = _clampToNote(core.DrawingPoint(
       x: canvasPoint.dx,
       y: canvasPoint.dy,
       pressure: 1.0,
     ));
+
+    activeShapeTool!.startShape(clampedPoint);
 
     isDrawingShape = true;
     setState(() {});
@@ -1071,11 +1506,13 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     final transform = ref.read(canvasTransformProvider);
     final canvasPoint = transform.screenToCanvas(event.localPosition);
 
-    tool.updateShape(core.DrawingPoint(
+    final clampedPoint = _clampToNote(core.DrawingPoint(
       x: canvasPoint.dx,
       y: canvasPoint.dy,
       pressure: 1.0,
     ));
+
+    tool.updateShape(clampedPoint);
 
     setState(() {});
   }
@@ -1089,15 +1526,20 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     final shape = tool.endShape();
 
     if (shape != null) {
-      final document = ref.read(documentProvider);
-      final command = core.AddShapeCommand(
-        layerIndex: document.activeLayerIndex,
-        shape: shape,
-      );
-      ref.read(historyManagerProvider.notifier).execute(command);
+      if (drawingInsideNote != null) {
+        _addShapeToStickyNote(shape, drawingInsideNote!);
+      } else {
+        final document = ref.read(documentProvider);
+        final command = core.AddShapeCommand(
+          layerIndex: document.activeLayerIndex,
+          shape: shape,
+        );
+        ref.read(historyManagerProvider.notifier).execute(command);
+      }
     }
 
     activeShapeTool = null;
+    drawingInsideNote = null;
     setState(() {});
   }
 

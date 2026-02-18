@@ -65,6 +65,9 @@ enum ToolType {
   /// Laser pointer - temporary pointer for presentations.
   laserPointer,
 
+  /// Sticky note - add colored sticky notes to canvas.
+  stickyNote,
+
   /// Toolbar settings - configure toolbar layout and tools.
   toolbarSettings;
 
@@ -109,6 +112,8 @@ enum ToolType {
         return 'Kaydır/Yakınlaştır';
       case ToolType.laserPointer:
         return 'Lazer İşaretçi';
+      case ToolType.stickyNote:
+        return 'Yapışkan Not';
       case ToolType.toolbarSettings:
         return 'Araç Çubuğu Ayarları';
     }

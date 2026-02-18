@@ -102,27 +102,30 @@ class EditorScreen extends ConsumerWidget {
   }
 
   Future<void> _handleBack(BuildContext context, WidgetRef ref) async {
-    final hasUnsaved = ref.read(hasUnsavedChangesProvider);
     final currentDoc = ref.read(documentProvider);
 
-    if (hasUnsaved) {
-      ref.read(autoSaveProvider.notifier).saveNow(currentDoc);
-      await Future.delayed(const Duration(milliseconds: 500));
+    // Always save current state before leaving (cancels any pending timer)
+    await ref.read(autoSaveProvider.notifier).saveNow(currentDoc);
+
+    // Navigate FIRST - this destroys EditorScreen and auto-disposes
+    // documentLoaderProvider (which is autoDispose). We must NOT invalidate
+    // documentLoaderProvider while the widget is still alive, because
+    // Riverpod emits the stale cached value before the fresh fetch completes,
+    // causing the guard to initialize with old data and block the fresh data.
+    if (context.mounted) {
+      context.go('/documents');
     }
-    
-    // TÜM provider'ları invalidate et
-    ref.invalidate(documentLoaderProvider(documentId));
-    ref.invalidate(documentProvider);  // ← EKLENDİ
+
+    // Invalidate non-autoDispose providers AFTER navigation
+    ref.invalidate(documentProvider);
     ref.invalidate(pageManagerProvider);
-    
+    ref.invalidate(autoSaveProvider);
+    ref.invalidate(hasUnsavedChangesProvider);
+
     // PDF state'lerini sıfırla
     ref.read(visiblePdfPageProvider.notifier).state = null;
     ref.read(currentPdfFilePathProvider.notifier).state = null;
     ref.read(totalPdfPagesProvider.notifier).state = 0;
-
-    if (context.mounted) {
-      context.go('/documents');
-    }
   }
 
   void _showDocumentMenu(BuildContext context, WidgetRef ref, DrawingDocument document) {

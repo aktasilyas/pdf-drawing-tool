@@ -76,6 +76,10 @@ abstract final class StarNoteIcons {
   static const sticker = PhosphorIconsLight.smiley;
   static const stickerActive = PhosphorIconsRegular.smiley;
 
+  // Sticky note
+  static const stickyNote = PhosphorIconsLight.noteBlank;
+  static const stickyNoteActive = PhosphorIconsRegular.noteBlank;
+
   // Laser pointer
   static const laser = PhosphorIconsLight.cursorClick;
   static const laserActive = PhosphorIconsRegular.cursorClick;
@@ -199,6 +203,7 @@ abstract final class StarNoteIcons {
       ToolType.image => active ? imageActive : image,
       ToolType.sticker => active ? stickerActive : sticker,
       ToolType.laserPointer => active ? laserActive : laser,
+      ToolType.stickyNote => active ? stickyNoteActive : stickyNote,
       ToolType.selection => active ? selectionActive : selection,
       ToolType.panZoom => active ? handActive : hand,
       ToolType.toolbarSettings => active ? sliders : sliders,

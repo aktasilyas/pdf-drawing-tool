@@ -155,11 +155,18 @@ class ImageElement {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is ImageElement && other.id == id;
+    if (other is! ImageElement) return false;
+    return other.id == id &&
+        other.filePath == filePath &&
+        other.x == x &&
+        other.y == y &&
+        other.width == width &&
+        other.height == height &&
+        other.rotation == rotation;
   }
 
   @override
-  int get hashCode => id.hashCode;
+  int get hashCode => Object.hash(id, filePath, x, y, width, height);
 }
 
 /// Minimal offset class to avoid Flutter dependency.

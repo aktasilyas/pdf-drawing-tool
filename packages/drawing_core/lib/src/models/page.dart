@@ -127,11 +127,7 @@ class Page {
     }
     final lastIndex = updatedLayers.length - 1;
     updatedLayers[lastIndex] = updatedLayers[lastIndex].addStroke(stroke);
-    
-    // #region agent log - Hipotez A
-    print('🔵 [A] Page.addStroke - strokes in updated layer: ${updatedLayers[lastIndex].strokes.length}');
-    // #endregion
-    
+
     return copyWith(layers: updatedLayers);
   }
 
@@ -172,10 +168,23 @@ class Page {
   }
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is Page && id == other.id;
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    if (other is! Page) return false;
+    if (other.id != id ||
+        other.index != index ||
+        other.size != size ||
+        other.background != background ||
+        other.isCover != isCover) {
+      return false;
+    }
+    if (other.layers.length != layers.length) return false;
+    for (int i = 0; i < layers.length; i++) {
+      if (other.layers[i] != layers[i]) return false;
+    }
+    return true;
+  }
 
   @override
-  int get hashCode => id.hashCode;
+  int get hashCode => Object.hash(id, index, layers.length);
 }

@@ -347,9 +347,16 @@ class Shape {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is Shape && other.id == id;
+    if (other is! Shape) return false;
+    return other.id == id &&
+        other.type == type &&
+        other.startPoint == startPoint &&
+        other.endPoint == endPoint &&
+        other.style == style &&
+        other.isFilled == isFilled &&
+        other.fillColor == fillColor;
   }
 
   @override
-  int get hashCode => id.hashCode;
+  int get hashCode => Object.hash(id, type, isFilled);
 }
