@@ -58,6 +58,7 @@ export 'src/models/template_category.dart';
 export 'src/models/template_pattern.dart';
 export 'src/models/text_element.dart';
 export 'src/models/image_element.dart';
+export 'src/models/sticky_note.dart';
 
 // Tools
 export 'src/tools/arrow_tool.dart';
@@ -99,6 +100,9 @@ export 'src/history/update_image_command.dart';
 export 'src/history/rotate_selection_command.dart';
 export 'src/history/duplicate_selection_command.dart';
 export 'src/history/change_selection_style_command.dart';
+export 'src/history/add_sticky_note_command.dart';
+export 'src/history/remove_sticky_note_command.dart';
+export 'src/history/update_sticky_note_command.dart';
 
 // Input Processing
 export 'src/input/path_smoother.dart';

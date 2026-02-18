@@ -444,7 +444,6 @@ class DrawingDocument extends Equatable {
       // V2: Add to current page
       final current = currentPage;
       if (current == null) {
-        print('🔴 [A] WARN: currentPage is NULL!');
         return this;
       }
 

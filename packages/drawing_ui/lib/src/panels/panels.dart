@@ -14,3 +14,4 @@ export 'lasso_selection_panel.dart';
 export 'laser_pointer_panel.dart';
 export 'pen_type_picker.dart';
 export 'text_settings_panel.dart';
+export 'sticky_note_panel.dart';

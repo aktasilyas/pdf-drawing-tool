@@ -13,3 +13,6 @@ export 'stroke_painter.dart';
 export 'text_painter.dart';
 export 'page_background_painter.dart';
 export 'selected_elements_painter.dart';
+export 'sticky_note_handles_painter.dart';
+export 'sticky_note_painter.dart';
+export 'sticky_note_resize_handles.dart';

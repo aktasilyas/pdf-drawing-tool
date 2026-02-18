@@ -49,6 +49,9 @@ Widget buildActivePanel({
     case ToolType.laserPointer:
       return const LaserPointerPanel();
 
+    case ToolType.stickyNote:
+      return const StickyNotePanel();
+
     case ToolType.text:
       return const TextSettingsPanel();
 

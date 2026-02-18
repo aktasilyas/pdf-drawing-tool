@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 import 'package:drawing_core/src/models/bounding_box.dart';
 import 'package:drawing_core/src/models/image_element.dart';
 import 'package:drawing_core/src/models/shape.dart';
+import 'package:drawing_core/src/models/sticky_note.dart';
 import 'package:drawing_core/src/models/stroke.dart';
 import 'package:drawing_core/src/models/text_element.dart';
 
@@ -39,6 +40,11 @@ class Layer extends Equatable {
   /// This list is unmodifiable.
   final List<ImageElement> images;
 
+  /// The sticky note elements contained in this layer.
+  ///
+  /// This list is unmodifiable.
+  final List<StickyNote> stickyNotes;
+
   /// Whether this layer is visible.
   final bool isVisible;
 
@@ -60,6 +66,7 @@ class Layer extends Equatable {
     List<Shape>? shapes,
     List<TextElement>? texts,
     List<ImageElement>? images,
+    List<StickyNote>? stickyNotes,
     this.isVisible = true,
     this.isLocked = false,
     double opacity = 1.0,
@@ -67,6 +74,7 @@ class Layer extends Equatable {
         shapes = List.unmodifiable(shapes ?? const []),
         texts = List.unmodifiable(texts ?? const []),
         images = List.unmodifiable(images ?? const []),
+        stickyNotes = List.unmodifiable(stickyNotes ?? const []),
         opacity = opacity.clamp(0.0, 1.0);
 
   /// Creates an empty layer with a generated ID.
@@ -78,6 +86,7 @@ class Layer extends Equatable {
       shapes: const [],
       texts: const [],
       images: const [],
+      stickyNotes: const [],
     );
   }
 
@@ -88,11 +97,11 @@ class Layer extends Equatable {
 
   /// Whether this layer has no strokes, shapes, texts, or images.
   bool get isEmpty =>
-      strokes.isEmpty && shapes.isEmpty && texts.isEmpty && images.isEmpty;
+      strokes.isEmpty && shapes.isEmpty && texts.isEmpty && images.isEmpty && stickyNotes.isEmpty;
 
-  /// Whether this layer has at least one stroke, shape, text, or image.
+  /// Whether this layer has at least one stroke, shape, text, image, or sticky note.
   bool get isNotEmpty =>
-      strokes.isNotEmpty || shapes.isNotEmpty || texts.isNotEmpty || images.isNotEmpty;
+      strokes.isNotEmpty || shapes.isNotEmpty || texts.isNotEmpty || images.isNotEmpty || stickyNotes.isNotEmpty;
 
   /// The number of strokes in this layer.
   int get strokeCount => strokes.length;
@@ -121,6 +130,7 @@ class Layer extends Equatable {
       shapes: shapes,
       texts: texts,
       images: images,
+      stickyNotes: stickyNotes,
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -140,6 +150,7 @@ class Layer extends Equatable {
       shapes: shapes,
       texts: texts,
       images: images,
+      stickyNotes: stickyNotes,
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -167,6 +178,7 @@ class Layer extends Equatable {
       shapes: shapes,
       texts: texts,
       images: images,
+      stickyNotes: stickyNotes,
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -184,6 +196,7 @@ class Layer extends Equatable {
       shapes: const [],
       texts: const [],
       images: const [],
+      stickyNotes: const [],
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -227,6 +240,7 @@ class Layer extends Equatable {
       shapes: [...shapes, shape],
       texts: texts,
       images: images,
+      stickyNotes: stickyNotes,
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -246,6 +260,7 @@ class Layer extends Equatable {
       shapes: newShapes,
       texts: texts,
       images: images,
+      stickyNotes: stickyNotes,
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -273,6 +288,7 @@ class Layer extends Equatable {
       shapes: newShapes,
       texts: texts,
       images: images,
+      stickyNotes: stickyNotes,
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -304,6 +320,7 @@ class Layer extends Equatable {
       shapes: shapes,
       texts: [...texts, text],
       images: images,
+      stickyNotes: stickyNotes,
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -323,6 +340,7 @@ class Layer extends Equatable {
       shapes: shapes,
       texts: newTexts,
       images: images,
+      stickyNotes: stickyNotes,
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -350,6 +368,7 @@ class Layer extends Equatable {
       shapes: shapes,
       texts: newTexts,
       images: images,
+      stickyNotes: stickyNotes,
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -379,6 +398,7 @@ class Layer extends Equatable {
       shapes: shapes,
       texts: texts,
       images: [...images, image],
+      stickyNotes: stickyNotes,
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -395,6 +415,7 @@ class Layer extends Equatable {
       shapes: shapes,
       texts: texts,
       images: newImages,
+      stickyNotes: stickyNotes,
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -418,6 +439,7 @@ class Layer extends Equatable {
       shapes: shapes,
       texts: texts,
       images: newImages,
+      stickyNotes: stickyNotes,
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -435,6 +457,77 @@ class Layer extends Equatable {
   }
 
   // ============================================================
+  // STICKY NOTE METHODS
+  // ============================================================
+
+  /// Returns a new [Layer] with the given sticky note added.
+  Layer addStickyNote(StickyNote note) {
+    return Layer(
+      id: id,
+      name: name,
+      strokes: strokes,
+      shapes: shapes,
+      texts: texts,
+      images: images,
+      stickyNotes: [...stickyNotes, note],
+      isVisible: isVisible,
+      isLocked: isLocked,
+      opacity: opacity,
+    );
+  }
+
+  /// Returns a new [Layer] with the sticky note matching [noteId] removed.
+  Layer removeStickyNote(String noteId) {
+    final newNotes = stickyNotes.where((n) => n.id != noteId).toList();
+    return Layer(
+      id: id,
+      name: name,
+      strokes: strokes,
+      shapes: shapes,
+      texts: texts,
+      images: images,
+      stickyNotes: newNotes,
+      isVisible: isVisible,
+      isLocked: isLocked,
+      opacity: opacity,
+    );
+  }
+
+  /// Returns a new [Layer] with the sticky note updated.
+  Layer updateStickyNote(StickyNote note) {
+    final index = stickyNotes.indexWhere((n) => n.id == note.id);
+    if (index == -1) {
+      return copyWith();
+    }
+
+    final newNotes = List<StickyNote>.from(stickyNotes);
+    newNotes[index] = note;
+
+    return Layer(
+      id: id,
+      name: name,
+      strokes: strokes,
+      shapes: shapes,
+      texts: texts,
+      images: images,
+      stickyNotes: newNotes,
+      isVisible: isVisible,
+      isLocked: isLocked,
+      opacity: opacity,
+    );
+  }
+
+  /// Returns the sticky note with the given [id], or null if not found.
+  StickyNote? getStickyNoteById(String noteId) {
+    for (final note in stickyNotes) {
+      if (note.id == noteId) {
+        return note;
+      }
+    }
+    return null;
+  }
+
+  // ============================================================
   // COMMON METHODS
   // ============================================================
 
@@ -446,6 +539,7 @@ class Layer extends Equatable {
     List<Shape>? shapes,
     List<TextElement>? texts,
     List<ImageElement>? images,
+    List<StickyNote>? stickyNotes,
     bool? isVisible,
     bool? isLocked,
     double? opacity,
@@ -457,6 +551,7 @@ class Layer extends Equatable {
       shapes: shapes ?? this.shapes,
       texts: texts ?? this.texts,
       images: images ?? this.images,
+      stickyNotes: stickyNotes ?? this.stickyNotes,
       isVisible: isVisible ?? this.isVisible,
       isLocked: isLocked ?? this.isLocked,
       opacity: opacity ?? this.opacity,
@@ -472,6 +567,7 @@ class Layer extends Equatable {
       'shapes': shapes.map((s) => s.toJson()).toList(),
       'texts': texts.map((t) => t.toJson()).toList(),
       'images': images.map((i) => i.toJson()).toList(),
+      'stickyNotes': stickyNotes.map((n) => n.toJson()).toList(),
       'isVisible': isVisible,
       'isLocked': isLocked,
       'opacity': opacity,
@@ -498,6 +594,10 @@ class Layer extends Equatable {
               ?.map((i) => ImageElement.fromJson(i as Map<String, dynamic>))
               .toList() ??
           const [],
+      stickyNotes: (json['stickyNotes'] as List?)
+              ?.map((n) => StickyNote.fromJson(n as Map<String, dynamic>))
+              .toList() ??
+          const [],
       isVisible: json['isVisible'] as bool? ?? true,
       isLocked: json['isLocked'] as bool? ?? false,
       opacity: (json['opacity'] as num?)?.toDouble() ?? 1.0,
@@ -506,7 +606,7 @@ class Layer extends Equatable {
 
   @override
   List<Object?> get props =>
-      [id, name, strokes, shapes, texts, images, isVisible, isLocked, opacity];
+      [id, name, strokes, shapes, texts, images, stickyNotes, isVisible, isLocked, opacity];
 
   @override
   String toString() {

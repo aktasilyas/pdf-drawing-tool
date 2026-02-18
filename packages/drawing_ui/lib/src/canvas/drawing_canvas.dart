@@ -8,6 +8,9 @@ import 'package:drawing_ui/src/canvas/shape_painter.dart';
 import 'package:drawing_ui/src/canvas/text_painter.dart';
 import 'package:drawing_ui/src/canvas/image_painter.dart';
 import 'package:drawing_ui/src/canvas/image_resize_handles.dart';
+import 'package:drawing_ui/src/canvas/sticky_note_painter.dart';
+import 'package:drawing_ui/src/canvas/sticky_note_handles_painter.dart';
+import 'package:drawing_ui/src/canvas/sticky_note_resize_handles.dart';
 import 'package:drawing_ui/src/canvas/selected_elements_painter.dart';
 import 'package:drawing_ui/src/canvas/page_background_painter.dart';
 import 'package:drawing_ui/src/canvas/drawing_canvas_helpers.dart';
@@ -29,6 +32,7 @@ import 'package:drawing_ui/src/providers/pdf_render_provider.dart';
 import 'package:drawing_ui/src/providers/canvas_dark_mode_provider.dart';
 import 'package:drawing_ui/src/providers/sticker_provider.dart';
 import 'package:drawing_ui/src/providers/image_provider.dart';
+import 'package:drawing_ui/src/providers/sticky_note_provider.dart';
 import 'package:drawing_ui/src/providers/history_provider.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
@@ -186,6 +190,18 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
   /// Original strokes affected by pixel eraser (for undo).
   final List<core.Stroke> _pixelEraseOriginalStrokes = [];
 
+  /// Note ID -> set of internal stroke IDs erased in current gesture.
+  final Map<String, Set<String>> _erasedNoteStrokeIds = {};
+
+  /// Note ID -> set of internal shape IDs erased in current gesture.
+  final Map<String, Set<String>> _erasedNoteShapeIds = {};
+
+  /// Note ID -> (stroke ID -> segment indices) for pixel erasure inside notes.
+  final Map<String, Map<String, List<int>>> _pixelEraseNoteHits = {};
+
+  /// Note ID -> original strokes for pixel erasure inside notes.
+  final Map<String, List<core.Stroke>> _pixelEraseNoteOriginalStrokes = {};
+
   // ─────────────────────────────────────────────────────────────────────────
   // INITIALIZATION TRACKING
   // ─────────────────────────────────────────────────────────────────────────
@@ -292,6 +308,27 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
 
   Widget _imageMenuDivider() {
     return Container(width: 1, height: 24, color: Colors.grey[300]);
+  }
+
+  void _handleStickyNoteDelete(core.StickyNote note) {
+    final document = ref.read(documentProvider);
+    final command = core.RemoveStickyNoteCommand(
+      layerIndex: document.activeLayerIndex,
+      stickyNoteId: note.id,
+    );
+    ref.read(historyManagerProvider.notifier).execute(command);
+    ref.read(stickyNotePlacementProvider.notifier).deselectNote();
+  }
+
+  void _handleStickyNoteColorChange(core.StickyNote note, int color) {
+    final updated = note.copyWith(color: color);
+    final document = ref.read(documentProvider);
+    final command = core.UpdateStickyNoteCommand(
+      layerIndex: document.activeLayerIndex,
+      newNote: updated,
+    );
+    ref.read(historyManagerProvider.notifier).execute(command);
+    ref.read(stickyNotePlacementProvider.notifier).selectNote(updated);
   }
 
   /// Initialize canvas transform for limited mode (page centering).
@@ -603,6 +640,20 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
   List<core.Stroke> get pixelEraseOriginalStrokes => _pixelEraseOriginalStrokes;
 
   @override
+  Map<String, Set<String>> get erasedNoteStrokeIds => _erasedNoteStrokeIds;
+
+  @override
+  Map<String, Set<String>> get erasedNoteShapeIds => _erasedNoteShapeIds;
+
+  @override
+  Map<String, Map<String, List<int>>> get pixelEraseNoteHits =>
+      _pixelEraseNoteHits;
+
+  @override
+  Map<String, List<core.Stroke>> get pixelEraseNoteOriginalStrokes =>
+      _pixelEraseNoteOriginalStrokes;
+
+  @override
   LaserController get laserController => _laserController;
 
   @override
@@ -619,6 +670,13 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
   double? get lastScale => _lastScale;
   @override
   set lastScale(double? value) => _lastScale = value;
+
+  /// Sticky note that constrains the current stroke (if drawing inside one).
+  core.StickyNote? _drawingInsideNote;
+  @override
+  core.StickyNote? get drawingInsideNote => _drawingInsideNote;
+  @override
+  set drawingInsideNote(core.StickyNote? value) => _drawingInsideNote = value;
 
   @override
   Widget build(BuildContext context) {
@@ -707,6 +765,9 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
     // Watch images for active layer
     final images = ref.watch(activeLayerImagesProvider);
 
+    // Watch sticky notes for active layer
+    final stickyNotes = ref.watch(activeLayerStickyNotesProvider);
+
     // Enable pointer events for drawing tools, selection tool, shape tool, text tool,
     // sticker placement mode, image tool, and image placement mode.
     // In read-only mode, all drawing pointer events are disabled (pan/zoom still works)
@@ -716,10 +777,11 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
     final isStickerPlacing = ref.watch(stickerPlacementProvider).isPlacing;
     final isImagePlacing = ref.watch(imagePlacementProvider).isPlacing;
     final isLaserTool = currentTool == ToolType.laserPointer;
+    final isStickyNoteTool = currentTool == ToolType.stickyNote;
     final enablePointerEvents = !widget.isReadOnly &&
         (isDrawingTool || isSelectionTool || isShapeTool || isTextTool ||
             isStickerTool || isStickerPlacing ||
-            isImageTool || isImagePlacing || isLaserTool);
+            isImageTool || isImagePlacing || isLaserTool || isStickyNoteTool);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -958,6 +1020,31 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                           ),
 
                           // ─────────────────────────────────────────────────────────
+                          // LAYER 3.5: Committed Sticky Notes (above strokes/shapes)
+                          // ─────────────────────────────────────────────────────────
+                          if (stickyNotes.isNotEmpty)
+                            Consumer(
+                              builder: (context, ref, _) {
+                                final liveNote = ref.watch(
+                                  stickyNotePlacementProvider
+                                      .select((s) => s.selectedNote),
+                                );
+                                return RepaintBoundary(
+                                  child: CustomPaint(
+                                    size: size,
+                                    painter: StickyNotePainter(
+                                      stickyNotes: stickyNotes,
+                                      renderer: _renderer,
+                                      overrideNote: liveNote,
+                                    ),
+                                    isComplex: true,
+                                    willChange: liveNote != null,
+                                  ),
+                                );
+                              },
+                            ),
+
+                          // ─────────────────────────────────────────────────────────
                           // LAYER 4: Active Stroke (Live Drawing)
                           // ─────────────────────────────────────────────────────────
                           // Uses ListenableBuilder to listen to DrawingController
@@ -1067,6 +1154,34 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                               return ImageResizeHandles(image: selected);
                             },
                           ),
+
+                          // ─────────────────────────────────────────────────────────
+                          // LAYER 9.5: Sticky Note Resize Handles
+                          // ─────────────────────────────────────────────────────────
+                          Builder(
+                            builder: (context) {
+                              final noteState =
+                                  ref.watch(stickyNotePlacementProvider);
+                              final selected = noteState.selectedNote;
+                              if (selected == null ||
+                                  noteState.isMoving ||
+                                  selected.minimized) {
+                                return const SizedBox.shrink();
+                              }
+                              // On stickyNote tool: full interactive handles.
+                              // On other tools: paint-only (visible but no gesture).
+                              if (isStickyNoteTool) {
+                                return StickyNoteResizeHandles(note: selected);
+                              }
+                              return IgnorePointer(
+                                child: CustomPaint(
+                                  painter: StickyNoteHandlesPainter(
+                                      note: selected),
+                                  child: const SizedBox.expand(),
+                                ),
+                              );
+                            },
+                          ),
                         ],
                       ),
                     ),
@@ -1164,6 +1279,30 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                       ),
                     ),
                   ),
+                );
+              },
+            ),
+
+            // ───────────────────────────────────────────────────────────────────
+            // Sticky Note Context Menu (color picker + delete)
+            // ───────────────────────────────────────────────────────────────────
+            Builder(
+              builder: (context) {
+                final noteState = ref.watch(stickyNotePlacementProvider);
+                if (!noteState.showMenu || noteState.selectedNote == null) {
+                  return const SizedBox.shrink();
+                }
+                final sn = noteState.selectedNote!;
+                final centerX = (sn.x + sn.width / 2) * transform.zoom +
+                    transform.offset.dx;
+                final screenY =
+                    sn.y * transform.zoom + transform.offset.dy - 50;
+                return _StickyNoteContextMenu(
+                  left: centerX,
+                  top: screenY,
+                  onDelete: () => _handleStickyNoteDelete(sn),
+                  onColorChange: (color) =>
+                      _handleStickyNoteColorChange(sn, color),
                 );
               },
             ),
@@ -1578,6 +1717,122 @@ class _SelectionContextMenu extends StatelessWidget {
         margin: const EdgeInsets.symmetric(horizontal: 2),
         decoration: BoxDecoration(
           color: color,
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.grey[300]!, width: 1),
+        ),
+      ),
+    );
+  }
+}
+
+// =============================================================================
+// STICKY NOTE CONTEXT MENU
+// =============================================================================
+
+/// Floating context menu for sticky note actions (color change, delete).
+class _StickyNoteContextMenu extends StatelessWidget {
+  final double left;
+  final double top;
+  final VoidCallback onDelete;
+  final ValueChanged<int> onColorChange;
+
+  static const _noteColors = [
+    0xFFFFF3CD, // Yellow
+    0xFFF8D7DA, // Pink
+    0xFFD1ECF1, // Blue
+    0xFFD4EDDA, // Green
+    0xFFFFE0CC, // Orange
+    0xFFE8D5F5, // Purple
+  ];
+
+  const _StickyNoteContextMenu({
+    required this.left,
+    required this.top,
+    required this.onDelete,
+    required this.onColorChange,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      left: left - 100,
+      top: top,
+      child: Listener(
+        behavior: HitTestBehavior.opaque,
+        onPointerDown: (_) {},
+        child: Material(
+          color: Colors.transparent,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Color dots row
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 6, vertical: 6),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: _noteColors
+                        .map((c) => _colorDot(c))
+                        .toList(),
+                  ),
+                ),
+                // Delete button
+                Container(
+                  decoration: BoxDecoration(
+                    border: Border(
+                      top: BorderSide(color: Colors.grey[200]!),
+                    ),
+                  ),
+                  child: GestureDetector(
+                    onTap: onDelete,
+                    behavior: HitTestBehavior.opaque,
+                    child: Container(
+                      width: _noteColors.length * 28.0 + 12,
+                      height: 36,
+                      alignment: Alignment.center,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          PhosphorIcon(StarNoteIcons.trash,
+                              size: 16, color: Colors.red),
+                          const SizedBox(width: 4),
+                          const Text('Sil',
+                              style: TextStyle(
+                                  fontSize: 12, color: Colors.red)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _colorDot(int colorValue) {
+    return GestureDetector(
+      onTap: () => onColorChange(colorValue),
+      child: Container(
+        width: 24,
+        height: 24,
+        margin: const EdgeInsets.symmetric(horizontal: 2),
+        decoration: BoxDecoration(
+          color: Color(colorValue),
           shape: BoxShape.circle,
           border: Border.all(color: Colors.grey[300]!, width: 1),
         ),

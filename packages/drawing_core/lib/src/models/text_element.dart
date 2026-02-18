@@ -245,9 +245,22 @@ class TextElement {
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is TextElement && other.id == id;
+    if (other is! TextElement) return false;
+    return other.id == id &&
+        other.text == text &&
+        other.x == x &&
+        other.y == y &&
+        other.fontSize == fontSize &&
+        other.color == color &&
+        other.fontFamily == fontFamily &&
+        other.isBold == isBold &&
+        other.isItalic == isItalic &&
+        other.isUnderline == isUnderline &&
+        other.alignment == alignment &&
+        other.width == width &&
+        other.height == height;
   }
 
   @override
-  int get hashCode => id.hashCode;
+  int get hashCode => Object.hash(id, text, x, y, fontSize, color);
 }

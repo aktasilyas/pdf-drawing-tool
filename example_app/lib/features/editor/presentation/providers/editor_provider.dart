@@ -18,8 +18,8 @@ final saveDocumentUseCaseProvider = Provider<SaveDocumentUseCase>((ref) {
 // Current document being edited
 final currentDocumentProvider = StateProvider<DrawingDocument?>((ref) => null);
 
-// Document loading state
-final documentLoaderProvider = FutureProvider.family<DrawingDocument, String>((ref, documentId) async {
+// Document loading state (autoDispose prevents stale cache on re-entry)
+final documentLoaderProvider = FutureProvider.autoDispose.family<DrawingDocument, String>((ref, documentId) async {
   final useCase = ref.watch(loadDocumentUseCaseProvider);
   final result = await useCase(documentId);
   return result.fold(
@@ -50,19 +50,22 @@ class AutoSaveNotifier extends StateNotifier<bool> {
     state = true; // Saving...
     final useCase = _ref.read(saveDocumentUseCaseProvider);
     final result = await useCase(document);
-    
+
     result.fold(
       (failure) => logger.e('Save failed', error: failure.message),
       (_) => logger.i('Document saved successfully: ${document.id}'),
     );
-    
+
     state = false; // Saved
-    _ref.read(hasUnsavedChangesProvider.notifier).state = false;
+    // Only clear unsaved flag if no new changes arrived during save
+    if (_debounceTimer == null || !_debounceTimer!.isActive) {
+      _ref.read(hasUnsavedChangesProvider.notifier).state = false;
+    }
   }
 
-  void saveNow(DrawingDocument document) {
+  Future<void> saveNow(DrawingDocument document) {
     _debounceTimer?.cancel();
-    _save(document);
+    return _save(document);
   }
 
   @override
