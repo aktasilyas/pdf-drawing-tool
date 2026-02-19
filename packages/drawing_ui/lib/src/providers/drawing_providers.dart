@@ -497,10 +497,23 @@ enum LaserMode {
   dot,
 }
 
+/// Laser line drawing style (only applies in line mode).
+enum LaserLineStyle {
+  /// Solid neon glow line with bright core.
+  solid,
+
+  /// Hollow neon line — glow only, no bright core.
+  hollow,
+
+  /// Rainbow gradient along the path.
+  rainbow,
+}
+
 /// Laser pointer settings data model.
 class LaserSettings {
   const LaserSettings({
     required this.mode,
+    required this.lineStyle,
     required this.thickness,
     required this.duration,
     required this.color,
@@ -508,6 +521,9 @@ class LaserSettings {
 
   /// The current laser mode (line or dot).
   final LaserMode mode;
+
+  /// Line drawing style (solid / hollow / rainbow).
+  final LaserLineStyle lineStyle;
 
   /// Thickness of the laser line/dot in mm.
   final double thickness;
@@ -522,6 +538,7 @@ class LaserSettings {
   factory LaserSettings.defaultSettings() {
     return const LaserSettings(
       mode: LaserMode.line,
+      lineStyle: LaserLineStyle.solid,
       thickness: 0.5,
       duration: 2.0,
       color: Color(0xFF29B6F6), // Light blue
@@ -530,12 +547,14 @@ class LaserSettings {
 
   LaserSettings copyWith({
     LaserMode? mode,
+    LaserLineStyle? lineStyle,
     double? thickness,
     double? duration,
     Color? color,
   }) {
     return LaserSettings(
       mode: mode ?? this.mode,
+      lineStyle: lineStyle ?? this.lineStyle,
       thickness: thickness ?? this.thickness,
       duration: duration ?? this.duration,
       color: color ?? this.color,
@@ -582,6 +601,10 @@ class LaserSettingsNotifier extends StateNotifier<LaserSettings> {
 
   void setMode(LaserMode mode) {
     state = state.copyWith(mode: mode);
+  }
+
+  void setLineStyle(LaserLineStyle style) {
+    state = state.copyWith(lineStyle: style);
   }
 
   void setThickness(double thickness) {

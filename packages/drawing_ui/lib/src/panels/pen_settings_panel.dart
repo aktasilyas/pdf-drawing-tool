@@ -6,6 +6,7 @@ import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/panels/pen_settings_widgets.dart';
+import 'package:drawing_ui/src/widgets/color_picker_strip.dart';
 import 'package:drawing_ui/src/widgets/goodnotes_slider.dart';
 
 /// GoodNotes-style pen settings panel.
@@ -104,6 +105,14 @@ class PenSettingsPanel extends ConsumerWidget {
             activeColor: cs.primary,
             onChanged: (v) =>
                 ref.read(penSettingsProvider(active).notifier).setStabilization(v),
+          ),
+          const SizedBox(height: 16),
+
+          // ── RENK SEÇİCİ ──
+          ColorPickerStrip(
+            selectedColor: s.color,
+            onColorSelected: (c) =>
+                ref.read(penSettingsProvider(active).notifier).setColor(c),
           ),
         ],
       ),

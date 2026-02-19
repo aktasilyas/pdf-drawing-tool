@@ -3,9 +3,9 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
-import 'package:drawing_ui/src/widgets/color_presets.dart';
+import 'package:drawing_ui/src/widgets/color_picker_strip.dart';
 import 'package:drawing_ui/src/widgets/compact_toggle.dart';
-import 'package:drawing_ui/src/widgets/unified_color_picker.dart';
+import 'package:drawing_ui/src/widgets/goodnotes_slider.dart';
 
 /// Shapes settings content for popover panel.
 class ShapesSettingsPanel extends ConsumerWidget {
@@ -31,7 +31,7 @@ class ShapesSettingsPanel extends ConsumerWidget {
                 shapesSettingsProvider.notifier).setSelectedShape(s),
           ),
           const SizedBox(height: 12),
-          _GoodNotesSlider(
+          GoodNotesSlider(
             label: 'KONTUR KALINLIĞI', activeColor: cs.primary,
             value: settings.strokeThickness, min: 0.1, max: 10.0,
             displayValue: '${settings.strokeThickness.toStringAsFixed(1)}mm',
@@ -39,8 +39,9 @@ class ShapesSettingsPanel extends ConsumerWidget {
                 shapesSettingsProvider.notifier).setStrokeThickness(v),
           ),
           const SizedBox(height: 10),
-          _ColorSection(
-            label: 'KONTUR RENGİ',
+          _StripLabel(label: 'KONTUR RENGİ'),
+          const SizedBox(height: 6),
+          ColorPickerStrip(
             selectedColor: settings.strokeColor,
             onColorSelected: (c) => ref.read(
                 shapesSettingsProvider.notifier).setStrokeColor(c),
@@ -53,8 +54,9 @@ class ShapesSettingsPanel extends ConsumerWidget {
           ),
           if (settings.fillEnabled) ...[
             const SizedBox(height: 8),
-            _ColorSection(
-              label: 'DOLGU RENGİ',
+            _StripLabel(label: 'DOLGU RENGİ'),
+            const SizedBox(height: 6),
+            ColorPickerStrip(
               selectedColor: settings.fillColor,
               onColorSelected: (c) => ref.read(
                   shapesSettingsProvider.notifier).setFillColor(c),
@@ -66,69 +68,16 @@ class ShapesSettingsPanel extends ConsumerWidget {
   }
 }
 
-/// GoodNotes-style slider: uppercase label + value + compact slider.
-class _GoodNotesSlider extends StatelessWidget {
-  const _GoodNotesSlider({
-    required this.label, required this.value, required this.min,
-    required this.max, required this.displayValue,
-    required this.activeColor, required this.onChanged,
-  });
+/// Section label for color strip.
+class _StripLabel extends StatelessWidget {
+  const _StripLabel({required this.label});
   final String label;
-  final double value, min, max;
-  final String displayValue;
-  final Color activeColor;
-  final ValueChanged<double> onChanged;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Column(mainAxisSize: MainAxisSize.min, children: [
-      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
-            color: cs.onSurfaceVariant, letterSpacing: 0.5)),
-        Text(displayValue, style: TextStyle(fontSize: 12,
-            fontWeight: FontWeight.w500, color: cs.onSurface)),
-      ]),
-      const SizedBox(height: 2),
-      SizedBox(height: 28, child: SliderTheme(
-        data: SliderThemeData(
-          trackHeight: 4,
-          thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-          overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
-          activeTrackColor: activeColor,
-          inactiveTrackColor: cs.surfaceContainerHighest,
-          thumbColor: activeColor,
-        ),
-        child: Slider(value: value.clamp(min, max), min: min, max: max,
-            onChanged: onChanged),
-      )),
-    ]);
-  }
-}
-
-/// Color section using unified color picker.
-class _ColorSection extends StatelessWidget {
-  const _ColorSection({
-    required this.label, required this.selectedColor,
-    required this.onColorSelected,
-  });
-  final String label;
-  final Color selectedColor;
-  final ValueChanged<Color> onColorSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-      Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
-          color: cs.onSurfaceVariant, letterSpacing: 0.5)),
-      const SizedBox(height: 6),
-      UnifiedColorPicker(
-        selectedColor: selectedColor, onColorSelected: onColorSelected,
-        quickColors: ColorSets.quickAccess,
-        colorSets: ColorSets.all, chipSize: 24.0, spacing: 6.0,
-      ),
-    ]);
+    return Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
+        color: cs.onSurfaceVariant, letterSpacing: 0.5));
   }
 }
 

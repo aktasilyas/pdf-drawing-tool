@@ -65,33 +65,132 @@ class LaserPainter extends CustomPainter {
     if (stroke.mode == LaserMode.dot || stroke.points.length == 1) {
       _renderDot(canvas, stroke, opacity);
     } else {
-      _renderLine(canvas, stroke, opacity);
+      switch (stroke.lineStyle) {
+        case LaserLineStyle.solid:
+          _renderSolidLine(canvas, stroke, opacity);
+        case LaserLineStyle.hollow:
+          _renderHollowLine(canvas, stroke, opacity);
+        case LaserLineStyle.rainbow:
+          _renderRainbowLine(canvas, stroke, opacity);
+      }
     }
   }
 
-  void _renderLine(Canvas canvas, LaserStroke stroke, double opacity) {
+  // ─── SOLID LINE (4-layer vivid neon glow) ───
+
+  void _renderSolidLine(Canvas canvas, LaserStroke stroke, double opacity) {
     final path = _buildPath(stroke.points);
     final t = stroke.thickness;
     final color = stroke.color;
 
-    // Layer 1: Outer glow
+    // Layer 1: Wide outer glow
     _outerPaint
-      ..color = color.withValues(alpha: 0.35 * opacity)
-      ..strokeWidth = t * 8
-      ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, t * 4);
+      ..color = color.withValues(alpha: 0.5 * opacity)
+      ..strokeWidth = t * 10
+      ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, t * 6);
     canvas.drawPath(path, _outerPaint);
 
     // Layer 2: Middle glow
     _middlePaint
-      ..color = color.withValues(alpha: 0.7 * opacity)
+      ..color = color.withValues(alpha: 0.85 * opacity)
+      ..strokeWidth = t * 5
+      ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, t * 2);
+    canvas.drawPath(path, _middlePaint);
+
+    // Layer 3: Tight bright glow
+    _corePaint
+      ..color = color.withValues(alpha: 0.95 * opacity)
+      ..strokeWidth = t * 2.5
+      ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, t * 0.5);
+    canvas.drawPath(path, _corePaint);
+
+    // Layer 4: Bright white core
+    final coreColor = Color.lerp(color, Colors.white, 0.7)!;
+    _corePaint
+      ..color = coreColor.withValues(alpha: opacity)
+      ..strokeWidth = t * 1.2
+      ..maskFilter = null;
+    canvas.drawPath(path, _corePaint);
+  }
+
+  // ─── HOLLOW LINE (tight glow + sharp colored core) ───
+
+  void _renderHollowLine(Canvas canvas, LaserStroke stroke, double opacity) {
+    final path = _buildPath(stroke.points);
+    final t = stroke.thickness;
+    final color = stroke.color;
+
+    // Layer 1: Subtle outer glow (narrow)
+    _outerPaint
+      ..color = color.withValues(alpha: 0.3 * opacity)
+      ..strokeWidth = t * 6
+      ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, t * 3);
+    canvas.drawPath(path, _outerPaint);
+
+    // Layer 2: Tight inner glow
+    _middlePaint
+      ..color = color.withValues(alpha: 0.6 * opacity)
+      ..strokeWidth = t * 3
+      ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, t * 0.8);
+    canvas.drawPath(path, _middlePaint);
+
+    // Layer 3: Sharp solid color core (dominant)
+    _corePaint
+      ..color = color.withValues(alpha: opacity)
+      ..strokeWidth = t * 1.8
+      ..maskFilter = null;
+    canvas.drawPath(path, _corePaint);
+  }
+
+  // ─── RAINBOW LINE (spectrum gradient along path) ───
+
+  static const _rainbowColors = [
+    Color(0xFFFF0000), // Red
+    Color(0xFFFF8800), // Orange
+    Color(0xFFFFFF00), // Yellow
+    Color(0xFF00FF00), // Green
+    Color(0xFF0088FF), // Blue
+    Color(0xFF8800FF), // Indigo
+    Color(0xFFFF00FF), // Violet
+  ];
+
+  void _renderRainbowLine(Canvas canvas, LaserStroke stroke, double opacity) {
+    if (stroke.points.length < 2) return;
+    final path = _buildPath(stroke.points);
+    final t = stroke.thickness;
+
+    // Compute path bounds for gradient direction
+    final bounds = path.getBounds();
+
+    final gradient = ui.Gradient.linear(
+      bounds.topLeft,
+      bounds.bottomRight,
+      _rainbowColors.map((c) => c.withValues(alpha: opacity)).toList(),
+      List.generate(
+        _rainbowColors.length,
+        (i) => i / (_rainbowColors.length - 1),
+      ),
+    );
+
+    // Layer 1: Rainbow outer glow
+    _outerPaint
+      ..shader = gradient
+      ..strokeWidth = t * 8
+      ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, t * 4);
+    canvas.drawPath(path, _outerPaint);
+    _outerPaint.shader = null;
+
+    // Layer 2: Rainbow middle glow
+    _middlePaint
+      ..shader = gradient
       ..strokeWidth = t * 3.5
       ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, t * 1.5);
     canvas.drawPath(path, _middlePaint);
+    _middlePaint.shader = null;
 
-    // Layer 3: Inner core (near-white)
-    final coreColor = Color.lerp(color, Colors.white, 0.5)!;
+    // Layer 3: Bright white core
     _corePaint
-      ..color = coreColor.withValues(alpha: opacity)
+      ..color = Colors.white.withValues(alpha: 0.9 * opacity)
       ..strokeWidth = t * 1.5
       ..maskFilter = null;
     canvas.drawPath(path, _corePaint);
@@ -102,26 +201,26 @@ class LaserPainter extends CustomPainter {
     final r = stroke.thickness * 1.5;
     final color = stroke.color;
 
-    // Layer 1: Outer glow
+    // Layer 1: Wide outer glow
     _outerPaint
-      ..color = color.withValues(alpha: 0.35 * opacity)
+      ..color = color.withValues(alpha: 0.5 * opacity)
       ..strokeWidth = 0
       ..style = PaintingStyle.fill
-      ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, r * 4);
-    canvas.drawCircle(center, r * 4, _outerPaint);
+      ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, r * 5);
+    canvas.drawCircle(center, r * 5, _outerPaint);
     _outerPaint.style = PaintingStyle.stroke;
 
     // Layer 2: Middle glow
     _middlePaint
-      ..color = color.withValues(alpha: 0.7 * opacity)
+      ..color = color.withValues(alpha: 0.85 * opacity)
       ..strokeWidth = 0
       ..style = PaintingStyle.fill
-      ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, r * 1.5);
-    canvas.drawCircle(center, r * 2, _middlePaint);
+      ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, r * 2);
+    canvas.drawCircle(center, r * 2.5, _middlePaint);
     _middlePaint.style = PaintingStyle.stroke;
 
-    // Layer 3: Inner core
-    final coreColor = Color.lerp(color, Colors.white, 0.5)!;
+    // Layer 3: Bright core
+    final coreColor = Color.lerp(color, Colors.white, 0.7)!;
     _corePaint
       ..color = coreColor.withValues(alpha: opacity)
       ..strokeWidth = 0

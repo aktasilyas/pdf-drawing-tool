@@ -13,6 +13,7 @@ class LaserStroke {
     required this.color,
     required this.thickness,
     required this.mode,
+    required this.lineStyle,
     required this.completedAt,
     required this.fadeDuration,
   });
@@ -22,6 +23,7 @@ class LaserStroke {
   final Color color;
   final double thickness;
   final LaserMode mode;
+  final LaserLineStyle lineStyle;
   final DateTime completedAt;
   final Duration fadeDuration;
 
@@ -43,6 +45,7 @@ class LaserStroke {
       color: color,
       thickness: thickness,
       mode: mode,
+      lineStyle: lineStyle,
       completedAt: completedAt,
       fadeDuration: fadeDuration,
     );
