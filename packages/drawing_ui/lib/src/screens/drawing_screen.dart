@@ -72,7 +72,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
     final size = MediaQuery.of(context).size;
     final isTablet = size.width >= ToolbarLayoutMode.compactBreakpoint;
     final showSidebar = _isSidebarOpen && ref.read(pageCountProvider) > 1;
-    final sidebarWidth = (isTablet && showSidebar) ? 140.0 : 0.0;
+    final sidebarWidth = (isTablet && showSidebar) ? kPageSidebarWidth : 0.0;
     final viewportSize = Size(size.width - sidebarWidth, size.height);
     final currentPage = ref.read(currentPageProvider);
     final pageSize = Size(currentPage.size.width, currentPage.size.height);
@@ -102,6 +102,18 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
         isPenPickerMode: isPenPickerMode,
         onPenSelected: _onPenSelected,
       );
+    });
+
+    // Sync page index from PageManager → DocumentProvider.
+    // This ensures all navigation sources (indicator bar, swipe, sidebar)
+    // keep the document's currentPageIndex in sync for correct auto-save.
+    ref.listen<int>(currentPageIndexProvider, (previous, current) {
+      if (previous != null && previous != current) {
+        final doc = ref.read(documentProvider);
+        if (doc.isMultiPage && doc.currentPageIndex != current) {
+          ref.read(documentProvider.notifier).updateDocument(doc.setCurrentPage(current));
+        }
+      }
     });
 
     // Listen to document changes for PDF prefetch and canvas transform
@@ -177,7 +189,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                           AnimatedContainer(
                             duration: const Duration(milliseconds: 250),
                             curve: Curves.easeInOut,
-                            width: showSidebar ? 140.0 : 0.0,
+                            width: showSidebar ? kPageSidebarWidth : 0.0,
                             clipBehavior: Clip.antiAlias,
                             decoration: const BoxDecoration(),
                             child: AnimatedOpacity(
@@ -228,10 +240,10 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                 AnimatedPositioned(
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.easeInOut,
-                  left: showSidebar ? 0 : -140,
+                  left: showSidebar ? 0 : -kPageSidebarWidth,
                   top: 0,
                   bottom: 0,
-                  width: 140,
+                  width: kPageSidebarWidth,
                   child: buildPageSidebar(context: context, ref: ref, thumbnailCache: _thumbnailCache),
                 ),
             ],

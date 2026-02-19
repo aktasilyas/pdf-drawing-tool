@@ -132,7 +132,7 @@ void main() {
 
       await tester.pump();
 
-      expect(find.byIcon(Icons.add), findsOneWidget);
+      expect(find.text('Add Page'), findsOneWidget);
     });
 
     testWidgets('should call onAddPage when add button tapped',
@@ -154,7 +154,7 @@ void main() {
 
       await tester.pump();
 
-      await tester.tap(find.byIcon(Icons.add));
+      await tester.tap(find.text('Add Page'));
       expect(addCalled, true);
     });
 
@@ -174,7 +174,7 @@ void main() {
 
       await tester.pump();
 
-      expect(find.byIcon(Icons.add), findsNothing);
+      expect(find.text('Add Page'), findsNothing);
     });
 
     testWidgets('should show delete button on long press', (tester) async {

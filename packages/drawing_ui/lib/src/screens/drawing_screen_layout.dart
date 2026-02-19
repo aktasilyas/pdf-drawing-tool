@@ -16,6 +16,9 @@ import 'package:drawing_ui/src/screens/drawing_screen_panels.dart';
 import 'package:drawing_ui/src/toolbar/tool_groups.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_layout_mode.dart';
 
+/// Sidebar width for the page navigator panel.
+const double kPageSidebarWidth = 240;
+
 /// Build the canvas area with all layers.
 Widget buildDrawingCanvasArea({
   required BuildContext context,
@@ -35,54 +38,28 @@ Widget buildDrawingCanvasArea({
     child: Stack(
       clipBehavior: Clip.hardEdge,
       children: [
-        Positioned.fill(
-          child: RepaintBoundary(
-            child: CustomPaint(
-              painter: InfiniteBackgroundPainter(
-                background: currentPage.background,
-                zoom: transform.zoom,
-                offset: transform.offset,
-                colorScheme: colorScheme,
-              ),
-              size: Size.infinite,
-            ),
-          ),
-        ),
-        Positioned.fill(
-          child: DrawingCanvas(
-            canvasMode: canvasMode,
-            isReadOnly: isReadOnly,
-          ),
-        ),
-        // Always present to prevent Stack position shifting when
-        // activePanelProvider toggles between tool and null.
+        Positioned.fill(child: RepaintBoundary(child: CustomPaint(
+          painter: InfiniteBackgroundPainter(background: currentPage.background,
+              zoom: transform.zoom, offset: transform.offset, colorScheme: colorScheme),
+          size: Size.infinite))),
+        Positioned.fill(child: DrawingCanvas(canvasMode: canvasMode, isReadOnly: isReadOnly)),
+        // Always present to prevent Stack position shifting when activePanelProvider toggles.
         if (!isReadOnly)
-          Positioned.fill(
-            child: IgnorePointer(
-              ignoring: ref.watch(activePanelProvider) == null,
-              child: GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onTap: onClosePanel,
-                child: const SizedBox.expand(),
-              ),
-            ),
-          ),
+          Positioned.fill(child: IgnorePointer(
+            ignoring: ref.watch(activePanelProvider) == null,
+            child: GestureDetector(behavior: HitTestBehavior.translucent, onTap: onClosePanel,
+                child: const SizedBox.expand()),
+          )),
         if (!isReadOnly)
-          Positioned(
-            left: penBoxPosition.dx,
-            top: penBoxPosition.dy,
-            child: FloatingPenBox(
-              position: penBoxPosition,
-              onPositionChanged: (delta) {
-                final newPosition = penBoxPosition + delta;
-                final clampedPosition = Offset(
-                  newPosition.dx.clamp(0, MediaQuery.of(context).size.width - 60),
-                  newPosition.dy.clamp(0, MediaQuery.of(context).size.height - 200),
-                );
-                onPenBoxPositionChanged(clampedPosition);
-              },
-            ),
-          ),
+          Positioned(left: penBoxPosition.dx, top: penBoxPosition.dy, child: FloatingPenBox(
+            position: penBoxPosition,
+            onPositionChanged: (delta) {
+              final p = penBoxPosition + delta;
+              onPenBoxPositionChanged(Offset(
+                p.dx.clamp(0, MediaQuery.of(context).size.width - 60),
+                p.dy.clamp(0, MediaQuery.of(context).size.height - 200)));
+            },
+          )),
         if (!isReadOnly) const FloatingUndoRedo(),
         if (!isReadOnly)
           Positioned(right: 16, bottom: 16, child: AskAIButton(onTap: onOpenAIPanel)),
@@ -122,93 +99,89 @@ Widget buildDrawingCanvasArea({
   return canvasStack;
 }
 
-/// Build the page navigator sidebar.
+/// Build the page navigator sidebar with a 2-column grid layout.
 Widget buildPageSidebar({required BuildContext context, required WidgetRef ref, required ThumbnailCache thumbnailCache}) {
   final pageManager = ref.watch(pageManagerProvider);
   final pageCount = ref.watch(pageCountProvider);
-  final colorScheme = Theme.of(context).colorScheme;
+  final cs = Theme.of(context).colorScheme;
   final isDark = Theme.of(context).brightness == Brightness.dark;
-
   return Container(
-    width: 140,
-    constraints: const BoxConstraints(minWidth: 100),
+    width: kPageSidebarWidth,
     decoration: BoxDecoration(
-      color: isDark ? colorScheme.surfaceContainerLow : colorScheme.surfaceContainerLowest,
-      border: Border(right: BorderSide(color: colorScheme.outlineVariant, width: 0.5)),
+      color: isDark ? cs.surfaceContainerLow : cs.surfaceContainerLowest,
+      border: Border(right: BorderSide(color: cs.outlineVariant, width: 0.5)),
     ),
-    child: Column(children: [
+    child: GridView.builder(
+      padding: const EdgeInsets.all(12),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2, crossAxisSpacing: 12, mainAxisSpacing: 16, childAspectRatio: 0.58,
+      ),
+      itemCount: pageCount + 1,
+      itemBuilder: (context, index) {
+        if (index < pageCount) {
+          return _buildGridThumbnailItem(context, ref, pageManager, thumbnailCache, index, cs, isDark);
+        }
+        return _buildAddPageCell(context, ref, cs, isDark);
+      },
+    ),
+  );
+}
+
+/// Build a single grid thumbnail item with page number and more icon.
+Widget _buildGridThumbnailItem(BuildContext context, WidgetRef ref, dynamic pageManager,
+    ThumbnailCache thumbnailCache, int index, ColorScheme cs, bool isDark) {
+  final page = pageManager.pages[index];
+  final sel = index == pageManager.currentIndex;
+  return GestureDetector(
+    onTap: () => ref.read(pageManagerProvider.notifier).goToPage(index),
+    child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       Expanded(
-        child: ListView.builder(
-          padding: const EdgeInsets.only(left: 12, right: 12, top: 16, bottom: 16),
-          itemCount: pageCount,
-          itemBuilder: (context, index) => _buildThumbnailItem(context, ref, pageManager, thumbnailCache, index, colorScheme, isDark),
+        child: Container(
+          decoration: BoxDecoration(
+            color: isDark ? cs.surfaceContainer : cs.surface, borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: sel ? cs.primary : cs.outlineVariant, width: sel ? 2 : 0.5),
+            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: sel ? 0.12 : 0.05),
+                blurRadius: sel ? 8 : 3, offset: Offset(0, sel ? 2 : 1))],
+          ),
+          child: ClipRRect(borderRadius: BorderRadius.circular(7),
+            child: PageThumbnail(page: page, cache: thumbnailCache, width: 102, height: 140,
+                isSelected: sel, showPageNumber: false)),
         ),
       ),
-      _buildAddPageButton(context, ref),
+      const SizedBox(height: 4),
+      Row(children: [
+        Text('${index + 1}', style: TextStyle(fontSize: 11,
+            fontWeight: sel ? FontWeight.w600 : FontWeight.w400, color: sel ? cs.primary : cs.onSurfaceVariant)),
+        const Spacer(),
+        SizedBox(width: 28, height: 28,
+            child: PhosphorIcon(StarNoteIcons.more, size: 16, color: cs.onSurfaceVariant)),
+      ]),
     ]),
   );
 }
 
-/// Build a single thumbnail item.
-Widget _buildThumbnailItem(BuildContext context, WidgetRef ref, dynamic pageManager,
-    ThumbnailCache thumbnailCache, int index, ColorScheme cs, bool isDark) {
-  final page = pageManager.pages[index];
-  final sel = index == pageManager.currentIndex;
-  return Padding(
-    padding: const EdgeInsets.only(bottom: 20),
-    child: GestureDetector(
-      onTap: () {
-        ref.read(pageManagerProvider.notifier).goToPage(index);
-        final doc = ref.read(documentProvider);
-        if (doc.isMultiPage && doc.currentPageIndex != index) {
-          ref.read(documentProvider.notifier).updateDocument(doc.setCurrentPage(index));
-        }
-      },
-      child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Container(
-          height: 152,
+/// Build the "Sayfa ekle" cell that sits inside the grid after the last page.
+Widget _buildAddPageCell(BuildContext context, WidgetRef ref, ColorScheme cs, bool isDark) {
+  return GestureDetector(
+    onTap: () => ref.read(pageManagerProvider.notifier).addPage(),
+    child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      Expanded(
+        child: Container(
           decoration: BoxDecoration(
             color: isDark ? cs.surfaceContainer : cs.surface, borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: sel ? cs.primary : cs.outlineVariant, width: sel ? 2 : 1),
-            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: sel ? 0.12 : 0.06), blurRadius: sel ? 8 : 4, offset: Offset(0, sel ? 2 : 1))],
+            border: Border.all(color: cs.outlineVariant, width: 1),
           ),
-          child: ClipRRect(borderRadius: BorderRadius.circular(7),
-            child: PageThumbnail(page: page, cache: thumbnailCache, width: 116, height: 152, isSelected: sel, showPageNumber: false)),
-        ),
-        const SizedBox(height: 6),
-        Text('${index + 1}', style: TextStyle(fontSize: 12, fontWeight: sel ? FontWeight.w600 : FontWeight.w400,
-            color: sel ? cs.primary : cs.onSurfaceVariant, letterSpacing: -0.2)),
-      ]),
-    ),
-  );
-}
-
-/// Build add page button.
-Widget _buildAddPageButton(BuildContext context, WidgetRef ref) {
-  final colorScheme = Theme.of(context).colorScheme;
-  final isDark = Theme.of(context).brightness == Brightness.dark;
-
-  return LayoutBuilder(builder: (context, constraints) {
-    final w = constraints.maxWidth;
-    if (w < 30) return const SizedBox.shrink();
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(border: Border(top: BorderSide(color: colorScheme.outlineVariant, width: 0.5))),
-      child: GestureDetector(
-        onTap: () => ref.read(pageManagerProvider.notifier).addPage(),
-        child: Container(
-          height: 48,
-          padding: EdgeInsets.symmetric(horizontal: w < 80 ? 2.0 : 8.0),
-          decoration: BoxDecoration(
-            color: isDark ? colorScheme.surfaceContainer : colorScheme.surface,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: colorScheme.outlineVariant, width: 1),
-          ),
-          child: Center(child: PhosphorIcon(StarNoteIcons.plus, size: w < 50 ? 16 : 20, color: colorScheme.primary)),
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+            PhosphorIcon(StarNoteIcons.plus, size: 24, color: cs.primary),
+            const SizedBox(height: 4),
+            Text('Sayfa ekle', style: TextStyle(fontSize: 11, color: cs.primary, fontWeight: FontWeight.w500)),
+          ]),
         ),
       ),
-    );
-  });
+      const SizedBox(height: 4),
+      const SizedBox(height: 28),
+    ]),
+  );
 }
 
 /// Floating AI button.
