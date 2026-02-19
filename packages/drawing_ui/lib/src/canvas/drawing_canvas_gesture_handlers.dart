@@ -787,6 +787,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       color: settings.color,
       thickness: settings.thickness,
       mode: settings.mode,
+      lineStyle: settings.lineStyle,
     );
     isLaserDrawing = true;
     lastPoint = event.localPosition;

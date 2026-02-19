@@ -33,6 +33,7 @@ class LaserController extends ChangeNotifier {
     required Color color,
     required double thickness,
     required LaserMode mode,
+    LaserLineStyle lineStyle = LaserLineStyle.solid,
   }) {
     _activeStroke = LaserStroke(
       id: _nextId++,
@@ -40,6 +41,7 @@ class LaserController extends ChangeNotifier {
       color: color,
       thickness: thickness,
       mode: mode,
+      lineStyle: lineStyle,
       completedAt: DateTime.now(), // placeholder, updated on end
       fadeDuration: Duration.zero, // placeholder
     );
@@ -72,6 +74,7 @@ class LaserController extends ChangeNotifier {
       color: stroke.color,
       thickness: stroke.thickness,
       mode: stroke.mode,
+      lineStyle: stroke.lineStyle,
       completedAt: DateTime.now(),
       fadeDuration: fadeDuration,
     ));

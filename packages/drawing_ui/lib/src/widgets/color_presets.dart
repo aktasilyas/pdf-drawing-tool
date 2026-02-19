@@ -50,6 +50,30 @@ class ColorPresets {
     Color(0xFFFF6E40), // Turuncu
   ];
 
+  /// 20 popüler renk — strip widget için
+  static const popular20 = [
+    Color(0xFF000000), // Siyah
+    Color(0xFF424242), // Koyu Gri
+    Color(0xFF9E9E9E), // Gri
+    Color(0xFFFFFFFF), // Beyaz
+    Color(0xFFE53935), // Kırmızı
+    Color(0xFFFF9800), // Turuncu
+    Color(0xFFFFC107), // Sarı
+    Color(0xFF43A047), // Yeşil
+    Color(0xFF1E88E5), // Mavi
+    Color(0xFF1A237E), // Lacivert
+    Color(0xFF9C27B0), // Mor
+    Color(0xFFE91E63), // Pembe
+    Color(0xFF795548), // Kahverengi
+    Color(0xFF00BCD4), // Turkuaz
+    Color(0xFF880E4F), // Bordo
+    Color(0xFF827717), // Zeytin Yeşili
+    Color(0xFF81D4FA), // Açık Mavi
+    Color(0xFFCE93D8), // Lavanta
+    Color(0xFFFFCC80), // Şeftali
+    Color(0xFFFF7043), // Mercan
+  ];
+
   /// Hızlı erişim renkleri
   static const quickAccess = [
     Color(0xFF000000),

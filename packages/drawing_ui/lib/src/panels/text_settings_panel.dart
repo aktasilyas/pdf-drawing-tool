@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
-import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/panels/text_preview_painter.dart';
-import 'package:drawing_ui/src/widgets/compact_color_picker.dart';
-import 'package:drawing_ui/src/widgets/color_presets.dart';
+import 'package:drawing_ui/src/widgets/color_picker_strip.dart';
 import 'package:drawing_ui/src/widgets/goodnotes_slider.dart';
 
 /// Settings panel for the text tool.
@@ -80,7 +77,7 @@ class TextSettingsPanel extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 8),
-          _TextColorPicker(
+          ColorPickerStrip(
             selectedColor: Color(settings.color),
             onColorSelected: (color) => ref
                 .read(textSettingsProvider.notifier)
@@ -111,177 +108,6 @@ class TextSettingsPanel extends ConsumerWidget {
                 ref.read(textSettingsProvider.notifier).toggleUnderline(),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Text Color Picker — square chips with radius + palette button
-// ---------------------------------------------------------------------------
-
-class _TextColorPicker extends StatelessWidget {
-  const _TextColorPicker({
-    required this.selectedColor,
-    required this.onColorSelected,
-  });
-
-  final Color selectedColor;
-  final ValueChanged<Color> onColorSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = ColorPresets.quickAccess.take(5).toList();
-
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        ...colors.map((color) => _SquareColorChip(
-              color: color,
-              isSelected: _colorsMatch(color, selectedColor),
-              onTap: () => onColorSelected(color),
-            )),
-        _PaletteButton(onTap: () => _showColorPalette(context)),
-      ],
-    );
-  }
-
-  void _showColorPalette(BuildContext context) {
-    final overlay = Overlay.of(context);
-    late OverlayEntry overlayEntry;
-
-    overlayEntry = OverlayEntry(
-      builder: (overlayContext) {
-        return Material(
-          color: Colors.black.withValues(alpha: 137.0 / 255.0),
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () => overlayEntry.remove(),
-            child: Center(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () {},
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: 320,
-                    maxHeight:
-                        MediaQuery.of(overlayContext).size.height * 0.85,
-                  ),
-                  child: CompactColorPicker(
-                    selectedColor: selectedColor,
-                    onColorSelected: (color) {
-                      onColorSelected(color);
-                      overlayEntry.remove();
-                    },
-                    onClose: () => overlayEntry.remove(),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-
-    overlay.insert(overlayEntry);
-  }
-
-  bool _colorsMatch(Color a, Color b) {
-    return (a.r * 255.0).round().clamp(0, 255) ==
-            (b.r * 255.0).round().clamp(0, 255) &&
-        (a.g * 255.0).round().clamp(0, 255) ==
-            (b.g * 255.0).round().clamp(0, 255) &&
-        (a.b * 255.0).round().clamp(0, 255) ==
-            (b.b * 255.0).round().clamp(0, 255);
-  }
-}
-
-class _SquareColorChip extends StatelessWidget {
-  const _SquareColorChip({
-    required this.color,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final Color color;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 32,
-        height: 32,
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isSelected
-                ? cs.primary
-                : (color.computeLuminance() > 0.8
-                    ? cs.outline.withValues(alpha: 0.5)
-                    : Colors.transparent),
-            width: isSelected ? 2.5 : 1,
-          ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: cs.primary.withValues(alpha: 0.3),
-                    blurRadius: 4,
-                    spreadRadius: 1,
-                  ),
-                ]
-              : null,
-        ),
-        child: isSelected
-            ? PhosphorIcon(
-                StarNoteIcons.check,
-                size: 14,
-                color: color.computeLuminance() > 0.5
-                    ? Colors.black
-                    : Colors.white,
-              )
-            : null,
-      ),
-    );
-  }
-}
-
-class _PaletteButton extends StatelessWidget {
-  const _PaletteButton({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 32,
-        height: 32,
-        decoration: BoxDecoration(
-          color: isDark
-              ? cs.surfaceContainerHighest
-              : cs.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: cs.outline.withValues(alpha: 0.3),
-          ),
-        ),
-        child: PhosphorIcon(
-          StarNoteIcons.palette,
-          size: 16,
-          color: cs.primary,
-        ),
       ),
     );
   }

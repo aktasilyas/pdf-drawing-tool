@@ -6,6 +6,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/widgets/color_picker_strip.dart';
 import 'package:drawing_ui/src/widgets/compact_toggle.dart';
 import 'package:drawing_ui/src/widgets/goodnotes_slider.dart';
 
@@ -91,6 +92,16 @@ class HighlighterSettingsPanel extends ConsumerWidget {
             onChanged: (v) => ref
                 .read(highlighterSettingsProvider.notifier)
                 .setStraightLineMode(v),
+          ),
+          const SizedBox(height: 16),
+
+          // ── RENK SEÇİCİ ──
+          ColorPickerStrip(
+            selectedColor: settings.color,
+            isHighlighter: true,
+            onColorSelected: (c) => ref
+                .read(highlighterSettingsProvider.notifier)
+                .setColor(c),
           ),
         ],
       ),

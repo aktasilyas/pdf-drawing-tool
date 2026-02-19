@@ -92,6 +92,7 @@ export 'src/widgets/anchored_panel.dart';
 export 'src/widgets/compact_color_picker.dart';
 export 'src/widgets/color_chip.dart';
 export 'src/widgets/color_chips_grid.dart';
+export 'src/widgets/color_picker_strip.dart';
 export 'src/widgets/color_picker_widgets.dart';
 export 'src/widgets/color_presets.dart';
 export 'src/widgets/cover_preview_widget.dart';
