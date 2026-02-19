@@ -16,3 +16,4 @@ export 'selected_elements_painter.dart';
 export 'sticky_note_handles_painter.dart';
 export 'sticky_note_painter.dart';
 export 'sticky_note_resize_handles.dart';
+export 'page_slide_transition.dart';

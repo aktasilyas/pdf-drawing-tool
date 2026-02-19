@@ -30,19 +30,33 @@ Widget buildDrawingCanvasArea({
   required ValueChanged<Offset> onPenBoxPositionChanged,
   required VoidCallback onClosePanel,
   required VoidCallback onOpenAIPanel,
+  GlobalKey<PageSlideTransitionState>? pageTransitionKey,
+  ValueChanged<int>? onPageChanged,
   CanvasColorScheme? colorScheme,
   bool isReadOnly = false,
 }) {
   const double swipeVelocityThreshold = 300;
+
+  // Core canvas content: background + drawing canvas (wrapped in transition)
+  Widget canvasContent = Stack(
+    children: [
+      Positioned.fill(child: RepaintBoundary(child: CustomPaint(
+        painter: InfiniteBackgroundPainter(background: currentPage.background,
+            zoom: transform.zoom, offset: transform.offset, colorScheme: colorScheme),
+        size: Size.infinite))),
+      Positioned.fill(child: DrawingCanvas(canvasMode: canvasMode, isReadOnly: isReadOnly)),
+    ],
+  );
+
+  if (pageTransitionKey != null) {
+    canvasContent = PageSlideTransition(key: pageTransitionKey, child: canvasContent);
+  }
+
   final canvasStack = ClipRect(
     child: Stack(
       clipBehavior: Clip.hardEdge,
       children: [
-        Positioned.fill(child: RepaintBoundary(child: CustomPaint(
-          painter: InfiniteBackgroundPainter(background: currentPage.background,
-              zoom: transform.zoom, offset: transform.offset, colorScheme: colorScheme),
-          size: Size.infinite))),
-        Positioned.fill(child: DrawingCanvas(canvasMode: canvasMode, isReadOnly: isReadOnly)),
+        Positioned.fill(child: canvasContent),
         // Always present to prevent Stack position shifting when activePanelProvider toggles.
         if (!isReadOnly)
           Positioned.fill(child: IgnorePointer(
@@ -71,11 +85,11 @@ Widget buildDrawingCanvasArea({
             ),
           ),
         // Floating page indicator bar
-        const Positioned(
+        Positioned(
           left: 0,
           right: 0,
           bottom: 0,
-          child: PageIndicatorBar(),
+          child: PageIndicatorBar(onPageChanged: onPageChanged),
         ),
       ],
     ),
@@ -87,9 +101,16 @@ Widget buildDrawingCanvasArea({
       onHorizontalDragEnd: (details) {
         final velocity = details.primaryVelocity ?? 0;
         if (velocity < -swipeVelocityThreshold) {
-          ref.read(pageManagerProvider.notifier).nextPage();
+          final idx = ref.read(currentPageIndexProvider);
+          final count = ref.read(pageCountProvider);
+          if (idx < count - 1) {
+            (onPageChanged ?? (_) => ref.read(pageManagerProvider.notifier).nextPage())(idx + 1);
+          }
         } else if (velocity > swipeVelocityThreshold) {
-          ref.read(pageManagerProvider.notifier).previousPage();
+          final idx = ref.read(currentPageIndexProvider);
+          if (idx > 0) {
+            (onPageChanged ?? (_) => ref.read(pageManagerProvider.notifier).previousPage())(idx - 1);
+          }
         }
       },
       child: canvasStack,
@@ -99,41 +120,124 @@ Widget buildDrawingCanvasArea({
   return canvasStack;
 }
 
-/// Build the page navigator sidebar with a 2-column grid layout.
-Widget buildPageSidebar({required BuildContext context, required WidgetRef ref, required ThumbnailCache thumbnailCache}) {
-  final pageManager = ref.watch(pageManagerProvider);
-  final pageCount = ref.watch(pageCountProvider);
-  final cs = Theme.of(context).colorScheme;
-  final isDark = Theme.of(context).brightness == Brightness.dark;
-  return Container(
-    width: kPageSidebarWidth,
-    decoration: BoxDecoration(
-      color: isDark ? cs.surfaceContainerLow : cs.surfaceContainerLowest,
-      border: Border(right: BorderSide(color: cs.outlineVariant, width: 0.5)),
-    ),
-    child: GridView.builder(
-      padding: const EdgeInsets.all(12),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2, crossAxisSpacing: 12, mainAxisSpacing: 16, childAspectRatio: 0.58,
+/// Page navigator sidebar with a 2-column grid layout.
+///
+/// Automatically scrolls to the currently selected page when mounted
+/// and when the page changes via external navigation.
+class PageSidebar extends ConsumerStatefulWidget {
+  const PageSidebar({super.key, required this.thumbnailCache, this.onPageTap});
+  final ThumbnailCache thumbnailCache;
+  final ValueChanged<int>? onPageTap;
+
+  @override
+  ConsumerState<PageSidebar> createState() => _PageSidebarState();
+}
+
+class _PageSidebarState extends ConsumerState<PageSidebar> {
+  static const int _crossAxisCount = 2;
+  static const double _crossAxisSpacing = 12;
+  static const double _mainAxisSpacing = 16;
+  static const double _childAspectRatio = 0.58;
+  static const double _gridPadding = 12;
+
+  late final ScrollController _scrollController;
+
+  double _offsetForIndex(int index) {
+    final availableWidth = kPageSidebarWidth - _gridPadding * 2;
+    final itemWidth = (availableWidth - _crossAxisSpacing * (_crossAxisCount - 1)) / _crossAxisCount;
+    final itemHeight = itemWidth / _childAspectRatio;
+    final rowHeight = itemHeight + _mainAxisSpacing;
+    final row = index ~/ _crossAxisCount;
+    // Place the row roughly 1/3 from the top of the viewport
+    return (_gridPadding + row * rowHeight).clamp(0.0, double.infinity);
+  }
+
+  void _scrollToPage(int index, {bool animate = true}) {
+    if (!_scrollController.hasClients) return;
+    final target = _offsetForIndex(index).clamp(0.0, _scrollController.position.maxScrollExtent);
+    if (animate) {
+      _scrollController.animateTo(target, duration: const Duration(milliseconds: 200), curve: Curves.easeInOut);
+    } else {
+      _scrollController.jumpTo(target);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    final currentIndex = ref.read(currentPageIndexProvider);
+    _scrollController = ScrollController(initialScrollOffset: _offsetForIndex(currentIndex));
+    // Correct scroll position after first layout in case providers
+    // weren't fully initialized when initialScrollOffset was calculated.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _correctScrollIfNeeded());
+  }
+
+  void _correctScrollIfNeeded() {
+    if (!mounted || !_scrollController.hasClients) return;
+    final idx = ref.read(currentPageIndexProvider);
+    final target = _offsetForIndex(idx);
+    final max = _scrollController.position.maxScrollExtent;
+    if (max <= 0 && target > 0) {
+      // GridView layout hasn't settled yet, retry next frame
+      WidgetsBinding.instance.addPostFrameCallback((_) => _correctScrollIfNeeded());
+      return;
+    }
+    final clamped = target.clamp(0.0, max);
+    if ((_scrollController.offset - clamped).abs() > 1) {
+      _scrollController.jumpTo(clamped);
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pageManager = ref.watch(pageManagerProvider);
+    final pageCount = ref.watch(pageCountProvider);
+    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    ref.listen<int>(currentPageIndexProvider, (prev, next) {
+      if (prev != next) _scrollToPage(next);
+    });
+
+    return Container(
+      width: kPageSidebarWidth,
+      decoration: BoxDecoration(
+        color: isDark ? cs.surfaceContainerLow : cs.surfaceContainerLowest,
+        border: Border(right: BorderSide(color: cs.outlineVariant, width: 0.5)),
       ),
-      itemCount: pageCount + 1,
-      itemBuilder: (context, index) {
-        if (index < pageCount) {
-          return _buildGridThumbnailItem(context, ref, pageManager, thumbnailCache, index, cs, isDark);
-        }
-        return _buildAddPageCell(context, ref, cs, isDark);
-      },
-    ),
-  );
+      child: GridView.builder(
+        controller: _scrollController,
+        padding: const EdgeInsets.all(_gridPadding),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: _crossAxisCount, crossAxisSpacing: _crossAxisSpacing,
+          mainAxisSpacing: _mainAxisSpacing, childAspectRatio: _childAspectRatio,
+        ),
+        itemCount: pageCount + 1,
+        itemBuilder: (context, index) {
+          if (index < pageCount) {
+            return _buildGridThumbnailItem(
+                context, ref, pageManager, widget.thumbnailCache, index, cs, isDark, widget.onPageTap);
+          }
+          return _buildAddPageCell(context, ref, cs, isDark);
+        },
+      ),
+    );
+  }
 }
 
 /// Build a single grid thumbnail item with page number and more icon.
 Widget _buildGridThumbnailItem(BuildContext context, WidgetRef ref, dynamic pageManager,
-    ThumbnailCache thumbnailCache, int index, ColorScheme cs, bool isDark) {
+    ThumbnailCache thumbnailCache, int index, ColorScheme cs, bool isDark, ValueChanged<int>? onPageTap) {
   final page = pageManager.pages[index];
   final sel = index == pageManager.currentIndex;
   return GestureDetector(
-    onTap: () => ref.read(pageManagerProvider.notifier).goToPage(index),
+    onTap: () => (onPageTap ?? (i) => ref.read(pageManagerProvider.notifier).goToPage(i))(index),
     child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       Expanded(
         child: Container(
