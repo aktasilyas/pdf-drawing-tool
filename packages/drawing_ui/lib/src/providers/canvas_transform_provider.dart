@@ -493,6 +493,33 @@ class CanvasTransformNotifier extends StateNotifier<CanvasTransform> {
   }
   */
 
+  /// Go to a specific zoom level and center the page.
+  void goToZoom({
+    required double targetZoom,
+    required Size viewportSize,
+    required Size pageSize,
+    double minZoom = 0.25,
+    double maxZoom = 5.0,
+  }) {
+    final clampedZoom = targetZoom.clamp(minZoom, maxZoom);
+
+    final pageScreenWidth = pageSize.width * clampedZoom;
+    final pageScreenHeight = pageSize.height * clampedZoom;
+
+    // Center page
+    final offsetX = pageScreenWidth <= viewportSize.width
+        ? (viewportSize.width - pageScreenWidth) / 2
+        : 0.0;
+    final offsetY = pageScreenHeight <= viewportSize.height
+        ? (viewportSize.height - pageScreenHeight) / 2
+        : 0.0;
+
+    state = state.copyWith(
+      zoom: clampedZoom,
+      offset: Offset(offsetX, offsetY),
+    );
+  }
+
   /// Zoom in by a fixed step (for button/keyboard).
   void zoomIn() {
     applyZoomDelta(1.25, Offset.zero); // 25% zoom in

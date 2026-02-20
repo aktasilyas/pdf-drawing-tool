@@ -1969,9 +1969,9 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     final renderBox = context.findRenderObject() as RenderBox?;
     final viewportSize = renderBox?.size ?? const Size(800, 600);
 
-    // Apply zoom (pinch gesture)
-    // Use localFocalPoint for correct coordinate mapping relative to canvas
-    if (lastScale != null && details.scale != 1.0) {
+    // Apply zoom (pinch gesture) — skip if zoom is locked
+    final isZoomLocked = ref.read(zoomLockedProvider);
+    if (!isZoomLocked && lastScale != null && details.scale != 1.0) {
       final scaleDelta = details.scale / lastScale!;
       if ((scaleDelta - 1.0).abs() > 0.001) {
         if (mode.isInfinite) {
