@@ -60,6 +60,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
   Future<void> _navigateToPage(int targetIndex) async {
     final currentIndex = ref.read(currentPageIndexProvider);
     if (targetIndex == currentIndex || _isPageTransitioning) return;
+
     _isPageTransitioning = true;
     try {
       final forward = targetIndex > currentIndex;
@@ -93,7 +94,10 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
     final isTablet = size.width >= ToolbarLayoutMode.compactBreakpoint;
     final showSidebar = _isSidebarOpen && ref.read(pageCountProvider) > 1;
     final sidebarWidth = (isTablet && showSidebar) ? kPageSidebarWidth : 0.0;
-    final viewportSize = Size(size.width - sidebarWidth, size.height);
+    var canvasWidth = size.width - sidebarWidth;
+    // In dual page mode, the primary canvas only occupies half the width
+    if (ref.read(dualPageModeProvider)) canvasWidth /= 2;
+    final viewportSize = Size(canvasWidth, size.height);
     final currentPage = ref.read(currentPageProvider);
     final pageSize = Size(currentPage.size.width, currentPage.size.height);
     final canvasMode = widget.canvasMode ?? const core.CanvasMode(isInfinite: true);
@@ -238,6 +242,8 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                             colorScheme: ref.watch(canvasColorSchemeProvider),
                             isReadOnly: isReaderMode,
                             scrollDirection: ref.watch(scrollDirectionProvider),
+                            isDualPage: ref.watch(dualPageModeProvider),
+                            secondaryPage: ref.watch(secondaryPageProvider),
                           ),
                         ),
                       ],

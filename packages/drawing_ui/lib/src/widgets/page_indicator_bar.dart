@@ -50,9 +50,23 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
     final canPrev = ref.watch(canGoPreviousProvider);
     final canNext = ref.watch(canGoNextProvider);
     final scrollDir = ref.watch(scrollDirectionProvider);
+    final isDual = ref.watch(dualPageModeProvider);
     final cs = Theme.of(context).colorScheme;
     ref.listen<int>(currentPageIndexProvider, (_, __) => _showBar());
     if (pageCount <= 1) return const SizedBox.shrink();
+
+    // Dual mode label: "Sayfa X-Y / N", single: "Sayfa X / N"
+    final String pageLabel;
+    if (isDual && currentIndex + 1 < pageCount) {
+      pageLabel = 'Sayfa ${currentIndex + 1}-${currentIndex + 2} / $pageCount';
+    } else {
+      pageLabel = 'Sayfa ${currentIndex + 1} / $pageCount';
+    }
+
+    // In dual mode: can go next if there are 2+ pages beyond current
+    final bool effectiveCanNext = isDual
+        ? currentIndex + 2 < pageCount
+        : canNext;
 
     return GestureDetector(
       onTap: _showBar,
@@ -69,23 +83,23 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
               boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 8, offset: const Offset(0, 2))],
             ),
             child: Row(mainAxisSize: MainAxisSize.min, children: [
-              _NavArrow(icon: scrollDir == Axis.horizontal ? StarNoteIcons.chevronLeft : StarNoteIcons.caretUp, tooltip: 'Önceki Sayfa', onTap: canPrev ? () { _navigateTo(currentIndex - 1, ref); } : null),
+              _NavArrow(icon: scrollDir == Axis.horizontal ? StarNoteIcons.chevronLeft : StarNoteIcons.caretUp, tooltip: 'Önceki Sayfa', onTap: canPrev ? () { _navigateTo(isDual ? (currentIndex - 2).clamp(0, pageCount - 1) : currentIndex - 1, ref); } : null),
               Tooltip(
                 message: 'Sayfaya Git',
                 child: Semantics(
-                  label: 'Sayfa ${currentIndex + 1} / $pageCount, Sayfaya gitmek için dokunun',
+                  label: '$pageLabel, Sayfaya gitmek için dokunun',
                   button: true,
                   child: GestureDetector(
                     onTap: () => _showGoToPageDialog(context, ref, pageCount),
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Text('Sayfa ${currentIndex + 1} / $pageCount',
+                      child: Text(pageLabel,
                           style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: cs.onSurface)),
                     ),
                   ),
                 ),
               ),
-              _NavArrow(icon: scrollDir == Axis.horizontal ? StarNoteIcons.chevronRight : StarNoteIcons.caretDown, tooltip: 'Sonraki Sayfa', onTap: canNext ? () { _navigateTo(currentIndex + 1, ref); } : null),
+              _NavArrow(icon: scrollDir == Axis.horizontal ? StarNoteIcons.chevronRight : StarNoteIcons.caretDown, tooltip: 'Sonraki Sayfa', onTap: effectiveCanNext ? () { _navigateTo(isDual ? (currentIndex + 2).clamp(0, pageCount - 1) : currentIndex + 1, ref); } : null),
             ]),
           )),
         ),

@@ -21,8 +21,6 @@ class PageOptionsPanel extends ConsumerStatefulWidget {
 }
 
 class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
-  bool _showResolvedComments = false;
-
   void _showGoToPageDialog(BuildContext context) {
     final pageCount = ref.read(pageCountProvider);
     final controller = TextEditingController();
@@ -258,13 +256,7 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
               ),
               _thickDivider(cs),
               PageOptionsSectionHeader(title: 'Ayarlar'),
-              PageOptionsToggleItem(
-                icon: StarNoteIcons.comment,
-                label: 'Çözülmüş yorumları göster',
-                value: _showResolvedComments,
-                onChanged: (v) =>
-                    setState(() => _showResolvedComments = v),
-              ),
+              _DualPageModeItem(onClose: widget.onClose),
               _ScrollDirectionItem(onClose: widget.onClose),
               const SizedBox(height: 8),
             ],
@@ -292,6 +284,23 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
         height: 8, thickness: 8,
         color: cs.outlineVariant.withValues(alpha: 0.3),
       );
+}
+
+/// Dual page (side-by-side) mode toggle.
+class _DualPageModeItem extends ConsumerWidget {
+  const _DualPageModeItem({required this.onClose});
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isDual = ref.watch(dualPageModeProvider);
+    return PageOptionsToggleItem(
+      icon: StarNoteIcons.splitView,
+      label: 'Çift sayfa görünümü',
+      value: isDual,
+      onChanged: (v) => ref.read(dualPageModeProvider.notifier).state = v,
+    );
+  }
 }
 
 /// Scroll direction toggle extracted to keep PageOptionsPanel under 300 lines.

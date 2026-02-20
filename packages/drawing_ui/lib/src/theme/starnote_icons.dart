@@ -147,6 +147,7 @@ abstract final class StarNoteIcons {
   static const comment = PhosphorIconsLight.chatCircleDots;
   static const scrollDirection = PhosphorIconsLight.arrowsHorizontal;
   static const scrollDirectionVertical = PhosphorIconsLight.arrowsDownUp;
+  static const splitView = PhosphorIconsLight.squareSplitHorizontal;
 
   // ═══════════════════════════════════════════
   // Page & Document Icons

@@ -17,3 +17,5 @@ export 'sticky_note_handles_painter.dart';
 export 'sticky_note_painter.dart';
 export 'sticky_note_resize_handles.dart';
 export 'page_slide_transition.dart';
+export 'secondary_canvas_view.dart';
+export 'secondary_canvas_layers.dart';
