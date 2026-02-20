@@ -237,6 +237,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                             onPageChanged: _navigateToPage,
                             colorScheme: ref.watch(canvasColorSchemeProvider),
                             isReadOnly: isReaderMode,
+                            scrollDirection: ref.watch(scrollDirectionProvider),
                           ),
                         ),
                       ],

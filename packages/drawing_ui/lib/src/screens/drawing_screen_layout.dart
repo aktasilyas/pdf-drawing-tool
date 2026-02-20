@@ -34,6 +34,7 @@ Widget buildDrawingCanvasArea({
   ValueChanged<int>? onPageChanged,
   CanvasColorScheme? colorScheme,
   bool isReadOnly = false,
+  Axis scrollDirection = Axis.horizontal,
 }) {
   const double swipeVelocityThreshold = 300;
 
@@ -49,7 +50,11 @@ Widget buildDrawingCanvasArea({
   );
 
   if (pageTransitionKey != null) {
-    canvasContent = PageSlideTransition(key: pageTransitionKey, child: canvasContent);
+    canvasContent = PageSlideTransition(
+      key: pageTransitionKey,
+      scrollDirection: scrollDirection,
+      child: canvasContent,
+    );
   }
 
   final canvasStack = ClipRect(
@@ -95,24 +100,27 @@ Widget buildDrawingCanvasArea({
     ),
   );
 
-  // In reader mode, wrap with horizontal swipe for page navigation
+  // In reader mode, wrap with swipe for page navigation
   if (isReadOnly) {
-    return GestureDetector(
-      onHorizontalDragEnd: (details) {
-        final velocity = details.primaryVelocity ?? 0;
-        if (velocity < -swipeVelocityThreshold) {
-          final idx = ref.read(currentPageIndexProvider);
-          final count = ref.read(pageCountProvider);
-          if (idx < count - 1) {
-            (onPageChanged ?? (_) => ref.read(pageManagerProvider.notifier).nextPage())(idx + 1);
-          }
-        } else if (velocity > swipeVelocityThreshold) {
-          final idx = ref.read(currentPageIndexProvider);
-          if (idx > 0) {
-            (onPageChanged ?? (_) => ref.read(pageManagerProvider.notifier).previousPage())(idx - 1);
-          }
+    void handleSwipe(DragEndDetails details) {
+      final velocity = details.primaryVelocity ?? 0;
+      if (velocity < -swipeVelocityThreshold) {
+        final idx = ref.read(currentPageIndexProvider);
+        final count = ref.read(pageCountProvider);
+        if (idx < count - 1) {
+          (onPageChanged ?? (_) => ref.read(pageManagerProvider.notifier).nextPage())(idx + 1);
         }
-      },
+      } else if (velocity > swipeVelocityThreshold) {
+        final idx = ref.read(currentPageIndexProvider);
+        if (idx > 0) {
+          (onPageChanged ?? (_) => ref.read(pageManagerProvider.notifier).previousPage())(idx - 1);
+        }
+      }
+    }
+
+    return GestureDetector(
+      onHorizontalDragEnd: scrollDirection == Axis.horizontal ? handleSwipe : null,
+      onVerticalDragEnd: scrollDirection == Axis.vertical ? handleSwipe : null,
       child: canvasStack,
     );
   }

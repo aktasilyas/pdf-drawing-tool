@@ -8,8 +8,13 @@ import 'package:flutter/material.dart';
 /// navigation, then animates the old screenshot out while the new
 /// page slides in.
 class PageSlideTransition extends StatefulWidget {
-  const PageSlideTransition({super.key, required this.child});
+  const PageSlideTransition({
+    super.key,
+    required this.child,
+    this.scrollDirection = Axis.horizontal,
+  });
   final Widget child;
+  final Axis scrollDirection;
 
   @override
   State<PageSlideTransition> createState() => PageSlideTransitionState();
@@ -94,6 +99,8 @@ class PageSlideTransitionState extends State<PageSlideTransition>
 
     final dir = _isForward ? -1.0 : 1.0;
 
+    final isHorizontal = widget.scrollDirection == Axis.horizontal;
+
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, _) {
@@ -101,17 +108,25 @@ class PageSlideTransitionState extends State<PageSlideTransition>
         return ClipRect(
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final w = constraints.maxWidth;
+              final extent = isHorizontal
+                  ? constraints.maxWidth
+                  : constraints.maxHeight;
+              final oldOffset = isHorizontal
+                  ? Offset(dir * t * extent, 0)
+                  : Offset(0, dir * t * extent);
+              final newOffset = isHorizontal
+                  ? Offset(-dir * (1 - t) * extent, 0)
+                  : Offset(0, -dir * (1 - t) * extent);
               return Stack(
                 children: [
                   // Old page sliding out
                   Transform.translate(
-                    offset: Offset(dir * t * w, 0),
+                    offset: oldOffset,
                     child: RawImage(image: _snapshot, fit: BoxFit.none),
                   ),
                   // New page sliding in
                   Transform.translate(
-                    offset: Offset(-dir * (1 - t) * w, 0),
+                    offset: newOffset,
                     child: child,
                   ),
                 ],

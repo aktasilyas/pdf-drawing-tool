@@ -42,3 +42,4 @@ export 'sticker_provider.dart';
 export 'image_provider.dart';
 export 'sticky_note_provider.dart';
 export 'page_trash_callback_provider.dart';
+export 'scroll_direction_provider.dart';

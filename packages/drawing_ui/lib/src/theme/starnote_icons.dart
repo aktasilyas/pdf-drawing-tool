@@ -143,6 +143,7 @@ abstract final class StarNoteIcons {
   static const orientationLandscape = PhosphorIconsLight.deviceTabletSpeaker;
   static const comment = PhosphorIconsLight.chatCircleDots;
   static const scrollDirection = PhosphorIconsLight.arrowsHorizontal;
+  static const scrollDirectionVertical = PhosphorIconsLight.arrowsDownUp;
 
   // ═══════════════════════════════════════════
   // Page & Document Icons

@@ -49,6 +49,7 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
     final currentIndex = ref.watch(currentPageIndexProvider);
     final canPrev = ref.watch(canGoPreviousProvider);
     final canNext = ref.watch(canGoNextProvider);
+    final scrollDir = ref.watch(scrollDirectionProvider);
     final cs = Theme.of(context).colorScheme;
     ref.listen<int>(currentPageIndexProvider, (_, __) => _showBar());
     if (pageCount <= 1) return const SizedBox.shrink();
@@ -68,7 +69,7 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
               boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 8, offset: const Offset(0, 2))],
             ),
             child: Row(mainAxisSize: MainAxisSize.min, children: [
-              _NavArrow(icon: StarNoteIcons.chevronLeft, tooltip: 'Önceki Sayfa', onTap: canPrev ? () { _navigateTo(currentIndex - 1, ref); } : null),
+              _NavArrow(icon: scrollDir == Axis.horizontal ? StarNoteIcons.chevronLeft : StarNoteIcons.caretUp, tooltip: 'Önceki Sayfa', onTap: canPrev ? () { _navigateTo(currentIndex - 1, ref); } : null),
               Tooltip(
                 message: 'Sayfaya Git',
                 child: Semantics(
@@ -84,7 +85,7 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
                   ),
                 ),
               ),
-              _NavArrow(icon: StarNoteIcons.chevronRight, tooltip: 'Sonraki Sayfa', onTap: canNext ? () { _navigateTo(currentIndex + 1, ref); } : null),
+              _NavArrow(icon: scrollDir == Axis.horizontal ? StarNoteIcons.chevronRight : StarNoteIcons.caretDown, tooltip: 'Sonraki Sayfa', onTap: canNext ? () { _navigateTo(currentIndex + 1, ref); } : null),
             ]),
           )),
         ),

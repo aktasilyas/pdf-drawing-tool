@@ -249,12 +249,7 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
                 onChanged: (v) =>
                     setState(() => _showResolvedComments = v),
               ),
-              PageOptionsMenuItem(
-                icon: StarNoteIcons.scrollDirection,
-                label: 'Kaydırma yönü',
-                trailing: _chevronTrailing(cs, 'Yatay'),
-                onTap: widget.onClose,
-              ),
+              _ScrollDirectionItem(onClose: widget.onClose),
               const SizedBox(height: 8),
             ],
           ),
@@ -281,4 +276,42 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
         height: 8, thickness: 8,
         color: cs.outlineVariant.withValues(alpha: 0.3),
       );
+}
+
+/// Scroll direction toggle extracted to keep PageOptionsPanel under 300 lines.
+class _ScrollDirectionItem extends ConsumerWidget {
+  const _ScrollDirectionItem({required this.onClose});
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final direction = ref.watch(scrollDirectionProvider);
+    final isHorizontal = direction == Axis.horizontal;
+    final cs = Theme.of(context).colorScheme;
+    return PageOptionsMenuItem(
+      icon: isHorizontal
+          ? StarNoteIcons.scrollDirection
+          : StarNoteIcons.scrollDirectionVertical,
+      label: 'Kaydırma yönü',
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            isHorizontal ? 'Yatay' : 'Dikey',
+            style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant),
+          ),
+          const SizedBox(width: 4),
+          PhosphorIcon(
+            StarNoteIcons.chevronRight,
+            size: 18,
+            color: cs.onSurfaceVariant,
+          ),
+        ],
+      ),
+      onTap: () {
+        ref.read(scrollDirectionProvider.notifier).state =
+            isHorizontal ? Axis.vertical : Axis.horizontal;
+      },
+    );
+  }
 }
