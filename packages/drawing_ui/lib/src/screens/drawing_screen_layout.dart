@@ -35,6 +35,8 @@ Widget buildDrawingCanvasArea({
   CanvasColorScheme? colorScheme,
   bool isReadOnly = false,
   Axis scrollDirection = Axis.horizontal,
+  bool isDualPage = false,
+  core.Page? secondaryPage,
 }) {
   const double swipeVelocityThreshold = 300;
 
@@ -48,6 +50,20 @@ Widget buildDrawingCanvasArea({
       Positioned.fill(child: DrawingCanvas(canvasMode: canvasMode, isReadOnly: isReadOnly)),
     ],
   );
+
+  if (isDualPage) {
+    canvasContent = Row(
+      children: [
+        Expanded(child: canvasContent),
+        Expanded(child: SecondaryCanvasView(
+          page: secondaryPage,
+          canvasMode: canvasMode,
+          colorScheme: colorScheme,
+          onTap: onPageChanged,
+        )),
+      ],
+    );
+  }
 
   if (pageTransitionKey != null) {
     canvasContent = PageSlideTransition(

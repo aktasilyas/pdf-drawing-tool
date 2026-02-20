@@ -1953,7 +1953,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       finishTextEditing();
     }
 
-    lastFocalPoint = details.focalPoint;
+    lastFocalPoint = details.localFocalPoint;
     lastScale = 1.0;
   }
 
@@ -1970,14 +1970,15 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     final viewportSize = renderBox?.size ?? const Size(800, 600);
 
     // Apply zoom (pinch gesture)
+    // Use localFocalPoint for correct coordinate mapping relative to canvas
     if (lastScale != null && details.scale != 1.0) {
       final scaleDelta = details.scale / lastScale!;
       if ((scaleDelta - 1.0).abs() > 0.001) {
         if (mode.isInfinite) {
           // Unlimited zoom for whiteboard - use mode's zoom limits
           transformNotifier.applyZoomDelta(
-            scaleDelta, 
-            details.focalPoint,
+            scaleDelta,
+            details.localFocalPoint,
             minZoom: mode.minZoom,
             maxZoom: mode.maxZoom,
           );
@@ -1985,7 +1986,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
           // Clamped zoom for notebook/limited modes
           transformNotifier.applyZoomDeltaClamped(
             scaleDelta,
-            details.focalPoint,
+            details.localFocalPoint,
             minZoom: mode.minZoom,
             maxZoom: mode.maxZoom,
             viewportSize: viewportSize,
@@ -1998,7 +1999,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
 
     // Apply pan (two finger drag)
     if (lastFocalPoint != null) {
-      final panDelta = details.focalPoint - lastFocalPoint!;
+      final panDelta = details.localFocalPoint - lastFocalPoint!;
       if (panDelta.distance > 0.5) {
         if (mode.isInfinite || mode.unlimitedPan) {
           // Unlimited pan for whiteboard
@@ -2015,7 +2016,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       }
     }
 
-    lastFocalPoint = details.focalPoint;
+    lastFocalPoint = details.localFocalPoint;
     lastScale = details.scale;
   }
 
