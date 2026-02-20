@@ -99,19 +99,15 @@ Widget buildDrawingCanvasArea({
         if (!isReadOnly) const FloatingUndoRedo(),
         if (!isReadOnly)
           Positioned(right: 16, bottom: 16, child: AskAIButton(onTap: onOpenAIPanel)),
-        if (ref.watch(isZoomingProvider))
+        // Zoom overlay: interactive for limited canvas, simple HUD for infinite
+        if (!isReadOnly && canvasMode != null && !canvasMode.isInfinite)
+          const Positioned.fill(child: Center(child: ZoomControlBar()))
+        else if (ref.watch(isZoomingProvider))
           Positioned.fill(
             child: Center(
               key: const ValueKey('zoom-indicator'),
               child: ZoomIndicator(zoomPercentage: ref.watch(zoomPercentageProvider)),
             ),
-          ),
-        // Zoom control bar (only for limited/page canvas modes)
-        if (!isReadOnly && canvasMode != null && !canvasMode.isInfinite)
-          const Positioned(
-            left: 16,
-            bottom: 56,
-            child: ZoomControlBar(),
           ),
         // Floating page indicator bar
         Positioned(
