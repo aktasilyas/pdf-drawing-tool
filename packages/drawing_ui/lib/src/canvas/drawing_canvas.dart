@@ -793,25 +793,22 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
         // This prevents "small square" bug on first render
         CanvasTransform effectiveTransform = transform;
         if (!canvasMode.isInfinite) {
-          final isDefaultTransform = 
+          final isDefaultTransform =
               transform.zoom == 1.0 && transform.offset == Offset.zero;
           if (isDefaultTransform) {
-            // Compute the correct transform immediately for first frame
-            // Using DEFAULT ZOOM: 1.0 (100%)
+            // Compute fit-to-height transform for first frame
             final pageSize = Size(currentPage.size.width, currentPage.size.height);
-            const defaultZoom = 1.0;
-            
-            final pageScreenWidth = pageSize.width * defaultZoom;
-            final pageScreenHeight = pageSize.height * defaultZoom;
-            
-            // Center horizontally
+            final fitHeightZoom = size.height / pageSize.height;
+
+            final pageScreenWidth = pageSize.width * fitHeightZoom;
+            final pageScreenHeight = pageSize.height * fitHeightZoom;
             final offsetX = (size.width - pageScreenWidth) / 2;
-            // Center vertically
             final offsetY = (size.height - pageScreenHeight) / 2;
-            
+
             effectiveTransform = CanvasTransform(
-              zoom: defaultZoom,
+              zoom: fitHeightZoom,
               offset: Offset(offsetX, offsetY),
+              baselineZoom: fitHeightZoom,
             );
           }
         }
