@@ -342,40 +342,24 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
       return;
     }
 
-    // Check if viewport size changed significantly (orientation change)
-    final needsReInit = !_hasInitialized || _isOrientationChanged(viewportSize);
+    // Check if viewport size changed significantly
+    final needsReInit = !_hasInitialized ||
+        _isOrientationChanged(viewportSize) ||
+        _isSignificantHeightChange(viewportSize);
     if (!needsReInit) return;
 
     // Mark as initialized immediately to prevent multiple calls
     _hasInitialized = true;
     _lastViewportSize = viewportSize;
 
-    // CRITICAL FIX: Initialize immediately on first build (not in postFrameCallback)
-    // This prevents the "small square" bug on initial render
-    final currentTransform = ref.read(canvasTransformProvider);
-    final isDefaultTransform =
-        currentTransform.zoom == 1.0 && currentTransform.offset == Offset.zero;
-
-      // Schedule initialization (immediate callback)
-    if (isDefaultTransform) {
-      // First time - use immediate callback (before next frame)
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        ref.read(canvasTransformProvider.notifier).initializeForPage(
-              viewportSize: viewportSize,
-              pageSize: Size(currentPage.size.width, currentPage.size.height),
-            );
-      });
-    } else {
-      // Re-initialization (orientation change)
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        ref.read(canvasTransformProvider.notifier).initializeForPage(
-              viewportSize: viewportSize,
-              pageSize: Size(currentPage.size.width, currentPage.size.height),
-            );
-      });
-    }
+    // Schedule initialization
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.read(canvasTransformProvider.notifier).initializeForPage(
+            viewportSize: viewportSize,
+            pageSize: Size(currentPage.size.width, currentPage.size.height),
+          );
+    });
   }
 
   /// Check if orientation changed (width/height swapped).
@@ -387,6 +371,14 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
     final isPortrait = newSize.height > newSize.width;
 
     return wasPortrait != isPortrait;
+  }
+
+  /// Detect significant viewport height change (keyboard show/hide).
+  /// Keyboards are typically > 200px, so 100px threshold avoids false positives.
+  bool _isSignificantHeightChange(Size newSize) {
+    final lastSize = _lastViewportSize;
+    if (lastSize == null) return false;
+    return (newSize.height - lastSize.height).abs() > 100;
   }
 
   /// Build PDF background widget (with lazy loading + automatic prefetch).

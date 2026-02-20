@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/drawing_ui.dart' hide PDFExportDialog;
+import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/editor/presentation/providers/editor_provider.dart';
 import 'package:example_app/features/editor/presentation/widgets/pdf_export_dialog.dart';
 import 'package:intl/intl.dart';
@@ -51,6 +52,19 @@ class EditorScreen extends ConsumerWidget {
             document.pages,
             currentIndex: document.currentPageIndex,
           );
+
+          // Set page trash callback for soft-delete support
+          ref.read(pageTrashCallbackProvider.notifier).state =
+              (pageIndex, page) async {
+            await ref
+                .read(documentsControllerProvider.notifier)
+                .movePageToTrash(
+                  documentId: document.id,
+                  documentTitle: document.title,
+                  pageIndex: pageIndex,
+                  pageData: page.toJson(),
+                );
+          };
 
           // Initialize canvas transform for limited mode (notebook/notepad)
           final canvasMode = document.canvasMode;
@@ -121,6 +135,7 @@ class EditorScreen extends ConsumerWidget {
     ref.invalidate(pageManagerProvider);
     ref.invalidate(autoSaveProvider);
     ref.invalidate(hasUnsavedChangesProvider);
+    ref.invalidate(pageTrashCallbackProvider);
 
     // PDF state'lerini sıfırla
     ref.read(visiblePdfPageProvider.notifier).state = null;

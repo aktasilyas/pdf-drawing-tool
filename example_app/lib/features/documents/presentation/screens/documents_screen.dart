@@ -201,6 +201,11 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
         doc,
         isTrash: _selectedSection == SidebarSection.trash,
       ),
+      onTrashedPageTap: (trashedPage) => showTrashedPageMenu(
+        context,
+        ref,
+        trashedPage,
+      ),
     );
   }
 

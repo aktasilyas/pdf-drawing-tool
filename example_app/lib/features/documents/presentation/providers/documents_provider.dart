@@ -4,7 +4,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:get_it/get_it.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:example_app/core/constants/storage_keys.dart';
+import 'package:example_app/features/documents/data/datasources/trashed_page_local_datasource.dart';
+import 'package:example_app/features/documents/data/repositories/page_trash_repository_impl.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
+import 'package:example_app/features/documents/domain/entities/trashed_page.dart';
 import 'package:example_app/features/documents/domain/entities/view_mode.dart';
 import 'package:example_app/features/documents/domain/entities/sort_option.dart';
 import 'package:example_app/features/documents/domain/repositories/document_repository.dart';
@@ -192,6 +195,56 @@ final trashDocumentsProvider = FutureProvider<List<DocumentInfo>>((ref) async {
     (failure) => throw Exception(failure.message),
     (documents) => documents,
   );
+});
+
+// Page trash repository
+final pageTrashRepositoryProvider = Provider<PageTrashRepository>((ref) {
+  final prefs = GetIt.instance<SharedPreferences>();
+  final datasource = TrashedPageLocalDatasourceImpl(prefs);
+  return PageTrashRepository(datasource, prefs);
+});
+
+// Trashed pages
+final trashedPagesProvider = FutureProvider<List<TrashedPage>>((ref) async {
+  final repo = ref.watch(pageTrashRepositoryProvider);
+  return repo.getTrashedPages();
+});
+
+/// Union type for trash items (documents + pages), sorted by deletedAt desc.
+sealed class TrashItem {
+  DateTime get deletedAt;
+}
+
+class TrashDocumentItem extends TrashItem {
+  final DocumentInfo document;
+  TrashDocumentItem(this.document);
+
+  @override
+  DateTime get deletedAt => document.deletedAt ?? document.updatedAt;
+}
+
+class TrashPageItem extends TrashItem {
+  final TrashedPage page;
+  TrashPageItem(this.page);
+
+  @override
+  DateTime get deletedAt => page.deletedAt;
+}
+
+// Combined trash items (documents + pages) sorted by deletion date
+final trashItemsProvider = FutureProvider<List<TrashItem>>((ref) async {
+  final docsAsync = ref.watch(trashDocumentsProvider);
+  final pagesAsync = ref.watch(trashedPagesProvider);
+
+  final docs = docsAsync.valueOrNull ?? [];
+  final pages = pagesAsync.valueOrNull ?? [];
+
+  final items = <TrashItem>[
+    ...docs.map((d) => TrashDocumentItem(d)),
+    ...pages.map((p) => TrashPageItem(p)),
+  ];
+  items.sort((a, b) => b.deletedAt.compareTo(a.deletedAt));
+  return items;
 });
 
 // Search results
@@ -546,6 +599,45 @@ class DocumentsController extends StateNotifier<AsyncValue<void>> {
       state = AsyncError(e, StackTrace.current);
       return false;
     }
+  }
+
+  // Page trash operations
+  Future<void> movePageToTrash({
+    required String documentId,
+    required String documentTitle,
+    required int pageIndex,
+    required Map<String, dynamic> pageData,
+  }) async {
+    final repo = _ref.read(pageTrashRepositoryProvider);
+    await repo.movePageToTrash(
+      documentId: documentId,
+      documentTitle: documentTitle,
+      pageIndex: pageIndex,
+      pageData: pageData,
+    );
+    _ref.invalidate(trashedPagesProvider);
+    _ref.invalidate(trashItemsProvider);
+  }
+
+  Future<bool> restorePageFromTrash(String trashedPageId) async {
+    final repo = _ref.read(pageTrashRepositoryProvider);
+    final result = await repo.restorePageFromTrash(trashedPageId);
+    _ref.invalidate(trashedPagesProvider);
+    _ref.invalidate(trashItemsProvider);
+    _ref.invalidate(documentsProvider);
+    return result;
+  }
+
+  Future<void> permanentlyDeletePage(String trashedPageId) async {
+    final repo = _ref.read(pageTrashRepositoryProvider);
+    await repo.permanentlyDeletePage(trashedPageId);
+    _ref.invalidate(trashedPagesProvider);
+    _ref.invalidate(trashItemsProvider);
+  }
+
+  Future<bool> trashedPageDocumentExists(String documentId) async {
+    final repo = _ref.read(pageTrashRepositoryProvider);
+    return repo.documentExists(documentId);
   }
 
   // Move documents to folder (bulk)
