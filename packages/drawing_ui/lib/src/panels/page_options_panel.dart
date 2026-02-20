@@ -12,9 +12,16 @@ import 'page_options_widgets.dart';
 
 /// GoodNotes-style page options popup panel.
 class PageOptionsPanel extends ConsumerStatefulWidget {
-  const PageOptionsPanel({super.key, required this.onClose});
+  const PageOptionsPanel({
+    super.key,
+    required this.onClose,
+    this.embedded = false,
+  });
 
   final VoidCallback onClose;
+
+  /// When true, skips Material/SizedBox wrapper (used inside PopoverController).
+  final bool embedded;
 
   @override
   ConsumerState<PageOptionsPanel> createState() => _PageOptionsPanelState();
@@ -194,76 +201,77 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
     final pageIndex = ref.watch(currentPageIndexProvider);
     final pageCount = ref.watch(pageCountProvider);
 
+    final content = SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          PageOptionsHeader(title: 'Sayfa ${pageIndex + 1}'),
+          _divider(cs),
+          PageOptionsMenuItem(
+            icon: StarNoteIcons.bookmark,
+            label: 'Sayfaya yer imi koy',
+            onTap: widget.onClose,
+          ),
+          PageOptionsMenuItem(
+            icon: StarNoteIcons.copy,
+            label: 'Sayfayı kopyala',
+            onTap: widget.onClose,
+          ),
+          PageOptionsMenuItem(
+            icon: StarNoteIcons.duplicate,
+            label: 'Sayfayı çoğalt',
+            onTap: _duplicatePage,
+          ),
+          // TODO: Activate rotate page when ready
+          // PageOptionsMenuItem(
+          //   icon: StarNoteIcons.rotate,
+          //   label: 'Sayfayı döndür',
+          //   onTap: () => _rotatePage(context),
+          // ),
+          PageOptionsMenuItem(
+            icon: StarNoteIcons.template,
+            label: 'Şablonu değiştir',
+            onTap: () => _changeTemplate(context),
+          ),
+          PageOptionsMenuItem(
+            icon: StarNoteIcons.goToPage,
+            label: 'Sayfaya git',
+            trailing: _chevronTrailing(cs, '${pageIndex + 1} / $pageCount'),
+            onTap: () => _showGoToPageDialog(context),
+          ),
+          _divider(cs),
+          PageOptionsMenuItem(
+            icon: StarNoteIcons.pageClear,
+            label: 'Sayfayı temizle',
+            isDestructive: true,
+            onTap: () => _clearPage(context),
+          ),
+          PageOptionsMenuItem(
+            icon: StarNoteIcons.trash,
+            label: 'Çöpe taşı',
+            isDestructive: true,
+            onTap: () => _deletePage(context),
+          ),
+          _thickDivider(cs),
+          PageOptionsSectionHeader(title: 'Ayarlar'),
+          // TEMPORARILY DISABLED: Dual page mode
+          // _DualPageModeItem(onClose: widget.onClose),
+          _ScrollDirectionItem(onClose: widget.onClose),
+          const SizedBox(height: 8),
+        ],
+      ),
+    );
+
+    if (widget.embedded) return content;
+
     return Material(
       color: cs.surface,
       borderRadius: BorderRadius.circular(16),
       clipBehavior: Clip.antiAlias,
       elevation: 8,
       shadowColor: Colors.black26,
-      child: SizedBox(
-        width: 320,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              PageOptionsHeader(title: 'Sayfa ${pageIndex + 1}'),
-              _divider(cs),
-              PageOptionsMenuItem(
-                icon: StarNoteIcons.bookmark,
-                label: 'Sayfaya yer imi koy',
-                onTap: widget.onClose,
-              ),
-              PageOptionsMenuItem(
-                icon: StarNoteIcons.copy,
-                label: 'Sayfayı kopyala',
-                onTap: widget.onClose,
-              ),
-              PageOptionsMenuItem(
-                icon: StarNoteIcons.duplicate,
-                label: 'Sayfayı çoğalt',
-                onTap: _duplicatePage,
-              ),
-              // TODO: Activate rotate page when ready
-              // PageOptionsMenuItem(
-              //   icon: StarNoteIcons.rotate,
-              //   label: 'Sayfayı döndür',
-              //   onTap: () => _rotatePage(context),
-              // ),
-              PageOptionsMenuItem(
-                icon: StarNoteIcons.template,
-                label: 'Şablonu değiştir',
-                onTap: () => _changeTemplate(context),
-              ),
-              PageOptionsMenuItem(
-                icon: StarNoteIcons.goToPage,
-                label: 'Sayfaya git',
-                trailing: _chevronTrailing(cs, '${pageIndex + 1} / $pageCount'),
-                onTap: () => _showGoToPageDialog(context),
-              ),
-              _divider(cs),
-              PageOptionsMenuItem(
-                icon: StarNoteIcons.pageClear,
-                label: 'Sayfayı temizle',
-                isDestructive: true,
-                onTap: () => _clearPage(context),
-              ),
-              PageOptionsMenuItem(
-                icon: StarNoteIcons.trash,
-                label: 'Çöpe taşı',
-                isDestructive: true,
-                onTap: () => _deletePage(context),
-              ),
-              _thickDivider(cs),
-              PageOptionsSectionHeader(title: 'Ayarlar'),
-              // TEMPORARILY DISABLED: Dual page mode
-              // _DualPageModeItem(onClose: widget.onClose),
-              _ScrollDirectionItem(onClose: widget.onClose),
-              const SizedBox(height: 8),
-            ],
-          ),
-        ),
-      ),
+      child: SizedBox(width: 320, child: content),
     );
   }
 

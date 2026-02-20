@@ -263,7 +263,7 @@ class _PageSidebarState extends ConsumerState<PageSidebar> {
             return _buildGridThumbnailItem(
                 context, ref, pageManager, widget.thumbnailCache, index, cs, isDark, widget.onPageTap);
           }
-          return _buildAddPageCell(context, ref, cs, isDark);
+          return _AddPageCell(cs: cs, isDark: isDark);
         },
       ),
     );
@@ -303,28 +303,67 @@ Widget _buildGridThumbnailItem(BuildContext context, WidgetRef ref, dynamic page
   );
 }
 
-/// Build the "Sayfa ekle" cell that sits inside the grid after the last page.
-Widget _buildAddPageCell(BuildContext context, WidgetRef ref, ColorScheme cs, bool isDark) {
-  return GestureDetector(
-    onTap: () => ref.read(pageManagerProvider.notifier).addPage(),
-    child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      Expanded(
-        child: Container(
-          decoration: BoxDecoration(
-            color: isDark ? cs.surfaceContainer : cs.surface, borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: cs.outlineVariant, width: 1),
+/// "Sayfa ekle" cell in the sidebar grid. Uses [PopoverController] to show
+/// the same arrow-popover as the toolbar's add-page button.
+class _AddPageCell extends StatefulWidget {
+  const _AddPageCell({required this.cs, required this.isDark});
+  final ColorScheme cs;
+  final bool isDark;
+
+  @override
+  State<_AddPageCell> createState() => _AddPageCellState();
+}
+
+class _AddPageCellState extends State<_AddPageCell> {
+  final PopoverController _popover = PopoverController();
+  final GlobalKey _anchorKey = GlobalKey();
+
+  @override
+  void dispose() {
+    _popover.dispose();
+    super.dispose();
+  }
+
+  void _toggle() {
+    if (_popover.isShowing) {
+      _popover.hide();
+      return;
+    }
+    _popover.show(
+      context: context,
+      anchorKey: _anchorKey,
+      maxWidth: 320,
+      onDismiss: () {},
+      child: AddPagePanel(onClose: () => _popover.hide(), embedded: true),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = widget.cs;
+    return GestureDetector(
+      key: _anchorKey,
+      onTap: _toggle,
+      child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+        Expanded(
+          child: Container(
+            decoration: BoxDecoration(
+              color: widget.isDark ? cs.surfaceContainer : cs.surface,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: cs.outlineVariant, width: 1),
+            ),
+            child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+              PhosphorIcon(StarNoteIcons.plus, size: 24, color: cs.primary),
+              const SizedBox(height: 4),
+              Text('Sayfa ekle', style: TextStyle(fontSize: 11, color: cs.primary, fontWeight: FontWeight.w500)),
+            ]),
           ),
-          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-            PhosphorIcon(StarNoteIcons.plus, size: 24, color: cs.primary),
-            const SizedBox(height: 4),
-            Text('Sayfa ekle', style: TextStyle(fontSize: 11, color: cs.primary, fontWeight: FontWeight.w500)),
-          ]),
         ),
-      ),
-      const SizedBox(height: 4),
-      const SizedBox(height: 28),
-    ]),
-  );
+        const SizedBox(height: 4),
+        const SizedBox(height: 28),
+      ]),
+    );
+  }
 }
 
 /// Floating AI button.

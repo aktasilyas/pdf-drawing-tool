@@ -101,6 +101,12 @@ class TopNavigationBar extends ConsumerWidget {
           },
           isActive: isReaderMode,
         ),
+        if (!isReaderMode)
+          StarNoteNavButton(
+            icon: StarNoteIcons.pageAdd,
+            tooltip: 'Sayfa Ekle',
+            onPressed: () => showAddPageMenu(context),
+          ),
         StarNoteNavButton(
           icon: StarNoteIcons.exportIcon,
           tooltip: 'Disa Aktar',
@@ -122,7 +128,6 @@ class TopNavigationBar extends ConsumerWidget {
     ColorScheme colorScheme,
     bool isReaderMode,
   ) {
-    final gridVisible = ref.watch(gridVisibilityProvider);
     final pageCount = ref.watch(pageCountProvider);
 
     return Row(
@@ -155,7 +160,7 @@ class TopNavigationBar extends ConsumerWidget {
         // -- Center spacer --
         const Expanded(child: SizedBox()),
 
-        // -- Right: Reader + Grid (hidden in reader mode) + Export + More --
+        // -- Right: Reader + Add Page + Export + More --
         StarNoteNavButton(
           icon: isReaderMode
               ? StarNoteIcons.readerModeActive
@@ -169,11 +174,9 @@ class TopNavigationBar extends ConsumerWidget {
 
         if (!isReaderMode)
           StarNoteNavButton(
-            icon: gridVisible ? StarNoteIcons.gridOn : StarNoteIcons.gridOff,
-            tooltip: gridVisible ? 'Kilavuzu Gizle' : 'Kilavuzu Goster',
-            onPressed: () =>
-                ref.read(gridVisibilityProvider.notifier).state = !gridVisible,
-            isActive: gridVisible,
+            icon: StarNoteIcons.pageAdd,
+            tooltip: 'Sayfa Ekle',
+            onPressed: () => showAddPageMenu(context),
           ),
 
         StarNoteNavButton(
