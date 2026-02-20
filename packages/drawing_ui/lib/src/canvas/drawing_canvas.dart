@@ -355,6 +355,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
     // Schedule initialization
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      ref.read(canvasViewportSizeProvider.notifier).state = viewportSize;
       ref.read(canvasTransformProvider.notifier).initializeForPage(
             viewportSize: viewportSize,
             pageSize: Size(currentPage.size.width, currentPage.size.height),

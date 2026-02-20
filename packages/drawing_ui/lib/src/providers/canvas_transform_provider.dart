@@ -581,3 +581,7 @@ final canZoomOutProvider = Provider<bool>((ref) {
 
 /// Whether zoom gesture is currently active.
 final isZoomingProvider = StateProvider<bool>((ref) => false);
+
+/// Current canvas viewport size (set by DrawingCanvas/DrawingScreen).
+/// Used by zoom controls to compute target offsets.
+final canvasViewportSizeProvider = StateProvider<Size>((ref) => Size.zero);

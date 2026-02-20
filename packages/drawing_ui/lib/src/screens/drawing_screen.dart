@@ -98,6 +98,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
     // TEMPORARILY DISABLED: Dual page mode
     // if (ref.read(dualPageModeProvider)) canvasWidth /= 2;
     final viewportSize = Size(canvasWidth, size.height);
+    ref.read(canvasViewportSizeProvider.notifier).state = viewportSize;
     final currentPage = ref.read(currentPageProvider);
     final pageSize = Size(currentPage.size.width, currentPage.size.height);
     final canvasMode = widget.canvasMode ?? const core.CanvasMode(isInfinite: true);

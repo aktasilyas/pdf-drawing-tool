@@ -106,6 +106,13 @@ Widget buildDrawingCanvasArea({
               child: ZoomIndicator(zoomPercentage: ref.watch(zoomPercentageProvider)),
             ),
           ),
+        // Zoom control bar (only for limited/page canvas modes)
+        if (!isReadOnly && canvasMode != null && !canvasMode.isInfinite)
+          const Positioned(
+            left: 16,
+            bottom: 56,
+            child: ZoomControlBar(),
+          ),
         // Floating page indicator bar
         Positioned(
           left: 0,
