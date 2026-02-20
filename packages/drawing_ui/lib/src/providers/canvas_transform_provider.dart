@@ -347,15 +347,28 @@ class CanvasTransformNotifier extends StateNotifier<CanvasTransform> {
     }
   }
 
-  /// Recenter page with current zoom (for viewport changes).
+  /// Recenter page for viewport changes (e.g., sidebar toggle, rotation).
   ///
-  /// Called when viewport size changes (e.g., sidebar toggle).
-  /// Keeps current zoom level, just adjusts offset to keep page visible.
+  /// Recalculates baselineZoom for the new viewport and preserves
+  /// the user's relative zoom level. E.g. if user was at 150%,
+  /// after rotation they stay at 150%.
   void recenterForViewport({
     required Size viewportSize,
     required Size pageSize,
   }) {
-    // For limited canvas: use special clamping (top-aligned)
+    final newBaselineZoom = viewportSize.height / pageSize.height;
+
+    // Preserve relative zoom (e.g. 150% stays 150%)
+    final currentRelativeZoom = state.baselineZoom > 0
+        ? state.zoom / state.baselineZoom
+        : 1.0;
+    final newZoom = newBaselineZoom * currentRelativeZoom;
+
+    state = state.copyWith(
+      zoom: newZoom,
+      baselineZoom: newBaselineZoom,
+    );
+
     _clampOffsetLimitedCanvas(viewportSize, pageSize);
   }
 
