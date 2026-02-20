@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/src/providers/canvas_transform_provider.dart';
@@ -8,10 +10,11 @@ void main() {
   // ===========================================================================
 
   group('CanvasTransform', () {
-    test('default values are zoom 1.0 and offset zero', () {
+    test('default values are zoom 1.0, offset zero, baselineZoom 1.0', () {
       const transform = CanvasTransform();
       expect(transform.zoom, 1.0);
       expect(transform.offset, Offset.zero);
+      expect(transform.baselineZoom, 1.0);
     });
 
     test('copyWith creates new instance with updated values', () {
@@ -73,9 +76,39 @@ void main() {
       const t1 = CanvasTransform(zoom: 1.5, offset: Offset(10, 20));
       const t2 = CanvasTransform(zoom: 1.5, offset: Offset(10, 20));
       const t3 = CanvasTransform(zoom: 2.0, offset: Offset(10, 20));
+      const t4 = CanvasTransform(zoom: 1.5, offset: Offset(10, 20), baselineZoom: 0.9);
 
       expect(t1, equals(t2));
       expect(t1, isNot(equals(t3)));
+      expect(t1, isNot(equals(t4))); // Different baselineZoom
+    });
+
+    test('copyWith preserves baselineZoom', () {
+      const original = CanvasTransform(zoom: 1.0, baselineZoom: 0.9);
+      final updated = original.copyWith(zoom: 1.8);
+
+      expect(updated.zoom, 1.8);
+      expect(updated.baselineZoom, 0.9); // Preserved
+    });
+
+    test('copyWith can update baselineZoom', () {
+      const original = CanvasTransform(zoom: 1.0, baselineZoom: 1.0);
+      final updated = original.copyWith(baselineZoom: 0.9);
+
+      expect(updated.baselineZoom, 0.9);
+    });
+
+    test('displayPercentage is relative to baselineZoom', () {
+      const t = CanvasTransform(zoom: 0.9, baselineZoom: 0.9);
+      expect(t.displayPercentage, closeTo(100.0, 0.1));
+
+      const t2 = CanvasTransform(zoom: 1.8, baselineZoom: 0.9);
+      expect(t2.displayPercentage, closeTo(200.0, 0.1));
+    });
+
+    test('displayPercentage defaults to raw zoom when baselineZoom is 1.0', () {
+      const t = CanvasTransform(zoom: 1.5, baselineZoom: 1.0);
+      expect(t.displayPercentage, closeTo(150.0, 0.1));
     });
   });
 
@@ -173,6 +206,70 @@ void main() {
       container.read(canvasTransformProvider.notifier).zoomOut();
 
       expect(container.read(canvasTransformProvider).zoom, 0.8);
+    });
+
+    test('initializeForPage sets baselineZoom to fit-to-height', () {
+      const viewportSize = Size(768, 758);
+      const pageSize = Size(595, 842);
+
+      container.read(canvasTransformProvider.notifier).initializeForPage(
+            viewportSize: viewportSize,
+            pageSize: pageSize,
+          );
+
+      final transform = container.read(canvasTransformProvider);
+      final expectedBaseline = viewportSize.height / pageSize.height;
+      expect(transform.baselineZoom, closeTo(expectedBaseline, 0.001));
+      expect(transform.zoom, closeTo(expectedBaseline, 0.001));
+      // Page should be centered horizontally
+      final expectedWidth = pageSize.width * expectedBaseline;
+      final expectedOffsetX = (viewportSize.width - expectedWidth) / 2;
+      expect(transform.offset.dx, closeTo(expectedOffsetX, 0.1));
+    });
+
+    test('snapBackForPage preserves baselineZoom', () {
+      const viewportSize = Size(768, 758);
+      const pageSize = Size(595, 842);
+      final expectedBaseline = viewportSize.height / pageSize.height;
+
+      // First initialize
+      container.read(canvasTransformProvider.notifier).initializeForPage(
+            viewportSize: viewportSize,
+            pageSize: pageSize,
+          );
+
+      // Simulate zoom out below baseline
+      container.read(canvasTransformProvider.notifier).setZoom(0.5);
+
+      // Snap back
+      container.read(canvasTransformProvider.notifier).snapBackForPage(
+            viewportSize: viewportSize,
+            pageSize: pageSize,
+          );
+
+      final transform = container.read(canvasTransformProvider);
+      expect(transform.zoom, closeTo(expectedBaseline, 0.001));
+      expect(transform.baselineZoom, closeTo(expectedBaseline, 0.001));
+    });
+
+    test('reset returns to baselineZoom', () {
+      const viewportSize = Size(768, 758);
+      const pageSize = Size(595, 842);
+
+      container.read(canvasTransformProvider.notifier).initializeForPage(
+            viewportSize: viewportSize,
+            pageSize: pageSize,
+          );
+
+      final baseline = container.read(canvasTransformProvider).baselineZoom;
+
+      // Zoom in
+      container.read(canvasTransformProvider.notifier).setZoom(2.0);
+      container.read(canvasTransformProvider.notifier).reset();
+
+      final transform = container.read(canvasTransformProvider);
+      expect(transform.zoom, closeTo(baseline, 0.001));
+      expect(transform.baselineZoom, closeTo(baseline, 0.001));
     });
   });
 
