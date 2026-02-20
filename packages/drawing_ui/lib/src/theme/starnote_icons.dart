@@ -108,6 +108,9 @@ abstract final class StarNoteIcons {
   static const bookmark = PhosphorIconsLight.bookmarkSimple;
   static const bookmarkFilled = PhosphorIconsFill.bookmarkSimple;
   static const rotate = PhosphorIconsLight.arrowsClockwise;
+  static const rotateCW = PhosphorIconsLight.arrowClockwise;
+  static const rotateCCW = PhosphorIconsLight.arrowCounterClockwise;
+  static const rotateHalf = PhosphorIconsLight.arrowUDownLeft;
   static const template = PhosphorIconsLight.layout;
   static const goToPage = PhosphorIconsLight.arrowSquareRight;
   static const sliders = PhosphorIconsLight.slidersHorizontal;

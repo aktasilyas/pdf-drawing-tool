@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import 'package:drawing_ui/src/providers/providers.dart';
+// import 'package:drawing_ui/src/services/page_rotation_service.dart'; // TODO: Activate
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/widgets/template_picker/template_picker.dart';
 
@@ -174,6 +175,21 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
     );
   }
 
+  // TODO: Activate when ready
+  // Future<void> _rotatePage(BuildContext context) async {
+  //   final angle = await showRotatePageDialog(context);
+  //   if (angle == null) return;
+  //   final doc = ref.read(documentProvider);
+  //   final pageIndex = ref.read(currentPageIndexProvider);
+  //   final page = doc.pages[pageIndex];
+  //   final rotated = PageRotationService.rotatePage(page, angle);
+  //   final newPages = List<Page>.from(doc.pages)..[pageIndex] = rotated;
+  //   final newDoc = doc.copyWith(pages: newPages);
+  //   ref.read(documentProvider.notifier).updateDocument(newDoc);
+  //   ref.read(pageManagerProvider.notifier).updateCurrentPage(rotated);
+  //   widget.onClose();
+  // }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -210,12 +226,12 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
                 label: 'Sayfayı çoğalt',
                 onTap: _duplicatePage,
               ),
-              PageOptionsMenuItem(
-                icon: StarNoteIcons.rotate,
-                label: 'Sayfayı döndür',
-                trailing: _chevronTrailing(cs),
-                onTap: widget.onClose,
-              ),
+              // TODO: Activate rotate page when ready
+              // PageOptionsMenuItem(
+              //   icon: StarNoteIcons.rotate,
+              //   label: 'Sayfayı döndür',
+              //   onTap: () => _rotatePage(context),
+              // ),
               PageOptionsMenuItem(
                 icon: StarNoteIcons.template,
                 label: 'Şablonu değiştir',

@@ -3,6 +3,7 @@ library;
 
 export 'background_thumbnail_queue.dart';
 export 'memory_budget.dart';
+export 'page_rotation_service.dart';
 export 'pdf_export_service.dart';
 export 'pdf_exporter.dart';
 export 'pdf_import_service.dart';

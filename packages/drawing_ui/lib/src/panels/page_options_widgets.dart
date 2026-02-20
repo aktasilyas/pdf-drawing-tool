@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
+import 'package:drawing_ui/src/services/page_rotation_service.dart';
+import 'package:drawing_ui/src/theme/theme.dart';
+
 /// Header widget for page options panel.
 class PageOptionsHeader extends StatelessWidget {
   const PageOptionsHeader({super.key, required this.title});
@@ -43,7 +46,9 @@ class PageOptionsMenuItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final color = isDestructive ? cs.error : cs.onSurface;
+    final disabled = onTap == null;
+    final color =
+        disabled ? cs.onSurface.withValues(alpha: 0.38) : isDestructive ? cs.error : cs.onSurface;
 
     return InkWell(
       onTap: onTap,
@@ -134,4 +139,39 @@ class PageOptionsToggleItem extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Shows a dialog letting the user choose a rotation angle.
+Future<RotationAngle?> showRotatePageDialog(BuildContext context) {
+  return showDialog<RotationAngle>(
+    context: context,
+    builder: (ctx) {
+      final cs = Theme.of(ctx).colorScheme;
+      return SimpleDialog(
+        title: const Text('Sayfayı Döndür'),
+        children: [
+          _rotateOption(ctx, cs, StarNoteIcons.rotateCW,
+              'Saat yönünde (90°)', RotationAngle.cw90),
+          _rotateOption(ctx, cs, StarNoteIcons.rotateCCW,
+              'Saat yönünün tersine (90°)', RotationAngle.ccw90),
+          _rotateOption(ctx, cs, StarNoteIcons.rotateHalf,
+              '180°', RotationAngle.half),
+        ],
+      );
+    },
+  );
+}
+
+Widget _rotateOption(BuildContext ctx, ColorScheme cs, IconData icon,
+    String label, RotationAngle angle) {
+  return SimpleDialogOption(
+    onPressed: () => Navigator.pop(ctx, angle),
+    child: Row(
+      children: [
+        PhosphorIcon(icon, size: 22, color: cs.onSurface),
+        const SizedBox(width: 16),
+        Text(label),
+      ],
+    ),
+  );
 }
