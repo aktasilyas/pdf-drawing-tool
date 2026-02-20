@@ -16,6 +16,9 @@ import 'package:drawing_ui/src/screens/drawing_screen_panels.dart';
 import 'package:drawing_ui/src/toolbar/tool_groups.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_layout_mode.dart';
 
+/// Sidebar width for the page navigator panel.
+const double kPageSidebarWidth = 240;
+
 /// Build the canvas area with all layers.
 Widget buildDrawingCanvasArea({
   required BuildContext context,
@@ -27,62 +30,50 @@ Widget buildDrawingCanvasArea({
   required ValueChanged<Offset> onPenBoxPositionChanged,
   required VoidCallback onClosePanel,
   required VoidCallback onOpenAIPanel,
+  GlobalKey<PageSlideTransitionState>? pageTransitionKey,
+  ValueChanged<int>? onPageChanged,
   CanvasColorScheme? colorScheme,
   bool isReadOnly = false,
 }) {
   const double swipeVelocityThreshold = 300;
+
+  // Core canvas content: background + drawing canvas (wrapped in transition)
+  Widget canvasContent = Stack(
+    children: [
+      Positioned.fill(child: RepaintBoundary(child: CustomPaint(
+        painter: InfiniteBackgroundPainter(background: currentPage.background,
+            zoom: transform.zoom, offset: transform.offset, colorScheme: colorScheme),
+        size: Size.infinite))),
+      Positioned.fill(child: DrawingCanvas(canvasMode: canvasMode, isReadOnly: isReadOnly)),
+    ],
+  );
+
+  if (pageTransitionKey != null) {
+    canvasContent = PageSlideTransition(key: pageTransitionKey, child: canvasContent);
+  }
+
   final canvasStack = ClipRect(
     child: Stack(
       clipBehavior: Clip.hardEdge,
       children: [
-        Positioned.fill(
-          child: RepaintBoundary(
-            child: CustomPaint(
-              painter: InfiniteBackgroundPainter(
-                background: currentPage.background,
-                zoom: transform.zoom,
-                offset: transform.offset,
-                colorScheme: colorScheme,
-              ),
-              size: Size.infinite,
-            ),
-          ),
-        ),
-        Positioned.fill(
-          child: DrawingCanvas(
-            canvasMode: canvasMode,
-            isReadOnly: isReadOnly,
-          ),
-        ),
-        // Always present to prevent Stack position shifting when
-        // activePanelProvider toggles between tool and null.
+        Positioned.fill(child: canvasContent),
+        // Always present to prevent Stack position shifting when activePanelProvider toggles.
         if (!isReadOnly)
-          Positioned.fill(
-            child: IgnorePointer(
-              ignoring: ref.watch(activePanelProvider) == null,
-              child: GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onTap: onClosePanel,
-                child: const SizedBox.expand(),
-              ),
-            ),
-          ),
+          Positioned.fill(child: IgnorePointer(
+            ignoring: ref.watch(activePanelProvider) == null,
+            child: GestureDetector(behavior: HitTestBehavior.translucent, onTap: onClosePanel,
+                child: const SizedBox.expand()),
+          )),
         if (!isReadOnly)
-          Positioned(
-            left: penBoxPosition.dx,
-            top: penBoxPosition.dy,
-            child: FloatingPenBox(
-              position: penBoxPosition,
-              onPositionChanged: (delta) {
-                final newPosition = penBoxPosition + delta;
-                final clampedPosition = Offset(
-                  newPosition.dx.clamp(0, MediaQuery.of(context).size.width - 60),
-                  newPosition.dy.clamp(0, MediaQuery.of(context).size.height - 200),
-                );
-                onPenBoxPositionChanged(clampedPosition);
-              },
-            ),
-          ),
+          Positioned(left: penBoxPosition.dx, top: penBoxPosition.dy, child: FloatingPenBox(
+            position: penBoxPosition,
+            onPositionChanged: (delta) {
+              final p = penBoxPosition + delta;
+              onPenBoxPositionChanged(Offset(
+                p.dx.clamp(0, MediaQuery.of(context).size.width - 60),
+                p.dy.clamp(0, MediaQuery.of(context).size.height - 200)));
+            },
+          )),
         if (!isReadOnly) const FloatingUndoRedo(),
         if (!isReadOnly)
           Positioned(right: 16, bottom: 16, child: AskAIButton(onTap: onOpenAIPanel)),
@@ -94,11 +85,11 @@ Widget buildDrawingCanvasArea({
             ),
           ),
         // Floating page indicator bar
-        const Positioned(
+        Positioned(
           left: 0,
           right: 0,
           bottom: 0,
-          child: PageIndicatorBar(),
+          child: PageIndicatorBar(onPageChanged: onPageChanged),
         ),
       ],
     ),
@@ -110,9 +101,16 @@ Widget buildDrawingCanvasArea({
       onHorizontalDragEnd: (details) {
         final velocity = details.primaryVelocity ?? 0;
         if (velocity < -swipeVelocityThreshold) {
-          ref.read(pageManagerProvider.notifier).nextPage();
+          final idx = ref.read(currentPageIndexProvider);
+          final count = ref.read(pageCountProvider);
+          if (idx < count - 1) {
+            (onPageChanged ?? (_) => ref.read(pageManagerProvider.notifier).nextPage())(idx + 1);
+          }
         } else if (velocity > swipeVelocityThreshold) {
-          ref.read(pageManagerProvider.notifier).previousPage();
+          final idx = ref.read(currentPageIndexProvider);
+          if (idx > 0) {
+            (onPageChanged ?? (_) => ref.read(pageManagerProvider.notifier).previousPage())(idx - 1);
+          }
         }
       },
       child: canvasStack,
@@ -122,93 +120,172 @@ Widget buildDrawingCanvasArea({
   return canvasStack;
 }
 
-/// Build the page navigator sidebar.
-Widget buildPageSidebar({required BuildContext context, required WidgetRef ref, required ThumbnailCache thumbnailCache}) {
-  final pageManager = ref.watch(pageManagerProvider);
-  final pageCount = ref.watch(pageCountProvider);
-  final colorScheme = Theme.of(context).colorScheme;
-  final isDark = Theme.of(context).brightness == Brightness.dark;
+/// Page navigator sidebar with a 2-column grid layout.
+///
+/// Automatically scrolls to the currently selected page when mounted
+/// and when the page changes via external navigation.
+class PageSidebar extends ConsumerStatefulWidget {
+  const PageSidebar({super.key, required this.thumbnailCache, this.onPageTap});
+  final ThumbnailCache thumbnailCache;
+  final ValueChanged<int>? onPageTap;
 
-  return Container(
-    width: 140,
-    constraints: const BoxConstraints(minWidth: 100),
-    decoration: BoxDecoration(
-      color: isDark ? colorScheme.surfaceContainerLow : colorScheme.surfaceContainerLowest,
-      border: Border(right: BorderSide(color: colorScheme.outlineVariant, width: 0.5)),
-    ),
-    child: Column(children: [
+  @override
+  ConsumerState<PageSidebar> createState() => _PageSidebarState();
+}
+
+class _PageSidebarState extends ConsumerState<PageSidebar> {
+  static const int _crossAxisCount = 2;
+  static const double _crossAxisSpacing = 12;
+  static const double _mainAxisSpacing = 16;
+  static const double _childAspectRatio = 0.58;
+  static const double _gridPadding = 12;
+
+  late final ScrollController _scrollController;
+
+  double _offsetForIndex(int index) {
+    final availableWidth = kPageSidebarWidth - _gridPadding * 2;
+    final itemWidth = (availableWidth - _crossAxisSpacing * (_crossAxisCount - 1)) / _crossAxisCount;
+    final itemHeight = itemWidth / _childAspectRatio;
+    final rowHeight = itemHeight + _mainAxisSpacing;
+    final row = index ~/ _crossAxisCount;
+    // Place the row roughly 1/3 from the top of the viewport
+    return (_gridPadding + row * rowHeight).clamp(0.0, double.infinity);
+  }
+
+  void _scrollToPage(int index, {bool animate = true}) {
+    if (!_scrollController.hasClients) return;
+    final target = _offsetForIndex(index).clamp(0.0, _scrollController.position.maxScrollExtent);
+    if (animate) {
+      _scrollController.animateTo(target, duration: const Duration(milliseconds: 200), curve: Curves.easeInOut);
+    } else {
+      _scrollController.jumpTo(target);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    final currentIndex = ref.read(currentPageIndexProvider);
+    _scrollController = ScrollController(initialScrollOffset: _offsetForIndex(currentIndex));
+    // Correct scroll position after first layout in case providers
+    // weren't fully initialized when initialScrollOffset was calculated.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _correctScrollIfNeeded());
+  }
+
+  void _correctScrollIfNeeded() {
+    if (!mounted || !_scrollController.hasClients) return;
+    final idx = ref.read(currentPageIndexProvider);
+    final target = _offsetForIndex(idx);
+    final max = _scrollController.position.maxScrollExtent;
+    if (max <= 0 && target > 0) {
+      // GridView layout hasn't settled yet, retry next frame
+      WidgetsBinding.instance.addPostFrameCallback((_) => _correctScrollIfNeeded());
+      return;
+    }
+    final clamped = target.clamp(0.0, max);
+    if ((_scrollController.offset - clamped).abs() > 1) {
+      _scrollController.jumpTo(clamped);
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final pageManager = ref.watch(pageManagerProvider);
+    final pageCount = ref.watch(pageCountProvider);
+    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    ref.listen<int>(currentPageIndexProvider, (prev, next) {
+      if (prev != next) _scrollToPage(next);
+    });
+
+    return Container(
+      width: kPageSidebarWidth,
+      decoration: BoxDecoration(
+        color: isDark ? cs.surfaceContainerLow : cs.surfaceContainerLowest,
+        border: Border(right: BorderSide(color: cs.outlineVariant, width: 0.5)),
+      ),
+      child: GridView.builder(
+        controller: _scrollController,
+        padding: const EdgeInsets.all(_gridPadding),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: _crossAxisCount, crossAxisSpacing: _crossAxisSpacing,
+          mainAxisSpacing: _mainAxisSpacing, childAspectRatio: _childAspectRatio,
+        ),
+        itemCount: pageCount + 1,
+        itemBuilder: (context, index) {
+          if (index < pageCount) {
+            return _buildGridThumbnailItem(
+                context, ref, pageManager, widget.thumbnailCache, index, cs, isDark, widget.onPageTap);
+          }
+          return _buildAddPageCell(context, ref, cs, isDark);
+        },
+      ),
+    );
+  }
+}
+
+/// Build a single grid thumbnail item with page number and more icon.
+Widget _buildGridThumbnailItem(BuildContext context, WidgetRef ref, dynamic pageManager,
+    ThumbnailCache thumbnailCache, int index, ColorScheme cs, bool isDark, ValueChanged<int>? onPageTap) {
+  final page = pageManager.pages[index];
+  final sel = index == pageManager.currentIndex;
+  return GestureDetector(
+    onTap: () => (onPageTap ?? (i) => ref.read(pageManagerProvider.notifier).goToPage(i))(index),
+    child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
       Expanded(
-        child: ListView.builder(
-          padding: const EdgeInsets.only(left: 12, right: 12, top: 16, bottom: 16),
-          itemCount: pageCount,
-          itemBuilder: (context, index) => _buildThumbnailItem(context, ref, pageManager, thumbnailCache, index, colorScheme, isDark),
+        child: Container(
+          decoration: BoxDecoration(
+            color: isDark ? cs.surfaceContainer : cs.surface, borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: sel ? cs.primary : cs.outlineVariant, width: sel ? 2 : 0.5),
+            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: sel ? 0.12 : 0.05),
+                blurRadius: sel ? 8 : 3, offset: Offset(0, sel ? 2 : 1))],
+          ),
+          child: ClipRRect(borderRadius: BorderRadius.circular(7),
+            child: PageThumbnail(page: page, cache: thumbnailCache, width: 102, height: 140,
+                isSelected: sel, showPageNumber: false)),
         ),
       ),
-      _buildAddPageButton(context, ref),
+      const SizedBox(height: 4),
+      Row(children: [
+        Text('${index + 1}', style: TextStyle(fontSize: 11,
+            fontWeight: sel ? FontWeight.w600 : FontWeight.w400, color: sel ? cs.primary : cs.onSurfaceVariant)),
+        const Spacer(),
+        SizedBox(width: 28, height: 28,
+            child: PhosphorIcon(StarNoteIcons.more, size: 16, color: cs.onSurfaceVariant)),
+      ]),
     ]),
   );
 }
 
-/// Build a single thumbnail item.
-Widget _buildThumbnailItem(BuildContext context, WidgetRef ref, dynamic pageManager,
-    ThumbnailCache thumbnailCache, int index, ColorScheme cs, bool isDark) {
-  final page = pageManager.pages[index];
-  final sel = index == pageManager.currentIndex;
-  return Padding(
-    padding: const EdgeInsets.only(bottom: 20),
-    child: GestureDetector(
-      onTap: () {
-        ref.read(pageManagerProvider.notifier).goToPage(index);
-        final doc = ref.read(documentProvider);
-        if (doc.isMultiPage && doc.currentPageIndex != index) {
-          ref.read(documentProvider.notifier).updateDocument(doc.setCurrentPage(index));
-        }
-      },
-      child: Column(mainAxisSize: MainAxisSize.min, children: [
-        Container(
-          height: 152,
+/// Build the "Sayfa ekle" cell that sits inside the grid after the last page.
+Widget _buildAddPageCell(BuildContext context, WidgetRef ref, ColorScheme cs, bool isDark) {
+  return GestureDetector(
+    onTap: () => ref.read(pageManagerProvider.notifier).addPage(),
+    child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+      Expanded(
+        child: Container(
           decoration: BoxDecoration(
             color: isDark ? cs.surfaceContainer : cs.surface, borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: sel ? cs.primary : cs.outlineVariant, width: sel ? 2 : 1),
-            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: sel ? 0.12 : 0.06), blurRadius: sel ? 8 : 4, offset: Offset(0, sel ? 2 : 1))],
+            border: Border.all(color: cs.outlineVariant, width: 1),
           ),
-          child: ClipRRect(borderRadius: BorderRadius.circular(7),
-            child: PageThumbnail(page: page, cache: thumbnailCache, width: 116, height: 152, isSelected: sel, showPageNumber: false)),
-        ),
-        const SizedBox(height: 6),
-        Text('${index + 1}', style: TextStyle(fontSize: 12, fontWeight: sel ? FontWeight.w600 : FontWeight.w400,
-            color: sel ? cs.primary : cs.onSurfaceVariant, letterSpacing: -0.2)),
-      ]),
-    ),
-  );
-}
-
-/// Build add page button.
-Widget _buildAddPageButton(BuildContext context, WidgetRef ref) {
-  final colorScheme = Theme.of(context).colorScheme;
-  final isDark = Theme.of(context).brightness == Brightness.dark;
-
-  return LayoutBuilder(builder: (context, constraints) {
-    final w = constraints.maxWidth;
-    if (w < 30) return const SizedBox.shrink();
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(border: Border(top: BorderSide(color: colorScheme.outlineVariant, width: 0.5))),
-      child: GestureDetector(
-        onTap: () => ref.read(pageManagerProvider.notifier).addPage(),
-        child: Container(
-          height: 48,
-          padding: EdgeInsets.symmetric(horizontal: w < 80 ? 2.0 : 8.0),
-          decoration: BoxDecoration(
-            color: isDark ? colorScheme.surfaceContainer : colorScheme.surface,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: colorScheme.outlineVariant, width: 1),
-          ),
-          child: Center(child: PhosphorIcon(StarNoteIcons.plus, size: w < 50 ? 16 : 20, color: colorScheme.primary)),
+          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+            PhosphorIcon(StarNoteIcons.plus, size: 24, color: cs.primary),
+            const SizedBox(height: 4),
+            Text('Sayfa ekle', style: TextStyle(fontSize: 11, color: cs.primary, fontWeight: FontWeight.w500)),
+          ]),
         ),
       ),
-    );
-  });
+      const SizedBox(height: 4),
+      const SizedBox(height: 28),
+    ]),
+  );
 }
 
 /// Floating AI button.

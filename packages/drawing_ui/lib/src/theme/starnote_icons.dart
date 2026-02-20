@@ -141,6 +141,8 @@ abstract final class StarNoteIcons {
   static const editPencil = PhosphorIconsLight.pencilSimpleLine;
   static const orientationPortrait = PhosphorIconsLight.deviceMobile;
   static const orientationLandscape = PhosphorIconsLight.deviceTabletSpeaker;
+  static const comment = PhosphorIconsLight.chatCircleDots;
+  static const scrollDirection = PhosphorIconsLight.arrowsHorizontal;
 
   // ═══════════════════════════════════════════
   // Page & Document Icons

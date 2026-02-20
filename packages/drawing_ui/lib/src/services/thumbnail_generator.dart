@@ -1,8 +1,10 @@
+import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'dart:typed_data';
 import 'package:flutter/material.dart' hide Page;
 import 'package:drawing_core/drawing_core.dart';
+import 'package:pdfx/pdfx.dart' as pdfx;
 
 /// Generates thumbnail images for pages.
 ///
@@ -232,36 +234,68 @@ class ThumbnailGenerator {
     }
   }
 
-  /// Renders PDF background on canvas
+  /// Renders PDF background on canvas.
+  ///
+  /// Supports both in-memory [pdfData] and lazy-loaded PDFs via [pdfFilePath].
   static Future<void> _renderPdfBackground(
     Canvas canvas,
     Page page,
   ) async {
-    if (page.background.pdfFilePath == null ||
-        page.background.pdfPageIndex == null) {
-      return;
-    }
+    if (page.background.pdfPageIndex == null) return;
 
     try {
-      // Bu kısım widget context'inden çağrılmalı
-      // Alternatif: PDF cache'den direkt oku
-      if (page.background.pdfData != null) {
-        final bytes = page.background.pdfData!;
-        final codec = await ui.instantiateImageCodec(bytes);
-        final frame = await codec.getNextFrame();
-        final pdfImage = frame.image;
+      Uint8List? bytes = page.background.pdfData;
 
-        // PDF'i page boyutuna sığdır
-        canvas.drawImageRect(
-          pdfImage,
-          Rect.fromLTWH(
-              0, 0, pdfImage.width.toDouble(), pdfImage.height.toDouble()),
-          Rect.fromLTWH(0, 0, page.size.width, page.size.height),
-          Paint()..filterQuality = FilterQuality.high,
+      // Lazy-loaded PDF: render from file path
+      if (bytes == null && page.background.pdfFilePath != null) {
+        bytes = await _renderPdfPageFromFile(
+          page.background.pdfFilePath!,
+          page.background.pdfPageIndex!,
         );
       }
+
+      if (bytes == null) return;
+
+      final codec = await ui.instantiateImageCodec(bytes);
+      final frame = await codec.getNextFrame();
+      final pdfImage = frame.image;
+
+      canvas.drawImageRect(
+        pdfImage,
+        Rect.fromLTWH(
+            0, 0, pdfImage.width.toDouble(), pdfImage.height.toDouble()),
+        Rect.fromLTWH(0, 0, page.size.width, page.size.height),
+        Paint()..filterQuality = FilterQuality.high,
+      );
     } catch (e) {
-      // PDF render hatası - sessizce devam et
+      // PDF render error - continue silently
+    }
+  }
+
+  /// Renders a single PDF page from file path, returning PNG bytes.
+  static Future<Uint8List?> _renderPdfPageFromFile(
+    String filePath,
+    int pageIndex,
+  ) async {
+    final file = File(filePath);
+    if (!await file.exists()) return null;
+
+    pdfx.PdfDocument? document;
+    pdfx.PdfPage? pdfPage;
+    try {
+      document = await pdfx.PdfDocument.openFile(filePath);
+      pdfPage = await document.getPage(pageIndex);
+
+      final pageImage = await pdfPage.render(
+        width: pdfPage.width * 0.5,
+        height: pdfPage.height * 0.5,
+        format: pdfx.PdfPageImageFormat.png,
+      );
+
+      return pageImage?.bytes;
+    } finally {
+      try { await pdfPage?.close(); } catch (_) {}
+      try { await document?.close(); } catch (_) {}
     }
   }
 

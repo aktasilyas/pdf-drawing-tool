@@ -70,9 +70,18 @@ customIcon: isPenGroup && _penTools.contains(currentTool)
 - Single-page: returns `SizedBox.shrink()`
 
 ## Key File Line Counts (watch 300 limit)
-- `drawing_screen.dart`: ~286 lines (very close to limit)
+- `drawing_screen.dart`: ~305 lines (slightly over limit)
 - `top_navigation_bar.dart`: ~262 lines
-- `drawing_screen_layout.dart`: ~299 lines (trimmed from 336 by condensing widget code)
+- `drawing_screen_layout.dart`: ~285 lines (after sidebar grid redesign)
+
+## Page Sidebar (GoodNotes-style 2-column grid)
+- `kPageSidebarWidth = 240` constant in `drawing_screen_layout.dart` (line 20)
+- `buildPageSidebar`: GridView.builder with crossAxisCount: 2, childAspectRatio: 0.58
+- `_buildGridThumbnailItem`: Expanded thumbnail + Row(Spacer, page number, "..." more icon)
+- `_buildAddPageButton`: Column with "+" icon + "Sayfa ekle" text, full-width bordered container
+- Thumbnail dimensions: width 102, height 140
+- Selected: primary border (2px), shadow alpha 0.12; Normal: outlineVariant (0.5px), alpha 0.05
+- `drawing_screen.dart` uses `kPageSidebarWidth` for all sidebar width references (no hardcoded 140)
 
 ## Settings Panel Design Pattern (pen/highlighter/eraser)
 All tool settings panels follow this consistent layout:

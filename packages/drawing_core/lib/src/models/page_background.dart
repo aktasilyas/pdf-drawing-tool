@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer' as developer;
 import 'dart:typed_data';
 import 'package:drawing_core/src/models/template_pattern.dart';
 
@@ -189,7 +190,7 @@ class PageBackground {
       try {
         pdfData = base64Decode(json['pdfDataBase64'] as String);
       } catch (e) {
-        print('❌ Failed to decode pdfDataBase64: $e');
+        developer.log('Failed to decode pdfDataBase64: $e', name: 'PageBackground');
       }
     }
     
@@ -201,7 +202,7 @@ class PageBackground {
           (p) => p.name == json['templatePattern'],
         );
       } catch (e) {
-        print('❌ Unknown template pattern: ${json['templatePattern']}');
+        developer.log('Unknown template pattern: ${json['templatePattern']}', name: 'PageBackground');
       }
     }
     

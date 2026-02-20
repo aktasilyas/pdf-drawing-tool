@@ -5,6 +5,7 @@ import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/toolbar/toolbar.dart';
+import 'package:drawing_ui/src/canvas/page_slide_transition.dart';
 import 'package:drawing_ui/src/screens/drawing_screen_layout.dart';
 import 'package:drawing_ui/src/widgets/widgets.dart';
 import 'package:drawing_ui/src/services/thumbnail_cache.dart';
@@ -35,10 +36,12 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
   final GlobalKey _penGroupButtonKey = GlobalKey();
   final GlobalKey _highlighterGroupButtonKey = GlobalKey();
   final GlobalKey _settingsButtonKey = GlobalKey();
+  final GlobalKey<PageSlideTransitionState> _pageTransitionKey = GlobalKey<PageSlideTransitionState>();
   final PopoverController _panelController = PopoverController();
   final ThumbnailCache _thumbnailCache = ThumbnailCache(maxSize: 20);
   Offset _penBoxPosition = const Offset(12, 12);
   bool _isSidebarOpen = false;
+  bool _isPageTransitioning = false;
 
   @override
   void didChangeDependencies() {
@@ -52,6 +55,23 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
     _panelController.dispose();
     _thumbnailCache.clear();
     super.dispose();
+  }
+
+  Future<void> _navigateToPage(int targetIndex) async {
+    final currentIndex = ref.read(currentPageIndexProvider);
+    if (targetIndex == currentIndex || _isPageTransitioning) return;
+    _isPageTransitioning = true;
+    try {
+      final forward = targetIndex > currentIndex;
+      await _pageTransitionKey.currentState?.captureSnapshot(forward: forward);
+      ref.read(pageManagerProvider.notifier).goToPage(targetIndex);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _pageTransitionKey.currentState?.startAnimation();
+        _isPageTransitioning = false;
+      });
+    } catch (_) {
+      _isPageTransitioning = false;
+    }
   }
 
   void _toggleSidebar() {
@@ -72,7 +92,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
     final size = MediaQuery.of(context).size;
     final isTablet = size.width >= ToolbarLayoutMode.compactBreakpoint;
     final showSidebar = _isSidebarOpen && ref.read(pageCountProvider) > 1;
-    final sidebarWidth = (isTablet && showSidebar) ? 140.0 : 0.0;
+    final sidebarWidth = (isTablet && showSidebar) ? kPageSidebarWidth : 0.0;
     final viewportSize = Size(size.width - sidebarWidth, size.height);
     final currentPage = ref.read(currentPageProvider);
     final pageSize = Size(currentPage.size.width, currentPage.size.height);
@@ -102,6 +122,18 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
         isPenPickerMode: isPenPickerMode,
         onPenSelected: _onPenSelected,
       );
+    });
+
+    // Sync page index from PageManager → DocumentProvider.
+    // This ensures all navigation sources (indicator bar, swipe, sidebar)
+    // keep the document's currentPageIndex in sync for correct auto-save.
+    ref.listen<int>(currentPageIndexProvider, (previous, current) {
+      if (previous != null && previous != current) {
+        final doc = ref.read(documentProvider);
+        if (doc.isMultiPage && doc.currentPageIndex != current) {
+          ref.read(documentProvider.notifier).updateDocument(doc.setCurrentPage(current));
+        }
+      }
     });
 
     // Listen to document changes for PDF prefetch and canvas transform
@@ -177,19 +209,17 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                           AnimatedContainer(
                             duration: const Duration(milliseconds: 250),
                             curve: Curves.easeInOut,
-                            width: showSidebar ? 140.0 : 0.0,
-                            clipBehavior: Clip.antiAlias,
+                            width: showSidebar ? kPageSidebarWidth : 0.0,
+                            clipBehavior: Clip.hardEdge,
                             decoration: const BoxDecoration(),
-                            child: AnimatedOpacity(
-                              duration: const Duration(milliseconds: 200),
-                              opacity: showSidebar ? 1.0 : 0.0,
-                              child: showSidebar
-                                  ? buildPageSidebar(
-                                      context: context,
-                                      ref: ref,
-                                      thumbnailCache: _thumbnailCache,
-                                    )
-                                  : const SizedBox.shrink(),
+                            child: OverflowBox(
+                              alignment: Alignment.centerLeft,
+                              maxWidth: kPageSidebarWidth,
+                              minWidth: kPageSidebarWidth,
+                              child: PageSidebar(
+                                thumbnailCache: _thumbnailCache,
+                                onPageTap: _navigateToPage,
+                              ),
                             ),
                           ),
                         Expanded(
@@ -203,6 +233,8 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                             onPenBoxPositionChanged: (p) => setState(() => _penBoxPosition = p),
                             onClosePanel: _closePanel,
                             onOpenAIPanel: () => openAIPanel(context),
+                            pageTransitionKey: _pageTransitionKey,
+                            onPageChanged: _navigateToPage,
                             colorScheme: ref.watch(canvasColorSchemeProvider),
                             isReadOnly: isReaderMode,
                           ),
@@ -228,11 +260,11 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                 AnimatedPositioned(
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.easeInOut,
-                  left: showSidebar ? 0 : -140,
+                  left: showSidebar ? 0 : -kPageSidebarWidth,
                   top: 0,
                   bottom: 0,
-                  width: 140,
-                  child: buildPageSidebar(context: context, ref: ref, thumbnailCache: _thumbnailCache),
+                  width: kPageSidebarWidth,
+                  child: PageSidebar(thumbnailCache: _thumbnailCache, onPageTap: _navigateToPage),
                 ),
             ],
           ),

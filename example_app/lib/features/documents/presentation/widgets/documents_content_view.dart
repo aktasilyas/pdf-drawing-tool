@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
 import 'package:example_app/features/documents/domain/entities/folder.dart';
 import 'package:example_app/features/documents/domain/entities/sort_option.dart';
+import 'package:example_app/features/documents/domain/entities/trashed_page.dart';
 import 'package:example_app/features/documents/domain/entities/view_mode.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
@@ -12,6 +13,7 @@ import 'package:example_app/features/documents/presentation/widgets/documents_er
 import 'package:example_app/features/documents/presentation/widgets/documents_list_view.dart';
 import 'package:example_app/features/documents/presentation/widgets/documents_sidebar.dart';
 import 'package:example_app/features/documents/presentation/widgets/document_card.dart';
+import 'package:example_app/features/documents/presentation/widgets/trash_content_view.dart';
 
 /// Routes content based on the selected sidebar section.
 class DocumentsContentView extends ConsumerWidget {
@@ -23,6 +25,7 @@ class DocumentsContentView extends ConsumerWidget {
     required this.onDocumentTap,
     required this.onFolderMore,
     required this.onDocumentMore,
+    this.onTrashedPageTap,
   });
 
   final SidebarSection section;
@@ -31,6 +34,7 @@ class DocumentsContentView extends ConsumerWidget {
   final ValueChanged<DocumentInfo> onDocumentTap;
   final ValueChanged<Folder> onFolderMore;
   final ValueChanged<DocumentInfo> onDocumentMore;
+  final ValueChanged<TrashedPage>? onTrashedPageTap;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -50,10 +54,10 @@ class DocumentsContentView extends ConsumerWidget {
           onDocumentMore: onDocumentMore,
         );
       case SidebarSection.trash:
-        return _SimpleDocumentList(
-          documentsAsync: ref.watch(trashDocumentsProvider),
+        return TrashContentView(
           onDocumentTap: onDocumentTap,
           onDocumentMore: onDocumentMore,
+          onTrashedPageTap: onTrashedPageTap ?? (_) {},
         );
       case SidebarSection.folder:
         return _DocumentsWithFolders(

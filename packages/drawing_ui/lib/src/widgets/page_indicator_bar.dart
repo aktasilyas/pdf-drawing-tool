@@ -10,8 +10,9 @@ import 'package:drawing_ui/src/theme/starnote_icons.dart';
 /// Displays current page number, total pages, and navigation arrows.
 /// Hidden for single-page documents. Auto-hides after 3 seconds.
 class PageIndicatorBar extends ConsumerStatefulWidget {
-  const PageIndicatorBar({super.key, this.autoHideDuration = const Duration(seconds: 3)});
+  const PageIndicatorBar({super.key, this.autoHideDuration = const Duration(seconds: 3), this.onPageChanged});
   final Duration autoHideDuration;
+  final ValueChanged<int>? onPageChanged;
 
   @override
   ConsumerState<PageIndicatorBar> createState() => _PageIndicatorBarState();
@@ -67,7 +68,7 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
               boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 8, offset: const Offset(0, 2))],
             ),
             child: Row(mainAxisSize: MainAxisSize.min, children: [
-              _NavArrow(icon: StarNoteIcons.chevronLeft, tooltip: 'Önceki Sayfa', onTap: canPrev ? () { ref.read(pageManagerProvider.notifier).previousPage(); _showBar(); } : null),
+              _NavArrow(icon: StarNoteIcons.chevronLeft, tooltip: 'Önceki Sayfa', onTap: canPrev ? () { _navigateTo(currentIndex - 1, ref); } : null),
               Tooltip(
                 message: 'Sayfaya Git',
                 child: Semantics(
@@ -83,12 +84,21 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
                   ),
                 ),
               ),
-              _NavArrow(icon: StarNoteIcons.chevronRight, tooltip: 'Sonraki Sayfa', onTap: canNext ? () { ref.read(pageManagerProvider.notifier).nextPage(); _showBar(); } : null),
+              _NavArrow(icon: StarNoteIcons.chevronRight, tooltip: 'Sonraki Sayfa', onTap: canNext ? () { _navigateTo(currentIndex + 1, ref); } : null),
             ]),
           )),
         ),
       ),
     );
+  }
+
+  void _navigateTo(int index, WidgetRef ref) {
+    if (widget.onPageChanged != null) {
+      widget.onPageChanged!(index);
+    } else {
+      ref.read(pageManagerProvider.notifier).goToPage(index);
+    }
+    _showBar();
   }
 
   void _showGoToPageDialog(BuildContext context, WidgetRef ref, int pageCount) {
@@ -110,8 +120,8 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
   void _goTo(String value, int pageCount, WidgetRef ref, BuildContext ctx) {
     final page = int.tryParse(value);
     if (page != null && page >= 1 && page <= pageCount) {
-      ref.read(pageManagerProvider.notifier).goToPage(page - 1);
       Navigator.pop(ctx);
+      _navigateTo(page - 1, ref);
     }
   }
 }
