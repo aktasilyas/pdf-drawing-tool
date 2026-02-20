@@ -56,7 +56,9 @@
       "Bash(grep:*)",
       "Bash(echo:*)",
       "Bash(git pull:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(gh pr:*)",
+      "Bash(gh auth status:*)"
     ]
   }
 }
