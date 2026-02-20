@@ -51,19 +51,20 @@ Widget buildDrawingCanvasArea({
     ],
   );
 
-  if (isDualPage) {
-    canvasContent = Row(
-      children: [
-        Expanded(child: canvasContent),
-        Expanded(child: SecondaryCanvasView(
-          page: secondaryPage,
-          canvasMode: canvasMode,
-          colorScheme: colorScheme,
-          onTap: onPageChanged,
-        )),
-      ],
-    );
-  }
+  // TEMPORARILY DISABLED: Dual page mode
+  // if (isDualPage) {
+  //   canvasContent = Row(
+  //     children: [
+  //       Expanded(child: canvasContent),
+  //       Expanded(child: SecondaryCanvasView(
+  //         page: secondaryPage,
+  //         canvasMode: canvasMode,
+  //         colorScheme: colorScheme,
+  //         onTap: onPageChanged,
+  //       )),
+  //     ],
+  //   );
+  // }
 
   if (pageTransitionKey != null) {
     canvasContent = PageSlideTransition(
