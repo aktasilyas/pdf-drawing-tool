@@ -75,12 +75,17 @@ class DrawingCanvas extends ConsumerStatefulWidget {
   /// When true, drawing gestures are disabled but pan/zoom remains active.
   final bool isReadOnly;
 
+  /// Callback for two-finger swipe page navigation.
+  /// Receives +1 (next page) or -1 (previous page).
+  final ValueChanged<int>? onPageSwipe;
+
   const DrawingCanvas({
     super.key,
     this.width = double.infinity,
     this.height = double.infinity,
     this.canvasMode,
     this.isReadOnly = false,
+    this.onPageSwipe,
   });
 
   @override
@@ -670,6 +675,23 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
   core.StickyNote? get drawingInsideNote => _drawingInsideNote;
   @override
   set drawingInsideNote(core.StickyNote? value) => _drawingInsideNote = value;
+
+  /// Focal point at the start of a scale gesture (for swipe detection).
+  Offset? _scaleStartFocalPoint;
+  @override
+  Offset? get scaleStartFocalPoint => _scaleStartFocalPoint;
+  @override
+  set scaleStartFocalPoint(Offset? value) => _scaleStartFocalPoint = value;
+
+  @override
+  ValueChanged<int>? get onPageSwipe => widget.onPageSwipe;
+
+  /// Whether the current scale gesture has been classified as zoom (not swipe).
+  bool _scaleGestureIsZoom = false;
+  @override
+  bool get scaleGestureIsZoom => _scaleGestureIsZoom;
+  @override
+  set scaleGestureIsZoom(bool value) => _scaleGestureIsZoom = value;
 
   @override
   Widget build(BuildContext context) {

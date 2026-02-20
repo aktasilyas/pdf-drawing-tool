@@ -47,7 +47,18 @@ Widget buildDrawingCanvasArea({
         painter: InfiniteBackgroundPainter(background: currentPage.background,
             zoom: transform.zoom, offset: transform.offset, colorScheme: colorScheme),
         size: Size.infinite))),
-      Positioned.fill(child: DrawingCanvas(canvasMode: canvasMode, isReadOnly: isReadOnly)),
+      Positioned.fill(child: DrawingCanvas(
+        canvasMode: canvasMode,
+        isReadOnly: isReadOnly,
+        onPageSwipe: isReadOnly ? null : (direction) {
+          final idx = ref.read(currentPageIndexProvider);
+          final count = ref.read(pageCountProvider);
+          final target = idx + direction;
+          if (target >= 0 && target < count) {
+            (onPageChanged ?? (_) {})(target);
+          }
+        },
+      )),
     ],
   );
 
