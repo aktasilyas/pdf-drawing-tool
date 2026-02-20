@@ -18,9 +18,15 @@ class CanvasTransform {
   /// Current pan offset in screen coordinates
   final Offset offset;
 
+  /// Baseline zoom = the zoom level when page fits the viewport.
+  /// UI shows "100%" at this value.
+  /// For whiteboard/infinite mode this is 1.0.
+  final double baselineZoom;
+
   const CanvasTransform({
     this.zoom = 1.0,
     this.offset = Offset.zero,
+    this.baselineZoom = 1.0,
   });
 
   /// Minimum allowed zoom level (25%)
@@ -29,11 +35,16 @@ class CanvasTransform {
   /// Maximum allowed zoom level (500%)
   static const double maxZoom = 5.0;
 
+  /// UI display percentage relative to baseline zoom.
+  /// At baselineZoom this returns 100, at 2x baselineZoom returns 200, etc.
+  double get displayPercentage => (zoom / baselineZoom) * 100;
+
   /// Creates a copy with updated values
-  CanvasTransform copyWith({double? zoom, Offset? offset}) {
+  CanvasTransform copyWith({double? zoom, Offset? offset, double? baselineZoom}) {
     return CanvasTransform(
       zoom: zoom ?? this.zoom,
       offset: offset ?? this.offset,
+      baselineZoom: baselineZoom ?? this.baselineZoom,
     );
   }
 
@@ -67,10 +78,11 @@ class CanvasTransform {
       other is CanvasTransform &&
           runtimeType == other.runtimeType &&
           zoom == other.zoom &&
-          offset == other.offset;
+          offset == other.offset &&
+          baselineZoom == other.baselineZoom;
 
   @override
-  int get hashCode => zoom.hashCode ^ offset.hashCode;
+  int get hashCode => zoom.hashCode ^ offset.hashCode ^ baselineZoom.hashCode;
 }
 
 // =============================================================================
@@ -122,7 +134,7 @@ class CanvasTransformNotifier extends StateNotifier<CanvasTransform> {
     final focalCanvasPoint = state.screenToCanvas(focalPoint);
     final newOffset = focalPoint - focalCanvasPoint * newZoom;
 
-    state = CanvasTransform(zoom: newZoom, offset: newOffset);
+    state = CanvasTransform(zoom: newZoom, offset: newOffset, baselineZoom: state.baselineZoom);
   }
 
   /// Apply zoom delta with custom limits from CanvasMode.
@@ -186,7 +198,7 @@ class CanvasTransformNotifier extends StateNotifier<CanvasTransform> {
       }
     }
 
-    state = CanvasTransform(zoom: newZoom, offset: newOffset);
+    state = CanvasTransform(zoom: newZoom, offset: newOffset, baselineZoom: state.baselineZoom);
   }
 
   /// Apply pan delta (for drag gesture).
@@ -262,14 +274,22 @@ class CanvasTransformNotifier extends StateNotifier<CanvasTransform> {
     state = state.copyWith(offset: newOffset);
   }
 
-  /// Reset to default (zoom 100%, centered).
+  /// Reset to baseline zoom (what user sees as "100%").
   void reset() {
-    state = const CanvasTransform();
+    state = CanvasTransform(
+      zoom: state.baselineZoom,
+      offset: Offset.zero,
+      baselineZoom: state.baselineZoom,
+    );
   }
 
-  /// Fit canvas to screen (reset zoom and center).
+  /// Fit canvas to screen (return to baseline zoom).
   void fitToScreen() {
-    state = const CanvasTransform(zoom: 1.0, offset: Offset.zero);
+    state = CanvasTransform(
+      zoom: state.baselineZoom,
+      offset: Offset.zero,
+      baselineZoom: state.baselineZoom,
+    );
   }
 
   /// Initialize transform for limited canvas (fill viewport with page).
@@ -281,22 +301,19 @@ class CanvasTransformNotifier extends StateNotifier<CanvasTransform> {
     required Size viewportSize,
     required Size pageSize,
   }) {
-    // DEFAULT ZOOM: Fit-to-height (page height = viewport height)
-    // This is the "100%" baseline - page fills screen vertically
+    // Fit-to-height zoom: page height = viewport height
     final fitHeightZoom = viewportSize.height / pageSize.height;
 
-    // Calculate offset - center page horizontally, top-align vertically
+    // Center page both horizontally AND vertically
     final pageScreenWidth = pageSize.width * fitHeightZoom;
-
-    // Center horizontally
+    final pageScreenHeight = pageSize.height * fitHeightZoom;
     final offsetX = (viewportSize.width - pageScreenWidth) / 2;
-    // Top-align vertically (page fills viewport height)
-    final offsetY = 0.0;
-
+    final offsetY = (viewportSize.height - pageScreenHeight) / 2;
 
     state = CanvasTransform(
       zoom: fitHeightZoom,
       offset: Offset(offsetX, offsetY),
+      baselineZoom: fitHeightZoom,
     );
   }
 
@@ -311,38 +328,47 @@ class CanvasTransformNotifier extends StateNotifier<CanvasTransform> {
     required Size viewportSize,
     required Size pageSize,
   }) {
-    // Baseline zoom: fit-to-height (page fills viewport vertically)
     final baselineZoom = viewportSize.height / pageSize.height;
 
-    // If current zoom is below baseline (zoom out), snap back to baseline
     if (state.zoom < baselineZoom) {
-      // Calculate offset at baseline zoom
       final pageScreenWidth = pageSize.width * baselineZoom;
-
-      // Center horizontally
+      final pageScreenHeight = pageSize.height * baselineZoom;
       final offsetX = (viewportSize.width - pageScreenWidth) / 2;
-      // Top-align vertically (page fills viewport height)
-      final offsetY = 0.0;
+      final offsetY = (viewportSize.height - pageScreenHeight) / 2;
 
       state = CanvasTransform(
         zoom: baselineZoom,
         offset: Offset(offsetX, offsetY),
+        baselineZoom: baselineZoom,
       );
     } else {
-      // Zoom >= baseline: keep current zoom, just clamp offset (top-aligned)
+      // Zoom >= baseline: keep current zoom, just clamp offset
       _clampOffsetLimitedCanvas(viewportSize, pageSize);
     }
   }
 
-  /// Recenter page with current zoom (for viewport changes).
+  /// Recenter page for viewport changes (e.g., sidebar toggle, rotation).
   ///
-  /// Called when viewport size changes (e.g., sidebar toggle).
-  /// Keeps current zoom level, just adjusts offset to keep page visible.
+  /// Recalculates baselineZoom for the new viewport and preserves
+  /// the user's relative zoom level. E.g. if user was at 150%,
+  /// after rotation they stay at 150%.
   void recenterForViewport({
     required Size viewportSize,
     required Size pageSize,
   }) {
-    // For limited canvas: use special clamping (top-aligned)
+    final newBaselineZoom = viewportSize.height / pageSize.height;
+
+    // Preserve relative zoom (e.g. 150% stays 150%)
+    final currentRelativeZoom = state.baselineZoom > 0
+        ? state.zoom / state.baselineZoom
+        : 1.0;
+    final newZoom = newBaselineZoom * currentRelativeZoom;
+
+    state = state.copyWith(
+      zoom: newZoom,
+      baselineZoom: newBaselineZoom,
+    );
+
     _clampOffsetLimitedCanvas(viewportSize, pageSize);
   }
 
@@ -370,12 +396,12 @@ class CanvasTransformNotifier extends StateNotifier<CanvasTransform> {
       );
     }
 
-    // Vertical clamping (top-aligned for limited canvas)
+    // Vertical clamping (center if smaller, clamp if larger)
     if (pageScreenHeight <= viewportSize.height) {
-      // Page shorter than viewport: top-align (offsetY = 0)
+      // Page shorter than viewport: CENTER vertically
       newOffset = Offset(
         newOffset.dx,
-        0.0,
+        (viewportSize.height - pageScreenHeight) / 2,
       );
     } else {
       // Page taller than viewport: clamp to keep within bounds
@@ -480,6 +506,33 @@ class CanvasTransformNotifier extends StateNotifier<CanvasTransform> {
   }
   */
 
+  /// Go to a specific zoom level and center the page.
+  void goToZoom({
+    required double targetZoom,
+    required Size viewportSize,
+    required Size pageSize,
+    double minZoom = 0.25,
+    double maxZoom = 5.0,
+  }) {
+    final clampedZoom = targetZoom.clamp(minZoom, maxZoom);
+
+    final pageScreenWidth = pageSize.width * clampedZoom;
+    final pageScreenHeight = pageSize.height * clampedZoom;
+
+    // Center page
+    final offsetX = pageScreenWidth <= viewportSize.width
+        ? (viewportSize.width - pageScreenWidth) / 2
+        : 0.0;
+    final offsetY = pageScreenHeight <= viewportSize.height
+        ? (viewportSize.height - pageScreenHeight) / 2
+        : 0.0;
+
+    state = state.copyWith(
+      zoom: clampedZoom,
+      offset: Offset(offsetX, offsetY),
+    );
+  }
+
   /// Zoom in by a fixed step (for button/keyboard).
   void zoomIn() {
     applyZoomDelta(1.25, Offset.zero); // 25% zoom in
@@ -501,15 +554,17 @@ final zoomLevelProvider = Provider<double>((ref) {
 });
 
 /// Zoom percentage string for UI display (e.g., "150%").
+/// Now relative to baselineZoom: baseline = 100%.
 final zoomPercentageProvider = Provider<String>((ref) {
-  final zoom = ref.watch(zoomLevelProvider);
-  return '${(zoom * 100).round()}%';
+  final transform = ref.watch(canvasTransformProvider);
+  final percentage = transform.displayPercentage.round();
+  return '$percentage%';
 });
 
-/// Whether canvas is at default zoom (100%).
+/// Whether canvas is at baseline zoom (what user sees as "100%").
 final isDefaultZoomProvider = Provider<bool>((ref) {
-  final zoom = ref.watch(zoomLevelProvider);
-  return (zoom - 1.0).abs() < 0.01;
+  final transform = ref.watch(canvasTransformProvider);
+  return (transform.zoom - transform.baselineZoom).abs() < 0.01;
 });
 
 /// Whether canvas can zoom in further.
@@ -526,3 +581,7 @@ final canZoomOutProvider = Provider<bool>((ref) {
 
 /// Whether zoom gesture is currently active.
 final isZoomingProvider = StateProvider<bool>((ref) => false);
+
+/// Current canvas viewport size (set by DrawingCanvas/DrawingScreen).
+/// Used by zoom controls to compute target offsets.
+final canvasViewportSizeProvider = StateProvider<Size>((ref) => Size.zero);

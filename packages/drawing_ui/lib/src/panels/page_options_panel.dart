@@ -256,7 +256,8 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
               ),
               _thickDivider(cs),
               PageOptionsSectionHeader(title: 'Ayarlar'),
-              _DualPageModeItem(onClose: widget.onClose),
+              // TEMPORARILY DISABLED: Dual page mode
+              // _DualPageModeItem(onClose: widget.onClose),
               _ScrollDirectionItem(onClose: widget.onClose),
               const SizedBox(height: 8),
             ],
@@ -287,6 +288,7 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
 }
 
 /// Dual page (side-by-side) mode toggle.
+// ignore: unused_element
 class _DualPageModeItem extends ConsumerWidget {
   const _DualPageModeItem({required this.onClose});
   final VoidCallback onClose;

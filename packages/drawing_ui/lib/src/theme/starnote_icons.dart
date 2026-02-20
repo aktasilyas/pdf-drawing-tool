@@ -118,6 +118,10 @@ abstract final class StarNoteIcons {
   static const eyedropper = PhosphorIconsLight.eyedropper;
   static const list = PhosphorIconsLight.list;
   static const lock = PhosphorIconsLight.lock;
+  static const lockOpen = PhosphorIconsLight.lockOpen;
+  static const lockFilled = PhosphorIconsFill.lock;
+  static const star = PhosphorIconsLight.star;
+  static const starFilled = PhosphorIconsFill.star;
   static const link = PhosphorIconsLight.link;
   static const tag = PhosphorIconsLight.tag;
   static const camera = PhosphorIconsLight.camera;

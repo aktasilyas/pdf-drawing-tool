@@ -44,3 +44,4 @@ export 'sticky_note_provider.dart';
 export 'page_trash_callback_provider.dart';
 export 'scroll_direction_provider.dart';
 export 'dual_page_provider.dart';
+export 'zoom_lock_provider.dart';

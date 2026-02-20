@@ -47,23 +47,35 @@ Widget buildDrawingCanvasArea({
         painter: InfiniteBackgroundPainter(background: currentPage.background,
             zoom: transform.zoom, offset: transform.offset, colorScheme: colorScheme),
         size: Size.infinite))),
-      Positioned.fill(child: DrawingCanvas(canvasMode: canvasMode, isReadOnly: isReadOnly)),
+      Positioned.fill(child: DrawingCanvas(
+        canvasMode: canvasMode,
+        isReadOnly: isReadOnly,
+        onPageSwipe: isReadOnly ? null : (direction) {
+          final idx = ref.read(currentPageIndexProvider);
+          final count = ref.read(pageCountProvider);
+          final target = idx + direction;
+          if (target >= 0 && target < count) {
+            (onPageChanged ?? (_) {})(target);
+          }
+        },
+      )),
     ],
   );
 
-  if (isDualPage) {
-    canvasContent = Row(
-      children: [
-        Expanded(child: canvasContent),
-        Expanded(child: SecondaryCanvasView(
-          page: secondaryPage,
-          canvasMode: canvasMode,
-          colorScheme: colorScheme,
-          onTap: onPageChanged,
-        )),
-      ],
-    );
-  }
+  // TEMPORARILY DISABLED: Dual page mode
+  // if (isDualPage) {
+  //   canvasContent = Row(
+  //     children: [
+  //       Expanded(child: canvasContent),
+  //       Expanded(child: SecondaryCanvasView(
+  //         page: secondaryPage,
+  //         canvasMode: canvasMode,
+  //         colorScheme: colorScheme,
+  //         onTap: onPageChanged,
+  //       )),
+  //     ],
+  //   );
+  // }
 
   if (pageTransitionKey != null) {
     canvasContent = PageSlideTransition(
@@ -98,7 +110,10 @@ Widget buildDrawingCanvasArea({
         if (!isReadOnly) const FloatingUndoRedo(),
         if (!isReadOnly)
           Positioned(right: 16, bottom: 16, child: AskAIButton(onTap: onOpenAIPanel)),
-        if (ref.watch(isZoomingProvider))
+        // Zoom overlay: interactive for limited canvas, simple HUD for infinite
+        if (!isReadOnly && canvasMode != null && !canvasMode.isInfinite)
+          const Positioned.fill(child: Center(child: ZoomControlBar()))
+        else if (ref.watch(isZoomingProvider))
           Positioned.fill(
             child: Center(
               key: const ValueKey('zoom-indicator'),

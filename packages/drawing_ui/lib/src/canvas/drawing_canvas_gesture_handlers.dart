@@ -58,6 +58,11 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
   set isLaserDrawing(bool value);
   core.StickyNote? get drawingInsideNote;
   set drawingInsideNote(core.StickyNote? value);
+  Offset? get scaleStartFocalPoint;
+  set scaleStartFocalPoint(Offset? value);
+  ValueChanged<int>? get onPageSwipe;
+  bool get scaleGestureIsZoom;
+  set scaleGestureIsZoom(bool value);
 
   /// Minimum distance between points to avoid excessive point creation.
   static const double minPointDistance = 1.0;
@@ -1955,6 +1960,8 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
 
     lastFocalPoint = details.localFocalPoint;
     lastScale = 1.0;
+    scaleStartFocalPoint = details.localFocalPoint;
+    scaleGestureIsZoom = false;
   }
 
   void handleScaleUpdate(ScaleUpdateDetails details) {
@@ -1969,9 +1976,30 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     final renderBox = context.findRenderObject() as RenderBox?;
     final viewportSize = renderBox?.size ?? const Size(800, 600);
 
-    // Apply zoom (pinch gesture)
-    // Use localFocalPoint for correct coordinate mapping relative to canvas
-    if (lastScale != null && details.scale != 1.0) {
+    // Gesture classification: zoom vs swipe.
+    // Zoom: fingers move apart/together but focal point stays ~stationary.
+    // Swipe: fingers move together, focal point travels far.
+    // Use both scale change AND displacement to decide.
+    if (!scaleGestureIsZoom && !mode.isInfinite && onPageSwipe != null) {
+      final scaleChange = (details.scale - 1.0).abs();
+      final displacement = scaleStartFocalPoint != null
+          ? (details.localFocalPoint - scaleStartFocalPoint!).distance
+          : 0.0;
+      if (scaleChange > 0.30) {
+        // Very large scale change = definitely zoom regardless of movement
+        scaleGestureIsZoom = true;
+      } else if (scaleChange > 0.12 && displacement < 30) {
+        // Moderate scale change + barely moved = intentional zoom
+        scaleGestureIsZoom = true;
+      }
+    }
+
+    // Apply zoom (pinch gesture) — skip if zoom is locked or gesture is swipe
+    final isZoomLocked = ref.read(zoomLockedProvider);
+    final suppressZoom = !mode.isInfinite &&
+        onPageSwipe != null &&
+        !scaleGestureIsZoom;
+    if (!isZoomLocked && !suppressZoom && lastScale != null && details.scale != 1.0) {
       final scaleDelta = details.scale / lastScale!;
       if ((scaleDelta - 1.0).abs() > 0.001) {
         if (mode.isInfinite) {
@@ -2036,8 +2064,21 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       ref.read(zoomBasedRenderProvider.notifier).onZoomChanged(currentZoom, cacheKey);
     }
 
-    // Snap back for limited canvas mode
+    // Detect two-finger swipe for page navigation (limited canvas only)
+    // Only attempt if gesture was NOT classified as zoom
     final mode = canvasMode ?? const core.CanvasMode(isInfinite: true);
+    if (!mode.isInfinite && onPageSwipe != null && !scaleGestureIsZoom) {
+      final swipeDir = _detectPageSwipe(details.velocity);
+      if (swipeDir != 0) {
+        onPageSwipe!(swipeDir);
+        lastFocalPoint = null;
+        lastScale = null;
+        scaleStartFocalPoint = null;
+        return;
+      }
+    }
+
+    // Snap back for limited canvas mode
     if (!mode.isInfinite && !mode.unlimitedPan) {
       final currentPage = ref.read(currentPageProvider);
       final renderBox = context.findRenderObject() as RenderBox?;
@@ -2051,5 +2092,39 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
 
     lastFocalPoint = null;
     lastScale = null;
+    scaleStartFocalPoint = null;
+  }
+
+  /// Detects a two-finger horizontal/vertical swipe gesture.
+  /// Called only when gesture was NOT classified as zoom (scaleGestureIsZoom == false).
+  /// Returns +1 (next page), -1 (previous page), or 0 (no swipe).
+  int _detectPageSwipe(Velocity velocity) {
+    final startPoint = scaleStartFocalPoint;
+    final endPoint = lastFocalPoint;
+
+    // Need valid tracking data
+    if (startPoint == null || endPoint == null) return 0;
+
+    final scrollDir = ref.read(scrollDirectionProvider);
+    final isHorizontal = scrollDir == Axis.horizontal;
+
+    // Check displacement from start
+    final displacement = endPoint - startPoint;
+    final primaryDisplacement =
+        isHorizontal ? displacement.dx : displacement.dy;
+    final crossDisplacement =
+        isHorizontal ? displacement.dy : displacement.dx;
+
+    // Minimum displacement along primary axis
+    if (primaryDisplacement.abs() < 30) return 0;
+
+    // Primary axis must dominate cross axis (loose ratio for natural swipes)
+    if (crossDisplacement.abs() > 0 &&
+        primaryDisplacement.abs() < crossDisplacement.abs() * 1.2) {
+      return 0;
+    }
+
+    // Negative displacement = swiped toward next page
+    return primaryDisplacement < 0 ? 1 : -1;
   }
 }

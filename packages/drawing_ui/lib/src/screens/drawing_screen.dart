@@ -95,9 +95,10 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
     final showSidebar = _isSidebarOpen && ref.read(pageCountProvider) > 1;
     final sidebarWidth = (isTablet && showSidebar) ? kPageSidebarWidth : 0.0;
     var canvasWidth = size.width - sidebarWidth;
-    // In dual page mode, the primary canvas only occupies half the width
-    if (ref.read(dualPageModeProvider)) canvasWidth /= 2;
+    // TEMPORARILY DISABLED: Dual page mode
+    // if (ref.read(dualPageModeProvider)) canvasWidth /= 2;
     final viewportSize = Size(canvasWidth, size.height);
+    ref.read(canvasViewportSizeProvider.notifier).state = viewportSize;
     final currentPage = ref.read(currentPageProvider);
     final pageSize = Size(currentPage.size.width, currentPage.size.height);
     final canvasMode = widget.canvasMode ?? const core.CanvasMode(isInfinite: true);
