@@ -9,7 +9,6 @@ import 'package:drawing_ui/src/toolbar/tool_groups.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_logic.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_nav_sections.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_widgets.dart';
-import 'package:drawing_ui/src/toolbar/top_nav_menus.dart';
 
 /// Expanded toolbar (>=840px) — single-row layout combining navigation and
 /// drawing tools.
@@ -105,7 +104,6 @@ class _ToolBarState extends ConsumerState<ToolBar> {
             isReaderMode: isReaderMode,
             onReaderToggle: () =>
                 ref.read(readerModeProvider.notifier).state = !isReaderMode,
-            onExportPressed: () => showExportMenu(context, ref),
             onShowRecordings: () => _openRecordingsTab(ref),
           ),
           const SizedBox(width: 4),

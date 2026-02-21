@@ -29,7 +29,7 @@ Future<String?> showAudioRenameDialog(
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(ctx),
-          child: const Text('Iptal'),
+          child: const Text('İptal'),
         ),
         FilledButton(
           onPressed: () {

@@ -116,7 +116,7 @@ class TopNavigationBar extends ConsumerWidget {
           ),
         StarNoteNavButton(
           icon: StarNoteIcons.exportIcon,
-          tooltip: 'Disa Aktar',
+          tooltip: 'Dışa Aktar',
           onPressed: () => showExportMenu(context, ref),
         ),
         StarNoteNavButton(
@@ -196,7 +196,7 @@ class TopNavigationBar extends ConsumerWidget {
 
         StarNoteNavButton(
           icon: StarNoteIcons.exportIcon,
-          tooltip: 'Disa Aktar',
+          tooltip: 'Dışa Aktar',
           onPressed: () => showExportMenu(context, ref),
         ),
 

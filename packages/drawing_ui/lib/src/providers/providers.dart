@@ -48,3 +48,4 @@ export 'sidebar_filter_provider.dart';
 export 'dual_page_provider.dart';
 export 'zoom_lock_provider.dart';
 export 'ruler_provider.dart';
+export 'export_progress_provider.dart';

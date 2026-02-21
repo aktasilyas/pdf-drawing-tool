@@ -4,6 +4,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import 'package:drawing_ui/src/panels/add_page_panel.dart';
 import 'package:drawing_ui/src/panels/audio_recording_dropdown.dart';
+import 'package:drawing_ui/src/panels/export_panel.dart';
 import 'package:drawing_ui/src/panels/page_options_panel.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/screens/layers_list.dart';
@@ -71,7 +72,7 @@ class ToolbarNavLeft extends StatelessWidget {
 }
 
 /// Which nav popover is currently open.
-enum _NavPanel { addPage, audioRecording, layers, more }
+enum _NavPanel { addPage, audioRecording, layers, export, more }
 
 /// Right navigation section: Reader toggle, Add Page, Export, More.
 ///
@@ -82,13 +83,11 @@ class ToolbarNavRight extends ConsumerStatefulWidget {
     super.key,
     this.isReaderMode = false,
     this.onReaderToggle,
-    this.onExportPressed,
     this.onShowRecordings,
   });
 
   final bool isReaderMode;
   final VoidCallback? onReaderToggle;
-  final VoidCallback? onExportPressed;
   final VoidCallback? onShowRecordings;
 
   @override
@@ -100,6 +99,7 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
   final GlobalKey _addPageKey = GlobalKey();
   final GlobalKey _micKey = GlobalKey();
   final GlobalKey _layersKey = GlobalKey();
+  final GlobalKey _exportKey = GlobalKey();
   final GlobalKey _moreKey = GlobalKey();
   _NavPanel? _activePanel;
 
@@ -141,6 +141,9 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
         final screenH = MediaQuery.of(context).size.height;
         final layersH = (screenH * 0.6).clamp(280.0, 420.0);
         child = SizedBox(width: 260, height: layersH, child: const LayersList());
+      case _NavPanel.export:
+        anchorKey = _exportKey;
+        child = ExportPanel(onClose: _closePanel, embedded: true);
       case _NavPanel.more:
         anchorKey = _moreKey;
         child = PageOptionsPanel(onClose: _closePanel, embedded: true);
@@ -212,9 +215,11 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
             isActive: _activePanel == _NavPanel.audioRecording,
           ),
         StarNoteNavButton(
+          key: _exportKey,
           icon: StarNoteIcons.exportIcon,
-          tooltip: 'Disa Aktar',
-          onPressed: widget.onExportPressed ?? () {},
+          tooltip: 'Dışa Aktar',
+          onPressed: () => _togglePanel(_NavPanel.export),
+          isActive: _activePanel == _NavPanel.export,
         ),
         StarNoteNavButton(
           key: _moreKey,

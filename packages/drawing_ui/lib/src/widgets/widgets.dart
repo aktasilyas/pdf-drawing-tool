@@ -12,6 +12,7 @@ export 'color_swatch_grid.dart';
 export 'color_chip.dart';
 export 'color_chips_grid.dart';
 export 'eraser_cursor_widget.dart';
+export 'floating_export_progress.dart';
 export 'floating_pen_box.dart';
 export 'floating_recording_bar.dart';
 export 'goodnotes_slider.dart';
