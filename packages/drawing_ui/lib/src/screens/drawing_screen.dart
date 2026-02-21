@@ -95,9 +95,9 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
     final showSidebar = _isSidebarOpen && ref.read(pageCountProvider) > 1;
     final sidebarWidth = (isTablet && showSidebar) ? kPageSidebarWidth : 0.0;
     var canvasWidth = size.width - sidebarWidth;
-    // TEMPORARILY DISABLED: Dual page mode
-    // if (ref.read(dualPageModeProvider)) canvasWidth /= 2;
-    final viewportSize = Size(canvasWidth, size.height);
+    // Use the actual canvas height from LayoutBuilder, not full screen height
+    final canvasHeight = ref.read(canvasViewportSizeProvider).height;
+    final viewportSize = Size(canvasWidth, canvasHeight > 0 ? canvasHeight : size.height);
     ref.read(canvasViewportSizeProvider.notifier).state = viewportSize;
     final currentPage = ref.read(currentPageProvider);
     final pageSize = Size(currentPage.size.width, currentPage.size.height);

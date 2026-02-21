@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
+import 'package:drawing_ui/src/panels/add_page_panel.dart';
+import 'package:drawing_ui/src/panels/page_options_panel.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/toolbar/starnote_nav_button.dart';
+import 'package:drawing_ui/src/widgets/popover_panel.dart';
 
 /// Left navigation section: Home, Sidebar toggle, document title, reader badge.
 ///
@@ -63,26 +66,74 @@ class ToolbarNavLeft extends StatelessWidget {
   }
 }
 
-/// Right navigation section: Reader toggle, Grid toggle, Export, More.
+/// Which nav popover is currently open.
+enum _NavPanel { addPage, more }
+
+/// Right navigation section: Reader toggle, Add Page, Export, More.
 ///
-/// Pure widget — all actions are via callbacks, no provider dependency.
-class ToolbarNavRight extends StatelessWidget {
+/// Uses [PopoverController] to show Add Page and More panels as popovers
+/// with an arrow pointing to the anchor button (same style as tool panels).
+class ToolbarNavRight extends StatefulWidget {
   const ToolbarNavRight({
     super.key,
     this.isReaderMode = false,
-    this.gridVisible = true,
     this.onReaderToggle,
-    this.onGridToggle,
     this.onExportPressed,
-    this.onMorePressed,
   });
 
   final bool isReaderMode;
-  final bool gridVisible;
   final VoidCallback? onReaderToggle;
-  final VoidCallback? onGridToggle;
   final VoidCallback? onExportPressed;
-  final VoidCallback? onMorePressed;
+
+  @override
+  State<ToolbarNavRight> createState() => _ToolbarNavRightState();
+}
+
+class _ToolbarNavRightState extends State<ToolbarNavRight> {
+  final PopoverController _popover = PopoverController();
+  final GlobalKey _addPageKey = GlobalKey();
+  final GlobalKey _moreKey = GlobalKey();
+  _NavPanel? _activePanel;
+
+  @override
+  void didUpdateWidget(ToolbarNavRight oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isReaderMode && !oldWidget.isReaderMode) {
+      _closePanel();
+    }
+  }
+
+  @override
+  void dispose() {
+    _popover.dispose();
+    super.dispose();
+  }
+
+  void _togglePanel(_NavPanel panel) {
+    if (_activePanel == panel) {
+      _closePanel();
+      return;
+    }
+    setState(() => _activePanel = panel);
+    final anchorKey = panel == _NavPanel.addPage ? _addPageKey : _moreKey;
+    final child = panel == _NavPanel.addPage
+        ? AddPagePanel(onClose: _closePanel, embedded: true)
+        : PageOptionsPanel(onClose: _closePanel, embedded: true);
+    _popover.show(
+      context: context,
+      anchorKey: anchorKey,
+      maxWidth: 320,
+      onDismiss: () {
+        if (mounted) setState(() => _activePanel = null);
+      },
+      child: child,
+    );
+  }
+
+  void _closePanel() {
+    _popover.hide();
+    if (mounted) setState(() => _activePanel = null);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,29 +141,32 @@ class ToolbarNavRight extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         StarNoteNavButton(
-          icon: isReaderMode
+          icon: widget.isReaderMode
               ? StarNoteIcons.readerModeActive
               : StarNoteIcons.readerMode,
-          tooltip: isReaderMode ? 'Duzenleme Modu' : 'Okuyucu Modu',
-          onPressed: onReaderToggle ?? () {},
-          isActive: isReaderMode,
+          tooltip: widget.isReaderMode ? 'Duzenleme Modu' : 'Okuyucu Modu',
+          onPressed: widget.onReaderToggle ?? () {},
+          isActive: widget.isReaderMode,
         ),
-        if (!isReaderMode)
+        if (!widget.isReaderMode)
           StarNoteNavButton(
-            icon: gridVisible ? StarNoteIcons.gridOn : StarNoteIcons.gridOff,
-            tooltip: gridVisible ? 'Kilavuzu Gizle' : 'Kilavuzu Goster',
-            onPressed: onGridToggle ?? () {},
-            isActive: gridVisible,
+            key: _addPageKey,
+            icon: StarNoteIcons.pageAdd,
+            tooltip: 'Sayfa Ekle',
+            onPressed: () => _togglePanel(_NavPanel.addPage),
+            isActive: _activePanel == _NavPanel.addPage,
           ),
         StarNoteNavButton(
           icon: StarNoteIcons.exportIcon,
           tooltip: 'Disa Aktar',
-          onPressed: onExportPressed ?? () {},
+          onPressed: widget.onExportPressed ?? () {},
         ),
         StarNoteNavButton(
+          key: _moreKey,
           icon: StarNoteIcons.more,
           tooltip: 'Daha Fazla',
-          onPressed: onMorePressed ?? () {},
+          onPressed: () => _togglePanel(_NavPanel.more),
+          isActive: _activePanel == _NavPanel.more,
         ),
       ],
     );

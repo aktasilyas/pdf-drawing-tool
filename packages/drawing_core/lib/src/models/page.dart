@@ -15,6 +15,7 @@ class Page {
   final DateTime createdAt;
   final DateTime updatedAt;
   final bool isCover; // Flag for cover pages (drawings not saved)
+  final bool isBookmarked;
 
   const Page({
     required this.id,
@@ -26,6 +27,7 @@ class Page {
     required this.createdAt,
     required this.updatedAt,
     this.isCover = false,
+    this.isBookmarked = false,
   });
 
   /// Factory for creating new page
@@ -88,6 +90,7 @@ class Page {
     DateTime? createdAt,
     DateTime? updatedAt,
     bool? isCover,
+    bool? isBookmarked,
   }) {
     return Page(
       id: id ?? this.id,
@@ -99,6 +102,7 @@ class Page {
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? DateTime.now(),
       isCover: isCover ?? this.isCover,
+      isBookmarked: isBookmarked ?? this.isBookmarked,
     );
   }
 
@@ -141,6 +145,7 @@ class Page {
     'createdAt': createdAt.toIso8601String(),
     'updatedAt': updatedAt.toIso8601String(),
     'isCover': isCover,
+    'isBookmarked': isBookmarked,
     // thumbnail is stored separately
   };
 
@@ -164,6 +169,7 @@ class Page {
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
       isCover: json['isCover'] as bool? ?? false,  // Backward compatible
+      isBookmarked: json['isBookmarked'] as bool? ?? false,
     );
   }
 
@@ -175,7 +181,8 @@ class Page {
         other.index != index ||
         other.size != size ||
         other.background != background ||
-        other.isCover != isCover) {
+        other.isCover != isCover ||
+        other.isBookmarked != isBookmarked) {
       return false;
     }
     if (other.layers.length != layers.length) return false;
@@ -186,5 +193,5 @@ class Page {
   }
 
   @override
-  int get hashCode => Object.hash(id, index, layers.length);
+  int get hashCode => Object.hash(id, index, layers.length, isBookmarked);
 }

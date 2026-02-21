@@ -70,7 +70,6 @@ class _ToolBarState extends ConsumerState<ToolBar> {
   Widget build(BuildContext context) {
     final theme = DrawingTheme.of(context);
     final isReaderMode = ref.watch(readerModeProvider);
-    final gridVisible = ref.watch(gridVisibilityProvider);
     final pageCount = ref.watch(pageCountProvider);
 
     return Container(
@@ -104,13 +103,9 @@ class _ToolBarState extends ConsumerState<ToolBar> {
           // Nav right section
           ToolbarNavRight(
             isReaderMode: isReaderMode,
-            gridVisible: gridVisible,
             onReaderToggle: () =>
                 ref.read(readerModeProvider.notifier).state = !isReaderMode,
-            onGridToggle: () =>
-                ref.read(gridVisibilityProvider.notifier).state = !gridVisible,
             onExportPressed: () => showExportMenu(context, ref),
-            onMorePressed: () => showMoreMenu(context, ref),
           ),
           const SizedBox(width: 4),
         ],
