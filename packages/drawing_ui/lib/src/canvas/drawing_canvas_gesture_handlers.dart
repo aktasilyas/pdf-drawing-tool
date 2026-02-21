@@ -282,6 +282,12 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     }
     // ══════════════════════════════════════════════════════════════
 
+    // Block drawing on locked or hidden active layer
+    final activeLayer = ref.read(documentProvider).activeLayer;
+    if (activeLayer != null && (activeLayer.isLocked || !activeLayer.isVisible)) {
+      return;
+    }
+
     pointerCount++;
 
     // Only handle with single finger

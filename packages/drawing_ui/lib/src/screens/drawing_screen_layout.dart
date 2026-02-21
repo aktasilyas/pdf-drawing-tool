@@ -15,6 +15,7 @@ import 'package:drawing_ui/src/screens/drawing_screen_panels.dart';
 import 'package:drawing_ui/src/toolbar/tool_groups.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_layout_mode.dart';
 
+export 'layers_list.dart' show LayersList;
 export 'page_sidebar.dart' show PageSidebar, kPageSidebarWidth;
 
 /// Build the canvas area with all layers.

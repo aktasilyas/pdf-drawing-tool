@@ -164,6 +164,7 @@ class DrawingDocument extends Equatable {
     required this.title,
     required List<Page> pages,
     int currentPageIndex = 0,
+    int activeLayerIndex = 0,
     DocumentSettings? settings,
     required this.createdAt,
     required this.updatedAt,
@@ -173,7 +174,7 @@ class DrawingDocument extends Equatable {
         _currentPageIndex = currentPageIndex,
         _settings = settings ?? DocumentSettings.defaults(),
         _layers = null,
-        _activeLayerIndex = null,
+        _activeLayerIndex = activeLayerIndex,
         _width = null,
         _height = null,
         audioRecordings = audioRecordings != null
@@ -194,7 +195,7 @@ class DrawingDocument extends Equatable {
     return DrawingDocument(
       id: _generateId(),
       title: title,
-      layers: [Layer.empty('Layer 1')],
+      layers: [Layer.empty('Katman 1')],
       activeLayerIndex: 0,
       createdAt: now,
       updatedAt: now,
@@ -245,7 +246,7 @@ class DrawingDocument extends Equatable {
     return DrawingDocument(
       id: _generateId(),
       title: title,
-      layers: layers.isEmpty ? [Layer.empty('Layer 1')] : layers,
+      layers: layers.isEmpty ? [Layer.empty('Katman 1')] : layers,
       activeLayerIndex: 0,
       createdAt: now,
       updatedAt: now,
@@ -271,14 +272,9 @@ class DrawingDocument extends Equatable {
 
   /// The currently active layer.
   Layer? get activeLayer {
-    if (_layers != null) {
-      // V1
-      if (activeLayerIndex >= 0 && activeLayerIndex < _layers!.length) {
-        return _layers![activeLayerIndex];
-      }
-    } else {
-      // V2
-      return currentPage?.activeLayer;
+    final layerList = layers;
+    if (activeLayerIndex >= 0 && activeLayerIndex < layerList.length) {
+      return layerList[activeLayerIndex];
     }
     return null;
   }
@@ -308,17 +304,32 @@ class DrawingDocument extends Equatable {
   bool get isMultiPage => _pages != null;
 
   /// Returns a new [DrawingDocument] with the given layer added.
+  ///
+  /// The new layer is added at the top and becomes the active layer.
   DrawingDocument addLayer(Layer layer) {
     if (isMultiPage) {
       // V2: Add to current page
       final current = currentPage;
       if (current == null) return this;
 
-      final updatedPage = current.copyWith(
-        layers: [...current.layers, layer],
-      );
+      final newLayers = [...current.layers, layer];
+      final updatedPage = current.copyWith(layers: newLayers);
 
-      return _updatePageV2(currentPageIndex, updatedPage);
+      final newPages = List<Page>.from(pages);
+      newPages[currentPageIndex] = updatedPage;
+
+      return DrawingDocument.multiPage(
+        id: id,
+        title: title,
+        pages: newPages,
+        currentPageIndex: currentPageIndex,
+        activeLayerIndex: newLayers.length - 1,
+        settings: settings,
+        createdAt: createdAt,
+        updatedAt: DateTime.now(),
+        documentType: documentType,
+        audioRecordings: audioRecordings,
+      );
     } else {
       // V1: Legacy
       return DrawingDocument(
@@ -351,7 +362,29 @@ class DrawingDocument extends Equatable {
       final newLayers = List<Layer>.from(current.layers)..removeAt(index);
       final updatedPage = current.copyWith(layers: newLayers);
 
-      return _updatePageV2(currentPageIndex, updatedPage);
+      // Adjust activeLayerIndex if needed
+      int newActiveIndex = activeLayerIndex;
+      if (activeLayerIndex >= newLayers.length) {
+        newActiveIndex = newLayers.length - 1;
+      } else if (activeLayerIndex > index) {
+        newActiveIndex = activeLayerIndex - 1;
+      }
+
+      final newPages = List<Page>.from(pages);
+      newPages[currentPageIndex] = updatedPage;
+
+      return DrawingDocument.multiPage(
+        id: id,
+        title: title,
+        pages: newPages,
+        currentPageIndex: currentPageIndex,
+        activeLayerIndex: newActiveIndex,
+        settings: settings,
+        createdAt: createdAt,
+        updatedAt: DateTime.now(),
+        documentType: documentType,
+        audioRecordings: audioRecordings,
+      );
     } else {
       // V1: Legacy
       final newLayers = List<Layer>.from(layers)..removeAt(index);
@@ -418,15 +451,24 @@ class DrawingDocument extends Equatable {
   /// Returns a new [DrawingDocument] with the active layer changed.
   ///
   /// If index is invalid, returns unchanged.
-  /// Note: V2 documents manage active layer per-page.
   DrawingDocument setActiveLayer(int index) {
     if (index < 0 || index >= layers.length) {
       return this;
     }
 
     if (isMultiPage) {
-      // V2: No-op (layers managed per-page)
-      return this;
+      return DrawingDocument.multiPage(
+        id: id,
+        title: title,
+        pages: pages,
+        currentPageIndex: currentPageIndex,
+        activeLayerIndex: index,
+        settings: settings,
+        createdAt: createdAt,
+        updatedAt: updatedAt,
+        documentType: documentType,
+        audioRecordings: audioRecordings,
+      );
     } else {
       // V1: Legacy
       return DrawingDocument(
@@ -435,7 +477,7 @@ class DrawingDocument extends Equatable {
         layers: layers,
         activeLayerIndex: index,
         createdAt: createdAt,
-        updatedAt: updatedAt, // Don't update for just changing active layer
+        updatedAt: updatedAt,
         width: width,
         height: height,
         documentType: documentType,
@@ -452,20 +494,8 @@ class DrawingDocument extends Equatable {
       return this;
     }
 
-    if (isMultiPage) {
-      // V2: Add to current page
-      final current = currentPage;
-      if (current == null) {
-        return this;
-      }
-
-      final updatedPage = current.addStroke(stroke);
-      return _updatePageV2(currentPageIndex, updatedPage);
-    } else {
-      // V1: Legacy
-      final updatedLayer = active.addStroke(stroke);
-      return updateLayer(activeLayerIndex, updatedLayer);
-    }
+    final updatedLayer = active.addStroke(stroke);
+    return updateLayer(activeLayerIndex, updatedLayer);
   }
 
   /// Returns a new [DrawingDocument] with the stroke removed from the active layer.
@@ -503,6 +533,7 @@ class DrawingDocument extends Equatable {
       title: title,
       pages: [...pages, page],
       currentPageIndex: currentPageIndex,
+      activeLayerIndex: activeLayerIndex,
       settings: settings,
       createdAt: createdAt,
       updatedAt: DateTime.now(),
@@ -537,6 +568,7 @@ class DrawingDocument extends Equatable {
       title: title,
       pages: newPages,
       currentPageIndex: newCurrentIndex,
+      activeLayerIndex: activeLayerIndex,
       settings: settings,
       createdAt: createdAt,
       updatedAt: DateTime.now(),
@@ -546,6 +578,8 @@ class DrawingDocument extends Equatable {
   }
 
   /// Set the current page (V2 only).
+  ///
+  /// Resets activeLayerIndex to 0 when switching pages.
   DrawingDocument setCurrentPage(int pageIndex) {
     if (!isMultiPage) {
       throw UnsupportedError(
@@ -561,6 +595,7 @@ class DrawingDocument extends Equatable {
       title: title,
       pages: pages,
       currentPageIndex: pageIndex,
+      activeLayerIndex: 0,
       settings: settings,
       createdAt: createdAt,
       updatedAt: updatedAt,
@@ -583,6 +618,7 @@ class DrawingDocument extends Equatable {
       title: title,
       pages: newPages,
       currentPageIndex: currentPageIndex,
+      activeLayerIndex: activeLayerIndex,
       settings: settings,
       createdAt: createdAt,
       updatedAt: DateTime.now(),
@@ -644,6 +680,7 @@ class DrawingDocument extends Equatable {
         title: title ?? this.title,
         pages: pages ?? this.pages,
         currentPageIndex: currentPageIndex ?? this.currentPageIndex,
+        activeLayerIndex: activeLayerIndex ?? this.activeLayerIndex,
         settings: settings ?? this.settings,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
@@ -677,6 +714,7 @@ class DrawingDocument extends Equatable {
         'title': title,
         'pages': pages.map((p) => p.toJson()).toList(),
         'currentPageIndex': currentPageIndex,
+        'activeLayerIndex': activeLayerIndex,
         'settings': settings.toJson(),
         'documentType': documentType.name,
         'createdAt': createdAt.toIso8601String(),
@@ -725,6 +763,7 @@ class DrawingDocument extends Equatable {
             .map((p) => Page.fromJson(p as Map<String, dynamic>))
             .toList(),
         currentPageIndex: _parseInt(json['currentPageIndex']) ?? 0,
+        activeLayerIndex: _parseInt(json['activeLayerIndex']) ?? 0,
         settings: json.containsKey('settings')
             ? DocumentSettings.fromJson(
                 json['settings'] as Map<String, dynamic>)

@@ -5,7 +5,8 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/panels/add_page_panel.dart';
 import 'package:drawing_ui/src/panels/audio_recording_dropdown.dart';
 import 'package:drawing_ui/src/panels/page_options_panel.dart';
-import 'package:drawing_ui/src/providers/ruler_provider.dart';
+import 'package:drawing_ui/src/providers/providers.dart';
+import 'package:drawing_ui/src/screens/layers_list.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/toolbar/starnote_nav_button.dart';
 import 'package:drawing_ui/src/widgets/popover_panel.dart';
@@ -70,7 +71,7 @@ class ToolbarNavLeft extends StatelessWidget {
 }
 
 /// Which nav popover is currently open.
-enum _NavPanel { addPage, audioRecording, more }
+enum _NavPanel { addPage, audioRecording, layers, more }
 
 /// Right navigation section: Reader toggle, Add Page, Export, More.
 ///
@@ -98,6 +99,7 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
   final PopoverController _popover = PopoverController();
   final GlobalKey _addPageKey = GlobalKey();
   final GlobalKey _micKey = GlobalKey();
+  final GlobalKey _layersKey = GlobalKey();
   final GlobalKey _moreKey = GlobalKey();
   _NavPanel? _activePanel;
 
@@ -133,6 +135,9 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
           onClose: _closePanel,
           onShowRecordings: () => widget.onShowRecordings?.call(),
         );
+      case _NavPanel.layers:
+        anchorKey = _layersKey;
+        child = const SizedBox(width: 260, height: 420, child: LayersList());
       case _NavPanel.more:
         anchorKey = _moreKey;
         child = PageOptionsPanel(onClose: _closePanel, embedded: true);
@@ -178,6 +183,14 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
                 .read(rulerVisibleProvider.notifier)
                 .state = !rulerVisible,
             isActive: rulerVisible,
+          ),
+        if (!widget.isReaderMode)
+          StarNoteNavButton(
+            key: _layersKey,
+            icon: StarNoteIcons.layers,
+            tooltip: 'Katmanlar',
+            onPressed: () => _togglePanel(_NavPanel.layers),
+            isActive: _activePanel == _NavPanel.layers,
           ),
         if (!widget.isReaderMode)
           StarNoteNavButton(

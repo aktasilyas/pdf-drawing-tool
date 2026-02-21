@@ -48,6 +48,12 @@ final activeLayerIndexProvider = Provider<int>((ref) {
   return document.activeLayerIndex;
 });
 
+/// All layers in the current page — for multi-layer rendering and layer panel.
+final allLayersProvider = Provider<List<Layer>>((ref) {
+  final document = ref.watch(documentProvider);
+  return document.layers;
+});
+
 // =============================================================================
 // DOCUMENT NOTIFIER
 // =============================================================================
@@ -114,6 +120,103 @@ class DocumentNotifier extends StateNotifier<DrawingDocument> {
     if (state.layerCount > 1) {
       state = state.removeLayer(index);
     }
+  }
+
+  /// Rename a layer.
+  void renameLayer(int index, String name) {
+    final layers = state.layers;
+    if (index < 0 || index >= layers.length) return;
+    final updated = layers[index].copyWith(name: name);
+    state = state.updateLayer(index, updated);
+  }
+
+  /// Toggle layer visibility.
+  void toggleLayerVisibility(int index) {
+    final layers = state.layers;
+    if (index < 0 || index >= layers.length) return;
+    final layer = layers[index];
+    state = state.updateLayer(index, layer.copyWith(isVisible: !layer.isVisible));
+  }
+
+  /// Toggle layer locked state.
+  void toggleLayerLocked(int index) {
+    final layers = state.layers;
+    if (index < 0 || index >= layers.length) return;
+    final layer = layers[index];
+    state = state.updateLayer(index, layer.copyWith(isLocked: !layer.isLocked));
+  }
+
+  /// Set layer opacity.
+  void setLayerOpacity(int index, double opacity) {
+    final layers = state.layers;
+    if (index < 0 || index >= layers.length) return;
+    state = state.updateLayer(index, layers[index].copyWith(opacity: opacity));
+  }
+
+  /// Reorder layers: remove from [oldIndex], insert at [newIndex].
+  ///
+  /// Uses remove-then-insert semantics — [newIndex] is the position
+  /// in the list AFTER the item has been removed.
+  void reorderLayers(int oldIndex, int newIndex) {
+    final layers = List<Layer>.from(state.layers);
+    if (oldIndex < 0 || oldIndex >= layers.length) return;
+    if (newIndex < 0 || newIndex >= layers.length) return;
+    if (oldIndex == newIndex) return;
+
+    final layer = layers.removeAt(oldIndex);
+    layers.insert(newIndex, layer);
+
+    final current = state.currentPage;
+    if (current == null) return;
+    final updatedPage = current.copyWith(layers: layers);
+    final newPages = List<Page>.from(state.pages);
+    newPages[state.currentPageIndex] = updatedPage;
+
+    // Track where the active layer ended up
+    int newActiveIndex = state.activeLayerIndex;
+    if (state.activeLayerIndex == oldIndex) {
+      newActiveIndex = newIndex;
+    } else {
+      // After removal, indices above oldIndex shift down by 1
+      if (state.activeLayerIndex > oldIndex) newActiveIndex--;
+      // After insertion, indices at/above newIndex shift up by 1
+      if (newActiveIndex >= newIndex) newActiveIndex++;
+    }
+
+    state = state.copyWith(
+      pages: newPages,
+      activeLayerIndex: newActiveIndex,
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  /// Duplicate a layer.
+  void duplicateLayer(int index) {
+    final layers = state.layers;
+    if (index < 0 || index >= layers.length) return;
+
+    final source = layers[index];
+    final duplicate = source.copyWith(
+      id: 'layer_${DateTime.now().microsecondsSinceEpoch}',
+      name: '${source.name} kopya',
+    );
+
+    // Insert duplicate above the source layer
+    final newLayers = List<Layer>.from(layers);
+    newLayers.insert(index + 1, duplicate);
+
+    final current = state.currentPage;
+    if (current == null) return;
+    final updatedPage = current.copyWith(layers: newLayers);
+    final newPages = List<Page>.from(state.pages);
+    newPages[state.currentPageIndex] = updatedPage;
+
+    // Set the duplicate as the active layer
+    state = state.copyWith(
+      pages: newPages,
+      activeLayerIndex: index + 1,
+      updatedAt: DateTime.now(),
+    );
   }
 
   /// Create new document.

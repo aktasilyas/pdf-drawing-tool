@@ -43,7 +43,7 @@ class Page {
       index: index,
       size: size ?? PageSize.a4Portrait,
       background: background ?? PageBackground.blank,
-      layers: [Layer.empty('Layer 1')], // Default empty layer
+      layers: [Layer.empty('Katman 1')], // Default empty layer
       createdAt: now,
       updatedAt: now,
       isCover: isCover,
@@ -77,7 +77,7 @@ class Page {
   bool get isEmpty => strokeCount == 0 && shapeCount == 0 && textCount == 0;
 
   /// Active layer (last one)
-  Layer get activeLayer => layers.isNotEmpty ? layers.last : Layer.empty('Default');
+  Layer get activeLayer => layers.isNotEmpty ? layers.last : Layer.empty('Katman');
 
   /// Copy with
   Page copyWith({
@@ -127,7 +127,7 @@ class Page {
   Page addStroke(Stroke stroke) {
     final updatedLayers = List<Layer>.from(layers);
     if (updatedLayers.isEmpty) {
-      updatedLayers.add(Layer.empty('Layer 1'));
+      updatedLayers.add(Layer.empty('Katman 1'));
     }
     final lastIndex = updatedLayers.length - 1;
     updatedLayers[lastIndex] = updatedLayers[lastIndex].addStroke(stroke);
