@@ -26,6 +26,8 @@ dependencies:
   pdfx: ^2.6.0  # PDF rendering and import
   pdf: ^3.10.8  # PDF creation and export
   path_provider: ^2.1.0  # For storing PDF files locally
+  record: ^6.0.0  # Cross-platform audio recording
+  just_audio: ^0.9.36  # Audio playback
 
 dev_dependencies:
   flutter_test:

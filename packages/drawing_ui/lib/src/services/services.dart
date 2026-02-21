@@ -1,6 +1,8 @@
 /// Services for drawing UI functionality.
 library;
 
+export 'audio_playback_service.dart';
+export 'audio_recording_service.dart';
 export 'background_thumbnail_queue.dart';
 export 'memory_budget.dart';
 export 'page_rotation_service.dart';

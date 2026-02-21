@@ -40,7 +40,6 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
   final PopoverController _panelController = PopoverController();
   final ThumbnailCache _thumbnailCache = ThumbnailCache(maxSize: 20);
   Offset _penBoxPosition = const Offset(12, 12);
-  bool _isSidebarOpen = false;
   bool _isPageTransitioning = false;
 
   @override
@@ -75,15 +74,17 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
     }
   }
 
+  bool get _isSidebarOpen => ref.read(sidebarOpenProvider);
+
   void _toggleSidebar() {
-    setState(() => _isSidebarOpen = !_isSidebarOpen);
+    ref.read(sidebarOpenProvider.notifier).state = !_isSidebarOpen;
     Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted) _recalculateCanvasTransform();
     });
   }
 
   void _closeSidebar() {
-    setState(() => _isSidebarOpen = false);
+    ref.read(sidebarOpenProvider.notifier).state = false;
     Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted) _recalculateCanvasTransform();
     });
@@ -157,7 +158,8 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
     final isDark = materialTheme.brightness == Brightness.dark;
     final screenWidth = MediaQuery.of(context).size.width;
     final isCompactMode = screenWidth < ToolbarLayoutMode.compactBreakpoint;
-    final showSidebar = _isSidebarOpen && ref.watch(pageCountProvider) > 1;
+    final isSidebarOpen = ref.watch(sidebarOpenProvider);
+    final showSidebar = isSidebarOpen && ref.watch(pageCountProvider) > 1;
 
     final scaffoldBgColor = canvasMode.isInfinite
         ? Color(currentPage.background.color)
@@ -205,7 +207,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                     onHomePressed: widget.onHomePressed,
                     onTitlePressed: widget.onTitlePressed,
                     onSidebarToggle: _toggleSidebar,
-                    isSidebarOpen: _isSidebarOpen,
+                    isSidebarOpen: isSidebarOpen,
                   ),
                   Expanded(
                     child: Row(

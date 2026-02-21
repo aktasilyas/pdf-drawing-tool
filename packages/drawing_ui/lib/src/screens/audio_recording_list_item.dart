@@ -1,22 +1,23 @@
 import 'package:drawing_core/drawing_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
+import 'package:drawing_ui/src/providers/audio_recording_provider.dart';
+import 'package:drawing_ui/src/services/audio_playback_service.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
 
 /// A single audio recording row in the sidebar recordings list.
-class AudioRecordingListItem extends StatelessWidget {
+class AudioRecordingListItem extends ConsumerWidget {
   const AudioRecordingListItem({
     super.key,
     required this.recording,
-    required this.onPlay,
     required this.onRename,
     required this.onDelete,
     required this.onGoToPage,
   });
 
   final AudioRecording recording;
-  final VoidCallback onPlay;
   final VoidCallback onRename;
   final VoidCallback onDelete;
   final VoidCallback onGoToPage;
@@ -34,8 +35,24 @@ class AudioRecordingListItem extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
+    final playbackState = ref.watch(audioPlaybackStateProvider);
+    final playingId = ref.watch(playingRecordingIdProvider);
+    final position = ref.watch(audioPlaybackPositionProvider);
+
+    final isThisActive = playingId == recording.id;
+    final isThisPlaying = isThisActive &&
+        (playbackState.valueOrNull == AudioPlaybackState.playing ||
+            playbackState.valueOrNull == AudioPlaybackState.paused);
+    final isPlaying = isThisActive &&
+        playbackState.valueOrNull == AudioPlaybackState.playing;
+    final hasFile = recording.filePath.isNotEmpty;
+
+    final displayDuration = isThisPlaying && position.valueOrNull != null
+        ? '${_formatDuration(position.valueOrNull!)} / '
+            '${_formatDuration(recording.duration)}'
+        : _formatDuration(recording.duration);
 
     return InkWell(
       onTap: onGoToPage,
@@ -43,34 +60,54 @@ class AudioRecordingListItem extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         child: Row(
           children: [
-            // Play button placeholder
-            _PlayButton(cs: cs, onTap: onPlay),
-            const SizedBox(width: 10),
-            // Title + metadata
-            Expanded(child: _TitleAndMeta(
-              title: recording.title,
-              duration: _formatDuration(recording.duration),
-              pageIndex: recording.pageIndex,
-              date: _formatDate(recording.createdAt),
+            _PlayButton(
               cs: cs,
-            )),
-            // More menu
-            _MoreMenu(
-              cs: cs,
-              onRename: onRename,
-              onDelete: onDelete,
+              isPlaying: isPlaying,
+              enabled: hasFile,
+              onTap: hasFile
+                  ? () => _handlePlayTap(ref, isPlaying, isThisPlaying)
+                  : null,
             ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _TitleAndMeta(
+                title: recording.title,
+                duration: displayDuration,
+                pageIndex: recording.pageIndex,
+                date: _formatDate(recording.createdAt),
+                cs: cs,
+              ),
+            ),
+            _MoreMenu(cs: cs, onRename: onRename, onDelete: onDelete),
           ],
         ),
       ),
     );
   }
+
+  void _handlePlayTap(WidgetRef ref, bool isPlaying, bool isThisPlaying) {
+    final service = ref.read(audioPlaybackServiceProvider);
+    if (isPlaying) {
+      service.pause();
+    } else if (isThisPlaying) {
+      service.resume();
+    } else {
+      service.play(recording.id, recording.filePath);
+    }
+  }
 }
 
 class _PlayButton extends StatelessWidget {
-  const _PlayButton({required this.cs, required this.onTap});
+  const _PlayButton({
+    required this.cs,
+    required this.isPlaying,
+    required this.enabled,
+    required this.onTap,
+  });
   final ColorScheme cs;
-  final VoidCallback onTap;
+  final bool isPlaying;
+  final bool enabled;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -81,13 +118,17 @@ class _PlayButton extends StatelessWidget {
         height: 36,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: cs.primaryContainer,
+          color: enabled
+              ? cs.primaryContainer
+              : cs.surfaceContainerHighest,
         ),
         child: Center(
           child: PhosphorIcon(
-            StarNoteIcons.play,
+            isPlaying ? StarNoteIcons.pause : StarNoteIcons.play,
             size: 16,
-            color: cs.onPrimaryContainer,
+            color: enabled
+                ? cs.onPrimaryContainer
+                : cs.onSurfaceVariant.withValues(alpha: 0.4),
           ),
         ),
       ),

@@ -18,7 +18,7 @@ class AudioRecordingsList extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final recordings = ref.watch(audioRecordingsProvider);
+    final recordings = ref.watch(audioRecordingsProvider).reversed.toList();
     final cs = Theme.of(context).colorScheme;
 
     if (recordings.isEmpty) {
@@ -39,7 +39,6 @@ class AudioRecordingsList extends ConsumerWidget {
         final recording = recordings[index];
         return AudioRecordingListItem(
           recording: recording,
-          onPlay: () {},
           onRename: () => _handleRename(context, ref, recording.id,
               recording.title),
           onDelete: () => _handleDelete(context, ref, recording.id),
