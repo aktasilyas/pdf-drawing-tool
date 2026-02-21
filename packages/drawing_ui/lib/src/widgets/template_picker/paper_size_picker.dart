@@ -3,17 +3,21 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
 
-/// Kağıt boyutu seçici - dropdown style
+/// Kagit boyutu secici - dropdown style
 class PaperSizePicker extends StatelessWidget {
   final PaperSize selectedSize;
   final ValueChanged<PaperSize> onSizeSelected;
   final bool showLandscapeToggle;
+
+  /// When true, uses smaller padding and font for compact bottom bars.
+  final bool dense;
 
   const PaperSizePicker({
     super.key,
     required this.selectedSize,
     required this.onSizeSelected,
     this.showLandscapeToggle = true,
+    this.dense = false,
   });
 
   static const _presets = [
@@ -34,40 +38,39 @@ class PaperSizePicker extends StatelessWidget {
       case PaperSizePreset.letter: return 'Letter';
       case PaperSizePreset.legal: return 'Legal';
       case PaperSizePreset.square: return 'Kare';
-      case PaperSizePreset.widescreen: return 'Geniş (16:9)';
-      case PaperSizePreset.custom: return 'Özel';
+      case PaperSizePreset.widescreen: return 'Genis (16:9)';
+      case PaperSizePreset.custom: return 'Ozel';
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final cs = theme.colorScheme;
+    final hPad = dense ? 8.0 : 12.0;
+    final fontSize = dense ? 12.0 : 14.0;
+    final iconSize = dense ? 14.0 : 18.0;
+    final h = dense ? 36.0 : null;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          height: h,
+          padding: EdgeInsets.symmetric(horizontal: hPad),
           decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerHigh,
+            color: cs.surfaceContainerHigh,
             borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: colorScheme.outline.withValues(alpha: 0.2),
-            ),
+            border: Border.all(color: cs.outline.withValues(alpha: 0.2)),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<PaperSizePreset>(
               value: selectedSize.preset,
-              icon: PhosphorIcon(
-                StarNoteIcons.caretDown,
-                size: 18,
-                color: colorScheme.onSurfaceVariant,
-              ),
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: colorScheme.onSurface,
-              ),
-              dropdownColor: colorScheme.surfaceContainerHighest,
+              isDense: dense,
+              icon: PhosphorIcon(StarNoteIcons.caretDown,
+                  size: iconSize, color: cs.onSurfaceVariant),
+              style: TextStyle(fontSize: fontSize, color: cs.onSurface),
+              dropdownColor: cs.surfaceContainerHighest,
               items: _presets.map((preset) {
                 return DropdownMenuItem(
                   value: preset,
@@ -85,19 +88,18 @@ class PaperSizePicker extends StatelessWidget {
             ),
           ),
         ),
-        
         if (showLandscapeToggle) ...[
           const SizedBox(width: 8),
           _OrientationToggle(
             isLandscape: selectedSize.isLandscape,
             onToggle: () {
               onSizeSelected(
-                selectedSize.isLandscape 
-                    ? selectedSize.portrait 
+                selectedSize.isLandscape
+                    ? selectedSize.portrait
                     : selectedSize.landscape,
               );
             },
-            colorScheme: colorScheme,
+            colorScheme: cs,
           ),
         ],
       ],

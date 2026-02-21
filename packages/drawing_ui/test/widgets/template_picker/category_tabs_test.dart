@@ -126,7 +126,7 @@ void main() {
       expect(selectedCategory, isNull);
     });
 
-    testWidgets('shows premium icon for premium categories', (tester) async {
+    testWidgets('does not show crown icons for categories', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -137,28 +137,11 @@ void main() {
         ),
       );
 
-      // Premium categories should show crown icon when not selected
+      // Crown icons should not appear (premium badges removed)
       final crownIcon = find.byWidgetPredicate(
         (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.crown,
       );
-      expect(crownIcon, findsWidgets);
-    });
-
-    testWidgets('hides premium icon when category is selected', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: CategoryTabs(
-              selectedCategory: TemplateCategory.productivity,
-              onCategorySelected: (_) {},
-            ),
-          ),
-        ),
-      );
-
-      // Premium icon count should be less when a premium category is selected
-      // (because selected premium categories don't show the icon)
-      expect(find.byType(CategoryTabs), findsOneWidget);
+      expect(crownIcon, findsNothing);
     });
 
     testWidgets('is horizontally scrollable', (tester) async {
@@ -265,7 +248,7 @@ void main() {
       expect(find.text(TemplateCategory.basic.displayName), findsOneWidget);
     });
 
-    testWidgets('renders all premium categories', (tester) async {
+    testWidgets('renders all categories including premium', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -276,12 +259,9 @@ void main() {
         ),
       );
 
-      // Check premium categories exist by verifying crown icons
-      if (TemplateCategory.values.any((c) => c.isPremium)) {
-        final crownIcon = find.byWidgetPredicate(
-          (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.crown,
-        );
-        expect(crownIcon, findsWidgets);
+      // All categories should be rendered as plain chips (no premium badges)
+      for (final category in TemplateCategory.values) {
+        expect(find.text(category.displayName), findsOneWidget);
       }
     });
 

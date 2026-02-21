@@ -19,7 +19,7 @@ void main() {
       expect(find.byType(CategoryTabs), findsOneWidget);
       expect(find.byType(TemplateGrid), findsOneWidget);
       expect(find.byType(PaperSizePicker), findsOneWidget);
-      expect(find.text('Oluştur'), findsOneWidget);
+      expect(find.text('Uygula'), findsOneWidget);
     });
 
     testWidgets('initializes with default template', (tester) async {
@@ -167,7 +167,7 @@ void main() {
       await tester.tap(find.text('Open'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Oluştur'));
+      await tester.tap(find.text('Uygula'));
       await tester.pumpAndSettle();
 
       expect(result, isNotNull);
@@ -175,74 +175,7 @@ void main() {
       expect(result?.paperSize, isNotNull);
     });
 
-    testWidgets('calls onPremiumTap when locked template tapped', (tester) async {
-      bool premiumTapped = false;
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: TemplatePicker(
-              isLocked: (template) => template.isPremium,
-              onPremiumTap: () {
-                premiumTapped = true;
-              },
-            ),
-          ),
-        ),
-      );
-
-      // Find and tap a locked template
-      final lockedCard = find.byWidgetPredicate(
-        (widget) => widget is TemplateCard && widget.isLocked,
-      );
-
-      if (lockedCard.evaluate().isNotEmpty) {
-        await tester.tap(lockedCard.first);
-        await tester.pumpAndSettle();
-
-        expect(premiumTapped, true);
-      }
-    });
-
-    testWidgets('does not change selection when locked template tapped', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: TemplatePicker(
-              isLocked: (template) => template.isPremium,
-            ),
-          ),
-        ),
-      );
-
-      // Count initially selected templates
-      final initialSelected = tester.widgetList<TemplateCard>(
-        find.byWidgetPredicate(
-          (widget) => widget is TemplateCard && widget.isSelected,
-        ),
-      ).length;
-
-      // Tap locked template (if any)
-      final lockedCard = find.byWidgetPredicate(
-        (widget) => widget is TemplateCard && widget.isLocked,
-      );
-
-      if (lockedCard.evaluate().isNotEmpty) {
-        await tester.tap(lockedCard.first);
-        await tester.pumpAndSettle();
-
-        // Selection should not change
-        final afterSelected = tester.widgetList<TemplateCard>(
-          find.byWidgetPredicate(
-            (widget) => widget is TemplateCard && widget.isSelected,
-          ),
-        ).length;
-
-        expect(afterSelected, initialSelected);
-      }
-    });
-
-    testWidgets('changes selection when unlocked template tapped', (tester) async {
+    testWidgets('all templates are selectable (no lock)', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -251,13 +184,25 @@ void main() {
         ),
       );
 
-      // Tap an unlocked template
-      final unlockedCard = find.byWidgetPredicate(
-        (widget) => widget is TemplateCard && !widget.isLocked,
+      // No card should be locked
+      final lockedCard = find.byWidgetPredicate(
+        (widget) => widget is TemplateCard && widget.isLocked,
+      );
+      expect(lockedCard, findsNothing);
+    });
+
+    testWidgets('changes selection when any template tapped', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TemplatePicker(),
+          ),
+        ),
       );
 
-      if (unlockedCard.evaluate().length > 1) {
-        await tester.tap(unlockedCard.at(1));
+      final cards = find.byType(TemplateCard);
+      if (cards.evaluate().length > 1) {
+        await tester.tap(cards.at(1));
         await tester.pumpAndSettle();
 
         // Should have exactly one selected
@@ -266,7 +211,6 @@ void main() {
             (widget) => widget is TemplateCard && widget.isSelected,
           ),
         ).length;
-
         expect(selected, 1);
       }
     });
@@ -312,7 +256,7 @@ void main() {
       );
 
       // FilledButton.icon creates multiple widgets, find by the button text
-      expect(find.text('Oluştur'), findsOneWidget);
+      expect(find.text('Uygula'), findsOneWidget);
 
       // Verify it has an icon (plus icon from StarNoteIcons)
       final plusIcon = find.byWidgetPredicate(
@@ -352,7 +296,7 @@ void main() {
               body: Center(
                 child: ElevatedButton(
                   onPressed: () {
-                    TemplatePicker.showAsBottomSheet(context);
+                    TemplatePicker.show(context);
                   },
                   child: const Text('Show'),
                 ),
@@ -378,7 +322,7 @@ void main() {
               body: Center(
                 child: ElevatedButton(
                   onPressed: () {
-                    TemplatePicker.showAsDialog(context);
+                    TemplatePicker.show(context);
                   },
                   child: const Text('Show'),
                 ),

@@ -1,12 +1,18 @@
+import 'dart:io';
+import 'dart:ui' as ui;
+
 import 'package:drawing_core/drawing_core.dart';
 import 'package:flutter/material.dart' hide Page;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/panels/add_page_panel_widgets.dart';
 import 'package:drawing_ui/src/panels/page_options_widgets.dart';
+import 'package:drawing_ui/src/widgets/template_picker/template_picker.dart';
 
 /// Quick-access template IDs shown in the horizontal thumbnail strip.
 const _quickTemplateIds = ['blank', 'thin_lined', 'grid', 'dotted', 'cornell'];
@@ -17,12 +23,21 @@ const _quickTemplateIds = ['blank', 'thin_lined', 'grid', 'dotted', 'cornell'];
 /// (more templates, image, photo, import). Tapping a template creates a new
 /// page at the selected position using the document's default page size.
 class AddPagePanel extends ConsumerStatefulWidget {
-  const AddPagePanel({super.key, required this.onClose, this.embedded = false});
+  const AddPagePanel({
+    super.key,
+    required this.onClose,
+    this.embedded = false,
+    this.onImportTap,
+  });
 
   final VoidCallback onClose;
 
   /// When true, skips Material/SizedBox wrapper (used inside PopoverController).
   final bool embedded;
+
+  /// Optional callback for "Import" action. When null, tapping import closes
+  /// the panel. Provided by the host app (e.g. example_app) to open FilePicker.
+  final VoidCallback? onImportTap;
 
   @override
   ConsumerState<AddPagePanel> createState() => _AddPagePanelState();
@@ -43,56 +58,96 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
         .toList();
   }
 
-  int _resolveInsertionIndex(int currentIndex, int pageCount) {
-    switch (_selectedPosition) {
-      case AddPagePosition.before:
-        return currentIndex;
-      case AddPagePosition.after:
-        return currentIndex + 1;
-      case AddPagePosition.lastPage:
-        return pageCount;
-    }
-  }
+  int _resolveInsertionIndex(int currentIndex, int pageCount) =>
+      switch (_selectedPosition) {
+        AddPagePosition.before => currentIndex,
+        AddPagePosition.after => currentIndex + 1,
+        AddPagePosition.lastPage => pageCount,
+      };
 
-  void _addPageFromTemplate(String templateId) {
-    final template = TemplateRegistry.getById(templateId);
-    if (template == null) return;
-
+  /// Inserts a new page with the given background at the selected position.
+  void _insertNewPage(PageBackground background, {PageSize? size}) {
     final doc = ref.read(documentProvider);
     final currentIndex = ref.read(currentPageIndexProvider);
-
-    final background = PageBackground(
-      type: BackgroundType.template,
-      color: template.defaultBackgroundColor,
-      templatePattern: template.pattern,
-      templateSpacingMm: template.spacingMm,
-      templateLineWidth: template.lineWidth,
-      lineColor: template.defaultLineColor,
-    );
-
     final insertIndex = _resolveInsertionIndex(currentIndex, doc.pages.length);
     final newPage = Page.create(
       index: insertIndex,
-      size: doc.settings.defaultPageSize,
+      size: size ?? doc.settings.defaultPageSize,
       background: background,
     );
-
     final newPages = List<Page>.from(doc.pages)..insert(insertIndex, newPage);
-    // Reindex pages after insertion
     for (int i = insertIndex; i < newPages.length; i++) {
       newPages[i] = newPages[i].copyWith(index: i);
     }
-
     final newDoc = doc.copyWith(
-      pages: newPages,
-      currentPageIndex: insertIndex,
-    );
+        pages: newPages, currentPageIndex: insertIndex);
     ref.read(documentProvider.notifier).updateDocument(newDoc);
     ref.read(pageManagerProvider.notifier).initializeFromDocument(
-          newDoc.pages,
-          currentIndex: newDoc.currentPageIndex,
-        );
+        newDoc.pages, currentIndex: newDoc.currentPageIndex);
+  }
+
+  void _addPageFromTemplate(String templateId) {
+    final t = TemplateRegistry.getById(templateId);
+    if (t == null) return;
+    _insertNewPage(PageBackground(
+      type: BackgroundType.template,
+      color: t.defaultBackgroundColor,
+      templatePattern: t.pattern,
+      templateSpacingMm: t.spacingMm,
+      templateLineWidth: t.lineWidth,
+      lineColor: t.defaultLineColor,
+    ));
     widget.onClose();
+  }
+
+  Future<void> _openTemplatePicker() async {
+    // Capture refs before close — onClose unmounts the widget.
+    final docNotifier = ref.read(documentProvider.notifier);
+    final pageManager = ref.read(pageManagerProvider.notifier);
+    final doc = ref.read(documentProvider);
+    final curIdx = ref.read(currentPageIndexProvider);
+    final navCtx = Navigator.of(context, rootNavigator: true).context;
+    widget.onClose();
+    final result = await TemplatePicker.show(navCtx);
+    if (result == null) return;
+    final t = result.template;
+    final bg = PageBackground(
+      type: BackgroundType.template,
+      color: result.backgroundColor?.toARGB32() ?? t.defaultBackgroundColor,
+      templatePattern: t.pattern, templateSpacingMm: t.spacingMm,
+      templateLineWidth: t.lineWidth,
+      lineColor: result.lineColor?.toARGB32() ?? t.defaultLineColor,
+    );
+    final idx = _resolveInsertionIndex(curIdx, doc.pages.length);
+    final np = List<Page>.from(doc.pages)
+      ..insert(idx, Page.create(
+          index: idx, size: doc.settings.defaultPageSize, background: bg));
+    for (int i = idx; i < np.length; i++) np[i] = np[i].copyWith(index: i);
+    final nd = doc.copyWith(pages: np, currentPageIndex: idx);
+    docNotifier.updateDocument(nd);
+    pageManager.initializeFromDocument(nd.pages, currentIndex: idx);
+  }
+
+  Future<void> _addImagePage(ImageSource source) async {
+    final picked = await ImagePicker()
+        .pickImage(source: source, imageQuality: 85);
+    if (picked == null) return;
+    final appDir = await getApplicationDocumentsDirectory();
+    final dir = Directory('${appDir.path}/starnote_images');
+    if (!dir.existsSync()) dir.createSync(recursive: true);
+    final dest = '${dir.path}/${DateTime.now().microsecondsSinceEpoch}'
+        '.${picked.path.split('.').last}';
+    await File(picked.path).copy(dest);
+    final bytes = await File(dest).readAsBytes();
+    final codec = await ui.instantiateImageCodec(bytes);
+    final frame = await codec.getNextFrame();
+    _insertNewPage(
+      PageBackground(type: BackgroundType.pdf, pdfData: bytes, pdfPageIndex: 1),
+      size: PageSize(
+          width: frame.image.width.toDouble(),
+          height: frame.image.height.toDouble()),
+    );
+    if (mounted) widget.onClose();
   }
 
   @override
@@ -213,25 +268,25 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
           icon: StarNoteIcons.template,
           label: 'Daha Fazla Şablon',
           trailing: chevron,
-          onTap: widget.onClose,
+          onTap: _openTemplatePicker,
         ),
         PageOptionsMenuItem(
           icon: StarNoteIcons.image,
           label: 'Resim',
           trailing: chevron,
-          onTap: widget.onClose,
+          onTap: () => _addImagePage(ImageSource.gallery),
         ),
         PageOptionsMenuItem(
           icon: StarNoteIcons.camera,
           label: 'Fotoğraf çek',
           trailing: chevron,
-          onTap: widget.onClose,
+          onTap: () => _addImagePage(ImageSource.camera),
         ),
         PageOptionsMenuItem(
           icon: StarNoteIcons.uploadFile,
           label: 'İçe aktar',
           trailing: chevron,
-          onTap: widget.onClose,
+          onTap: widget.onImportTap ?? widget.onClose,
         ),
       ],
     );
