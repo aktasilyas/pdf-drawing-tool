@@ -43,6 +43,12 @@ import 'package:drawing_ui/src/widgets/widgets.dart';
 // DRAWING CANVAS WIDGET
 // =============================================================================
 
+/// Wraps [child] with [Opacity] only when opacity < 1.0.
+Widget _wrapOpacity(double opacity, Widget child) {
+  if (opacity >= 1.0) return child;
+  return Opacity(opacity: opacity, child: child);
+}
+
 /// The main drawing canvas widget that handles stroke rendering.
 ///
 /// This widget uses a multi-layer architecture for optimal performance:
@@ -699,9 +705,13 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
     // Watch providers
     final allLayers = ref.watch(allLayersProvider);
     final activeLayerIndex = ref.watch(activeLayerIndexProvider);
-    final activeLayerVisible = activeLayerIndex >= 0 &&
-        activeLayerIndex < allLayers.length &&
+    final activeLayerValid = activeLayerIndex >= 0 &&
+        activeLayerIndex < allLayers.length;
+    final activeLayerVisible = activeLayerValid &&
         allLayers[activeLayerIndex].isVisible;
+    final activeLayerOpacity = activeLayerValid
+        ? allLayers[activeLayerIndex].opacity
+        : 1.0;
     final strokes = ref.watch(activeLayerStrokesProvider);
     final shapes = ref.watch(activeLayerShapesProvider);
     final texts = ref.watch(activeLayerTextsProvider);
@@ -975,96 +985,96 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                           // ─────────────────────────────────────────────────────────
                           // ACTIVE LAYER: Committed content (hidden when !isVisible)
                           // ─────────────────────────────────────────────────────────
-                          if (activeLayerVisible) ...[
-                            if (images.isNotEmpty)
-                              Consumer(
-                                builder: (context, ref, _) {
-                                  final liveImage = ref.watch(
-                                    imagePlacementProvider
-                                        .select((s) => s.selectedImage),
-                                  );
-                                  return RepaintBoundary(
-                                    child: CustomPaint(
-                                      size: size,
-                                      painter: ImageElementPainter(
-                                        images: images,
-                                        cacheManager: _imageCacheManager,
-                                        overrideImage: liveImage,
-                                      ),
-                                      isComplex: true,
-                                      willChange: liveImage != null,
+                          if (activeLayerVisible)
+                            _wrapOpacity(activeLayerOpacity, Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                if (images.isNotEmpty)
+                                  Consumer(
+                                    builder: (context, ref, _) {
+                                      final liveImage = ref.watch(
+                                        imagePlacementProvider
+                                            .select((s) => s.selectedImage),
+                                      );
+                                      return RepaintBoundary(
+                                        child: CustomPaint(
+                                          size: size,
+                                          painter: ImageElementPainter(
+                                            images: images,
+                                            cacheManager: _imageCacheManager,
+                                            overrideImage: liveImage,
+                                          ),
+                                          isComplex: true,
+                                          willChange: liveImage != null,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                // Committed Strokes
+                                RepaintBoundary(
+                                  child: CustomPaint(
+                                    size: size,
+                                    painter: CommittedStrokesPainter(
+                                      strokes: strokes,
+                                      renderer: _renderer,
+                                      excludedSegments: pixelEraserPreview,
+                                      excludedStrokeIds: excludedStrokeIds,
                                     ),
-                                  );
-                                },
-                              ),
-
-                            // Committed Strokes
-                            RepaintBoundary(
-                              child: CustomPaint(
-                                size: size,
-                                painter: CommittedStrokesPainter(
-                                  strokes: strokes,
-                                  renderer: _renderer,
-                                  excludedSegments: pixelEraserPreview,
-                                  excludedStrokeIds: excludedStrokeIds,
+                                    isComplex: true,
+                                    willChange: pixelEraserPreview.isNotEmpty || hasLiveTransform,
+                                  ),
                                 ),
-                                isComplex: true,
-                                willChange: pixelEraserPreview.isNotEmpty || hasLiveTransform,
-                              ),
-                            ),
-
-                            // Committed Shapes + Preview Shape
-                            RepaintBoundary(
-                              child: CustomPaint(
-                                size: size,
-                                painter: ShapePainter(
-                                  shapes: shapes,
-                                  activeShape: previewShape,
-                                  excludedShapeIds: excludedShapeIds,
-                                ),
-                                isComplex: true,
-                                willChange: previewShape != null || hasLiveTransform,
-                              ),
-                            ),
-
-                            // Committed Texts + Active Text
-                            RepaintBoundary(
-                              child: CustomPaint(
-                                size: size,
-                                painter: TextElementPainter(
-                                  texts: texts,
-                                  activeText: textToolState.isEditing
-                                      ? textToolState.activeText
-                                      : null,
-                                ),
-                                isComplex: true,
-                                willChange: textToolState.isEditing,
-                              ),
-                            ),
-
-                            // Committed Sticky Notes
-                            if (stickyNotes.isNotEmpty)
-                              Consumer(
-                                builder: (context, ref, _) {
-                                  final liveNote = ref.watch(
-                                    stickyNotePlacementProvider
-                                        .select((s) => s.selectedNote),
-                                  );
-                                  return RepaintBoundary(
-                                    child: CustomPaint(
-                                      size: size,
-                                      painter: StickyNotePainter(
-                                        stickyNotes: stickyNotes,
-                                        renderer: _renderer,
-                                        overrideNote: liveNote,
-                                      ),
-                                      isComplex: true,
-                                      willChange: liveNote != null,
+                                // Committed Shapes + Preview Shape
+                                RepaintBoundary(
+                                  child: CustomPaint(
+                                    size: size,
+                                    painter: ShapePainter(
+                                      shapes: shapes,
+                                      activeShape: previewShape,
+                                      excludedShapeIds: excludedShapeIds,
                                     ),
-                                  );
-                                },
-                              ),
-                          ],
+                                    isComplex: true,
+                                    willChange: previewShape != null || hasLiveTransform,
+                                  ),
+                                ),
+                                // Committed Texts + Active Text
+                                RepaintBoundary(
+                                  child: CustomPaint(
+                                    size: size,
+                                    painter: TextElementPainter(
+                                      texts: texts,
+                                      activeText: textToolState.isEditing
+                                          ? textToolState.activeText
+                                          : null,
+                                    ),
+                                    isComplex: true,
+                                    willChange: textToolState.isEditing,
+                                  ),
+                                ),
+                                // Committed Sticky Notes
+                                if (stickyNotes.isNotEmpty)
+                                  Consumer(
+                                    builder: (context, ref, _) {
+                                      final liveNote = ref.watch(
+                                        stickyNotePlacementProvider
+                                            .select((s) => s.selectedNote),
+                                      );
+                                      return RepaintBoundary(
+                                        child: CustomPaint(
+                                          size: size,
+                                          painter: StickyNotePainter(
+                                            stickyNotes: stickyNotes,
+                                            renderer: _renderer,
+                                            overrideNote: liveNote,
+                                          ),
+                                          isComplex: true,
+                                          willChange: liveNote != null,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                              ],
+                            )),
 
                           // ─────────────────────────────────────────────────────────
                           // PASSIVE LAYERS ABOVE ACTIVE
@@ -1083,21 +1093,24 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                           // Uses ListenableBuilder to listen to DrawingController
                           // for optimal performance during drawing
                           if (activeLayerVisible)
-                            RepaintBoundary(
-                              child: ListenableBuilder(
-                                listenable: _drawingController,
-                                builder: (context, _) {
-                                  return CustomPaint(
-                                    size: size,
-                                    painter: ActiveStrokePainter(
-                                      points: _drawingController.activePoints,
-                                      style: _drawingController.activeStyle,
-                                      renderer: _renderer,
-                                    ),
-                                    isComplex: false,
-                                    willChange: true,
-                                  );
-                                },
+                            _wrapOpacity(
+                              activeLayerOpacity,
+                              RepaintBoundary(
+                                child: ListenableBuilder(
+                                  listenable: _drawingController,
+                                  builder: (context, _) {
+                                    return CustomPaint(
+                                      size: size,
+                                      painter: ActiveStrokePainter(
+                                        points: _drawingController.activePoints,
+                                        style: _drawingController.activeStyle,
+                                        renderer: _renderer,
+                                      ),
+                                      isComplex: false,
+                                      willChange: true,
+                                    );
+                                  },
+                                ),
                               ),
                             ),
 

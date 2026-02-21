@@ -137,7 +137,10 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
         );
       case _NavPanel.layers:
         anchorKey = _layersKey;
-        child = const SizedBox(width: 260, height: 420, child: LayersList());
+        // Cap height to 60% of screen, min 280, max 420
+        final screenH = MediaQuery.of(context).size.height;
+        final layersH = (screenH * 0.6).clamp(280.0, 420.0);
+        child = SizedBox(width: 260, height: layersH, child: const LayersList());
       case _NavPanel.more:
         anchorKey = _moreKey;
         child = PageOptionsPanel(onClose: _closePanel, embedded: true);
@@ -228,22 +231,19 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
 /// Document title pill with caret-down icon.
 class _DocumentTitle extends StatelessWidget {
   const _DocumentTitle({
-    required this.title,
-    required this.onPressed,
-    required this.colorScheme,
+    required this.title, required this.onPressed, required this.colorScheme,
   });
-
   final String? title;
   final VoidCallback? onPressed;
   final ColorScheme colorScheme;
 
   @override
   Widget build(BuildContext context) {
+    final label = title ?? 'İsimsiz Not';
     return Tooltip(
       message: 'Doküman Seçenekleri',
       child: Semantics(
-        label: title ?? 'İsimsiz Not',
-        button: true,
+        label: label, button: true,
         child: GestureDetector(
           onTap: onPressed,
           child: Container(
@@ -251,31 +251,16 @@ class _DocumentTitle extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
             decoration: BoxDecoration(
               color: colorScheme.onSurface.withValues(alpha: 0.06),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Flexible(
-                  child: Text(
-                    title ?? 'İsimsiz Not',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: colorScheme.onSurface,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                const SizedBox(width: 3),
-                PhosphorIcon(
-                  StarNoteIcons.caretDown,
-                  size: 12,
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ],
-            ),
+              borderRadius: BorderRadius.circular(16)),
+            child: Row(mainAxisSize: MainAxisSize.min, children: [
+              Flexible(child: Text(label, maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500,
+                      color: colorScheme.onSurface))),
+              const SizedBox(width: 3),
+              PhosphorIcon(StarNoteIcons.caretDown, size: 12,
+                  color: colorScheme.onSurfaceVariant),
+            ]),
           ),
         ),
       ),
@@ -286,38 +271,24 @@ class _DocumentTitle extends StatelessWidget {
 /// "Salt okunur" badge shown in reader mode.
 class _ReaderBadge extends StatelessWidget {
   const _ReaderBadge({required this.colorScheme});
-
   final ColorScheme colorScheme;
 
   @override
   Widget build(BuildContext context) {
+    final cs = colorScheme;
     return Semantics(
       label: 'Salt okunur mod aktif',
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
         decoration: BoxDecoration(
-          color: colorScheme.secondaryContainer,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            PhosphorIcon(
-              StarNoteIcons.readerMode,
-              size: 12,
-              color: colorScheme.onSecondaryContainer,
-            ),
-            const SizedBox(width: 3),
-            Text(
-              'Salt okunur',
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-                color: colorScheme.onSecondaryContainer,
-              ),
-            ),
-          ],
-        ),
+            color: cs.secondaryContainer, borderRadius: BorderRadius.circular(10)),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          PhosphorIcon(StarNoteIcons.readerMode, size: 12,
+              color: cs.onSecondaryContainer),
+          const SizedBox(width: 3),
+          Text('Salt okunur', style: TextStyle(fontSize: 11,
+              fontWeight: FontWeight.w500, color: cs.onSecondaryContainer)),
+        ]),
       ),
     );
   }

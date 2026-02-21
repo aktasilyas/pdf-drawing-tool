@@ -198,7 +198,7 @@ class DocumentNotifier extends StateNotifier<DrawingDocument> {
     final source = layers[index];
     final duplicate = source.copyWith(
       id: 'layer_${DateTime.now().microsecondsSinceEpoch}',
-      name: '${source.name} kopya',
+      name: _duplicateName(source.name),
     );
 
     // Insert duplicate above the source layer
@@ -217,6 +217,17 @@ class DocumentNotifier extends StateNotifier<DrawingDocument> {
       activeLayerIndex: index + 1,
       updatedAt: DateTime.now(),
     );
+  }
+
+  /// Generate a smart duplicate name: "Foo" → "Foo (2)", "Foo (2)" → "Foo (3)".
+  static String _duplicateName(String original) {
+    final match = RegExp(r'^(.+?)\s*\((\d+)\)$').firstMatch(original);
+    if (match != null) {
+      final base = match.group(1)!;
+      final num = int.parse(match.group(2)!) + 1;
+      return '$base ($num)';
+    }
+    return '$original (2)';
   }
 
   /// Create new document.

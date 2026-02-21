@@ -332,11 +332,12 @@ class DrawingDocument extends Equatable {
       );
     } else {
       // V1: Legacy
+      final newLayers = [...layers, layer];
       return DrawingDocument(
         id: id,
         title: title,
-        layers: [...layers, layer],
-        activeLayerIndex: activeLayerIndex,
+        layers: newLayers,
+        activeLayerIndex: newLayers.length - 1,
         createdAt: createdAt,
         updatedAt: DateTime.now(),
         width: width,
