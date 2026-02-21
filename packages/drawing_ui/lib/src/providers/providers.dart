@@ -47,3 +47,4 @@ export 'scroll_direction_provider.dart';
 export 'sidebar_filter_provider.dart';
 export 'dual_page_provider.dart';
 export 'zoom_lock_provider.dart';
+export 'ruler_provider.dart';
