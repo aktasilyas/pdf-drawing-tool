@@ -68,7 +68,7 @@ Widget buildDrawingCanvasArea({
     );
   }
 
-  final canvasStack = ClipRect(
+  final clippedCanvas = ClipRect(
     child: Stack(
       clipBehavior: Clip.hardEdge,
       children: [
@@ -108,6 +108,17 @@ Widget buildDrawingCanvasArea({
         ),
       ],
     ),
+  );
+
+  // Ruler overlay sits outside the ClipRect so it can overflow the canvas edges.
+  // SizedBox.expand() gives the outer Stack an intrinsic size from its parent.
+  final canvasStack = Stack(
+    clipBehavior: Clip.none,
+    children: [
+      const SizedBox.expand(),
+      Positioned.fill(child: clippedCanvas),
+      if (!isReadOnly) const RulerOverlay(),
+    ],
   );
 
   if (isReadOnly) {

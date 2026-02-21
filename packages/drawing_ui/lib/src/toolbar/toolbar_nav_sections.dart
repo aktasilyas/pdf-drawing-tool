@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import 'package:drawing_ui/src/panels/add_page_panel.dart';
 import 'package:drawing_ui/src/panels/audio_recording_dropdown.dart';
 import 'package:drawing_ui/src/panels/page_options_panel.dart';
+import 'package:drawing_ui/src/providers/ruler_provider.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/toolbar/starnote_nav_button.dart';
 import 'package:drawing_ui/src/widgets/popover_panel.dart';
@@ -74,7 +76,7 @@ enum _NavPanel { addPage, audioRecording, more }
 ///
 /// Uses [PopoverController] to show Add Page and More panels as popovers
 /// with an arrow pointing to the anchor button (same style as tool panels).
-class ToolbarNavRight extends StatefulWidget {
+class ToolbarNavRight extends ConsumerStatefulWidget {
   const ToolbarNavRight({
     super.key,
     this.isReaderMode = false,
@@ -89,10 +91,10 @@ class ToolbarNavRight extends StatefulWidget {
   final VoidCallback? onShowRecordings;
 
   @override
-  State<ToolbarNavRight> createState() => _ToolbarNavRightState();
+  ConsumerState<ToolbarNavRight> createState() => _ToolbarNavRightState();
 }
 
-class _ToolbarNavRightState extends State<ToolbarNavRight> {
+class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
   final PopoverController _popover = PopoverController();
   final GlobalKey _addPageKey = GlobalKey();
   final GlobalKey _micKey = GlobalKey();
@@ -153,6 +155,8 @@ class _ToolbarNavRightState extends State<ToolbarNavRight> {
 
   @override
   Widget build(BuildContext context) {
+    final rulerVisible = ref.watch(rulerVisibleProvider);
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -164,6 +168,17 @@ class _ToolbarNavRightState extends State<ToolbarNavRight> {
           onPressed: widget.onReaderToggle ?? () {},
           isActive: widget.isReaderMode,
         ),
+        if (!widget.isReaderMode)
+          StarNoteNavButton(
+            icon: rulerVisible
+                ? StarNoteIcons.rulerActive
+                : StarNoteIcons.ruler,
+            tooltip: 'Cetvel',
+            onPressed: () => ref
+                .read(rulerVisibleProvider.notifier)
+                .state = !rulerVisible,
+            isActive: rulerVisible,
+          ),
         if (!widget.isReaderMode)
           StarNoteNavButton(
             key: _addPageKey,
