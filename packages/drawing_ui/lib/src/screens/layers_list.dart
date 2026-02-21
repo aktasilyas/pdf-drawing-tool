@@ -15,11 +15,15 @@ class LayersList extends ConsumerWidget {
     final layers = ref.watch(allLayersProvider);
     final activeIndex = ref.watch(activeLayerIndexProvider);
     final cs = Theme.of(context).colorScheme;
+    final activeOpacity = activeIndex >= 0 && activeIndex < layers.length
+        ? layers[activeIndex].opacity
+        : 1.0;
     return Column(
       children: [
         _LayerListHeader(cs: cs),
         Expanded(child: _buildList(ref, layers, activeIndex, cs)),
-        _LayerActionBar(cs: cs, activeIndex: activeIndex, layerCount: layers.length),
+        _LayerFooter(cs: cs, activeIndex: activeIndex, opacity: activeOpacity,
+            layerCount: layers.length),
       ],
     );
   }
@@ -68,24 +72,17 @@ class _LayerListHeader extends ConsumerWidget {
         border: Border(bottom: BorderSide(color: cs.outlineVariant, width: 0.5)),
       ),
       child: Row(children: [
-        Expanded(
-          child: Text('Katmanlar', style: TextStyle(
-            fontSize: 13, fontWeight: FontWeight.w600, color: cs.onSurface,
-          )),
-        ),
-        SizedBox(
-          height: 48,
-          child: TextButton.icon(
-            onPressed: () =>
-                ref.read(documentProvider.notifier).addLayer('Katman ${layerCount + 1}'),
-            icon: PhosphorIcon(StarNoteIcons.plus, size: 18, color: cs.primary),
-            label: Text('Katman Ekle', style: TextStyle(fontSize: 12, color: cs.primary)),
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              minimumSize: const Size(48, 48),
-            ),
-          ),
-        ),
+        Expanded(child: Text('Katmanlar', style: TextStyle(
+            fontSize: 13, fontWeight: FontWeight.w600, color: cs.onSurface))),
+        SizedBox(height: 48, child: TextButton.icon(
+          onPressed: () =>
+              ref.read(documentProvider.notifier).addLayer('Katman ${layerCount + 1}'),
+          icon: PhosphorIcon(StarNoteIcons.plus, size: 18, color: cs.primary),
+          label: Text('Katman Ekle', style: TextStyle(fontSize: 12, color: cs.primary)),
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            minimumSize: const Size(48, 48)),
+        )),
       ]),
     );
   }
@@ -157,7 +154,7 @@ class _LayerRowState extends ConsumerState<_LayerRow> {
           ReorderableDragStartListener(
             index: widget.displayIndex,
             child: SizedBox(
-              width: 32, height: 48,
+              width: 48, height: 48,
               child: Center(
                 child: PhosphorIcon(StarNoteIcons.dragHandle, size: 18, color: cs.onSurfaceVariant),
               ),
@@ -186,14 +183,11 @@ class _LayerRowState extends ConsumerState<_LayerRow> {
   Widget _buildNameField(ColorScheme cs, Layer layer) {
     if (_isEditing) {
       return TextField(
-        controller: _tc,
-        autofocus: true,
+        controller: _tc, autofocus: true,
         style: TextStyle(fontSize: 13, color: cs.onSurface),
-        decoration: const InputDecoration(
-          isDense: true,
-          contentPadding: EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-          border: InputBorder.none,
-        ),
+        decoration: const InputDecoration(isDense: true,
+            contentPadding: EdgeInsets.symmetric(horizontal: 4, vertical: 6),
+            border: InputBorder.none),
         onSubmitted: (_) => _submitRename(),
         onTapOutside: (_) => _submitRename(),
       );
@@ -202,14 +196,9 @@ class _LayerRowState extends ConsumerState<_LayerRow> {
       onDoubleTap: () => setState(() => _isEditing = true),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: Text(
-          layer.name,
-          style: TextStyle(
-            fontSize: 13, color: cs.onSurface,
-            fontWeight: widget.isActive ? FontWeight.w600 : FontWeight.normal,
-          ),
-          overflow: TextOverflow.ellipsis, maxLines: 1,
-        ),
+        child: Text(layer.name, overflow: TextOverflow.ellipsis, maxLines: 1,
+            style: TextStyle(fontSize: 13, color: cs.onSurface,
+                fontWeight: widget.isActive ? FontWeight.w600 : FontWeight.normal)),
       ),
     );
   }
@@ -233,7 +222,7 @@ class _IconToggle extends StatelessWidget {
         onTap: onPressed,
         customBorder: const CircleBorder(),
         child: SizedBox(
-          width: 36, height: 48,
+          width: 48, height: 48,
           child: Center(child: PhosphorIcon(icon, size: 18, color: color)),
         ),
       ),
@@ -241,44 +230,71 @@ class _IconToggle extends StatelessWidget {
   }
 }
 
-class _LayerActionBar extends ConsumerWidget {
-  const _LayerActionBar({
-    required this.cs, required this.activeIndex, required this.layerCount,
+class _LayerFooter extends ConsumerWidget {
+  const _LayerFooter({
+    required this.cs, required this.activeIndex,
+    required this.opacity, required this.layerCount,
   });
   final ColorScheme cs;
   final int activeIndex;
+  final double opacity;
   final int layerCount;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final canDelete = layerCount > 1;
-    return Container(
-      height: 48,
-      decoration: BoxDecoration(
-        border: Border(top: BorderSide(color: cs.outlineVariant, width: 0.5)),
+    final border = BorderSide(color: cs.outlineVariant, width: 0.5);
+    return Column(mainAxisSize: MainAxisSize.min, children: [
+      // Opacity slider
+      Container(
+        height: 36,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        decoration: BoxDecoration(border: Border(top: border)),
+        child: Row(children: [
+          Text('${(opacity * 100).round()}%',
+              style: TextStyle(fontSize: 11, color: cs.onSurfaceVariant)),
+          Expanded(
+            child: SliderTheme(
+              data: SliderThemeData(
+                trackHeight: 2,
+                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+                overlayShape: const RoundSliderOverlayShape(overlayRadius: 14),
+                activeTrackColor: cs.primary,
+                inactiveTrackColor: cs.onSurface.withValues(alpha: 0.12),
+                thumbColor: cs.primary,
+              ),
+              child: Slider(
+                value: opacity,
+                onChanged: (v) => ref.read(documentProvider.notifier)
+                    .setLayerOpacity(activeIndex, v),
+              ),
+            ),
+          ),
+        ]),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
+      // Action buttons
+      Container(
+        height: 48,
+        decoration: BoxDecoration(border: Border(top: border)),
+        child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           IconButton(
             onPressed: canDelete
                 ? () => ref.read(documentProvider.notifier).removeLayer(activeIndex)
                 : null,
             icon: PhosphorIcon(StarNoteIcons.trash, size: 18,
-              color: canDelete ? cs.error : cs.onSurfaceVariant.withValues(alpha: 0.3)),
+                color: canDelete ? cs.error : cs.onSurfaceVariant.withValues(alpha: 0.3)),
             tooltip: 'Katmani Sil',
             constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
           ),
           const SizedBox(width: 16),
           IconButton(
-            onPressed: () =>
-                ref.read(documentProvider.notifier).duplicateLayer(activeIndex),
+            onPressed: () => ref.read(documentProvider.notifier).duplicateLayer(activeIndex),
             icon: PhosphorIcon(StarNoteIcons.duplicate, size: 18, color: cs.onSurface),
             tooltip: 'Katmani Kopyala',
             constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
           ),
-        ],
+        ]),
       ),
-    );
+    ]);
   }
 }
