@@ -21,25 +21,25 @@ class TemplateCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
+    final cs = theme.colorScheme;
 
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isSelected 
-                ? colorScheme.primary 
-                : colorScheme.outline.withValues(alpha: 0.2),
-            width: isSelected ? 2.5 : 1,
+            color: isSelected
+                ? cs.primary
+                : cs.outline.withValues(alpha: 0.2),
+            width: isSelected ? 2 : 1,
           ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: colorScheme.primary.withValues(alpha: 0.3),
-                    blurRadius: 8,
+                    color: cs.primary.withValues(alpha: 0.25),
+                    blurRadius: 6,
                     offset: const Offset(0, 2),
                   ),
                 ]
@@ -48,55 +48,53 @@ class TemplateCard extends StatelessWidget {
         child: Stack(
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(11),
+              borderRadius: BorderRadius.circular(7),
               child: TemplatePreviewWidget(
                 template: template,
                 showBorder: false,
               ),
             ),
-            
             if (isLocked)
               Positioned(
-                top: 6,
-                right: 6,
+                top: 4,
+                right: 4,
                 child: Container(
-                  padding: const EdgeInsets.all(4),
+                  padding: const EdgeInsets.all(3),
                   decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.9),
-                    borderRadius: BorderRadius.circular(6),
+                    color: cs.surfaceContainerHighest
+                        .withValues(alpha: 0.9),
+                    borderRadius: BorderRadius.circular(4),
                   ),
-                  child: PhosphorIcon(
-                    StarNoteIcons.lock,
-                    size: 14,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
+                  child: PhosphorIcon(StarNoteIcons.lock,
+                      size: 12, color: cs.onSurfaceVariant),
                 ),
               ),
-            
             Positioned(
               left: 0,
               right: 0,
               bottom: 0,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
                     colors: [
                       Colors.transparent,
-                      colorScheme.surface.withValues(alpha: 0.95),
+                      cs.surface.withValues(alpha: 0.95),
                     ],
                   ),
                   borderRadius: const BorderRadius.vertical(
-                    bottom: Radius.circular(11),
-                  ),
+                      bottom: Radius.circular(7)),
                 ),
                 child: Text(
                   template.name,
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: colorScheme.onSurface,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                    fontSize: 10,
+                    color: cs.onSurface,
+                    fontWeight:
+                        isSelected ? FontWeight.w600 : FontWeight.normal,
                   ),
                   textAlign: TextAlign.center,
                   maxLines: 1,
@@ -104,22 +102,18 @@ class TemplateCard extends StatelessWidget {
                 ),
               ),
             ),
-            
             if (isSelected)
               Positioned(
-                top: 6,
-                left: 6,
+                top: 4,
+                left: 4,
                 child: Container(
                   padding: const EdgeInsets.all(2),
                   decoration: BoxDecoration(
-                    color: colorScheme.primary,
+                    color: cs.primary,
                     shape: BoxShape.circle,
                   ),
-                  child: PhosphorIcon(
-                    StarNoteIcons.check,
-                    size: 12,
-                    color: colorScheme.onPrimary,
-                  ),
+                  child: PhosphorIcon(StarNoteIcons.check,
+                      size: 10, color: cs.onPrimary),
                 ),
               ),
           ],

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/widgets/template_picker/template_card.dart';
 
-/// Template grid - responsive (phone: 3 kolon, tablet: 5 kolon)
+/// Template grid - responsive (phone: 4 kolon, tablet: 6 kolon)
 class TemplateGrid extends StatelessWidget {
   final List<Template> templates;
   final Template? selectedTemplate;
@@ -22,12 +22,12 @@ class TemplateGrid extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isTablet = constraints.maxWidth >= 600;
-        final crossAxisCount = isTablet ? 5 : 3;
-        final spacing = isTablet ? 16.0 : 12.0;
-        final childAspectRatio = isTablet ? 0.75 : 0.72;
+        final crossAxisCount = isTablet ? 6 : 4;
+        const spacing = 8.0;
+        final childAspectRatio = isTablet ? 0.7 : 0.68;
 
         return GridView.builder(
-          padding: EdgeInsets.all(spacing),
+          padding: const EdgeInsets.all(spacing),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
             crossAxisSpacing: spacing,
@@ -38,7 +38,7 @@ class TemplateGrid extends StatelessWidget {
           itemBuilder: (context, index) {
             final template = templates[index];
             final locked = isLocked?.call(template) ?? template.isPremium;
-            
+
             return TemplateCard(
               template: template,
               isSelected: selectedTemplate?.id == template.id,
