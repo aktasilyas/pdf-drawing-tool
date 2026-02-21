@@ -55,7 +55,7 @@ class PageOptionsMenuItem extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: SizedBox(
-        height: 40,
+        height: 48,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Row(
@@ -105,12 +105,14 @@ class PageOptionsToggleItem extends StatelessWidget {
     super.key,
     required this.icon,
     required this.label,
+    this.subtitle,
     required this.value,
     required this.onChanged,
   });
 
   final IconData icon;
   final String label;
+  final String? subtitle;
   final bool value;
   final ValueChanged<bool> onChanged;
 
@@ -127,10 +129,16 @@ class PageOptionsToggleItem extends StatelessWidget {
             PhosphorIcon(icon, size: 22, color: cs.onSurface),
             const SizedBox(width: 16),
             Expanded(
-              child: Text(
-                label,
-                style: TextStyle(fontSize: 15, color: cs.onSurface),
-              ),
+              child: subtitle != null
+                  ? Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(label, style: TextStyle(fontSize: 15, color: cs.onSurface)),
+                        Text(subtitle!, style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant)),
+                      ],
+                    )
+                  : Text(label, style: TextStyle(fontSize: 15, color: cs.onSurface)),
             ),
             Switch.adaptive(
               value: value,
@@ -205,31 +213,72 @@ class ScrollDirectionItem extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final direction = ref.watch(scrollDirectionProvider);
     final isHorizontal = direction == Axis.horizontal;
-    final cs = Theme.of(context).colorScheme;
-    return PageOptionsMenuItem(
+    return PageOptionsToggleItem(
       icon: isHorizontal
           ? StarNoteIcons.scrollDirection
           : StarNoteIcons.scrollDirectionVertical,
       label: 'Kaydırma yönü',
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            isHorizontal ? 'Yatay' : 'Dikey',
-            style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant),
-          ),
-          const SizedBox(width: 4),
-          PhosphorIcon(
-            StarNoteIcons.chevronRight,
-            size: 18,
-            color: cs.onSurfaceVariant,
-          ),
-        ],
-      ),
-      onTap: () {
-        ref.read(scrollDirectionProvider.notifier).state =
-            isHorizontal ? Axis.vertical : Axis.horizontal;
-      },
+      subtitle: isHorizontal ? 'Yatay' : 'Dikey',
+      value: isHorizontal,
+      onChanged: (v) => ref.read(scrollDirectionProvider.notifier).state =
+          v ? Axis.horizontal : Axis.vertical,
     );
   }
+}
+
+// ═══════════════════════════════════════════
+// Extracted helpers (shared with page_options_panel.dart)
+// ═══════════════════════════════════════════
+
+/// Chevron trailing widget with optional label (e.g. "3 / 10 >").
+Widget pageOptionsChevronTrailing(ColorScheme cs, [String? label]) {
+  return Row(mainAxisSize: MainAxisSize.min, children: [
+    if (label != null) ...[
+      Text(label, style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant)),
+      const SizedBox(width: 4),
+    ],
+    PhosphorIcon(StarNoteIcons.chevronRight, size: 18, color: cs.onSurfaceVariant),
+  ]);
+}
+
+/// Thin divider between menu items.
+Widget pageOptionsDivider(ColorScheme cs) =>
+    Divider(height: 0.5, thickness: 0.5, color: cs.outlineVariant);
+
+/// Thick divider separating sections.
+Widget pageOptionsThickDivider(ColorScheme cs) =>
+    Divider(height: 8, thickness: 8, color: cs.outlineVariant.withValues(alpha: 0.3));
+
+/// "Go to page" dialog extracted from PageOptionsPanel.
+void showGoToPageDialog({
+  required BuildContext context,
+  required int pageCount,
+  required PageManagerNotifier pageManager,
+}) {
+  final controller = TextEditingController();
+  void goTo(String value, BuildContext ctx) {
+    final page = int.tryParse(value);
+    if (page != null && page >= 1 && page <= pageCount) {
+      Navigator.pop(ctx);
+      pageManager.goToPage(page - 1);
+    }
+  }
+
+  showDialog(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: const Text('Sayfaya Git'),
+      content: TextField(
+        controller: controller,
+        keyboardType: TextInputType.number,
+        autofocus: true,
+        decoration: InputDecoration(hintText: '1 - $pageCount'),
+        onSubmitted: (v) => goTo(v, ctx),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('İptal')),
+        FilledButton(onPressed: () => goTo(controller.text, ctx), child: const Text('Git')),
+      ],
+    ),
+  );
 }

@@ -1,10 +1,10 @@
 /// Export options panel shown as a popover below the export toolbar button.
 import 'dart:io';
 
-import 'package:drawing_core/drawing_core.dart' show DrawingDocument;
+import 'package:drawing_core/drawing_core.dart' show DrawingDocument, Page;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Page;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -61,14 +61,30 @@ class ExportPanel extends ConsumerWidget {
 Future<void> performPDFExport(
   ExportProgressNotifier progress,
   DrawingDocument document,
-) async {
-  progress.start(document.pages.length);
+) {
+  return performPagesPDFExport(
+    progress,
+    pages: document.pages,
+    title: document.title,
+  );
+}
+
+/// Exports the given [pages] to PDF with [title] as filename base.
+///
+/// Used by [performPDFExport] for full-document export and by
+/// `PageOptionsPanel` for single-page export.
+Future<void> performPagesPDFExport(
+  ExportProgressNotifier progress, {
+  required List<Page> pages,
+  required String title,
+}) async {
+  progress.start(pages.length);
 
   try {
     final exporter = PDFExporter();
     final result = await exporter.exportPages(
-      pages: document.pages,
-      metadata: PDFDocumentMetadata(title: document.title),
+      pages: pages,
+      metadata: PDFDocumentMetadata(title: title),
       onProgress: progress.updateProgress,
     );
 
@@ -78,7 +94,7 @@ Future<void> performPDFExport(
     }
 
     final bytes = Uint8List.fromList(result.pdfBytes);
-    final filename = _sanitizeFilename(document.title);
+    final filename = sanitizeFilename(title);
 
     // Let user pick save location
     final savedPath = await FilePicker.platform.saveFile(
@@ -106,7 +122,8 @@ Future<void> performPDFExport(
   }
 }
 
-String _sanitizeFilename(String title) {
+/// Sanitizes a string for use as a filename.
+String sanitizeFilename(String title) {
   var name = title.isEmpty ? 'doküman' : title;
   name = name.replaceAll(RegExp(r'[<>:"/\\|?*]'), '');
   if (name.length > 200) name = name.substring(0, 200);
