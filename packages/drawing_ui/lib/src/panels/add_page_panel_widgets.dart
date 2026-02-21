@@ -1,6 +1,8 @@
 import 'package:drawing_core/drawing_core.dart';
 import 'package:flutter/material.dart';
+import 'package:phosphor_flutter/phosphor_flutter.dart';
 
+import 'package:drawing_ui/src/theme/starnote_icons.dart';
 import 'package:drawing_ui/src/widgets/template_preview_widget.dart';
 
 /// Position where the new page should be inserted.
@@ -103,6 +105,47 @@ class QuickTemplateThumbnail extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Header row with title and close button for AddPagePanel.
+class AddPageHeader extends StatelessWidget {
+  const AddPageHeader({super.key, required this.onClose});
+
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.only(left: 20, right: 8, top: 8, bottom: 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              'Sayfa ekle',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: cs.onSurface,
+              ),
+            ),
+          ),
+          IconButton(
+            icon: PhosphorIcon(
+              StarNoteIcons.close,
+              size: 20,
+              color: cs.onSurfaceVariant,
+            ),
+            onPressed: onClose,
+            splashRadius: 20,
+            constraints: const BoxConstraints.tightFor(width: 36, height: 36),
+            padding: EdgeInsets.zero,
+          ),
+        ],
       ),
     );
   }

@@ -10,6 +10,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
+import 'package:drawing_ui/src/panels/add_page_import_helper.dart';
 import 'package:drawing_ui/src/panels/add_page_panel_widgets.dart';
 import 'package:drawing_ui/src/panels/page_options_widgets.dart';
 import 'package:drawing_ui/src/widgets/template_picker/template_picker.dart';
@@ -27,17 +28,12 @@ class AddPagePanel extends ConsumerStatefulWidget {
     super.key,
     required this.onClose,
     this.embedded = false,
-    this.onImportTap,
   });
 
   final VoidCallback onClose;
 
   /// When true, skips Material/SizedBox wrapper (used inside PopoverController).
   final bool embedded;
-
-  /// Optional callback for "Import" action. When null, tapping import closes
-  /// the panel. Provided by the host app (e.g. example_app) to open FilePicker.
-  final VoidCallback? onImportTap;
 
   @override
   ConsumerState<AddPagePanel> createState() => _AddPagePanelState();
@@ -150,6 +146,29 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
     if (mounted) widget.onClose();
   }
 
+  Future<void> _handleImport() async {
+    final docNotifier = ref.read(documentProvider.notifier);
+    final pageManager = ref.read(pageManagerProvider.notifier);
+    final doc = ref.read(documentProvider);
+    final curIdx = ref.read(currentPageIndexProvider);
+    final insertIdx = _resolveInsertionIndex(curIdx, doc.pages.length);
+    widget.onClose();
+
+    final imported = await pickAndImportFile(
+      insertIndex: insertIdx,
+      defaultPageSize: doc.settings.defaultPageSize,
+    );
+    if (imported.isEmpty) return;
+
+    final newPages = List<Page>.from(doc.pages)..insertAll(insertIdx, imported);
+    for (int i = insertIdx; i < newPages.length; i++) {
+      newPages[i] = newPages[i].copyWith(index: i);
+    }
+    final newDoc = doc.copyWith(pages: newPages, currentPageIndex: insertIdx);
+    docNotifier.updateDocument(newDoc);
+    pageManager.initializeFromDocument(newDoc.pages, currentIndex: insertIdx);
+  }
+
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
@@ -158,7 +177,7 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildHeader(cs),
+        AddPageHeader(onClose: widget.onClose),
         _divider(cs),
         AddPagePositionSelector(
           selected: _selectedPosition,
@@ -181,37 +200,6 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
       elevation: 8,
       shadowColor: Colors.black26,
       child: SizedBox(width: 320, child: content),
-    );
-  }
-
-  Widget _buildHeader(ColorScheme cs) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 20, right: 8, top: 8, bottom: 8),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              'Sayfa ekle',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: cs.onSurface,
-              ),
-            ),
-          ),
-          IconButton(
-            icon: PhosphorIcon(
-              StarNoteIcons.close,
-              size: 20,
-              color: cs.onSurfaceVariant,
-            ),
-            onPressed: widget.onClose,
-            splashRadius: 20,
-            constraints: const BoxConstraints.tightFor(width: 36, height: 36),
-            padding: EdgeInsets.zero,
-          ),
-        ],
-      ),
     );
   }
 
@@ -286,7 +274,7 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
           icon: StarNoteIcons.uploadFile,
           label: 'İçe aktar',
           trailing: chevron,
-          onTap: widget.onImportTap ?? widget.onClose,
+          onTap: _handleImport,
         ),
       ],
     );
