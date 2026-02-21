@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
+import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/services/page_rotation_service.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 
@@ -174,4 +176,60 @@ Widget _rotateOption(BuildContext ctx, ColorScheme cs, IconData icon,
       ],
     ),
   );
+}
+
+/// Dual page (side-by-side) mode toggle.
+// ignore: unused_element
+class DualPageModeItem extends ConsumerWidget {
+  const DualPageModeItem({super.key, required this.onClose});
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isDual = ref.watch(dualPageModeProvider);
+    return PageOptionsToggleItem(
+      icon: StarNoteIcons.splitView,
+      label: 'Çift sayfa görünümü',
+      value: isDual,
+      onChanged: (v) => ref.read(dualPageModeProvider.notifier).state = v,
+    );
+  }
+}
+
+/// Scroll direction toggle for page options settings.
+class ScrollDirectionItem extends ConsumerWidget {
+  const ScrollDirectionItem({super.key, required this.onClose});
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final direction = ref.watch(scrollDirectionProvider);
+    final isHorizontal = direction == Axis.horizontal;
+    final cs = Theme.of(context).colorScheme;
+    return PageOptionsMenuItem(
+      icon: isHorizontal
+          ? StarNoteIcons.scrollDirection
+          : StarNoteIcons.scrollDirectionVertical,
+      label: 'Kaydırma yönü',
+      trailing: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            isHorizontal ? 'Yatay' : 'Dikey',
+            style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant),
+          ),
+          const SizedBox(width: 4),
+          PhosphorIcon(
+            StarNoteIcons.chevronRight,
+            size: 18,
+            color: cs.onSurfaceVariant,
+          ),
+        ],
+      ),
+      onTap: () {
+        ref.read(scrollDirectionProvider.notifier).state =
+            isHorizontal ? Axis.vertical : Axis.horizontal;
+      },
+    );
+  }
 }

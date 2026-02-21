@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import 'package:drawing_ui/src/providers/providers.dart';
-// import 'package:drawing_ui/src/services/page_rotation_service.dart'; // TODO: Activate
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/widgets/template_picker/template_picker.dart';
 
@@ -16,6 +15,7 @@ class PageOptionsPanel extends ConsumerStatefulWidget {
     super.key,
     required this.onClose,
     this.embedded = false,
+    this.pageIndex,
   });
 
   final VoidCallback onClose;
@@ -23,16 +23,51 @@ class PageOptionsPanel extends ConsumerStatefulWidget {
   /// When true, skips Material/SizedBox wrapper (used inside PopoverController).
   final bool embedded;
 
+  /// When set, operates on this specific page index instead of
+  /// [currentPageIndexProvider]. Used by the sidebar "..." button.
+  final int? pageIndex;
+
   @override
   ConsumerState<PageOptionsPanel> createState() => _PageOptionsPanelState();
 }
 
 class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
+  /// Resolved page index: either the explicit [pageIndex] or current.
+  int get _pageIndex =>
+      widget.pageIndex ?? ref.read(currentPageIndexProvider);
+
+  void _toggleBookmark() {
+    final doc = ref.read(documentProvider);
+    final idx = _pageIndex;
+    final page = doc.pages[idx];
+    final updated = page.copyWith(isBookmarked: !page.isBookmarked);
+    final newPages = List<Page>.from(doc.pages)..[idx] = updated;
+    final newDoc = doc.copyWith(pages: newPages);
+    ref.read(documentProvider.notifier).updateDocument(newDoc);
+    ref.read(pageManagerProvider.notifier).initializeFromDocument(
+          newDoc.pages,
+          currentIndex: newDoc.currentPageIndex,
+        );
+    widget.onClose();
+  }
+
   void _showGoToPageDialog(BuildContext context) {
     final pageCount = ref.read(pageCountProvider);
+    final pageManager = ref.read(pageManagerProvider.notifier);
+    final navContext = Navigator.of(context, rootNavigator: true).context;
+    widget.onClose();
+
     final controller = TextEditingController();
+    void goTo(String value, BuildContext ctx) {
+      final page = int.tryParse(value);
+      if (page != null && page >= 1 && page <= pageCount) {
+        Navigator.pop(ctx);
+        pageManager.goToPage(page - 1);
+      }
+    }
+
     showDialog(
-      context: context,
+      context: navContext,
       builder: (ctx) => AlertDialog(
         title: const Text('Sayfaya Git'),
         content: TextField(
@@ -40,37 +75,24 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
           keyboardType: TextInputType.number,
           autofocus: true,
           decoration: InputDecoration(hintText: '1 - $pageCount'),
-          onSubmitted: (v) => _goToPage(v, pageCount, ctx),
+          onSubmitted: (v) => goTo(v, ctx),
         ),
         actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              widget.onClose();
-            },
-            child: const Text('İptal'),
-          ),
-          FilledButton(
-            onPressed: () => _goToPage(controller.text, pageCount, ctx),
-            child: const Text('Git'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('İptal')),
+          FilledButton(onPressed: () => goTo(controller.text, ctx), child: const Text('Git')),
         ],
       ),
     );
   }
 
-  void _goToPage(String value, int pageCount, BuildContext ctx) {
-    final page = int.tryParse(value);
-    if (page != null && page >= 1 && page <= pageCount) {
-      Navigator.pop(ctx);
-      widget.onClose();
-      ref.read(pageManagerProvider.notifier).goToPage(page - 1);
-    }
-  }
-
   Future<void> _changeTemplate(BuildContext context) async {
-    final result = await TemplatePicker.show(context);
+    final docNotifier = ref.read(documentProvider.notifier);
+    final pageManager = ref.read(pageManagerProvider.notifier);
+    final page = ref.read(currentPageProvider);
+    final navContext = Navigator.of(context, rootNavigator: true).context;
     widget.onClose();
+
+    final result = await TemplatePicker.show(navContext);
     if (result == null) return;
     final t = result.template;
     final newBg = PageBackground(
@@ -81,16 +103,13 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
       templateLineWidth: t.lineWidth,
       lineColor: result.lineColor?.toARGB32() ?? t.defaultLineColor,
     );
-    final page = ref.read(currentPageProvider);
-    ref.read(documentProvider.notifier).updatePageBackground(page.id, newBg);
-    ref
-        .read(pageManagerProvider.notifier)
-        .updateCurrentPage(page.copyWith(background: newBg));
+    docNotifier.updatePageBackground(page.id, newBg);
+    pageManager.updateCurrentPage(page.copyWith(background: newBg));
   }
 
   void _duplicatePage() {
     final doc = ref.read(documentProvider);
-    final pageIndex = ref.read(currentPageIndexProvider);
+    final pageIndex = _pageIndex;
     final original = doc.pages[pageIndex];
     final duplicate = Page(
       id: 'page_${DateTime.now().microsecondsSinceEpoch}',
@@ -121,33 +140,40 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
       return;
     }
 
-    final pageIndex = ref.read(currentPageIndexProvider);
+    final pageIndex = _pageIndex;
     final trashCallback = ref.read(pageTrashCallbackProvider);
+    final docNotifier = ref.read(documentProvider.notifier);
+    final pageManager = ref.read(pageManagerProvider.notifier);
+    final doc = ref.read(documentProvider);
 
     // Close panel first — trash is reversible, no confirmation needed
     widget.onClose();
 
     // Soft-delete via callback if host app provided one
     if (trashCallback != null) {
-      final doc = ref.read(documentProvider);
       final page = doc.pages[pageIndex];
       await trashCallback(pageIndex, page);
     }
 
     // Remove page from document (both soft and hard paths need this)
-    final doc = ref.read(documentProvider);
-    final newDoc = doc.removePage(pageIndex);
-    ref.read(documentProvider.notifier).updateDocument(newDoc);
-    ref.read(pageManagerProvider.notifier).initializeFromDocument(
+    final freshDoc = docNotifier.currentDocument;
+    final newDoc = freshDoc.removePage(pageIndex);
+    docNotifier.updateDocument(newDoc);
+    pageManager.initializeFromDocument(
           newDoc.pages,
           currentIndex: newDoc.currentPageIndex,
         );
   }
 
   void _clearPage(BuildContext context) {
-    final pageIndex = ref.read(currentPageIndexProvider);
+    final pageIndex = _pageIndex;
+    final doc = ref.read(documentProvider);
+    final historyManager = ref.read(historyManagerProvider.notifier);
+    final navContext = Navigator.of(context, rootNavigator: true).context;
+    widget.onClose();
+
     showDialog(
-      context: context,
+      context: navContext,
       builder: (ctx) => AlertDialog(
         title: const Text('Sayfayı Temizle'),
         content: Text(
@@ -155,24 +181,15 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
         ),
         actions: [
           TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              widget.onClose();
-            },
+            onPressed: () => Navigator.pop(ctx),
             child: const Text('İptal'),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
-              widget.onClose();
-              final doc = ref.read(documentProvider);
-              ref.read(historyManagerProvider.notifier).execute(
-                    ClearLayerCommand(layerIndex: doc.activeLayerIndex),
-                  );
+              historyManager.execute(ClearLayerCommand(layerIndex: doc.activeLayerIndex));
             },
-            style: TextButton.styleFrom(
-              foregroundColor: Theme.of(ctx).colorScheme.error,
-            ),
+            style: TextButton.styleFrom(foregroundColor: Theme.of(ctx).colorScheme.error),
             child: const Text('Temizle'),
           ),
         ],
@@ -180,26 +197,13 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
     );
   }
 
-  // TODO: Activate when ready
-  // Future<void> _rotatePage(BuildContext context) async {
-  //   final angle = await showRotatePageDialog(context);
-  //   if (angle == null) return;
-  //   final doc = ref.read(documentProvider);
-  //   final pageIndex = ref.read(currentPageIndexProvider);
-  //   final page = doc.pages[pageIndex];
-  //   final rotated = PageRotationService.rotatePage(page, angle);
-  //   final newPages = List<Page>.from(doc.pages)..[pageIndex] = rotated;
-  //   final newDoc = doc.copyWith(pages: newPages);
-  //   ref.read(documentProvider.notifier).updateDocument(newDoc);
-  //   ref.read(pageManagerProvider.notifier).updateCurrentPage(rotated);
-  //   widget.onClose();
-  // }
-
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final pageIndex = ref.watch(currentPageIndexProvider);
+    final int pageIndex = widget.pageIndex ?? ref.watch(currentPageIndexProvider);
     final pageCount = ref.watch(pageCountProvider);
+    final doc = ref.watch(documentProvider);
+    final isBookmarked = doc.pages[pageIndex].isBookmarked;
 
     final content = SingleChildScrollView(
       child: Column(
@@ -209,9 +213,11 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
           PageOptionsHeader(title: 'Sayfa ${pageIndex + 1}'),
           _divider(cs),
           PageOptionsMenuItem(
-            icon: StarNoteIcons.bookmark,
-            label: 'Sayfaya yer imi koy',
-            onTap: widget.onClose,
+            icon: isBookmarked
+                ? StarNoteIcons.bookmarkFilled
+                : StarNoteIcons.bookmark,
+            label: isBookmarked ? 'Yer imini kaldır' : 'Yer imi koy',
+            onTap: _toggleBookmark,
           ),
           PageOptionsMenuItem(
             icon: StarNoteIcons.copy,
@@ -223,12 +229,6 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
             label: 'Sayfayı çoğalt',
             onTap: _duplicatePage,
           ),
-          // TODO: Activate rotate page when ready
-          // PageOptionsMenuItem(
-          //   icon: StarNoteIcons.rotate,
-          //   label: 'Sayfayı döndür',
-          //   onTap: () => _rotatePage(context),
-          // ),
           PageOptionsMenuItem(
             icon: StarNoteIcons.template,
             label: 'Şablonu değiştir',
@@ -256,8 +256,8 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
           _thickDivider(cs),
           PageOptionsSectionHeader(title: 'Ayarlar'),
           // TEMPORARILY DISABLED: Dual page mode
-          // _DualPageModeItem(onClose: widget.onClose),
-          _ScrollDirectionItem(onClose: widget.onClose),
+          // DualPageModeItem(onClose: widget.onClose),
+          ScrollDirectionItem(onClose: widget.onClose),
           const SizedBox(height: 8),
         ],
       ),
@@ -275,78 +275,11 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
     );
   }
 
-  Widget _chevronTrailing(ColorScheme cs, [String? label]) => Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (label != null) ...[
-            Text(label, style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant)),
-            const SizedBox(width: 4),
-          ],
-          PhosphorIcon(StarNoteIcons.chevronRight, size: 18, color: cs.onSurfaceVariant),
-        ],
-      );
+  Widget _chevronTrailing(ColorScheme cs, [String? label]) => Row(mainAxisSize: MainAxisSize.min, children: [
+    if (label != null) ...[Text(label, style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant)), const SizedBox(width: 4)],
+    PhosphorIcon(StarNoteIcons.chevronRight, size: 18, color: cs.onSurfaceVariant),
+  ]);
 
-  Widget _divider(ColorScheme cs) =>
-      Divider(height: 0.5, thickness: 0.5, color: cs.outlineVariant);
-
-  Widget _thickDivider(ColorScheme cs) => Divider(
-        height: 8, thickness: 8,
-        color: cs.outlineVariant.withValues(alpha: 0.3),
-      );
-}
-
-/// Dual page (side-by-side) mode toggle.
-// ignore: unused_element
-class _DualPageModeItem extends ConsumerWidget {
-  const _DualPageModeItem({required this.onClose});
-  final VoidCallback onClose;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isDual = ref.watch(dualPageModeProvider);
-    return PageOptionsToggleItem(
-      icon: StarNoteIcons.splitView,
-      label: 'Çift sayfa görünümü',
-      value: isDual,
-      onChanged: (v) => ref.read(dualPageModeProvider.notifier).state = v,
-    );
-  }
-}
-
-/// Scroll direction toggle extracted to keep PageOptionsPanel under 300 lines.
-class _ScrollDirectionItem extends ConsumerWidget {
-  const _ScrollDirectionItem({required this.onClose});
-  final VoidCallback onClose;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final direction = ref.watch(scrollDirectionProvider);
-    final isHorizontal = direction == Axis.horizontal;
-    final cs = Theme.of(context).colorScheme;
-    return PageOptionsMenuItem(
-      icon: isHorizontal
-          ? StarNoteIcons.scrollDirection
-          : StarNoteIcons.scrollDirectionVertical,
-      label: 'Kaydırma yönü',
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            isHorizontal ? 'Yatay' : 'Dikey',
-            style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant),
-          ),
-          const SizedBox(width: 4),
-          PhosphorIcon(
-            StarNoteIcons.chevronRight,
-            size: 18,
-            color: cs.onSurfaceVariant,
-          ),
-        ],
-      ),
-      onTap: () {
-        ref.read(scrollDirectionProvider.notifier).state =
-            isHorizontal ? Axis.vertical : Axis.horizontal;
-      },
-    );
-  }
+  Widget _divider(ColorScheme cs) => Divider(height: 0.5, thickness: 0.5, color: cs.outlineVariant);
+  Widget _thickDivider(ColorScheme cs) => Divider(height: 8, thickness: 8, color: cs.outlineVariant.withValues(alpha: 0.3));
 }
