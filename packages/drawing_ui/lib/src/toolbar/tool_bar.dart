@@ -106,6 +106,7 @@ class _ToolBarState extends ConsumerState<ToolBar> {
             onReaderToggle: () =>
                 ref.read(readerModeProvider.notifier).state = !isReaderMode,
             onExportPressed: () => showExportMenu(context, ref),
+            onShowRecordings: () => _openRecordingsTab(ref),
           ),
           const SizedBox(width: 4),
         ],
@@ -220,6 +221,11 @@ class _ToolBarState extends ConsumerState<ToolBar> {
     final active = ref.read(activePanelProvider);
     ref.read(activePanelProvider.notifier).state =
         active == tool ? null : tool;
+  }
+
+  void _openRecordingsTab(WidgetRef ref) {
+    ref.read(sidebarFilterProvider.notifier).state = SidebarFilter.recordings;
+    if (!widget.isSidebarOpen) widget.onSidebarToggle?.call();
   }
 
   GlobalKey? getToolButtonKey(ToolType tool) => _toolButtonKeys[tool];

@@ -107,6 +107,13 @@ class TopNavigationBar extends ConsumerWidget {
             tooltip: 'Sayfa Ekle',
             onPressed: () => showAddPageMenu(context),
           ),
+        if (!isReaderMode)
+          StarNoteNavButton(
+            icon: StarNoteIcons.microphone,
+            tooltip: 'Ses Kaydi',
+            onPressed: () => showAudioMenu(
+              context, ref, onSidebarToggle, isSidebarOpen),
+          ),
         StarNoteNavButton(
           icon: StarNoteIcons.exportIcon,
           tooltip: 'Disa Aktar',
@@ -177,6 +184,14 @@ class TopNavigationBar extends ConsumerWidget {
             icon: StarNoteIcons.pageAdd,
             tooltip: 'Sayfa Ekle',
             onPressed: () => showAddPageMenu(context),
+          ),
+
+        if (!isReaderMode)
+          StarNoteNavButton(
+            icon: StarNoteIcons.microphone,
+            tooltip: 'Ses Kaydi',
+            onPressed: () => showAudioMenu(
+              context, ref, onSidebarToggle, isSidebarOpen),
           ),
 
         StarNoteNavButton(

@@ -154,6 +154,16 @@ abstract final class StarNoteIcons {
   static const splitView = PhosphorIconsLight.squareSplitHorizontal;
 
   // ═══════════════════════════════════════════
+  // Audio Icons
+  // ═══════════════════════════════════════════
+
+  static const microphone = PhosphorIconsLight.microphone;
+  static const waveform = PhosphorIconsLight.waveform;
+  static const play = PhosphorIconsLight.play;
+  static const pause = PhosphorIconsLight.pause;
+  static const recordCircle = PhosphorIconsLight.record;
+
+  // ═══════════════════════════════════════════
   // Page & Document Icons
   // ═══════════════════════════════════════════
 

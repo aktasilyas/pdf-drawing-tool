@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import 'package:drawing_core/src/models/audio_recording.dart';
 import 'package:drawing_core/src/models/canvas_mode.dart';
 import 'package:drawing_core/src/models/document_settings.dart';
 import 'package:drawing_core/src/models/document_type.dart';
@@ -49,6 +50,9 @@ class DrawingDocument extends Equatable {
 
   /// Document type (notebook, whiteboard, etc.)
   final DocumentType documentType;
+
+  /// Audio recordings attached to this document.
+  final List<AudioRecording> audioRecordings;
 
   /// When this document was created.
   final DateTime createdAt;
@@ -142,13 +146,17 @@ class DrawingDocument extends Equatable {
     double width = 1920.0,
     double height = 1080.0,
     this.documentType = DocumentType.notebook,
+    List<AudioRecording>? audioRecordings,
   })  : _layers = List.unmodifiable(layers),
         _activeLayerIndex = activeLayerIndex,
         _width = width,
         _height = height,
         _pages = null,
         _currentPageIndex = null,
-        _settings = null;
+        _settings = null,
+        audioRecordings = audioRecordings != null
+            ? List.unmodifiable(audioRecordings)
+            : const [];
 
   /// Creates a multi-page [DrawingDocument] (V2).
   DrawingDocument.multiPage({
@@ -160,13 +168,17 @@ class DrawingDocument extends Equatable {
     required this.createdAt,
     required this.updatedAt,
     this.documentType = DocumentType.notebook,
+    List<AudioRecording>? audioRecordings,
   })  : _pages = List.unmodifiable(pages),
         _currentPageIndex = currentPageIndex,
         _settings = settings ?? DocumentSettings.defaults(),
         _layers = null,
         _activeLayerIndex = null,
         _width = null,
-        _height = null;
+        _height = null,
+        audioRecordings = audioRecordings != null
+            ? List.unmodifiable(audioRecordings)
+            : const [];
 
   /// Creates an empty document with a single empty layer (V1).
   ///
@@ -495,6 +507,7 @@ class DrawingDocument extends Equatable {
       createdAt: createdAt,
       updatedAt: DateTime.now(),
       documentType: documentType,
+      audioRecordings: audioRecordings,
     );
   }
 
@@ -528,6 +541,7 @@ class DrawingDocument extends Equatable {
       createdAt: createdAt,
       updatedAt: DateTime.now(),
       documentType: documentType,
+      audioRecordings: audioRecordings,
     );
   }
 
@@ -551,6 +565,7 @@ class DrawingDocument extends Equatable {
       createdAt: createdAt,
       updatedAt: updatedAt,
       documentType: documentType,
+      audioRecordings: audioRecordings,
     );
   }
 
@@ -572,6 +587,37 @@ class DrawingDocument extends Equatable {
       createdAt: createdAt,
       updatedAt: DateTime.now(),
       documentType: documentType,
+      audioRecordings: audioRecordings,
+    );
+  }
+
+  // ========== AUDIO RECORDING OPERATIONS ==========
+
+  /// Add an audio recording to this document.
+  DrawingDocument addAudioRecording(AudioRecording recording) {
+    return copyWith(
+      audioRecordings: [...audioRecordings, recording],
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  /// Remove an audio recording by ID.
+  DrawingDocument removeAudioRecording(String recordingId) {
+    return copyWith(
+      audioRecordings:
+          audioRecordings.where((r) => r.id != recordingId).toList(),
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  /// Update an audio recording by ID.
+  DrawingDocument updateAudioRecording(
+      String recordingId, AudioRecording updated) {
+    return copyWith(
+      audioRecordings: audioRecordings
+          .map((r) => r.id == recordingId ? updated : r)
+          .toList(),
+      updatedAt: DateTime.now(),
     );
   }
 
@@ -589,6 +635,7 @@ class DrawingDocument extends Equatable {
     double? width,
     double? height,
     DocumentType? documentType,
+    List<AudioRecording>? audioRecordings,
   }) {
     if (isMultiPage) {
       // V2: Copy as multi-page
@@ -601,6 +648,7 @@ class DrawingDocument extends Equatable {
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
         documentType: documentType ?? this.documentType,
+        audioRecordings: audioRecordings ?? this.audioRecordings,
       );
     } else {
       // V1: Copy as legacy
@@ -614,6 +662,7 @@ class DrawingDocument extends Equatable {
         width: width ?? this.width,
         height: height ?? this.height,
         documentType: documentType ?? this.documentType,
+        audioRecordings: audioRecordings ?? this.audioRecordings,
       );
     }
   }
@@ -632,6 +681,9 @@ class DrawingDocument extends Equatable {
         'documentType': documentType.name,
         'createdAt': createdAt.toIso8601String(),
         'updatedAt': updatedAt.toIso8601String(),
+        if (audioRecordings.isNotEmpty)
+          'audioRecordings':
+              audioRecordings.map((r) => r.toJson()).toList(),
       };
     } else {
       // V1: Legacy format (no version for backward compat)
@@ -680,6 +732,10 @@ class DrawingDocument extends Equatable {
         createdAt: DateTime.parse(json['createdAt'] as String),
         updatedAt: DateTime.parse(json['updatedAt'] as String),
         documentType: documentType,
+        audioRecordings: (json['audioRecordings'] as List?)
+            ?.map(
+                (r) => AudioRecording.fromJson(r as Map<String, dynamic>))
+            .toList(),
       );
     }
 
@@ -741,6 +797,7 @@ class DrawingDocument extends Equatable {
         _width,
         _height,
         documentType,
+        audioRecordings,
         createdAt,
         updatedAt,
       ];

@@ -35,6 +35,7 @@
 library drawing_core;
 
 // Models
+export 'src/models/audio_recording.dart';
 export 'src/models/bounding_box.dart';
 export 'src/models/canvas_mode.dart';
 export 'src/models/cover.dart';

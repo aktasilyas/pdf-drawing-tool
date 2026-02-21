@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import 'package:drawing_ui/src/panels/add_page_panel.dart';
+import 'package:drawing_ui/src/panels/audio_recording_dropdown.dart';
 import 'package:drawing_ui/src/panels/page_options_panel.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/toolbar/starnote_nav_button.dart';
@@ -67,7 +68,7 @@ class ToolbarNavLeft extends StatelessWidget {
 }
 
 /// Which nav popover is currently open.
-enum _NavPanel { addPage, more }
+enum _NavPanel { addPage, audioRecording, more }
 
 /// Right navigation section: Reader toggle, Add Page, Export, More.
 ///
@@ -79,11 +80,13 @@ class ToolbarNavRight extends StatefulWidget {
     this.isReaderMode = false,
     this.onReaderToggle,
     this.onExportPressed,
+    this.onShowRecordings,
   });
 
   final bool isReaderMode;
   final VoidCallback? onReaderToggle;
   final VoidCallback? onExportPressed;
+  final VoidCallback? onShowRecordings;
 
   @override
   State<ToolbarNavRight> createState() => _ToolbarNavRightState();
@@ -92,6 +95,7 @@ class ToolbarNavRight extends StatefulWidget {
 class _ToolbarNavRightState extends State<ToolbarNavRight> {
   final PopoverController _popover = PopoverController();
   final GlobalKey _addPageKey = GlobalKey();
+  final GlobalKey _micKey = GlobalKey();
   final GlobalKey _moreKey = GlobalKey();
   _NavPanel? _activePanel;
 
@@ -115,10 +119,22 @@ class _ToolbarNavRightState extends State<ToolbarNavRight> {
       return;
     }
     setState(() => _activePanel = panel);
-    final anchorKey = panel == _NavPanel.addPage ? _addPageKey : _moreKey;
-    final child = panel == _NavPanel.addPage
-        ? AddPagePanel(onClose: _closePanel, embedded: true)
-        : PageOptionsPanel(onClose: _closePanel, embedded: true);
+    final GlobalKey anchorKey;
+    final Widget child;
+    switch (panel) {
+      case _NavPanel.addPage:
+        anchorKey = _addPageKey;
+        child = AddPagePanel(onClose: _closePanel, embedded: true);
+      case _NavPanel.audioRecording:
+        anchorKey = _micKey;
+        child = AudioRecordingDropdown(
+          onClose: _closePanel,
+          onShowRecordings: () => widget.onShowRecordings?.call(),
+        );
+      case _NavPanel.more:
+        anchorKey = _moreKey;
+        child = PageOptionsPanel(onClose: _closePanel, embedded: true);
+    }
     _popover.show(
       context: context,
       anchorKey: anchorKey,
@@ -155,6 +171,14 @@ class _ToolbarNavRightState extends State<ToolbarNavRight> {
             tooltip: 'Sayfa Ekle',
             onPressed: () => _togglePanel(_NavPanel.addPage),
             isActive: _activePanel == _NavPanel.addPage,
+          ),
+        if (!widget.isReaderMode)
+          StarNoteNavButton(
+            key: _micKey,
+            icon: StarNoteIcons.microphone,
+            tooltip: 'Ses Kaydi',
+            onPressed: () => _togglePanel(_NavPanel.audioRecording),
+            isActive: _activePanel == _NavPanel.audioRecording,
           ),
         StarNoteNavButton(
           icon: StarNoteIcons.exportIcon,

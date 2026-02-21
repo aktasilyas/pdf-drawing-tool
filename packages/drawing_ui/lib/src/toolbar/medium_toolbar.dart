@@ -106,6 +106,7 @@ class _MediumToolbarState extends ConsumerState<MediumToolbar> {
             onReaderToggle: () =>
                 ref.read(readerModeProvider.notifier).state = !isReaderMode,
             onExportPressed: () => showExportMenu(context, ref),
+            onShowRecordings: () => _openRecordingsTab(ref),
           ),
           const SizedBox(width: 4),
         ],
@@ -211,5 +212,10 @@ class _MediumToolbarState extends ConsumerState<MediumToolbar> {
     final active = ref.read(activePanelProvider);
     ref.read(activePanelProvider.notifier).state =
         active == tool ? null : tool;
+  }
+
+  void _openRecordingsTab(WidgetRef ref) {
+    ref.read(sidebarFilterProvider.notifier).state = SidebarFilter.recordings;
+    if (!widget.isSidebarOpen) widget.onSidebarToggle?.call();
   }
 }

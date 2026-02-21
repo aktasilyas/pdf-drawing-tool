@@ -168,6 +168,59 @@ void showAddPageMenu(BuildContext context) {
   }
 }
 
+/// Shows audio recording bottom sheet menu (compact/phone layout).
+void showAudioMenu(
+  BuildContext context,
+  WidgetRef ref,
+  VoidCallback? onSidebarToggle,
+  bool isSidebarOpen,
+) {
+  final colorScheme = Theme.of(context).colorScheme;
+
+  showModalBottomSheet<void>(
+    context: context,
+    builder: (ctx) => SafeArea(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: 8),
+          Container(
+            width: 32,
+            height: 4,
+            decoration: BoxDecoration(
+              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          const SizedBox(height: 12),
+          ListTile(
+            leading: PhosphorIcon(
+              StarNoteIcons.recordCircle,
+              color: colorScheme.onSurface,
+            ),
+            title: const Text('Kaydet'),
+            onTap: () => Navigator.pop(ctx),
+          ),
+          ListTile(
+            leading: PhosphorIcon(
+              StarNoteIcons.waveform,
+              color: colorScheme.onSurface,
+            ),
+            title: const Text('Kayitlari goster'),
+            onTap: () {
+              Navigator.pop(ctx);
+              ref.read(sidebarFilterProvider.notifier).state =
+                  SidebarFilter.recordings;
+              if (!isSidebarOpen) onSidebarToggle?.call();
+            },
+          ),
+          const SizedBox(height: 8),
+        ],
+      ),
+    ),
+  );
+}
+
 // ── Private helpers ──
 
 void _showPDFImportDialog(BuildContext context, WidgetRef ref) {

@@ -7,13 +7,11 @@ import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/services/thumbnail_cache.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
 
+import 'audio_recordings_list.dart';
 import 'page_sidebar_widgets.dart';
 
 /// Sidebar width for the page navigator panel.
 const double kPageSidebarWidth = 240;
-
-/// Filter options for the sidebar page list.
-enum _SidebarFilter { allPages, bookmarked }
 
 /// Page navigator sidebar with a 2-column grid layout.
 ///
@@ -36,7 +34,6 @@ class _PageSidebarState extends ConsumerState<PageSidebar> {
   static const double _gridPadding = 12;
 
   late final ScrollController _scrollController;
-  _SidebarFilter _filter = _SidebarFilter.allPages;
 
   double _offsetForIndex(int index) {
     final availableWidth = kPageSidebarWidth - _gridPadding * 2;
@@ -98,23 +95,11 @@ class _PageSidebarState extends ConsumerState<PageSidebar> {
     final pageManager = ref.watch(pageManagerProvider);
     final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final filter = ref.watch(sidebarFilterProvider);
 
     ref.listen<int>(currentPageIndexProvider, (prev, next) {
       if (prev != next) _scrollToPage(next);
     });
-
-    // Compute filtered pages with original indices
-    final allPages = pageManager.pages;
-    final isBookmarkFilter = _filter == _SidebarFilter.bookmarked;
-    final filteredEntries = <_PageEntry>[];
-    for (int i = 0; i < allPages.length; i++) {
-      if (!isBookmarkFilter || allPages[i].isBookmarked) {
-        filteredEntries.add(_PageEntry(page: allPages[i], originalIndex: i));
-      }
-    }
-
-    final showAddCell = !isBookmarkFilter;
-    final itemCount = filteredEntries.length + (showAddCell ? 1 : 0);
 
     return Container(
       width: kPageSidebarWidth,
@@ -126,39 +111,63 @@ class _PageSidebarState extends ConsumerState<PageSidebar> {
       child: Column(
         children: [
           _FilterBar(
-            filter: _filter,
-            onFilterChanged: (f) => setState(() => _filter = f),
+            filter: filter,
+            onFilterChanged: (f) =>
+                ref.read(sidebarFilterProvider.notifier).state = f,
             cs: cs,
           ),
           Expanded(
-            child: GridView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(_gridPadding),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: _crossAxisCount,
-                crossAxisSpacing: _crossAxisSpacing,
-                mainAxisSpacing: _mainAxisSpacing,
-                childAspectRatio: _childAspectRatio,
-              ),
-              itemCount: itemCount,
-              itemBuilder: (context, index) {
-                if (index < filteredEntries.length) {
-                  final entry = filteredEntries[index];
-                  return PageGridItem(
-                    page: entry.page,
-                    index: entry.originalIndex,
-                    isSelected:
-                        entry.originalIndex == pageManager.currentIndex,
-                    thumbnailCache: widget.thumbnailCache,
-                    onPageTap: widget.onPageTap,
-                  );
-                }
-                return AddPageCell(cs: cs, isDark: isDark);
-              },
-            ),
+            child: filter == SidebarFilter.recordings
+                ? const AudioRecordingsList()
+                : _buildPageGrid(pageManager, filter, cs, isDark),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildPageGrid(
+    dynamic pageManager,
+    SidebarFilter filter,
+    ColorScheme cs,
+    bool isDark,
+  ) {
+    final allPages = pageManager.pages;
+    final isBookmarkFilter = filter == SidebarFilter.bookmarked;
+    final filteredEntries = <_PageEntry>[];
+    for (int i = 0; i < allPages.length; i++) {
+      if (!isBookmarkFilter || allPages[i].isBookmarked) {
+        filteredEntries.add(_PageEntry(page: allPages[i], originalIndex: i));
+      }
+    }
+
+    final showAddCell = !isBookmarkFilter;
+    final itemCount = filteredEntries.length + (showAddCell ? 1 : 0);
+
+    return GridView.builder(
+      controller: _scrollController,
+      padding: const EdgeInsets.all(_gridPadding),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: _crossAxisCount,
+        crossAxisSpacing: _crossAxisSpacing,
+        mainAxisSpacing: _mainAxisSpacing,
+        childAspectRatio: _childAspectRatio,
+      ),
+      itemCount: itemCount,
+      itemBuilder: (context, index) {
+        if (index < filteredEntries.length) {
+          final entry = filteredEntries[index];
+          return PageGridItem(
+            page: entry.page,
+            index: entry.originalIndex,
+            isSelected:
+                entry.originalIndex == pageManager.currentIndex,
+            thumbnailCache: widget.thumbnailCache,
+            onPageTap: widget.onPageTap,
+          );
+        }
+        return AddPageCell(cs: cs, isDark: isDark);
+      },
     );
   }
 }
@@ -170,7 +179,7 @@ class _PageEntry {
   final int originalIndex;
 }
 
-/// Centered segmented tab bar: all pages / bookmarked.
+/// Centered segmented tab bar: all pages / bookmarked / recordings.
 class _FilterBar extends StatelessWidget {
   const _FilterBar({
     required this.filter,
@@ -178,8 +187,8 @@ class _FilterBar extends StatelessWidget {
     required this.cs,
   });
 
-  final _SidebarFilter filter;
-  final ValueChanged<_SidebarFilter> onFilterChanged;
+  final SidebarFilter filter;
+  final ValueChanged<SidebarFilter> onFilterChanged;
   final ColorScheme cs;
 
   @override
@@ -208,19 +217,26 @@ class _FilterBar extends StatelessWidget {
             children: [
               _FilterTab(
                 icon: StarNoteIcons.gridOn,
-                isActive: filter == _SidebarFilter.allPages,
+                isActive: filter == SidebarFilter.allPages,
                 cs: cs,
-                tooltip: 'Tüm sayfalar',
-                onTap: () => onFilterChanged(_SidebarFilter.allPages),
+                tooltip: 'Tum sayfalar',
+                onTap: () => onFilterChanged(SidebarFilter.allPages),
               ),
               _FilterTab(
-                icon: filter == _SidebarFilter.bookmarked
+                icon: filter == SidebarFilter.bookmarked
                     ? StarNoteIcons.bookmarkFilled
                     : StarNoteIcons.bookmark,
-                isActive: filter == _SidebarFilter.bookmarked,
+                isActive: filter == SidebarFilter.bookmarked,
                 cs: cs,
                 tooltip: 'Yer imleri',
-                onTap: () => onFilterChanged(_SidebarFilter.bookmarked),
+                onTap: () => onFilterChanged(SidebarFilter.bookmarked),
+              ),
+              _FilterTab(
+                icon: StarNoteIcons.waveform,
+                isActive: filter == SidebarFilter.recordings,
+                cs: cs,
+                tooltip: 'Ses kayitlari',
+                onTap: () => onFilterChanged(SidebarFilter.recordings),
               ),
             ],
           ),

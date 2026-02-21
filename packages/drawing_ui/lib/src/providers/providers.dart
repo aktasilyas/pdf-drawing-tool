@@ -1,6 +1,7 @@
 /// Providers for drawing UI state management.
 library;
 
+export 'audio_recording_provider.dart';
 export 'canvas_transform_provider.dart';
 export 'document_provider.dart';
 export 'drawing_providers.dart';
@@ -43,5 +44,6 @@ export 'image_provider.dart';
 export 'sticky_note_provider.dart';
 export 'page_trash_callback_provider.dart';
 export 'scroll_direction_provider.dart';
+export 'sidebar_filter_provider.dart';
 export 'dual_page_provider.dart';
 export 'zoom_lock_provider.dart';
