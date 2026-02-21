@@ -1,7 +1,9 @@
 import 'package:drawing_core/drawing_core.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Page;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
+import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/panels/add_page_panel_widgets.dart';
 import 'package:drawing_ui/src/panels/page_options_widgets.dart';
@@ -12,9 +14,9 @@ const _quickTemplateIds = ['blank', 'thin_lined', 'grid', 'dotted', 'cornell'];
 /// GoodNotes-style "Add Page" popup panel.
 ///
 /// Shows position selection, quick template thumbnails, and action items
-/// (more templates, image, photo, import). UI-only for now — functionality
-/// will be wired in a follow-up.
-class AddPagePanel extends StatefulWidget {
+/// (more templates, image, photo, import). Tapping a template creates a new
+/// page at the selected position using the document's default page size.
+class AddPagePanel extends ConsumerStatefulWidget {
   const AddPagePanel({super.key, required this.onClose, this.embedded = false});
 
   final VoidCallback onClose;
@@ -23,10 +25,10 @@ class AddPagePanel extends StatefulWidget {
   final bool embedded;
 
   @override
-  State<AddPagePanel> createState() => _AddPagePanelState();
+  ConsumerState<AddPagePanel> createState() => _AddPagePanelState();
 }
 
-class _AddPagePanelState extends State<AddPagePanel> {
+class _AddPagePanelState extends ConsumerState<AddPagePanel> {
   AddPagePosition _selectedPosition = AddPagePosition.after;
   String _selectedTemplateId = 'blank';
 
@@ -39,6 +41,58 @@ class _AddPagePanelState extends State<AddPagePanel> {
         .map((id) => TemplateRegistry.getById(id))
         .whereType<Template>()
         .toList();
+  }
+
+  int _resolveInsertionIndex(int currentIndex, int pageCount) {
+    switch (_selectedPosition) {
+      case AddPagePosition.before:
+        return currentIndex;
+      case AddPagePosition.after:
+        return currentIndex + 1;
+      case AddPagePosition.lastPage:
+        return pageCount;
+    }
+  }
+
+  void _addPageFromTemplate(String templateId) {
+    final template = TemplateRegistry.getById(templateId);
+    if (template == null) return;
+
+    final doc = ref.read(documentProvider);
+    final currentIndex = ref.read(currentPageIndexProvider);
+
+    final background = PageBackground(
+      type: BackgroundType.template,
+      color: template.defaultBackgroundColor,
+      templatePattern: template.pattern,
+      templateSpacingMm: template.spacingMm,
+      templateLineWidth: template.lineWidth,
+      lineColor: template.defaultLineColor,
+    );
+
+    final insertIndex = _resolveInsertionIndex(currentIndex, doc.pages.length);
+    final newPage = Page.create(
+      index: insertIndex,
+      size: doc.settings.defaultPageSize,
+      background: background,
+    );
+
+    final newPages = List<Page>.from(doc.pages)..insert(insertIndex, newPage);
+    // Reindex pages after insertion
+    for (int i = insertIndex; i < newPages.length; i++) {
+      newPages[i] = newPages[i].copyWith(index: i);
+    }
+
+    final newDoc = doc.copyWith(
+      pages: newPages,
+      currentPageIndex: insertIndex,
+    );
+    ref.read(documentProvider.notifier).updateDocument(newDoc);
+    ref.read(pageManagerProvider.notifier).initializeFromDocument(
+          newDoc.pages,
+          currentIndex: newDoc.currentPageIndex,
+        );
+    widget.onClose();
   }
 
   @override
@@ -135,11 +189,7 @@ class _AddPagePanelState extends State<AddPagePanel> {
                 return QuickTemplateThumbnail(
                   template: t,
                   isSelected: t.id == _selectedTemplateId,
-                  onTap: () {
-                    setState(() => _selectedTemplateId = t.id);
-                    // Placeholder: just close for now
-                    widget.onClose();
-                  },
+                  onTap: () => _addPageFromTemplate(t.id),
                 );
               },
             ),
