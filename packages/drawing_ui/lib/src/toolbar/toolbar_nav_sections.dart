@@ -10,6 +10,7 @@ import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/screens/layers_list.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/toolbar/starnote_nav_button.dart';
+import 'package:drawing_ui/src/widgets/document_title_button.dart';
 import 'package:drawing_ui/src/widgets/popover_panel.dart';
 
 /// Left navigation section: Home, Sidebar toggle, document title, reader badge.
@@ -20,7 +21,8 @@ class ToolbarNavLeft extends StatelessWidget {
     super.key,
     this.documentTitle,
     this.onHomePressed,
-    this.onTitlePressed,
+    this.onRenameDocument,
+    this.onDeleteDocument,
     this.onSidebarToggle,
     this.isSidebarOpen = false,
     this.isReaderMode = false,
@@ -29,7 +31,8 @@ class ToolbarNavLeft extends StatelessWidget {
 
   final String? documentTitle;
   final VoidCallback? onHomePressed;
-  final VoidCallback? onTitlePressed;
+  final VoidCallback? onRenameDocument;
+  final VoidCallback? onDeleteDocument;
   final VoidCallback? onSidebarToggle;
   final bool isSidebarOpen;
   final bool isReaderMode;
@@ -37,8 +40,6 @@ class ToolbarNavLeft extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -57,14 +58,14 @@ class ToolbarNavLeft extends StatelessWidget {
             isActive: isSidebarOpen,
           ),
         const SizedBox(width: 4),
-        _DocumentTitle(
+        DocumentTitleButton(
           title: documentTitle,
-          onPressed: onTitlePressed,
-          colorScheme: colorScheme,
+          onRename: onRenameDocument ?? () {},
+          onDelete: onDeleteDocument ?? () {},
         ),
         if (isReaderMode) ...[
           const SizedBox(width: 8),
-          _ReaderBadge(colorScheme: colorScheme),
+          _ReaderBadge(colorScheme: Theme.of(context).colorScheme),
         ],
       ],
     );
@@ -229,46 +230,6 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
           isActive: _activePanel == _NavPanel.more,
         ),
       ],
-    );
-  }
-}
-
-/// Document title pill with caret-down icon.
-class _DocumentTitle extends StatelessWidget {
-  const _DocumentTitle({
-    required this.title, required this.onPressed, required this.colorScheme,
-  });
-  final String? title;
-  final VoidCallback? onPressed;
-  final ColorScheme colorScheme;
-
-  @override
-  Widget build(BuildContext context) {
-    final label = title ?? 'İsimsiz Not';
-    return Tooltip(
-      message: 'Doküman Seçenekleri',
-      child: Semantics(
-        label: label, button: true,
-        child: GestureDetector(
-          onTap: onPressed,
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 160),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: colorScheme.onSurface.withValues(alpha: 0.06),
-              borderRadius: BorderRadius.circular(16)),
-            child: Row(mainAxisSize: MainAxisSize.min, children: [
-              Flexible(child: Text(label, maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500,
-                      color: colorScheme.onSurface))),
-              const SizedBox(width: 3),
-              PhosphorIcon(StarNoteIcons.caretDown, size: 12,
-                  color: colorScheme.onSurfaceVariant),
-            ]),
-          ),
-        ),
-      ),
     );
   }
 }

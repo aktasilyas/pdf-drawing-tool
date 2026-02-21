@@ -51,64 +51,66 @@ class ExportPanel extends ConsumerWidget {
     onClose();
     final document = ref.read(documentProvider);
     final notifier = ref.read(exportProgressProvider.notifier);
-    _performPDFExport(notifier, document);
+    performPDFExport(notifier, document);
   }
+}
 
-  Future<void> _performPDFExport(
-    ExportProgressNotifier progress,
-    DrawingDocument document,
-  ) async {
-    progress.start(document.pages.length);
+/// Exports all pages of [document] to PDF using the floating progress overlay.
+///
+/// Shared by [ExportPanel] and `DocumentOptionsPanel`.
+Future<void> performPDFExport(
+  ExportProgressNotifier progress,
+  DrawingDocument document,
+) async {
+  progress.start(document.pages.length);
 
-    try {
-      final exporter = PDFExporter();
-      final result = await exporter.exportPages(
-        pages: document.pages,
-        metadata: PDFDocumentMetadata(title: document.title),
-        onProgress: progress.updateProgress,
-      );
+  try {
+    final exporter = PDFExporter();
+    final result = await exporter.exportPages(
+      pages: document.pages,
+      metadata: PDFDocumentMetadata(title: document.title),
+      onProgress: progress.updateProgress,
+    );
 
-      if (!result.isSuccess) {
-        progress.setError(result.errorMessage ?? 'PDF oluşturulamadı');
-        return;
-      }
-
-      final bytes = Uint8List.fromList(result.pdfBytes);
-      final filename = _sanitizeFilename(document.title);
-
-      // Let user pick save location
-      final savedPath = await FilePicker.platform.saveFile(
-        dialogTitle: 'PDF Kaydet',
-        fileName: '$filename.pdf',
-        type: FileType.custom,
-        allowedExtensions: ['pdf'],
-        bytes: bytes,
-      );
-
-      if (savedPath != null) {
-        // Desktop: saveFile returns path but may not write bytes
-        final file = File(savedPath);
-        if (!await file.exists() || await file.length() == 0) {
-          await file.writeAsBytes(bytes);
-        }
-        progress.complete(result.fileSizeFormatted);
-      } else {
-        // User cancelled file picker
-        progress.dismiss();
-      }
-    } catch (e) {
-      debugPrint('PDF export error: $e');
-      progress.setError('PDF dışa aktarılamadı: $e');
+    if (!result.isSuccess) {
+      progress.setError(result.errorMessage ?? 'PDF oluşturulamadı');
+      return;
     }
-  }
 
-  static String _sanitizeFilename(String title) {
-    var name = title.isEmpty ? 'doküman' : title;
-    name = name.replaceAll(RegExp(r'[<>:"/\\|?*]'), '');
-    if (name.length > 200) name = name.substring(0, 200);
-    return name;
-  }
+    final bytes = Uint8List.fromList(result.pdfBytes);
+    final filename = _sanitizeFilename(document.title);
 
+    // Let user pick save location
+    final savedPath = await FilePicker.platform.saveFile(
+      dialogTitle: 'PDF Kaydet',
+      fileName: '$filename.pdf',
+      type: FileType.custom,
+      allowedExtensions: ['pdf'],
+      bytes: bytes,
+    );
+
+    if (savedPath != null) {
+      // Desktop: saveFile returns path but may not write bytes
+      final file = File(savedPath);
+      if (!await file.exists() || await file.length() == 0) {
+        await file.writeAsBytes(bytes);
+      }
+      progress.complete(result.fileSizeFormatted);
+    } else {
+      // User cancelled file picker
+      progress.dismiss();
+    }
+  } catch (e) {
+    debugPrint('PDF export error: $e');
+    progress.setError('PDF dışa aktarılamadı: $e');
+  }
+}
+
+String _sanitizeFilename(String title) {
+  var name = title.isEmpty ? 'doküman' : title;
+  name = name.replaceAll(RegExp(r'[<>:"/\\|?*]'), '');
+  if (name.length > 200) name = name.substring(0, 200);
+  return name;
 }
 
 class _PanelHeader extends StatelessWidget {

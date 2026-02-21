@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:drawing_core/drawing_core.dart';
-import 'package:drawing_ui/drawing_ui.dart' hide PDFExportDialog;
+import 'package:drawing_ui/drawing_ui.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/editor/presentation/providers/editor_provider.dart';
-import 'package:example_app/features/editor/presentation/widgets/pdf_export_dialog.dart';
-import 'package:intl/intl.dart';
 
 class EditorScreen extends ConsumerWidget {
   final String documentId;
@@ -101,7 +99,8 @@ class EditorScreen extends ConsumerWidget {
             documentTitle: document.title,
             canvasMode: canvasMode,
             onHomePressed: () => _handleBack(context, ref),
-            onTitlePressed: () => _showDocumentMenu(context, ref, document),
+            onRenameDocument: () => _showRenameDialog(context, ref),
+            onDeleteDocument: () => _showDeleteConfirmation(context, ref),
             onDocumentChanged: (doc) {
               if (doc is DrawingDocument) {
                 ref.read(currentDocumentProvider.notifier).state = doc;
@@ -143,138 +142,8 @@ class EditorScreen extends ConsumerWidget {
     ref.read(totalPdfPagesProvider.notifier).state = 0;
   }
 
-  void _showDocumentMenu(BuildContext context, WidgetRef ref, DrawingDocument document) {
-    final currentDoc = ref.watch(documentProvider);
-    final isSaving = ref.watch(autoSaveProvider);
-    final hasUnsaved = ref.watch(hasUnsavedChangesProvider);
-    final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: isDark ? colorScheme.surfaceContainerHighest : colorScheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Document info header
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  const Icon(Icons.description_outlined, size: 32),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                currentDoc.title,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 16,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            if (isSaving)
-                              const SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              )
-                            else if (hasUnsaved)
-                              const Icon(
-                                Icons.circle,
-                                size: 8,
-                                color: Colors.orange,
-                              ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Son düzenleme: ${_formatDate(currentDoc.updatedAt)}',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            fontSize: 12,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Divider(height: 1),
-            // Menu items
-            ListTile(
-              leading: const Icon(Icons.edit_outlined),
-              title: const Text('Yeniden Adlandır'),
-              onTap: () {
-                Navigator.pop(context);
-                _showRenameDialog(context, ref, currentDoc);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.picture_as_pdf_outlined),
-              title: const Text('PDF Olarak Dışa Aktar'),
-              onTap: () {
-                Navigator.pop(context);
-                _showExportDialog(context, ref, currentDoc);
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.share_outlined),
-              title: const Text('Paylaş'),
-              onTap: () {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Paylaşma özelliği yakında eklenecek'),
-                    behavior: SnackBarBehavior.floating,
-                  ),
-                );
-              },
-            ),
-            const Divider(height: 1),
-            ListTile(
-              leading: Icon(Icons.delete_outline, color: colorScheme.error),
-              title: Text(
-                'Çöpe Taşı',
-                style: TextStyle(color: colorScheme.error),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                _showDeleteConfirmation(context, ref);
-              },
-            ),
-            const SizedBox(height: 8),
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    final diff = now.difference(date);
-    
-    if (diff.inMinutes < 1) return 'Az önce';
-    if (diff.inHours < 1) return '${diff.inMinutes} dakika önce';
-    if (diff.inDays < 1) return '${diff.inHours} saat önce';
-    if (diff.inDays < 7) return '${diff.inDays} gün önce';
-    
-    return DateFormat('dd.MM.yyyy').format(date);
-  }
-
-  void _showRenameDialog(BuildContext context, WidgetRef ref, DrawingDocument document) {
+  void _showRenameDialog(BuildContext context, WidgetRef ref) {
+    final document = ref.read(documentProvider);
     final controller = TextEditingController(text: document.title);
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -325,46 +194,39 @@ class EditorScreen extends ConsumerWidget {
     );
   }
 
-  void _showExportDialog(BuildContext context, WidgetRef ref, DrawingDocument document) {
-    showDialog(
-      context: context,
-      builder: (context) => PDFExportDialog(
-        totalPages: document.pageCount,
-      ),
-    );
-  }
-
   void _showDeleteConfirmation(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: isDark ? colorScheme.surfaceContainerHighest : colorScheme.surface,
-        title: Text('Çöpe Taşı', style: TextStyle(color: colorScheme.onSurface)),
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: isDark
+            ? colorScheme.surfaceContainerHighest
+            : colorScheme.surface,
+        title: Text('Çöpe Taşı',
+            style: TextStyle(color: colorScheme.onSurface)),
         content: Text(
           'Bu belge çöpe taşınacak. Daha sonra geri yükleyebilirsiniz.',
           style: TextStyle(color: colorScheme.onSurfaceVariant),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('İptal'),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
               backgroundColor: colorScheme.error,
             ),
-            onPressed: () {
-              Navigator.pop(context);
-              // TODO: Implement move to trash
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Çöpe taşıma özelliği yakında eklenecek'),
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
+            onPressed: () async {
+              Navigator.pop(dialogContext);
+              final result = await ref
+                  .read(documentsControllerProvider.notifier)
+                  .moveToTrash(documentId);
+              if (result && context.mounted) {
+                context.go('/documents');
+              }
             },
             child: const Text('Çöpe Taşı'),
           ),

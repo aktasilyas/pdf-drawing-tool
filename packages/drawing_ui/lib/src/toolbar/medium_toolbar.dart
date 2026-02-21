@@ -30,7 +30,8 @@ class MediumToolbar extends ConsumerStatefulWidget {
     this.highlighterGroupButtonKey,
     this.documentTitle,
     this.onHomePressed,
-    this.onTitlePressed,
+    this.onRenameDocument,
+    this.onDeleteDocument,
     this.onSidebarToggle,
     this.isSidebarOpen = false,
   });
@@ -44,7 +45,8 @@ class MediumToolbar extends ConsumerStatefulWidget {
   // Nav parameters
   final String? documentTitle;
   final VoidCallback? onHomePressed;
-  final VoidCallback? onTitlePressed;
+  final VoidCallback? onRenameDocument;
+  final VoidCallback? onDeleteDocument;
   final VoidCallback? onSidebarToggle;
   final bool isSidebarOpen;
 
@@ -89,7 +91,8 @@ class _MediumToolbarState extends ConsumerState<MediumToolbar> {
           ToolbarNavLeft(
             documentTitle: widget.documentTitle,
             onHomePressed: widget.onHomePressed,
-            onTitlePressed: widget.onTitlePressed,
+            onRenameDocument: widget.onRenameDocument,
+            onDeleteDocument: widget.onDeleteDocument,
             onSidebarToggle: widget.onSidebarToggle,
             isSidebarOpen: widget.isSidebarOpen,
             isReaderMode: isReaderMode,

@@ -2,6 +2,7 @@
 library;
 
 export 'anchored_panel.dart';
+export 'document_title_button.dart';
 export 'compact_color_picker.dart';
 export 'compact_slider.dart';
 export 'compact_toggle.dart';

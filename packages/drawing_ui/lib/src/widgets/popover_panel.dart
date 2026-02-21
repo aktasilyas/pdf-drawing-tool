@@ -134,7 +134,7 @@ class _PopoverOverlayState extends State<_PopoverOverlay>
       edge, widget.screenSize.width - widget.maxWidth - edge,
     );
     final arrowLeft = (cx - left - aw / 2).clamp(16.0, widget.maxWidth - 16.0 - aw);
-    final bg = cs.surfaceContainerHigh;
+    final bg = cs.surface;
     final border = cs.outlineVariant;
 
     final arrow = Padding(
@@ -165,7 +165,7 @@ class _PopoverOverlayState extends State<_PopoverOverlay>
   Widget _buildHorizontal(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     const edge = 12.0, gap = 4.0, ah = 10.0, aw = 20.0;
-    final bg = cs.surfaceContainerHigh;
+    final bg = cs.surface;
     final border = cs.outlineVariant;
 
     final anchorRight = widget.anchorPosition.dx + widget.anchorSize.width;

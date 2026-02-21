@@ -6,6 +6,7 @@ import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/toolbar/starnote_nav_button.dart';
 import 'package:drawing_ui/src/toolbar/top_nav_menus.dart';
+import 'package:drawing_ui/src/widgets/document_title_button.dart';
 
 /// Top navigation bar (Row 1) — Navigation and document actions.
 ///
@@ -23,7 +24,8 @@ class TopNavigationBar extends ConsumerWidget {
     super.key,
     this.documentTitle,
     this.onHomePressed,
-    this.onTitlePressed,
+    this.onRenameDocument,
+    this.onDeleteDocument,
     this.onSidebarToggle,
     this.isSidebarOpen = false,
     this.compact = false,
@@ -35,8 +37,11 @@ class TopNavigationBar extends ConsumerWidget {
   /// Callback when home button is pressed.
   final VoidCallback? onHomePressed;
 
-  /// Callback when document title is pressed.
-  final VoidCallback? onTitlePressed;
+  /// Callback when rename is requested from title popover.
+  final VoidCallback? onRenameDocument;
+
+  /// Callback when delete is requested from title popover.
+  final VoidCallback? onDeleteDocument;
 
   /// Callback when sidebar toggle is pressed.
   final VoidCallback? onSidebarToggle;
@@ -89,7 +94,14 @@ class TopNavigationBar extends ConsumerWidget {
         const SizedBox(width: 4),
         if (isReaderMode) _buildReaderBadge(colorScheme),
         if (isReaderMode) const SizedBox(width: 4),
-        Expanded(child: _buildDocumentTitle(colorScheme)),
+        Expanded(
+          child: DocumentTitleButton(
+            title: documentTitle,
+            onRename: onRenameDocument ?? () {},
+            onDelete: onDeleteDocument ?? () {},
+            maxWidth: 300,
+          ),
+        ),
         const SizedBox(width: 4),
         StarNoteNavButton(
           icon: isReaderMode
@@ -157,7 +169,14 @@ class TopNavigationBar extends ConsumerWidget {
           ),
 
         const SizedBox(width: 4),
-        Flexible(child: _buildDocumentTitle(colorScheme)),
+        Flexible(
+          child: DocumentTitleButton(
+            title: documentTitle,
+            onRename: onRenameDocument ?? () {},
+            onDelete: onDeleteDocument ?? () {},
+            maxWidth: 300,
+          ),
+        ),
 
         if (isReaderMode) ...[
           const SizedBox(width: 8),
@@ -242,51 +261,4 @@ class TopNavigationBar extends ConsumerWidget {
     );
   }
 
-  /// Document title pill with caret-down icon.
-  Widget _buildDocumentTitle(ColorScheme colorScheme) {
-    return Tooltip(
-      message: 'Doküman Seçenekleri',
-      child: Semantics(
-        label: documentTitle ?? 'İsimsiz Not',
-        button: true,
-        child: GestureDetector(
-          onTap: onTitlePressed,
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 300),
-            padding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 6,
-            ),
-            decoration: BoxDecoration(
-              color: colorScheme.onSurface.withValues(alpha: 0.06),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Flexible(
-                  child: Text(
-                    documentTitle ?? 'İsimsiz Not',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: colorScheme.onSurface,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                PhosphorIcon(
-                  StarNoteIcons.caretDown,
-                  size: 14,
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }
