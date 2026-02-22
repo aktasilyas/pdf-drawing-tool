@@ -175,7 +175,7 @@ class _PageGridItemState extends ConsumerState<PageGridItem> {
                   child: Center(
                     child: PhosphorIcon(
                       StarNoteIcons.more,
-                      size: 16,
+                      size: 20,
                       color: cs.onSurfaceVariant,
                     ),
                   ),

@@ -54,6 +54,7 @@ export 'src/models/shape.dart';
 export 'src/models/shape_type.dart';
 export 'src/models/stroke.dart';
 export 'src/models/stroke_style.dart';
+export 'src/models/stroke_style_enums.dart';
 export 'src/models/template.dart';
 export 'src/models/template_category.dart';
 export 'src/models/template_pattern.dart';

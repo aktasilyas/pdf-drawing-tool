@@ -71,6 +71,9 @@ class PenTypeConfig {
   /// Nib angle in degrees for calligraphy (0 = horizontal, 90 = vertical).
   final double nibAngle;
 
+  /// Whether this pen type supports pressure-sensitive variable width.
+  final bool pressureSensitive;
+
   const PenTypeConfig({
     required this.displayName,
     required this.displayNameTr,
@@ -85,6 +88,7 @@ class PenTypeConfig {
     this.glowIntensity = 0.0,
     this.dashPattern,
     this.nibAngle = 0.0,
+    this.pressureSensitive = false,
   });
 }
 
@@ -150,6 +154,7 @@ extension PenTypeExtension on PenType {
           defaultThickness: 5.0,
           maxThickness: 30.0,
           nibShape: NibShape.ellipse,
+          pressureSensitive: true,
         );
       case PenType.neonHighlighter:
         return const PenTypeConfig(
@@ -176,9 +181,14 @@ extension PenTypeExtension on PenType {
   }
 
   /// Creates a StrokeStyle from this pen type with given color.
+  ///
+  /// [pressureSensitive] and [pressureSensitivity] override the pen type
+  /// defaults when provided (e.g. from user settings).
   StrokeStyle toStrokeStyle({
     required int color,
     double? thickness,
+    bool? pressureSensitive,
+    double? pressureSensitivity,
   }) {
     final c = config;
     return StrokeStyle(
@@ -192,6 +202,8 @@ extension PenTypeExtension on PenType {
       glowIntensity: c.glowIntensity,
       dashPattern: c.dashPattern,
       nibAngle: c.nibAngle,
+      pressureSensitive: pressureSensitive ?? c.pressureSensitive,
+      pressureSensitivity: pressureSensitivity ?? 0.75,
     );
   }
 }
