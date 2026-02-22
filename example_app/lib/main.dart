@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/settings/settings.dart';
 import 'package:example_app/features/sync/presentation/providers/sync_provider.dart';
+import 'package:drawing_ui/drawing_ui.dart' as drawing_ui;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,6 +40,7 @@ void main() async {
     ProviderScope(
       overrides: [
         sharedPreferencesProvider.overrideWithValue(prefs),
+        drawing_ui.sharedPreferencesProvider.overrideWithValue(prefs),
       ],
       child: const StarNoteApp(),
     ),

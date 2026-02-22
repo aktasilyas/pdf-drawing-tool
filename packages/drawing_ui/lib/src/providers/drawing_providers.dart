@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/models/models.dart';
+import 'package:drawing_ui/src/providers/pen_settings_provider.dart';
+
+// Re-export extracted settings providers for backward compatibility.
+export 'pen_settings_provider.dart';
+export 'highlighter_settings_provider.dart';
+export 'eraser_settings_provider.dart';
 
 // =============================================================================
 // TOOL SELECTION
@@ -18,279 +23,8 @@ final activePanelProvider = StateProvider<ToolType?>((ref) {
 });
 
 // =============================================================================
-// TOOL SETTINGS PROVIDERS
+// SHAPES SETTINGS
 // =============================================================================
-
-/// Settings for pen tools (family provider by tool type).
-/// 
-/// For pen tools with PenType, default values come from PenType.config.
-final penSettingsProvider =
-    StateNotifierProvider.family<PenSettingsNotifier, PenSettings, ToolType>(
-  (ref, toolType) => PenSettingsNotifier(_defaultPenSettings(toolType)),
-);
-
-PenSettings _defaultPenSettings(ToolType toolType) {
-  // Use PenType config for pen tools
-  final penType = toolType.penType;
-  if (penType != null) {
-    final config = penType.config;
-    return PenSettings(
-      color: const Color(0xFF000000), // Default black
-      thickness: config.defaultThickness,
-      stabilization: 0.3, // Default stabilization
-      nibShape: _nibShapeFromCore(config.nibShape),
-      pressureSensitive: true, // Default pressure sensitivity
-      pressureSensitivity: 0.75,
-      textured: config.texture != StrokeTexture.none,
-    );
-  }
-
-  // Fallback for non-pen tools
-  return const PenSettings(
-    color: Color(0xFF000000),
-    thickness: 2.0,
-    stabilization: 0.3,
-    nibShape: NibShapeType.circle,
-    pressureSensitive: true,
-    pressureSensitivity: 0.75,
-  );
-}
-
-/// Converts core NibShape to UI NibShapeType.
-NibShapeType _nibShapeFromCore(NibShape nibShape) {
-  switch (nibShape) {
-    case NibShape.circle:
-      return NibShapeType.circle;
-    case NibShape.ellipse:
-      return NibShapeType.ellipse;
-    case NibShape.rectangle:
-      return NibShapeType.rectangle;
-  }
-}
-
-/// Notifier for pen settings state.
-class PenSettingsNotifier extends StateNotifier<PenSettings> {
-  PenSettingsNotifier(super.state);
-
-  void setColor(Color color) {
-    state = state.copyWith(color: color);
-  }
-
-  void setThickness(double thickness) {
-    state = state.copyWith(thickness: thickness);
-  }
-
-  void setStabilization(double stabilization) {
-    state = state.copyWith(stabilization: stabilization);
-  }
-
-  void setNibShape(NibShapeType nibShape) {
-    state = state.copyWith(nibShape: nibShape);
-  }
-
-  void setPressureSensitive(bool pressureSensitive) {
-    state = state.copyWith(pressureSensitive: pressureSensitive);
-  }
-
-  void setPressureSensitivity(double pressureSensitivity) {
-    state = state.copyWith(pressureSensitivity: pressureSensitivity);
-  }
-
-  void setNibAngle(double nibAngle) {
-    state = state.copyWith(nibAngle: nibAngle);
-  }
-}
-
-/// Pen settings data model for UI state.
-class PenSettings {
-  const PenSettings({
-    required this.color,
-    required this.thickness,
-    required this.stabilization,
-    required this.nibShape,
-    required this.pressureSensitive,
-    this.pressureSensitivity = 0.75,
-    this.nibAngle = 0.0,
-    this.textured = false,
-  });
-
-  final Color color;
-  final double thickness;
-  final double stabilization;
-  final NibShapeType nibShape;
-  final bool pressureSensitive;
-  final double pressureSensitivity;
-  final double nibAngle;
-  final bool textured;
-
-  PenSettings copyWith({
-    Color? color,
-    double? thickness,
-    double? stabilization,
-    NibShapeType? nibShape,
-    bool? pressureSensitive,
-    double? pressureSensitivity,
-    double? nibAngle,
-    bool? textured,
-  }) {
-    return PenSettings(
-      color: color ?? this.color,
-      thickness: thickness ?? this.thickness,
-      stabilization: stabilization ?? this.stabilization,
-      nibShape: nibShape ?? this.nibShape,
-      pressureSensitive: pressureSensitive ?? this.pressureSensitive,
-      pressureSensitivity: pressureSensitivity ?? this.pressureSensitivity,
-      nibAngle: nibAngle ?? this.nibAngle,
-      textured: textured ?? this.textured,
-    );
-  }
-}
-
-/// Nib shape type for UI representation.
-enum NibShapeType { circle, ellipse, rectangle }
-
-/// Highlighter settings provider.
-final highlighterSettingsProvider =
-    StateNotifierProvider<HighlighterSettingsNotifier, HighlighterSettings>(
-  (ref) => HighlighterSettingsNotifier(const HighlighterSettings(
-    color: Color(0x80FFEB3B),
-    thickness: 20.0,
-    straightLineMode: false,
-    glowIntensity: 0.6,
-  )),
-);
-
-/// Highlighter settings data model.
-class HighlighterSettings {
-  const HighlighterSettings({
-    required this.color,
-    required this.thickness,
-    required this.straightLineMode,
-    this.glowIntensity = 0.6,
-  });
-
-  final Color color;
-  final double thickness;
-  final bool straightLineMode;
-  final double glowIntensity;
-
-  HighlighterSettings copyWith({
-    Color? color,
-    double? thickness,
-    bool? straightLineMode,
-    double? glowIntensity,
-  }) {
-    return HighlighterSettings(
-      color: color ?? this.color,
-      thickness: thickness ?? this.thickness,
-      straightLineMode: straightLineMode ?? this.straightLineMode,
-      glowIntensity: glowIntensity ?? this.glowIntensity,
-    );
-  }
-}
-
-/// Notifier for highlighter settings.
-class HighlighterSettingsNotifier extends StateNotifier<HighlighterSettings> {
-  HighlighterSettingsNotifier(super.state);
-
-  void setColor(Color color) {
-    state = state.copyWith(color: color);
-  }
-
-  void setThickness(double thickness) {
-    state = state.copyWith(thickness: thickness);
-  }
-
-  void setStraightLineMode(bool straightLineMode) {
-    state = state.copyWith(straightLineMode: straightLineMode);
-  }
-
-  void setGlowIntensity(double glowIntensity) {
-    state = state.copyWith(glowIntensity: glowIntensity);
-  }
-}
-
-/// Eraser settings provider.
-final eraserSettingsProvider =
-    StateNotifierProvider<EraserSettingsNotifier, EraserSettings>(
-  (ref) => EraserSettingsNotifier(const EraserSettings(
-    mode: EraserMode.pixel,
-    size: 20.0,
-    pressureSensitive: true,
-    eraseOnlyHighlighter: false,
-    eraseBandOnly: false,
-    autoLift: false,
-  )),
-);
-
-/// Eraser mode enum.
-enum EraserMode { pixel, stroke, lasso }
-
-/// Eraser settings data model.
-class EraserSettings {
-  const EraserSettings({
-    required this.mode,
-    required this.size,
-    required this.pressureSensitive,
-    required this.eraseOnlyHighlighter,
-    required this.eraseBandOnly,
-    required this.autoLift,
-  });
-
-  final EraserMode mode;
-  final double size;
-  final bool pressureSensitive;
-  final bool eraseOnlyHighlighter;
-  final bool eraseBandOnly;
-  final bool autoLift;
-
-  EraserSettings copyWith({
-    EraserMode? mode,
-    double? size,
-    bool? pressureSensitive,
-    bool? eraseOnlyHighlighter,
-    bool? eraseBandOnly,
-    bool? autoLift,
-  }) {
-    return EraserSettings(
-      mode: mode ?? this.mode,
-      size: size ?? this.size,
-      pressureSensitive: pressureSensitive ?? this.pressureSensitive,
-      eraseOnlyHighlighter: eraseOnlyHighlighter ?? this.eraseOnlyHighlighter,
-      eraseBandOnly: eraseBandOnly ?? this.eraseBandOnly,
-      autoLift: autoLift ?? this.autoLift,
-    );
-  }
-}
-
-/// Notifier for eraser settings.
-class EraserSettingsNotifier extends StateNotifier<EraserSettings> {
-  EraserSettingsNotifier(super.state);
-
-  void setMode(EraserMode mode) {
-    state = state.copyWith(mode: mode);
-  }
-
-  void setSize(double size) {
-    state = state.copyWith(size: size);
-  }
-
-  void setPressureSensitive(bool pressureSensitive) {
-    state = state.copyWith(pressureSensitive: pressureSensitive);
-  }
-
-  void setEraseOnlyHighlighter(bool eraseOnlyHighlighter) {
-    state = state.copyWith(eraseOnlyHighlighter: eraseOnlyHighlighter);
-  }
-
-  void setEraseBandOnly(bool eraseBandOnly) {
-    state = state.copyWith(eraseBandOnly: eraseBandOnly);
-  }
-
-  void setAutoLift(bool autoLift) {
-    state = state.copyWith(autoLift: autoLift);
-  }
-}
 
 /// Shapes settings provider.
 final shapesSettingsProvider =
@@ -304,37 +38,37 @@ final shapesSettingsProvider =
   )),
 );
 
-/// Shape type enum - En çok kullanılan 10 şekil.
-/// Core ShapeType ile birebir eşleşir.
+/// Shape type enum - En cok kullanilan 10 sekil.
+/// Core ShapeType ile birebir eslesir.
 enum ShapeType {
-  /// Düz çizgi
+  /// Duz cizgi
   line,
 
-  /// Ok işareti
+  /// Ok isareti
   arrow,
 
-  /// Dikdörtgen
+  /// Dikdortgen
   rectangle,
 
   /// Elips/Daire
   ellipse,
 
-  /// Üçgen
+  /// Ucgen
   triangle,
 
-  /// Eşkenar dörtgen
+  /// Eskenar dortgen
   diamond,
 
-  /// Yıldız
+  /// Yildiz
   star,
 
-  /// Beşgen
+  /// Besgen
   pentagon,
 
-  /// Altıgen
+  /// Altigen
   hexagon,
 
-  /// Artı işareti
+  /// Arti isareti
   plus,
 }
 
@@ -405,16 +139,16 @@ enum LassoMode {
   /// Free-form lasso selection (Serbest kement).
   freeform,
 
-  /// Rectangle selection (Dikdörtgen kement).
+  /// Rectangle selection (Dikdortgen kement).
   rectangle,
 }
 
 /// Types of elements that can be selected with lasso tool.
 enum SelectableType {
-  /// Shapes (Şekil).
+  /// Shapes (Sekil).
   shape,
 
-  /// Images and stickers (Resim/Çıkartma).
+  /// Images and stickers (Resim/Cikartma).
   imageSticker,
 
   /// Tape/washi elements (Bant).
@@ -423,13 +157,13 @@ enum SelectableType {
   /// Text boxes (Metin kutusu).
   textBox,
 
-  /// Handwriting strokes (El yazısı).
+  /// Handwriting strokes (El yazisi).
   handwriting,
 
-  /// Highlighter strokes (Vurgulayıcı).
+  /// Highlighter strokes (Vurgulayici).
   highlighter,
 
-  /// Links (Bağlantı).
+  /// Links (Baglanti).
   link,
 
   /// Labels (Etiket).
@@ -490,7 +224,7 @@ class LassoSettings {
 
 /// Laser pointer mode.
 enum LaserMode {
-  /// Line mode - draws a temporary line (Çizgi).
+  /// Line mode - draws a temporary line (Cizgi).
   line,
 
   /// Dot mode - shows a temporary dot (Nokta).
@@ -502,7 +236,7 @@ enum LaserLineStyle {
   /// Solid neon glow line with bright core.
   solid,
 
-  /// Hollow neon line — glow only, no bright core.
+  /// Hollow neon line - glow only, no bright core.
   hollow,
 
   /// Rainbow gradient along the path.
@@ -656,7 +390,6 @@ final penBoxPresetsProvider =
 );
 
 List<PenPreset> _defaultPenPresets() {
-  // Başlangıçta boş - kullanıcı kendi kalemlerini ekleyecek
   return [];
 }
 
@@ -714,19 +447,16 @@ class PenBoxPresetsNotifier extends StateNotifier<List<PenPreset>> {
   }
 
   void addPreset(PenPreset preset) {
-    // Find first empty slot
     final emptyIndex = state.indexWhere((p) => p.isEmpty);
     if (emptyIndex != -1) {
       updatePreset(emptyIndex, preset);
     } else {
-      // No empty slot, add to the end of the list
       state = [...state, preset];
     }
   }
 
   void removePreset(int index) {
     if (index < 0 || index >= state.length) return;
-    // Listeden tamamen sil
     state = [
       ...state.sublist(0, index),
       ...state.sublist(index + 1),

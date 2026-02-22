@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/models/models.dart';
+import 'package:drawing_ui/src/panels/tool_panel.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
 import 'package:drawing_ui/src/widgets/color_picker_strip.dart';
@@ -27,14 +28,24 @@ class HighlighterSettingsPanel extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Title ──
-          Text(
-            isNeon ? 'Neon Fosforlu' : 'Fosforlu Kalem',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: cs.onSurface,
-            ),
+          // ── Title + Close ──
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  isNeon ? 'Neon Fosforlu' : 'Fosforlu Kalem',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurface,
+                  ),
+                ),
+              ),
+              PanelCloseButton(
+                onTap: () =>
+                    ref.read(activePanelProvider.notifier).state = null,
+              ),
+            ],
           ),
           const SizedBox(height: 16),
 
@@ -56,7 +67,7 @@ class HighlighterSettingsPanel extends ConsumerWidget {
 
           // ── KALINLIK (thickness) ──
           GoodNotesSlider(
-            label: 'KALINLIK',
+            label: 'Kalınlık',
             value: settings.thickness
                 .clamp(isNeon ? 8.0 : 10.0, isNeon ? 30.0 : 40.0),
             min: isNeon ? 8.0 : 10.0,
@@ -72,7 +83,7 @@ class HighlighterSettingsPanel extends ConsumerWidget {
           // ── PARLAKLIK (glow — neon only) ──
           if (isNeon) ...[
             GoodNotesSlider(
-              label: 'PARLAKLIK',
+              label: 'Parlaklık',
               value: settings.glowIntensity,
               min: 0.1,
               max: 1.0,

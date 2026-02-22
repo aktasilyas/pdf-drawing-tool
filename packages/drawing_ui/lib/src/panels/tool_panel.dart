@@ -407,3 +407,40 @@ class PanelActionButton extends StatelessWidget {
     );
   }
 }
+
+/// Reusable panel close button — circular X icon.
+///
+/// Used in tool settings panels (pen, highlighter, eraser, etc.)
+/// to provide an explicit close action.
+class PanelCloseButton extends StatelessWidget {
+  const PanelCloseButton({super.key, required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            color: isDark
+                ? cs.surfaceContainerHigh
+                : cs.surfaceContainerHighest,
+            shape: BoxShape.circle,
+          ),
+          child: PhosphorIcon(
+            StarNoteIcons.close,
+            size: StarNoteIcons.panelSize,
+            color: cs.onSurfaceVariant,
+          ),
+        ),
+      ),
+    );
+  }
+}

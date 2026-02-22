@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/panels/selection_preview_painter.dart';
+import 'package:drawing_ui/src/panels/tool_panel.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 
@@ -24,14 +25,24 @@ class LassoSelectionPanel extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // -- Title (dynamic based on mode) --
-          Text(
-            _titleForMode(settings.mode),
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: cs.onSurface,
-            ),
+          // -- Title + Close --
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  _titleForMode(settings.mode),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurface,
+                  ),
+                ),
+              ),
+              PanelCloseButton(
+                onTap: () =>
+                    ref.read(activePanelProvider.notifier).state = null,
+              ),
+            ],
           ),
           const SizedBox(height: 16),
 
@@ -55,7 +66,7 @@ class LassoSelectionPanel extends ConsumerWidget {
 
           // -- Section label --
           Text(
-            'SEÇİLEBİLİR',
+            'Seçilebilir',
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,

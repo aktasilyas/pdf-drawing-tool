@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/models/models.dart';
-import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/panels/pen_settings_widgets.dart';
+import 'package:drawing_ui/src/panels/tool_panel.dart';
+import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/widgets/color_picker_strip.dart';
 import 'package:drawing_ui/src/widgets/goodnotes_slider.dart';
 
@@ -43,14 +44,24 @@ class PenSettingsPanel extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Başlık ──
-          Text(
-            active.penType?.config.displayNameTr ?? 'Kalem',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: cs.onSurface,
-            ),
+          // ── Başlık + Kapat ──
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  active.penType?.config.displayNameTr ?? 'Kalem',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurface,
+                  ),
+                ),
+              ),
+              PanelCloseButton(
+                onTap: () =>
+                    ref.read(activePanelProvider.notifier).state = null,
+              ),
+            ],
           ),
           const SizedBox(height: 16),
 
@@ -71,7 +82,7 @@ class PenSettingsPanel extends ConsumerWidget {
 
           // ── UÇ KESKİNLİĞİ (thickness) ──
           GoodNotesSlider(
-            label: 'UÇ KESKİNLİĞİ',
+            label: 'Uç Keskinliği',
             value: s.thickness.clamp(_minTh(active), _maxTh(active)),
             min: _minTh(active),
             max: _maxTh(active),
@@ -84,7 +95,7 @@ class PenSettingsPanel extends ConsumerWidget {
 
           // ── BASINÇ DUYARLILIĞI ──
           GoodNotesSlider(
-            label: 'BASINÇ DUYARLILIĞI',
+            label: 'Basınç Duyarlılığı',
             value: s.pressureSensitivity,
             min: 0,
             max: 1,
@@ -97,7 +108,7 @@ class PenSettingsPanel extends ConsumerWidget {
 
           // ── ÇİZGİ STABİLİZASYONU ──
           GoodNotesSlider(
-            label: 'ÇİZGİ STABİLİZASYONU',
+            label: 'Çizgi Stabilizasyonu',
             value: s.stabilization,
             min: 0,
             max: 1,
