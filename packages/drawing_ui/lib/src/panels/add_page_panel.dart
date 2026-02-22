@@ -179,15 +179,25 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
       children: [
         AddPageHeader(onClose: widget.onClose),
         _divider(cs),
-        AddPagePositionSelector(
-          selected: _selectedPosition,
-          onChanged: (pos) => setState(() => _selectedPosition = pos),
+        Flexible(
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AddPagePositionSelector(
+                  selected: _selectedPosition,
+                  onChanged: (pos) => setState(() => _selectedPosition = pos),
+                ),
+                _divider(cs),
+                _buildTemplateSection(cs),
+                _divider(cs),
+                _buildActionItems(cs),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
         ),
-        _divider(cs),
-        _buildTemplateSection(cs),
-        _divider(cs),
-        _buildActionItems(cs),
-        const SizedBox(height: 8),
       ],
     );
 

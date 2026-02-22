@@ -4,11 +4,13 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import 'package:drawing_ui/src/panels/add_page_panel.dart';
 import 'package:drawing_ui/src/panels/audio_recording_dropdown.dart';
+import 'package:drawing_ui/src/panels/export_panel.dart';
 import 'package:drawing_ui/src/panels/page_options_panel.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/screens/layers_list.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/toolbar/starnote_nav_button.dart';
+import 'package:drawing_ui/src/widgets/document_title_button.dart';
 import 'package:drawing_ui/src/widgets/popover_panel.dart';
 
 /// Left navigation section: Home, Sidebar toggle, document title, reader badge.
@@ -19,7 +21,8 @@ class ToolbarNavLeft extends StatelessWidget {
     super.key,
     this.documentTitle,
     this.onHomePressed,
-    this.onTitlePressed,
+    this.onRenameDocument,
+    this.onDeleteDocument,
     this.onSidebarToggle,
     this.isSidebarOpen = false,
     this.isReaderMode = false,
@@ -28,7 +31,8 @@ class ToolbarNavLeft extends StatelessWidget {
 
   final String? documentTitle;
   final VoidCallback? onHomePressed;
-  final VoidCallback? onTitlePressed;
+  final VoidCallback? onRenameDocument;
+  final VoidCallback? onDeleteDocument;
   final VoidCallback? onSidebarToggle;
   final bool isSidebarOpen;
   final bool isReaderMode;
@@ -36,8 +40,6 @@ class ToolbarNavLeft extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -56,14 +58,14 @@ class ToolbarNavLeft extends StatelessWidget {
             isActive: isSidebarOpen,
           ),
         const SizedBox(width: 4),
-        _DocumentTitle(
+        DocumentTitleButton(
           title: documentTitle,
-          onPressed: onTitlePressed,
-          colorScheme: colorScheme,
+          onRename: onRenameDocument ?? () {},
+          onDelete: onDeleteDocument ?? () {},
         ),
         if (isReaderMode) ...[
           const SizedBox(width: 8),
-          _ReaderBadge(colorScheme: colorScheme),
+          _ReaderBadge(colorScheme: Theme.of(context).colorScheme),
         ],
       ],
     );
@@ -71,7 +73,7 @@ class ToolbarNavLeft extends StatelessWidget {
 }
 
 /// Which nav popover is currently open.
-enum _NavPanel { addPage, audioRecording, layers, more }
+enum _NavPanel { addPage, audioRecording, layers, export, more }
 
 /// Right navigation section: Reader toggle, Add Page, Export, More.
 ///
@@ -82,13 +84,11 @@ class ToolbarNavRight extends ConsumerStatefulWidget {
     super.key,
     this.isReaderMode = false,
     this.onReaderToggle,
-    this.onExportPressed,
     this.onShowRecordings,
   });
 
   final bool isReaderMode;
   final VoidCallback? onReaderToggle;
-  final VoidCallback? onExportPressed;
   final VoidCallback? onShowRecordings;
 
   @override
@@ -100,6 +100,7 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
   final GlobalKey _addPageKey = GlobalKey();
   final GlobalKey _micKey = GlobalKey();
   final GlobalKey _layersKey = GlobalKey();
+  final GlobalKey _exportKey = GlobalKey();
   final GlobalKey _moreKey = GlobalKey();
   _NavPanel? _activePanel;
 
@@ -141,6 +142,9 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
         final screenH = MediaQuery.of(context).size.height;
         final layersH = (screenH * 0.6).clamp(280.0, 420.0);
         child = SizedBox(width: 260, height: layersH, child: const LayersList());
+      case _NavPanel.export:
+        anchorKey = _exportKey;
+        child = ExportPanel(onClose: _closePanel, embedded: true);
       case _NavPanel.more:
         anchorKey = _moreKey;
         child = PageOptionsPanel(onClose: _closePanel, embedded: true);
@@ -212,9 +216,11 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
             isActive: _activePanel == _NavPanel.audioRecording,
           ),
         StarNoteNavButton(
+          key: _exportKey,
           icon: StarNoteIcons.exportIcon,
-          tooltip: 'Disa Aktar',
-          onPressed: widget.onExportPressed ?? () {},
+          tooltip: 'Dışa Aktar',
+          onPressed: () => _togglePanel(_NavPanel.export),
+          isActive: _activePanel == _NavPanel.export,
         ),
         StarNoteNavButton(
           key: _moreKey,
@@ -224,46 +230,6 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
           isActive: _activePanel == _NavPanel.more,
         ),
       ],
-    );
-  }
-}
-
-/// Document title pill with caret-down icon.
-class _DocumentTitle extends StatelessWidget {
-  const _DocumentTitle({
-    required this.title, required this.onPressed, required this.colorScheme,
-  });
-  final String? title;
-  final VoidCallback? onPressed;
-  final ColorScheme colorScheme;
-
-  @override
-  Widget build(BuildContext context) {
-    final label = title ?? 'İsimsiz Not';
-    return Tooltip(
-      message: 'Doküman Seçenekleri',
-      child: Semantics(
-        label: label, button: true,
-        child: GestureDetector(
-          onTap: onPressed,
-          child: Container(
-            constraints: const BoxConstraints(maxWidth: 160),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: colorScheme.onSurface.withValues(alpha: 0.06),
-              borderRadius: BorderRadius.circular(16)),
-            child: Row(mainAxisSize: MainAxisSize.min, children: [
-              Flexible(child: Text(label, maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500,
-                      color: colorScheme.onSurface))),
-              const SizedBox(width: 3),
-              PhosphorIcon(StarNoteIcons.caretDown, size: 12,
-                  color: colorScheme.onSurfaceVariant),
-            ]),
-          ),
-        ),
-      ),
     );
   }
 }

@@ -1,70 +1,26 @@
+import 'dart:io';
+import 'dart:math';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
+import 'package:drawing_core/drawing_core.dart';
+import 'package:flutter/material.dart' hide Page;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:drawing_core/drawing_core.dart';
+import 'package:pdfx/pdfx.dart' as pdfx;
 
-/// PDF page format.
-class PDFPageFormat {
-  final double width;
-  final double height;
-
-  const PDFPageFormat({
-    required this.width,
-    required this.height,
-  });
-
-  /// A4 format (595 x 842 points).
-  static const a4 = PDFPageFormat(width: 595, height: 842);
-
-  /// A5 format (420 x 595 points).
-  static const a5 = PDFPageFormat(width: 420, height: 595);
-
-  /// Letter format (612 x 792 points).
-  static const letter = PDFPageFormat(width: 612, height: 792);
-
-  /// Legal format (612 x 1008 points).
-  static const legal = PDFPageFormat(width: 612, height: 1008);
-
-  /// Creates a custom page format.
-  factory PDFPageFormat.custom({
-    required double width,
-    required double height,
-  }) {
-    return PDFPageFormat(width: width, height: height);
-  }
-
-  /// Converts to pdf package PdfPageFormat.
-  PdfPageFormat toPdfPageFormat() {
-    return PdfPageFormat(width, height);
-  }
-}
+import 'package:drawing_ui/src/rendering/flutter_stroke_renderer.dart';
 
 /// PDF export mode.
-enum PDFExportMode {
-  /// Export as vector graphics (strokes, shapes).
-  vector,
-
-  /// Export as raster images.
-  raster,
-
-  /// Hybrid mode (vector where possible, raster fallback).
-  hybrid,
-}
+enum PDFExportMode { vector, raster, hybrid }
 
 /// PDF export quality level.
 enum PDFExportQuality {
-  /// Low quality (72 DPI).
   low,
-
-  /// Medium quality (150 DPI).
   medium,
-
-  /// High quality (300 DPI).
   high,
-
-  /// Print quality (600 DPI).
   print;
 
-  /// Gets DPI for this quality level.
   int get dpi {
     switch (this) {
       case PDFExportQuality.low:
@@ -79,28 +35,35 @@ enum PDFExportQuality {
   }
 }
 
+/// PDF page format.
+class PDFPageFormat {
+  final double width;
+  final double height;
+
+  const PDFPageFormat({required this.width, required this.height});
+
+  static const a4 = PDFPageFormat(width: 595, height: 842);
+  static const a5 = PDFPageFormat(width: 420, height: 595);
+  static const letter = PDFPageFormat(width: 612, height: 792);
+  static const legal = PDFPageFormat(width: 612, height: 1008);
+
+  PdfPageFormat toPdfPageFormat() => PdfPageFormat(width, height);
+}
+
 /// Options for PDF export.
 class PDFExportOptions {
-  /// Whether to include page backgrounds.
   final bool includeBackground;
-
-  /// Export mode (vector/raster/hybrid).
   final PDFExportMode exportMode;
-
-  /// Export quality level.
   final PDFExportQuality quality;
-
-  /// Page format for the PDF.
   final PDFPageFormat? pageFormat;
 
   const PDFExportOptions({
     this.includeBackground = true,
-    this.exportMode = PDFExportMode.vector,
-    this.quality = PDFExportQuality.high,
+    this.exportMode = PDFExportMode.raster,
+    this.quality = PDFExportQuality.medium,
     this.pageFormat,
   });
 
-  /// Creates a copy with new values.
   PDFExportOptions copyWith({
     bool? includeBackground,
     PDFExportMode? exportMode,
@@ -116,26 +79,10 @@ class PDFExportOptions {
   }
 }
 
-/// PDF output format.
-enum PDFOutputFormat {
-  pdf;
-
-  /// File extension for this format.
-  String get extension => 'pdf';
-
-  /// MIME type for this format.
-  String get mimeType => 'application/pdf';
-}
-
 /// Result of PDF export operation.
 class PDFExportResult {
-  /// Whether export was successful.
   final bool isSuccess;
-
-  /// PDF file bytes.
   final List<int> pdfBytes;
-
-  /// Error message if export failed.
   final String? errorMessage;
 
   const PDFExportResult({
@@ -144,35 +91,20 @@ class PDFExportResult {
     this.errorMessage,
   });
 
-  /// Creates a successful result.
-  factory PDFExportResult.success(List<int> bytes) {
-    return PDFExportResult(
-      isSuccess: true,
-      pdfBytes: bytes,
-    );
-  }
+  factory PDFExportResult.success(List<int> bytes) =>
+      PDFExportResult(isSuccess: true, pdfBytes: bytes);
 
-  /// Creates an error result.
-  factory PDFExportResult.error(String message) {
-    return PDFExportResult(
-      isSuccess: false,
-      pdfBytes: const [],
-      errorMessage: message,
-    );
-  }
+  factory PDFExportResult.error(String message) =>
+      PDFExportResult(isSuccess: false, pdfBytes: const [], errorMessage: message);
 
-  /// File size in bytes.
   int get fileSizeBytes => pdfBytes.length;
 
-  /// Formatted file size.
   String get fileSizeFormatted {
-    if (fileSizeBytes < 1024) {
-      return '$fileSizeBytes B';
-    } else if (fileSizeBytes < 1024 * 1024) {
+    if (fileSizeBytes < 1024) return '$fileSizeBytes B';
+    if (fileSizeBytes < 1024 * 1024) {
       return '${(fileSizeBytes / 1024).toStringAsFixed(1)} KB';
-    } else {
-      return '${(fileSizeBytes / (1024 * 1024)).toStringAsFixed(1)} MB';
     }
+    return '${(fileSizeBytes / (1024 * 1024)).toStringAsFixed(1)} MB';
   }
 }
 
@@ -180,329 +112,342 @@ class PDFExportResult {
 class PDFDocumentMetadata {
   final String? title;
   final String? author;
-  final String? subject;
-  final List<String>? keywords;
   final String? creator;
 
-  const PDFDocumentMetadata({
-    this.title,
-    this.author,
-    this.subject,
-    this.keywords,
-    this.creator = 'StarNote',
-  });
+  const PDFDocumentMetadata({this.title, this.author, this.creator = 'StarNote'});
 }
 
-/// PDF size representation.
-class PDFSize {
-  final double width;
-  final double height;
-
-  const PDFSize(this.width, this.height);
-}
-
-/// Service for exporting Drawing pages to PDF.
+/// Raster-based PDF exporter.
+///
+/// Renders each page to a PNG image using Flutter's Canvas (same rendering
+/// pipeline as the screen) and embeds the images in a PDF document.
+/// This guarantees WYSIWYG output.
 class PDFExporter {
-  /// Default page format.
-  final PDFPageFormat defaultPageFormat;
+  final _strokeRenderer = FlutterStrokeRenderer();
 
-  PDFExporter({
-    this.defaultPageFormat = PDFPageFormat.a4,
-  });
+  /// Calculates render scale from DPI. PDF points are at 72 DPI base.
+  static double _scaleFromDpi(int dpi) => dpi / 72.0;
 
-  /// Checks if a page is exportable.
-  bool isPageExportable(Page page) {
-    // Check if page has valid dimensions
-    if (page.size.width <= 0 || page.size.height <= 0) {
-      return false;
-    }
-
-    // Empty pages are still exportable (for background)
-    return true;
-  }
-
-  /// Calculates PDF size from page size.
-  PDFSize calculatePDFSize(PageSize pageSize) {
-    return PDFSize(pageSize.width, pageSize.height);
-  }
-
-  /// Converts drawing coordinates to PDF coordinates.
-  ///
-  /// Drawing has origin at top-left, PDF at bottom-left.
-  (double, double) convertCoordinates({
-    required double drawingX,
-    required double drawingY,
-    required double pageHeight,
-  }) {
-    return (drawingX, pageHeight - drawingY);
-  }
-
-  /// Calculates export progress.
-  double calculateProgress({
-    required int currentPage,
-    required int totalPages,
-  }) {
-    if (totalPages == 0) return 0.0;
-    return currentPage / totalPages;
-  }
-
-  /// Exports multiple pages to a PDF document.
+  /// Exports all pages to a single PDF document.
   Future<PDFExportResult> exportPages({
     required List<Page> pages,
-    required PDFExportOptions options,
     PDFDocumentMetadata? metadata,
-    void Function(double progress)? onProgress,
+    PDFExportOptions options = const PDFExportOptions(),
+    void Function(int current, int total)? onProgress,
   }) async {
-    if (pages.isEmpty) {
-      throw ArgumentError('Pages list cannot be empty');
-    }
+    if (pages.isEmpty) return PDFExportResult.error('Sayfa bulunamadı');
+
+    final renderScale = _scaleFromDpi(options.quality.dpi);
 
     try {
       final pdf = pw.Document();
 
       for (int i = 0; i < pages.length; i++) {
         final page = pages[i];
+        if (page.size.width <= 0 || page.size.height <= 0) continue;
 
-        if (!isPageExportable(page)) {
-          continue;
-        }
+        final imageBytes = await _renderPageToImage(page, renderScale);
+        if (imageBytes == null) continue;
 
-        // Create PDF page
-        final pdfPage = await _createPDFPage(page, options);
-        pdf.addPage(pdfPage);
+        final pageFormat = PdfPageFormat(page.size.width, page.size.height);
+        final image = pw.MemoryImage(imageBytes);
 
-        // Report progress
-        onProgress?.call(calculateProgress(
-          currentPage: i + 1,
-          totalPages: pages.length,
+        pdf.addPage(pw.Page(
+          pageFormat: pageFormat,
+          margin: pw.EdgeInsets.zero,
+          build: (_) => pw.FullPage(
+            ignoreMargins: true,
+            child: pw.Image(image),
+          ),
         ));
+
+        onProgress?.call(i + 1, pages.length);
       }
 
-      // Set metadata
-      if (metadata != null) {
-        // Note: pw.Document metadata is set via constructor or document.pdfDocument.info
-        // For simplicity, we skip metadata in this basic implementation
-        // Full implementation would set: title, author, subject, keywords, creator
-      }
-
-      // Generate PDF bytes
       final bytes = await pdf.save();
-
       return PDFExportResult.success(bytes);
     } catch (e) {
       return PDFExportResult.error(e.toString());
     }
   }
 
-  /// Exports a single page to PDF.
-  Future<PDFExportResult> exportPage({
-    required Page page,
-    required PDFExportOptions options,
-    PDFDocumentMetadata? metadata,
-  }) async {
-    return exportPages(
-      pages: [page],
-      options: options,
-      metadata: metadata,
-    );
-  }
+  /// Renders a single page to PNG bytes using PictureRecorder.
+  Future<Uint8List?> _renderPageToImage(Page page, double renderScale) async {
+    final w = page.size.width;
+    final h = page.size.height;
+    final renderW = (w * renderScale).toInt();
+    final renderH = (h * renderScale).toInt();
 
-  /// Creates a PDF page from a Drawing page.
-  Future<pw.Page> _createPDFPage(
-    Page page,
-    PDFExportOptions options,
-  ) async {
-    final pageSize = calculatePDFSize(page.size);
-    final pageFormat = options.pageFormat?.toPdfPageFormat() ??
-        PdfPageFormat(pageSize.width, pageSize.height);
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
 
-    return pw.Page(
-      pageFormat: pageFormat,
-      build: (context) {
-        return pw.CustomPaint(
-          painter: (canvas, size) {
-            // Draw background
-            if (options.includeBackground) {
-              _drawBackground(canvas, size, page.background);
-            }
+    canvas.scale(renderScale);
 
-            // Draw content based on export mode
-            switch (options.exportMode) {
-              case PDFExportMode.vector:
-                _drawVectorContent(canvas, page, pageSize.height);
-                break;
-              case PDFExportMode.raster:
-                // Raster mode would render to image first
-                // Not implemented in this basic version
-                _drawVectorContent(canvas, page, pageSize.height);
-                break;
-              case PDFExportMode.hybrid:
-                _drawVectorContent(canvas, page, pageSize.height);
-                break;
-            }
-          },
-        );
-      },
-    );
-  }
+    // 1. Background color + pattern
+    _renderBackground(canvas, page);
 
-  /// Draws page background.
-  void _drawBackground(
-    PdfGraphics canvas,
-    PdfPoint size,
-    PageBackground background,
-  ) {
-    if (background.type == BackgroundType.blank) {
-      final color = _convertColor(background.color);
-      canvas
-        ..setFillColor(color)
-        ..drawRect(0, 0, size.x, size.y)
-        ..fillPath();
+    // 2. PDF background image (if any)
+    if (page.background.type == BackgroundType.pdf) {
+      await _renderPdfBackground(canvas, page, renderScale);
     }
-    // Other background types (grid, lines) can be added here
-  }
 
-  /// Draws vector content (strokes, shapes, text).
-  void _drawVectorContent(
-    PdfGraphics canvas,
-    Page page,
-    double pageHeight,
-  ) {
-    // Draw all layers
+    // 3. All visible layers
     for (final layer in page.layers) {
       if (!layer.isVisible) continue;
 
-      // Draw strokes
-      for (final stroke in layer.strokes) {
-        _drawStroke(canvas, stroke, pageHeight);
+      final needsOpacity = layer.opacity < 1.0;
+      if (needsOpacity) {
+        canvas.saveLayer(
+          Rect.fromLTWH(0, 0, w, h),
+          Paint()..color = Color.fromARGB(
+            (layer.opacity * 255).round(), 255, 255, 255,
+          ),
+        );
       }
 
-      // Draw shapes
-      for (final shape in layer.shapes) {
-        _drawShape(canvas, shape, pageHeight);
-      }
+      _strokeRenderer.renderStrokes(canvas, layer.strokes);
+      _renderShapes(canvas, layer.shapes);
+      _renderTexts(canvas, layer.texts);
 
-      // Draw texts
-      for (final text in layer.texts) {
-        _drawText(canvas, text, pageHeight);
+      if (needsOpacity) canvas.restore();
+    }
+
+    final picture = recorder.endRecording();
+    final image = await picture.toImage(renderW, renderH);
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    return byteData?.buffer.asUint8List();
+  }
+
+  void _renderBackground(Canvas canvas, Page page) {
+    final bg = page.background;
+    final w = page.size.width;
+    final h = page.size.height;
+
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, w, h),
+      Paint()..color = Color(bg.color),
+    );
+
+    final lineColor = bg.lineColor ?? 0xFFE0E0E0;
+    final linePaint = Paint()
+      ..color = Color(lineColor)
+      ..strokeWidth = bg.templateLineWidth ?? 0.5
+      ..isAntiAlias = true;
+
+    switch (bg.type) {
+      case BackgroundType.blank:
+      case BackgroundType.cover:
+      case BackgroundType.pdf:
+        break;
+      case BackgroundType.grid:
+        _drawGrid(canvas, w, h, linePaint, bg.gridSpacing ?? 25.0);
+        break;
+      case BackgroundType.lined:
+        _drawLines(canvas, w, h, linePaint, bg.lineSpacing ?? 25.0);
+        break;
+      case BackgroundType.dotted:
+        _drawDots(canvas, w, h, bg.gridSpacing ?? 20.0, Color(lineColor));
+        break;
+      case BackgroundType.template:
+        if (bg.templatePattern != null) {
+          final sp = (bg.templateSpacingMm ?? 8.0) * 3.78;
+          _drawGrid(canvas, w, h, linePaint, sp);
+        }
+        break;
+    }
+  }
+
+  void _drawGrid(Canvas c, double w, double h, Paint p, double s) {
+    for (double x = s; x < w; x += s) {
+      c.drawLine(Offset(x, 0), Offset(x, h), p);
+    }
+    for (double y = s; y < h; y += s) {
+      c.drawLine(Offset(0, y), Offset(w, y), p);
+    }
+  }
+
+  void _drawLines(Canvas c, double w, double h, Paint p, double s) {
+    for (double y = s * 2; y < h; y += s) {
+      c.drawLine(Offset(0, y), Offset(w, y), p);
+    }
+  }
+
+  void _drawDots(Canvas c, double w, double h, double s, Color color) {
+    final p = Paint()..color = color..style = PaintingStyle.fill;
+    for (double x = s; x < w; x += s) {
+      for (double y = s; y < h; y += s) {
+        c.drawCircle(Offset(x, y), 1.0, p);
       }
     }
   }
 
-  /// Draws a stroke.
-  void _drawStroke(PdfGraphics canvas, Stroke stroke, double pageHeight) {
-    if (stroke.points.length < 2) return;
+  Future<void> _renderPdfBackground(
+    Canvas canvas, Page page, double renderScale,
+  ) async {
+    if (page.background.pdfPageIndex == null) return;
+    try {
+      Uint8List? bytes;
 
-    final color = _convertColor(stroke.style.color);
-    canvas
-      ..setStrokeColor(color)
-      ..setLineWidth(stroke.style.thickness);
+      // Prefer re-rendering from file at export resolution for best quality
+      if (page.background.pdfFilePath != null) {
+        bytes = await _renderPdfPage(
+          page.background.pdfFilePath!,
+          page.background.pdfPageIndex!,
+          renderScale,
+        );
+      }
 
-    final firstPoint = stroke.points.first;
-    final (x, y) = convertCoordinates(
-      drawingX: firstPoint.x,
-      drawingY: firstPoint.y,
-      pageHeight: pageHeight,
-    );
+      // Fall back to cached pdfData (may be lower resolution)
+      bytes ??= page.background.pdfData;
+      if (bytes == null) return;
 
-    canvas.moveTo(x, y);
+      final codec = await ui.instantiateImageCodec(bytes);
+      final frame = await codec.getNextFrame();
+      final img = frame.image;
 
-    for (int i = 1; i < stroke.points.length; i++) {
-      final point = stroke.points[i];
-      final (px, py) = convertCoordinates(
-        drawingX: point.x,
-        drawingY: point.y,
-        pageHeight: pageHeight,
+      canvas.drawImageRect(
+        img,
+        Rect.fromLTWH(0, 0, img.width.toDouble(), img.height.toDouble()),
+        Rect.fromLTWH(0, 0, page.size.width, page.size.height),
+        Paint()..filterQuality = FilterQuality.high,
       );
-      canvas.lineTo(px, py);
-    }
-
-    canvas.strokePath();
+    } catch (_) {}
   }
 
-  /// Draws a shape.
-  void _drawShape(PdfGraphics canvas, Shape shape, double pageHeight) {
-    final color = _convertColor(shape.style.color);
-    canvas
-      ..setStrokeColor(color)
-      ..setLineWidth(shape.style.thickness);
+  Future<Uint8List?> _renderPdfPage(
+    String path, int index, double renderScale,
+  ) async {
+    if (!await File(path).exists()) return null;
+    pdfx.PdfDocument? doc;
+    pdfx.PdfPage? pg;
+    try {
+      doc = await pdfx.PdfDocument.openFile(path);
+      pg = await doc.getPage(index);
+      final img = await pg.render(
+        width: pg.width * renderScale,
+        height: pg.height * renderScale,
+        format: pdfx.PdfPageImageFormat.png,
+      );
+      return img?.bytes;
+    } finally {
+      try { await pg?.close(); } catch (_) {}
+      try { await doc?.close(); } catch (_) {}
+    }
+  }
 
-    final (x, y) = convertCoordinates(
-      drawingX: shape.bounds.left,
-      drawingY: shape.bounds.top,
-      pageHeight: pageHeight,
-    );
+  void _renderShapes(Canvas canvas, List<Shape> shapes) {
+    final paint = Paint()
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..isAntiAlias = true;
 
-    final width = shape.bounds.width;
-    final height = shape.bounds.height;
+    for (final shape in shapes) {
+      if (shape.isFilled) {
+        paint.color = Color(shape.fillColor ?? shape.style.color);
+        paint.style = PaintingStyle.fill;
+        _drawShapeByType(canvas, shape, paint);
+
+        paint.color = Color(shape.style.color).withValues(
+          alpha: shape.style.opacity,
+        );
+        paint.strokeWidth = shape.style.thickness;
+        paint.style = PaintingStyle.stroke;
+        _drawShapeByType(canvas, shape, paint);
+      } else {
+        paint.color = Color(shape.style.color).withValues(
+          alpha: shape.style.opacity,
+        );
+        paint.strokeWidth = shape.style.thickness;
+        paint.style = PaintingStyle.stroke;
+        _drawShapeByType(canvas, shape, paint);
+      }
+    }
+  }
+
+  void _drawShapeByType(Canvas canvas, Shape shape, Paint paint) {
+    final s = Offset(shape.startPoint.x, shape.startPoint.y);
+    final e = Offset(shape.endPoint.x, shape.endPoint.y);
+    final rect = Rect.fromPoints(s, e);
 
     switch (shape.type) {
-      case ShapeType.rectangle:
-        canvas.drawRect(x, y - height, width, height);
-        break;
-      case ShapeType.ellipse:
-        canvas.drawEllipse(
-          x + width / 2,
-          y - height / 2,
-          width / 2,
-          height / 2,
-        );
-        break;
       case ShapeType.line:
-        canvas
-          ..moveTo(x, y)
-          ..lineTo(x + width, y - height);
-        break;
+        canvas.drawLine(s, e, paint);
       case ShapeType.arrow:
-        // Draw arrow line
-        canvas
-          ..moveTo(x, y)
-          ..lineTo(x + width, y - height);
-        // Arrow head would be drawn here in full implementation
-        break;
+        canvas.drawLine(s, e, paint);
+        _drawArrowHead(canvas, s, e, paint);
+      case ShapeType.rectangle:
+        canvas.drawRect(rect, paint);
+      case ShapeType.ellipse:
+        canvas.drawOval(rect, paint);
       case ShapeType.triangle:
+        final l = min(s.dx, e.dx);
+        final r = max(s.dx, e.dx);
+        final t = min(s.dy, e.dy);
+        final b = max(s.dy, e.dy);
+        canvas.drawPath(
+          Path()..moveTo((l + r) / 2, t)..lineTo(l, b)..lineTo(r, b)..close(),
+          paint,
+        );
       case ShapeType.diamond:
+        final cx = (s.dx + e.dx) / 2;
+        final cy = (s.dy + e.dy) / 2;
+        final hw = (e.dx - s.dx).abs() / 2;
+        final hh = (e.dy - s.dy).abs() / 2;
+        canvas.drawPath(
+          Path()..moveTo(cx, cy - hh)..lineTo(cx + hw, cy)
+            ..lineTo(cx, cy + hh)..lineTo(cx - hw, cy)..close(),
+          paint,
+        );
       case ShapeType.star:
       case ShapeType.pentagon:
       case ShapeType.hexagon:
       case ShapeType.plus:
-        // Basic implementations - render as rectangles for now
-        canvas.drawRect(x, y - height, width, height);
-        break;
-    }
-
-    if (shape.isFilled) {
-      canvas.fillPath();
-    } else {
-      canvas.strokePath();
+        canvas.drawRect(rect, paint);
     }
   }
 
-  /// Draws text.
-  void _drawText(PdfGraphics canvas, TextElement text, double pageHeight) {
-    // Basic text rendering
-    // Full text support would require font handling
-    final (x, y) = convertCoordinates(
-      drawingX: text.x,
-      drawingY: text.y,
-      pageHeight: pageHeight,
+  void _drawArrowHead(Canvas canvas, Offset start, Offset end, Paint paint) {
+    final dx = end.dx - start.dx;
+    final dy = end.dy - start.dy;
+    final len = sqrt(dx * dx + dy * dy);
+    if (len < 10) return;
+
+    final ux = dx / len;
+    final uy = dy / len;
+    final sz = paint.strokeWidth * 4;
+    final bx = end.dx - ux * sz;
+    final by = end.dy - uy * sz;
+    final px = -uy * sz * 0.5;
+    final py = ux * sz * 0.5;
+
+    canvas.drawPath(
+      Path()..moveTo(end.dx, end.dy)
+        ..lineTo(bx + px, by + py)..lineTo(bx - px, by - py)..close(),
+      Paint()..color = paint.color..style = PaintingStyle.fill..isAntiAlias = true,
     );
-
-    // Text rendering in PDF requires fonts
-    // This is a placeholder for the structure
-    // Actual implementation would use pw.Text widget instead of CustomPaint
-    // Suppress unused variable warnings
-    // ignore: unnecessary_type_check
-    assert(x is double && y is double);
   }
 
-  /// Converts ARGB color to PDF color.
-  PdfColor _convertColor(int argbColor) {
-    // final a = (argbColor >> 24) & 0xFF; // Alpha not used in basic PDF colors
-    final r = (argbColor >> 16) & 0xFF;
-    final g = (argbColor >> 8) & 0xFF;
-    final b = argbColor & 0xFF;
-
-    return PdfColor(r / 255, g / 255, b / 255);
+  void _renderTexts(Canvas canvas, List<TextElement> texts) {
+    for (final t in texts) {
+      if (t.text.isEmpty) continue;
+      final style = ui.TextStyle(
+        color: Color(t.color),
+        fontSize: t.fontSize,
+        fontFamily: t.fontFamily,
+        fontWeight: t.isBold ? FontWeight.bold : FontWeight.normal,
+        fontStyle: t.isItalic ? FontStyle.italic : FontStyle.normal,
+        decoration: t.isUnderline ? TextDecoration.underline : TextDecoration.none,
+      );
+      final builder = ui.ParagraphBuilder(ui.ParagraphStyle(
+        textAlign: t.alignment == TextAlignment.center
+            ? TextAlign.center
+            : t.alignment == TextAlignment.right
+                ? TextAlign.right
+                : TextAlign.left,
+      ))..pushStyle(style)..addText(t.text);
+      final paragraph = builder.build();
+      paragraph.layout(ui.ParagraphConstraints(width: t.width ?? 1000.0));
+      canvas.drawParagraph(paragraph, Offset(t.x, t.y));
+    }
   }
 }

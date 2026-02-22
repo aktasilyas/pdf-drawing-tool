@@ -1,12 +1,12 @@
 import 'package:drawing_core/drawing_core.dart';
 import 'package:flutter/material.dart' hide Page;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/widgets/template_picker/template_picker.dart';
 
+import 'export_panel.dart' show performPagesPDFExport;
 import 'page_options_widgets.dart';
 
 /// GoodNotes-style page options popup panel.
@@ -56,32 +56,10 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
     final pageManager = ref.read(pageManagerProvider.notifier);
     final navContext = Navigator.of(context, rootNavigator: true).context;
     widget.onClose();
-
-    final controller = TextEditingController();
-    void goTo(String value, BuildContext ctx) {
-      final page = int.tryParse(value);
-      if (page != null && page >= 1 && page <= pageCount) {
-        Navigator.pop(ctx);
-        pageManager.goToPage(page - 1);
-      }
-    }
-
-    showDialog(
+    showGoToPageDialog(
       context: navContext,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Sayfaya Git'),
-        content: TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          autofocus: true,
-          decoration: InputDecoration(hintText: '1 - $pageCount'),
-          onSubmitted: (v) => goTo(v, ctx),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('İptal')),
-          FilledButton(onPressed: () => goTo(controller.text, ctx), child: const Text('Git')),
-        ],
-      ),
+      pageCount: pageCount,
+      pageManager: pageManager,
     );
   }
 
@@ -107,27 +85,61 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
     pageManager.updateCurrentPage(page.copyWith(background: newBg));
   }
 
+  void _copyPage(BuildContext context) {
+    final doc = ref.read(documentProvider);
+    final original = doc.pages[_pageIndex];
+    ref.read(copiedPageProvider.notifier).state = original;
+    widget.onClose();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Sayfa kopyalandı')),
+    );
+  }
+
+  void _pastePage(BuildContext context) {
+    final copied = ref.read(copiedPageProvider);
+    if (copied == null) return;
+    _insertDeepCopy(copied);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Sayfa yapıştırıldı')),
+    );
+  }
+
   void _duplicatePage() {
     final doc = ref.read(documentProvider);
+    _insertDeepCopy(doc.pages[_pageIndex]);
+  }
+
+  /// Deep-copies [source] and inserts after current page index.
+  void _insertDeepCopy(Page source) {
     final pageIndex = _pageIndex;
-    final original = doc.pages[pageIndex];
-    final duplicate = Page(
+    final clone = Page(
       id: 'page_${DateTime.now().microsecondsSinceEpoch}',
       index: pageIndex + 1,
-      size: original.size,
-      background: original.background,
-      layers: original.layers.map((l) => l.copyWith()).toList(),
+      size: source.size,
+      background: source.background,
+      layers: source.layers.map((l) => l.copyWith()).toList(),
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );
-    final newPages = List<Page>.from(doc.pages)..insert(pageIndex + 1, duplicate);
+    final doc = ref.read(documentProvider);
+    final newPages = List<Page>.from(doc.pages)..insert(pageIndex + 1, clone);
     final newDoc = doc.copyWith(pages: newPages, currentPageIndex: pageIndex + 1);
     ref.read(documentProvider.notifier).updateDocument(newDoc);
     ref.read(pageManagerProvider.notifier).initializeFromDocument(
-          newDoc.pages,
-          currentIndex: newDoc.currentPageIndex,
-        );
+          newDoc.pages, currentIndex: newDoc.currentPageIndex);
     widget.onClose();
+  }
+
+  void _exportPageAsPdf() {
+    final doc = ref.read(documentProvider);
+    final pageIndex = _pageIndex;
+    final notifier = ref.read(exportProgressProvider.notifier);
+    widget.onClose();
+    performPagesPDFExport(
+      notifier,
+      pages: [doc.pages[pageIndex]],
+      title: '${doc.title}_sayfa${pageIndex + 1}',
+    );
   }
 
   Future<void> _deletePage(BuildContext context) async {
@@ -204,6 +216,7 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
     final pageCount = ref.watch(pageCountProvider);
     final doc = ref.watch(documentProvider);
     final isBookmarked = doc.pages[pageIndex].isBookmarked;
+    final hasCopiedPage = ref.watch(copiedPageProvider) != null;
 
     final content = SingleChildScrollView(
       child: Column(
@@ -211,7 +224,7 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           PageOptionsHeader(title: 'Sayfa ${pageIndex + 1}'),
-          _divider(cs),
+          pageOptionsDivider(cs),
           PageOptionsMenuItem(
             icon: isBookmarked
                 ? StarNoteIcons.bookmarkFilled
@@ -222,7 +235,12 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
           PageOptionsMenuItem(
             icon: StarNoteIcons.copy,
             label: 'Sayfayı kopyala',
-            onTap: widget.onClose,
+            onTap: () => _copyPage(context),
+          ),
+          PageOptionsMenuItem(
+            icon: StarNoteIcons.paste,
+            label: 'Sayfayı yapıştır',
+            onTap: hasCopiedPage ? () => _pastePage(context) : null,
           ),
           PageOptionsMenuItem(
             icon: StarNoteIcons.duplicate,
@@ -237,10 +255,15 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
           PageOptionsMenuItem(
             icon: StarNoteIcons.goToPage,
             label: 'Sayfaya git',
-            trailing: _chevronTrailing(cs, '${pageIndex + 1} / $pageCount'),
+            trailing: pageOptionsChevronTrailing(cs, '${pageIndex + 1} / $pageCount'),
             onTap: () => _showGoToPageDialog(context),
           ),
-          _divider(cs),
+          PageOptionsMenuItem(
+            icon: StarNoteIcons.pdfFile,
+            label: 'PDF olarak dışa aktar',
+            onTap: _exportPageAsPdf,
+          ),
+          pageOptionsDivider(cs),
           PageOptionsMenuItem(
             icon: StarNoteIcons.pageClear,
             label: 'Sayfayı temizle',
@@ -253,7 +276,7 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
             isDestructive: true,
             onTap: () => _deletePage(context),
           ),
-          _thickDivider(cs),
+          pageOptionsThickDivider(cs),
           PageOptionsSectionHeader(title: 'Ayarlar'),
           // TEMPORARILY DISABLED: Dual page mode
           // DualPageModeItem(onClose: widget.onClose),
@@ -274,12 +297,4 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
       child: SizedBox(width: 320, child: content),
     );
   }
-
-  Widget _chevronTrailing(ColorScheme cs, [String? label]) => Row(mainAxisSize: MainAxisSize.min, children: [
-    if (label != null) ...[Text(label, style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant)), const SizedBox(width: 4)],
-    PhosphorIcon(StarNoteIcons.chevronRight, size: 18, color: cs.onSurfaceVariant),
-  ]);
-
-  Widget _divider(ColorScheme cs) => Divider(height: 0.5, thickness: 0.5, color: cs.outlineVariant);
-  Widget _thickDivider(ColorScheme cs) => Divider(height: 8, thickness: 8, color: cs.outlineVariant.withValues(alpha: 0.3));
 }

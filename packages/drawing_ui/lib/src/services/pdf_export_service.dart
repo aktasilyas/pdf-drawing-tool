@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:drawing_core/drawing_core.dart';
 import 'pdf_exporter.dart';
-import 'vector_pdf_renderer.dart';
 import 'raster_pdf_renderer.dart';
 
 /// State of PDF export process.
@@ -106,8 +105,6 @@ class PDFExportServiceResult {
 /// Service for orchestrating PDF export workflow.
 class PDFExportService {
   final PDFExporter _exporter;
-  // ignore: unused_field
-  final VectorPDFRenderer _vectorRenderer;
   final RasterPDFRenderer _rasterRenderer;
 
   PDFExportState _state = PDFExportState.idle;
@@ -125,10 +122,8 @@ class PDFExportService {
 
   PDFExportService({
     PDFExporter? exporter,
-    VectorPDFRenderer? vectorRenderer,
     RasterPDFRenderer? rasterRenderer,
   })  : _exporter = exporter ?? PDFExporter(),
-        _vectorRenderer = vectorRenderer ?? VectorPDFRenderer(),
         _rasterRenderer = rasterRenderer ?? RasterPDFRenderer();
 
   /// Current export state.
@@ -180,7 +175,7 @@ class PDFExportService {
 
   /// Checks if a page is exportable.
   bool isPageExportable(Page page) {
-    return _exporter.isPageExportable(page);
+    return page.size.width > 0 && page.size.height > 0;
   }
 
   /// Calculates progress.
@@ -256,9 +251,11 @@ class PDFExportService {
 
       final result = await _exporter.exportPages(
         pages: pages,
-        options: config.toExportOptions(),
         metadata: metadata,
-        onProgress: (progress) {
+        options: config.toExportOptions(),
+        onProgress: (current, total) {
+          final progress = total > 0 ? current / total : 0.0;
+          _processedPages = current;
           _updateProgress(progress);
           onProgress?.call(progress);
         },

@@ -126,7 +126,7 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
         onSubmitted: (v) { _goTo(v, pageCount, ref, ctx); },
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(ctx), child: Text('Iptal', style: TextStyle(color: Theme.of(ctx).colorScheme.onSurfaceVariant))),
+        TextButton(onPressed: () => Navigator.pop(ctx), child: Text('İptal', style: TextStyle(color: Theme.of(ctx).colorScheme.onSurfaceVariant))),
         FilledButton(onPressed: () { _goTo(controller.text, pageCount, ref, ctx); }, child: const Text('Git')),
       ],
     ));

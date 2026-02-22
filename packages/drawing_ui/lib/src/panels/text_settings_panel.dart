@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/panels/text_preview_painter.dart';
+import 'package:drawing_ui/src/panels/tool_panel.dart';
+import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/widgets/color_picker_strip.dart';
 import 'package:drawing_ui/src/widgets/goodnotes_slider.dart';
 
@@ -23,14 +24,24 @@ class TextSettingsPanel extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // -- Title --
-          Text(
-            'Metin Aracı',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: cs.onSurface,
-            ),
+          // -- Title + Close --
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Metin Aracı',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurface,
+                  ),
+                ),
+              ),
+              PanelCloseButton(
+                onTap: () =>
+                    ref.read(activePanelProvider.notifier).state = null,
+              ),
+            ],
           ),
           const SizedBox(height: 8),
           Text(
@@ -54,7 +65,7 @@ class TextSettingsPanel extends ConsumerWidget {
 
           // -- Font Size Slider --
           GoodNotesSlider(
-            label: 'BOYUT',
+            label: 'Boyut',
             value: settings.fontSize.clamp(8.0, 72.0),
             min: 8.0,
             max: 72.0,
@@ -68,7 +79,7 @@ class TextSettingsPanel extends ConsumerWidget {
 
           // -- Color Section --
           Text(
-            'RENK',
+            'Renk',
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
@@ -87,7 +98,7 @@ class TextSettingsPanel extends ConsumerWidget {
 
           // -- Style Section --
           Text(
-            'STİL',
+            'Stil',
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,

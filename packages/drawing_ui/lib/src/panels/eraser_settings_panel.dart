@@ -4,6 +4,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/panels/eraser_preview_painter.dart';
+import 'package:drawing_ui/src/panels/tool_panel.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/widgets/compact_toggle.dart';
@@ -34,14 +35,24 @@ class EraserSettingsPanel extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // -- Ba\u015fl\u0131k --
-          Text(
-            _titleForMode(active),
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: cs.onSurface,
-            ),
+          // -- Başlık + Kapat --
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  _titleForMode(active),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurface,
+                  ),
+                ),
+              ),
+              PanelCloseButton(
+                onTap: () =>
+                    ref.read(activePanelProvider.notifier).state = null,
+              ),
+            ],
           ),
           const SizedBox(height: 16),
 
@@ -63,7 +74,7 @@ class EraserSettingsPanel extends ConsumerWidget {
           // -- BOYUT slider --
           if (showSizeSlider) ...[
             GoodNotesSlider(
-              label: 'BOYUT',
+              label: 'Boyut',
               value: settings.size.clamp(5.0, 100.0),
               min: 5.0,
               max: 100.0,
@@ -89,12 +100,6 @@ class EraserSettingsPanel extends ConsumerWidget {
             onChanged: (v) => ref
                 .read(eraserSettingsProvider.notifier)
                 .setEraseOnlyHighlighter(v),
-          ),
-          CompactToggle(
-            label: 'Sadece bant sil',
-            value: settings.eraseBandOnly,
-            onChanged: (v) =>
-                ref.read(eraserSettingsProvider.notifier).setEraseBandOnly(v),
           ),
           CompactToggle(
             label: 'Otomatik kald\u0131r',

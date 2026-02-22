@@ -2,6 +2,7 @@
 library;
 
 export 'anchored_panel.dart';
+export 'document_title_button.dart';
 export 'compact_color_picker.dart';
 export 'compact_slider.dart';
 export 'compact_toggle.dart';
@@ -12,6 +13,7 @@ export 'color_swatch_grid.dart';
 export 'color_chip.dart';
 export 'color_chips_grid.dart';
 export 'eraser_cursor_widget.dart';
+export 'floating_export_progress.dart';
 export 'floating_pen_box.dart';
 export 'floating_recording_bar.dart';
 export 'goodnotes_slider.dart';
@@ -26,7 +28,12 @@ export 'pdf_import_dialog.dart';
 export 'pen_icon_widget.dart';
 export 'popover_panel.dart';
 export 'reorderable_tool_list.dart';
+export 'selection_actions.dart';
 export 'selection_handles.dart';
+export 'selection_handles_painter.dart';
+export 'selection_toolbar.dart';
+export 'selection_toolbar_buttons.dart';
+export 'selection_overflow_menu.dart';
 export 'spectrum_picker.dart';
 export 'text_context_menu.dart';
 export 'text_input_overlay.dart';

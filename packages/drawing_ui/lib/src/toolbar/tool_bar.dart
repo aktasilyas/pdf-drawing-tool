@@ -9,7 +9,6 @@ import 'package:drawing_ui/src/toolbar/tool_groups.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_logic.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_nav_sections.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_widgets.dart';
-import 'package:drawing_ui/src/toolbar/top_nav_menus.dart';
 
 /// Expanded toolbar (>=840px) — single-row layout combining navigation and
 /// drawing tools.
@@ -33,7 +32,8 @@ class ToolBar extends ConsumerStatefulWidget {
     this.highlighterGroupButtonKey,
     this.documentTitle,
     this.onHomePressed,
-    this.onTitlePressed,
+    this.onRenameDocument,
+    this.onDeleteDocument,
     this.onSidebarToggle,
     this.isSidebarOpen = false,
   });
@@ -47,7 +47,8 @@ class ToolBar extends ConsumerStatefulWidget {
   // Nav parameters
   final String? documentTitle;
   final VoidCallback? onHomePressed;
-  final VoidCallback? onTitlePressed;
+  final VoidCallback? onRenameDocument;
+  final VoidCallback? onDeleteDocument;
   final VoidCallback? onSidebarToggle;
   final bool isSidebarOpen;
 
@@ -90,7 +91,8 @@ class _ToolBarState extends ConsumerState<ToolBar> {
           ToolbarNavLeft(
             documentTitle: widget.documentTitle,
             onHomePressed: widget.onHomePressed,
-            onTitlePressed: widget.onTitlePressed,
+            onRenameDocument: widget.onRenameDocument,
+            onDeleteDocument: widget.onDeleteDocument,
             onSidebarToggle: widget.onSidebarToggle,
             isSidebarOpen: widget.isSidebarOpen,
             isReaderMode: isReaderMode,
@@ -105,7 +107,6 @@ class _ToolBarState extends ConsumerState<ToolBar> {
             isReaderMode: isReaderMode,
             onReaderToggle: () =>
                 ref.read(readerModeProvider.notifier).state = !isReaderMode,
-            onExportPressed: () => showExportMenu(context, ref),
             onShowRecordings: () => _openRecordingsTab(ref),
           ),
           const SizedBox(width: 4),

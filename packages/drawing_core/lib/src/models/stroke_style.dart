@@ -1,69 +1,12 @@
 import 'package:equatable/equatable.dart';
 
-/// The shape of the pen nib/tip.
-enum NibShape {
-  /// A circular nib shape.
-  circle,
-
-  /// An elliptical nib shape.
-  ellipse,
-
-  /// A rectangular nib shape.
-  rectangle,
-}
-
-/// Blend modes for drawing operations.
-enum DrawingBlendMode {
-  /// Normal blending (default).
-  normal,
-
-  /// Multiply blend mode.
-  multiply,
-
-  /// Screen blend mode.
-  screen,
-
-  /// Overlay blend mode.
-  overlay,
-
-  /// Darken blend mode.
-  darken,
-
-  /// Lighten blend mode.
-  lighten,
-}
-
-/// Stroke pattern types for dashed lines.
-enum StrokePattern {
-  /// Solid continuous line.
-  solid,
-
-  /// Dashed line pattern.
-  dashed,
-
-  /// Dotted line pattern.
-  dotted,
-}
-
-/// Texture types for stroke rendering.
-enum StrokeTexture {
-  /// No texture, smooth stroke.
-  none,
-
-  /// Pencil-like grainy texture.
-  pencil,
-
-  /// Chalk-like rough texture.
-  chalk,
-
-  /// Watercolor-like soft edges.
-  watercolor,
-}
+import 'stroke_style_enums.dart';
+export 'stroke_style_enums.dart';
 
 /// Defines the visual style of a stroke.
 ///
 /// Contains color, thickness, opacity, nib shape, blend mode, eraser flag,
-/// pattern, texture, and glow effects.
+/// pattern, texture, glow effects, and pressure sensitivity settings.
 /// Colors are represented as ARGB integers (0xAARRGGBB format).
 ///
 /// This class is immutable and uses [Equatable] for value equality.
@@ -104,6 +47,13 @@ class StrokeStyle extends Equatable {
   /// Nib angle in degrees (for calligraphy ellipse nib). 0 = horizontal, 90 = vertical.
   final double nibAngle;
 
+  /// Whether this stroke uses pressure-sensitive variable width rendering.
+  final bool pressureSensitive;
+
+  /// How much pressure affects width (0.0 = uniform, 1.0 = full range).
+  /// Clamped to [0.0, 1.0].
+  final double pressureSensitivity;
+
   /// Creates a new [StrokeStyle].
   ///
   /// [color] is in ARGB format (0xAARRGGBB).
@@ -112,6 +62,7 @@ class StrokeStyle extends Equatable {
   /// [glowRadius] is clamped to the range [0.0, 20.0].
   /// [glowIntensity] is clamped to the range [0.0, 1.0].
   /// [nibAngle] is the angle in degrees for ellipse nib (calligraphy).
+  /// [pressureSensitivity] is clamped to [0.0, 1.0].
   StrokeStyle({
     required this.color,
     required double thickness,
@@ -125,10 +76,13 @@ class StrokeStyle extends Equatable {
     double glowIntensity = 0.0,
     this.dashPattern,
     this.nibAngle = 0.0,
+    this.pressureSensitive = false,
+    double pressureSensitivity = 0.75,
   })  : thickness = thickness.clamp(0.1, 50.0),
         opacity = opacity.clamp(0.0, 1.0),
         glowRadius = glowRadius.clamp(0.0, 20.0),
-        glowIntensity = glowIntensity.clamp(0.0, 1.0);
+        glowIntensity = glowIntensity.clamp(0.0, 1.0),
+        pressureSensitivity = pressureSensitivity.clamp(0.0, 1.0);
 
   /// Creates a pen style.
   ///
@@ -159,17 +113,21 @@ class StrokeStyle extends Equatable {
     );
   }
 
-  /// Creates a brush style.
+  /// Creates a brush style with pressure sensitivity enabled.
   ///
-  /// Default: black color, 5.0 thickness, ellipse nib.
+  /// Default: black color, 5.0 thickness, ellipse nib, pressure sensitive.
   factory StrokeStyle.brush({
     int color = 0xFF000000,
     double thickness = 5.0,
+    bool pressureSensitive = true,
+    double pressureSensitivity = 0.75,
   }) {
     return StrokeStyle(
       color: color,
       thickness: thickness,
       nibShape: NibShape.ellipse,
+      pressureSensitive: pressureSensitive,
+      pressureSensitivity: pressureSensitivity,
     );
   }
 
@@ -212,6 +170,8 @@ class StrokeStyle extends Equatable {
     double? glowIntensity,
     List<double>? dashPattern,
     double? nibAngle,
+    bool? pressureSensitive,
+    double? pressureSensitivity,
   }) {
     return StrokeStyle(
       color: color ?? this.color,
@@ -226,6 +186,8 @@ class StrokeStyle extends Equatable {
       glowIntensity: glowIntensity ?? this.glowIntensity,
       dashPattern: dashPattern ?? this.dashPattern,
       nibAngle: nibAngle ?? this.nibAngle,
+      pressureSensitive: pressureSensitive ?? this.pressureSensitive,
+      pressureSensitivity: pressureSensitivity ?? this.pressureSensitivity,
     );
   }
 
@@ -244,34 +206,17 @@ class StrokeStyle extends Equatable {
       'glowIntensity': glowIntensity,
       'dashPattern': dashPattern,
       'nibAngle': nibAngle,
+      'pressureSensitive': pressureSensitive,
+      'pressureSensitivity': pressureSensitivity,
     };
   }
 
   /// Creates a [StrokeStyle] from a JSON map.
   factory StrokeStyle.fromJson(Map<String, dynamic> json) {
-    // Safe number parsing
-    double parseDouble(dynamic value, double defaultValue) {
-      if (value == null) return defaultValue;
-      if (value is double) return value;
-      if (value is int) return value.toDouble();
-      if (value is String) return double.tryParse(value) ?? defaultValue;
-      if (value is num) return value.toDouble();
-      return defaultValue;
-    }
-    
-    int parseInt(dynamic value, int defaultValue) {
-      if (value == null) return defaultValue;
-      if (value is int) return value;
-      if (value is double) return value.toInt();
-      if (value is String) return int.tryParse(value) ?? defaultValue;
-      if (value is num) return value.toInt();
-      return defaultValue;
-    }
-    
     return StrokeStyle(
-      color: parseInt(json['color'], 0xFF000000),
-      thickness: parseDouble(json['thickness'], 1.0),
-      opacity: parseDouble(json['opacity'], 1.0),
+      color: _parseInt(json['color'], 0xFF000000),
+      thickness: _parseDouble(json['thickness'], 1.0),
+      opacity: _parseDouble(json['opacity'], 1.0),
       nibShape: NibShape.values.firstWhere(
         (e) => e.name == json['nibShape'],
         orElse: () => NibShape.circle,
@@ -289,13 +234,33 @@ class StrokeStyle extends Equatable {
         (e) => e.name == json['texture'],
         orElse: () => StrokeTexture.none,
       ),
-      glowRadius: parseDouble(json['glowRadius'], 0.0),
-      glowIntensity: parseDouble(json['glowIntensity'], 0.0),
+      glowRadius: _parseDouble(json['glowRadius'], 0.0),
+      glowIntensity: _parseDouble(json['glowIntensity'], 0.0),
       dashPattern: (json['dashPattern'] as List<dynamic>?)
-          ?.map((e) => parseDouble(e, 0.0))
+          ?.map((e) => _parseDouble(e, 0.0))
           .toList(),
-      nibAngle: parseDouble(json['nibAngle'], 0.0),
+      nibAngle: _parseDouble(json['nibAngle'], 0.0),
+      pressureSensitive: json['pressureSensitive'] as bool? ?? false,
+      pressureSensitivity: _parseDouble(json['pressureSensitivity'], 0.75),
     );
+  }
+
+  static double _parseDouble(dynamic value, double defaultValue) {
+    if (value == null) return defaultValue;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? defaultValue;
+    if (value is num) return value.toDouble();
+    return defaultValue;
+  }
+
+  static int _parseInt(dynamic value, int defaultValue) {
+    if (value == null) return defaultValue;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value) ?? defaultValue;
+    if (value is num) return value.toInt();
+    return defaultValue;
   }
 
   @override
@@ -312,6 +277,8 @@ class StrokeStyle extends Equatable {
         glowIntensity,
         dashPattern,
         nibAngle,
+        pressureSensitive,
+        pressureSensitivity,
       ];
 
   @override
@@ -319,6 +286,7 @@ class StrokeStyle extends Equatable {
     return 'StrokeStyle(color: 0x${color.toRadixString(16).padLeft(8, '0').toUpperCase()}, '
         'thickness: $thickness, opacity: $opacity, nibShape: $nibShape, '
         'blendMode: $blendMode, isEraser: $isEraser, pattern: $pattern, '
-        'texture: $texture, glowRadius: $glowRadius, glowIntensity: $glowIntensity)';
+        'texture: $texture, glowRadius: $glowRadius, glowIntensity: $glowIntensity, '
+        'pressureSensitive: $pressureSensitive, pressureSensitivity: $pressureSensitivity)';
   }
 }

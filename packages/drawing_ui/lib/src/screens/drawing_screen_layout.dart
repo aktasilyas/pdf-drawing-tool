@@ -92,6 +92,7 @@ Widget buildDrawingCanvasArea({
           )),
         if (!isReadOnly) const FloatingUndoRedo(),
         if (!isReadOnly) const FloatingRecordingBar(),
+        if (!isReadOnly) const FloatingExportProgress(),
         if (!isReadOnly)
           Positioned(right: 16, bottom: 16, child: AskAIButton(onTap: onOpenAIPanel)),
         if (!isReadOnly && canvasMode != null && !canvasMode.isInfinite)

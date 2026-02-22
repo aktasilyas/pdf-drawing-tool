@@ -17,14 +17,16 @@ class DrawingScreen extends ConsumerStatefulWidget {
     this.documentTitle,
     this.canvasMode,
     this.onHomePressed,
-    this.onTitlePressed,
+    this.onRenameDocument,
+    this.onDeleteDocument,
     this.onDocumentChanged,
   });
 
   final String? documentTitle;
   final core.CanvasMode? canvasMode;
   final VoidCallback? onHomePressed;
-  final VoidCallback? onTitlePressed;
+  final VoidCallback? onRenameDocument;
+  final VoidCallback? onDeleteDocument;
   final ValueChanged<dynamic>? onDocumentChanged;
 
   @override
@@ -205,7 +207,8 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                     highlighterGroupButtonKey: _highlighterGroupButtonKey,
                     documentTitle: widget.documentTitle,
                     onHomePressed: widget.onHomePressed,
-                    onTitlePressed: widget.onTitlePressed,
+                    onRenameDocument: widget.onRenameDocument,
+                    onDeleteDocument: widget.onDeleteDocument,
                     onSidebarToggle: _toggleSidebar,
                     isSidebarOpen: isSidebarOpen,
                   ),

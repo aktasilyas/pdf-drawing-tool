@@ -1,18 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:drawing_core/drawing_core.dart';
 
+import 'pencil_texture_renderer.dart';
+import 'variable_width_renderer.dart';
+
 /// Renders [Stroke] objects from drawing_core to Flutter Canvas.
 ///
 /// This class bridges the gap between the UI-agnostic drawing_core
 /// and Flutter's rendering system.
 class FlutterStrokeRenderer {
+  /// Variable-width renderer for pressure-sensitive strokes.
+  final VariableWidthStrokeRenderer _variableWidthRenderer =
+      VariableWidthStrokeRenderer();
+
+  /// Pencil texture renderer for pencil/chalk-like effects.
+  final PencilTextureRenderer _pencilRenderer = PencilTextureRenderer();
+
   /// Renders a single stroke to the canvas.
   ///
   /// Does nothing if the stroke is empty.
+  /// Delegates to [VariableWidthStrokeRenderer] when pressure-sensitive.
   void renderStroke(Canvas canvas, Stroke stroke) {
     if (stroke.isEmpty) return;
 
     final style = stroke.style;
+
+    if (style.pressureSensitive) {
+      _variableWidthRenderer.render(canvas, stroke.points, style);
+      return;
+    }
+
+    if (style.texture == StrokeTexture.pencil) {
+      _pencilRenderer.render(canvas, stroke.points, style);
+      return;
+    }
+
     var paint = _createPaint(style);
     var path = _createPath(stroke.points, style);
 
@@ -54,44 +76,59 @@ class FlutterStrokeRenderer {
 
     final points = stroke.points;
     final style = stroke.style;
-    var paint = _createPaint(style);
-    paint = _buildPaintWithGlow(style, paint);
     final totalSegments = points.length - 1;
 
     int i = 0;
     while (i < totalSegments) {
-      // Skip excluded segments
       if (excludedSegments.contains(i)) {
         i++;
         continue;
       }
 
-      // Collect contiguous non-excluded range
       final rangeStart = i;
       while (i < totalSegments && !excludedSegments.contains(i)) {
         i++;
       }
 
-      // Render points[rangeStart..i] as a sub-stroke
       final subPoints = points.sublist(rangeStart, i + 1);
-      var path = _createPath(subPoints, style);
-      if (style.pattern != StrokePattern.solid &&
-          style.dashPattern != null) {
-        path = _createDashedPath(path, style.dashPattern!);
+
+      if (style.pressureSensitive) {
+        _variableWidthRenderer.render(canvas, subPoints, style);
+      } else if (style.texture == StrokeTexture.pencil) {
+        _pencilRenderer.render(canvas, subPoints, style);
+      } else {
+        var paint = _createPaint(style);
+        paint = _buildPaintWithGlow(style, paint);
+        var path = _createPath(subPoints, style);
+        if (style.pattern != StrokePattern.solid &&
+            style.dashPattern != null) {
+          path = _createDashedPath(path, style.dashPattern!);
+        }
+        canvas.drawPath(path, paint);
       }
-      canvas.drawPath(path, paint);
     }
   }
 
   /// Renders an active (incomplete) stroke being drawn.
   ///
   /// This is used for live preview while the user is drawing.
+  /// Delegates to [VariableWidthStrokeRenderer] when pressure-sensitive.
   void renderActiveStroke(
     Canvas canvas,
     List<DrawingPoint> points,
     StrokeStyle style,
   ) {
     if (points.isEmpty) return;
+
+    if (style.pressureSensitive) {
+      _variableWidthRenderer.render(canvas, points, style);
+      return;
+    }
+
+    if (style.texture == StrokeTexture.pencil) {
+      _pencilRenderer.render(canvas, points, style);
+      return;
+    }
 
     var paint = _createPaint(style);
     var path = _createPath(points, style);

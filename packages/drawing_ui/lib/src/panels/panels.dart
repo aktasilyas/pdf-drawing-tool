@@ -19,3 +19,4 @@ export 'page_options_panel.dart';
 export 'page_options_widgets.dart';
 export 'add_page_panel.dart';
 export 'add_page_panel_widgets.dart';
+export 'document_options_panel.dart';

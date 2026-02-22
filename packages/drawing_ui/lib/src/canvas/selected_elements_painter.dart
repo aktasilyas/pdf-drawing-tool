@@ -21,10 +21,16 @@ class SelectedElementsPainter extends CustomPainter {
   /// Live rotation angle in radians.
   final double rotation;
 
-  /// Center X of the selection (for rotation pivot).
+  /// Live horizontal scale factor.
+  final double scaleX;
+
+  /// Live vertical scale factor.
+  final double scaleY;
+
+  /// Center X of the selection (for rotation/scale pivot).
   final double centerX;
 
-  /// Center Y of the selection (for rotation pivot).
+  /// Center Y of the selection (for rotation/scale pivot).
   final double centerY;
 
   final FlutterStrokeRenderer _renderer;
@@ -34,6 +40,8 @@ class SelectedElementsPainter extends CustomPainter {
     required this.selectedShapes,
     required this.moveDelta,
     required this.rotation,
+    this.scaleX = 1.0,
+    this.scaleY = 1.0,
     required this.centerX,
     required this.centerY,
     FlutterStrokeRenderer? renderer,
@@ -45,10 +53,13 @@ class SelectedElementsPainter extends CustomPainter {
 
     canvas.save();
 
-    // Apply live transform: translate to center, rotate, translate back + delta
+    // Apply live transform: translate to center, rotate, scale, translate back + delta
     canvas.translate(centerX + moveDelta.dx, centerY + moveDelta.dy);
     if (rotation != 0) {
       canvas.rotate(rotation);
+    }
+    if (scaleX != 1.0 || scaleY != 1.0) {
+      canvas.scale(scaleX, scaleY);
     }
     canvas.translate(-centerX, -centerY);
 
@@ -68,6 +79,8 @@ class SelectedElementsPainter extends CustomPainter {
   bool shouldRepaint(covariant SelectedElementsPainter oldDelegate) {
     return oldDelegate.moveDelta != moveDelta ||
         oldDelegate.rotation != rotation ||
+        oldDelegate.scaleX != scaleX ||
+        oldDelegate.scaleY != scaleY ||
         oldDelegate.centerX != centerX ||
         oldDelegate.centerY != centerY ||
         !identical(oldDelegate.selectedStrokes, selectedStrokes) ||

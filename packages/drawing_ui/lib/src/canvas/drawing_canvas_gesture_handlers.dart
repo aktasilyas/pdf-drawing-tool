@@ -39,8 +39,6 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
   core.StrokeStyle? get straightLineStyle;
   set straightLineStyle(core.StrokeStyle? value);
   Set<String> get erasedShapeIds;
-  Set<String> get erasedTextIds;
-  Set<String> get erasedImageIds;
   Map<String, List<int>> get pixelEraseHits;
   List<core.Stroke> get pixelEraseOriginalStrokes;
   /// Note ID -> set of internal stroke IDs erased in current gesture.
@@ -810,6 +808,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
 
     if (selection != null) {
       ref.read(selectionProvider.notifier).setSelection(selection);
+      ref.read(selectionUiProvider.notifier).showContextMenu();
     }
 
     setState(() {});
@@ -948,7 +947,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
         pixelEraseNoteHits.clear();
         pixelEraseNoteOriginalStrokes.clear();
         ref.read(pixelEraserPreviewProvider.notifier).state = {};
-        handlePixelEraseAt(canvasPoint);
+        handlePixelEraseAt(canvasPoint, event.pressure.clamp(0.0, 1.0));
         break;
 
       case EraserMode.stroke:
@@ -956,12 +955,11 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
         final eraserTool = ref.read(eraserToolProvider);
         eraserTool.startErasing();
         erasedShapeIds.clear();
-        erasedTextIds.clear();
-        erasedImageIds.clear();
         erasedNoteStrokeIds.clear();
         erasedNoteShapeIds.clear();
         pixelEraseNoteHits.clear();
         pixelEraseNoteOriginalStrokes.clear();
+        ref.read(strokeEraserPreviewProvider.notifier).state = {};
         eraseAtPoint(event.localPosition);
         break;
 
@@ -992,7 +990,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
           canvasPoint.dy,
           event.pressure.clamp(0.0, 1.0),
         );
-        handlePixelEraseAt(canvasPoint);
+        handlePixelEraseAt(canvasPoint, event.pressure.clamp(0.0, 1.0));
         break;
 
       case EraserMode.stroke:
@@ -1045,28 +1043,11 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
         }
         erasedShapeIds.clear();
 
-        // Commit erased texts
-        for (final textId in erasedTextIds) {
-          final command = core.RemoveTextCommand(
-            layerIndex: layerIndex,
-            textId: textId,
-          );
-          ref.read(historyManagerProvider.notifier).execute(command);
-        }
-        erasedTextIds.clear();
-
-        // Commit erased images
-        for (final imageId in erasedImageIds) {
-          final command = core.RemoveImageCommand(
-            layerIndex: layerIndex,
-            imageId: imageId,
-          );
-          ref.read(historyManagerProvider.notifier).execute(command);
-        }
-        erasedImageIds.clear();
-
         // Commit erased note internal strokes/shapes
         _commitNoteErasures(layerIndex);
+
+        // Clear stroke eraser preview
+        ref.read(strokeEraserPreviewProvider.notifier).state = {};
         break;
 
       case EraserMode.lasso:
@@ -1074,24 +1055,40 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
         ref.read(lassoEraserPointsProvider.notifier).state = [];
         break;
     }
+
+    // AutoLift: switch back to previous tool after erasing
+    if (settings.autoLift) {
+      final prevTool = ref.read(previousToolProvider);
+      if (prevTool != null) {
+        ref.read(currentToolProvider.notifier).state = prevTool;
+        ref.read(previousToolProvider.notifier).state = null;
+      }
+    }
   }
 
-  void handlePixelEraseAt(Offset canvasPoint) {
+  void handlePixelEraseAt(Offset canvasPoint, double pressure) {
     final strokes = ref.read(activeLayerStrokesProvider);
     final shapes = ref.read(activeLayerShapesProvider);
-    final texts = ref.read(activeLayerTextsProvider);
-    final images = ref.read(activeLayerImagesProvider);
     final settings = ref.read(eraserSettingsProvider);
     final pixelTool = ref.read(pixelEraserToolProvider);
 
     // Apply eraser filters first
     final filteredStrokes = applyEraserFilters(strokes, settings);
 
+    // Convert eraser size from screen space to canvas space
+    final zoom = ref.read(canvasTransformProvider).zoom;
+    final baseSize = settings.size / zoom;
+
+    // Scale eraser size based on pressure when pressure sensitivity is on
+    final effectiveSize = settings.pressureSensitive
+        ? baseSize * (0.3 + 0.7 * pressure)
+        : baseSize;
+
     final hits = pixelTool.findSegmentsAt(
       filteredStrokes,
       canvasPoint.dx,
       canvasPoint.dy,
-      settings.size,
+      effectiveSize,
     );
 
     for (final hit in hits) {
@@ -1114,46 +1111,20 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     }
 
     // Check shapes (use eraser size as tolerance)
+    final tolerance = effectiveSize / 2;
     for (final shape in shapes) {
       if (!erasedShapeIds.contains(shape.id)) {
-        if (shape.containsPoint(
-          canvasPoint.dx,
-          canvasPoint.dy,
-          settings.size / 2, // Use radius as tolerance
-        )) {
+        if (shape.containsPoint(canvasPoint.dx, canvasPoint.dy, tolerance)) {
           erasedShapeIds.add(shape.id);
         }
       }
     }
 
-    // Check texts
-    for (final text in texts) {
-      if (!erasedTextIds.contains(text.id)) {
-        if (text.containsPoint(
-          canvasPoint.dx,
-          canvasPoint.dy,
-          settings.size / 2, // Use radius as tolerance
-        )) {
-          erasedTextIds.add(text.id);
-        }
-      }
-    }
-
-    // Check images
-    for (final image in images) {
-      if (!erasedImageIds.contains(image.id)) {
-        if (image.containsPoint(
-          canvasPoint.dx,
-          canvasPoint.dy,
-          settings.size / 2,
-        )) {
-          erasedImageIds.add(image.id);
-        }
-      }
-    }
+    // Eraser does NOT erase texts, images, or stickers.
+    // Those are deleted via their own context menu (tap → delete).
 
     // Erase inside sticky notes (pixel mode: segment-level tracking)
-    _eraseInsideStickyNotes(canvasPoint, settings.size / 2, isPixelMode: true);
+    _eraseInsideStickyNotes(canvasPoint, tolerance, isPixelMode: true);
 
     // Update preview provider for visual feedback
     ref.read(pixelEraserPreviewProvider.notifier).state =
@@ -1191,24 +1162,6 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       ref.read(historyManagerProvider.notifier).execute(command);
     }
 
-    // Commit texts
-    for (final textId in erasedTextIds) {
-      final command = core.RemoveTextCommand(
-        layerIndex: layerIndex,
-        textId: textId,
-      );
-      ref.read(historyManagerProvider.notifier).execute(command);
-    }
-
-    // Commit images
-    for (final imageId in erasedImageIds) {
-      final command = core.RemoveImageCommand(
-        layerIndex: layerIndex,
-        imageId: imageId,
-      );
-      ref.read(historyManagerProvider.notifier).execute(command);
-    }
-
     // Commit note internal erasures
     _commitNoteErasures(layerIndex);
 
@@ -1216,13 +1169,13 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     pixelEraseHits.clear();
     pixelEraseOriginalStrokes.clear();
     erasedShapeIds.clear();
-    erasedTextIds.clear();
-    erasedImageIds.clear();
     ref.read(pixelEraserPreviewProvider.notifier).state = {};
   }
 
   void commitLassoErase(int layerIndex) {
-    final strokes = ref.read(activeLayerStrokesProvider);
+    final settings = ref.read(eraserSettingsProvider);
+    final allStrokes = ref.read(activeLayerStrokesProvider);
+    final strokes = applyEraserFilters(allStrokes, settings);
     final lassoTool = ref.read(lassoEraserToolProvider);
 
     final result = lassoTool.onPointerUp(strokes);
@@ -1257,68 +1210,52 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
 
     final strokes = ref.read(activeLayerStrokesProvider);
     final shapes = ref.read(activeLayerShapesProvider);
-    final texts = ref.read(activeLayerTextsProvider);
-    final images = ref.read(activeLayerImagesProvider);
     final eraserTool = ref.read(eraserToolProvider);
     final eraserSettings = ref.read(eraserSettingsProvider);
+
+    // Convert eraser tolerance from screen space to canvas space
+    final canvasTolerance = eraserTool.tolerance / transform.zoom;
 
     // Find strokes to erase
     var toErase = eraserTool.findStrokesToErase(
       strokes,
       canvasPoint.dx,
       canvasPoint.dy,
+      toleranceOverride: canvasTolerance,
     );
 
     // Apply eraser filters
     toErase = applyEraserFilters(toErase, eraserSettings);
 
+    var previewChanged = false;
     for (final stroke in toErase) {
       if (!eraserTool.isAlreadyErased(stroke.id)) {
         eraserTool.markAsErased(stroke.id);
+        previewChanged = true;
       }
+    }
+
+    // Update real-time visual feedback
+    if (previewChanged) {
+      ref.read(strokeEraserPreviewProvider.notifier).state =
+          Set<String>.from(eraserTool.erasedIds);
     }
 
     // Find shapes to erase (no filters for shapes)
     for (final shape in shapes) {
       if (!erasedShapeIds.contains(shape.id)) {
         if (shape.containsPoint(
-          canvasPoint.dx,
-          canvasPoint.dy,
-          eraserTool.tolerance,
-        )) {
+          canvasPoint.dx, canvasPoint.dy, canvasTolerance)) {
           erasedShapeIds.add(shape.id);
         }
       }
     }
 
-    // Find texts to erase (no filters for texts)
-    for (final text in texts) {
-      if (!erasedTextIds.contains(text.id)) {
-        if (text.containsPoint(
-          canvasPoint.dx,
-          canvasPoint.dy,
-          eraserTool.tolerance,
-        )) {
-          erasedTextIds.add(text.id);
-        }
-      }
-    }
+    // Eraser does NOT erase texts, images, or stickers.
+    // Those are deleted via their own context menu (tap → delete).
 
-    // Find images to erase
-    for (final image in images) {
-      if (!erasedImageIds.contains(image.id)) {
-        if (image.containsPoint(
-          canvasPoint.dx,
-          canvasPoint.dy,
-          eraserTool.tolerance,
-        )) {
-          erasedImageIds.add(image.id);
-        }
-      }
-    }
-
-    // Erase inside sticky notes (relative coordinate check)
-    _eraseInsideStickyNotes(canvasPoint, eraserTool.tolerance);
+    // Erase inside sticky notes (strokes/shapes only)
+    _eraseInsideStickyNotes(canvasPoint, canvasTolerance);
   }
 
   /// Checks if the eraser point hits strokes/shapes inside any sticky note.

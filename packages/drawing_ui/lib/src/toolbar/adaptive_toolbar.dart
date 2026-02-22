@@ -21,7 +21,8 @@ class AdaptiveToolbar extends StatelessWidget {
     this.highlighterGroupButtonKey,
     this.documentTitle,
     this.onHomePressed,
-    this.onTitlePressed,
+    this.onRenameDocument,
+    this.onDeleteDocument,
     this.onSidebarToggle,
     this.isSidebarOpen = false,
   });
@@ -44,7 +45,8 @@ class AdaptiveToolbar extends StatelessWidget {
   // Nav parameters (passed through to ToolBar/MediumToolbar/TopNavigationBar)
   final String? documentTitle;
   final VoidCallback? onHomePressed;
-  final VoidCallback? onTitlePressed;
+  final VoidCallback? onRenameDocument;
+  final VoidCallback? onDeleteDocument;
   final VoidCallback? onSidebarToggle;
   final bool isSidebarOpen;
 
@@ -70,7 +72,8 @@ class AdaptiveToolbar extends StatelessWidget {
             highlighterGroupButtonKey: highlighterGroupButtonKey,
             documentTitle: documentTitle,
             onHomePressed: onHomePressed,
-            onTitlePressed: onTitlePressed,
+            onRenameDocument: onRenameDocument,
+            onDeleteDocument: onDeleteDocument,
             onSidebarToggle: onSidebarToggle,
             isSidebarOpen: isSidebarOpen,
           );
@@ -85,7 +88,8 @@ class AdaptiveToolbar extends StatelessWidget {
             highlighterGroupButtonKey: highlighterGroupButtonKey,
             documentTitle: documentTitle,
             onHomePressed: onHomePressed,
-            onTitlePressed: onTitlePressed,
+            onRenameDocument: onRenameDocument,
+            onDeleteDocument: onDeleteDocument,
             onSidebarToggle: onSidebarToggle,
             isSidebarOpen: isSidebarOpen,
           );
@@ -95,7 +99,8 @@ class AdaptiveToolbar extends StatelessWidget {
         return TopNavigationBar(
           documentTitle: documentTitle,
           onHomePressed: onHomePressed,
-          onTitlePressed: onTitlePressed,
+          onRenameDocument: onRenameDocument,
+          onDeleteDocument: onDeleteDocument,
           onSidebarToggle: onSidebarToggle,
           isSidebarOpen: isSidebarOpen,
           compact: true,

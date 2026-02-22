@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:drawing_ui/src/panels/tool_panel.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/widgets/color_picker_strip.dart';
@@ -35,13 +36,23 @@ class LaserPointerPanel extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: cs.onSurface,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurface,
+                  ),
+                ),
+              ),
+              PanelCloseButton(
+                onTap: () =>
+                    ref.read(activePanelProvider.notifier).state = null,
+              ),
+            ],
           ),
           const SizedBox(height: 16),
 
@@ -67,7 +78,7 @@ class LaserPointerPanel extends ConsumerWidget {
 
           // Thickness slider
           GoodNotesSlider(
-            label: 'KALINLIK',
+            label: 'Kalınlık',
             value: settings.thickness.clamp(0.5, 5.0),
             min: 0.5,
             max: 5.0,
@@ -80,7 +91,7 @@ class LaserPointerPanel extends ConsumerWidget {
 
           // Duration slider
           GoodNotesSlider(
-            label: 'SÜRE',
+            label: 'Süre',
             value: settings.duration.clamp(0.5, 5.0),
             min: 0.5,
             max: 5.0,

@@ -399,6 +399,8 @@ void main() {
             quickThicknessProvider.overrideWith((ref) => [1.0, 2.5, 5.0]),
             penSettingsProvider(ToolType.ballpointPen).overrideWith(
               (ref) => PenSettingsNotifier(
+                null,
+                ToolType.ballpointPen,
                 const PenSettings(
                   color: Colors.black,
                   thickness: 2.5,
@@ -430,6 +432,8 @@ void main() {
             quickThicknessProvider.overrideWith((ref) => [1.0, 2.5, 5.0]),
             penSettingsProvider(ToolType.ballpointPen).overrideWith(
               (ref) => PenSettingsNotifier(
+                null,
+                ToolType.ballpointPen,
                 const PenSettings(
                   color: Colors.black,
                   thickness: 2.5,

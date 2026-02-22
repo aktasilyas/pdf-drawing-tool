@@ -5,7 +5,7 @@ import 'package:drawing_ui/src/services/pdf_exporter.dart';
 
 void main() {
   group('PDFExportDialog', () {
-    testWidgets('should display dialog with title', (tester) async {
+    testWidgets('should display dialog with Turkish title', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -13,9 +13,7 @@ void main() {
               builder: (context) => ElevatedButton(
                 onPressed: () => showDialog(
                   context: context,
-                  builder: (context) => const PDFExportDialog(
-                    totalPages: 5,
-                  ),
+                  builder: (context) => const PDFExportDialog(totalPages: 5),
                 ),
                 child: const Text('Open'),
               ),
@@ -27,111 +25,90 @@ void main() {
       await tester.tap(find.text('Open'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Export to PDF'), findsOneWidget);
+      expect(find.text('PDF Olarak Disa Aktar'), findsOneWidget);
     });
 
     testWidgets('should display total pages count', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: PDFExportDialog(totalPages: 5),
-          ),
+          home: Scaffold(body: PDFExportDialog(totalPages: 5)),
         ),
       );
 
-      expect(find.textContaining('5 pages'), findsOneWidget);
+      expect(find.text('5 sayfa'), findsOneWidget);
     });
 
-    testWidgets('should display export mode options', (tester) async {
+    testWidgets('should display export mode options in Turkish', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: PDFExportDialog(totalPages: 5),
-          ),
+          home: Scaffold(body: PDFExportDialog(totalPages: 5)),
         ),
       );
 
-      expect(find.text('Export Mode'), findsOneWidget);
-      expect(find.text('Vector'), findsOneWidget);
+      expect(find.text('Disa Aktarma Modu'), findsOneWidget);
+      expect(find.text('Vektor'), findsOneWidget);
       expect(find.text('Raster'), findsOneWidget);
-      expect(find.text('Hybrid'), findsOneWidget);
+      expect(find.text('Karma'), findsOneWidget);
     });
 
     testWidgets('should display quality options', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: PDFExportDialog(totalPages: 5),
-          ),
+          home: Scaffold(body: PDFExportDialog(totalPages: 5)),
         ),
       );
 
-      expect(find.text('Quality'), findsOneWidget);
+      expect(find.text('Kalite'), findsOneWidget);
+      expect(find.text('Dusuk'), findsOneWidget);
+      expect(find.text('Orta'), findsOneWidget);
+      expect(find.text('Yuksek'), findsOneWidget);
+      expect(find.text('Baski'), findsOneWidget);
     });
 
-    testWidgets('should display page format options', (tester) async {
+    testWidgets('should display page format section', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: PDFExportDialog(totalPages: 5),
-          ),
+          home: Scaffold(body: PDFExportDialog(totalPages: 5)),
         ),
       );
 
-      expect(find.text('Page Format'), findsOneWidget);
+      expect(find.text('Sayfa Formati'), findsOneWidget);
+      expect(find.text('A4'), findsOneWidget);
     });
 
-    testWidgets('should display include background option', (tester) async {
+    testWidgets('should display background toggle', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: PDFExportDialog(totalPages: 5),
-          ),
+          home: Scaffold(body: PDFExportDialog(totalPages: 5)),
         ),
       );
 
-      expect(find.text('Include backgrounds'), findsOneWidget);
+      expect(find.text('Arka plani dahil et'), findsOneWidget);
+      expect(find.byType(Switch), findsOneWidget);
     });
 
-    testWidgets('should toggle export mode', (tester) async {
+    testWidgets('should toggle export mode on tap', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: PDFExportDialog(totalPages: 5),
-          ),
+          home: Scaffold(body: PDFExportDialog(totalPages: 5)),
         ),
       );
 
-      // Tap on Raster mode
       await tester.tap(find.text('Raster'));
       await tester.pump();
 
-      // Mode should change (RadioListTile would update)
       expect(find.text('Raster'), findsOneWidget);
     });
 
-    testWidgets('should display cancel button', (tester) async {
+    testWidgets('should display Turkish action buttons', (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: PDFExportDialog(totalPages: 5),
-          ),
+          home: Scaffold(body: PDFExportDialog(totalPages: 5)),
         ),
       );
 
-      expect(find.text('Cancel'), findsOneWidget);
-    });
-
-    testWidgets('should display export button', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: PDFExportDialog(totalPages: 5),
-          ),
-        ),
-      );
-
-      expect(find.text('Export'), findsOneWidget);
+      expect(find.text('Iptal'), findsOneWidget);
+      expect(find.text('Disa Aktar'), findsOneWidget);
     });
 
     testWidgets('should close dialog on cancel', (tester) async {
@@ -142,8 +119,39 @@ void main() {
               builder: (context) => ElevatedButton(
                 onPressed: () => showDialog(
                   context: context,
-                  builder: (context) => const PDFExportDialog(
-                    totalPages: 5,
+                  builder: (context) => const PDFExportDialog(totalPages: 5),
+                ),
+                child: const Text('Open'),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('PDF Olarak Disa Aktar'), findsOneWidget);
+
+      await tester.tap(find.text('Iptal'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('PDF Olarak Disa Aktar'), findsNothing);
+    });
+
+    testWidgets('should call onExport callback', (tester) async {
+      PDFExportConfig? exportedConfig;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => ElevatedButton(
+                onPressed: () => showDialog(
+                  context: context,
+                  builder: (context) => PDFExportDialog(
+                    totalPages: 3,
+                    onExport: (config) => exportedConfig = config,
                   ),
                 ),
                 child: const Text('Open'),
@@ -156,84 +164,34 @@ void main() {
       await tester.tap(find.text('Open'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Export to PDF'), findsOneWidget);
-
-      await tester.tap(find.text('Cancel'));
+      await tester.tap(find.text('Disa Aktar'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Export to PDF'), findsNothing);
+      expect(exportedConfig, isNotNull);
+      expect(exportedConfig!.exportMode, PDFExportMode.vector);
+      expect(exportedConfig!.quality, PDFExportQuality.high);
+      expect(exportedConfig!.includeBackground, true);
     });
 
-    testWidgets('should show progress during export', (tester) async {
+    testWidgets('should not overflow on small screens', (tester) async {
+      tester.view.physicalSize = const Size(400, 600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
       await tester.pumpWidget(
         const MaterialApp(
-          home: Scaffold(
-            body: PDFExportDialog(
-              totalPages: 5,
-              isExporting: true,
-            ),
-          ),
+          home: Scaffold(body: PDFExportDialog(totalPages: 10)),
         ),
       );
 
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
-    });
-
-    testWidgets('should display progress message', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: PDFExportDialog(
-              totalPages: 5,
-              isExporting: true,
-              progressMessage: 'Exporting page 3 of 5...',
-            ),
-          ),
-        ),
-      );
-
-      expect(find.text('Exporting page 3 of 5...'), findsOneWidget);
-    });
-
-    testWidgets('should disable buttons during export', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: PDFExportDialog(
-              totalPages: 5,
-              isExporting: true,
-            ),
-          ),
-        ),
-      );
-
-      final cancelButton = find.widgetWithText(TextButton, 'Cancel');
-      final exportButton = find.widgetWithText(ElevatedButton, 'Export');
-
-      expect(tester.widget<TextButton>(cancelButton).onPressed, isNull);
-      expect(tester.widget<ElevatedButton>(exportButton).onPressed, isNull);
-    });
-
-    testWidgets('should display error message', (tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: PDFExportDialog(
-              totalPages: 5,
-              errorMessage: 'Export failed',
-            ),
-          ),
-        ),
-      );
-
-      expect(find.text('Export failed'), findsOneWidget);
-      expect(find.byIcon(Icons.error_outline), findsOneWidget);
+      // No overflow errors expected — dialog uses SingleChildScrollView
+      expect(tester.takeException(), isNull);
     });
   });
 
   group('PDFExportConfig', () {
     test('should create with default values', () {
-      final config = PDFExportConfig();
+      const config = PDFExportConfig();
 
       expect(config.exportMode, PDFExportMode.vector);
       expect(config.quality, PDFExportQuality.high);
@@ -241,7 +199,7 @@ void main() {
     });
 
     test('should create with custom values', () {
-      final config = PDFExportConfig(
+      const config = PDFExportConfig(
         exportMode: PDFExportMode.raster,
         quality: PDFExportQuality.medium,
         includeBackground: false,
@@ -252,21 +210,24 @@ void main() {
       expect(config.includeBackground, false);
     });
 
-    test('should copy with new values', () {
-      final original = PDFExportConfig();
-      final copy = original.copyWith(
+    test('should convert to export options', () {
+      const config = PDFExportConfig(
         exportMode: PDFExportMode.hybrid,
+        quality: PDFExportQuality.low,
+        includeBackground: false,
       );
+      final options = config.toExportOptions();
 
-      expect(copy.exportMode, PDFExportMode.hybrid);
-      expect(copy.quality, original.quality);
+      expect(options.exportMode, PDFExportMode.hybrid);
+      expect(options.quality, PDFExportQuality.low);
+      expect(options.includeBackground, false);
     });
   });
 
-  group('ExportResult', () {
+  group('ExportDialogResult', () {
     test('should create successful result', () {
       final result = ExportDialogResult.success(
-        config: PDFExportConfig(),
+        config: const PDFExportConfig(),
       );
 
       expect(result.confirmed, true);
@@ -278,95 +239,6 @@ void main() {
 
       expect(result.confirmed, false);
       expect(result.config, isNull);
-    });
-  });
-
-  group('QualitySelector', () {
-    testWidgets('should display quality levels', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: QualitySelector(
-              selectedQuality: PDFExportQuality.high,
-              onQualityChanged: (_) {},
-            ),
-          ),
-        ),
-      );
-
-      expect(find.text('Low'), findsOneWidget);
-      expect(find.text('Medium'), findsOneWidget);
-      expect(find.text('High'), findsOneWidget);
-      expect(find.text('Print'), findsOneWidget);
-    });
-
-    testWidgets('should show quality descriptions', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: QualitySelector(
-              selectedQuality: PDFExportQuality.high,
-              onQualityChanged: (_) {},
-            ),
-          ),
-        ),
-      );
-
-      expect(find.textContaining('DPI'), findsWidgets);
-    });
-  });
-
-  group('FormatSelector', () {
-    testWidgets('should display format options', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: FormatSelector(
-              selectedFormat: PDFPageFormat.a4,
-              onFormatChanged: (_) {},
-            ),
-          ),
-        ),
-      );
-
-      expect(find.text('A4'), findsOneWidget);
-      expect(find.text('A5'), findsOneWidget);
-      expect(find.text('Letter'), findsOneWidget);
-      expect(find.text('Legal'), findsOneWidget);
-    });
-
-    testWidgets('should show format dimensions', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: FormatSelector(
-              selectedFormat: PDFPageFormat.a4,
-              onFormatChanged: (_) {},
-            ),
-          ),
-        ),
-      );
-
-      expect(find.textContaining('×'), findsWidgets);
-    });
-  });
-
-  group('ExportModeSelector', () {
-    testWidgets('should display mode descriptions', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: ExportModeSelector(
-              selectedMode: PDFExportMode.vector,
-              onModeChanged: (_) {},
-            ),
-          ),
-        ),
-      );
-
-      expect(find.textContaining('best quality'), findsOneWidget);
-      expect(find.textContaining('smaller file'), findsOneWidget);
-      expect(find.textContaining('balanced'), findsOneWidget);
     });
   });
 }

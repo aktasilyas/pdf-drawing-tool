@@ -52,6 +52,8 @@ final activeStrokeStyleProvider = Provider<StrokeStyle>((ref) {
     return penType.toStrokeStyle(
       color: settings.color.toARGB32(),
       thickness: settings.thickness,
+      pressureSensitive: settings.pressureSensitive,
+      pressureSensitivity: settings.pressureSensitivity,
     );
   }
 

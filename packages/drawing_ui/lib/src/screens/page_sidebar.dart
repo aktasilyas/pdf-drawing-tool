@@ -48,6 +48,8 @@ class _PageSidebarState extends ConsumerState<PageSidebar> {
 
   void _scrollToPage(int index, {bool animate = true}) {
     if (!_scrollController.hasClients) return;
+    // During AnimatedSwitcher transitions two GridViews share this controller.
+    if (_scrollController.positions.length != 1) return;
     final target =
         _offsetForIndex(index).clamp(0.0, _scrollController.position.maxScrollExtent);
     if (animate) {
@@ -70,6 +72,8 @@ class _PageSidebarState extends ConsumerState<PageSidebar> {
 
   void _correctScrollIfNeeded() {
     if (!mounted || !_scrollController.hasClients) return;
+    // During AnimatedSwitcher transitions two GridViews share this controller.
+    if (_scrollController.positions.length != 1) return;
     final idx = ref.read(currentPageIndexProvider);
     final target = _offsetForIndex(idx);
     final max = _scrollController.position.maxScrollExtent;
@@ -117,9 +121,29 @@ class _PageSidebarState extends ConsumerState<PageSidebar> {
             cs: cs,
           ),
           Expanded(
-            child: filter == SidebarFilter.recordings
-                ? const AudioRecordingsList()
-                : _buildPageGrid(pageManager, filter, cs, isDark),
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 250),
+              switchInCurve: Curves.easeOut,
+              switchOutCurve: Curves.easeIn,
+              transitionBuilder: (child, animation) {
+                return FadeTransition(
+                  opacity: animation,
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: const Offset(0, 0.04),
+                      end: Offset.zero,
+                    ).animate(animation),
+                    child: child,
+                  ),
+                );
+              },
+              child: KeyedSubtree(
+                key: ValueKey(filter),
+                child: filter == SidebarFilter.recordings
+                    ? const AudioRecordingsList()
+                    : _buildPageGrid(pageManager, filter, cs, isDark),
+              ),
+            ),
           ),
         ],
       ),

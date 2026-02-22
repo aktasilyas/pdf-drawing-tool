@@ -186,12 +186,6 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
   /// Shape IDs erased in current gesture session.
   final Set<String> _erasedShapeIds = {};
 
-  /// Text IDs erased in current gesture session.
-  final Set<String> _erasedTextIds = {};
-
-  /// Image IDs erased in current gesture session.
-  final Set<String> _erasedImageIds = {};
-
   // ─────────────────────────────────────────────────────────────────────────
   // PIXEL ERASER TRACKING
   // ─────────────────────────────────────────────────────────────────────────
@@ -263,42 +257,6 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
     _laserController.dispose();
     _imageCacheManager.dispose();
     super.dispose();
-  }
-
-  void _handleSelectionDelete(core.Selection selection) {
-    final document = ref.read(documentProvider);
-    final command = core.DeleteSelectionCommand(
-      layerIndex: document.activeLayerIndex,
-      strokeIds: selection.selectedStrokeIds,
-      shapeIds: selection.selectedShapeIds,
-    );
-    ref.read(historyManagerProvider.notifier).execute(command);
-    ref.read(selectionProvider.notifier).clearSelection();
-    ref.read(selectionUiProvider.notifier).reset();
-  }
-
-  void _handleSelectionDuplicate(core.Selection selection) {
-    final document = ref.read(documentProvider);
-    final command = core.DuplicateSelectionCommand(
-      layerIndex: document.activeLayerIndex,
-      strokeIds: selection.selectedStrokeIds,
-      shapeIds: selection.selectedShapeIds,
-    );
-    ref.read(historyManagerProvider.notifier).execute(command);
-    ref.read(selectionUiProvider.notifier).reset();
-    ref.read(selectionProvider.notifier).clearSelection();
-  }
-
-  void _handleSelectionColorChange(core.Selection selection, Color color) {
-    if (selection.selectedStrokeIds.isEmpty) return;
-    final document = ref.read(documentProvider);
-    final command = core.ChangeSelectionStyleCommand(
-      layerIndex: document.activeLayerIndex,
-      strokeIds: selection.selectedStrokeIds,
-      newColor: color.toARGB32(),
-    );
-    ref.read(historyManagerProvider.notifier).execute(command);
-    ref.read(selectionUiProvider.notifier).hideContextMenu();
   }
 
   Widget _imageMenuButton(
@@ -633,12 +591,6 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
   Set<String> get erasedShapeIds => _erasedShapeIds;
 
   @override
-  Set<String> get erasedTextIds => _erasedTextIds;
-
-  @override
-  Set<String> get erasedImageIds => _erasedImageIds;
-
-  @override
   Map<String, List<int>> get pixelEraseHits => _pixelEraseHits;
 
   @override
@@ -751,6 +703,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
     final lassoEraserPoints = ref.watch(lassoEraserPointsProvider);
     final isEraserTool = ref.watch(isEraserToolProvider);
     final pixelEraserPreview = ref.watch(pixelEraserPreviewProvider);
+    final strokeEraserPreview = ref.watch(strokeEraserPreviewProvider);
 
     // Selection tool preview path
     List<core.DrawingPoint>? selectionPreviewPath;
@@ -1018,10 +971,14 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                                       strokes: strokes,
                                       renderer: _renderer,
                                       excludedSegments: pixelEraserPreview,
-                                      excludedStrokeIds: excludedStrokeIds,
+                                      excludedStrokeIds: strokeEraserPreview.isNotEmpty
+                                          ? {...excludedStrokeIds, ...strokeEraserPreview}
+                                          : excludedStrokeIds,
                                     ),
                                     isComplex: true,
-                                    willChange: pixelEraserPreview.isNotEmpty || hasLiveTransform,
+                                    willChange: pixelEraserPreview.isNotEmpty ||
+                                        strokeEraserPreview.isNotEmpty ||
+                                        hasLiveTransform,
                                   ),
                                 ),
                                 // Committed Shapes + Preview Shape
@@ -1170,6 +1127,8 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                                   selectedShapes: selectedShapes,
                                   moveDelta: selectionUi.moveDelta,
                                   rotation: selectionUi.rotation,
+                                  scaleX: selectionUi.scaleX,
+                                  scaleY: selectionUi.scaleY,
                                   centerX: (selection.bounds.left + selection.bounds.right) / 2,
                                   centerY: (selection.bounds.top + selection.bounds.bottom) / 2,
                                   renderer: _renderer,
@@ -1253,26 +1212,10 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
               ),
 
             // ───────────────────────────────────────────────────────────────────
-            // Selection Context Menu (delete/copy/style)
+            // Selection Toolbar (floating toolbar with quick actions + overflow)
             // ───────────────────────────────────────────────────────────────────
             if (selectionUi.showMenu && selection != null)
-              Builder(
-                builder: (context) {
-                  final centerX = (selection.bounds.left + selection.bounds.right) / 2 *
-                          transform.zoom +
-                      transform.offset.dx;
-                  final screenY = selection.bounds.top * transform.zoom +
-                      transform.offset.dy -
-                      50;
-                  return _SelectionContextMenu(
-                    left: centerX,
-                    top: screenY,
-                    onDelete: () => _handleSelectionDelete(selection),
-                    onDuplicate: () => _handleSelectionDuplicate(selection),
-                    onStyleColor: (color) => _handleSelectionColorChange(selection, color),
-                  );
-                },
-              ),
+              SelectionToolbar(selection: selection),
 
             // ───────────────────────────────────────────────────────────────────
             // Image Context Menu (delete/duplicate/move only, no edit/style)
@@ -1633,141 +1576,6 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
           ],
         );
       },
-    );
-  }
-}
-
-// =============================================================================
-// SELECTION CONTEXT MENU
-// =============================================================================
-
-/// Floating context menu for selection actions (delete, copy, style).
-class _SelectionContextMenu extends StatelessWidget {
-  final double left;
-  final double top;
-  final VoidCallback onDelete;
-  final VoidCallback onDuplicate;
-  final ValueChanged<Color> onStyleColor;
-
-  static const _quickColors = [
-    Color(0xFF000000),
-    Color(0xFFE53935),
-    Color(0xFF1E88E5),
-    Color(0xFF43A047),
-    Color(0xFFFB8C00),
-    Color(0xFF8E24AA),
-  ];
-
-  const _SelectionContextMenu({
-    required this.left,
-    required this.top,
-    required this.onDelete,
-    required this.onDuplicate,
-    required this.onStyleColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      left: left - 100,
-      top: top,
-      child: Listener(
-        behavior: HitTestBehavior.opaque,
-        onPointerDown: (_) {},
-        child: Material(
-          color: Colors.transparent,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.2),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _menuButton(
-                      StarNoteIcons.trash,
-                      'Sil',
-                      onDelete,
-                      Colors.red,
-                    ),
-                    _divider(),
-                    _menuButton(
-                      StarNoteIcons.copy,
-                      'Kopyala',
-                      onDuplicate,
-                      null,
-                    ),
-                  ],
-                ),
-                // Quick color row
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 4,
-                    vertical: 4,
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: _quickColors
-                        .map((c) => _colorDot(c))
-                        .toList(),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _menuButton(
-    PhosphorIconData icon,
-    String tooltip,
-    VoidCallback onTap,
-    Color? color,
-  ) {
-    return Tooltip(
-      message: tooltip,
-      child: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: Container(
-          width: 40,
-          height: 40,
-          alignment: Alignment.center,
-          child: PhosphorIcon(icon, size: 20, color: color ?? Colors.black87),
-        ),
-      ),
-    );
-  }
-
-  Widget _divider() {
-    return Container(width: 1, height: 24, color: Colors.grey[300]);
-  }
-
-  Widget _colorDot(Color color) {
-    return GestureDetector(
-      onTap: () => onStyleColor(color),
-      child: Container(
-        width: 24,
-        height: 24,
-        margin: const EdgeInsets.symmetric(horizontal: 2),
-        decoration: BoxDecoration(
-          color: color,
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.grey[300]!, width: 1),
-        ),
-      ),
     );
   }
 }

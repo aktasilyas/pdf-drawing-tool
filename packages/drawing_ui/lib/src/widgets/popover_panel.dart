@@ -134,8 +134,13 @@ class _PopoverOverlayState extends State<_PopoverOverlay>
       edge, widget.screenSize.width - widget.maxWidth - edge,
     );
     final arrowLeft = (cx - left - aw / 2).clamp(16.0, widget.maxWidth - 16.0 - aw);
-    final bg = cs.surfaceContainerHigh;
+    final bg = cs.surface;
     final border = cs.outlineVariant;
+
+    // Max height for the panel content (excluding arrow).
+    final maxPanelHeight = openAbove
+        ? anchorTop - gap - ah - edge
+        : widget.screenSize.height - anchorBottom - gap - ah - edge;
 
     final arrow = Padding(
       padding: EdgeInsets.only(left: arrowLeft),
@@ -144,7 +149,7 @@ class _PopoverOverlayState extends State<_PopoverOverlay>
         painter: _ArrowPainter(color: bg, borderColor: border, direction: openAbove ? _ArrowDir.down : _ArrowDir.up),
       ),
     );
-    final panel = _panelBox(bg, border);
+    final panel = _panelBox(bg, border, maxHeight: maxPanelHeight);
     final content = Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -165,7 +170,7 @@ class _PopoverOverlayState extends State<_PopoverOverlay>
   Widget _buildHorizontal(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     const edge = 12.0, gap = 4.0, ah = 10.0, aw = 20.0;
-    final bg = cs.surfaceContainerHigh;
+    final bg = cs.surface;
     final border = cs.outlineVariant;
 
     final anchorRight = widget.anchorPosition.dx + widget.anchorSize.width;
@@ -184,7 +189,8 @@ class _PopoverOverlayState extends State<_PopoverOverlay>
         painter: _ArrowPainter(color: bg, borderColor: border, direction: _ArrowDir.left),
       ),
     );
-    final panel = _panelBox(bg, border);
+    final panelMaxH = widget.screenSize.height - edge * 2 - ah;
+    final panel = _panelBox(bg, border, maxHeight: panelMaxH);
     final content = Row(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -198,8 +204,11 @@ class _PopoverOverlayState extends State<_PopoverOverlay>
     );
   }
 
-  Widget _panelBox(Color bg, Color border) => Container(
-    constraints: BoxConstraints(maxWidth: widget.maxWidth),
+  Widget _panelBox(Color bg, Color border, {double? maxHeight}) => Container(
+    constraints: BoxConstraints(
+      maxWidth: widget.maxWidth,
+      maxHeight: maxHeight ?? double.infinity,
+    ),
     decoration: BoxDecoration(
       color: bg,
       borderRadius: BorderRadius.circular(16),

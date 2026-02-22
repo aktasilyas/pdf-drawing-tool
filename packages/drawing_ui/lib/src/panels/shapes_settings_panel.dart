@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:drawing_ui/src/panels/tool_panel.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/widgets/color_picker_strip.dart';
 import 'package:drawing_ui/src/widgets/compact_toggle.dart';
@@ -22,8 +23,18 @@ class ShapesSettingsPanel extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Şekil', style: TextStyle(
-            fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSurface)),
+          Row(
+            children: [
+              Expanded(
+                child: Text('Şekil', style: TextStyle(
+                  fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSurface)),
+              ),
+              PanelCloseButton(
+                onTap: () =>
+                    ref.read(activePanelProvider.notifier).state = null,
+              ),
+            ],
+          ),
           const SizedBox(height: 10),
           _ShapeGrid(
             selectedShape: settings.selectedShape,
@@ -32,14 +43,14 @@ class ShapesSettingsPanel extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           GoodNotesSlider(
-            label: 'KONTUR KALINLIĞI', activeColor: cs.primary,
+            label: 'Kontur Kalınlığı', activeColor: cs.primary,
             value: settings.strokeThickness, min: 0.1, max: 10.0,
             displayValue: '${settings.strokeThickness.toStringAsFixed(1)}mm',
             onChanged: (v) => ref.read(
                 shapesSettingsProvider.notifier).setStrokeThickness(v),
           ),
           const SizedBox(height: 10),
-          _StripLabel(label: 'KONTUR RENGİ'),
+          _StripLabel(label: 'Kontur Rengi'),
           const SizedBox(height: 6),
           ColorPickerStrip(
             selectedColor: settings.strokeColor,
@@ -54,7 +65,7 @@ class ShapesSettingsPanel extends ConsumerWidget {
           ),
           if (settings.fillEnabled) ...[
             const SizedBox(height: 8),
-            _StripLabel(label: 'DOLGU RENGİ'),
+            _StripLabel(label: 'Dolgu Rengi'),
             const SizedBox(height: 6),
             ColorPickerStrip(
               selectedColor: settings.fillColor,

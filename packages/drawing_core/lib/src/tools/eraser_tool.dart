@@ -49,36 +49,26 @@ class EraserTool extends DrawingTool {
   ///
   /// [strokes] - Aranacak stroke listesi
   /// [x], [y] - Silgi pozisyonu
+  /// [toleranceOverride] - Canvas-space tolerance (null ise varsayılan kullanılır)
   ///
   /// Returns: Silinecek stroke'ların listesi
   List<Stroke> findStrokesToErase(
     List<Stroke> strokes,
     double x,
-    double y,
-  ) {
+    double y, {
+    double? toleranceOverride,
+  }) {
+    final t = toleranceOverride ?? tolerance;
     switch (mode) {
       case EraserMode.stroke:
-        // Tek stroke bul ve tamamını sil
-        final stroke = _hitTester.findTopElementAt(
-          strokes,
-          x,
-          y,
-          tolerance,
-        );
+        final stroke = _hitTester.findTopElementAt(strokes, x, y, t);
         return stroke != null ? [stroke] : [];
 
       case EraserMode.pixel:
-        final stroke = _hitTester.findTopElementAt(
-          strokes,
-          x,
-          y,
-          tolerance,
-        );
+        final stroke = _hitTester.findTopElementAt(strokes, x, y, t);
         return stroke != null ? [stroke] : [];
 
       case EraserMode.lasso:
-        // Lasso mode is handled separately by LassoEraserTool
-        // This method is not used for lasso mode
         return [];
     }
   }
@@ -113,6 +103,9 @@ class EraserTool extends DrawingTool {
     _erasedStrokeIds.clear();
     return result;
   }
+
+  /// Current erased stroke IDs in this session (read-only view).
+  Set<String> get erasedIds => Set.unmodifiable(_erasedStrokeIds);
 
   /// Şu ana kadar silinen stroke sayısı
   int get erasedCount => _erasedStrokeIds.length;
