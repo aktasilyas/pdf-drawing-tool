@@ -102,12 +102,6 @@ class EraserSettingsPanel extends ConsumerWidget {
                 .setEraseOnlyHighlighter(v),
           ),
           CompactToggle(
-            label: 'Sadece bant sil',
-            value: settings.eraseBandOnly,
-            onChanged: (v) =>
-                ref.read(eraserSettingsProvider.notifier).setEraseBandOnly(v),
-          ),
-          CompactToggle(
             label: 'Otomatik kald\u0131r',
             value: settings.autoLift,
             onChanged: (v) =>

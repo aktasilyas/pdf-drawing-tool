@@ -20,7 +20,6 @@ const _defaultEraserSettings = EraserSettings(
   size: 20.0,
   pressureSensitive: true,
   eraseOnlyHighlighter: false,
-  eraseBandOnly: false,
   autoLift: false,
 );
 
@@ -31,7 +30,6 @@ class EraserSettings {
     required this.size,
     required this.pressureSensitive,
     required this.eraseOnlyHighlighter,
-    required this.eraseBandOnly,
     required this.autoLift,
   });
 
@@ -39,7 +37,6 @@ class EraserSettings {
   final double size;
   final bool pressureSensitive;
   final bool eraseOnlyHighlighter;
-  final bool eraseBandOnly;
   final bool autoLift;
 
   EraserSettings copyWith({
@@ -47,7 +44,6 @@ class EraserSettings {
     double? size,
     bool? pressureSensitive,
     bool? eraseOnlyHighlighter,
-    bool? eraseBandOnly,
     bool? autoLift,
   }) {
     return EraserSettings(
@@ -55,7 +51,6 @@ class EraserSettings {
       size: size ?? this.size,
       pressureSensitive: pressureSensitive ?? this.pressureSensitive,
       eraseOnlyHighlighter: eraseOnlyHighlighter ?? this.eraseOnlyHighlighter,
-      eraseBandOnly: eraseBandOnly ?? this.eraseBandOnly,
       autoLift: autoLift ?? this.autoLift,
     );
   }
@@ -66,7 +61,6 @@ class EraserSettings {
       'size': size,
       'pressureSensitive': pressureSensitive,
       'eraseOnlyHighlighter': eraseOnlyHighlighter,
-      'eraseBandOnly': eraseBandOnly,
       'autoLift': autoLift,
     };
   }
@@ -83,7 +77,6 @@ class EraserSettings {
           json['pressureSensitive'] as bool? ?? d.pressureSensitive,
       eraseOnlyHighlighter:
           json['eraseOnlyHighlighter'] as bool? ?? d.eraseOnlyHighlighter,
-      eraseBandOnly: json['eraseBandOnly'] as bool? ?? d.eraseBandOnly,
       autoLift: json['autoLift'] as bool? ?? d.autoLift,
     );
   }
@@ -149,11 +142,6 @@ class EraserSettingsNotifier extends StateNotifier<EraserSettings> {
 
   void setEraseOnlyHighlighter(bool eraseOnlyHighlighter) {
     state = state.copyWith(eraseOnlyHighlighter: eraseOnlyHighlighter);
-    _save();
-  }
-
-  void setEraseBandOnly(bool eraseBandOnly) {
-    state = state.copyWith(eraseBandOnly: eraseBandOnly);
     _save();
   }
 

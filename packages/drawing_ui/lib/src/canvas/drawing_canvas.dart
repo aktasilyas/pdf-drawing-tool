@@ -186,12 +186,6 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
   /// Shape IDs erased in current gesture session.
   final Set<String> _erasedShapeIds = {};
 
-  /// Text IDs erased in current gesture session.
-  final Set<String> _erasedTextIds = {};
-
-  /// Image IDs erased in current gesture session.
-  final Set<String> _erasedImageIds = {};
-
   // ─────────────────────────────────────────────────────────────────────────
   // PIXEL ERASER TRACKING
   // ─────────────────────────────────────────────────────────────────────────
@@ -633,12 +627,6 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
   Set<String> get erasedShapeIds => _erasedShapeIds;
 
   @override
-  Set<String> get erasedTextIds => _erasedTextIds;
-
-  @override
-  Set<String> get erasedImageIds => _erasedImageIds;
-
-  @override
   Map<String, List<int>> get pixelEraseHits => _pixelEraseHits;
 
   @override
@@ -751,6 +739,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
     final lassoEraserPoints = ref.watch(lassoEraserPointsProvider);
     final isEraserTool = ref.watch(isEraserToolProvider);
     final pixelEraserPreview = ref.watch(pixelEraserPreviewProvider);
+    final strokeEraserPreview = ref.watch(strokeEraserPreviewProvider);
 
     // Selection tool preview path
     List<core.DrawingPoint>? selectionPreviewPath;
@@ -1018,10 +1007,14 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                                       strokes: strokes,
                                       renderer: _renderer,
                                       excludedSegments: pixelEraserPreview,
-                                      excludedStrokeIds: excludedStrokeIds,
+                                      excludedStrokeIds: strokeEraserPreview.isNotEmpty
+                                          ? {...excludedStrokeIds, ...strokeEraserPreview}
+                                          : excludedStrokeIds,
                                     ),
                                     isComplex: true,
-                                    willChange: pixelEraserPreview.isNotEmpty || hasLiveTransform,
+                                    willChange: pixelEraserPreview.isNotEmpty ||
+                                        strokeEraserPreview.isNotEmpty ||
+                                        hasLiveTransform,
                                   ),
                                 ),
                                 // Committed Shapes + Preview Shape

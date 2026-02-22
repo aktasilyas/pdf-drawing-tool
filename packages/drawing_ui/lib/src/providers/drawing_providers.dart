@@ -17,6 +17,9 @@ final currentToolProvider = StateProvider<ToolType>((ref) {
   return ToolType.ballpointPen;
 });
 
+/// Tool that was active before switching to eraser (for autoLift).
+final previousToolProvider = StateProvider<ToolType?>((ref) => null);
+
 /// Whether a panel is currently open (and which one).
 final activePanelProvider = StateProvider<ToolType?>((ref) {
   return null;

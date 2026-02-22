@@ -84,6 +84,13 @@ void handleToolPressed(WidgetRef ref, ToolType tool) {
       ref.read(activePanelProvider.notifier).state = currentTool;
     }
   } else {
+    // Save previous tool when switching to eraser (for autoLift)
+    final isNewEraser = eraserTools.contains(tool);
+    final wasEraser = eraserTools.contains(currentTool);
+    if (isNewEraser && !wasEraser) {
+      ref.read(previousToolProvider.notifier).state = currentTool;
+    }
+
     // First click — just select, no panel
     ref.read(currentToolProvider.notifier).state = tool;
     ref.read(activePanelProvider.notifier).state = null;

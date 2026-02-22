@@ -67,17 +67,12 @@ mixin DrawingCanvasHelpers<T extends ConsumerStatefulWidget>
     List<core.Stroke> strokes,
     EraserSettings settings,
   ) {
-    var filtered = strokes;
+    if (!settings.eraseOnlyHighlighter) return strokes;
 
-    // Filter: Erase only highlighter strokes
-    if (settings.eraseOnlyHighlighter) {
-      filtered = filtered.where((stroke) {
-        // Check if stroke is a highlighter (has transparency)
-        final color = Color(stroke.style.color);
-        return color.a < 1.0; // Highlighters typically have alpha < 1.0
-      }).toList();
-    }
-
-    return filtered;
+    // Highlighter strokes: rectangle nib + opacity < 1.0
+    return strokes.where((stroke) {
+      return stroke.style.nibShape == core.NibShape.rectangle &&
+          stroke.style.opacity < 1.0;
+    }).toList();
   }
 }
