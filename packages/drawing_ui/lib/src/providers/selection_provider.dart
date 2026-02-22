@@ -92,7 +92,7 @@ final activeSelectionToolProvider = Provider<SelectionTool>((ref) {
 });
 
 // ============================================================
-// SELECTION UI STATE (live move, rotation, context menu)
+// SELECTION UI STATE (live move, rotation, scale, context menu)
 // ============================================================
 
 /// UI-layer state for live selection feedback and context menu.
@@ -103,26 +103,49 @@ class SelectionUiState {
   /// Live rotation angle in radians (reset on commit).
   final double rotation;
 
-  /// Whether the context menu is visible.
+  /// Live horizontal scale factor (reset on commit).
+  final double scaleX;
+
+  /// Live vertical scale factor (reset on commit).
+  final double scaleY;
+
+  /// Which handle is currently being dragged (null if none).
+  final SelectionHandle? activeHandle;
+
+  /// Whether the context menu / toolbar is visible.
   final bool showMenu;
 
   const SelectionUiState({
     this.moveDelta = Offset.zero,
     this.rotation = 0.0,
+    this.scaleX = 1.0,
+    this.scaleY = 1.0,
+    this.activeHandle,
     this.showMenu = false,
   });
 
   /// Whether any live transform is active.
-  bool get hasTransform => moveDelta != Offset.zero || rotation != 0.0;
+  bool get hasTransform =>
+      moveDelta != Offset.zero ||
+      rotation != 0.0 ||
+      scaleX != 1.0 ||
+      scaleY != 1.0;
 
   SelectionUiState copyWith({
     Offset? moveDelta,
     double? rotation,
+    double? scaleX,
+    double? scaleY,
+    SelectionHandle? activeHandle,
+    bool clearActiveHandle = false,
     bool? showMenu,
   }) {
     return SelectionUiState(
       moveDelta: moveDelta ?? this.moveDelta,
       rotation: rotation ?? this.rotation,
+      scaleX: scaleX ?? this.scaleX,
+      scaleY: scaleY ?? this.scaleY,
+      activeHandle: clearActiveHandle ? null : (activeHandle ?? this.activeHandle),
       showMenu: showMenu ?? this.showMenu,
     );
   }
@@ -140,6 +163,18 @@ class SelectionUiNotifier extends StateNotifier<SelectionUiState> {
     state = state.copyWith(rotation: angle, showMenu: false);
   }
 
+  void setScale(double sx, double sy) {
+    state = state.copyWith(scaleX: sx, scaleY: sy, showMenu: false);
+  }
+
+  void setActiveHandle(SelectionHandle? handle) {
+    if (handle == null) {
+      state = state.copyWith(clearActiveHandle: true);
+    } else {
+      state = state.copyWith(activeHandle: handle);
+    }
+  }
+
   void showContextMenu() {
     state = state.copyWith(showMenu: true);
   }
@@ -153,7 +188,7 @@ class SelectionUiNotifier extends StateNotifier<SelectionUiState> {
   }
 }
 
-/// Provider for selection UI state (live move, rotation, context menu).
+/// Provider for selection UI state (live move, rotation, scale, context menu).
 final selectionUiProvider =
     StateNotifierProvider<SelectionUiNotifier, SelectionUiState>((ref) {
   return SelectionUiNotifier();

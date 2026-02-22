@@ -808,6 +808,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
 
     if (selection != null) {
       ref.read(selectionProvider.notifier).setSelection(selection);
+      ref.read(selectionUiProvider.notifier).showContextMenu();
     }
 
     setState(() {});

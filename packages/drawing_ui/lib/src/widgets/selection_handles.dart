@@ -5,15 +5,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/internal.dart';
 
-enum _DragMode { move, rotate }
+enum _DragMode { move, rotate, scale }
 
-/// Widget that handles selection interactions: live move, rotate, and tap.
+/// Handles selection interactions: live move, rotate, scale, and tap.
 ///
-/// Placed inside the Transform stack (canvas coordinates).
-/// - Drag inside selection → live move (strokes follow finger).
+/// - Drag corner handle → uniform scale.
+/// - Drag edge handle → axis-constrained scale.
 /// - Drag rotation handle → live rotate.
-/// - Tap inside → show context menu.
-/// - Tap outside → clear selection.
+/// - Drag inside body → live move.
+/// - Tap inside → show toolbar. Tap outside → clear selection.
 class SelectionHandles extends ConsumerStatefulWidget {
   final Selection selection;
   final VoidCallback? onSelectionChanged;
@@ -33,12 +33,13 @@ class _SelectionHandlesState extends ConsumerState<SelectionHandles> {
   Offset? _dragStart;
   BoundingBox? _originalBounds;
 
-  static const double _hitRadius = 20.0;
-  static const double _rotHandleDist = 30.0;
+  static const double _hitR = 22.0;
+  static const double _rotDist = 36.0;
+  static const double _minSize = 20.0;
 
   @override
   Widget build(BuildContext context) {
-    final selectionUi = ref.watch(selectionUiProvider);
+    final ui = ref.watch(selectionUiProvider);
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTapUp: _onTapUp,
@@ -46,359 +47,254 @@ class _SelectionHandlesState extends ConsumerState<SelectionHandles> {
       onPanUpdate: _onPanUpdate,
       onPanEnd: _onPanEnd,
       child: CustomPaint(
-        painter: _SelectionHandlesPainter(
+        painter: SelectionHandlesPainter(
           bounds: widget.selection.bounds,
-          moveDelta: selectionUi.moveDelta,
-          rotation: selectionUi.rotation,
+          moveDelta: ui.moveDelta,
+          rotation: ui.rotation,
+          scaleX: ui.scaleX,
+          scaleY: ui.scaleY,
         ),
         child: const SizedBox.expand(),
       ),
     );
   }
 
-  // ── Coordinate helpers ──
+  // ── Helpers ──
 
-  Offset _rotHandlePos(BoundingBox b) {
+  Offset _rotHandlePos(BoundingBox b) =>
+      Offset((b.left + b.right) / 2, b.top - _rotDist);
+
+  bool _inside(Offset pt, BoundingBox b) =>
+      pt.dx >= b.left && pt.dx <= b.right && pt.dy >= b.top && pt.dy <= b.bottom;
+
+  SelectionHandle? _hitTestHandle(Offset pt, BoundingBox b) {
     final cx = (b.left + b.right) / 2;
-    return Offset(cx, b.top - _rotHandleDist);
+    final cy = (b.top + b.bottom) / 2;
+    // Corners
+    if ((pt - Offset(b.left, b.top)).distance <= _hitR) return SelectionHandle.topLeft;
+    if ((pt - Offset(b.right, b.top)).distance <= _hitR) return SelectionHandle.topRight;
+    if ((pt - Offset(b.left, b.bottom)).distance <= _hitR) return SelectionHandle.bottomLeft;
+    if ((pt - Offset(b.right, b.bottom)).distance <= _hitR) return SelectionHandle.bottomRight;
+    // Edges
+    if ((pt - Offset(cx, b.top)).distance <= _hitR) return SelectionHandle.topCenter;
+    if ((pt - Offset(cx, b.bottom)).distance <= _hitR) return SelectionHandle.bottomCenter;
+    if ((pt - Offset(b.left, cy)).distance <= _hitR) return SelectionHandle.middleLeft;
+    if ((pt - Offset(b.right, cy)).distance <= _hitR) return SelectionHandle.middleRight;
+    return null;
   }
 
-  bool _isInsideBounds(Offset pt, BoundingBox b) {
-    return pt.dx >= b.left &&
-        pt.dx <= b.right &&
-        pt.dy >= b.top &&
-        pt.dy <= b.bottom;
-  }
+  bool _isCorner(SelectionHandle h) =>
+      h == SelectionHandle.topLeft || h == SelectionHandle.topRight ||
+      h == SelectionHandle.bottomLeft || h == SelectionHandle.bottomRight;
 
-  // ── Tap handler ──
+  // ── Tap ──
 
   void _onTapUp(TapUpDetails details) {
     final pos = details.localPosition;
-    final bounds = widget.selection.bounds;
-
-    // Tap on rotation handle → ignore (drag intent)
-    if ((pos - _rotHandlePos(bounds)).distance <= _hitRadius) return;
-
-    // Tap inside body → show context menu
-    if (_isInsideBounds(pos, bounds)) {
+    final b = widget.selection.bounds;
+    if ((pos - _rotHandlePos(b)).distance <= _hitR) return;
+    if (_inside(pos, b)) {
       ref.read(selectionUiProvider.notifier).showContextMenu();
       return;
     }
-
-    // Outside → clear selection
-    ref.read(selectionUiProvider.notifier).reset();
-    ref.read(selectionProvider.notifier).clearSelection();
-    widget.onSelectionChanged?.call();
+    _clearSelection();
   }
 
-  // ── Pan handlers ──
+  // ── Pan ──
 
   void _onPanStart(DragStartDetails details) {
     final pos = details.localPosition;
-    final bounds = widget.selection.bounds;
-
-    // Hide menu on any drag
+    final b = widget.selection.bounds;
     ref.read(selectionUiProvider.notifier).hideContextMenu();
 
-    // Rotation handle
-    if ((pos - _rotHandlePos(bounds)).distance <= _hitRadius) {
-      _dragMode = _DragMode.rotate;
-      _dragStart = pos;
-      _originalBounds = bounds;
+    if ((pos - _rotHandlePos(b)).distance <= _hitR) {
+      _startDrag(_DragMode.rotate, pos, b);
       return;
     }
-
-    // Inside body → move
-    if (_isInsideBounds(pos, bounds)) {
-      _dragMode = _DragMode.move;
-      _dragStart = pos;
-      _originalBounds = bounds;
+    final handle = _hitTestHandle(pos, b);
+    if (handle != null) {
+      _startDrag(_DragMode.scale, pos, b);
+      ref.read(selectionUiProvider.notifier).setActiveHandle(handle);
       return;
     }
+    if (_inside(pos, b)) {
+      _startDrag(_DragMode.move, pos, b);
+      return;
+    }
+    _clearSelection();
+  }
 
-    // Outside → clear
-    ref.read(selectionUiProvider.notifier).reset();
-    ref.read(selectionProvider.notifier).clearSelection();
-    widget.onSelectionChanged?.call();
+  void _startDrag(_DragMode mode, Offset pos, BoundingBox b) {
+    _dragMode = mode;
+    _dragStart = pos;
+    _originalBounds = b;
   }
 
   void _onPanUpdate(DragUpdateDetails details) {
     if (_dragMode == null || _originalBounds == null) return;
     final pos = details.localPosition;
-
     switch (_dragMode!) {
       case _DragMode.move:
-        final delta = pos - _dragStart!;
-        ref.read(selectionUiProvider.notifier).setMoveDelta(delta);
-
+        ref.read(selectionUiProvider.notifier).setMoveDelta(pos - _dragStart!);
       case _DragMode.rotate:
-        final bounds = _originalBounds!;
-        final cx = (bounds.left + bounds.right) / 2;
-        final cy = (bounds.top + bounds.bottom) / 2;
-        final angle =
-            math.atan2(pos.dy - cy, pos.dx - cx) + math.pi / 2;
-        ref.read(selectionUiProvider.notifier).setRotation(angle);
+        final b = _originalBounds!;
+        final cx = (b.left + b.right) / 2, cy = (b.top + b.bottom) / 2;
+        ref.read(selectionUiProvider.notifier)
+            .setRotation(math.atan2(pos.dy - cy, pos.dx - cx) + math.pi / 2);
+      case _DragMode.scale:
+        _updateScale(pos);
     }
   }
 
-  void _onPanEnd(DragEndDetails details) {
-    if (_dragMode == null || _originalBounds == null) {
-      _reset();
-      return;
-    }
+  void _updateScale(Offset pos) {
+    final b = _originalBounds!;
+    final handle = ref.read(selectionUiProvider).activeHandle;
+    if (handle == null) return;
+    final cx = (b.left + b.right) / 2, cy = (b.top + b.bottom) / 2;
+    final halfW = (b.right - b.left) / 2, halfH = (b.bottom - b.top) / 2;
+    if (halfW < 1 || halfH < 1) return;
 
+    double sx = 1.0, sy = 1.0;
+    if (_isCorner(handle)) {
+      final d0 = (_dragStart! - Offset(cx, cy)).distance;
+      if (d0 < 1) return;
+      final f = (pos - Offset(cx, cy)).distance / d0;
+      sx = f; sy = f;
+    } else {
+      switch (handle) {
+        case SelectionHandle.topCenter:
+        case SelectionHandle.bottomCenter:
+          final d0 = (_dragStart!.dy - cy).abs();
+          if (d0 < 1) return;
+          sy = (pos.dy - cy).abs() / d0;
+        case SelectionHandle.middleLeft:
+        case SelectionHandle.middleRight:
+          final d0 = (_dragStart!.dx - cx).abs();
+          if (d0 < 1) return;
+          sx = (pos.dx - cx).abs() / d0;
+        default: break;
+      }
+    }
+    if (halfW * 2 * sx < _minSize) sx = _minSize / (halfW * 2);
+    if (halfH * 2 * sy < _minSize) sy = _minSize / (halfH * 2);
+    ref.read(selectionUiProvider.notifier).setScale(sx, sy);
+  }
+
+  void _onPanEnd(DragEndDetails details) {
+    if (_dragMode == null || _originalBounds == null) { _reset(); return; }
     switch (_dragMode!) {
-      case _DragMode.move:
-        _commitMove();
-      case _DragMode.rotate:
-        _commitRotation();
+      case _DragMode.move: _commitMove();
+      case _DragMode.rotate: _commitRotation();
+      case _DragMode.scale: _commitScale();
     }
     _reset();
   }
 
+  // ── Commits ──
+
   void _commitMove() {
     final delta = ref.read(selectionUiProvider).moveDelta;
     if (delta == Offset.zero) return;
-
-    // Clamp to page bounds
     final page = ref.read(currentPageProvider);
     final ob = _originalBounds!;
-    final clampedDx = delta.dx.clamp(
-      -ob.left,
-      page.size.width - ob.right,
-    );
-    final clampedDy = delta.dy.clamp(
-      -ob.top,
-      page.size.height - ob.bottom,
-    );
+    final dx = delta.dx.clamp(-ob.left, page.size.width - ob.right);
+    final dy = delta.dy.clamp(-ob.top, page.size.height - ob.bottom);
 
-    final document = ref.read(documentProvider);
-    final command = MoveSelectionCommand(
-      layerIndex: document.activeLayerIndex,
+    _executeCommand(MoveSelectionCommand(
+      layerIndex: ref.read(documentProvider).activeLayerIndex,
       strokeIds: widget.selection.selectedStrokeIds,
       shapeIds: widget.selection.selectedShapeIds,
-      deltaX: clampedDx,
-      deltaY: clampedDy,
-    );
-    ref.read(historyManagerProvider.notifier).execute(command);
-
-    // Update selection bounds
-    final newBounds = BoundingBox(
-      left: ob.left + clampedDx,
-      top: ob.top + clampedDy,
-      right: ob.right + clampedDx,
-      bottom: ob.bottom + clampedDy,
-    );
+      deltaX: dx, deltaY: dy,
+    ));
     ref.read(selectionProvider.notifier).setSelection(
-          widget.selection.copyWith(
-            bounds: newBounds,
-            lassoPath: null,
-            type: SelectionType.rectangle,
-          ),
-        );
-    ref.read(selectionUiProvider.notifier).reset();
-    widget.onSelectionChanged?.call();
+      widget.selection.copyWith(
+        bounds: BoundingBox(
+          left: ob.left + dx, top: ob.top + dy,
+          right: ob.right + dx, bottom: ob.bottom + dy,
+        ),
+        lassoPath: null, type: SelectionType.rectangle,
+      ),
+    );
+    _finishTransform();
   }
 
   void _commitRotation() {
     final angle = ref.read(selectionUiProvider).rotation;
     if (angle == 0.0) return;
-
     final ob = _originalBounds!;
-    final cx = (ob.left + ob.right) / 2;
-    final cy = (ob.top + ob.bottom) / 2;
-
-    final document = ref.read(documentProvider);
-    final command = RotateSelectionCommand(
-      layerIndex: document.activeLayerIndex,
+    final cx = (ob.left + ob.right) / 2, cy = (ob.top + ob.bottom) / 2;
+    _executeCommand(RotateSelectionCommand(
+      layerIndex: ref.read(documentProvider).activeLayerIndex,
       strokeIds: widget.selection.selectedStrokeIds,
       shapeIds: widget.selection.selectedShapeIds,
-      centerX: cx,
-      centerY: cy,
-      angle: angle,
-    );
-    ref.read(historyManagerProvider.notifier).execute(command);
+      centerX: cx, centerY: cy, angle: angle,
+    ));
+    _recalculateBounds();
+    _finishTransform();
+  }
 
-    // Recalculate bounds from actual stroke positions
-    _recalculateBoundsAfterRotation();
+  void _commitScale() {
+    final ui = ref.read(selectionUiProvider);
+    if (ui.scaleX == 1.0 && ui.scaleY == 1.0) return;
+    final ob = _originalBounds!;
+    final cx = (ob.left + ob.right) / 2, cy = (ob.top + ob.bottom) / 2;
+    _executeCommand(ScaleSelectionCommand(
+      layerIndex: ref.read(documentProvider).activeLayerIndex,
+      strokeIds: widget.selection.selectedStrokeIds,
+      shapeIds: widget.selection.selectedShapeIds,
+      centerX: cx, centerY: cy, scaleX: ui.scaleX, scaleY: ui.scaleY,
+    ));
+    _recalculateBounds();
+    _finishTransform();
+  }
+
+  void _executeCommand(DrawingCommand command) {
+    ref.read(historyManagerProvider.notifier).execute(command);
+  }
+
+  void _recalculateBounds() {
+    final doc = ref.read(documentProvider);
+    final layer = doc.layers[doc.activeLayerIndex];
+    double? minX, minY, maxX, maxY;
+    void expand(BoundingBox b) {
+      minX = minX == null ? b.left : math.min(minX!, b.left);
+      minY = minY == null ? b.top : math.min(minY!, b.top);
+      maxX = maxX == null ? b.right : math.max(maxX!, b.right);
+      maxY = maxY == null ? b.bottom : math.max(maxY!, b.bottom);
+    }
+    for (final id in widget.selection.selectedStrokeIds) {
+      final b = layer.getStrokeById(id)?.bounds;
+      if (b != null) expand(b);
+    }
+    for (final id in widget.selection.selectedShapeIds) {
+      final s = layer.getShapeById(id);
+      if (s != null) expand(s.bounds);
+    }
+    if (minX != null) {
+      ref.read(selectionProvider.notifier).setSelection(
+        widget.selection.copyWith(
+          bounds: BoundingBox(left: minX!, top: minY!, right: maxX!, bottom: maxY!),
+          lassoPath: null, type: SelectionType.rectangle,
+        ),
+      );
+    }
+  }
+
+  void _finishTransform() {
     ref.read(selectionUiProvider.notifier).reset();
     widget.onSelectionChanged?.call();
   }
 
-  void _recalculateBoundsAfterRotation() {
-    final doc = ref.read(documentProvider);
-    final layer = doc.layers[doc.activeLayerIndex];
-
-    double? minX, minY, maxX, maxY;
-
-    for (final id in widget.selection.selectedStrokeIds) {
-      final stroke = layer.getStrokeById(id);
-      if (stroke == null) continue;
-      final b = stroke.bounds;
-      if (b == null) continue;
-      minX = minX == null ? b.left : math.min(minX, b.left);
-      minY = minY == null ? b.top : math.min(minY, b.top);
-      maxX = maxX == null ? b.right : math.max(maxX, b.right);
-      maxY = maxY == null ? b.bottom : math.max(maxY, b.bottom);
-    }
-
-    for (final id in widget.selection.selectedShapeIds) {
-      final shape = layer.getShapeById(id);
-      if (shape == null) continue;
-      final b = shape.bounds;
-      minX = minX == null ? b.left : math.min(minX, b.left);
-      minY = minY == null ? b.top : math.min(minY, b.top);
-      maxX = maxX == null ? b.right : math.max(maxX, b.right);
-      maxY = maxY == null ? b.bottom : math.max(maxY, b.bottom);
-    }
-
-    if (minX != null && minY != null && maxX != null && maxY != null) {
-      ref.read(selectionProvider.notifier).setSelection(
-            widget.selection.copyWith(
-              bounds:
-                  BoundingBox(left: minX, top: minY, right: maxX, bottom: maxY),
-              lassoPath: null,
-              type: SelectionType.rectangle,
-            ),
-          );
-    }
+  void _clearSelection() {
+    ref.read(selectionUiProvider.notifier).reset();
+    ref.read(selectionProvider.notifier).clearSelection();
+    widget.onSelectionChanged?.call();
   }
 
   void _reset() {
     _dragMode = null;
     _dragStart = null;
     _originalBounds = null;
-  }
-}
-
-/// Paints blue border, 4 corner circles, and rotation handle.
-class _SelectionHandlesPainter extends CustomPainter {
-  final BoundingBox bounds;
-  final Offset moveDelta;
-  final double rotation;
-
-  static const double _r = 6.0;
-  static const double _rotDist = 30.0;
-
-  _SelectionHandlesPainter({
-    required this.bounds,
-    required this.moveDelta,
-    required this.rotation,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final cx = (bounds.left + bounds.right) / 2;
-    final cy = (bounds.top + bounds.bottom) / 2;
-    final rect =
-        Rect.fromLTRB(bounds.left, bounds.top, bounds.right, bounds.bottom);
-
-    canvas.save();
-
-    // Apply live transform
-    canvas.translate(cx + moveDelta.dx, cy + moveDelta.dy);
-    if (rotation != 0) canvas.rotate(rotation);
-    canvas.translate(-cx, -cy);
-
-    // Border
-    final border = Paint()
-      ..color = const Color(0xFF2196F3)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
-    canvas.drawRect(rect, border);
-
-    // Corner handles
-    final fill = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.fill;
-    final handleStroke = Paint()
-      ..color = const Color(0xFF2196F3)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
-
-    for (final c in [
-      rect.topLeft,
-      rect.topRight,
-      rect.bottomLeft,
-      rect.bottomRight,
-    ]) {
-      canvas.drawCircle(c, _r, fill);
-      canvas.drawCircle(c, _r, handleStroke);
-    }
-
-    // Rotation handle: line + circle above top-center
-    final topCenter = Offset(cx, bounds.top);
-    final rotHandle = Offset(cx, bounds.top - _rotDist);
-    canvas.drawLine(topCenter, rotHandle, border);
-    canvas.drawCircle(rotHandle, _r, fill);
-    canvas.drawCircle(rotHandle, _r, handleStroke);
-
-    // Circular arrow icon inside rotation handle
-    _drawRotationArrow(canvas, rotHandle);
-
-    canvas.restore();
-  }
-
-  void _drawRotationArrow(Canvas canvas, Offset center) {
-    final paint = Paint()
-      ..color = const Color(0xFF2196F3)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5
-      ..strokeCap = StrokeCap.round;
-
-    const arcRadius = 4.0;
-    final arcRect = Rect.fromCircle(center: center, radius: arcRadius);
-    canvas.drawArc(arcRect, -math.pi * 0.75, math.pi * 1.5, false, paint);
-
-    final arrowTip = Offset(
-      center.dx + arcRadius * math.cos(math.pi * 0.75),
-      center.dy + arcRadius * math.sin(math.pi * 0.75),
-    );
-    final arrowPaint = Paint()
-      ..color = const Color(0xFF2196F3)
-      ..style = PaintingStyle.fill;
-    final path = Path();
-    path.moveTo(arrowTip.dx - 3, arrowTip.dy - 1);
-    path.lineTo(arrowTip.dx + 1, arrowTip.dy - 3);
-    path.lineTo(arrowTip.dx + 1, arrowTip.dy + 2);
-    path.close();
-    canvas.drawPath(path, arrowPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant _SelectionHandlesPainter old) {
-    return old.bounds != bounds ||
-        old.moveDelta != moveDelta ||
-        old.rotation != rotation;
-  }
-}
-
-/// Widget for selection actions (delete, copy, etc.).
-class SelectionActions extends ConsumerWidget {
-  final Selection selection;
-  final VoidCallback? onDeleted;
-
-  const SelectionActions({
-    super.key,
-    required this.selection,
-    this.onDeleted,
-  });
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return const SizedBox.shrink();
-  }
-
-  void deleteSelection(WidgetRef ref) {
-    final document = ref.read(documentProvider);
-    final command = DeleteSelectionCommand(
-      layerIndex: document.activeLayerIndex,
-      strokeIds: selection.selectedStrokeIds,
-      shapeIds: selection.selectedShapeIds,
-    );
-    ref.read(historyManagerProvider.notifier).execute(command);
-    ref.read(selectionProvider.notifier).clearSelection();
-    ref.read(selectionUiProvider.notifier).reset();
-    onDeleted?.call();
+    ref.read(selectionUiProvider.notifier).setActiveHandle(null);
   }
 }

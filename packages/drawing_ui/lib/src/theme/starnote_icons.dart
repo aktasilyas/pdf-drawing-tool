@@ -106,6 +106,7 @@ abstract final class StarNoteIcons {
   static const copy = PhosphorIconsLight.copy;
   static const duplicate = PhosphorIconsLight.copySimple;
   static const paste = PhosphorIconsLight.clipboardText;
+  static const scissors = PhosphorIconsLight.scissors;
   static const bookmark = PhosphorIconsLight.bookmarkSimple;
   static const bookmarkFilled = PhosphorIconsFill.bookmarkSimple;
   static const rotate = PhosphorIconsLight.arrowsClockwise;

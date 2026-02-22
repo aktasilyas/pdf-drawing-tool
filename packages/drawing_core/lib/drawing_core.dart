@@ -105,6 +105,9 @@ export 'src/history/change_selection_style_command.dart';
 export 'src/history/add_sticky_note_command.dart';
 export 'src/history/remove_sticky_note_command.dart';
 export 'src/history/update_sticky_note_command.dart';
+export 'src/history/scale_selection_command.dart';
+export 'src/history/reorder_selection_command.dart';
+export 'src/history/flip_selection_command.dart';
 
 // Input Processing
 export 'src/input/path_smoother.dart';
