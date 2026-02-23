@@ -14,6 +14,12 @@ class DuplicateSelectionCommand implements DrawingCommand {
   /// IDs of shapes to duplicate.
   final List<String> shapeIds;
 
+  /// IDs of images to duplicate.
+  final List<String> imageIds;
+
+  /// IDs of texts to duplicate.
+  final List<String> textIds;
+
   /// Horizontal offset for duplicated items.
   final double offsetX;
 
@@ -26,10 +32,18 @@ class DuplicateSelectionCommand implements DrawingCommand {
   /// New shape IDs created by execute (for post-execute selection update).
   final List<String> newShapeIds = [];
 
+  /// New image IDs created by execute (for post-execute selection update).
+  final List<String> newImageIds = [];
+
+  /// New text IDs created by execute (for post-execute selection update).
+  final List<String> newTextIds = [];
+
   DuplicateSelectionCommand({
     required this.layerIndex,
     required this.strokeIds,
     this.shapeIds = const [],
+    this.imageIds = const [],
+    this.textIds = const [],
     this.offsetX = 40.0,
     this.offsetY = 40.0,
   });
@@ -39,6 +53,8 @@ class DuplicateSelectionCommand implements DrawingCommand {
     var layer = document.layers[layerIndex];
     newStrokeIds.clear();
     newShapeIds.clear();
+    newImageIds.clear();
+    newTextIds.clear();
 
     for (final id in strokeIds) {
       final idx = layer.strokes.indexWhere((s) => s.id == id);
@@ -89,6 +105,44 @@ class DuplicateSelectionCommand implements DrawingCommand {
       layer = layer.addShape(newShape);
     }
 
+    // Duplicate images
+    for (final id in imageIds) {
+      final image = layer.getImageById(id);
+      if (image == null) continue;
+
+      final newImage = ImageElement.create(
+        filePath: image.filePath,
+        x: image.x + offsetX,
+        y: image.y + offsetY,
+        width: image.width,
+        height: image.height,
+        rotation: image.rotation,
+      );
+      newImageIds.add(newImage.id);
+      layer = layer.addImage(newImage);
+    }
+
+    // Duplicate texts
+    for (final id in textIds) {
+      final text = layer.getTextById(id);
+      if (text == null) continue;
+
+      final newText = TextElement.create(
+        text: text.text,
+        x: text.x + offsetX,
+        y: text.y + offsetY,
+        fontSize: text.fontSize,
+        color: text.color,
+        fontFamily: text.fontFamily,
+        isBold: text.isBold,
+        isItalic: text.isItalic,
+        isUnderline: text.isUnderline,
+        alignment: text.alignment,
+      );
+      newTextIds.add(newText.id);
+      layer = layer.addText(newText);
+    }
+
     return document.updateLayer(layerIndex, layer);
   }
 
@@ -102,11 +156,17 @@ class DuplicateSelectionCommand implements DrawingCommand {
     for (final id in newShapeIds) {
       layer = layer.removeShape(id);
     }
+    for (final id in newImageIds) {
+      layer = layer.removeImage(id);
+    }
+    for (final id in newTextIds) {
+      layer = layer.removeText(id);
+    }
 
     return document.updateLayer(layerIndex, layer);
   }
 
   @override
   String get description =>
-      'Duplicate ${strokeIds.length + shapeIds.length} element(s)';
+      'Duplicate ${strokeIds.length + shapeIds.length + imageIds.length + textIds.length} element(s)';
 }

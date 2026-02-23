@@ -12,25 +12,20 @@ class ImageElementPainter extends CustomPainter {
   final List<ImageElement> images;
   final ImageCacheManager cacheManager;
 
-  /// If set, this image's live position/size is used instead of the
-  /// committed version in [images]. This enables real-time drag feedback.
-  final ImageElement? overrideImage;
+  /// Image IDs to exclude from rendering (used during live selection transform).
+  final Set<String> excludedImageIds;
 
   ImageElementPainter({
     required this.images,
     required this.cacheManager,
-    this.overrideImage,
+    this.excludedImageIds = const {},
   }) : super(repaint: cacheManager);
 
   @override
   void paint(Canvas canvas, Size size) {
     for (final image in images) {
-      // Use live override position when dragging/resizing
-      final effective =
-          (overrideImage != null && overrideImage!.id == image.id)
-              ? overrideImage!
-              : image;
-      _drawImage(canvas, effective);
+      if (excludedImageIds.contains(image.id)) continue;
+      _drawImage(canvas, image);
     }
   }
 
@@ -110,13 +105,7 @@ class ImageElementPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant ImageElementPainter oldDelegate) {
     return oldDelegate.images != images ||
-        oldDelegate.overrideImage != overrideImage ||
-        (overrideImage != null &&
-            oldDelegate.overrideImage != null &&
-            (overrideImage!.x != oldDelegate.overrideImage!.x ||
-                overrideImage!.y != oldDelegate.overrideImage!.y ||
-                overrideImage!.width != oldDelegate.overrideImage!.width ||
-                overrideImage!.height != oldDelegate.overrideImage!.height));
+        oldDelegate.excludedImageIds != excludedImageIds;
   }
 }
 

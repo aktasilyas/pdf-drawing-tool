@@ -30,7 +30,12 @@ class RectSelectionTool implements SelectionTool {
   }
 
   @override
-  Selection? endSelection(List<Stroke> strokes, [List<Shape> shapes = const []]) {
+  Selection? endSelection(
+    List<Stroke> strokes, [
+    List<Shape> shapes = const [],
+    List<ImageElement> images = const [],
+    List<TextElement> texts = const [],
+  ]) {
     if (!_isSelecting || _startPoint == null || _endPoint == null) {
       cancelSelection();
       return null;
@@ -58,7 +63,16 @@ class RectSelectionTool implements SelectionTool {
     // Find shapes that intersect with selection rectangle
     final selectedShapeIds = _findShapesInRect(shapes, selectionBounds);
 
-    if (selectedStrokeIds.isEmpty && selectedShapeIds.isEmpty) {
+    // Find images that intersect with selection rectangle
+    final selectedImageIds = _findImagesInRect(images, selectionBounds);
+
+    // Find texts that intersect with selection rectangle
+    final selectedTextIds = _findTextsInRect(texts, selectionBounds);
+
+    if (selectedStrokeIds.isEmpty &&
+        selectedShapeIds.isEmpty &&
+        selectedImageIds.isEmpty &&
+        selectedTextIds.isEmpty) {
       _clear();
       return null;
     }
@@ -69,12 +83,18 @@ class RectSelectionTool implements SelectionTool {
       selectedStrokeIds,
       shapes,
       selectedShapeIds,
+      images,
+      selectedImageIds,
+      texts,
+      selectedTextIds,
     );
 
     final selection = Selection.create(
       type: SelectionType.rectangle,
       selectedStrokeIds: selectedStrokeIds,
       selectedShapeIds: selectedShapeIds,
+      selectedImageIds: selectedImageIds,
+      selectedTextIds: selectedTextIds,
       bounds: actualBounds,
     );
 
@@ -135,6 +155,42 @@ class RectSelectionTool implements SelectionTool {
         .toList();
   }
 
+  /// Finds all texts whose bounds intersect with the selection rectangle.
+  List<String> _findTextsInRect(
+    List<TextElement> texts,
+    BoundingBox selectionBounds,
+  ) {
+    final selectedIds = <String>[];
+    for (final text in texts) {
+      final bounds = text.bounds;
+      if (bounds.left < selectionBounds.right &&
+          bounds.right > selectionBounds.left &&
+          bounds.top < selectionBounds.bottom &&
+          bounds.bottom > selectionBounds.top) {
+        selectedIds.add(text.id);
+      }
+    }
+    return selectedIds;
+  }
+
+  /// Finds all images whose bounds intersect with the selection rectangle.
+  List<String> _findImagesInRect(
+    List<ImageElement> images,
+    BoundingBox selectionBounds,
+  ) {
+    final selectedIds = <String>[];
+    for (final image in images) {
+      final bounds = image.bounds;
+      if (bounds.left < selectionBounds.right &&
+          bounds.right > selectionBounds.left &&
+          bounds.top < selectionBounds.bottom &&
+          bounds.bottom > selectionBounds.top) {
+        selectedIds.add(image.id);
+      }
+    }
+    return selectedIds;
+  }
+
   /// Finds all shapes whose bounds intersect with the selection rectangle.
   List<String> _findShapesInRect(
     List<Shape> shapes,
@@ -169,13 +225,17 @@ class RectSelectionTool implements SelectionTool {
         bounds.bottom > rect.top;
   }
 
-  /// Calculates the bounding box of selected strokes and shapes.
+  /// Calculates the bounding box of selected strokes, shapes, images, and texts.
   BoundingBox _calculateSelectionBounds(
     List<Stroke> strokes,
     List<String> selectedStrokeIds,
     List<Shape> shapes,
     List<String> selectedShapeIds,
-  ) {
+    List<ImageElement> images,
+    List<String> selectedImageIds, [
+    List<TextElement> texts = const [],
+    List<String> selectedTextIds = const [],
+  ]) {
     double minX = double.infinity;
     double minY = double.infinity;
     double maxX = double.negativeInfinity;
@@ -199,6 +259,28 @@ class RectSelectionTool implements SelectionTool {
       if (!selectedShapeIds.contains(shape.id)) continue;
 
       final bounds = shape.bounds;
+      minX = min(minX, bounds.left);
+      minY = min(minY, bounds.top);
+      maxX = max(maxX, bounds.right);
+      maxY = max(maxY, bounds.bottom);
+    }
+
+    // Add image bounds
+    for (final image in images) {
+      if (!selectedImageIds.contains(image.id)) continue;
+
+      final bounds = image.bounds;
+      minX = min(minX, bounds.left);
+      minY = min(minY, bounds.top);
+      maxX = max(maxX, bounds.right);
+      maxY = max(maxY, bounds.bottom);
+    }
+
+    // Add text bounds
+    for (final text in texts) {
+      if (!selectedTextIds.contains(text.id)) continue;
+
+      final bounds = text.bounds;
       minX = min(minX, bounds.left);
       minY = min(minY, bounds.top);
       maxX = max(maxX, bounds.right);

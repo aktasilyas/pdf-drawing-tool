@@ -18,6 +18,12 @@ class RotateSelectionCommand implements DrawingCommand {
   /// IDs of shapes to rotate.
   final List<String> shapeIds;
 
+  /// IDs of images to rotate.
+  final List<String> imageIds;
+
+  /// IDs of texts to rotate (position only, text stays upright).
+  final List<String> textIds;
+
   /// Center X of rotation.
   final double centerX;
 
@@ -31,6 +37,8 @@ class RotateSelectionCommand implements DrawingCommand {
     required this.layerIndex,
     required this.strokeIds,
     this.shapeIds = const [],
+    this.imageIds = const [],
+    this.textIds = const [],
     required this.centerX,
     required this.centerY,
     required this.angle,
@@ -93,10 +101,38 @@ class RotateSelectionCommand implements DrawingCommand {
       ));
     }
 
+    // Rotate images
+    for (final id in imageIds) {
+      final image = layer.getImageById(id);
+      if (image == null) continue;
+
+      final imgCx = image.x + image.width / 2;
+      final imgCy = image.y + image.height / 2;
+      final dx = imgCx - centerX, dy = imgCy - centerY;
+      final newCx = centerX + dx * cosA - dy * sinA;
+      final newCy = centerY + dx * sinA + dy * cosA;
+      layer = layer.updateImage(image.copyWith(
+        x: newCx - image.width / 2,
+        y: newCy - image.height / 2,
+        rotation: image.rotation + a,
+      ));
+    }
+
+    // Rotate texts (position only — text has no rotation property)
+    for (final id in textIds) {
+      final text = layer.getTextById(id);
+      if (text == null) continue;
+
+      final dx = text.x - centerX, dy = text.y - centerY;
+      final newX = centerX + dx * cosA - dy * sinA;
+      final newY = centerY + dx * sinA + dy * cosA;
+      layer = layer.updateText(text.copyWith(x: newX, y: newY));
+    }
+
     return document.updateLayer(layerIndex, layer);
   }
 
   @override
   String get description =>
-      'Rotate ${strokeIds.length + shapeIds.length} element(s)';
+      'Rotate ${strokeIds.length + shapeIds.length + imageIds.length + textIds.length} element(s)';
 }

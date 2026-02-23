@@ -7,17 +7,20 @@ class TextElementPainter extends CustomPainter {
   final List<TextElement> texts;
   final TextElement? activeText; // Editing preview
   final bool showCursor;
+  final Set<String> excludedTextIds;
 
   TextElementPainter({
     required this.texts,
     this.activeText,
     this.showCursor = false,
+    this.excludedTextIds = const {},
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     // Committed texts
     for (final text in texts) {
+      if (excludedTextIds.contains(text.id)) continue;
       _drawText(canvas, text);
     }
 
@@ -110,6 +113,7 @@ class TextElementPainter extends CustomPainter {
   bool shouldRepaint(covariant TextElementPainter oldDelegate) {
     return oldDelegate.texts != texts ||
         oldDelegate.activeText != activeText ||
-        oldDelegate.showCursor != showCursor;
+        oldDelegate.showCursor != showCursor ||
+        oldDelegate.excludedTextIds != excludedTextIds;
   }
 }

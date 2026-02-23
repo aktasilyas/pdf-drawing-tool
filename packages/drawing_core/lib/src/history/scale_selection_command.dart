@@ -16,6 +16,12 @@ class ScaleSelectionCommand implements DrawingCommand {
   /// IDs of shapes to scale.
   final List<String> shapeIds;
 
+  /// IDs of images to scale.
+  final List<String> imageIds;
+
+  /// IDs of texts to scale.
+  final List<String> textIds;
+
   /// Center X of scale transformation.
   final double centerX;
 
@@ -31,10 +37,15 @@ class ScaleSelectionCommand implements DrawingCommand {
   /// Cached original thicknesses for undo (strokeId → thickness).
   final Map<String, double> _originalThicknesses = {};
 
+  /// Cached original font sizes for undo (textId → fontSize).
+  final Map<String, double> _originalFontSizes = {};
+
   ScaleSelectionCommand({
     required this.layerIndex,
     required this.strokeIds,
     this.shapeIds = const [],
+    this.imageIds = const [],
+    this.textIds = const [],
     required this.centerX,
     required this.centerY,
     required this.scaleX,
@@ -43,7 +54,8 @@ class ScaleSelectionCommand implements DrawingCommand {
 
   @override
   DrawingDocument execute(DrawingDocument document) {
-    return _applyScale(document, scaleX, scaleY, cacheThickness: true);
+    return _applyScale(document, scaleX, scaleY,
+        cacheThickness: true, cacheFontSize: true);
   }
 
   @override
@@ -53,6 +65,7 @@ class ScaleSelectionCommand implements DrawingCommand {
       1.0 / scaleX,
       1.0 / scaleY,
       restoreThickness: true,
+      restoreFontSize: true,
     );
   }
 
@@ -62,6 +75,8 @@ class ScaleSelectionCommand implements DrawingCommand {
     double sy, {
     bool cacheThickness = false,
     bool restoreThickness = false,
+    bool cacheFontSize = false,
+    bool restoreFontSize = false,
   }) {
     var layer = document.layers[layerIndex];
     final thicknessScale = max(sx.abs(), sy.abs());
@@ -117,10 +132,51 @@ class ScaleSelectionCommand implements DrawingCommand {
       ));
     }
 
+    // Scale images
+    for (final id in imageIds) {
+      final image = layer.getImageById(id);
+      if (image == null) continue;
+
+      final imgCx = image.x + image.width / 2;
+      final imgCy = image.y + image.height / 2;
+      final newCx = centerX + (imgCx - centerX) * sx;
+      final newCy = centerY + (imgCy - centerY) * sy;
+      final newW = image.width * sx.abs();
+      final newH = image.height * sy.abs();
+      layer = layer.updateImage(image.copyWith(
+        x: newCx - newW / 2,
+        y: newCy - newH / 2,
+        width: newW,
+        height: newH,
+      ));
+    }
+
+    // Scale texts (position + fontSize)
+    for (final id in textIds) {
+      final text = layer.getTextById(id);
+      if (text == null) continue;
+
+      if (cacheFontSize) {
+        _originalFontSizes[id] = text.fontSize;
+      }
+
+      final newX = centerX + (text.x - centerX) * sx;
+      final newY = centerY + (text.y - centerY) * sy;
+      final newFontSize = restoreFontSize && _originalFontSizes.containsKey(id)
+          ? _originalFontSizes[id]!
+          : (text.fontSize * thicknessScale).clamp(4.0, 200.0);
+
+      layer = layer.updateText(text.copyWith(
+        x: newX,
+        y: newY,
+        fontSize: newFontSize,
+      ));
+    }
+
     return document.updateLayer(layerIndex, layer);
   }
 
   @override
   String get description =>
-      'Scale ${strokeIds.length + shapeIds.length} element(s)';
+      'Scale ${strokeIds.length + shapeIds.length + imageIds.length + textIds.length} element(s)';
 }

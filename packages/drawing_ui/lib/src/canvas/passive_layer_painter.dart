@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:drawing_core/drawing_core.dart' show Layer;
 import 'package:drawing_ui/src/canvas/stroke_painter.dart';
 import 'package:drawing_ui/src/canvas/shape_painter.dart';
-import 'package:drawing_ui/src/canvas/text_painter.dart';
 import 'package:drawing_ui/src/canvas/image_painter.dart';
+import 'package:drawing_ui/src/canvas/interleaved_object_painter.dart';
 import 'package:drawing_ui/src/canvas/sticky_note_painter.dart';
 import 'package:drawing_ui/src/rendering/rendering.dart';
 
@@ -30,19 +30,6 @@ class PassiveLayerStack extends StatelessWidget {
 
     Widget content = Stack(
       children: [
-        // Images (below strokes)
-        if (layer.images.isNotEmpty)
-          RepaintBoundary(
-            child: CustomPaint(
-              size: Size.infinite,
-              painter: ImageElementPainter(
-                images: layer.images,
-                cacheManager: imageCacheManager,
-              ),
-              isComplex: true,
-              willChange: false,
-            ),
-          ),
         // Strokes
         if (layer.strokes.isNotEmpty)
           RepaintBoundary(
@@ -66,12 +53,16 @@ class PassiveLayerStack extends StatelessWidget {
               willChange: false,
             ),
           ),
-        // Texts
-        if (layer.texts.isNotEmpty)
+        // Images + Texts (interleaved by creation order)
+        if (layer.images.isNotEmpty || layer.texts.isNotEmpty)
           RepaintBoundary(
             child: CustomPaint(
               size: Size.infinite,
-              painter: TextElementPainter(texts: layer.texts),
+              painter: InterleavedObjectPainter(
+                images: layer.images,
+                texts: layer.texts,
+                cacheManager: imageCacheManager,
+              ),
               isComplex: true,
               willChange: false,
             ),

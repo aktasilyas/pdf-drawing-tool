@@ -21,7 +21,12 @@ class MockSelectionTool implements SelectionTool {
   }
 
   @override
-  Selection? endSelection(List<Stroke> strokes, [List<Shape> shapes = const []]) {
+  Selection? endSelection(
+    List<Stroke> strokes, [
+    List<Shape> shapes = const [],
+    List<ImageElement> images = const [],
+    List<TextElement> texts = const [],
+  ]) {
     if (!_isSelecting || _path.isEmpty) {
       _isSelecting = false;
       return null;
@@ -29,13 +34,14 @@ class MockSelectionTool implements SelectionTool {
 
     _isSelecting = false;
 
-    // Simple mock: return selection with all strokes and shapes
-    if (strokes.isEmpty && shapes.isEmpty) return null;
+    // Simple mock: return selection with all strokes, shapes, and texts
+    if (strokes.isEmpty && shapes.isEmpty && texts.isEmpty) return null;
 
     return Selection.create(
       type: selectionType,
       selectedStrokeIds: strokes.map((s) => s.id).toList(),
       selectedShapeIds: shapes.map((s) => s.id).toList(),
+      selectedTextIds: texts.map((t) => t.id).toList(),
       bounds: BoundingBox(
         left: _path.map((p) => p.x).reduce((a, b) => a < b ? a : b),
         top: _path.map((p) => p.y).reduce((a, b) => a < b ? a : b),

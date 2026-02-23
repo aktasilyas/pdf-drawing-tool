@@ -31,7 +31,8 @@ class _SelectionToolbarState extends ConsumerState<SelectionToolbar> {
 
   @override
   void dispose() {
-    _closeOverflow();
+    _overflowEntry?.remove();
+    _overflowEntry = null;
     super.dispose();
   }
 
@@ -41,6 +42,10 @@ class _SelectionToolbarState extends ConsumerState<SelectionToolbar> {
     for (final id in widget.selection.selectedStrokeIds) {
       final s = layer.getStrokeById(id);
       if (s != null) return s.style.color;
+    }
+    for (final id in widget.selection.selectedTextIds) {
+      final t = layer.getTextById(id);
+      if (t != null) return t.color;
     }
     return 0xFF000000;
   }

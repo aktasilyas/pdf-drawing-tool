@@ -17,6 +17,12 @@ class MoveSelectionCommand implements DrawingCommand {
   /// IDs of shapes to move.
   final List<String> shapeIds;
 
+  /// IDs of images to move.
+  final List<String> imageIds;
+
+  /// IDs of texts to move.
+  final List<String> textIds;
+
   /// Horizontal movement delta.
   final double deltaX;
 
@@ -28,6 +34,8 @@ class MoveSelectionCommand implements DrawingCommand {
     required this.layerIndex,
     required this.strokeIds,
     this.shapeIds = const [],
+    this.imageIds = const [],
+    this.textIds = const [],
     required this.deltaX,
     required this.deltaY,
   });
@@ -78,6 +86,26 @@ class MoveSelectionCommand implements DrawingCommand {
       layer = layer.updateShape(movedShape);
     }
 
+    // Move images
+    for (final id in imageIds) {
+      final image = layer.getImageById(id);
+      if (image == null) continue;
+
+      layer = layer.updateImage(
+        image.copyWith(x: image.x + deltaX, y: image.y + deltaY),
+      );
+    }
+
+    // Move texts
+    for (final id in textIds) {
+      final text = layer.getTextById(id);
+      if (text == null) continue;
+
+      layer = layer.updateText(
+        text.copyWith(x: text.x + deltaX, y: text.y + deltaY),
+      );
+    }
+
     return document.updateLayer(layerIndex, layer);
   }
 
@@ -88,6 +116,8 @@ class MoveSelectionCommand implements DrawingCommand {
       layerIndex: layerIndex,
       strokeIds: strokeIds,
       shapeIds: shapeIds,
+      imageIds: imageIds,
+      textIds: textIds,
       deltaX: -deltaX,
       deltaY: -deltaY,
     ).execute(document);
@@ -95,5 +125,5 @@ class MoveSelectionCommand implements DrawingCommand {
 
   @override
   String get description =>
-      'Move ${strokeIds.length + shapeIds.length} element(s)';
+      'Move ${strokeIds.length + shapeIds.length + imageIds.length + textIds.length} element(s)';
 }

@@ -23,6 +23,12 @@ class ReorderSelectionCommand implements DrawingCommand {
   /// IDs of shapes to reorder.
   final List<String> shapeIds;
 
+  /// IDs of images to reorder.
+  final List<String> imageIds;
+
+  /// IDs of texts to reorder.
+  final List<String> textIds;
+
   /// Direction to reorder.
   final ReorderDirection direction;
 
@@ -32,10 +38,18 @@ class ReorderSelectionCommand implements DrawingCommand {
   /// Cached original shape indices for undo (shapeId → index).
   final Map<String, int> _originalShapeIndices = {};
 
+  /// Cached original image indices for undo (imageId → index).
+  final Map<String, int> _originalImageIndices = {};
+
+  /// Cached original text indices for undo (textId → index).
+  final Map<String, int> _originalTextIndices = {};
+
   ReorderSelectionCommand({
     required this.layerIndex,
     required this.strokeIds,
     this.shapeIds = const [],
+    this.imageIds = const [],
+    this.textIds = const [],
     required this.direction,
   });
 
@@ -46,6 +60,8 @@ class ReorderSelectionCommand implements DrawingCommand {
     // Cache original indices
     _originalStrokeIndices.clear();
     _originalShapeIndices.clear();
+    _originalImageIndices.clear();
+    _originalTextIndices.clear();
     for (final id in strokeIds) {
       final idx = layer.strokes.indexWhere((s) => s.id == id);
       if (idx != -1) _originalStrokeIndices[id] = idx;
@@ -53,6 +69,14 @@ class ReorderSelectionCommand implements DrawingCommand {
     for (final id in shapeIds) {
       final idx = layer.shapes.indexWhere((s) => s.id == id);
       if (idx != -1) _originalShapeIndices[id] = idx;
+    }
+    for (final id in imageIds) {
+      final idx = layer.images.indexWhere((i) => i.id == id);
+      if (idx != -1) _originalImageIndices[id] = idx;
+    }
+    for (final id in textIds) {
+      final idx = layer.texts.indexWhere((t) => t.id == id);
+      if (idx != -1) _originalTextIndices[id] = idx;
     }
 
     // Reorder strokes
@@ -81,6 +105,32 @@ class ReorderSelectionCommand implements DrawingCommand {
       layer = layer.copyWith(shapes: reordered);
     }
 
+    // Reorder images
+    if (imageIds.isNotEmpty) {
+      final imageIdSet = imageIds.toSet();
+      final selected = layer.images.where((i) => imageIdSet.contains(i.id)).toList();
+      final others = layer.images.where((i) => !imageIdSet.contains(i.id)).toList();
+
+      final reordered = direction == ReorderDirection.bringToFront
+          ? [...others, ...selected]
+          : [...selected, ...others];
+
+      layer = layer.copyWith(images: reordered);
+    }
+
+    // Reorder texts
+    if (textIds.isNotEmpty) {
+      final textIdSet = textIds.toSet();
+      final selected = layer.texts.where((t) => textIdSet.contains(t.id)).toList();
+      final others = layer.texts.where((t) => !textIdSet.contains(t.id)).toList();
+
+      final reordered = direction == ReorderDirection.bringToFront
+          ? [...others, ...selected]
+          : [...selected, ...others];
+
+      layer = layer.copyWith(texts: reordered);
+    }
+
     return document.updateLayer(layerIndex, layer);
   }
 
@@ -88,43 +138,62 @@ class ReorderSelectionCommand implements DrawingCommand {
   DrawingDocument undo(DrawingDocument document) {
     var layer = document.layers[layerIndex];
 
-    // Restore strokes to original positions
+    // Restore strokes to original positions using ID-to-index rebuild
     if (_originalStrokeIndices.isNotEmpty) {
-      final strokeList = List<Stroke>.from(layer.strokes);
-      final entries = _originalStrokeIndices.entries.toList()
-        ..sort((a, b) => a.value.compareTo(b.value));
-
-      for (final entry in entries) {
-        final currentIdx = strokeList.indexWhere((s) => s.id == entry.key);
-        if (currentIdx == -1) continue;
-        final stroke = strokeList.removeAt(currentIdx);
-        final targetIdx = entry.value.clamp(0, strokeList.length);
-        strokeList.insert(targetIdx, stroke);
-      }
-      layer = layer.copyWith(strokes: strokeList);
+      layer = layer.copyWith(strokes: _restoreOrder<Stroke>(
+        layer.strokes, _originalStrokeIndices, (s) => s.id));
     }
 
-    // Restore shapes to original positions
+    // Restore shapes to original positions using ID-to-index rebuild
     if (_originalShapeIndices.isNotEmpty) {
-      final shapeList = List<Shape>.from(layer.shapes);
-      final entries = _originalShapeIndices.entries.toList()
-        ..sort((a, b) => a.value.compareTo(b.value));
+      layer = layer.copyWith(shapes: _restoreOrder<Shape>(
+        layer.shapes, _originalShapeIndices, (s) => s.id));
+    }
 
-      for (final entry in entries) {
-        final currentIdx = shapeList.indexWhere((s) => s.id == entry.key);
-        if (currentIdx == -1) continue;
-        final shape = shapeList.removeAt(currentIdx);
-        final targetIdx = entry.value.clamp(0, shapeList.length);
-        shapeList.insert(targetIdx, shape);
-      }
-      layer = layer.copyWith(shapes: shapeList);
+    // Restore images to original positions using ID-to-index rebuild
+    if (_originalImageIndices.isNotEmpty) {
+      layer = layer.copyWith(images: _restoreOrder<ImageElement>(
+        layer.images, _originalImageIndices, (i) => i.id));
+    }
+
+    // Restore texts to original positions using ID-to-index rebuild
+    if (_originalTextIndices.isNotEmpty) {
+      layer = layer.copyWith(texts: _restoreOrder<TextElement>(
+        layer.texts, _originalTextIndices, (t) => t.id));
     }
 
     return document.updateLayer(layerIndex, layer);
   }
 
+  /// Rebuilds [items] so that cached items land at their original indices
+  /// and non-cached items fill the remaining slots in their current order.
+  List<T> _restoreOrder<T>(
+    List<T> items, Map<String, int> originalIndices, String Function(T) getId,
+  ) {
+    final idToItem = {for (final item in items) getId(item): item};
+    final result = List<T?>.filled(items.length, null);
+    final cachedIds = originalIndices.keys.toSet();
+
+    // Place cached items at their original positions
+    for (final entry in originalIndices.entries) {
+      final item = idToItem[entry.key];
+      if (item != null && entry.value < result.length) {
+        result[entry.value] = item;
+      }
+    }
+
+    // Fill remaining slots with non-cached items in current order
+    final remaining = items.where((i) => !cachedIds.contains(getId(i)));
+    final ri = remaining.iterator;
+    for (var i = 0; i < result.length; i++) {
+      if (result[i] == null && ri.moveNext()) result[i] = ri.current;
+    }
+
+    return result.whereType<T>().toList();
+  }
+
   @override
   String get description =>
       '${direction == ReorderDirection.bringToFront ? 'Bring to front' : 'Send to back'}'
-      ' ${strokeIds.length + shapeIds.length} element(s)';
+      ' ${strokeIds.length + shapeIds.length + imageIds.length + textIds.length} element(s)';
 }

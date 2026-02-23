@@ -378,16 +378,19 @@ final pdfPageRenderProvider =
 // PAGE CHANGE HANDLER
 // =============================================================================
 
-/// Sayfa değiştiğinde: önce görünen sayfa, sonra adjacent prefetch
-void prefetchOnPageChange(WidgetRef ref, int newPageIndex) {
+/// Sayfa değiştiğinde: önce görünen sayfa, sonra adjacent prefetch.
+///
+/// [pdfPageIndex] is the 1-based PDF page number from
+/// `page.background.pdfPageIndex`, NOT the document page index.
+void prefetchOnPageChange(WidgetRef ref, int pdfPageIndex) {
   final pdfFilePath = ref.read(currentPdfFilePathProvider);
   final totalPages = ref.read(totalPdfPagesProvider);
-  
+
   if (pdfFilePath == null || totalPages == 0) return;
-  
-  ref.read(visiblePdfPageProvider.notifier).state = newPageIndex;
-  
-  final currentPage = newPageIndex + 1; // 1-based
+
+  ref.read(visiblePdfPageProvider.notifier).state = pdfPageIndex - 1;
+
+  final currentPage = pdfPageIndex; // already 1-based
   final currentKey = '$pdfFilePath|$currentPage';
   
   final cache = ref.read(pdfPageCacheProvider);

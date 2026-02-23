@@ -6,9 +6,8 @@ import 'package:drawing_ui/src/canvas/stroke_painter.dart';
 import 'package:drawing_ui/src/canvas/passive_layer_painter.dart';
 import 'package:drawing_ui/src/canvas/selection_painter.dart';
 import 'package:drawing_ui/src/canvas/shape_painter.dart';
-import 'package:drawing_ui/src/canvas/text_painter.dart';
 import 'package:drawing_ui/src/canvas/image_painter.dart';
-import 'package:drawing_ui/src/canvas/image_resize_handles.dart';
+import 'package:drawing_ui/src/canvas/interleaved_object_painter.dart';
 import 'package:drawing_ui/src/canvas/sticky_note_painter.dart';
 import 'package:drawing_ui/src/canvas/sticky_note_handles_painter.dart';
 import 'package:drawing_ui/src/canvas/sticky_note_resize_handles.dart';
@@ -35,6 +34,7 @@ import 'package:drawing_ui/src/providers/sticker_provider.dart';
 import 'package:drawing_ui/src/providers/image_provider.dart';
 import 'package:drawing_ui/src/providers/sticky_note_provider.dart';
 import 'package:drawing_ui/src/providers/history_provider.dart';
+import 'package:drawing_ui/src/providers/selection_clipboard_provider.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
 import 'package:drawing_ui/src/widgets/widgets.dart';
@@ -257,27 +257,6 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
     _laserController.dispose();
     _imageCacheManager.dispose();
     super.dispose();
-  }
-
-  Widget _imageMenuButton(
-      PhosphorIconData icon, String tooltip, VoidCallback onTap, Color? color) {
-    return Tooltip(
-      message: tooltip,
-      child: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: Container(
-          width: 40,
-          height: 40,
-          alignment: Alignment.center,
-          child: PhosphorIcon(icon, size: 20, color: color ?? Colors.black87),
-        ),
-      ),
-    );
-  }
-
-  Widget _imageMenuDivider() {
-    return Container(width: 1, height: 24, color: Colors.grey[300]);
   }
 
   void _handleStickyNoteDelete(core.StickyNote note) {
@@ -691,9 +670,10 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
 
         // 🚀 PDF sayfaları için adjacent prefetch tetikle
         if (current.background.type == BackgroundType.pdf &&
-            current.background.pdfFilePath != null) {
-          // Yeni prefetch sistemi - otomatik adjacent sayfaları yükler
-          prefetchOnPageChange(ref, current.index);
+            current.background.pdfFilePath != null &&
+            current.background.pdfPageIndex != null) {
+          // pdfPageIndex kullan (1-based), document page index değil
+          prefetchOnPageChange(ref, current.background.pdfPageIndex!);
         }
       }
     });
@@ -711,22 +691,37 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
       selectionPreviewPath = ref.read(activeSelectionToolProvider).currentPath;
     }
 
+    // Watch images for active layer (before excluded IDs computation)
+    final images = ref.watch(activeLayerImagesProvider);
+
     // Compute excluded IDs + selected elements for live transform
     final hasLiveTransform = selectionUi.hasTransform;
     Set<String> excludedStrokeIds = const {};
     Set<String> excludedShapeIds = const {};
+    Set<String> excludedImageIds = const {};
+    Set<String> excludedTextIds = const {};
     List<core.Stroke> selectedStrokes = const [];
     List<core.Shape> selectedShapes = const [];
+    List<core.ImageElement> selectedImages = const [];
+    List<core.TextElement> selectedTexts = const [];
 
     if (selection != null && hasLiveTransform) {
       excludedStrokeIds = selection.selectedStrokeIds.toSet();
       excludedShapeIds = selection.selectedShapeIds.toSet();
+      excludedImageIds = selection.selectedImageIds.toSet();
+      excludedTextIds = selection.selectedTextIds.toSet();
 
       selectedStrokes = strokes
           .where((s) => excludedStrokeIds.contains(s.id))
           .toList();
       selectedShapes = shapes
           .where((s) => excludedShapeIds.contains(s.id))
+          .toList();
+      selectedImages = images
+          .where((i) => excludedImageIds.contains(i.id))
+          .toList();
+      selectedTexts = texts
+          .where((t) => excludedTextIds.contains(t.id))
           .toList();
     }
 
@@ -745,9 +740,6 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
       straightLinePreviewPoints = [start, end];
       straightLinePreviewStyle = _straightLineStyle;
     }
-
-    // Watch images for active layer
-    final images = ref.watch(activeLayerImagesProvider);
 
     // Watch sticky notes for active layer
     final stickyNotes = ref.watch(activeLayerStickyNotesProvider);
@@ -942,27 +934,6 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                             _wrapOpacity(activeLayerOpacity, Stack(
                               clipBehavior: Clip.none,
                               children: [
-                                if (images.isNotEmpty)
-                                  Consumer(
-                                    builder: (context, ref, _) {
-                                      final liveImage = ref.watch(
-                                        imagePlacementProvider
-                                            .select((s) => s.selectedImage),
-                                      );
-                                      return RepaintBoundary(
-                                        child: CustomPaint(
-                                          size: size,
-                                          painter: ImageElementPainter(
-                                            images: images,
-                                            cacheManager: _imageCacheManager,
-                                            overrideImage: liveImage,
-                                          ),
-                                          isComplex: true,
-                                          willChange: liveImage != null,
-                                        ),
-                                      );
-                                    },
-                                  ),
                                 // Committed Strokes
                                 RepaintBoundary(
                                   child: CustomPaint(
@@ -994,20 +965,26 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                                     willChange: previewShape != null || hasLiveTransform,
                                   ),
                                 ),
-                                // Committed Texts + Active Text
-                                RepaintBoundary(
-                                  child: CustomPaint(
-                                    size: size,
-                                    painter: TextElementPainter(
-                                      texts: texts,
-                                      activeText: textToolState.isEditing
-                                          ? textToolState.activeText
-                                          : null,
+                                // Images + Texts interleaved by creation order
+                                if (images.isNotEmpty || texts.isNotEmpty)
+                                  RepaintBoundary(
+                                    child: CustomPaint(
+                                      size: size,
+                                      painter: InterleavedObjectPainter(
+                                        images: images,
+                                        texts: texts,
+                                        cacheManager: _imageCacheManager,
+                                        activeText: textToolState.isEditing
+                                            ? textToolState.activeText
+                                            : null,
+                                        excludedImageIds: excludedImageIds,
+                                        excludedTextIds: excludedTextIds,
+                                      ),
+                                      isComplex: true,
+                                      willChange: textToolState.isEditing ||
+                                          hasLiveTransform,
                                     ),
-                                    isComplex: true,
-                                    willChange: textToolState.isEditing,
                                   ),
-                                ),
                                 // Committed Sticky Notes
                                 if (stickyNotes.isNotEmpty)
                                   Consumer(
@@ -1125,6 +1102,9 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                                 painter: SelectedElementsPainter(
                                   selectedStrokes: selectedStrokes,
                                   selectedShapes: selectedShapes,
+                                  selectedImages: selectedImages,
+                                  selectedTexts: selectedTexts,
+                                  imageCacheManager: _imageCacheManager,
                                   moveDelta: selectionUi.moveDelta,
                                   rotation: selectionUi.rotation,
                                   scaleX: selectionUi.scaleX,
@@ -1148,21 +1128,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                             ),
 
                           // ─────────────────────────────────────────────────────────
-                          // LAYER 9: Image Resize Handles
-                          // ─────────────────────────────────────────────────────────
-                          Builder(
-                            builder: (context) {
-                              final imgState = ref.watch(imagePlacementProvider);
-                              final selected = imgState.selectedImage;
-                              if (selected == null || imgState.isMoving) {
-                                return const SizedBox.shrink();
-                              }
-                              return ImageResizeHandles(image: selected);
-                            },
-                          ),
-
-                          // ─────────────────────────────────────────────────────────
-                          // LAYER 9.5: Sticky Note Resize Handles
+                          // LAYER 9: Sticky Note Resize Handles
                           // ─────────────────────────────────────────────────────────
                           Builder(
                             builder: (context) {
@@ -1197,79 +1163,19 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
             ),
 
             // ───────────────────────────────────────────────────────────────────
-            // Text Context Menu (must be outside gesture handlers, uses screen coordinates)
-            // ───────────────────────────────────────────────────────────────────
-            if (textToolState.showMenu && textToolState.menuText != null)
-              TextContextMenu(
-                textElement: textToolState.menuText!,
-                zoom: transform.zoom,
-                canvasOffset: transform.offset,
-                onEdit: isTextTool ? handleTextEdit : handleTextStyle,
-                onDelete: handleTextDelete,
-                onStyle: isTextTool ? handleTextStyle : null,
-                onDuplicate: handleTextDuplicate,
-                onMove: handleTextMove,
-              ),
-
-            // ───────────────────────────────────────────────────────────────────
             // Selection Toolbar (floating toolbar with quick actions + overflow)
             // ───────────────────────────────────────────────────────────────────
             if (selectionUi.showMenu && selection != null)
               SelectionToolbar(selection: selection),
 
             // ───────────────────────────────────────────────────────────────────
-            // Image Context Menu (delete/duplicate/move only, no edit/style)
+            // Paste Context Menu (long press on empty canvas)
             // ───────────────────────────────────────────────────────────────────
             Builder(
               builder: (context) {
-                final imgState = ref.watch(imagePlacementProvider);
-                if (!imgState.showMenu || imgState.selectedImage == null) {
-                  return const SizedBox.shrink();
-                }
-                final mi = imgState.selectedImage!;
-                // Center menu above image
-                final centerX = (mi.x + mi.width / 2) * transform.zoom +
-                    transform.offset.dx;
-                final screenY = mi.y * transform.zoom + transform.offset.dy - 50;
-                const menuWidth = 81.0; // 40 + 1 + 40
-                return Positioned(
-                  left: centerX - menuWidth / 2,
-                  top: screenY,
-                  child: Listener(
-                    behavior: HitTestBehavior.opaque,
-                    onPointerDown: (_) {},
-                    child: Material(
-                      color: Colors.transparent,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.2),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            _imageMenuButton(
-                              StarNoteIcons.trash, 'Sil',
-                              handleImageDelete, Colors.red,
-                            ),
-                            _imageMenuDivider(),
-                            _imageMenuButton(
-                              StarNoteIcons.copy, 'Kopyala',
-                              handleImageDuplicate, null,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                );
+                final pasteMenu = ref.watch(pasteMenuProvider);
+                if (pasteMenu == null) return const SizedBox.shrink();
+                return PasteContextMenu(state: pasteMenu);
               },
             ),
 
@@ -1325,119 +1231,6 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                     ref.read(textToolProvider.notifier).hideStylePopup(),
                 stickerMode: !isTextTool,
               ),
-
-            // ───────────────────────────────────────────────────────────────────
-            // Text Move Mode Indicator
-            // ───────────────────────────────────────────────────────────────────
-            if (textToolState.isMoving)
-              Positioned(
-                top: 60,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.primary,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.2),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        PhosphorIcon(StarNoteIcons.touchApp,
-                            color: Colors.white, size: 18),
-                        const SizedBox(width: 8),
-                        const Text(
-                          'Taşımak için bir yere dokunun',
-                          style: TextStyle(color: Colors.white, fontSize: 14),
-                        ),
-                        const SizedBox(width: 12),
-                        GestureDetector(
-                          onTap: () => ref
-                              .read(textToolProvider.notifier)
-                              .cancelMoving(),
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.2),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const PhosphorIcon(StarNoteIcons.close,
-                                color: Colors.white, size: 16),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
-            // ───────────────────────────────────────────────────────────────────
-            // Image Move Mode Indicator
-            // ───────────────────────────────────────────────────────────────────
-            Builder(
-              builder: (context) {
-                final imgState = ref.watch(imagePlacementProvider);
-                if (!imgState.isMoving) return const SizedBox.shrink();
-                return Positioned(
-                  top: 60,
-                  left: 0,
-                  right: 0,
-                  child: Center(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.2),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          PhosphorIcon(StarNoteIcons.touchApp,
-                              color: Colors.white, size: 18),
-                          const SizedBox(width: 8),
-                          const Text(
-                            'Tasimak icin bir yere dokunun',
-                            style: TextStyle(color: Colors.white, fontSize: 14),
-                          ),
-                          const SizedBox(width: 12),
-                          GestureDetector(
-                            onTap: () => ref
-                                .read(imagePlacementProvider.notifier)
-                                .cancelMoving(),
-                            child: Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.2),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const PhosphorIcon(StarNoteIcons.close,
-                                  color: Colors.white, size: 16),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
 
             // ───────────────────────────────────────────────────────────────────
             // Sticker Placement Mode Indicator

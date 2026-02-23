@@ -31,7 +31,12 @@ class LassoSelectionTool implements SelectionTool {
   }
 
   @override
-  Selection? endSelection(List<Stroke> strokes, [List<Shape> shapes = const []]) {
+  Selection? endSelection(
+    List<Stroke> strokes, [
+    List<Shape> shapes = const [],
+    List<ImageElement> images = const [],
+    List<TextElement> texts = const [],
+  ]) {
     if (!_isSelecting || _path.length < 3) {
       cancelSelection();
       return null;
@@ -51,7 +56,16 @@ class LassoSelectionTool implements SelectionTool {
     // Find shapes inside the lasso
     final selectedShapeIds = _findShapesInLasso(shapes, closedPath);
 
-    if (selectedStrokeIds.isEmpty && selectedShapeIds.isEmpty) {
+    // Find images inside the lasso
+    final selectedImageIds = _findImagesInLasso(images, closedPath);
+
+    // Find texts inside the lasso
+    final selectedTextIds = _findTextsInLasso(texts, closedPath);
+
+    if (selectedStrokeIds.isEmpty &&
+        selectedShapeIds.isEmpty &&
+        selectedImageIds.isEmpty &&
+        selectedTextIds.isEmpty) {
       _path.clear();
       return null;
     }
@@ -62,12 +76,18 @@ class LassoSelectionTool implements SelectionTool {
       selectedStrokeIds,
       shapes,
       selectedShapeIds,
+      images,
+      selectedImageIds,
+      texts,
+      selectedTextIds,
     );
 
     final selection = Selection.create(
       type: SelectionType.lasso,
       selectedStrokeIds: selectedStrokeIds,
       selectedShapeIds: selectedShapeIds,
+      selectedImageIds: selectedImageIds,
+      selectedTextIds: selectedTextIds,
       bounds: bounds,
       lassoPath: closedPath,
     );
@@ -101,6 +121,39 @@ class LassoSelectionTool implements SelectionTool {
       }
     }
 
+    return selectedIds;
+  }
+
+  /// Finds all texts whose center is inside the lasso.
+  List<String> _findTextsInLasso(
+    List<TextElement> texts,
+    List<DrawingPoint> polygon,
+  ) {
+    final selectedIds = <String>[];
+    for (final text in texts) {
+      final bounds = text.bounds;
+      final cx = (bounds.left + bounds.right) / 2;
+      final cy = (bounds.top + bounds.bottom) / 2;
+      if (_isPointInPolygon(cx, cy, polygon)) {
+        selectedIds.add(text.id);
+      }
+    }
+    return selectedIds;
+  }
+
+  /// Finds all images whose center is inside the lasso.
+  List<String> _findImagesInLasso(
+    List<ImageElement> images,
+    List<DrawingPoint> polygon,
+  ) {
+    final selectedIds = <String>[];
+    for (final image in images) {
+      final cx = image.x + image.width / 2;
+      final cy = image.y + image.height / 2;
+      if (_isPointInPolygon(cx, cy, polygon)) {
+        selectedIds.add(image.id);
+      }
+    }
     return selectedIds;
   }
 
@@ -175,13 +228,17 @@ class LassoSelectionTool implements SelectionTool {
     return inside;
   }
 
-  /// Calculates the bounding box of selected strokes and shapes.
+  /// Calculates the bounding box of selected strokes, shapes, images, and texts.
   BoundingBox _calculateSelectionBounds(
     List<Stroke> strokes,
     List<String> selectedStrokeIds,
     List<Shape> shapes,
     List<String> selectedShapeIds,
-  ) {
+    List<ImageElement> images,
+    List<String> selectedImageIds, [
+    List<TextElement> texts = const [],
+    List<String> selectedTextIds = const [],
+  ]) {
     double minX = double.infinity;
     double minY = double.infinity;
     double maxX = double.negativeInfinity;
@@ -205,6 +262,28 @@ class LassoSelectionTool implements SelectionTool {
       if (!selectedShapeIds.contains(shape.id)) continue;
 
       final bounds = shape.bounds;
+      minX = min(minX, bounds.left);
+      minY = min(minY, bounds.top);
+      maxX = max(maxX, bounds.right);
+      maxY = max(maxY, bounds.bottom);
+    }
+
+    // Add image bounds
+    for (final image in images) {
+      if (!selectedImageIds.contains(image.id)) continue;
+
+      final bounds = image.bounds;
+      minX = min(minX, bounds.left);
+      minY = min(minY, bounds.top);
+      maxX = max(maxX, bounds.right);
+      maxY = max(maxY, bounds.bottom);
+    }
+
+    // Add text bounds
+    for (final text in texts) {
+      if (!selectedTextIds.contains(text.id)) continue;
+
+      final bounds = text.bounds;
       minX = min(minX, bounds.left);
       minY = min(minY, bounds.top);
       maxX = max(maxX, bounds.right);
