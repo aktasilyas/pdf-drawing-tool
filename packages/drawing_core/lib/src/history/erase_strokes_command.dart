@@ -14,6 +14,9 @@ class EraseStrokesCommand implements DrawingCommand {
   /// Undo için silinen stroke'ları cache'le
   final List<Stroke> _erasedStrokes = [];
 
+  /// Cached elementOrder before execute (for undo z-order restore).
+  List<String> _originalElementOrder = const [];
+
   /// Yeni bir [EraseStrokesCommand] oluşturur.
   ///
   /// [layerIndex] - Silme işleminin yapılacağı layer
@@ -30,6 +33,9 @@ class EraseStrokesCommand implements DrawingCommand {
     }
 
     final layer = document.layers[layerIndex];
+
+    // Cache elementOrder before removal (for undo z-order restore)
+    _originalElementOrder = List<String>.from(layer.elementOrder);
 
     // Silinecek stroke'ları cache'le (undo için)
     _erasedStrokes.clear();
@@ -63,6 +69,11 @@ class EraseStrokesCommand implements DrawingCommand {
     // Silinen stroke'ları geri ekle (ters sırada - orijinal pozisyonlara)
     for (final stroke in _erasedStrokes.reversed) {
       layer = layer.addStroke(stroke);
+    }
+
+    // Restore original elementOrder (addStroke appends to end, wrong z-order)
+    if (_originalElementOrder.isNotEmpty) {
+      layer = layer.copyWith(elementOrder: _originalElementOrder);
     }
 
     return document.updateLayer(layerIndex, layer);

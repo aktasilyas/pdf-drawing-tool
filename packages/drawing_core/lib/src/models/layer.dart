@@ -45,6 +45,13 @@ class Layer extends Equatable {
   /// This list is unmodifiable.
   final List<StickyNote> stickyNotes;
 
+  /// Explicit render order for all element types.
+  ///
+  /// When non-empty, the unified painter uses this order instead of
+  /// type-based layering. Contains IDs of [Stroke]s, [Shape]s,
+  /// [ImageElement]s, and [TextElement]s.
+  final List<String> elementOrder;
+
   /// Whether this layer is visible.
   final bool isVisible;
 
@@ -67,6 +74,7 @@ class Layer extends Equatable {
     List<TextElement>? texts,
     List<ImageElement>? images,
     List<StickyNote>? stickyNotes,
+    List<String>? elementOrder,
     this.isVisible = true,
     this.isLocked = false,
     double opacity = 1.0,
@@ -75,6 +83,7 @@ class Layer extends Equatable {
         texts = List.unmodifiable(texts ?? const []),
         images = List.unmodifiable(images ?? const []),
         stickyNotes = List.unmodifiable(stickyNotes ?? const []),
+        elementOrder = List.unmodifiable(elementOrder ?? const []),
         opacity = opacity.clamp(0.0, 1.0);
 
   /// Creates an empty layer with a generated ID.
@@ -87,6 +96,7 @@ class Layer extends Equatable {
       texts: const [],
       images: const [],
       stickyNotes: const [],
+      elementOrder: const [],
     );
   }
 
@@ -131,6 +141,7 @@ class Layer extends Equatable {
       texts: texts,
       images: images,
       stickyNotes: stickyNotes,
+      elementOrder: [...elementOrder, stroke.id],
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -151,6 +162,7 @@ class Layer extends Equatable {
       texts: texts,
       images: images,
       stickyNotes: stickyNotes,
+      elementOrder: elementOrder.where((id) => id != strokeId).toList(),
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -179,6 +191,7 @@ class Layer extends Equatable {
       texts: texts,
       images: images,
       stickyNotes: stickyNotes,
+      elementOrder: elementOrder,
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -197,6 +210,7 @@ class Layer extends Equatable {
       texts: const [],
       images: const [],
       stickyNotes: const [],
+      elementOrder: const [],
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -241,6 +255,7 @@ class Layer extends Equatable {
       texts: texts,
       images: images,
       stickyNotes: stickyNotes,
+      elementOrder: [...elementOrder, shape.id],
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -261,6 +276,7 @@ class Layer extends Equatable {
       texts: texts,
       images: images,
       stickyNotes: stickyNotes,
+      elementOrder: elementOrder.where((id) => id != shapeId).toList(),
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -289,6 +305,7 @@ class Layer extends Equatable {
       texts: texts,
       images: images,
       stickyNotes: stickyNotes,
+      elementOrder: elementOrder,
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -321,6 +338,7 @@ class Layer extends Equatable {
       texts: [...texts, text],
       images: images,
       stickyNotes: stickyNotes,
+      elementOrder: [...elementOrder, text.id],
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -341,6 +359,7 @@ class Layer extends Equatable {
       texts: newTexts,
       images: images,
       stickyNotes: stickyNotes,
+      elementOrder: elementOrder.where((id) => id != textId).toList(),
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -369,6 +388,7 @@ class Layer extends Equatable {
       texts: newTexts,
       images: images,
       stickyNotes: stickyNotes,
+      elementOrder: elementOrder,
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -399,6 +419,7 @@ class Layer extends Equatable {
       texts: texts,
       images: [...images, image],
       stickyNotes: stickyNotes,
+      elementOrder: [...elementOrder, image.id],
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -416,6 +437,7 @@ class Layer extends Equatable {
       texts: texts,
       images: newImages,
       stickyNotes: stickyNotes,
+      elementOrder: elementOrder.where((id) => id != imageId).toList(),
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -440,6 +462,7 @@ class Layer extends Equatable {
       texts: texts,
       images: newImages,
       stickyNotes: stickyNotes,
+      elementOrder: elementOrder,
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -470,6 +493,7 @@ class Layer extends Equatable {
       texts: texts,
       images: images,
       stickyNotes: [...stickyNotes, note],
+      elementOrder: elementOrder,
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -487,6 +511,7 @@ class Layer extends Equatable {
       texts: texts,
       images: images,
       stickyNotes: newNotes,
+      elementOrder: elementOrder,
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -511,6 +536,7 @@ class Layer extends Equatable {
       texts: texts,
       images: images,
       stickyNotes: newNotes,
+      elementOrder: elementOrder,
       isVisible: isVisible,
       isLocked: isLocked,
       opacity: opacity,
@@ -540,6 +566,7 @@ class Layer extends Equatable {
     List<TextElement>? texts,
     List<ImageElement>? images,
     List<StickyNote>? stickyNotes,
+    List<String>? elementOrder,
     bool? isVisible,
     bool? isLocked,
     double? opacity,
@@ -552,6 +579,7 @@ class Layer extends Equatable {
       texts: texts ?? this.texts,
       images: images ?? this.images,
       stickyNotes: stickyNotes ?? this.stickyNotes,
+      elementOrder: elementOrder ?? this.elementOrder,
       isVisible: isVisible ?? this.isVisible,
       isLocked: isLocked ?? this.isLocked,
       opacity: opacity ?? this.opacity,
@@ -568,6 +596,7 @@ class Layer extends Equatable {
       'texts': texts.map((t) => t.toJson()).toList(),
       'images': images.map((i) => i.toJson()).toList(),
       'stickyNotes': stickyNotes.map((n) => n.toJson()).toList(),
+      'elementOrder': elementOrder,
       'isVisible': isVisible,
       'isLocked': isLocked,
       'opacity': opacity,
@@ -598,6 +627,10 @@ class Layer extends Equatable {
               ?.map((n) => StickyNote.fromJson(n as Map<String, dynamic>))
               .toList() ??
           const [],
+      elementOrder: (json['elementOrder'] as List?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const [],
       isVisible: json['isVisible'] as bool? ?? true,
       isLocked: json['isLocked'] as bool? ?? false,
       opacity: (json['opacity'] as num?)?.toDouble() ?? 1.0,
@@ -606,7 +639,7 @@ class Layer extends Equatable {
 
   @override
   List<Object?> get props =>
-      [id, name, strokes, shapes, texts, images, stickyNotes, isVisible, isLocked, opacity];
+      [id, name, strokes, shapes, texts, images, stickyNotes, elementOrder, isVisible, isLocked, opacity];
 
   @override
   String toString() {

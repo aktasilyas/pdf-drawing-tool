@@ -5,9 +5,8 @@ import 'package:drawing_core/drawing_core.dart' show BackgroundType;
 import 'package:drawing_ui/src/canvas/stroke_painter.dart';
 import 'package:drawing_ui/src/canvas/passive_layer_painter.dart';
 import 'package:drawing_ui/src/canvas/selection_painter.dart';
-import 'package:drawing_ui/src/canvas/shape_painter.dart';
 import 'package:drawing_ui/src/canvas/image_painter.dart';
-import 'package:drawing_ui/src/canvas/interleaved_object_painter.dart';
+import 'package:drawing_ui/src/canvas/unified_element_painter.dart';
 import 'package:drawing_ui/src/canvas/sticky_note_painter.dart';
 import 'package:drawing_ui/src/canvas/sticky_note_handles_painter.dart';
 import 'package:drawing_ui/src/canvas/sticky_note_resize_handles.dart';
@@ -691,8 +690,11 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
       selectionPreviewPath = ref.read(activeSelectionToolProvider).currentPath;
     }
 
-    // Watch images for active layer (before excluded IDs computation)
+    // Watch images and elementOrder for active layer
     final images = ref.watch(activeLayerImagesProvider);
+    final elementOrder = activeLayerValid
+        ? allLayers[activeLayerIndex].elementOrder
+        : const <String>[];
 
     // Compute excluded IDs + selected elements for live transform
     final hasLiveTransform = selectionUi.hasTransform;
@@ -934,57 +936,39 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                             _wrapOpacity(activeLayerOpacity, Stack(
                               clipBehavior: Clip.none,
                               children: [
-                                // Committed Strokes
+                                // Unified element painter: strokes, shapes, images, texts
                                 RepaintBoundary(
                                   child: CustomPaint(
                                     size: size,
-                                    painter: CommittedStrokesPainter(
+                                    painter: UnifiedElementPainter(
                                       strokes: strokes,
+                                      shapes: shapes,
+                                      images: images,
+                                      texts: texts,
+                                      elementOrder: elementOrder,
                                       renderer: _renderer,
-                                      excludedSegments: pixelEraserPreview,
+                                      cacheManager: _imageCacheManager,
+                                      activeShape: previewShape,
+                                      activeText: textToolState.isEditing
+                                          ? textToolState.activeText
+                                          : null,
                                       excludedStrokeIds: strokeEraserPreview.isNotEmpty
                                           ? {...excludedStrokeIds, ...strokeEraserPreview}
                                           : excludedStrokeIds,
+                                      excludedShapeIds: excludedShapeIds,
+                                      excludedImageIds: excludedImageIds,
+                                      excludedTextIds: excludedTextIds,
+                                      pixelEraserPreview: pixelEraserPreview,
+                                      strokeEraserPreview: strokeEraserPreview,
                                     ),
                                     isComplex: true,
                                     willChange: pixelEraserPreview.isNotEmpty ||
                                         strokeEraserPreview.isNotEmpty ||
+                                        previewShape != null ||
+                                        textToolState.isEditing ||
                                         hasLiveTransform,
                                   ),
                                 ),
-                                // Committed Shapes + Preview Shape
-                                RepaintBoundary(
-                                  child: CustomPaint(
-                                    size: size,
-                                    painter: ShapePainter(
-                                      shapes: shapes,
-                                      activeShape: previewShape,
-                                      excludedShapeIds: excludedShapeIds,
-                                    ),
-                                    isComplex: true,
-                                    willChange: previewShape != null || hasLiveTransform,
-                                  ),
-                                ),
-                                // Images + Texts interleaved by creation order
-                                if (images.isNotEmpty || texts.isNotEmpty)
-                                  RepaintBoundary(
-                                    child: CustomPaint(
-                                      size: size,
-                                      painter: InterleavedObjectPainter(
-                                        images: images,
-                                        texts: texts,
-                                        cacheManager: _imageCacheManager,
-                                        activeText: textToolState.isEditing
-                                            ? textToolState.activeText
-                                            : null,
-                                        excludedImageIds: excludedImageIds,
-                                        excludedTextIds: excludedTextIds,
-                                      ),
-                                      isComplex: true,
-                                      willChange: textToolState.isEditing ||
-                                          hasLiveTransform,
-                                    ),
-                                  ),
                                 // Committed Sticky Notes
                                 if (stickyNotes.isNotEmpty)
                                   Consumer(
@@ -1166,7 +1150,10 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
             // Selection Toolbar (floating toolbar with quick actions + overflow)
             // ───────────────────────────────────────────────────────────────────
             if (selectionUi.showMenu && selection != null)
-              SelectionToolbar(selection: selection),
+              SelectionToolbar(
+                selection: selection,
+                cacheManager: _imageCacheManager,
+              ),
 
             // ───────────────────────────────────────────────────────────────────
             // Paste Context Menu (long press on empty canvas)

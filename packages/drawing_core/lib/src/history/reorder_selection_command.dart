@@ -44,6 +44,9 @@ class ReorderSelectionCommand implements DrawingCommand {
   /// Cached original text indices for undo (textId → index).
   final Map<String, int> _originalTextIndices = {};
 
+  /// Cached original elementOrder for undo.
+  List<String> _originalElementOrder = const [];
+
   ReorderSelectionCommand({
     required this.layerIndex,
     required this.strokeIds,
@@ -57,7 +60,8 @@ class ReorderSelectionCommand implements DrawingCommand {
   DrawingDocument execute(DrawingDocument document) {
     var layer = document.layers[layerIndex];
 
-    // Cache original indices
+    // Cache original element order and indices
+    _originalElementOrder = List<String>.from(layer.elementOrder);
     _originalStrokeIndices.clear();
     _originalShapeIndices.clear();
     _originalImageIndices.clear();
@@ -131,6 +135,23 @@ class ReorderSelectionCommand implements DrawingCommand {
       layer = layer.copyWith(texts: reordered);
     }
 
+    // Reorder elementOrder (all element types render order)
+    final allSelectedIds = {...strokeIds, ...shapeIds, ...imageIds, ...textIds};
+    if (allSelectedIds.isNotEmpty && layer.elementOrder.isNotEmpty) {
+      final selected = layer.elementOrder
+          .where((id) => allSelectedIds.contains(id))
+          .toList();
+      final others = layer.elementOrder
+          .where((id) => !allSelectedIds.contains(id))
+          .toList();
+
+      final reordered = direction == ReorderDirection.bringToFront
+          ? [...others, ...selected]
+          : [...selected, ...others];
+
+      layer = layer.copyWith(elementOrder: reordered);
+    }
+
     return document.updateLayer(layerIndex, layer);
   }
 
@@ -160,6 +181,11 @@ class ReorderSelectionCommand implements DrawingCommand {
     if (_originalTextIndices.isNotEmpty) {
       layer = layer.copyWith(texts: _restoreOrder<TextElement>(
         layer.texts, _originalTextIndices, (t) => t.id));
+    }
+
+    // Restore elementOrder
+    if (_originalElementOrder.isNotEmpty) {
+      layer = layer.copyWith(elementOrder: _originalElementOrder);
     }
 
     return document.updateLayer(layerIndex, layer);
