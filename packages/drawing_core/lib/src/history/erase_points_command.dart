@@ -10,32 +10,63 @@ class ErasePointsCommand implements DrawingCommand {
   });
   
   final int layerIndex;
-  
+
   /// Original strokes before erasing
   final List<Stroke> originalStrokes;
-  
+
   /// Resulting strokes after erasing (split strokes)
   final List<Stroke> resultingStrokes;
+
+  /// Cached elementOrder before execute (for undo z-order restore).
+  List<String> _originalElementOrder = const [];
   
   @override
   DrawingDocument execute(DrawingDocument document) {
     if (layerIndex < 0 || layerIndex >= document.layers.length) {
       return document;
     }
-    
+
     final layer = document.layers[layerIndex];
-    
+
+    // Cache elementOrder before modification (for undo z-order restore)
+    _originalElementOrder = List<String>.from(layer.elementOrder);
+
     // Remove original strokes
     var newStrokes = List<Stroke>.from(layer.strokes);
     for (final original in originalStrokes) {
       newStrokes.removeWhere((s) => s.id == original.id);
     }
-    
+
     // Add resulting strokes (split pieces)
     newStrokes.addAll(resultingStrokes);
-    
-    final updatedLayer = layer.copyWith(strokes: newStrokes);
-    
+
+    // Update elementOrder: replace each original ID with its split IDs in-place
+    final originalIds = {for (final s in originalStrokes) s.id};
+    final splitMap = <String, List<String>>{};
+    for (final original in originalStrokes) {
+      splitMap[original.id] = resultingStrokes
+          .where((s) => s.id.startsWith('${original.id}_split_'))
+          .map((s) => s.id)
+          .toList();
+    }
+
+    final newElementOrder = <String>[];
+    for (final id in layer.elementOrder) {
+      if (originalIds.contains(id)) {
+        final splits = splitMap[id];
+        if (splits != null && splits.isNotEmpty) {
+          newElementOrder.addAll(splits);
+        }
+      } else {
+        newElementOrder.add(id);
+      }
+    }
+
+    final updatedLayer = layer.copyWith(
+      strokes: newStrokes,
+      elementOrder: newElementOrder,
+    );
+
     return document.updateLayer(layerIndex, updatedLayer);
   }
   
@@ -44,20 +75,26 @@ class ErasePointsCommand implements DrawingCommand {
     if (layerIndex < 0 || layerIndex >= document.layers.length) {
       return document;
     }
-    
+
     final layer = document.layers[layerIndex];
-    
+
     // Remove resulting strokes
     var newStrokes = List<Stroke>.from(layer.strokes);
     for (final result in resultingStrokes) {
       newStrokes.removeWhere((s) => s.id == result.id);
     }
-    
+
     // Restore original strokes
     newStrokes.addAll(originalStrokes);
-    
-    final updatedLayer = layer.copyWith(strokes: newStrokes);
-    
+
+    // Restore original elementOrder
+    final updatedLayer = layer.copyWith(
+      strokes: newStrokes,
+      elementOrder: _originalElementOrder.isNotEmpty
+          ? _originalElementOrder
+          : null,
+    );
+
     return document.updateLayer(layerIndex, updatedLayer);
   }
   

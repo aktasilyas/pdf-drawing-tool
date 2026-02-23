@@ -32,6 +32,7 @@ class _SelectionHandlesState extends ConsumerState<SelectionHandles> {
   _DragMode? _dragMode;
   Offset? _dragStart;
   BoundingBox? _originalBounds;
+  double? _initialAngle;
 
   static const double _hitR = 22.0;
   static const double _rotDist = 36.0;
@@ -67,20 +68,22 @@ class _SelectionHandlesState extends ConsumerState<SelectionHandles> {
   bool _inside(Offset pt, BoundingBox b) =>
       pt.dx >= b.left && pt.dx <= b.right && pt.dy >= b.top && pt.dy <= b.bottom;
 
-  SelectionHandle? _hitTestHandle(Offset pt, BoundingBox b) {
-    final cx = (b.left + b.right) / 2;
-    final cy = (b.top + b.bottom) / 2;
-    // Corners
-    if ((pt - Offset(b.left, b.top)).distance <= _hitR) return SelectionHandle.topLeft;
-    if ((pt - Offset(b.right, b.top)).distance <= _hitR) return SelectionHandle.topRight;
-    if ((pt - Offset(b.left, b.bottom)).distance <= _hitR) return SelectionHandle.bottomLeft;
-    if ((pt - Offset(b.right, b.bottom)).distance <= _hitR) return SelectionHandle.bottomRight;
-    // Edges
-    if ((pt - Offset(cx, b.top)).distance <= _hitR) return SelectionHandle.topCenter;
-    if ((pt - Offset(cx, b.bottom)).distance <= _hitR) return SelectionHandle.bottomCenter;
-    if ((pt - Offset(b.left, cy)).distance <= _hitR) return SelectionHandle.middleLeft;
-    if ((pt - Offset(b.right, cy)).distance <= _hitR) return SelectionHandle.middleRight;
-    return null;
+  /// Returns closest handle within [_hitR], or null.
+  /// Tuple return provides handle center for precise drag start.
+  (SelectionHandle, Offset)? _hitTestHandle(Offset pt, BoundingBox b) {
+    final cx = (b.left + b.right) / 2, cy = (b.top + b.bottom) / 2;
+    final handles = [
+      (SelectionHandle.topLeft, Offset(b.left, b.top)),
+      (SelectionHandle.topRight, Offset(b.right, b.top)),
+      (SelectionHandle.bottomLeft, Offset(b.left, b.bottom)),
+      (SelectionHandle.bottomRight, Offset(b.right, b.bottom)),
+      (SelectionHandle.topCenter, Offset(cx, b.top)),
+      (SelectionHandle.bottomCenter, Offset(cx, b.bottom)),
+      (SelectionHandle.middleLeft, Offset(b.left, cy)),
+      (SelectionHandle.middleRight, Offset(b.right, cy)),
+    ];
+    handles.sort((a, b) => (pt - a.$2).distance.compareTo((pt - b.$2).distance));
+    return (pt - handles.first.$2).distance <= _hitR ? handles.first : null;
   }
 
   bool _isCorner(SelectionHandle h) =>
@@ -93,6 +96,7 @@ class _SelectionHandlesState extends ConsumerState<SelectionHandles> {
     final pos = details.localPosition;
     final b = widget.selection.bounds;
     if ((pos - _rotHandlePos(b)).distance <= _hitR) return;
+    if (_hitTestHandle(pos, b) != null) return;
     if (_inside(pos, b)) {
       ref.read(selectionUiProvider.notifier).showContextMenu();
       return;
@@ -109,12 +113,14 @@ class _SelectionHandlesState extends ConsumerState<SelectionHandles> {
 
     if ((pos - _rotHandlePos(b)).distance <= _hitR) {
       _startDrag(_DragMode.rotate, pos, b);
+      _initialAngle = math.atan2(
+          pos.dy - (b.top + b.bottom) / 2, pos.dx - (b.left + b.right) / 2);
       return;
     }
-    final handle = _hitTestHandle(pos, b);
-    if (handle != null) {
-      _startDrag(_DragMode.scale, pos, b);
-      ref.read(selectionUiProvider.notifier).setActiveHandle(handle);
+    final hit = _hitTestHandle(pos, b);
+    if (hit != null) {
+      _startDrag(_DragMode.scale, hit.$2, b);
+      ref.read(selectionUiProvider.notifier).setActiveHandle(hit.$1);
       return;
     }
     if (_inside(pos, b)) {
@@ -125,9 +131,7 @@ class _SelectionHandlesState extends ConsumerState<SelectionHandles> {
   }
 
   void _startDrag(_DragMode mode, Offset pos, BoundingBox b) {
-    _dragMode = mode;
-    _dragStart = pos;
-    _originalBounds = b;
+    _dragMode = mode; _dragStart = pos; _originalBounds = b;
   }
 
   void _onPanUpdate(DragUpdateDetails details) {
@@ -135,12 +139,20 @@ class _SelectionHandlesState extends ConsumerState<SelectionHandles> {
     final pos = details.localPosition;
     switch (_dragMode!) {
       case _DragMode.move:
-        ref.read(selectionUiProvider.notifier).setMoveDelta(pos - _dragStart!);
+        final d = pos - _dragStart!;
+        final ob = _originalBounds!;
+        final sz = ref.read(currentPageProvider).size;
+        // Safe clamp: if bounds wider/taller than page, allow free movement
+        final minDx = -ob.left, maxDx = sz.width - ob.right;
+        final minDy = -ob.top, maxDy = sz.height - ob.bottom;
+        ref.read(selectionUiProvider.notifier).setMoveDelta(Offset(
+          minDx <= maxDx ? d.dx.clamp(minDx, maxDx) : d.dx,
+          minDy <= maxDy ? d.dy.clamp(minDy, maxDy) : d.dy));
       case _DragMode.rotate:
-        final b = _originalBounds!;
-        final cx = (b.left + b.right) / 2, cy = (b.top + b.bottom) / 2;
-        ref.read(selectionUiProvider.notifier)
-            .setRotation(math.atan2(pos.dy - cy, pos.dx - cx) + math.pi / 2);
+        final ob = _originalBounds!;
+        final a = math.atan2(pos.dy - (ob.top + ob.bottom) / 2,
+            pos.dx - (ob.left + ob.right) / 2);
+        ref.read(selectionUiProvider.notifier).setRotation(a - (_initialAngle ?? a));
       case _DragMode.scale:
         _updateScale(pos);
     }
@@ -156,27 +168,27 @@ class _SelectionHandlesState extends ConsumerState<SelectionHandles> {
 
     double sx = 1.0, sy = 1.0;
     if (_isCorner(handle)) {
-      final d0 = (_dragStart! - Offset(cx, cy)).distance;
-      if (d0 < 1) return;
-      final f = (pos - Offset(cx, cy)).distance / d0;
-      sx = f; sy = f;
+      final d0 = (_dragStart! - Offset(cx, cy)).distance; if (d0 < 1) return;
+      sx = (pos - Offset(cx, cy)).distance / d0; sy = sx;
     } else {
       switch (handle) {
-        case SelectionHandle.topCenter:
-        case SelectionHandle.bottomCenter:
-          final d0 = (_dragStart!.dy - cy).abs();
-          if (d0 < 1) return;
+        case SelectionHandle.topCenter: case SelectionHandle.bottomCenter:
+          final d0 = (_dragStart!.dy - cy).abs(); if (d0 < 1) return;
           sy = (pos.dy - cy).abs() / d0;
-        case SelectionHandle.middleLeft:
-        case SelectionHandle.middleRight:
-          final d0 = (_dragStart!.dx - cx).abs();
-          if (d0 < 1) return;
+        case SelectionHandle.middleLeft: case SelectionHandle.middleRight:
+          final d0 = (_dragStart!.dx - cx).abs(); if (d0 < 1) return;
           sx = (pos.dx - cx).abs() / d0;
         default: break;
       }
     }
     if (halfW * 2 * sx < _minSize) sx = _minSize / (halfW * 2);
     if (halfH * 2 * sy < _minSize) sy = _minSize / (halfH * 2);
+    // Clamp to canvas bounds — scaled bounds must stay within page
+    final sz = ref.read(currentPageProvider).size;
+    final mxX = math.min(cx, sz.width - cx) / halfW;
+    final mxY = math.min(cy, sz.height - cy) / halfH;
+    if (sx > mxX) sx = mxX; if (sy > mxY) sy = mxY;
+    if (_isCorner(handle)) { final f = math.min(sx, sy); sx = f; sy = f; }
     ref.read(selectionUiProvider.notifier).setScale(sx, sy);
   }
 
@@ -195,22 +207,20 @@ class _SelectionHandlesState extends ConsumerState<SelectionHandles> {
   void _commitMove() {
     final delta = ref.read(selectionUiProvider).moveDelta;
     if (delta == Offset.zero) return;
-    final page = ref.read(currentPageProvider);
     final ob = _originalBounds!;
-    final dx = delta.dx.clamp(-ob.left, page.size.width - ob.right);
-    final dy = delta.dy.clamp(-ob.top, page.size.height - ob.bottom);
-
     _executeCommand(MoveSelectionCommand(
       layerIndex: ref.read(documentProvider).activeLayerIndex,
       strokeIds: widget.selection.selectedStrokeIds,
       shapeIds: widget.selection.selectedShapeIds,
-      deltaX: dx, deltaY: dy,
+      imageIds: widget.selection.selectedImageIds,
+      textIds: widget.selection.selectedTextIds,
+      deltaX: delta.dx, deltaY: delta.dy,
     ));
     ref.read(selectionProvider.notifier).setSelection(
       widget.selection.copyWith(
         bounds: BoundingBox(
-          left: ob.left + dx, top: ob.top + dy,
-          right: ob.right + dx, bottom: ob.bottom + dy,
+          left: ob.left + delta.dx, top: ob.top + delta.dy,
+          right: ob.right + delta.dx, bottom: ob.bottom + delta.dy,
         ),
         lassoPath: null, type: SelectionType.rectangle,
       ),
@@ -227,10 +237,10 @@ class _SelectionHandlesState extends ConsumerState<SelectionHandles> {
       layerIndex: ref.read(documentProvider).activeLayerIndex,
       strokeIds: widget.selection.selectedStrokeIds,
       shapeIds: widget.selection.selectedShapeIds,
-      centerX: cx, centerY: cy, angle: angle,
-    ));
-    _recalculateBounds();
-    _finishTransform();
+      imageIds: widget.selection.selectedImageIds,
+      textIds: widget.selection.selectedTextIds,
+      centerX: cx, centerY: cy, angle: angle));
+    _recalculateBounds(); _finishTransform();
   }
 
   void _commitScale() {
@@ -242,10 +252,10 @@ class _SelectionHandlesState extends ConsumerState<SelectionHandles> {
       layerIndex: ref.read(documentProvider).activeLayerIndex,
       strokeIds: widget.selection.selectedStrokeIds,
       shapeIds: widget.selection.selectedShapeIds,
-      centerX: cx, centerY: cy, scaleX: ui.scaleX, scaleY: ui.scaleY,
-    ));
-    _recalculateBounds();
-    _finishTransform();
+      imageIds: widget.selection.selectedImageIds,
+      textIds: widget.selection.selectedTextIds,
+      centerX: cx, centerY: cy, scaleX: ui.scaleX, scaleY: ui.scaleY));
+    _recalculateBounds(); _finishTransform();
   }
 
   void _executeCommand(DrawingCommand command) {
@@ -263,12 +273,16 @@ class _SelectionHandlesState extends ConsumerState<SelectionHandles> {
       maxY = maxY == null ? b.bottom : math.max(maxY!, b.bottom);
     }
     for (final id in widget.selection.selectedStrokeIds) {
-      final b = layer.getStrokeById(id)?.bounds;
-      if (b != null) expand(b);
+      final b = layer.getStrokeById(id)?.bounds; if (b != null) expand(b);
     }
     for (final id in widget.selection.selectedShapeIds) {
-      final s = layer.getShapeById(id);
-      if (s != null) expand(s.bounds);
+      final s = layer.getShapeById(id); if (s != null) expand(s.bounds);
+    }
+    for (final id in widget.selection.selectedImageIds) {
+      final i = layer.getImageById(id); if (i != null) expand(i.bounds);
+    }
+    for (final id in widget.selection.selectedTextIds) {
+      final t = layer.getTextById(id); if (t != null) expand(t.bounds);
     }
     if (minX != null) {
       ref.read(selectionProvider.notifier).setSelection(
@@ -292,9 +306,8 @@ class _SelectionHandlesState extends ConsumerState<SelectionHandles> {
   }
 
   void _reset() {
-    _dragMode = null;
-    _dragStart = null;
-    _originalBounds = null;
+    _dragMode = null; _dragStart = null;
+    _originalBounds = null; _initialAngle = null;
     ref.read(selectionUiProvider.notifier).setActiveHandle(null);
   }
 }

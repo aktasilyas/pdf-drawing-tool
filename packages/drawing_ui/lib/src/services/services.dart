@@ -15,6 +15,7 @@ export 'pdf_render_queue.dart';
 export 'pdf_to_page_converter.dart';
 export 'preloading_strategy.dart';
 export 'raster_pdf_renderer.dart';
+export 'selection_capture_service.dart';
 export 'thumbnail_cache.dart';
 export 'thumbnail_generator.dart';
 export 'vector_pdf_renderer.dart';

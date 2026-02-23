@@ -46,6 +46,8 @@ customIcon: isPenGroup && _penTools.contains(currentTool)
 - Avoid unused imports - analyzer will warn
 - DrawingTheme imported from `theme/theme.dart` barrel
 - `starnote_icons.dart` is re-exported by `theme/theme.dart` -- do NOT add both imports
+- `flutter/material.dart` re-exports `debugPrint` -- do NOT add separate `foundation.dart` import
+- `flutter/foundation.dart` re-exports `dart:typed_data` -- adding foundation makes typed_data redundant
 
 ## Icon System
 - All icons use `PhosphorIcon` widget + `StarNoteIcons.*` constants
@@ -94,6 +96,24 @@ All tool settings panels follow this consistent layout:
 6. `SizedBox(height: 8)` between sliders/toggles, `CompactToggle` (shared widget)
 - CustomPainter logic can be extracted to separate `*_painter.dart` files to stay under 300 lines
 - `PhosphorIconsLight` for deselected, `PhosphorIconsRegular` for selected icon states
+
+## Ruler Overlay Architecture
+- See [ruler-overlay.md](ruler-overlay.md) for coordinate system details.
+- Key lesson: GestureDetector must be OUTSIDE Transform.rotate to get screen-space deltas.
+- Ruler dimensions are public constants in `ruler_overlay.dart`, imported by gesture handlers.
+- Rotation pivot = `rulerPos + Offset(0, rulerContentHeight / 2)` (NOT `rulerBodyHeight / 2`).
+
+## Flutter Transform Patterns
+- `Transform.rotate` with `transformHitTests: true` (default) correctly transforms hit tests even when GestureDetector wraps it from outside.
+- `details.globalPosition` in drag callbacks is always in screen coordinates regardless of widget tree transforms.
+- Use `RenderBox.localToGlobal()` via a `GlobalKey` to resolve widget-local coordinates to global screen coordinates.
+
+## Selection Capture with Background
+- `SelectionCaptureService.captureSelection` supports optional `PageBackground`, `pdfImageBytes`, `pageSize`
+- PDF image bytes must be decoded to `ui.Image` before canvas recording (async `ui.instantiateImageCodec`)
+- Background pattern rendered with `canvas.save()/clipRect()/restore()` to prevent bleeding outside selection
+- `Uint8List` requires explicit `import 'dart:typed_data'` -- `flutter/material.dart` alone does NOT export it
+- PDF cache key format: `"filePath|pageNumber"` (1-based page number)
 
 ## Testing Notes
 - Pre-existing failures: ~45 tests (PDF, canvas, toolbar icon matching) - expected

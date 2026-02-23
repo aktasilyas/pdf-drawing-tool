@@ -14,22 +14,42 @@ class DeleteSelectionCommand implements DrawingCommand {
   /// IDs of shapes to delete.
   final List<String> shapeIds;
 
+  /// IDs of images to delete.
+  final List<String> imageIds;
+
+  /// IDs of texts to delete.
+  final List<String> textIds;
+
   /// Cache of deleted strokes for undo.
   final List<Stroke> _deletedStrokes = [];
 
   /// Cache of deleted shapes for undo.
   final List<Shape> _deletedShapes = [];
 
+  /// Cache of deleted images for undo.
+  final List<ImageElement> _deletedImages = [];
+
+  /// Cache of deleted texts for undo.
+  final List<TextElement> _deletedTexts = [];
+
+  /// Cached original elementOrder for undo.
+  List<String> _originalElementOrder = const [];
+
   /// Creates a delete selection command.
   DeleteSelectionCommand({
     required this.layerIndex,
     required this.strokeIds,
     this.shapeIds = const [],
+    this.imageIds = const [],
+    this.textIds = const [],
   });
 
   @override
   DrawingDocument execute(DrawingDocument document) {
     var layer = document.layers[layerIndex];
+
+    // Cache elementOrder for undo
+    _originalElementOrder = List<String>.from(layer.elementOrder);
 
     // Cache strokes to be deleted (for undo)
     _deletedStrokes.clear();
@@ -52,6 +72,24 @@ class DeleteSelectionCommand implements DrawingCommand {
       }
     }
 
+    // Cache images to be deleted (for undo)
+    _deletedImages.clear();
+    for (final id in imageIds) {
+      final image = layer.getImageById(id);
+      if (image != null) {
+        _deletedImages.add(image);
+      }
+    }
+
+    // Cache texts to be deleted (for undo)
+    _deletedTexts.clear();
+    for (final id in textIds) {
+      final text = layer.getTextById(id);
+      if (text != null) {
+        _deletedTexts.add(text);
+      }
+    }
+
     // Remove strokes
     for (final id in strokeIds) {
       layer = layer.removeStroke(id);
@@ -60,6 +98,16 @@ class DeleteSelectionCommand implements DrawingCommand {
     // Remove shapes
     for (final id in shapeIds) {
       layer = layer.removeShape(id);
+    }
+
+    // Remove images
+    for (final id in imageIds) {
+      layer = layer.removeImage(id);
+    }
+
+    // Remove texts
+    for (final id in textIds) {
+      layer = layer.removeText(id);
     }
 
     return document.updateLayer(layerIndex, layer);
@@ -79,10 +127,25 @@ class DeleteSelectionCommand implements DrawingCommand {
       layer = layer.addShape(shape);
     }
 
+    // Restore deleted images in reverse order
+    for (final image in _deletedImages.reversed) {
+      layer = layer.addImage(image);
+    }
+
+    // Restore deleted texts in reverse order
+    for (final text in _deletedTexts.reversed) {
+      layer = layer.addText(text);
+    }
+
+    // Restore original elementOrder (addImage/addText would append new IDs)
+    if (_originalElementOrder.isNotEmpty) {
+      layer = layer.copyWith(elementOrder: _originalElementOrder);
+    }
+
     return document.updateLayer(layerIndex, layer);
   }
 
   @override
   String get description =>
-      'Delete ${strokeIds.length + shapeIds.length} element(s)';
+      'Delete ${strokeIds.length + shapeIds.length + imageIds.length + textIds.length} element(s)';
 }

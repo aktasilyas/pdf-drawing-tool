@@ -27,21 +27,29 @@ class ShapePainter extends CustomPainter {
     this.excludedShapeIds = const {},
   });
 
+  /// Renders a single shape onto the canvas.
+  ///
+  /// This static method allows other painters (e.g. UnifiedElementPainter)
+  /// to render shapes without instantiating a ShapePainter.
+  static void paintSingleShape(Canvas canvas, Shape shape) {
+    _paintShapeImpl(canvas, shape, isPreview: false);
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
     // Committed shapes
     for (final shape in shapes) {
       if (excludedShapeIds.contains(shape.id)) continue;
-      _drawShape(canvas, shape);
+      _paintShapeImpl(canvas, shape);
     }
 
     // Active shape (preview)
     if (activeShape != null) {
-      _drawShape(canvas, activeShape!, isPreview: true);
+      _paintShapeImpl(canvas, activeShape!, isPreview: true);
     }
   }
 
-  void _drawShape(Canvas canvas, Shape shape, {bool isPreview = false}) {
+  static void _paintShapeImpl(Canvas canvas, Shape shape, {bool isPreview = false}) {
     final previewOpacity = isPreview ? 0.5 : 1.0;
 
     // Filled shapes: önce dolgu, sonra kontur çiz
@@ -70,7 +78,7 @@ class ShapePainter extends CustomPainter {
     }
   }
 
-  void _drawShapeByType(Canvas canvas, Shape shape) {
+  static void _drawShapeByType(Canvas canvas, Shape shape) {
     switch (shape.type) {
       case ShapeType.line:
         _drawLine(canvas, shape);
@@ -105,7 +113,7 @@ class ShapePainter extends CustomPainter {
     }
   }
 
-  void _drawLine(Canvas canvas, Shape shape) {
+  static void _drawLine(Canvas canvas, Shape shape) {
     canvas.drawLine(
       Offset(shape.startPoint.x, shape.startPoint.y),
       Offset(shape.endPoint.x, shape.endPoint.y),
@@ -113,7 +121,7 @@ class ShapePainter extends CustomPainter {
     );
   }
 
-  void _drawRectangle(Canvas canvas, Shape shape) {
+  static void _drawRectangle(Canvas canvas, Shape shape) {
     final rect = Rect.fromPoints(
       Offset(shape.startPoint.x, shape.startPoint.y),
       Offset(shape.endPoint.x, shape.endPoint.y),
@@ -121,7 +129,7 @@ class ShapePainter extends CustomPainter {
     canvas.drawRect(rect, _paint);
   }
 
-  void _drawEllipse(Canvas canvas, Shape shape) {
+  static void _drawEllipse(Canvas canvas, Shape shape) {
     final rect = Rect.fromPoints(
       Offset(shape.startPoint.x, shape.startPoint.y),
       Offset(shape.endPoint.x, shape.endPoint.y),
@@ -129,7 +137,7 @@ class ShapePainter extends CustomPainter {
     canvas.drawOval(rect, _paint);
   }
 
-  void _drawArrow(Canvas canvas, Shape shape) {
+  static void _drawArrow(Canvas canvas, Shape shape) {
     final start = Offset(shape.startPoint.x, shape.startPoint.y);
     final end = Offset(shape.endPoint.x, shape.endPoint.y);
 
@@ -172,7 +180,7 @@ class ShapePainter extends CustomPainter {
     canvas.drawPath(path, fillPaint);
   }
 
-  void _drawTriangle(Canvas canvas, Shape shape) {
+  static void _drawTriangle(Canvas canvas, Shape shape) {
     final left = min(shape.startPoint.x, shape.endPoint.x);
     final right = max(shape.startPoint.x, shape.endPoint.x);
     final top = min(shape.startPoint.y, shape.endPoint.y);
@@ -186,7 +194,7 @@ class ShapePainter extends CustomPainter {
     canvas.drawPath(path, _paint);
   }
 
-  void _drawDiamond(Canvas canvas, Shape shape) {
+  static void _drawDiamond(Canvas canvas, Shape shape) {
     final cx = (shape.startPoint.x + shape.endPoint.x) / 2;
     final cy = (shape.startPoint.y + shape.endPoint.y) / 2;
     final hw = (shape.endPoint.x - shape.startPoint.x).abs() / 2;
@@ -201,7 +209,7 @@ class ShapePainter extends CustomPainter {
     canvas.drawPath(path, _paint);
   }
 
-  void _drawStar(Canvas canvas, Shape shape) {
+  static void _drawStar(Canvas canvas, Shape shape) {
     final cx = (shape.startPoint.x + shape.endPoint.x) / 2;
     final cy = (shape.startPoint.y + shape.endPoint.y) / 2;
     final rx = (shape.endPoint.x - shape.startPoint.x).abs() / 2;
@@ -228,7 +236,7 @@ class ShapePainter extends CustomPainter {
     canvas.drawPath(path, _paint);
   }
 
-  void _drawPolygon(Canvas canvas, Shape shape, int sides) {
+  static void _drawPolygon(Canvas canvas, Shape shape, int sides) {
     final cx = (shape.startPoint.x + shape.endPoint.x) / 2;
     final cy = (shape.startPoint.y + shape.endPoint.y) / 2;
     final rx = (shape.endPoint.x - shape.startPoint.x).abs() / 2;
@@ -250,7 +258,7 @@ class ShapePainter extends CustomPainter {
     canvas.drawPath(path, _paint);
   }
 
-  void _drawPlus(Canvas canvas, Shape shape) {
+  static void _drawPlus(Canvas canvas, Shape shape) {
     final left = min(shape.startPoint.x, shape.endPoint.x);
     final right = max(shape.startPoint.x, shape.endPoint.x);
     final top = min(shape.startPoint.y, shape.endPoint.y);

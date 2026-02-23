@@ -43,3 +43,11 @@
 - Pen/highlighter/toolsWithPanel lists are duplicated in: tool_bar.dart, medium_toolbar.dart, compact_bottom_bar.dart, drawing_screen_panels.dart
 - Breakpoints 600/840 scattered across multiple files; should be centralized
 - _NavButton in top_navigation_bar.dart is 32x32dp -- major touch target violation
+
+## Layers Feature Patterns (Feb 2026)
+- 6 new DocumentNotifier ops: toggleVisibility, toggleLocked, setOpacity, reorder, duplicate, rename
+- PassiveLayerStack renders non-active layers with RepaintBoundary isolation
+- ReorderableListView uses reversed index mapping (display top = highest data index)
+- _IconToggle in layers_list.dart: width=36 < 48dp minimum
+- Locked layer NOT checked in handlePointerDown -- users can draw on locked layers (BUG)
+- V1 addLayer does not set activeLayerIndex to new layer (inconsistent with V2)

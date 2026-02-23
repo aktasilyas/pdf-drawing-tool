@@ -7,10 +7,10 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import 'package:drawing_ui/src/canvas/canvas_color_scheme.dart';
 import 'package:drawing_ui/src/canvas/image_painter.dart';
+import 'package:drawing_ui/src/canvas/interleaved_object_painter.dart';
 import 'package:drawing_ui/src/canvas/page_background_painter.dart';
 import 'package:drawing_ui/src/canvas/stroke_painter.dart';
 import 'package:drawing_ui/src/canvas/shape_painter.dart';
-import 'package:drawing_ui/src/canvas/text_painter.dart';
 import 'package:drawing_ui/src/canvas/sticky_note_painter.dart';
 import 'package:drawing_ui/src/providers/pdf_render_provider.dart';
 import 'package:drawing_ui/src/rendering/rendering.dart';
@@ -39,6 +39,7 @@ Widget buildSecondaryCanvasLayers({
   final allTexts = <core.TextElement>[];
   final allImages = <core.ImageElement>[];
   final allStickyNotes = <core.StickyNote>[];
+  final allElementOrder = <String>[];
 
   for (final layer in page.layers) {
     if (!layer.isVisible) continue;
@@ -47,6 +48,7 @@ Widget buildSecondaryCanvasLayers({
     allTexts.addAll(layer.texts);
     allImages.addAll(layer.images);
     allStickyNotes.addAll(layer.stickyNotes);
+    allElementOrder.addAll(layer.elementOrder);
   }
 
   return Stack(
@@ -128,23 +130,7 @@ Widget buildSecondaryCanvasLayers({
       ],
 
       // ─────────────────────────────────────────────────────────────────
-      // LAYER 1: Images
-      // ─────────────────────────────────────────────────────────────────
-      if (allImages.isNotEmpty)
-        RepaintBoundary(
-          child: CustomPaint(
-            size: pageSize,
-            painter: ImageElementPainter(
-              images: allImages,
-              cacheManager: imageCacheManager,
-            ),
-            isComplex: true,
-            willChange: false,
-          ),
-        ),
-
-      // ─────────────────────────────────────────────────────────────────
-      // LAYER 2: Strokes
+      // LAYER 1: Strokes
       // ─────────────────────────────────────────────────────────────────
       if (allStrokes.isNotEmpty)
         RepaintBoundary(
@@ -160,7 +146,7 @@ Widget buildSecondaryCanvasLayers({
         ),
 
       // ─────────────────────────────────────────────────────────────────
-      // LAYER 3: Shapes
+      // LAYER 2: Shapes
       // ─────────────────────────────────────────────────────────────────
       if (allShapes.isNotEmpty)
         RepaintBoundary(
@@ -173,13 +159,18 @@ Widget buildSecondaryCanvasLayers({
         ),
 
       // ─────────────────────────────────────────────────────────────────
-      // LAYER 3: Texts
+      // LAYER 3: Images + Texts (interleaved by creation order)
       // ─────────────────────────────────────────────────────────────────
-      if (allTexts.isNotEmpty)
+      if (allImages.isNotEmpty || allTexts.isNotEmpty)
         RepaintBoundary(
           child: CustomPaint(
             size: pageSize,
-            painter: TextElementPainter(texts: allTexts),
+            painter: InterleavedObjectPainter(
+              images: allImages,
+              texts: allTexts,
+              cacheManager: imageCacheManager,
+              elementOrder: allElementOrder,
+            ),
             isComplex: true,
             willChange: false,
           ),

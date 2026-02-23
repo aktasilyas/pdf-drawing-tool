@@ -11,6 +11,9 @@ class RemoveShapeCommand implements DrawingCommand {
   /// Undo için silinen shape'i cache'le
   Shape? _removedShape;
 
+  /// Cached elementOrder before execute (for undo z-order restore).
+  List<String> _originalElementOrder = const [];
+
   /// Constructor
   RemoveShapeCommand({
     required this.layerIndex,
@@ -24,6 +27,9 @@ class RemoveShapeCommand implements DrawingCommand {
     }
 
     final layer = document.layers[layerIndex];
+
+    // Cache elementOrder before removal (for undo z-order restore)
+    _originalElementOrder = List<String>.from(layer.elementOrder);
 
     // Silinecek shape'i cache'le
     _removedShape = layer.getShapeById(shapeId);
@@ -40,9 +46,15 @@ class RemoveShapeCommand implements DrawingCommand {
       return document;
     }
 
-    final layer = document.layers[layerIndex];
-    final updatedLayer = layer.addShape(_removedShape!);
-    return document.updateLayer(layerIndex, updatedLayer);
+    var layer = document.layers[layerIndex];
+    layer = layer.addShape(_removedShape!);
+
+    // Restore original elementOrder (addShape appends to end, wrong z-order)
+    if (_originalElementOrder.isNotEmpty) {
+      layer = layer.copyWith(elementOrder: _originalElementOrder);
+    }
+
+    return document.updateLayer(layerIndex, layer);
   }
 
   @override

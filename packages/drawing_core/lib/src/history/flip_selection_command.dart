@@ -22,6 +22,12 @@ class FlipSelectionCommand implements DrawingCommand {
   /// IDs of shapes to flip.
   final List<String> shapeIds;
 
+  /// IDs of images to flip.
+  final List<String> imageIds;
+
+  /// IDs of texts to flip.
+  final List<String> textIds;
+
   /// Center X of the selection bounds.
   final double centerX;
 
@@ -35,6 +41,8 @@ class FlipSelectionCommand implements DrawingCommand {
     required this.layerIndex,
     required this.strokeIds,
     this.shapeIds = const [],
+    this.imageIds = const [],
+    this.textIds = const [],
     required this.centerX,
     required this.centerY,
     required this.axis,
@@ -92,11 +100,40 @@ class FlipSelectionCommand implements DrawingCommand {
       ));
     }
 
+    // Flip images
+    for (final id in imageIds) {
+      final image = layer.getImageById(id);
+      if (image == null) continue;
+
+      final imgCx = image.x + image.width / 2;
+      final imgCy = image.y + image.height / 2;
+      final newCx = axis == FlipAxis.horizontal ? 2 * centerX - imgCx : imgCx;
+      final newCy = axis == FlipAxis.vertical ? 2 * centerY - imgCy : imgCy;
+      final newRot = axis == FlipAxis.horizontal
+          ? -image.rotation
+          : image.rotation;
+      layer = layer.updateImage(image.copyWith(
+        x: newCx - image.width / 2,
+        y: newCy - image.height / 2,
+        rotation: newRot,
+      ));
+    }
+
+    // Flip texts (position only)
+    for (final id in textIds) {
+      final text = layer.getTextById(id);
+      if (text == null) continue;
+
+      final newX = axis == FlipAxis.horizontal ? 2 * centerX - text.x : text.x;
+      final newY = axis == FlipAxis.vertical ? 2 * centerY - text.y : text.y;
+      layer = layer.updateText(text.copyWith(x: newX, y: newY));
+    }
+
     return document.updateLayer(layerIndex, layer);
   }
 
   @override
   String get description =>
       'Flip ${axis == FlipAxis.horizontal ? 'horizontal' : 'vertical'}'
-      ' ${strokeIds.length + shapeIds.length} element(s)';
+      ' ${strokeIds.length + shapeIds.length + imageIds.length + textIds.length} element(s)';
 }

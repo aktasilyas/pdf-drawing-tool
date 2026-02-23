@@ -23,10 +23,16 @@ abstract class SelectionTool {
   ///
   /// [strokes] - The list of strokes to check for selection.
   /// [shapes] - The list of shapes to check for selection.
+  /// [images] - The list of images to check for selection.
   ///
-  /// Returns a [Selection] containing the selected strokes and shapes,
+  /// Returns a [Selection] containing the selected strokes, shapes, and images,
   /// or null if the selection is invalid or empty.
-  Selection? endSelection(List<Stroke> strokes, [List<Shape> shapes = const []]);
+  Selection? endSelection(
+    List<Stroke> strokes, [
+    List<Shape> shapes = const [],
+    List<ImageElement> images = const [],
+    List<TextElement> texts = const [],
+  ]);
 
   /// Cancels the current selection.
   ///

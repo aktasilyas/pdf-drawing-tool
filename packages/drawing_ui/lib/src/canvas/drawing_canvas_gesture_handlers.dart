@@ -1,3 +1,4 @@
+import 'dart:async' show Timer;
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -66,6 +67,10 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
 
   /// Minimum distance between points to avoid excessive point creation.
   static const double minPointDistance = 1.0;
+
+  // ── Long press paste menu ──
+  Timer? _longPressTimer;
+  Offset? _longPressScreenPos;
 
   /// Detects if the pointer starts inside a (non-minimized) sticky note
   /// and stores it for point clamping during the stroke.
@@ -301,22 +306,10 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       return;
     }
 
-    // Handle text move mode regardless of current tool
-    if (textToolState.isMoving) {
-      final transform = ref.read(canvasTransformProvider);
-      final canvasPoint =
-          (event.localPosition - transform.offset) / transform.zoom;
-      moveTextTo(canvasPoint.dx, canvasPoint.dy);
-      return;
-    }
-
-    // Handle image move mode regardless of current tool
-    final imgState = ref.read(imagePlacementProvider);
-    if (imgState.isMoving) {
-      final transform = ref.read(canvasTransformProvider);
-      final canvasPoint =
-          (event.localPosition - transform.offset) / transform.zoom;
-      _moveImageTo(canvasPoint.dx, canvasPoint.dy);
+    // Dismiss paste menu if showing
+    final pasteMenu = ref.read(pasteMenuProvider);
+    if (pasteMenu != null) {
+      ref.read(pasteMenuProvider.notifier).state = null;
       return;
     }
 
@@ -327,23 +320,11 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       return;
     }
 
-    // Close image context menu if showing (keep selection for resize handles)
-    if (imgState.showMenu) {
-      ref.read(imagePlacementProvider.notifier).hideContextMenu();
-      return;
-    }
-
     // Close sticky note context menu if showing
     final stickyNoteState = ref.read(stickyNotePlacementProvider);
     if (stickyNoteState.showMenu) {
       ref.read(stickyNotePlacementProvider.notifier).hideContextMenu();
       return;
-    }
-
-    // If an image is selected (resize handles visible) and we're not on image tool,
-    // deselect the image
-    if (imgState.selectedImage != null && toolType != ToolType.image) {
-      ref.read(imagePlacementProvider.notifier).deselectImage();
     }
 
     // If a sticky note is selected and we're not on stickyNote tool,
@@ -384,6 +365,26 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
           return;
         }
       }
+
+      // Start long press timer for paste menu (only if clipboard has data)
+      final clipboard = ref.read(selectionClipboardProvider);
+      if (clipboard != null) {
+        _longPressScreenPos = event.localPosition;
+        _longPressTimer?.cancel();
+        _longPressTimer = Timer(const Duration(milliseconds: 500), () {
+          _longPressTimer = null;
+          isSelecting = false;
+          ref.read(activeSelectionToolProvider).cancelSelection();
+          final transform = ref.read(canvasTransformProvider);
+          final canvasPos = transform.screenToCanvas(_longPressScreenPos!);
+          ref.read(pasteMenuProvider.notifier).state = PasteMenuState(
+            screenPos: _longPressScreenPos!,
+            canvasPos: canvasPos,
+          );
+          setState(() {});
+        });
+      }
+
       // Start new selection (outside existing or no selection)
       handleSelectionDown(event);
       return;
@@ -462,31 +463,32 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     }
 
     // Image tool selected (no placement) — tap on existing image selects it
+    // via the main selection system (SelectionHandles + SelectionToolbar)
     if (toolType == ToolType.image) {
       final transform = ref.read(canvasTransformProvider);
       final canvasPoint =
           (event.localPosition - transform.offset) / transform.zoom;
-      final currentImgState = ref.read(imagePlacementProvider);
-
-      // If a selected image is showing resize handles, let the handles widget
-      // handle pan/tap events (it runs as GestureDetector inside Transform).
-      if (currentImgState.selectedImage != null && !currentImgState.showMenu) {
-        return;
-      }
 
       final images = ref.read(activeLayerImagesProvider);
       for (final image in images.reversed) {
         if (image.containsPoint(canvasPoint.dx, canvasPoint.dy, 10)) {
-          ref.read(imagePlacementProvider.notifier).selectImage(image);
+          final selection = core.Selection.create(
+            type: core.SelectionType.rectangle,
+            selectedStrokeIds: const [],
+            selectedShapeIds: const [],
+            selectedImageIds: [image.id],
+            bounds: image.bounds,
+          );
+          ref.read(selectionProvider.notifier).setSelection(selection);
+          ref.read(selectionUiProvider.notifier).showContextMenu();
+          ref.read(currentToolProvider.notifier).state = ToolType.selection;
           return;
         }
       }
-      // Tap on empty area → deselect
-      ref.read(imagePlacementProvider.notifier).deselectImage();
       return;
     }
 
-    // Sticker tool selected (no placement) — tap on existing text shows menu
+    // Sticker tool selected (no placement) — tap on existing text selects it
     if (toolType == ToolType.sticker) {
       final transform = ref.read(canvasTransformProvider);
       final canvasPoint =
@@ -494,7 +496,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       final texts = ref.read(activeLayerTextsProvider);
       for (final text in texts.reversed) {
         if (text.containsPoint(canvasPoint.dx, canvasPoint.dy, 10)) {
-          ref.read(textToolProvider.notifier).showContextMenu(text);
+          _selectText(text);
           return;
         }
       }
@@ -541,7 +543,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       return;
     }
 
-    // Check if tap is on an existing text/sticker — show context menu
+    // Check if tap is on an existing text/sticker — select it
     {
       final transform = ref.read(canvasTransformProvider);
       final canvasPoint =
@@ -549,7 +551,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       final texts = ref.read(activeLayerTextsProvider);
       for (final text in texts.reversed) {
         if (text.containsPoint(canvasPoint.dx, canvasPoint.dy, 10)) {
-          ref.read(textToolProvider.notifier).showContextMenu(text);
+          _selectText(text);
           return;
         }
       }
@@ -609,6 +611,15 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     }
     // ══════════════════════════════════════════════════════════════
 
+    // Cancel long press timer if finger moved too far
+    if (_longPressTimer != null && _longPressScreenPos != null) {
+      final dist = (event.localPosition - _longPressScreenPos!).distance;
+      if (dist > 10) {
+        _longPressTimer?.cancel();
+        _longPressTimer = null;
+      }
+    }
+
     // Selection mode
     if (isSelecting) {
       handleSelectionMove(event);
@@ -658,6 +669,9 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
 
   /// Handles pointer up - finishes stroke, eraser, selection, or shape.
   void handlePointerUp(PointerUpEvent event) {
+    _longPressTimer?.cancel();
+    _longPressTimer = null;
+
     pointerCount = (pointerCount - 1).clamp(0, 10);
 
     // Selection mode
@@ -709,6 +723,9 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
 
   /// Handles pointer cancel - cancels the current operation.
   void handlePointerCancel(PointerCancelEvent event) {
+    _longPressTimer?.cancel();
+    _longPressTimer = null;
+
     pointerCount = (pointerCount - 1).clamp(0, 10);
 
     // Selection mode
@@ -801,10 +818,27 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     isSelecting = false;
 
     final tool = ref.read(activeSelectionToolProvider);
-    final strokes = ref.read(activeLayerStrokesProvider);
-    final shapes = ref.read(activeLayerShapesProvider);
+    final allStrokes = ref.read(activeLayerStrokesProvider);
+    final allShapes = ref.read(activeLayerShapesProvider);
+    final allImages = ref.read(activeLayerImagesProvider);
+    final allTexts = ref.read(activeLayerTextsProvider);
+    final lassoSettings = ref.read(lassoSettingsProvider);
 
-    final selection = tool.endSelection(strokes, shapes);
+    // Filter by selectable type settings
+    final strokes = filterStrokesBySelectableType(
+      allStrokes,
+      lassoSettings.selectableTypes,
+    );
+    final allowShapes =
+        lassoSettings.selectableTypes[SelectableType.shape] ?? true;
+    final shapes = allowShapes ? allShapes : <core.Shape>[];
+    final allowImages =
+        lassoSettings.selectableTypes[SelectableType.imageSticker] ?? true;
+    final images = allowImages ? allImages : <core.ImageElement>[];
+    // Text/stickers use the same filter as imageSticker
+    final texts = allowImages ? allTexts : <core.TextElement>[];
+
+    final selection = tool.endSelection(strokes, shapes, images, texts);
 
     if (selection != null) {
       ref.read(selectionProvider.notifier).setSelection(selection);
@@ -1596,12 +1630,6 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     // Check if there's already active text editing
     final textToolState = ref.read(textToolProvider);
 
-    // Handle move mode - move text to tapped location
-    if (textToolState.isMoving) {
-      moveTextTo(canvasPoint.dx, canvasPoint.dy);
-      return;
-    }
-
     if (textToolState.isEditing) {
       // Check if tapped on the same text element - if not, finish current and STOP
       final activeText = textToolState.activeText;
@@ -1630,13 +1658,12 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       return;
     }
 
-    // Check if tapped on existing text - show context menu
+    // Check if tapped on existing text - enter editing directly (text tool)
     final texts = ref.read(activeLayerTextsProvider);
 
     for (final text in texts.reversed) {
       if (text.containsPoint(canvasPoint.dx, canvasPoint.dy, 10)) {
-        // Show context menu for existing text
-        ref.read(textToolProvider.notifier).showContextMenu(text);
+        ref.read(textToolProvider.notifier).editExistingText(text);
         return;
       }
     }
@@ -1678,6 +1705,9 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
         textElement: currentText,
       );
       ref.read(historyManagerProvider.notifier).execute(command);
+
+      // Auto-select into selection system
+      _selectText(currentText);
     } else {
       // Update existing text
       final command = core.UpdateTextCommand(
@@ -1693,41 +1723,22 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  // TEXT CONTEXT MENU HANDLERS
+  // TEXT HELPERS
   // ─────────────────────────────────────────────────────────────────────────
 
-  void handleTextEdit() {
-    final textToolState = ref.read(textToolProvider);
-    final menuText = textToolState.menuText;
-    if (menuText != null) {
-      ref
-          .read(textToolProvider.notifier)
-          .editExistingText(menuText);
-    }
-  }
-
-  void handleTextDelete() {
-    final textToolState = ref.read(textToolProvider);
-    final menuText = textToolState.menuText;
-    if (menuText != null) {
-      final document = ref.read(documentProvider);
-      final command = core.RemoveTextCommand(
-        layerIndex: document.activeLayerIndex,
-        textId: menuText.id,
-      );
-      ref.read(historyManagerProvider.notifier).execute(command);
-      ref.read(textToolProvider.notifier).hideContextMenu();
-    }
-  }
-
-  void handleTextStyle() {
-    final textToolState = ref.read(textToolProvider);
-    final menuText = textToolState.menuText;
-    if (menuText != null) {
-      ref
-          .read(textToolProvider.notifier)
-          .showStylePopup(menuText);
-    }
+  /// Selects a text element into the main selection system.
+  void _selectText(core.TextElement text) {
+    final selection = core.Selection.create(
+      type: core.SelectionType.rectangle,
+      selectedStrokeIds: const [],
+      selectedShapeIds: const [],
+      selectedImageIds: const [],
+      selectedTextIds: [text.id],
+      bounds: text.bounds,
+    );
+    ref.read(selectionProvider.notifier).setSelection(selection);
+    ref.read(selectionUiProvider.notifier).showContextMenu();
+    ref.read(currentToolProvider.notifier).state = ToolType.selection;
   }
 
   void handleTextStyleChanged(core.TextElement updatedText) {
@@ -1737,58 +1748,6 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       newText: updatedText,
     );
     ref.read(historyManagerProvider.notifier).execute(command);
-  }
-
-  void handleTextDuplicate() {
-    final textToolState = ref.read(textToolProvider);
-    final menuText = textToolState.menuText;
-    if (menuText != null) {
-      final originalText = menuText;
-      // Create duplicate with visible offset (40px diagonal)
-      final duplicateText = core.TextElement.create(
-        text: originalText.text,
-        x: originalText.x + 40, // Offset by 40 pixels
-        y: originalText.y + 40,
-        fontSize: originalText.fontSize,
-        color: originalText.color,
-        fontFamily: originalText.fontFamily,
-        isBold: originalText.isBold,
-        isItalic: originalText.isItalic,
-        isUnderline: originalText.isUnderline,
-        alignment: originalText.alignment,
-      );
-
-      final document = ref.read(documentProvider);
-      final command = core.AddTextCommand(
-        layerIndex: document.activeLayerIndex,
-        textElement: duplicateText,
-      );
-      ref.read(historyManagerProvider.notifier).execute(command);
-      ref.read(textToolProvider.notifier).hideContextMenu();
-    }
-  }
-
-  void handleTextMove() {
-    final textToolState = ref.read(textToolProvider);
-    final menuText = textToolState.menuText;
-    if (menuText != null) {
-      ref.read(textToolProvider.notifier).startMoving(menuText);
-    }
-  }
-
-  void moveTextTo(double x, double y) {
-    final textToolState = ref.read(textToolProvider);
-    final movingText = textToolState.movingText;
-    if (movingText != null) {
-      final movedText = movingText.copyWith(x: x, y: y);
-      final document = ref.read(documentProvider);
-      final command = core.UpdateTextCommand(
-        layerIndex: document.activeLayerIndex,
-        newText: movedText,
-      );
-      ref.read(historyManagerProvider.notifier).execute(command);
-      ref.read(textToolProvider.notifier).cancelMoving();
-    }
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -1818,17 +1777,11 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     final canvasPoint =
         (event.localPosition - transform.offset) / transform.zoom;
 
-    // If text move mode is active, move the element
-    if (textToolState.isMoving) {
-      moveTextTo(canvasPoint.dx, canvasPoint.dy);
-      return;
-    }
-
-    // Check if tap is on an existing text/sticker — show context menu
+    // Check if tap is on an existing text/sticker — select it
     final texts = ref.read(activeLayerTextsProvider);
     for (final text in texts.reversed) {
       if (text.containsPoint(canvasPoint.dx, canvasPoint.dy, 10)) {
-        ref.read(textToolProvider.notifier).showContextMenu(text);
+        _selectText(text);
         return;
       }
     }
@@ -1847,6 +1800,10 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       textElement: textElement,
     );
     ref.read(historyManagerProvider.notifier).execute(command);
+
+    // Exit sticker placement and auto-select into selection system
+    ref.read(stickerPlacementProvider.notifier).placed();
+    _selectText(textElement);
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -1891,70 +1848,25 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
 
     // Exit placement mode
     ref.read(imagePlacementProvider.notifier).placed();
+
+    // Auto-select image into the main selection system
+    final selection = core.Selection.create(
+      type: core.SelectionType.rectangle,
+      selectedStrokeIds: const [],
+      selectedShapeIds: const [],
+      selectedImageIds: [imageElement.id],
+      bounds: imageElement.bounds,
+    );
+    ref.read(selectionProvider.notifier).setSelection(selection);
+    ref.read(selectionUiProvider.notifier).showContextMenu();
+
+    // Switch to selection tool so handles are interactive
+    ref.read(currentToolProvider.notifier).state = ToolType.selection;
   }
 
   // ─────────────────────────────────────────────────────────────────────────
   // IMAGE CONTEXT MENU HANDLERS
   // ─────────────────────────────────────────────────────────────────────────
-
-  void handleImageDelete() {
-    final imgState = ref.read(imagePlacementProvider);
-    final image = imgState.selectedImage;
-    if (image != null) {
-      final document = ref.read(documentProvider);
-      final command = core.RemoveImageCommand(
-        layerIndex: document.activeLayerIndex,
-        imageId: image.id,
-      );
-      ref.read(historyManagerProvider.notifier).execute(command);
-      ref.read(imagePlacementProvider.notifier).deselectImage();
-    }
-  }
-
-  void handleImageDuplicate() {
-    final imgState = ref.read(imagePlacementProvider);
-    final image = imgState.selectedImage;
-    if (image != null) {
-      final duplicate = core.ImageElement.create(
-        filePath: image.filePath,
-        x: image.x + 40,
-        y: image.y + 40,
-        width: image.width,
-        height: image.height,
-        rotation: image.rotation,
-      );
-      final document = ref.read(documentProvider);
-      final command = core.AddImageCommand(
-        layerIndex: document.activeLayerIndex,
-        imageElement: duplicate,
-      );
-      ref.read(historyManagerProvider.notifier).execute(command);
-      ref.read(imagePlacementProvider.notifier).deselectImage();
-    }
-  }
-
-  void handleImageMove() {
-    final imgState = ref.read(imagePlacementProvider);
-    final image = imgState.selectedImage;
-    if (image != null) {
-      ref.read(imagePlacementProvider.notifier).startMoving(image);
-    }
-  }
-
-  void _moveImageTo(double x, double y) {
-    final imgState = ref.read(imagePlacementProvider);
-    final movingImage = imgState.movingImage;
-    if (movingImage != null) {
-      final movedImage = movingImage.copyWith(x: x, y: y);
-      final document = ref.read(documentProvider);
-      final command = core.UpdateImageCommand(
-        layerIndex: document.activeLayerIndex,
-        newImage: movedImage,
-      );
-      ref.read(historyManagerProvider.notifier).execute(command);
-      ref.read(imagePlacementProvider.notifier).cancelMoving();
-    }
-  }
 
   // ─────────────────────────────────────────────────────────────────────────
   // SCALE GESTURE HANDLERS (Two Finger Zoom/Pan)

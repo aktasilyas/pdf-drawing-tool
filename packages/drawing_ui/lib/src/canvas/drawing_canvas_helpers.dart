@@ -34,32 +34,58 @@ mixin DrawingCanvasHelpers<T extends ConsumerStatefulWidget>
 
   /// Checks if a point is inside the selection interaction area.
   ///
-  /// This includes:
-  /// - The selection bounds rectangle
-  /// - The rotation handle area (30px above top-center + 20px hit radius)
+  /// Constants match [SelectionHandles] exactly: hitR=22, rotDist=36.
+  /// Includes: expanded bounds (for scale handles), rotation handle, and
+  /// the connecting line between top-center and rotation handle.
   bool isPointInSelection(Offset point, core.Selection selection) {
     final bounds = selection.bounds;
+    const hitR = 22.0;
+    const rotDist = 36.0;
 
-    // Check inside bounds rectangle
-    if (point.dx >= bounds.left &&
-        point.dx <= bounds.right &&
-        point.dy >= bounds.top &&
-        point.dy <= bounds.bottom) {
+    // Check expanded bounds — handles extend beyond bounds by hitR
+    if (point.dx >= bounds.left - hitR &&
+        point.dx <= bounds.right + hitR &&
+        point.dy >= bounds.top - hitR &&
+        point.dy <= bounds.bottom + hitR) {
       return true;
     }
 
-    // Check rotation handle area (30px above top-center, 20px hit radius)
-    const rotHandleDist = 30.0;
-    const hitRadius = 20.0;
+    // Check rotation handle (rotDist above top-center, hitR radius)
     final cx = (bounds.left + bounds.right) / 2;
-    final rotHandleY = bounds.top - rotHandleDist;
+    final rotHandleY = bounds.top - rotDist;
     final dx = point.dx - cx;
     final dy = point.dy - rotHandleY;
-    if (dx * dx + dy * dy <= hitRadius * hitRadius) {
+    if (dx * dx + dy * dy <= hitR * hitR) {
+      return true;
+    }
+
+    // Check line between top-center and rotation handle
+    if ((point.dx - cx).abs() <= hitR &&
+        point.dy >= rotHandleY - hitR &&
+        point.dy <= bounds.top) {
       return true;
     }
 
     return false;
+  }
+
+  /// Filters strokes based on lasso selectable type settings.
+  List<core.Stroke> filterStrokesBySelectableType(
+    List<core.Stroke> strokes,
+    Map<SelectableType, bool> selectableTypes,
+  ) {
+    final allowHandwriting =
+        selectableTypes[SelectableType.handwriting] ?? true;
+    final allowHighlighter =
+        selectableTypes[SelectableType.highlighter] ?? true;
+    if (allowHandwriting && allowHighlighter) return strokes;
+
+    return strokes.where((stroke) {
+      final isHighlighter =
+          stroke.style.nibShape == core.NibShape.rectangle &&
+              stroke.style.opacity < 1.0;
+      return isHighlighter ? allowHighlighter : allowHandwriting;
+    }).toList();
   }
 
   /// Apply eraser filters based on settings
