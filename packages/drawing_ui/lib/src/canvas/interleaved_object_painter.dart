@@ -21,6 +21,7 @@ class InterleavedObjectPainter extends CustomPainter {
   final TextElement? activeText;
   final Set<String> excludedImageIds;
   final Set<String> excludedTextIds;
+  final List<String> elementOrder;
 
   InterleavedObjectPainter({
     required this.images,
@@ -29,30 +30,61 @@ class InterleavedObjectPainter extends CustomPainter {
     this.activeText,
     this.excludedImageIds = const {},
     this.excludedTextIds = const {},
+    this.elementOrder = const [],
   }) : super(repaint: cacheManager);
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Build a merged list of entries sorted by ID (microsecond timestamp).
-    final entries = <_PaintEntry>[];
-
+    // Build id→element maps for order-based lookup.
+    final imageMap = <String, ImageElement>{};
     for (final img in images) {
-      if (excludedImageIds.contains(img.id)) continue;
-      entries.add(_PaintEntry(id: img.id, image: img));
+      if (!excludedImageIds.contains(img.id)) imageMap[img.id] = img;
     }
+    final textMap = <String, TextElement>{};
     for (final txt in texts) {
-      if (excludedTextIds.contains(txt.id)) continue;
-      entries.add(_PaintEntry(id: txt.id, text: txt));
+      if (!excludedTextIds.contains(txt.id)) textMap[txt.id] = txt;
     }
 
-    // Sort ascending by ID → oldest first (bottom), newest last (top).
-    entries.sort((a, b) => a.id.compareTo(b.id));
-
-    for (final e in entries) {
-      if (e.image != null) {
-        _drawImage(canvas, e.image!);
-      } else {
-        _drawText(canvas, e.text!);
+    if (elementOrder.isNotEmpty) {
+      // Paint in explicit order, then append any remaining (backward compat).
+      final painted = <String>{};
+      for (final id in elementOrder) {
+        painted.add(id);
+        final img = imageMap[id];
+        if (img != null) { _drawImage(canvas, img); continue; }
+        final txt = textMap[id];
+        if (txt != null) { _drawText(canvas, txt); }
+      }
+      // Remaining elements not in elementOrder: sorted by ID.
+      final remaining = <_PaintEntry>[];
+      for (final e in imageMap.entries) {
+        if (!painted.contains(e.key)) {
+          remaining.add(_PaintEntry(id: e.key, image: e.value));
+        }
+      }
+      for (final e in textMap.entries) {
+        if (!painted.contains(e.key)) {
+          remaining.add(_PaintEntry(id: e.key, text: e.value));
+        }
+      }
+      remaining.sort((a, b) => a.id.compareTo(b.id));
+      for (final e in remaining) {
+        if (e.image != null) { _drawImage(canvas, e.image!); }
+        else { _drawText(canvas, e.text!); }
+      }
+    } else {
+      // Fallback: sort by ID (microsecond timestamp) — oldest first.
+      final entries = <_PaintEntry>[];
+      for (final e in imageMap.entries) {
+        entries.add(_PaintEntry(id: e.key, image: e.value));
+      }
+      for (final e in textMap.entries) {
+        entries.add(_PaintEntry(id: e.key, text: e.value));
+      }
+      entries.sort((a, b) => a.id.compareTo(b.id));
+      for (final e in entries) {
+        if (e.image != null) { _drawImage(canvas, e.image!); }
+        else { _drawText(canvas, e.text!); }
       }
     }
 
@@ -168,7 +200,8 @@ class InterleavedObjectPainter extends CustomPainter {
         oldDelegate.texts != texts ||
         oldDelegate.activeText != activeText ||
         oldDelegate.excludedImageIds != excludedImageIds ||
-        oldDelegate.excludedTextIds != excludedTextIds;
+        oldDelegate.excludedTextIds != excludedTextIds ||
+        oldDelegate.elementOrder != elementOrder;
   }
 }
 

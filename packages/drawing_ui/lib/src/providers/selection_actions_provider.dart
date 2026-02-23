@@ -1,12 +1,17 @@
-import 'dart:ui' show Offset;
+import 'dart:typed_data';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/canvas/image_painter.dart';
 import 'package:drawing_ui/src/models/selection_action.dart';
 import 'package:drawing_ui/src/providers/document_provider.dart';
 import 'package:drawing_ui/src/providers/history_provider.dart';
+import 'package:drawing_ui/src/providers/pdf_render_provider.dart';
 import 'package:drawing_ui/src/providers/selection_provider.dart';
 import 'package:drawing_ui/src/providers/selection_clipboard_provider.dart';
+import 'package:drawing_ui/src/services/selection_capture_service.dart';
+import 'package:drawing_ui/src/screens/drawing_screen_layout.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
 
 // ============================================================
@@ -205,6 +210,80 @@ void _changeColor(WidgetRef ref, Selection selection, int color) {
   ref.read(selectionUiProvider.notifier).hideContextMenu();
 }
 
+Future<void> _screenshotSelection(
+  WidgetRef ref,
+  Selection selection,
+  ImageCacheManager? cacheManager,
+  BuildContext? context,
+) async {
+  if (cacheManager == null) return;
+
+  try {
+    final document = ref.read(documentProvider);
+    final layer = document.layers[document.activeLayerIndex];
+
+    // Get current page background and size for screenshot rendering
+    final currentPage = document.currentPage;
+    final background = currentPage?.background;
+    final pageSz = currentPage != null
+        ? Size(currentPage.size.width, currentPage.size.height)
+        : null;
+
+    // Get PDF image bytes from cache if PDF background
+    Uint8List? pdfImageBytes;
+    if (background?.type == BackgroundType.pdf) {
+      if (background!.pdfData != null) {
+        pdfImageBytes = background.pdfData;
+      } else if (background.pdfFilePath != null &&
+          background.pdfPageIndex != null) {
+        final cacheKey =
+            '${background.pdfFilePath}|${background.pdfPageIndex}';
+        final cache = ref.read(pdfPageCacheProvider);
+        pdfImageBytes = cache[cacheKey];
+      }
+    }
+
+    final bytes = await SelectionCaptureService.captureSelection(
+      selection: selection,
+      layer: layer,
+      cacheManager: cacheManager,
+      background: background,
+      pdfImageBytes: pdfImageBytes,
+      pageSize: pageSz,
+    );
+    if (bytes == null) {
+      _showSnackBar(context, 'Ekran resmi oluşturulamadı');
+      return;
+    }
+
+    final gallerySaved = await SelectionCaptureService.saveToGallery(bytes);
+    final clipboardCopied =
+        await SelectionCaptureService.copyToClipboard(bytes);
+
+    String msg;
+    if (gallerySaved && clipboardCopied) {
+      msg = 'Ekran resmi galeriye kaydedildi ve panoya kopyalandı';
+    } else if (gallerySaved) {
+      msg = 'Ekran resmi galeriye kaydedildi';
+    } else if (clipboardCopied) {
+      msg = 'Ekran resmi panoya kopyalandı';
+    } else {
+      msg = 'Ekran resmi kaydedilemedi';
+    }
+    _showSnackBar(context, msg);
+  } catch (e) {
+    debugPrint('Screenshot selection failed: $e');
+    _showSnackBar(context, 'Ekran resmi oluşturulamadı');
+  }
+}
+
+void _showSnackBar(BuildContext? context, String message) {
+  if (context == null || !context.mounted) return;
+  ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+    SnackBar(content: Text(message)),
+  );
+}
+
 // ============================================================
 // ACTION CONFIG BUILDER
 // ============================================================
@@ -212,8 +291,10 @@ void _changeColor(WidgetRef ref, Selection selection, int color) {
 /// Builds the [SelectionActionConfig] for the current selection.
 SelectionActionConfig buildSelectionActionConfig(
   WidgetRef ref,
-  Selection selection,
-) {
+  Selection selection, {
+  ImageCacheManager? cacheManager,
+  BuildContext? context,
+}) {
   final clipboard = ref.read(selectionClipboardProvider);
   final hasClipboard = clipboard != null;
 
@@ -239,7 +320,8 @@ SelectionActionConfig buildSelectionActionConfig(
       id: 'ai',
       icon: StarNoteIcons.sparkle,
       label: 'AI Asistan',
-      isEnabled: false,
+      isEnabled: context != null,
+      onExecute: context != null ? () => openAIPanel(context) : null,
     ),
     SelectionAction(
       id: 'color',
@@ -252,7 +334,10 @@ SelectionActionConfig buildSelectionActionConfig(
       id: 'screenshot',
       icon: StarNoteIcons.camera,
       label: 'Ekran Resmi',
-      isEnabled: false,
+      isEnabled: cacheManager != null,
+      onExecute: cacheManager != null
+          ? () => _screenshotSelection(ref, selection, cacheManager, context)
+          : null,
     ),
     SelectionAction(
       id: 'cut',
@@ -285,13 +370,13 @@ SelectionActionConfig buildSelectionActionConfig(
     ),
     SelectionAction(
       id: 'overflow_front',
-      icon: StarNoteIcons.caretUp,
+      icon: StarNoteIcons.bringToFront,
       label: 'Öne Getir',
       onExecute: () => _bringToFront(ref, selection),
     ),
     SelectionAction(
       id: 'overflow_back',
-      icon: StarNoteIcons.caretDown,
+      icon: StarNoteIcons.sendToBack,
       label: 'Arkaya Gönder',
       onExecute: () => _sendToBack(ref, selection),
     ),
@@ -322,13 +407,17 @@ SelectionActionConfig buildSelectionActionConfig(
       id: 'overflow_ai',
       icon: StarNoteIcons.sparkle,
       label: 'Yapay zekaya sor',
-      isEnabled: false,
+      isEnabled: context != null,
+      onExecute: context != null ? () => openAIPanel(context) : null,
     ),
     SelectionAction(
       id: 'overflow_screenshot',
       icon: StarNoteIcons.camera,
       label: 'Ekran Resmi Çek',
-      isEnabled: false,
+      isEnabled: cacheManager != null,
+      onExecute: cacheManager != null
+          ? () => _screenshotSelection(ref, selection, cacheManager, context)
+          : null,
     ),
     SelectionAction(
       id: 'overflow_delete',

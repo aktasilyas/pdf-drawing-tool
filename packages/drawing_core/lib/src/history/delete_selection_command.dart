@@ -32,6 +32,9 @@ class DeleteSelectionCommand implements DrawingCommand {
   /// Cache of deleted texts for undo.
   final List<TextElement> _deletedTexts = [];
 
+  /// Cached original elementOrder for undo.
+  List<String> _originalElementOrder = const [];
+
   /// Creates a delete selection command.
   DeleteSelectionCommand({
     required this.layerIndex,
@@ -44,6 +47,9 @@ class DeleteSelectionCommand implements DrawingCommand {
   @override
   DrawingDocument execute(DrawingDocument document) {
     var layer = document.layers[layerIndex];
+
+    // Cache elementOrder for undo
+    _originalElementOrder = List<String>.from(layer.elementOrder);
 
     // Cache strokes to be deleted (for undo)
     _deletedStrokes.clear();
@@ -129,6 +135,11 @@ class DeleteSelectionCommand implements DrawingCommand {
     // Restore deleted texts in reverse order
     for (final text in _deletedTexts.reversed) {
       layer = layer.addText(text);
+    }
+
+    // Restore original elementOrder (addImage/addText would append new IDs)
+    if (_originalElementOrder.isNotEmpty) {
+      layer = layer.copyWith(elementOrder: _originalElementOrder);
     }
 
     return document.updateLayer(layerIndex, layer);

@@ -153,7 +153,54 @@ cmd.exe /c "cd /d C:\\Users\\aktas\\source\\repos\\starnote_drawing_workspace\\e
   - CanvasColorScheme effective color methods: 3 tests
   - Painter colorScheme support: 3 tests
 
-Total: 112 tests, all passing
+### Drawing UI - Long Press Paste Menu (Feb 2025)
+- paste_menu_provider_test.dart: 22 tests
+  - PasteMenuState model: 4 tests
+  - pasteMenuProvider defaults/set/clear: 3 tests
+  - pasteFromClipboardAt delta logic: 9 tests (pure math, no WidgetRef needed)
+  - selectionClipboardProvider: 4 tests (missing clipboard - no crash; strokes; shapes; clear)
+  - Strategy: unit-test the math (delta computation) directly without WidgetRef.
+    pasteFromClipboardAt requires WidgetRef so test its logic by verifying the
+    arithmetic separately, and test side-effects (pasteMenuProvider cleared) in
+    widget tests.
+- paste_context_menu_test.dart: 23 tests
+  - Rendering (light/dark theme, icon, text, Positioned, Row): 10 tests
+  - Positioning (clamp left/right, above/below, center): 6 tests
+  - Interactions (tap clears provider, GestureDetector, Listener.opaque): 5 tests
+  - State acceptance: 2 tests
+
+Total: 157 tests, all passing
+
+### Patterns learned during paste menu tests
+- **Fixed-width pill overflow in tests**: The "Ahem" test font has wider metrics than real
+  device fonts. When a widget has a fixed pixel size (e.g., 120x40 pill), suppress
+  RenderFlex overflow with:
+  ```dart
+  void _ignoreOverflow() {
+    final prev = FlutterError.onError;
+    FlutterError.onError = (d) {
+      if (d.exceptionAsString().contains('RenderFlex overflowed')) return;
+      prev?.call(d);
+    };
+    addTearDown(() => FlutterError.onError = prev);
+  }
+  ```
+  Call `_ignoreOverflow()` at the top of each affected `testWidgets` body.
+
+- **Multiple Listeners in widget tree**: `tester.widget<Listener>(find.descendant(...))`
+  fails with "Too many elements". Use `.widgetList<Listener>()` then `.where()`:
+  ```dart
+  final opaqueListeners = tester.widgetList<Listener>(...).where(
+    (l) => l.behavior == HitTestBehavior.opaque).toList();
+  expect(opaqueListeners, isNotEmpty);
+  ```
+
+- **ProviderContainer capture in testWidgets**: To read provider state after tap,
+  capture the container via `ProviderScope.containerOf(context)` inside a Builder.
+
+- **textScaler in MaterialApp.builder**: To prevent font-scale from blowing up
+  fixed-dimension widgets in tests, add `textScaler: TextScaler.noScaling` in the
+  `MaterialApp.builder` MediaQuery override.
 
 ## Entity Structure Reference (for tests)
 

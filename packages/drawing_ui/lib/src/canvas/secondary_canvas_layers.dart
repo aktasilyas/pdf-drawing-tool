@@ -39,6 +39,7 @@ Widget buildSecondaryCanvasLayers({
   final allTexts = <core.TextElement>[];
   final allImages = <core.ImageElement>[];
   final allStickyNotes = <core.StickyNote>[];
+  final allElementOrder = <String>[];
 
   for (final layer in page.layers) {
     if (!layer.isVisible) continue;
@@ -47,6 +48,7 @@ Widget buildSecondaryCanvasLayers({
     allTexts.addAll(layer.texts);
     allImages.addAll(layer.images);
     allStickyNotes.addAll(layer.stickyNotes);
+    allElementOrder.addAll(layer.elementOrder);
   }
 
   return Stack(
@@ -167,6 +169,7 @@ Widget buildSecondaryCanvasLayers({
               images: allImages,
               texts: allTexts,
               cacheManager: imageCacheManager,
+              elementOrder: allElementOrder,
             ),
             isComplex: true,
             willChange: false,

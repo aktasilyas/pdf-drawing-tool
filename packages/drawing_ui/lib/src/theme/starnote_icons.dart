@@ -154,6 +154,8 @@ abstract final class StarNoteIcons {
   static const scrollDirection = PhosphorIconsLight.arrowsHorizontal;
   static const scrollDirectionVertical = PhosphorIconsLight.arrowsDownUp;
   static const splitView = PhosphorIconsLight.squareSplitHorizontal;
+  static const bringToFront = PhosphorIconsLight.arrowLineUp;
+  static const sendToBack = PhosphorIconsLight.arrowLineDown;
 
   // ═══════════════════════════════════════════
   // Audio Icons

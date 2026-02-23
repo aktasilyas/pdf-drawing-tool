@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/canvas/image_painter.dart';
 import 'package:drawing_ui/src/models/selection_action.dart';
 import 'package:drawing_ui/src/providers/document_provider.dart';
 import 'package:drawing_ui/src/providers/selection_actions_provider.dart';
@@ -17,7 +18,12 @@ import 'package:drawing_ui/src/widgets/compact_color_picker.dart';
 /// to stay within screen bounds (shifts up/down/left as needed).
 class SelectionToolbar extends ConsumerStatefulWidget {
   final Selection selection;
-  const SelectionToolbar({super.key, required this.selection});
+  final ImageCacheManager? cacheManager;
+  const SelectionToolbar({
+    super.key,
+    required this.selection,
+    this.cacheManager,
+  });
 
   @override
   ConsumerState<SelectionToolbar> createState() => _SelectionToolbarState();
@@ -64,7 +70,12 @@ class _SelectionToolbarState extends ConsumerState<SelectionToolbar> {
     final useTop = bottomY + 52 > screenHeight - 48;
     final menuY = useTop ? topY : bottomY;
 
-    final config = buildSelectionActionConfig(ref, widget.selection);
+    final config = buildSelectionActionConfig(
+      ref,
+      widget.selection,
+      cacheManager: widget.cacheManager,
+      context: context,
+    );
     final buttonCount = config.toolbarActions.length + 1;
     const buttonWidth = 40.0;
     final toolbarWidth = buttonCount * buttonWidth + 16;
@@ -162,13 +173,16 @@ class _SelectionToolbarState extends ConsumerState<SelectionToolbar> {
               top: top,
               child: GestureDetector(
                 onTap: () {}, // absorb taps on menu itself
-                child: SelectionOverflowMenu(
-                  topRowActions: config.topRowActions,
-                  actions: config.overflowActions,
-                  onActionTap: (a) {
-                    _closeOverflow();
-                    a.onExecute?.call();
-                  },
+                child: Material(
+                  color: Colors.transparent,
+                  child: SelectionOverflowMenu(
+                    topRowActions: config.topRowActions,
+                    actions: config.overflowActions,
+                    onActionTap: (a) {
+                      _closeOverflow();
+                      a.onExecute?.call();
+                    },
+                  ),
                 ),
               ),
             ),
