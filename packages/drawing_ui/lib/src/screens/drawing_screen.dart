@@ -183,6 +183,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
     return DrawingThemeProvider(
       theme: drawingTheme,
       child: Scaffold(
+        resizeToAvoidBottomInset: false,
         backgroundColor: scaffoldBgColor,
         // Phone: bottom bar
         bottomNavigationBar: isCompactMode && !isReaderMode

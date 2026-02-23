@@ -43,6 +43,7 @@ const Set<ToolType> toolsWithPanel = {
   ToolType.laserPointer,
   ToolType.selection,
   ToolType.stickyNote,
+  ToolType.text,
 };
 
 /// Pen tools as a Set (for anchor resolution in panels).

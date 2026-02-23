@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/providers/document_provider.dart';
+import 'package:drawing_ui/src/providers/toolbar_config_provider.dart';
 
 /// Text tool state
 class TextToolState {
@@ -166,6 +170,12 @@ final activeLayerTextsProvider = Provider<List<TextElement>>((ref) {
 // Text Settings (default style for new text elements)
 // ---------------------------------------------------------------------------
 
+/// SharedPreferences key for text settings.
+const _textSettingsKey = 'starnote_text_settings';
+
+/// Default text settings.
+const _defaultTextSettings = TextSettings();
+
 /// Persistent settings for the text tool panel.
 class TextSettings {
   final double fontSize;
@@ -197,29 +207,88 @@ class TextSettings {
       isUnderline: isUnderline ?? this.isUnderline,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'fontSize': fontSize,
+      'color': color,
+      'isBold': isBold,
+      'isItalic': isItalic,
+      'isUnderline': isUnderline,
+    };
+  }
+
+  factory TextSettings.fromJson(Map<String, dynamic> json) {
+    const d = _defaultTextSettings;
+    return TextSettings(
+      fontSize: (json['fontSize'] as num?)?.toDouble() ?? d.fontSize,
+      color: json['color'] as int? ?? d.color,
+      isBold: json['isBold'] as bool? ?? d.isBold,
+      isItalic: json['isItalic'] as bool? ?? d.isItalic,
+      isUnderline: json['isUnderline'] as bool? ?? d.isUnderline,
+    );
+  }
+
+  String toJsonString() => jsonEncode(toJson());
+
+  factory TextSettings.fromJsonString(String source) {
+    final json = jsonDecode(source) as Map<String, dynamic>;
+    return TextSettings.fromJson(json);
+  }
 }
 
+/// Notifier for text settings with SharedPreferences persistence.
 class TextSettingsNotifier extends StateNotifier<TextSettings> {
-  TextSettingsNotifier() : super(const TextSettings());
+  TextSettingsNotifier(this._prefs) : super(_load(_prefs));
 
-  void setFontSize(double size) =>
-      state = state.copyWith(fontSize: size);
+  final SharedPreferences? _prefs;
 
-  void setColor(int color) =>
-      state = state.copyWith(color: color);
+  static TextSettings _load(SharedPreferences? prefs) {
+    if (prefs == null) return _defaultTextSettings;
+    final source = prefs.getString(_textSettingsKey);
+    if (source != null) {
+      try {
+        return TextSettings.fromJsonString(source);
+      } catch (_) {
+        // Invalid JSON, use defaults
+      }
+    }
+    return _defaultTextSettings;
+  }
 
-  void toggleBold() =>
-      state = state.copyWith(isBold: !state.isBold);
+  Future<void> _save() async {
+    await _prefs?.setString(_textSettingsKey, state.toJsonString());
+  }
 
-  void toggleItalic() =>
-      state = state.copyWith(isItalic: !state.isItalic);
+  void setFontSize(double size) {
+    state = state.copyWith(fontSize: size);
+    _save();
+  }
 
-  void toggleUnderline() =>
-      state = state.copyWith(isUnderline: !state.isUnderline);
+  void setColor(int color) {
+    state = state.copyWith(color: color);
+    _save();
+  }
+
+  void toggleBold() {
+    state = state.copyWith(isBold: !state.isBold);
+    _save();
+  }
+
+  void toggleItalic() {
+    state = state.copyWith(isItalic: !state.isItalic);
+    _save();
+  }
+
+  void toggleUnderline() {
+    state = state.copyWith(isUnderline: !state.isUnderline);
+    _save();
+  }
 }
 
-/// Provider for default text settings.
+/// Provider for default text settings with SharedPreferences persistence.
 final textSettingsProvider =
     StateNotifierProvider<TextSettingsNotifier, TextSettings>((ref) {
-  return TextSettingsNotifier();
+  final prefs = ref.watch(sharedPreferencesProvider);
+  return TextSettingsNotifier(prefs);
 });
