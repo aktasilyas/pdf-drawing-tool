@@ -1,34 +1,71 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 
-/// MOCK sticker categories for UI display - Turkish.
-const _mockStickerCategories = [
+/// Sticker categories.
+const _stickerCategories = [
   'Emoji',
   'Hayvanlar',
   'Yiyecek',
   'Seyahat',
   'Nesneler',
   'Semboller',
+  'Eller',
+  'Doğa',
 ];
 
 /// Returns sticker list for a given category.
 List<String> _getStickersForCategory(String category) {
   switch (category) {
     case 'Emoji':
-      return ['😀', '😂', '🥰', '😎', '🤔', '😊', '🙂', '😇', '🤩', '😋', '😜', '🤗'];
+      return [
+        '😀', '😃', '😄', '😁', '😂', '🤣', '😊', '😇',
+        '🥰', '😍', '🤩', '😘', '😋', '😜', '🤪', '😎',
+        '🤔', '🤨', '😏', '😌', '🥳', '🤗', '🫡', '🫠',
+      ];
     case 'Hayvanlar':
-      return ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮'];
+      return [
+        '🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼',
+        '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🐔',
+        '🦄', '🐝', '🦋', '🐢', '🐙', '🦀', '🐬', '🦅',
+      ];
     case 'Yiyecek':
-      return ['🍎', '🍕', '🍔', '🌮', '🍣', '🍩', '🍪', '🎂', '🍦', '🍫', '☕', '🧁'];
+      return [
+        '🍎', '🍊', '🍋', '🍇', '🍓', '🍑', '🍕', '🍔',
+        '🌮', '🌯', '🍣', '🍱', '🍩', '🍪', '🎂', '🍰',
+        '🍦', '🍫', '☕', '🧁', '🥐', '🥗', '🍿', '🧃',
+      ];
     case 'Seyahat':
-      return ['✈️', '🚗', '🚀', '⛵', '🏖️', '🗽', '🏔️', '🌍', '🏰', '🎡', '⛺', '🏝️'];
+      return [
+        '✈️', '🚗', '🚀', '⛵', '🏖️', '🗽', '🏔️', '🌍',
+        '🏰', '🎡', '⛺', '🏝️', '🗼', '🌋', '🏕️', '🚂',
+        '🚁', '⛷️', '🏄', '🎢', '🚢', '🛸', '🌅', '🗺️',
+      ];
     case 'Nesneler':
-      return ['📱', '💻', '📷', '🎮', '🎧', '📚', '✏️', '🔑', '💡', '⌚', '🎁', '🎈'];
+      return [
+        '📱', '💻', '📷', '🎮', '🎧', '📚', '✏️', '🔑',
+        '💡', '⌚', '🎁', '🎈', '🔔', '📌', '🎯', '🏆',
+        '🎪', '🎭', '🎬', '🎤', '🎸', '🎹', '🔬', '🔭',
+      ];
     case 'Semboller':
-      return ['❤️', '⭐', '✨', '💫', '🔥', '💯', '✅', '❌', '⚡', '💪', '👍', '🎉'];
+      return [
+        '❤️', '🧡', '💛', '💚', '💙', '💜', '🤎', '🖤',
+        '⭐', '✨', '💫', '🔥', '💯', '✅', '❌', '⚡',
+        '💪', '👍', '🎉', '🎊', '♻️', '💎', '🏳️‍🌈', '☮️',
+      ];
+    case 'Eller':
+      return [
+        '👋', '🤚', '✋', '🖖', '👌', '🤌', '🤏', '✌️',
+        '🤞', '🫰', '🤟', '🤙', '👈', '👉', '👆', '👇',
+        '☝️', '👍', '👎', '👏', '🙌', '🫶', '🤝', '🙏',
+      ];
+    case 'Doğa':
+      return [
+        '🌸', '🌺', '🌻', '🌹', '🌷', '🪻', '💐', '🌿',
+        '🍀', '🍁', '🍂', '🌴', '🌵', '🌊', '☀️', '🌙',
+        '⭐', '🌈', '☁️', '❄️', '💧', '🌪️', '🔥', '🍃',
+      ];
     default:
       return ['❓'];
   }
@@ -54,7 +91,7 @@ class _StickerPanelState extends ConsumerState<StickerPanel>
   void initState() {
     super.initState();
     _tabController = TabController(
-      length: _mockStickerCategories.length,
+      length: _stickerCategories.length,
       vsync: this,
     );
   }
@@ -77,36 +114,36 @@ class _StickerPanelState extends ConsumerState<StickerPanel>
           Text('Çıkartmalar', style: TextStyle(
             fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSurface)),
           const SizedBox(height: 10),
-          // Category tabs - compact
+          // Category tabs
           SizedBox(
             height: 32,
             child: TabBar(
               controller: _tabController,
               isScrollable: true,
-              labelColor: const Color(0xFF4A9DFF),
-              unselectedLabelColor: Colors.grey,
+              labelColor: cs.primary,
+              unselectedLabelColor: cs.onSurfaceVariant,
+              indicatorColor: cs.primary,
               indicatorSize: TabBarIndicatorSize.label,
               labelStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
               unselectedLabelStyle: const TextStyle(fontSize: 11),
               indicatorWeight: 2,
-              tabs: _mockStickerCategories.map((cat) => Tab(text: cat)).toList(),
+              dividerHeight: 0,
+              tabs: _stickerCategories.map((cat) => Tab(text: cat)).toList(),
             ),
           ),
           const SizedBox(height: 10),
 
-          // Sticker grid - compact
+          // Sticker grid
           SizedBox(
-            height: 160,
+            height: 200,
             child: TabBarView(
               controller: _tabController,
-              children: _mockStickerCategories.map((category) {
+              children: _stickerCategories.map((category) {
                 return _StickerGrid(
                   category: category,
                   selectedIndex: _selectedStickerIndex,
                   onStickerSelected: (index) {
-                    setState(() {
-                      _selectedStickerIndex = index;
-                    });
+                    setState(() => _selectedStickerIndex = index);
                   },
                   onStickerDoubleTap: (emoji) {
                     ref.read(stickerPlacementProvider.notifier).selectEmoji(emoji);
@@ -118,14 +155,7 @@ class _StickerPanelState extends ConsumerState<StickerPanel>
           ),
           const SizedBox(height: 10),
 
-          // Premium stickers section (locked) - compact
-          _CompactLockedSection(
-            title: 'Premium Çıkartmalar',
-            onTap: () => _showPremiumPrompt(context),
-          ),
-          const SizedBox(height: 10),
-
-          // Insert button - compact
+          // Insert button
           _CompactActionButton(
             label: 'Çıkartma Ekle',
             icon: StarNoteIcons.plus,
@@ -144,59 +174,10 @@ class _StickerPanelState extends ConsumerState<StickerPanel>
 
   String? _getSelectedEmoji() {
     if (_selectedStickerIndex < 0) return null;
-    final category = _mockStickerCategories[_tabController.index];
+    final category = _stickerCategories[_tabController.index];
     final stickers = _getStickersForCategory(category);
     if (_selectedStickerIndex >= stickers.length) return null;
     return stickers[_selectedStickerIndex];
-  }
-
-  void _showPremiumPrompt(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Premium çıkartmalar için abonelik gerekli'),
-        duration: Duration(seconds: 2),
-      ),
-    );
-  }
-}
-
-/// Compact locked section
-class _CompactLockedSection extends StatelessWidget {
-  const _CompactLockedSection({
-    required this.title,
-    required this.onTap,
-  });
-
-  final String title;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        decoration: BoxDecoration(
-          color: Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: Row(
-          children: [
-            PhosphorIcon(StarNoteIcons.lock, size: 14, color: Colors.orange),
-            const SizedBox(width: 6),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 11,
-                color: Color(0xFF666666),
-              ),
-            ),
-            const Spacer(),
-            PhosphorIcon(StarNoteIcons.chevronRight, size: 16, color: const Color(0xFF999999)),
-          ],
-        ),
-      ),
-    );
   }
 }
 
@@ -216,7 +197,8 @@ class _CompactActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = enabled ? const Color(0xFF4A9DFF) : Colors.grey;
+    final cs = Theme.of(context).colorScheme;
+    final color = enabled ? cs.primary : cs.onSurfaceVariant;
     return InkWell(
       onTap: enabled ? onPressed : null,
       borderRadius: BorderRadius.circular(8),
@@ -246,7 +228,7 @@ class _CompactActionButton extends StatelessWidget {
   }
 }
 
-/// Grid of stickers for a category - compact.
+/// Grid of stickers for a category.
 class _StickerGrid extends StatelessWidget {
   const _StickerGrid({
     required this.category,
@@ -262,6 +244,7 @@ class _StickerGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     final stickers = _getStickersForCategory(category);
 
     return GridView.builder(
@@ -278,10 +261,12 @@ class _StickerGrid extends StatelessWidget {
           onDoubleTap: () => onStickerDoubleTap?.call(stickers[index]),
           child: Container(
             decoration: BoxDecoration(
-              color: isSelected ? const Color(0xFF4A9DFF).withValues(alpha: 0.1) : Colors.grey.shade100,
+              color: isSelected
+                  ? cs.primary.withValues(alpha: 0.12)
+                  : cs.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(6),
               border: Border.all(
-                color: isSelected ? const Color(0xFF4A9DFF) : Colors.grey.shade300,
+                color: isSelected ? cs.primary : cs.outlineVariant,
                 width: isSelected ? 1.5 : 1,
               ),
             ),
@@ -296,5 +281,4 @@ class _StickerGrid extends StatelessWidget {
       },
     );
   }
-
 }
