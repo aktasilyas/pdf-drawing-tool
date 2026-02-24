@@ -205,7 +205,9 @@ void main() {
 
   group('LaserSettingsProvider', () {
     test('default mode is line', () {
-      final container = ProviderContainer();
+      final container = ProviderContainer(overrides: [
+        sharedPreferencesProvider.overrideWithValue(null),
+      ]);
       addTearDown(container.dispose);
 
       final settings = container.read(laserSettingsProvider);
@@ -213,7 +215,9 @@ void main() {
     });
 
     test('default thickness is 0.5', () {
-      final container = ProviderContainer();
+      final container = ProviderContainer(overrides: [
+        sharedPreferencesProvider.overrideWithValue(null),
+      ]);
       addTearDown(container.dispose);
 
       final settings = container.read(laserSettingsProvider);
@@ -221,7 +225,9 @@ void main() {
     });
 
     test('default duration is 2.0', () {
-      final container = ProviderContainer();
+      final container = ProviderContainer(overrides: [
+        sharedPreferencesProvider.overrideWithValue(null),
+      ]);
       addTearDown(container.dispose);
 
       final settings = container.read(laserSettingsProvider);
@@ -229,7 +235,9 @@ void main() {
     });
 
     test('default color is light blue', () {
-      final container = ProviderContainer();
+      final container = ProviderContainer(overrides: [
+        sharedPreferencesProvider.overrideWithValue(null),
+      ]);
       addTearDown(container.dispose);
 
       final settings = container.read(laserSettingsProvider);
@@ -237,7 +245,9 @@ void main() {
     });
 
     test('can change mode', () {
-      final container = ProviderContainer();
+      final container = ProviderContainer(overrides: [
+        sharedPreferencesProvider.overrideWithValue(null),
+      ]);
       addTearDown(container.dispose);
 
       container.read(laserSettingsProvider.notifier).setMode(LaserMode.dot);
@@ -246,7 +256,9 @@ void main() {
     });
 
     test('can change thickness', () {
-      final container = ProviderContainer();
+      final container = ProviderContainer(overrides: [
+        sharedPreferencesProvider.overrideWithValue(null),
+      ]);
       addTearDown(container.dispose);
 
       container.read(laserSettingsProvider.notifier).setThickness(3.5);
@@ -255,7 +267,9 @@ void main() {
     });
 
     test('can change duration', () {
-      final container = ProviderContainer();
+      final container = ProviderContainer(overrides: [
+        sharedPreferencesProvider.overrideWithValue(null),
+      ]);
       addTearDown(container.dispose);
 
       container.read(laserSettingsProvider.notifier).setDuration(4.0);
@@ -264,7 +278,9 @@ void main() {
     });
 
     test('can change color', () {
-      final container = ProviderContainer();
+      final container = ProviderContainer(overrides: [
+        sharedPreferencesProvider.overrideWithValue(null),
+      ]);
       addTearDown(container.dispose);
 
       container.read(laserSettingsProvider.notifier).setColor(Colors.blue);
@@ -273,7 +289,9 @@ void main() {
     });
 
     test('duration range is 0.5 to 5.0', () {
-      final container = ProviderContainer();
+      final container = ProviderContainer(overrides: [
+        sharedPreferencesProvider.overrideWithValue(null),
+      ]);
       addTearDown(container.dispose);
 
       // Set to min

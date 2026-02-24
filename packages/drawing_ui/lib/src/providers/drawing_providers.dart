@@ -373,6 +373,47 @@ class LaserSettings {
       color: color ?? this.color,
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'mode': mode.name,
+      'lineStyle': lineStyle.name,
+      'thickness': thickness,
+      'duration': duration,
+      'color': color.toARGB32(),
+    };
+  }
+
+  factory LaserSettings.fromJson(Map<String, dynamic> json) {
+    final defaults = LaserSettings.defaultSettings();
+    LaserMode mode = defaults.mode;
+    if (json['mode'] is String) {
+      try {
+        mode = LaserMode.values.firstWhere((m) => m.name == json['mode']);
+      } catch (_) {}
+    }
+    LaserLineStyle lineStyle = defaults.lineStyle;
+    if (json['lineStyle'] is String) {
+      try {
+        lineStyle = LaserLineStyle.values
+            .firstWhere((s) => s.name == json['lineStyle']);
+      } catch (_) {}
+    }
+    return LaserSettings(
+      mode: mode,
+      lineStyle: lineStyle,
+      thickness: (json['thickness'] as num?)?.toDouble() ?? defaults.thickness,
+      duration: (json['duration'] as num?)?.toDouble() ?? defaults.duration,
+      color: json['color'] is int ? Color(json['color'] as int) : defaults.color,
+    );
+  }
+
+  String toJsonString() => jsonEncode(toJson());
+
+  factory LaserSettings.fromJsonString(String source) {
+    final json = jsonDecode(source) as Map<String, dynamic>;
+    return LaserSettings.fromJson(json);
+  }
 }
 
 /// SharedPreferences key for lasso settings.
@@ -428,34 +469,62 @@ class LassoSettingsNotifier extends StateNotifier<LassoSettings> {
   }
 }
 
-/// Laser settings provider.
+/// SharedPreferences key for laser settings.
+const _laserSettingsKey = 'starnote_laser_settings';
+
+/// Laser settings provider with SharedPreferences persistence.
 final laserSettingsProvider =
     StateNotifierProvider<LaserSettingsNotifier, LaserSettings>(
-  (ref) => LaserSettingsNotifier(LaserSettings.defaultSettings()),
+  (ref) {
+    final prefs = ref.watch(sharedPreferencesProvider);
+    return LaserSettingsNotifier(prefs);
+  },
 );
 
-/// Notifier for laser settings.
+/// Notifier for laser settings with persistence.
 class LaserSettingsNotifier extends StateNotifier<LaserSettings> {
-  LaserSettingsNotifier(super.state);
+  LaserSettingsNotifier(this._prefs) : super(_load(_prefs));
+
+  final SharedPreferences? _prefs;
+
+  static LaserSettings _load(SharedPreferences? prefs) {
+    if (prefs == null) return LaserSettings.defaultSettings();
+    final source = prefs.getString(_laserSettingsKey);
+    if (source != null) {
+      try {
+        return LaserSettings.fromJsonString(source);
+      } catch (_) {}
+    }
+    return LaserSettings.defaultSettings();
+  }
+
+  Future<void> _save() async {
+    await _prefs?.setString(_laserSettingsKey, state.toJsonString());
+  }
 
   void setMode(LaserMode mode) {
     state = state.copyWith(mode: mode);
+    _save();
   }
 
   void setLineStyle(LaserLineStyle style) {
     state = state.copyWith(lineStyle: style);
+    _save();
   }
 
   void setThickness(double thickness) {
     state = state.copyWith(thickness: thickness);
+    _save();
   }
 
   void setDuration(double duration) {
     state = state.copyWith(duration: duration);
+    _save();
   }
 
   void setColor(Color color) {
     state = state.copyWith(color: color);
+    _save();
   }
 }
 
