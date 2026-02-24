@@ -208,10 +208,8 @@ void handlePanelChange({
   if (w < ToolbarLayoutMode.compactBreakpoint) return;
   if (panel == null) {
     panelController.hide();
-  } else if (panel != ToolType.panZoom) {
-    final anchorKey = panel == ToolType.toolbarSettings
-        ? settingsButtonKey
-        : penToolsSet.contains(panel)
+  } else if (panel != ToolType.panZoom && panel != ToolType.toolbarSettings) {
+    final anchorKey = penToolsSet.contains(panel)
             ? penGroupButtonKey
             : highlighterToolsSet.contains(panel)
                 ? highlighterGroupButtonKey

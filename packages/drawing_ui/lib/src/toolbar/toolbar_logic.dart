@@ -92,7 +92,7 @@ void handleToolPressed(WidgetRef ref, ToolType tool) {
     }
 
     // First click — just select, no panel
-    ref.read(currentToolProvider.notifier).state = tool;
+    ref.read(currentToolProvider.notifier).selectTool(tool);
     ref.read(activePanelProvider.notifier).state = null;
   }
 }

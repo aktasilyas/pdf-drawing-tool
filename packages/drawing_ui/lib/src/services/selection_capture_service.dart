@@ -19,6 +19,9 @@ class SelectionCaptureService {
   ///
   /// Returns PNG bytes, or null if rendering fails.
   /// Renders the page [background] (color, pattern, PDF) behind elements.
+  /// High-resolution scale factor for screenshot output.
+  static const double _exportScale = 3.0;
+
   static Future<Uint8List?> captureSelection({
     required Selection selection,
     required Layer layer,
@@ -34,6 +37,10 @@ class SelectionCaptureService {
       final h = bounds.bottom - bounds.top + padding * 2;
       if (w <= 0 || h <= 0) return null;
 
+      final isLasso = selection.type == SelectionType.lasso &&
+          selection.lassoPath != null &&
+          selection.lassoPath!.length >= 3;
+
       // Decode PDF background image before recording (async operation)
       ui.Image? pdfImage;
       if (background?.type == BackgroundType.pdf && pdfImageBytes != null) {
@@ -43,49 +50,55 @@ class SelectionCaptureService {
       final recorder = ui.PictureRecorder();
       final canvas = Canvas(recorder);
 
-      // Background color (from page background or white default)
-      final bgColor =
-          background != null ? Color(background.color) : Colors.white;
-      canvas.drawRect(Rect.fromLTWH(0, 0, w, h), Paint()..color = bgColor);
+      // Scale up for high-resolution output
+      canvas.scale(_exportScale);
 
       // Translate so selection bounds start at (padding, padding)
       canvas.translate(-bounds.left + padding, -bounds.top + padding);
 
-      // Render background pattern clipped to selection area
-      if (background != null) {
-        canvas.save();
-        canvas.clipRect(Rect.fromLTRB(
-            bounds.left, bounds.top, bounds.right, bounds.bottom));
-        _renderBackground(canvas, background, pdfImage, pageSize);
-        canvas.restore();
+      // Build clip path: lasso shape or padded rectangle
+      final Path clipPath;
+      if (isLasso) {
+        final lasso = selection.lassoPath!;
+        clipPath = Path()..moveTo(lasso.first.x, lasso.first.y);
+        for (int i = 1; i < lasso.length; i++) {
+          clipPath.lineTo(lasso[i].x, lasso[i].y);
+        }
+        clipPath.close();
+      } else {
+        clipPath = Path()
+          ..addRect(Rect.fromLTRB(
+              bounds.left - padding, bounds.top - padding,
+              bounds.right + padding, bounds.bottom + padding));
       }
 
-      // Render selected strokes
-      final strokeIds = selection.selectedStrokeIds.toSet();
-      final selectedStrokes =
-          layer.strokes.where((s) => strokeIds.contains(s.id)).toList();
-      _renderStrokes(canvas, selectedStrokes);
+      // Clip to selection shape and draw background
+      canvas.save();
+      canvas.clipPath(clipPath);
 
-      // Render selected shapes
-      final shapeIds = selection.selectedShapeIds.toSet();
-      final selectedShapes =
-          layer.shapes.where((s) => shapeIds.contains(s.id)).toList();
-      _renderShapes(canvas, selectedShapes);
+      // Background color (from page background or white default)
+      final bgColor =
+          background != null ? Color(background.color) : Colors.white;
+      canvas.drawRect(
+        Rect.fromLTRB(bounds.left - padding, bounds.top - padding,
+            bounds.right + padding, bounds.bottom + padding),
+        Paint()..color = bgColor,
+      );
 
-      // Render selected images
-      final imageIds = selection.selectedImageIds.toSet();
-      final selectedImages =
-          layer.images.where((i) => imageIds.contains(i.id)).toList();
-      _renderImages(canvas, selectedImages, cacheManager);
+      // Render background pattern
+      if (background != null) {
+        _renderBackground(canvas, background, pdfImage, pageSize);
+      }
 
-      // Render selected texts
-      final textIds = selection.selectedTextIds.toSet();
-      final selectedTexts =
-          layer.texts.where((t) => textIds.contains(t.id)).toList();
-      _renderTexts(canvas, selectedTexts);
+      // Render selected elements (all clipped to selection shape)
+      _renderLayerElements(canvas, selection, layer, cacheManager);
+
+      canvas.restore();
 
       final picture = recorder.endRecording();
-      final image = await picture.toImage(w.ceil(), h.ceil());
+      final imgW = (w * _exportScale).ceil();
+      final imgH = (h * _exportScale).ceil();
+      final image = await picture.toImage(imgW, imgH);
       final byteData =
           await image.toByteData(format: ui.ImageByteFormat.png);
 
@@ -94,6 +107,34 @@ class SelectionCaptureService {
       debugPrint('SelectionCaptureService: captureSelection failed: $e');
       return null;
     }
+  }
+
+  /// Renders all selected layer elements onto the canvas.
+  static void _renderLayerElements(
+    Canvas canvas,
+    Selection selection,
+    Layer layer,
+    ImageCacheManager cacheManager,
+  ) {
+    final strokeIds = selection.selectedStrokeIds.toSet();
+    final selectedStrokes =
+        layer.strokes.where((s) => strokeIds.contains(s.id)).toList();
+    _renderStrokes(canvas, selectedStrokes);
+
+    final shapeIds = selection.selectedShapeIds.toSet();
+    final selectedShapes =
+        layer.shapes.where((s) => shapeIds.contains(s.id)).toList();
+    _renderShapes(canvas, selectedShapes);
+
+    final imageIds = selection.selectedImageIds.toSet();
+    final selectedImages =
+        layer.images.where((i) => imageIds.contains(i.id)).toList();
+    _renderImages(canvas, selectedImages, cacheManager);
+
+    final textIds = selection.selectedTextIds.toSet();
+    final selectedTexts =
+        layer.texts.where((t) => textIds.contains(t.id)).toList();
+    _renderTexts(canvas, selectedTexts);
   }
 
   /// Saves PNG bytes to the device gallery.
@@ -222,7 +263,16 @@ class SelectionCaptureService {
           ui.ParagraphStyle(textAlign: align, maxLines: null))
             ..pushStyle(style)..addText(t.text))
           .build()..layout(ui.ParagraphConstraints(width: t.width ?? 1000.0));
+      canvas.save();
+      if (t.rotation != 0.0) {
+        final cx = t.x + p.maxIntrinsicWidth / 2;
+        final cy = t.y + p.height / 2;
+        canvas.translate(cx, cy);
+        canvas.rotate(t.rotation);
+        canvas.translate(-cx, -cy);
+      }
       canvas.drawParagraph(p, Offset(t.x, t.y));
+      canvas.restore();
     }
   }
 

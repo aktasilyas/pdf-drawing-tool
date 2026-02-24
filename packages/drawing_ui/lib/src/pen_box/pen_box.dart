@@ -75,7 +75,7 @@ class PenBox extends ConsumerWidget {
     ref.read(selectedPresetIndexProvider.notifier).state = index;
 
     // Update current tool to match preset
-    ref.read(currentToolProvider.notifier).state = preset.toolType;
+    ref.read(currentToolProvider.notifier).selectTool(preset.toolType);
 
     // Update tool settings to match preset
     ref.read(penSettingsProvider(preset.toolType).notifier)

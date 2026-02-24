@@ -1105,7 +1105,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                           // ─────────────────────────────────────────────────────────
                           // LAYER 8: Selection Handles (for drag interactions)
                           // ─────────────────────────────────────────────────────────
-                          if (selection != null)
+                          if (selection != null && selection.isNotEmpty)
                             SelectionHandles(
                               selection: selection,
                               onSelectionChanged: () => setState(() {}),

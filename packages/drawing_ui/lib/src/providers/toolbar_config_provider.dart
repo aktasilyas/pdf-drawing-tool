@@ -7,9 +7,9 @@ import 'package:drawing_ui/src/models/tool_type.dart';
 const _toolbarConfigKey = 'starnote_toolbar_config';
 
 /// Provider for SharedPreferences instance for toolbar config
-/// 
+///
 /// This provider can be overridden by the host app to enable persistence:
-/// 
+///
 /// ```dart
 /// ProviderScope(
 ///   overrides: [
@@ -18,7 +18,7 @@ const _toolbarConfigKey = 'starnote_toolbar_config';
 ///   child: MyApp(),
 /// )
 /// ```
-/// 
+///
 /// If not overridden, toolbar config will work without persistence (memory-only).
 final sharedPreferencesProvider = Provider<SharedPreferences?>((ref) {
   return null; // Default: no persistence
@@ -37,17 +37,12 @@ class ToolbarConfigNotifier extends StateNotifier<ToolbarConfig> {
   final SharedPreferences? _prefs;
 
   static ToolbarConfig _loadConfig(SharedPreferences? prefs) {
-    if (prefs == null) {
-      // No persistence available, use default
-      return ToolbarConfig.defaultConfig();
-    }
-    
+    if (prefs == null) return ToolbarConfig.defaultConfig();
     final jsonString = prefs.getString(_toolbarConfigKey);
     if (jsonString != null) {
       try {
         return ToolbarConfig.fromJsonString(jsonString);
       } catch (e) {
-        // Invalid JSON, return default
         return ToolbarConfig.defaultConfig();
       }
     }
@@ -58,7 +53,6 @@ class ToolbarConfigNotifier extends StateNotifier<ToolbarConfig> {
     if (_prefs != null) {
       await _prefs!.setString(_toolbarConfigKey, state.toJsonString());
     }
-    // If no prefs, just update state without persistence
   }
 
   /// Toggle visibility of a tool
@@ -73,19 +67,31 @@ class ToolbarConfigNotifier extends StateNotifier<ToolbarConfig> {
     await _saveConfig();
   }
 
+  /// Toggle visibility of an extra tool (ruler, audio, etc.)
+  Future<void> toggleExtraTool(String key) async {
+    state = state.toggleExtraToolVisibility(key);
+    await _saveConfig();
+  }
+
+  /// Reorder extra tools
+  Future<void> reorderExtraTools(int oldIndex, int newIndex) async {
+    state = state.reorderExtraTools(oldIndex, newIndex);
+    await _saveConfig();
+  }
+
   /// Toggle quick access bar visibility
   Future<void> toggleQuickAccess() async {
     state = state.copyWith(showQuickAccess: !state.showQuickAccess);
     await _saveConfig();
   }
 
-  /// Update quick access colors
+  /// Set quick access colors
   Future<void> setQuickAccessColors(List<int> colors) async {
     state = state.copyWith(quickAccessColors: colors);
     await _saveConfig();
   }
 
-  /// Update quick access thicknesses
+  /// Set quick access thicknesses
   Future<void> setQuickAccessThicknesses(List<double> thicknesses) async {
     state = state.copyWith(quickAccessThicknesses: thicknesses);
     await _saveConfig();

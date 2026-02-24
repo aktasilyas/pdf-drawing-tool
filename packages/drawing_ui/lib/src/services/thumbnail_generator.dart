@@ -450,10 +450,19 @@ class ThumbnailGenerator {
       );
 
       textPainter.layout();
+      canvas.save();
+      if (textElement.rotation != 0.0) {
+        final cx = textElement.x + textPainter.width / 2;
+        final cy = textElement.y + textPainter.height / 2;
+        canvas.translate(cx, cy);
+        canvas.rotate(textElement.rotation);
+        canvas.translate(-cx, -cy);
+      }
       textPainter.paint(
         canvas,
         Offset(textElement.x, textElement.y),
       );
+      canvas.restore();
     }
   }
 }

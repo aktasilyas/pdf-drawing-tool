@@ -58,6 +58,15 @@ class TextElementPainter extends CustomPainter {
     final layoutWidth = text.width ?? 1000.0;
     paragraph.layout(ui.ParagraphConstraints(width: layoutWidth));
 
+    canvas.save();
+    if (text.rotation != 0.0) {
+      final cx = text.x + paragraph.maxIntrinsicWidth / 2;
+      final cy = text.y + paragraph.height / 2;
+      canvas.translate(cx, cy);
+      canvas.rotate(text.rotation);
+      canvas.translate(-cx, -cy);
+    }
+
     // Draw text
     canvas.drawParagraph(paragraph, Offset(text.x, text.y));
 
@@ -65,6 +74,7 @@ class TextElementPainter extends CustomPainter {
     if (isActive) {
       _drawEditingIndicator(canvas, text, paragraph);
     }
+    canvas.restore();
   }
 
   void _drawEditingIndicator(

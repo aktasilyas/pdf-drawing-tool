@@ -119,14 +119,26 @@ class FlipSelectionCommand implements DrawingCommand {
       ));
     }
 
-    // Flip texts (position only)
+    // Flip texts — same center-based approach as images.
     for (final id in textIds) {
       final text = layer.getTextById(id);
       if (text == null) continue;
 
-      final newX = axis == FlipAxis.horizontal ? 2 * centerX - text.x : text.x;
-      final newY = axis == FlipAxis.vertical ? 2 * centerY - text.y : text.y;
-      layer = layer.updateText(text.copyWith(x: newX, y: newY));
+      final b = text.bounds;
+      final cx = (b.left + b.right) / 2;
+      final cy = (b.top + b.bottom) / 2;
+      final halfW = cx - text.x;
+      final halfH = cy - text.y;
+      final newCx = axis == FlipAxis.horizontal ? 2 * centerX - cx : cx;
+      final newCy = axis == FlipAxis.vertical ? 2 * centerY - cy : cy;
+      final newRot = axis == FlipAxis.horizontal
+          ? -text.rotation
+          : text.rotation;
+      layer = layer.updateText(text.copyWith(
+        x: newCx - halfW,
+        y: newCy - halfH,
+        rotation: newRot,
+      ));
     }
 
     return document.updateLayer(layerIndex, layer);

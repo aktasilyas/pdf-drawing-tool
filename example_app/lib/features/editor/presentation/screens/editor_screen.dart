@@ -94,6 +94,7 @@ class EditorScreen extends ConsumerWidget {
         final canvasMode = document.canvasMode;
 
         return Scaffold(
+          resizeToAvoidBottomInset: false,
           // NO AppBar - DrawingScreen handles everything
           body: DrawingScreen(
             documentTitle: document.title,

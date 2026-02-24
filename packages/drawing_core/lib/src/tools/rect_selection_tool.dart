@@ -51,8 +51,8 @@ class RectSelectionTool implements SelectionTool {
       bottom: max(_startPoint!.y, _endPoint!.y),
     );
 
-    // Minimum size check - prevent accidental tiny selections
-    if (selectionBounds.width < 5 || selectionBounds.height < 5) {
+    // Minimum size check - prevent accidental tiny selections (e.g. taps)
+    if (selectionBounds.width < 20 || selectionBounds.height < 20) {
       _clear();
       return null;
     }
@@ -69,25 +69,24 @@ class RectSelectionTool implements SelectionTool {
     // Find texts that intersect with selection rectangle
     final selectedTextIds = _findTextsInRect(texts, selectionBounds);
 
-    if (selectedStrokeIds.isEmpty &&
-        selectedShapeIds.isEmpty &&
-        selectedImageIds.isEmpty &&
-        selectedTextIds.isEmpty) {
-      _clear();
-      return null;
-    }
+    final bool hasSelectedItems = selectedStrokeIds.isNotEmpty ||
+        selectedShapeIds.isNotEmpty ||
+        selectedImageIds.isNotEmpty ||
+        selectedTextIds.isNotEmpty;
 
-    // Calculate actual bounds of selected items
-    final actualBounds = _calculateSelectionBounds(
-      strokes,
-      selectedStrokeIds,
-      shapes,
-      selectedShapeIds,
-      images,
-      selectedImageIds,
-      texts,
-      selectedTextIds,
-    );
+    // Use actual bounds of selected items, or the drawn area for empty selections
+    final bounds = hasSelectedItems
+        ? _calculateSelectionBounds(
+            strokes,
+            selectedStrokeIds,
+            shapes,
+            selectedShapeIds,
+            images,
+            selectedImageIds,
+            texts,
+            selectedTextIds,
+          )
+        : selectionBounds;
 
     final selection = Selection.create(
       type: SelectionType.rectangle,
@@ -95,7 +94,7 @@ class RectSelectionTool implements SelectionTool {
       selectedShapeIds: selectedShapeIds,
       selectedImageIds: selectedImageIds,
       selectedTextIds: selectedTextIds,
-      bounds: actualBounds,
+      bounds: bounds,
     );
 
     _clear();

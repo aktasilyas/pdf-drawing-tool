@@ -143,8 +143,8 @@ class _SelectionTypeSelector extends StatelessWidget {
   static IconData _iconFor(LassoMode mode, bool selected) {
     return switch (mode) {
       LassoMode.freeform => selected
-          ? PhosphorIconsRegular.selection
-          : PhosphorIconsLight.selection,
+          ? PhosphorIconsRegular.lasso
+          : PhosphorIconsLight.lasso,
       LassoMode.rectangle => selected
           ? PhosphorIconsRegular.boundingBox
           : PhosphorIconsLight.boundingBox,

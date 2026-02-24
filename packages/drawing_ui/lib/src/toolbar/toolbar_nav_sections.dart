@@ -168,6 +168,9 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
   @override
   Widget build(BuildContext context) {
     final rulerVisible = ref.watch(rulerVisibleProvider);
+    final toolbarConfig = ref.watch(toolbarConfigProvider);
+    final rulerEnabled = toolbarConfig.extraToolVisible('ruler');
+    final audioEnabled = toolbarConfig.extraToolVisible('audio');
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -180,7 +183,7 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
           onPressed: widget.onReaderToggle ?? () {},
           isActive: widget.isReaderMode,
         ),
-        if (!widget.isReaderMode)
+        if (!widget.isReaderMode && rulerEnabled)
           StarNoteNavButton(
             icon: rulerVisible
                 ? StarNoteIcons.rulerActive
@@ -207,7 +210,7 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
             onPressed: () => _togglePanel(_NavPanel.addPage),
             isActive: _activePanel == _NavPanel.addPage,
           ),
-        if (!widget.isReaderMode)
+        if (!widget.isReaderMode && audioEnabled)
           StarNoteNavButton(
             key: _micKey,
             icon: StarNoteIcons.microphone,

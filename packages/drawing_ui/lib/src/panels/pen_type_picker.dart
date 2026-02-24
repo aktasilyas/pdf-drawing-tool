@@ -37,7 +37,7 @@ class PenTypePicker extends ConsumerWidget {
           return Expanded(
             child: GestureDetector(
               onTap: () {
-                ref.read(currentToolProvider.notifier).state = pen;
+                ref.read(currentToolProvider.notifier).selectTool(pen);
                 onPenSelected?.call(pen);
               },
               behavior: HitTestBehavior.opaque,

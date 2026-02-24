@@ -13,6 +13,7 @@ import 'package:drawing_ui/src/providers/selection_clipboard_provider.dart';
 import 'package:drawing_ui/src/services/selection_capture_service.dart';
 import 'package:drawing_ui/src/screens/drawing_screen_layout.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/widgets/screenshot_preview_dialog.dart';
 
 // ============================================================
 // ACTION HELPERS
@@ -256,6 +257,14 @@ Future<void> _screenshotSelection(
       return;
     }
 
+    if (context == null || !context.mounted) return;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => ScreenshotPreviewDialog(bytes: bytes),
+    );
+    if (confirmed != true) return;
+
     final gallerySaved = await SelectionCaptureService.saveToGallery(bytes);
     final clipboardCopied =
         await SelectionCaptureService.copyToClipboard(bytes);
@@ -295,6 +304,32 @@ SelectionActionConfig buildSelectionActionConfig(
   ImageCacheManager? cacheManager,
   BuildContext? context,
 }) {
+  // Empty selection: only AI + Screenshot actions
+  if (selection.isEmpty) {
+    return SelectionActionConfig(
+      toolbarActions: [
+        SelectionAction(
+          id: 'ai',
+          icon: StarNoteIcons.sparkle,
+          label: 'AI Asistan',
+          isEnabled: context != null,
+          onExecute: context != null ? () => openAIPanel(context) : null,
+        ),
+        SelectionAction(
+          id: 'screenshot',
+          icon: StarNoteIcons.camera,
+          label: 'Ekran Resmi',
+          isEnabled: cacheManager != null,
+          onExecute: cacheManager != null
+              ? () => _screenshotSelection(ref, selection, cacheManager, context)
+              : null,
+        ),
+      ],
+      topRowActions: const [],
+      overflowActions: const [],
+    );
+  }
+
   final clipboard = ref.read(selectionClipboardProvider);
   final hasClipboard = clipboard != null;
 

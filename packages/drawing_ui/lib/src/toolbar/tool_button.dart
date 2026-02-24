@@ -75,27 +75,35 @@ class ToolButton extends StatelessWidget {
     final iconData =
         customIcon ?? StarNoteIcons.iconForTool(toolType, active: isSelected);
 
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: enabled
-          ? () {
-              if (isSelected && hasPanel && onPanelTap != null) {
-                onPanelTap!();
-              } else {
-                onPressed();
-              }
-            }
-          : null,
-      child: Container(
-        key: buttonKey,
-        width: buttonSize,
-        height: buttonSize,
-        decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Center(
-          child: PhosphorIcon(iconData, size: iconSize, color: iconColor),
+    return Semantics(
+      label: toolType.displayName,
+      button: true,
+      enabled: enabled,
+      child: Tooltip(
+        message: toolType.displayName,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: enabled
+              ? () {
+                  if (isSelected && hasPanel && onPanelTap != null) {
+                    onPanelTap!();
+                  } else {
+                    onPressed();
+                  }
+                }
+              : null,
+          child: Container(
+            key: buttonKey,
+            width: buttonSize,
+            height: buttonSize,
+            decoration: BoxDecoration(
+              color: bgColor,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Center(
+              child: PhosphorIcon(iconData, size: iconSize, color: iconColor),
+            ),
+          ),
         ),
       ),
     );

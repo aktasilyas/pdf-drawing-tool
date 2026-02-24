@@ -151,7 +151,7 @@ class ScaleSelectionCommand implements DrawingCommand {
       ));
     }
 
-    // Scale texts (position + fontSize)
+    // Scale texts (position + fontSize) — same center-based approach as images.
     for (final id in textIds) {
       final text = layer.getTextById(id);
       if (text == null) continue;
@@ -160,16 +160,27 @@ class ScaleSelectionCommand implements DrawingCommand {
         _originalFontSizes[id] = text.fontSize;
       }
 
-      final newX = centerX + (text.x - centerX) * sx;
-      final newY = centerY + (text.y - centerY) * sy;
+      final b = text.bounds;
+      final cx = (b.left + b.right) / 2;
+      final cy = (b.top + b.bottom) / 2;
+      final halfW = cx - text.x;
+      final halfH = cy - text.y;
+      final newCx = centerX + (cx - centerX) * sx;
+      final newCy = centerY + (cy - centerY) * sy;
       final newFontSize = restoreFontSize && _originalFontSizes.containsKey(id)
           ? _originalFontSizes[id]!
           : (text.fontSize * thicknessScale).clamp(4.0, 200.0);
 
+      final fontRatio = newFontSize / text.fontSize;
+      final newHalfW = halfW * fontRatio;
+      final newHalfH = halfH * fontRatio;
+
       layer = layer.updateText(text.copyWith(
-        x: newX,
-        y: newY,
+        x: newCx - newHalfW,
+        y: newCy - newHalfH,
         fontSize: newFontSize,
+        width: text.width != null ? text.width! * fontRatio : null,
+        height: text.height != null ? text.height! * fontRatio : null,
       ));
     }
 

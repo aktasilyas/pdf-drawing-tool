@@ -8,6 +8,7 @@ import 'package:drawing_ui/src/widgets/template_picker/template_picker.dart';
 
 import 'export_panel.dart' show performPagesPDFExport;
 import 'page_options_widgets.dart';
+import 'toolbar_settings_panel.dart';
 
 /// GoodNotes-style page options popup panel.
 class PageOptionsPanel extends ConsumerStatefulWidget {
@@ -281,6 +282,23 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
           // TEMPORARILY DISABLED: Dual page mode
           // DualPageModeItem(onClose: widget.onClose),
           ScrollDirectionItem(onClose: widget.onClose),
+          PageOptionsMenuItem(
+            icon: StarNoteIcons.sliders,
+            label: 'Araç Çubuğunu Düzenle',
+            onTap: () {
+              widget.onClose();
+              showDialog<void>(
+                context: context,
+                builder: (_) => const Dialog(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(16)),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: ToolbarSettingsPanel(),
+                ),
+              );
+            },
+          ),
           const SizedBox(height: 8),
         ],
       ),

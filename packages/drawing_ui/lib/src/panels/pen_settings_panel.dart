@@ -76,7 +76,7 @@ class PenSettingsPanel extends ConsumerWidget {
             selectedType: currentTool,
             selectedColor: s.color,
             onTypeSelected: (t) =>
-                ref.read(currentToolProvider.notifier).state = t,
+                ref.read(currentToolProvider.notifier).selectTool(t),
           ),
           const SizedBox(height: 20),
 
