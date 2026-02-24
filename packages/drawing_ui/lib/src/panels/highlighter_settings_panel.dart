@@ -61,7 +61,7 @@ class HighlighterSettingsPanel extends ConsumerWidget {
           _HighlighterTypeSelector(
             selectedType: currentTool,
             onTypeSelected: (t) =>
-                ref.read(currentToolProvider.notifier).state = t,
+                ref.read(currentToolProvider.notifier).selectTool(t),
           ),
           const SizedBox(height: 20),
 

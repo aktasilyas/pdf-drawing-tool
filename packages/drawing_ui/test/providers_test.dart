@@ -18,7 +18,7 @@ void main() {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
-      container.read(currentToolProvider.notifier).state = ToolType.highlighter;
+      container.read(currentToolProvider.notifier).selectTool(ToolType.highlighter);
       expect(container.read(currentToolProvider), ToolType.highlighter);
     });
   });

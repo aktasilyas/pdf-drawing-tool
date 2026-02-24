@@ -1,5 +1,6 @@
 import 'dart:async' show Timer;
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -315,8 +316,17 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
 
     // Close selection context menu if showing
     final selUi = ref.read(selectionUiProvider);
+    final isSelectionTool = ref.read(isSelectionToolProvider);
     if (selUi.showMenu) {
       ref.read(selectionUiProvider.notifier).hideContextMenu();
+      // When selection tool is active, clear and start new selection immediately
+      // instead of consuming the tap just to hide the menu.
+      if (isSelectionTool) {
+        ref.read(selectionProvider.notifier).clearSelection();
+        ref.read(selectionUiProvider.notifier).reset();
+        handleSelectionDown(event);
+        return;
+      }
       return;
     }
 
@@ -350,7 +360,6 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     }
 
     // Check if selection tool is active
-    final isSelectionTool = ref.read(isSelectionToolProvider);
     if (isSelectionTool) {
       // Check if there's an existing selection
       final selection = ref.read(selectionProvider);
@@ -481,7 +490,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
           );
           ref.read(selectionProvider.notifier).setSelection(selection);
           ref.read(selectionUiProvider.notifier).showContextMenu();
-          ref.read(currentToolProvider.notifier).state = ToolType.selection;
+          ref.read(currentToolProvider.notifier).selectTool(ToolType.selection);
           return;
         }
       }
@@ -1094,7 +1103,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     if (settings.autoLift) {
       final prevTool = ref.read(previousToolProvider);
       if (prevTool != null) {
-        ref.read(currentToolProvider.notifier).state = prevTool;
+        ref.read(currentToolProvider.notifier).selectTool(prevTool);
         ref.read(previousToolProvider.notifier).state = null;
       }
     }
@@ -1738,7 +1747,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     );
     ref.read(selectionProvider.notifier).setSelection(selection);
     ref.read(selectionUiProvider.notifier).showContextMenu();
-    ref.read(currentToolProvider.notifier).state = ToolType.selection;
+    ref.read(currentToolProvider.notifier).selectTool(ToolType.selection);
   }
 
   void handleTextStyleChanged(core.TextElement updatedText) {
@@ -1787,11 +1796,23 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     }
 
     // Empty area — place new sticker
+    // Measure actual emoji size for accurate selection bounds
+    const stickerFontSize = 48.0;
+    final paragraph = (ui.ParagraphBuilder(ui.ParagraphStyle())
+          ..pushStyle(ui.TextStyle(fontSize: stickerFontSize))
+          ..addText(emoji))
+        .build();
+    paragraph.layout(const ui.ParagraphConstraints(width: 1000.0));
+    final measuredW = paragraph.maxIntrinsicWidth;
+    final measuredH = paragraph.height;
+
     final textElement = core.TextElement.create(
       text: emoji,
-      x: canvasPoint.dx,
-      y: canvasPoint.dy,
-      fontSize: 48,
+      x: canvasPoint.dx - measuredW / 2,
+      y: canvasPoint.dy - measuredH / 2,
+      fontSize: stickerFontSize,
+      width: measuredW,
+      height: measuredH,
     );
 
     final document = ref.read(documentProvider);
@@ -1861,7 +1882,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     ref.read(selectionUiProvider.notifier).showContextMenu();
 
     // Switch to selection tool so handles are interactive
-    ref.read(currentToolProvider.notifier).state = ToolType.selection;
+    ref.read(currentToolProvider.notifier).selectTool(ToolType.selection);
   }
 
   // ─────────────────────────────────────────────────────────────────────────

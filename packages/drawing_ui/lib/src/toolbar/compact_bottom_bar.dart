@@ -185,7 +185,7 @@ class _CompactBottomBarState extends ConsumerState<CompactBottomBar> {
       }
     } else {
       // First click — just select
-      ref.read(currentToolProvider.notifier).state = tool;
+      ref.read(currentToolProvider.notifier).selectTool(tool);
       ref.read(activePanelProvider.notifier).state = null;
       ref.read(penPickerModeProvider.notifier).state = false;
     }

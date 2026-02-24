@@ -43,7 +43,7 @@ class ToolbarOverflowMenu extends ConsumerWidget {
       ),
       position: PopupMenuPosition.under,
       onSelected: (tool) {
-        ref.read(currentToolProvider.notifier).state = tool;
+        ref.read(currentToolProvider.notifier).selectTool(tool);
         ref.read(activePanelProvider.notifier).state = null;
       },
       itemBuilder: (context) => hiddenTools.map((tool) {

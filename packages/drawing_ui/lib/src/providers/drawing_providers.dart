@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/pen_settings_provider.dart';
+import 'package:drawing_ui/src/providers/toolbar_config_provider.dart';
 
 // Re-export extracted settings providers for backward compatibility.
 export 'pen_settings_provider.dart';
@@ -12,10 +16,43 @@ export 'eraser_settings_provider.dart';
 // TOOL SELECTION
 // =============================================================================
 
-/// Currently selected tool type.
-final currentToolProvider = StateProvider<ToolType>((ref) {
-  return ToolType.ballpointPen;
+/// SharedPreferences key for persisting selected tool.
+const _currentToolKey = 'starnote_current_tool';
+
+/// Currently selected tool type with SharedPreferences persistence.
+final currentToolProvider =
+    StateNotifierProvider<CurrentToolNotifier, ToolType>((ref) {
+  final prefs = ref.watch(sharedPreferencesProvider);
+  return CurrentToolNotifier(prefs);
 });
+
+/// Notifier for current tool selection with persistence.
+class CurrentToolNotifier extends StateNotifier<ToolType> {
+  CurrentToolNotifier(this._prefs, {ToolType? initialTool})
+      : super(initialTool ?? _load(_prefs));
+
+  final SharedPreferences? _prefs;
+
+  static ToolType _load(SharedPreferences? prefs) {
+    if (prefs == null) return ToolType.ballpointPen;
+    final name = prefs.getString(_currentToolKey);
+    if (name != null) {
+      try {
+        return ToolType.values.firstWhere((t) => t.name == name);
+      } catch (_) {}
+    }
+    return ToolType.ballpointPen;
+  }
+
+  Future<void> _save() async {
+    await _prefs?.setString(_currentToolKey, state.name);
+  }
+
+  void selectTool(ToolType tool) {
+    state = tool;
+    _save();
+  }
+}
 
 /// Tool that was active before switching to eraser (for autoLift).
 final previousToolProvider = StateProvider<ToolType?>((ref) => null);
@@ -219,6 +256,45 @@ class LassoSettings {
     newTypes[type] = enabled;
     return copyWith(selectableTypes: newTypes);
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'mode': mode.name,
+      'selectableTypes': {
+        for (final e in selectableTypes.entries) e.key.name: e.value,
+      },
+    };
+  }
+
+  factory LassoSettings.fromJson(Map<String, dynamic> json) {
+    final defaults = LassoSettings.defaultSettings();
+    LassoMode mode = defaults.mode;
+    if (json['mode'] is String) {
+      try {
+        mode = LassoMode.values.firstWhere((m) => m.name == json['mode']);
+      } catch (_) {}
+    }
+
+    final selectableTypes = Map<SelectableType, bool>.from(
+        defaults.selectableTypes);
+    if (json['selectableTypes'] is Map) {
+      final map = json['selectableTypes'] as Map;
+      for (final type in SelectableType.values) {
+        if (map.containsKey(type.name)) {
+          selectableTypes[type] = map[type.name] as bool? ?? true;
+        }
+      }
+    }
+
+    return LassoSettings(mode: mode, selectableTypes: selectableTypes);
+  }
+
+  String toJsonString() => jsonEncode(toJson());
+
+  factory LassoSettings.fromJsonString(String source) {
+    final json = jsonDecode(source) as Map<String, dynamic>;
+    return LassoSettings.fromJson(json);
+  }
 }
 
 // =============================================================================
@@ -299,22 +375,47 @@ class LaserSettings {
   }
 }
 
-/// Lasso settings provider.
+/// SharedPreferences key for lasso settings.
+const _lassoSettingsKey = 'starnote_lasso_settings';
+
+/// Lasso settings provider with SharedPreferences persistence.
 final lassoSettingsProvider =
     StateNotifierProvider<LassoSettingsNotifier, LassoSettings>(
-  (ref) => LassoSettingsNotifier(LassoSettings.defaultSettings()),
+  (ref) {
+    final prefs = ref.watch(sharedPreferencesProvider);
+    return LassoSettingsNotifier(prefs);
+  },
 );
 
-/// Notifier for lasso settings.
+/// Notifier for lasso settings with persistence.
 class LassoSettingsNotifier extends StateNotifier<LassoSettings> {
-  LassoSettingsNotifier(super.state);
+  LassoSettingsNotifier(this._prefs) : super(_load(_prefs));
+
+  final SharedPreferences? _prefs;
+
+  static LassoSettings _load(SharedPreferences? prefs) {
+    if (prefs == null) return LassoSettings.defaultSettings();
+    final source = prefs.getString(_lassoSettingsKey);
+    if (source != null) {
+      try {
+        return LassoSettings.fromJsonString(source);
+      } catch (_) {}
+    }
+    return LassoSettings.defaultSettings();
+  }
+
+  Future<void> _save() async {
+    await _prefs?.setString(_lassoSettingsKey, state.toJsonString());
+  }
 
   void setMode(LassoMode mode) {
     state = state.copyWith(mode: mode);
+    _save();
   }
 
   void setSelectableType(SelectableType type, bool enabled) {
     state = state.withSelectableType(type, enabled);
+    _save();
   }
 
   void setAllSelectableTypes(bool enabled) {
@@ -323,6 +424,7 @@ class LassoSettingsNotifier extends StateNotifier<LassoSettings> {
       newTypes[type] = enabled;
     }
     state = state.copyWith(selectableTypes: newTypes);
+    _save();
   }
 }
 

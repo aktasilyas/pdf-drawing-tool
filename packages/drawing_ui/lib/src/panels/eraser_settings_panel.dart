@@ -64,7 +64,7 @@ class EraserSettingsPanel extends ConsumerWidget {
           _EraserTypeSelector(
             selectedType: active,
             onTypeSelected: (t) {
-              ref.read(currentToolProvider.notifier).state = t;
+              ref.read(currentToolProvider.notifier).selectTool(t);
               final mode = _toolTypeToMode(t);
               ref.read(eraserSettingsProvider.notifier).setMode(mode);
             },

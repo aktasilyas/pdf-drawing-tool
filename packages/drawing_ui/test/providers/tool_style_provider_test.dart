@@ -43,7 +43,7 @@ void main() {
     test('returns highlighter style with 0.4 opacity', () {
       final container = ProviderContainer(
         overrides: [
-          currentToolProvider.overrideWith((ref) => ToolType.highlighter),
+          currentToolProvider.overrideWith((ref) => CurrentToolNotifier(null, initialTool: ToolType.highlighter)),
         ],
       );
 
@@ -59,7 +59,7 @@ void main() {
     test('returns eraser style with isEraser true', () {
       final container = ProviderContainer(
         overrides: [
-          currentToolProvider.overrideWith((ref) => ToolType.pixelEraser),
+          currentToolProvider.overrideWith((ref) => CurrentToolNotifier(null, initialTool: ToolType.pixelEraser)),
         ],
       );
 
@@ -74,7 +74,7 @@ void main() {
     test('returns brush style with ellipse nib', () {
       final container = ProviderContainer(
         overrides: [
-          currentToolProvider.overrideWith((ref) => ToolType.brushPen),
+          currentToolProvider.overrideWith((ref) => CurrentToolNotifier(null, initialTool: ToolType.brushPen)),
         ],
       );
 
@@ -89,7 +89,7 @@ void main() {
     test('returns default style for non-drawing tools', () {
       final container = ProviderContainer(
         overrides: [
-          currentToolProvider.overrideWith((ref) => ToolType.shapes),
+          currentToolProvider.overrideWith((ref) => CurrentToolNotifier(null, initialTool: ToolType.shapes)),
         ],
       );
 
@@ -109,7 +109,7 @@ void main() {
       expect(style.opacity, 1.0);
 
       // Change to highlighter
-      container.read(currentToolProvider.notifier).state = ToolType.highlighter;
+      container.read(currentToolProvider.notifier).selectTool(ToolType.highlighter);
       style = container.read(activeStrokeStyleProvider);
       expect(style.opacity, 0.4); // Updated from 0.5 to 0.4
 
@@ -165,7 +165,7 @@ void main() {
     test('returns true for fountainPen', () {
       final container = ProviderContainer(
         overrides: [
-          currentToolProvider.overrideWith((ref) => ToolType.gelPen),
+          currentToolProvider.overrideWith((ref) => CurrentToolNotifier(null, initialTool: ToolType.gelPen)),
         ],
       );
       expect(container.read(isDrawingToolProvider), true);
@@ -175,7 +175,7 @@ void main() {
     test('returns true for pencil', () {
       final container = ProviderContainer(
         overrides: [
-          currentToolProvider.overrideWith((ref) => ToolType.pencil),
+          currentToolProvider.overrideWith((ref) => CurrentToolNotifier(null, initialTool: ToolType.pencil)),
         ],
       );
       expect(container.read(isDrawingToolProvider), true);
@@ -185,7 +185,7 @@ void main() {
     test('returns true for brush', () {
       final container = ProviderContainer(
         overrides: [
-          currentToolProvider.overrideWith((ref) => ToolType.brushPen),
+          currentToolProvider.overrideWith((ref) => CurrentToolNotifier(null, initialTool: ToolType.brushPen)),
         ],
       );
       expect(container.read(isDrawingToolProvider), true);
@@ -195,7 +195,7 @@ void main() {
     test('returns true for highlighter', () {
       final container = ProviderContainer(
         overrides: [
-          currentToolProvider.overrideWith((ref) => ToolType.highlighter),
+          currentToolProvider.overrideWith((ref) => CurrentToolNotifier(null, initialTool: ToolType.highlighter)),
         ],
       );
       expect(container.read(isDrawingToolProvider), true);
@@ -205,7 +205,7 @@ void main() {
     test('returns true for pixelEraser', () {
       final container = ProviderContainer(
         overrides: [
-          currentToolProvider.overrideWith((ref) => ToolType.pixelEraser),
+          currentToolProvider.overrideWith((ref) => CurrentToolNotifier(null, initialTool: ToolType.pixelEraser)),
         ],
       );
       expect(container.read(isDrawingToolProvider), true);
@@ -215,7 +215,7 @@ void main() {
     test('returns true for strokeEraser', () {
       final container = ProviderContainer(
         overrides: [
-          currentToolProvider.overrideWith((ref) => ToolType.strokeEraser),
+          currentToolProvider.overrideWith((ref) => CurrentToolNotifier(null, initialTool: ToolType.strokeEraser)),
         ],
       );
       expect(container.read(isDrawingToolProvider), true);
@@ -225,7 +225,7 @@ void main() {
     test('returns true for lassoEraser', () {
       final container = ProviderContainer(
         overrides: [
-          currentToolProvider.overrideWith((ref) => ToolType.lassoEraser),
+          currentToolProvider.overrideWith((ref) => CurrentToolNotifier(null, initialTool: ToolType.lassoEraser)),
         ],
       );
       expect(container.read(isDrawingToolProvider), true);
@@ -235,7 +235,7 @@ void main() {
     test('returns false for shapes', () {
       final container = ProviderContainer(
         overrides: [
-          currentToolProvider.overrideWith((ref) => ToolType.shapes),
+          currentToolProvider.overrideWith((ref) => CurrentToolNotifier(null, initialTool: ToolType.shapes)),
         ],
       );
       expect(container.read(isDrawingToolProvider), false);
@@ -245,7 +245,7 @@ void main() {
     test('returns false for text', () {
       final container = ProviderContainer(
         overrides: [
-          currentToolProvider.overrideWith((ref) => ToolType.text),
+          currentToolProvider.overrideWith((ref) => CurrentToolNotifier(null, initialTool: ToolType.text)),
         ],
       );
       expect(container.read(isDrawingToolProvider), false);
@@ -255,7 +255,7 @@ void main() {
     test('returns false for selection', () {
       final container = ProviderContainer(
         overrides: [
-          currentToolProvider.overrideWith((ref) => ToolType.selection),
+          currentToolProvider.overrideWith((ref) => CurrentToolNotifier(null, initialTool: ToolType.selection)),
         ],
       );
       expect(container.read(isDrawingToolProvider), false);
@@ -265,7 +265,7 @@ void main() {
     test('returns false for panZoom', () {
       final container = ProviderContainer(
         overrides: [
-          currentToolProvider.overrideWith((ref) => ToolType.panZoom),
+          currentToolProvider.overrideWith((ref) => CurrentToolNotifier(null, initialTool: ToolType.panZoom)),
         ],
       );
       expect(container.read(isDrawingToolProvider), false);
@@ -287,7 +287,7 @@ void main() {
     test('returns true for pixelEraser', () {
       final container = ProviderContainer(
         overrides: [
-          currentToolProvider.overrideWith((ref) => ToolType.pixelEraser),
+          currentToolProvider.overrideWith((ref) => CurrentToolNotifier(null, initialTool: ToolType.pixelEraser)),
         ],
       );
       expect(container.read(isEraserToolProvider), true);
@@ -297,7 +297,7 @@ void main() {
     test('returns true for strokeEraser', () {
       final container = ProviderContainer(
         overrides: [
-          currentToolProvider.overrideWith((ref) => ToolType.strokeEraser),
+          currentToolProvider.overrideWith((ref) => CurrentToolNotifier(null, initialTool: ToolType.strokeEraser)),
         ],
       );
       expect(container.read(isEraserToolProvider), true);
@@ -307,7 +307,7 @@ void main() {
     test('returns true for lassoEraser', () {
       final container = ProviderContainer(
         overrides: [
-          currentToolProvider.overrideWith((ref) => ToolType.lassoEraser),
+          currentToolProvider.overrideWith((ref) => CurrentToolNotifier(null, initialTool: ToolType.lassoEraser)),
         ],
       );
       expect(container.read(isEraserToolProvider), true);
@@ -330,7 +330,7 @@ void main() {
       ]) {
         final container = ProviderContainer(
           overrides: [
-            currentToolProvider.overrideWith((ref) => toolType),
+            currentToolProvider.overrideWith((ref) => CurrentToolNotifier(null, initialTool: toolType)),
           ],
         );
         expect(container.read(isPenToolProvider), true,
@@ -347,7 +347,7 @@ void main() {
       ]) {
         final container = ProviderContainer(
           overrides: [
-            currentToolProvider.overrideWith((ref) => toolType),
+            currentToolProvider.overrideWith((ref) => CurrentToolNotifier(null, initialTool: toolType)),
           ],
         );
         expect(container.read(isPenToolProvider), false,

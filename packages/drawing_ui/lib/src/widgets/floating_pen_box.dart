@@ -249,7 +249,7 @@ class _FloatingPenBoxState extends ConsumerState<FloatingPenBox> {
   void _onPresetTap(int index, PenPreset preset) {
     if (_isEditMode) return;
     ref.read(selectedPresetIndexProvider.notifier).state = index;
-    ref.read(currentToolProvider.notifier).state = preset.toolType;
+    ref.read(currentToolProvider.notifier).selectTool(preset.toolType);
     ref.read(penSettingsProvider(preset.toolType).notifier)
       ..setColor(preset.color)
       ..setThickness(preset.thickness)
