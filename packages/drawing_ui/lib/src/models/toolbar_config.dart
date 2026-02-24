@@ -65,12 +65,19 @@ class ToolbarConfig {
     this.showQuickAccess = true,
     this.quickAccessColors = const [],
     this.quickAccessThicknesses = const [],
+    this.extraToolVisibility = const {},
   });
 
   final List<ToolConfig> tools;
   final bool showQuickAccess;
   final List<int> quickAccessColors; // Color values
   final List<double> quickAccessThicknesses;
+
+  /// Visibility map for extra tools (ruler, audio, etc.).
+  final Map<String, bool> extraToolVisibility;
+
+  /// Whether an extra tool is visible (defaults to true).
+  bool extraToolVisible(String key) => extraToolVisibility[key] ?? true;
 
   /// Default toolbar configuration
   factory ToolbarConfig.defaultConfig() {
@@ -125,12 +132,14 @@ class ToolbarConfig {
     bool? showQuickAccess,
     List<int>? quickAccessColors,
     List<double>? quickAccessThicknesses,
+    Map<String, bool>? extraToolVisibility,
   }) {
     return ToolbarConfig(
       tools: tools ?? this.tools,
       showQuickAccess: showQuickAccess ?? this.showQuickAccess,
       quickAccessColors: quickAccessColors ?? this.quickAccessColors,
       quickAccessThicknesses: quickAccessThicknesses ?? this.quickAccessThicknesses,
+      extraToolVisibility: extraToolVisibility ?? this.extraToolVisibility,
     );
   }
 
@@ -172,6 +181,7 @@ class ToolbarConfig {
     'showQuickAccess': showQuickAccess,
     'quickAccessColors': quickAccessColors,
     'quickAccessThicknesses': quickAccessThicknesses,
+    'extraToolVisibility': extraToolVisibility,
   };
 
   factory ToolbarConfig.fromJson(Map<String, dynamic> json) {
@@ -186,6 +196,8 @@ class ToolbarConfig {
       quickAccessThicknesses: (json['quickAccessThicknesses'] as List<dynamic>?)
           ?.map((t) => (t as num).toDouble())
           .toList() ?? const [],
+      extraToolVisibility: (json['extraToolVisibility'] as Map<String, dynamic>?)
+          ?.map((k, v) => MapEntry(k, v as bool)) ?? const {},
     );
   }
 

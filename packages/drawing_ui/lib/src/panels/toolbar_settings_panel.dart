@@ -26,7 +26,7 @@ class ToolbarSettingsPanel extends ConsumerWidget {
           const SizedBox(height: 12),
           Flexible(child: _buildToolsSection(context, cs)),
           const SizedBox(height: 12),
-          _buildExtraToolsSection(context, cs),
+          _buildExtraToolsSection(context, ref, cs),
           const SizedBox(height: 12),
           _buildResetButton(context, ref, cs),
           const SizedBox(height: 12),
@@ -129,7 +129,15 @@ class ToolbarSettingsPanel extends ConsumerWidget {
     );
   }
 
-  Widget _buildExtraToolsSection(BuildContext context, ColorScheme cs) {
+  Widget _buildExtraToolsSection(
+    BuildContext context,
+    WidgetRef ref,
+    ColorScheme cs,
+  ) {
+    final config = ref.watch(toolbarConfigProvider);
+    final rulerVisible = config.extraToolVisible('ruler');
+    final audioVisible = config.extraToolVisible('audio');
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
@@ -150,12 +158,20 @@ class ToolbarSettingsPanel extends ConsumerWidget {
             icon: StarNoteIcons.ruler,
             label: 'Cetvel',
             subtitle: 'Düz çizgi çizme aracı',
+            isVisible: rulerVisible,
+            onToggle: () => ref
+                .read(toolbarConfigProvider.notifier)
+                .toggleExtraTool('ruler'),
           ),
           const SizedBox(height: 4),
           _ExtraToolTile(
             icon: StarNoteIcons.microphone,
             label: 'Ses Kaydı',
             subtitle: 'Ses kaydetme özelliği',
+            isVisible: audioVisible,
+            onToggle: () => ref
+                .read(toolbarConfigProvider.notifier)
+                .toggleExtraTool('audio'),
           ),
         ],
       ),
@@ -196,10 +212,13 @@ class ToolbarSettingsPanel extends ConsumerWidget {
 
   void _showResetConfirmation(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
-    final rootNav = Navigator.of(context, rootNavigator: true);
+
+    // Close the popover first so the dialog is not hidden behind it.
+    ref.read(activePanelProvider.notifier).state = null;
 
     showDialog(
-      context: rootNav.context,
+      context: context,
+      useRootNavigator: true,
       builder: (dialogCtx) => AlertDialog(
         backgroundColor: cs.surface,
         title: Text(
@@ -233,23 +252,34 @@ class ToolbarSettingsPanel extends ConsumerWidget {
   }
 }
 
-/// Fixed (non-reorderable) extra tool tile.
+/// Fixed (non-reorderable) extra tool tile with toggle.
 class _ExtraToolTile extends StatelessWidget {
   const _ExtraToolTile({
     required this.icon,
     required this.label,
     required this.subtitle,
+    required this.isVisible,
+    required this.onToggle,
   });
 
   final IconData icon;
   final String label;
   final String subtitle;
+  final bool isVisible;
+  final VoidCallback onToggle;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final iconColor = isVisible
+        ? cs.onSurface
+        : cs.onSurfaceVariant.withValues(alpha: 0.5);
+    final textColor = isVisible
+        ? cs.onSurface
+        : cs.onSurfaceVariant.withValues(alpha: 0.6);
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      padding: const EdgeInsets.only(left: 10, top: 2, bottom: 2, right: 0),
       decoration: BoxDecoration(
         color: cs.surfaceContainerHighest.withValues(alpha: 0.4),
         borderRadius: BorderRadius.circular(6),
@@ -260,7 +290,7 @@ class _ExtraToolTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          PhosphorIcon(icon, size: 16, color: cs.onSurface),
+          PhosphorIcon(icon, size: 16, color: iconColor),
           const SizedBox(width: 8),
           Expanded(
             child: Column(
@@ -270,7 +300,8 @@ class _ExtraToolTile extends StatelessWidget {
                   label,
                   style: TextStyle(
                     fontSize: 11,
-                    color: cs.onSurface,
+                    color: textColor,
+                    decoration: isVisible ? null : TextDecoration.lineThrough,
                   ),
                 ),
                 Text(
@@ -283,10 +314,13 @@ class _ExtraToolTile extends StatelessWidget {
               ],
             ),
           ),
-          PhosphorIcon(
-            StarNoteIcons.lock,
-            size: 13,
-            color: cs.onSurfaceVariant.withValues(alpha: 0.5),
+          Transform.scale(
+            scale: 0.7,
+            child: Switch(
+              value: isVisible,
+              onChanged: (_) => onToggle(),
+              activeThumbColor: cs.primary,
+            ),
           ),
         ],
       ),

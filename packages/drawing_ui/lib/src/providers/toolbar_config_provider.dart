@@ -91,6 +91,15 @@ class ToolbarConfigNotifier extends StateNotifier<ToolbarConfig> {
     await _saveConfig();
   }
 
+  /// Toggle visibility of an extra tool (ruler, audio, etc.)
+  Future<void> toggleExtraTool(String key) async {
+    final current = state.extraToolVisible(key);
+    final updated = Map<String, bool>.from(state.extraToolVisibility);
+    updated[key] = !current;
+    state = state.copyWith(extraToolVisibility: updated);
+    await _saveConfig();
+  }
+
   /// Reset to default configuration
   Future<void> resetToDefault() async {
     state = ToolbarConfig.defaultConfig();
