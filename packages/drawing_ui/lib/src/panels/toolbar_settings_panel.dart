@@ -6,54 +6,72 @@ import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/widgets/reorderable_tool_list.dart';
 
 /// Panel for customizing toolbar appearance and tool order.
-class ToolbarSettingsPanel extends ConsumerWidget {
+///
+/// Two tabs: "Araçlar" (reorderable drawing tools) and
+/// "Ek Araçlar" (reorderable extra tools like ruler, audio).
+class ToolbarSettingsPanel extends ConsumerStatefulWidget {
   const ToolbarSettingsPanel({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ToolbarSettingsPanel> createState() =>
+      _ToolbarSettingsPanelState();
+}
+
+class _ToolbarSettingsPanelState extends ConsumerState<ToolbarSettingsPanel>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final screenHeight = MediaQuery.of(context).size.height;
-    final maxHeight = (screenHeight * 0.75).clamp(420.0, 660.0);
+    final maxHeight = (screenHeight * 0.8).clamp(480.0, 720.0);
 
     return Container(
-      width: 300,
+      width: 340,
       constraints: BoxConstraints(maxHeight: maxHeight),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildHeader(context, ref, cs),
+          _buildHeader(cs),
           Divider(height: 1, color: cs.outlineVariant.withValues(alpha: 0.5)),
-          const SizedBox(height: 12),
-          Flexible(child: _buildToolsSection(context, cs)),
-          const SizedBox(height: 12),
-          _buildExtraToolsSection(context, ref, cs),
-          const SizedBox(height: 12),
-          _buildResetButton(context, ref, cs),
+          _buildTabBar(cs),
+          Expanded(child: _buildTabContent()),
+          const SizedBox(height: 8),
+          _buildResetButton(cs),
           const SizedBox(height: 12),
         ],
       ),
     );
   }
 
-  Widget _buildHeader(
-    BuildContext context,
-    WidgetRef ref,
-    ColorScheme cs,
-  ) {
+  Widget _buildHeader(ColorScheme cs) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
+      padding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
       child: Row(
         children: [
           Container(
-            width: 28,
-            height: 28,
+            width: 26,
+            height: 26,
             decoration: BoxDecoration(
               color: cs.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(6),
             ),
             child: Icon(
               StarNoteIcons.settings,
-              size: 15,
+              size: 14,
               color: cs.primary,
             ),
           ),
@@ -62,7 +80,7 @@ class ToolbarSettingsPanel extends ConsumerWidget {
             child: Text(
               'Araç Çubuğu Ayarları',
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: cs.onSurface,
               ),
@@ -75,9 +93,7 @@ class ToolbarSettingsPanel extends ConsumerWidget {
               size: 16,
               color: cs.onSurfaceVariant,
             ),
-            onPressed: () {
-              ref.read(activePanelProvider.notifier).state = null;
-            },
+            onPressed: () => Navigator.of(context).pop(),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
             splashRadius: 16,
@@ -87,242 +103,121 @@ class ToolbarSettingsPanel extends ConsumerWidget {
     );
   }
 
-  Widget _buildToolsSection(BuildContext context, ColorScheme cs) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildTabBar(ColorScheme cs) {
+    return TabBar(
+      controller: _tabController,
+      labelColor: cs.primary,
+      unselectedLabelColor: cs.onSurfaceVariant,
+      labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+      unselectedLabelStyle:
+          const TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
+      indicatorSize: TabBarIndicatorSize.tab,
+      indicatorWeight: 2,
+      dividerHeight: 0.5,
+      dividerColor: cs.outlineVariant.withValues(alpha: 0.5),
+      tabs: const [
+        Tab(height: 36, text: 'Araçlar'),
+        Tab(height: 36, text: 'Ek Araçlar'),
+      ],
+    );
+  }
+
+  Widget _buildTabContent() {
+    return TabBarView(
+      controller: _tabController,
       children: [
+        _buildToolsTab(),
+        _buildExtraToolsTab(),
+      ],
+    );
+  }
+
+  Widget _buildToolsTab() {
+    final cs = Theme.of(context).colorScheme;
+    return Column(
+      children: [
+        const SizedBox(height: 6),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: [
-              Text(
-                'Araçlar',
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: cs.onSurface,
+              Flexible(
+                child: Text(
+                  'Araçları sıralayın ve gizleyin',
+                  style: TextStyle(fontSize: 11, color: cs.onSurfaceVariant),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               const Spacer(),
-              Text(
-                'Sırala',
-                style: TextStyle(
-                  fontSize: 11,
-                  color: cs.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(width: 4),
               PhosphorIcon(
                 StarNoteIcons.dragHandle,
-                size: 13,
+                size: 12,
                 color: cs.onSurfaceVariant,
               ),
             ],
           ),
         ),
-        const SizedBox(height: 8),
-        const Flexible(
-          child: ReorderableToolList(),
-        ),
+        const SizedBox(height: 4),
+        const Expanded(child: ReorderableToolList()),
       ],
     );
   }
 
-  Widget _buildExtraToolsSection(
-    BuildContext context,
-    WidgetRef ref,
-    ColorScheme cs,
-  ) {
-    final config = ref.watch(toolbarConfigProvider);
-    final rulerVisible = config.extraToolVisible('ruler');
-    final audioVisible = config.extraToolVisible('audio');
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Divider(height: 1, color: cs.outlineVariant.withValues(alpha: 0.4)),
-          const SizedBox(height: 10),
-          Text(
-            'Ek Araçlar',
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: cs.onSurface,
-            ),
+  Widget _buildExtraToolsTab() {
+    final cs = Theme.of(context).colorScheme;
+    return Column(
+      children: [
+        const SizedBox(height: 6),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            children: [
+              Flexible(
+                child: Text(
+                  'Ek araçları sıralayın ve gizleyin',
+                  style: TextStyle(fontSize: 11, color: cs.onSurfaceVariant),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const Spacer(),
+              PhosphorIcon(
+                StarNoteIcons.dragHandle,
+                size: 12,
+                color: cs.onSurfaceVariant,
+              ),
+            ],
           ),
-          const SizedBox(height: 6),
-          _ExtraToolTile(
-            icon: StarNoteIcons.ruler,
-            label: 'Cetvel',
-            subtitle: 'Düz çizgi çizme aracı',
-            isVisible: rulerVisible,
-            onToggle: () => ref
-                .read(toolbarConfigProvider.notifier)
-                .toggleExtraTool('ruler'),
-          ),
-          const SizedBox(height: 4),
-          _ExtraToolTile(
-            icon: StarNoteIcons.microphone,
-            label: 'Ses Kaydı',
-            subtitle: 'Ses kaydetme özelliği',
-            isVisible: audioVisible,
-            onToggle: () => ref
-                .read(toolbarConfigProvider.notifier)
-                .toggleExtraTool('audio'),
-          ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 4),
+        const Expanded(child: ReorderableExtraToolList()),
+      ],
     );
   }
 
-  Widget _buildResetButton(
-    BuildContext context,
-    WidgetRef ref,
-    ColorScheme cs,
-  ) {
+  Widget _buildResetButton(ColorScheme cs) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: SizedBox(
         width: double.infinity,
-        height: 36,
+        height: 34,
         child: OutlinedButton.icon(
-          onPressed: () => _showResetConfirmation(context, ref),
-          icon: PhosphorIcon(StarNoteIcons.rotate, size: 14),
+          onPressed: () {
+            ref.read(toolbarConfigProvider.notifier).resetToDefault();
+          },
+          icon: PhosphorIcon(StarNoteIcons.rotate, size: 13),
           label: const Text(
             'Varsayılana Sıfırla',
             style: TextStyle(fontSize: 12),
           ),
           style: OutlinedButton.styleFrom(
             foregroundColor: cs.onSurfaceVariant,
-            side: BorderSide(
-              color: cs.outline.withValues(alpha: 0.3),
-            ),
+            side: BorderSide(color: cs.outline.withValues(alpha: 0.3)),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 12),
           ),
         ),
-      ),
-    );
-  }
-
-  void _showResetConfirmation(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
-
-    // Close the popover first so the dialog is not hidden behind it.
-    ref.read(activePanelProvider.notifier).state = null;
-
-    showDialog(
-      context: context,
-      useRootNavigator: true,
-      builder: (dialogCtx) => AlertDialog(
-        backgroundColor: cs.surface,
-        title: Text(
-          'Sıfırla',
-          style: TextStyle(color: cs.onSurface),
-        ),
-        content: Text(
-          'Araç çubuğu ayarları varsayılana döndürülecek. '
-          'Devam etmek istiyor musunuz?',
-          style: TextStyle(color: cs.onSurfaceVariant),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogCtx),
-            child: const Text('İptal'),
-          ),
-          TextButton(
-            onPressed: () async {
-              await ref
-                  .read(toolbarConfigProvider.notifier)
-                  .resetToDefault();
-              if (dialogCtx.mounted) {
-                Navigator.pop(dialogCtx);
-              }
-            },
-            child: const Text('Sıfırla'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Fixed (non-reorderable) extra tool tile with toggle.
-class _ExtraToolTile extends StatelessWidget {
-  const _ExtraToolTile({
-    required this.icon,
-    required this.label,
-    required this.subtitle,
-    required this.isVisible,
-    required this.onToggle,
-  });
-
-  final IconData icon;
-  final String label;
-  final String subtitle;
-  final bool isVisible;
-  final VoidCallback onToggle;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final iconColor = isVisible
-        ? cs.onSurface
-        : cs.onSurfaceVariant.withValues(alpha: 0.5);
-    final textColor = isVisible
-        ? cs.onSurface
-        : cs.onSurfaceVariant.withValues(alpha: 0.6);
-
-    return Container(
-      padding: const EdgeInsets.only(left: 10, top: 2, bottom: 2, right: 0),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerHighest.withValues(alpha: 0.4),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(
-          color: cs.outline.withValues(alpha: 0.15),
-          width: 0.5,
-        ),
-      ),
-      child: Row(
-        children: [
-          PhosphorIcon(icon, size: 16, color: iconColor),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: textColor,
-                    decoration: isVisible ? null : TextDecoration.lineThrough,
-                  ),
-                ),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    fontSize: 9.5,
-                    color: cs.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Transform.scale(
-            scale: 0.7,
-            child: Switch(
-              value: isVisible,
-              onChanged: (_) => onToggle(),
-              activeThumbColor: cs.primary,
-            ),
-          ),
-        ],
       ),
     );
   }

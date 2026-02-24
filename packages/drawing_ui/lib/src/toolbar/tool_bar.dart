@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
@@ -131,7 +130,6 @@ class _ToolBarState extends ConsumerState<ToolBar> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               ...visibleTools.map((tool) => _buildToolButton(tool, currentTool)),
-              _buildSettingsButton(theme),
             ],
           ),
         ),
@@ -174,50 +172,6 @@ class _ToolBarState extends ConsumerState<ToolBar> {
         onPanelTap: hasPanel ? () => _onPanelTap(tool) : null,
         hasPanel: hasPanel,
         customIcon: customIcon,
-      ),
-    );
-  }
-
-  Widget _buildSettingsButton(DrawingTheme theme) {
-    final isActive =
-        ref.watch(activePanelProvider) == ToolType.toolbarSettings;
-    final cs = Theme.of(context).colorScheme;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 2),
-      child: Tooltip(
-        message: 'Araç Çubuğu Ayarları',
-        child: Semantics(
-          label: 'Araç Çubuğu Ayarları',
-          button: true,
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () {
-              final current = ref.read(activePanelProvider);
-              ref.read(activePanelProvider.notifier).state =
-                  current == ToolType.toolbarSettings
-                      ? null
-                      : ToolType.toolbarSettings;
-            },
-            child: Container(
-              key: widget.settingsButtonKey,
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: isActive
-                    ? cs.primary.withValues(alpha: 0.12)
-                    : theme.toolbarBackground,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: PhosphorIcon(
-                StarNoteIcons.settings,
-                size: StarNoteIcons.actionSize,
-                color: isActive ? cs.primary : theme.toolbarIconColor,
-                semanticLabel: 'Araç Çubuğu Ayarları',
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }

@@ -44,27 +44,35 @@ void main() {
     expect(find.text('Araç Çubuğu Ayarları'), findsOneWidget);
   });
 
-  testWidgets('displays extra tools section', (tester) async {
-    await tester.pumpWidget(createTestWidget());
-    await tester.pumpAndSettle();
-
-    expect(find.text('Ek Araçlar'), findsOneWidget);
-    expect(find.text('Cetvel'), findsOneWidget);
-    expect(find.text('Ses Kaydı'), findsOneWidget);
-  });
-
-  testWidgets('displays tools section', (tester) async {
+  testWidgets('displays two tabs', (tester) async {
     await tester.pumpWidget(createTestWidget());
     await tester.pumpAndSettle();
 
     expect(find.text('Araçlar'), findsOneWidget);
+    expect(find.text('Ek Araçlar'), findsOneWidget);
+    expect(find.byType(TabBar), findsOneWidget);
+  });
+
+  testWidgets('extra tools tab shows Cetvel and Ses Kaydı', (tester) async {
+    await tester.pumpWidget(createTestWidget());
+    await tester.pumpAndSettle();
+
+    // Tap "Ek Araçlar" tab
+    await tester.tap(find.text('Ek Araçlar'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Cetvel'), findsOneWidget);
+    expect(find.text('Ses Kaydı'), findsOneWidget);
   });
 
   testWidgets('displays reset button', (tester) async {
     await tester.pumpWidget(createTestWidget());
     await tester.pumpAndSettle();
 
-    expect(find.widgetWithText(OutlinedButton, 'Varsayılana Sıfırla'), findsOneWidget);
+    expect(
+      find.widgetWithText(OutlinedButton, 'Varsayılana Sıfırla'),
+      findsOneWidget,
+    );
     expect(find.byIcon(StarNoteIcons.rotate), findsOneWidget);
   });
 }
