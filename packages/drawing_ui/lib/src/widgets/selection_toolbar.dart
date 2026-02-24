@@ -76,7 +76,10 @@ class _SelectionToolbarState extends ConsumerState<SelectionToolbar> {
       cacheManager: widget.cacheManager,
       context: context,
     );
-    final buttonCount = config.toolbarActions.length + 1;
+    final hasOverflow =
+        config.topRowActions.isNotEmpty || config.overflowActions.isNotEmpty;
+    final buttonCount =
+        config.toolbarActions.length + (hasOverflow ? 1 : 0);
     const buttonWidth = 40.0;
     final toolbarWidth = buttonCount * buttonWidth + 16;
     final screenWidth = MediaQuery.of(context).size.width;
@@ -99,6 +102,8 @@ class _SelectionToolbarState extends ConsumerState<SelectionToolbar> {
   }
 
   Widget _buildToolbarPill(SelectionActionConfig config) {
+    final hasOverflow =
+        config.topRowActions.isNotEmpty || config.overflowActions.isNotEmpty;
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -120,15 +125,16 @@ class _SelectionToolbarState extends ConsumerState<SelectionToolbar> {
               action: action,
               onTap: () => _handleAction(action),
             ),
-          Container(
-            key: _moreKey,
-            child: SelectionToolbarIconButton(
-              icon: StarNoteIcons.more,
-              tooltip: 'Daha fazla',
-              onTap: () => _toggleOverflow(config),
-              isActive: _isOverflowOpen,
+          if (hasOverflow)
+            Container(
+              key: _moreKey,
+              child: SelectionToolbarIconButton(
+                icon: StarNoteIcons.more,
+                tooltip: 'Daha fazla',
+                onTap: () => _toggleOverflow(config),
+                isActive: _isOverflowOpen,
+              ),
             ),
-          ),
         ],
       ),
     );

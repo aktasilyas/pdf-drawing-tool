@@ -50,6 +50,13 @@ class LassoSelectionTool implements SelectionTool {
       closedPath.add(closedPath.first);
     }
 
+    // Minimum size check - prevent accidental tiny selections (e.g. taps)
+    final pathBounds = _calculateLassoPathBounds(closedPath);
+    if (pathBounds.width < 20 || pathBounds.height < 20) {
+      _path.clear();
+      return null;
+    }
+
     // Find strokes inside the lasso
     final selectedStrokeIds = _findStrokesInLasso(strokes, closedPath);
 
@@ -62,25 +69,24 @@ class LassoSelectionTool implements SelectionTool {
     // Find texts inside the lasso
     final selectedTextIds = _findTextsInLasso(texts, closedPath);
 
-    if (selectedStrokeIds.isEmpty &&
-        selectedShapeIds.isEmpty &&
-        selectedImageIds.isEmpty &&
-        selectedTextIds.isEmpty) {
-      _path.clear();
-      return null;
-    }
+    final bool hasSelectedItems = selectedStrokeIds.isNotEmpty ||
+        selectedShapeIds.isNotEmpty ||
+        selectedImageIds.isNotEmpty ||
+        selectedTextIds.isNotEmpty;
 
-    // Calculate bounds of selected items
-    final bounds = _calculateSelectionBounds(
-      strokes,
-      selectedStrokeIds,
-      shapes,
-      selectedShapeIds,
-      images,
-      selectedImageIds,
-      texts,
-      selectedTextIds,
-    );
+    // Use actual bounds of selected items, or the lasso path bounds for empty selections
+    final bounds = hasSelectedItems
+        ? _calculateSelectionBounds(
+            strokes,
+            selectedStrokeIds,
+            shapes,
+            selectedShapeIds,
+            images,
+            selectedImageIds,
+            texts,
+            selectedTextIds,
+          )
+        : _calculateLassoPathBounds(closedPath);
 
     final selection = Selection.create(
       type: SelectionType.lasso,
@@ -293,6 +299,30 @@ class LassoSelectionTool implements SelectionTool {
     // Handle case where no valid bounds found
     if (minX == double.infinity) {
       return BoundingBox.zero();
+    }
+
+    return BoundingBox(
+      left: minX,
+      top: minY,
+      right: maxX,
+      bottom: maxY,
+    );
+  }
+
+  /// Calculates bounding box from the lasso path points.
+  BoundingBox _calculateLassoPathBounds(List<DrawingPoint> path) {
+    if (path.isEmpty) return BoundingBox.zero();
+
+    double minX = double.infinity;
+    double minY = double.infinity;
+    double maxX = double.negativeInfinity;
+    double maxY = double.negativeInfinity;
+
+    for (final point in path) {
+      minX = min(minX, point.x);
+      minY = min(minY, point.y);
+      maxX = max(maxX, point.x);
+      maxY = max(maxY, point.y);
     }
 
     return BoundingBox(
