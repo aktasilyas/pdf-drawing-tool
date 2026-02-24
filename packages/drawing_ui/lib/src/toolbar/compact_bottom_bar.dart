@@ -8,101 +8,109 @@ import 'package:drawing_ui/src/toolbar/tool_groups.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_logic.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_widgets.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_overflow_menu.dart';
+import 'package:drawing_ui/src/toolbar/top_navigation_bar.dart';
 
-/// Compact bottom toolbar for phone screens (<600px).
+/// Compact tool row for phone screens (<600px).
 ///
-/// Shows undo/redo + max 5 tool buttons + overflow menu.
+/// Sits as the second row in the top toolbar area.
+/// Shows undo/redo + max 7 tool buttons + overflow menu.
 /// Tool panels open as bottom sheets instead of anchored panels.
-class CompactBottomBar extends ConsumerStatefulWidget {
-  const CompactBottomBar({
+class CompactToolRow extends ConsumerStatefulWidget {
+  const CompactToolRow({
     super.key,
+    this.onAIPressed,
     this.onUndoPressed,
     this.onRedoPressed,
     this.onPanelRequested,
   });
 
+  final VoidCallback? onAIPressed;
   final VoidCallback? onUndoPressed;
   final VoidCallback? onRedoPressed;
 
   /// Callback when a tool's panel should open as bottom sheet.
-  /// DrawingScreen handles the actual showModalBottomSheet call.
   final ValueChanged<ToolType>? onPanelRequested;
 
-  static const int maxVisibleTools = 5;
+  static const int maxVisibleTools = 7;
 
   @override
-  ConsumerState<CompactBottomBar> createState() => _CompactBottomBarState();
+  ConsumerState<CompactToolRow> createState() => _CompactToolRowState();
 }
 
-class _CompactBottomBarState extends ConsumerState<CompactBottomBar> {
+class _CompactToolRowState extends ConsumerState<CompactToolRow> {
   @override
   Widget build(BuildContext context) {
+    final isReaderMode = ref.watch(readerModeProvider);
+    if (isReaderMode) return const SizedBox.shrink();
+
     final colorScheme = Theme.of(context).colorScheme;
     final canUndo = ref.watch(canUndoProvider);
     final canRedo = ref.watch(canRedoProvider);
     final currentTool = ref.watch(currentToolProvider);
     final toolbarConfig = ref.watch(toolbarConfigProvider);
 
-    // Get grouped visible tools (same logic as MediumToolbar)
-    final allTools = _getGroupedVisibleTools(toolbarConfig, currentTool);
-    final shownTools = allTools.take(CompactBottomBar.maxVisibleTools).toList();
-    final hiddenTools = allTools.skip(CompactBottomBar.maxVisibleTools).toList();
+    // Get grouped visible tools, excluding tools shown in the nav row.
+    final topTools = TopNavigationBar.compactTopBarTools.toSet();
+    final allTools = _getGroupedVisibleTools(toolbarConfig, currentTool)
+        .where((t) => !topTools.contains(t))
+        .toList();
+    final shownTools =
+        allTools.take(CompactToolRow.maxVisibleTools).toList();
+    final hiddenTools =
+        allTools.skip(CompactToolRow.maxVisibleTools).toList();
 
     return Container(
-      height: 56,
+      height: 48,
       decoration: BoxDecoration(
         color: colorScheme.surface,
         border: Border(
-          top: BorderSide(
+          bottom: BorderSide(
             color: colorScheme.outlineVariant,
             width: 0.5,
           ),
         ),
       ),
-      child: SafeArea(
-        top: false,
-        child: Row(
-          children: [
-            const SizedBox(width: 8),
+      child: Row(
+        children: [
+          const SizedBox(width: 4),
 
-            // Undo/Redo
-            ToolbarUndoRedoButtons(
-              canUndo: canUndo,
-              canRedo: canRedo,
-              onUndo: widget.onUndoPressed,
-              onRedo: widget.onRedoPressed,
+          // Undo/Redo
+          ToolbarUndoRedoButtons(
+            canUndo: canUndo,
+            canRedo: canRedo,
+            onUndo: widget.onUndoPressed,
+            onRedo: widget.onRedoPressed,
+          ),
+
+          const SizedBox(width: 2),
+
+          // Divider
+          Container(
+            width: 1,
+            height: 28,
+            color: colorScheme.outlineVariant,
+          ),
+
+          const SizedBox(width: 2),
+
+          // Tool buttons
+          Expanded(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: shownTools.map((tool) {
+                return _buildToolButton(tool, currentTool);
+              }).toList(),
+            ),
+          ),
+
+          // Overflow menu (if hidden tools exist)
+          if (hiddenTools.isNotEmpty)
+            ToolbarOverflowMenu(
+              hiddenTools: hiddenTools,
             ),
 
-            const SizedBox(width: 4),
-
-            // Divider
-            Container(
-              width: 1,
-              height: 28,
-              color: colorScheme.outlineVariant,
-            ),
-
-            const SizedBox(width: 4),
-
-            // Tool buttons (max 5)
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: shownTools.map((tool) {
-                  return _buildToolButton(tool, currentTool);
-                }).toList(),
-              ),
-            ),
-
-            // Overflow menu (if hidden tools exist)
-            if (hiddenTools.isNotEmpty)
-              ToolbarOverflowMenu(
-                hiddenTools: hiddenTools,
-              ),
-
-            const SizedBox(width: 8),
-          ],
-        ),
+          const SizedBox(width: 4),
+        ],
       ),
     );
   }
@@ -130,6 +138,7 @@ class _CompactBottomBarState extends ConsumerState<CompactBottomBar> {
       onPanelTap: hasPanel ? () => _onPanelTap(tool) : null,
       hasPanel: hasPanel,
       customIcon: customIcon,
+      compact: true,
     );
   }
 

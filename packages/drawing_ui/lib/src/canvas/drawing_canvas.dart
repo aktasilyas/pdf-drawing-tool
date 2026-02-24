@@ -782,19 +782,24 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
           final isDefaultTransform =
               transform.zoom == 1.0 && transform.offset == Offset.zero;
           if (isDefaultTransform) {
-            // Compute fit-to-height transform for first frame
+            // Compute fit-to-screen transform for first frame
             final pageSize = Size(currentPage.size.width, currentPage.size.height);
-            final fitHeightZoom = size.height / pageSize.height;
+            final fitWidth = size.width / pageSize.width;
+            final fitHeight = size.height / pageSize.height;
+            // Use fit-width with padding on narrow (portrait) screens
+            final fitZoom = (fitWidth < fitHeight)
+                ? fitWidth * 0.96
+                : fitHeight;
 
-            final pageScreenWidth = pageSize.width * fitHeightZoom;
-            final pageScreenHeight = pageSize.height * fitHeightZoom;
+            final pageScreenWidth = pageSize.width * fitZoom;
+            final pageScreenHeight = pageSize.height * fitZoom;
             final offsetX = (size.width - pageScreenWidth) / 2;
             final offsetY = (size.height - pageScreenHeight) / 2;
 
             effectiveTransform = CanvasTransform(
-              zoom: fitHeightZoom,
+              zoom: fitZoom,
               offset: Offset(offsetX, offsetY),
-              baselineZoom: fitHeightZoom,
+              baselineZoom: fitZoom,
             );
           }
         }

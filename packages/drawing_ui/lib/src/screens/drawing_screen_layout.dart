@@ -1,10 +1,8 @@
 /// Layout builders and helpers for the drawing screen.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
 import 'package:drawing_ui/src/models/models.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
 import 'package:drawing_ui/src/canvas/canvas.dart';
 import 'package:drawing_ui/src/canvas/canvas_color_scheme.dart';
 import 'package:drawing_ui/src/canvas/infinite_background_painter.dart';
@@ -28,7 +26,6 @@ Widget buildDrawingCanvasArea({
   required Offset penBoxPosition,
   required ValueChanged<Offset> onPenBoxPositionChanged,
   required VoidCallback onClosePanel,
-  required VoidCallback onOpenAIPanel,
   GlobalKey<PageSlideTransitionState>? pageTransitionKey,
   ValueChanged<int>? onPageChanged,
   CanvasColorScheme? colorScheme,
@@ -36,6 +33,7 @@ Widget buildDrawingCanvasArea({
   Axis scrollDirection = Axis.horizontal,
   bool isDualPage = false,
   core.Page? secondaryPage,
+  bool isCompactMode = false,
 }) {
   const double swipeVelocityThreshold = 300;
 
@@ -90,11 +88,9 @@ Widget buildDrawingCanvasArea({
                 p.dy.clamp(0, MediaQuery.of(context).size.height - 200)));
             },
           )),
-        if (!isReadOnly) const FloatingUndoRedo(),
+        if (!isReadOnly && !isCompactMode) const FloatingUndoRedo(),
         if (!isReadOnly) const FloatingRecordingBar(),
         if (!isReadOnly) const FloatingExportProgress(),
-        if (!isReadOnly)
-          Positioned(right: 16, bottom: 16, child: AskAIButton(onTap: onOpenAIPanel)),
         if (!isReadOnly && canvasMode != null && !canvasMode.isInfinite)
           const Positioned.fill(child: Center(child: ZoomControlBar()))
         else if (ref.watch(isZoomingProvider))
@@ -150,29 +146,6 @@ Widget buildDrawingCanvasArea({
   return canvasStack;
 }
 
-/// Floating AI button.
-class AskAIButton extends StatelessWidget {
-  const AskAIButton({super.key, required this.onTap});
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 56, height: 56,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(colors: [cs.primary, cs.primary.withValues(alpha: 0.8)], begin: Alignment.topLeft, end: Alignment.bottomRight),
-          borderRadius: BorderRadius.circular(28),
-          boxShadow: [BoxShadow(color: cs.primary.withValues(alpha: 80.0 / 255.0), blurRadius: 16, offset: const Offset(0, 4))],
-        ),
-        child: PhosphorIcon(StarNoteIcons.sparkle, color: cs.onPrimary, size: 24),
-      ),
-    );
-  }
-}
-
 /// Zoom indicator shown in center while zooming.
 class ZoomIndicator extends StatelessWidget {
   const ZoomIndicator({super.key, required this.zoomPercentage});
@@ -209,11 +182,19 @@ void handlePanelChange({
   if (panel == null) {
     panelController.hide();
   } else if (panel != ToolType.panZoom && panel != ToolType.toolbarSettings) {
-    final anchorKey = penToolsSet.contains(panel)
+    var anchorKey = penToolsSet.contains(panel)
             ? penGroupButtonKey
             : highlighterToolsSet.contains(panel)
                 ? highlighterGroupButtonKey
                 : toolButtonKeys[panel] ?? GlobalKey();
+    // Fallback for tools hidden in the overflow menu: their key has no
+    // context because no ToolButton widget exists for them.  Use the last
+    // visible tool button as anchor (closest to the overflow icon).
+    if (anchorKey.currentContext == null) {
+      for (final entry in toolButtonKeys.entries) {
+        if (entry.value.currentContext != null) anchorKey = entry.value;
+      }
+    }
     final isPicker = isPenPickerMode && penToolsSet.contains(panel);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       panelController.show(

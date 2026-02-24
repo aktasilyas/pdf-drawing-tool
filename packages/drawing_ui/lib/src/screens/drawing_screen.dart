@@ -48,7 +48,11 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final brightness = MediaQuery.platformBrightnessOf(context);
-    ref.read(platformBrightnessProvider.notifier).state = brightness;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref.read(platformBrightnessProvider.notifier).state = brightness;
+      }
+    });
   }
 
   @override
@@ -185,22 +189,14 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         backgroundColor: scaffoldBgColor,
-        // Phone: bottom bar
-        bottomNavigationBar: isCompactMode && !isReaderMode
-            ? CompactBottomBar(
-                onUndoPressed: _onUndoPressed,
-                onRedoPressed: _onRedoPressed,
-                onPanelRequested: (tool) {
-                  showToolPanelSheet(context: context, tool: tool);
-                },
-              )
-            : null,
         body: SafeArea(
+          top: !isCompactMode,
           child: Stack(
             children: [
               Column(
                 children: [
                   AdaptiveToolbar(
+                    onAIPressed: () => openAIPanel(context),
                     onSettingsPressed: _onSettingsPressed,
                     settingsButtonKey: _settingsButtonKey,
                     toolButtonKeys: _toolButtonKeys,
@@ -212,6 +208,11 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                     onDeleteDocument: widget.onDeleteDocument,
                     onSidebarToggle: _toggleSidebar,
                     isSidebarOpen: isSidebarOpen,
+                    onToolPanelRequested: isCompactMode
+                        ? (tool) => showToolPanelSheet(context: context, ref: ref, tool: tool)
+                        : null,
+                    onUndoPressed: _onUndoPressed,
+                    onRedoPressed: _onRedoPressed,
                   ),
                   Expanded(
                     child: Row(
@@ -243,7 +244,6 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                             penBoxPosition: _penBoxPosition,
                             onPenBoxPositionChanged: (p) => setState(() => _penBoxPosition = p),
                             onClosePanel: _closePanel,
-                            onOpenAIPanel: () => openAIPanel(context),
                             pageTransitionKey: _pageTransitionKey,
                             onPageChanged: _navigateToPage,
                             colorScheme: ref.watch(canvasColorSchemeProvider),
@@ -251,6 +251,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                             scrollDirection: ref.watch(scrollDirectionProvider),
                             isDualPage: ref.watch(dualPageModeProvider),
                             secondaryPage: ref.watch(secondaryPageProvider),
+                            isCompactMode: isCompactMode,
                           ),
                         ),
                       ],

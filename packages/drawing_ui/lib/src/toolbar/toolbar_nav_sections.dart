@@ -27,6 +27,7 @@ class ToolbarNavLeft extends StatelessWidget {
     this.isSidebarOpen = false,
     this.isReaderMode = false,
     this.pageCount = 1,
+    this.showTitle = true,
   });
 
   final String? documentTitle;
@@ -37,6 +38,10 @@ class ToolbarNavLeft extends StatelessWidget {
   final bool isSidebarOpen;
   final bool isReaderMode;
   final int pageCount;
+
+  /// When false, hides the document title button (used in MediumToolbar
+  /// where title moves to the "more" popup to save horizontal space).
+  final bool showTitle;
 
   @override
   Widget build(BuildContext context) {
@@ -57,12 +62,14 @@ class ToolbarNavLeft extends StatelessWidget {
             onPressed: onSidebarToggle ?? () {},
             isActive: isSidebarOpen,
           ),
-        const SizedBox(width: 4),
-        DocumentTitleButton(
-          title: documentTitle,
-          onRename: onRenameDocument ?? () {},
-          onDelete: onDeleteDocument ?? () {},
-        ),
+        if (showTitle) ...[
+          const SizedBox(width: 4),
+          DocumentTitleButton(
+            title: documentTitle,
+            onRename: onRenameDocument ?? () {},
+            onDelete: onDeleteDocument ?? () {},
+          ),
+        ],
         if (isReaderMode) ...[
           const SizedBox(width: 8),
           _ReaderBadge(colorScheme: Theme.of(context).colorScheme),
@@ -85,11 +92,27 @@ class ToolbarNavRight extends ConsumerStatefulWidget {
     this.isReaderMode = false,
     this.onReaderToggle,
     this.onShowRecordings,
+    this.documentTitle,
+    this.onRenameDocument,
+    this.onDeleteDocument,
+    this.showAddPage = true,
+    this.showExport = true,
   });
 
   final bool isReaderMode;
   final VoidCallback? onReaderToggle;
   final VoidCallback? onShowRecordings;
+
+  /// Document title shown in the "more" popup (used by MediumToolbar).
+  final String? documentTitle;
+  final VoidCallback? onRenameDocument;
+  final VoidCallback? onDeleteDocument;
+
+  /// When false, hides the Add Page button (moved to "more" popup).
+  final bool showAddPage;
+
+  /// When false, hides the Export button (moved to "more" popup).
+  final bool showExport;
 
   @override
   ConsumerState<ToolbarNavRight> createState() => _ToolbarNavRightState();
@@ -128,7 +151,7 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
     final Widget child;
     switch (panel) {
       case _NavPanel.addPage:
-        anchorKey = _addPageKey;
+        anchorKey = widget.showAddPage ? _addPageKey : _moreKey;
         child = AddPagePanel(onClose: _closePanel, embedded: true);
       case _NavPanel.audioRecording:
         anchorKey = _micKey;
@@ -143,11 +166,35 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
         final layersH = (screenH * 0.6).clamp(280.0, 420.0);
         child = SizedBox(width: 260, height: layersH, child: const LayersList());
       case _NavPanel.export:
-        anchorKey = _exportKey;
+        anchorKey = widget.showExport ? _exportKey : _moreKey;
         child = ExportPanel(onClose: _closePanel, embedded: true);
       case _NavPanel.more:
         anchorKey = _moreKey;
-        child = PageOptionsPanel(onClose: _closePanel, embedded: true);
+        final isCompact = !widget.showAddPage || !widget.showExport;
+        child = PageOptionsPanel(
+          onClose: _closePanel,
+          embedded: true,
+          compact: isCompact,
+          documentTitle: widget.documentTitle,
+          onRenameDocument: widget.onRenameDocument,
+          onDeleteDocument: widget.onDeleteDocument,
+          onAddPage: !widget.showAddPage
+              ? () {
+                  _closePanel();
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (mounted) _togglePanel(_NavPanel.addPage);
+                  });
+                }
+              : null,
+          onExport: !widget.showExport
+              ? () {
+                  _closePanel();
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (mounted) _togglePanel(_NavPanel.export);
+                  });
+                }
+              : null,
+        );
     }
     _popover.show(
       context: context,
@@ -202,7 +249,7 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
             onPressed: () => _togglePanel(_NavPanel.layers),
             isActive: _activePanel == _NavPanel.layers,
           ),
-        if (!widget.isReaderMode)
+        if (!widget.isReaderMode && widget.showAddPage)
           StarNoteNavButton(
             key: _addPageKey,
             icon: StarNoteIcons.pageAdd,
@@ -218,13 +265,14 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
             onPressed: () => _togglePanel(_NavPanel.audioRecording),
             isActive: _activePanel == _NavPanel.audioRecording,
           ),
-        StarNoteNavButton(
-          key: _exportKey,
-          icon: StarNoteIcons.exportIcon,
-          tooltip: 'Dışa Aktar',
-          onPressed: () => _togglePanel(_NavPanel.export),
-          isActive: _activePanel == _NavPanel.export,
-        ),
+        if (widget.showExport)
+          StarNoteNavButton(
+            key: _exportKey,
+            icon: StarNoteIcons.exportIcon,
+            tooltip: 'Dışa Aktar',
+            onPressed: () => _togglePanel(_NavPanel.export),
+            isActive: _activePanel == _NavPanel.export,
+          ),
         StarNoteNavButton(
           key: _moreKey,
           icon: StarNoteIcons.more,

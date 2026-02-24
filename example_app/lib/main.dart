@@ -67,6 +67,21 @@ class StarNoteApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'StarNote',
       debugShowCheckedModeBanner: false,
+      builder: (context, child) {
+        // In landscape, remove all system padding so content fills
+        // the entire screen including the notch/cutout area.
+        if (MediaQuery.of(context).orientation == Orientation.landscape) {
+          return MediaQuery.removePadding(
+            context: context,
+            removeLeft: true,
+            removeRight: true,
+            removeTop: true,
+            removeBottom: true,
+            child: child!,
+          );
+        }
+        return child!;
+      },
       theme: ThemeData(
         colorSchemeSeed: const Color(0xFF38434F),
         useMaterial3: true,

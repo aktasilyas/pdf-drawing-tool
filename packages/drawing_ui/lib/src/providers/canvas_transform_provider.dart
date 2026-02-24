@@ -292,28 +292,27 @@ class CanvasTransformNotifier extends StateNotifier<CanvasTransform> {
     );
   }
 
-  /// Initialize transform for limited canvas (fill viewport with page).
+  /// Initialize transform for limited canvas (fit page within viewport).
   ///
   /// [viewportSize] is the screen viewport size
   /// [pageSize] is the document page size
-  /// This calculates the optimal zoom to fill the viewport
+  /// Uses min(fitWidth, fitHeight) so the page fits both dimensions.
   void initializeForPage({
     required Size viewportSize,
     required Size pageSize,
   }) {
-    // Fit-to-height zoom: page height = viewport height
-    final fitHeightZoom = viewportSize.height / pageSize.height;
+    final baselineZoom = _fitZoom(viewportSize, pageSize);
 
     // Center page both horizontally AND vertically
-    final pageScreenWidth = pageSize.width * fitHeightZoom;
-    final pageScreenHeight = pageSize.height * fitHeightZoom;
+    final pageScreenWidth = pageSize.width * baselineZoom;
+    final pageScreenHeight = pageSize.height * baselineZoom;
     final offsetX = (viewportSize.width - pageScreenWidth) / 2;
     final offsetY = (viewportSize.height - pageScreenHeight) / 2;
 
     state = CanvasTransform(
-      zoom: fitHeightZoom,
+      zoom: baselineZoom,
       offset: Offset(offsetX, offsetY),
-      baselineZoom: fitHeightZoom,
+      baselineZoom: baselineZoom,
     );
   }
 
@@ -328,7 +327,7 @@ class CanvasTransformNotifier extends StateNotifier<CanvasTransform> {
     required Size viewportSize,
     required Size pageSize,
   }) {
-    final baselineZoom = viewportSize.height / pageSize.height;
+    final baselineZoom = _fitZoom(viewportSize, pageSize);
 
     if (state.zoom < baselineZoom) {
       final pageScreenWidth = pageSize.width * baselineZoom;
@@ -356,7 +355,7 @@ class CanvasTransformNotifier extends StateNotifier<CanvasTransform> {
     required Size viewportSize,
     required Size pageSize,
   }) {
-    final newBaselineZoom = viewportSize.height / pageSize.height;
+    final newBaselineZoom = _fitZoom(viewportSize, pageSize);
 
     // Preserve relative zoom (e.g. 150% stays 150%)
     final currentRelativeZoom = state.baselineZoom > 0
@@ -370,6 +369,17 @@ class CanvasTransformNotifier extends StateNotifier<CanvasTransform> {
     );
 
     _clampOffsetLimitedCanvas(viewportSize, pageSize);
+  }
+
+  /// Baseline zoom that fits the page within the viewport.
+  ///
+  /// Uses min(fitWidth, fitHeight) with a small padding factor so the
+  /// page doesn't touch the viewport edges on narrow (portrait) screens.
+  static double _fitZoom(Size viewportSize, Size pageSize) {
+    const padding = 0.96; // ~4% breathing room on the tight axis
+    final fitWidth = viewportSize.width / pageSize.width;
+    final fitHeight = viewportSize.height / pageSize.height;
+    return (fitWidth < fitHeight) ? fitWidth * padding : fitHeight;
   }
 
   /// Clamp offset for limited canvas (top-aligned, not centered).
