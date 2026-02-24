@@ -74,7 +74,7 @@ class StarNoteNavButton extends StatelessWidget {
             child: Container(
               width: size,
               height: size,
-              margin: const EdgeInsets.symmetric(horizontal: 2),
+              margin: const EdgeInsets.symmetric(horizontal: 1),
               decoration: BoxDecoration(
                 color: bgColor,
                 borderRadius: BorderRadius.circular(8),

@@ -84,7 +84,19 @@ void showExportMenu(BuildContext context, WidgetRef ref) {
 ///
 /// On tablet (>=600px): floating dialog positioned top-right below toolbar.
 /// On phone (<600px): modal bottom sheet.
-void showMoreMenu(BuildContext context, WidgetRef ref) {
+///
+/// Optional params add document info and hidden-button actions to the panel
+/// (used by the phone compact layout to consolidate toolbar items).
+void showMoreMenu(
+  BuildContext context,
+  WidgetRef ref, {
+  String? documentTitle,
+  VoidCallback? onRenameDocument,
+  VoidCallback? onDeleteDocument,
+  bool showAddPage = false,
+  bool showExport = false,
+  bool compact = false,
+}) {
   final isTablet = MediaQuery.sizeOf(context).width >= 600;
 
   if (isTablet) {
@@ -105,8 +117,8 @@ void showMoreMenu(BuildContext context, WidgetRef ref) {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) => DraggableScrollableSheet(
-        initialChildSize: 0.7,
-        maxChildSize: 0.9,
+        initialChildSize: 0.85,
+        maxChildSize: 0.95,
         minChildSize: 0.4,
         builder: (_, controller) => Container(
           decoration: BoxDecoration(
@@ -117,6 +129,22 @@ void showMoreMenu(BuildContext context, WidgetRef ref) {
           ),
           child: PageOptionsPanel(
             onClose: () => Navigator.pop(ctx),
+            documentTitle: documentTitle,
+            onRenameDocument: onRenameDocument,
+            onDeleteDocument: onDeleteDocument,
+            compact: compact,
+            onAddPage: showAddPage
+                ? () {
+                    Navigator.pop(ctx);
+                    showAddPageMenu(context);
+                  }
+                : null,
+            onExport: showExport
+                ? () {
+                    Navigator.pop(ctx);
+                    showExportMenu(context, ref);
+                  }
+                : null,
           ),
         ),
       ),
@@ -149,8 +177,8 @@ void showAddPageMenu(BuildContext context) {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) => DraggableScrollableSheet(
-        initialChildSize: 0.6,
-        maxChildSize: 0.9,
+        initialChildSize: 0.75,
+        maxChildSize: 0.95,
         minChildSize: 0.3,
         builder: (_, controller) => Container(
           decoration: BoxDecoration(
@@ -176,6 +204,7 @@ void showAudioMenu(
   bool isSidebarOpen,
 ) {
   final colorScheme = Theme.of(context).colorScheme;
+  final isActive = ref.read(isRecordingProvider);
 
   showModalBottomSheet<void>(
     context: context,
@@ -193,14 +222,43 @@ void showAudioMenu(
             ),
           ),
           const SizedBox(height: 12),
-          ListTile(
-            leading: PhosphorIcon(
-              StarNoteIcons.recordCircle,
-              color: colorScheme.onSurface,
+          if (isActive)
+            ListTile(
+              leading: PhosphorIcon(
+                StarNoteIcons.recordCircle,
+                color: colorScheme.onSurface,
+              ),
+              title: const Text('Kayit devam ediyor...'),
+              enabled: false,
+            )
+          else
+            ListTile(
+              leading: PhosphorIcon(
+                StarNoteIcons.recordCircle,
+                color: colorScheme.onSurface,
+              ),
+              title: const Text('Kaydet'),
+              onTap: () async {
+                final service = ref.read(audioRecordingServiceProvider);
+                final hasPerms = await service.hasPermission();
+                if (!hasPerms) {
+                  if (ctx.mounted) {
+                    Navigator.pop(ctx);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Mikrofon izni gerekli. '
+                            'Lütfen ayarlardan izin verin.'),
+                      ),
+                    );
+                  }
+                  return;
+                }
+                final started = await service.startRecording();
+                if (started && ctx.mounted) {
+                  Navigator.pop(ctx);
+                }
+              },
             ),
-            title: const Text('Kaydet'),
-            onTap: () => Navigator.pop(ctx),
-          ),
           ListTile(
             leading: PhosphorIcon(
               StarNoteIcons.waveform,

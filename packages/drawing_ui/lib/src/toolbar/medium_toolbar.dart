@@ -6,6 +6,7 @@ import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/toolbar/tool_button.dart';
 import 'package:drawing_ui/src/toolbar/tool_groups.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_logic.dart';
+import 'package:drawing_ui/src/toolbar/starnote_nav_button.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_nav_sections.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_overflow_menu.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_widgets.dart';
@@ -21,6 +22,7 @@ import 'package:drawing_ui/src/toolbar/toolbar_widgets.dart';
 class MediumToolbar extends ConsumerStatefulWidget {
   const MediumToolbar({
     super.key,
+    this.onAIPressed,
     this.onSettingsPressed,
     this.settingsButtonKey,
     this.toolButtonKeys,
@@ -34,6 +36,7 @@ class MediumToolbar extends ConsumerStatefulWidget {
     this.isSidebarOpen = false,
   });
 
+  final VoidCallback? onAIPressed;
   final VoidCallback? onSettingsPressed;
   final GlobalKey? settingsButtonKey;
   final Map<ToolType, GlobalKey>? toolButtonKeys;
@@ -95,6 +98,7 @@ class _MediumToolbarState extends ConsumerState<MediumToolbar> {
             isSidebarOpen: widget.isSidebarOpen,
             isReaderMode: isReaderMode,
             pageCount: pageCount,
+            showTitle: false,
           ),
           // Tools section (hidden in reader mode)
           if (!isReaderMode) ..._buildToolsSection(theme),
@@ -106,6 +110,11 @@ class _MediumToolbarState extends ConsumerState<MediumToolbar> {
             onReaderToggle: () =>
                 ref.read(readerModeProvider.notifier).state = !isReaderMode,
             onShowRecordings: () => _openRecordingsTab(ref),
+            documentTitle: widget.documentTitle,
+            onRenameDocument: widget.onRenameDocument,
+            onDeleteDocument: widget.onDeleteDocument,
+            showAddPage: false,
+            showExport: false,
           ),
           const SizedBox(width: 4),
         ],
@@ -124,6 +133,13 @@ class _MediumToolbarState extends ConsumerState<MediumToolbar> {
 
     return [
       const ToolbarVerticalDivider(),
+      if (widget.onAIPressed != null)
+        StarNoteNavButton(
+          icon: StarNoteIcons.sparkle,
+          tooltip: 'Yapay Zeka',
+          onPressed: widget.onAIPressed!,
+        ),
+      if (widget.onAIPressed != null) const ToolbarVerticalDivider(),
       ...visibleTools.map((tool) => _buildToolButton(tool, currentTool)),
       if (hiddenTools.isNotEmpty)
         ToolbarOverflowMenu(hiddenTools: hiddenTools),
@@ -154,7 +170,7 @@ class _MediumToolbarState extends ConsumerState<MediumToolbar> {
     }
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 1),
       child: ToolButton(
         key: buttonKey,
         toolType: tool,

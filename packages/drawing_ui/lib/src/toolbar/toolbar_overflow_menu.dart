@@ -5,6 +5,8 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
+import 'package:drawing_ui/src/toolbar/tool_groups.dart';
+import 'package:drawing_ui/src/toolbar/toolbar_logic.dart';
 
 /// Overflow menu for tools that don't fit in the medium toolbar.
 ///
@@ -43,8 +45,13 @@ class ToolbarOverflowMenu extends ConsumerWidget {
       ),
       position: PopupMenuPosition.under,
       onSelected: (tool) {
-        ref.read(currentToolProvider.notifier).selectTool(tool);
-        ref.read(activePanelProvider.notifier).state = null;
+        final wasSelected = isToolSelected(tool, currentTool);
+        handleToolPressed(ref, tool);
+        // Auto-open panel for newly selected tools since the user
+        // explicitly chose them from the overflow menu.
+        if (!wasSelected && toolsWithPanel.contains(tool)) {
+          ref.read(activePanelProvider.notifier).state = tool;
+        }
       },
       itemBuilder: (context) => hiddenTools.map((tool) {
         final isSelected = tool == currentTool;

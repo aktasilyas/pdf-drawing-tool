@@ -8,18 +8,22 @@ import 'package:drawing_ui/src/theme/theme.dart';
 
 /// Header widget for page options panel.
 class PageOptionsHeader extends StatelessWidget {
-  const PageOptionsHeader({super.key, required this.title});
+  const PageOptionsHeader({super.key, required this.title, this.compact = false});
   final String title;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      padding: EdgeInsets.symmetric(
+        horizontal: compact ? 16 : 20,
+        vertical: compact ? 8 : 12,
+      ),
       child: Text(
         title,
         style: TextStyle(
-          fontSize: 16,
+          fontSize: compact ? 14 : 16,
           fontWeight: FontWeight.w600,
           color: cs.onSurface,
         ),
@@ -37,6 +41,7 @@ class PageOptionsMenuItem extends StatelessWidget {
     this.trailing,
     this.isDestructive = false,
     this.onTap,
+    this.compact = false,
   });
 
   final IconData icon;
@@ -44,6 +49,7 @@ class PageOptionsMenuItem extends StatelessWidget {
   final Widget? trailing;
   final bool isDestructive;
   final VoidCallback? onTap;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -55,17 +61,17 @@ class PageOptionsMenuItem extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: SizedBox(
-        height: 48,
+        height: compact ? 40 : 48,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: EdgeInsets.symmetric(horizontal: compact ? 16 : 20),
           child: Row(
             children: [
-              PhosphorIcon(icon, size: 22, color: color),
-              const SizedBox(width: 16),
+              PhosphorIcon(icon, size: compact ? 20 : 22, color: color),
+              SizedBox(width: compact ? 12 : 16),
               Expanded(
                 child: Text(
                   label,
-                  style: TextStyle(fontSize: 15, color: color),
+                  style: TextStyle(fontSize: compact ? 13 : 15, color: color),
                 ),
               ),
               if (trailing != null) trailing!,
@@ -79,18 +85,19 @@ class PageOptionsMenuItem extends StatelessWidget {
 
 /// Section header for settings area.
 class PageOptionsSectionHeader extends StatelessWidget {
-  const PageOptionsSectionHeader({super.key, required this.title});
+  const PageOptionsSectionHeader({super.key, required this.title, this.compact = false});
   final String title;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 4, 20, 2),
+      padding: EdgeInsets.fromLTRB(compact ? 16 : 20, compact ? 2 : 4, compact ? 16 : 20, compact ? 1 : 2),
       child: Text(
         title,
         style: TextStyle(
-          fontSize: 13,
+          fontSize: compact ? 12 : 13,
           fontWeight: FontWeight.w600,
           color: cs.onSurfaceVariant,
         ),
@@ -108,6 +115,7 @@ class PageOptionsToggleItem extends StatelessWidget {
     this.subtitle,
     required this.value,
     required this.onChanged,
+    this.compact = false,
   });
 
   final IconData icon;
@@ -115,30 +123,31 @@ class PageOptionsToggleItem extends StatelessWidget {
   final String? subtitle;
   final bool value;
   final ValueChanged<bool> onChanged;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
     return SizedBox(
-      height: 48,
+      height: compact ? 40 : 48,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: EdgeInsets.symmetric(horizontal: compact ? 16 : 20),
         child: Row(
           children: [
-            PhosphorIcon(icon, size: 22, color: cs.onSurface),
-            const SizedBox(width: 16),
+            PhosphorIcon(icon, size: compact ? 20 : 22, color: cs.onSurface),
+            SizedBox(width: compact ? 12 : 16),
             Expanded(
               child: subtitle != null
                   ? Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(label, style: TextStyle(fontSize: 15, color: cs.onSurface)),
-                        Text(subtitle!, style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant)),
+                        Text(label, style: TextStyle(fontSize: compact ? 13 : 15, color: cs.onSurface)),
+                        Text(subtitle!, style: TextStyle(fontSize: compact ? 11 : 12, color: cs.onSurfaceVariant)),
                       ],
                     )
-                  : Text(label, style: TextStyle(fontSize: 15, color: cs.onSurface)),
+                  : Text(label, style: TextStyle(fontSize: compact ? 13 : 15, color: cs.onSurface)),
             ),
             Switch.adaptive(
               value: value,
@@ -206,8 +215,9 @@ class DualPageModeItem extends ConsumerWidget {
 
 /// Scroll direction toggle for page options settings.
 class ScrollDirectionItem extends ConsumerWidget {
-  const ScrollDirectionItem({super.key, required this.onClose});
+  const ScrollDirectionItem({super.key, required this.onClose, this.compact = false});
   final VoidCallback onClose;
+  final bool compact;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -222,6 +232,7 @@ class ScrollDirectionItem extends ConsumerWidget {
       value: isHorizontal,
       onChanged: (v) => ref.read(scrollDirectionProvider.notifier).state =
           v ? Axis.horizontal : Axis.vertical,
+      compact: compact,
     );
   }
 }
@@ -246,8 +257,12 @@ Widget pageOptionsDivider(ColorScheme cs) =>
     Divider(height: 0.5, thickness: 0.5, color: cs.outlineVariant);
 
 /// Thick divider separating sections.
-Widget pageOptionsThickDivider(ColorScheme cs) =>
-    Divider(height: 8, thickness: 8, color: cs.outlineVariant.withValues(alpha: 0.3));
+Widget pageOptionsThickDivider(ColorScheme cs, {bool compact = false}) =>
+    Divider(
+      height: compact ? 6 : 8,
+      thickness: compact ? 6 : 8,
+      color: cs.outlineVariant.withValues(alpha: 0.3),
+    );
 
 /// "Go to page" dialog extracted from PageOptionsPanel.
 void showGoToPageDialog({

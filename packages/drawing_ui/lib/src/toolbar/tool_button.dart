@@ -65,8 +65,8 @@ class ToolButton extends StatelessWidget {
       bgColor = Colors.transparent;
       iconColor = colorScheme.onSurface.withValues(alpha: 0.25);
     } else if (isSelected) {
-      bgColor = colorScheme.primary;
-      iconColor = colorScheme.onPrimary;
+      bgColor = colorScheme.primary.withValues(alpha: 0.12);
+      iconColor = colorScheme.primary;
     } else {
       bgColor = Colors.transparent;
       iconColor = colorScheme.onSurfaceVariant;

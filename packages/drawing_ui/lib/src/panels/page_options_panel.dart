@@ -17,6 +17,12 @@ class PageOptionsPanel extends ConsumerStatefulWidget {
     required this.onClose,
     this.embedded = false,
     this.pageIndex,
+    this.documentTitle,
+    this.onRenameDocument,
+    this.onDeleteDocument,
+    this.onAddPage,
+    this.onExport,
+    this.compact = false,
   });
 
   final VoidCallback onClose;
@@ -27,6 +33,20 @@ class PageOptionsPanel extends ConsumerStatefulWidget {
   /// When set, operates on this specific page index instead of
   /// [currentPageIndexProvider]. Used by the sidebar "..." button.
   final int? pageIndex;
+
+  /// Document title shown at top of panel (used by MediumToolbar).
+  final String? documentTitle;
+  final VoidCallback? onRenameDocument;
+  final VoidCallback? onDeleteDocument;
+
+  /// Callback to open the Add Page panel (used when the button is hidden).
+  final VoidCallback? onAddPage;
+
+  /// Callback to open the Export panel (used when the button is hidden).
+  final VoidCallback? onExport;
+
+  /// When true, uses smaller spacing/fonts (MediumToolbar popup).
+  final bool compact;
 
   @override
   ConsumerState<PageOptionsPanel> createState() => _PageOptionsPanelState();
@@ -219,49 +239,95 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
     final isBookmarked = doc.pages[pageIndex].isBookmarked;
     final hasCopiedPage = ref.watch(copiedPageProvider) != null;
 
+    final c = widget.compact;
     final content = SingleChildScrollView(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          PageOptionsHeader(title: 'Sayfa ${pageIndex + 1}'),
+          if (widget.documentTitle != null) ...[
+            PageOptionsHeader(title: widget.documentTitle!, compact: c),
+            pageOptionsDivider(cs),
+            PageOptionsMenuItem(
+              icon: StarNoteIcons.editPencil,
+              label: 'Yeniden Adlandır',
+              compact: c,
+              onTap: () {
+                widget.onClose();
+                widget.onRenameDocument?.call();
+              },
+            ),
+            PageOptionsMenuItem(
+              icon: StarNoteIcons.trash,
+              label: 'Çöpe Taşı',
+              isDestructive: true,
+              compact: c,
+              onTap: () {
+                widget.onClose();
+                widget.onDeleteDocument?.call();
+              },
+            ),
+            if (widget.onExport != null)
+              PageOptionsMenuItem(
+                icon: StarNoteIcons.exportIcon,
+                label: 'Dışa Aktar',
+                compact: c,
+                onTap: widget.onExport,
+              ),
+            pageOptionsThickDivider(cs, compact: c),
+          ],
+          PageOptionsHeader(title: 'Sayfa ${pageIndex + 1}', compact: c),
           pageOptionsDivider(cs),
+          if (widget.onAddPage != null)
+            PageOptionsMenuItem(
+              icon: StarNoteIcons.pageAdd,
+              label: 'Sayfa Ekle',
+              compact: c,
+              onTap: widget.onAddPage,
+            ),
           PageOptionsMenuItem(
             icon: isBookmarked
                 ? StarNoteIcons.bookmarkFilled
                 : StarNoteIcons.bookmark,
             label: isBookmarked ? 'Yer imini kaldır' : 'Yer imi koy',
+            compact: c,
             onTap: _toggleBookmark,
           ),
           PageOptionsMenuItem(
             icon: StarNoteIcons.copy,
             label: 'Sayfayı kopyala',
+            compact: c,
             onTap: () => _copyPage(context),
           ),
           PageOptionsMenuItem(
             icon: StarNoteIcons.paste,
             label: 'Sayfayı yapıştır',
+            compact: c,
             onTap: hasCopiedPage ? () => _pastePage(context) : null,
           ),
           PageOptionsMenuItem(
             icon: StarNoteIcons.duplicate,
             label: 'Sayfayı çoğalt',
+            compact: c,
             onTap: _duplicatePage,
           ),
           PageOptionsMenuItem(
             icon: StarNoteIcons.template,
             label: 'Şablonu değiştir',
+            compact: c,
             onTap: () => _changeTemplate(context),
           ),
           PageOptionsMenuItem(
             icon: StarNoteIcons.goToPage,
             label: 'Sayfaya git',
+            compact: c,
             trailing: pageOptionsChevronTrailing(cs, '${pageIndex + 1} / $pageCount'),
             onTap: () => _showGoToPageDialog(context),
           ),
           PageOptionsMenuItem(
             icon: StarNoteIcons.pdfFile,
             label: 'PDF olarak dışa aktar',
+            compact: c,
             onTap: _exportPageAsPdf,
           ),
           pageOptionsDivider(cs),
@@ -269,22 +335,25 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
             icon: StarNoteIcons.pageClear,
             label: 'Sayfayı temizle',
             isDestructive: true,
+            compact: c,
             onTap: () => _clearPage(context),
           ),
           PageOptionsMenuItem(
             icon: StarNoteIcons.trash,
             label: 'Çöpe taşı',
             isDestructive: true,
+            compact: c,
             onTap: () => _deletePage(context),
           ),
-          pageOptionsThickDivider(cs),
-          PageOptionsSectionHeader(title: 'Ayarlar'),
+          pageOptionsThickDivider(cs, compact: c),
+          PageOptionsSectionHeader(title: 'Ayarlar', compact: c),
           // TEMPORARILY DISABLED: Dual page mode
           // DualPageModeItem(onClose: widget.onClose),
-          ScrollDirectionItem(onClose: widget.onClose),
+          ScrollDirectionItem(onClose: widget.onClose, compact: c),
           PageOptionsMenuItem(
             icon: StarNoteIcons.sliders,
             label: 'Araç Çubuğunu Düzenle',
+            compact: c,
             onTap: () {
               widget.onClose();
               showDialog<void>(
@@ -299,7 +368,7 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
               );
             },
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: c ? 4 : 8),
         ],
       ),
     );

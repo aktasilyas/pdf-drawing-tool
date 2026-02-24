@@ -6,6 +6,7 @@ import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/toolbar/tool_button.dart';
 import 'package:drawing_ui/src/toolbar/tool_groups.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_logic.dart';
+import 'package:drawing_ui/src/toolbar/starnote_nav_button.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_nav_sections.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_widgets.dart';
 
@@ -24,6 +25,7 @@ import 'package:drawing_ui/src/toolbar/toolbar_widgets.dart';
 class ToolBar extends ConsumerStatefulWidget {
   const ToolBar({
     super.key,
+    this.onAIPressed,
     this.onSettingsPressed,
     this.settingsButtonKey,
     this.toolButtonKeys,
@@ -37,6 +39,7 @@ class ToolBar extends ConsumerStatefulWidget {
     this.isSidebarOpen = false,
   });
 
+  final VoidCallback? onAIPressed;
   final VoidCallback? onSettingsPressed;
   final GlobalKey? settingsButtonKey;
   final Map<ToolType, GlobalKey>? toolButtonKeys;
@@ -122,6 +125,13 @@ class _ToolBarState extends ConsumerState<ToolBar> {
 
     return [
       const ToolbarVerticalDivider(),
+      if (widget.onAIPressed != null)
+        StarNoteNavButton(
+          icon: StarNoteIcons.sparkle,
+          tooltip: 'Yapay Zeka',
+          onPressed: widget.onAIPressed!,
+        ),
+      if (widget.onAIPressed != null) const ToolbarVerticalDivider(),
       Expanded(
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,

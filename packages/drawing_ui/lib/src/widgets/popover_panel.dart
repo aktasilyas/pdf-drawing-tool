@@ -92,7 +92,7 @@ class _PopoverOverlayState extends State<_PopoverOverlay>
   void dispose() { _anim.dispose(); super.dispose(); }
 
   _Placement _decidePlacement() {
-    const edge = 12.0, gap = 4.0, minSpace = 300.0;
+    const edge = 12.0, gap = 8.0, minSpace = 300.0;
     final anchorBottom = widget.anchorPosition.dy + widget.anchorSize.height;
     final anchorTop = widget.anchorPosition.dy;
     final spaceBelow = widget.screenSize.height - anchorBottom - gap - edge;
@@ -124,7 +124,7 @@ class _PopoverOverlayState extends State<_PopoverOverlay>
   /// Vertical popover (below or above anchor).
   Widget _buildVertical(BuildContext context, _Placement placement) {
     final cs = Theme.of(context).colorScheme;
-    const edge = 12.0, gap = 4.0, ah = 10.0, aw = 20.0;
+    const edge = 12.0, gap = 8.0;
     final openAbove = placement == _Placement.above;
 
     final anchorBottom = widget.anchorPosition.dy + widget.anchorSize.height;
@@ -133,31 +133,17 @@ class _PopoverOverlayState extends State<_PopoverOverlay>
     final left = (cx - widget.maxWidth / 2).clamp(
       edge, widget.screenSize.width - widget.maxWidth - edge,
     );
-    final arrowLeft = (cx - left - aw / 2).clamp(16.0, widget.maxWidth - 16.0 - aw);
     final bg = cs.surface;
     final border = cs.outlineVariant;
 
-    // Max height for the panel content (excluding arrow).
     final maxPanelHeight = openAbove
-        ? anchorTop - gap - ah - edge
-        : widget.screenSize.height - anchorBottom - gap - ah - edge;
+        ? anchorTop - gap - edge
+        : widget.screenSize.height - anchorBottom - gap - edge;
 
-    final arrow = Padding(
-      padding: EdgeInsets.only(left: arrowLeft),
-      child: CustomPaint(
-        size: const Size(aw, ah),
-        painter: _ArrowPainter(color: bg, borderColor: border, direction: openAbove ? _ArrowDir.down : _ArrowDir.up),
-      ),
-    );
     final panel = _panelBox(bg, border, maxHeight: maxPanelHeight);
-    final content = Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: openAbove ? [panel, arrow] : [arrow, panel],
-    );
 
     final animated = _animatedWrap(
-      content,
+      panel,
       openAbove ? Alignment.bottomCenter : Alignment.topCenter,
     );
 
@@ -169,7 +155,7 @@ class _PopoverOverlayState extends State<_PopoverOverlay>
   /// Horizontal popover (right of anchor).
   Widget _buildHorizontal(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    const edge = 12.0, gap = 4.0, ah = 10.0, aw = 20.0;
+    const edge = 12.0, gap = 8.0;
     final bg = cs.surface;
     final border = cs.outlineVariant;
 
@@ -177,30 +163,15 @@ class _PopoverOverlayState extends State<_PopoverOverlay>
     final anchorCy = widget.anchorPosition.dy + widget.anchorSize.height / 2;
     final left = anchorRight + gap;
 
-    // Vertical position: center on anchor, clamped to screen
     final maxHeight = widget.screenSize.height - edge * 2;
     final top = (anchorCy - maxHeight / 2).clamp(edge, widget.screenSize.height - maxHeight - edge);
-    final arrowTop = (anchorCy - top - ah / 2).clamp(16.0, maxHeight - 16.0 - ah);
 
-    final arrow = Padding(
-      padding: EdgeInsets.only(top: arrowTop),
-      child: CustomPaint(
-        size: const Size(aw, ah),
-        painter: _ArrowPainter(color: bg, borderColor: border, direction: _ArrowDir.left),
-      ),
-    );
-    final panelMaxH = widget.screenSize.height - edge * 2 - ah;
-    final panel = _panelBox(bg, border, maxHeight: panelMaxH);
-    final content = Row(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [arrow, panel],
-    );
+    final panel = _panelBox(bg, border, maxHeight: maxHeight);
 
     return Positioned(
       left: left,
       top: top,
-      child: _animatedWrap(content, Alignment.centerLeft),
+      child: _animatedWrap(panel, Alignment.centerLeft),
     );
   }
 
@@ -217,7 +188,10 @@ class _PopoverOverlayState extends State<_PopoverOverlay>
     ),
     child: ClipRRect(
       borderRadius: BorderRadius.circular(16),
-      child: Material(type: MaterialType.transparency, child: widget.child),
+      child: Material(
+        type: MaterialType.transparency,
+        child: SingleChildScrollView(child: widget.child),
+      ),
     ),
   );
 
@@ -231,45 +205,3 @@ class _PopoverOverlayState extends State<_PopoverOverlay>
   );
 }
 
-/// Arrow direction for the popover.
-enum _ArrowDir { up, down, left }
-
-class _ArrowPainter extends CustomPainter {
-  const _ArrowPainter({
-    required this.color,
-    required this.borderColor,
-    required this.direction,
-  });
-  final Color color;
-  final Color borderColor;
-  final _ArrowDir direction;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final fill = Path();
-    final stroke = Path();
-
-    switch (direction) {
-      case _ArrowDir.up:
-        fill..moveTo(size.width / 2, 0)..lineTo(size.width, size.height)..lineTo(0, size.height)..close();
-        stroke..moveTo(0, size.height)..lineTo(size.width / 2, 0)..lineTo(size.width, size.height);
-      case _ArrowDir.down:
-        fill..moveTo(0, 0)..lineTo(size.width, 0)..lineTo(size.width / 2, size.height)..close();
-        stroke..moveTo(0, 0)..lineTo(size.width / 2, size.height)..lineTo(size.width, 0);
-      case _ArrowDir.left:
-        // Arrow pointing left: tip at left center, base on right
-        fill..moveTo(0, size.height / 2)..lineTo(size.width, 0)..lineTo(size.width, size.height)..close();
-        stroke..moveTo(size.width, 0)..lineTo(0, size.height / 2)..lineTo(size.width, size.height);
-    }
-
-    canvas.drawPath(fill, Paint()..color = color);
-    canvas.drawPath(stroke, Paint()
-      ..color = borderColor
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 0.5);
-  }
-
-  @override
-  bool shouldRepaint(covariant _ArrowPainter old) =>
-      old.color != color || old.borderColor != borderColor || old.direction != direction;
-}

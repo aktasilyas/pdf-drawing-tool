@@ -93,25 +93,22 @@ void main() {
     });
   });
 
-  group('CompactBottomBar', () {
-    testWidgets('has_56dp_height', (tester) async {
+  group('CompactToolRow', () {
+    testWidgets('has_48dp_height', (tester) async {
       await tester.pumpWidget(
-        buildTestWidget(const CompactBottomBar(), width: 400),
+        buildTestWidget(const CompactToolRow(), width: 400),
       );
 
       final container = tester.widget<Container>(
-        find.ancestor(
-          of: find.byType(SafeArea),
-          matching: find.byType(Container),
-        ).first,
+        find.byType(Container).first,
       );
 
-      expect(container.constraints?.maxHeight, equals(56));
+      expect(container.constraints?.maxHeight, equals(48));
     });
 
     testWidgets('shows_undo_redo_buttons', (tester) async {
       await tester.pumpWidget(
-        buildTestWidget(const CompactBottomBar(), width: 400),
+        buildTestWidget(const CompactToolRow(), width: 400),
       );
 
       expect(find.byIcon(StarNoteIcons.undo), findsOneWidget);
@@ -120,19 +117,19 @@ void main() {
 
     testWidgets('shows_max_5_tool_buttons', (tester) async {
       await tester.pumpWidget(
-        buildTestWidget(const CompactBottomBar(), width: 400),
+        buildTestWidget(const CompactToolRow(), width: 400),
       );
 
       final toolButtons = find.byType(ToolButton);
       expect(
         toolButtons.evaluate().length,
-        lessThanOrEqualTo(CompactBottomBar.maxVisibleTools),
+        lessThanOrEqualTo(CompactToolRow.maxVisibleTools),
       );
     });
 
     testWidgets('shows_overflow_menu_when_needed', (tester) async {
       await tester.pumpWidget(
-        buildTestWidget(const CompactBottomBar(), width: 400),
+        buildTestWidget(const CompactToolRow(), width: 400),
       );
 
       expect(find.byType(ToolbarOverflowMenu), findsOneWidget);
@@ -143,7 +140,7 @@ void main() {
 
       await tester.pumpWidget(
         buildTestWidget(
-          CompactBottomBar(
+          CompactToolRow(
             onPanelRequested: (tool) => requestedPanel = tool,
           ),
           width: 400,
