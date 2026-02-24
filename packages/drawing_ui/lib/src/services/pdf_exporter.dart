@@ -447,7 +447,16 @@ class PDFExporter {
       ))..pushStyle(style)..addText(t.text);
       final paragraph = builder.build();
       paragraph.layout(ui.ParagraphConstraints(width: t.width ?? 1000.0));
+      canvas.save();
+      if (t.rotation != 0.0) {
+        final cx = t.x + paragraph.maxIntrinsicWidth / 2;
+        final cy = t.y + paragraph.height / 2;
+        canvas.translate(cx, cy);
+        canvas.rotate(t.rotation);
+        canvas.translate(-cx, -cy);
+      }
       canvas.drawParagraph(paragraph, Offset(t.x, t.y));
+      canvas.restore();
     }
   }
 }

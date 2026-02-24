@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:drawing_core/drawing_core.dart';
 
 /// Text alignment options.
@@ -68,6 +70,9 @@ class TextElement {
   /// Optional height constraint (null = auto height).
   final double? height;
 
+  /// Rotation angle in radians.
+  final double rotation;
+
   const TextElement({
     required this.id,
     required this.text,
@@ -82,6 +87,7 @@ class TextElement {
     this.alignment = TextAlignment.left,
     this.width,
     this.height,
+    this.rotation = 0.0,
   });
 
   /// Creates a new text element with a generated ID.
@@ -100,6 +106,7 @@ class TextElement {
     TextAlignment alignment = TextAlignment.left,
     double? width,
     double? height,
+    double rotation = 0.0,
   }) {
     return TextElement(
       id: DateTime.now().microsecondsSinceEpoch.toString(),
@@ -115,6 +122,7 @@ class TextElement {
       alignment: alignment,
       width: width,
       height: height,
+      rotation: rotation,
     );
   }
 
@@ -126,26 +134,69 @@ class TextElement {
 
   /// Bounding box (tahmini - gerçek boyut render'da hesaplanır)
   BoundingBox get bounds {
-    // Tahmini karakter genişliği
-    final charWidth = fontSize * 0.6;
     final lineHeight = fontSize * 1.2;
-
-    // Satır sayısı
     final lines = text.split('\n');
-    final maxLineLength = lines.isEmpty
-        ? 0
-        : lines.map((l) => l.length).reduce((a, b) => a > b ? a : b);
 
-    final estimatedWidth = width ?? (maxLineLength * charWidth);
-    final estimatedHeight = height ?? (lines.length * lineHeight);
+    double maxLineWidth = 0;
+    for (final line in lines) {
+      final runes = line.runes.toList();
+      final hasEmoji = runes.any((r) => r > 0xFF);
+      if (hasEmoji) {
+        maxLineWidth = math.max(maxLineWidth,
+            _countVisibleGlyphs(runes) * fontSize);
+      } else {
+        maxLineWidth = math.max(maxLineWidth,
+            runes.length * fontSize * 0.6);
+      }
+    }
 
-    return BoundingBox(
-      left: x,
-      top: y,
-      right: x + estimatedWidth,
-      bottom: y + estimatedHeight,
-    );
+    final w = width ?? maxLineWidth;
+    final h = height ?? (lines.length * lineHeight);
+
+    if (rotation == 0.0) {
+      return BoundingBox(left: x, top: y, right: x + w, bottom: y + h);
+    }
+    // Rotated bounding box
+    final cx = x + w / 2;
+    final cy = y + h / 2;
+    final cosR = math.cos(rotation);
+    final sinR = math.sin(rotation);
+    // Rotate four corners and find axis-aligned envelope
+    double minX = double.infinity, maxX = double.negativeInfinity;
+    double minY = double.infinity, maxY = double.negativeInfinity;
+    for (final corner in [
+      (x, y), (x + w, y), (x + w, y + h), (x, y + h),
+    ]) {
+      final dx = corner.$1 - cx;
+      final dy = corner.$2 - cy;
+      final rx = cx + dx * cosR - dy * sinR;
+      final ry = cy + dx * sinR + dy * cosR;
+      if (rx < minX) minX = rx;
+      if (rx > maxX) maxX = rx;
+      if (ry < minY) minY = ry;
+      if (ry > maxY) maxY = ry;
+    }
+    return BoundingBox(left: minX, top: minY, right: maxX, bottom: maxY);
   }
+
+  /// Counts visible glyphs by collapsing ZWJ sequences and skipping
+  /// invisible modifiers (variation selectors, skin tones, etc.).
+  static int _countVisibleGlyphs(List<int> runes) {
+    int count = 0;
+    bool joinedToPrev = false;
+    for (final rune in runes) {
+      if (rune == 0x200D) { joinedToPrev = true; continue; } // ZWJ
+      if (_isInvisibleModifier(rune)) continue;
+      if (!joinedToPrev) count++;
+      joinedToPrev = false;
+    }
+    return math.max(count, 1);
+  }
+
+  static bool _isInvisibleModifier(int rune) =>
+      (rune >= 0xFE00 && rune <= 0xFE0F) || // Variation selectors
+      (rune >= 0x1F3FB && rune <= 0x1F3FF) || // Skin tone modifiers
+      rune == 0x20E3; // Combining enclosing keycap
 
   /// Hit test - nokta text üzerinde mi?
   bool containsPoint(double px, double py, double tolerance) {
@@ -170,6 +221,7 @@ class TextElement {
     TextAlignment? alignment,
     double? width,
     double? height,
+    double? rotation,
   }) {
     return TextElement(
       id: id,
@@ -185,6 +237,7 @@ class TextElement {
       alignment: alignment ?? this.alignment,
       width: width ?? this.width,
       height: height ?? this.height,
+      rotation: rotation ?? this.rotation,
     );
   }
 
@@ -203,6 +256,7 @@ class TextElement {
         'alignment': alignment.name,
         'width': width,
         'height': height,
+        'rotation': rotation,
       };
 
   factory TextElement.fromJson(Map<String, dynamic> json) {
@@ -239,6 +293,7 @@ class TextElement {
       alignment: TextAlignment.values.byName(json['alignment'] ?? 'left'),
       width: json['width'] != null ? parseDouble(json['width'], 0.0) : null,
       height: json['height'] != null ? parseDouble(json['height'], 0.0) : null,
+      rotation: parseDouble(json['rotation'], 0.0),
     );
   }
 
@@ -258,9 +313,10 @@ class TextElement {
         other.isUnderline == isUnderline &&
         other.alignment == alignment &&
         other.width == width &&
-        other.height == height;
+        other.height == height &&
+        other.rotation == rotation;
   }
 
   @override
-  int get hashCode => Object.hash(id, text, x, y, fontSize, color);
+  int get hashCode => Object.hash(id, text, x, y, fontSize, color, rotation);
 }

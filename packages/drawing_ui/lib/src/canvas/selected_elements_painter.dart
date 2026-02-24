@@ -157,7 +157,17 @@ class SelectedElementsPainter extends CustomPainter {
 
     final paragraph = builder.build();
     paragraph.layout(ui.ParagraphConstraints(width: text.width ?? 1000.0));
+
+    canvas.save();
+    if (text.rotation != 0.0) {
+      final cx = text.x + paragraph.maxIntrinsicWidth / 2;
+      final cy = text.y + paragraph.height / 2;
+      canvas.translate(cx, cy);
+      canvas.rotate(text.rotation);
+      canvas.translate(-cx, -cy);
+    }
     canvas.drawParagraph(paragraph, Offset(text.x, text.y));
+    canvas.restore();
   }
 
   @override

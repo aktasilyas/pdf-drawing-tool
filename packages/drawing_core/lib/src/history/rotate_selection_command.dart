@@ -118,15 +118,24 @@ class RotateSelectionCommand implements DrawingCommand {
       ));
     }
 
-    // Rotate texts (position only — text has no rotation property)
+    // Rotate texts — same center-based approach as images.
     for (final id in textIds) {
       final text = layer.getTextById(id);
       if (text == null) continue;
 
-      final dx = text.x - centerX, dy = text.y - centerY;
-      final newX = centerX + dx * cosA - dy * sinA;
-      final newY = centerY + dx * sinA + dy * cosA;
-      layer = layer.updateText(text.copyWith(x: newX, y: newY));
+      final b = text.bounds;
+      final cx = (b.left + b.right) / 2;
+      final cy = (b.top + b.bottom) / 2;
+      final halfW = cx - text.x;
+      final halfH = cy - text.y;
+      final dx = cx - centerX, dy = cy - centerY;
+      final newCx = centerX + dx * cosA - dy * sinA;
+      final newCy = centerY + dx * sinA + dy * cosA;
+      layer = layer.updateText(text.copyWith(
+        x: newCx - halfW,
+        y: newCy - halfH,
+        rotation: text.rotation + a,
+      ));
     }
 
     return document.updateLayer(layerIndex, layer);
