@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/providers/drawing_providers.dart';
 import 'package:drawing_ui/src/providers/image_provider.dart';
@@ -25,44 +24,39 @@ class ImagePanel extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Resim Ekle', style: TextStyle(
-            fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSurface)),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: _ImageSourceButton(
-                  icon: StarNoteIcons.images,
-                  label: 'Album',
-                  onTap: () => _pickFromAlbum(context, ref),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: _ImageSourceButton(
-                  icon: StarNoteIcons.camera,
-                  label: 'Kamera',
-                  onTap: () => _takePhoto(context, ref),
-                ),
-              ),
-            ],
+          Text(
+            'Resim Ekle',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: cs.onSurface,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Galeriden veya kamerayla resim ekleyin',
+            style: TextStyle(
+              fontSize: 11,
+              color: cs.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: 12),
-          _CompactLockedSection(
-            title: 'Bulut Depolama',
-            onTap: () => _showPremiumPrompt(context),
+          _ImageSourceTile(
+            icon: StarNoteIcons.images,
+            label: 'Galeriden Se\u00e7',
+            subtitle: 'Alb\u00fcmden bir resim se\u00e7in',
+            onTap: () => _pickImage(context, ref, ImageSource.gallery),
+          ),
+          const SizedBox(height: 8),
+          _ImageSourceTile(
+            icon: StarNoteIcons.camera,
+            label: 'Foto\u011fraf \u00c7ek',
+            subtitle: 'Kamera ile yeni foto\u011fraf \u00e7ekin',
+            onTap: () => _pickImage(context, ref, ImageSource.camera),
           ),
         ],
       ),
     );
-  }
-
-  Future<void> _pickFromAlbum(BuildContext context, WidgetRef ref) async {
-    await _pickImage(context, ref, ImageSource.gallery);
-  }
-
-  Future<void> _takePhoto(BuildContext context, WidgetRef ref) async {
-    await _pickImage(context, ref, ImageSource.camera);
   }
 
   Future<void> _pickImage(
@@ -94,95 +88,70 @@ class ImagePanel extends ConsumerWidget {
       ref.read(activePanelProvider.notifier).state = null;
     }
   }
-
-  void _showPremiumPrompt(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Bulut depolama icin abonelik gerekli'),
-        duration: Duration(seconds: 2),
-      ),
-    );
-  }
 }
 
-/// Compact locked section.
-class _CompactLockedSection extends StatelessWidget {
-  const _CompactLockedSection({
-    required this.title,
-    required this.onTap,
-  });
-
-  final String title;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        decoration: BoxDecoration(
-          color: Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: Row(
-          children: [
-            PhosphorIcon(StarNoteIcons.cloud, size: 14, color: Colors.grey),
-            const SizedBox(width: 6),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 11,
-                color: Color(0xFF666666),
-              ),
-            ),
-            const Spacer(),
-            PhosphorIcon(StarNoteIcons.lock, size: 12, color: Colors.orange),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Button for image source selection - compact.
-class _ImageSourceButton extends StatelessWidget {
-  const _ImageSourceButton({
+/// A list-tile style button for image source selection.
+class _ImageSourceTile extends StatelessWidget {
+  const _ImageSourceTile({
     required this.icon,
     required this.label,
+    required this.subtitle,
     required this.onTap,
   });
 
   final IconData icon;
   final String label;
+  final String subtitle;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: const Color(0xFF4A9DFF).withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-              color: const Color(0xFF4A9DFF).withValues(alpha: 0.3)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 22, color: const Color(0xFF4A9DFF)),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-                color: Color(0xFF4A9DFF),
+    final cs = Theme.of(context).colorScheme;
+    return Material(
+      color: cs.surfaceContainerHighest.withValues(alpha: 0.5),
+      borderRadius: BorderRadius.circular(10),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: cs.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, size: 18, color: cs.primary),
               ),
-            ),
-          ],
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: cs.onSurface,
+                      ),
+                    ),
+                    const SizedBox(height: 1),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 10.5,
+                        color: cs.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
