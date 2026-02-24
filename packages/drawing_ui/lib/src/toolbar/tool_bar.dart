@@ -179,6 +179,10 @@ class _ToolBarState extends ConsumerState<ToolBar> {
   }
 
   Widget _buildSettingsButton(DrawingTheme theme) {
+    final isActive =
+        ref.watch(activePanelProvider) == ToolType.toolbarSettings;
+    final cs = Theme.of(context).colorScheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2),
       child: Tooltip(
@@ -200,13 +204,15 @@ class _ToolBarState extends ConsumerState<ToolBar> {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: theme.toolbarBackground,
+                color: isActive
+                    ? cs.primary.withValues(alpha: 0.12)
+                    : theme.toolbarBackground,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: PhosphorIcon(
                 StarNoteIcons.settings,
                 size: StarNoteIcons.actionSize,
-                color: theme.toolbarIconColor,
+                color: isActive ? cs.primary : theme.toolbarIconColor,
                 semanticLabel: 'Araç Çubuğu Ayarları',
               ),
             ),

@@ -17,14 +17,12 @@ void main() {
       overrides: [
         sharedPreferencesProvider.overrideWithValue(prefs),
       ],
-      child: MaterialApp(
+      child: const MaterialApp(
         home: Scaffold(
           body: SizedBox(
             width: 400,
             height: 600,
-            child: SingleChildScrollView(
-              child: ToolbarSettingsPanel(),
-            ),
+            child: ToolbarSettingsPanel(),
           ),
         ),
       ),
@@ -46,12 +44,13 @@ void main() {
     expect(find.text('Araç Çubuğu Ayarları'), findsOneWidget);
   });
 
-  testWidgets('displays quick access section', (tester) async {
+  testWidgets('displays extra tools section', (tester) async {
     await tester.pumpWidget(createTestWidget());
     await tester.pumpAndSettle();
 
-    expect(find.text('Hızlı Erişim Çubuğu'), findsOneWidget);
-    expect(find.byType(Switch), findsWidgets);
+    expect(find.text('Ek Araçlar'), findsOneWidget);
+    expect(find.text('Cetvel'), findsOneWidget);
+    expect(find.text('Ses Kaydı'), findsOneWidget);
   });
 
   testWidgets('displays tools section', (tester) async {

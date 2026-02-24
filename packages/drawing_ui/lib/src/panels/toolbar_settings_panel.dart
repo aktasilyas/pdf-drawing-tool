@@ -4,7 +4,6 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/widgets/reorderable_tool_list.dart';
-import 'package:drawing_ui/src/models/toolbar_config.dart';
 
 /// Panel for customizing toolbar appearance and tool order.
 class ToolbarSettingsPanel extends ConsumerWidget {
@@ -12,175 +11,117 @@ class ToolbarSettingsPanel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final config = ref.watch(toolbarConfigProvider);
-    final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cs = Theme.of(context).colorScheme;
     final screenHeight = MediaQuery.of(context).size.height;
-    // Responsive maxHeight - increased for better visibility
-    final maxHeight = (screenHeight * 0.7).clamp(400.0, 600.0);
+    final maxHeight = (screenHeight * 0.75).clamp(420.0, 660.0);
 
     return Container(
-      width: 280,
-      // Esnek yükseklik - ekran boyutuna göre ayarlanır
-      constraints: BoxConstraints(
-        maxHeight: maxHeight,
-      ),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1C1C1E) : colorScheme.surface,
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: (isDark ? 60 : 38) / 255.0),
-            blurRadius: 12,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
+      width: 300,
+      constraints: BoxConstraints(maxHeight: maxHeight),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Header
-          _buildHeader(context, ref),
-          
-          Divider(height: 1, color: colorScheme.outlineVariant),
-          
-          const SizedBox(height: 8),
-          
-          // Quick Access Toggle
-          _buildQuickAccessSection(context, ref, config),
-          
+          _buildHeader(context, ref, cs),
+          Divider(height: 1, color: cs.outlineVariant.withValues(alpha: 0.5)),
           const SizedBox(height: 12),
-          
-          // Tools Section (scrollable)
-          Flexible(
-            child: _buildToolsSection(context),
-          ),
-          
+          Flexible(child: _buildToolsSection(context, cs)),
           const SizedBox(height: 12),
-          
-          // Reset Button
-          _buildResetButton(context, ref),
-          
-          const SizedBox(height: 8),
+          _buildExtraToolsSection(context, cs),
+          const SizedBox(height: 12),
+          _buildResetButton(context, ref, cs),
+          const SizedBox(height: 12),
         ],
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context, WidgetRef ref) {
-    final colorScheme = Theme.of(context).colorScheme;
-    
+  Widget _buildHeader(
+    BuildContext context,
+    WidgetRef ref,
+    ColorScheme cs,
+  ) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.fromLTRB(16, 12, 8, 12),
       child: Row(
         children: [
-          PhosphorIcon(StarNoteIcons.settings, size: StarNoteIcons.panelSize, color: colorScheme.onSurfaceVariant),
-          const SizedBox(width: 6),
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: cs.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Icon(
+              StarNoteIcons.settings,
+              size: 15,
+              color: cs.primary,
+            ),
+          ),
+          const SizedBox(width: 10),
           Expanded(
             child: Text(
               'Araç Çubuğu Ayarları',
               style: TextStyle(
-                fontSize: 13,
+                fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: colorScheme.onSurface,
+                color: cs.onSurface,
               ),
               overflow: TextOverflow.ellipsis,
             ),
           ),
           IconButton(
-            icon: PhosphorIcon(StarNoteIcons.close, size: StarNoteIcons.panelSize, color: colorScheme.onSurfaceVariant),
+            icon: PhosphorIcon(
+              StarNoteIcons.close,
+              size: 16,
+              color: cs.onSurfaceVariant,
+            ),
             onPressed: () {
               ref.read(activePanelProvider.notifier).state = null;
             },
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
+            splashRadius: 16,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildQuickAccessSection(
-    BuildContext context,
-    WidgetRef ref,
-    ToolbarConfig config,
-  ) {
-    final colorScheme = Theme.of(context).colorScheme;
-    
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Flexible(
-                child: Text(
-                  'Hızlı Erişim Çubuğu',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w500,
-                    color: colorScheme.onSurface,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              Transform.scale(
-                scale: 0.8,
-                child: Switch(
-                  value: config.showQuickAccess,
-                  onChanged: (_) async {
-                    await ref.read(toolbarConfigProvider.notifier).toggleQuickAccess();
-                  },
-                  activeThumbColor: colorScheme.primary,
-                ),
-              ),
-            ],
-          ),
-          Text(
-            'Sık kullanılan renk ve kalınlıkları göster',
-            style: TextStyle(
-              fontSize: 10,
-              color: colorScheme.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildToolsSection(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    
+  Widget _buildToolsSection(BuildContext context, ColorScheme cs) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: [
               Text(
                 'Araçlar',
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 13,
                   fontWeight: FontWeight.w500,
-                  color: colorScheme.onSurface,
+                  color: cs.onSurface,
                 ),
               ),
               const Spacer(),
               Text(
-                'Sürükle',
+                'Sırala',
                 style: TextStyle(
-                  fontSize: 10,
-                  color: colorScheme.onSurfaceVariant,
+                  fontSize: 11,
+                  color: cs.onSurfaceVariant,
                 ),
+              ),
+              const SizedBox(width: 4),
+              PhosphorIcon(
+                StarNoteIcons.dragHandle,
+                size: 13,
+                color: cs.onSurfaceVariant,
               ),
             ],
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 8),
         const Flexible(
           child: ReorderableToolList(),
         ),
@@ -188,24 +129,64 @@ class ToolbarSettingsPanel extends ConsumerWidget {
     );
   }
 
-  Widget _buildResetButton(BuildContext context, WidgetRef ref) {
-    final colorScheme = Theme.of(context).colorScheme;
-    
+  Widget _buildExtraToolsSection(BuildContext context, ColorScheme cs) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Divider(height: 1, color: cs.outlineVariant.withValues(alpha: 0.4)),
+          const SizedBox(height: 10),
+          Text(
+            'Ek Araçlar',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: cs.onSurface,
+            ),
+          ),
+          const SizedBox(height: 6),
+          _ExtraToolTile(
+            icon: StarNoteIcons.ruler,
+            label: 'Cetvel',
+            subtitle: 'Düz çizgi çizme aracı',
+          ),
+          const SizedBox(height: 4),
+          _ExtraToolTile(
+            icon: StarNoteIcons.microphone,
+            label: 'Ses Kaydı',
+            subtitle: 'Ses kaydetme özelliği',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildResetButton(
+    BuildContext context,
+    WidgetRef ref,
+    ColorScheme cs,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       child: SizedBox(
         width: double.infinity,
-        height: 32,
+        height: 36,
         child: OutlinedButton.icon(
           onPressed: () => _showResetConfirmation(context, ref),
           icon: PhosphorIcon(StarNoteIcons.rotate, size: 14),
           label: const Text(
             'Varsayılana Sıfırla',
-            style: TextStyle(fontSize: 11),
+            style: TextStyle(fontSize: 12),
           ),
           style: OutlinedButton.styleFrom(
-            foregroundColor: colorScheme.onSurfaceVariant,
-            side: BorderSide(color: colorScheme.outline.withValues(alpha: 0.3)),
+            foregroundColor: cs.onSurfaceVariant,
+            side: BorderSide(
+              color: cs.outline.withValues(alpha: 0.3),
+            ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
             padding: const EdgeInsets.symmetric(horizontal: 12),
           ),
         ),
@@ -214,30 +195,98 @@ class ToolbarSettingsPanel extends ConsumerWidget {
   }
 
   void _showResetConfirmation(BuildContext context, WidgetRef ref) {
-    final colorScheme = Theme.of(context).colorScheme;
-    
+    final cs = Theme.of(context).colorScheme;
+    final rootNav = Navigator.of(context, rootNavigator: true);
+
     showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: colorScheme.surface,
-        title: Text('Sıfırla', style: TextStyle(color: colorScheme.onSurface)),
+      context: rootNav.context,
+      builder: (dialogCtx) => AlertDialog(
+        backgroundColor: cs.surface,
+        title: Text(
+          'Sıfırla',
+          style: TextStyle(color: cs.onSurface),
+        ),
         content: Text(
-          'Araç çubuğu ayarları varsayılana döndürülecek. Devam etmek istiyor musunuz?',
-          style: TextStyle(color: colorScheme.onSurfaceVariant),
+          'Araç çubuğu ayarları varsayılana döndürülecek. '
+          'Devam etmek istiyor musunuz?',
+          style: TextStyle(color: cs.onSurfaceVariant),
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogCtx),
             child: const Text('İptal'),
           ),
           TextButton(
             onPressed: () async {
-              await ref.read(toolbarConfigProvider.notifier).resetToDefault();
-              if (context.mounted) {
-                Navigator.pop(context);
+              await ref
+                  .read(toolbarConfigProvider.notifier)
+                  .resetToDefault();
+              if (dialogCtx.mounted) {
+                Navigator.pop(dialogCtx);
               }
             },
             child: const Text('Sıfırla'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Fixed (non-reorderable) extra tool tile.
+class _ExtraToolTile extends StatelessWidget {
+  const _ExtraToolTile({
+    required this.icon,
+    required this.label,
+    required this.subtitle,
+  });
+
+  final IconData icon;
+  final String label;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainerHighest.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: cs.outline.withValues(alpha: 0.15),
+          width: 0.5,
+        ),
+      ),
+      child: Row(
+        children: [
+          PhosphorIcon(icon, size: 16, color: cs.onSurface),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: cs.onSurface,
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    fontSize: 9.5,
+                    color: cs.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          PhosphorIcon(
+            StarNoteIcons.lock,
+            size: 13,
+            color: cs.onSurfaceVariant.withValues(alpha: 0.5),
           ),
         ],
       ),

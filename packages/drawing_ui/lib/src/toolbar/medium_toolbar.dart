@@ -172,6 +172,10 @@ class _MediumToolbarState extends ConsumerState<MediumToolbar> {
   }
 
   Widget _buildSettingsButton(DrawingTheme theme) {
+    final isActive =
+        ref.watch(activePanelProvider) == ToolType.toolbarSettings;
+    final cs = Theme.of(context).colorScheme;
+
     return Tooltip(
       message: 'Araç Çubuğu Ayarları',
       child: Semantics(
@@ -192,13 +196,15 @@ class _MediumToolbarState extends ConsumerState<MediumToolbar> {
             height: 48,
             margin: const EdgeInsets.symmetric(horizontal: 2),
             decoration: BoxDecoration(
-              color: theme.toolbarBackground,
+              color: isActive
+                  ? cs.primary.withValues(alpha: 0.12)
+                  : theme.toolbarBackground,
               borderRadius: BorderRadius.circular(8),
             ),
             child: PhosphorIcon(
               StarNoteIcons.settings,
               size: StarNoteIcons.actionSize,
-              color: theme.toolbarIconColor,
+              color: isActive ? cs.primary : theme.toolbarIconColor,
               semanticLabel: 'Araç Çubuğu Ayarları',
             ),
           ),
