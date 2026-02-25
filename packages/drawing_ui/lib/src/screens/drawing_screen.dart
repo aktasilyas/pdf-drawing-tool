@@ -6,6 +6,7 @@ import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/toolbar/toolbar.dart';
 import 'package:drawing_ui/src/canvas/page_slide_transition.dart';
+import 'package:drawing_ui/src/canvas/page_background_painter.dart';
 import 'package:drawing_ui/src/screens/drawing_screen_layout.dart';
 import 'package:drawing_ui/src/widgets/widgets.dart';
 import 'package:drawing_ui/src/services/thumbnail_cache.dart';
@@ -43,6 +44,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
   final ThumbnailCache _thumbnailCache = ThumbnailCache(maxSize: 20);
   Offset _penBoxPosition = const Offset(12, 12);
   bool _isPageTransitioning = false;
+  int? _preSwitchPageIndex; // Original page index before interactive pre-switch
 
   @override
   void didChangeDependencies() {
@@ -78,6 +80,97 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
     } catch (_) {
       _isPageTransitioning = false;
     }
+  }
+
+  /// Called when drag direction is determined. Pre-switches the page so the
+  /// live child renders the target page. Returns true if pre-switch happened.
+  bool _onDragDirectionDetermined(int direction) {
+    final currentIdx = ref.read(currentPageIndexProvider);
+    final count = ref.read(pageCountProvider);
+    final targetIdx = currentIdx + direction;
+    if (targetIdx >= 0 && targetIdx < count) {
+      _preSwitchPageIndex = currentIdx;
+      ref.read(pageManagerProvider.notifier).goToPage(targetIdx);
+      return true;
+    }
+    return false; // Last page forward — can't pre-switch
+  }
+
+  /// Called when a pre-switched drag is cancelled. Reverts to original page.
+  void _onDragReverted() {
+    if (_preSwitchPageIndex != null) {
+      ref.read(pageManagerProvider.notifier).goToPage(_preSwitchPageIndex!);
+      _preSwitchPageIndex = null;
+    }
+  }
+
+  /// Called when interactive swipe completes (only for non-pre-switched cases).
+  void _handleSwipeNavigate(int direction) {
+    if (_preSwitchPageIndex != null) {
+      // Page was already pre-switched — just clear saved index
+      _preSwitchPageIndex = null;
+      return;
+    }
+    // Not pre-switched (e.g., last page forward) — handle normally
+    final currentIndex = ref.read(currentPageIndexProvider);
+    if (direction == 1) {
+      final count = ref.read(pageCountProvider);
+      if (currentIndex < count - 1) {
+        ref.read(pageManagerProvider.notifier).goToPage(currentIndex + 1);
+      } else {
+        _addPageAfterLast();
+      }
+    } else if (direction == -1) {
+      if (currentIndex > 0) {
+        ref.read(pageManagerProvider.notifier).goToPage(currentIndex - 1);
+      }
+    }
+  }
+
+  /// Resolves the background for a new page added by swipe.
+  /// If the current page is a built-in template, reuse it.
+  /// Otherwise (PDF, cover, etc.) fall back to thin_lined template.
+  core.PageBackground _resolveNewPageBackground() {
+    final bg = ref.read(currentPageProvider).background;
+    switch (bg.type) {
+      case core.BackgroundType.template:
+      case core.BackgroundType.blank:
+      case core.BackgroundType.grid:
+      case core.BackgroundType.lined:
+      case core.BackgroundType.dotted:
+        return bg;
+      case core.BackgroundType.pdf:
+      case core.BackgroundType.cover:
+        final t = core.TemplateRegistry.getById('thin_lined')!;
+        return core.PageBackground(
+          type: core.BackgroundType.template,
+          color: t.defaultBackgroundColor,
+          templatePattern: t.pattern,
+          templateSpacingMm: t.spacingMm,
+          templateLineWidth: t.lineWidth,
+          lineColor: t.defaultLineColor,
+        );
+    }
+  }
+
+  /// Adds a new page after the last page.
+  void _addPageAfterLast() {
+    final doc = ref.read(documentProvider);
+    final newPage = core.Page.create(
+      index: doc.pages.length,
+      size: doc.settings.defaultPageSize,
+      background: _resolveNewPageBackground(),
+    );
+    final newPages = List<core.Page>.from(doc.pages)..add(newPage);
+    final newDoc = doc.copyWith(
+      pages: newPages,
+      currentPageIndex: newPages.length - 1,
+    );
+    ref.read(documentProvider.notifier).updateDocument(newDoc);
+    ref.read(pageManagerProvider.notifier).initializeFromDocument(
+      newDoc.pages,
+      currentIndex: newDoc.currentPageIndex,
+    );
   }
 
   bool get _isSidebarOpen => ref.read(sidebarOpenProvider);
@@ -252,6 +345,16 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                             isDualPage: ref.watch(dualPageModeProvider),
                             secondaryPage: ref.watch(secondaryPageProvider),
                             isCompactMode: isCompactMode,
+                            nextPagePreviewColor: _getAdjacentPageColor(1),
+                            prevPagePreviewColor: _getAdjacentPageColor(-1),
+                            canSwipeForward: true,
+                            canSwipeBack: ref.watch(canGoPreviousProvider),
+                            onSwipeNavigate: _handleSwipeNavigate,
+                            onDragDirectionDetermined: _onDragDirectionDetermined,
+                            onDragReverted: _onDragReverted,
+                            addPagePreview: ref.watch(currentPageIndexProvider) >=
+                                ref.watch(pageCountProvider) - 1
+                                ? _buildAddPagePreview() : null,
                           ),
                         ),
                       ],
@@ -321,6 +424,79 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
   void _closePanel() {
     ref.read(activePanelProvider.notifier).state = null;
     ref.read(penPickerModeProvider.notifier).state = false;
+  }
+
+  /// Builds a preview widget shown when swiping past the last page.
+  /// Shows the page at its correct aspect ratio with surrounding area.
+  Widget _buildAddPagePreview() {
+    final bg = _resolveNewPageBackground();
+    final cs = ref.read(canvasColorSchemeProvider);
+    final canvasMode = widget.canvasMode ?? const core.CanvasMode(isInfinite: true);
+    final pageSize = ref.read(documentProvider).settings.defaultPageSize;
+    final surroundColor = canvasMode.isInfinite
+        ? Color(bg.color) : Color(canvasMode.surroundingAreaColor);
+
+    return LayoutBuilder(builder: (_, constraints) {
+      final vw = constraints.maxWidth;
+      final vh = constraints.maxHeight;
+      final pw = pageSize.width;
+      final ph = pageSize.height;
+      // Fit page within viewport with padding
+      final fitZoom = (vw / pw < vh / ph ? vw / pw : vh / ph) * 0.88;
+      final pageW = pw * fitZoom;
+      final pageH = ph * fitZoom;
+
+      return Container(color: surroundColor, child: Stack(children: [
+        // Centered page with correct aspect ratio
+        Positioned(
+          left: (vw - pageW) / 2, top: (vh - pageH) / 2,
+          width: pageW, height: pageH,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Color(bg.color),
+              border: Border.all(color: const Color(0x1A000000), width: 0.5),
+              boxShadow: const [BoxShadow(
+                color: Color(0x26000000), blurRadius: 12, offset: Offset(0, 4))],
+            ),
+            child: CustomPaint(
+              painter: PageBackgroundPatternPainter(
+                background: bg, colorScheme: cs),
+              size: Size(pageW, pageH)),
+          ),
+        ),
+        // Hint overlay
+        Positioned.fill(child: Center(child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.55),
+            borderRadius: BorderRadius.circular(12)),
+          child: const Column(mainAxisSize: MainAxisSize.min, children: [
+            Icon(Icons.add_rounded, color: Colors.white, size: 32),
+            SizedBox(height: 6),
+            Text('Yeni sayfa eklemek için\nsürükleyip bırakın',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white, fontSize: 13,
+                fontWeight: FontWeight.w500)),
+          ]),
+        ))),
+      ]));
+    });
+  }
+
+  /// Returns the background color of the page at offset from current.
+  /// offset: 1 for next page, -1 for previous page.
+  Color? _getAdjacentPageColor(int offset) {
+    final pages = ref.read(pagesProvider);
+    final currentIndex = ref.read(currentPageIndexProvider);
+    final targetIndex = currentIndex + offset;
+    if (targetIndex >= 0 && targetIndex < pages.length) {
+      return Color(pages[targetIndex].background.color);
+    }
+    // For "add page after last", show same background as current page
+    if (offset > 0) {
+      return Color(pages[currentIndex].background.color);
+    }
+    return null;
   }
 
   void _onPenSelected(ToolType selectedPen) {

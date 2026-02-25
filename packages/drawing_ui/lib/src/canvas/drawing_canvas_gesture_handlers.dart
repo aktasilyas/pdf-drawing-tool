@@ -63,8 +63,12 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
   Offset? get scaleStartFocalPoint;
   set scaleStartFocalPoint(Offset? value);
   ValueChanged<int>? get onPageSwipe;
+  VoidCallback? get onPageSwipeDragBegin;
+  ValueChanged<double>? get onPageSwipeDragUpdate;
+  ValueChanged<double>? get onPageSwipeDragEnd;
   bool get scaleGestureIsZoom;
   set scaleGestureIsZoom(bool value);
+  bool _swipeDragActive = false;
 
   /// Minimum distance between points to avoid excessive point creation.
   static const double minPointDistance = 1.0;
@@ -683,6 +687,9 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
 
     pointerCount = (pointerCount - 1).clamp(0, 10);
 
+    // Guard against disposed widget (e.g. page transition disposes canvas)
+    if (!mounted) return;
+
     // Selection mode
     if (isSelecting) {
       handleSelectionUp(event);
@@ -736,6 +743,8 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     _longPressTimer = null;
 
     pointerCount = (pointerCount - 1).clamp(0, 10);
+
+    if (!mounted) return;
 
     // Selection mode
     if (isSelecting) {
@@ -1930,11 +1939,13 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     lastScale = 1.0;
     scaleStartFocalPoint = details.localFocalPoint;
     scaleGestureIsZoom = false;
+    _swipeDragActive = false;
   }
 
   void handleScaleUpdate(ScaleUpdateDetails details) {
     // Only handle zoom/pan with 2+ fingers
     if (details.pointerCount < 2) return;
+    if (!mounted) return;
 
     final transformNotifier = ref.read(canvasTransformProvider.notifier);
     final mode = canvasMode ?? const core.CanvasMode(isInfinite: true);
@@ -1947,31 +1958,55 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     // Gesture classification: zoom vs swipe.
     // Zoom: fingers move apart/together but focal point stays ~stationary.
     // Swipe: fingers move together, focal point travels far.
-    // Use both scale change AND displacement to decide.
     if (!scaleGestureIsZoom && !mode.isInfinite && onPageSwipe != null) {
       final scaleChange = (details.scale - 1.0).abs();
       final displacement = scaleStartFocalPoint != null
           ? (details.localFocalPoint - scaleStartFocalPoint!).distance
           : 0.0;
       if (scaleChange > 0.30) {
-        // Very large scale change = definitely zoom regardless of movement
         scaleGestureIsZoom = true;
       } else if (scaleChange > 0.12 && displacement < 30) {
-        // Moderate scale change + barely moved = intentional zoom
         scaleGestureIsZoom = true;
       }
+      // If reclassified as zoom while drag was active, cancel it
+      if (scaleGestureIsZoom && _swipeDragActive) {
+        onPageSwipeDragEnd?.call(0);
+        _swipeDragActive = false;
+      }
+    }
+
+    // When swipe mode: feed interactive drag deltas to PageSlideTransition
+    final suppressZoom = !mode.isInfinite &&
+        onPageSwipe != null &&
+        !scaleGestureIsZoom;
+    if (suppressZoom && onPageSwipeDragUpdate != null && lastFocalPoint != null) {
+      final scrollDir = ref.read(scrollDirectionProvider);
+      final isHoriz = scrollDir == Axis.horizontal;
+      final panDelta = details.localFocalPoint - lastFocalPoint!;
+      final primaryDelta = isHoriz ? panDelta.dx : panDelta.dy;
+      if (!_swipeDragActive) {
+        final displacement = scaleStartFocalPoint != null
+            ? (details.localFocalPoint - scaleStartFocalPoint!).distance
+            : 0.0;
+        if (displacement > 10) {
+          _swipeDragActive = true;
+          onPageSwipeDragBegin?.call();
+        }
+      }
+      if (_swipeDragActive) {
+        onPageSwipeDragUpdate!(primaryDelta);
+      }
+      lastFocalPoint = details.localFocalPoint;
+      lastScale = details.scale;
+      return;
     }
 
     // Apply zoom (pinch gesture) — skip if zoom is locked or gesture is swipe
     final isZoomLocked = ref.read(zoomLockedProvider);
-    final suppressZoom = !mode.isInfinite &&
-        onPageSwipe != null &&
-        !scaleGestureIsZoom;
     if (!isZoomLocked && !suppressZoom && lastScale != null && details.scale != 1.0) {
       final scaleDelta = details.scale / lastScale!;
       if ((scaleDelta - 1.0).abs() > 0.001) {
         if (mode.isInfinite) {
-          // Unlimited zoom for whiteboard - use mode's zoom limits
           transformNotifier.applyZoomDelta(
             scaleDelta,
             details.localFocalPoint,
@@ -1979,7 +2014,6 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
             maxZoom: mode.maxZoom,
           );
         } else {
-          // Clamped zoom for notebook/limited modes
           transformNotifier.applyZoomDeltaClamped(
             scaleDelta,
             details.localFocalPoint,
@@ -1998,10 +2032,8 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       final panDelta = details.localFocalPoint - lastFocalPoint!;
       if (panDelta.distance > 0.5) {
         if (mode.isInfinite || mode.unlimitedPan) {
-          // Unlimited pan for whiteboard
           transformNotifier.applyPanDelta(panDelta);
         } else {
-          // Clamped pan for notebook/limited modes
           transformNotifier.applyPanDeltaClamped(
             panDelta,
             viewportSize: viewportSize,
@@ -2017,6 +2049,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
   }
 
   void handleScaleEnd(ScaleEndDetails details) {
+    if (!mounted) return;
     // Hide zoom indicator
     ref.read(isZoomingProvider.notifier).state = false;
 
@@ -2032,9 +2065,22 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       ref.read(zoomBasedRenderProvider.notifier).onZoomChanged(currentZoom, cacheKey);
     }
 
-    // Detect two-finger swipe for page navigation (limited canvas only)
-    // Only attempt if gesture was NOT classified as zoom
+    // End interactive swipe drag if active
     final mode = canvasMode ?? const core.CanvasMode(isInfinite: true);
+    if (_swipeDragActive) {
+      final scrollDir = ref.read(scrollDirectionProvider);
+      final isHoriz = scrollDir == Axis.horizontal;
+      final vel = details.velocity.pixelsPerSecond;
+      final primaryVel = isHoriz ? vel.dx : vel.dy;
+      onPageSwipeDragEnd?.call(primaryVel);
+      _swipeDragActive = false;
+      lastFocalPoint = null;
+      lastScale = null;
+      scaleStartFocalPoint = null;
+      return;
+    }
+
+    // Fallback: detect two-finger swipe (for cases without interactive drag)
     if (!mode.isInfinite && onPageSwipe != null && !scaleGestureIsZoom) {
       final swipeDir = _detectPageSwipe(details.velocity);
       if (swipeDir != 0) {
