@@ -9,7 +9,7 @@ import 'package:example_app/features/ai/presentation/widgets/ai_widgets.dart';
 /// Full-screen AI chat modal.
 ///
 /// Opened when the user taps the AI button in the toolbar.
-/// Supports text chat and canvas screenshot analysis.
+/// Supports text chat, canvas screenshot analysis, and chat history.
 class AIChatModal extends ConsumerStatefulWidget {
   const AIChatModal({super.key});
 
@@ -30,6 +30,7 @@ class AIChatModal extends ConsumerStatefulWidget {
 
 class _AIChatModalState extends ConsumerState<AIChatModal> {
   final _scrollController = ScrollController();
+  bool _showHistory = false;
 
   @override
   void initState() {
@@ -73,6 +74,16 @@ class _AIChatModalState extends ConsumerState<AIChatModal> {
     _scrollToBottom();
   }
 
+  void _handleConversationSelected(String id) {
+    ref.read(aiChatProvider.notifier).initialize(
+          existingConversationId: id,
+        );
+    // Close history on phone
+    if (MediaQuery.of(context).size.width < 600) {
+      setState(() => _showHistory = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final chatState = ref.watch(aiChatProvider);
@@ -101,19 +112,27 @@ class _AIChatModalState extends ConsumerState<AIChatModal> {
             _buildHeader(theme),
             const Divider(height: 1),
             Expanded(
-              child: chatState.isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : _buildMessageList(chatState),
+              child: Row(
+                children: [
+                  if (_showHistory)
+                    AIConversationList(
+                      currentConversationId: chatState.conversationId,
+                      onConversationSelected:
+                          _handleConversationSelected,
+                    ),
+                  Expanded(child: _buildChatArea(chatState, theme)),
+                ],
+              ),
             ),
-          if (chatState.error != null)
-            _buildErrorBanner(chatState.error!, theme),
+            if (chatState.error != null)
+              _buildErrorBanner(chatState.error!, theme),
             AIInputBar(
               onSend: _handleSend,
               onAttachCanvas: _handleCanvasCapture,
               isStreaming: chatState.isStreaming,
               enabled: remaining != 0,
               remainingMessages: remaining >= 0 ? remaining : null,
-              modelName: 'Gemini Flash',
+              modelName: 'GPT-4o mini',
             ),
           ],
         ),
@@ -143,8 +162,15 @@ class _AIChatModalState extends ConsumerState<AIChatModal> {
           ),
           const Spacer(),
           IconButton(
+            onPressed: () =>
+                setState(() => _showHistory = !_showHistory),
+            icon: const Icon(Icons.history),
+            tooltip: 'Sohbet geçmişi',
+          ),
+          IconButton(
             onPressed: () {
               ref.read(aiChatProvider.notifier).newConversation();
+              refreshConversations(ref);
             },
             icon: const Icon(Icons.add_comment_outlined),
             tooltip: 'Yeni sohbet',
@@ -152,6 +178,13 @@ class _AIChatModalState extends ConsumerState<AIChatModal> {
         ],
       ),
     );
+  }
+
+  Widget _buildChatArea(AIChatState chatState, ThemeData theme) {
+    if (chatState.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    return _buildMessageList(chatState);
   }
 
   Widget _buildMessageList(AIChatState chatState) {
@@ -165,7 +198,8 @@ class _AIChatModalState extends ConsumerState<AIChatModal> {
       itemCount:
           chatState.messages.length + (chatState.isStreaming ? 1 : 0),
       itemBuilder: (context, index) {
-        if (index == chatState.messages.length && chatState.isStreaming) {
+        if (index == chatState.messages.length &&
+            chatState.isStreaming) {
           return AIStreamingBubble(
               content: chatState.streamingContent);
         }
@@ -178,72 +212,42 @@ class _AIChatModalState extends ConsumerState<AIChatModal> {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.auto_awesome,
-              size: 48,
-              color: theme.colorScheme.primary.withValues(alpha: 0.5),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'StarNote AI',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Sorularınızı sorun, notlarınızı özetleyin\n'
-              "veya canvas'ı AI ile analiz edin.",
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 24),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              alignment: WrapAlignment.center,
-              children: [
-                _buildQuickAction(
-                  theme,
-                  icon: Icons.calculate,
-                  label: 'Denklemi çöz',
-                  onTap: () =>
-                      _handleSend('Bu denklemi adım adım çöz'),
-                ),
-                _buildQuickAction(
-                  theme,
-                  icon: Icons.summarize,
-                  label: 'Notları özetle',
-                  onTap: () => _handleSend('Bu notları özetle'),
-                ),
-                _buildQuickAction(
-                  theme,
-                  icon: Icons.center_focus_strong,
-                  label: "Canvas'ı analiz et",
-                  onTap: _handleCanvasCapture,
-                ),
-              ],
-            ),
-          ],
-        ),
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Icon(Icons.auto_awesome, size: 48,
+              color: theme.colorScheme.primary.withValues(alpha: 0.5)),
+          const SizedBox(height: 16),
+          Text('StarNote AI', style: theme.textTheme.headlineSmall
+              ?.copyWith(fontWeight: FontWeight.w600)),
+          const SizedBox(height: 8),
+          Text(
+            'Sorularınızı sorun, notlarınızı özetleyin\n'
+            "veya canvas'ı AI ile analiz edin.",
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant),
+          ),
+          const SizedBox(height: 24),
+          Wrap(
+            spacing: 8, runSpacing: 8,
+            alignment: WrapAlignment.center,
+            children: [
+              _quickAction(theme, Icons.calculate, 'Denklemi çöz',
+                  () => _handleSend('Bu denklemi adım adım çöz')),
+              _quickAction(theme, Icons.summarize, 'Notları özetle',
+                  () => _handleSend('Bu notları özetle')),
+              _quickAction(theme, Icons.center_focus_strong,
+                  "Canvas'ı analiz et", _handleCanvasCapture),
+            ],
+          ),
+        ]),
       ),
     );
   }
 
-  Widget _buildQuickAction(
-    ThemeData theme, {
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
+  Widget _quickAction(
+      ThemeData theme, IconData icon, String label, VoidCallback onTap) {
     return ActionChip(
-      avatar: Icon(icon, size: 16),
-      label: Text(label),
+      avatar: Icon(icon, size: 16), label: Text(label),
       onPressed: onTap,
       backgroundColor: theme.colorScheme.surfaceContainerHighest,
     );
@@ -252,7 +256,8 @@ class _AIChatModalState extends ConsumerState<AIChatModal> {
   Widget _buildErrorBanner(String error, ThemeData theme) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding:
+          const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       color: theme.colorScheme.errorContainer,
       child: Row(
         children: [

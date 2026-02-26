@@ -1857,6 +1857,1222 @@ class SyncMetadataCompanion extends UpdateCompanion<SyncMetadataData> {
   }
 }
 
+class $AiConversationsLocalTable extends AiConversationsLocal
+    with TableInfo<$AiConversationsLocalTable, AiConversationsLocalData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AiConversationsLocalTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+      'user_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+      'title', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('Yeni Sohbet'));
+  static const VerificationMeta _documentIdMeta =
+      const VerificationMeta('documentId');
+  @override
+  late final GeneratedColumn<String> documentId = GeneratedColumn<String>(
+      'document_id', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _taskTypeMeta =
+      const VerificationMeta('taskType');
+  @override
+  late final GeneratedColumn<String> taskType = GeneratedColumn<String>(
+      'task_type', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('chat'));
+  static const VerificationMeta _totalInputTokensMeta =
+      const VerificationMeta('totalInputTokens');
+  @override
+  late final GeneratedColumn<int> totalInputTokens = GeneratedColumn<int>(
+      'total_input_tokens', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _totalOutputTokensMeta =
+      const VerificationMeta('totalOutputTokens');
+  @override
+  late final GeneratedColumn<int> totalOutputTokens = GeneratedColumn<int>(
+      'total_output_tokens', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _messageCountMeta =
+      const VerificationMeta('messageCount');
+  @override
+  late final GeneratedColumn<int> messageCount = GeneratedColumn<int>(
+      'message_count', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _isPinnedMeta =
+      const VerificationMeta('isPinned');
+  @override
+  late final GeneratedColumn<bool> isPinned = GeneratedColumn<bool>(
+      'is_pinned', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("is_pinned" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _isSyncedMeta =
+      const VerificationMeta('isSynced');
+  @override
+  late final GeneratedColumn<bool> isSynced = GeneratedColumn<bool>(
+      'is_synced', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("is_synced" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        userId,
+        title,
+        documentId,
+        taskType,
+        totalInputTokens,
+        totalOutputTokens,
+        messageCount,
+        isPinned,
+        isSynced,
+        createdAt,
+        updatedAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'ai_conversations_local';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<AiConversationsLocalData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(_userIdMeta,
+          userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta));
+    } else if (isInserting) {
+      context.missing(_userIdMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+          _titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
+    }
+    if (data.containsKey('document_id')) {
+      context.handle(
+          _documentIdMeta,
+          documentId.isAcceptableOrUnknown(
+              data['document_id']!, _documentIdMeta));
+    }
+    if (data.containsKey('task_type')) {
+      context.handle(_taskTypeMeta,
+          taskType.isAcceptableOrUnknown(data['task_type']!, _taskTypeMeta));
+    }
+    if (data.containsKey('total_input_tokens')) {
+      context.handle(
+          _totalInputTokensMeta,
+          totalInputTokens.isAcceptableOrUnknown(
+              data['total_input_tokens']!, _totalInputTokensMeta));
+    }
+    if (data.containsKey('total_output_tokens')) {
+      context.handle(
+          _totalOutputTokensMeta,
+          totalOutputTokens.isAcceptableOrUnknown(
+              data['total_output_tokens']!, _totalOutputTokensMeta));
+    }
+    if (data.containsKey('message_count')) {
+      context.handle(
+          _messageCountMeta,
+          messageCount.isAcceptableOrUnknown(
+              data['message_count']!, _messageCountMeta));
+    }
+    if (data.containsKey('is_pinned')) {
+      context.handle(_isPinnedMeta,
+          isPinned.isAcceptableOrUnknown(data['is_pinned']!, _isPinnedMeta));
+    }
+    if (data.containsKey('is_synced')) {
+      context.handle(_isSyncedMeta,
+          isSynced.isAcceptableOrUnknown(data['is_synced']!, _isSyncedMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AiConversationsLocalData map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AiConversationsLocalData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      userId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}user_id'])!,
+      title: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
+      documentId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}document_id']),
+      taskType: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}task_type'])!,
+      totalInputTokens: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}total_input_tokens'])!,
+      totalOutputTokens: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}total_output_tokens'])!,
+      messageCount: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}message_count'])!,
+      isPinned: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_pinned'])!,
+      isSynced: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_synced'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+    );
+  }
+
+  @override
+  $AiConversationsLocalTable createAlias(String alias) {
+    return $AiConversationsLocalTable(attachedDatabase, alias);
+  }
+}
+
+class AiConversationsLocalData extends DataClass
+    implements Insertable<AiConversationsLocalData> {
+  final String id;
+  final String userId;
+  final String title;
+  final String? documentId;
+  final String taskType;
+  final int totalInputTokens;
+  final int totalOutputTokens;
+  final int messageCount;
+  final bool isPinned;
+  final bool isSynced;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const AiConversationsLocalData(
+      {required this.id,
+      required this.userId,
+      required this.title,
+      this.documentId,
+      required this.taskType,
+      required this.totalInputTokens,
+      required this.totalOutputTokens,
+      required this.messageCount,
+      required this.isPinned,
+      required this.isSynced,
+      required this.createdAt,
+      required this.updatedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['user_id'] = Variable<String>(userId);
+    map['title'] = Variable<String>(title);
+    if (!nullToAbsent || documentId != null) {
+      map['document_id'] = Variable<String>(documentId);
+    }
+    map['task_type'] = Variable<String>(taskType);
+    map['total_input_tokens'] = Variable<int>(totalInputTokens);
+    map['total_output_tokens'] = Variable<int>(totalOutputTokens);
+    map['message_count'] = Variable<int>(messageCount);
+    map['is_pinned'] = Variable<bool>(isPinned);
+    map['is_synced'] = Variable<bool>(isSynced);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  AiConversationsLocalCompanion toCompanion(bool nullToAbsent) {
+    return AiConversationsLocalCompanion(
+      id: Value(id),
+      userId: Value(userId),
+      title: Value(title),
+      documentId: documentId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(documentId),
+      taskType: Value(taskType),
+      totalInputTokens: Value(totalInputTokens),
+      totalOutputTokens: Value(totalOutputTokens),
+      messageCount: Value(messageCount),
+      isPinned: Value(isPinned),
+      isSynced: Value(isSynced),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory AiConversationsLocalData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AiConversationsLocalData(
+      id: serializer.fromJson<String>(json['id']),
+      userId: serializer.fromJson<String>(json['userId']),
+      title: serializer.fromJson<String>(json['title']),
+      documentId: serializer.fromJson<String?>(json['documentId']),
+      taskType: serializer.fromJson<String>(json['taskType']),
+      totalInputTokens: serializer.fromJson<int>(json['totalInputTokens']),
+      totalOutputTokens: serializer.fromJson<int>(json['totalOutputTokens']),
+      messageCount: serializer.fromJson<int>(json['messageCount']),
+      isPinned: serializer.fromJson<bool>(json['isPinned']),
+      isSynced: serializer.fromJson<bool>(json['isSynced']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'userId': serializer.toJson<String>(userId),
+      'title': serializer.toJson<String>(title),
+      'documentId': serializer.toJson<String?>(documentId),
+      'taskType': serializer.toJson<String>(taskType),
+      'totalInputTokens': serializer.toJson<int>(totalInputTokens),
+      'totalOutputTokens': serializer.toJson<int>(totalOutputTokens),
+      'messageCount': serializer.toJson<int>(messageCount),
+      'isPinned': serializer.toJson<bool>(isPinned),
+      'isSynced': serializer.toJson<bool>(isSynced),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  AiConversationsLocalData copyWith(
+          {String? id,
+          String? userId,
+          String? title,
+          Value<String?> documentId = const Value.absent(),
+          String? taskType,
+          int? totalInputTokens,
+          int? totalOutputTokens,
+          int? messageCount,
+          bool? isPinned,
+          bool? isSynced,
+          DateTime? createdAt,
+          DateTime? updatedAt}) =>
+      AiConversationsLocalData(
+        id: id ?? this.id,
+        userId: userId ?? this.userId,
+        title: title ?? this.title,
+        documentId: documentId.present ? documentId.value : this.documentId,
+        taskType: taskType ?? this.taskType,
+        totalInputTokens: totalInputTokens ?? this.totalInputTokens,
+        totalOutputTokens: totalOutputTokens ?? this.totalOutputTokens,
+        messageCount: messageCount ?? this.messageCount,
+        isPinned: isPinned ?? this.isPinned,
+        isSynced: isSynced ?? this.isSynced,
+        createdAt: createdAt ?? this.createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+      );
+  AiConversationsLocalData copyWithCompanion(
+      AiConversationsLocalCompanion data) {
+    return AiConversationsLocalData(
+      id: data.id.present ? data.id.value : this.id,
+      userId: data.userId.present ? data.userId.value : this.userId,
+      title: data.title.present ? data.title.value : this.title,
+      documentId:
+          data.documentId.present ? data.documentId.value : this.documentId,
+      taskType: data.taskType.present ? data.taskType.value : this.taskType,
+      totalInputTokens: data.totalInputTokens.present
+          ? data.totalInputTokens.value
+          : this.totalInputTokens,
+      totalOutputTokens: data.totalOutputTokens.present
+          ? data.totalOutputTokens.value
+          : this.totalOutputTokens,
+      messageCount: data.messageCount.present
+          ? data.messageCount.value
+          : this.messageCount,
+      isPinned: data.isPinned.present ? data.isPinned.value : this.isPinned,
+      isSynced: data.isSynced.present ? data.isSynced.value : this.isSynced,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AiConversationsLocalData(')
+          ..write('id: $id, ')
+          ..write('userId: $userId, ')
+          ..write('title: $title, ')
+          ..write('documentId: $documentId, ')
+          ..write('taskType: $taskType, ')
+          ..write('totalInputTokens: $totalInputTokens, ')
+          ..write('totalOutputTokens: $totalOutputTokens, ')
+          ..write('messageCount: $messageCount, ')
+          ..write('isPinned: $isPinned, ')
+          ..write('isSynced: $isSynced, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      userId,
+      title,
+      documentId,
+      taskType,
+      totalInputTokens,
+      totalOutputTokens,
+      messageCount,
+      isPinned,
+      isSynced,
+      createdAt,
+      updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AiConversationsLocalData &&
+          other.id == this.id &&
+          other.userId == this.userId &&
+          other.title == this.title &&
+          other.documentId == this.documentId &&
+          other.taskType == this.taskType &&
+          other.totalInputTokens == this.totalInputTokens &&
+          other.totalOutputTokens == this.totalOutputTokens &&
+          other.messageCount == this.messageCount &&
+          other.isPinned == this.isPinned &&
+          other.isSynced == this.isSynced &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class AiConversationsLocalCompanion
+    extends UpdateCompanion<AiConversationsLocalData> {
+  final Value<String> id;
+  final Value<String> userId;
+  final Value<String> title;
+  final Value<String?> documentId;
+  final Value<String> taskType;
+  final Value<int> totalInputTokens;
+  final Value<int> totalOutputTokens;
+  final Value<int> messageCount;
+  final Value<bool> isPinned;
+  final Value<bool> isSynced;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const AiConversationsLocalCompanion({
+    this.id = const Value.absent(),
+    this.userId = const Value.absent(),
+    this.title = const Value.absent(),
+    this.documentId = const Value.absent(),
+    this.taskType = const Value.absent(),
+    this.totalInputTokens = const Value.absent(),
+    this.totalOutputTokens = const Value.absent(),
+    this.messageCount = const Value.absent(),
+    this.isPinned = const Value.absent(),
+    this.isSynced = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AiConversationsLocalCompanion.insert({
+    required String id,
+    required String userId,
+    this.title = const Value.absent(),
+    this.documentId = const Value.absent(),
+    this.taskType = const Value.absent(),
+    this.totalInputTokens = const Value.absent(),
+    this.totalOutputTokens = const Value.absent(),
+    this.messageCount = const Value.absent(),
+    this.isPinned = const Value.absent(),
+    this.isSynced = const Value.absent(),
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        userId = Value(userId),
+        createdAt = Value(createdAt),
+        updatedAt = Value(updatedAt);
+  static Insertable<AiConversationsLocalData> custom({
+    Expression<String>? id,
+    Expression<String>? userId,
+    Expression<String>? title,
+    Expression<String>? documentId,
+    Expression<String>? taskType,
+    Expression<int>? totalInputTokens,
+    Expression<int>? totalOutputTokens,
+    Expression<int>? messageCount,
+    Expression<bool>? isPinned,
+    Expression<bool>? isSynced,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (userId != null) 'user_id': userId,
+      if (title != null) 'title': title,
+      if (documentId != null) 'document_id': documentId,
+      if (taskType != null) 'task_type': taskType,
+      if (totalInputTokens != null) 'total_input_tokens': totalInputTokens,
+      if (totalOutputTokens != null) 'total_output_tokens': totalOutputTokens,
+      if (messageCount != null) 'message_count': messageCount,
+      if (isPinned != null) 'is_pinned': isPinned,
+      if (isSynced != null) 'is_synced': isSynced,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AiConversationsLocalCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? userId,
+      Value<String>? title,
+      Value<String?>? documentId,
+      Value<String>? taskType,
+      Value<int>? totalInputTokens,
+      Value<int>? totalOutputTokens,
+      Value<int>? messageCount,
+      Value<bool>? isPinned,
+      Value<bool>? isSynced,
+      Value<DateTime>? createdAt,
+      Value<DateTime>? updatedAt,
+      Value<int>? rowid}) {
+    return AiConversationsLocalCompanion(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      title: title ?? this.title,
+      documentId: documentId ?? this.documentId,
+      taskType: taskType ?? this.taskType,
+      totalInputTokens: totalInputTokens ?? this.totalInputTokens,
+      totalOutputTokens: totalOutputTokens ?? this.totalOutputTokens,
+      messageCount: messageCount ?? this.messageCount,
+      isPinned: isPinned ?? this.isPinned,
+      isSynced: isSynced ?? this.isSynced,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
+    }
+    if (documentId.present) {
+      map['document_id'] = Variable<String>(documentId.value);
+    }
+    if (taskType.present) {
+      map['task_type'] = Variable<String>(taskType.value);
+    }
+    if (totalInputTokens.present) {
+      map['total_input_tokens'] = Variable<int>(totalInputTokens.value);
+    }
+    if (totalOutputTokens.present) {
+      map['total_output_tokens'] = Variable<int>(totalOutputTokens.value);
+    }
+    if (messageCount.present) {
+      map['message_count'] = Variable<int>(messageCount.value);
+    }
+    if (isPinned.present) {
+      map['is_pinned'] = Variable<bool>(isPinned.value);
+    }
+    if (isSynced.present) {
+      map['is_synced'] = Variable<bool>(isSynced.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AiConversationsLocalCompanion(')
+          ..write('id: $id, ')
+          ..write('userId: $userId, ')
+          ..write('title: $title, ')
+          ..write('documentId: $documentId, ')
+          ..write('taskType: $taskType, ')
+          ..write('totalInputTokens: $totalInputTokens, ')
+          ..write('totalOutputTokens: $totalOutputTokens, ')
+          ..write('messageCount: $messageCount, ')
+          ..write('isPinned: $isPinned, ')
+          ..write('isSynced: $isSynced, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $AiMessagesLocalTable extends AiMessagesLocal
+    with TableInfo<$AiMessagesLocalTable, AiMessagesLocalData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AiMessagesLocalTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _conversationIdMeta =
+      const VerificationMeta('conversationId');
+  @override
+  late final GeneratedColumn<String> conversationId = GeneratedColumn<String>(
+      'conversation_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES ai_conversations_local (id)'));
+  static const VerificationMeta _roleMeta = const VerificationMeta('role');
+  @override
+  late final GeneratedColumn<String> role = GeneratedColumn<String>(
+      'role', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _contentMeta =
+      const VerificationMeta('content');
+  @override
+  late final GeneratedColumn<String> content = GeneratedColumn<String>(
+      'content', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _modelMeta = const VerificationMeta('model');
+  @override
+  late final GeneratedColumn<String> model = GeneratedColumn<String>(
+      'model', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _providerMeta =
+      const VerificationMeta('provider');
+  @override
+  late final GeneratedColumn<String> provider = GeneratedColumn<String>(
+      'provider', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _inputTokensMeta =
+      const VerificationMeta('inputTokens');
+  @override
+  late final GeneratedColumn<int> inputTokens = GeneratedColumn<int>(
+      'input_tokens', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _outputTokensMeta =
+      const VerificationMeta('outputTokens');
+  @override
+  late final GeneratedColumn<int> outputTokens = GeneratedColumn<int>(
+      'output_tokens', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _hasImageMeta =
+      const VerificationMeta('hasImage');
+  @override
+  late final GeneratedColumn<bool> hasImage = GeneratedColumn<bool>(
+      'has_image', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("has_image" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _imagePathMeta =
+      const VerificationMeta('imagePath');
+  @override
+  late final GeneratedColumn<String> imagePath = GeneratedColumn<String>(
+      'image_path', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _isSyncedMeta =
+      const VerificationMeta('isSynced');
+  @override
+  late final GeneratedColumn<bool> isSynced = GeneratedColumn<bool>(
+      'is_synced', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("is_synced" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        conversationId,
+        role,
+        content,
+        model,
+        provider,
+        inputTokens,
+        outputTokens,
+        hasImage,
+        imagePath,
+        isSynced,
+        createdAt
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'ai_messages_local';
+  @override
+  VerificationContext validateIntegrity(
+      Insertable<AiMessagesLocalData> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('conversation_id')) {
+      context.handle(
+          _conversationIdMeta,
+          conversationId.isAcceptableOrUnknown(
+              data['conversation_id']!, _conversationIdMeta));
+    } else if (isInserting) {
+      context.missing(_conversationIdMeta);
+    }
+    if (data.containsKey('role')) {
+      context.handle(
+          _roleMeta, role.isAcceptableOrUnknown(data['role']!, _roleMeta));
+    } else if (isInserting) {
+      context.missing(_roleMeta);
+    }
+    if (data.containsKey('content')) {
+      context.handle(_contentMeta,
+          content.isAcceptableOrUnknown(data['content']!, _contentMeta));
+    } else if (isInserting) {
+      context.missing(_contentMeta);
+    }
+    if (data.containsKey('model')) {
+      context.handle(
+          _modelMeta, model.isAcceptableOrUnknown(data['model']!, _modelMeta));
+    }
+    if (data.containsKey('provider')) {
+      context.handle(_providerMeta,
+          provider.isAcceptableOrUnknown(data['provider']!, _providerMeta));
+    }
+    if (data.containsKey('input_tokens')) {
+      context.handle(
+          _inputTokensMeta,
+          inputTokens.isAcceptableOrUnknown(
+              data['input_tokens']!, _inputTokensMeta));
+    }
+    if (data.containsKey('output_tokens')) {
+      context.handle(
+          _outputTokensMeta,
+          outputTokens.isAcceptableOrUnknown(
+              data['output_tokens']!, _outputTokensMeta));
+    }
+    if (data.containsKey('has_image')) {
+      context.handle(_hasImageMeta,
+          hasImage.isAcceptableOrUnknown(data['has_image']!, _hasImageMeta));
+    }
+    if (data.containsKey('image_path')) {
+      context.handle(_imagePathMeta,
+          imagePath.isAcceptableOrUnknown(data['image_path']!, _imagePathMeta));
+    }
+    if (data.containsKey('is_synced')) {
+      context.handle(_isSyncedMeta,
+          isSynced.isAcceptableOrUnknown(data['is_synced']!, _isSyncedMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AiMessagesLocalData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AiMessagesLocalData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      conversationId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}conversation_id'])!,
+      role: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}role'])!,
+      content: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}content'])!,
+      model: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}model']),
+      provider: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}provider']),
+      inputTokens: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}input_tokens'])!,
+      outputTokens: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}output_tokens'])!,
+      hasImage: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}has_image'])!,
+      imagePath: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}image_path']),
+      isSynced: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_synced'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+    );
+  }
+
+  @override
+  $AiMessagesLocalTable createAlias(String alias) {
+    return $AiMessagesLocalTable(attachedDatabase, alias);
+  }
+}
+
+class AiMessagesLocalData extends DataClass
+    implements Insertable<AiMessagesLocalData> {
+  final String id;
+  final String conversationId;
+  final String role;
+  final String content;
+  final String? model;
+  final String? provider;
+  final int inputTokens;
+  final int outputTokens;
+  final bool hasImage;
+  final String? imagePath;
+  final bool isSynced;
+  final DateTime createdAt;
+  const AiMessagesLocalData(
+      {required this.id,
+      required this.conversationId,
+      required this.role,
+      required this.content,
+      this.model,
+      this.provider,
+      required this.inputTokens,
+      required this.outputTokens,
+      required this.hasImage,
+      this.imagePath,
+      required this.isSynced,
+      required this.createdAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['conversation_id'] = Variable<String>(conversationId);
+    map['role'] = Variable<String>(role);
+    map['content'] = Variable<String>(content);
+    if (!nullToAbsent || model != null) {
+      map['model'] = Variable<String>(model);
+    }
+    if (!nullToAbsent || provider != null) {
+      map['provider'] = Variable<String>(provider);
+    }
+    map['input_tokens'] = Variable<int>(inputTokens);
+    map['output_tokens'] = Variable<int>(outputTokens);
+    map['has_image'] = Variable<bool>(hasImage);
+    if (!nullToAbsent || imagePath != null) {
+      map['image_path'] = Variable<String>(imagePath);
+    }
+    map['is_synced'] = Variable<bool>(isSynced);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  AiMessagesLocalCompanion toCompanion(bool nullToAbsent) {
+    return AiMessagesLocalCompanion(
+      id: Value(id),
+      conversationId: Value(conversationId),
+      role: Value(role),
+      content: Value(content),
+      model:
+          model == null && nullToAbsent ? const Value.absent() : Value(model),
+      provider: provider == null && nullToAbsent
+          ? const Value.absent()
+          : Value(provider),
+      inputTokens: Value(inputTokens),
+      outputTokens: Value(outputTokens),
+      hasImage: Value(hasImage),
+      imagePath: imagePath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(imagePath),
+      isSynced: Value(isSynced),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory AiMessagesLocalData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AiMessagesLocalData(
+      id: serializer.fromJson<String>(json['id']),
+      conversationId: serializer.fromJson<String>(json['conversationId']),
+      role: serializer.fromJson<String>(json['role']),
+      content: serializer.fromJson<String>(json['content']),
+      model: serializer.fromJson<String?>(json['model']),
+      provider: serializer.fromJson<String?>(json['provider']),
+      inputTokens: serializer.fromJson<int>(json['inputTokens']),
+      outputTokens: serializer.fromJson<int>(json['outputTokens']),
+      hasImage: serializer.fromJson<bool>(json['hasImage']),
+      imagePath: serializer.fromJson<String?>(json['imagePath']),
+      isSynced: serializer.fromJson<bool>(json['isSynced']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'conversationId': serializer.toJson<String>(conversationId),
+      'role': serializer.toJson<String>(role),
+      'content': serializer.toJson<String>(content),
+      'model': serializer.toJson<String?>(model),
+      'provider': serializer.toJson<String?>(provider),
+      'inputTokens': serializer.toJson<int>(inputTokens),
+      'outputTokens': serializer.toJson<int>(outputTokens),
+      'hasImage': serializer.toJson<bool>(hasImage),
+      'imagePath': serializer.toJson<String?>(imagePath),
+      'isSynced': serializer.toJson<bool>(isSynced),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  AiMessagesLocalData copyWith(
+          {String? id,
+          String? conversationId,
+          String? role,
+          String? content,
+          Value<String?> model = const Value.absent(),
+          Value<String?> provider = const Value.absent(),
+          int? inputTokens,
+          int? outputTokens,
+          bool? hasImage,
+          Value<String?> imagePath = const Value.absent(),
+          bool? isSynced,
+          DateTime? createdAt}) =>
+      AiMessagesLocalData(
+        id: id ?? this.id,
+        conversationId: conversationId ?? this.conversationId,
+        role: role ?? this.role,
+        content: content ?? this.content,
+        model: model.present ? model.value : this.model,
+        provider: provider.present ? provider.value : this.provider,
+        inputTokens: inputTokens ?? this.inputTokens,
+        outputTokens: outputTokens ?? this.outputTokens,
+        hasImage: hasImage ?? this.hasImage,
+        imagePath: imagePath.present ? imagePath.value : this.imagePath,
+        isSynced: isSynced ?? this.isSynced,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  AiMessagesLocalData copyWithCompanion(AiMessagesLocalCompanion data) {
+    return AiMessagesLocalData(
+      id: data.id.present ? data.id.value : this.id,
+      conversationId: data.conversationId.present
+          ? data.conversationId.value
+          : this.conversationId,
+      role: data.role.present ? data.role.value : this.role,
+      content: data.content.present ? data.content.value : this.content,
+      model: data.model.present ? data.model.value : this.model,
+      provider: data.provider.present ? data.provider.value : this.provider,
+      inputTokens:
+          data.inputTokens.present ? data.inputTokens.value : this.inputTokens,
+      outputTokens: data.outputTokens.present
+          ? data.outputTokens.value
+          : this.outputTokens,
+      hasImage: data.hasImage.present ? data.hasImage.value : this.hasImage,
+      imagePath: data.imagePath.present ? data.imagePath.value : this.imagePath,
+      isSynced: data.isSynced.present ? data.isSynced.value : this.isSynced,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AiMessagesLocalData(')
+          ..write('id: $id, ')
+          ..write('conversationId: $conversationId, ')
+          ..write('role: $role, ')
+          ..write('content: $content, ')
+          ..write('model: $model, ')
+          ..write('provider: $provider, ')
+          ..write('inputTokens: $inputTokens, ')
+          ..write('outputTokens: $outputTokens, ')
+          ..write('hasImage: $hasImage, ')
+          ..write('imagePath: $imagePath, ')
+          ..write('isSynced: $isSynced, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      id,
+      conversationId,
+      role,
+      content,
+      model,
+      provider,
+      inputTokens,
+      outputTokens,
+      hasImage,
+      imagePath,
+      isSynced,
+      createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AiMessagesLocalData &&
+          other.id == this.id &&
+          other.conversationId == this.conversationId &&
+          other.role == this.role &&
+          other.content == this.content &&
+          other.model == this.model &&
+          other.provider == this.provider &&
+          other.inputTokens == this.inputTokens &&
+          other.outputTokens == this.outputTokens &&
+          other.hasImage == this.hasImage &&
+          other.imagePath == this.imagePath &&
+          other.isSynced == this.isSynced &&
+          other.createdAt == this.createdAt);
+}
+
+class AiMessagesLocalCompanion extends UpdateCompanion<AiMessagesLocalData> {
+  final Value<String> id;
+  final Value<String> conversationId;
+  final Value<String> role;
+  final Value<String> content;
+  final Value<String?> model;
+  final Value<String?> provider;
+  final Value<int> inputTokens;
+  final Value<int> outputTokens;
+  final Value<bool> hasImage;
+  final Value<String?> imagePath;
+  final Value<bool> isSynced;
+  final Value<DateTime> createdAt;
+  final Value<int> rowid;
+  const AiMessagesLocalCompanion({
+    this.id = const Value.absent(),
+    this.conversationId = const Value.absent(),
+    this.role = const Value.absent(),
+    this.content = const Value.absent(),
+    this.model = const Value.absent(),
+    this.provider = const Value.absent(),
+    this.inputTokens = const Value.absent(),
+    this.outputTokens = const Value.absent(),
+    this.hasImage = const Value.absent(),
+    this.imagePath = const Value.absent(),
+    this.isSynced = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AiMessagesLocalCompanion.insert({
+    required String id,
+    required String conversationId,
+    required String role,
+    required String content,
+    this.model = const Value.absent(),
+    this.provider = const Value.absent(),
+    this.inputTokens = const Value.absent(),
+    this.outputTokens = const Value.absent(),
+    this.hasImage = const Value.absent(),
+    this.imagePath = const Value.absent(),
+    this.isSynced = const Value.absent(),
+    required DateTime createdAt,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        conversationId = Value(conversationId),
+        role = Value(role),
+        content = Value(content),
+        createdAt = Value(createdAt);
+  static Insertable<AiMessagesLocalData> custom({
+    Expression<String>? id,
+    Expression<String>? conversationId,
+    Expression<String>? role,
+    Expression<String>? content,
+    Expression<String>? model,
+    Expression<String>? provider,
+    Expression<int>? inputTokens,
+    Expression<int>? outputTokens,
+    Expression<bool>? hasImage,
+    Expression<String>? imagePath,
+    Expression<bool>? isSynced,
+    Expression<DateTime>? createdAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (conversationId != null) 'conversation_id': conversationId,
+      if (role != null) 'role': role,
+      if (content != null) 'content': content,
+      if (model != null) 'model': model,
+      if (provider != null) 'provider': provider,
+      if (inputTokens != null) 'input_tokens': inputTokens,
+      if (outputTokens != null) 'output_tokens': outputTokens,
+      if (hasImage != null) 'has_image': hasImage,
+      if (imagePath != null) 'image_path': imagePath,
+      if (isSynced != null) 'is_synced': isSynced,
+      if (createdAt != null) 'created_at': createdAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AiMessagesLocalCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? conversationId,
+      Value<String>? role,
+      Value<String>? content,
+      Value<String?>? model,
+      Value<String?>? provider,
+      Value<int>? inputTokens,
+      Value<int>? outputTokens,
+      Value<bool>? hasImage,
+      Value<String?>? imagePath,
+      Value<bool>? isSynced,
+      Value<DateTime>? createdAt,
+      Value<int>? rowid}) {
+    return AiMessagesLocalCompanion(
+      id: id ?? this.id,
+      conversationId: conversationId ?? this.conversationId,
+      role: role ?? this.role,
+      content: content ?? this.content,
+      model: model ?? this.model,
+      provider: provider ?? this.provider,
+      inputTokens: inputTokens ?? this.inputTokens,
+      outputTokens: outputTokens ?? this.outputTokens,
+      hasImage: hasImage ?? this.hasImage,
+      imagePath: imagePath ?? this.imagePath,
+      isSynced: isSynced ?? this.isSynced,
+      createdAt: createdAt ?? this.createdAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (conversationId.present) {
+      map['conversation_id'] = Variable<String>(conversationId.value);
+    }
+    if (role.present) {
+      map['role'] = Variable<String>(role.value);
+    }
+    if (content.present) {
+      map['content'] = Variable<String>(content.value);
+    }
+    if (model.present) {
+      map['model'] = Variable<String>(model.value);
+    }
+    if (provider.present) {
+      map['provider'] = Variable<String>(provider.value);
+    }
+    if (inputTokens.present) {
+      map['input_tokens'] = Variable<int>(inputTokens.value);
+    }
+    if (outputTokens.present) {
+      map['output_tokens'] = Variable<int>(outputTokens.value);
+    }
+    if (hasImage.present) {
+      map['has_image'] = Variable<bool>(hasImage.value);
+    }
+    if (imagePath.present) {
+      map['image_path'] = Variable<String>(imagePath.value);
+    }
+    if (isSynced.present) {
+      map['is_synced'] = Variable<bool>(isSynced.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AiMessagesLocalCompanion(')
+          ..write('id: $id, ')
+          ..write('conversationId: $conversationId, ')
+          ..write('role: $role, ')
+          ..write('content: $content, ')
+          ..write('model: $model, ')
+          ..write('provider: $provider, ')
+          ..write('inputTokens: $inputTokens, ')
+          ..write('outputTokens: $outputTokens, ')
+          ..write('hasImage: $hasImage, ')
+          ..write('imagePath: $imagePath, ')
+          ..write('isSynced: $isSynced, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -1864,12 +3080,22 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $FoldersTable folders = $FoldersTable(this);
   late final $SyncQueueTable syncQueue = $SyncQueueTable(this);
   late final $SyncMetadataTable syncMetadata = $SyncMetadataTable(this);
+  late final $AiConversationsLocalTable aiConversationsLocal =
+      $AiConversationsLocalTable(this);
+  late final $AiMessagesLocalTable aiMessagesLocal =
+      $AiMessagesLocalTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [documents, folders, syncQueue, syncMetadata];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+        documents,
+        folders,
+        syncQueue,
+        syncMetadata,
+        aiConversationsLocal,
+        aiMessagesLocal
+      ];
 }
 
 typedef $$DocumentsTableCreateCompanionBuilder = DocumentsCompanion Function({
@@ -2746,6 +3972,767 @@ typedef $$SyncMetadataTableProcessedTableManager = ProcessedTableManager<
     ),
     SyncMetadataData,
     PrefetchHooks Function()>;
+typedef $$AiConversationsLocalTableCreateCompanionBuilder
+    = AiConversationsLocalCompanion Function({
+  required String id,
+  required String userId,
+  Value<String> title,
+  Value<String?> documentId,
+  Value<String> taskType,
+  Value<int> totalInputTokens,
+  Value<int> totalOutputTokens,
+  Value<int> messageCount,
+  Value<bool> isPinned,
+  Value<bool> isSynced,
+  required DateTime createdAt,
+  required DateTime updatedAt,
+  Value<int> rowid,
+});
+typedef $$AiConversationsLocalTableUpdateCompanionBuilder
+    = AiConversationsLocalCompanion Function({
+  Value<String> id,
+  Value<String> userId,
+  Value<String> title,
+  Value<String?> documentId,
+  Value<String> taskType,
+  Value<int> totalInputTokens,
+  Value<int> totalOutputTokens,
+  Value<int> messageCount,
+  Value<bool> isPinned,
+  Value<bool> isSynced,
+  Value<DateTime> createdAt,
+  Value<DateTime> updatedAt,
+  Value<int> rowid,
+});
+
+final class $$AiConversationsLocalTableReferences extends BaseReferences<
+    _$AppDatabase, $AiConversationsLocalTable, AiConversationsLocalData> {
+  $$AiConversationsLocalTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$AiMessagesLocalTable, List<AiMessagesLocalData>>
+      _aiMessagesLocalRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.aiMessagesLocal,
+              aliasName: $_aliasNameGenerator(db.aiConversationsLocal.id,
+                  db.aiMessagesLocal.conversationId));
+
+  $$AiMessagesLocalTableProcessedTableManager get aiMessagesLocalRefs {
+    final manager =
+        $$AiMessagesLocalTableTableManager($_db, $_db.aiMessagesLocal).filter(
+            (f) => f.conversationId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache =
+        $_typedResult.readTableOrNull(_aiMessagesLocalRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
+
+class $$AiConversationsLocalTableFilterComposer
+    extends Composer<_$AppDatabase, $AiConversationsLocalTable> {
+  $$AiConversationsLocalTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get title => $composableBuilder(
+      column: $table.title, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get documentId => $composableBuilder(
+      column: $table.documentId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get taskType => $composableBuilder(
+      column: $table.taskType, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get totalInputTokens => $composableBuilder(
+      column: $table.totalInputTokens,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get totalOutputTokens => $composableBuilder(
+      column: $table.totalOutputTokens,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get messageCount => $composableBuilder(
+      column: $table.messageCount, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isPinned => $composableBuilder(
+      column: $table.isPinned, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isSynced => $composableBuilder(
+      column: $table.isSynced, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  Expression<bool> aiMessagesLocalRefs(
+      Expression<bool> Function($$AiMessagesLocalTableFilterComposer f) f) {
+    final $$AiMessagesLocalTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.aiMessagesLocal,
+        getReferencedColumn: (t) => t.conversationId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$AiMessagesLocalTableFilterComposer(
+              $db: $db,
+              $table: $db.aiMessagesLocal,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
+class $$AiConversationsLocalTableOrderingComposer
+    extends Composer<_$AppDatabase, $AiConversationsLocalTable> {
+  $$AiConversationsLocalTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get userId => $composableBuilder(
+      column: $table.userId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get title => $composableBuilder(
+      column: $table.title, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get documentId => $composableBuilder(
+      column: $table.documentId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get taskType => $composableBuilder(
+      column: $table.taskType, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get totalInputTokens => $composableBuilder(
+      column: $table.totalInputTokens,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get totalOutputTokens => $composableBuilder(
+      column: $table.totalOutputTokens,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get messageCount => $composableBuilder(
+      column: $table.messageCount,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isPinned => $composableBuilder(
+      column: $table.isPinned, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isSynced => $composableBuilder(
+      column: $table.isSynced, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$AiConversationsLocalTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AiConversationsLocalTable> {
+  $$AiConversationsLocalTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
+
+  GeneratedColumn<String> get documentId => $composableBuilder(
+      column: $table.documentId, builder: (column) => column);
+
+  GeneratedColumn<String> get taskType =>
+      $composableBuilder(column: $table.taskType, builder: (column) => column);
+
+  GeneratedColumn<int> get totalInputTokens => $composableBuilder(
+      column: $table.totalInputTokens, builder: (column) => column);
+
+  GeneratedColumn<int> get totalOutputTokens => $composableBuilder(
+      column: $table.totalOutputTokens, builder: (column) => column);
+
+  GeneratedColumn<int> get messageCount => $composableBuilder(
+      column: $table.messageCount, builder: (column) => column);
+
+  GeneratedColumn<bool> get isPinned =>
+      $composableBuilder(column: $table.isPinned, builder: (column) => column);
+
+  GeneratedColumn<bool> get isSynced =>
+      $composableBuilder(column: $table.isSynced, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  Expression<T> aiMessagesLocalRefs<T extends Object>(
+      Expression<T> Function($$AiMessagesLocalTableAnnotationComposer a) f) {
+    final $$AiMessagesLocalTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.aiMessagesLocal,
+        getReferencedColumn: (t) => t.conversationId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$AiMessagesLocalTableAnnotationComposer(
+              $db: $db,
+              $table: $db.aiMessagesLocal,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+}
+
+class $$AiConversationsLocalTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $AiConversationsLocalTable,
+    AiConversationsLocalData,
+    $$AiConversationsLocalTableFilterComposer,
+    $$AiConversationsLocalTableOrderingComposer,
+    $$AiConversationsLocalTableAnnotationComposer,
+    $$AiConversationsLocalTableCreateCompanionBuilder,
+    $$AiConversationsLocalTableUpdateCompanionBuilder,
+    (AiConversationsLocalData, $$AiConversationsLocalTableReferences),
+    AiConversationsLocalData,
+    PrefetchHooks Function({bool aiMessagesLocalRefs})> {
+  $$AiConversationsLocalTableTableManager(
+      _$AppDatabase db, $AiConversationsLocalTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AiConversationsLocalTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AiConversationsLocalTableOrderingComposer(
+                  $db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AiConversationsLocalTableAnnotationComposer(
+                  $db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> userId = const Value.absent(),
+            Value<String> title = const Value.absent(),
+            Value<String?> documentId = const Value.absent(),
+            Value<String> taskType = const Value.absent(),
+            Value<int> totalInputTokens = const Value.absent(),
+            Value<int> totalOutputTokens = const Value.absent(),
+            Value<int> messageCount = const Value.absent(),
+            Value<bool> isPinned = const Value.absent(),
+            Value<bool> isSynced = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              AiConversationsLocalCompanion(
+            id: id,
+            userId: userId,
+            title: title,
+            documentId: documentId,
+            taskType: taskType,
+            totalInputTokens: totalInputTokens,
+            totalOutputTokens: totalOutputTokens,
+            messageCount: messageCount,
+            isPinned: isPinned,
+            isSynced: isSynced,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String userId,
+            Value<String> title = const Value.absent(),
+            Value<String?> documentId = const Value.absent(),
+            Value<String> taskType = const Value.absent(),
+            Value<int> totalInputTokens = const Value.absent(),
+            Value<int> totalOutputTokens = const Value.absent(),
+            Value<int> messageCount = const Value.absent(),
+            Value<bool> isPinned = const Value.absent(),
+            Value<bool> isSynced = const Value.absent(),
+            required DateTime createdAt,
+            required DateTime updatedAt,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              AiConversationsLocalCompanion.insert(
+            id: id,
+            userId: userId,
+            title: title,
+            documentId: documentId,
+            taskType: taskType,
+            totalInputTokens: totalInputTokens,
+            totalOutputTokens: totalOutputTokens,
+            messageCount: messageCount,
+            isPinned: isPinned,
+            isSynced: isSynced,
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$AiConversationsLocalTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({aiMessagesLocalRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (aiMessagesLocalRefs) db.aiMessagesLocal
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (aiMessagesLocalRefs)
+                    await $_getPrefetchedData<AiConversationsLocalData,
+                            $AiConversationsLocalTable, AiMessagesLocalData>(
+                        currentTable: table,
+                        referencedTable: $$AiConversationsLocalTableReferences
+                            ._aiMessagesLocalRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$AiConversationsLocalTableReferences(db, table, p0)
+                                .aiMessagesLocalRefs,
+                        referencedItemsForCurrentItem:
+                            (item, referencedItems) => referencedItems
+                                .where((e) => e.conversationId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$AiConversationsLocalTableProcessedTableManager
+    = ProcessedTableManager<
+        _$AppDatabase,
+        $AiConversationsLocalTable,
+        AiConversationsLocalData,
+        $$AiConversationsLocalTableFilterComposer,
+        $$AiConversationsLocalTableOrderingComposer,
+        $$AiConversationsLocalTableAnnotationComposer,
+        $$AiConversationsLocalTableCreateCompanionBuilder,
+        $$AiConversationsLocalTableUpdateCompanionBuilder,
+        (AiConversationsLocalData, $$AiConversationsLocalTableReferences),
+        AiConversationsLocalData,
+        PrefetchHooks Function({bool aiMessagesLocalRefs})>;
+typedef $$AiMessagesLocalTableCreateCompanionBuilder = AiMessagesLocalCompanion
+    Function({
+  required String id,
+  required String conversationId,
+  required String role,
+  required String content,
+  Value<String?> model,
+  Value<String?> provider,
+  Value<int> inputTokens,
+  Value<int> outputTokens,
+  Value<bool> hasImage,
+  Value<String?> imagePath,
+  Value<bool> isSynced,
+  required DateTime createdAt,
+  Value<int> rowid,
+});
+typedef $$AiMessagesLocalTableUpdateCompanionBuilder = AiMessagesLocalCompanion
+    Function({
+  Value<String> id,
+  Value<String> conversationId,
+  Value<String> role,
+  Value<String> content,
+  Value<String?> model,
+  Value<String?> provider,
+  Value<int> inputTokens,
+  Value<int> outputTokens,
+  Value<bool> hasImage,
+  Value<String?> imagePath,
+  Value<bool> isSynced,
+  Value<DateTime> createdAt,
+  Value<int> rowid,
+});
+
+final class $$AiMessagesLocalTableReferences extends BaseReferences<
+    _$AppDatabase, $AiMessagesLocalTable, AiMessagesLocalData> {
+  $$AiMessagesLocalTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static $AiConversationsLocalTable _conversationIdTable(_$AppDatabase db) =>
+      db.aiConversationsLocal.createAlias($_aliasNameGenerator(
+          db.aiMessagesLocal.conversationId, db.aiConversationsLocal.id));
+
+  $$AiConversationsLocalTableProcessedTableManager get conversationId {
+    final $_column = $_itemColumn<String>('conversation_id')!;
+
+    final manager =
+        $$AiConversationsLocalTableTableManager($_db, $_db.aiConversationsLocal)
+            .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_conversationIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$AiMessagesLocalTableFilterComposer
+    extends Composer<_$AppDatabase, $AiMessagesLocalTable> {
+  $$AiMessagesLocalTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get role => $composableBuilder(
+      column: $table.role, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get content => $composableBuilder(
+      column: $table.content, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get model => $composableBuilder(
+      column: $table.model, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get provider => $composableBuilder(
+      column: $table.provider, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get inputTokens => $composableBuilder(
+      column: $table.inputTokens, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get outputTokens => $composableBuilder(
+      column: $table.outputTokens, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get hasImage => $composableBuilder(
+      column: $table.hasImage, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get imagePath => $composableBuilder(
+      column: $table.imagePath, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isSynced => $composableBuilder(
+      column: $table.isSynced, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+
+  $$AiConversationsLocalTableFilterComposer get conversationId {
+    final $$AiConversationsLocalTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.conversationId,
+        referencedTable: $db.aiConversationsLocal,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$AiConversationsLocalTableFilterComposer(
+              $db: $db,
+              $table: $db.aiConversationsLocal,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$AiMessagesLocalTableOrderingComposer
+    extends Composer<_$AppDatabase, $AiMessagesLocalTable> {
+  $$AiMessagesLocalTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get role => $composableBuilder(
+      column: $table.role, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get content => $composableBuilder(
+      column: $table.content, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get model => $composableBuilder(
+      column: $table.model, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get provider => $composableBuilder(
+      column: $table.provider, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get inputTokens => $composableBuilder(
+      column: $table.inputTokens, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get outputTokens => $composableBuilder(
+      column: $table.outputTokens,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get hasImage => $composableBuilder(
+      column: $table.hasImage, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get imagePath => $composableBuilder(
+      column: $table.imagePath, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isSynced => $composableBuilder(
+      column: $table.isSynced, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  $$AiConversationsLocalTableOrderingComposer get conversationId {
+    final $$AiConversationsLocalTableOrderingComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.conversationId,
+            referencedTable: $db.aiConversationsLocal,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$AiConversationsLocalTableOrderingComposer(
+                  $db: $db,
+                  $table: $db.aiConversationsLocal,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+}
+
+class $$AiMessagesLocalTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AiMessagesLocalTable> {
+  $$AiMessagesLocalTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get role =>
+      $composableBuilder(column: $table.role, builder: (column) => column);
+
+  GeneratedColumn<String> get content =>
+      $composableBuilder(column: $table.content, builder: (column) => column);
+
+  GeneratedColumn<String> get model =>
+      $composableBuilder(column: $table.model, builder: (column) => column);
+
+  GeneratedColumn<String> get provider =>
+      $composableBuilder(column: $table.provider, builder: (column) => column);
+
+  GeneratedColumn<int> get inputTokens => $composableBuilder(
+      column: $table.inputTokens, builder: (column) => column);
+
+  GeneratedColumn<int> get outputTokens => $composableBuilder(
+      column: $table.outputTokens, builder: (column) => column);
+
+  GeneratedColumn<bool> get hasImage =>
+      $composableBuilder(column: $table.hasImage, builder: (column) => column);
+
+  GeneratedColumn<String> get imagePath =>
+      $composableBuilder(column: $table.imagePath, builder: (column) => column);
+
+  GeneratedColumn<bool> get isSynced =>
+      $composableBuilder(column: $table.isSynced, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  $$AiConversationsLocalTableAnnotationComposer get conversationId {
+    final $$AiConversationsLocalTableAnnotationComposer composer =
+        $composerBuilder(
+            composer: this,
+            getCurrentColumn: (t) => t.conversationId,
+            referencedTable: $db.aiConversationsLocal,
+            getReferencedColumn: (t) => t.id,
+            builder: (joinBuilder,
+                    {$addJoinBuilderToRootComposer,
+                    $removeJoinBuilderFromRootComposer}) =>
+                $$AiConversationsLocalTableAnnotationComposer(
+                  $db: $db,
+                  $table: $db.aiConversationsLocal,
+                  $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                  joinBuilder: joinBuilder,
+                  $removeJoinBuilderFromRootComposer:
+                      $removeJoinBuilderFromRootComposer,
+                ));
+    return composer;
+  }
+}
+
+class $$AiMessagesLocalTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $AiMessagesLocalTable,
+    AiMessagesLocalData,
+    $$AiMessagesLocalTableFilterComposer,
+    $$AiMessagesLocalTableOrderingComposer,
+    $$AiMessagesLocalTableAnnotationComposer,
+    $$AiMessagesLocalTableCreateCompanionBuilder,
+    $$AiMessagesLocalTableUpdateCompanionBuilder,
+    (AiMessagesLocalData, $$AiMessagesLocalTableReferences),
+    AiMessagesLocalData,
+    PrefetchHooks Function({bool conversationId})> {
+  $$AiMessagesLocalTableTableManager(
+      _$AppDatabase db, $AiMessagesLocalTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AiMessagesLocalTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AiMessagesLocalTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AiMessagesLocalTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> conversationId = const Value.absent(),
+            Value<String> role = const Value.absent(),
+            Value<String> content = const Value.absent(),
+            Value<String?> model = const Value.absent(),
+            Value<String?> provider = const Value.absent(),
+            Value<int> inputTokens = const Value.absent(),
+            Value<int> outputTokens = const Value.absent(),
+            Value<bool> hasImage = const Value.absent(),
+            Value<String?> imagePath = const Value.absent(),
+            Value<bool> isSynced = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              AiMessagesLocalCompanion(
+            id: id,
+            conversationId: conversationId,
+            role: role,
+            content: content,
+            model: model,
+            provider: provider,
+            inputTokens: inputTokens,
+            outputTokens: outputTokens,
+            hasImage: hasImage,
+            imagePath: imagePath,
+            isSynced: isSynced,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String conversationId,
+            required String role,
+            required String content,
+            Value<String?> model = const Value.absent(),
+            Value<String?> provider = const Value.absent(),
+            Value<int> inputTokens = const Value.absent(),
+            Value<int> outputTokens = const Value.absent(),
+            Value<bool> hasImage = const Value.absent(),
+            Value<String?> imagePath = const Value.absent(),
+            Value<bool> isSynced = const Value.absent(),
+            required DateTime createdAt,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              AiMessagesLocalCompanion.insert(
+            id: id,
+            conversationId: conversationId,
+            role: role,
+            content: content,
+            model: model,
+            provider: provider,
+            inputTokens: inputTokens,
+            outputTokens: outputTokens,
+            hasImage: hasImage,
+            imagePath: imagePath,
+            isSynced: isSynced,
+            createdAt: createdAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$AiMessagesLocalTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({conversationId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (conversationId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.conversationId,
+                    referencedTable: $$AiMessagesLocalTableReferences
+                        ._conversationIdTable(db),
+                    referencedColumn: $$AiMessagesLocalTableReferences
+                        ._conversationIdTable(db)
+                        .id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$AiMessagesLocalTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $AiMessagesLocalTable,
+    AiMessagesLocalData,
+    $$AiMessagesLocalTableFilterComposer,
+    $$AiMessagesLocalTableOrderingComposer,
+    $$AiMessagesLocalTableAnnotationComposer,
+    $$AiMessagesLocalTableCreateCompanionBuilder,
+    $$AiMessagesLocalTableUpdateCompanionBuilder,
+    (AiMessagesLocalData, $$AiMessagesLocalTableReferences),
+    AiMessagesLocalData,
+    PrefetchHooks Function({bool conversationId})>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -2758,4 +4745,8 @@ class $AppDatabaseManager {
       $$SyncQueueTableTableManager(_db, _db.syncQueue);
   $$SyncMetadataTableTableManager get syncMetadata =>
       $$SyncMetadataTableTableManager(_db, _db.syncMetadata);
+  $$AiConversationsLocalTableTableManager get aiConversationsLocal =>
+      $$AiConversationsLocalTableTableManager(_db, _db.aiConversationsLocal);
+  $$AiMessagesLocalTableTableManager get aiMessagesLocal =>
+      $$AiMessagesLocalTableTableManager(_db, _db.aiMessagesLocal);
 }

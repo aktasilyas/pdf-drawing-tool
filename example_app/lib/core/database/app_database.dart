@@ -140,14 +140,71 @@ class SyncMetadata extends Table {
   Set<Column> get primaryKey => {key};
 }
 
+/// Local AI conversation storage.
+class AiConversationsLocal extends Table {
+  TextColumn get id => text()();
+  TextColumn get userId => text()();
+  TextColumn get title =>
+      text().withDefault(const Constant('Yeni Sohbet'))();
+  TextColumn get documentId => text().nullable()();
+  TextColumn get taskType =>
+      text().withDefault(const Constant('chat'))();
+  IntColumn get totalInputTokens =>
+      integer().withDefault(const Constant(0))();
+  IntColumn get totalOutputTokens =>
+      integer().withDefault(const Constant(0))();
+  IntColumn get messageCount =>
+      integer().withDefault(const Constant(0))();
+  BoolColumn get isPinned =>
+      boolean().withDefault(const Constant(false))();
+  BoolColumn get isSynced =>
+      boolean().withDefault(const Constant(false))();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+/// Local AI message storage.
+class AiMessagesLocal extends Table {
+  TextColumn get id => text()();
+  TextColumn get conversationId =>
+      text().references(AiConversationsLocal, #id)();
+  TextColumn get role => text()(); // 'user', 'assistant', 'system'
+  TextColumn get content => text()();
+  TextColumn get model => text().nullable()();
+  TextColumn get provider => text().nullable()();
+  IntColumn get inputTokens =>
+      integer().withDefault(const Constant(0))();
+  IntColumn get outputTokens =>
+      integer().withDefault(const Constant(0))();
+  BoolColumn get hasImage =>
+      boolean().withDefault(const Constant(false))();
+  TextColumn get imagePath => text().nullable()();
+  BoolColumn get isSynced =>
+      boolean().withDefault(const Constant(false))();
+  DateTimeColumn get createdAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 /// Application database
-@DriftDatabase(tables: [Documents, Folders, SyncQueue, SyncMetadata])
+@DriftDatabase(tables: [
+  Documents,
+  Folders,
+  SyncQueue,
+  SyncMetadata,
+  AiConversationsLocal,
+  AiMessagesLocal,
+])
 class AppDatabase extends _$AppDatabase {
   /// Creates the database with platform-specific connection
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration {
@@ -157,7 +214,6 @@ class AppDatabase extends _$AppDatabase {
       },
       onUpgrade: (Migrator m, int from, int to) async {
         if (from < 2) {
-          // Add paperColor and isPortrait columns with SQL
           await customStatement(
             'ALTER TABLE documents ADD COLUMN paper_color TEXT NOT NULL DEFAULT "Sarı kağıt"',
           );
@@ -166,13 +222,11 @@ class AppDatabase extends _$AppDatabase {
           );
         }
         if (from < 3) {
-          // Add documentType column
           await customStatement(
             'ALTER TABLE documents ADD COLUMN document_type TEXT NOT NULL DEFAULT "notebook"',
           );
         }
         if (from < 4) {
-          // Add cover and paper size columns
           await customStatement(
             'ALTER TABLE documents ADD COLUMN cover_id TEXT',
           );
@@ -185,6 +239,10 @@ class AppDatabase extends _$AppDatabase {
           await customStatement(
             'ALTER TABLE documents ADD COLUMN paper_height_mm REAL NOT NULL DEFAULT 297.0',
           );
+        }
+        if (from < 5) {
+          await m.createTable(aiConversationsLocal);
+          await m.createTable(aiMessagesLocal);
         }
       },
     );
