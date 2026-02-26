@@ -1,10 +1,12 @@
 /// Export options panel shown as a popover below the export toolbar button.
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:drawing_core/drawing_core.dart' show DrawingDocument, Page;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Page;
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
@@ -12,7 +14,7 @@ import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/services/pdf_exporter.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 
-/// Export panel with PDF export option.
+/// Export panel with PDF and PNG export options.
 class ExportPanel extends ConsumerWidget {
   const ExportPanel({super.key, required this.onClose, this.embedded = false});
 
@@ -27,11 +29,18 @@ class ExportPanel extends ConsumerWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         _PanelHeader(cs: cs),
+        // TODO: PDF export disabled — re-enable after fixing infinite mode rendering
+        // _ExportOption(
+        //   icon: StarNoteIcons.pdfFile,
+        //   label: 'PDF Olarak Dışa Aktar',
+        //   cs: cs,
+        //   onTap: () => _exportPDF(context, ref),
+        // ),
         _ExportOption(
-          icon: StarNoteIcons.pdfFile,
-          label: 'PDF Olarak Dışa Aktar',
+          icon: StarNoteIcons.image,
+          label: 'PNG Olarak Dışa Aktar',
           cs: cs,
-          onTap: () => _exportPDF(context, ref),
+          onTap: () => _exportPNG(context, ref),
         ),
       ],
     );
@@ -46,12 +55,22 @@ class ExportPanel extends ConsumerWidget {
     return content;
   }
 
-  /// Directly exports all pages to PDF — no dialog.
-  void _exportPDF(BuildContext context, WidgetRef ref) {
+  // TODO: Re-enable after fixing PDF export for infinite mode
+  // void _exportPDF(BuildContext context, WidgetRef ref) {
+  //   onClose();
+  //   final document = ref.read(documentProvider);
+  //   final notifier = ref.read(exportProgressProvider.notifier);
+  //   final isInfinite = ref.read(isInfiniteCanvasProvider);
+  //   performPDFExport(notifier, document, isInfiniteCanvas: isInfinite);
+  // }
+
+  /// Captures canvas screenshot and saves as PNG.
+  void _exportPNG(BuildContext context, WidgetRef ref) {
     onClose();
     final document = ref.read(documentProvider);
     final notifier = ref.read(exportProgressProvider.notifier);
-    performPDFExport(notifier, document);
+    final boundaryKey = ref.read(canvasBoundaryKeyProvider);
+    performPNGExport(notifier, boundaryKey, title: document.title);
   }
 }
 
@@ -60,12 +79,14 @@ class ExportPanel extends ConsumerWidget {
 /// Shared by [ExportPanel] and `DocumentOptionsPanel`.
 Future<void> performPDFExport(
   ExportProgressNotifier progress,
-  DrawingDocument document,
-) {
+  DrawingDocument document, {
+  bool isInfiniteCanvas = false,
+}) {
   return performPagesPDFExport(
     progress,
     pages: document.pages,
     title: document.title,
+    isInfiniteCanvas: isInfiniteCanvas,
   );
 }
 
@@ -77,6 +98,7 @@ Future<void> performPagesPDFExport(
   ExportProgressNotifier progress, {
   required List<Page> pages,
   required String title,
+  bool isInfiniteCanvas = false,
 }) async {
   progress.start(pages.length);
 
@@ -85,6 +107,7 @@ Future<void> performPagesPDFExport(
     final result = await exporter.exportPages(
       pages: pages,
       metadata: PDFDocumentMetadata(title: title),
+      options: PDFExportOptions(isInfiniteCanvas: isInfiniteCanvas),
       onProgress: progress.updateProgress,
     );
 
@@ -94,7 +117,7 @@ Future<void> performPagesPDFExport(
     }
 
     final bytes = Uint8List.fromList(result.pdfBytes);
-    final filename = sanitizeFilename(title);
+    final filename = _buildExportFilename(title);
 
     // Let user pick save location
     final savedPath = await FilePicker.platform.saveFile(
@@ -120,6 +143,71 @@ Future<void> performPagesPDFExport(
     debugPrint('PDF export error: $e');
     progress.setError('PDF dışa aktarılamadı: $e');
   }
+}
+
+/// Captures the canvas via RepaintBoundary and saves as PNG.
+Future<void> performPNGExport(
+  ExportProgressNotifier progress,
+  GlobalKey boundaryKey, {
+  required String title,
+}) async {
+  progress.start(1);
+
+  try {
+    final boundary = boundaryKey.currentContext?.findRenderObject()
+        as RenderRepaintBoundary?;
+    if (boundary == null) {
+      progress.setError('Tuval yakalanamadı');
+      return;
+    }
+
+    final image = await boundary.toImage(pixelRatio: 3.0);
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    if (byteData == null) {
+      progress.setError('Görüntü oluşturulamadı');
+      return;
+    }
+
+    final bytes = byteData.buffer.asUint8List();
+    final filename = _buildExportFilename(title);
+
+    final savedPath = await FilePicker.platform.saveFile(
+      dialogTitle: 'PNG Kaydet',
+      fileName: '$filename.png',
+      type: FileType.custom,
+      allowedExtensions: ['png'],
+      bytes: bytes,
+    );
+
+    if (savedPath != null) {
+      final file = File(savedPath);
+      if (!await file.exists() || await file.length() == 0) {
+        await file.writeAsBytes(bytes);
+      }
+      final sizeMB = (bytes.length / (1024 * 1024)).toStringAsFixed(1);
+      progress.complete('$sizeMB MB');
+    } else {
+      progress.dismiss();
+    }
+
+    progress.updateProgress(1, 1);
+  } catch (e) {
+    debugPrint('PNG export error: $e');
+    progress.setError('PNG dışa aktarılamadı: $e');
+  }
+}
+
+/// Builds an export filename with title + date/time stamp.
+String _buildExportFilename(String title) {
+  final base = sanitizeFilename(title);
+  final now = DateTime.now();
+  final stamp = '${now.year}'
+      '${now.month.toString().padLeft(2, '0')}'
+      '${now.day.toString().padLeft(2, '0')}'
+      '_'
+      '${now.hour.toString().padLeft(2, '0')}'
+      '${now.minute.toString().padLeft(2, '0')}';
+  return '${base}_$stamp';
 }
 
 /// Sanitizes a string for use as a filename.

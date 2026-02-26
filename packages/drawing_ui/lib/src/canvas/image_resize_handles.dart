@@ -6,6 +6,7 @@ import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/providers/document_provider.dart';
 import 'package:drawing_ui/src/providers/history_provider.dart';
 import 'package:drawing_ui/src/providers/image_provider.dart';
+import 'package:drawing_ui/src/providers/infinite_canvas_provider.dart';
 import 'package:drawing_ui/src/providers/page_provider.dart';
 
 enum _Corner { topLeft, topRight, bottomLeft, bottomRight }
@@ -189,9 +190,8 @@ class _ImageResizeHandlesState extends ConsumerState<ImageResizeHandles> {
         final cur =
             ref.read(imagePlacementProvider).selectedImage ?? _originalImage!;
         final moved = cur.copyWith(x: cur.x + delta.dx, y: cur.y + delta.dy);
-        ref
-            .read(imagePlacementProvider.notifier)
-            .updateSelectedImage(_clampToPage(moved));
+        ref.read(imagePlacementProvider.notifier).updateSelectedImage(
+            ref.read(isInfiniteCanvasProvider) ? moved : _clampToPage(moved));
         break;
 
       case _DragMode.rotate:

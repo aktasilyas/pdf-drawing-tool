@@ -143,13 +143,14 @@ class TopNavigationBar extends ConsumerWidget {
           ...compactTopBarTools.map((tool) => _buildCompactToolButton(
             ref: ref, tool: tool, currentTool: currentTool, size: sz,
           )),
-          StarNoteNavButton(
-            icon: StarNoteIcons.microphone,
-            tooltip: 'Ses Kaydi',
-            onPressed: () => showAudioMenu(
-              context, ref, onSidebarToggle, isSidebarOpen),
-            size: sz,
-          ),
+          if (!ref.watch(isInfiniteCanvasProvider))
+            StarNoteNavButton(
+              icon: StarNoteIcons.microphone,
+              tooltip: 'Ses Kaydi',
+              onPressed: () => showAudioMenu(
+                context, ref, onSidebarToggle, isSidebarOpen),
+              size: sz,
+            ),
           StarNoteNavButton(
             icon: rulerVisible
                 ? StarNoteIcons.rulerActive
@@ -177,15 +178,17 @@ class TopNavigationBar extends ConsumerWidget {
         StarNoteNavButton(
           icon: StarNoteIcons.more,
           tooltip: 'Daha Fazla',
-          onPressed: () => showMoreMenu(
-            context, ref,
-            documentTitle: documentTitle,
-            onRenameDocument: onRenameDocument,
-            onDeleteDocument: onDeleteDocument,
-            showAddPage: !isReaderMode,
-            showExport: true,
-            compact: true,
-          ),
+          onPressed: () => ref.read(isInfiniteCanvasProvider)
+              ? showInfiniteBackgroundMenu(context)
+              : showMoreMenu(
+                  context, ref,
+                  documentTitle: documentTitle,
+                  onRenameDocument: onRenameDocument,
+                  onDeleteDocument: onDeleteDocument,
+                  showAddPage: !isReaderMode,
+                  showExport: true,
+                  compact: true,
+                ),
           size: sz,
         ),
       ],
@@ -274,14 +277,14 @@ class TopNavigationBar extends ConsumerWidget {
           isActive: isReaderMode,
         ),
 
-        if (!isReaderMode)
+        if (!isReaderMode && !ref.watch(isInfiniteCanvasProvider))
           StarNoteNavButton(
             icon: StarNoteIcons.pageAdd,
             tooltip: 'Sayfa Ekle',
             onPressed: () => showAddPageMenu(context),
           ),
 
-        if (!isReaderMode)
+        if (!isReaderMode && !ref.watch(isInfiniteCanvasProvider))
           StarNoteNavButton(
             icon: StarNoteIcons.microphone,
             tooltip: 'Ses Kaydi',
@@ -298,7 +301,9 @@ class TopNavigationBar extends ConsumerWidget {
         StarNoteNavButton(
           icon: StarNoteIcons.more,
           tooltip: 'Daha Fazla',
-          onPressed: () => showMoreMenu(context, ref),
+          onPressed: () => ref.read(isInfiniteCanvasProvider)
+              ? showInfiniteBackgroundMenu(context)
+              : showMoreMenu(context, ref),
         ),
       ],
     );

@@ -323,9 +323,19 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     final isSelectionTool = ref.read(isSelectionToolProvider);
     if (selUi.showMenu) {
       ref.read(selectionUiProvider.notifier).hideContextMenu();
-      // When selection tool is active, clear and start new selection immediately
-      // instead of consuming the tap just to hide the menu.
       if (isSelectionTool) {
+        // If tap is inside existing selection, just hide menu and let
+        // SelectionHandles handle the interaction (move/resize/rotate).
+        final selection = ref.read(selectionProvider);
+        if (selection != null) {
+          final transform = ref.read(canvasTransformProvider);
+          final canvasPoint =
+              (event.localPosition - transform.offset) / transform.zoom;
+          if (isPointInSelection(canvasPoint, selection)) {
+            return;
+          }
+        }
+        // Tap is outside — clear and start new selection
         ref.read(selectionProvider.notifier).clearSelection();
         ref.read(selectionUiProvider.notifier).reset();
         handleSelectionDown(event);
@@ -856,7 +866,18 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     // Text/stickers use the same filter as imageSticker
     final texts = allowImages ? allTexts : <core.TextElement>[];
 
-    final selection = tool.endSelection(strokes, shapes, images, texts);
+    var selection = tool.endSelection(strokes, shapes, images, texts);
+
+    // Tap-to-select: when the rectangle is too small (tap), hit test the
+    // tap point against individual element bounds (topmost first).
+    if (selection == null) {
+      final transform = ref.read(canvasTransformProvider);
+      final canvasPoint =
+          (event.localPosition - transform.offset) / transform.zoom;
+      selection = _hitTestElementsAtPoint(
+        canvasPoint, strokes, shapes, images, texts,
+      );
+    }
 
     if (selection != null) {
       ref.read(selectionProvider.notifier).setSelection(selection);
@@ -864,6 +885,82 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     }
 
     setState(() {});
+  }
+
+  /// Hit-tests a single point against elements and returns a selection
+  /// containing the topmost hit element, or null if nothing was hit.
+  core.Selection? _hitTestElementsAtPoint(
+    Offset point,
+    List<core.Stroke> strokes,
+    List<core.Shape> shapes,
+    List<core.ImageElement> images,
+    List<core.TextElement> texts,
+  ) {
+    const tolerance = 10.0;
+    final px = point.dx, py = point.dy;
+
+    // Check elements in reverse (topmost first) using element order
+    final doc = ref.read(documentProvider);
+    final layer = doc.layers[doc.activeLayerIndex];
+    final order = layer.elementOrder;
+
+    for (int i = order.length - 1; i >= 0; i--) {
+      final id = order[i];
+
+      // Check texts
+      final text = texts.where((t) => t.id == id).firstOrNull;
+      if (text != null && text.containsPoint(px, py, tolerance)) {
+        return core.Selection.create(
+          type: core.SelectionType.rectangle,
+          selectedStrokeIds: const [],
+          selectedTextIds: [id],
+          bounds: text.bounds,
+        );
+      }
+
+      // Check images
+      final image = images.where((img) => img.id == id).firstOrNull;
+      if (image != null && image.containsPoint(px, py, tolerance)) {
+        return core.Selection.create(
+          type: core.SelectionType.rectangle,
+          selectedStrokeIds: const [],
+          selectedImageIds: [id],
+          bounds: image.bounds,
+        );
+      }
+
+      // Check shapes
+      final shape = shapes.where((s) => s.id == id).firstOrNull;
+      if (shape != null) {
+        final b = shape.bounds;
+        if (px >= b.left - tolerance && px <= b.right + tolerance &&
+            py >= b.top - tolerance && py <= b.bottom + tolerance) {
+          return core.Selection.create(
+            type: core.SelectionType.rectangle,
+            selectedStrokeIds: const [],
+            selectedShapeIds: [id],
+            bounds: b,
+          );
+        }
+      }
+
+      // Check strokes
+      final stroke = strokes.where((s) => s.id == id).firstOrNull;
+      if (stroke != null) {
+        final b = stroke.bounds;
+        if (b != null &&
+            px >= b.left - tolerance && px <= b.right + tolerance &&
+            py >= b.top - tolerance && py <= b.bottom + tolerance) {
+          return core.Selection.create(
+            type: core.SelectionType.rectangle,
+            selectedStrokeIds: [id],
+            bounds: b,
+          );
+        }
+      }
+    }
+
+    return null;
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -1846,25 +1943,30 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     if (imagePath == null) return;
 
     final transform = ref.read(canvasTransformProvider);
-    final canvasPoint =
-        (event.localPosition - transform.offset) / transform.zoom;
+    final canvasPoint = transform.screenToCanvas(event.localPosition);
 
     // Default image size on canvas
     const defaultWidth = 200.0;
     const defaultHeight = 200.0;
 
-    // Clamp position to page bounds
-    final page = ref.read(currentPageProvider);
-    final maxX = (page.size.width - defaultWidth).clamp(0.0, page.size.width);
-    final maxY =
-        (page.size.height - defaultHeight).clamp(0.0, page.size.height);
-    final clampedX = (canvasPoint.dx - defaultWidth / 2).clamp(0.0, maxX);
-    final clampedY = (canvasPoint.dy - defaultHeight / 2).clamp(0.0, maxY);
+    double imgX = canvasPoint.dx - defaultWidth / 2;
+    double imgY = canvasPoint.dy - defaultHeight / 2;
+
+    // Clamp position to page bounds (skip in infinite mode)
+    if (!ref.read(isInfiniteCanvasProvider)) {
+      final page = ref.read(currentPageProvider);
+      final maxX =
+          (page.size.width - defaultWidth).clamp(0.0, page.size.width);
+      final maxY =
+          (page.size.height - defaultHeight).clamp(0.0, page.size.height);
+      imgX = imgX.clamp(0.0, maxX);
+      imgY = imgY.clamp(0.0, maxY);
+    }
 
     final imageElement = core.ImageElement.create(
       filePath: imagePath,
-      x: clampedX,
-      y: clampedY,
+      x: imgX,
+      y: imgY,
       width: defaultWidth,
       height: defaultHeight,
     );

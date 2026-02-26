@@ -34,6 +34,7 @@ import 'package:drawing_ui/src/providers/image_provider.dart';
 import 'package:drawing_ui/src/providers/sticky_note_provider.dart';
 import 'package:drawing_ui/src/providers/history_provider.dart';
 import 'package:drawing_ui/src/providers/selection_clipboard_provider.dart';
+import 'package:drawing_ui/src/providers/infinite_canvas_provider.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
 import 'package:drawing_ui/src/widgets/widgets.dart';
@@ -845,6 +846,8 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                 onScaleUpdate: handleScaleUpdate,
                 onScaleEnd: handleScaleEnd,
                 behavior: HitTestBehavior.opaque,
+                child: RepaintBoundary(
+                key: ref.read(canvasBoundaryKeyProvider),
                 child: ClipRect(
                 child: SizedBox(
                   width: size.width,
@@ -1161,6 +1164,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                       ),
                     ),
                   ),
+                ),
                 ),
               ),
             ),

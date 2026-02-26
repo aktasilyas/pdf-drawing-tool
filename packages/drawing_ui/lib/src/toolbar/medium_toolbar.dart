@@ -15,7 +15,7 @@ import 'package:drawing_ui/src/toolbar/toolbar_widgets.dart';
 ///
 /// Single-row layout combining navigation and drawing tools:
 /// ```
-/// [Nav Left] | [first 6 tools] [settings] [overflow] | [Nav Right]
+/// [Nav Left] | [tools (dynamic)] [AI] [overflow] | [Nav Right]
 /// ```
 ///
 /// Reader mode: hides tool section, shows only nav.
@@ -56,8 +56,6 @@ class MediumToolbar extends ConsumerStatefulWidget {
 }
 
 class _MediumToolbarState extends ConsumerState<MediumToolbar> {
-  static const _maxVisibleTools = 6;
-
   final Map<ToolType, GlobalKey> _toolButtonKeys = {};
 
   @override
@@ -101,9 +99,10 @@ class _MediumToolbarState extends ConsumerState<MediumToolbar> {
             showTitle: false,
           ),
           // Tools section (hidden in reader mode)
-          if (!isReaderMode) ..._buildToolsSection(theme),
-          // Spacer pushes nav right to end
-          const Spacer(),
+          if (!isReaderMode)
+            Expanded(child: _buildDynamicToolsSection(theme))
+          else
+            const Spacer(),
           // Nav right section
           ToolbarNavRight(
             isReaderMode: isReaderMode,
@@ -122,28 +121,57 @@ class _MediumToolbarState extends ConsumerState<MediumToolbar> {
     );
   }
 
-  /// Build visible tools + settings + overflow.
-  List<Widget> _buildToolsSection(DrawingTheme theme) {
+  /// Build tools section with dynamic tool count based on available width.
+  Widget _buildDynamicToolsSection(DrawingTheme theme) {
     final currentTool = ref.watch(currentToolProvider);
     final toolbarConfig = ref.watch(toolbarConfigProvider);
-
     final allTools = getGroupedVisibleTools(toolbarConfig, currentTool);
-    final visibleTools = allTools.take(_maxVisibleTools).toList();
-    final hiddenTools = allTools.skip(_maxVisibleTools).toList();
+    final hasAI = widget.onAIPressed != null;
 
-    return [
-      const ToolbarVerticalDivider(),
-      if (widget.onAIPressed != null)
-        StarNoteNavButton(
-          icon: StarNoteIcons.sparkle,
-          tooltip: 'Yapay Zeka',
-          onPressed: widget.onAIPressed!,
-        ),
-      if (widget.onAIPressed != null) const ToolbarVerticalDivider(),
-      ...visibleTools.map((tool) => _buildToolButton(tool, currentTool)),
-      if (hiddenTools.isNotEmpty)
-        ToolbarOverflowMenu(hiddenTools: hiddenTools),
-    ];
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const toolSlotWidth = 42.0;
+        const overflowWidth = 48.0;
+        const dividerWidth = 17.0;
+        const aiButtonWidth = 40.0;
+
+        // Subtract fixed elements: divider + optional AI button + divider
+        var available = constraints.maxWidth - dividerWidth;
+        if (hasAI) available -= aiButtonWidth + dividerWidth;
+
+        final totalTools = allTools.length;
+        var max =
+            (available / toolSlotWidth).floor().clamp(0, totalTools);
+        var shownTools = allTools.take(max).toList();
+        var hiddenTools = allTools.skip(max).toList();
+
+        if (hiddenTools.isNotEmpty && max > 0) {
+          max = ((available - overflowWidth) / toolSlotWidth)
+              .floor()
+              .clamp(1, totalTools);
+          shownTools = allTools.take(max).toList();
+          hiddenTools = allTools.skip(max).toList();
+        }
+
+        return Row(
+          children: [
+            const ToolbarVerticalDivider(),
+            if (hasAI)
+              StarNoteNavButton(
+                icon: StarNoteIcons.sparkle,
+                tooltip: 'Yapay Zeka',
+                onPressed: widget.onAIPressed!,
+              ),
+            if (hasAI) const ToolbarVerticalDivider(),
+            ...shownTools
+                .map((tool) => _buildToolButton(tool, currentTool)),
+            if (hiddenTools.isNotEmpty)
+              ToolbarOverflowMenu(hiddenTools: hiddenTools),
+            const Spacer(),
+          ],
+        );
+      },
+    );
   }
 
   Widget _buildToolButton(ToolType tool, ToolType currentTool) {

@@ -33,15 +33,30 @@ class DocumentOptionsPanel extends ConsumerWidget {
           color: cs.onSurface,
           onTap: () { onClose(); onRename(); },
         ),
+        // TODO: PDF export disabled — re-enable after fixing infinite mode rendering
+        // _OptionTile(
+        //   icon: StarNoteIcons.pdfFile,
+        //   label: 'PDF Olarak Dışa Aktar',
+        //   color: cs.onSurface,
+        //   onTap: () {
+        //     onClose();
+        //     final document = ref.read(documentProvider);
+        //     final notifier = ref.read(exportProgressProvider.notifier);
+        //     final isInfinite = ref.read(isInfiniteCanvasProvider);
+        //     performPDFExport(notifier, document,
+        //         isInfiniteCanvas: isInfinite);
+        //   },
+        // ),
         _OptionTile(
-          icon: StarNoteIcons.pdfFile,
-          label: 'PDF Olarak Dışa Aktar',
+          icon: StarNoteIcons.image,
+          label: 'PNG Olarak Dışa Aktar',
           color: cs.onSurface,
           onTap: () {
             onClose();
             final document = ref.read(documentProvider);
             final notifier = ref.read(exportProgressProvider.notifier);
-            performPDFExport(notifier, document);
+            final boundaryKey = ref.read(canvasBoundaryKeyProvider);
+            performPNGExport(notifier, boundaryKey, title: document.title);
           },
         ),
         Divider(height: 1, indent: 16, endIndent: 16,
