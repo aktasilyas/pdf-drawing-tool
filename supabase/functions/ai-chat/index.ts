@@ -252,13 +252,15 @@ Deno.serve(async (req) => {
       });
     }
 
-    // 2. Get user tier from subscription (profiles or subscription table)
-    // For now, check if premium entitlement exists
-    // TODO: İlyas — profiles tablosuna subscription_tier kolonu ekle veya
-    // mevcut subscription entity'den tier bilgisini çek
-    const tier: UserTier = "free"; // Default — will be updated with real tier lookup
+    // 2. Parse request (need tier before rate limit check)
+    const { messages, taskType = "chat", conversationId, image, tier: requestTier } = await req.json();
 
-    // 3. Rate limit check (DB-based, no Redis needed for MVP)
+    // 3. Determine user tier from request (validated client-side via RevenueCat)
+    const tier: UserTier = (requestTier === "premium" || requestTier === "premiumPlus")
+      ? requestTier
+      : "free";
+
+    // 4. Rate limit check (DB-based, no Redis needed for MVP)
     const { data: dailyCount } = await supabase.rpc("get_daily_ai_message_count", {
       p_user_id: user.id,
     });
@@ -280,9 +282,6 @@ Deno.serve(async (req) => {
         },
       );
     }
-
-    // 4. Parse request
-    const { messages, taskType = "chat", conversationId, image } = await req.json();
 
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return new Response(JSON.stringify({ error: "messages array required" }), {

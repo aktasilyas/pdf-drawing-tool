@@ -27,6 +27,7 @@ class AIRemoteDataSource {
     required List<Map<String, dynamic>> messages,
     required String taskType,
     required String conversationId,
+    String tier = 'free',
     String? imageBase64,
   }) async* {
     final session = _supabase.auth.currentSession;
@@ -40,6 +41,7 @@ class AIRemoteDataSource {
       'messages': messages,
       'taskType': taskType,
       'conversationId': conversationId,
+      'tier': tier,
       if (imageBase64 != null) 'image': imageBase64,
     });
 

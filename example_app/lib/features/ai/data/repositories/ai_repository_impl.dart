@@ -48,6 +48,7 @@ class AIRepositoryImpl implements AIRepository {
       ],
       taskType: _mapTaskType(taskType),
       conversationId: conversationId,
+      tier: _tierString,
       imageBase64: imageBase64,
     )) {
       buffer.write(chunk);
@@ -172,6 +173,12 @@ class AIRepositoryImpl implements AIRepository {
   }
 
   // ─── Private Helpers ─────────────────────────────────
+
+  String get _tierString => switch (_userTier) {
+        SubscriptionTier.free => 'free',
+        SubscriptionTier.premium => 'premium',
+        SubscriptionTier.premiumPlus => 'premiumPlus',
+      };
 
   Future<void> _syncMessageToCloud(AIMessage message) async {
     try {

@@ -8,6 +8,7 @@ import 'package:example_app/features/ai/data/repositories/ai_repository_impl.dar
 import 'package:example_app/features/ai/data/services/canvas_capture_service.dart';
 import 'package:example_app/features/ai/domain/repositories/ai_repository.dart';
 import 'package:example_app/features/premium/domain/entities/subscription.dart';
+import 'package:example_app/features/premium/presentation/providers/subscription_provider.dart';
 import 'package:example_app/features/sync/presentation/providers/sync_provider.dart';
 
 export 'ai_chat_provider.dart';
@@ -34,15 +35,47 @@ final aiLocalDataSourceProvider = Provider<AILocalDataSource>((ref) {
   return AILocalDataSource(db);
 });
 
+// ─── Repository ─────────────────────────────────────────
+
 final aiRepositoryProvider = Provider<AIRepository>((ref) {
   final remote = ref.watch(aiRemoteDataSourceProvider);
   final local = ref.watch(aiLocalDataSourceProvider);
-  // TODO: Gerçek subscription tier'ı subscription provider'dan al
-  // Şimdilik free tier — Step 6'da premium entegrasyonu yapılacak
-  const tier = SubscriptionTier.free;
+  final tier = ref.watch(aiTierProvider);
   return AIRepositoryImpl(
     remoteDataSource: remote,
     localDataSource: local,
     userTier: tier,
   );
+});
+
+// ─── Subscription-Aware Providers ───────────────────────
+
+/// Active user's AI tier (derived from subscription).
+final aiTierProvider = Provider<SubscriptionTier>((ref) {
+  final subscription = ref.watch(subscriptionProvider);
+  return subscription.when(
+    data: (sub) => sub.tier,
+    loading: () => SubscriptionTier.free,
+    error: (_, __) => SubscriptionTier.free,
+  );
+});
+
+/// Active model name for UI badge display.
+final aiModelNameProvider = Provider<String>((ref) {
+  final tier = ref.watch(aiTierProvider);
+  return switch (tier) {
+    SubscriptionTier.free => 'GPT-4o mini',
+    SubscriptionTier.premium => 'GPT-4o mini',
+    SubscriptionTier.premiumPlus => 'GPT-4o',
+  };
+});
+
+/// Daily message limit based on tier.
+final aiDailyLimitProvider = Provider<int>((ref) {
+  final tier = ref.watch(aiTierProvider);
+  return switch (tier) {
+    SubscriptionTier.free => 15,
+    SubscriptionTier.premium => 150,
+    SubscriptionTier.premiumPlus => 1000,
+  };
 });

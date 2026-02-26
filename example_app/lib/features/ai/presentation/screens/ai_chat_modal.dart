@@ -61,11 +61,23 @@ class _AIChatModalState extends ConsumerState<AIChatModal> {
   }
 
   void _handleSend(String text) {
+    if (!ref.read(canSendAIMessageProvider)) {
+      AIUpgradePrompt.show(context,
+          reason: AIUpgradeReason.dailyLimitReached,
+          onUpgrade: () => Navigator.of(context).pop());
+      return;
+    }
     ref.read(aiChatProvider.notifier).sendMessage(text);
     _scrollToBottom();
   }
 
   void _handleCanvasCapture() {
+    if (!ref.read(canSendAIMessageProvider)) {
+      AIUpgradePrompt.show(context,
+          reason: AIUpgradeReason.dailyLimitReached,
+          onUpgrade: () => Navigator.of(context).pop());
+      return;
+    }
     final canvasKey = ref.read(canvasBoundaryKeyProvider);
     ref.read(aiChatProvider.notifier).sendWithCanvas(
       'Bu çizimi analiz et ve açıkla.',
@@ -75,10 +87,8 @@ class _AIChatModalState extends ConsumerState<AIChatModal> {
   }
 
   void _handleConversationSelected(String id) {
-    ref.read(aiChatProvider.notifier).initialize(
-          existingConversationId: id,
-        );
-    // Close history on phone
+    ref.read(aiChatProvider.notifier)
+        .initialize(existingConversationId: id);
     if (MediaQuery.of(context).size.width < 600) {
       setState(() => _showHistory = false);
     }
@@ -90,8 +100,11 @@ class _AIChatModalState extends ConsumerState<AIChatModal> {
     final remaining = ref.watch(remainingAIMessagesProvider);
     final theme = Theme.of(context);
 
-    // Auto-scroll when streaming
+    // Auto-scroll when streaming + refresh usage when done
     ref.listen(aiChatProvider, (prev, next) {
+      if (prev?.isStreaming == true && !next.isStreaming) {
+        ref.invalidate(aiUsageProvider);
+      }
       if (next.isStreaming ||
           next.messages.length != (prev?.messages.length ?? 0)) {
         _scrollToBottom();
@@ -110,6 +123,7 @@ class _AIChatModalState extends ConsumerState<AIChatModal> {
         child: Column(
           children: [
             _buildHeader(theme),
+            const AIUsageBar(),
             const Divider(height: 1),
             Expanded(
               child: Row(
@@ -130,9 +144,9 @@ class _AIChatModalState extends ConsumerState<AIChatModal> {
               onSend: _handleSend,
               onAttachCanvas: _handleCanvasCapture,
               isStreaming: chatState.isStreaming,
-              enabled: remaining != 0,
+              enabled: ref.watch(canSendAIMessageProvider),
               remainingMessages: remaining >= 0 ? remaining : null,
-              modelName: 'GPT-4o mini',
+              modelName: ref.watch(aiModelNameProvider),
             ),
           ],
         ),
