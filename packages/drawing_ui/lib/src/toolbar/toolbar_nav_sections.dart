@@ -5,6 +5,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/panels/add_page_panel.dart';
 import 'package:drawing_ui/src/panels/audio_recording_dropdown.dart';
 import 'package:drawing_ui/src/panels/export_panel.dart';
+import 'package:drawing_ui/src/panels/infinite_background_panel.dart';
 import 'package:drawing_ui/src/panels/page_options_panel.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/screens/layers_list.dart';
@@ -170,31 +171,35 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
         child = ExportPanel(onClose: _closePanel, embedded: true);
       case _NavPanel.more:
         anchorKey = _moreKey;
-        final isCompact = !widget.showAddPage || !widget.showExport;
-        child = PageOptionsPanel(
-          onClose: _closePanel,
-          embedded: true,
-          compact: isCompact,
-          documentTitle: widget.documentTitle,
-          onRenameDocument: widget.onRenameDocument,
-          onDeleteDocument: widget.onDeleteDocument,
-          onAddPage: !widget.showAddPage
-              ? () {
-                  _closePanel();
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (mounted) _togglePanel(_NavPanel.addPage);
-                  });
-                }
-              : null,
-          onExport: !widget.showExport
-              ? () {
-                  _closePanel();
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (mounted) _togglePanel(_NavPanel.export);
-                  });
-                }
-              : null,
-        );
+        if (ref.read(isInfiniteCanvasProvider)) {
+          child = InfiniteBackgroundPanel(onClose: _closePanel);
+        } else {
+          final isCompact = !widget.showAddPage || !widget.showExport;
+          child = PageOptionsPanel(
+            onClose: _closePanel,
+            embedded: true,
+            compact: isCompact,
+            documentTitle: widget.documentTitle,
+            onRenameDocument: widget.onRenameDocument,
+            onDeleteDocument: widget.onDeleteDocument,
+            onAddPage: !widget.showAddPage
+                ? () {
+                    _closePanel();
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) _togglePanel(_NavPanel.addPage);
+                    });
+                  }
+                : null,
+            onExport: !widget.showExport
+                ? () {
+                    _closePanel();
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (mounted) _togglePanel(_NavPanel.export);
+                    });
+                  }
+                : null,
+          );
+        }
     }
     _popover.show(
       context: context,
@@ -241,7 +246,7 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
                 .state = !rulerVisible,
             isActive: rulerVisible,
           ),
-        if (!widget.isReaderMode)
+        if (!widget.isReaderMode && !ref.watch(isInfiniteCanvasProvider))
           StarNoteNavButton(
             key: _layersKey,
             icon: StarNoteIcons.layers,
@@ -249,7 +254,7 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
             onPressed: () => _togglePanel(_NavPanel.layers),
             isActive: _activePanel == _NavPanel.layers,
           ),
-        if (!widget.isReaderMode && widget.showAddPage)
+        if (!widget.isReaderMode && widget.showAddPage && !ref.watch(isInfiniteCanvasProvider))
           StarNoteNavButton(
             key: _addPageKey,
             icon: StarNoteIcons.pageAdd,
@@ -257,7 +262,7 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
             onPressed: () => _togglePanel(_NavPanel.addPage),
             isActive: _activePanel == _NavPanel.addPage,
           ),
-        if (!widget.isReaderMode && audioEnabled)
+        if (!widget.isReaderMode && audioEnabled && !ref.watch(isInfiniteCanvasProvider))
           StarNoteNavButton(
             key: _micKey,
             icon: StarNoteIcons.microphone,

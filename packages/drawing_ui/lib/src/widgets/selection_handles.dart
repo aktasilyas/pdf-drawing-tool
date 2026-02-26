@@ -117,11 +117,13 @@ class _SelectionHandlesState extends ConsumerState<SelectionHandles> {
 
   void _onPointerUp(PointerUpEvent event) {
     if (event.pointer != _activePointer) return;
+    if (!mounted) return;
     _handlePointerUp(event.localPosition);
   }
 
   void _onPointerCancel(PointerCancelEvent event) {
     if (event.pointer != _activePointer) return;
+    if (!mounted) return;
     // Cancel any in-progress drag
     if (_dragMode != null) {
       ref.read(selectionUiProvider.notifier).reset();
@@ -169,13 +171,17 @@ class _SelectionHandlesState extends ConsumerState<SelectionHandles> {
     switch (_dragMode!) {
       case _DragMode.move:
         final d = pos - _dragStart!;
-        final ob = _originalBounds!;
-        final sz = ref.read(currentPageProvider).size;
-        final minDx = -ob.left, maxDx = sz.width - ob.right;
-        final minDy = -ob.top, maxDy = sz.height - ob.bottom;
-        ref.read(selectionUiProvider.notifier).setMoveDelta(Offset(
-            minDx <= maxDx ? d.dx.clamp(minDx, maxDx) : d.dx,
-            minDy <= maxDy ? d.dy.clamp(minDy, maxDy) : d.dy));
+        if (ref.read(isInfiniteCanvasProvider)) {
+          ref.read(selectionUiProvider.notifier).setMoveDelta(d);
+        } else {
+          final ob = _originalBounds!;
+          final sz = ref.read(currentPageProvider).size;
+          final minDx = -ob.left, maxDx = sz.width - ob.right;
+          final minDy = -ob.top, maxDy = sz.height - ob.bottom;
+          ref.read(selectionUiProvider.notifier).setMoveDelta(Offset(
+              minDx <= maxDx ? d.dx.clamp(minDx, maxDx) : d.dx,
+              minDy <= maxDy ? d.dy.clamp(minDy, maxDy) : d.dy));
+        }
       case _DragMode.rotate:
         final ob = _originalBounds!;
         final a = math.atan2(pos.dy - (ob.top + ob.bottom) / 2,
@@ -220,11 +226,13 @@ class _SelectionHandlesState extends ConsumerState<SelectionHandles> {
     }
     if (halfW * 2 * sx < _minSize) sx = _minSize / (halfW * 2);
     if (halfH * 2 * sy < _minSize) sy = _minSize / (halfH * 2);
-    final sz = ref.read(currentPageProvider).size;
-    final mxX = math.min(cx, sz.width - cx) / halfW;
-    final mxY = math.min(cy, sz.height - cy) / halfH;
-    if (sx > mxX) sx = mxX;
-    if (sy > mxY) sy = mxY;
+    if (!ref.read(isInfiniteCanvasProvider)) {
+      final sz = ref.read(currentPageProvider).size;
+      final mxX = math.min(cx, sz.width - cx) / halfW;
+      final mxY = math.min(cy, sz.height - cy) / halfH;
+      if (sx > mxX) sx = mxX;
+      if (sy > mxY) sy = mxY;
+    }
     if (_isCorner(handle)) {
       final f = math.min(sx, sy);
       sx = f;

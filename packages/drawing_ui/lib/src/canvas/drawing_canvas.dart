@@ -34,6 +34,7 @@ import 'package:drawing_ui/src/providers/image_provider.dart';
 import 'package:drawing_ui/src/providers/sticky_note_provider.dart';
 import 'package:drawing_ui/src/providers/history_provider.dart';
 import 'package:drawing_ui/src/providers/selection_clipboard_provider.dart';
+import 'package:drawing_ui/src/providers/infinite_canvas_provider.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
 import 'package:drawing_ui/src/widgets/widgets.dart';
@@ -85,6 +86,11 @@ class DrawingCanvas extends ConsumerStatefulWidget {
   /// Receives +1 (next page) or -1 (previous page).
   final ValueChanged<int>? onPageSwipe;
 
+  /// Interactive two-finger swipe drag callbacks for smooth page transitions.
+  final VoidCallback? onPageSwipeDragBegin;
+  final ValueChanged<double>? onPageSwipeDragUpdate;
+  final ValueChanged<double>? onPageSwipeDragEnd;
+
   const DrawingCanvas({
     super.key,
     this.width = double.infinity,
@@ -92,6 +98,9 @@ class DrawingCanvas extends ConsumerStatefulWidget {
     this.canvasMode,
     this.isReadOnly = false,
     this.onPageSwipe,
+    this.onPageSwipeDragBegin,
+    this.onPageSwipeDragUpdate,
+    this.onPageSwipeDragEnd,
   });
 
   @override
@@ -622,6 +631,12 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
 
   @override
   ValueChanged<int>? get onPageSwipe => widget.onPageSwipe;
+  @override
+  VoidCallback? get onPageSwipeDragBegin => widget.onPageSwipeDragBegin;
+  @override
+  ValueChanged<double>? get onPageSwipeDragUpdate => widget.onPageSwipeDragUpdate;
+  @override
+  ValueChanged<double>? get onPageSwipeDragEnd => widget.onPageSwipeDragEnd;
 
   /// Whether the current scale gesture has been classified as zoom (not swipe).
   bool _scaleGestureIsZoom = false;
@@ -831,6 +846,8 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                 onScaleUpdate: handleScaleUpdate,
                 onScaleEnd: handleScaleEnd,
                 behavior: HitTestBehavior.opaque,
+                child: RepaintBoundary(
+                key: ref.read(canvasBoundaryKeyProvider),
                 child: ClipRect(
                 child: SizedBox(
                   width: size.width,
@@ -1147,6 +1164,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                       ),
                     ),
                   ),
+                ),
                 ),
               ),
             ),

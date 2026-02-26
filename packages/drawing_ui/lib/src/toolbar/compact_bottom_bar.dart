@@ -13,7 +13,7 @@ import 'package:drawing_ui/src/toolbar/top_navigation_bar.dart';
 /// Compact tool row for phone screens (<600px).
 ///
 /// Sits as the second row in the top toolbar area.
-/// Shows undo/redo + max 7 tool buttons + overflow menu.
+/// Shows undo/redo + dynamically sized tool buttons + overflow menu.
 /// Tool panels open as bottom sheets instead of anchored panels.
 class CompactToolRow extends ConsumerStatefulWidget {
   const CompactToolRow({
@@ -30,8 +30,6 @@ class CompactToolRow extends ConsumerStatefulWidget {
 
   /// Callback when a tool's panel should open as bottom sheet.
   final ValueChanged<ToolType>? onPanelRequested;
-
-  static const int maxVisibleTools = 7;
 
   @override
   ConsumerState<CompactToolRow> createState() => _CompactToolRowState();
@@ -54,10 +52,6 @@ class _CompactToolRowState extends ConsumerState<CompactToolRow> {
     final allTools = _getGroupedVisibleTools(toolbarConfig, currentTool)
         .where((t) => !topTools.contains(t))
         .toList();
-    final shownTools =
-        allTools.take(CompactToolRow.maxVisibleTools).toList();
-    final hiddenTools =
-        allTools.skip(CompactToolRow.maxVisibleTools).toList();
 
     return Container(
       height: 48,
@@ -93,21 +87,40 @@ class _CompactToolRowState extends ConsumerState<CompactToolRow> {
 
           const SizedBox(width: 2),
 
-          // Tool buttons
+          // Tool buttons (dynamically sized)
           Expanded(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: shownTools.map((tool) {
-                return _buildToolButton(tool, currentTool);
-              }).toList(),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                const toolSlotWidth = 40.0;
+                const overflowWidth = 48.0;
+                final totalTools = allTools.length;
+
+                var max = (constraints.maxWidth / toolSlotWidth)
+                    .floor()
+                    .clamp(0, totalTools);
+                var shownTools = allTools.take(max).toList();
+                var hiddenTools = allTools.skip(max).toList();
+
+                if (hiddenTools.isNotEmpty && max > 0) {
+                  max = ((constraints.maxWidth - overflowWidth) / toolSlotWidth)
+                      .floor()
+                      .clamp(1, totalTools);
+                  shownTools = allTools.take(max).toList();
+                  hiddenTools = allTools.skip(max).toList();
+                }
+
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ...shownTools
+                        .map((tool) => _buildToolButton(tool, currentTool)),
+                    if (hiddenTools.isNotEmpty)
+                      ToolbarOverflowMenu(hiddenTools: hiddenTools),
+                  ],
+                );
+              },
             ),
           ),
-
-          // Overflow menu (if hidden tools exist)
-          if (hiddenTools.isNotEmpty)
-            ToolbarOverflowMenu(
-              hiddenTools: hiddenTools,
-            ),
 
           const SizedBox(width: 4),
         ],

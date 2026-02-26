@@ -34,8 +34,15 @@ Widget buildDrawingCanvasArea({
   bool isDualPage = false,
   core.Page? secondaryPage,
   bool isCompactMode = false,
+  Color? nextPagePreviewColor,
+  Color? prevPagePreviewColor,
+  bool canSwipeForward = true,
+  bool canSwipeBack = true,
+  ValueChanged<int>? onSwipeNavigate,
+  bool Function(int direction)? onDragDirectionDetermined,
+  VoidCallback? onDragReverted,
+  Widget? addPagePreview,
 }) {
-  const double swipeVelocityThreshold = 300;
 
   // Core canvas content: background + drawing canvas (wrapped in transition)
   Widget canvasContent = Stack(
@@ -55,6 +62,12 @@ Widget buildDrawingCanvasArea({
             (onPageChanged ?? (_) {})(target);
           }
         },
+        onPageSwipeDragBegin: isReadOnly || pageTransitionKey == null
+            ? null : () => pageTransitionKey.currentState?.beginDrag(),
+        onPageSwipeDragUpdate: isReadOnly || pageTransitionKey == null
+            ? null : (d) => pageTransitionKey.currentState?.updateDrag(d),
+        onPageSwipeDragEnd: isReadOnly || pageTransitionKey == null
+            ? null : (v) => pageTransitionKey.currentState?.endDrag(v),
       )),
     ],
   );
@@ -63,6 +76,14 @@ Widget buildDrawingCanvasArea({
     canvasContent = PageSlideTransition(
       key: pageTransitionKey,
       scrollDirection: scrollDirection,
+      nextPagePreviewColor: nextPagePreviewColor,
+      prevPagePreviewColor: prevPagePreviewColor,
+      canSwipeForward: canSwipeForward,
+      canSwipeBack: canSwipeBack,
+      onSwipeNavigate: onSwipeNavigate,
+      onDragDirectionDetermined: onDragDirectionDetermined,
+      onDragReverted: onDragReverted,
+      addPagePreview: addPagePreview,
       child: canvasContent,
     );
   }
@@ -120,25 +141,28 @@ Widget buildDrawingCanvasArea({
   );
 
   if (isReadOnly) {
-    void handleSwipe(DragEndDetails details) {
-      final velocity = details.primaryVelocity ?? 0;
-      if (velocity < -swipeVelocityThreshold) {
-        final idx = ref.read(currentPageIndexProvider);
-        final count = ref.read(pageCountProvider);
-        if (idx < count - 1) {
-          (onPageChanged ?? (_) => ref.read(pageManagerProvider.notifier).nextPage())(idx + 1);
-        }
-      } else if (velocity > swipeVelocityThreshold) {
-        final idx = ref.read(currentPageIndexProvider);
-        if (idx > 0) {
-          (onPageChanged ?? (_) => ref.read(pageManagerProvider.notifier).previousPage())(idx - 1);
-        }
-      }
-    }
-
+    final isHoriz = scrollDirection == Axis.horizontal;
     return GestureDetector(
-      onHorizontalDragEnd: scrollDirection == Axis.horizontal ? handleSwipe : null,
-      onVerticalDragEnd: scrollDirection == Axis.vertical ? handleSwipe : null,
+      onHorizontalDragStart: isHoriz
+          ? (_) => pageTransitionKey?.currentState?.beginDrag()
+          : null,
+      onHorizontalDragUpdate: isHoriz
+          ? (d) => pageTransitionKey?.currentState?.updateDrag(d.delta.dx)
+          : null,
+      onHorizontalDragEnd: isHoriz
+          ? (d) => pageTransitionKey?.currentState
+              ?.endDrag(d.primaryVelocity ?? 0)
+          : null,
+      onVerticalDragStart: !isHoriz
+          ? (_) => pageTransitionKey?.currentState?.beginDrag()
+          : null,
+      onVerticalDragUpdate: !isHoriz
+          ? (d) => pageTransitionKey?.currentState?.updateDrag(d.delta.dy)
+          : null,
+      onVerticalDragEnd: !isHoriz
+          ? (d) => pageTransitionKey?.currentState
+              ?.endDrag(d.primaryVelocity ?? 0)
+          : null,
       child: canvasStack,
     );
   }

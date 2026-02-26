@@ -57,11 +57,16 @@ class PDFExportOptions {
   final PDFExportQuality quality;
   final PDFPageFormat? pageFormat;
 
+  /// When true, calculates content bounding box and uses it as page size
+  /// instead of the fixed page dimensions. Used for infinite/whiteboard canvas.
+  final bool isInfiniteCanvas;
+
   const PDFExportOptions({
     this.includeBackground = true,
     this.exportMode = PDFExportMode.raster,
     this.quality = PDFExportQuality.medium,
     this.pageFormat,
+    this.isInfiniteCanvas = false,
   });
 
   PDFExportOptions copyWith({
@@ -69,12 +74,14 @@ class PDFExportOptions {
     PDFExportMode? exportMode,
     PDFExportQuality? quality,
     PDFPageFormat? pageFormat,
+    bool? isInfiniteCanvas,
   }) {
     return PDFExportOptions(
       includeBackground: includeBackground ?? this.includeBackground,
       exportMode: exportMode ?? this.exportMode,
       quality: quality ?? this.quality,
       pageFormat: pageFormat ?? this.pageFormat,
+      isInfiniteCanvas: isInfiniteCanvas ?? this.isInfiniteCanvas,
     );
   }
 }
@@ -144,12 +151,58 @@ class PDFExporter {
 
       for (int i = 0; i < pages.length; i++) {
         final page = pages[i];
-        if (page.size.width <= 0 || page.size.height <= 0) continue;
 
-        final imageBytes = await _renderPageToImage(page, renderScale);
+        Uint8List? imageBytes;
+        double pdfW, pdfH;
+
+        if (options.isInfiniteCanvas) {
+          if (page.size.width <= 0 || page.size.height <= 0) continue;
+
+          // Start with page area (0,0,w,h) — typically A4
+          final pageW = page.size.width;
+          final pageH = page.size.height;
+
+          // Find content bounds; if empty, render just the blank page
+          final contentRect = _calculateContentBounds(page);
+
+          // Union of page area and content area (+ padding)
+          const padding = 24.0;
+          final double left;
+          final double top;
+          final double right;
+          final double bottom;
+          if (contentRect != null) {
+            left = min(0.0, contentRect.left - padding);
+            top = min(0.0, contentRect.top - padding);
+            right = max(pageW, contentRect.right + padding);
+            bottom = max(pageH, contentRect.bottom + padding);
+          } else {
+            left = 0;
+            top = 0;
+            right = pageW;
+            bottom = pageH;
+          }
+
+          pdfW = right - left;
+          pdfH = bottom - top;
+
+          // Offset to shift origin so (left,top) maps to (0,0) in the image
+          final offsetX = -left;
+          final offsetY = -top;
+
+          imageBytes = await _renderInfinitePage(
+            page, renderScale, pdfW, pdfH, offsetX, offsetY,
+          );
+        } else {
+          if (page.size.width <= 0 || page.size.height <= 0) continue;
+          pdfW = page.size.width;
+          pdfH = page.size.height;
+          imageBytes = await _renderPageToImage(page, renderScale);
+        }
+
         if (imageBytes == null) continue;
 
-        final pageFormat = PdfPageFormat(page.size.width, page.size.height);
+        final pageFormat = PdfPageFormat(pdfW, pdfH);
         final image = pw.MemoryImage(imageBytes);
 
         pdf.addPage(pw.Page(
@@ -207,6 +260,97 @@ class PDFExporter {
 
       _strokeRenderer.renderStrokes(canvas, layer.strokes);
       _renderShapes(canvas, layer.shapes);
+      await _renderImages(canvas, layer.images);
+      _renderTexts(canvas, layer.texts);
+
+      if (needsOpacity) canvas.restore();
+    }
+
+    final picture = recorder.endRecording();
+    final image = await picture.toImage(renderW, renderH);
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+    return byteData?.buffer.asUint8List();
+  }
+
+  /// Calculates the bounding rect of all content across visible layers.
+  Rect? _calculateContentBounds(Page page) {
+    double? minX, minY, maxX, maxY;
+
+    void expand(BoundingBox b) {
+      minX = minX == null ? b.left : min(minX!, b.left);
+      minY = minY == null ? b.top : min(minY!, b.top);
+      maxX = maxX == null ? b.right : max(maxX!, b.right);
+      maxY = maxY == null ? b.bottom : max(maxY!, b.bottom);
+    }
+
+    for (final layer in page.layers) {
+      if (!layer.isVisible) continue;
+      for (final stroke in layer.strokes) {
+        final b = stroke.bounds;
+        if (b != null) expand(b);
+      }
+      for (final shape in layer.shapes) {
+        expand(shape.bounds);
+      }
+      for (final img in layer.images) {
+        expand(img.bounds);
+      }
+      for (final text in layer.texts) {
+        expand(text.bounds);
+      }
+      for (final note in layer.stickyNotes) {
+        expand(note.bounds);
+      }
+    }
+
+    if (minX == null) return null;
+    return Rect.fromLTRB(minX!, minY!, maxX!, maxY!);
+  }
+
+  /// Renders an infinite canvas page with a content-derived size.
+  Future<Uint8List?> _renderInfinitePage(
+    Page page,
+    double renderScale,
+    double w,
+    double h,
+    double offsetX,
+    double offsetY,
+  ) async {
+    final renderW = (w * renderScale).toInt();
+    final renderH = (h * renderScale).toInt();
+
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+
+    canvas.scale(renderScale);
+
+    // Background fills the entire export area
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, w, h),
+      Paint()..color = Color(page.background.color),
+    );
+    _renderBackgroundPattern(canvas, w, h, page.background);
+
+    // Translate so content is positioned correctly
+    canvas.translate(offsetX, offsetY);
+
+    // Render all visible layers
+    for (final layer in page.layers) {
+      if (!layer.isVisible) continue;
+
+      final needsOpacity = layer.opacity < 1.0;
+      if (needsOpacity) {
+        canvas.saveLayer(
+          null,
+          Paint()..color = Color.fromARGB(
+            (layer.opacity * 255).round(), 255, 255, 255,
+          ),
+        );
+      }
+
+      _strokeRenderer.renderStrokes(canvas, layer.strokes);
+      _renderShapes(canvas, layer.shapes);
+      await _renderImages(canvas, layer.images);
       _renderTexts(canvas, layer.texts);
 
       if (needsOpacity) canvas.restore();
@@ -219,15 +363,19 @@ class PDFExporter {
   }
 
   void _renderBackground(Canvas canvas, Page page) {
-    final bg = page.background;
     final w = page.size.width;
     final h = page.size.height;
 
     canvas.drawRect(
       Rect.fromLTWH(0, 0, w, h),
-      Paint()..color = Color(bg.color),
+      Paint()..color = Color(page.background.color),
     );
+    _renderBackgroundPattern(canvas, w, h, page.background);
+  }
 
+  void _renderBackgroundPattern(
+    Canvas canvas, double w, double h, PageBackground bg,
+  ) {
     final lineColor = bg.lineColor ?? 0xFFE0E0E0;
     final linePaint = Paint()
       ..color = Color(lineColor)
@@ -457,6 +605,44 @@ class PDFExporter {
       }
       canvas.drawParagraph(paragraph, Offset(t.x, t.y));
       canvas.restore();
+    }
+  }
+
+  /// Renders image elements on the canvas by loading from their file paths.
+  Future<void> _renderImages(
+    Canvas canvas, List<ImageElement> images,
+  ) async {
+    for (final img in images) {
+      try {
+        final file = File(img.filePath);
+        if (!await file.exists()) continue;
+
+        final bytes = await file.readAsBytes();
+        final codec = await ui.instantiateImageCodec(bytes);
+        final frame = await codec.getNextFrame();
+        final uiImage = frame.image;
+
+        canvas.save();
+        if (img.rotation != 0.0) {
+          final cx = img.x + img.width / 2;
+          final cy = img.y + img.height / 2;
+          canvas.translate(cx, cy);
+          canvas.rotate(img.rotation);
+          canvas.translate(-cx, -cy);
+        }
+
+        final src = Rect.fromLTWH(
+          0, 0, uiImage.width.toDouble(), uiImage.height.toDouble(),
+        );
+        final dst = Rect.fromLTWH(img.x, img.y, img.width, img.height);
+        canvas.drawImageRect(
+          uiImage, src, dst,
+          Paint()..filterQuality = FilterQuality.high,
+        );
+        canvas.restore();
+      } catch (_) {
+        // Skip images that fail to load
+      }
     }
   }
 }
