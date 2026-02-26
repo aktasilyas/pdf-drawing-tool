@@ -21,6 +21,7 @@ class DrawingScreen extends ConsumerStatefulWidget {
     this.onRenameDocument,
     this.onDeleteDocument,
     this.onDocumentChanged,
+    this.onAIPressed,
   });
 
   final String? documentTitle;
@@ -29,6 +30,7 @@ class DrawingScreen extends ConsumerStatefulWidget {
   final VoidCallback? onRenameDocument;
   final VoidCallback? onDeleteDocument;
   final ValueChanged<dynamic>? onDocumentChanged;
+  final VoidCallback? onAIPressed;
 
   @override
   ConsumerState<DrawingScreen> createState() => _DrawingScreenState();
@@ -290,7 +292,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
               Column(
                 children: [
                   AdaptiveToolbar(
-                    onAIPressed: () => openAIPanel(context),
+                    onAIPressed: widget.onAIPressed ?? () => openAIPanel(context),
                     onSettingsPressed: _onSettingsPressed,
                     settingsButtonKey: _settingsButtonKey,
                     toolButtonKeys: _toolButtonKeys,
