@@ -93,26 +93,30 @@ class _AIChatModalState extends ConsumerState<AIChatModal> {
         borderRadius:
             const BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      child: Column(
-        children: [
-          _buildHeader(theme),
-          const Divider(height: 1),
-          Expanded(
-            child: chatState.isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : _buildMessageList(chatState),
-          ),
+      child: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        behavior: HitTestBehavior.translucent,
+        child: Column(
+          children: [
+            _buildHeader(theme),
+            const Divider(height: 1),
+            Expanded(
+              child: chatState.isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _buildMessageList(chatState),
+            ),
           if (chatState.error != null)
             _buildErrorBanner(chatState.error!, theme),
-          AIInputBar(
-            onSend: _handleSend,
-            onAttachCanvas: _handleCanvasCapture,
-            isStreaming: chatState.isStreaming,
-            enabled: remaining != 0,
-            remainingMessages: remaining >= 0 ? remaining : null,
-            modelName: 'Gemini Flash',
-          ),
-        ],
+            AIInputBar(
+              onSend: _handleSend,
+              onAttachCanvas: _handleCanvasCapture,
+              isStreaming: chatState.isStreaming,
+              enabled: remaining != 0,
+              remainingMessages: remaining >= 0 ? remaining : null,
+              modelName: 'Gemini Flash',
+            ),
+          ],
+        ),
       ),
     );
   }

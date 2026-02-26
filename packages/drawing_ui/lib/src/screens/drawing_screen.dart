@@ -254,7 +254,13 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
     final currentPage = ref.watch(currentPageProvider);
     final transform = ref.watch(canvasTransformProvider);
     final canvasMode = widget.canvasMode ?? const core.CanvasMode(isInfinite: true);
-    ref.read(isInfiniteCanvasProvider.notifier).state = canvasMode.isInfinite;
+    // Defer provider modification to after build completes
+    final isInfinite = canvasMode.isInfinite;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref.read(isInfiniteCanvasProvider.notifier).state = isInfinite;
+      }
+    });
     final materialTheme = Theme.of(context);
     final colorScheme = materialTheme.colorScheme;
     final isDark = materialTheme.brightness == Brightness.dark;

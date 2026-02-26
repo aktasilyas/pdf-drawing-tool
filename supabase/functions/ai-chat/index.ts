@@ -29,13 +29,13 @@ const RATE_LIMITS: Record<UserTier, number> = {
 };
 
 function selectModel(task: TaskType, tier: UserTier): ModelConfig {
-  // Free tier → always Gemini Flash (cheapest multimodal: $0.10/MTok input)
+  // Free tier → GPT-4o-mini (cheap + reliable: $0.15/MTok input, $0.60/MTok output)
   if (tier === "free") {
     return {
-      provider: "google",
-      model: "gemini-2.0-flash",
+      provider: "openai",
+      model: "gpt-4o-mini",
       maxTokens: task.startsWith("summarize") ? 2048 : 1024,
-      temperature: task.includes("math") || task.includes("ocr") ? 0.1 : 0.7,
+      temperature: task.includes("math") || task.includes("ocr") ? 0.2 : 0.7,
     };
   }
 
