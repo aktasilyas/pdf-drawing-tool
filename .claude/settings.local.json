@@ -60,7 +60,11 @@
       "Bash(gh pr:*)",
       "Bash(gh auth status:*)",
       "Bash(git fetch:*)",
-      "Bash(comm:*)"
+      "Bash(comm:*)",
+      "Bash(npx supabase:*)",
+      "Bash(supabase:*)",
+      "Bash(npx:*)",
+      "Bash(__NEW_LINE_fd4607b4bebb6311__ curl:*)"
     ]
   }
 }
