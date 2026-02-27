@@ -165,6 +165,22 @@ class TemplatePatternPainter extends CustomPainter
     for (double y = _spacingPx; y < size.height; y += _spacingPx) {
       canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
     }
+
+    // Margin desteği (engineer_pad vb.)
+    final showMarginLeft = extraData?['showMarginLeft'] as bool? ?? false;
+    if (showMarginLeft) {
+      final marginMm = (extraData?['marginMm'] as num?)?.toDouble() ?? 25;
+      final marginPx = marginMm * 72 / 25.4;
+      final marginPaint = Paint()
+        ..color = lineColor
+        ..strokeWidth = lineWidth * 3
+        ..isAntiAlias = true;
+      canvas.drawLine(
+        Offset(marginPx, 0),
+        Offset(marginPx, size.height),
+        marginPaint,
+      );
+    }
   }
 
   void _drawDots(Canvas canvas, Size size) {
@@ -316,20 +332,90 @@ class TemplatePatternPainter extends CustomPainter
 
   void _drawCalligraphy(Canvas canvas, Size size) {
     final paint = _linePaint;
-    final angle = 0.364; // tan(20°) - kaligrafi açısı
-    
+    final style = extraData?['style'] as String?;
+
+    // Açı: extraData'dan oku veya default 55°
+    final angleDeg = (extraData?['angle'] as num?)?.toDouble() ?? 55;
+    final tanAngle = tan(angleDeg * pi / 180);
+
+    if (style == 'copperplate') {
+      _drawCopperplateCalligraphy(canvas, size, paint, tanAngle);
+    } else {
+      _drawStandardCalligraphy(canvas, size, paint, tanAngle);
+    }
+  }
+
+  void _drawStandardCalligraphy(
+    Canvas canvas, Size size, Paint paint, double tanAngle,
+  ) {
     // Yatay baseline'lar
     for (double y = _spacingPx * 2; y < size.height; y += _spacingPx) {
       canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
     }
-    
+
     // Açılı rehber çizgiler
     paint.color = lineColor.withValues(alpha: 0.3);
     for (double x = 0; x < size.width + size.height; x += _spacingPx * 2) {
       canvas.drawLine(
         Offset(x, 0),
-        Offset(x - size.height * angle, size.height),
+        Offset(x - size.height * tanAngle, size.height),
         paint,
+      );
+    }
+  }
+
+  void _drawCopperplateCalligraphy(
+    Canvas canvas, Size size, Paint paint, double tanAngle,
+  ) {
+    // Ratio: ascender:x-height:descender (default 3:2:3)
+    final ratioStr = (extraData?['ratio'] as String?) ?? '3:2:3';
+    final parts = ratioStr.split(':');
+    final aR = double.tryParse(parts[0]) ?? 3;
+    final xR = double.tryParse(parts[1]) ?? 2;
+    final dR = double.tryParse(parts[2]) ?? 3;
+    final totalR = aR + xR + dR;
+
+    final zoneH = _spacingPx; // Toplam bir satır yüksekliği
+    final ascenderH = zoneH * (aR / totalR);
+    final xHeightH = zoneH * (xR / totalR);
+    final descenderH = zoneH * (dR / totalR);
+    final topMargin = _spacingPx * 2;
+
+    final basePaint = Paint()
+      ..color = lineColor
+      ..strokeWidth = lineWidth
+      ..isAntiAlias = true;
+    final zonePaint = Paint()
+      ..color = lineColor.withValues(alpha: 0.25)
+      ..strokeWidth = lineWidth * 0.5
+      ..isAntiAlias = true;
+
+    for (double y = topMargin; y + zoneH <= size.height; y += zoneH) {
+      final ascLine = y;
+      final xLine = y + ascenderH;
+      final baseLine = y + ascenderH + xHeightH;
+      final descLine = y + ascenderH + xHeightH + descenderH;
+
+      // Ascender line (kalın)
+      canvas.drawLine(Offset(0, ascLine), Offset(size.width, ascLine), basePaint);
+      // x-height line (ince)
+      canvas.drawLine(Offset(0, xLine), Offset(size.width, xLine), zonePaint);
+      // Baseline (kalın)
+      canvas.drawLine(Offset(0, baseLine), Offset(size.width, baseLine), basePaint);
+      // Descender line (ince)
+      canvas.drawLine(Offset(0, descLine), Offset(size.width, descLine), zonePaint);
+    }
+
+    // Açılı rehber çizgiler
+    final anglePaint = Paint()
+      ..color = lineColor.withValues(alpha: 0.2)
+      ..strokeWidth = lineWidth * 0.5
+      ..isAntiAlias = true;
+    for (double x = 0; x < size.width + size.height; x += _spacingPx * 1.5) {
+      canvas.drawLine(
+        Offset(x, 0),
+        Offset(x - size.height * tanAngle, size.height),
+        anglePaint,
       );
     }
   }

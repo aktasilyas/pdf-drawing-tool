@@ -8,7 +8,7 @@ import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/index.dart';
 
 /// TemplateCategory.iconName → IconData mapping
-IconData _categoryIcon(String iconName) {
+IconData categoryIcon(String iconName) {
   switch (iconName) {
     case 'description': return Icons.description_outlined;
     case 'work': return Icons.work_outline;
@@ -22,10 +22,10 @@ IconData _categoryIcon(String iconName) {
   }
 }
 
-/// Template category tabs widget
+/// Template category tabs widget — null = "Hepsi" (All)
 class TemplateCategoryTabs extends StatelessWidget {
-  final TemplateCategory selectedCategory;
-  final ValueChanged<TemplateCategory> onCategorySelected;
+  final TemplateCategory? selectedCategory;
+  final ValueChanged<TemplateCategory?> onCategorySelected;
 
   const TemplateCategoryTabs({
     super.key,
@@ -40,18 +40,29 @@ class TemplateCategoryTabs extends StatelessWidget {
       child: ListView(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-        children: TemplateCategory.values.map((category) {
-          final isSelected = selectedCategory == category;
-          return Padding(
+        children: [
+          Padding(
             padding: const EdgeInsets.only(right: AppSpacing.sm),
             child: AppChip(
-              label: category.displayName,
-              icon: _categoryIcon(category.iconName),
-              isSelected: isSelected,
-              onTap: () => onCategorySelected(category),
+              label: 'Hepsi',
+              icon: Icons.apps_outlined,
+              isSelected: selectedCategory == null,
+              onTap: () => onCategorySelected(null),
             ),
-          );
-        }).toList(),
+          ),
+          ...TemplateCategory.values.map((category) {
+            final isSelected = selectedCategory == category;
+            return Padding(
+              padding: const EdgeInsets.only(right: AppSpacing.sm),
+              child: AppChip(
+                label: category.displayName,
+                icon: categoryIcon(category.iconName),
+                isSelected: isSelected,
+                onTap: () => onCategorySelected(category),
+              ),
+            );
+          }),
+        ],
       ),
     );
   }

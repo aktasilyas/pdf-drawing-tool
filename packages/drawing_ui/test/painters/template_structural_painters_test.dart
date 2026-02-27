@@ -293,6 +293,133 @@ void main() {
       });
     });
 
+    group('grid margin support', () {
+      testWidgets('grid renders with left margin (engineer_pad)', (tester) async {
+        final painter = TemplatePatternPainter(
+          pattern: TemplatePattern.smallGrid,
+          spacingMm: 5,
+          lineWidth: 0.3,
+          lineColor: lineColor,
+          backgroundColor: backgroundColor,
+          pageSize: a4Size,
+          extraData: {'showMarginLeft': true, 'marginMm': 25},
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: CustomPaint(size: a4Size, painter: painter),
+            ),
+          ),
+        );
+
+        expect(tester.takeException(), isNull);
+        expect(painter.extraData?['showMarginLeft'], true);
+        expect(painter.extraData?['marginMm'], 25);
+      });
+
+      testWidgets('grid renders without margin when flag is false',
+          (tester) async {
+        final painter = TemplatePatternPainter(
+          pattern: TemplatePattern.smallGrid,
+          spacingMm: 5,
+          lineWidth: 0.3,
+          lineColor: lineColor,
+          backgroundColor: backgroundColor,
+          pageSize: a4Size,
+          extraData: {'showMarginLeft': false},
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: CustomPaint(size: a4Size, painter: painter),
+            ),
+          ),
+        );
+
+        expect(tester.takeException(), isNull);
+      });
+    });
+
+    group('calligraphy angle and copperplate support', () {
+      testWidgets('calligraphy reads custom angle from extraData',
+          (tester) async {
+        final painter = TemplatePatternPainter(
+          pattern: TemplatePattern.calligraphy,
+          spacingMm: 12,
+          lineWidth: 0.5,
+          lineColor: lineColor,
+          backgroundColor: backgroundColor,
+          pageSize: a4Size,
+          extraData: {'angle': 55},
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: CustomPaint(size: a4Size, painter: painter),
+            ),
+          ),
+        );
+
+        expect(tester.takeException(), isNull);
+        expect(painter.extraData?['angle'], 55);
+      });
+
+      testWidgets('copperplate calligraphy renders zone lines',
+          (tester) async {
+        final painter = TemplatePatternPainter(
+          pattern: TemplatePattern.calligraphy,
+          spacingMm: 12,
+          lineWidth: 0.5,
+          lineColor: lineColor,
+          backgroundColor: backgroundColor,
+          pageSize: a4Size,
+          extraData: {
+            'angle': 55,
+            'ratio': '3:2:3',
+            'style': 'copperplate',
+          },
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: CustomPaint(size: a4Size, painter: painter),
+            ),
+          ),
+        );
+
+        expect(tester.takeException(), isNull);
+        expect(painter.extraData?['style'], 'copperplate');
+        expect(painter.extraData?['ratio'], '3:2:3');
+      });
+
+      testWidgets('copperplate renders with default ratio when not specified',
+          (tester) async {
+        final painter = TemplatePatternPainter(
+          pattern: TemplatePattern.calligraphy,
+          spacingMm: 12,
+          lineWidth: 0.5,
+          lineColor: lineColor,
+          backgroundColor: backgroundColor,
+          pageSize: a4Size,
+          extraData: {'style': 'copperplate', 'angle': 55},
+        );
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: CustomPaint(size: a4Size, painter: painter),
+            ),
+          ),
+        );
+
+        expect(tester.takeException(), isNull);
+      });
+    });
+
     group('structural pattern properties', () {
       test('all structural patterns are marked as isStructured', () {
         final structuralPatterns = [

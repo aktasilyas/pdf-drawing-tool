@@ -3,7 +3,7 @@ import 'package:drawing_core/src/models/template_category.dart';
 import 'package:drawing_core/src/models/template_pattern.dart';
 import 'package:drawing_core/src/services/template_definitions_new.dart' as ext;
 
-/// Template registry — 37 templates (9 free + 28 premium) across 8 categories.
+/// Template registry — 32 templates (9 free + 23 premium) across 8 categories.
 class TemplateRegistry {
   TemplateRegistry._();
 
@@ -100,90 +100,11 @@ class TemplateRegistry {
   ];
 
   static final List<Template> productivityTemplates = [
-    Template(
-      id: 'todo_list',
-      name: 'Yapılacaklar',
-      nameEn: 'To-Do List',
-      category: TemplateCategory.productivity,
-      pattern: TemplatePattern.mediumLines,
-      isPremium: true,
-      defaultBackgroundColor: 0xFFFFFFFF,
-      defaultLineColor: 0xFFE0E0E0,
-      spacingMm: 10,
-      extraData: {
-        'hasCheckboxes': true,
-        'checkboxSize': 16,
-      },
-    ),
-    Template(
-      id: 'meeting_notes',
-      name: 'Toplantı',
-      nameEn: 'Meeting Notes',
-      category: TemplateCategory.productivity,
-      pattern: TemplatePattern.cornell,
-      isPremium: true,
-      defaultBackgroundColor: 0xFFFFFFFF,
-      defaultLineColor: 0xFFE0E0E0,
-      spacingMm: 8,
-      extraData: {
-        'leftMarginRatio': 0.25,
-        'bottomSummaryRatio': 0.2,
-      },
-    ),
-    Template(
-      id: 'daily_planner',
-      name: 'Günlük Plan',
-      nameEn: 'Daily Planner',
-      category: TemplateCategory.productivity,
-      pattern: TemplatePattern.thinLines,
-      isPremium: true,
-      defaultBackgroundColor: 0xFFFFFFFF,
-      defaultLineColor: 0xFFE0E0E0,
-      spacingMm: 6,
-      extraData: {
-        'timeSlots': true,
-        'startHour': 6,
-        'endHour': 22,
-        'slotDuration': 30,
-      },
-    ),
-    Template(
-      id: 'weekly_planner',
-      name: 'Haftalık Plan',
-      nameEn: 'Weekly Planner',
-      category: TemplateCategory.productivity,
-      pattern: TemplatePattern.mediumGrid,
-      isPremium: true,
-      defaultBackgroundColor: 0xFFFFFFFF,
-      defaultLineColor: 0xFFE0E0E0,
-      spacingMm: 7,
-      extraData: {
-        'days': 7,
-        'columns': ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'],
-      },
-    ),
     ...ext.newProductivityTemplates,
   ];
 
   /// Creative templates (Premium)
   static final List<Template> creativeTemplates = [
-    Template(
-      id: 'storyboard',
-      name: 'Storyboard',
-      nameEn: 'Storyboard',
-      category: TemplateCategory.creative,
-      pattern: TemplatePattern.mediumGrid,
-      isPremium: true,
-      defaultBackgroundColor: 0xFFFFFFFF,
-      defaultLineColor: 0xFFE0E0E0,
-      spacingMm: 5,
-      lineWidth: 0.3,
-      extraData: {
-        'frames': 6,
-        'layout': '2x3',
-        'aspectRatio': 16 / 9,
-      },
-    ),
     Template(
       id: 'music_staff',
       name: 'Nota Kağıdı',

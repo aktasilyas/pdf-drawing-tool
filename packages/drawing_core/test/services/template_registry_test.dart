@@ -4,21 +4,21 @@ import 'package:drawing_core/drawing_core.dart';
 void main() {
   group('TemplateRegistry', () {
     test('has correct template count', () {
-      // 8 basic + 6 prod + 6 creative + 6 special
-      // + 3 planning + 3 journal + 3 edu + 2 stationery = 37
-      expect(TemplateRegistry.all.length, 37);
+      // 8 basic + 2 prod + 5 creative + 6 special
+      // + 3 planning + 3 journal + 3 edu + 2 stationery = 32
+      expect(TemplateRegistry.all.length, 32);
     });
 
     test('has 8 basic templates', () {
       expect(TemplateRegistry.basicTemplates.length, 8);
     });
 
-    test('has 6 productivity templates', () {
-      expect(TemplateRegistry.productivityTemplates.length, 6);
+    test('has 2 productivity templates', () {
+      expect(TemplateRegistry.productivityTemplates.length, 2);
     });
 
-    test('has 6 creative templates', () {
-      expect(TemplateRegistry.creativeTemplates.length, 6);
+    test('has 5 creative templates', () {
+      expect(TemplateRegistry.creativeTemplates.length, 5);
     });
 
     test('has 6 special templates', () {
@@ -106,13 +106,13 @@ void main() {
 
       test('returns correct templates for productivity', () {
         final templates = TemplateRegistry.getByCategory(TemplateCategory.productivity);
-        expect(templates.length, 6);
+        expect(templates.length, 2);
         expect(templates.every((t) => t.category == TemplateCategory.productivity), true);
       });
 
       test('returns correct templates for creative', () {
         final templates = TemplateRegistry.getByCategory(TemplateCategory.creative);
-        expect(templates.length, 6);
+        expect(templates.length, 5);
         expect(templates.every((t) => t.category == TemplateCategory.creative), true);
       });
 
@@ -142,7 +142,7 @@ void main() {
       test('returns only premium templates', () {
         final premium = TemplateRegistry.getPremiumTemplates();
         expect(premium.every((t) => t.isPremium), true);
-        expect(premium.length, 28); // 37 - 9 = 28
+        expect(premium.length, 23); // 32 - 9 = 23
       });
     });
 
