@@ -120,4 +120,5 @@ export 'src/managers/page_manager.dart';
 
 // Services
 export 'src/services/cover_registry.dart';
+export 'src/services/template_definitions_new.dart';
 export 'src/services/template_registry.dart';

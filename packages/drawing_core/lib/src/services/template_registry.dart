@@ -1,28 +1,28 @@
 import 'package:drawing_core/src/models/template.dart';
 import 'package:drawing_core/src/models/template_category.dart';
 import 'package:drawing_core/src/models/template_pattern.dart';
+import 'package:drawing_core/src/services/template_definitions_new.dart' as ext;
 
-/// Template registry with predefined templates.
-/// Total: 16 templates (6 basic + 10 premium)
+/// Template registry — 37 templates (9 free + 28 premium) across 8 categories.
 class TemplateRegistry {
   TemplateRegistry._();
 
-  /// All available templates
   static final List<Template> all = [
-    // === BASIC (Free) - 6 Templates ===
     ...basicTemplates,
-    
-    // === PRODUCTIVITY (Premium) - 4 Templates ===
     ...productivityTemplates,
-    
-    // === CREATIVE (Premium) - 3 Templates ===
     ...creativeTemplates,
-    
-    // === SPECIAL (Premium) - 3 Templates ===
     ...specialTemplates,
+    ...planningTemplates,
+    ...journalTemplates,
+    ...educationTemplates,
+    ...stationeryTemplates,
   ];
 
-  /// Default blank template
+  static final List<Template> planningTemplates = ext.planningTemplates;
+  static final List<Template> journalTemplates = ext.journalTemplates;
+  static final List<Template> educationTemplates = ext.educationTemplates;
+  static final List<Template> stationeryTemplates = ext.stationeryTemplates;
+
   static Template get blank => getById('blank')!;
 
   /// Basic templates (Free)
@@ -96,9 +96,9 @@ class TemplateRegistry {
         'bottomSummaryRatio': 0.25,
       },
     ),
+    ...ext.newBasicTemplates,
   ];
 
-  /// Productivity templates (Premium)
   static final List<Template> productivityTemplates = [
     Template(
       id: 'todo_list',
@@ -162,6 +162,7 @@ class TemplateRegistry {
         'columns': ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'],
       },
     ),
+    ...ext.newProductivityTemplates,
   ];
 
   /// Creative templates (Premium)
@@ -215,6 +216,7 @@ class TemplateRegistry {
         'capHeight': true,
       },
     ),
+    ...ext.newCreativeTemplates,
   ];
 
   /// Special templates (Premium)
@@ -264,6 +266,7 @@ class TemplateRegistry {
         'angle': 55,
       },
     ),
+    ...ext.newSpecialTemplates,
   ];
 
   /// Get template by ID

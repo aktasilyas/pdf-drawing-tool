@@ -3,8 +3,8 @@ import 'package:drawing_core/drawing_core.dart';
 
 void main() {
   group('TemplateCategory', () {
-    test('should have 4 categories', () {
-      expect(TemplateCategory.values.length, 4);
+    test('should have 8 categories', () {
+      expect(TemplateCategory.values.length, 8);
     });
     
     test('basic should be free', () {
@@ -16,6 +16,26 @@ void main() {
       expect(TemplateCategory.productivity.isPremium, true);
       expect(TemplateCategory.creative.isPremium, true);
       expect(TemplateCategory.special.isPremium, true);
+    });
+
+    test('new categories should be premium', () {
+      expect(TemplateCategory.planning.isPremium, true);
+      expect(TemplateCategory.journal.isPremium, true);
+      expect(TemplateCategory.education.isPremium, true);
+      expect(TemplateCategory.stationery.isPremium, true);
+    });
+
+    test('new categories should have displayName', () {
+      expect(TemplateCategory.planning.displayName, 'Planlama');
+      expect(TemplateCategory.journal.displayName, 'Günlük');
+      expect(TemplateCategory.education.displayName, 'Eğitim');
+      expect(TemplateCategory.stationery.displayName, 'Kırtasiye');
+    });
+
+    test('all categories should have iconName', () {
+      for (final cat in TemplateCategory.values) {
+        expect(cat.iconName, isNotEmpty);
+      }
     });
     
     test('displayName should return Turkish name', () {
@@ -30,8 +50,8 @@ void main() {
   });
   
   group('TemplatePattern', () {
-    test('should have 16 patterns', () {
-      expect(TemplatePattern.values.length, 16);
+    test('should have 28 patterns', () {
+      expect(TemplatePattern.values.length, 28);
     });
     
     test('blank should have zero spacing', () {
@@ -73,6 +93,19 @@ void main() {
       expect(TemplatePattern.smallDots.hasDots, true);
       expect(TemplatePattern.mediumDots.hasDots, true);
       expect(TemplatePattern.smallGrid.hasDots, false);
+    });
+
+    test('new patterns should be structured', () {
+      expect(TemplatePattern.dailyPlanner.isStructured, true);
+      expect(TemplatePattern.todoList.isStructured, true);
+      expect(TemplatePattern.bulletJournal.isStructured, true);
+      expect(TemplatePattern.storyboard.isStructured, true);
+    });
+
+    test('old patterns should not be structured', () {
+      expect(TemplatePattern.blank.isStructured, false);
+      expect(TemplatePattern.mediumGrid.isStructured, false);
+      expect(TemplatePattern.cornell.isStructured, false);
     });
   });
 }
