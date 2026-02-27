@@ -29,6 +29,32 @@ class TemplateGridView extends StatelessWidget {
     final isPhone = Responsive.isPhone(context);
     final crossAxisCount = isPhone ? 3 : 5;
 
+    if (templates.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.dashboard_customize_outlined,
+              size: 48,
+              color: Theme.of(context)
+                  .colorScheme
+                  .onSurfaceVariant
+                  .withValues(alpha: 0.4),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              'Bu kategoride şablon yok',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return GridView.builder(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.lg,
@@ -99,6 +125,28 @@ class _TemplateGridItem extends StatelessWidget {
                       backgroundColorOverride: Color(paperColor),
                       showBorder: false,
                     ),
+                    if (template.isPremium)
+                      Positioned(
+                        top: AppSpacing.xs,
+                        right: AppSpacing.xs,
+                        child: Container(
+                          padding: const EdgeInsets.all(3),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest
+                                .withValues(alpha: 0.85),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Icon(
+                            Icons.lock_outline,
+                            size: 12,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant,
+                          ),
+                        ),
+                      ),
                     if (isSelected)
                       Positioned(
                         left: AppSpacing.sm,
