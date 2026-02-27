@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'dart:typed_data';
 import 'package:flutter/material.dart' hide Page;
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:drawing_core/drawing_core.dart';
 import 'package:pdfx/pdfx.dart' as pdfx;
 
@@ -63,7 +64,7 @@ class ThumbnailGenerator {
       canvas.scale(scale);
 
       // CRITICAL: Render page background (cover color, template pattern, etc.)
-      _renderPageBackground(canvas, page);
+      await _renderPageBackground(canvas, page);
 
       // CRITICAL: Render PDF background if exists
       if (page.background.type == BackgroundType.pdf) {
@@ -92,13 +93,14 @@ class ThumbnailGenerator {
   }
 
   /// Renders page background (cover color, template patterns, etc.)
-  static void _renderPageBackground(Canvas canvas, Page page) {
+  static Future<void> _renderPageBackground(Canvas canvas, Page page) async {
     final background = page.background;
+    final pageSize = Size(page.size.width, page.size.height);
 
     // 1. Draw base background color
     final bgColor = Color(background.color);
     canvas.drawRect(
-      Rect.fromLTWH(0, 0, page.size.width, page.size.height),
+      Rect.fromLTWH(0, 0, pageSize.width, pageSize.height),
       Paint()..color = bgColor,
     );
 
@@ -111,33 +113,27 @@ class ThumbnailGenerator {
 
     switch (background.type) {
       case BackgroundType.blank:
-        // Solid color only (for covers)
         break;
 
       case BackgroundType.grid:
         final spacing = background.gridSpacing ?? 25.0;
-        _drawGrid(canvas, Size(page.size.width, page.size.height), linePaint,
-            spacing);
+        _drawGrid(canvas, pageSize, linePaint, spacing);
         break;
 
       case BackgroundType.lined:
         final spacing = background.lineSpacing ?? 25.0;
-        _drawLines(canvas, Size(page.size.width, page.size.height), linePaint,
-            spacing);
+        _drawLines(canvas, pageSize, linePaint, spacing);
         break;
 
       case BackgroundType.dotted:
         final spacing = background.gridSpacing ?? 20.0;
-        _drawDots(canvas, Size(page.size.width, page.size.height), spacing,
-            Color(lineColor));
+        _drawDots(canvas, pageSize, spacing, Color(lineColor));
         break;
 
       case BackgroundType.template:
-        // Template patterns (kareli, çizgili vb.)
         if (background.templatePattern != null) {
           _drawTemplatePattern(
-            canvas,
-            Size(page.size.width, page.size.height),
+            canvas, pageSize,
             background.templatePattern!,
             background.templateSpacingMm ?? 8.0,
             background.templateLineWidth ?? 0.5,
@@ -147,13 +143,40 @@ class ThumbnailGenerator {
         break;
 
       case BackgroundType.pdf:
-        // PDF handled separately
         break;
-        
+
       case BackgroundType.cover:
-        // Cover backgrounds rendered via PageBackgroundPatternPainter in main canvas
-        // Thumbnails will show solid color from background.color
+        await _renderCoverImage(canvas, pageSize, background.coverId);
         break;
+    }
+  }
+
+  /// Loads cover image from assets and draws it on canvas.
+  static Future<void> _renderCoverImage(
+    Canvas canvas, Size size, String? coverId,
+  ) async {
+    if (coverId == null) return;
+    final cover = CoverRegistry.byId(coverId);
+    if (cover == null ||
+        cover.style != CoverStyle.image ||
+        cover.imagePath == null) {
+      return;
+    }
+    try {
+      final data = await rootBundle.load(cover.imagePath!);
+      final codec = await ui.instantiateImageCodec(
+        data.buffer.asUint8List(),
+      );
+      final frame = await codec.getNextFrame();
+      final img = frame.image;
+      canvas.drawImageRect(
+        img,
+        Rect.fromLTWH(0, 0, img.width.toDouble(), img.height.toDouble()),
+        Rect.fromLTWH(0, 0, size.width, size.height),
+        Paint()..filterQuality = FilterQuality.medium,
+      );
+    } catch (_) {
+      // Asset yüklenemezse primaryColor fallback zaten çizildi
     }
   }
 

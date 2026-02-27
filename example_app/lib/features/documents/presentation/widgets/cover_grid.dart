@@ -106,14 +106,19 @@ class _CoverGridItem extends StatelessWidget {
                         child: Container(
                           padding: const EdgeInsets.all(AppSpacing.xxs),
                           decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.6),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest
+                                .withValues(alpha: 0.85),
                             borderRadius:
                                 BorderRadius.circular(AppRadius.xs),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.lock,
                             size: AppIconSize.xs,
-                            color: Colors.white,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant,
                           ),
                         ),
                       ),

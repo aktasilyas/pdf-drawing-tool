@@ -162,6 +162,10 @@ class PageBackgroundPatternPainter extends CustomPainter {
         // Minimal frame (already rendered correctly via solid color)
         // Note: The frame decoration is typically done in UI layer, not canvas
         break;
+
+      case CoverStyle.image:
+        // Image covers are rendered in UI layer via Image.asset widget
+        break;
     }
   }
 
@@ -233,5 +237,59 @@ class PageBackgroundPatternPainter extends CustomPainter {
   bool shouldRepaint(covariant PageBackgroundPatternPainter oldDelegate) {
     return oldDelegate.background != background ||
         oldDelegate.colorScheme != colorScheme;
+  }
+}
+
+/// Combines cover image (if applicable) with pattern painter.
+/// Use this instead of bare CustomPaint+PageBackgroundPatternPainter.
+class PageBackgroundView extends StatelessWidget {
+  final PageBackground background;
+  final CanvasColorScheme? colorScheme;
+  final Size pageSize;
+
+  const PageBackgroundView({
+    super.key,
+    required this.background,
+    required this.pageSize,
+    this.colorScheme,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final imagePath = _coverImagePath;
+    final painter = CustomPaint(
+      painter: PageBackgroundPatternPainter(
+        background: background,
+        colorScheme: colorScheme,
+      ),
+      size: pageSize,
+      isComplex: true,
+      willChange: false,
+    );
+
+    if (imagePath == null) return painter;
+
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: Image.asset(
+            imagePath,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+          ),
+        ),
+        painter,
+      ],
+    );
+  }
+
+  String? get _coverImagePath {
+    if (background.type != BackgroundType.cover ||
+        background.coverId == null) {
+      return null;
+    }
+    final cover = CoverRegistry.byId(background.coverId!);
+    if (cover?.style != CoverStyle.image) return null;
+    return cover?.imagePath;
   }
 }

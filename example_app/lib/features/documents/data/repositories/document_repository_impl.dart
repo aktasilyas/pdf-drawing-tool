@@ -392,21 +392,40 @@ class DocumentRepositoryImpl implements DocumentRepository {
     required Map<String, dynamic> content,
     int? pageCount,
     DateTime? updatedAt,
+    String? coverId,
+    bool updateCover = false,
   }) async {
     try {
       // Save content
       await _localDatasource.saveDocumentContent(id, content);
-      
+
       // Update metadata if provided
-      if (pageCount != null || updatedAt != null) {
+      if (pageCount != null || updatedAt != null || updateCover) {
         final document = await _localDatasource.getDocument(id);
-        final updated = document.copyWith(
-          pageCount: pageCount,
+        // Build updated model manually to allow setting coverId to null
+        final updated = DocumentModel(
+          id: document.id,
+          title: document.title,
+          folderId: document.folderId,
+          templateId: document.templateId,
+          createdAt: document.createdAt,
           updatedAt: updatedAt ?? DateTime.now(),
+          thumbnailPath: document.thumbnailPath,
+          pageCount: pageCount ?? document.pageCount,
+          isFavorite: document.isFavorite,
+          isInTrash: document.isInTrash,
+          syncState: document.syncState,
+          paperColor: document.paperColor,
+          isPortrait: document.isPortrait,
+          documentType: document.documentType,
+          coverId: updateCover ? coverId : document.coverId,
+          hasCover: updateCover ? (coverId != null) : document.hasCover,
+          paperWidthMm: document.paperWidthMm,
+          paperHeightMm: document.paperHeightMm,
         );
         await _localDatasource.updateDocument(updated);
       }
-      
+
       return const Right(null);
     } on CacheException catch (e) {
       return Left(CacheFailure(e.message));

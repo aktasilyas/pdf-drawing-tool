@@ -52,7 +52,10 @@ class PaperColorPalette extends StatelessWidget {
               boxShadow: (color == 0xFFFFFFFF || color == 0xFFF5F5F5)
                   ? [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.1),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .shadow
+                            .withValues(alpha: 0.1),
                         blurRadius: 2,
                         offset: const Offset(0, 1),
                       ),
@@ -63,7 +66,9 @@ class PaperColorPalette extends StatelessWidget {
                 ? Icon(
                     Icons.check,
                     size: AppIconSize.sm,
-                    color: color == 0xFF1A1A1A ? Colors.white : AppColors.primary,
+                    color: color == 0xFF1A1A1A
+                        ? AppColors.onPrimary
+                        : AppColors.primary,
                   )
                 : null,
           ),

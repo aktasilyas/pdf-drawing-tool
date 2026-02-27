@@ -49,11 +49,19 @@ class TemplatePreviewSection extends StatelessWidget {
     return _buildMobileLayout(context);
   }
 
+  /// Calculate preview card dimensions based on paper aspect ratio.
+  (double width, double height) _calcPreviewDimensions(double maxDim) {
+    final ratio = paperSize.widthMm / paperSize.heightMm;
+    if (ratio >= 1.0) {
+      // Landscape or square
+      return (maxDim, maxDim / ratio);
+    }
+    // Portrait
+    return (maxDim * ratio, maxDim);
+  }
+
   Widget _buildTabletLayout(BuildContext context) {
-    const baseW = 110.0;
-    const baseH = 155.0;
-    final previewW = paperSize.isLandscape ? baseH : baseW;
-    final previewH = paperSize.isLandscape ? baseW : baseH;
+    final (previewW, previewH) = _calcPreviewDimensions(155.0);
 
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -78,10 +86,7 @@ class TemplatePreviewSection extends StatelessWidget {
   }
 
   Widget _buildMobileLayout(BuildContext context) {
-    const baseW = 90.0;
-    const baseH = 127.0;
-    final previewW = paperSize.isLandscape ? baseH : baseW;
-    final previewH = paperSize.isLandscape ? baseW : baseH;
+    final (previewW, previewH) = _calcPreviewDimensions(127.0);
 
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -206,8 +211,8 @@ class TemplatePreviewSection extends StatelessWidget {
       case PaperSizePreset.letter: return 'Letter';
       case PaperSizePreset.legal: return 'Legal';
       case PaperSizePreset.square: return 'Kare';
-      case PaperSizePreset.widescreen: return 'Genis';
-      case PaperSizePreset.custom: return 'Ozel';
+      case PaperSizePreset.widescreen: return 'Geniş';
+      case PaperSizePreset.custom: return 'Özel';
     }
   }
 }

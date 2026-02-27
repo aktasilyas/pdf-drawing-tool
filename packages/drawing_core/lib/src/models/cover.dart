@@ -4,6 +4,7 @@ enum CoverStyle {
   gradient,   // Gradient
   pattern,    // Desenli (çizgili, noktalı vs)
   minimal,    // Minimalist çerçeve
+  image,      // Görsel kapak (asset)
 }
 
 /// Kapak modeli
@@ -13,6 +14,7 @@ class Cover {
   final CoverStyle style;
   final int primaryColor;
   final int? secondaryColor; // Gradient için
+  final String? imagePath; // Asset path (örn: 'assets/covers/cover_01_kraft.webp')
   final bool isPremium;
   final bool showTitle; // Başlık gösterilsin mi
 
@@ -22,8 +24,9 @@ class Cover {
     required this.style,
     required this.primaryColor,
     this.secondaryColor,
+    this.imagePath,
     this.isPremium = false,
-    this.showTitle = true,
+    this.showTitle = false,
   });
 
   factory Cover.fromJson(Map<String, dynamic> json) {
@@ -36,8 +39,9 @@ class Cover {
       ),
       primaryColor: json['primaryColor'] as int,
       secondaryColor: json['secondaryColor'] as int?,
+      imagePath: json['imagePath'] as String?,
       isPremium: json['isPremium'] as bool? ?? false,
-      showTitle: json['showTitle'] as bool? ?? true,
+      showTitle: json['showTitle'] as bool? ?? false,
     );
   }
 
@@ -47,6 +51,7 @@ class Cover {
     'style': style.name,
     'primaryColor': primaryColor,
     if (secondaryColor != null) 'secondaryColor': secondaryColor,
+    if (imagePath != null) 'imagePath': imagePath,
     'isPremium': isPremium,
     'showTitle': showTitle,
   };

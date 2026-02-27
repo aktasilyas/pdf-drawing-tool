@@ -59,3 +59,4 @@ flutter:
     - .env
     - assets/icons/
     - assets/stickers/
+    - assets/covers/

@@ -78,5 +78,7 @@ abstract class DocumentRepository {
     required Map<String, dynamic> content,
     int? pageCount,
     DateTime? updatedAt,
+    String? coverId,
+    bool updateCover = false,
   });
 }

@@ -229,6 +229,9 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
   /// Last viewport size for detecting orientation changes.
   Size? _lastViewportSize;
 
+  /// Last page size for detecting paper format/orientation changes.
+  Size? _lastPageSize;
+
   // ─────────────────────────────────────────────────────────────────────────
   // Public Getters/Setters (for mixins and testing)
   // ─────────────────────────────────────────────────────────────────────────
@@ -256,6 +259,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
     if (oldWidget.canvasMode != widget.canvasMode) {
       _hasInitialized = false;
       _lastViewportSize = null;
+      _lastPageSize = null;
     }
   }
 
@@ -296,18 +300,23 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
     if (canvasMode.isInfinite) {
       _hasInitialized = true;
       _lastViewportSize = viewportSize;
+      _lastPageSize = Size(currentPage.size.width, currentPage.size.height);
       return;
     }
 
-    // Check if viewport size changed significantly
+    final pageSize = Size(currentPage.size.width, currentPage.size.height);
+
+    // Check if viewport or page size changed significantly
     final needsReInit = !_hasInitialized ||
         _isOrientationChanged(viewportSize) ||
-        _isSignificantHeightChange(viewportSize);
+        _isSignificantHeightChange(viewportSize) ||
+        _isPageSizeChanged(pageSize);
     if (!needsReInit) return;
 
     // Mark as initialized immediately to prevent multiple calls
     _hasInitialized = true;
     _lastViewportSize = viewportSize;
+    _lastPageSize = pageSize;
 
     // Schedule initialization
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -337,6 +346,14 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
     final lastSize = _lastViewportSize;
     if (lastSize == null) return false;
     return (newSize.height - lastSize.height).abs() > 100;
+  }
+
+  /// Detect page size change (paper format or orientation change).
+  bool _isPageSizeChanged(Size newPageSize) {
+    final last = _lastPageSize;
+    if (last == null) return false;
+    return (last.width - newPageSize.width).abs() > 1 ||
+        (last.height - newPageSize.height).abs() > 1;
   }
 
   /// Build PDF background widget (with lazy loading + automatic prefetch).
@@ -923,15 +940,11 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                                                 )
                                               : null,
                                         ),
-                                        child: CustomPaint(
-                                          painter: PageBackgroundPatternPainter(
-                                            background: currentPage.background,
-                                            colorScheme: colorScheme,
-                                          ),
-                                          size: Size(currentPage.size.width,
+                                        child: PageBackgroundView(
+                                          background: currentPage.background,
+                                          colorScheme: colorScheme,
+                                          pageSize: Size(currentPage.size.width,
                                               currentPage.size.height),
-                                          isComplex: true,
-                                          willChange: false,
                                         ),
                                       ),
                                     ),

@@ -5,13 +5,6 @@ class CoverRegistry {
   CoverRegistry._();
 
   // === SOLID KAPAKLAR (Düz Renk) ===
-  static const solidBlack = Cover(
-    id: 'solid_black',
-    name: 'Klasik Siyah',
-    style: CoverStyle.solid,
-    primaryColor: 0xFF1A1A1A,
-  );
-
   static const solidNavy = Cover(
     id: 'solid_navy',
     name: 'Lacivert',
@@ -27,20 +20,6 @@ class CoverRegistry {
   );
 
   // === MINIMAL KAPAKLAR (Çerçeveli) ===
-  static const minimalWhite = Cover(
-    id: 'minimal_white',
-    name: 'Beyaz Çerçeve',
-    style: CoverStyle.minimal,
-    primaryColor: 0xFFFFFFFF,
-  );
-
-  static const minimalBlack = Cover(
-    id: 'minimal_black',
-    name: 'Siyah Çerçeve',
-    style: CoverStyle.minimal,
-    primaryColor: 0xFF1A1A1A,
-  );
-
   static const minimalGray = Cover(
     id: 'minimal_gray',
     name: 'Gri Çerçeve',
@@ -100,13 +79,78 @@ class CoverRegistry {
     isPremium: true,
   );
 
+  // === GÖRSEL KAPAKLAR (Image) ===
+  static const imageCoverKraft = Cover(
+    id: 'img_kraft',
+    name: 'Kraft',
+    style: CoverStyle.image,
+    primaryColor: 0xFFD2B48C,
+    imagePath: 'assets/covers/cover_01_kraft.webp',
+  );
+
+  static const imageCoverGeometric = Cover(
+    id: 'img_geometric',
+    name: 'Geometrik',
+    style: CoverStyle.image,
+    primaryColor: 0xFFFFFFFF,
+    imagePath: 'assets/covers/cover_02_geometric_bw.png',
+  );
+
+  static const imageCoverTerrazzo = Cover(
+    id: 'img_terrazzo',
+    name: 'Terrazzo',
+    style: CoverStyle.image,
+    primaryColor: 0xFFF0ECEA,
+    imagePath: 'assets/covers/cover_03_terrazzo.png',
+  );
+
+  static const imageCoverDinosaur = Cover(
+    id: 'img_dinosaur',
+    name: 'Dinozor',
+    style: CoverStyle.image,
+    primaryColor: 0xFFFDE68A,
+    imagePath: 'assets/covers/cover_06_dinosaur.webp',
+  );
+
+  static const imageCoverSpace = Cover(
+    id: 'img_space',
+    name: 'Uzay',
+    style: CoverStyle.image,
+    primaryColor: 0xFF0C2340,
+    imagePath: 'assets/covers/cover_07_space.webp',
+  );
+
+  static const imageCoverFloral = Cover(
+    id: 'img_floral',
+    name: 'Çiçekli',
+    style: CoverStyle.image,
+    primaryColor: 0xFFE91E8C,
+    imagePath: 'assets/covers/cover_08_floral_pink.webp',
+    isPremium: true,
+  );
+
+  static const imageCoverNavyGold = Cover(
+    id: 'img_navy_gold',
+    name: 'Lacivert Gold',
+    style: CoverStyle.image,
+    primaryColor: 0xFF1B2A4A,
+    imagePath: 'assets/covers/cover_09_navy_gold.webp',
+    isPremium: true,
+  );
+
+  static const imageCoverLeather = Cover(
+    id: 'img_leather',
+    name: 'Deri',
+    style: CoverStyle.image,
+    primaryColor: 0xFF3E2723,
+    imagePath: 'assets/covers/cover_10_leather.webp',
+    isPremium: true,
+  );
+
   // === TÜM KAPAKLAR ===
   static const List<Cover> all = [
-    solidBlack,
     solidNavy,
     solidBurgundy,
-    minimalWhite,
-    minimalBlack,
     minimalGray,
     patternDots,
     patternLines,
@@ -114,17 +158,27 @@ class CoverRegistry {
     gradientOcean,
     gradientForest,
     gradientPurple,
+    imageCoverKraft,
+    imageCoverGeometric,
+    imageCoverTerrazzo,
+    imageCoverDinosaur,
+    imageCoverSpace,
+    imageCoverFloral,
+    imageCoverNavyGold,
+    imageCoverLeather,
   ];
 
   static const List<Cover> free = [
-    solidBlack,
     solidNavy,
     solidBurgundy,
-    minimalWhite,
-    minimalBlack,
     minimalGray,
     patternDots,
     patternLines,
+    imageCoverKraft,
+    imageCoverGeometric,
+    imageCoverTerrazzo,
+    imageCoverDinosaur,
+    imageCoverSpace,
   ];
 
   static const List<Cover> premium = [
@@ -132,10 +186,13 @@ class CoverRegistry {
     gradientOcean,
     gradientForest,
     gradientPurple,
+    imageCoverFloral,
+    imageCoverNavyGold,
+    imageCoverLeather,
   ];
 
   /// Default kapak
-  static const Cover defaultCover = solidBlack;
+  static const Cover defaultCover = solidNavy;
 
   /// ID'ye göre kapak bul
   static Cover? byId(String id) {

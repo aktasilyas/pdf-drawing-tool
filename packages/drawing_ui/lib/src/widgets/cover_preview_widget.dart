@@ -50,25 +50,25 @@ class CoverPreviewWidget extends StatelessWidget {
           fit: StackFit.expand,
           children: [
             // Kapak arka planı
-            _buildBackground(),
-            
+            _buildBackground(theme),
+
             // Başlık
             if (cover.showTitle && title != null && title!.isNotEmpty)
               _buildTitle(theme),
-            
+
             // Dekoratif çizgiler (notebook efekti)
-            _buildDecoration(),
+            _buildDecoration(theme),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildBackground() {
+  Widget _buildBackground(ThemeData theme) {
     switch (cover.style) {
       case CoverStyle.solid:
         return Container(color: Color(cover.primaryColor));
-      
+
       case CoverStyle.gradient:
         return Container(
           decoration: BoxDecoration(
@@ -82,12 +82,15 @@ class CoverPreviewWidget extends StatelessWidget {
             ),
           ),
         );
-      
+
       case CoverStyle.pattern:
         return _buildPatternBackground();
-      
+
       case CoverStyle.minimal:
-        return _buildMinimalBackground();
+        return _buildMinimalBackground(theme);
+
+      case CoverStyle.image:
+        return _buildImageBackground();
     }
   }
 
@@ -103,13 +106,14 @@ class CoverPreviewWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildMinimalBackground() {
+  Widget _buildMinimalBackground(ThemeData theme) {
     final bgColor = Color(cover.primaryColor);
     final luminance = bgColor.computeLuminance();
-    
+    final surface = theme.colorScheme.surface;
+
     // Minimal: Açık arka plan + koyu çerçeve veya tam tersi
-    final frameColor = luminance > 0.5 ? bgColor : Colors.white;
-    final backgroundColor = luminance > 0.5 ? Colors.white : bgColor;
+    final frameColor = luminance > 0.5 ? bgColor : surface;
+    final backgroundColor = luminance > 0.5 ? surface : bgColor;
     
     return Container(
       color: backgroundColor,
@@ -135,11 +139,29 @@ class CoverPreviewWidget extends StatelessWidget {
     );
   }
 
+  Widget _buildImageBackground() {
+    if (cover.imagePath != null) {
+      return Image.asset(
+        cover.imagePath!,
+        fit: BoxFit.cover,
+        width: width,
+        height: height,
+        errorBuilder: (_, __, ___) => Container(
+          color: Color(cover.primaryColor),
+        ),
+      );
+    }
+    // imagePath yoksa primaryColor fallback
+    return Container(color: Color(cover.primaryColor));
+  }
+
   Widget _buildTitle(ThemeData theme) {
     // Renk kontrastına göre başlık rengi
     final bgColor = Color(cover.primaryColor);
     final luminance = bgColor.computeLuminance();
-    final titleColor = luminance > 0.5 ? Colors.black87 : Colors.white;
+    final titleColor = luminance > 0.5
+        ? theme.colorScheme.onSurface
+        : theme.colorScheme.surface;
 
     return Positioned(
       left: 16,
@@ -154,7 +176,7 @@ class CoverPreviewWidget extends StatelessWidget {
           letterSpacing: 0.3,
           shadows: [
             Shadow(
-              color: Colors.black.withValues(alpha: 0.3),
+              color: theme.colorScheme.shadow.withValues(alpha: 0.3),
               blurRadius: 4,
               offset: const Offset(0, 1),
             ),
@@ -167,7 +189,10 @@ class CoverPreviewWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildDecoration() {
+  Widget _buildDecoration(ThemeData theme) {
+    final shadow = theme.colorScheme.shadow;
+    final onSurface = theme.colorScheme.onSurface;
+
     // Sol kenarda notebook cilt efekti
     return Positioned(
       left: 0,
@@ -178,9 +203,9 @@ class CoverPreviewWidget extends StatelessWidget {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Colors.black.withValues(alpha: 0.2),
-              Colors.black.withValues(alpha: 0.05),
-              Colors.transparent,
+              shadow.withValues(alpha: 0.2),
+              shadow.withValues(alpha: 0.05),
+              shadow.withValues(alpha: 0),
             ],
           ),
         ),
@@ -198,7 +223,7 @@ class CoverPreviewWidget extends StatelessWidget {
                   height: dotSize,
                   margin: const EdgeInsets.only(left: 3),
                   decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.3),
+                    color: onSurface.withValues(alpha: 0.3),
                     shape: BoxShape.circle,
                   ),
                 ),

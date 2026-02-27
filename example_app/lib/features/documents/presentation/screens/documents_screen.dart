@@ -31,14 +31,6 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
   bool _isSidebarCollapsed = false;
 
   @override
-  void dispose() {
-    ref.read(selectionModeProvider.notifier).state = false;
-    ref.read(selectedDocumentsProvider.notifier).state = {};
-    ref.read(selectedFoldersProvider.notifier).state = {};
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final isPhone = Responsive.isPhone(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;

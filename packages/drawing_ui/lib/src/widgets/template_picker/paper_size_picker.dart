@@ -38,19 +38,23 @@ class PaperSizePicker extends StatelessWidget {
       case PaperSizePreset.letter: return 'Letter';
       case PaperSizePreset.legal: return 'Legal';
       case PaperSizePreset.square: return 'Kare';
-      case PaperSizePreset.widescreen: return 'Genis (16:9)';
-      case PaperSizePreset.custom: return 'Ozel';
+      case PaperSizePreset.widescreen: return 'Geniş (16:9)';
+      case PaperSizePreset.custom: return 'Özel';
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
+    final cs = Theme.of(context).colorScheme;
     final hPad = dense ? 8.0 : 12.0;
     final fontSize = dense ? 12.0 : 14.0;
     final iconSize = dense ? 14.0 : 18.0;
     final h = dense ? 36.0 : null;
+    final border = Border.all(color: cs.outline.withValues(alpha: 0.2));
+    final radius = BorderRadius.circular(8);
+    final decoration = BoxDecoration(
+      color: cs.surfaceContainerHigh, borderRadius: radius, border: border,
+    );
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -58,11 +62,7 @@ class PaperSizePicker extends StatelessWidget {
         Container(
           height: h,
           padding: EdgeInsets.symmetric(horizontal: hPad),
-          decoration: BoxDecoration(
-            color: cs.surfaceContainerHigh,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: cs.outline.withValues(alpha: 0.2)),
-          ),
+          decoration: decoration,
           child: DropdownButtonHideUnderline(
             child: DropdownButton<PaperSizePreset>(
               value: selectedSize.preset,
@@ -90,55 +90,35 @@ class PaperSizePicker extends StatelessWidget {
         ),
         if (showLandscapeToggle) ...[
           const SizedBox(width: 8),
-          _OrientationToggle(
-            isLandscape: selectedSize.isLandscape,
-            onToggle: () {
-              onSizeSelected(
-                selectedSize.isLandscape
-                    ? selectedSize.portrait
-                    : selectedSize.landscape,
-              );
-            },
-            colorScheme: cs,
+          Container(
+            height: h,
+            padding: EdgeInsets.symmetric(horizontal: hPad),
+            decoration: decoration,
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<bool>(
+                value: selectedSize.isLandscape,
+                isDense: dense,
+                icon: PhosphorIcon(StarNoteIcons.caretDown,
+                    size: iconSize, color: cs.onSurfaceVariant),
+                style: TextStyle(fontSize: fontSize, color: cs.onSurface),
+                dropdownColor: cs.surfaceContainerHighest,
+                items: const [
+                  DropdownMenuItem(value: false, child: Text('Dikey')),
+                  DropdownMenuItem(value: true, child: Text('Yatay')),
+                ],
+                onChanged: (isLandscape) {
+                  if (isLandscape == null) return;
+                  onSizeSelected(
+                    isLandscape
+                        ? selectedSize.landscape
+                        : selectedSize.portrait,
+                  );
+                },
+              ),
+            ),
           ),
         ],
       ],
-    );
-  }
-}
-
-class _OrientationToggle extends StatelessWidget {
-  final bool isLandscape;
-  final VoidCallback onToggle;
-  final ColorScheme colorScheme;
-
-  const _OrientationToggle({
-    required this.isLandscape,
-    required this.onToggle,
-    required this.colorScheme,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onToggle,
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: colorScheme.outline.withValues(alpha: 0.2),
-          ),
-        ),
-        child: PhosphorIcon(
-          isLandscape
-              ? StarNoteIcons.orientationLandscape
-              : StarNoteIcons.orientationPortrait,
-          size: 20,
-          color: colorScheme.onSurfaceVariant,
-        ),
-      ),
     );
   }
 }
