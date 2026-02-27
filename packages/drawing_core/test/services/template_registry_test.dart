@@ -4,24 +4,25 @@ import 'package:drawing_core/drawing_core.dart';
 void main() {
   group('TemplateRegistry', () {
     test('has correct template count', () {
-      // 6 basic + 4 productivity + 3 creative + 3 special = 16
-      expect(TemplateRegistry.all.length, 16);
+      // 8 basic + 2 prod + 5 creative + 6 special
+      // + 3 planning + 3 journal + 3 edu + 2 stationery = 32
+      expect(TemplateRegistry.all.length, 32);
     });
 
-    test('has 6 basic templates', () {
-      expect(TemplateRegistry.basicTemplates.length, 6);
+    test('has 8 basic templates', () {
+      expect(TemplateRegistry.basicTemplates.length, 8);
     });
 
-    test('has 4 productivity templates', () {
-      expect(TemplateRegistry.productivityTemplates.length, 4);
+    test('has 2 productivity templates', () {
+      expect(TemplateRegistry.productivityTemplates.length, 2);
     });
 
-    test('has 3 creative templates', () {
-      expect(TemplateRegistry.creativeTemplates.length, 3);
+    test('has 5 creative templates', () {
+      expect(TemplateRegistry.creativeTemplates.length, 5);
     });
 
-    test('has 3 special templates', () {
-      expect(TemplateRegistry.specialTemplates.length, 3);
+    test('has 6 special templates', () {
+      expect(TemplateRegistry.specialTemplates.length, 6);
     });
 
     test('blank getter works', () {
@@ -85,6 +86,8 @@ void main() {
           'small_grid',
           'dotted',
           'cornell',
+          'medium_lined',
+          'wide_ruled',
         ];
 
         for (final id in expectedIds) {
@@ -97,26 +100,33 @@ void main() {
     group('getByCategory', () {
       test('returns correct templates for basic', () {
         final templates = TemplateRegistry.getByCategory(TemplateCategory.basic);
-        expect(templates.length, 6);
+        expect(templates.length, 8);
         expect(templates.every((t) => t.category == TemplateCategory.basic), true);
       });
 
       test('returns correct templates for productivity', () {
         final templates = TemplateRegistry.getByCategory(TemplateCategory.productivity);
-        expect(templates.length, 4);
+        expect(templates.length, 2);
         expect(templates.every((t) => t.category == TemplateCategory.productivity), true);
       });
 
       test('returns correct templates for creative', () {
         final templates = TemplateRegistry.getByCategory(TemplateCategory.creative);
-        expect(templates.length, 3);
+        expect(templates.length, 5);
         expect(templates.every((t) => t.category == TemplateCategory.creative), true);
       });
 
       test('returns correct templates for special', () {
         final templates = TemplateRegistry.getByCategory(TemplateCategory.special);
-        expect(templates.length, 3);
+        expect(templates.length, 6);
         expect(templates.every((t) => t.category == TemplateCategory.special), true);
+      });
+
+      test('should have templates for all 8 categories', () {
+        for (final cat in TemplateCategory.values) {
+          final templates = TemplateRegistry.getByCategory(cat);
+          expect(templates, isNotEmpty, reason: '${cat.name} has no templates');
+        }
       });
     });
 
@@ -124,7 +134,7 @@ void main() {
       test('returns only free templates', () {
         final free = TemplateRegistry.getFreeTemplates();
         expect(free.every((t) => !t.isPremium), true);
-        expect(free.length, 6); // All basic templates
+        expect(free.length, 9); // 8 basic + 1 stationery (checklist_simple)
       });
     });
 
@@ -132,7 +142,7 @@ void main() {
       test('returns only premium templates', () {
         final premium = TemplateRegistry.getPremiumTemplates();
         expect(premium.every((t) => t.isPremium), true);
-        expect(premium.length, 10); // 16 - 6 = 10
+        expect(premium.length, 23); // 32 - 9 = 23
       });
     });
 
@@ -151,8 +161,8 @@ void main() {
 
       test('returns templates with cornell pattern', () {
         final templates = TemplateRegistry.getByPattern(TemplatePattern.cornell);
-        expect(templates.length, 1); // Only cornell template
-        expect(templates.first.id, 'cornell');
+        expect(templates.length, greaterThanOrEqualTo(1));
+        expect(templates.any((t) => t.id == 'cornell'), true);
       });
     });
 
@@ -226,13 +236,45 @@ void main() {
 
       test('templates with lines/grids/dots have spacing', () {
         for (final template in TemplateRegistry.all) {
-          if (template.pattern.hasLines || 
-              template.pattern.hasGrid || 
+          if (template.pattern.hasLines ||
+              template.pattern.hasGrid ||
               template.pattern.hasDots) {
             expect(template.spacingMm, greaterThan(0),
                 reason: '${template.id} should have spacing');
           }
         }
+      });
+    });
+
+    group('new category templates', () {
+      test('planning templates should exist', () {
+        final planning =
+            TemplateRegistry.getByCategory(TemplateCategory.planning);
+        expect(planning.length, 3);
+      });
+
+      test('journal templates should exist', () {
+        final journal =
+            TemplateRegistry.getByCategory(TemplateCategory.journal);
+        expect(journal.length, 3);
+      });
+
+      test('education templates should exist', () {
+        final edu =
+            TemplateRegistry.getByCategory(TemplateCategory.education);
+        expect(edu.length, 3);
+      });
+
+      test('stationery templates should exist', () {
+        final stationery =
+            TemplateRegistry.getByCategory(TemplateCategory.stationery);
+        expect(stationery.length, 2);
+      });
+
+      test('checklist should be free', () {
+        final checklist = TemplateRegistry.getById('checklist_simple');
+        expect(checklist, isNotNull);
+        expect(checklist!.isPremium, false);
       });
     });
   });

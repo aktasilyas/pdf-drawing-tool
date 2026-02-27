@@ -30,7 +30,7 @@ class _TemplateSelectionScreenState
   bool _hasCover = true;
   PaperSize _paperSize = PaperSize.a4;
   int _paperColor = 0xFFFFFFFF;
-  TemplateCategory _category = TemplateCategory.basic;
+  TemplateCategory? _category;
   Template? _template;
   bool _isSelectingCover = false;
   Cover _cover = CoverRegistry.defaultCover;
@@ -38,8 +38,7 @@ class _TemplateSelectionScreenState
   @override
   void initState() {
     super.initState();
-    _template =
-        TemplateRegistry.getByCategory(TemplateCategory.basic).firstOrNull;
+    _template = TemplateRegistry.all.firstOrNull;
   }
 
   @override
@@ -105,7 +104,9 @@ class _TemplateSelectionScreenState
           if (!_isSelectingCover)
             TemplateCategoryTabs(
               selectedCategory: _category,
-              onCategorySelected: (c) => setState(() => _category = c),
+              onCategorySelected: (c) => setState(() {
+                _category = c;
+              }),
             ),
           const SizedBox(height: AppSpacing.xs),
           Expanded(

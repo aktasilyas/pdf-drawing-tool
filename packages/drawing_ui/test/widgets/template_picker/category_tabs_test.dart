@@ -249,6 +249,12 @@ void main() {
     });
 
     testWidgets('renders all categories including premium', (tester) async {
+      // Use wide viewport so all category chips are visible in horizontal ListView
+      tester.view.physicalSize = const Size(1920, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(

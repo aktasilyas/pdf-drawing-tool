@@ -49,6 +49,44 @@ enum TemplatePattern {
   
   /// Kaligrafi (açılı çizgiler)
   calligraphy,
+
+  // === YENİ YAPISAL PATTERN'LAR ===
+
+  /// Günlük planlayıcı (saat dilimleri)
+  dailyPlanner,
+
+  /// Haftalık planlayıcı (gün sütunları)
+  weeklyPlanner,
+
+  /// Aylık planlayıcı (takvim grid)
+  monthlyPlanner,
+
+  /// Bullet Journal (index + signifier)
+  bulletJournal,
+
+  /// Teşekkür günlüğü (prompt alanları)
+  gratitudeJournal,
+
+  /// Yapılacaklar listesi (checkbox + öncelik)
+  todoList,
+
+  /// Kontrol listesi (checkbox satırları)
+  checklist,
+
+  /// Storyboard (kare çerçeveler + açıklama)
+  storyboard,
+
+  /// Wireframe (cihaz çerçevesi + grid)
+  wireframe,
+
+  /// Toplantı notları (bölümler: katılımcılar, gündem, notlar)
+  meetingNotes,
+
+  /// Okuma günlüğü (tablo: başlık, yazar, sayfa, puan)
+  readingLog,
+
+  /// Kelime listesi (tablo: kelime, anlam, cümle)
+  vocabularyList,
 }
 
 /// TemplatePattern extension methods
@@ -85,9 +123,26 @@ extension TemplatePatternExtension on TemplatePattern {
         return 10;
       case TemplatePattern.calligraphy:
         return 12;
+      case TemplatePattern.dailyPlanner:
+      case TemplatePattern.weeklyPlanner:
+      case TemplatePattern.gratitudeJournal:
+      case TemplatePattern.meetingNotes:
+      case TemplatePattern.readingLog:
+      case TemplatePattern.vocabularyList:
+      case TemplatePattern.monthlyPlanner:
+        return 8;
+      case TemplatePattern.bulletJournal:
+        return 7;
+      case TemplatePattern.todoList:
+      case TemplatePattern.checklist:
+        return 10;
+      case TemplatePattern.storyboard:
+        return 0;
+      case TemplatePattern.wireframe:
+        return 5;
     }
   }
-  
+
   /// Pattern için varsayılan çizgi kalınlığı (px)
   double get defaultLineWidth {
     switch (this) {
@@ -96,6 +151,8 @@ extension TemplatePatternExtension on TemplatePattern {
       case TemplatePattern.thinLines:
       case TemplatePattern.smallGrid:
       case TemplatePattern.smallDots:
+      case TemplatePattern.bulletJournal:
+      case TemplatePattern.wireframe:
         return 0.3;
       case TemplatePattern.mediumLines:
       case TemplatePattern.mediumGrid:
@@ -118,7 +175,9 @@ extension TemplatePatternExtension on TemplatePattern {
            this == TemplatePattern.cornell ||
            this == TemplatePattern.music ||
            this == TemplatePattern.handwriting ||
-           this == TemplatePattern.calligraphy;
+           this == TemplatePattern.calligraphy ||
+           this == TemplatePattern.meetingNotes ||
+           this == TemplatePattern.readingLog;
   }
   
   /// Pattern grid içeriyor mu?
@@ -127,7 +186,10 @@ extension TemplatePatternExtension on TemplatePattern {
            this == TemplatePattern.mediumGrid ||
            this == TemplatePattern.largeGrid ||
            this == TemplatePattern.isometric ||
-           this == TemplatePattern.hexagonal;
+           this == TemplatePattern.hexagonal ||
+           this == TemplatePattern.monthlyPlanner ||
+           this == TemplatePattern.storyboard ||
+           this == TemplatePattern.wireframe;
   }
   
   /// Pattern nokta içeriyor mu?
@@ -135,5 +197,26 @@ extension TemplatePatternExtension on TemplatePattern {
     return this == TemplatePattern.smallDots ||
            this == TemplatePattern.mediumDots ||
            this == TemplatePattern.largeDots;
+  }
+
+  /// Bu pattern yapısal mı (header, bölge, checkbox içerir)?
+  bool get isStructured {
+    switch (this) {
+      case TemplatePattern.dailyPlanner:
+      case TemplatePattern.weeklyPlanner:
+      case TemplatePattern.monthlyPlanner:
+      case TemplatePattern.bulletJournal:
+      case TemplatePattern.gratitudeJournal:
+      case TemplatePattern.todoList:
+      case TemplatePattern.checklist:
+      case TemplatePattern.storyboard:
+      case TemplatePattern.wireframe:
+      case TemplatePattern.meetingNotes:
+      case TemplatePattern.readingLog:
+      case TemplatePattern.vocabularyList:
+        return true;
+      default:
+        return false;
+    }
   }
 }

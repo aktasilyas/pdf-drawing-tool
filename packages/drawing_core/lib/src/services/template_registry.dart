@@ -1,28 +1,28 @@
 import 'package:drawing_core/src/models/template.dart';
 import 'package:drawing_core/src/models/template_category.dart';
 import 'package:drawing_core/src/models/template_pattern.dart';
+import 'package:drawing_core/src/services/template_definitions_new.dart' as ext;
 
-/// Template registry with predefined templates.
-/// Total: 16 templates (6 basic + 10 premium)
+/// Template registry — 32 templates (9 free + 23 premium) across 8 categories.
 class TemplateRegistry {
   TemplateRegistry._();
 
-  /// All available templates
   static final List<Template> all = [
-    // === BASIC (Free) - 6 Templates ===
     ...basicTemplates,
-    
-    // === PRODUCTIVITY (Premium) - 4 Templates ===
     ...productivityTemplates,
-    
-    // === CREATIVE (Premium) - 3 Templates ===
     ...creativeTemplates,
-    
-    // === SPECIAL (Premium) - 3 Templates ===
     ...specialTemplates,
+    ...planningTemplates,
+    ...journalTemplates,
+    ...educationTemplates,
+    ...stationeryTemplates,
   ];
 
-  /// Default blank template
+  static final List<Template> planningTemplates = ext.planningTemplates;
+  static final List<Template> journalTemplates = ext.journalTemplates;
+  static final List<Template> educationTemplates = ext.educationTemplates;
+  static final List<Template> stationeryTemplates = ext.stationeryTemplates;
+
   static Template get blank => getById('blank')!;
 
   /// Basic templates (Free)
@@ -96,93 +96,15 @@ class TemplateRegistry {
         'bottomSummaryRatio': 0.25,
       },
     ),
+    ...ext.newBasicTemplates,
   ];
 
-  /// Productivity templates (Premium)
   static final List<Template> productivityTemplates = [
-    Template(
-      id: 'todo_list',
-      name: 'Yapılacaklar',
-      nameEn: 'To-Do List',
-      category: TemplateCategory.productivity,
-      pattern: TemplatePattern.mediumLines,
-      isPremium: true,
-      defaultBackgroundColor: 0xFFFFFFFF,
-      defaultLineColor: 0xFFE0E0E0,
-      spacingMm: 10,
-      extraData: {
-        'hasCheckboxes': true,
-        'checkboxSize': 16,
-      },
-    ),
-    Template(
-      id: 'meeting_notes',
-      name: 'Toplantı',
-      nameEn: 'Meeting Notes',
-      category: TemplateCategory.productivity,
-      pattern: TemplatePattern.cornell,
-      isPremium: true,
-      defaultBackgroundColor: 0xFFFFFFFF,
-      defaultLineColor: 0xFFE0E0E0,
-      spacingMm: 8,
-      extraData: {
-        'leftMarginRatio': 0.25,
-        'bottomSummaryRatio': 0.2,
-      },
-    ),
-    Template(
-      id: 'daily_planner',
-      name: 'Günlük Plan',
-      nameEn: 'Daily Planner',
-      category: TemplateCategory.productivity,
-      pattern: TemplatePattern.thinLines,
-      isPremium: true,
-      defaultBackgroundColor: 0xFFFFFFFF,
-      defaultLineColor: 0xFFE0E0E0,
-      spacingMm: 6,
-      extraData: {
-        'timeSlots': true,
-        'startHour': 6,
-        'endHour': 22,
-        'slotDuration': 30,
-      },
-    ),
-    Template(
-      id: 'weekly_planner',
-      name: 'Haftalık Plan',
-      nameEn: 'Weekly Planner',
-      category: TemplateCategory.productivity,
-      pattern: TemplatePattern.mediumGrid,
-      isPremium: true,
-      defaultBackgroundColor: 0xFFFFFFFF,
-      defaultLineColor: 0xFFE0E0E0,
-      spacingMm: 7,
-      extraData: {
-        'days': 7,
-        'columns': ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'],
-      },
-    ),
+    ...ext.newProductivityTemplates,
   ];
 
   /// Creative templates (Premium)
   static final List<Template> creativeTemplates = [
-    Template(
-      id: 'storyboard',
-      name: 'Storyboard',
-      nameEn: 'Storyboard',
-      category: TemplateCategory.creative,
-      pattern: TemplatePattern.mediumGrid,
-      isPremium: true,
-      defaultBackgroundColor: 0xFFFFFFFF,
-      defaultLineColor: 0xFFE0E0E0,
-      spacingMm: 5,
-      lineWidth: 0.3,
-      extraData: {
-        'frames': 6,
-        'layout': '2x3',
-        'aspectRatio': 16 / 9,
-      },
-    ),
     Template(
       id: 'music_staff',
       name: 'Nota Kağıdı',
@@ -215,6 +137,7 @@ class TemplateRegistry {
         'capHeight': true,
       },
     ),
+    ...ext.newCreativeTemplates,
   ];
 
   /// Special templates (Premium)
@@ -264,6 +187,7 @@ class TemplateRegistry {
         'angle': 55,
       },
     ),
+    ...ext.newSpecialTemplates,
   ];
 
   /// Get template by ID
