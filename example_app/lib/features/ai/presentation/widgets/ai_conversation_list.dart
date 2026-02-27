@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
+import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/ai/domain/entities/ai_entities.dart';
 import 'package:example_app/features/ai/presentation/providers/ai_providers.dart';
 
@@ -21,13 +22,16 @@ class AIConversationList extends ConsumerWidget {
     final conversationsAsync = ref.watch(aiConversationsProvider);
     final theme = Theme.of(context);
 
-    return Container(
-      width: 280,
+    return ColoredBox(
       color: theme.colorScheme.surfaceContainerLow,
       child: Column(
         children: [
           _buildHeader(theme),
-          const Divider(height: 1),
+          Divider(
+            height: 1,
+            thickness: 0.5,
+            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+          ),
           Expanded(
             child: conversationsAsync.when(
               data: (conversations) =>
@@ -47,13 +51,13 @@ class AIConversationList extends ConsumerWidget {
 
   Widget _buildHeader(ThemeData theme) {
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(AppSpacing.lg),
       child: Row(
         children: [
           Icon(Icons.history,
-              size: 20, color: theme.colorScheme.primary),
-          const SizedBox(width: 8),
-          Text('Sohbet Geçmişi',
+              size: AppIconSize.md, color: theme.colorScheme.primary),
+          SizedBox(width: AppSpacing.sm),
+          Text('Sohbet Gecmisi',
               style: theme.textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.w600,
               )),
@@ -70,7 +74,7 @@ class AIConversationList extends ConsumerWidget {
     if (conversations.isEmpty) {
       return Center(
         child: Text(
-          'Henüz sohbet yok',
+          'Henuz sohbet yok',
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
@@ -79,7 +83,7 @@ class AIConversationList extends ConsumerWidget {
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: EdgeInsets.symmetric(vertical: AppSpacing.xs),
       itemCount: conversations.length,
       itemBuilder: (context, index) {
         final conv = conversations[index];
@@ -121,8 +125,9 @@ class _ConversationTile extends StatelessWidget {
       selected: isActive,
       selectedTileColor:
           theme.colorScheme.primary.withValues(alpha: 0.1),
-      contentPadding:
-          const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+      contentPadding: EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg, vertical: AppSpacing.xxs,
+      ),
       title: Text(
         conversation.title,
         maxLines: 1,
@@ -138,10 +143,9 @@ class _ConversationTile extends StatelessWidget {
         ),
       ),
       trailing: IconButton(
-        icon: const Icon(Icons.delete_outline, size: 18),
+        icon: Icon(Icons.delete_outline, size: AppIconSize.sm + 2),
         onPressed: onDelete,
-        padding: EdgeInsets.zero,
-        constraints: const BoxConstraints(),
+        visualDensity: VisualDensity.compact,
         tooltip: 'Sil',
       ),
       onTap: onTap,

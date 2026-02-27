@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/features/premium/presentation/screens/paywall_placeholder_screen.dart';
+
 /// Reason for showing upgrade prompt.
 enum AIUpgradeReason {
   dailyLimitReached,
@@ -29,10 +32,14 @@ class AIUpgradePrompt extends StatelessWidget {
     return showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (_) => AIUpgradePrompt(
+      builder: (sheetContext) => AIUpgradePrompt(
         reason: reason,
-        onUpgrade: onUpgrade,
-        onDismiss: () => Navigator.of(context).pop(),
+        onUpgrade: onUpgrade ??
+            () {
+              Navigator.of(sheetContext).pop();
+              PaywallPlaceholderScreen.show(context);
+            },
+        onDismiss: () => Navigator.of(sheetContext).pop(),
       ),
     );
   }
@@ -43,18 +50,18 @@ class AIUpgradePrompt extends StatelessWidget {
     final config = _getConfig(reason);
 
     return Container(
-      margin: const EdgeInsets.all(16),
+      margin: EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppRadius.bottomSheet),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(24),
+      child: SingleChildScrollView(
+        padding: EdgeInsets.all(AppSpacing.xl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 56, height: 56,
+              width: AppSpacing.toolbarHeight, height: AppSpacing.toolbarHeight,
               decoration: BoxDecoration(
                 gradient: LinearGradient(colors: [
                   theme.colorScheme.primary,
@@ -62,32 +69,32 @@ class AIUpgradePrompt extends StatelessWidget {
                 ]),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.auto_awesome,
-                  color: Colors.white, size: 28),
+              child: Icon(Icons.auto_awesome,
+                  color: theme.colorScheme.onPrimary, size: AppIconSize.xl),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: AppSpacing.lg),
             Text(config.title,
                 style: theme.textTheme.titleLarge
                     ?.copyWith(fontWeight: FontWeight.w700),
                 textAlign: TextAlign.center),
-            const SizedBox(height: 8),
+            SizedBox(height: AppSpacing.sm),
             Text(config.description,
                 style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant),
                 textAlign: TextAlign.center),
-            const SizedBox(height: 20),
+            SizedBox(height: AppSpacing.xl),
             ...config.features.map((f) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  padding: EdgeInsets.symmetric(vertical: AppSpacing.xs),
                   child: Row(children: [
                     Icon(Icons.check_circle,
-                        size: 20,
+                        size: AppIconSize.md,
                         color: theme.colorScheme.primary),
-                    const SizedBox(width: 12),
+                    SizedBox(width: AppSpacing.md),
                     Expanded(child: Text(f,
                         style: theme.textTheme.bodyMedium)),
                   ]),
                 )),
-            const SizedBox(height: 24),
+            SizedBox(height: AppSpacing.xl),
             SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
@@ -96,13 +103,13 @@ class AIUpgradePrompt extends StatelessWidget {
                 label: Text(config.ctaText),
                 style: FilledButton.styleFrom(
                   padding:
-                      const EdgeInsets.symmetric(vertical: 14),
+                      EdgeInsets.symmetric(vertical: AppSpacing.md + 2),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
+                      borderRadius: BorderRadius.circular(AppRadius.lg)),
                 ),
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: AppSpacing.sm),
             TextButton(
               onPressed: onDismiss,
               child: Text(config.dismissText),
@@ -116,41 +123,41 @@ class AIUpgradePrompt extends StatelessWidget {
   _UpgradeConfig _getConfig(AIUpgradeReason reason) {
     return switch (reason) {
       AIUpgradeReason.dailyLimitReached => const _UpgradeConfig(
-            title: 'Günlük Limitine Ulaştın',
-            description: "Premium'a yükselterek daha fazla AI "
-                'mesajı gönder ve güçlü modellere eriş.',
+            title: 'Gunluk Limitine Ulastin',
+            description: "Premium'a yukselterek daha fazla AI "
+                'mesaji gonder ve guclu modellere eris.',
             features: [
-              'Günde 150 mesaj (15 yerine)',
-              'GPT-4o mini ile daha akıllı yanıtlar',
-              'Gelişmiş matematik çözümü',
-              'Görsel analiz',
+              'Gunde 150 mesaj (15 yerine)',
+              'GPT-4o mini ile daha akilli yanitlar',
+              'Gelismis matematik cozumu',
+              'Gorsel analiz',
             ],
-            ctaText: "Premium'a Yükselt",
-            dismissText: 'Yarın tekrar dene',
+            ctaText: "Premium'a Yukselt",
+            dismissText: 'Yarin tekrar dene',
           ),
       AIUpgradeReason.premiumModelRequested => const _UpgradeConfig(
             title: 'Premium Model Gerekli',
             description:
-                'Bu özellik premium AI modelleri gerektirir.',
+                'Bu ozellik premium AI modelleri gerektirir.',
             features: [
-              'GPT-4o ile ileri düzey analiz',
-              'Karmaşık matematik problemleri',
-              'Daha doğru el yazısı tanıma',
-              'Öncelikli yanıt süresi',
+              'GPT-4o ile ileri duzey analiz',
+              'Karmasik matematik problemleri',
+              'Daha dogru el yazisi tanima',
+              'Oncelikli yanit suresi',
             ],
-            ctaText: "Premium'a Yükselt",
-            dismissText: 'Ücretsiz model ile devam',
+            ctaText: "Premium'a Yukselt",
+            dismissText: 'Ucretsiz model ile devam',
           ),
       AIUpgradeReason.advancedFeature => const _UpgradeConfig(
-            title: 'Pro Özellik',
-            description: 'Bu özellik Pro abonelere özeldir.',
+            title: 'Pro Ozellik',
+            description: 'Bu ozellik Pro abonelere ozeldir.',
             features: [
-              'Sınırsız AI mesajı',
-              'GPT-4o ve o4-mini erişimi',
-              'Flashcard oluşturma',
-              'Sınav hazırlık modu',
+              'Sinirsiz AI mesaji',
+              'GPT-4o ve o4-mini erisimi',
+              'Flashcard olusturma',
+              'Sinav hazirlik modu',
             ],
-            ctaText: "Pro'ya Yükselt",
+            ctaText: "Pro'ya Yukselt",
             dismissText: 'Daha sonra',
           ),
     };
