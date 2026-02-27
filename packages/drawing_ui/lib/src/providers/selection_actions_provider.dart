@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/canvas/image_painter.dart';
 import 'package:drawing_ui/src/models/selection_action.dart';
+import 'package:drawing_ui/src/providers/ai_callback_provider.dart';
 import 'package:drawing_ui/src/providers/document_provider.dart';
 import 'package:drawing_ui/src/providers/history_provider.dart';
 import 'package:drawing_ui/src/providers/pdf_render_provider.dart';
@@ -303,7 +304,13 @@ SelectionActionConfig buildSelectionActionConfig(
   Selection selection, {
   ImageCacheManager? cacheManager,
   BuildContext? context,
+  VoidCallback? onAIPressed,
 }) {
+  // Resolve AI callback: prefer explicit param, then provider, then fallback
+  final resolvedAICallback = onAIPressed
+      ?? ref.read(onAIPressedCallbackProvider)
+      ?? (context != null ? () => openAIPanel(context) : null);
+
   // Empty selection: only AI + Screenshot actions
   if (selection.isEmpty) {
     return SelectionActionConfig(
@@ -312,8 +319,8 @@ SelectionActionConfig buildSelectionActionConfig(
           id: 'ai',
           icon: StarNoteIcons.sparkle,
           label: 'AI Asistan',
-          isEnabled: context != null,
-          onExecute: context != null ? () => openAIPanel(context) : null,
+          isEnabled: resolvedAICallback != null,
+          onExecute: resolvedAICallback,
         ),
         SelectionAction(
           id: 'screenshot',
@@ -355,8 +362,8 @@ SelectionActionConfig buildSelectionActionConfig(
       id: 'ai',
       icon: StarNoteIcons.sparkle,
       label: 'AI Asistan',
-      isEnabled: context != null,
-      onExecute: context != null ? () => openAIPanel(context) : null,
+      isEnabled: resolvedAICallback != null,
+      onExecute: resolvedAICallback,
     ),
     SelectionAction(
       id: 'color',
@@ -442,8 +449,8 @@ SelectionActionConfig buildSelectionActionConfig(
       id: 'overflow_ai',
       icon: StarNoteIcons.sparkle,
       label: 'Yapay zekaya sor',
-      isEnabled: context != null,
-      onExecute: context != null ? () => openAIPanel(context) : null,
+      isEnabled: resolvedAICallback != null,
+      onExecute: resolvedAICallback,
     ),
     SelectionAction(
       id: 'overflow_screenshot',

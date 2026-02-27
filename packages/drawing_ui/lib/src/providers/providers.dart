@@ -1,6 +1,7 @@
 /// Providers for drawing UI state management.
 library;
 
+export 'ai_callback_provider.dart';
 export 'audio_recording_provider.dart';
 export 'canvas_transform_provider.dart';
 export 'document_provider.dart';

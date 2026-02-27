@@ -287,9 +287,11 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
     final canvasMode = widget.canvasMode ?? const core.CanvasMode(isInfinite: true);
     // Defer provider modification to after build completes
     final isInfinite = canvasMode.isInfinite;
+    final aiCallback = widget.onAIPressed ?? () => openAIPanel(context);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         ref.read(isInfiniteCanvasProvider.notifier).state = isInfinite;
+        ref.read(onAIPressedCallbackProvider.notifier).state = aiCallback;
       }
     });
     final materialTheme = Theme.of(context);
