@@ -113,14 +113,10 @@ Widget buildSecondaryCanvasLayers({
                             )
                           : null,
                     ),
-                    child: CustomPaint(
-                      painter: PageBackgroundPatternPainter(
-                        background: page.background,
-                        colorScheme: colorScheme,
-                      ),
-                      size: pageSize,
-                      isComplex: true,
-                      willChange: false,
+                    child: PageBackgroundView(
+                      background: page.background,
+                      colorScheme: colorScheme,
+                      pageSize: pageSize,
                     ),
                   ),
                 ),

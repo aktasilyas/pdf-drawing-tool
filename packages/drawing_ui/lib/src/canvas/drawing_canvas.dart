@@ -923,15 +923,11 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                                                 )
                                               : null,
                                         ),
-                                        child: CustomPaint(
-                                          painter: PageBackgroundPatternPainter(
-                                            background: currentPage.background,
-                                            colorScheme: colorScheme,
-                                          ),
-                                          size: Size(currentPage.size.width,
+                                        child: PageBackgroundView(
+                                          background: currentPage.background,
+                                          colorScheme: colorScheme,
+                                          pageSize: Size(currentPage.size.width,
                                               currentPage.size.height),
-                                          isComplex: true,
-                                          willChange: false,
                                         ),
                                       ),
                                     ),

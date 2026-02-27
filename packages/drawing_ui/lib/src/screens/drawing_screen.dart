@@ -550,10 +550,9 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
               boxShadow: const [BoxShadow(
                 color: Color(0x26000000), blurRadius: 12, offset: Offset(0, 4))],
             ),
-            child: CustomPaint(
-              painter: PageBackgroundPatternPainter(
-                background: bg, colorScheme: cs),
-              size: Size(pageW, pageH)),
+            child: PageBackgroundView(
+              background: bg, colorScheme: cs,
+              pageSize: Size(pageW, pageH)),
           ),
         ),
         // Hint overlay

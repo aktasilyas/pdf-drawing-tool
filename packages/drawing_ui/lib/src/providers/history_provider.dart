@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'document_provider.dart';
+import 'page_provider.dart';
 
 // =============================================================================
 // HISTORY PROVIDER
@@ -97,7 +98,7 @@ class HistoryNotifier extends StateNotifier<HistoryState> {
     final document = _ref.read(documentProvider);
     final newDocument = _historyManager.execute(command, document);
     _ref.read(documentProvider.notifier).updateDocument(newDocument);
-
+    _syncPageManager(newDocument);
     _updateState();
   }
 
@@ -142,6 +143,7 @@ class HistoryNotifier extends StateNotifier<HistoryState> {
 
     if (newDocument != null) {
       _ref.read(documentProvider.notifier).updateDocument(newDocument);
+      _syncPageManager(newDocument);
       _updateState();
     }
   }
@@ -157,6 +159,7 @@ class HistoryNotifier extends StateNotifier<HistoryState> {
 
     if (newDocument != null) {
       _ref.read(documentProvider.notifier).updateDocument(newDocument);
+      _syncPageManager(newDocument);
       _updateState();
     }
   }
@@ -167,6 +170,14 @@ class HistoryNotifier extends StateNotifier<HistoryState> {
   void clearHistory() {
     _historyManager.clear();
     _updateState();
+  }
+
+  /// Sync page manager with the latest document state.
+  void _syncPageManager(DrawingDocument document) {
+    _ref.read(pageManagerProvider.notifier).initializeFromDocument(
+      document.pages,
+      currentIndex: document.currentPageIndex,
+    );
   }
 
   /// Update state from history manager.

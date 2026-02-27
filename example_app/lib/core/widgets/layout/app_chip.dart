@@ -56,10 +56,14 @@ class AppChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final effectiveColor = color ?? AppColors.primary;
+    final unselectedBg = isDark
+        ? AppColors.surfaceVariantDark
+        : AppColors.surfaceVariantLight;
 
     return Material(
-      color: isSelected ? effectiveColor : AppColors.surfaceVariantLight,
+      color: isSelected ? effectiveColor : unselectedBg,
       borderRadius: BorderRadius.circular(AppRadius.full),
       child: InkWell(
         onTap: onTap,
@@ -77,14 +81,14 @@ class AppChip extends StatelessWidget {
                 Icon(
                   icon,
                   size: AppIconSize.sm,
-                  color: _getContentColor(effectiveColor),
+                  color: _getContentColor(effectiveColor, isDark: isDark),
                 ),
                 const SizedBox(width: AppSpacing.xs),
               ],
               Text(
                 label,
                 style: AppTypography.labelMedium.copyWith(
-                  color: _getContentColor(effectiveColor),
+                  color: _getContentColor(effectiveColor, isDark: isDark),
                 ),
               ),
               if (onDelete != null) ...[
@@ -95,7 +99,7 @@ class AppChip extends StatelessWidget {
                   child: Icon(
                     Icons.close,
                     size: AppIconSize.sm,
-                    color: _getContentColor(effectiveColor),
+                    color: _getContentColor(effectiveColor, isDark: isDark),
                   ),
                 ),
               ],
@@ -106,7 +110,8 @@ class AppChip extends StatelessWidget {
     );
   }
 
-  Color _getContentColor(Color chipColor) {
-    return isSelected ? AppColors.onPrimary : AppColors.textPrimaryLight;
+  Color _getContentColor(Color chipColor, {bool isDark = false}) {
+    if (isSelected) return AppColors.onPrimary;
+    return isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
   }
 }
