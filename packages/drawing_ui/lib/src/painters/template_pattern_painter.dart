@@ -2,9 +2,15 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:drawing_core/drawing_core.dart';
 
+import 'template_planner_painters.dart';
+import 'template_creative_painters.dart';
+import 'template_table_painters.dart';
+
 /// Template pattern'larını çizen base painter.
 /// Tema renklerini dışarıdan alır, hardcoded renk kullanmaz.
-class TemplatePatternPainter extends CustomPainter {
+class TemplatePatternPainter extends CustomPainter
+    with TemplatePlannerPainters, TemplateCreativePainters,
+        TemplateTablePainters {
   final TemplatePattern pattern;
   final double spacingMm;
   final double lineWidth;
@@ -15,6 +21,14 @@ class TemplatePatternPainter extends CustomPainter {
 
   // mm → px dönüşüm (72 DPI)
   double get _spacingPx => spacingMm * 72 / 25.4;
+
+  /// Public getter for mixin access
+  @override
+  double get spacingPx => _spacingPx;
+
+  /// Public getter for mixin access
+  @override
+  Paint get linePaint => _linePaint;
 
   const TemplatePatternPainter({
     required this.pattern,
@@ -88,6 +102,44 @@ class TemplatePatternPainter extends CustomPainter {
         break;
       case TemplatePattern.calligraphy:
         _drawCalligraphy(canvas, size);
+        break;
+
+      // === YAPISAL PATTERN'LAR ===
+      case TemplatePattern.dailyPlanner:
+        drawDailyPlanner(canvas, size);
+        break;
+      case TemplatePattern.weeklyPlanner:
+        drawWeeklyPlanner(canvas, size);
+        break;
+      case TemplatePattern.monthlyPlanner:
+        drawMonthlyPlanner(canvas, size);
+        break;
+      case TemplatePattern.bulletJournal:
+        drawBulletJournal(canvas, size);
+        break;
+      case TemplatePattern.gratitudeJournal:
+        drawGratitudeJournal(canvas, size);
+        break;
+      case TemplatePattern.todoList:
+        drawTodoList(canvas, size);
+        break;
+      case TemplatePattern.checklist:
+        drawChecklist(canvas, size);
+        break;
+      case TemplatePattern.storyboard:
+        drawStoryboard(canvas, size);
+        break;
+      case TemplatePattern.wireframe:
+        drawWireframe(canvas, size);
+        break;
+      case TemplatePattern.meetingNotes:
+        drawMeetingNotes(canvas, size);
+        break;
+      case TemplatePattern.readingLog:
+        drawReadingLog(canvas, size);
+        break;
+      case TemplatePattern.vocabularyList:
+        drawVocabularyList(canvas, size);
         break;
     }
   }
