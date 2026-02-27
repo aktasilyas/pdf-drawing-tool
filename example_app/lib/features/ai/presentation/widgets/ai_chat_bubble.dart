@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
 import 'package:example_app/features/ai/domain/entities/ai_entities.dart';
@@ -137,7 +138,16 @@ class AIChatBubble extends StatelessWidget {
           ),
         ),
         if (isStreaming) _buildTypingCursor(theme),
+        if (!isStreaming && message.content.isNotEmpty)
+          _buildCopyButton(theme),
       ],
+    );
+  }
+
+  Widget _buildCopyButton(ThemeData theme) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: _CopyButton(content: message.content),
     );
   }
 
@@ -152,6 +162,59 @@ class AIChatBubble extends StatelessWidget {
             color: theme.colorScheme.primary,
             borderRadius: BorderRadius.circular(1),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Copy button with "copied" feedback.
+class _CopyButton extends StatefulWidget {
+  const _CopyButton({required this.content});
+  final String content;
+
+  @override
+  State<_CopyButton> createState() => _CopyButtonState();
+}
+
+class _CopyButtonState extends State<_CopyButton> {
+  bool _copied = false;
+
+  Future<void> _handleCopy() async {
+    await Clipboard.setData(ClipboardData(text: widget.content));
+    if (!mounted) return;
+    setState(() => _copied = true);
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) setState(() => _copied = false);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final color = theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6);
+
+    return InkWell(
+      onTap: _copied ? null : _handleCopy,
+      borderRadius: BorderRadius.circular(4),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              _copied ? Icons.check : Icons.copy,
+              size: 14,
+              color: _copied ? theme.colorScheme.primary : color,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              _copied ? 'Kopyalandi' : 'Kopyala',
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: _copied ? theme.colorScheme.primary : color,
+              ),
+            ),
+          ],
         ),
       ),
     );

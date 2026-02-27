@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -62,8 +64,10 @@ class AIChatNotifier extends StateNotifier<AIChatState> {
 
   /// Initialize with a new or existing conversation.
   Future<void> initialize({String? existingConversationId}) async {
+    await _streamSubscription?.cancel();
+
     if (existingConversationId != null) {
-      state = state.copyWith(
+      state = AIChatState(
         isLoading: true,
         conversationId: existingConversationId,
       );
@@ -90,6 +94,16 @@ class AIChatNotifier extends StateNotifier<AIChatState> {
     AITaskType taskType = AITaskType.chat,
   }) async {
     await _send(text: text, taskType: taskType);
+  }
+
+  /// Send a message with pre-captured image bytes (e.g. from selection).
+  Future<void> sendWithImageBytes(
+    String text,
+    Uint8List imageBytes, {
+    AITaskType taskType = AITaskType.ocrSimple,
+  }) async {
+    final imageBase64 = base64Encode(imageBytes);
+    await _send(text: text, taskType: taskType, imageBase64: imageBase64);
   }
 
   /// Capture canvas and send with a prompt to the AI.
@@ -177,6 +191,8 @@ class AIChatNotifier extends StateNotifier<AIChatState> {
             isStreaming: false,
             streamingContent: '',
           );
+
+          _autoTitleIfNeeded(text);
         },
         onError: (error) {
           state = state.copyWith(
@@ -193,6 +209,28 @@ class AIChatNotifier extends StateNotifier<AIChatState> {
         error: _mapError(e),
       );
     }
+  }
+
+  /// Auto-generate a title from the first user message.
+  ///
+  /// Only runs once — when the conversation has exactly one user message
+  /// (the first exchange). Truncates to 40 chars.
+  void _autoTitleIfNeeded(String firstMessage) {
+    // Only auto-title on the first user message
+    final userMessages =
+        state.messages.where((m) => m.role == MessageRole.user);
+    if (userMessages.length != 1 || state.conversationId == null) return;
+
+    final title = _generateTitle(firstMessage);
+    _repository.updateConversationTitle(state.conversationId!, title);
+  }
+
+  String _generateTitle(String message) {
+    var title = message.trim().replaceAll(RegExp(r'\s+'), ' ');
+    if (title.length > 40) {
+      title = '${title.substring(0, 37)}...';
+    }
+    return title;
   }
 
   /// Clear error state.
@@ -227,8 +265,11 @@ class AIChatNotifier extends StateNotifier<AIChatState> {
 }
 
 /// Provider instance for AI chat.
+///
+/// Not autoDispose — sidebar open/close should preserve chat state.
+/// Manually invalidated when leaving the editor screen.
 final aiChatProvider =
-    StateNotifierProvider.autoDispose<AIChatNotifier, AIChatState>((ref) {
+    StateNotifierProvider<AIChatNotifier, AIChatState>((ref) {
   final repository = ref.watch(aiRepositoryProvider);
   final captureService = ref.watch(canvasCaptureServiceProvider);
   return AIChatNotifier(

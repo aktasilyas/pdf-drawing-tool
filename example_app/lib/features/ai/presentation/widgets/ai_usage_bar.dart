@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/ai/presentation/providers/ai_providers.dart';
 
 /// Compact usage indicator showing daily AI message quota.
 ///
 /// Displays as a thin progress bar with text like "5/15 mesaj".
-/// Changes color from primary → orange → red as limit approaches.
+/// Changes color from primary -> warning -> error as limit approaches.
 class AIUsageBar extends ConsumerWidget {
   const AIUsageBar({super.key});
 
@@ -26,24 +27,24 @@ class AIUsageBar extends ConsumerWidget {
         final color = percent < 0.6
             ? theme.colorScheme.primary
             : percent < 0.85
-                ? Colors.orange
+                ? AppColors.warning
                 : theme.colorScheme.error;
 
         return Padding(
-          padding: const EdgeInsets.symmetric(
-              horizontal: 16, vertical: 6),
+          padding: EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 2),
+                    padding: EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm, vertical: AppSpacing.xxs),
                     decoration: BoxDecoration(
                       color: theme.colorScheme.primary
                           .withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(AppRadius.lg),
                     ),
                     child: Text(
                       modelName,
@@ -63,9 +64,9 @@ class AIUsageBar extends ConsumerWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: AppSpacing.xs),
               ClipRRect(
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: BorderRadius.circular(AppRadius.xs),
                 child: LinearProgressIndicator(
                   value: percent,
                   minHeight: 3,
@@ -75,6 +76,15 @@ class AIUsageBar extends ConsumerWidget {
                       AlwaysStoppedAnimation<Color>(color),
                 ),
               ),
+              if (used >= limit) ...[
+                SizedBox(height: AppSpacing.xs),
+                Text(
+                  "Yarin 00:00'da yenilenir",
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.error,
+                  ),
+                ),
+              ],
             ],
           ),
         );
