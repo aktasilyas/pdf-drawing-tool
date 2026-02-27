@@ -13,6 +13,7 @@ import 'package:example_app/features/sync/presentation/providers/sync_provider.d
 
 export 'ai_chat_provider.dart';
 export 'ai_conversations_provider.dart';
+export 'ai_sidebar_provider.dart';
 export 'ai_usage_provider.dart';
 
 // ─── Service Providers ──────────────────────────────────

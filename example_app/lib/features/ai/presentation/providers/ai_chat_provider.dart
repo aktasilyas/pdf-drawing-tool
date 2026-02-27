@@ -227,8 +227,11 @@ class AIChatNotifier extends StateNotifier<AIChatState> {
 }
 
 /// Provider instance for AI chat.
+///
+/// Not autoDispose — sidebar open/close should preserve chat state.
+/// Manually invalidated when leaving the editor screen.
 final aiChatProvider =
-    StateNotifierProvider.autoDispose<AIChatNotifier, AIChatState>((ref) {
+    StateNotifierProvider<AIChatNotifier, AIChatState>((ref) {
   final repository = ref.watch(aiRepositoryProvider);
   final captureService = ref.watch(canvasCaptureServiceProvider);
   return AIChatNotifier(

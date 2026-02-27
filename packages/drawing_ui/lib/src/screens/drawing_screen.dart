@@ -22,6 +22,10 @@ class DrawingScreen extends ConsumerStatefulWidget {
     this.onDeleteDocument,
     this.onDocumentChanged,
     this.onAIPressed,
+    this.externalLeftSidebar,
+    this.isExternalLeftSidebarOpen = false,
+    this.externalLeftSidebarWidth = 0.0,
+    this.onExternalLeftSidebarClose,
   });
 
   final String? documentTitle;
@@ -31,6 +35,19 @@ class DrawingScreen extends ConsumerStatefulWidget {
   final VoidCallback? onDeleteDocument;
   final ValueChanged<dynamic>? onDocumentChanged;
   final VoidCallback? onAIPressed;
+
+  /// Optional external left sidebar widget (e.g. AI chat).
+  /// Rendered below the toolbar, to the left of the canvas area.
+  final Widget? externalLeftSidebar;
+
+  /// Whether the external left sidebar is open.
+  final bool isExternalLeftSidebarOpen;
+
+  /// Width of the external left sidebar.
+  final double externalLeftSidebarWidth;
+
+  /// Called when the phone overlay is tapped to dismiss the sidebar.
+  final VoidCallback? onExternalLeftSidebarClose;
 
   @override
   ConsumerState<DrawingScreen> createState() => _DrawingScreenState();
@@ -57,6 +74,17 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
         ref.read(platformBrightnessProvider.notifier).state = brightness;
       }
     });
+  }
+
+  @override
+  void didUpdateWidget(DrawingScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isExternalLeftSidebarOpen !=
+        widget.isExternalLeftSidebarOpen) {
+      Future.delayed(const Duration(milliseconds: 300), () {
+        if (mounted) _recalculateCanvasTransform();
+      });
+    }
   }
 
   @override
@@ -196,7 +224,10 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
     final isTablet = size.width >= ToolbarLayoutMode.compactBreakpoint;
     final showSidebar = _isSidebarOpen && ref.read(pageCountProvider) > 1;
     final sidebarWidth = (isTablet && showSidebar) ? kPageSidebarWidth : 0.0;
-    var canvasWidth = size.width - sidebarWidth;
+    final externalInset = (isTablet && widget.isExternalLeftSidebarOpen)
+        ? widget.externalLeftSidebarWidth
+        : 0.0;
+    var canvasWidth = size.width - sidebarWidth - externalInset;
     // Use the actual canvas height from LayoutBuilder, not full screen height
     final canvasHeight = ref.read(canvasViewportSizeProvider).height;
     final viewportSize = Size(canvasWidth, canvasHeight > 0 ? canvasHeight : size.height);
@@ -319,6 +350,24 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                   Expanded(
                     child: Row(
                       children: [
+                        // External left sidebar (e.g. AI chat) — tablet only
+                        if (!isCompactMode && widget.externalLeftSidebar != null)
+                          AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                            width: widget.isExternalLeftSidebarOpen
+                                ? widget.externalLeftSidebarWidth
+                                : 0.0,
+                            clipBehavior: Clip.hardEdge,
+                            decoration: const BoxDecoration(),
+                            child: OverflowBox(
+                              alignment: Alignment.centerLeft,
+                              maxWidth: widget.externalLeftSidebarWidth,
+                              minWidth: widget.externalLeftSidebarWidth,
+                              child: widget.externalLeftSidebar,
+                            ),
+                          ),
+                        // Page sidebar — tablet only
                         if (isCompactMode == false)
                           AnimatedContainer(
                             duration: const Duration(milliseconds: 250),
@@ -372,6 +421,37 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                 ],
               ),
 
+              // Phone external left sidebar overlay
+              if (isCompactMode &&
+                  widget.externalLeftSidebar != null &&
+                  widget.isExternalLeftSidebarOpen)
+                Positioned.fill(
+                  child: GestureDetector(
+                    onTap: widget.onExternalLeftSidebarClose,
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 250),
+                      opacity: 0.5,
+                      child: Container(color: Colors.black),
+                    ),
+                  ),
+                ),
+              // Phone external left sidebar drawer
+              if (isCompactMode && widget.externalLeftSidebar != null)
+                AnimatedPositioned(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeInOut,
+                  left: widget.isExternalLeftSidebarOpen
+                      ? 0
+                      : -widget.externalLeftSidebarWidth,
+                  top: 0,
+                  bottom: 0,
+                  width: widget.externalLeftSidebarWidth,
+                  child: Material(
+                    elevation: 8,
+                    child: widget.externalLeftSidebar!,
+                  ),
+                ),
+              // Phone page sidebar overlay
               if (isCompactMode && showSidebar)
                 Positioned.fill(
                   child: GestureDetector(
@@ -383,6 +463,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                     ),
                   ),
                 ),
+              // Phone page sidebar drawer
               if (isCompactMode)
                 AnimatedPositioned(
                   duration: const Duration(milliseconds: 300),

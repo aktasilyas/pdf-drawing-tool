@@ -4,8 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/drawing_ui.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
-import 'package:example_app/features/ai/presentation/screens/ai_chat_modal.dart';
+import 'package:example_app/features/ai/presentation/providers/ai_providers.dart';
 import 'package:example_app/features/editor/presentation/providers/editor_provider.dart';
+import 'package:example_app/features/editor/presentation/widgets/editor_body.dart';
 
 class EditorScreen extends ConsumerWidget {
   final String documentId;
@@ -97,13 +98,12 @@ class EditorScreen extends ConsumerWidget {
         return Scaffold(
           resizeToAvoidBottomInset: false,
           // NO AppBar - DrawingScreen handles everything
-          body: DrawingScreen(
+          body: EditorBody(
             documentTitle: document.title,
             canvasMode: canvasMode,
             onHomePressed: () => _handleBack(context, ref),
             onRenameDocument: () => _showRenameDialog(context, ref),
             onDeleteDocument: () => _showDeleteConfirmation(context, ref),
-            onAIPressed: () => AIChatModal.show(context),
             onDocumentChanged: (doc) {
               if (doc is DrawingDocument) {
                 ref.read(currentDocumentProvider.notifier).state = doc;
@@ -138,6 +138,8 @@ class EditorScreen extends ConsumerWidget {
     ref.invalidate(autoSaveProvider);
     ref.invalidate(hasUnsavedChangesProvider);
     ref.invalidate(pageTrashCallbackProvider);
+    ref.invalidate(aiChatProvider);
+    ref.invalidate(aiSidebarOpenProvider);
 
     // PDF state'lerini sıfırla
     ref.read(visiblePdfPageProvider.notifier).state = null;
