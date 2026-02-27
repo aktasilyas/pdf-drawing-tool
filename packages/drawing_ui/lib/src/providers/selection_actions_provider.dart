@@ -10,6 +10,7 @@ import 'package:drawing_ui/src/providers/document_provider.dart';
 import 'package:drawing_ui/src/providers/history_provider.dart';
 import 'package:drawing_ui/src/providers/pdf_render_provider.dart';
 import 'package:drawing_ui/src/providers/selection_provider.dart';
+import 'package:drawing_ui/src/providers/pending_selection_image_provider.dart';
 import 'package:drawing_ui/src/providers/selection_clipboard_provider.dart';
 import 'package:drawing_ui/src/services/selection_capture_service.dart';
 import 'package:drawing_ui/src/screens/drawing_screen_layout.dart';
@@ -287,6 +288,66 @@ Future<void> _screenshotSelection(
   }
 }
 
+Future<void> _captureAndOpenAI(
+  WidgetRef ref,
+  Selection selection,
+  ImageCacheManager? cacheManager,
+  VoidCallback aiCallback,
+) async {
+  // Skip capture only when no cache or zero-area bounds (Selection.empty()).
+  // Non-empty bounds should be captured even without selected elements,
+  // so the user can ask AI about the selected canvas area.
+  final hasBounds = selection.bounds.width > 0 && selection.bounds.height > 0;
+  if (cacheManager == null || !hasBounds) {
+    aiCallback();
+    return;
+  }
+
+  // Read everything from ref BEFORE the async gap to avoid stale WidgetRef.
+  final document = ref.read(documentProvider);
+  final pendingNotifier = ref.read(pendingSelectionImageProvider.notifier);
+
+  try {
+    final layer = document.layers[document.activeLayerIndex];
+
+    final currentPage = document.currentPage;
+    final background = currentPage?.background;
+    final pageSz = currentPage != null
+        ? Size(currentPage.size.width, currentPage.size.height)
+        : null;
+
+    Uint8List? pdfImageBytes;
+    if (background?.type == BackgroundType.pdf) {
+      if (background!.pdfData != null) {
+        pdfImageBytes = background.pdfData;
+      } else if (background.pdfFilePath != null &&
+          background.pdfPageIndex != null) {
+        final cacheKey =
+            '${background.pdfFilePath}|${background.pdfPageIndex}';
+        final cache = ref.read(pdfPageCacheProvider);
+        pdfImageBytes = cache[cacheKey];
+      }
+    }
+
+    final bytes = await SelectionCaptureService.captureSelection(
+      selection: selection,
+      layer: layer,
+      cacheManager: cacheManager,
+      background: background,
+      pdfImageBytes: pdfImageBytes,
+      pageSize: pageSz,
+    );
+
+    if (bytes != null) {
+      pendingNotifier.state = bytes;
+    }
+  } catch (e) {
+    debugPrint('Capture for AI failed: $e');
+  }
+
+  aiCallback();
+}
+
 void _showSnackBar(BuildContext? context, String message) {
   if (context == null || !context.mounted) return;
   ScaffoldMessenger.maybeOf(context)?.showSnackBar(
@@ -320,7 +381,10 @@ SelectionActionConfig buildSelectionActionConfig(
           icon: StarNoteIcons.sparkle,
           label: 'AI Asistan',
           isEnabled: resolvedAICallback != null,
-          onExecute: resolvedAICallback,
+          onExecute: resolvedAICallback != null
+              ? () => _captureAndOpenAI(
+                    ref, selection, cacheManager, resolvedAICallback)
+              : null,
         ),
         SelectionAction(
           id: 'screenshot',
@@ -363,7 +427,10 @@ SelectionActionConfig buildSelectionActionConfig(
       icon: StarNoteIcons.sparkle,
       label: 'AI Asistan',
       isEnabled: resolvedAICallback != null,
-      onExecute: resolvedAICallback,
+      onExecute: resolvedAICallback != null
+          ? () => _captureAndOpenAI(
+                ref, selection, cacheManager, resolvedAICallback)
+          : null,
     ),
     SelectionAction(
       id: 'color',
@@ -450,7 +517,10 @@ SelectionActionConfig buildSelectionActionConfig(
       icon: StarNoteIcons.sparkle,
       label: 'Yapay zekaya sor',
       isEnabled: resolvedAICallback != null,
-      onExecute: resolvedAICallback,
+      onExecute: resolvedAICallback != null
+          ? () => _captureAndOpenAI(
+                ref, selection, cacheManager, resolvedAICallback)
+          : null,
     ),
     SelectionAction(
       id: 'overflow_screenshot',

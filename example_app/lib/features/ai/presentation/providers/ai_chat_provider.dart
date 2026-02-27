@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -92,6 +94,16 @@ class AIChatNotifier extends StateNotifier<AIChatState> {
     AITaskType taskType = AITaskType.chat,
   }) async {
     await _send(text: text, taskType: taskType);
+  }
+
+  /// Send a message with pre-captured image bytes (e.g. from selection).
+  Future<void> sendWithImageBytes(
+    String text,
+    Uint8List imageBytes, {
+    AITaskType taskType = AITaskType.ocrSimple,
+  }) async {
+    final imageBase64 = base64Encode(imageBytes);
+    await _send(text: text, taskType: taskType, imageBase64: imageBase64);
   }
 
   /// Capture canvas and send with a prompt to the AI.

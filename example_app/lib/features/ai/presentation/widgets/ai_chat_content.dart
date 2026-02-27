@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:drawing_ui/drawing_ui.dart' show canvasBoundaryKeyProvider;
+import 'package:drawing_ui/drawing_ui.dart'
+    show canvasBoundaryKeyProvider, pendingSelectionImageProvider;
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/ai/presentation/providers/ai_providers.dart';
 import 'package:example_app/features/ai/presentation/widgets/ai_widgets.dart';
@@ -16,6 +17,7 @@ class AIChatContent extends ConsumerStatefulWidget {
 class _AIChatContentState extends ConsumerState<AIChatContent> {
   final _scrollController = ScrollController();
   bool _showHistory = false;
+
   @override
   void initState() {
     super.initState();
@@ -23,16 +25,20 @@ class _AIChatContentState extends ConsumerState<AIChatContent> {
       _initializeIfNeeded();
     });
   }
+
   void _initializeIfNeeded() {
     final s = ref.read(aiChatProvider);
     if (s.conversationId == null && !s.isLoading) {
-      ref.read(aiChatProvider.notifier).initialize();    }
+      ref.read(aiChatProvider.notifier).initialize();
+    }
   }
+
   @override
   void dispose() {
     _scrollController.dispose();
     super.dispose();
   }
+
   void _scrollToBottom() {
     if (_scrollController.hasClients) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -46,15 +52,27 @@ class _AIChatContentState extends ConsumerState<AIChatContent> {
       });
     }
   }
+
   void _handleSend(String text) {
     if (!ref.read(canSendAIMessageProvider)) {
       AIUpgradePrompt.show(context,
           reason: AIUpgradeReason.dailyLimitReached);
       return;
     }
-    ref.read(aiChatProvider.notifier).sendMessage(text);
+
+    final pendingImage = ref.read(pendingSelectionImageProvider);
+    if (pendingImage != null) {
+      final message = text.isEmpty ? 'Bu secimi analiz et.' : text;
+      ref.read(aiChatProvider.notifier).sendWithImageBytes(
+            message, pendingImage);
+      ref.read(pendingSelectionImageProvider.notifier).state = null;
+    } else {
+      if (text.isEmpty) return;
+      ref.read(aiChatProvider.notifier).sendMessage(text);
+    }
     _scrollToBottom();
   }
+
   void _handleCanvasCapture() {
     if (!ref.read(canSendAIMessageProvider)) {
       AIUpgradePrompt.show(context,
@@ -68,15 +86,30 @@ class _AIChatContentState extends ConsumerState<AIChatContent> {
     );
     _scrollToBottom();
   }
+
+  void _handleClearPendingImage() {
+    ref.read(pendingSelectionImageProvider.notifier).state = null;
+  }
+
   void _handleConversationSelected(String id) {
+    ref.read(pendingSelectionImageProvider.notifier).state = null;
     ref.read(aiChatProvider.notifier)
         .initialize(existingConversationId: id);
     setState(() => _showHistory = false);
   }
+
+  void _handleNewChat() {
+    ref.read(pendingSelectionImageProvider.notifier).state = null;
+    ref.read(aiChatProvider.notifier).newConversation();
+    refreshConversations(ref);
+  }
+
   @override
   Widget build(BuildContext context) {
     final chatState = ref.watch(aiChatProvider);
+    final pendingImage = ref.watch(pendingSelectionImageProvider);
     final theme = Theme.of(context);
+
     ref.listen(aiChatProvider, (prev, next) {
       if (prev?.isStreaming == true && !next.isStreaming) {
         ref.invalidate(aiUsageProvider);
@@ -87,12 +120,18 @@ class _AIChatContentState extends ConsumerState<AIChatContent> {
         _scrollToBottom();
       }
     });
+
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       behavior: HitTestBehavior.translucent,
       child: Column(
         children: [
-          _buildHeader(theme),
+          AIChatHeader(
+            onClose: widget.onClose,
+            onToggleHistory: () =>
+                setState(() => _showHistory = !_showHistory),
+            onNewChat: _handleNewChat,
+          ),
           Divider(
             height: 1,
             thickness: 0.5,
@@ -126,6 +165,8 @@ class _AIChatContentState extends ConsumerState<AIChatContent> {
             onAttachCanvas: _handleCanvasCapture,
             isStreaming: chatState.isStreaming,
             enabled: ref.watch(canSendAIMessageProvider),
+            pendingImage: pendingImage,
+            onClearPendingImage: _handleClearPendingImage,
             onLimitReached: () => AIUpgradePrompt.show(
               context,
               reason: AIUpgradeReason.dailyLimitReached,
@@ -135,99 +176,7 @@ class _AIChatContentState extends ConsumerState<AIChatContent> {
       ),
     );
   }
-  Widget _buildHeader(ThemeData theme) {
-    final viewMode = ref.watch(aiChatViewModeProvider);
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm, vertical: AppSpacing.xs,
-      ),
-      child: Row(
-        children: [
-          PopupMenuButton<String>(
-            icon: Icon(Icons.more_vert, size: AppIconSize.md),
-            tooltip: 'Menu',
-            onSelected: (value) {
-              switch (value) {
-                case 'sidebar':
-                  ref.read(aiChatViewModeProvider.notifier).state =
-                      AIChatViewMode.sidebar;
-                case 'floating':
-                  ref.read(aiChatViewModeProvider.notifier).state =
-                      AIChatViewMode.floating;
-                case 'close':
-                  widget.onClose();
-              }
-            },
-            itemBuilder: (context) => [
-              _viewModeItem(
-                value: 'sidebar', icon: Icons.view_sidebar,
-                label: 'Sidebar gorunumu',
-                isActive: viewMode == AIChatViewMode.sidebar,
-              ),
-              _viewModeItem(
-                value: 'floating', icon: Icons.picture_in_picture,
-                label: 'Yuzen pencere',
-                isActive: viewMode == AIChatViewMode.floating,
-              ),
-              const PopupMenuDivider(),
-              PopupMenuItem(
-                value: 'close',
-                child: Row(children: [
-                  Icon(Icons.close, size: AppIconSize.md),
-                  SizedBox(width: AppSpacing.md),
-                  const Text('Kapat'),
-                ]),
-              ),
-            ],
-          ),
-          SizedBox(width: AppSpacing.xs),
-          Text('StarNote AI',
-              style: theme.textTheme.titleSmall
-                  ?.copyWith(fontWeight: FontWeight.w600)),
-          const Spacer(),
-          IconButton(
-            onPressed: () =>
-                setState(() => _showHistory = !_showHistory),
-            icon: Icon(Icons.history, size: AppIconSize.md),
-            tooltip: 'Sohbet gecmisi',
-          ),
-          TextButton.icon(
-            onPressed: () {
-              ref.read(aiChatProvider.notifier).newConversation();
-              refreshConversations(ref);
-            },
-            icon: Icon(Icons.add_comment_outlined, size: AppIconSize.sm),
-            label: const Text('Yeni Chat'),
-            style: TextButton.styleFrom(
-              foregroundColor: theme.colorScheme.primary,
-              padding: EdgeInsets.symmetric(
-                horizontal: AppSpacing.md, vertical: AppSpacing.xs,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppRadius.sm),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-  PopupMenuItem<String> _viewModeItem({
-    required String value, required IconData icon,
-    required String label, required bool isActive,
-  }) {
-    return PopupMenuItem(
-      value: value,
-      child: Row(children: [
-        Icon(icon, size: AppIconSize.md),
-        SizedBox(width: AppSpacing.md),
-        Expanded(child: Text(label)),
-        if (isActive)
-          Icon(Icons.check, size: AppIconSize.sm + 2,
-              color: Theme.of(context).colorScheme.primary),
-      ]),
-    );
-  }
+
   Widget _buildChatArea(AIChatState chatState, ThemeData theme) {
     if (chatState.isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -248,6 +197,7 @@ class _AIChatContentState extends ConsumerState<AIChatContent> {
       },
     );
   }
+
   Widget _buildEmptyState(ThemeData theme) {
     return Center(
       child: SingleChildScrollView(
@@ -270,6 +220,7 @@ class _AIChatContentState extends ConsumerState<AIChatContent> {
       ),
     );
   }
+
   Widget _buildErrorBanner(String error, ThemeData theme) {
     return Container(
       width: double.infinity,

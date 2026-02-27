@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 
 import 'package:example_app/core/theme/index.dart';
@@ -11,6 +13,8 @@ class AIInputBar extends StatefulWidget {
     this.onLimitReached,
     this.isStreaming = false,
     this.enabled = true,
+    this.pendingImage,
+    this.onClearPendingImage,
   });
 
   final ValueChanged<String> onSend;
@@ -18,6 +22,8 @@ class AIInputBar extends StatefulWidget {
   final VoidCallback? onLimitReached;
   final bool isStreaming;
   final bool enabled;
+  final Uint8List? pendingImage;
+  final VoidCallback? onClearPendingImage;
 
   @override
   State<AIInputBar> createState() => _AIInputBarState();
@@ -44,20 +50,22 @@ class _AIInputBarState extends State<AIInputBar> {
     super.dispose();
   }
 
+  bool get _canSend =>
+      !widget.isStreaming &&
+      widget.enabled &&
+      (_hasText || widget.pendingImage != null);
+
   void _handleSend() {
     final text = _controller.text.trim();
-    if (text.isEmpty || !widget.enabled || widget.isStreaming) return;
+    if (!_canSend) return;
+    // Allow sending with just an image (text may be empty)
     widget.onSend(text);
     _controller.clear();
   }
 
-  void _sendQuick(String text) {
-    if (!widget.enabled || widget.isStreaming) return;
-    widget.onSend(text);
-  }
-
   Widget _buildQuickChips(ThemeData theme) {
     final isEnabled = widget.enabled && !widget.isStreaming;
+    void sendQuick(String t) { if (isEnabled) widget.onSend(t); }
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       padding: EdgeInsets.fromLTRB(
@@ -67,11 +75,11 @@ class _AIInputBarState extends State<AIInputBar> {
         spacing: AppSpacing.sm,
         children: [
           _chip(theme, 'Bunu coz', Icons.lightbulb_outline,
-              isEnabled, () => _sendQuick('Bunu coz')),
+              isEnabled, () => sendQuick('Bunu coz')),
           _chip(theme, 'Bana anlat', Icons.chat_bubble_outline,
-              isEnabled, () => _sendQuick('Bana anlat')),
+              isEnabled, () => sendQuick('Bana anlat')),
           _chip(theme, 'Ozetle', Icons.short_text,
-              isEnabled, () => _sendQuick('Ozetle')),
+              isEnabled, () => sendQuick('Ozetle')),
         ],
       ),
     );
@@ -96,6 +104,32 @@ class _AIInputBarState extends State<AIInputBar> {
       ),
       backgroundColor: Colors.transparent,
       visualDensity: VisualDensity.compact,
+    );
+  }
+
+  Widget _buildPendingImagePreview(ThemeData theme) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+          AppSpacing.md, AppSpacing.sm, AppSpacing.md, 0),
+      child: Row(children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(AppRadius.sm),
+          child: Image.memory(widget.pendingImage!,
+              width: 56, height: 56, fit: BoxFit.cover),
+        ),
+        SizedBox(width: AppSpacing.sm),
+        Expanded(
+          child: Text('Secim ekran goruntusu',
+              style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant)),
+        ),
+        IconButton(
+          onPressed: widget.onClearPendingImage,
+          icon: Icon(Icons.close, size: AppIconSize.sm),
+          tooltip: 'Kaldir',
+          visualDensity: VisualDensity.compact,
+        ),
+      ]),
     );
   }
 
@@ -170,7 +204,7 @@ class _AIInputBarState extends State<AIInputBar> {
         ),
         SizedBox(width: AppSpacing.xs),
         IconButton.filled(
-          onPressed: _hasText && !widget.isStreaming ? _handleSend : null,
+          onPressed: _canSend ? _handleSend : null,
           icon: widget.isStreaming
               ? SizedBox(
                   width: AppIconSize.sm + 2,
@@ -236,6 +270,8 @@ class _AIInputBarState extends State<AIInputBar> {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (widget.enabled) _buildQuickChips(theme),
+            if (widget.pendingImage != null)
+              _buildPendingImagePreview(theme),
             Padding(
               padding: EdgeInsets.all(AppSpacing.sm),
               child: widget.enabled
