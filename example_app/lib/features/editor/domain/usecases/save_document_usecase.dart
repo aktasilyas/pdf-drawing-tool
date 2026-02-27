@@ -19,29 +19,37 @@ class SaveDocumentUseCase {
         }
         return page;
       }).toList();
-      
+
       // Create cleaned document
       final cleanedDocument = document.copyWith(
         pages: cleanedPages,
         updatedAt: DateTime.now(),
       );
-      
+
       // 2. Serialize document to JSON
       final content = cleanedDocument.toJson();
-      
-      // 3. Save to DB
+
+      // 3. Extract coverId from cover page for metadata sync
+      final coverPage = document.pages
+          .where((p) => p.isCover)
+          .firstOrNull;
+      final coverId = coverPage?.background.coverId;
+
+      // 4. Save to DB
       final result = await _repository.saveDocumentContent(
         id: document.id,
         content: content,
         pageCount: document.pageCount,
         updatedAt: DateTime.now(),
+        coverId: coverId,
+        updateCover: true,
       );
-      
+
       result.fold(
         (failure) => logger.e('Save document failed', error: failure.message),
         (_) => logger.i('Document saved: ${document.id}'),
       );
-      
+
       return result;
     } catch (e) {
       logger.e('Save document exception', error: e, stackTrace: StackTrace.current);

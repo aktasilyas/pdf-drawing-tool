@@ -7,8 +7,11 @@ import 'package:drawing_core/drawing_core.dart';
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/index.dart';
 
-/// Paper format picker bottom sheet
-class FormatPickerSheet extends StatelessWidget {
+/// Paper format picker bottom sheet.
+///
+/// StatefulWidget that holds orientation + size in local state,
+/// submitting both on "Tamam" button press.
+class FormatPickerSheet extends StatefulWidget {
   final PaperSize currentSize;
 
   const FormatPickerSheet({super.key, required this.currentSize});
@@ -29,6 +32,26 @@ class FormatPickerSheet extends StatelessWidget {
   }
 
   @override
+  State<FormatPickerSheet> createState() => _FormatPickerSheetState();
+}
+
+class _FormatPickerSheetState extends State<FormatPickerSheet> {
+  late PaperSizePreset _selectedPreset;
+  late bool _isLandscape;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedPreset = widget.currentSize.preset;
+    _isLandscape = widget.currentSize.isLandscape;
+  }
+
+  PaperSize get _currentSelection {
+    final base = PaperSize.fromPreset(_selectedPreset);
+    return _isLandscape ? base.landscape : base.portrait;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textSecondary =
@@ -41,69 +64,118 @@ class FormatPickerSheet extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Format Sec', style: AppTypography.titleMedium),
+            _buildDragHandle(isDark),
             const SizedBox(height: AppSpacing.md),
-
-            // Orientation
-            Text('Yon:',
-                style: AppTypography.labelMedium
-                    .copyWith(color: textSecondary)),
-            const SizedBox(height: AppSpacing.sm),
-            Row(
-              children: [
-                _OrientationChip(
-                  label: 'Dikey',
-                  icon: Icons.crop_portrait,
-                  isSelected: !currentSize.isLandscape,
-                  onTap: () =>
-                      Navigator.pop(context, currentSize.portrait),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                _OrientationChip(
-                  label: 'Yatay',
-                  icon: Icons.crop_landscape,
-                  isSelected: currentSize.isLandscape,
-                  onTap: () =>
-                      Navigator.pop(context, currentSize.landscape),
-                ),
-              ],
-            ),
+            _buildHeader(textSecondary),
             const SizedBox(height: AppSpacing.lg),
-
-            // Size
-            Text('Boyut:',
-                style: AppTypography.labelMedium
-                    .copyWith(color: textSecondary)),
+            _buildOrientationSection(textSecondary),
+            const SizedBox(height: AppSpacing.lg),
+            _buildSizeSection(textSecondary),
+            const SizedBox(height: AppSpacing.lg),
+            _buildConfirmButton(),
             const SizedBox(height: AppSpacing.sm),
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.sm,
-              children: [
-                PaperSizePreset.a4,
-                PaperSizePreset.a5,
-                PaperSizePreset.a6,
-                PaperSizePreset.letter,
-                PaperSizePreset.square,
-              ].map((preset) {
-                final isSelected = currentSize.preset == preset;
-                return AppChip(
-                  label: _getPresetName(preset),
-                  isSelected: isSelected,
-                  onTap: () {
-                    final newSize = PaperSize.fromPreset(preset);
-                    Navigator.pop(
-                      context,
-                      currentSize.isLandscape
-                          ? newSize.landscape
-                          : newSize,
-                    );
-                  },
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: AppSpacing.md),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildDragHandle(bool isDark) {
+    return Center(
+      child: Container(
+        width: 36,
+        height: 4,
+        decoration: BoxDecoration(
+          color: isDark
+              ? AppColors.outlineDark.withValues(alpha: 0.3)
+              : AppColors.outlineLight.withValues(alpha: 0.3),
+          borderRadius: BorderRadius.circular(2),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(Color textSecondary) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        const Text('Format', style: AppTypography.titleMedium),
+        Text(
+          '${_currentSelection.widthMm.toInt()} x '
+          '${_currentSelection.heightMm.toInt()} mm',
+          style: AppTypography.caption.copyWith(color: textSecondary),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOrientationSection(Color textSecondary) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Yön',
+          style: AppTypography.labelMedium.copyWith(color: textSecondary),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Row(
+          children: [
+            AppChip(
+              label: 'Dikey',
+              icon: Icons.crop_portrait,
+              isSelected: !_isLandscape,
+              onTap: () => setState(() => _isLandscape = false),
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            AppChip(
+              label: 'Yatay',
+              icon: Icons.crop_landscape,
+              isSelected: _isLandscape,
+              onTap: () => setState(() => _isLandscape = true),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSizeSection(Color textSecondary) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Boyut',
+          style: AppTypography.labelMedium.copyWith(color: textSecondary),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
+          children: [
+            PaperSizePreset.a4,
+            PaperSizePreset.a5,
+            PaperSizePreset.a6,
+            PaperSizePreset.letter,
+            PaperSizePreset.legal,
+            PaperSizePreset.square,
+          ].map((preset) {
+            return AppChip(
+              label: _getPresetName(preset),
+              isSelected: _selectedPreset == preset,
+              onTap: () => setState(() => _selectedPreset = preset),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildConfirmButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: AppButton(
+        label: 'Tamam',
+        onPressed: () => Navigator.pop(context, _currentSelection),
       ),
     );
   }
@@ -116,65 +188,8 @@ class FormatPickerSheet extends StatelessWidget {
       case PaperSizePreset.letter: return 'Letter';
       case PaperSizePreset.legal: return 'Legal';
       case PaperSizePreset.square: return 'Kare';
-      case PaperSizePreset.widescreen: return 'Genis';
-      case PaperSizePreset.custom: return 'Ozel';
+      case PaperSizePreset.widescreen: return 'Geniş';
+      case PaperSizePreset.custom: return 'Özel';
     }
-  }
-}
-
-class _OrientationChip extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _OrientationChip({
-    required this.label,
-    required this.icon,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final surfaceVariant = isDark
-        ? AppColors.surfaceVariantDark
-        : AppColors.surfaceVariantLight;
-    final outlineColor =
-        isDark ? AppColors.outlineDark : AppColors.outlineLight;
-    final textPrimary =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.sm,
-        ),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : surfaceVariant,
-          borderRadius: BorderRadius.circular(AppRadius.sm),
-          border: Border.all(
-            color: isSelected ? AppColors.primary : outlineColor,
-          ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: AppIconSize.sm,
-                color: isSelected ? AppColors.onPrimary : textPrimary),
-            const SizedBox(width: AppSpacing.xs),
-            Text(label,
-                style: AppTypography.labelMedium.copyWith(
-                  color: isSelected ? AppColors.onPrimary : textPrimary,
-                  fontWeight:
-                      isSelected ? FontWeight.w600 : FontWeight.normal,
-                )),
-          ],
-        ),
-      ),
-    );
   }
 }

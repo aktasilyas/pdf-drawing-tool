@@ -1,23 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_core/drawing_core.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
 import 'package:drawing_ui/src/widgets/template_picker/category_tabs.dart';
+import 'package:drawing_ui/src/widgets/template_picker/cover_grid.dart';
 import 'package:drawing_ui/src/widgets/template_picker/template_grid.dart';
 import 'package:drawing_ui/src/widgets/template_picker/paper_size_picker.dart';
-import 'package:drawing_ui/src/widgets/template_preview_widget.dart';
+import 'package:drawing_ui/src/widgets/template_picker/template_picker_helpers.dart';
 
-/// Paper color presets for the dropdown.
-const _paperColorPresets = <String, Color>{
-  'Beyaz': Color(0xFFFFFFFF),
-  'Krem': Color(0xFFFFFDE7),
-  'Siyah': Color(0xFF303030),
-};
+export 'template_picker_helpers.dart' show TemplatePickerResult;
 
 /// Ana template secici - responsive (phone: full sheet, tablet: dialog)
 class TemplatePicker extends StatefulWidget {
   final Template? initialTemplate;
   final PaperSize initialPaperSize;
+  final Color initialPaperColor;
+  final Cover? initialCover;
   final bool Function(Template)? isLocked;
   final VoidCallback? onPremiumTap;
 
@@ -26,6 +22,8 @@ class TemplatePicker extends StatefulWidget {
     this.initialTemplate,
     this.initialPaperSize = const PaperSize(
         widthMm: 210, heightMm: 297, preset: PaperSizePreset.a4),
+    this.initialPaperColor = const Color(0xFFFFFFFF),
+    this.initialCover,
     this.isLocked,
     this.onPremiumTap,
   });
@@ -36,12 +34,16 @@ class TemplatePicker extends StatefulWidget {
     Template? initialTemplate,
     PaperSize initialPaperSize = const PaperSize(
         widthMm: 210, heightMm: 297, preset: PaperSizePreset.a4),
+    Color initialPaperColor = const Color(0xFFFFFFFF),
+    Cover? initialCover,
     bool Function(Template)? isLocked,
     VoidCallback? onPremiumTap,
   }) {
     final picker = TemplatePicker(
       initialTemplate: initialTemplate,
       initialPaperSize: initialPaperSize,
+      initialPaperColor: initialPaperColor,
+      initialCover: initialCover,
       isLocked: isLocked,
       onPremiumTap: onPremiumTap,
     );
@@ -52,7 +54,7 @@ class TemplatePicker extends StatefulWidget {
           backgroundColor: Theme.of(context).colorScheme.surface,
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20)),
-          child: SizedBox(width: 720, height: 560, child: picker),
+          child: SizedBox(width: 780, height: 620, child: picker),
         ),
       );
     }
@@ -65,7 +67,7 @@ class TemplatePicker extends StatefulWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (_) => DraggableScrollableSheet(
-        initialChildSize: 0.85, minChildSize: 0.5, maxChildSize: 0.95,
+        initialChildSize: 0.90, minChildSize: 0.5, maxChildSize: 0.95,
         expand: false,
         builder: (_, __) => picker,
       ),
@@ -76,24 +78,40 @@ class TemplatePicker extends StatefulWidget {
   State<TemplatePicker> createState() => _TemplatePickerState();
 }
 
-class _TemplatePickerState extends State<TemplatePicker> {
+class _TemplatePickerState extends State<TemplatePicker>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tabController;
   TemplateCategory? _selectedCategory;
   late Template _selectedTemplate;
   late PaperSize _selectedPaperSize;
-  Color _paperColor = const Color(0xFFFFFFFF);
+  late Color _paperColor;
+  Cover? _selectedCover;
 
   @override
   void initState() {
     super.initState();
     _selectedTemplate = widget.initialTemplate ?? TemplateRegistry.blank;
     _selectedPaperSize = widget.initialPaperSize;
+    _paperColor = widget.initialPaperColor;
+    _selectedCover = widget.initialCover;
+    _tabController = TabController(length: 2, vsync: this, initialIndex: 1);
+    _tabController.addListener(() {
+      if (!_tabController.indexIsChanging) setState(() {});
+    });
   }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  bool get _isCoverTab => _tabController.index == 0;
 
   List<Template> get _filteredTemplates {
     final source = _selectedCategory == null
         ? TemplateRegistry.all
         : TemplateRegistry.getByCategory(_selectedCategory!);
-    // Keep only first template per unique pattern
     final seen = <TemplatePattern>{};
     return source.where((t) {
       if (seen.contains(t.pattern)) return false;
@@ -102,15 +120,12 @@ class _TemplatePickerState extends State<TemplatePicker> {
     }).toList();
   }
 
-  void _handleTemplateSelected(Template template) {
-    setState(() => _selectedTemplate = template);
-  }
-
   void _handleConfirm() {
     Navigator.of(context).pop(TemplatePickerResult(
       template: _selectedTemplate,
       paperSize: _selectedPaperSize,
       backgroundColor: _paperColor,
+      cover: _selectedCover,
     ));
   }
 
@@ -118,91 +133,68 @@ class _TemplatePickerState extends State<TemplatePicker> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final isTablet = MediaQuery.of(context).size.width >= 600;
     return Column(children: [
-      _buildHeader(theme, cs),
+      _buildTabBar(theme, cs),
+      Expanded(
+        child: TabBarView(
+          controller: _tabController,
+          children: [
+            CoverGrid(
+              covers: CoverRegistry.all,
+              selectedCover: _selectedCover,
+              onCoverSelected: (c) => setState(() => _selectedCover = c),
+            ),
+            _buildPaperTab(),
+          ],
+        ),
+      ),
+      _buildBottomBar(cs),
+    ]);
+  }
+
+  Widget _buildTabBar(ThemeData theme, ColorScheme cs) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: cs.outline.withValues(alpha: 0.15)),
+        ),
+      ),
+      child: TabBar(
+        controller: _tabController,
+        labelColor: cs.primary,
+        unselectedLabelColor: cs.onSurfaceVariant,
+        labelStyle: theme.textTheme.titleSmall
+            ?.copyWith(fontWeight: FontWeight.w600),
+        unselectedLabelStyle: theme.textTheme.titleSmall,
+        indicatorColor: cs.primary,
+        indicatorWeight: 2.5,
+        tabs: const [Tab(text: 'Kapak'), Tab(text: 'Kâğıt')],
+      ),
+    );
+  }
+
+  Widget _buildPaperTab() {
+    return Column(children: [
+      const SizedBox(height: 4),
       CategoryTabs(
         selectedCategory: _selectedCategory,
         onCategorySelected: (c) => setState(() => _selectedCategory = c),
       ),
       const SizedBox(height: 4),
       Expanded(
-        child: isTablet
-            ? Row(children: [
-                Expanded(flex: 3, child: _buildGrid()),
-                Expanded(flex: 2, child: _buildPreview(theme, cs)),
-              ])
-            : _buildGrid(),
+        child: TemplateGrid(
+          templates: _filteredTemplates,
+          selectedTemplate: _selectedTemplate,
+          onTemplateSelected: (t) => setState(() => _selectedTemplate = t),
+          isLocked: (_) => false,
+        ),
       ),
-      _buildBottomBar(cs),
     ]);
   }
 
-  Widget _buildHeader(ThemeData theme, ColorScheme cs) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 12, 8, 4),
-      child: Row(children: [
-        Text('Şablon Seç',
-            style: theme.textTheme.titleMedium
-                ?.copyWith(fontWeight: FontWeight.w600, color: cs.onSurface)),
-        const Spacer(),
-        IconButton(
-          onPressed: () => Navigator.of(context).pop(),
-          icon: PhosphorIcon(StarNoteIcons.close,
-              size: 20, color: cs.onSurfaceVariant),
-        ),
-      ]),
-    );
-  }
-
-  Widget _buildGrid() => TemplateGrid(
-        templates: _filteredTemplates,
-        selectedTemplate: _selectedTemplate,
-        onTemplateSelected: _handleTemplateSelected,
-        isLocked: (_) => false,
-      );
-
-  Widget _buildPreview(ThemeData theme, ColorScheme cs) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(8, 0, 16, 0),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: cs.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: cs.outline.withValues(alpha: 0.1)),
-      ),
-      child: Column(children: [
-        Expanded(
-          child: Center(
-            child: AspectRatio(
-              aspectRatio: 210 / 297,
-              child: TemplatePreviewWidget(
-                template: _selectedTemplate,
-                backgroundColorOverride: _paperColor,
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 12),
-        Text(_selectedTemplate.name,
-            style: theme.textTheme.titleSmall
-                ?.copyWith(fontWeight: FontWeight.w600, color: cs.onSurface),
-            textAlign: TextAlign.center),
-        const SizedBox(height: 4),
-        Text(_selectedPaperSize.preset.name.toUpperCase(),
-            style: theme.textTheme.bodySmall
-                ?.copyWith(color: cs.onSurfaceVariant)),
-      ]),
-    );
-  }
-
   Widget _buildBottomBar(ColorScheme cs) {
-    const h = 36.0;
-    final border = Border.all(color: cs.outline.withValues(alpha: 0.2));
-    final radius = BorderRadius.circular(8);
+    final radius = BorderRadius.circular(10);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         color: cs.surfaceContainerLow,
         border: Border(
@@ -210,89 +202,64 @@ class _TemplatePickerState extends State<TemplatePicker> {
       ),
       child: SafeArea(
         top: false,
-        child: Row(children: [
-          _buildPaperColorDropdown(cs, h, border, radius),
-          const SizedBox(width: 8),
-          Flexible(
-            child: PaperSizePicker(
-              selectedSize: _selectedPaperSize,
-              onSizeSelected: (s) => setState(() => _selectedPaperSize = s),
-              showLandscapeToggle: false,
-              dense: true,
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          // Options strip (paper color, size, orientation)
+          if (!_isCoverTab)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+              child: Row(children: [
+                PaperColorDropdown(
+                  selectedColor: _paperColor,
+                  onColorChanged: (c) => setState(() => _paperColor = c),
+                ),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: PaperSizePicker(
+                    selectedSize: _selectedPaperSize,
+                    onSizeSelected: (s) =>
+                        setState(() => _selectedPaperSize = s),
+                    showLandscapeToggle: true,
+                    dense: true,
+                  ),
+                ),
+              ]),
             ),
-          ),
-          const SizedBox(width: 8),
-          SizedBox(
-            height: h,
-            child: FilledButton(
-              onPressed: _handleConfirm,
-              style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                shape: RoundedRectangleBorder(borderRadius: radius),
-              ),
-              child: const Text('Uygula',
-                  style:
-                      TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+          // Action buttons
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: radius),
+                  ),
+                  child: Text('İptal',
+                      style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: cs.onSurfaceVariant)),
+                ),
+                const SizedBox(width: 8),
+                FilledButton(
+                  onPressed: _handleConfirm,
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: radius),
+                  ),
+                  child: const Text('Uygula',
+                      style: TextStyle(
+                          fontSize: 14, fontWeight: FontWeight.w600)),
+                ),
+              ],
             ),
           ),
         ]),
       ),
     );
   }
-
-  Widget _buildPaperColorDropdown(
-      ColorScheme cs, double h, Border border, BorderRadius radius) {
-    return Container(
-      height: h,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      decoration: BoxDecoration(
-          color: cs.surfaceContainerHigh, borderRadius: radius, border: border),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<Color>(
-          value: _paperColor,
-          isDense: true,
-          icon: PhosphorIcon(StarNoteIcons.caretDown,
-              size: 14, color: cs.onSurfaceVariant),
-          style: TextStyle(fontSize: 12, color: cs.onSurface),
-          dropdownColor: cs.surfaceContainerHighest,
-          items: _paperColorPresets.entries.map((e) {
-            return DropdownMenuItem(
-              value: e.value,
-              child: Row(mainAxisSize: MainAxisSize.min, children: [
-                Container(
-                  width: 14, height: 14,
-                  decoration: BoxDecoration(
-                    color: e.value,
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                        color: cs.outline.withValues(alpha: 0.5)),
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Text(e.key),
-              ]),
-            );
-          }).toList(),
-          onChanged: (c) {
-            if (c != null) setState(() => _paperColor = c);
-          },
-        ),
-      ),
-    );
-  }
-}
-
-/// Template picker sonucu
-class TemplatePickerResult {
-  final Template template;
-  final PaperSize paperSize;
-  final Color? lineColor;
-  final Color? backgroundColor;
-
-  const TemplatePickerResult({
-    required this.template,
-    required this.paperSize,
-    this.lineColor,
-    this.backgroundColor,
-  });
 }
