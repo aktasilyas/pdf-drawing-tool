@@ -23,14 +23,21 @@ class FolderRepositoryImpl implements FolderRepository {
   @override
   Future<Either<Failure, List<Folder>>> getFolders({String? parentId}) async {
     try {
-      final folders = await _localDatasource.getFolders(parentId: parentId);
+      // Always fetch all folders to compute recursive document counts
+      final allFolders = await _localDatasource.getFolders();
       final documents = await _documentDatasource.getAllDocuments();
+      final nonTrashedDocs = documents.where((doc) => !doc.isInTrash).toList();
 
-      // Calculate document count for each folder
-      final entities = folders.map((model) {
-        final docCount = documents
-            .where((doc) => doc.folderId == model.id && !doc.isInTrash)
-            .length;
+      // Filter to requested scope
+      final targetFolders = parentId == null
+          ? allFolders
+          : allFolders.where((f) => f.parentId == parentId).toList();
+
+      // Calculate recursive document count (includes subfolder documents)
+      final entities = targetFolders.map((model) {
+        final folderIds = {model.id, ..._getDescendantIds(model.id, allFolders)};
+        final docCount =
+            nonTrashedDocs.where((doc) => folderIds.contains(doc.folderId)).length;
         return model.copyWith(documentCount: docCount).toEntity();
       }).toList();
 
@@ -259,6 +266,17 @@ class FolderRepositoryImpl implements FolderRepository {
     } catch (e) {
       return Left(CacheFailure('Failed to get folder path: $e'));
     }
+  }
+
+  /// Returns all descendant folder IDs for recursive document counting.
+  Set<String> _getDescendantIds(String folderId, List<FolderModel> allFolders) {
+    final descendants = <String>{};
+    final children = allFolders.where((f) => f.parentId == folderId);
+    for (final child in children) {
+      descendants.add(child.id);
+      descendants.addAll(_getDescendantIds(child.id, allFolders));
+    }
+    return descendants;
   }
 
   Future<bool> _checkCircularReference(

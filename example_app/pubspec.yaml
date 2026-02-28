@@ -52,6 +52,28 @@ dev_dependencies:
   freezed: ^2.4.5
   json_serializable: ^6.7.1
   mocktail: ^1.0.0
+  flutter_launcher_icons: ^0.14.3
+  flutter_native_splash: ^2.4.4
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/elyanotes_app_icon.png"
+  min_sdk_android: 21
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/images/elyanotes_app_icon.png"
+  web:
+    generate: true
+    image_path: "assets/images/elyanotes_app_icon.png"
+
+flutter_native_splash:
+  color: "#FFFFFF"
+  image: "assets/images/elyanotes_logo.png"
+  android_12:
+    color: "#FFFFFF"
+    image: "assets/images/elyanotes_app_icon.png"
+  ios: true
+  android: true
 
 flutter:
   uses-material-design: true
@@ -61,3 +83,4 @@ flutter:
     - assets/icons/
     - assets/stickers/
     - assets/covers/
+    - assets/images/
