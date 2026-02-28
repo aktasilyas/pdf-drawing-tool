@@ -122,6 +122,20 @@ class FolderRepositoryImpl implements FolderRepository {
   }
 
   @override
+  Future<Either<Failure, Folder>> toggleFavorite(String id) async {
+    try {
+      final folder = await _localDatasource.getFolder(id);
+      final updated = folder.copyWith(isFavorite: !folder.isFavorite);
+      final result = await _localDatasource.updateFolder(updated);
+      return Right(result.toEntity());
+    } on CacheException catch (e) {
+      return Left(CacheFailure(e.message));
+    } catch (e) {
+      return Left(CacheFailure('Failed to toggle favorite: $e'));
+    }
+  }
+
+  @override
   Future<Either<Failure, void>> deleteFolder(
     String id, {
     bool deleteContents = false,

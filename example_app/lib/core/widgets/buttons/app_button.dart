@@ -139,7 +139,7 @@ class AppButton extends StatelessWidget {
       case AppButtonVariant.text:
         return TextButton(
           onPressed: isDisabled ? null : onPressed,
-          style: _textStyle(specs),
+          style: _textStyle(specs, isDark),
           child: child,
         );
 
@@ -285,7 +285,7 @@ class AppButton extends StatelessWidget {
         isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariantLight;
 
     return OutlinedButton.styleFrom(
-      foregroundColor: AppColors.primary,
+      foregroundColor: isDark ? AppColors.accent : AppColors.primary,
       backgroundColor: Colors.transparent,
       padding: EdgeInsets.symmetric(horizontal: specs.horizontalPadding),
       shape: RoundedRectangleBorder(
@@ -305,8 +305,9 @@ class AppButton extends StatelessWidget {
   }
 
   /// Text: arka plan yok, border yok, sadece text + ripple
-  ButtonStyle _textStyle(_ButtonSpecs specs) => TextButton.styleFrom(
-        foregroundColor: AppColors.primary,
+  ButtonStyle _textStyle(_ButtonSpecs specs, bool isDark) =>
+      TextButton.styleFrom(
+        foregroundColor: isDark ? AppColors.accent : AppColors.primary,
         padding: EdgeInsets.symmetric(horizontal: specs.horizontalPadding),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.button),

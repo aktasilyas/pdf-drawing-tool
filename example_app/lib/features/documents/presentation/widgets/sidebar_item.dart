@@ -49,32 +49,31 @@ class SidebarItem extends StatelessWidget {
     final effectiveIconColor = iconColor ??
         (isSelected ? selectedColor : textSecondary);
 
-    final iconSz = isSubfolder ? AppIconSize.sm : AppIconSize.md;
+    final iconSz = isSubfolder ? AppIconSize.sm : AppIconSize.sm;
 
     return Padding(
       padding: EdgeInsets.only(
-        left: isSubfolder ? AppSpacing.xl : AppSpacing.md,
-        right: AppSpacing.md,
-        top: AppSpacing.xxs,
-        bottom: AppSpacing.xxs,
+        left: isSubfolder ? AppSpacing.xl : AppSpacing.sm,
+        right: AppSpacing.sm,
+        top: 1,
+        bottom: 1,
       ),
       child: Stack(
         children: [
           // Main content
           Material(
             color: isSelected ? selectedBg : Colors.transparent,
-            borderRadius: BorderRadius.circular(AppRadius.md),
+            borderRadius: BorderRadius.circular(AppRadius.sm),
             child: InkWell(
               onTap: onTap,
-              borderRadius: BorderRadius.circular(AppRadius.md),
+              borderRadius: BorderRadius.circular(AppRadius.sm),
               hoverColor: isDark
                   ? AppColors.surfaceVariantDark.withValues(alpha: 0.5)
                   : AppColors.surfaceVariantLight.withValues(alpha: 0.5),
               child: Container(
-                constraints:
-                    const BoxConstraints(minHeight: AppSpacing.minTouchTarget),
+                constraints: const BoxConstraints(minHeight: 40),
                 padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+                    horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
                 child: Row(
                   children: [
                     Icon(
@@ -82,23 +81,24 @@ class SidebarItem extends StatelessWidget {
                       size: iconSz,
                       color: effectiveIconColor,
                     ),
-                    const SizedBox(width: AppSpacing.md),
+                    const SizedBox(width: AppSpacing.sm),
                     Expanded(
                       child: Text(
                         label,
                         style: (isSubfolder
-                                ? AppTypography.bodyMedium
-                                : AppTypography.titleMedium)
+                                ? AppTypography.caption
+                                : AppTypography.bodyMedium)
                             .copyWith(
                           color: isSelected ? selectedColor : textPrimary,
-                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                          fontWeight:
+                              isSelected ? FontWeight.w600 : FontWeight.w400,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     if (trailing != null) ...[
-                      const SizedBox(width: AppSpacing.sm),
+                      const SizedBox(width: AppSpacing.xs),
                       trailing!,
                     ],
                   ],
@@ -110,8 +110,8 @@ class SidebarItem extends StatelessWidget {
           if (isSelected)
             Positioned(
               left: 0,
-              top: 8,
-              bottom: 8,
+              top: 6,
+              bottom: 6,
               child: Container(
                 width: 3,
                 decoration: BoxDecoration(
