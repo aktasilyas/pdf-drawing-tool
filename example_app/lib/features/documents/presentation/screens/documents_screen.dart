@@ -274,17 +274,20 @@ class _MobileHeader extends StatelessWidget {
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text(
+          Image.asset(
+            'assets/images/elyanotes_logo_transparent.png',
+            height: 32,
+            fit: BoxFit.contain,
+            errorBuilder: (_, __, ___) => Text(
               'ElyaNotes',
               style: GoogleFonts.lobsterTwo(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: textPrimary,
               ),
-              overflow: TextOverflow.ellipsis,
             ),
           ),
+          const Spacer(),
           AppIconButton(
             icon: Icons.settings_outlined,
             variant: AppIconButtonVariant.ghost,

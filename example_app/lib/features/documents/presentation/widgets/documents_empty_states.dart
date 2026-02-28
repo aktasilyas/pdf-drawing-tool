@@ -17,10 +17,51 @@ class DocumentsEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const AppEmptyState(
-      icon: Icons.description_outlined,
-      title: 'Henüz not yok',
-      description: 'Yeni bir not oluşturmak için "+" butonuna tıklayın',
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xxl),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(
+              'assets/images/elyanotes_logo_transparent.png',
+              height: 64,
+              fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            Icon(
+              Icons.description_outlined,
+              size: AppIconSize.emptyState,
+              color: isDark
+                  ? AppColors.textSecondaryDark
+                  : AppColors.textSecondaryLight,
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            Text(
+              'Henüz not yok',
+              style: AppTypography.headlineSmall.copyWith(
+                color: isDark
+                    ? AppColors.textPrimaryDark
+                    : AppColors.textPrimaryLight,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              'Yeni bir not oluşturmak için "+" butonuna tıklayın',
+              style: AppTypography.bodyMedium.copyWith(
+                color: isDark
+                    ? AppColors.textSecondaryDark
+                    : AppColors.textSecondaryLight,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

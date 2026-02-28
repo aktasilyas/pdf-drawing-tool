@@ -138,6 +138,18 @@ class SettingsScreen extends ConsumerWidget {
               SettingsSection(
                 title: 'HAKKINDA',
                 children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.lg, horizontal: AppSpacing.lg),
+                    child: Center(
+                      child: Image.asset(
+                        'assets/images/elyanotes_logo.png',
+                        width: 200,
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                      ),
+                    ),
+                  ),
                   SettingsTile(
                     icon: Icons.info_outline,
                     title: 'Versiyon',
