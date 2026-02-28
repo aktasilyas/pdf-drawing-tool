@@ -58,8 +58,8 @@ abstract class AppDurations {
   /// Tooltip görünme süresi (2 saniye)
   static const Duration tooltip = Duration(seconds: 2);
 
-  /// Splash ekranı süresi (2 saniye)
-  static const Duration splash = Duration(seconds: 2);
+  /// Splash ekranı süresi (3.5 saniye)
+  static const Duration splash = Duration(milliseconds: 3500);
 
   /// Debounce süresi - arama vb. (300ms)
   static const Duration debounce = normal;

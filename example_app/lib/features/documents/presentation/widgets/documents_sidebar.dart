@@ -107,24 +107,21 @@ class DocumentsSidebar extends ConsumerWidget {
           AppSpacing.md, AppSpacing.lg, AppSpacing.sm, AppSpacing.sm),
       child: Row(
         children: [
-          Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              color: AppColors.primary,
-              borderRadius: BorderRadius.circular(AppRadius.xs),
-            ),
-            child: const Icon(Icons.edit_note,
-                color: AppColors.onPrimary, size: AppIconSize.sm),
-          ),
-          const SizedBox(width: AppSpacing.sm),
           Expanded(
-            child: Text(
-              'ElyaNotes',
-              style: GoogleFonts.lobsterTwo(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: textPrimary,
+            child: Image.asset(
+              isDark
+                  ? 'assets/images/elyanotes_logo_transparent.png'
+                  : 'assets/images/elyanotes_logo.png',
+              height: 72,
+              fit: BoxFit.contain,
+              alignment: Alignment.centerLeft,
+              errorBuilder: (_, __, ___) => Text(
+                'ElyaNotes',
+                style: GoogleFonts.lobsterTwo(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: textPrimary,
+                ),
               ),
             ),
           ),
