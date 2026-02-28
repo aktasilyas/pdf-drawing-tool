@@ -1,6 +1,7 @@
 /// Samsung Notes-style color picker with Kartelalar (swatch) and Spektrum tabs.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
 import 'package:drawing_ui/src/providers/recent_colors_provider.dart';
@@ -158,8 +159,8 @@ class _CompactColorPickerState extends ConsumerState<CompactColorPicker>
           indicatorSize: TabBarIndicatorSize.tab,
           dividerHeight: 0,
           labelStyle:
-              const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-          unselectedLabelStyle: const TextStyle(fontSize: 13),
+              GoogleFonts.sourceSerif4(fontSize: 13, fontWeight: FontWeight.w600),
+          unselectedLabelStyle: GoogleFonts.sourceSerif4(fontSize: 13),
           tabs: const [Tab(text: 'Kartelalar'), Tab(text: 'Spektrum')],
         ),
       ),
@@ -211,10 +212,10 @@ class _ColorInfoBar extends StatelessWidget {
     return Expanded(
       child: Column(children: [
         Text(label,
-            style: TextStyle(fontSize: 9, color: cs.onSurfaceVariant)),
+            style: GoogleFonts.sourceSerif4(fontSize: 9, color: cs.onSurfaceVariant)),
         const SizedBox(height: 2),
         Text(value,
-            style: TextStyle(
+            style: GoogleFonts.sourceSerif4(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
                 color: cs.onSurface)),
@@ -348,7 +349,7 @@ class _ActionButtons extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 child: Text('İptal et',
-                    style: TextStyle(fontSize: 15, color: textColor)),
+                    style: GoogleFonts.sourceSerif4(fontSize: 15, color: textColor)),
               ),
             ),
           ),
@@ -362,7 +363,7 @@ class _ActionButtons extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 child: Text('Bitti',
-                    style: TextStyle(
+                    style: GoogleFonts.sourceSerif4(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
                         color: primaryColor)),

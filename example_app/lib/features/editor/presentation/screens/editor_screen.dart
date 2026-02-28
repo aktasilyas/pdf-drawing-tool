@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/drawing_ui.dart';
@@ -157,10 +158,10 @@ class EditorScreen extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: isDark ? colorScheme.surfaceContainerHighest : colorScheme.surface,
-        title: Text('Yeniden Adlandır', style: TextStyle(color: colorScheme.onSurface)),
+        title: Text('Yeniden Adlandır', style: GoogleFonts.sourceSerif4(color: colorScheme.onSurface)),
         content: TextField(
           controller: controller,
-          style: TextStyle(color: colorScheme.onSurface),
+          style: GoogleFonts.sourceSerif4(color: colorScheme.onSurface),
           decoration: InputDecoration(
             labelText: 'Belge Adı',
             border: const OutlineInputBorder(),
@@ -210,10 +211,10 @@ class EditorScreen extends ConsumerWidget {
             ? colorScheme.surfaceContainerHighest
             : colorScheme.surface,
         title: Text('Çöpe Taşı',
-            style: TextStyle(color: colorScheme.onSurface)),
+            style: GoogleFonts.sourceSerif4(color: colorScheme.onSurface)),
         content: Text(
           'Bu belge çöpe taşınacak. Daha sonra geri yükleyebilirsiniz.',
-          style: TextStyle(color: colorScheme.onSurfaceVariant),
+          style: GoogleFonts.sourceSerif4(color: colorScheme.onSurfaceVariant),
         ),
         actions: [
           TextButton(

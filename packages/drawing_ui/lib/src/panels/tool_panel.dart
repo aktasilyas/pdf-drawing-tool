@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 
@@ -128,7 +129,7 @@ class _PanelHeader extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style: TextStyle(
+              style: GoogleFonts.sourceSerif4(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: colorScheme.onSurface,
@@ -196,7 +197,7 @@ class PanelSection extends StatelessWidget {
           children: [
             Text(
               title,
-              style: TextStyle(
+              style: GoogleFonts.sourceSerif4(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: colorScheme.onSurfaceVariant,
@@ -218,7 +219,7 @@ class PanelSection extends StatelessWidget {
                     const SizedBox(width: 2),
                     Text(
                       'PRO',
-                      style: TextStyle(
+                      style: GoogleFonts.sourceSerif4(
                         fontSize: 9,
                         fontWeight: FontWeight.w700,
                         color: colorScheme.tertiary,
@@ -278,7 +279,7 @@ class _LockedSectionOverlay extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       'Premium',
-                      style: TextStyle(
+                      style: GoogleFonts.sourceSerif4(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
                         color: colorScheme.tertiary,
@@ -321,7 +322,7 @@ class PanelToggleRow extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(
+            style: GoogleFonts.sourceSerif4(
               fontSize: 14,
               fontWeight: FontWeight.w400,
               color: enabled ? colorScheme.onSurface : colorScheme.outline,
@@ -394,7 +395,7 @@ class PanelActionButton extends StatelessWidget {
               ],
               Text(
                 label,
-                style: TextStyle(
+                style: GoogleFonts.sourceSerif4(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: fgColor,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/providers/selection_clipboard_provider.dart';
 import 'package:drawing_ui/src/providers/selection_actions_provider.dart';
@@ -56,9 +57,9 @@ class PasteContextMenu extends ConsumerWidget {
                   PhosphorIcon(StarNoteIcons.paste, size: 18,
                       color: Colors.black87),
                   const SizedBox(width: 6),
-                  const Text(
+                  Text(
                     'Yapıştır',
-                    style: TextStyle(
+                    style: GoogleFonts.sourceSerif4(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                       color: Colors.black87,

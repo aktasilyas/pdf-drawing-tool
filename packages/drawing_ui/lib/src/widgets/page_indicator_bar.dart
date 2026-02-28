@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
 
 /// Compact floating page indicator bar shown below the canvas.
@@ -94,7 +95,7 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Text(pageLabel,
-                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: cs.onSurface)),
+                          style: GoogleFonts.sourceSerif4(fontSize: 13, fontWeight: FontWeight.w500, color: cs.onSurface)),
                     ),
                   ),
                 ),
@@ -126,7 +127,7 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
         onSubmitted: (v) { _goTo(v, pageCount, ref, ctx); },
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(ctx), child: Text('İptal', style: TextStyle(color: Theme.of(ctx).colorScheme.onSurfaceVariant))),
+        TextButton(onPressed: () => Navigator.pop(ctx), child: Text('İptal', style: GoogleFonts.sourceSerif4(color: Theme.of(ctx).colorScheme.onSurfaceVariant))),
         FilledButton(onPressed: () { _goTo(controller.text, pageCount, ref, ctx); }, child: const Text('Git')),
       ],
     ));

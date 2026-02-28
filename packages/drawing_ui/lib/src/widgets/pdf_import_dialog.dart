@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
 
@@ -179,7 +180,7 @@ class _PDFImportDialogState extends State<PDFImportDialog> {
                     Expanded(
                       child: Text(
                         _errorMessage!,
-                        style: TextStyle(
+                        style: GoogleFonts.sourceSerif4(
                           color: Theme.of(context).colorScheme.onErrorContainer,
                         ),
                       ),

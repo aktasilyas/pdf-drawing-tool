@@ -30,6 +30,7 @@ dependencies:
   just_audio: ^0.9.36  # Audio playback
   image_gallery_saver_plus: ^4.0.1  # Save images to device gallery
   pasteboard: ^0.3.0  # Clipboard image copy (cross-platform)
+  google_fonts: ^6.2.1  # Source Serif 4 typography
 
 dev_dependencies:
   flutter_test:

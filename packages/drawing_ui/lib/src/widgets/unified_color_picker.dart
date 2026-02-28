@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
 import 'package:drawing_ui/src/widgets/compact_color_picker.dart';
@@ -195,7 +196,7 @@ class _MoreButton extends StatelessWidget {
             const SizedBox(width: 3),
             Text(
               'Daha fazla',
-              style: TextStyle(
+              style: GoogleFonts.sourceSerif4(
                 fontSize: 10,
                 color: colorScheme.primary,
               ),

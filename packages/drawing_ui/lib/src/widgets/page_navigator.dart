@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart' hide Page;
+import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
@@ -116,7 +117,7 @@ class _PageNavigatorState extends State<PageNavigator> {
             if (widget.onDuplicatePage != null)
               ListTile(
                 leading: PhosphorIcon(StarNoteIcons.copy, color: colorScheme.onSurface),
-                title: Text('Duplicate Page', style: TextStyle(color: colorScheme.onSurface)),
+                title: Text('Duplicate Page', style: GoogleFonts.sourceSerif4(color: colorScheme.onSurface)),
                 onTap: () {
                   Navigator.pop(context);
                   widget.onDuplicatePage!(index);
@@ -125,7 +126,7 @@ class _PageNavigatorState extends State<PageNavigator> {
             if (widget.onDeletePage != null)
               ListTile(
                 leading: PhosphorIcon(StarNoteIcons.trash, color: colorScheme.error),
-                title: Text('Delete Page', style: TextStyle(color: colorScheme.error)),
+                title: Text('Delete Page', style: GoogleFonts.sourceSerif4(color: colorScheme.error)),
                 onTap: () {
                   Navigator.pop(context);
                   _confirmDelete(index);
@@ -151,8 +152,8 @@ class _PageNavigatorState extends State<PageNavigator> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: colorScheme.surface,
-        title: Text('Delete Page', style: TextStyle(color: colorScheme.onSurface)),
-        content: Text('Delete page ${index + 1}?', style: TextStyle(color: colorScheme.onSurfaceVariant)),
+        title: Text('Delete Page', style: GoogleFonts.sourceSerif4(color: colorScheme.onSurface)),
+        content: Text('Delete page ${index + 1}?', style: GoogleFonts.sourceSerif4(color: colorScheme.onSurfaceVariant)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -218,7 +219,7 @@ class _PageNavigatorState extends State<PageNavigator> {
                 ? Center(
                     child: Text(
                       'No pages',
-                      style: TextStyle(color: colorScheme.onSurfaceVariant),
+                      style: GoogleFonts.sourceSerif4(color: colorScheme.onSurfaceVariant),
                     ),
                   )
                 : ListView.builder(
@@ -291,7 +292,7 @@ class _PageNavigatorState extends State<PageNavigator> {
               const SizedBox(height: 4),
               Text(
                 'Add Page',
-                style: TextStyle(
+                style: GoogleFonts.sourceSerif4(
                   fontSize: 12,
                   color: colorScheme.onSurfaceVariant,
                 ),

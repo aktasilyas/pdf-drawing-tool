@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:drawing_ui/src/providers/ruler_provider.dart';
 
@@ -281,7 +282,7 @@ class _AngleBadge extends StatelessWidget {
       ),
       child: Text(
         '${degrees.toStringAsFixed(1)}°',
-        style: TextStyle(
+        style: GoogleFonts.sourceSerif4(
           color: textColor,
           fontSize: 13,
           fontWeight: FontWeight.w600,

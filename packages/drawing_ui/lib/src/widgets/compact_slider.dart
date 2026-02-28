@@ -1,5 +1,6 @@
 /// Compact slider widget for panel settings.
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 /// Compact slider with inline title and value label.
 ///
@@ -79,7 +80,7 @@ class CompactSlider extends StatelessWidget {
           children: [
             Text(
               title,
-              style: TextStyle(
+              style: GoogleFonts.sourceSerif4(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
                 color: colorScheme.onSurfaceVariant,
@@ -87,7 +88,7 @@ class CompactSlider extends StatelessWidget {
             ),
             Text(
               label,
-              style: TextStyle(
+              style: GoogleFonts.sourceSerif4(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
                 color: colorScheme.onSurface,

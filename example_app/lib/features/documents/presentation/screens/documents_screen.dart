@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/utils/responsive.dart';
@@ -63,9 +64,6 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _MobileHeader(
-            title: isInFolder
-                ? 'Belgeler'
-                : getSectionTitle(ref, _selectedSection, _selectedFolderId),
             onSettingsTap: () => context.push('/settings'),
           ),
           if (isInFolder)
@@ -252,11 +250,9 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
 /// Mobile header with hamburger menu and settings.
 class _MobileHeader extends StatelessWidget {
   const _MobileHeader({
-    required this.title,
     required this.onSettingsTap,
   });
 
-  final String title;
   final VoidCallback onSettingsTap;
 
   @override
@@ -280,9 +276,12 @@ class _MobileHeader extends StatelessWidget {
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
-              title,
-              style: AppTypography.headlineMedium
-                  .copyWith(color: textPrimary),
+              'ElyaNotes',
+              style: GoogleFonts.lobsterTwo(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: textPrimary,
+              ),
               overflow: TextOverflow.ellipsis,
             ),
           ),

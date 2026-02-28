@@ -1,5 +1,6 @@
 /// Compact toggle widget for panel settings.
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 /// Compact toggle (switch) with label.
 ///
@@ -50,7 +51,7 @@ class CompactToggle extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: TextStyle(
+              style: GoogleFonts.sourceSerif4(
                 fontSize: 11,
                 color: colorScheme.onSurface,
               ),

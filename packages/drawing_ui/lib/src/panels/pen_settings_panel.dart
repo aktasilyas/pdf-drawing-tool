@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/panels/pen_settings_widgets.dart';
@@ -50,7 +51,7 @@ class PenSettingsPanel extends ConsumerWidget {
               Expanded(
                 child: Text(
                   active.penType?.config.displayNameTr ?? 'Kalem',
-                  style: TextStyle(
+                  style: GoogleFonts.sourceSerif4(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: cs.onSurface,

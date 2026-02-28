@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
@@ -285,7 +286,7 @@ class _PresetOptionsSheet extends ConsumerWidget {
               Expanded(
                 child: Text(
                   label,
-                  style: TextStyle(
+                  style: GoogleFonts.sourceSerif4(
                     color: colorScheme.onSurface,
                     fontSize: 15,
                     fontWeight: FontWeight.w500,

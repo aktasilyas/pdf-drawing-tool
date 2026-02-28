@@ -1,6 +1,7 @@
 /// Widgets for the page navigator sidebar: grid item and add-page cell.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
 
@@ -158,7 +159,7 @@ class _PageGridItemState extends ConsumerState<PageGridItem> {
             children: [
               Text(
                 '${widget.index + 1}',
-                style: TextStyle(
+                style: GoogleFonts.sourceSerif4(
                   fontSize: 11,
                   fontWeight: sel ? FontWeight.w600 : FontWeight.w400,
                   color: sel ? cs.primary : cs.onSurfaceVariant,
@@ -247,7 +248,7 @@ class _AddPageCellState extends State<AddPageCell> {
                   const SizedBox(height: 4),
                   Text(
                     'Sayfa ekle',
-                    style: TextStyle(
+                    style: GoogleFonts.sourceSerif4(
                       fontSize: 11,
                       color: cs.primary,
                       fontWeight: FontWeight.w500,

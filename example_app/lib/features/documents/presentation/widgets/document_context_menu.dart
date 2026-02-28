@@ -141,7 +141,7 @@ class _MenuItem extends StatelessWidget {
       leading: Icon(icon, color: color),
       title: Text(
         title,
-        style: TextStyle(color: color),
+        style: AppTypography.bodyMedium.copyWith(color: color),
       ),
       onTap: onTap,
     );

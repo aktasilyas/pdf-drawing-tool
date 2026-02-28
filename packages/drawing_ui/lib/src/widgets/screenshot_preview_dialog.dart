@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 /// Dialog that shows a screenshot preview before saving.
 ///
@@ -52,7 +53,7 @@ class ScreenshotPreviewDialog extends StatelessWidget {
                   onPressed: () => Navigator.of(context).pop(false),
                   child: Text(
                     'İptal',
-                    style: TextStyle(color: cs.onSurfaceVariant),
+                    style: GoogleFonts.sourceSerif4(color: cs.onSurfaceVariant),
                   ),
                 ),
                 const SizedBox(width: 12),

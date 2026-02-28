@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
@@ -561,12 +562,12 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
           decoration: BoxDecoration(
             color: Colors.black.withValues(alpha: 0.55),
             borderRadius: BorderRadius.circular(12)),
-          child: const Column(mainAxisSize: MainAxisSize.min, children: [
-            Icon(Icons.add_rounded, color: Colors.white, size: 32),
-            SizedBox(height: 6),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            const Icon(Icons.add_rounded, color: Colors.white, size: 32),
+            const SizedBox(height: 6),
             Text('Yeni sayfa eklemek için\nsürükleyip bırakın',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white, fontSize: 13,
+              style: GoogleFonts.sourceSerif4(color: Colors.white, fontSize: 13,
                 fontWeight: FontWeight.w500)),
           ]),
         ))),

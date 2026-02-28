@@ -1,5 +1,6 @@
 /// Dialog for image export / share options.
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
 
@@ -131,7 +132,7 @@ class _DialogHeader extends StatelessWidget {
         Text(title, style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 4),
         Text('$pageCount sayfa',
-            style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant)),
+            style: GoogleFonts.sourceSerif4(fontSize: 13, color: cs.onSurfaceVariant)),
       ],
     );
   }
@@ -150,7 +151,7 @@ class _FormatSelector extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Format', style: TextStyle(
+        Text('Format', style: GoogleFonts.sourceSerif4(
             fontSize: 13, fontWeight: FontWeight.w600, color: cs.onSurface)),
         const SizedBox(height: 8),
         Row(children: ImageFormat.values.map((fmt) {
@@ -184,7 +185,7 @@ class _QualitySelector extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Kalite', style: TextStyle(
+        Text('Kalite', style: GoogleFonts.sourceSerif4(
             fontSize: 13, fontWeight: FontWeight.w600, color: cs.onSurface)),
         const SizedBox(height: 8),
         Row(children: ImageQuality.values.map((q) {
@@ -228,7 +229,7 @@ class _SelectableCard extends StatelessWidget {
             color: isSelected ? cs.primary : cs.outlineVariant, width: 1),
         ),
         alignment: Alignment.center,
-        child: Text(label, style: TextStyle(
+        child: Text(label, style: GoogleFonts.sourceSerif4(
           fontSize: 12, fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
           color: isSelected ? cs.onPrimaryContainer : cs.onSurface,
         )),
@@ -251,7 +252,7 @@ class _BackgroundToggle extends StatelessWidget {
       PhosphorIcon(StarNoteIcons.image, size: 18, color: cs.onSurfaceVariant),
       const SizedBox(width: 8),
       Expanded(child: Text('Arka planı dahil et',
-          style: TextStyle(fontSize: 13, color: cs.onSurface))),
+          style: GoogleFonts.sourceSerif4(fontSize: 13, color: cs.onSurface))),
       Switch(value: value, onChanged: onChanged),
     ]);
   }
@@ -274,7 +275,7 @@ class _ActionButtons extends StatelessWidget {
       children: [
         TextButton(
           onPressed: onCancel,
-          child: Text('İptal', style: TextStyle(color: cs.onSurfaceVariant)),
+          child: Text('İptal', style: GoogleFonts.sourceSerif4(color: cs.onSurfaceVariant)),
         ),
         const SizedBox(width: 12),
         FilledButton(onPressed: onExport, child: Text(buttonLabel)),

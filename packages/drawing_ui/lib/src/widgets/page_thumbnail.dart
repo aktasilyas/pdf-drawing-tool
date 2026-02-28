@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart' hide Page;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
@@ -198,7 +199,7 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
                     ),
                     child: Text(
                       '${widget.page.index + 1}',
-                      style: const TextStyle(
+                      style: GoogleFonts.sourceSerif4(
                         color: Colors.white,
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
@@ -244,7 +245,7 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
             Text(
               'Failed to\ngenerate',
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: GoogleFonts.sourceSerif4(
                 color: colorScheme.onSurfaceVariant,
                 fontSize: 12,
               ),

@@ -49,28 +49,26 @@ class SelectionModeHeader extends ConsumerWidget {
             tooltip: 'Kapat',
             onPressed: () => _exitSelectionMode(ref),
           ),
-          const SizedBox(width: AppSpacing.sm),
+          const SizedBox(width: AppSpacing.xs),
           // Selection count
-          Text(
-            '$totalSelected seçildi',
-            style: AppTypography.titleMedium.copyWith(
-              color: isDark
-                  ? AppColors.textPrimaryDark
-                  : AppColors.textPrimaryLight,
+          Flexible(
+            child: Text(
+              '$totalSelected seçildi',
+              style: AppTypography.titleMedium.copyWith(
+                color: isDark
+                    ? AppColors.textPrimaryDark
+                    : AppColors.textPrimaryLight,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
-          const SizedBox(width: AppSpacing.sm),
-          // Select all button
-          _SelectAllButton(
-            allDocumentIds: allDocumentIds,
-            allFolderIds: allFolderIds,
-          ),
-          const SizedBox(width: AppSpacing.xs),
+          const Spacer(),
           // Actions
           if (!isTrashSection) ...[
             AppIconButton(
               icon: Icons.content_copy,
               variant: AppIconButtonVariant.ghost,
+              size: isPhone ? AppIconButtonSize.small : AppIconButtonSize.medium,
               tooltip: 'Çoğalt',
               onPressed: hasSelection
                   ? () => _duplicateSelected(context, ref, selectedDocs)
@@ -79,6 +77,7 @@ class SelectionModeHeader extends ConsumerWidget {
             AppIconButton(
               icon: Icons.drive_file_move_outline,
               variant: AppIconButtonVariant.ghost,
+              size: isPhone ? AppIconButtonSize.small : AppIconButtonSize.medium,
               tooltip: 'Taşı',
               onPressed: hasSelection
                   ? () =>
@@ -89,12 +88,17 @@ class SelectionModeHeader extends ConsumerWidget {
           AppIconButton(
             icon: Icons.delete_outline,
             variant: AppIconButtonVariant.ghost,
+            size: isPhone ? AppIconButtonSize.small : AppIconButtonSize.medium,
             tooltip: isTrashSection ? 'Kalıcı Sil' : 'Sil',
             onPressed: hasSelection
                 ? () => _deleteSelected(context, ref, selectedDocs)
                 : null,
           ),
-          const Spacer(),
+          // Select all button
+          _SelectAllButton(
+            allDocumentIds: allDocumentIds,
+            allFolderIds: allFolderIds,
+          ),
         ],
       ),
     );

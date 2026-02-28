@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import 'package:drawing_ui/src/providers/providers.dart';
@@ -22,7 +23,7 @@ class PageOptionsHeader extends StatelessWidget {
       ),
       child: Text(
         title,
-        style: TextStyle(
+        style: GoogleFonts.sourceSerif4(
           fontSize: compact ? 14 : 16,
           fontWeight: FontWeight.w600,
           color: cs.onSurface,
@@ -71,7 +72,7 @@ class PageOptionsMenuItem extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  style: TextStyle(fontSize: compact ? 13 : 15, color: color),
+                  style: GoogleFonts.sourceSerif4(fontSize: compact ? 13 : 15, color: color),
                 ),
               ),
               if (trailing != null) trailing!,
@@ -96,7 +97,7 @@ class PageOptionsSectionHeader extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(compact ? 16 : 20, compact ? 2 : 4, compact ? 16 : 20, compact ? 1 : 2),
       child: Text(
         title,
-        style: TextStyle(
+        style: GoogleFonts.sourceSerif4(
           fontSize: compact ? 12 : 13,
           fontWeight: FontWeight.w600,
           color: cs.onSurfaceVariant,
@@ -143,11 +144,11 @@ class PageOptionsToggleItem extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(label, style: TextStyle(fontSize: compact ? 13 : 15, color: cs.onSurface)),
-                        Text(subtitle!, style: TextStyle(fontSize: compact ? 11 : 12, color: cs.onSurfaceVariant)),
+                        Text(label, style: GoogleFonts.sourceSerif4(fontSize: compact ? 13 : 15, color: cs.onSurface)),
+                        Text(subtitle!, style: GoogleFonts.sourceSerif4(fontSize: compact ? 11 : 12, color: cs.onSurfaceVariant)),
                       ],
                     )
-                  : Text(label, style: TextStyle(fontSize: compact ? 13 : 15, color: cs.onSurface)),
+                  : Text(label, style: GoogleFonts.sourceSerif4(fontSize: compact ? 13 : 15, color: cs.onSurface)),
             ),
             Switch.adaptive(
               value: value,
@@ -245,7 +246,7 @@ class ScrollDirectionItem extends ConsumerWidget {
 Widget pageOptionsChevronTrailing(ColorScheme cs, [String? label]) {
   return Row(mainAxisSize: MainAxisSize.min, children: [
     if (label != null) ...[
-      Text(label, style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant)),
+      Text(label, style: GoogleFonts.sourceSerif4(fontSize: 13, color: cs.onSurfaceVariant)),
       const SizedBox(width: 4),
     ],
     PhosphorIcon(StarNoteIcons.chevronRight, size: 18, color: cs.onSurfaceVariant),

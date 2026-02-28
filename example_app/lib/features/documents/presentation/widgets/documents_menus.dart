@@ -39,7 +39,7 @@ void _showTrashDocumentMenu(
         children: [
           ListTile(
             leading: const Icon(Icons.restore_from_trash),
-            title: const Text('Kurtar'),
+            title: Text('Kurtar', style: AppTypography.bodyMedium),
             onTap: () async {
               Navigator.pop(ctx);
               final controller =
@@ -64,7 +64,9 @@ void _showTrashDocumentMenu(
             leading: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
             title: Text(
               'Kalıcı Sil',
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
+              style: AppTypography.bodyMedium.copyWith(
+                color: Theme.of(context).colorScheme.error,
+              ),
             ),
             onTap: () async {
               Navigator.pop(ctx);
@@ -121,7 +123,7 @@ void _showNormalDocumentMenu(
         children: [
           ListTile(
             leading: const Icon(Icons.edit_outlined),
-            title: const Text('Yeniden Adlandır'),
+            title: Text('Yeniden Adlandır', style: AppTypography.bodyMedium),
             onTap: () {
               Navigator.pop(ctx);
               showRenameDocumentDialog(context, ref, document);
@@ -129,7 +131,7 @@ void _showNormalDocumentMenu(
           ),
           ListTile(
             leading: const Icon(Icons.content_copy),
-            title: const Text('Çoğalt'),
+            title: Text('Çoğalt', style: AppTypography.bodyMedium),
             onTap: () async {
               Navigator.pop(ctx);
               final controller =
@@ -151,7 +153,7 @@ void _showNormalDocumentMenu(
           ),
           ListTile(
             leading: const Icon(Icons.drive_file_move_outlined),
-            title: const Text('Taşı'),
+            title: Text('Taşı', style: AppTypography.bodyMedium),
             onTap: () async {
               Navigator.pop(ctx);
               final messenger = ScaffoldMessenger.of(context);
@@ -181,6 +183,7 @@ void _showNormalDocumentMenu(
               document.isFavorite
                   ? 'Favorilerden Kaldır'
                   : 'Favorilere Ekle',
+              style: AppTypography.bodyMedium,
             ),
             onTap: () {
               Navigator.pop(ctx);
@@ -195,7 +198,9 @@ void _showNormalDocumentMenu(
                 Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.error),
             title: Text(
               'Çöpe Taşı',
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
+              style: AppTypography.bodyMedium.copyWith(
+                color: Theme.of(context).colorScheme.error,
+              ),
             ),
             onTap: () {
               Navigator.pop(ctx);
@@ -230,7 +235,7 @@ void showTrashedPageMenu(
             padding: const EdgeInsets.all(AppSpacing.lg),
             child: Text(
               '${trashedPage.sourceDocumentTitle} — Sayfa ${trashedPage.originalPageIndex + 1}',
-              style: const TextStyle(fontWeight: FontWeight.w600),
+              style: AppTypography.titleMedium,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -238,7 +243,7 @@ void showTrashedPageMenu(
           const AppDivider(),
           ListTile(
             leading: const Icon(Icons.restore_from_trash),
-            title: const Text('Kurtar'),
+            title: Text('Kurtar', style: AppTypography.bodyMedium),
             onTap: () async {
               Navigator.pop(ctx);
               final controller =
@@ -282,7 +287,9 @@ void showTrashedPageMenu(
             ),
             title: Text(
               'Kalıcı Sil',
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
+              style: AppTypography.bodyMedium.copyWith(
+                color: Theme.of(context).colorScheme.error,
+              ),
             ),
             onTap: () async {
               Navigator.pop(ctx);

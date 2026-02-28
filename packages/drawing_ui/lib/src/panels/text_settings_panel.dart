@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:drawing_ui/src/panels/text_preview_painter.dart';
 import 'package:drawing_ui/src/panels/tool_panel.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
@@ -30,7 +31,7 @@ class TextSettingsPanel extends ConsumerWidget {
               Expanded(
                 child: Text(
                   'Metin Aracı',
-                  style: TextStyle(
+                  style: GoogleFonts.sourceSerif4(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: cs.onSurface,
@@ -46,7 +47,7 @@ class TextSettingsPanel extends ConsumerWidget {
           const SizedBox(height: 8),
           Text(
             'Tuvale dokunarak metin kutusu ekleyin.',
-            style: TextStyle(
+            style: GoogleFonts.sourceSerif4(
               fontSize: 12,
               color: cs.onSurfaceVariant,
             ),
@@ -80,7 +81,7 @@ class TextSettingsPanel extends ConsumerWidget {
           // -- Color Section --
           Text(
             'Renk',
-            style: TextStyle(
+            style: GoogleFonts.sourceSerif4(
               fontSize: 11,
               fontWeight: FontWeight.w600,
               color: cs.onSurfaceVariant,
@@ -99,7 +100,7 @@ class TextSettingsPanel extends ConsumerWidget {
           // -- Style Section --
           Text(
             'Stil',
-            style: TextStyle(
+            style: GoogleFonts.sourceSerif4(
               fontSize: 11,
               fontWeight: FontWeight.w600,
               color: cs.onSurfaceVariant,
@@ -212,7 +213,7 @@ class _StyleToggle extends StatelessWidget {
         child: Center(
           child: Text(
             label,
-            style: TextStyle(
+            style: GoogleFonts.sourceSerif4(
               fontSize: 18,
               fontWeight: fontWeight ?? FontWeight.normal,
               fontStyle: fontStyle,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../providers/export_progress_provider.dart';
@@ -135,7 +136,7 @@ class _ExportingBody extends StatelessWidget {
             children: [
               Text(
                 'PDF Dışa Aktarılıyor...',
-                style: TextStyle(
+                style: GoogleFonts.sourceSerif4(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: cs.onSurface,
@@ -144,7 +145,7 @@ class _ExportingBody extends StatelessWidget {
               const SizedBox(height: 2),
               Text(
                 detail.toString(),
-                style: TextStyle(
+                style: GoogleFonts.sourceSerif4(
                   fontSize: 11,
                   color: cs.onSurfaceVariant,
                   fontFeatures: const [FontFeature.tabularFigures()],
@@ -179,7 +180,7 @@ class _CompletedBody extends StatelessWidget {
         Expanded(
           child: Text(
             'PDF Kaydedildi$sizeText',
-            style: TextStyle(
+            style: GoogleFonts.sourceSerif4(
               fontSize: 13,
               fontWeight: FontWeight.w600,
               color: cs.onSurface,
@@ -209,7 +210,7 @@ class _ErrorBody extends StatelessWidget {
         Expanded(
           child: Text(
             state.errorMessage ?? 'PDF dışa aktarılamadı',
-            style: TextStyle(
+            style: GoogleFonts.sourceSerif4(
               fontSize: 13,
               fontWeight: FontWeight.w600,
               color: cs.error,

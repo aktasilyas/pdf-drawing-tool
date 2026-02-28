@@ -1,5 +1,6 @@
 /// Layout builders and helpers for the drawing screen.
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
 import 'package:drawing_ui/src/models/models.dart';
@@ -183,7 +184,7 @@ class ZoomIndicator extends StatelessWidget {
         color: Colors.black.withValues(alpha: 0.7), borderRadius: BorderRadius.circular(12),
         boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4))],
       ),
-      child: Text(zoomPercentage, style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w600, letterSpacing: 1)),
+      child: Text(zoomPercentage, style: GoogleFonts.sourceSerif4(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w600, letterSpacing: 1)),
     ),
   );
 }

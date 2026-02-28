@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
+import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import 'package:drawing_ui/src/canvas/canvas_color_scheme.dart';
@@ -283,7 +284,7 @@ class _LastPagePlaceholder extends StatelessWidget {
                 size: 40, color: cs.outlineVariant),
             const SizedBox(height: 8),
             Text('Son sayfa',
-                style: TextStyle(fontSize: 13, color: cs.onSurfaceVariant)),
+                style: GoogleFonts.sourceSerif4(fontSize: 13, color: cs.onSurfaceVariant)),
           ],
         ),
       ),

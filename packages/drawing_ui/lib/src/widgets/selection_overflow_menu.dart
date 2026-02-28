@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/models/selection_action.dart';
 
@@ -130,7 +131,7 @@ class _TopRowButton extends StatelessWidget {
               ),
               Text(
                 action.label,
-                style: TextStyle(fontSize: 11, color: color),
+                style: GoogleFonts.sourceSerif4(fontSize: 11, color: color),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -168,7 +169,7 @@ class _OverflowListItem extends StatelessWidget {
               Expanded(
                 child: Text(
                   action.label,
-                  style: TextStyle(fontSize: 15, color: color),
+                  style: GoogleFonts.sourceSerif4(fontSize: 15, color: color),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),

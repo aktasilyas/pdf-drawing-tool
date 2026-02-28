@@ -1,5 +1,6 @@
 /// Dialog for PDF export options.
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:drawing_ui/src/services/pdf_exporter.dart';
 
 /// Configuration for PDF export.
@@ -107,11 +108,11 @@ class _PDFExportDialogState extends State<PDFExportDialog> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('PDF Olarak Dışa Aktar',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600,
+            style: GoogleFonts.sourceSerif4(fontSize: 16, fontWeight: FontWeight.w600,
                 color: cs.onSurface)),
         const SizedBox(height: 2),
         Text('${widget.totalPages} sayfa',
-            style: TextStyle(fontSize: 12, color: cs.onSurfaceVariant)),
+            style: GoogleFonts.sourceSerif4(fontSize: 12, color: cs.onSurfaceVariant)),
       ],
     );
   }
@@ -147,7 +148,7 @@ class _PDFExportDialogState extends State<PDFExportDialog> {
                 color: selected ? cs.primary : cs.outlineVariant, width: 1),
           ),
           alignment: Alignment.center,
-          child: Text(label, style: TextStyle(fontSize: 12,
+          child: Text(label, style: GoogleFonts.sourceSerif4(fontSize: 12,
               fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
               color: selected ? cs.onPrimaryContainer : cs.onSurface)),
         ),
@@ -190,10 +191,10 @@ class _PDFExportDialogState extends State<PDFExportDialog> {
           ),
           alignment: Alignment.center,
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Text(label, style: TextStyle(fontSize: 11,
+            Text(label, style: GoogleFonts.sourceSerif4(fontSize: 11,
                 fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
                 color: selected ? cs.onPrimaryContainer : cs.onSurface)),
-            Text('$dpi DPI', style: TextStyle(fontSize: 9,
+            Text('$dpi DPI', style: GoogleFonts.sourceSerif4(fontSize: 9,
                 color: selected
                     ? cs.onPrimaryContainer.withValues(alpha: 0.7)
                     : cs.onSurfaceVariant)),
@@ -220,7 +221,7 @@ class _PDFExportDialogState extends State<PDFExportDialog> {
             child: DropdownButton<PDFPageFormat>(
               value: _pageFormat,
               isExpanded: true,
-              style: TextStyle(fontSize: 13, color: cs.onSurface),
+              style: GoogleFonts.sourceSerif4(fontSize: 13, color: cs.onSurface),
               items: const [
                 DropdownMenuItem(value: PDFPageFormat.a4, child: Text('A4')),
                 DropdownMenuItem(value: PDFPageFormat.a5, child: Text('A5')),
@@ -240,7 +241,7 @@ class _PDFExportDialogState extends State<PDFExportDialog> {
   Widget _buildBackgroundToggle(ColorScheme cs) {
     return Row(children: [
       Expanded(child: Text('Arka planı dahil et',
-          style: TextStyle(fontSize: 13, color: cs.onSurface))),
+          style: GoogleFonts.sourceSerif4(fontSize: 13, color: cs.onSurface))),
       Switch(
         value: _includeBackground,
         onChanged: (v) => setState(() => _includeBackground = v),
@@ -256,7 +257,7 @@ class _PDFExportDialogState extends State<PDFExportDialog> {
           onPressed: () =>
               Navigator.of(context).pop(ExportDialogResult.cancelled()),
           child: Text('İptal',
-              style: TextStyle(color: cs.onSurfaceVariant)),
+              style: GoogleFonts.sourceSerif4(color: cs.onSurfaceVariant)),
         ),
         const SizedBox(width: 12),
         FilledButton(
@@ -268,7 +269,7 @@ class _PDFExportDialogState extends State<PDFExportDialog> {
   }
 
   Widget _sectionLabel(String text, ColorScheme cs) {
-    return Text(text, style: TextStyle(
+    return Text(text, style: GoogleFonts.sourceSerif4(
         fontSize: 12, fontWeight: FontWeight.w600, color: cs.onSurface));
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
 import 'package:drawing_ui/src/models/models.dart';
@@ -41,7 +42,7 @@ class EraserSettingsPanel extends ConsumerWidget {
               Expanded(
                 child: Text(
                   _titleForMode(active),
-                  style: TextStyle(
+                  style: GoogleFonts.sourceSerif4(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: cs.onSurface,
@@ -154,11 +155,11 @@ class EraserSettingsPanel extends ConsumerWidget {
       builder: (ctx) => AlertDialog(
         backgroundColor: cs.surface,
         title: Text('Sayfay\u0131 Temizle?',
-            style: TextStyle(color: cs.onSurface)),
+            style: GoogleFonts.sourceSerif4(color: cs.onSurface)),
         content: Text(
           'Bu sayfa i\u00e7eri\u011fini tamamen silecek. '
           'Bu i\u015flem geri al\u0131namaz.',
-          style: TextStyle(color: cs.onSurfaceVariant),
+          style: GoogleFonts.sourceSerif4(color: cs.onSurfaceVariant),
         ),
         actions: [
           TextButton(
@@ -283,7 +284,7 @@ class _CompactActionButton extends StatelessWidget {
           children: [
             Icon(icon, size: 14, color: color),
             const SizedBox(width: 4),
-            Text(label, style: TextStyle(
+            Text(label, style: GoogleFonts.sourceSerif4(
               fontSize: 11, fontWeight: FontWeight.w500, color: color)),
           ],
         ),

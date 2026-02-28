@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import 'package:drawing_ui/src/panels/add_page_panel.dart';
@@ -308,7 +309,7 @@ class _ReaderBadge extends StatelessWidget {
           PhosphorIcon(StarNoteIcons.readerMode, size: 12,
               color: cs.onSecondaryContainer),
           const SizedBox(width: 3),
-          Text('Salt okunur', style: TextStyle(fontSize: 11,
+          Text('Salt okunur', style: GoogleFonts.sourceSerif4(fontSize: 11,
               fontWeight: FontWeight.w500, color: cs.onSecondaryContainer)),
         ]),
       ),

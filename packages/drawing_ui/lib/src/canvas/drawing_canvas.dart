@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
 import 'package:drawing_core/drawing_core.dart' show BackgroundType;
 import 'package:drawing_ui/src/canvas/stroke_painter.dart';
@@ -491,7 +492,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
             const SizedBox(height: 8),
             Text(
               'PDF Sayfası',
-              style: TextStyle(fontSize: 12, color: colorScheme.onSurfaceVariant),
+              style: GoogleFonts.sourceSerif4(fontSize: 12, color: colorScheme.onSurfaceVariant),
             ),
           ],
         ),
@@ -528,12 +529,12 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
               const SizedBox(height: 8),
               Text(
                 'PDF Yüklenemedi',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: colorScheme.onErrorContainer),
+                style: GoogleFonts.sourceSerif4(fontSize: 12, fontWeight: FontWeight.bold, color: colorScheme.onErrorContainer),
               ),
               const SizedBox(height: 4),
               Text(
                 error,
-                style: TextStyle(fontSize: 10, color: colorScheme.onErrorContainer),
+                style: GoogleFonts.sourceSerif4(fontSize: 10, color: colorScheme.onErrorContainer),
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -1288,12 +1289,12 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(stickerState.selectedEmoji!,
-                              style: const TextStyle(fontSize: 24)),
+                              style: GoogleFonts.sourceSerif4(fontSize: 24)),
                           const SizedBox(width: 8),
-                          const Text(
+                          Text(
                             'Yerleştirmek için dokunun',
                             style:
-                                TextStyle(color: Colors.white, fontSize: 14),
+                                GoogleFonts.sourceSerif4(color: Colors.white, fontSize: 14),
                           ),
                           const SizedBox(width: 12),
                           GestureDetector(
@@ -1352,10 +1353,10 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                           PhosphorIcon(StarNoteIcons.image,
                               color: Colors.white, size: 18),
                           const SizedBox(width: 8),
-                          const Text(
+                          Text(
                             'Resmi yerlesirmek icin dokunun',
                             style:
-                                TextStyle(color: Colors.white, fontSize: 14),
+                                GoogleFonts.sourceSerif4(color: Colors.white, fontSize: 14),
                           ),
                           const SizedBox(width: 12),
                           GestureDetector(
@@ -1479,8 +1480,8 @@ class _StickyNoteContextMenu extends StatelessWidget {
                           PhosphorIcon(StarNoteIcons.trash,
                               size: 16, color: Colors.red),
                           const SizedBox(width: 4),
-                          const Text('Sil',
-                              style: TextStyle(
+                          Text('Sil',
+                              style: GoogleFonts.sourceSerif4(
                                   fontSize: 12, color: Colors.red)),
                         ],
                       ),

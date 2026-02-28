@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
@@ -98,7 +99,7 @@ class _TextStylePopupState extends State<TextStylePopup> {
                     children: [
                       Text(
                         widget.stickerMode ? 'Emoji Boyutu' : 'Metin Stili',
-                        style: const TextStyle(
+                        style: GoogleFonts.sourceSerif4(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
@@ -120,9 +121,9 @@ class _TextStylePopupState extends State<TextStylePopup> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Renk',
-                          style: TextStyle(fontSize: 12, color: Color(0xFF666666)),
+                          style: GoogleFonts.sourceSerif4(fontSize: 12, color: const Color(0xFF666666)),
                         ),
                         const SizedBox(height: 8),
                         UnifiedColorPicker(
@@ -146,14 +147,14 @@ class _TextStylePopupState extends State<TextStylePopup> {
                     children: [
                       Row(
                         children: [
-                          const Text(
+                          Text(
                             'Boyut',
-                            style: TextStyle(fontSize: 12, color: Color(0xFF666666)),
+                            style: GoogleFonts.sourceSerif4(fontSize: 12, color: const Color(0xFF666666)),
                           ),
                           const Spacer(),
                           Text(
                             '${_fontSize.round()}',
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                            style: GoogleFonts.sourceSerif4(fontSize: 12, fontWeight: FontWeight.w600),
                           ),
                         ],
                       ),
@@ -185,9 +186,9 @@ class _TextStylePopupState extends State<TextStylePopup> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         'Stil',
-                        style: TextStyle(fontSize: 12, color: Color(0xFF666666)),
+                        style: GoogleFonts.sourceSerif4(fontSize: 12, color: const Color(0xFF666666)),
                       ),
                       const SizedBox(height: 8),
                       Row(
@@ -272,7 +273,7 @@ class _StyleButton extends StatelessWidget {
         child: Center(
           child: Text(
             label,
-            style: TextStyle(
+            style: GoogleFonts.sourceSerif4(
               fontSize: 18,
               fontWeight: label == 'B' ? FontWeight.bold : FontWeight.normal,
               fontStyle: fontStyle,

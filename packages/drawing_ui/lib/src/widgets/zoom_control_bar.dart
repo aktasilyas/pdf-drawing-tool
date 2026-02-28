@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
 
 /// Centered zoom overlay shown during and briefly after pinch zoom.
@@ -159,7 +160,7 @@ class _ZoomControlBarState extends ConsumerState<ZoomControlBar>
                 children: [
                   Text(
                     '$percentage%',
-                    style: const TextStyle(
+                    style: GoogleFonts.sourceSerif4(
                       color: Colors.white,
                       fontSize: 28,
                       fontWeight: FontWeight.w600,
@@ -234,7 +235,7 @@ class _ZoomControlBarState extends ConsumerState<ZoomControlBar>
               const SizedBox(width: 12),
               Text(
                 '$zoomPercent%',
-                style: TextStyle(
+                style: GoogleFonts.sourceSerif4(
                   color: Colors.white,
                   fontSize: 16,
                   fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,

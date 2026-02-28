@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import 'package:drawing_ui/src/providers/audio_recording_provider.dart';
@@ -90,7 +91,7 @@ class _EmptyState extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             'Henuz kayit yok',
-            style: TextStyle(
+            style: GoogleFonts.sourceSerif4(
               fontSize: 14,
               color: cs.onSurfaceVariant,
             ),

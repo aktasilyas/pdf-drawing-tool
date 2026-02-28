@@ -91,7 +91,7 @@ class SidebarItem extends StatelessWidget {
                             .copyWith(
                           color: isSelected ? selectedColor : textPrimary,
                           fontWeight:
-                              isSelected ? FontWeight.w600 : FontWeight.w400,
+                              isSelected ? FontWeight.w700 : FontWeight.w600,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
