@@ -12,7 +12,6 @@ import 'package:example_app/features/documents/presentation/widgets/documents_em
 import 'package:example_app/features/documents/presentation/widgets/documents_error_views.dart';
 import 'package:example_app/features/documents/presentation/widgets/documents_list_view.dart';
 import 'package:example_app/features/documents/presentation/widgets/documents_sidebar.dart';
-import 'package:example_app/features/documents/presentation/widgets/document_card.dart';
 import 'package:example_app/features/documents/presentation/widgets/trash_content_view.dart';
 
 /// Routes content based on the selected sidebar section.
@@ -48,9 +47,10 @@ class DocumentsContentView extends ConsumerWidget {
           onDocumentMore: onDocumentMore,
         );
       case SidebarSection.favorites:
-        return _SimpleDocumentList(
-          documentsAsync: ref.watch(favoriteDocumentsProvider),
+        return _FavoritesView(
+          onFolderTap: onFolderTap,
           onDocumentTap: onDocumentTap,
+          onFolderMore: onFolderMore,
           onDocumentMore: onDocumentMore,
         );
       case SidebarSection.trash:
@@ -172,82 +172,57 @@ class _DocumentsWithFolders extends ConsumerWidget {
   }
 }
 
-/// Simple document list (for favorites, trash) without folders.
-class _SimpleDocumentList extends ConsumerWidget {
-  const _SimpleDocumentList({
-    required this.documentsAsync,
+/// Favorites view - shows both favorite folders and favorite documents.
+class _FavoritesView extends ConsumerWidget {
+  const _FavoritesView({
+    required this.onFolderTap,
     required this.onDocumentTap,
+    required this.onFolderMore,
     required this.onDocumentMore,
   });
 
-  final AsyncValue<List<DocumentInfo>> documentsAsync;
+  final ValueChanged<Folder> onFolderTap;
   final ValueChanged<DocumentInfo> onDocumentTap;
+  final ValueChanged<Folder> onFolderMore;
   final ValueChanged<DocumentInfo> onDocumentMore;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return documentsAsync.when(
+    final favFoldersAsync = ref.watch(favoriteFoldersProvider);
+    final favDocsAsync = ref.watch(favoriteDocumentsProvider);
+
+    return favFoldersAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => DocumentsErrorView(error: error),
-      data: (documents) {
-        if (documents.isEmpty) return const DocumentsEmptyState();
-        final viewMode = ref.watch(viewModeProvider);
-        final searchQuery = ref.watch(searchQueryProvider);
-        final sorted = _sortDocuments(ref, documents);
-        final filtered = searchQuery.isEmpty
-            ? sorted
-            : sorted
-                .where((doc) => doc.title
-                    .toLowerCase()
-                    .contains(searchQuery.toLowerCase()))
-                .toList();
-        if (filtered.isEmpty && searchQuery.isNotEmpty) {
-          return DocumentsEmptySearchResult(query: searchQuery);
-        }
-        if (viewMode == ViewMode.grid) {
-          return _buildSimpleGrid(ref, filtered);
-        }
-        return DocumentsCombinedListView(
-          folders: const [],
-          documents: filtered,
-          onFolderTap: (_) {},
-          onDocumentTap: onDocumentTap,
-          onFolderMore: (_) {},
-          onDocumentMore: onDocumentMore,
-        );
-      },
-    );
-  }
-
-  Widget _buildSimpleGrid(WidgetRef ref, List<DocumentInfo> documents) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final width = constraints.maxWidth;
-        final cardWidth = width < 600 ? 160.0 : 180.0;
-        final spacing = width < 600 ? 16.0 : 24.0;
-        final padding = width < 600 ? 16.0 : 32.0;
-        return Padding(
-          padding: EdgeInsets.symmetric(horizontal: padding),
-          child: GridView.builder(
-            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: cardWidth,
-              childAspectRatio: 0.68,
-              crossAxisSpacing: spacing,
-              mainAxisSpacing: spacing,
-            ),
-            itemCount: documents.length,
-            itemBuilder: (context, index) {
-              final doc = documents[index];
-              return DocumentCard(
-                document: doc,
-                onTap: () => onDocumentTap(doc),
-                onFavoriteToggle: () => ref
-                    .read(documentsControllerProvider.notifier)
-                    .toggleFavorite(doc.id),
-                onMorePressed: () => onDocumentMore(doc),
+      data: (folders) {
+        return favDocsAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (error, _) => DocumentsErrorView(error: error),
+          data: (documents) {
+            if (folders.isEmpty && documents.isEmpty) {
+              return const DocumentsEmptyState();
+            }
+            final sorted = _sortDocuments(ref, documents);
+            final viewMode = ref.watch(viewModeProvider);
+            if (viewMode == ViewMode.grid) {
+              return DocumentsCombinedGridView(
+                folders: folders,
+                documents: sorted,
+                onFolderTap: onFolderTap,
+                onDocumentTap: onDocumentTap,
+                onFolderMore: onFolderMore,
+                onDocumentMore: onDocumentMore,
               );
-            },
-          ),
+            }
+            return DocumentsCombinedListView(
+              folders: folders,
+              documents: sorted,
+              onFolderTap: onFolderTap,
+              onDocumentTap: onDocumentTap,
+              onFolderMore: onFolderMore,
+              onDocumentMore: onDocumentMore,
+            );
+          },
         );
       },
     );

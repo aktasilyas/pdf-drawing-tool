@@ -8,6 +8,7 @@ class FolderModel {
   final int sortOrder;
   final DateTime createdAt;
   final int documentCount;
+  final bool isFavorite;
 
   const FolderModel({
     required this.id,
@@ -17,6 +18,7 @@ class FolderModel {
     this.sortOrder = 0,
     required this.createdAt,
     this.documentCount = 0,
+    this.isFavorite = false,
   });
 
   factory FolderModel.fromJson(Map<String, dynamic> json) {
@@ -28,6 +30,7 @@ class FolderModel {
       sortOrder: json['sort_order'] as int? ?? 0,
       createdAt: DateTime.parse(json['created_at'] as String),
       documentCount: json['document_count'] as int? ?? 0,
+      isFavorite: json['is_favorite'] as bool? ?? false,
     );
   }
 
@@ -39,6 +42,7 @@ class FolderModel {
         'sort_order': sortOrder,
         'created_at': createdAt.toIso8601String(),
         'document_count': documentCount,
+        'is_favorite': isFavorite,
       };
 
   Folder toEntity() => Folder(
@@ -49,6 +53,7 @@ class FolderModel {
         sortOrder: sortOrder,
         createdAt: createdAt,
         documentCount: documentCount,
+        isFavorite: isFavorite,
       );
 
   factory FolderModel.fromEntity(Folder entity) => FolderModel(
@@ -59,6 +64,7 @@ class FolderModel {
         sortOrder: entity.sortOrder,
         createdAt: entity.createdAt,
         documentCount: entity.documentCount,
+        isFavorite: entity.isFavorite,
       );
 
   FolderModel copyWith({
@@ -69,6 +75,7 @@ class FolderModel {
     int? sortOrder,
     DateTime? createdAt,
     int? documentCount,
+    bool? isFavorite,
   }) {
     return FolderModel(
       id: id ?? this.id,
@@ -80,6 +87,7 @@ class FolderModel {
       sortOrder: sortOrder ?? this.sortOrder,
       createdAt: createdAt ?? this.createdAt,
       documentCount: documentCount ?? this.documentCount,
+      isFavorite: isFavorite ?? this.isFavorite,
     );
   }
 

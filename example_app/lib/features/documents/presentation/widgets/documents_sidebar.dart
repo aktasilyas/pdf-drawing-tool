@@ -7,7 +7,6 @@ import 'package:go_router/go_router.dart';
 
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/index.dart';
-import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/sidebar_item.dart';
 
@@ -47,61 +46,51 @@ class DocumentsSidebar extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildHeader(context),
-          Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
-            child: AppSearchField(
-              hint: 'Ara...',
-              onChanged: (q) =>
-                  ref.read(searchQueryProvider.notifier).state = q,
-            ),
+          const SizedBox(height: AppSpacing.xs),
+          // Sabit menü öğeleri
+          SidebarItem(
+            icon: Icons.description_outlined,
+            selectedIcon: Icons.description,
+            label: 'Tüm Notlar',
+            isSelected: selectedSection == SidebarSection.documents,
+            onTap: () => onSectionChanged(SidebarSection.documents),
           ),
-          const SizedBox(height: AppSpacing.sm),
+          SidebarItem(
+            icon: Icons.star_outline,
+            selectedIcon: Icons.star,
+            label: 'Favoriler',
+            isSelected: selectedSection == SidebarSection.favorites,
+            onTap: () => onSectionChanged(SidebarSection.favorites),
+            iconColor: selectedSection == SidebarSection.favorites
+                ? AppColors.accent
+                : null,
+          ),
+          SidebarItem(
+            icon: Icons.delete_outline,
+            selectedIcon: Icons.delete,
+            label: 'Son Silinenler',
+            isSelected: selectedSection == SidebarSection.trash,
+            onTap: () => onSectionChanged(SidebarSection.trash),
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
+            child: AppDivider(),
+          ),
+          // Klasörler başlığı (sabit)
+          _buildFoldersHeader(context),
+          // Klasör listesi (sadece burası scroll)
           Expanded(
             child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SidebarItem(
-                    icon: Icons.description_outlined,
-                    selectedIcon: Icons.description,
-                    label: 'Tüm Notlar',
-                    isSelected: selectedSection == SidebarSection.documents,
-                    onTap: () => onSectionChanged(SidebarSection.documents),
-                  ),
-                  SidebarItem(
-                    icon: Icons.star_outline,
-                    selectedIcon: Icons.star,
-                    label: 'Favoriler',
-                    isSelected: selectedSection == SidebarSection.favorites,
-                    onTap: () => onSectionChanged(SidebarSection.favorites),
-                    iconColor: selectedSection == SidebarSection.favorites
-                        ? AppColors.accent
-                        : null,
-                  ),
-                  SidebarItem(
-                    icon: Icons.delete_outline,
-                    selectedIcon: Icons.delete,
-                    label: 'Son Silinenler',
-                    isSelected: selectedSection == SidebarSection.trash,
-                    onTap: () => onSectionChanged(SidebarSection.trash),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
-                    child: AppDivider(),
-                  ),
-                  _buildFoldersHeader(context),
-                  _buildFoldersList(context, foldersAsync),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
-                    child: AppDivider(),
-                  ),
-                  _buildTagsPlaceholder(context),
-                  const SizedBox(height: AppSpacing.xl),
-                ],
-              ),
+              child: _buildFoldersList(context, foldersAsync),
             ),
           ),
+          // Alt bölüm (sabit)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
+            child: AppDivider(),
+          ),
+          _buildTagsPlaceholder(context),
+          const SizedBox(height: AppSpacing.lg),
         ],
       ),
     );
@@ -114,24 +103,24 @@ class DocumentsSidebar extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-          AppSpacing.lg, AppSpacing.xl, AppSpacing.md, AppSpacing.md),
+          AppSpacing.md, AppSpacing.lg, AppSpacing.sm, AppSpacing.sm),
       child: Row(
         children: [
           Container(
-            width: 36,
-            height: 36,
+            width: 28,
+            height: 28,
             decoration: BoxDecoration(
               color: AppColors.primary,
-              borderRadius: BorderRadius.circular(AppRadius.sm),
+              borderRadius: BorderRadius.circular(AppRadius.xs),
             ),
             child: const Icon(Icons.edit_note,
-                color: AppColors.onPrimary, size: AppIconSize.lg),
+                color: AppColors.onPrimary, size: AppIconSize.sm),
           ),
-          const SizedBox(width: AppSpacing.md),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
               'StarNote',
-              style: AppTypography.headlineMedium.copyWith(
+              style: AppTypography.titleLarge.copyWith(
                 color: textPrimary,
                 fontWeight: FontWeight.w700,
               ),
@@ -156,7 +145,7 @@ class DocumentsSidebar extends ConsumerWidget {
     return AppSectionHeader(
       title: 'Klasörler',
       padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.lg, vertical: AppSpacing.xs),
+          horizontal: AppSpacing.md, vertical: AppSpacing.xs),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -195,7 +184,7 @@ class DocumentsSidebar extends ConsumerWidget {
         if (rootFolders.isEmpty) {
           return Padding(
             padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+                horizontal: AppSpacing.md, vertical: AppSpacing.xs),
             child: Text('Klasör yok',
                 style: AppTypography.caption.copyWith(color: tertiaryColor)),
           );
@@ -257,15 +246,15 @@ class DocumentsSidebar extends ConsumerWidget {
         const AppSectionHeader(
           title: 'Etiketler',
           padding: EdgeInsets.symmetric(
-              horizontal: AppSpacing.lg, vertical: AppSpacing.xs),
+              horizontal: AppSpacing.md, vertical: AppSpacing.xs),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+              horizontal: AppSpacing.md, vertical: AppSpacing.xs),
           child: Row(
             children: [
               Icon(Icons.label_outline,
-                  size: AppIconSize.md, color: tertiaryColor),
+                  size: AppIconSize.sm, color: tertiaryColor),
               const SizedBox(width: AppSpacing.sm),
               Text('Yakında...',
                   style: AppTypography.caption.copyWith(color: tertiaryColor)),

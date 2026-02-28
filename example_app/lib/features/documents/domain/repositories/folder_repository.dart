@@ -33,6 +33,9 @@ abstract class FolderRepository {
   /// Move folder to new parent
   Future<Either<Failure, void>> moveFolder(String id, String? newParentId);
 
+  /// Toggle folder favorite status
+  Future<Either<Failure, Folder>> toggleFavorite(String id);
+
   /// Watch folders list (reactive)
   Stream<List<Folder>> watchFolders({String? parentId});
 

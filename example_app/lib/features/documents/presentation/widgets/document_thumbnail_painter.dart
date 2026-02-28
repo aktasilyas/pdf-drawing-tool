@@ -71,3 +71,31 @@ class DocumentThumbnailPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
+
+/// Whiteboard dot grid painter — sparser, lighter dots than template dots.
+class WhiteboardGridPainter extends CustomPainter {
+  final Color dotColor;
+  final double spacing;
+
+  WhiteboardGridPainter({
+    required this.dotColor,
+    this.spacing = 20,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = dotColor
+      ..style = PaintingStyle.fill;
+
+    for (double x = spacing; x < size.width; x += spacing) {
+      for (double y = spacing; y < size.height; y += spacing) {
+        canvas.drawCircle(Offset(x, y), 0.8, paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant WhiteboardGridPainter oldDelegate) =>
+      dotColor != oldDelegate.dotColor || spacing != oldDelegate.spacing;
+}

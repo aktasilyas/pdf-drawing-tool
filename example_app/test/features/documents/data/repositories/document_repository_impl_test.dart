@@ -6,17 +6,36 @@ import 'package:example_app/features/documents/documents.dart';
 class MockDocumentLocalDatasource extends Mock
     implements DocumentLocalDatasource {}
 
+class MockFolderLocalDatasource extends Mock
+    implements FolderLocalDatasource {}
+
 class MockUuid extends Mock implements Uuid {}
 
 void main() {
   late DocumentRepositoryImpl repository;
   late MockDocumentLocalDatasource mockDatasource;
+  late MockFolderLocalDatasource mockFolderDatasource;
   late MockUuid mockUuid;
+
+  setUpAll(() {
+    registerFallbackValue(DocumentModel(
+      id: '',
+      title: '',
+      templateId: '',
+      createdAt: DateTime(2024),
+      updatedAt: DateTime(2024),
+    ));
+  });
 
   setUp(() {
     mockDatasource = MockDocumentLocalDatasource();
+    mockFolderDatasource = MockFolderLocalDatasource();
     mockUuid = MockUuid();
-    repository = DocumentRepositoryImpl(mockDatasource, mockUuid);
+    repository = DocumentRepositoryImpl(
+      mockDatasource,
+      mockFolderDatasource,
+      mockUuid,
+    );
   });
 
   group('DocumentRepositoryImpl', () {
@@ -182,7 +201,7 @@ void main() {
     group('search', () {
       test('should return matching documents', () async {
         // Arrange
-        when(() => mockDatasource.getDocuments())
+        when(() => mockDatasource.getAllDocuments())
             .thenAnswer((_) async => testModels);
 
         // Act
@@ -198,7 +217,7 @@ void main() {
 
       test('should be case-insensitive', () async {
         // Arrange
-        when(() => mockDatasource.getDocuments())
+        when(() => mockDatasource.getAllDocuments())
             .thenAnswer((_) async => testModels);
 
         // Act
@@ -248,7 +267,7 @@ void main() {
           ),
         ];
 
-        when(() => mockDatasource.getDocuments())
+        when(() => mockDatasource.getAllDocuments())
             .thenAnswer((_) async => modelsWithTrash);
 
         // Act

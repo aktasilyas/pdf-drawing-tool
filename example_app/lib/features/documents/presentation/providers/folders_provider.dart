@@ -9,6 +9,12 @@ final folderRepositoryProvider = Provider<FolderRepository>((ref) {
   return GetIt.instance<FolderRepository>();
 });
 
+// Favorite folders
+final favoriteFoldersProvider = FutureProvider<List<Folder>>((ref) async {
+  final folders = await ref.watch(foldersProvider.future);
+  return folders.where((f) => f.isFavorite).toList();
+});
+
 // All folders (root level by default)
 final foldersProvider = FutureProvider<List<Folder>>((ref) async {
   final repository = ref.watch(folderRepositoryProvider);
@@ -146,6 +152,18 @@ class FoldersController extends StateNotifier<AsyncValue<void>> {
     required String? newParentId,
   }) async {
     final result = await _repository.moveFolder(folderId, newParentId);
+    return result.fold(
+      (failure) => false,
+      (_) {
+        _invalidateFolders();
+        _invalidateDocuments();
+        return true;
+      },
+    );
+  }
+
+  Future<bool> toggleFavorite(String folderId) async {
+    final result = await _repository.toggleFavorite(folderId);
     return result.fold(
       (failure) => false,
       (_) {

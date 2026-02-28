@@ -60,7 +60,10 @@ void _registerRepositories() {
   
   // Documents
   getIt.registerLazySingleton<DocumentRepository>(
-    () => DocumentRepositoryImpl(getIt()),
+    () => DocumentRepositoryImpl(
+      getIt<DocumentLocalDatasource>(),
+      getIt<FolderLocalDatasource>(),
+    ),
   );
   
   // Folders

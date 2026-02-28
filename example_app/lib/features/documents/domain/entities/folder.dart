@@ -8,6 +8,7 @@ class Folder extends Equatable {
   final int sortOrder;
   final DateTime createdAt;
   final int documentCount;
+  final bool isFavorite;
 
   const Folder({
     required this.id,
@@ -17,6 +18,7 @@ class Folder extends Equatable {
     this.sortOrder = 0,
     required this.createdAt,
     this.documentCount = 0,
+    this.isFavorite = false,
   });
 
   /// Bu klasör root klasör mü? (parentId == null)
@@ -38,6 +40,7 @@ class Folder extends Equatable {
     int? sortOrder,
     DateTime? createdAt,
     int? documentCount,
+    bool? isFavorite,
   }) {
     return Folder(
       id: id ?? this.id,
@@ -49,6 +52,7 @@ class Folder extends Equatable {
       sortOrder: sortOrder ?? this.sortOrder,
       createdAt: createdAt ?? this.createdAt,
       documentCount: documentCount ?? this.documentCount,
+      isFavorite: isFavorite ?? this.isFavorite,
     );
   }
 
@@ -63,5 +67,6 @@ class Folder extends Equatable {
         sortOrder,
         createdAt,
         documentCount,
+        isFavorite,
       ];
 }

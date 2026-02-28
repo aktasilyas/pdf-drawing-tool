@@ -176,11 +176,13 @@ class _TemplateSelectionScreenState
     if (_template == null) return;
 
     final controller = ref.read(documentsControllerProvider.notifier);
+    final folderId = ref.read(currentFolderIdProvider);
     final docTitle = _title.trim().isEmpty ? 'Isimsiz Not' : _title.trim();
 
     final documentId = await controller.createDocument(
       title: docTitle,
       templateId: _template!.id,
+      folderId: folderId,
       paperColor: _mapColorToName(_paperColor),
       isPortrait: !_paperSize.isLandscape,
       documentType: DocumentType.notebook,
