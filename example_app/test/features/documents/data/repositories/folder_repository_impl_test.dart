@@ -17,6 +17,14 @@ void main() {
   late MockDocumentLocalDatasource mockDocumentDatasource;
   late MockUuid mockUuid;
 
+  setUpAll(() {
+    registerFallbackValue(FolderModel(
+      id: 'fallback',
+      name: 'Fallback',
+      createdAt: DateTime(2024),
+    ));
+  });
+
   setUp(() {
     mockFolderDatasource = MockFolderLocalDatasource();
     mockDocumentDatasource = MockDocumentLocalDatasource();
@@ -47,7 +55,7 @@ void main() {
     group('getFolders', () {
       test('should return list of folders sorted by name', () async {
         // Arrange
-        when(() => mockFolderDatasource.getFolders(parentId: null))
+        when(() => mockFolderDatasource.getFolders())
             .thenAnswer((_) async => testModels);
         when(() => mockDocumentDatasource.getAllDocuments())
             .thenAnswer((_) async => []);
@@ -64,15 +72,21 @@ void main() {
             expect(folders.first.name, 'Test Folder');
           },
         );
-        verify(() => mockFolderDatasource.getFolders(parentId: null)).called(1);
-        verify(() => mockDocumentDatasource.getDocuments()).called(1);
+        verify(() => mockFolderDatasource.getFolders()).called(1);
+        verify(() => mockDocumentDatasource.getAllDocuments()).called(1);
       });
 
       test('should filter folders by parentId', () async {
-        // Arrange
+        // Arrange - getFolders() always fetches all, then filters in memory
         const parentId = 'parent-1';
-        when(() => mockFolderDatasource.getFolders(parentId: parentId))
-            .thenAnswer((_) async => [testModel]);
+        final subFolder = FolderModel(
+          id: 'sub-1',
+          name: 'Sub Folder',
+          parentId: parentId,
+          createdAt: DateTime(2024, 1, 3),
+        );
+        when(() => mockFolderDatasource.getFolders())
+            .thenAnswer((_) async => [...testModels, subFolder]);
         when(() => mockDocumentDatasource.getAllDocuments())
             .thenAnswer((_) async => []);
 
@@ -86,6 +100,59 @@ void main() {
           (folders) => expect(folders.length, 1),
         );
       });
+
+      test('should count documents recursively including subfolders', () async {
+        // Arrange - parent folder with a subfolder, documents in subfolder
+        final parentFolder = FolderModel(
+          id: 'parent',
+          name: 'Parent',
+          createdAt: DateTime(2024, 1, 1),
+        );
+        final childFolder = FolderModel(
+          id: 'child',
+          name: 'Child',
+          parentId: 'parent',
+          createdAt: DateTime(2024, 1, 2),
+        );
+        when(() => mockFolderDatasource.getFolders())
+            .thenAnswer((_) async => [parentFolder, childFolder]);
+        when(() => mockDocumentDatasource.getAllDocuments())
+            .thenAnswer((_) async => [
+                  DocumentModel(
+                    id: 'doc-1',
+                    title: 'Doc in child',
+                    templateId: 'blank',
+                    folderId: 'child',
+                    createdAt: DateTime.now(),
+                    updatedAt: DateTime.now(),
+                  ),
+                  DocumentModel(
+                    id: 'doc-2',
+                    title: 'Doc in parent',
+                    templateId: 'blank',
+                    folderId: 'parent',
+                    createdAt: DateTime.now(),
+                    updatedAt: DateTime.now(),
+                  ),
+                ]);
+
+        // Act
+        final result = await repository.getFolders();
+
+        // Assert
+        expect(result.isRight(), true);
+        result.fold(
+          (_) => fail('Should return folders'),
+          (folders) {
+            final parent = folders.firstWhere((f) => f.id == 'parent');
+            final child = folders.firstWhere((f) => f.id == 'child');
+            // Parent should count its own doc + child's doc = 2
+            expect(parent.documentCount, 2);
+            // Child should count only its own doc = 1
+            expect(child.documentCount, 1);
+          },
+        );
+      });
     });
 
     group('createFolder', () {
@@ -97,6 +164,12 @@ void main() {
       test('should create folder with generated ID', () async {
         // Arrange
         when(() => mockUuid.v4()).thenReturn(testId);
+        when(() => mockFolderDatasource.getFolder(testParentId))
+            .thenAnswer((_) async => FolderModel(
+                  id: testParentId,
+                  name: 'Parent',
+                  createdAt: DateTime(2024),
+                ));
         when(() => mockFolderDatasource.createFolder(any()))
             .thenAnswer((invocation) async {
           final model = invocation.positionalArguments[0] as FolderModel;
@@ -176,6 +249,8 @@ void main() {
                   name: 'New Parent',
                   createdAt: DateTime.now(),
                 ));
+        when(() => mockFolderDatasource.getFolders(parentId: 'folder-1'))
+            .thenAnswer((_) async => []);
         when(() => mockFolderDatasource.updateFolder(any()))
             .thenAnswer((invocation) async {
           final model = invocation.positionalArguments[0] as FolderModel;
