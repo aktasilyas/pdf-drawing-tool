@@ -196,6 +196,9 @@ class DocumentCard extends ConsumerWidget {
   }
 
   Widget _buildTemplatePlaceholder(BuildContext context) {
+    if (document.documentType == core.DocumentType.whiteboard) {
+      return _buildWhiteboardPlaceholder(context);
+    }
     if (document.documentType == core.DocumentType.notebook) {
       return Stack(
         children: [
@@ -210,6 +213,28 @@ class DocumentCard extends ConsumerWidget {
     return CustomPaint(
       painter: DocumentThumbnailPainter(document.templateId),
       size: Size.infinite,
+    );
+  }
+
+  Widget _buildWhiteboardPlaceholder(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final frameColor = isDark
+        ? AppColors.outlineDark.withValues(alpha: 0.8)
+        : AppColors.outlineLight;
+    final dotColor = isDark
+        ? Colors.white.withValues(alpha: 0.08)
+        : Colors.black.withValues(alpha: 0.08);
+
+    return Container(
+      padding: const EdgeInsets.all(4),
+      color: frameColor,
+      child: Container(
+        color: isDark ? const Color(0xFF2A2A2A) : Colors.white,
+        child: CustomPaint(
+          painter: WhiteboardGridPainter(dotColor: dotColor),
+          size: Size.infinite,
+        ),
+      ),
     );
   }
 

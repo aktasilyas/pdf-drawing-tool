@@ -206,6 +206,9 @@ class CompactDocumentThumbnail extends StatelessWidget {
         ),
       );
     }
+    if (document.documentType == core.DocumentType.whiteboard) {
+      return _CompactWhiteboardThumbnail();
+    }
     return Stack(
       children: [
         CustomPaint(
@@ -240,6 +243,31 @@ class _CompactSpiralBinding extends StatelessWidget {
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CompactWhiteboardThumbnail extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final frameColor = isDark
+        ? AppColors.outlineDark.withValues(alpha: 0.8)
+        : AppColors.outlineLight;
+    final dotColor = isDark
+        ? Colors.white.withValues(alpha: 0.08)
+        : Colors.black.withValues(alpha: 0.08);
+
+    return Container(
+      padding: const EdgeInsets.all(2),
+      color: frameColor,
+      child: Container(
+        color: isDark ? const Color(0xFF2A2A2A) : Colors.white,
+        child: CustomPaint(
+          painter: WhiteboardGridPainter(dotColor: dotColor, spacing: 10),
+          size: const Size(36, 44),
         ),
       ),
     );

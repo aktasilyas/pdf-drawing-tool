@@ -7,15 +7,18 @@ import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
 import 'package:example_app/features/documents/domain/repositories/document_repository.dart';
 import 'package:example_app/features/documents/data/datasources/document_local_datasource.dart';
+import 'package:example_app/features/documents/data/datasources/folder_local_datasource.dart';
 import 'package:example_app/features/documents/data/models/document_model.dart';
 
 @Injectable(as: DocumentRepository)
 class DocumentRepositoryImpl implements DocumentRepository {
   final DocumentLocalDatasource _localDatasource;
+  final FolderLocalDatasource _folderDatasource;
   final Uuid _uuid;
 
   DocumentRepositoryImpl(
-    this._localDatasource, [
+    this._localDatasource,
+    this._folderDatasource, [
     Uuid? uuid,
   ]) : _uuid = uuid ?? const Uuid();
 
@@ -224,7 +227,7 @@ class DocumentRepositoryImpl implements DocumentRepository {
   @override
   Future<Either<Failure, List<DocumentInfo>>> getFavorites() async {
     try {
-      final documents = await _localDatasource.getDocuments();
+      final documents = await _localDatasource.getAllDocuments();
       final favorites = documents
           .where((doc) => doc.isFavorite && !doc.isInTrash)
           .map((model) => model.toEntity())
@@ -244,7 +247,7 @@ class DocumentRepositoryImpl implements DocumentRepository {
   @override
   Future<Either<Failure, List<DocumentInfo>>> getRecent({int limit = 10}) async {
     try {
-      final documents = await _localDatasource.getDocuments();
+      final documents = await _localDatasource.getAllDocuments();
       final recent = documents
           .where((doc) => !doc.isInTrash)
           .map((model) => model.toEntity())
@@ -264,7 +267,7 @@ class DocumentRepositoryImpl implements DocumentRepository {
   @override
   Future<Either<Failure, List<DocumentInfo>>> search(String query) async {
     try {
-      final documents = await _localDatasource.getDocuments();
+      final documents = await _localDatasource.getAllDocuments();
       final lowerQuery = query.toLowerCase();
       final results = documents
           .where((doc) =>
@@ -349,9 +352,37 @@ class DocumentRepositoryImpl implements DocumentRepository {
   Future<Either<Failure, void>> restoreFromTrash(String id) async {
     try {
       final document = await _localDatasource.getDocument(id);
-      final updated = document.copyWith(
-        isInTrash: false,
+
+      // Check if the original folder still exists
+      String? restoredFolderId = document.folderId;
+      if (restoredFolderId != null) {
+        try {
+          await _folderDatasource.getFolder(restoredFolderId);
+        } on CacheException {
+          // Folder no longer exists — move document to root
+          restoredFolderId = null;
+        }
+      }
+
+      final updated = DocumentModel(
+        id: document.id,
+        title: document.title,
+        folderId: restoredFolderId,
+        templateId: document.templateId,
+        createdAt: document.createdAt,
         updatedAt: DateTime.now(),
+        thumbnailPath: document.thumbnailPath,
+        pageCount: document.pageCount,
+        isFavorite: document.isFavorite,
+        isInTrash: false,
+        syncState: document.syncState,
+        paperColor: document.paperColor,
+        isPortrait: document.isPortrait,
+        documentType: document.documentType,
+        coverId: document.coverId,
+        hasCover: document.hasCover,
+        paperWidthMm: document.paperWidthMm,
+        paperHeightMm: document.paperHeightMm,
       );
       await _localDatasource.updateDocument(updated);
       return const Right(null);
