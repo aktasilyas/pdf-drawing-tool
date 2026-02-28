@@ -44,9 +44,7 @@ class Sidebar extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
             child: Text(
               'StarNote',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.w600,
+              style: AppTypography.displayLarge.copyWith(
                 color: Theme.of(context).colorScheme.onSurface,
                 letterSpacing: -0.5,
               ),
@@ -82,9 +80,9 @@ class Sidebar extends ConsumerWidget {
                       children: [
                         Text(
                           'Klasörler',
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          style: AppTypography.labelMedium.copyWith(
                                 color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0.5,
                               ),
                         ),
                         const Spacer(),
@@ -140,8 +138,7 @@ class Sidebar extends ConsumerWidget {
                             isSelected: isSelected,
                             trailing: Text(
                               '${folder.documentCount}',
-                              style: TextStyle(
-                                fontSize: 12,
+                              style: AppTypography.caption.copyWith(
                                 color: isSelected
                                     ? Theme.of(context).colorScheme.onPrimaryContainer
                                     : Theme.of(context).colorScheme.onSurfaceVariant,
@@ -258,9 +255,8 @@ class _SidebarItem extends StatelessWidget {
                 Expanded(
                   child: Text(
                     label,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                    style: AppTypography.titleLarge.copyWith(
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                       color: isSelected
                           ? colorScheme.primary
                           : colorScheme.onSurface,

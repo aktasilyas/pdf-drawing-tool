@@ -14,6 +14,7 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'tokens/index.dart';
 
@@ -138,19 +139,21 @@ abstract class AppTheme {
     required Color primary,
     required Color secondary,
   }) =>
-      TextTheme(
-        displayLarge: AppTypography.displayLarge.copyWith(color: primary),
-        displayMedium: AppTypography.displayMedium.copyWith(color: primary),
-        headlineLarge: AppTypography.headlineLarge.copyWith(color: primary),
-        headlineMedium: AppTypography.headlineMedium.copyWith(color: primary),
-        headlineSmall: AppTypography.headlineSmall.copyWith(color: primary),
-        titleLarge: AppTypography.titleLarge.copyWith(color: primary),
-        titleMedium: AppTypography.titleMedium.copyWith(color: primary),
-        bodyLarge: AppTypography.bodyLarge.copyWith(color: primary),
-        bodyMedium: AppTypography.bodyMedium.copyWith(color: primary),
-        labelLarge: AppTypography.labelLarge.copyWith(color: primary),
-        labelMedium: AppTypography.labelMedium.copyWith(color: secondary),
-        bodySmall: AppTypography.caption.copyWith(color: secondary),
+      GoogleFonts.sourceSerif4TextTheme(
+        TextTheme(
+          displayLarge: AppTypography.displayLarge.copyWith(color: primary),
+          displayMedium: AppTypography.displayMedium.copyWith(color: primary),
+          headlineLarge: AppTypography.headlineLarge.copyWith(color: primary),
+          headlineMedium: AppTypography.headlineMedium.copyWith(color: primary),
+          headlineSmall: AppTypography.headlineSmall.copyWith(color: primary),
+          titleLarge: AppTypography.titleLarge.copyWith(color: primary),
+          titleMedium: AppTypography.titleMedium.copyWith(color: primary),
+          bodyLarge: AppTypography.bodyLarge.copyWith(color: primary),
+          bodyMedium: AppTypography.bodyMedium.copyWith(color: primary),
+          labelLarge: AppTypography.labelLarge.copyWith(color: primary),
+          labelMedium: AppTypography.labelMedium.copyWith(color: secondary),
+          bodySmall: AppTypography.caption.copyWith(color: secondary),
+        ),
       );
 
   // ══════════════════════════════════════════════════════════════════════════

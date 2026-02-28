@@ -99,7 +99,7 @@ class _FormatPickerSheetState extends State<FormatPickerSheet> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Text('Format', style: AppTypography.titleMedium),
+        Text('Format', style: AppTypography.titleMedium),
         Text(
           '${_currentSelection.widthMm.toInt()} x '
           '${_currentSelection.heightMm.toInt()} mm',

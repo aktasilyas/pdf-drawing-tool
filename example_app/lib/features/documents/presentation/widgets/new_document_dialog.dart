@@ -78,10 +78,8 @@ PopupMenuItem<NewDocumentOption> _buildMenuItem(
           Expanded(
             child: Text(
               label,
-              style: TextStyle(
-                fontSize: 15,
+              style: AppTypography.titleLarge.copyWith(
                 color: Theme.of(context).colorScheme.onSurface,
-                fontWeight: FontWeight.w500,
               ),
             ),
           ),

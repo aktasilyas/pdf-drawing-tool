@@ -158,7 +158,7 @@ class TemplatePreviewSection extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text('Kapak', style: AppTypography.caption),
+            Text('Kapak', style: AppTypography.caption),
             Transform.scale(
               scale: 0.8,
               child: Switch(
@@ -172,7 +172,7 @@ class TemplatePreviewSection extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text('Format', style: AppTypography.caption),
+            Text('Format', style: AppTypography.caption),
             GestureDetector(
               onTap: () => _showFormatPicker(context),
               child: Row(

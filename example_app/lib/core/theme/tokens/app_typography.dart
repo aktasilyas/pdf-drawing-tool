@@ -12,10 +12,12 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 /// StarNote tipografi stilleri.
 ///
 /// Material Design 3 tipografi sistemine dayalı.
+/// Source Serif 4 font ailesi kullanılır.
 /// Hardcoded font size kullanımı yasaktır!
 abstract class AppTypography {
   // ══════════════════════════════════════════════════════════════════════════
@@ -23,14 +25,14 @@ abstract class AppTypography {
   // ══════════════════════════════════════════════════════════════════════════
 
   /// 32dp - En büyük başlık (Splash ekranı, Hero metinler)
-  static const TextStyle displayLarge = TextStyle(
+  static TextStyle get displayLarge => GoogleFonts.sourceSerif4(
     fontSize: 32,
     fontWeight: FontWeight.bold,
     height: 1.25,
   );
 
   /// 28dp - Büyük display metni
-  static const TextStyle displayMedium = TextStyle(
+  static TextStyle get displayMedium => GoogleFonts.sourceSerif4(
     fontSize: 28,
     fontWeight: FontWeight.bold,
     height: 1.29,
@@ -41,21 +43,21 @@ abstract class AppTypography {
   // ══════════════════════════════════════════════════════════════════════════
 
   /// 24dp - Ekran başlığı (AppBar title)
-  static const TextStyle headlineLarge = TextStyle(
+  static TextStyle get headlineLarge => GoogleFonts.sourceSerif4(
     fontSize: 24,
     fontWeight: FontWeight.w600,
     height: 1.33,
   );
 
   /// 20dp - Alt ekran başlığı
-  static const TextStyle headlineMedium = TextStyle(
+  static TextStyle get headlineMedium => GoogleFonts.sourceSerif4(
     fontSize: 20,
     fontWeight: FontWeight.w600,
     height: 1.4,
   );
 
   /// 18dp - Küçük başlık
-  static const TextStyle headlineSmall = TextStyle(
+  static TextStyle get headlineSmall => GoogleFonts.sourceSerif4(
     fontSize: 18,
     fontWeight: FontWeight.w600,
     height: 1.44,
@@ -66,14 +68,14 @@ abstract class AppTypography {
   // ══════════════════════════════════════════════════════════════════════════
 
   /// 16dp - Card/Liste başlığı
-  static const TextStyle titleLarge = TextStyle(
+  static TextStyle get titleLarge => GoogleFonts.sourceSerif4(
     fontSize: 16,
     fontWeight: FontWeight.w600,
     height: 1.5,
   );
 
   /// 14dp - Küçük başlık
-  static const TextStyle titleMedium = TextStyle(
+  static TextStyle get titleMedium => GoogleFonts.sourceSerif4(
     fontSize: 14,
     fontWeight: FontWeight.w600,
     height: 1.43,
@@ -84,14 +86,14 @@ abstract class AppTypography {
   // ══════════════════════════════════════════════════════════════════════════
 
   /// 16dp - Büyük body metni
-  static const TextStyle bodyLarge = TextStyle(
+  static TextStyle get bodyLarge => GoogleFonts.sourceSerif4(
     fontSize: 16,
     fontWeight: FontWeight.normal,
     height: 1.5,
   );
 
   /// 14dp - Standart body metni
-  static const TextStyle bodyMedium = TextStyle(
+  static TextStyle get bodyMedium => GoogleFonts.sourceSerif4(
     fontSize: 14,
     fontWeight: FontWeight.normal,
     height: 1.43,
@@ -102,14 +104,14 @@ abstract class AppTypography {
   // ══════════════════════════════════════════════════════════════════════════
 
   /// 14dp - Buton metni, form label
-  static const TextStyle labelLarge = TextStyle(
+  static TextStyle get labelLarge => GoogleFonts.sourceSerif4(
     fontSize: 14,
     fontWeight: FontWeight.w500,
     height: 1.43,
   );
 
   /// 12dp - Küçük label
-  static const TextStyle labelMedium = TextStyle(
+  static TextStyle get labelMedium => GoogleFonts.sourceSerif4(
     fontSize: 12,
     fontWeight: FontWeight.w500,
     height: 1.33,
@@ -120,7 +122,7 @@ abstract class AppTypography {
   // ══════════════════════════════════════════════════════════════════════════
 
   /// 12dp - Caption, yardımcı metin, tarih/saat
-  static const TextStyle caption = TextStyle(
+  static TextStyle get caption => GoogleFonts.sourceSerif4(
     fontSize: 12,
     fontWeight: FontWeight.normal,
     height: 1.33,
