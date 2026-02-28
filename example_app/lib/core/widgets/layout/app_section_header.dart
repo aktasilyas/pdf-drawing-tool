@@ -1,4 +1,4 @@
-/// StarNote Design System - AppSectionHeader Component
+/// ElyaNotes Design System - AppSectionHeader Component
 ///
 /// Bölüm başlığı komponenti.
 ///
@@ -18,7 +18,7 @@ import 'package:flutter/material.dart';
 
 import 'package:example_app/core/theme/index.dart';
 
-/// StarNote section header komponenti.
+/// ElyaNotes section header komponenti.
 ///
 /// Liste bölümlerini ayırmak için kullanılır.
 class AppSectionHeader extends StatelessWidget {

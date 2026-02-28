@@ -1,4 +1,4 @@
-/// StarNote Design System - AppIconButton Component
+/// ElyaNotes Design System - AppIconButton Component
 ///
 /// Icon-only buton komponenti. 4 variant ve 3 size destekler.
 ///
@@ -44,7 +44,7 @@ enum AppIconButtonSize {
   large,
 }
 
-/// StarNote icon buton komponenti.
+/// ElyaNotes icon buton komponenti.
 ///
 /// 4 farklı variant ve 3 farklı boyut destekler.
 /// Tooltip accessibility için önemlidir.

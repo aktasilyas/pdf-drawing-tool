@@ -1,4 +1,4 @@
-/// StarNote Design System - AppEmptyState Component
+/// ElyaNotes Design System - AppEmptyState Component
 ///
 /// Boş durum göstergesi.
 ///
@@ -19,7 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/buttons/index.dart';
 
-/// StarNote empty state komponenti.
+/// ElyaNotes empty state komponenti.
 ///
 /// Boş liste/sayfa durumlarında kullanılır.
 class AppEmptyState extends StatelessWidget {

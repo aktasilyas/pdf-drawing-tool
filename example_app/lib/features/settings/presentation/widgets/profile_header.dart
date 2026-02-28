@@ -1,4 +1,4 @@
-/// StarNote Profile Header - Design system profile card
+/// ElyaNotes Profile Header - Design system profile card
 library;
 
 import 'package:flutter/material.dart';

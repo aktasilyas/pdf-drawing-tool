@@ -1,4 +1,4 @@
-/// StarNote Manage Folders Screen
+/// ElyaNotes Manage Folders Screen
 ///
 /// Klasörleri yönet ekranı - drag-drop sıralama, renk değiştirme, silme.
 library;

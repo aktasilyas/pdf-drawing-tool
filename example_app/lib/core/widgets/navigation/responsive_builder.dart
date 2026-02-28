@@ -1,4 +1,4 @@
-/// StarNote Design System - ResponsiveBuilder Component
+/// ElyaNotes Design System - ResponsiveBuilder Component
 ///
 /// Ekran boyutuna göre farklı widget döndürür.
 ///
@@ -24,7 +24,7 @@ import 'package:flutter/material.dart';
 
 import 'package:example_app/core/utils/responsive.dart';
 
-/// StarNote responsive builder komponenti.
+/// ElyaNotes responsive builder komponenti.
 ///
 /// Ekran boyutuna göre farklı layout'lar gösterir.
 class ResponsiveBuilder extends StatelessWidget {

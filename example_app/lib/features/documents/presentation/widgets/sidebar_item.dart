@@ -1,4 +1,4 @@
-/// StarNote Sidebar Item Widget
+/// ElyaNotes Sidebar Item Widget
 library;
 
 import 'package:flutter/material.dart';

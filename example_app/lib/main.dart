@@ -42,7 +42,7 @@ void main() async {
         sharedPreferencesProvider.overrideWithValue(prefs),
         drawing_ui.sharedPreferencesProvider.overrideWithValue(prefs),
       ],
-      child: const StarNoteApp(),
+      child: const ElyaNotesApp(),
     ),
   );
 }
@@ -50,9 +50,9 @@ void main() async {
 /// Global Supabase client getter
 final supabase = Supabase.instance.client;
 
-/// Main application widget for StarNote.
-class StarNoteApp extends ConsumerWidget {
-  const StarNoteApp({super.key});
+/// Main application widget for ElyaNotes.
+class ElyaNotesApp extends ConsumerWidget {
+  const ElyaNotesApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -65,7 +65,7 @@ class StarNoteApp extends ConsumerWidget {
     };
 
     return MaterialApp.router(
-      title: 'StarNote',
+      title: 'ElyaNotes',
       debugShowCheckedModeBanner: false,
       builder: (context, child) {
         // In landscape, remove all system padding so content fills

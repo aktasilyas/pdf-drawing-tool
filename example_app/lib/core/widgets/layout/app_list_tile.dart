@@ -1,4 +1,4 @@
-/// StarNote Design System - AppListTile Component
+/// ElyaNotes Design System - AppListTile Component
 ///
 /// Modern liste item komponenti.
 /// Selected state: sol kenar 3px primary bar.
@@ -19,7 +19,7 @@ import 'package:flutter/material.dart';
 
 import 'package:example_app/core/theme/index.dart';
 
-/// StarNote modern list tile komponenti.
+/// ElyaNotes modern list tile komponenti.
 ///
 /// Modern tasarım kuralları:
 /// - Vertical padding: 14-16dp (daha fazla nefes alanı)

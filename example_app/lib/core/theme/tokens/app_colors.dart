@@ -1,4 +1,4 @@
-/// StarNote Design System - Color Tokens
+/// ElyaNotes Design System - Color Tokens
 ///
 /// Bu dosya tüm uygulama renklerini içerir.
 /// Onay tarihi: 1 Şubat 2026
@@ -13,7 +13,7 @@ library;
 
 import 'package:flutter/material.dart';
 
-/// StarNote renk paleti.
+/// ElyaNotes renk paleti.
 ///
 /// Tüm renkler bu sınıftan alınmalıdır.
 /// Hardcoded renk kullanımı yasaktır!

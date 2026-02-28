@@ -206,7 +206,7 @@ class _AIChatContentState extends ConsumerState<AIChatContent> {
           Icon(Icons.auto_awesome, size: AppIconSize.emptyState,
               color: theme.colorScheme.primary.withValues(alpha: 0.5)),
           SizedBox(height: AppSpacing.lg),
-          Text('StarNote AI', style: theme.textTheme.headlineSmall
+          Text('ElyaNotes AI', style: theme.textTheme.headlineSmall
               ?.copyWith(fontWeight: FontWeight.w600)),
           SizedBox(height: AppSpacing.sm),
           Text(

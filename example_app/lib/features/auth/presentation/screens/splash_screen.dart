@@ -70,7 +70,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
             const SizedBox(height: AppSpacing.xxl),
             // Title
             Text(
-              'StarNote',
+              'ElyaNotes',
               style: AppTypography.displayLarge.copyWith(
                 color: AppColors.onPrimary,
                 letterSpacing: 1.2,

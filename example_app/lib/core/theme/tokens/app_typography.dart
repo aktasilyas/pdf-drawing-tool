@@ -1,4 +1,4 @@
-/// StarNote Design System - Typography Tokens
+/// ElyaNotes Design System - Typography Tokens
 ///
 /// Tüm metin stilleri bu dosyadan alınmalıdır.
 ///
@@ -14,7 +14,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// StarNote tipografi stilleri.
+/// ElyaNotes tipografi stilleri.
 ///
 /// Material Design 3 tipografi sistemine dayalı.
 /// Source Serif 4 font ailesi kullanılır.

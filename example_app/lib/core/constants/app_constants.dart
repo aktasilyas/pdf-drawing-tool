@@ -3,7 +3,7 @@ library;
 
 abstract class AppConstants {
   // App Info
-  static const String appName = 'StarNote';
+  static const String appName = 'ElyaNotes';
   static const String appVersion = '1.0.0';
   
   // Limits - Free Tier

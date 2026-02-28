@@ -1,4 +1,4 @@
-/// StarNote Template Preview Card - Preview card for template selection
+/// ElyaNotes Template Preview Card - Preview card for template selection
 library;
 
 import 'package:flutter/material.dart';

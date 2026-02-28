@@ -1,4 +1,4 @@
-/// StarNote Design System - Token Exports
+/// ElyaNotes Design System - Token Exports
 ///
 /// Bu dosya tüm design token'larını tek noktadan export eder.
 ///

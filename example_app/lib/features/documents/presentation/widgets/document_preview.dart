@@ -1,4 +1,4 @@
-/// StarNote Document Preview Widgets
+/// ElyaNotes Document Preview Widgets
 ///
 /// Doküman önizleme widget'ları (PDF, Image preview).
 library;

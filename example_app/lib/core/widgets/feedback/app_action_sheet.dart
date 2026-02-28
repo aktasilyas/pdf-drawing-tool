@@ -1,4 +1,4 @@
-/// StarNote Design System - AppActionSheet Component
+/// ElyaNotes Design System - AppActionSheet Component
 ///
 /// Action sheet komponenti (liste seçimi).
 ///
@@ -50,7 +50,7 @@ class AppActionSheetItem<T> {
   });
 }
 
-/// StarNote action sheet komponenti.
+/// ElyaNotes action sheet komponenti.
 ///
 /// Bottom sheet olarak açılır, itemlardan biri seçilir.
 class AppActionSheet {

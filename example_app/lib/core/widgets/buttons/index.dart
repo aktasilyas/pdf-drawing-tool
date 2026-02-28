@@ -1,4 +1,4 @@
-/// StarNote Design System - Button Exports
+/// ElyaNotes Design System - Button Exports
 ///
 /// Tüm buton komponentlerini export eder.
 ///

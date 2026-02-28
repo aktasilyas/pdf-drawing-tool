@@ -1,4 +1,4 @@
-/// StarNote Template Grouped List - Collapsible tree view of all templates
+/// ElyaNotes Template Grouped List - Collapsible tree view of all templates
 library;
 
 import 'package:flutter/material.dart';

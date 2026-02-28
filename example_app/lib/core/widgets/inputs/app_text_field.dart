@@ -1,4 +1,4 @@
-/// StarNote Design System - AppTextField Component
+/// ElyaNotes Design System - AppTextField Component
 ///
 /// Modern, filled text input komponenti.
 /// Default: border yok, sadece fill color.
@@ -19,7 +19,7 @@ import 'package:flutter/material.dart';
 
 import 'package:example_app/core/theme/index.dart';
 
-/// StarNote modern text field komponenti.
+/// ElyaNotes modern text field komponenti.
 ///
 /// Modern minimal tasarım:
 /// - Default: filled, border yok

@@ -1,5 +1,5 @@
 -- =====================================================
--- StarNote Sync Feature - Supabase Database Schema
+-- ElyaNotes Sync Feature - Supabase Database Schema
 -- =====================================================
 -- Author: Agent-C
 -- Date: 2026-01-22

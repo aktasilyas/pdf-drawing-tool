@@ -30,7 +30,7 @@ class AuthPhoneHeader extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.md),
         Text(
-          'StarNote',
+          'ElyaNotes',
           style: AppTypography.headlineLarge.copyWith(
             color: AppColors.textPrimaryLight,
           ),

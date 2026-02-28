@@ -1,4 +1,4 @@
-/// StarNote Selection Mode Header
+/// ElyaNotes Selection Mode Header
 ///
 /// Seçim modunda gösterilen header widget'ı.
 /// Tümünü seç, çoğalt, taşı, sil işlemleri içerir.

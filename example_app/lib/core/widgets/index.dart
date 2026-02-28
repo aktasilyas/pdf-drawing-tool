@@ -1,4 +1,4 @@
-/// StarNote Design System - Widget Library Exports
+/// ElyaNotes Design System - Widget Library Exports
 ///
 /// Tüm widget kategorilerini tek noktadan export eder.
 ///

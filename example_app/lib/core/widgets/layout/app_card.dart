@@ -1,4 +1,4 @@
-/// StarNote Design System - AppCard Component
+/// ElyaNotes Design System - AppCard Component
 ///
 /// Card komponenti. 3 variant destekler.
 ///
@@ -28,7 +28,7 @@ enum AppCardVariant {
   outlined,
 }
 
-/// StarNote card komponenti.
+/// ElyaNotes card komponenti.
 ///
 /// 3 farklı variant, tıklanabilir, seçilebilir.
 class AppCard extends StatelessWidget {

@@ -1,4 +1,4 @@
-/// StarNote Manage Folder List Item
+/// ElyaNotes Manage Folder List Item
 ///
 /// Klasör yönetimi ekranında kullanılan liste elemanı.
 library;

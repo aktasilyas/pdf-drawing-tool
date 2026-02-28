@@ -1,4 +1,4 @@
-/// StarNote Design System - Shadow Tokens
+/// ElyaNotes Design System - Shadow Tokens
 ///
 /// Tüm gölge değerleri bu dosyadan alınmalıdır.
 ///
@@ -16,7 +16,7 @@ library;
 
 import 'package:flutter/material.dart';
 
-/// StarNote gölge stilleri.
+/// ElyaNotes gölge stilleri.
 ///
 /// Tutarlı elevation/gölge efektleri için kullanılır.
 /// Hardcoded shadow kullanımı yasaktır!

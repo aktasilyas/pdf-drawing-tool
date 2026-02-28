@@ -1,4 +1,4 @@
-/// StarNote Document Thumbnail Painter
+/// ElyaNotes Document Thumbnail Painter
 ///
 /// Doküman thumbnail'ı için template pattern çizen CustomPainter.
 library;

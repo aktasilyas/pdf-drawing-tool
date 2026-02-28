@@ -1,4 +1,4 @@
-/// StarNote Design System - Layout Exports
+/// ElyaNotes Design System - Layout Exports
 ///
 /// Tüm layout komponentlerini export eder.
 ///

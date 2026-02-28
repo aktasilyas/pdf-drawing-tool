@@ -1,4 +1,4 @@
-/// StarNote Settings Tile - Design system list tile for settings
+/// ElyaNotes Settings Tile - Design system list tile for settings
 library;
 
 import 'package:flutter/material.dart';

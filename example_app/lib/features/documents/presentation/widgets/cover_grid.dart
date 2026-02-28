@@ -1,4 +1,4 @@
-/// StarNote Cover Grid - Grid view for cover selection
+/// ElyaNotes Cover Grid - Grid view for cover selection
 library;
 
 import 'package:flutter/material.dart';

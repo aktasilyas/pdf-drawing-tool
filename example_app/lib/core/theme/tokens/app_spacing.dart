@@ -1,4 +1,4 @@
-/// StarNote Design System - Spacing Tokens
+/// ElyaNotes Design System - Spacing Tokens
 ///
 /// 4dp grid sistemi kullanır.
 /// Tüm spacing değerleri bu dosyadan alınmalıdır.
@@ -12,7 +12,7 @@
 /// ```
 library;
 
-/// StarNote spacing değerleri.
+/// ElyaNotes spacing değerleri.
 ///
 /// 4dp grid sistemine dayalı tutarlı boşluk değerleri.
 /// Hardcoded spacing kullanımı yasaktır!

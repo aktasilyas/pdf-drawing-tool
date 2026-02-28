@@ -1,4 +1,4 @@
-/// StarNote Design System - AppLoading Components
+/// ElyaNotes Design System - AppLoading Components
 ///
 /// Loading göstergeleri.
 ///

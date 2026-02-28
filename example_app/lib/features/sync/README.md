@@ -297,4 +297,4 @@ Conflict detection logic henüz tam implement edilmedi. `getConflicts()` metodu
 
 ## License
 
-This module is part of StarNote project.
+This module is part of ElyaNotes project.

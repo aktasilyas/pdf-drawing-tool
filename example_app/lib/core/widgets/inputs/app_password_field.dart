@@ -1,4 +1,4 @@
-/// StarNote Design System - AppPasswordField Component
+/// ElyaNotes Design System - AppPasswordField Component
 ///
 /// Modern, şifre girişi için özel input komponenti.
 /// Default: border yok, sadece fill color.
@@ -18,7 +18,7 @@ import 'package:flutter/material.dart';
 
 import 'package:example_app/core/theme/index.dart';
 
-/// StarNote modern şifre field komponenti.
+/// ElyaNotes modern şifre field komponenti.
 ///
 /// Modern minimal tasarım:
 /// - Default: filled, border yok

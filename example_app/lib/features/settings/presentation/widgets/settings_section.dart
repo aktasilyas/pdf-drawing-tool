@@ -1,4 +1,4 @@
-/// StarNote Settings Section - Design system section wrapper
+/// ElyaNotes Settings Section - Design system section wrapper
 library;
 
 import 'package:flutter/material.dart';

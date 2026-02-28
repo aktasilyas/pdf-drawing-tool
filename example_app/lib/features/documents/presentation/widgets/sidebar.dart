@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
@@ -43,10 +44,11 @@ class Sidebar extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
             child: Text(
-              'StarNote',
-              style: AppTypography.displayLarge.copyWith(
+              'ElyaNotes',
+              style: GoogleFonts.lobsterTwo(
+                fontSize: 32,
+                fontWeight: FontWeight.bold,
                 color: Theme.of(context).colorScheme.onSurface,
-                letterSpacing: -0.5,
               ),
             ),
           ),

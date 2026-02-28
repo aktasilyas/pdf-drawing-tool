@@ -1,4 +1,4 @@
-/// StarNote Documents Empty States
+/// ElyaNotes Documents Empty States
 ///
 /// Çeşitli bölümler için boş durum widget'ları.
 /// Tüm empty state'ler AppEmptyState widget'ını kullanır.

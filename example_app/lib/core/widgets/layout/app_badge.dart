@@ -1,4 +1,4 @@
-/// StarNote Design System - AppBadge Component
+/// ElyaNotes Design System - AppBadge Component
 ///
 /// Badge/notification indicator komponenti.
 ///
@@ -20,7 +20,7 @@ import 'package:flutter/material.dart';
 
 import 'package:example_app/core/theme/index.dart';
 
-/// StarNote badge komponenti.
+/// ElyaNotes badge komponenti.
 ///
 /// Widget'ın üzerine badge ekler (dot veya label).
 class AppBadge extends StatelessWidget {

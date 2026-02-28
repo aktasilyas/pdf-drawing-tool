@@ -1,9 +1,10 @@
-/// StarNote Documents Sidebar - Design system sidebar component
+/// ElyaNotes Documents Sidebar - Design system sidebar component
 library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/index.dart';
@@ -119,10 +120,11 @@ class DocumentsSidebar extends ConsumerWidget {
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
-              'StarNote',
-              style: AppTypography.titleLarge.copyWith(
+              'ElyaNotes',
+              style: GoogleFonts.lobsterTwo(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
                 color: textPrimary,
-                fontWeight: FontWeight.w700,
               ),
             ),
           ),

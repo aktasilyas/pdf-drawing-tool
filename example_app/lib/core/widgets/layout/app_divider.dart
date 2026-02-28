@@ -1,4 +1,4 @@
-/// StarNote Design System - AppDivider Component
+/// ElyaNotes Design System - AppDivider Component
 ///
 /// Divider komponenti.
 ///
@@ -14,7 +14,7 @@ import 'package:flutter/material.dart';
 
 import 'package:example_app/core/theme/index.dart';
 
-/// StarNote divider komponenti.
+/// ElyaNotes divider komponenti.
 ///
 /// Horizontal ayırıcı çizgi.
 class AppDivider extends StatelessWidget {

@@ -1,4 +1,4 @@
-/// StarNote Design System - Border Radius Tokens
+/// ElyaNotes Design System - Border Radius Tokens
 ///
 /// Standart radius değeri: 10dp (md)
 /// Tüm radius değerleri bu dosyadan alınmalıdır.
@@ -12,7 +12,7 @@
 /// ```
 library;
 
-/// StarNote border radius değerleri.
+/// ElyaNotes border radius değerleri.
 ///
 /// Tutarlı köşe yuvarlaklığı için kullanılır.
 /// Hardcoded radius kullanımı yasaktır!

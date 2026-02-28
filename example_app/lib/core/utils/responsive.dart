@@ -1,4 +1,4 @@
-/// StarNote Design System - Responsive Utilities
+/// ElyaNotes Design System - Responsive Utilities
 ///
 /// Responsive design yardımcıları.
 ///

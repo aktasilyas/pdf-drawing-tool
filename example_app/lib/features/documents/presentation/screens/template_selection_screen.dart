@@ -1,4 +1,4 @@
-/// StarNote Template Selection Screen - Design system template picker
+/// ElyaNotes Template Selection Screen - Design system template picker
 library;
 
 import 'package:flutter/material.dart';

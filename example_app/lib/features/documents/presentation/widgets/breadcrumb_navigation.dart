@@ -1,4 +1,4 @@
-/// StarNote Breadcrumb Navigation Widget
+/// ElyaNotes Breadcrumb Navigation Widget
 ///
 /// Klasör path navigasyonu için kullanılır.
 /// Tıklanabilir segmentler ile üst klasörlere dönüş imkanı sağlar.

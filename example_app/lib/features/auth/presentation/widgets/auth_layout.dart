@@ -159,7 +159,7 @@ class _BrandingSide extends StatelessWidget {
                         const _AppLogo(size: 100),
                         const SizedBox(height: 24),
                         const Text(
-                          'StarNote',
+                          'ElyaNotes',
                           style: TextStyle(
                             fontSize: 40,
                             fontWeight: FontWeight.bold,

@@ -71,7 +71,7 @@ class AIChatHeader extends ConsumerWidget {
             ),
             SizedBox(width: AppSpacing.xs),
             Flexible(
-              child: Text('StarNote AI',
+              child: Text('ElyaNotes AI',
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.titleSmall
                       ?.copyWith(fontWeight: FontWeight.w600)),

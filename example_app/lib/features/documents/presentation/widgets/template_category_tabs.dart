@@ -1,4 +1,4 @@
-/// StarNote Template Category Tabs - Horizontal scrolling category chips
+/// ElyaNotes Template Category Tabs - Horizontal scrolling category chips
 library;
 
 import 'package:flutter/material.dart';

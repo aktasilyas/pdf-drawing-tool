@@ -1,4 +1,4 @@
-/// StarNote Design System - AppToast Component
+/// ElyaNotes Design System - AppToast Component
 ///
 /// Toast/SnackBar komponenti.
 ///
@@ -35,7 +35,7 @@ enum AppToastType {
   info,
 }
 
-/// StarNote toast/snackbar komponenti.
+/// ElyaNotes toast/snackbar komponenti.
 ///
 /// 4 farklı tip destekler, action button eklenebilir.
 class AppToast {

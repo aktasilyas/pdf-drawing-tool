@@ -1,4 +1,4 @@
-/// StarNote Documents Header - Başlık, sıralama ve görünüm modu.
+/// ElyaNotes Documents Header - Başlık, sıralama ve görünüm modu.
 library;
 
 import 'package:flutter/material.dart';

@@ -1,4 +1,4 @@
-/// StarNote Document Card
+/// ElyaNotes Document Card
 ///
 /// Doküman kartı widget'ı. Thumbnail, başlık, tarih gösterir.
 library;

@@ -1,4 +1,4 @@
-/// StarNote Design System - AppAvatar Component
+/// ElyaNotes Design System - AppAvatar Component
 ///
 /// Avatar komponenti.
 ///
@@ -26,7 +26,7 @@ enum AppAvatarSize {
   large,
 }
 
-/// StarNote avatar komponenti.
+/// ElyaNotes avatar komponenti.
 ///
 /// 3 farklı boyut, image/initials/icon destekler.
 class AppAvatar extends StatelessWidget {

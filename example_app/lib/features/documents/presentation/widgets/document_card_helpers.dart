@@ -1,4 +1,4 @@
-/// StarNote Document Card Helper Widgets
+/// ElyaNotes Document Card Helper Widgets
 ///
 /// Doküman kartı için yardımcı widget'lar.
 library;

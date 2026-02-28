@@ -1,4 +1,4 @@
-/// StarNote Design System - Navigation Exports
+/// ElyaNotes Design System - Navigation Exports
 ///
 /// Tüm navigation/responsive komponentlerini export eder.
 ///

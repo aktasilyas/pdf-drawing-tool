@@ -1,4 +1,4 @@
-/// StarNote Design System - AppButton Component
+/// ElyaNotes Design System - AppButton Component
 ///
 /// Modern, flat buton komponenti. 5 variant ve 3 size destekler.
 /// Rounded, flat, modern tasarım.
@@ -48,7 +48,7 @@ enum AppButtonSize {
   large,
 }
 
-/// StarNote modern buton komponenti.
+/// ElyaNotes modern buton komponenti.
 ///
 /// Modern tasarım kuralları:
 /// - Border radius: AppRadius.md (10) — soft rectangle

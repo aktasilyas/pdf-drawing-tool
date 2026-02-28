@@ -1,4 +1,4 @@
-/// StarNote Design System - AppChip Component
+/// ElyaNotes Design System - AppChip Component
 ///
 /// Chip/tag komponenti.
 ///
@@ -22,7 +22,7 @@ import 'package:flutter/material.dart';
 
 import 'package:example_app/core/theme/index.dart';
 
-/// StarNote chip komponenti.
+/// ElyaNotes chip komponenti.
 ///
 /// Seçilebilir, silinebilir tag/chip.
 class AppChip extends StatelessWidget {

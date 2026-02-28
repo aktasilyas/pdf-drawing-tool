@@ -1,4 +1,4 @@
-/// StarNote Design System - AdaptiveNavigation Component
+/// ElyaNotes Design System - AdaptiveNavigation Component
 ///
 /// Responsive navigation. Phone: BottomNav, Tablet: NavigationRail.
 ///
@@ -47,7 +47,7 @@ class AdaptiveNavItem {
   });
 }
 
-/// StarNote adaptive navigation komponenti.
+/// ElyaNotes adaptive navigation komponenti.
 ///
 /// Phone'da BottomNavigationBar, tablet'te NavigationRail.
 class AdaptiveNavigation extends StatelessWidget {

@@ -39,7 +39,7 @@ class AuthBrandingPanel extends StatelessWidget {
                 const SizedBox(height: AppSpacing.xl),
                 // Title
                 Text(
-                  'StarNote',
+                  'ElyaNotes',
                   style: AppTypography.displayLarge.copyWith(
                     color: AppColors.onPrimary,
                     letterSpacing: 1.2,

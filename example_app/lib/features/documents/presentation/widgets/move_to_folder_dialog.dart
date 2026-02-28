@@ -1,4 +1,4 @@
-/// StarNote Move to Folder Dialog - Design system dialog
+/// ElyaNotes Move to Folder Dialog - Design system dialog
 library;
 
 import 'package:flutter/material.dart';

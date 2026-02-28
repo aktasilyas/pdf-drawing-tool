@@ -1,4 +1,4 @@
-/// StarNote Design System - MasterDetailLayout Component
+/// ElyaNotes Design System - MasterDetailLayout Component
 ///
 /// Master-detail pattern. Phone: tek sütun, Tablet: iki sütun.
 ///
@@ -18,7 +18,7 @@ import 'package:example_app/core/utils/responsive.dart';
 import 'package:example_app/core/widgets/feedback/index.dart';
 import 'package:example_app/core/widgets/layout/index.dart';
 
-/// StarNote master-detail layout komponenti.
+/// ElyaNotes master-detail layout komponenti.
 ///
 /// Tablet'te yan yana, phone'da tek ekran.
 class MasterDetailLayout extends StatelessWidget {

@@ -62,7 +62,7 @@ class PaywallPlaceholderScreen extends StatelessWidget {
           Icon(Icons.star, color: theme.colorScheme.primary),
           const SizedBox(width: 8),
           Text(
-            'StarNote Premium',
+            'ElyaNotes Premium',
             style: theme.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.w700,
             ),

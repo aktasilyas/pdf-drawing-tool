@@ -1,4 +1,4 @@
-/// StarNote Format Picker Sheet - Bottom sheet for paper format selection
+/// ElyaNotes Format Picker Sheet - Bottom sheet for paper format selection
 library;
 
 import 'package:flutter/material.dart';

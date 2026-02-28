@@ -1,4 +1,4 @@
-/// StarNote Design System - AppSearchField Component
+/// ElyaNotes Design System - AppSearchField Component
 ///
 /// Modern, debounce destekli arama input'u.
 /// Default: border yok, sadece fill color.
@@ -20,7 +20,7 @@ import 'package:flutter/material.dart';
 
 import 'package:example_app/core/theme/index.dart';
 
-/// StarNote modern arama field komponenti.
+/// ElyaNotes modern arama field komponenti.
 ///
 /// Modern minimal tasarım:
 /// - Default: filled, border yok

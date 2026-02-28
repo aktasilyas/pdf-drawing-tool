@@ -1,4 +1,4 @@
-/// StarNote Design System - AppConfirmDialog Component
+/// ElyaNotes Design System - AppConfirmDialog Component
 ///
 /// Onay dialogu komponenti.
 ///
@@ -21,7 +21,7 @@ import 'package:example_app/core/widgets/buttons/index.dart';
 
 import 'app_modal.dart';
 
-/// StarNote onay dialogu komponenti.
+/// ElyaNotes onay dialogu komponenti.
 ///
 /// İki butonlu (iptal/onayla) basit dialog.
 class AppConfirmDialog {

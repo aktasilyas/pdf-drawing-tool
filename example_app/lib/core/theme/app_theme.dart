@@ -1,4 +1,4 @@
-/// StarNote Design System - Theme Configuration
+/// ElyaNotes Design System - Theme Configuration
 ///
 /// Light ve Dark tema tanımları.
 /// Tüm değerler design token'larından alınır.
@@ -18,7 +18,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 import 'tokens/index.dart';
 
-/// StarNote tema tanımları.
+/// ElyaNotes tema tanımları.
 ///
 /// Light ve Dark temalar için ThemeData sağlar.
 /// Hardcoded değer kullanımı yasaktır!

@@ -1,4 +1,4 @@
-/// StarNote Template Preview Section
+/// ElyaNotes Template Preview Section
 ///
 /// Preview cards and settings panel for template selection screen.
 library;

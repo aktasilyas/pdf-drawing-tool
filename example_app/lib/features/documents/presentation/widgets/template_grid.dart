@@ -1,4 +1,4 @@
-/// StarNote Template Grid - Grid view for template selection
+/// ElyaNotes Template Grid - Grid view for template selection
 library;
 
 import 'package:flutter/material.dart';

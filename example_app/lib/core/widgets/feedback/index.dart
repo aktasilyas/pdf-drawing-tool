@@ -1,4 +1,4 @@
-/// StarNote Design System - Feedback Exports
+/// ElyaNotes Design System - Feedback Exports
 ///
 /// Tüm feedback komponentlerini export eder.
 ///

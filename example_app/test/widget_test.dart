@@ -1,4 +1,4 @@
-// Basic widget test for the StarNote Drawing example app.
+// Basic widget test for the ElyaNotes Drawing example app.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -7,11 +7,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:example_app/main.dart';
 
 void main() {
-  testWidgets('StarNoteApp renders DrawingScreen', (WidgetTester tester) async {
+  testWidgets('ElyaNotesApp renders DrawingScreen', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(
       const ProviderScope(
-        child: StarNoteApp(),
+        child: ElyaNotesApp(),
       ),
     );
 

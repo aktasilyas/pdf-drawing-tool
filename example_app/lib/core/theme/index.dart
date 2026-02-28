@@ -1,4 +1,4 @@
-/// StarNote Design System - Theme Exports
+/// ElyaNotes Design System - Theme Exports
 ///
 /// Bu dosya tüm theme bileşenlerini tek noktadan export eder.
 ///

@@ -1,4 +1,4 @@
-/// StarNote Settings Screen - Design system settings page
+/// ElyaNotes Settings Screen - Design system settings page
 library;
 
 import 'package:flutter/material.dart';

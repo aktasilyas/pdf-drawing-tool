@@ -1,4 +1,4 @@
-/// StarNote Design System - Input Exports
+/// ElyaNotes Design System - Input Exports
 ///
 /// Tüm input komponentlerini export eder.
 ///

@@ -1,4 +1,4 @@
-/// StarNote Design System - AppModal Component
+/// ElyaNotes Design System - AppModal Component
 ///
 /// Responsive, keyboard-safe modal komponenti.
 /// Phone: Bottom sheet, Tablet: Center dialog.
@@ -25,7 +25,7 @@ import 'package:flutter/material.dart';
 
 import 'package:example_app/core/theme/index.dart';
 
-/// StarNote responsive modal komponenti.
+/// ElyaNotes responsive modal komponenti.
 ///
 /// Phone'da bottom sheet, tablet'te center dialog olarak gösterilir.
 /// Keyboard-safe: klavye açılınca modal yukarı kayar.

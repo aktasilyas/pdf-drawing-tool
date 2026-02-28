@@ -1,4 +1,4 @@
-/// StarNote Folder Card
+/// ElyaNotes Folder Card
 ///
 /// Klasör kartı widget'ı. DocumentCard ile aynı boyut ve yapıda.
 library;

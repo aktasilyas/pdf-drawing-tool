@@ -1,4 +1,4 @@
-/// StarNote Folder Color Picker Dialog
+/// ElyaNotes Folder Color Picker Dialog
 ///
 /// Klasör renk seçici dialog'u.
 library;

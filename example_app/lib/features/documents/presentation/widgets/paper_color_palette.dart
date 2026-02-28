@@ -1,4 +1,4 @@
-/// StarNote Paper Color Palette - Color picker for paper background
+/// ElyaNotes Paper Color Palette - Color picker for paper background
 library;
 
 import 'package:flutter/material.dart';

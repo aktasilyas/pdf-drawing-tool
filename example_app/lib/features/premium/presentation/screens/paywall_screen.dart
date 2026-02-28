@@ -15,7 +15,7 @@ class PaywallScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('StarNote Premium'),
+        title: const Text('ElyaNotes Premium'),
         actions: const [
           Padding(
             padding: EdgeInsets.only(right: 16.0),

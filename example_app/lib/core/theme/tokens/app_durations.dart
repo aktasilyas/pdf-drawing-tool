@@ -1,4 +1,4 @@
-/// StarNote Design System - Animation Duration & Curve Tokens
+/// ElyaNotes Design System - Animation Duration & Curve Tokens
 ///
 /// Tüm animasyon süreleri ve eğrileri bu dosyadan alınmalıdır.
 ///
@@ -15,7 +15,7 @@ library;
 
 import 'package:flutter/material.dart';
 
-/// StarNote animasyon süreleri.
+/// ElyaNotes animasyon süreleri.
 ///
 /// Tutarlı animasyon hızları için kullanılır.
 /// Hardcoded duration kullanımı yasaktır!
@@ -65,7 +65,7 @@ abstract class AppDurations {
   static const Duration debounce = normal;
 }
 
-/// StarNote animasyon eğrileri.
+/// ElyaNotes animasyon eğrileri.
 ///
 /// Tutarlı animasyon eğrileri için kullanılır.
 /// Hardcoded curve kullanımı yasaktır!

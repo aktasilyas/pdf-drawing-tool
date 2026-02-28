@@ -1,4 +1,4 @@
-/// StarNote Design System - Icon Size Tokens
+/// ElyaNotes Design System - Icon Size Tokens
 ///
 /// Tüm icon boyutları bu dosyadan alınmalıdır.
 ///
@@ -11,7 +11,7 @@
 /// ```
 library;
 
-/// StarNote icon boyutları.
+/// ElyaNotes icon boyutları.
 ///
 /// Tutarlı icon boyutları için kullanılır.
 /// Hardcoded icon size kullanımı yasaktır!
