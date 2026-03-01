@@ -11,29 +11,39 @@ class AuthPhoneHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+
     return Column(
       children: [
-        Container(
-          width: 80,
-          height: 80,
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          decoration: BoxDecoration(
-            color: AppColors.primary,
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-            boxShadow: AppShadows.sm,
-          ),
-          child: const Icon(
-            Icons.edit_note_rounded,
-            size: AppIconSize.huge,
-            color: AppColors.onPrimary,
+        ClipRRect(
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          child: Image.asset(
+            'assets/images/elyanotes_logo_transparent.png',
+            width: 80,
+            height: 80,
+            errorBuilder: (_, __, ___) => Container(
+              width: 80,
+              height: 80,
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(AppRadius.lg),
+                boxShadow: AppShadows.sm,
+              ),
+              child: const Icon(
+                Icons.edit_note_rounded,
+                size: AppIconSize.huge,
+                color: AppColors.onPrimary,
+              ),
+            ),
           ),
         ),
         const SizedBox(height: AppSpacing.md),
         Text(
           'ElyaNotes',
-          style: AppTypography.headlineLarge.copyWith(
-            color: AppColors.textPrimaryLight,
-          ),
+          style: AppTypography.headlineLarge.copyWith(color: textPrimary),
         ),
       ],
     );

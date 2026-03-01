@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/core/utils/logger.dart';
 import 'package:example_app/core/widgets/index.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
@@ -67,25 +68,28 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     final session = Supabase.instance.client.auth.currentSession;
 
     if (session != null) {
-      debugPrint('Session found: ${session.user.email}');
+      logger.i('Session found: ${session.user.email}');
       context.go('/documents');
     } else {
-      debugPrint('No session, redirecting to login');
+      logger.i('No session, redirecting to login');
       context.go('/login');
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+
     return Scaffold(
-      backgroundColor: AppColors.surfaceLight,
+      backgroundColor: bgColor,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _LogoWidget(animation: _logoAnimation),
+            _LogoWidget(animation: _logoAnimation, isDark: isDark),
             const SizedBox(height: AppSpacing.xl),
-            _SubtitleWidget(animation: _subtitleAnimation),
+            _SubtitleWidget(animation: _subtitleAnimation, isDark: isDark),
             const SizedBox(height: AppSpacing.xxxl),
             _LoadingWidget(animation: _loadingAnimation),
           ],
@@ -96,36 +100,60 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 }
 
 class _LogoWidget extends AnimatedWidget {
-  const _LogoWidget({required Animation<double> animation})
-      : super(listenable: animation);
+  final bool isDark;
+
+  const _LogoWidget({
+    required Animation<double> animation,
+    required this.isDark,
+  }) : super(listenable: animation);
 
   Animation<double> get _progress => listenable as Animation<double>;
 
   @override
   Widget build(BuildContext context) {
     final scale = 0.85 + (_progress.value * 0.15);
+    final surfaceColor =
+        isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+    final textColor =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+
     return Opacity(
       opacity: _progress.value,
       child: Transform.scale(
         scale: scale,
-        child: Image.asset(
-          'assets/images/elyanotes_logo.png',
-          width: 280,
-          height: 280,
-          errorBuilder: (_, __, ___) => Container(
-            width: 280,
-            height: 280,
-            decoration: BoxDecoration(
-              color: AppColors.surfaceLight,
-              borderRadius: BorderRadius.circular(AppRadius.bottomSheet),
-              boxShadow: AppShadows.lg,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(
+              'assets/images/elyanotes_logo_transparent_logo.png',
+              width: 280,
+              height: 280,
+              errorBuilder: (_, __, ___) => Container(
+                width: 280,
+                height: 280,
+                decoration: BoxDecoration(
+                  color: surfaceColor,
+                  borderRadius: BorderRadius.circular(AppRadius.bottomSheet),
+                  boxShadow: AppShadows.lg,
+                ),
+                child: const Icon(
+                  Icons.edit_note_rounded,
+                  size: 80,
+                  color: AppColors.primary,
+                ),
+              ),
             ),
-            child: const Icon(
-              Icons.edit_note_rounded,
-              size: 80,
-              color: AppColors.primary,
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              'ElyaNotes',
+              style: TextStyle(
+                fontFamily: 'ComicRelief',
+                fontSize: 32,
+                fontWeight: FontWeight.w700,
+                color: textColor,
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -133,13 +161,20 @@ class _LogoWidget extends AnimatedWidget {
 }
 
 class _SubtitleWidget extends AnimatedWidget {
-  const _SubtitleWidget({required Animation<double> animation})
-      : super(listenable: animation);
+  final bool isDark;
+
+  const _SubtitleWidget({
+    required Animation<double> animation,
+    required this.isDark,
+  }) : super(listenable: animation);
 
   Animation<double> get _progress => listenable as Animation<double>;
 
   @override
   Widget build(BuildContext context) {
+    final textColor =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+
     return Opacity(
       opacity: _progress.value,
       child: Transform.translate(
@@ -147,7 +182,7 @@ class _SubtitleWidget extends AnimatedWidget {
         child: Text(
           'Notlar\u0131n\u0131 \u00f6zg\u00fcrce yarat',
           style: AppTypography.titleLarge.copyWith(
-            color: AppColors.textPrimaryLight,
+            color: textColor,
             fontWeight: FontWeight.w400,
           ),
         ),

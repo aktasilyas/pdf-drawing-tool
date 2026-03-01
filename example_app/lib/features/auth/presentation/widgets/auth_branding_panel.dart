@@ -21,19 +21,27 @@ class AuthBrandingPanel extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // Logo
-                Container(
-                  width: 120,
-                  height: 120,
-                  padding: const EdgeInsets.all(AppSpacing.xl),
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceLight,
-                    borderRadius: BorderRadius.circular(AppRadius.xl),
-                    boxShadow: AppShadows.lg,
-                  ),
-                  child: const Icon(
-                    Icons.edit_note_rounded,
-                    size: AppIconSize.huge + 16,
-                    color: AppColors.primary,
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(AppRadius.xl),
+                  child: Image.asset(
+                    'assets/images/elyanotes_logo_transparent.png',
+                    width: 120,
+                    height: 120,
+                    errorBuilder: (_, __, ___) => Container(
+                      width: 120,
+                      height: 120,
+                      padding: const EdgeInsets.all(AppSpacing.xl),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceLight,
+                        borderRadius: BorderRadius.circular(AppRadius.xl),
+                        boxShadow: AppShadows.lg,
+                      ),
+                      child: const Icon(
+                        Icons.edit_note_rounded,
+                        size: AppIconSize.huge + 16,
+                        color: AppColors.primary,
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.xl),
@@ -54,11 +62,55 @@ class AuthBrandingPanel extends StatelessWidget {
                   ),
                   textAlign: TextAlign.center,
                 ),
+                const SizedBox(height: AppSpacing.xxxl),
+                // Feature items
+                const _FeatureItem(
+                  icon: Icons.note_alt_outlined,
+                  text: 'Sınırsız not ve çizim',
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                const _FeatureItem(
+                  icon: Icons.picture_as_pdf_outlined,
+                  text: 'PDF üzerine çizim',
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                const _FeatureItem(
+                  icon: Icons.sync_outlined,
+                  text: 'Tüm cihazlarda senkronize',
+                ),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _FeatureItem extends StatelessWidget {
+  final IconData icon;
+  final String text;
+
+  const _FeatureItem({required this.icon, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          icon,
+          size: AppIconSize.md,
+          color: AppColors.onPrimary.withValues(alpha: 0.85),
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        Text(
+          text,
+          style: AppTypography.bodyMedium.copyWith(
+            color: AppColors.onPrimary.withValues(alpha: 0.85),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -21,17 +21,17 @@ void main() async {
   // Load environment variables
   await dotenv.load(fileName: ".env");
 
-  // Initialize Supabase
-  await Supabase.initialize(
-    url: dotenv.env['SUPABASE_URL']!,
-    anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
-    debug: true, // Dev için debug açık
-  );
+  // Initialize Supabase and SharedPreferences in parallel
+  final (_, prefs) = await (
+    Supabase.initialize(
+      url: dotenv.env['SUPABASE_URL']!,
+      anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
+      debug: true,
+    ),
+    SharedPreferences.getInstance(),
+  ).wait;
 
   logger.i('Supabase initialized: ${dotenv.env['SUPABASE_URL']}');
-
-  // Initialize SharedPreferences
-  final prefs = await SharedPreferences.getInstance();
 
   // Initialize GetIt dependencies
   await configureDependencies();
@@ -57,7 +57,7 @@ class ElyaNotesApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
-    
+
     final themeMode = switch (settings.themeMode) {
       AppThemeMode.light => ThemeMode.light,
       AppThemeMode.dark => ThemeMode.dark,

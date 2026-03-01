@@ -4,6 +4,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/features/auth/presentation/constants/auth_strings.dart';
 
 /// A styled button for Google Sign-In.
 class GoogleSignInButton extends StatelessWidget {
@@ -16,6 +17,11 @@ class GoogleSignInButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final outline = isDark ? AppColors.outlineDark : AppColors.outlineLight;
+    final textColor =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+
     return OutlinedButton(
       onPressed: onPressed,
       style: OutlinedButton.styleFrom(
@@ -23,22 +29,23 @@ class GoogleSignInButton extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.button),
         ),
-        side: const BorderSide(color: AppColors.outlineLight),
+        side: BorderSide(color: outline),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(
-            Icons.g_mobiledata,
-            size: AppIconSize.lg,
-            color: AppColors.textPrimaryLight,
+          Text(
+            'G',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: textColor,
+            ),
           ),
           const SizedBox(width: AppSpacing.sm),
           Text(
-            'Google ile Giriş Yap',
-            style: AppTypography.labelLarge.copyWith(
-              color: AppColors.textPrimaryLight,
-            ),
+            AuthStrings.googleSignIn,
+            style: AppTypography.labelLarge.copyWith(color: textColor),
           ),
         ],
       ),

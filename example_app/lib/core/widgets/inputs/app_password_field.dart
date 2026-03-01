@@ -50,6 +50,9 @@ class AppPasswordField extends StatefulWidget {
   /// Enabled state.
   final bool enabled;
 
+  /// Keyboard action button.
+  final TextInputAction? textInputAction;
+
   const AppPasswordField({
     this.controller,
     this.label = 'Şifre',
@@ -59,6 +62,7 @@ class AppPasswordField extends StatefulWidget {
     this.validator,
     this.focusNode,
     this.enabled = true,
+    this.textInputAction,
     super.key,
   });
 
@@ -136,6 +140,7 @@ class _AppPasswordFieldState extends State<AppPasswordField> {
               obscureText: _obscureText,
               onChanged: widget.onChanged,
               validator: widget.validator,
+              textInputAction: widget.textInputAction,
               style: AppTypography.bodyMedium.copyWith(color: textColor),
               decoration: InputDecoration(
                 hintText: widget.hint,
