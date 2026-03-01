@@ -1,4 +1,4 @@
-/// Modern registration screen with responsive layout and design system.
+/// Simplified registration screen with centered logo and form.
 library;
 
 import 'package:flutter/material.dart';
@@ -8,13 +8,10 @@ import 'package:go_router/go_router.dart';
 import 'package:example_app/core/routing/route_names.dart';
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/utils/logger.dart';
-import 'package:example_app/core/utils/responsive.dart';
 import 'package:example_app/core/utils/validators.dart';
 import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/auth/presentation/constants/auth_strings.dart';
 import 'package:example_app/features/auth/presentation/providers/auth_provider.dart';
-import 'package:example_app/features/auth/presentation/widgets/auth_branding_panel.dart';
-import 'package:example_app/features/auth/presentation/widgets/auth_phone_header.dart';
 import 'package:example_app/features/auth/presentation/widgets/google_sign_in_button.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -43,75 +40,78 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isTablet = Responsive.isTablet(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? AppColors.backgroundDark : AppColors.backgroundLight;
-    final surfaceColor = isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
-
-    return Scaffold(
-      backgroundColor: isTablet ? bgColor : surfaceColor,
-      body: isTablet ? _buildTabletLayout(surfaceColor) : _buildPhoneLayout(),
-    );
-  }
-
-  Widget _buildTabletLayout(Color surfaceColor) {
-    return Row(
-      children: [
-        const Expanded(flex: 45, child: AuthBrandingPanel()),
-        Expanded(
-          flex: 55,
-          child: Container(
-            color: surfaceColor,
-            child: Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(AppSpacing.xxxl),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 400),
-                  child: _buildForm(),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPhoneLayout() {
-    return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          children: [
-            const AuthPhoneHeader(),
-            const SizedBox(height: AppSpacing.xxl),
-            _buildForm(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildForm() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textPrimary =
+    final surfaceColor =
+        isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+    final textColor =
         isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
     final textSecondary =
         isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
 
+    return Scaffold(
+      backgroundColor: surfaceColor,
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.xl,
+                  vertical: AppSpacing.lg,
+                ),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 400),
+                  child: _buildContent(textColor, textSecondary),
+                ),
+              ),
+            ),
+          ),
+          if (const bool.fromEnvironment('dart.vm.product') == false)
+            Positioned(
+              right: AppSpacing.lg,
+              bottom: AppSpacing.lg,
+              child: SafeArea(
+                child: TextButton(
+                  onPressed: _skipRegister,
+                  child: Text(
+                    AuthStrings.devSkip,
+                    style: AppTypography.labelMedium.copyWith(
+                      color: textSecondary,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContent(Color textColor, Color textSecondary) {
     return Form(
       key: _formKey,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            AuthStrings.signUpTitle,
-            style: AppTypography.headlineLarge.copyWith(color: textPrimary),
+          Image.asset(
+            'assets/images/elyanotes_logo_transparent_logo.png',
+            width: 120,
+            height: 120,
+            errorBuilder: (_, __, ___) => const Icon(
+              Icons.edit_note_rounded,
+              size: 120,
+              color: AppColors.primary,
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            AuthStrings.signUpSubtitle,
-            style: AppTypography.bodyMedium.copyWith(color: textSecondary),
+            'elyanotes',
+            style: TextStyle(
+              fontFamily: 'ComicRelief',
+              fontSize: 28,
+              fontWeight: FontWeight.w700,
+              color: textColor,
+            ),
           ),
           const SizedBox(height: AppSpacing.xl),
           AppTextField(
@@ -123,7 +123,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             validator: Validators.displayName,
             enabled: !_isLoading,
           ),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.sm),
           AppTextField(
             controller: _emailController,
             label: AuthStrings.emailLabel,
@@ -134,7 +134,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             validator: Validators.email,
             enabled: !_isLoading,
           ),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.sm),
           AppPasswordField(
             controller: _passwordController,
             label: AuthStrings.passwordLabel,
@@ -143,7 +143,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             enabled: !_isLoading,
             textInputAction: TextInputAction.next,
           ),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.sm),
           AppPasswordField(
             controller: _confirmPasswordController,
             label: AuthStrings.confirmPasswordLabel,
@@ -153,7 +153,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             enabled: !_isLoading,
             textInputAction: TextInputAction.done,
           ),
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.md),
           AppButton(
             label: AuthStrings.signUpTitle,
             onPressed: _isLoading ? null : _handleRegister,
@@ -161,66 +161,52 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             isExpanded: true,
           ),
           const SizedBox(height: AppSpacing.md),
-          if (const bool.fromEnvironment('dart.vm.product') == false)
-            AppButton(
-              label: AuthStrings.devSkip,
-              variant: AppButtonVariant.outline,
-              onPressed: _skipRegister,
-              isExpanded: true,
-            ),
-          const SizedBox(height: AppSpacing.xl),
-          _buildOrDivider(textSecondary),
-          const SizedBox(height: AppSpacing.xl),
+          Row(
+            children: [
+              const Expanded(child: AppDivider()),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                child: Text(
+                  AuthStrings.orDivider,
+                  style: AppTypography.labelMedium.copyWith(
+                    color: textSecondary,
+                  ),
+                ),
+              ),
+              const Expanded(child: AppDivider()),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
           GoogleSignInButton(
             onPressed: _isLoading ? null : _handleGoogleRegister,
           ),
-          const SizedBox(height: AppSpacing.xl),
+          const SizedBox(height: AppSpacing.md),
           Text(
             AuthStrings.termsText,
             style: AppTypography.caption.copyWith(color: textSecondary),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: AppSpacing.xl),
-          _buildLoginLink(textSecondary),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildOrDivider(Color textSecondary) {
-    return Row(
-      children: [
-        const Expanded(child: AppDivider()),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-          child: Text(
-            AuthStrings.orDivider,
-            style: AppTypography.labelMedium.copyWith(color: textSecondary),
-          ),
-        ),
-        const Expanded(child: AppDivider()),
-      ],
-    );
-  }
-
-  Widget _buildLoginLink(Color textSecondary) {
-    return Center(
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            AuthStrings.alreadyHaveAccount,
-            style: AppTypography.bodyMedium.copyWith(color: textSecondary),
-          ),
-          TextButton(
-            onPressed: _isLoading ? null : _goToLogin,
-            child: Text(
-              AuthStrings.signIn,
-              style: AppTypography.bodyMedium.copyWith(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w600,
+          const SizedBox(height: AppSpacing.sm),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                AuthStrings.alreadyHaveAccount,
+                style:
+                    AppTypography.bodyMedium.copyWith(color: textSecondary),
               ),
-            ),
+              TextButton(
+                onPressed: _isLoading ? null : _goToLogin,
+                child: Text(
+                  AuthStrings.signIn,
+                  style: AppTypography.bodyMedium.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
