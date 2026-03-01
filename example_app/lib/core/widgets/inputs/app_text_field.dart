@@ -135,7 +135,7 @@ class _AppTextFieldState extends State<AppTextField> {
 
     // Theme-aware colors
     final fillColor =
-        isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariantLight;
+        isDark ? AppColors.surfaceVariantDark : AppColors.surfaceLight;
     final textColor =
         isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
     final hintColor =
@@ -163,9 +163,22 @@ class _AppTextFieldState extends State<AppTextField> {
             ),
             const SizedBox(height: AppSpacing.xs),
           ],
-          ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 48),
-            child: TextFormField(
+          DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppRadius.textField),
+              boxShadow: isDark
+                  ? []
+                  : const [
+                      BoxShadow(
+                        color: Color(0x0D000000),
+                        blurRadius: 4,
+                        offset: Offset(0, 1),
+                      ),
+                    ],
+            ),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 48),
+              child: TextFormField(
               controller: widget.controller,
               focusNode: _focusNode,
               enabled: widget.enabled,
@@ -240,6 +253,7 @@ class _AppTextFieldState extends State<AppTextField> {
                 ),
               ),
             ),
+          ),
           ),
           if (hasError) ...[
             const SizedBox(height: AppSpacing.xs),

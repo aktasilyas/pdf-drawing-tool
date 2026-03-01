@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
 
@@ -43,13 +41,30 @@ class Sidebar extends ConsumerWidget {
           // Logo / App name
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
-            child: Text(
-              'ElyaNotes',
-              style: GoogleFonts.lobsterTwo(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
+            child: Row(
+              children: [
+                Image.asset(
+                  'assets/images/elyanotes_logo_transparent_logo.png',
+                  height: 40,
+                  width: 40,
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, __, ___) => const Icon(
+                    Icons.edit_note_rounded,
+                    size: 40,
+                    color: AppColors.primary,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Text(
+                  'elyanotes',
+                  style: TextStyle(
+                    fontFamily: 'ComicRelief',
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+              ],
             ),
           ),
 

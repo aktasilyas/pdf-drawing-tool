@@ -1,4 +1,4 @@
-/// Modern registration screen with responsive layout and design system.
+/// Simplified registration screen with centered logo and form.
 library;
 
 import 'package:flutter/material.dart';
@@ -7,12 +7,11 @@ import 'package:go_router/go_router.dart';
 
 import 'package:example_app/core/routing/route_names.dart';
 import 'package:example_app/core/theme/index.dart';
-import 'package:example_app/core/utils/responsive.dart';
+import 'package:example_app/core/utils/logger.dart';
 import 'package:example_app/core/utils/validators.dart';
 import 'package:example_app/core/widgets/index.dart';
+import 'package:example_app/features/auth/presentation/constants/auth_strings.dart';
 import 'package:example_app/features/auth/presentation/providers/auth_provider.dart';
-import 'package:example_app/features/auth/presentation/widgets/auth_branding_panel.dart';
-import 'package:example_app/features/auth/presentation/widgets/auth_phone_header.dart';
 import 'package:example_app/features/auth/presentation/widgets/google_sign_in_button.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -41,204 +40,173 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isTablet = Responsive.isTablet(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor =
+        isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+    final textColor =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final textSecondary =
+        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
 
     return Scaffold(
-      backgroundColor:
-          isTablet ? AppColors.backgroundLight : AppColors.surfaceLight,
-      body: isTablet ? _buildTabletLayout() : _buildPhoneLayout(),
-    );
-  }
-
-  Widget _buildTabletLayout() {
-    return Row(
-      children: [
-        // Left: Branding Panel (45%)
-        const Expanded(
-          flex: 45,
-          child: AuthBrandingPanel(),
-        ),
-        // Right: Form Panel (55%)
-        Expanded(
-          flex: 55,
-          child: Container(
-            color: AppColors.surfaceLight,
+      backgroundColor: surfaceColor,
+      body: Stack(
+        children: [
+          SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(AppSpacing.xxxl),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.xl,
+                  vertical: AppSpacing.lg,
+                ),
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 400),
-                  child: _buildForm(),
+                  child: _buildContent(textColor, textSecondary),
                 ),
               ),
             ),
           ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPhoneLayout() {
-    return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          children: [
-            // Top Logo
-            const AuthPhoneHeader(),
-            const SizedBox(height: AppSpacing.xxl),
-            // Form
-            _buildForm(),
-          ],
-        ),
+          if (const bool.fromEnvironment('dart.vm.product') == false)
+            Positioned(
+              right: AppSpacing.lg,
+              bottom: AppSpacing.lg,
+              child: SafeArea(
+                child: TextButton(
+                  onPressed: _skipRegister,
+                  child: Text(
+                    AuthStrings.devSkip,
+                    style: AppTypography.labelMedium.copyWith(
+                      color: textSecondary,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
 
-  Widget _buildForm() {
+  Widget _buildContent(Color textColor, Color textSecondary) {
     return Form(
       key: _formKey,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Title
-          Text(
-            'Kayıt Ol',
-            style: AppTypography.headlineLarge.copyWith(
-              color: AppColors.textPrimaryLight,
+          Image.asset(
+            'assets/images/elyanotes_logo_transparent_logo.png',
+            width: 120,
+            height: 120,
+            errorBuilder: (_, __, ___) => const Icon(
+              Icons.edit_note_rounded,
+              size: 120,
+              color: AppColors.primary,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'Yeni hesap oluştur',
-            style: AppTypography.bodyMedium.copyWith(
-              color: AppColors.textSecondaryLight,
+            'elyanotes',
+            style: TextStyle(
+              fontFamily: 'ComicRelief',
+              fontSize: 28,
+              fontWeight: FontWeight.w700,
+              color: textColor,
             ),
           ),
           const SizedBox(height: AppSpacing.xl),
-
-          // Display Name Field
           AppTextField(
             controller: _displayNameController,
-            label: 'Ad Soyad',
-            hint: 'Adınız ve soyadınız',
+            label: AuthStrings.displayNameLabel,
+            hint: AuthStrings.displayNameHint,
             prefixIcon: Icons.person_outlined,
+            textInputAction: TextInputAction.next,
             validator: Validators.displayName,
             enabled: !_isLoading,
           ),
-          const SizedBox(height: AppSpacing.lg),
-
-          // Email Field
+          const SizedBox(height: AppSpacing.sm),
           AppTextField(
             controller: _emailController,
-            label: 'E-posta',
-            hint: 'ornek@email.com',
+            label: AuthStrings.emailLabel,
+            hint: AuthStrings.emailHint,
             prefixIcon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
+            textInputAction: TextInputAction.next,
             validator: Validators.email,
             enabled: !_isLoading,
           ),
-          const SizedBox(height: AppSpacing.lg),
-
-          // Password Field
+          const SizedBox(height: AppSpacing.sm),
           AppPasswordField(
             controller: _passwordController,
-            label: 'Şifre',
-            hint: 'En az 6 karakter',
+            label: AuthStrings.passwordLabel,
+            hint: AuthStrings.passwordHint,
             validator: Validators.password,
+            enabled: !_isLoading,
+            textInputAction: TextInputAction.next,
           ),
-          const SizedBox(height: AppSpacing.lg),
-
-          // Confirm Password Field
+          const SizedBox(height: AppSpacing.sm),
           AppPasswordField(
             controller: _confirmPasswordController,
-            label: 'Şifre Tekrar',
-            hint: 'Şifrenizi tekrar girin',
-            validator: Validators.confirmPassword(_passwordController.text),
+            label: AuthStrings.confirmPasswordLabel,
+            hint: AuthStrings.confirmPasswordHint,
+            validator: (value) =>
+                Validators.confirmPassword(_passwordController.text)(value),
+            enabled: !_isLoading,
+            textInputAction: TextInputAction.done,
           ),
-          const SizedBox(height: AppSpacing.lg),
-
-          // Register Button
+          const SizedBox(height: AppSpacing.md),
           AppButton(
-            label: 'Kayıt Ol',
+            label: AuthStrings.signUpTitle,
             onPressed: _isLoading ? null : _handleRegister,
             isLoading: _isLoading,
             isExpanded: true,
           ),
           const SizedBox(height: AppSpacing.md),
-
-          // Dev Skip Button (only in dev mode)
-          if (const bool.fromEnvironment('dart.vm.product') == false)
-            AppButton(
-              label: 'Atla (Geliştirme)',
-              variant: AppButtonVariant.outline,
-              onPressed: _skipRegister,
-              isExpanded: true,
-            ),
-          const SizedBox(height: AppSpacing.xl),
-
-          // Divider with "veya"
           Row(
             children: [
               const Expanded(child: AppDivider()),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                 child: Text(
-                  'veya',
+                  AuthStrings.orDivider,
                   style: AppTypography.labelMedium.copyWith(
-                    color: AppColors.textSecondaryLight,
+                    color: textSecondary,
                   ),
                 ),
               ),
               const Expanded(child: AppDivider()),
             ],
           ),
-          const SizedBox(height: AppSpacing.xl),
-
-          // Google Sign-In Button
+          const SizedBox(height: AppSpacing.md),
           GoogleSignInButton(
             onPressed: _isLoading ? null : _handleGoogleRegister,
           ),
-          const SizedBox(height: AppSpacing.xl),
-
-          // Terms Text
+          const SizedBox(height: AppSpacing.md),
           Text(
-            'Hesap oluşturarak Kullanım Koşullarını ve Gizlilik Politikasını kabul etmiş olursunuz',
-            style: AppTypography.caption.copyWith(
-              color: AppColors.textSecondaryLight,
-            ),
+            AuthStrings.termsText,
+            style: AppTypography.caption.copyWith(color: textSecondary),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: AppSpacing.xl),
-
-          // Login Link
-          Center(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Zaten hesabın var mı? ',
+          const SizedBox(height: AppSpacing.sm),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                AuthStrings.alreadyHaveAccount,
+                style:
+                    AppTypography.bodyMedium.copyWith(color: textSecondary),
+              ),
+              TextButton(
+                onPressed: _isLoading ? null : _goToLogin,
+                child: Text(
+                  AuthStrings.signIn,
                   style: AppTypography.bodyMedium.copyWith(
-                    color: AppColors.textSecondaryLight,
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-                TextButton(
-                  onPressed: _isLoading ? null : _goToLogin,
-                  style: TextButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: Text(
-                    'Giriş Yap',
-                    style: AppTypography.bodyMedium.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),
@@ -246,11 +214,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 
   Future<void> _handleRegister() async {
-    if (!(_formKey.currentState?.validate() ?? false)) {
-      return;
-    }
+    if (!(_formKey.currentState?.validate() ?? false)) return;
 
-    // Check if passwords match
     if (_passwordController.text != _confirmPasswordController.text) {
       AppToast.error(context, 'Şifreler eşleşmiyor');
       return;
@@ -267,13 +232,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     setState(() => _isLoading = false);
 
     if (error != null) {
-      if (mounted) {
-        AppToast.error(context, error);
-      }
+      if (mounted) AppToast.error(context, error);
     } else {
-      if (mounted) {
-        _showSuccessModal();
-      }
+      if (mounted) _showSuccessModal();
     }
   }
 
@@ -286,29 +247,27 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     setState(() => _isLoading = false);
 
     if (error != null) {
-      if (mounted) {
-        AppToast.error(context, error);
-      }
+      if (mounted) AppToast.error(context, error);
     } else {
-      if (mounted) {
-        context.go(RouteNames.documents);
-      }
+      if (mounted) context.go(RouteNames.documents);
     }
   }
 
-  void _goToLogin() {
-    context.go(RouteNames.login);
-  }
+  void _goToLogin() => context.go(RouteNames.login);
 
   void _skipRegister() {
-    debugPrint('🚀 [DEV] Skipping register - going to documents');
+    logger.d('[DEV] Skipping register - going to documents');
     context.go(RouteNames.documents);
   }
 
   Future<void> _showSuccessModal() async {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textSecondary =
+        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+
     await AppModal.show(
       context: context,
-      title: 'Kayıt Başarılı!',
+      title: AuthStrings.registrationSuccess,
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -319,18 +278,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           ),
           const SizedBox(height: AppSpacing.lg),
           Text(
-            'E-posta adresinize doğrulama bağlantısı gönderdik. '
-            'Lütfen e-postanızı kontrol edin ve hesabınızı doğrulayın.',
-            style: AppTypography.bodyMedium.copyWith(
-              color: AppColors.textSecondaryLight,
-            ),
+            AuthStrings.verificationMessage,
+            style: AppTypography.bodyMedium.copyWith(color: textSecondary),
             textAlign: TextAlign.center,
           ),
         ],
       ),
       actions: [
         AppButton(
-          label: 'Giriş Ekranına Dön',
+          label: AuthStrings.backToLogin,
           onPressed: () {
             Navigator.pop(context);
             context.go(RouteNames.login);

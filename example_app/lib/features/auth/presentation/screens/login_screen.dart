@@ -1,4 +1,4 @@
-/// Modern login screen with responsive layout and design system.
+/// Simplified login screen with centered logo and form.
 library;
 
 import 'package:flutter/material.dart';
@@ -7,12 +7,11 @@ import 'package:go_router/go_router.dart';
 
 import 'package:example_app/core/routing/route_names.dart';
 import 'package:example_app/core/theme/index.dart';
-import 'package:example_app/core/utils/responsive.dart';
+import 'package:example_app/core/utils/logger.dart';
 import 'package:example_app/core/utils/validators.dart';
 import 'package:example_app/core/widgets/index.dart';
+import 'package:example_app/features/auth/presentation/constants/auth_strings.dart';
 import 'package:example_app/features/auth/presentation/providers/auth_provider.dart';
-import 'package:example_app/features/auth/presentation/widgets/auth_branding_panel.dart';
-import 'package:example_app/features/auth/presentation/widgets/auth_phone_header.dart';
 import 'package:example_app/features/auth/presentation/widgets/google_sign_in_button.dart';
 
 const Key loginEmailFieldKey = Key('login_email_field');
@@ -40,104 +39,100 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isTablet = Responsive.isTablet(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor =
+        isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+    final textColor =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final textSecondary =
+        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
 
     return Scaffold(
-      backgroundColor:
-          isTablet ? AppColors.backgroundLight : AppColors.surfaceLight,
-      body: isTablet ? _buildTabletLayout() : _buildPhoneLayout(),
-    );
-  }
-
-  Widget _buildTabletLayout() {
-    return Row(
-      children: [
-        // Left: Branding Panel (45%)
-        const Expanded(
-          flex: 45,
-          child: AuthBrandingPanel(),
-        ),
-        // Right: Form Panel (55%)
-        Expanded(
-          flex: 55,
-          child: Container(
-            color: AppColors.surfaceLight,
+      backgroundColor: surfaceColor,
+      body: Stack(
+        children: [
+          SafeArea(
             child: Center(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(AppSpacing.xxxl),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.xl,
+                  vertical: AppSpacing.lg,
+                ),
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 400),
-                  child: _buildForm(),
+                  child: _buildContent(textColor, textSecondary),
                 ),
               ),
             ),
           ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPhoneLayout() {
-    return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          children: [
-            // Top Logo
-            const AuthPhoneHeader(),
-            const SizedBox(height: AppSpacing.xxl),
-            // Form
-            _buildForm(),
-          ],
-        ),
+          if (const bool.fromEnvironment('dart.vm.product') == false)
+            Positioned(
+              right: AppSpacing.lg,
+              bottom: AppSpacing.lg,
+              child: SafeArea(
+                child: TextButton(
+                  onPressed: _skipLogin,
+                  child: Text(
+                    AuthStrings.devSkip,
+                    style: AppTypography.labelMedium.copyWith(
+                      color: textSecondary,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
 
-  Widget _buildForm() {
+  Widget _buildContent(Color textColor, Color textSecondary) {
     return Form(
       key: _formKey,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          // Title
-          Text(
-            'Giriş Yap',
-            style: AppTypography.headlineLarge.copyWith(
-              color: AppColors.textPrimaryLight,
+          Image.asset(
+            'assets/images/elyanotes_logo_transparent_logo.png',
+            width: 120,
+            height: 120,
+            errorBuilder: (_, __, ___) => const Icon(
+              Icons.edit_note_rounded,
+              size: 120,
+              color: AppColors.primary,
             ),
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'Hesabınıza giriş yapın',
-            style: AppTypography.bodyMedium.copyWith(
-              color: AppColors.textSecondaryLight,
+            'elyanotes',
+            style: TextStyle(
+              fontFamily: 'ComicRelief',
+              fontSize: 28,
+              fontWeight: FontWeight.w700,
+              color: textColor,
             ),
           ),
           const SizedBox(height: AppSpacing.xl),
-
-          // Email Field
           AppTextField(
             controller: _emailController,
-            label: 'E-posta',
-            hint: 'ornek@email.com',
+            label: AuthStrings.emailLabel,
+            hint: AuthStrings.emailHint,
             prefixIcon: Icons.email_outlined,
             keyboardType: TextInputType.emailAddress,
+            textInputAction: TextInputAction.next,
             validator: Validators.email,
             enabled: !_isLoading,
           ),
-          const SizedBox(height: AppSpacing.lg),
-
-          // Password Field
+          const SizedBox(height: AppSpacing.md),
           AppPasswordField(
             controller: _passwordController,
-            label: 'Şifre',
+            label: AuthStrings.passwordLabel,
             hint: '••••••••',
             validator: Validators.password,
+            enabled: !_isLoading,
+            textInputAction: TextInputAction.done,
           ),
           const SizedBox(height: AppSpacing.xs),
-
-          // Forgot Password Link
           Align(
             alignment: Alignment.centerRight,
             child: TextButton(
@@ -149,86 +144,61 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
               ),
               child: Text(
-                'Şifremi Unuttum',
+                AuthStrings.forgotPassword,
                 style: AppTypography.labelMedium.copyWith(
                   color: AppColors.primary,
                 ),
               ),
             ),
           ),
-          const SizedBox(height: AppSpacing.lg),
-
-          // Login Button
+          const SizedBox(height: AppSpacing.md),
           AppButton(
-            label: 'Giriş Yap',
+            label: AuthStrings.signInTitle,
             onPressed: _isLoading ? null : _handleLogin,
             isLoading: _isLoading,
             isExpanded: true,
           ),
           const SizedBox(height: AppSpacing.md),
-
-          // Dev Skip Button (only in dev mode)
-          if (const bool.fromEnvironment('dart.vm.product') == false)
-            AppButton(
-              label: 'Atla (Geliştirme)',
-              variant: AppButtonVariant.outline,
-              onPressed: _skipLogin,
-              isExpanded: true,
-            ),
-          const SizedBox(height: AppSpacing.xl),
-
-          // Divider with "veya"
           Row(
             children: [
               const Expanded(child: AppDivider()),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                 child: Text(
-                  'veya',
+                  AuthStrings.orDivider,
                   style: AppTypography.labelMedium.copyWith(
-                    color: AppColors.textSecondaryLight,
+                    color: textSecondary,
                   ),
                 ),
               ),
               const Expanded(child: AppDivider()),
             ],
           ),
-          const SizedBox(height: AppSpacing.xl),
-
-          // Google Sign-In Button
+          const SizedBox(height: AppSpacing.md),
           GoogleSignInButton(
             onPressed: _isLoading ? null : _handleGoogleLogin,
           ),
-          const SizedBox(height: AppSpacing.xxl),
-
-          // Sign Up Link
-          Center(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Hesabın yok mu? ',
+          const SizedBox(height: AppSpacing.lg),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                AuthStrings.noAccount,
+                style:
+                    AppTypography.bodyMedium.copyWith(color: textSecondary),
+              ),
+              TextButton(
+                onPressed: _isLoading ? null : _goToRegister,
+                child: Text(
+                  AuthStrings.signUp,
                   style: AppTypography.bodyMedium.copyWith(
-                    color: AppColors.textSecondaryLight,
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-                TextButton(
-                  onPressed: _isLoading ? null : _goToRegister,
-                  style: TextButton.styleFrom(
-                    padding: EdgeInsets.zero,
-                    minimumSize: Size.zero,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  child: Text(
-                    'Kayıt Ol',
-                    style: AppTypography.bodyMedium.copyWith(
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),
@@ -236,9 +206,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _handleLogin() async {
-    if (!(_formKey.currentState?.validate() ?? false)) {
-      return;
-    }
+    if (!(_formKey.currentState?.validate() ?? false)) return;
 
     setState(() => _isLoading = true);
 
@@ -250,13 +218,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     setState(() => _isLoading = false);
 
     if (error != null) {
-      if (mounted) {
-        AppToast.error(context, error);
-      }
+      if (mounted) AppToast.error(context, error);
     } else {
-      if (mounted) {
-        context.go(RouteNames.documents);
-      }
+      if (mounted) context.go(RouteNames.documents);
     }
   }
 
@@ -269,22 +233,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     setState(() => _isLoading = false);
 
     if (error != null) {
-      if (mounted) {
-        AppToast.error(context, error);
-      }
+      if (mounted) AppToast.error(context, error);
     } else {
-      if (mounted) {
-        context.go(RouteNames.documents);
-      }
+      if (mounted) context.go(RouteNames.documents);
     }
   }
 
-  void _goToRegister() {
-    context.go(RouteNames.register);
-  }
+  void _goToRegister() => context.go(RouteNames.register);
 
   void _skipLogin() {
-    debugPrint('🚀 [DEV] Skipping login - going to documents');
+    logger.d('[DEV] Skipping login - going to documents');
     context.go(RouteNames.documents);
   }
 
@@ -293,40 +251,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     await AppModal.show<bool>(
       context: context,
-      title: 'Şifre Sıfırlama',
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'E-posta adresinize şifre sıfırlama bağlantısı göndereceğiz.',
-            style: AppTypography.bodyMedium.copyWith(
-              color: AppColors.textSecondaryLight,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          AppTextField(
-            controller: emailController,
-            label: 'E-posta',
-            hint: 'ornek@email.com',
-            prefixIcon: Icons.email_outlined,
-            keyboardType: TextInputType.emailAddress,
-            validator: Validators.email,
-          ),
-        ],
-      ),
+      title: AuthStrings.resetPasswordTitle,
+      content: _ForgotPasswordContent(emailController: emailController),
       actions: [
         AppButton(
-          label: 'İptal',
+          label: AuthStrings.cancel,
           variant: AppButtonVariant.text,
           onPressed: () => Navigator.pop(context, false),
         ),
         AppButton(
-          label: 'Gönder',
+          label: AuthStrings.send,
           onPressed: () async {
             final email = emailController.text.trim();
-            if (email.isEmpty || !email.contains('@')) {
-              AppToast.error(context, 'Geçerli bir e-posta girin');
+            if (Validators.email(email) != null) {
+              AppToast.error(context, AuthStrings.enterValidEmail);
               return;
             }
 
@@ -339,8 +277,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               if (error != null) {
                 AppToast.error(context, error);
               } else {
-                AppToast.success(
-                    context, 'Şifre sıfırlama e-postası gönderildi');
+                AppToast.success(context, AuthStrings.resetEmailSent);
               }
             }
           },
@@ -349,5 +286,38 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
 
     emailController.dispose();
+  }
+}
+
+class _ForgotPasswordContent extends StatelessWidget {
+  final TextEditingController emailController;
+
+  const _ForgotPasswordContent({required this.emailController});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textSecondary =
+        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          AuthStrings.resetPasswordDescription,
+          style: AppTypography.bodyMedium.copyWith(color: textSecondary),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        AppTextField(
+          controller: emailController,
+          label: AuthStrings.emailLabel,
+          hint: AuthStrings.emailHint,
+          prefixIcon: Icons.email_outlined,
+          keyboardType: TextInputType.emailAddress,
+          validator: Validators.email,
+        ),
+      ],
+    );
   }
 }

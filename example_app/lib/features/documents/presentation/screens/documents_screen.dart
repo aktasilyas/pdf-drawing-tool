@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
-
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/utils/responsive.dart';
 import 'package:example_app/core/widgets/index.dart';
@@ -275,16 +273,24 @@ class _MobileHeader extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.sm),
           Image.asset(
-            'assets/images/elyanotes_logo_transparent.png',
-            height: 32,
+            'assets/images/elyanotes_logo_transparent_logo.png',
+            height: 28,
+            width: 28,
             fit: BoxFit.contain,
-            errorBuilder: (_, __, ___) => Text(
-              'ElyaNotes',
-              style: GoogleFonts.lobsterTwo(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: textPrimary,
-              ),
+            errorBuilder: (_, __, ___) => const Icon(
+              Icons.edit_note_rounded,
+              size: 28,
+              color: AppColors.primary,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.xs),
+          Text(
+            'elyanotes',
+            style: TextStyle(
+              fontFamily: 'ComicRelief',
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: textPrimary,
             ),
           ),
           const Spacer(),

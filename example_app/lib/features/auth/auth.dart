@@ -12,8 +12,6 @@ export 'presentation/providers/auth_provider.dart';
 export 'presentation/screens/login_screen.dart';
 export 'presentation/screens/register_screen.dart';
 export 'presentation/screens/splash_screen.dart';
-export 'presentation/widgets/social_login_buttons.dart';
-
 // Domain
 export 'domain/entities/user.dart';
 export 'domain/repositories/auth_repository.dart';

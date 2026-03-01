@@ -1,8 +1,11 @@
 /// Simplified Riverpod auth providers for Supabase.
-import 'package:flutter/material.dart';
+library;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+
+import 'package:example_app/core/utils/logger.dart';
 
 // Current auth state stream
 final authStateProvider = StreamProvider<User?>((ref) {
@@ -46,15 +49,15 @@ class AuthController extends StateNotifier<AsyncValue<void>> {
         return 'Kayıt başarısız';
       }
 
-      debugPrint('✅ Sign up successful: ${response.user?.email}');
+      logger.i('Sign up successful: ${response.user?.email}');
       return null; // Success
     } on AuthException catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
-      debugPrint('❌ Sign up error: ${e.message}');
+      logger.e('Sign up error: ${e.message}');
       return _friendlyErrorMessage(e.message);
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
-      debugPrint('❌ Sign up error: $e');
+      logger.e('Sign up error: $e');
       return e.toString();
     }
   }
@@ -77,15 +80,15 @@ class AuthController extends StateNotifier<AsyncValue<void>> {
         return 'Giriş başarısız';
       }
 
-      debugPrint('✅ Sign in successful: ${response.user?.email}');
+      logger.i('Sign in successful: ${response.user?.email}');
       return null; // Success
     } on AuthException catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
-      debugPrint('❌ Sign in error: ${e.message}');
+      logger.e('Sign in error: ${e.message}');
       return _friendlyErrorMessage(e.message);
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
-      debugPrint('❌ Sign in error: $e');
+      logger.e('Sign in error: $e');
       return e.toString();
     }
   }
@@ -96,10 +99,10 @@ class AuthController extends StateNotifier<AsyncValue<void>> {
     try {
       await _supabase.auth.signOut();
       state = const AsyncValue.data(null);
-      debugPrint('✅ Sign out successful');
+      logger.i('Sign out successful');
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
-      debugPrint('❌ Sign out error: $e');
+      logger.e('Sign out error: $e');
     }
   }
 
@@ -107,13 +110,13 @@ class AuthController extends StateNotifier<AsyncValue<void>> {
   Future<String?> resetPassword(String email) async {
     try {
       await _supabase.auth.resetPasswordForEmail(email);
-      debugPrint('✅ Password reset email sent to: $email');
+      logger.i('Password reset email sent to: $email');
       return null; // Success
     } on AuthException catch (e) {
-      debugPrint('❌ Reset password error: ${e.message}');
+      logger.e('Reset password error: ${e.message}');
       return _friendlyErrorMessage(e.message);
     } catch (e) {
-      debugPrint('❌ Reset password error: $e');
+      logger.e('Reset password error: $e');
       return e.toString();
     }
   }
@@ -122,51 +125,38 @@ class AuthController extends StateNotifier<AsyncValue<void>> {
   Future<String?> signInWithGoogle() async {
     state = const AsyncValue.loading();
     try {
-      // Initialize Google Sign-In with Web Client ID
       final googleSignIn = GoogleSignIn(
         scopes: ['email', 'profile'],
-        // Web OAuth Client ID (from Google Cloud Console)
-        // This is REQUIRED for getting idToken
         serverClientId:
             '129947293915-lrn645esmtn61bv1icstcimhtr2rorv8.apps.googleusercontent.com',
       );
 
-      // Trigger Google Sign-In flow
-      debugPrint('🚀 [GOOGLE] Starting sign in flow...');
+      logger.d('[GOOGLE] Starting sign in flow...');
       final googleUser = await googleSignIn.signIn();
       if (googleUser == null) {
         state = const AsyncValue.data(null);
-        debugPrint('⚠️ Google sign in cancelled by user');
+        logger.w('Google sign in cancelled by user');
         return 'Google girişi iptal edildi';
       }
 
-      debugPrint('✅ [GOOGLE] User selected: ${googleUser.email}');
+      logger.d('[GOOGLE] User selected: ${googleUser.email}');
 
-      // Get Google auth credentials
       final googleAuth = await googleUser.authentication;
       final idToken = googleAuth.idToken;
       final accessToken = googleAuth.accessToken;
 
-      debugPrint(
-          '🔑 [GOOGLE] idToken: ${idToken != null ? "✅ exists (${idToken.substring(0, 20)}...)" : "❌ NULL"}');
-      debugPrint(
-          '🔑 [GOOGLE] accessToken: ${accessToken != null ? "✅ exists" : "❌ NULL"}');
+      logger.d('[GOOGLE] idToken: ${idToken != null ? "exists" : "NULL"}');
+      logger.d(
+          '[GOOGLE] accessToken: ${accessToken != null ? "exists" : "NULL"}');
 
       if (idToken == null) {
         state = const AsyncValue.data(null);
-        debugPrint('❌ Google token is null');
-        debugPrint('❌ [GOOGLE] Possible causes:');
-        debugPrint('   1. Web OAuth Client ID missing in Google Cloud Console');
-        debugPrint('   2. SHA-1 fingerprint mismatch');
-        debugPrint(
-            '   3. User not in test users list (if app is in Testing mode)');
+        logger.e('[GOOGLE] idToken is null - possible causes: '
+            'Web OAuth Client ID missing, SHA-1 mismatch, '
+            'user not in test users list');
         return 'Google token alınamadı';
       }
 
-      debugPrint('🔑 Google ID Token: ${idToken.substring(0, 20)}...');
-      debugPrint('🔑 Google Access Token: ${accessToken?.substring(0, 20)}...');
-
-      // Sign in to Supabase with Google token
       final response = await _supabase.auth.signInWithIdToken(
         provider: OAuthProvider.google,
         idToken: idToken,
@@ -176,19 +166,19 @@ class AuthController extends StateNotifier<AsyncValue<void>> {
       state = const AsyncValue.data(null);
 
       if (response.user == null) {
-        debugPrint('❌ Supabase user is null after Google sign in');
+        logger.e('Supabase user is null after Google sign in');
         return 'Google girişi başarısız';
       }
 
-      debugPrint('✅ Google sign in successful: ${response.user?.email}');
+      logger.i('Google sign in successful: ${response.user?.email}');
       return null; // Success
     } on AuthException catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
-      debugPrint('❌ Google sign in error (AuthException): ${e.message}');
+      logger.e('Google sign in error (AuthException): ${e.message}');
       return _friendlyErrorMessage(e.message);
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
-      debugPrint('❌ Google sign in error: $e');
+      logger.e('Google sign in error: $e');
       return e.toString();
     }
   }

@@ -4,8 +4,6 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
-
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
@@ -108,21 +106,30 @@ class DocumentsSidebar extends ConsumerWidget {
       child: Row(
         children: [
           Expanded(
-            child: Image.asset(
-              isDark
-                  ? 'assets/images/elyanotes_logo_transparent.png'
-                  : 'assets/images/elyanotes_logo.png',
-              height: 72,
-              fit: BoxFit.contain,
-              alignment: Alignment.centerLeft,
-              errorBuilder: (_, __, ___) => Text(
-                'ElyaNotes',
-                style: GoogleFonts.lobsterTwo(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: textPrimary,
+            child: Row(
+              children: [
+                Image.asset(
+                  'assets/images/elyanotes_logo_transparent_logo.png',
+                  height: 40,
+                  width: 40,
+                  fit: BoxFit.contain,
+                  errorBuilder: (_, __, ___) => const Icon(
+                    Icons.edit_note_rounded,
+                    size: 40,
+                    color: AppColors.primary,
+                  ),
                 ),
-              ),
+                const SizedBox(width: AppSpacing.sm),
+                Text(
+                  'elyanotes',
+                  style: TextStyle(
+                    fontFamily: 'ComicRelief',
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                    color: textPrimary,
+                  ),
+                ),
+              ],
             ),
           ),
           // Collapse/Close button instead of Settings

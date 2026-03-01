@@ -68,12 +68,10 @@ flutter_launcher_icons:
 
 flutter_native_splash:
   color: "#FFFFFF"
-  image: "assets/images/elyanotes_logo.png"
   android_12:
     color: "#FFFFFF"
-    image: "assets/images/elyanotes_app_icon.png"
-  ios: true
-  android: true
+  ios: false
+  android: false
 
 flutter:
   uses-material-design: true
@@ -84,3 +82,9 @@ flutter:
     - assets/stickers/
     - assets/covers/
     - assets/images/
+
+  fonts:
+    - family: ComicRelief
+      fonts:
+        - asset: assets/fonts/ComicRelief-Bold.ttf
+          weight: 700

@@ -50,6 +50,9 @@ class AppPasswordField extends StatefulWidget {
   /// Enabled state.
   final bool enabled;
 
+  /// Keyboard action button.
+  final TextInputAction? textInputAction;
+
   const AppPasswordField({
     this.controller,
     this.label = 'Şifre',
@@ -59,6 +62,7 @@ class AppPasswordField extends StatefulWidget {
     this.validator,
     this.focusNode,
     this.enabled = true,
+    this.textInputAction,
     super.key,
   });
 
@@ -103,7 +107,7 @@ class _AppPasswordFieldState extends State<AppPasswordField> {
 
     // Theme-aware colors
     final fillColor =
-        isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariantLight;
+        isDark ? AppColors.surfaceVariantDark : AppColors.surfaceLight;
     final textColor =
         isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
     final hintColor =
@@ -127,15 +131,29 @@ class _AppPasswordFieldState extends State<AppPasswordField> {
             ),
           ),
           const SizedBox(height: AppSpacing.xs),
-          ConstrainedBox(
-            constraints: const BoxConstraints(minHeight: 48),
-            child: TextFormField(
+          DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppRadius.textField),
+              boxShadow: isDark
+                  ? []
+                  : const [
+                      BoxShadow(
+                        color: Color(0x0D000000),
+                        blurRadius: 4,
+                        offset: Offset(0, 1),
+                      ),
+                    ],
+            ),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 48),
+              child: TextFormField(
               controller: widget.controller,
               focusNode: _focusNode,
               enabled: widget.enabled,
               obscureText: _obscureText,
               onChanged: widget.onChanged,
               validator: widget.validator,
+              textInputAction: widget.textInputAction,
               style: AppTypography.bodyMedium.copyWith(color: textColor),
               decoration: InputDecoration(
                 hintText: widget.hint,
@@ -202,6 +220,7 @@ class _AppPasswordFieldState extends State<AppPasswordField> {
                 ),
               ),
             ),
+          ),
           ),
           if (hasError) ...[
             const SizedBox(height: AppSpacing.xs),
