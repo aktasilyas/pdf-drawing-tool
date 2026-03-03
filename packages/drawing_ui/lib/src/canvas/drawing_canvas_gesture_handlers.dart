@@ -2061,14 +2061,23 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     // Zoom: fingers move apart/together but focal point stays ~stationary.
     // Swipe: fingers move together, focal point travels far.
     if (!scaleGestureIsZoom && !mode.isInfinite && onPageSwipe != null) {
-      final scaleChange = (details.scale - 1.0).abs();
-      final displacement = scaleStartFocalPoint != null
-          ? (details.localFocalPoint - scaleStartFocalPoint!).distance
-          : 0.0;
-      if (scaleChange > 0.30) {
+      // When zoomed in beyond baseline, two-finger gestures should always
+      // pan/zoom the canvas — never trigger page swipe.
+      final currentTransform = ref.read(canvasTransformProvider);
+      final isZoomedIn =
+          currentTransform.zoom > currentTransform.baselineZoom * 1.05;
+      if (isZoomedIn) {
         scaleGestureIsZoom = true;
-      } else if (scaleChange > 0.12 && displacement < 30) {
-        scaleGestureIsZoom = true;
+      } else {
+        final scaleChange = (details.scale - 1.0).abs();
+        final displacement = scaleStartFocalPoint != null
+            ? (details.localFocalPoint - scaleStartFocalPoint!).distance
+            : 0.0;
+        if (scaleChange > 0.30) {
+          scaleGestureIsZoom = true;
+        } else if (scaleChange > 0.12 && displacement < 30) {
+          scaleGestureIsZoom = true;
+        }
       }
       // If reclassified as zoom while drag was active, cancel it
       if (scaleGestureIsZoom && _swipeDragActive) {

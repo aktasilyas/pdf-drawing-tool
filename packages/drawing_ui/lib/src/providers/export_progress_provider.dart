@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Status of an ongoing PDF export operation.
-enum ExportProgressStatus { idle, exporting, completed, error }
+enum ExportProgressStatus { idle, exporting, completed, error, cancelled }
 
 /// Immutable state for the export progress indicator.
 class ExportProgressState {
@@ -62,9 +62,26 @@ class ExportProgressNotifier extends StateNotifier<ExportProgressState> {
   ExportProgressNotifier() : super(const ExportProgressState());
 
   Timer? _autoDismissTimer;
+  bool _cancelRequested = false;
+
+  bool get isCancelRequested => _cancelRequested;
+
+  void requestCancel() {
+    _cancelRequested = true;
+  }
+
+  void setCancelled() {
+    state = state.copyWith(status: ExportProgressStatus.cancelled);
+    _autoDismissTimer?.cancel();
+    _autoDismissTimer = Timer(
+      const Duration(milliseconds: 1200),
+      dismiss,
+    );
+  }
 
   void start(int totalPages) {
     _autoDismissTimer?.cancel();
+    _cancelRequested = false;
     state = ExportProgressState(
       status: ExportProgressStatus.exporting,
       totalPages: totalPages,

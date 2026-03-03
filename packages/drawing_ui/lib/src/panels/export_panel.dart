@@ -24,24 +24,26 @@ class ExportPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
+    final isInfinite = ref.watch(isInfiniteCanvasProvider);
 
     Widget content = Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         _PanelHeader(cs: cs),
-        // TODO: PDF export disabled — re-enable after fixing infinite mode rendering
-        // _ExportOption(
-        //   icon: StarNoteIcons.pdfFile,
-        //   label: 'PDF Olarak Dışa Aktar',
-        //   cs: cs,
-        //   onTap: () => _exportPDF(context, ref),
-        // ),
-        _ExportOption(
-          icon: StarNoteIcons.image,
-          label: 'PNG Olarak Dışa Aktar',
-          cs: cs,
-          onTap: () => _exportPNG(context, ref),
-        ),
+        if (isInfinite)
+          _ExportOption(
+            icon: StarNoteIcons.image,
+            label: 'PNG Olarak Dışa Aktar',
+            cs: cs,
+            onTap: () => _exportPNG(context, ref),
+          )
+        else
+          _ExportOption(
+            icon: StarNoteIcons.pdfFile,
+            label: 'PDF Olarak Dışa Aktar',
+            cs: cs,
+            onTap: () => _exportPDF(context, ref),
+          ),
       ],
     );
 
@@ -55,14 +57,12 @@ class ExportPanel extends ConsumerWidget {
     return content;
   }
 
-  // TODO: Re-enable after fixing PDF export for infinite mode
-  // void _exportPDF(BuildContext context, WidgetRef ref) {
-  //   onClose();
-  //   final document = ref.read(documentProvider);
-  //   final notifier = ref.read(exportProgressProvider.notifier);
-  //   final isInfinite = ref.read(isInfiniteCanvasProvider);
-  //   performPDFExport(notifier, document, isInfiniteCanvas: isInfinite);
-  // }
+  void _exportPDF(BuildContext context, WidgetRef ref) {
+    onClose();
+    final document = ref.read(documentProvider);
+    final notifier = ref.read(exportProgressProvider.notifier);
+    performPDFExport(notifier, document);
+  }
 
   /// Captures canvas screenshot and saves as PNG.
   void _exportPNG(BuildContext context, WidgetRef ref) {
@@ -109,7 +109,13 @@ Future<void> performPagesPDFExport(
       metadata: PDFDocumentMetadata(title: title),
       options: PDFExportOptions(isInfiniteCanvas: isInfiniteCanvas),
       onProgress: progress.updateProgress,
+      isCancelled: () => progress.isCancelRequested,
     );
+
+    if (result.wasCancelled) {
+      progress.setCancelled();
+      return;
+    }
 
     if (!result.isSuccess) {
       progress.setError(result.errorMessage ?? 'PDF oluşturulamadı');

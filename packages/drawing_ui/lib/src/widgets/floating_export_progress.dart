@@ -81,6 +81,7 @@ class _ExportProgressContent extends ConsumerWidget {
       ExportProgressStatus.exporting => _ExportingBody(state: state, cs: cs),
       ExportProgressStatus.completed => _CompletedBody(state: state, cs: cs),
       ExportProgressStatus.error => _ErrorBody(state: state, cs: cs),
+      ExportProgressStatus.cancelled => _CancelledBody(cs: cs),
       ExportProgressStatus.idle => const SizedBox.shrink(),
     };
   }
@@ -90,13 +91,17 @@ class _ExportProgressContent extends ConsumerWidget {
       ExportProgressStatus.exporting => cs.primary,
       ExportProgressStatus.completed => Colors.green,
       ExportProgressStatus.error => cs.error,
+      ExportProgressStatus.cancelled => cs.onSurfaceVariant,
       ExportProgressStatus.idle => cs.primary,
     };
 
     return SizedBox(
       height: 3,
       child: LinearProgressIndicator(
-        value: state.status == ExportProgressStatus.error ? 1.0 : state.progress,
+        value: state.status == ExportProgressStatus.error ||
+                state.status == ExportProgressStatus.cancelled
+            ? 1.0
+            : state.progress,
         backgroundColor: Colors.transparent,
         valueColor: AlwaysStoppedAnimation<Color>(color),
       ),
@@ -104,13 +109,13 @@ class _ExportProgressContent extends ConsumerWidget {
   }
 }
 
-class _ExportingBody extends StatelessWidget {
+class _ExportingBody extends ConsumerWidget {
   const _ExportingBody({required this.state, required this.cs});
   final ExportProgressState state;
   final ColorScheme cs;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final pct = (state.progress * 100).round();
     final estimate = state.estimatedTimeRemaining;
     final detail = StringBuffer('%$pct');
@@ -152,6 +157,23 @@ class _ExportingBody extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ),
+        const SizedBox(width: 4),
+        SizedBox(
+          width: 28,
+          height: 28,
+          child: IconButton(
+            padding: EdgeInsets.zero,
+            iconSize: 16,
+            splashRadius: 16,
+            icon: PhosphorIcon(
+              StarNoteIcons.close,
+              size: 16,
+              color: cs.onSurfaceVariant,
+            ),
+            onPressed: () =>
+                ref.read(exportProgressProvider.notifier).requestCancel(),
           ),
         ),
       ],
@@ -217,6 +239,35 @@ class _ErrorBody extends StatelessWidget {
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CancelledBody extends StatelessWidget {
+  const _CancelledBody({required this.cs});
+  final ColorScheme cs;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        PhosphorIcon(
+          StarNoteIcons.close,
+          size: 18,
+          color: cs.onSurfaceVariant,
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Text(
+            'İptal edildi',
+            style: GoogleFonts.sourceSerif4(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: cs.onSurfaceVariant,
+            ),
           ),
         ),
       ],
