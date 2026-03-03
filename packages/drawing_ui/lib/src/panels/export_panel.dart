@@ -8,8 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Page;
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
-
+import 'package:drawing_ui/src/panels/page_options_widgets.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/services/pdf_exporter.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
@@ -31,17 +30,15 @@ class ExportPanel extends ConsumerWidget {
       children: [
         _PanelHeader(cs: cs),
         if (isInfinite)
-          _ExportOption(
+          PageOptionsMenuItem(
             icon: StarNoteIcons.image,
             label: 'PNG Olarak Dışa Aktar',
-            cs: cs,
             onTap: () => _exportPNG(context, ref),
           )
         else
-          _ExportOption(
+          PageOptionsMenuItem(
             icon: StarNoteIcons.pdfFile,
             label: 'PDF Olarak Dışa Aktar',
-            cs: cs,
             onTap: () => _exportPDF(context, ref),
           ),
       ],
@@ -247,32 +244,3 @@ class _PanelHeader extends StatelessWidget {
   }
 }
 
-class _ExportOption extends StatelessWidget {
-  const _ExportOption({
-    required this.icon, required this.label,
-    required this.cs, required this.onTap,
-  });
-  final IconData icon;
-  final String label;
-  final ColorScheme cs;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: SizedBox(
-        height: 48,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(children: [
-            PhosphorIcon(icon, size: 20, color: cs.onSurface),
-            const SizedBox(width: 12),
-            Expanded(child: Text(label, style: TextStyle(
-                fontSize: 14, color: cs.onSurface))),
-          ]),
-        ),
-      ),
-    );
-  }
-}

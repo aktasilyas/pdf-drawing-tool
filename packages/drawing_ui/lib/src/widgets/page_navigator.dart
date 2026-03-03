@@ -4,6 +4,7 @@ import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/theme/drawing_shadows.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
 import 'package:drawing_ui/src/services/thumbnail_cache.dart';
+import 'package:drawing_ui/src/panels/page_options_widgets.dart';
 import 'package:drawing_ui/src/widgets/page_thumbnail.dart';
 
 /// A navigation bar widget that displays page thumbnails and allows page management.
@@ -106,33 +107,40 @@ class _PageNavigatorState extends State<PageNavigator> {
     }
 
     final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
 
     showModalBottomSheet(
       context: context,
       backgroundColor: colorScheme.surface,
-      builder: (context) => SafeArea(
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            const SizedBox(height: 12),
             if (widget.onDuplicatePage != null)
-              ListTile(
-                leading: PhosphorIcon(StarNoteIcons.copy, color: colorScheme.onSurface),
-                title: Text('Duplicate Page', style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface)),
+              PageOptionsMenuItem(
+                icon: StarNoteIcons.copy,
+                label: 'Sayfayı çoğalt',
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.pop(ctx);
                   widget.onDuplicatePage!(index);
                 },
               ),
+            if (widget.onDuplicatePage != null && widget.onDeletePage != null)
+              pageOptionsDivider(colorScheme),
             if (widget.onDeletePage != null)
-              ListTile(
-                leading: PhosphorIcon(StarNoteIcons.trash, color: colorScheme.error),
-                title: Text('Delete Page', style: textTheme.bodyMedium?.copyWith(color: colorScheme.error)),
+              PageOptionsMenuItem(
+                icon: StarNoteIcons.trash,
+                label: 'Sayfayı sil',
+                isDestructive: true,
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.pop(ctx);
                   _confirmDelete(index);
                 },
               ),
+            const SizedBox(height: 8),
           ],
         ),
       ),

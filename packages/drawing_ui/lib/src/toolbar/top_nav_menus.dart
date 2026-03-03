@@ -5,6 +5,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/panels/add_page_panel.dart';
 import 'package:drawing_ui/src/panels/infinite_background_panel.dart';
 import 'package:drawing_ui/src/panels/page_options_panel.dart';
+import 'package:drawing_ui/src/panels/page_options_widgets.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/widgets/pdf_import_dialog.dart';
@@ -18,6 +19,9 @@ void showExportMenu(BuildContext context, WidgetRef ref) {
 
   showModalBottomSheet<void>(
     context: context,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+    ),
     builder: (ctx) => SafeArea(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -32,47 +36,32 @@ void showExportMenu(BuildContext context, WidgetRef ref) {
             ),
           ),
           const SizedBox(height: 12),
-          ListTile(
-            leading: PhosphorIcon(
-              StarNoteIcons.exportIcon,
-              color: colorScheme.onSurface,
-            ),
-            title: const Text('PDF İçe Aktar'),
+          PageOptionsMenuItem(
+            icon: StarNoteIcons.exportIcon,
+            label: 'PDF İçe Aktar',
             onTap: () {
               Navigator.pop(ctx);
               _showPDFImportDialog(context, ref);
             },
           ),
-          ListTile(
-            leading: PhosphorIcon(
-              StarNoteIcons.pdfFile,
-              color: colorScheme.onSurface,
-            ),
-            title: const Text('PDF Olarak Dışa Aktar'),
+          pageOptionsDivider(colorScheme),
+          PageOptionsMenuItem(
+            icon: StarNoteIcons.pdfFile,
+            label: 'PDF Olarak Dışa Aktar',
             onTap: () {
               Navigator.pop(ctx);
               _showPDFExportDialog(context, ref);
             },
           ),
-          ListTile(
-            leading: PhosphorIcon(
-              StarNoteIcons.image,
-              color: colorScheme.onSurface,
-              size: StarNoteIcons.navSize,
-            ),
-            title: const Text('Resim Olarak Dışa Aktar'),
-            enabled: false,
-            onTap: () => Navigator.pop(ctx),
+          pageOptionsDivider(colorScheme),
+          PageOptionsMenuItem(
+            icon: StarNoteIcons.image,
+            label: 'Resim Olarak Dışa Aktar',
           ),
-          ListTile(
-            leading: PhosphorIcon(
-              StarNoteIcons.share,
-              color: colorScheme.onSurface,
-              size: StarNoteIcons.navSize,
-            ),
-            title: const Text('Paylaş'),
-            enabled: false,
-            onTap: () => Navigator.pop(ctx),
+          pageOptionsDivider(colorScheme),
+          PageOptionsMenuItem(
+            icon: StarNoteIcons.share,
+            label: 'Paylaş',
           ),
           const SizedBox(height: 8),
         ],

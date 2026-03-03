@@ -61,8 +61,32 @@ class PageOptionsMenuItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final disabled = onTap == null;
-    final color =
-        disabled ? cs.onSurface.withValues(alpha: 0.38) : isDestructive ? cs.error : cs.onSurface;
+
+    // Icon color
+    final Color iconColor;
+    // Icon background color
+    final Color iconBgColor;
+
+    if (disabled) {
+      iconColor = cs.onSurface.withValues(alpha: 0.38);
+      iconBgColor = cs.onSurface.withValues(alpha: 0.05);
+    } else if (isDestructive) {
+      iconColor = cs.error;
+      iconBgColor = cs.error.withValues(alpha: 0.1);
+    } else {
+      iconColor = cs.primary;
+      iconBgColor = cs.surfaceContainerHigh;
+    }
+
+    // Label color: destructive/disabled affect label, normal stays onSurface
+    final labelColor = disabled
+        ? cs.onSurface.withValues(alpha: 0.38)
+        : isDestructive
+            ? cs.error
+            : cs.onSurface;
+
+    final circleSize = compact ? 30.0 : 36.0;
+    final iconSize = compact ? 18.0 : 20.0;
 
     return InkWell(
       onTap: onTap,
@@ -72,14 +96,24 @@ class PageOptionsMenuItem extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: compact ? 16 : 20),
           child: Row(
             children: [
-              PhosphorIcon(icon, size: compact ? 20 : 22, color: color),
-              SizedBox(width: compact ? 12 : 16),
+              Container(
+                width: circleSize,
+                height: circleSize,
+                decoration: BoxDecoration(
+                  color: iconBgColor,
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: PhosphorIcon(icon, size: iconSize, color: iconColor),
+                ),
+              ),
+              const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   label,
                   style: compact
-                      ? Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 13, color: color)
-                      : Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 15, color: color),
+                      ? Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 13, color: labelColor)
+                      : Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 15, color: labelColor),
                 ),
               ),
               if (trailing != null) trailing!,
@@ -270,9 +304,14 @@ Widget pageOptionsChevronTrailing(ColorScheme cs, [String? label, TextTheme? tex
   ]);
 }
 
-/// Thin divider between menu items.
-Widget pageOptionsDivider(ColorScheme cs) =>
-    Divider(height: 0.5, thickness: 0.5, color: cs.outlineVariant);
+/// Thin divider between menu items with indent matching circular icon layout.
+Widget pageOptionsDivider(ColorScheme cs, {bool compact = false}) =>
+    Divider(
+      height: 0.5,
+      thickness: 0.5,
+      color: cs.outlineVariant,
+      indent: compact ? 46 : 56,
+    );
 
 /// Thick divider separating sections.
 Widget pageOptionsThickDivider(ColorScheme cs, {bool compact = false}) =>

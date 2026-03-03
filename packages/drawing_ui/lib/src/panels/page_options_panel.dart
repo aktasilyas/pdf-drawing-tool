@@ -383,7 +383,7 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
         children: [
           if (widget.documentTitle != null) ...[
             PageOptionsHeader(title: widget.documentTitle!, compact: c),
-            pageOptionsDivider(cs),
+            pageOptionsDivider(cs, compact: c),
             PageOptionsMenuItem(
               icon: StarNoteIcons.editPencil,
               label: 'Yeniden Adlandır',
@@ -413,7 +413,7 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
             pageOptionsThickDivider(cs, compact: c),
           ],
           PageOptionsHeader(title: 'Sayfa ${pageIndex + 1}', compact: c),
-          pageOptionsDivider(cs),
+          pageOptionsDivider(cs, compact: c),
           if (widget.onAddPage != null)
             PageOptionsMenuItem(
               icon: StarNoteIcons.pageAdd,
@@ -466,7 +466,7 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
             compact: c,
             onTap: _exportPageAsPdf,
           ),
-          pageOptionsDivider(cs),
+          pageOptionsDivider(cs, compact: c),
           PageOptionsMenuItem(
             icon: StarNoteIcons.pageClear,
             label: 'Sayfayı temizle',
