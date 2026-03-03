@@ -1,6 +1,5 @@
 /// Layout builders and helpers for the drawing screen.
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
 import 'package:drawing_ui/src/models/models.dart';
@@ -11,6 +10,7 @@ import 'package:drawing_ui/src/panels/panels.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/widgets/widgets.dart';
 import 'package:drawing_ui/src/screens/drawing_screen_panels.dart';
+import 'package:drawing_ui/src/theme/drawing_shadows.dart';
 import 'package:drawing_ui/src/toolbar/tool_groups.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_layout_mode.dart';
 
@@ -177,16 +177,21 @@ class ZoomIndicator extends StatelessWidget {
   final String zoomPercentage;
 
   @override
-  Widget build(BuildContext context) => IgnorePointer(
-    child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.7), borderRadius: BorderRadius.circular(12),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.3), blurRadius: 10, offset: const Offset(0, 4))],
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final brightness = Theme.of(context).brightness;
+    return IgnorePointer(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+        decoration: BoxDecoration(
+          color: colorScheme.scrim.withValues(alpha: 0.7),
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: DrawingShadows.floating(brightness),
+        ),
+        child: Text(zoomPercentage, style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.w600, letterSpacing: 1)),
       ),
-      child: Text(zoomPercentage, style: GoogleFonts.sourceSerif4(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w600, letterSpacing: 1)),
-    ),
-  );
+    );
+  }
 }
 
 /// Handle panel state changes - show/hide overlay.

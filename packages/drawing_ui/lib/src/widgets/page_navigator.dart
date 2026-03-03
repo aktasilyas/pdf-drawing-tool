@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart' hide Page;
-import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/theme/drawing_shadows.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
 import 'package:drawing_ui/src/services/thumbnail_cache.dart';
 import 'package:drawing_ui/src/widgets/page_thumbnail.dart';
@@ -106,6 +106,7 @@ class _PageNavigatorState extends State<PageNavigator> {
     }
 
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     showModalBottomSheet(
       context: context,
@@ -117,7 +118,7 @@ class _PageNavigatorState extends State<PageNavigator> {
             if (widget.onDuplicatePage != null)
               ListTile(
                 leading: PhosphorIcon(StarNoteIcons.copy, color: colorScheme.onSurface),
-                title: Text('Duplicate Page', style: GoogleFonts.sourceSerif4(color: colorScheme.onSurface)),
+                title: Text('Duplicate Page', style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface)),
                 onTap: () {
                   Navigator.pop(context);
                   widget.onDuplicatePage!(index);
@@ -126,7 +127,7 @@ class _PageNavigatorState extends State<PageNavigator> {
             if (widget.onDeletePage != null)
               ListTile(
                 leading: PhosphorIcon(StarNoteIcons.trash, color: colorScheme.error),
-                title: Text('Delete Page', style: GoogleFonts.sourceSerif4(color: colorScheme.error)),
+                title: Text('Delete Page', style: textTheme.bodyMedium?.copyWith(color: colorScheme.error)),
                 onTap: () {
                   Navigator.pop(context);
                   _confirmDelete(index);
@@ -147,13 +148,14 @@ class _PageNavigatorState extends State<PageNavigator> {
     }
 
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: colorScheme.surface,
-        title: Text('Delete Page', style: GoogleFonts.sourceSerif4(color: colorScheme.onSurface)),
-        content: Text('Delete page ${index + 1}?', style: GoogleFonts.sourceSerif4(color: colorScheme.onSurfaceVariant)),
+        title: Text('Delete Page', style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface)),
+        content: Text('Delete page ${index + 1}?', style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -191,13 +193,7 @@ class _PageNavigatorState extends State<PageNavigator> {
             width: 1,
           ),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.1),
-            blurRadius: 4,
-            offset: const Offset(0, -2),
-          ),
-        ],
+        boxShadow: DrawingShadows.floating(theme.brightness),
       ),
       child: Column(
         children: [
@@ -219,7 +215,7 @@ class _PageNavigatorState extends State<PageNavigator> {
                 ? Center(
                     child: Text(
                       'No pages',
-                      style: GoogleFonts.sourceSerif4(color: colorScheme.onSurfaceVariant),
+                      style: theme.textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
                     ),
                   )
                 : ListView.builder(
@@ -265,7 +261,8 @@ class _PageNavigatorState extends State<PageNavigator> {
 
   Widget _buildAddButton() {
     final colorScheme = Theme.of(context).colorScheme;
-    
+    final textTheme = Theme.of(context).textTheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: GestureDetector(
@@ -292,8 +289,7 @@ class _PageNavigatorState extends State<PageNavigator> {
               const SizedBox(height: 4),
               Text(
                 'Add Page',
-                style: GoogleFonts.sourceSerif4(
-                  fontSize: 12,
+                style: textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),

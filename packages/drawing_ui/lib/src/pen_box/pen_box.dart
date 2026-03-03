@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
@@ -95,7 +94,7 @@ class PenBox extends ConsumerWidget {
     // Show preset edit options
     showModalBottomSheet(
       context: context,
-      backgroundColor: isDark ? const Color(0xFF1C1C1E) : colorScheme.surface,
+      backgroundColor: isDark ? colorScheme.surfaceContainerLow : colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -286,7 +285,7 @@ class _PresetOptionsSheet extends ConsumerWidget {
               Expanded(
                 child: Text(
                   label,
-                  style: GoogleFonts.sourceSerif4(
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: colorScheme.onSurface,
                     fontSize: 15,
                     fontWeight: FontWeight.w500,

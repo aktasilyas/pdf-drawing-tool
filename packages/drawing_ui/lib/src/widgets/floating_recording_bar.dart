@@ -1,7 +1,6 @@
 import 'package:drawing_core/drawing_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../providers/audio_recording_provider.dart';
@@ -9,6 +8,7 @@ import '../providers/document_provider.dart';
 import '../providers/page_provider.dart';
 import '../providers/sidebar_filter_provider.dart';
 import '../services/audio_recording_service.dart';
+import '../theme/drawing_shadows.dart';
 import '../theme/starnote_icons.dart';
 
 /// Floating recording bar shown during active audio recording.
@@ -61,13 +61,7 @@ class _RecordingBarContent extends ConsumerWidget {
         border: isDark
             ? Border.all(color: cs.outlineVariant)
             : null,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: DrawingShadows.floating(Theme.of(context).brightness),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -152,12 +146,12 @@ class _TimerDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     final minutes = elapsed.inMinutes.remainder(60).toString().padLeft(2, '0');
     final seconds = elapsed.inSeconds.remainder(60).toString().padLeft(2, '0');
     return Text(
       '$minutes:$seconds',
-      style: GoogleFonts.sourceSerif4(
-        fontSize: 14,
+      style: textTheme.bodyMedium?.copyWith(
         fontWeight: FontWeight.w600,
         fontFeatures: const [FontFeature.tabularFigures()],
         color: cs.onSurface,

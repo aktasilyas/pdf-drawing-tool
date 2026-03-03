@@ -98,8 +98,8 @@ class _TextInputOverlayState extends ConsumerState<TextInputOverlay> {
             maxWidth: MediaQuery.of(context).size.width - screenX - 20,
           ),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.9),
-            border: Border.all(color: const Color(0xFF2196F3), width: 2),
+            color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.9),
+            border: Border.all(color: Theme.of(context).colorScheme.primary, width: 2),
             borderRadius: BorderRadius.circular(4),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

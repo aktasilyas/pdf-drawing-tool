@@ -1,6 +1,5 @@
 /// Dialog for image export / share options.
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
 
@@ -132,7 +131,7 @@ class _DialogHeader extends StatelessWidget {
         Text(title, style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 4),
         Text('$pageCount sayfa',
-            style: GoogleFonts.sourceSerif4(fontSize: 13, color: cs.onSurfaceVariant)),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
       ],
     );
   }
@@ -151,8 +150,8 @@ class _FormatSelector extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Format', style: GoogleFonts.sourceSerif4(
-            fontSize: 13, fontWeight: FontWeight.w600, color: cs.onSurface)),
+        Text('Format', style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            fontWeight: FontWeight.w600, color: cs.onSurface)),
         const SizedBox(height: 8),
         Row(children: ImageFormat.values.map((fmt) {
           final isSelected = fmt == selected;
@@ -185,8 +184,8 @@ class _QualitySelector extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Kalite', style: GoogleFonts.sourceSerif4(
-            fontSize: 13, fontWeight: FontWeight.w600, color: cs.onSurface)),
+        Text('Kalite', style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            fontWeight: FontWeight.w600, color: cs.onSurface)),
         const SizedBox(height: 8),
         Row(children: ImageQuality.values.map((q) {
           final isSelected = q == selected;
@@ -229,8 +228,8 @@ class _SelectableCard extends StatelessWidget {
             color: isSelected ? cs.primary : cs.outlineVariant, width: 1),
         ),
         alignment: Alignment.center,
-        child: Text(label, style: GoogleFonts.sourceSerif4(
-          fontSize: 12, fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+        child: Text(label, style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
           color: isSelected ? cs.onPrimaryContainer : cs.onSurface,
         )),
       ),
@@ -252,7 +251,7 @@ class _BackgroundToggle extends StatelessWidget {
       PhosphorIcon(StarNoteIcons.image, size: 18, color: cs.onSurfaceVariant),
       const SizedBox(width: 8),
       Expanded(child: Text('Arka planı dahil et',
-          style: GoogleFonts.sourceSerif4(fontSize: 13, color: cs.onSurface))),
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: cs.onSurface))),
       Switch(value: value, onChanged: onChanged),
     ]);
   }
@@ -275,7 +274,7 @@ class _ActionButtons extends StatelessWidget {
       children: [
         TextButton(
           onPressed: onCancel,
-          child: Text('İptal', style: GoogleFonts.sourceSerif4(color: cs.onSurfaceVariant)),
+          child: Text('İptal', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
         ),
         const SizedBox(width: 12),
         FilledButton(onPressed: onExport, child: Text(buttonLabel)),

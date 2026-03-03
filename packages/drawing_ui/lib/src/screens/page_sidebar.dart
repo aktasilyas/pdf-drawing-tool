@@ -5,6 +5,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/services/thumbnail_cache.dart';
+import 'package:drawing_ui/src/theme/drawing_shadows.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
 
 import 'audio_recordings_list.dart';
@@ -288,6 +289,7 @@ class _FilterTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
     return Tooltip(
       message: tooltip,
       child: GestureDetector(
@@ -300,11 +302,7 @@ class _FilterTab extends StatelessWidget {
             color: isActive ? cs.surface : Colors.transparent,
             borderRadius: BorderRadius.circular(6),
             boxShadow: isActive
-                ? [BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 2,
-                    offset: const Offset(0, 1),
-                  )]
+                ? DrawingShadows.floating(brightness)
                 : null,
           ),
           child: Center(

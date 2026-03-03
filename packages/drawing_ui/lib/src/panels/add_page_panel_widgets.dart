@@ -45,7 +45,7 @@ class AddPagePositionSelector extends StatelessWidget {
         style: ButtonStyle(
           visualDensity: VisualDensity.compact,
           textStyle: WidgetStatePropertyAll(
-            TextStyle(fontSize: 13, color: cs.onSurface),
+            Theme.of(context).textTheme.bodySmall!.copyWith(color: cs.onSurface),
           ),
         ),
       ),

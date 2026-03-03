@@ -1,7 +1,6 @@
 import 'package:drawing_core/drawing_core.dart';
 import 'package:flutter/material.dart' hide Page;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import 'package:drawing_ui/src/providers/providers.dart';
@@ -38,7 +37,7 @@ class InfiniteBackgroundPanel extends ConsumerWidget {
       borderRadius: BorderRadius.circular(16),
       clipBehavior: Clip.antiAlias,
       elevation: 8,
-      shadowColor: Colors.black26,
+      shadowColor: cs.shadow.withValues(alpha: 0.26),
       child: SizedBox(width: 280, child: content),
     );
   }
@@ -51,12 +50,13 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 14, 8, 10),
       child: Row(children: [
         Expanded(child: Text('Arka Plan',
-          style: GoogleFonts.sourceSerif4(fontSize: 16, fontWeight: FontWeight.w600,
-            color: cs.onSurface))),
+          style: textTheme.titleMedium?.copyWith(fontSize: 16,
+            fontWeight: FontWeight.w600, color: cs.onSurface))),
         IconButton(
           icon: PhosphorIcon(PhosphorIconsLight.x, size: 20,
             color: cs.onSurfaceVariant),
@@ -105,7 +105,7 @@ class _PatternSection extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.only(left: 4, bottom: 10),
             child: Text('Arka Plan Deseni',
-              style: GoogleFonts.sourceSerif4(fontSize: 13, fontWeight: FontWeight.w600,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(fontSize: 13,
                 color: cs.onSurfaceVariant)),
           ),
           Row(children: [
@@ -189,7 +189,7 @@ class _ColorSection extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.only(left: 4, bottom: 10),
             child: Text('Arka Plan Rengi',
-              style: GoogleFonts.sourceSerif4(fontSize: 13, fontWeight: FontWeight.w600,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(fontSize: 13,
                 color: cs.onSurfaceVariant)),
           ),
           Row(children: [
@@ -268,7 +268,7 @@ class _PatternChip extends StatelessWidget {
               _PatternIcon(type: type, color: isSelected
                   ? cs.onPrimaryContainer : cs.onSurfaceVariant),
               const SizedBox(height: 4),
-              Text(label, style: GoogleFonts.sourceSerif4(fontSize: 11,
+              Text(label, style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 color: isSelected ? cs.onPrimaryContainer : cs.onSurfaceVariant)),
             ],
@@ -375,7 +375,7 @@ class _ColorChip extends StatelessWidget {
                 Icon(Icons.check, size: 14, color: checkColor),
                 const SizedBox(width: 4),
               ],
-              Text(label, style: GoogleFonts.sourceSerif4(fontSize: 12,
+              Text(label, style: Theme.of(context).textTheme.labelMedium?.copyWith(
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 color: textColor)),
             ],

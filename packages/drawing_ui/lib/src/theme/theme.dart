@@ -2,5 +2,6 @@
 library;
 
 export 'drawing_colors.dart';
+export 'drawing_shadows.dart';
 export 'drawing_theme.dart';
 export 'starnote_icons.dart';

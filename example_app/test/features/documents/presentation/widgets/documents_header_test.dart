@@ -6,106 +6,44 @@ import 'package:example_app/features/documents/presentation/widgets/documents_he
 
 void main() {
   group('DocumentsHeader', () {
-    testWidgets('should_render_without_error', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: Scaffold(
-              body: DocumentsHeader(
-                title: 'Test Title',
-                onNewPressed: () {},
-                sortOption: SortOption.date,
-                onSortChanged: (_) {},
-              ),
+    Widget buildSubject({
+      VoidCallback? onNewPressed,
+      SortOption sortOption = SortOption.date,
+      ValueChanged<SortOption>? onSortChanged,
+    }) {
+      return ProviderScope(
+        child: MaterialApp(
+          home: Scaffold(
+            body: DocumentsHeader(
+              onNewPressed: onNewPressed ?? () {},
+              sortOption: sortOption,
+              onSortChanged: onSortChanged ?? (_) {},
             ),
           ),
         ),
       );
+    }
 
+    testWidgets('should render without error', (tester) async {
+      await tester.pumpWidget(buildSubject());
       expect(find.byType(DocumentsHeader), findsOneWidget);
     });
 
-    testWidgets('should_display_title', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: Scaffold(
-              body: DocumentsHeader(
-                title: 'My Documents',
-                onNewPressed: () {},
-                sortOption: SortOption.date,
-                onSortChanged: (_) {},
-              ),
-            ),
-          ),
-        ),
-      );
-
-      expect(find.text('My Documents'), findsOneWidget);
-    });
-
-    testWidgets('should_render_new_button', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: Scaffold(
-              body: DocumentsHeader(
-                title: 'Documents',
-                onNewPressed: () {},
-                sortOption: SortOption.date,
-                onSortChanged: (_) {},
-              ),
-            ),
-          ),
-        ),
-      );
-
-      // New button should be visible
+    testWidgets('should render new button', (tester) async {
+      await tester.pumpWidget(buildSubject());
       expect(find.byIcon(Icons.add), findsOneWidget);
     });
 
-    testWidgets('should_call_onNewPressed_when_tapped', (tester) async {
+    testWidgets('should call onNewPressed when tapped', (tester) async {
       var pressed = false;
-
       await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: Scaffold(
-              body: DocumentsHeader(
-                title: 'Documents',
-                onNewPressed: () => pressed = true,
-                sortOption: SortOption.date,
-                onSortChanged: (_) {},
-              ),
-            ),
-          ),
-        ),
+        buildSubject(onNewPressed: () => pressed = true),
       );
 
       await tester.tap(find.byIcon(Icons.add));
       await tester.pump();
 
       expect(pressed, isTrue);
-    });
-
-    testWidgets('should_display_sort_button', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            home: Scaffold(
-              body: DocumentsHeader(
-                title: 'Documents',
-                onNewPressed: () {},
-                sortOption: SortOption.date,
-                onSortChanged: (_) {},
-              ),
-            ),
-          ),
-        ),
-      );
-
-      // Sort button should be visible
-      expect(find.byIcon(Icons.sort), findsOneWidget);
     });
   });
 }

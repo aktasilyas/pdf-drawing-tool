@@ -457,7 +457,7 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
             icon: StarNoteIcons.goToPage,
             label: 'Sayfaya git',
             compact: c,
-            trailing: pageOptionsChevronTrailing(cs, '${pageIndex + 1} / $pageCount'),
+            trailing: pageOptionsChevronTrailing(cs, '${pageIndex + 1} / $pageCount', Theme.of(context).textTheme),
             onTap: () => _showGoToPageDialog(context),
           ),
           PageOptionsMenuItem(
@@ -516,7 +516,7 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
       borderRadius: BorderRadius.circular(16),
       clipBehavior: Clip.antiAlias,
       elevation: 8,
-      shadowColor: Colors.black26,
+      shadowColor: cs.shadow.withValues(alpha: 0.26),
       child: SizedBox(width: 320, child: content),
     );
   }

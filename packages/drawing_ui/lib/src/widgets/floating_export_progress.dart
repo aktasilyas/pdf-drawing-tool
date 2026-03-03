@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../providers/export_progress_provider.dart';
+import '../theme/drawing_shadows.dart';
 import '../theme/starnote_icons.dart';
 
 /// Floating progress indicator for PDF export operations.
@@ -54,13 +54,7 @@ class _ExportProgressContent extends ConsumerWidget {
           color: cs.surface,
           borderRadius: BorderRadius.circular(16),
           border: isDark ? Border.all(color: cs.outlineVariant) : null,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.1),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          boxShadow: DrawingShadows.floating(Theme.of(context).brightness),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -116,6 +110,7 @@ class _ExportingBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final textTheme = Theme.of(context).textTheme;
     final pct = (state.progress * 100).round();
     final estimate = state.estimatedTimeRemaining;
     final detail = StringBuffer('%$pct');
@@ -141,17 +136,15 @@ class _ExportingBody extends ConsumerWidget {
             children: [
               Text(
                 'PDF Dışa Aktarılıyor...',
-                style: GoogleFonts.sourceSerif4(
+                style: textTheme.titleSmall?.copyWith(
                   fontSize: 13,
-                  fontWeight: FontWeight.w600,
                   color: cs.onSurface,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 detail.toString(),
-                style: GoogleFonts.sourceSerif4(
-                  fontSize: 11,
+                style: textTheme.labelSmall?.copyWith(
                   color: cs.onSurfaceVariant,
                   fontFeatures: const [FontFeature.tabularFigures()],
                 ),
@@ -188,6 +181,7 @@ class _CompletedBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     final sizeText =
         state.fileSize != null ? ' (${state.fileSize})' : '';
 
@@ -202,9 +196,8 @@ class _CompletedBody extends StatelessWidget {
         Expanded(
           child: Text(
             'PDF Kaydedildi$sizeText',
-            style: GoogleFonts.sourceSerif4(
+            style: textTheme.titleSmall?.copyWith(
               fontSize: 13,
-              fontWeight: FontWeight.w600,
               color: cs.onSurface,
             ),
           ),
@@ -221,6 +214,7 @@ class _ErrorBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return Row(
       children: [
         PhosphorIcon(
@@ -232,9 +226,8 @@ class _ErrorBody extends StatelessWidget {
         Expanded(
           child: Text(
             state.errorMessage ?? 'PDF dışa aktarılamadı',
-            style: GoogleFonts.sourceSerif4(
+            style: textTheme.titleSmall?.copyWith(
               fontSize: 13,
-              fontWeight: FontWeight.w600,
               color: cs.error,
             ),
             maxLines: 2,
@@ -252,6 +245,7 @@ class _CancelledBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return Row(
       children: [
         PhosphorIcon(
@@ -263,9 +257,8 @@ class _CancelledBody extends StatelessWidget {
         Expanded(
           child: Text(
             'İptal edildi',
-            style: GoogleFonts.sourceSerif4(
+            style: textTheme.titleSmall?.copyWith(
               fontSize: 13,
-              fontWeight: FontWeight.w600,
               color: cs.onSurfaceVariant,
             ),
           ),

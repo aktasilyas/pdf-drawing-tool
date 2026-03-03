@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/theme/drawing_shadows.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
 import 'unified_color_picker.dart';
 
@@ -60,12 +60,16 @@ class _TextStylePopupState extends State<TextStylePopup> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     // Calculate screen position
     final screenX = widget.textElement.x * widget.zoom + widget.canvasOffset.dx;
     final screenY = widget.textElement.y * widget.zoom + widget.canvasOffset.dy;
 
     // Position popup above the text
     final popupY = screenY - 160;
+
+    final brightness = Theme.of(context).brightness;
 
     return Positioned(
       left: screenX,
@@ -78,15 +82,9 @@ class _TextStylePopupState extends State<TextStylePopup> {
           child: Container(
             width: 240,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: cs.surface,
               borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.2),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+              boxShadow: DrawingShadows.floating(brightness),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -99,15 +97,15 @@ class _TextStylePopupState extends State<TextStylePopup> {
                     children: [
                       Text(
                         widget.stickerMode ? 'Emoji Boyutu' : 'Metin Stili',
-                        style: GoogleFonts.sourceSerif4(
-                          fontSize: 14,
+                        style: textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
+                          color: cs.onSurface,
                         ),
                       ),
                       const Spacer(),
                       GestureDetector(
                         onTap: widget.onClose,
-                        child: PhosphorIcon(StarNoteIcons.close, size: 18, color: const Color(0xFF666666)),
+                        child: PhosphorIcon(StarNoteIcons.close, size: 18, color: cs.onSurfaceVariant),
                       ),
                     ],
                   ),
@@ -123,7 +121,7 @@ class _TextStylePopupState extends State<TextStylePopup> {
                       children: [
                         Text(
                           'Renk',
-                          style: GoogleFonts.sourceSerif4(fontSize: 12, color: const Color(0xFF666666)),
+                          style: textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
                         ),
                         const SizedBox(height: 8),
                         UnifiedColorPicker(
@@ -149,12 +147,12 @@ class _TextStylePopupState extends State<TextStylePopup> {
                         children: [
                           Text(
                             'Boyut',
-                            style: GoogleFonts.sourceSerif4(fontSize: 12, color: const Color(0xFF666666)),
+                            style: textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
                           ),
                           const Spacer(),
                           Text(
                             '${_fontSize.round()}',
-                            style: GoogleFonts.sourceSerif4(fontSize: 12, fontWeight: FontWeight.w600),
+                            style: textTheme.labelMedium?.copyWith(color: cs.onSurface),
                           ),
                         ],
                       ),
@@ -188,7 +186,7 @@ class _TextStylePopupState extends State<TextStylePopup> {
                     children: [
                       Text(
                         'Stil',
-                        style: GoogleFonts.sourceSerif4(fontSize: 12, color: const Color(0xFF666666)),
+                        style: textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
                       ),
                       const SizedBox(height: 8),
                       Row(
@@ -258,27 +256,29 @@ class _StyleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: 40,
         height: 40,
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF2196F3) : Colors.grey[100],
+          color: isSelected ? cs.primary : cs.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isSelected ? const Color(0xFF2196F3) : Colors.grey[300]!,
+            color: isSelected ? cs.primary : cs.outlineVariant,
           ),
         ),
         child: Center(
           child: Text(
             label,
-            style: GoogleFonts.sourceSerif4(
+            style: textTheme.titleMedium?.copyWith(
               fontSize: 18,
               fontWeight: label == 'B' ? FontWeight.bold : FontWeight.normal,
               fontStyle: fontStyle,
               decoration: decoration,
-              color: isSelected ? Colors.white : Colors.black87,
+              color: isSelected ? cs.onPrimary : cs.onSurface,
             ),
           ),
         ),

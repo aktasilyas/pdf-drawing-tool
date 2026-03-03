@@ -1,13 +1,13 @@
 /// Widgets for the page navigator sidebar: grid item and add-page cell.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
 
 import 'package:drawing_ui/src/panels/panels.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/services/thumbnail_cache.dart';
+import 'package:drawing_ui/src/theme/drawing_shadows.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
 import 'package:drawing_ui/src/widgets/widgets.dart';
 
@@ -80,7 +80,9 @@ class _PageGridItemState extends ConsumerState<PageGridItem> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textTheme = Theme.of(context).textTheme;
+    final brightness = Theme.of(context).brightness;
+    final isDark = brightness == Brightness.dark;
     final sel = widget.isSelected;
     final page = widget.page;
 
@@ -105,14 +107,7 @@ class _PageGridItemState extends ConsumerState<PageGridItem> {
                         color: sel ? cs.primary : cs.outlineVariant,
                         width: sel ? 2 : 0.5,
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black
-                              .withValues(alpha: sel ? 0.12 : 0.05),
-                          blurRadius: sel ? 8 : 3,
-                          offset: Offset(0, sel ? 2 : 1),
-                        ),
-                      ],
+                      boxShadow: DrawingShadows.page(brightness),
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(7),
@@ -159,8 +154,7 @@ class _PageGridItemState extends ConsumerState<PageGridItem> {
             children: [
               Text(
                 '${widget.index + 1}',
-                style: GoogleFonts.sourceSerif4(
-                  fontSize: 11,
+                style: textTheme.labelSmall?.copyWith(
                   fontWeight: sel ? FontWeight.w600 : FontWeight.w400,
                   color: sel ? cs.primary : cs.onSurfaceVariant,
                 ),
@@ -228,6 +222,7 @@ class _AddPageCellState extends State<AddPageCell> {
   @override
   Widget build(BuildContext context) {
     final cs = widget.cs;
+    final textTheme = Theme.of(context).textTheme;
     return GestureDetector(
       key: _anchorKey,
       onTap: _toggle,
@@ -248,10 +243,8 @@ class _AddPageCellState extends State<AddPageCell> {
                   const SizedBox(height: 4),
                   Text(
                     'Sayfa ekle',
-                    style: GoogleFonts.sourceSerif4(
-                      fontSize: 11,
+                    style: textTheme.labelSmall?.copyWith(
                       color: cs.primary,
-                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],

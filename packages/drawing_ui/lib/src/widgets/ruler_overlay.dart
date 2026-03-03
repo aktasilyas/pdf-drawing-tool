@@ -2,9 +2,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
-
 import 'package:drawing_ui/src/providers/ruler_provider.dart';
+import 'package:drawing_ui/src/theme/drawing_shadows.dart';
 
 /// Ruler strip height (the narrow dimension) in screen pixels.
 const double rulerStripHeight = 160;
@@ -86,13 +85,7 @@ class _RulerOverlayState extends ConsumerState<RulerOverlay> {
                   width: 2.0,
                 ),
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: cs.shadow.withValues(alpha: 0.15),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+              boxShadow: DrawingShadows.floating(Theme.of(context).brightness),
             ),
             child: Stack(
               children: [
@@ -282,9 +275,8 @@ class _AngleBadge extends StatelessWidget {
       ),
       child: Text(
         '${degrees.toStringAsFixed(1)}°',
-        style: GoogleFonts.sourceSerif4(
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
           color: textColor,
-          fontSize: 13,
           fontWeight: FontWeight.w600,
         ),
       ),
