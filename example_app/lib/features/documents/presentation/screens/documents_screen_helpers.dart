@@ -66,8 +66,9 @@ mixin DocumentsScreenHelpers on ConsumerState<DocumentsScreen> {
   Widget buildBreadcrumb(
     String? selectedFolderId,
     VoidCallback navigateToRoot,
-    void Function(String) navigateToFolder,
-  ) {
+    void Function(String) navigateToFolder, {
+    bool compact = false,
+  }) {
     if (selectedFolderId == null) return const SizedBox.shrink();
 
     final folderPathAsync = ref.watch(folderPathProvider(selectedFolderId));
@@ -83,6 +84,8 @@ mixin DocumentsScreenHelpers on ConsumerState<DocumentsScreen> {
         ];
         return BreadcrumbNavigation(
           items: items,
+          showBackButton: !compact,
+          padding: compact ? EdgeInsets.zero : null,
           onItemTap: (item) {
             if (item.folderId == null) {
               navigateToRoot();

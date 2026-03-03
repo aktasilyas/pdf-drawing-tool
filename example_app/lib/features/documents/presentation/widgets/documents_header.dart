@@ -3,8 +3,6 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/core/utils/responsive.dart';
@@ -15,7 +13,6 @@ import 'package:example_app/features/documents/presentation/widgets/selection_mo
 import 'sort_popup_button.dart';
 
 class DocumentsHeader extends ConsumerWidget {
-  final String title;
   final VoidCallback onNewPressed;
   final SortOption sortOption;
   final ValueChanged<SortOption> onSortChanged;
@@ -27,7 +24,6 @@ class DocumentsHeader extends ConsumerWidget {
 
   const DocumentsHeader({
     super.key,
-    required this.title,
     required this.onNewPressed,
     required this.sortOption,
     required this.onSortChanged,
@@ -54,47 +50,18 @@ class DocumentsHeader extends ConsumerWidget {
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: isPhone ? AppSpacing.lg : AppSpacing.xxl,
-        vertical: AppSpacing.md,
+        vertical: AppSpacing.sm,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildTitleRow(context, isPhone),
           if (isTrashSection) ...[
-            const SizedBox(height: AppSpacing.sm),
             _buildTrashInfo(context),
+            const SizedBox(height: AppSpacing.sm),
           ],
-          const SizedBox(height: AppSpacing.md),
           _buildActionRow(context, ref),
         ],
       ),
-    );
-  }
-
-  Widget _buildTitleRow(BuildContext context, bool isPhone) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textPrimary =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
-
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            title,
-            style: (isPhone
-                    ? AppTypography.headlineMedium
-                    : AppTypography.headlineLarge)
-                .copyWith(color: textPrimary),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        if (!isPhone)
-          _CircleIconButton(
-            icon: Icons.settings_outlined,
-            tooltip: 'Ayarlar',
-            onPressed: () => context.push('/settings'),
-          ),
-      ],
     );
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:drawing_ui/src/theme/drawing_theme.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/toolbar/tool_button.dart';
@@ -41,7 +42,7 @@ class _CompactToolRowState extends ConsumerState<CompactToolRow> {
     final isReaderMode = ref.watch(readerModeProvider);
     if (isReaderMode) return const SizedBox.shrink();
 
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = DrawingTheme.of(context);
     final canUndo = ref.watch(canUndoProvider);
     final canRedo = ref.watch(canRedoProvider);
     final currentTool = ref.watch(currentToolProvider);
@@ -56,10 +57,10 @@ class _CompactToolRowState extends ConsumerState<CompactToolRow> {
     return Container(
       height: 48,
       decoration: BoxDecoration(
-        color: colorScheme.surface,
+        color: theme.toolbarBackground,
         border: Border(
           bottom: BorderSide(
-            color: colorScheme.outlineVariant,
+            color: theme.toolbarIconColor.withValues(alpha: 0.15),
             width: 0.5,
           ),
         ),
@@ -80,9 +81,9 @@ class _CompactToolRowState extends ConsumerState<CompactToolRow> {
 
           // Divider
           Container(
-            width: 1,
-            height: 28,
-            color: colorScheme.outlineVariant,
+            width: 0.5,
+            height: 24,
+            color: theme.toolbarIconColor.withValues(alpha: 0.3),
           ),
 
           const SizedBox(width: 2),

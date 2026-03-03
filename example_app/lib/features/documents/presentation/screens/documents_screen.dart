@@ -61,15 +61,17 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _MobileHeader(
+          _MobileTopBar(
+            center: isInFolder
+                ? buildBreadcrumb(
+                    _selectedFolderId,
+                    _navigateToRoot,
+                    _navigateToFolder,
+                    compact: true,
+                  )
+                : _buildMobileTitle(),
             onSettingsTap: () => context.push('/settings'),
           ),
-          if (isInFolder)
-            buildBreadcrumb(
-              _selectedFolderId,
-              _navigateToRoot,
-              _navigateToFolder,
-            ),
           _buildHeader(),
           _buildSoftDivider(),
           Expanded(child: _buildContentView()),
@@ -78,8 +80,23 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
     );
   }
 
+  Widget _buildMobileTitle() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+
+    return Text(
+      getSectionTitle(ref, _selectedSection, _selectedFolderId),
+      style: AppTypography.headlineMedium.copyWith(color: textPrimary),
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+
   Widget _buildDesktopLayout() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isInFolder = _selectedSection == SidebarSection.folder &&
+        _selectedFolderId != null;
+
     return Row(
       children: [
         AnimatedContainer(
@@ -105,14 +122,20 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildCollapseToggle(),
-                  if (_selectedSection == SidebarSection.folder &&
-                      _selectedFolderId != null)
-                    buildBreadcrumb(
-                      _selectedFolderId,
-                      _navigateToRoot,
-                      _navigateToFolder,
-                    ),
+                  _DesktopTopBar(
+                    center: isInFolder
+                        ? buildBreadcrumb(
+                            _selectedFolderId,
+                            _navigateToRoot,
+                            _navigateToFolder,
+                            compact: true,
+                          )
+                        : _buildDesktopTitle(),
+                    onSidebarToggle: () => setState(
+                        () => _isSidebarCollapsed = !_isSidebarCollapsed),
+                    isSidebarCollapsed: _isSidebarCollapsed,
+                    onSettingsTap: () => context.push('/settings'),
+                  ),
                   _buildHeader(),
                   _buildSoftDivider(),
                   Expanded(child: _buildContentView()),
@@ -125,22 +148,20 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
     );
   }
 
-  Widget _buildCollapseToggle() {
-    if (!_isSidebarCollapsed) return const SizedBox.shrink();
-    return Padding(
-      padding: const EdgeInsets.only(left: AppSpacing.sm, top: AppSpacing.lg),
-      child: AppIconButton(
-        icon: Icons.menu,
-        variant: AppIconButtonVariant.ghost,
-        tooltip: 'Kenar çubuğunu aç',
-        onPressed: () => setState(() => _isSidebarCollapsed = false),
-      ),
+  Widget _buildDesktopTitle() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+
+    return Text(
+      getSectionTitle(ref, _selectedSection, _selectedFolderId),
+      style: AppTypography.headlineLarge.copyWith(color: textPrimary),
+      overflow: TextOverflow.ellipsis,
     );
   }
 
   Widget _buildHeader() {
     return DocumentsHeader(
-      title: getSectionTitle(ref, _selectedSection, _selectedFolderId),
       newButtonKey: _addButtonKey,
       onNewPressed: () => showNewDocumentDropdown(context, _addButtonKey),
       sortOption: ref.watch(sortOptionProvider),
@@ -238,50 +259,82 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
   void _handleDocumentTap(DocumentInfo doc) => handleDocumentTap(doc);
 }
 
-/// Mobile header with hamburger menu and settings.
-class _MobileHeader extends StatelessWidget {
-  const _MobileHeader({required this.onSettingsTap});
+/// Mobile top bar: [Sidebar icon] [Title or Path] [Settings icon]
+class _MobileTopBar extends StatelessWidget {
+  const _MobileTopBar({
+    required this.center,
+    required this.onSettingsTap,
+  });
+  final Widget center;
   final VoidCallback onSettingsTap;
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textPrimary =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
-
     return Padding(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.sm,
+      ),
       child: Row(
         children: [
           Builder(
             builder: (ctx) => AppIconButton(
-              icon: Icons.menu,
+              icon: Icons.view_sidebar_outlined,
               variant: AppIconButtonVariant.ghost,
               tooltip: 'Menü',
               onPressed: () => Scaffold.of(ctx).openDrawer(),
             ),
           ),
-          const SizedBox(width: AppSpacing.sm),
-          Image.asset(
-            'assets/images/elyanotes_logo_transparent_logo.png',
-            height: 28,
-            width: 28,
-            fit: BoxFit.contain,
-            errorBuilder: (_, __, ___) => const Icon(
-              Icons.edit_note_rounded,
-              size: 28,
-              color: AppColors.primary,
-            ),
-          ),
           const SizedBox(width: AppSpacing.xs),
-          Text(
-            'elyanotes',
-            style: AppTypography.logo(
-              fontSize: 20,
-              color: textPrimary,
-            ),
+          Expanded(child: center),
+          const SizedBox(width: AppSpacing.xs),
+          AppIconButton(
+            icon: Icons.settings_outlined,
+            variant: AppIconButtonVariant.ghost,
+            tooltip: 'Ayarlar',
+            onPressed: onSettingsTap,
           ),
-          const Spacer(),
+        ],
+      ),
+    );
+  }
+}
+
+/// Desktop top bar: [Sidebar toggle] [Title or Path] [Settings icon]
+class _DesktopTopBar extends StatelessWidget {
+  const _DesktopTopBar({
+    required this.center,
+    required this.onSidebarToggle,
+    required this.isSidebarCollapsed,
+    required this.onSettingsTap,
+  });
+  final Widget center;
+  final VoidCallback onSidebarToggle;
+  final bool isSidebarCollapsed;
+  final VoidCallback onSettingsTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
+      child: Row(
+        children: [
+          AppIconButton(
+            icon: isSidebarCollapsed
+                ? Icons.view_sidebar_outlined
+                : Icons.view_sidebar,
+            variant: AppIconButtonVariant.ghost,
+            tooltip: isSidebarCollapsed
+                ? 'Kenar çubuğunu aç'
+                : 'Kenar çubuğunu kapat',
+            onPressed: onSidebarToggle,
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(child: center),
+          const SizedBox(width: AppSpacing.sm),
           AppIconButton(
             icon: Icons.settings_outlined,
             variant: AppIconButtonVariant.ghost,

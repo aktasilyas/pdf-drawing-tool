@@ -28,6 +28,7 @@ Widget buildSecondaryCanvasLayers({
   required ImageCacheManager imageCacheManager,
   required WidgetRef ref,
   CanvasColorScheme? colorScheme,
+  Color selectionColor = const Color(0xFF10B981),
 }) {
   final pageSize = Size(page.size.width, page.size.height);
   final isPdf = page.background.type == core.BackgroundType.pdf;
@@ -166,6 +167,7 @@ Widget buildSecondaryCanvasLayers({
               texts: allTexts,
               cacheManager: imageCacheManager,
               elementOrder: allElementOrder,
+              selectionColor: selectionColor,
             ),
             isComplex: true,
             willChange: false,

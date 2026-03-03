@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-
 /// Full-spectrum color picker: Hue × Saturation 2D area + Value slider.
 /// Optionally shows an opacity slider for highlighter tools.
 class SpectrumPicker extends StatelessWidget {
@@ -189,6 +187,7 @@ class _GradientSliderRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return Row(children: [
       Expanded(
         child: Container(
@@ -228,10 +227,9 @@ class _GradientSliderRow extends StatelessWidget {
         width: 48,
         child: Text(
           '${(value * 100).round()} %',
-          style: GoogleFonts.sourceSerif4(
+          style: textTheme.bodySmall?.copyWith(
             fontSize: 13,
             color: Theme.of(context).colorScheme.onSurface,
-            fontWeight: FontWeight.w500,
           ),
         ),
       ),

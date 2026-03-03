@@ -50,7 +50,10 @@ class _ImageResizeHandlesState extends ConsumerState<ImageResizeHandles> {
       onPanUpdate: _onPanUpdate,
       onPanEnd: _onPanEnd,
       child: CustomPaint(
-        painter: _ImageHandlesPainter(image: widget.image),
+        painter: _ImageHandlesPainter(
+          image: widget.image,
+          selectionColor: Theme.of(context).colorScheme.primary,
+        ),
         child: const SizedBox.expand(),
       ),
     );
@@ -274,13 +277,14 @@ class _ImageResizeHandlesState extends ConsumerState<ImageResizeHandles> {
   }
 }
 
-/// Paints blue border, 4 corner handles, and rotation handle with arrow icon.
+/// Paints selection border, 4 corner handles, and rotation handle with arrow icon.
 class _ImageHandlesPainter extends CustomPainter {
   final ImageElement image;
+  final Color selectionColor;
   static const double _r = 8.0;
   static const double _rotDist = 30.0;
 
-  _ImageHandlesPainter({required this.image});
+  _ImageHandlesPainter({required this.image, required this.selectionColor});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -297,7 +301,7 @@ class _ImageHandlesPainter extends CustomPainter {
 
     // Border
     final border = Paint()
-      ..color = const Color(0xFF2196F3)
+      ..color = selectionColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
     canvas.drawRect(rect, border);
@@ -307,7 +311,7 @@ class _ImageHandlesPainter extends CustomPainter {
       ..color = Colors.white
       ..style = PaintingStyle.fill;
     final handleStroke = Paint()
-      ..color = const Color(0xFF2196F3)
+      ..color = selectionColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
 
@@ -334,7 +338,7 @@ class _ImageHandlesPainter extends CustomPainter {
   /// Draws a small circular arrow (↻) inside the rotation handle circle.
   void _drawRotationArrow(Canvas canvas, Offset center) {
     final paint = Paint()
-      ..color = const Color(0xFF2196F3)
+      ..color = selectionColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5
       ..strokeCap = StrokeCap.round;
@@ -350,7 +354,7 @@ class _ImageHandlesPainter extends CustomPainter {
       center.dy + arcRadius * math.sin(math.pi * 0.75),
     );
     final arrowPaint = Paint()
-      ..color = const Color(0xFF2196F3)
+      ..color = selectionColor
       ..style = PaintingStyle.fill;
     final path = Path();
     // Small triangle pointing in the arc's tangent direction
@@ -367,6 +371,7 @@ class _ImageHandlesPainter extends CustomPainter {
         oldDelegate.image.y != image.y ||
         oldDelegate.image.width != image.width ||
         oldDelegate.image.height != image.height ||
-        oldDelegate.image.rotation != image.rotation;
+        oldDelegate.image.rotation != image.rotation ||
+        oldDelegate.selectionColor != selectionColor;
   }
 }

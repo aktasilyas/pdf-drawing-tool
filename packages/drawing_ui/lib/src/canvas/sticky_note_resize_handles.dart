@@ -45,7 +45,10 @@ class _StickyNoteResizeHandlesState
       onPanUpdate: _onPanUpdate,
       onPanEnd: _onPanEnd,
       child: CustomPaint(
-        painter: StickyNoteHandlesPainter(note: widget.note),
+        painter: StickyNoteHandlesPainter(
+          note: widget.note,
+          selectionColor: Theme.of(context).colorScheme.primary,
+        ),
         child: const SizedBox.expand(),
       ),
     );

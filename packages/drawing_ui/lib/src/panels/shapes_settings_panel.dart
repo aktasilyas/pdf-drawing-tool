@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:drawing_ui/src/panels/tool_panel.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/widgets/color_picker_strip.dart';
@@ -27,7 +26,7 @@ class ShapesSettingsPanel extends ConsumerWidget {
           Row(
             children: [
               Expanded(
-                child: Text('Şekil', style: GoogleFonts.sourceSerif4(
+                child: Text('Şekil', style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSurface)),
               ),
               PanelCloseButton(
@@ -88,7 +87,7 @@ class _StripLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Text(label, style: GoogleFonts.sourceSerif4(fontSize: 11, fontWeight: FontWeight.w600,
+    return Text(label, style: Theme.of(context).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600,
         color: cs.onSurfaceVariant, letterSpacing: 0.5));
   }
 }

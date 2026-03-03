@@ -53,7 +53,7 @@ class ToolButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = DrawingTheme.of(context);
 
     final buttonSize = compact ? 36.0 : 40.0;
     final iconSize = compact ? 20.0 : StarNoteIcons.toolSize;
@@ -63,13 +63,13 @@ class ToolButton extends StatelessWidget {
 
     if (!enabled) {
       bgColor = Colors.transparent;
-      iconColor = colorScheme.onSurface.withValues(alpha: 0.25);
+      iconColor = theme.toolbarIconDisabledColor;
     } else if (isSelected) {
-      bgColor = colorScheme.primary.withValues(alpha: 0.12);
-      iconColor = colorScheme.primary;
+      bgColor = theme.toolbarIconSelectedColor.withValues(alpha: 0.15);
+      iconColor = theme.toolbarIconSelectedColor;
     } else {
       bgColor = Colors.transparent;
-      iconColor = colorScheme.onSurfaceVariant;
+      iconColor = theme.toolbarIconColor;
     }
 
     final iconData =

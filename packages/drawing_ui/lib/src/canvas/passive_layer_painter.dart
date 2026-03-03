@@ -45,6 +45,7 @@ class PassiveLayerStack extends StatelessWidget {
                 elementOrder: layer.elementOrder,
                 renderer: renderer,
                 cacheManager: imageCacheManager,
+                selectionColor: Theme.of(context).colorScheme.primary,
               ),
               isComplex: true,
               willChange: false,

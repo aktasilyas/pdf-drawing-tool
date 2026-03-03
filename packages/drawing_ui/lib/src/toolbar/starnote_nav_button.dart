@@ -46,17 +46,17 @@ class StarNoteNavButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = DrawingTheme.of(context);
     final effectiveIconSize = iconSize ?? StarNoteIcons.navSize;
 
     final iconColor = isDisabled
-        ? colorScheme.onSurface.withValues(alpha: 0.38)
+        ? theme.toolbarIconDisabledColor
         : isActive
-            ? colorScheme.primary
-            : colorScheme.onSurfaceVariant;
+            ? theme.toolbarIconSelectedColor
+            : theme.toolbarIconColor;
 
     final bgColor = isActive
-        ? colorScheme.primary.withValues(alpha: 0.12)
+        ? theme.toolbarIconSelectedColor.withValues(alpha: 0.15)
         : Colors.transparent;
 
     return Tooltip(

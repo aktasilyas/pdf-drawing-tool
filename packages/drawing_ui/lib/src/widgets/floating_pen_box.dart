@@ -63,7 +63,7 @@ class _FloatingPenBoxState extends ConsumerState<FloatingPenBox> {
         ) : null,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.07),
+            color: colorScheme.shadow.withValues(alpha: isDark ? 0.4 : 0.07),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
-import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import 'package:drawing_ui/src/canvas/canvas_color_scheme.dart';
@@ -254,6 +253,7 @@ class _SecondaryCanvasViewState extends ConsumerState<SecondaryCanvasView> {
                       renderer: _renderer,
                       imageCacheManager: _imageCacheManager,
                       ref: ref,
+                      selectionColor: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                 ),
@@ -274,6 +274,7 @@ class _LastPagePlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Container(
       color: surroundingColor,
       child: Center(
@@ -284,7 +285,7 @@ class _LastPagePlaceholder extends StatelessWidget {
                 size: 40, color: cs.outlineVariant),
             const SizedBox(height: 8),
             Text('Son sayfa',
-                style: GoogleFonts.sourceSerif4(fontSize: 13, color: cs.onSurfaceVariant)),
+                style: textTheme.bodySmall?.copyWith(fontSize: 13, color: cs.onSurfaceVariant)),
           ],
         ),
       ),

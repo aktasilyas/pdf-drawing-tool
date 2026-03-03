@@ -30,6 +30,7 @@ class UnifiedElementPainter extends CustomPainter {
   final Set<String> excludedTextIds;
   final Map<String, List<int>> pixelEraserPreview;
   final Set<String> strokeEraserPreview;
+  final Color selectionColor;
 
   UnifiedElementPainter({
     required this.strokes,
@@ -47,6 +48,7 @@ class UnifiedElementPainter extends CustomPainter {
     this.excludedTextIds = const {},
     this.pixelEraserPreview = const {},
     this.strokeEraserPreview = const {},
+    this.selectionColor = const Color(0xFF10B981),
   }) : super(repaint: cacheManager);
 
   @override
@@ -297,7 +299,7 @@ class UnifiedElementPainter extends CustomPainter {
 
     if (isActive) {
       final paint = Paint()
-        ..color = const Color(0xFF2196F3)
+        ..color = selectionColor
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.0;
       canvas.drawRect(
@@ -334,7 +336,8 @@ class UnifiedElementPainter extends CustomPainter {
         !identical(oldDelegate.excludedImageIds, excludedImageIds) ||
         !identical(oldDelegate.excludedTextIds, excludedTextIds) ||
         !identical(oldDelegate.pixelEraserPreview, pixelEraserPreview) ||
-        !identical(oldDelegate.strokeEraserPreview, strokeEraserPreview);
+        !identical(oldDelegate.strokeEraserPreview, strokeEraserPreview) ||
+        oldDelegate.selectionColor != selectionColor;
   }
 }
 

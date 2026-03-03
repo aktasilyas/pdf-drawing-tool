@@ -1,7 +1,6 @@
 /// Document options popover panel — Rename, PDF Export, Delete.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import 'package:drawing_ui/src/panels/export_panel.dart';
@@ -99,7 +98,7 @@ class _OptionTile extends StatelessWidget {
             PhosphorIcon(icon, size: 20, color: color),
             const SizedBox(width: 12),
             Expanded(child: Text(label,
-                style: GoogleFonts.sourceSerif4(fontSize: 14, color: color))),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: color))),
           ]),
         ),
       ),

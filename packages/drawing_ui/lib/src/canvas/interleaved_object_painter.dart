@@ -22,6 +22,7 @@ class InterleavedObjectPainter extends CustomPainter {
   final Set<String> excludedImageIds;
   final Set<String> excludedTextIds;
   final List<String> elementOrder;
+  final Color selectionColor;
 
   InterleavedObjectPainter({
     required this.images,
@@ -31,6 +32,7 @@ class InterleavedObjectPainter extends CustomPainter {
     this.excludedImageIds = const {},
     this.excludedTextIds = const {},
     this.elementOrder = const [],
+    this.selectionColor = const Color(0xFF10B981),
   }) : super(repaint: cacheManager);
 
   @override
@@ -182,7 +184,7 @@ class InterleavedObjectPainter extends CustomPainter {
 
     if (isActive) {
       final paint = Paint()
-        ..color = const Color(0xFF2196F3)
+        ..color = selectionColor
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.0;
       canvas.drawRect(
@@ -212,7 +214,8 @@ class InterleavedObjectPainter extends CustomPainter {
         oldDelegate.activeText != activeText ||
         oldDelegate.excludedImageIds != excludedImageIds ||
         oldDelegate.excludedTextIds != excludedTextIds ||
-        oldDelegate.elementOrder != elementOrder;
+        oldDelegate.elementOrder != elementOrder ||
+        oldDelegate.selectionColor != selectionColor;
   }
 }
 

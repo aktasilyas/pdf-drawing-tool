@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:drawing_ui/src/panels/text_preview_painter.dart';
 import 'package:drawing_ui/src/panels/tool_panel.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
@@ -31,7 +30,7 @@ class TextSettingsPanel extends ConsumerWidget {
               Expanded(
                 child: Text(
                   'Metin Aracı',
-                  style: GoogleFonts.sourceSerif4(
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: cs.onSurface,
@@ -47,8 +46,7 @@ class TextSettingsPanel extends ConsumerWidget {
           const SizedBox(height: 8),
           Text(
             'Tuvale dokunarak metin kutusu ekleyin.',
-            style: GoogleFonts.sourceSerif4(
-              fontSize: 12,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
               color: cs.onSurfaceVariant,
             ),
           ),
@@ -81,8 +79,7 @@ class TextSettingsPanel extends ConsumerWidget {
           // -- Color Section --
           Text(
             'Renk',
-            style: GoogleFonts.sourceSerif4(
-              fontSize: 11,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
               fontWeight: FontWeight.w600,
               color: cs.onSurfaceVariant,
               letterSpacing: 0.5,
@@ -100,8 +97,7 @@ class TextSettingsPanel extends ConsumerWidget {
           // -- Style Section --
           Text(
             'Stil',
-            style: GoogleFonts.sourceSerif4(
-              fontSize: 11,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
               fontWeight: FontWeight.w600,
               color: cs.onSurfaceVariant,
               letterSpacing: 0.5,
@@ -213,7 +209,7 @@ class _StyleToggle extends StatelessWidget {
         child: Center(
           child: Text(
             label,
-            style: GoogleFonts.sourceSerif4(
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
               fontSize: 18,
               fontWeight: fontWeight ?? FontWeight.normal,
               fontStyle: fontStyle,

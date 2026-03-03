@@ -1,6 +1,5 @@
 /// Procreate/GoodNotes-style layer management panel for the page sidebar.
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_core/drawing_core.dart' show Layer;
@@ -65,6 +64,7 @@ class _LayerListHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final textTheme = Theme.of(context).textTheme;
     final layerCount = ref.watch(allLayersProvider).length;
     return Container(
       height: 44,
@@ -73,13 +73,13 @@ class _LayerListHeader extends ConsumerWidget {
         border: Border(bottom: BorderSide(color: cs.outlineVariant, width: 0.5)),
       ),
       child: Row(children: [
-        Expanded(child: Text('Katmanlar', style: GoogleFonts.sourceSerif4(
-            fontSize: 13, fontWeight: FontWeight.w600, color: cs.onSurface))),
+        Expanded(child: Text('Katmanlar', style: textTheme.titleSmall?.copyWith(
+            fontSize: 13, color: cs.onSurface))),
         SizedBox(height: 48, child: TextButton.icon(
           onPressed: () =>
               ref.read(documentProvider.notifier).addLayer('Katman ${layerCount + 1}'),
           icon: PhosphorIcon(StarNoteIcons.plus, size: 18, color: cs.primary),
-          label: Text('Katman Ekle', style: GoogleFonts.sourceSerif4(fontSize: 12, color: cs.primary)),
+          label: Text('Katman Ekle', style: textTheme.bodySmall?.copyWith(color: cs.primary)),
           style: TextButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             minimumSize: const Size(48, 48)),
@@ -182,10 +182,11 @@ class _LayerRowState extends ConsumerState<_LayerRow> {
   }
 
   Widget _buildNameField(ColorScheme cs, Layer layer) {
+    final textTheme = Theme.of(context).textTheme;
     if (_isEditing) {
       return TextField(
         controller: _tc, autofocus: true,
-        style: GoogleFonts.sourceSerif4(fontSize: 13, color: cs.onSurface),
+        style: textTheme.bodySmall?.copyWith(fontSize: 13, color: cs.onSurface),
         decoration: const InputDecoration(isDense: true,
             contentPadding: EdgeInsets.symmetric(horizontal: 4, vertical: 6),
             border: InputBorder.none),
@@ -198,8 +199,9 @@ class _LayerRowState extends ConsumerState<_LayerRow> {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4),
         child: Text(layer.name, overflow: TextOverflow.ellipsis, maxLines: 1,
-            style: GoogleFonts.sourceSerif4(fontSize: 13, color: cs.onSurface,
-                fontWeight: widget.isActive ? FontWeight.w600 : FontWeight.normal)),
+            style: widget.isActive
+                ? textTheme.titleSmall?.copyWith(fontSize: 13, color: cs.onSurface)
+                : textTheme.bodySmall?.copyWith(fontSize: 13, color: cs.onSurface)),
       ),
     );
   }
@@ -243,6 +245,7 @@ class _LayerFooter extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final textTheme = Theme.of(context).textTheme;
     final canDelete = layerCount > 1;
     final border = BorderSide(color: cs.outlineVariant, width: 0.5);
     return Column(mainAxisSize: MainAxisSize.min, children: [
@@ -253,7 +256,7 @@ class _LayerFooter extends ConsumerWidget {
         decoration: BoxDecoration(border: Border(top: border)),
         child: Row(children: [
           Text('${(opacity * 100).round()}%',
-              style: GoogleFonts.sourceSerif4(fontSize: 11, color: cs.onSurfaceVariant)),
+              style: textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant)),
           Expanded(
             child: SliderTheme(
               data: SliderThemeData(

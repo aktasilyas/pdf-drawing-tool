@@ -11,9 +11,13 @@ const double stickyNoteIconGap = 4.0;
 /// and top-right shrink + three-dot icon buttons.
 class StickyNoteHandlesPainter extends CustomPainter {
   final StickyNote note;
+  final Color selectionColor;
   static const double _r = 8.0;
 
-  StickyNoteHandlesPainter({required this.note});
+  StickyNoteHandlesPainter({
+    required this.note,
+    required this.selectionColor,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -21,7 +25,7 @@ class StickyNoteHandlesPainter extends CustomPainter {
 
     // Selection border
     final border = Paint()
-      ..color = const Color(0xFF2196F3)
+      ..color = selectionColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
     canvas.drawRRect(
@@ -30,7 +34,7 @@ class StickyNoteHandlesPainter extends CustomPainter {
     // Bottom-right resize handle
     final fill = Paint()..color = Colors.white..style = PaintingStyle.fill;
     final stroke = Paint()
-      ..color = const Color(0xFF2196F3)
+      ..color = selectionColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
     final br = Offset(note.x + note.width, note.y + note.height);
@@ -114,7 +118,7 @@ class StickyNoteHandlesPainter extends CustomPainter {
 
   void _drawResizeArrow(Canvas canvas, Offset center) {
     final p = Paint()
-      ..color = const Color(0xFF2196F3)
+      ..color = selectionColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5
       ..strokeCap = StrokeCap.round;
@@ -136,6 +140,7 @@ class StickyNoteHandlesPainter extends CustomPainter {
     return old.note.x != note.x ||
         old.note.y != note.y ||
         old.note.width != note.width ||
-        old.note.height != note.height;
+        old.note.height != note.height ||
+        old.selectionColor != selectionColor;
   }
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 
@@ -112,7 +111,7 @@ class _StickerPanelState extends ConsumerState<StickerPanel>
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Çıkartmalar', style: GoogleFonts.sourceSerif4(
+          Text('Çıkartmalar', style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSurface)),
           const SizedBox(height: 10),
           // Category tabs
@@ -125,8 +124,8 @@ class _StickerPanelState extends ConsumerState<StickerPanel>
               unselectedLabelColor: cs.onSurfaceVariant,
               indicatorColor: cs.primary,
               indicatorSize: TabBarIndicatorSize.label,
-              labelStyle: GoogleFonts.sourceSerif4(fontSize: 11, fontWeight: FontWeight.w500),
-              unselectedLabelStyle: GoogleFonts.sourceSerif4(fontSize: 11),
+              labelStyle: Theme.of(context).textTheme.labelSmall,
+              unselectedLabelStyle: Theme.of(context).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.normal),
               indicatorWeight: 2,
               dividerHeight: 0,
               tabs: _stickerCategories.map((cat) => Tab(text: cat)).toList(),
@@ -216,9 +215,7 @@ class _CompactActionButton extends StatelessWidget {
             const SizedBox(width: 6),
             Text(
               label,
-              style: GoogleFonts.sourceSerif4(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
                 color: color,
               ),
             ),
@@ -274,7 +271,7 @@ class _StickerGrid extends StatelessWidget {
             child: Center(
               child: Text(
                 stickers[index],
-                style: GoogleFonts.sourceSerif4(fontSize: 18),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(fontSize: 18),
               ),
             ),
           ),

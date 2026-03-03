@@ -24,21 +24,25 @@ class SelectionPainter extends CustomPainter {
   /// + SelectionHandles custom painter handle the visuals.
   final bool hasLiveTransform;
 
+  /// The selection accent color (driven by the app's colorScheme.primary).
+  final Color selectionColor;
+
   /// Dashed stroke paint for the selection border.
-  static final Paint _dashPaint = Paint()
-    ..color = const Color(0xFF2196F3)
+  late final Paint _dashPaint = Paint()
+    ..color = selectionColor
     ..style = PaintingStyle.stroke
     ..strokeWidth = 1.5
     ..strokeCap = StrokeCap.round
     ..strokeJoin = StrokeJoin.round;
 
   /// Semi-transparent fill paint for the selection area.
-  static final Paint _fillPaint = Paint()
-    ..color = const Color(0x152196F3)
+  late final Paint _fillPaint = Paint()
+    ..color = selectionColor.withValues(alpha: 0.08)
     ..style = PaintingStyle.fill;
 
   SelectionPainter({
     required this.selection,
+    required this.selectionColor,
     this.previewPath,
     this.zoom = 1.0,
     this.hasLiveTransform = false,
@@ -126,6 +130,7 @@ class SelectionPainter extends CustomPainter {
   bool shouldRepaint(covariant SelectionPainter oldDelegate) {
     return oldDelegate.selection != selection ||
         oldDelegate.previewPath != previewPath ||
-        oldDelegate.hasLiveTransform != hasLiveTransform;
+        oldDelegate.hasLiveTransform != hasLiveTransform ||
+        oldDelegate.selectionColor != selectionColor;
   }
 }

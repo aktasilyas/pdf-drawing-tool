@@ -81,7 +81,7 @@ class _ToolBarState extends ConsumerState<ToolBar> {
         color: theme.toolbarBackground,
         border: Border(
           bottom: BorderSide(
-            color: theme.panelBorderColor.withValues(alpha: 80.0 / 255.0),
+            color: theme.toolbarIconColor.withValues(alpha: 0.15),
             width: 0.5,
           ),
         ),

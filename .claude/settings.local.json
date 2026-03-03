@@ -64,7 +64,12 @@
       "Bash(npx supabase:*)",
       "Bash(supabase:*)",
       "Bash(npx:*)",
-      "Bash(__NEW_LINE_fd4607b4bebb6311__ curl:*)"
+      "Bash(__NEW_LINE_fd4607b4bebb6311__ curl:*)",
+      "Bash(sudo apt-get:*)",
+      "Bash(xxd:*)",
+      "Bash(curl:*)",
+      "WebFetch(domain:pub.nfet.net)",
+      "Bash(dart pub:*)"
     ]
   }
 }

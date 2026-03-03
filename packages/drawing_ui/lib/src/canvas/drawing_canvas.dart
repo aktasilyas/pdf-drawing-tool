@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
 import 'package:drawing_core/drawing_core.dart' show BackgroundType;
 import 'package:drawing_ui/src/canvas/stroke_painter.dart';
@@ -492,7 +491,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
             const SizedBox(height: 8),
             Text(
               'PDF Sayfası',
-              style: GoogleFonts.sourceSerif4(fontSize: 12, color: colorScheme.onSurfaceVariant),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
             ),
           ],
         ),
@@ -529,12 +528,12 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
               const SizedBox(height: 8),
               Text(
                 'PDF Yüklenemedi',
-                style: GoogleFonts.sourceSerif4(fontSize: 12, fontWeight: FontWeight.bold, color: colorScheme.onErrorContainer),
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold, color: colorScheme.onErrorContainer),
               ),
               const SizedBox(height: 4),
               Text(
                 error,
-                style: GoogleFonts.sourceSerif4(fontSize: 10, color: colorScheme.onErrorContainer),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(fontSize: 10, color: colorScheme.onErrorContainer),
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -996,6 +995,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                                       excludedTextIds: excludedTextIds,
                                       pixelEraserPreview: pixelEraserPreview,
                                       strokeEraserPreview: strokeEraserPreview,
+                                      selectionColor: Theme.of(context).colorScheme.primary,
                                     ),
                                     isComplex: true,
                                     willChange: pixelEraserPreview.isNotEmpty ||
@@ -1103,6 +1103,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                               size: size,
                               painter: SelectionPainter(
                                 selection: selection,
+                                selectionColor: Theme.of(context).colorScheme.primary,
                                 previewPath: selectionPreviewPath,
                                 zoom: transform.zoom,
                                 hasLiveTransform: hasLiveTransform,
@@ -1168,7 +1169,9 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                               return IgnorePointer(
                                 child: CustomPaint(
                                   painter: StickyNoteHandlesPainter(
-                                      note: selected),
+                                    note: selected,
+                                    selectionColor: Theme.of(context).colorScheme.primary,
+                                  ),
                                   child: const SizedBox.expand(),
                                 ),
                               );
@@ -1289,12 +1292,12 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(stickerState.selectedEmoji!,
-                              style: GoogleFonts.sourceSerif4(fontSize: 24)),
+                              style: Theme.of(context).textTheme.headlineSmall),
                           const SizedBox(width: 8),
                           Text(
                             'Yerleştirmek için dokunun',
                             style:
-                                GoogleFonts.sourceSerif4(color: Colors.white, fontSize: 14),
+                                Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white),
                           ),
                           const SizedBox(width: 12),
                           GestureDetector(
@@ -1356,7 +1359,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                           Text(
                             'Resmi yerlesirmek icin dokunun',
                             style:
-                                GoogleFonts.sourceSerif4(color: Colors.white, fontSize: 14),
+                                Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white),
                           ),
                           const SizedBox(width: 12),
                           GestureDetector(
@@ -1481,8 +1484,8 @@ class _StickyNoteContextMenu extends StatelessWidget {
                               size: 16, color: Colors.red),
                           const SizedBox(width: 4),
                           Text('Sil',
-                              style: GoogleFonts.sourceSerif4(
-                                  fontSize: 12, color: Colors.red)),
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Colors.red)),
                         ],
                       ),
                     ),

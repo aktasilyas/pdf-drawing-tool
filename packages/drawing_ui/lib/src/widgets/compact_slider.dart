@@ -1,7 +1,5 @@
 /// Compact slider widget for panel settings.
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-
 /// Compact slider with inline title and value label.
 ///
 /// Commonly used in tool settings panels for adjusting numeric values
@@ -70,7 +68,8 @@ class CompactSlider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+    final textTheme = Theme.of(context).textTheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -80,16 +79,14 @@ class CompactSlider extends StatelessWidget {
           children: [
             Text(
               title,
-              style: GoogleFonts.sourceSerif4(
-                fontSize: 11,
+              style: textTheme.labelSmall?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: colorScheme.onSurfaceVariant,
               ),
             ),
             Text(
               label,
-              style: GoogleFonts.sourceSerif4(
-                fontSize: 11,
+              style: textTheme.labelSmall?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: colorScheme.onSurface,
               ),
