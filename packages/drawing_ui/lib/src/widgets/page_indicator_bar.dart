@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:drawing_ui/src/theme/drawing_shadows.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
 
 /// Compact floating page indicator bar shown below the canvas.
@@ -81,7 +81,7 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
             decoration: BoxDecoration(
               color: cs.surfaceContainerHigh.withValues(alpha: 0.92),
               borderRadius: BorderRadius.circular(20),
-              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 8, offset: const Offset(0, 2))],
+              boxShadow: DrawingShadows.toolbar(Theme.of(context).brightness),
             ),
             child: Row(mainAxisSize: MainAxisSize.min, children: [
               _NavArrow(icon: scrollDir == Axis.horizontal ? StarNoteIcons.chevronLeft : StarNoteIcons.caretUp, tooltip: 'Önceki Sayfa', onTap: canPrev ? () { _navigateTo(isDual ? (currentIndex - 2).clamp(0, pageCount - 1) : currentIndex - 1, ref); } : null),
@@ -95,7 +95,7 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Text(pageLabel,
-                          style: GoogleFonts.sourceSerif4(fontSize: 13, fontWeight: FontWeight.w500, color: cs.onSurface)),
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 13, color: cs.onSurface)),
                     ),
                   ),
                 ),
@@ -127,7 +127,7 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
         onSubmitted: (v) { _goTo(v, pageCount, ref, ctx); },
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(ctx), child: Text('İptal', style: GoogleFonts.sourceSerif4(color: Theme.of(ctx).colorScheme.onSurfaceVariant))),
+        TextButton(onPressed: () => Navigator.pop(ctx), child: Text('İptal', style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(color: Theme.of(ctx).colorScheme.onSurfaceVariant))),
         FilledButton(onPressed: () { _goTo(controller.text, pageCount, ref, ctx); }, child: const Text('Git')),
       ],
     ));

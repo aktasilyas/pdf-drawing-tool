@@ -57,7 +57,7 @@ class FloatingQuickColors extends ConsumerWidget {
               : null,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.1),
+              color: colorScheme.shadow.withValues(alpha: isDark ? 0.3 : 0.1),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -226,7 +226,6 @@ class _ColorDot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final isDark = color.computeLuminance() < 0.4;
 
     return GestureDetector(
       onTap: onTap,
@@ -250,7 +249,7 @@ class _ColorDot extends StatelessWidget {
               ? Icon(
                   Icons.check,
                   size: 14,
-                  color: isDark ? Colors.white : Colors.black,
+                  color: colorScheme.onSurface,
                 )
               : null,
         ),
@@ -298,7 +297,7 @@ class _PaletteButton extends StatelessWidget {
 
     entry = OverlayEntry(
       builder: (ctx) => Material(
-        color: Colors.black.withValues(alpha: 137.0 / 255.0),
+        color: Theme.of(ctx).colorScheme.scrim.withValues(alpha: 0.54),
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () => entry.remove(),

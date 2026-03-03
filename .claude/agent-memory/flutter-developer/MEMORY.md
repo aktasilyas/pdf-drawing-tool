@@ -115,8 +115,35 @@ All tool settings panels follow this consistent layout:
 - `Uint8List` requires explicit `import 'dart:typed_data'` -- `flutter/material.dart` alone does NOT export it
 - PDF cache key format: `"filePath|pageNumber"` (1-based page number)
 
+## DrawingShadows Token System
+- File: `packages/drawing_ui/lib/src/theme/drawing_shadows.dart`
+- Methods: `.panel(brightness)`, `.floating(brightness)`, `.selection(brightness, [tintColor])`, `.toolbar(brightness)`, `.page(brightness)`, `.none`
+- Import: `import 'package:drawing_ui/src/theme/drawing_shadows.dart';`
+- See [design-system-patterns.md](design-system-patterns.md) for color/shadow migration rules
+- Color migration: `Colors.black` shadow -> `colorScheme.shadow`; overlay/scrim -> `colorScheme.scrim.withValues(alpha:X)`; `Colors.grey.shade200` bg -> `colorScheme.surfaceContainerHighest`; `Colors.grey.shade300` border -> `colorScheme.outlineVariant`
+- KEEP: checkerboard Paint colors, contrast icons on colored chips, semantic colors
+
+## Design System Migration (GoogleFonts -> textTheme)
+- Completed migration of `GoogleFonts.sourceSerif4(...)` -> `Theme.of(context).textTheme.*` in all 14 panel files + page_options_panel.dart call site
+- Panels dir is now 100% GoogleFonts-free: `packages/drawing_ui/lib/src/panels/`
+- Remaining GoogleFonts refs exist in `widgets/` dir (not yet migrated)
+- Mapping: fontSize 11->labelSmall, 12/w400->bodySmall, 12/w500+->labelMedium, 13/w600->titleSmall, 14->bodyMedium, 15->bodyMedium(fontSize:15), 16/w600->titleMedium(fontSize:16,fontWeight:w600), 18+->titleMedium(fontSize:18), 24->headlineSmall, 28->headlineMedium
+- Drop fontSize when it matches the textTheme style's default; drop fontWeight when it matches base (labelSmall=w500, bodySmall=w400, titleSmall=w500)
+- Use `?.copyWith(...)` since textTheme properties are nullable
+- For helper functions without BuildContext (e.g. `pageOptionsChevronTrailing`), pass `TextTheme?` as optional param
+- Pre-existing errors in widgets/ dir (GoogleFonts refs, SelectionPainter missing selectionColor) unrelated to migration
+
+## Selection Color Migration (Material Blue -> colorScheme.primary)
+- Completed: All hardcoded `Color(0xFF2196F3)` / `Color(0xFF448AFF)` replaced in drawing_ui/lib/src/
+- Pattern for CustomPainters: Add `Color selectionColor` constructor param, pass `Theme.of(context).colorScheme.primary` from widget
+- For static Paint objects using selection color: convert from `static final` to `late final` instance fields
+- Alpha variants: `selectionColor.withValues(alpha: 0.08)` for 0x15, `withValues(alpha: 0.06)` for 0x10
+- Excluded files: `drawing_colors.dart`, `toolbar_config.dart` (drawing palette), `laser_painter.dart` (rainbow)
+- Default fallback for non-widget contexts: `Color(0xFF10B981)` (Emerald Green primary)
+
 ## Testing Notes
 - Pre-existing failures: ~45 tests (PDF, canvas, toolbar icon matching) - expected
 - Pre-existing warnings: 3 unnecessary_non_null_assertion in pdf_render_provider.dart
 - New tests should verify responsive behavior at different breakpoints
+- When adding required painter params, update test files too (selection_painter_test, text_painter_test)
 - Analyze before commit: `cmd.exe /c "cd /d C:\Users\aktas\source\repos\starnote_drawing_workspace && dart analyze packages/drawing_ui"`

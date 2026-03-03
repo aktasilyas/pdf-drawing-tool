@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
 
 /// Centered zoom overlay shown during and briefly after pinch zoom.
@@ -135,6 +134,7 @@ class _ZoomControlBarState extends ConsumerState<ZoomControlBar>
   }
 
   Widget _buildBar(int percentage, bool isLocked, bool isFavorite) {
+    final textTheme = Theme.of(context).textTheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       decoration: _overlayDecoration,
@@ -160,9 +160,8 @@ class _ZoomControlBarState extends ConsumerState<ZoomControlBar>
                 children: [
                   Text(
                     '$percentage%',
-                    style: GoogleFonts.sourceSerif4(
+                    style: textTheme.headlineMedium?.copyWith(
                       color: Colors.white,
-                      fontSize: 28,
                       fontWeight: FontWeight.w600,
                       letterSpacing: 1,
                     ),
@@ -212,6 +211,7 @@ class _ZoomControlBarState extends ConsumerState<ZoomControlBar>
   }
 
   Widget _buildDropdownItem(int zoomPercent, bool isActive) {
+    final textTheme = Theme.of(context).textTheme;
     return GestureDetector(
       onTap: () => _goToFavorite(zoomPercent),
       behavior: HitTestBehavior.opaque,
@@ -235,11 +235,15 @@ class _ZoomControlBarState extends ConsumerState<ZoomControlBar>
               const SizedBox(width: 12),
               Text(
                 '$zoomPercent%',
-                style: GoogleFonts.sourceSerif4(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-                ),
+                style: isActive
+                    ? textTheme.titleMedium?.copyWith(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      )
+                    : textTheme.bodyLarge?.copyWith(
+                        color: Colors.white,
+                      ),
               ),
             ],
           ),

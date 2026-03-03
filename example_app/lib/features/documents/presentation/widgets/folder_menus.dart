@@ -7,6 +7,7 @@ import 'package:example_app/features/documents/domain/entities/folder.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/folder_color_picker.dart';
+import 'package:example_app/features/documents/presentation/widgets/menu_tile.dart';
 import 'package:example_app/features/documents/presentation/widgets/move_to_folder_dialog.dart';
 
 /// Shows context menu for a folder.
@@ -19,44 +20,40 @@ void showFolderMenu(
   final isDark = Theme.of(context).brightness == Brightness.dark;
   final surfaceColor =
       isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
-  final textPrimary =
-      isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
-  final textSecondary =
-      isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
 
   showModalBottomSheet(
     context: context,
     backgroundColor: surfaceColor,
     shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      borderRadius:
+          BorderRadius.vertical(top: Radius.circular(AppRadius.bottomSheet)),
     ),
     builder: (ctx) => SafeArea(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ListTile(
-            leading: Icon(Icons.edit_outlined, color: textSecondary),
-            title: Text('Yeniden Adlandır',
-                style: AppTypography.bodyMedium.copyWith(color: textPrimary)),
+          const SizedBox(height: AppSpacing.md),
+          MenuTile(
+            icon: Icons.edit_outlined,
+            label: 'Yeniden Adlandır',
             onTap: () {
               Navigator.pop(ctx);
               _showRenameFolderDialog(context, ref, folder);
             },
           ),
-          ListTile(
-            leading: Icon(Icons.color_lens_outlined, color: textSecondary),
-            title: Text('Renk Değiştir',
-                style: AppTypography.bodyMedium.copyWith(color: textPrimary)),
+          _softDivider(isDark),
+          MenuTile(
+            icon: Icons.color_lens_outlined,
+            label: 'Renk Değiştir',
             onTap: () {
               Navigator.pop(ctx);
               _showColorPicker(context, ref, folder);
             },
           ),
-          ListTile(
-            leading:
-                Icon(Icons.drive_file_move_outlined, color: textSecondary),
-            title: Text('Taşı',
-                style: AppTypography.bodyMedium.copyWith(color: textPrimary)),
+          _softDivider(isDark),
+          MenuTile(
+            icon: Icons.drive_file_move_outlined,
+            label: 'Taşı',
             onTap: () async {
               Navigator.pop(ctx);
               final messenger = ScaffoldMessenger.of(context);
@@ -78,7 +75,7 @@ void showFolderMenu(
               }
             },
           ),
-          const AppDivider(),
+          _softDivider(isDark),
           _buildDeleteFolderTile(context, ref, folder, onDeleted),
           const SizedBox(height: AppSpacing.sm),
         ],
@@ -124,10 +121,10 @@ Widget _buildDeleteFolderTile(
   final textPrimary =
       isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
 
-  return ListTile(
-    leading: const Icon(Icons.delete_outline, color: AppColors.error),
-    title: Text('Sil',
-        style: AppTypography.bodyMedium.copyWith(color: AppColors.error)),
+  return MenuTile(
+    icon: Icons.delete_outline,
+    label: 'Sil',
+    isDestructive: true,
     onTap: () async {
       Navigator.pop(context);
       final confirmed = await showDialog<bool>(
@@ -264,5 +261,17 @@ void _showRenameFolderDialog(
         ),
       ],
     ),
+  );
+}
+
+/// Soft divider matching settings/sidebar pattern (0.5px, outlineVariant).
+Widget _softDivider(bool isDark) {
+  return Divider(
+    height: 0.5,
+    thickness: 0.5,
+    color: isDark
+        ? AppColors.outlineVariantDark
+        : AppColors.outlineVariantLight,
+    indent: 56,
   );
 }

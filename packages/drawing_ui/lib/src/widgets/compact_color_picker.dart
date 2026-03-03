@@ -1,8 +1,8 @@
 /// Samsung Notes-style color picker with Kartelalar (swatch) and Spektrum tabs.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:drawing_ui/src/theme/drawing_shadows.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
 import 'package:drawing_ui/src/providers/recent_colors_provider.dart';
 import 'package:drawing_ui/src/widgets/color_swatch_grid.dart';
@@ -80,13 +80,7 @@ class _CompactColorPickerState extends ConsumerState<CompactColorPicker>
           border: isDark
               ? Border.all(color: cs.outline.withValues(alpha: 0.2))
               : null,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.5 : 0.2),
-              blurRadius: 24,
-              offset: const Offset(0, 8),
-            ),
-          ],
+          boxShadow: DrawingShadows.panel(Theme.of(context).brightness),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -140,6 +134,7 @@ class _CompactColorPickerState extends ConsumerState<CompactColorPicker>
   }
 
   Widget _buildTabBar(ColorScheme cs) {
+    final textTheme = Theme.of(context).textTheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       child: Container(
@@ -159,8 +154,8 @@ class _CompactColorPickerState extends ConsumerState<CompactColorPicker>
           indicatorSize: TabBarIndicatorSize.tab,
           dividerHeight: 0,
           labelStyle:
-              GoogleFonts.sourceSerif4(fontSize: 13, fontWeight: FontWeight.w600),
-          unselectedLabelStyle: GoogleFonts.sourceSerif4(fontSize: 13),
+              textTheme.titleSmall?.copyWith(fontSize: 13),
+          unselectedLabelStyle: textTheme.bodySmall?.copyWith(fontSize: 13),
           tabs: const [Tab(text: 'Kartelalar'), Tab(text: 'Spektrum')],
         ),
       ),
@@ -180,6 +175,7 @@ class _ColorInfoBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     final r = (color.r * 255).round();
     final g = (color.g * 255).round();
     final b = (color.b * 255).round();
@@ -200,23 +196,22 @@ class _ColorInfoBar extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        _infoCol('Altıgen', '#${hex.toUpperCase()}', cs),
-        _infoCol('Kırmızı', '$r', cs),
-        _infoCol('Yeşil', '$g', cs),
-        _infoCol('Mavi', '$b', cs),
+        _infoCol('Altıgen', '#${hex.toUpperCase()}', cs, textTheme),
+        _infoCol('Kırmızı', '$r', cs, textTheme),
+        _infoCol('Yeşil', '$g', cs, textTheme),
+        _infoCol('Mavi', '$b', cs, textTheme),
       ]),
     );
   }
 
-  Widget _infoCol(String label, String value, ColorScheme cs) {
+  Widget _infoCol(String label, String value, ColorScheme cs, TextTheme textTheme) {
     return Expanded(
       child: Column(children: [
         Text(label,
-            style: GoogleFonts.sourceSerif4(fontSize: 9, color: cs.onSurfaceVariant)),
+            style: textTheme.labelSmall?.copyWith(fontSize: 9, color: cs.onSurfaceVariant)),
         const SizedBox(height: 2),
         Text(value,
-            style: GoogleFonts.sourceSerif4(
-                fontSize: 11,
+            style: textTheme.labelSmall?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: cs.onSurface)),
       ]),
@@ -338,6 +333,7 @@ class _ActionButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
       child: Row(children: [
@@ -349,7 +345,7 @@ class _ActionButtons extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 child: Text('İptal et',
-                    style: GoogleFonts.sourceSerif4(fontSize: 15, color: textColor)),
+                    style: textTheme.bodyMedium?.copyWith(fontSize: 15, color: textColor)),
               ),
             ),
           ),
@@ -363,7 +359,7 @@ class _ActionButtons extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 child: Text('Bitti',
-                    style: GoogleFonts.sourceSerif4(
+                    style: textTheme.bodyMedium?.copyWith(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
                         color: primaryColor)),

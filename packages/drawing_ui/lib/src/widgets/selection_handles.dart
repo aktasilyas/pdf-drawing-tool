@@ -59,6 +59,7 @@ class _SelectionHandlesState extends ConsumerState<SelectionHandles> {
           bounds: widget.selection.bounds,
           moveDelta: ui.moveDelta,
           rotation: ui.rotation,
+          selectionColor: Theme.of(context).colorScheme.primary,
           scaleX: ui.scaleX,
           scaleY: ui.scaleY,
         ),

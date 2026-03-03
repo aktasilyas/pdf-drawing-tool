@@ -50,7 +50,8 @@ class ThicknessSlider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = DrawingTheme.of(context);
-    final color = previewColor ?? Colors.black;
+    final colorScheme = Theme.of(context).colorScheme;
+    final color = previewColor ?? colorScheme.onSurface;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,13 +64,13 @@ class ThicknessSlider extends StatelessWidget {
               Text(
                 label!,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Colors.grey.shade700,
+                      color: colorScheme.onSurfaceVariant,
                     ),
               ),
               Text(
                 value.toStringAsFixed(1),
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.grey.shade500,
+                      color: colorScheme.outline,
                     ),
               ),
             ],
@@ -113,7 +114,7 @@ class ThicknessSlider extends StatelessWidget {
                     overlayRadius: 20,
                   ),
                   activeTrackColor: theme.toolbarIconSelectedColor,
-                  inactiveTrackColor: Colors.grey.shade300,
+                  inactiveTrackColor: colorScheme.outlineVariant,
                   thumbColor: theme.toolbarIconSelectedColor,
                   overlayColor: theme.toolbarIconSelectedColor.withValues(alpha: 32.0 / 255.0),
                 ),
@@ -149,6 +150,7 @@ class StabilizationSlider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = DrawingTheme.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -160,13 +162,13 @@ class StabilizationSlider extends StatelessWidget {
             Text(
               'Stabilization',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey.shade700,
+                    color: colorScheme.onSurfaceVariant,
                   ),
             ),
             Text(
               '${(value * 100).toInt()}%',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.grey.shade500,
+                    color: colorScheme.outline,
                   ),
             ),
           ],
@@ -182,7 +184,7 @@ class StabilizationSlider extends StatelessWidget {
               overlayRadius: 20,
             ),
             activeTrackColor: theme.toolbarIconSelectedColor,
-            inactiveTrackColor: Colors.grey.shade300,
+            inactiveTrackColor: colorScheme.outlineVariant,
             thumbColor: theme.toolbarIconSelectedColor,
             overlayColor: theme.toolbarIconSelectedColor.withValues(alpha: 32.0 / 255.0),
           ),

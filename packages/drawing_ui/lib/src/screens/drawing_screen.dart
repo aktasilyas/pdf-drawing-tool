@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
@@ -308,10 +307,10 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
         : Color(canvasMode.surroundingAreaColor);
 
     final drawingTheme = DrawingTheme(
-      toolbarBackground: colorScheme.surface,
-      toolbarIconColor: colorScheme.onSurfaceVariant,
-      toolbarIconSelectedColor: colorScheme.primary,
-      toolbarIconDisabledColor: colorScheme.onSurface.withValues(alpha: 0.38),
+      toolbarBackground: colorScheme.primary,
+      toolbarIconColor: colorScheme.onPrimary.withValues(alpha: 0.7),
+      toolbarIconSelectedColor: colorScheme.onPrimary,
+      toolbarIconDisabledColor: colorScheme.onPrimary.withValues(alpha: 0.3),
       panelBackground: isDark
           ? colorScheme.surfaceContainerHigh
           : colorScheme.surface,
@@ -434,7 +433,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                     child: AnimatedOpacity(
                       duration: const Duration(milliseconds: 250),
                       opacity: 0.5,
-                      child: Container(color: Colors.black),
+                      child: Container(color: colorScheme.scrim),
                     ),
                   ),
                 ),
@@ -462,7 +461,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                     child: AnimatedOpacity(
                       duration: const Duration(milliseconds: 250),
                       opacity: 0.5,
-                      child: Container(color: Colors.black),
+                      child: Container(color: colorScheme.scrim),
                     ),
                   ),
                 ),
@@ -528,6 +527,9 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
     final pageSize = ref.read(documentProvider).settings.defaultPageSize;
     final surroundColor = canvasMode.isInfinite
         ? Color(bg.color) : Color(canvasMode.surroundingAreaColor);
+    final materialTheme = Theme.of(context);
+    final previewColorScheme = materialTheme.colorScheme;
+    final brightness = materialTheme.brightness;
 
     return LayoutBuilder(builder: (_, constraints) {
       final vw = constraints.maxWidth;
@@ -547,9 +549,8 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
           child: Container(
             decoration: BoxDecoration(
               color: Color(bg.color),
-              border: Border.all(color: const Color(0x1A000000), width: 0.5),
-              boxShadow: const [BoxShadow(
-                color: Color(0x26000000), blurRadius: 12, offset: Offset(0, 4))],
+              border: Border.all(color: previewColorScheme.outlineVariant, width: 0.5),
+              boxShadow: DrawingShadows.page(brightness),
             ),
             child: PageBackgroundView(
               background: bg, colorScheme: cs,
@@ -560,15 +561,14 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
         Positioned.fill(child: Center(child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
           decoration: BoxDecoration(
-            color: Colors.black.withValues(alpha: 0.55),
+            color: previewColorScheme.scrim.withValues(alpha: 0.55),
             borderRadius: BorderRadius.circular(12)),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             const Icon(Icons.add_rounded, color: Colors.white, size: 32),
             const SizedBox(height: 6),
             Text('Yeni sayfa eklemek için\nsürükleyip bırakın',
               textAlign: TextAlign.center,
-              style: GoogleFonts.sourceSerif4(color: Colors.white, fontSize: 13,
-                fontWeight: FontWeight.w500)),
+              style: materialTheme.textTheme.bodySmall?.copyWith(fontSize: 13, color: Colors.white)),
           ]),
         ))),
       ]));

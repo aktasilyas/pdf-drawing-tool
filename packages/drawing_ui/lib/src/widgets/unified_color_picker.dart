@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
 import 'package:drawing_ui/src/widgets/compact_color_picker.dart';
@@ -63,7 +62,7 @@ class UnifiedColorPicker extends StatelessWidget {
     overlayEntry = OverlayEntry(
       builder: (overlayContext) {
         return Material(
-          color: Colors.black.withValues(alpha: 137.0 / 255.0), // 0.54 opacity for stronger backdrop
+          color: Theme.of(overlayContext).colorScheme.scrim.withValues(alpha: 0.54),
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () => overlayEntry.remove(),
@@ -196,7 +195,7 @@ class _MoreButton extends StatelessWidget {
             const SizedBox(width: 3),
             Text(
               'Daha fazla',
-              style: GoogleFonts.sourceSerif4(
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 fontSize: 10,
                 color: colorScheme.primary,
               ),

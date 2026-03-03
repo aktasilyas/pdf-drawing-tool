@@ -6,6 +6,7 @@ import 'package:drawing_ui/src/models/selection_action.dart';
 import 'package:drawing_ui/src/providers/document_provider.dart';
 import 'package:drawing_ui/src/providers/selection_actions_provider.dart';
 import 'package:drawing_ui/src/providers/canvas_transform_provider.dart';
+import 'package:drawing_ui/src/theme/drawing_shadows.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
 import 'package:drawing_ui/src/widgets/selection_overflow_menu.dart';
 import 'package:drawing_ui/src/widgets/selection_toolbar_buttons.dart';
@@ -102,19 +103,14 @@ class _SelectionToolbarState extends ConsumerState<SelectionToolbar> {
   }
 
   Widget _buildToolbarPill(SelectionActionConfig config) {
+    final colorScheme = Theme.of(context).colorScheme;
     final hasOverflow =
         config.topRowActions.isNotEmpty || config.overflowActions.isNotEmpty;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.15),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: DrawingShadows.panel(Theme.of(context).brightness),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       child: Row(
@@ -231,7 +227,7 @@ class _SelectionToolbarState extends ConsumerState<SelectionToolbar> {
     late OverlayEntry entry;
     entry = OverlayEntry(
       builder: (ctx) => Material(
-        color: Colors.black.withValues(alpha: 137.0 / 255.0),
+        color: Theme.of(ctx).colorScheme.scrim.withValues(alpha: 0.54),
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () => entry.remove(),

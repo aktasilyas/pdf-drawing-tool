@@ -29,6 +29,8 @@ class TextContextMenu extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     // Calculate screen position
     final screenX = textElement.x * zoom + canvasOffset.dx;
     final screenY = textElement.y * zoom + canvasOffset.dy;
@@ -47,11 +49,11 @@ class TextContextMenu extends ConsumerWidget {
           color: Colors.transparent,
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colorScheme.surface,
               borderRadius: BorderRadius.circular(8),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.2),
+                  color: colorScheme.shadow.withValues(alpha: 0.15),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -66,34 +68,34 @@ class TextContextMenu extends ConsumerWidget {
                     tooltip: 'Düzenle',
                     onTap: onEdit!,
                   ),
-                  const _MenuDivider(),
+                  _MenuDivider(color: colorScheme.outlineVariant),
                 ],
                 _MenuButton(
                   icon: StarNoteIcons.trash,
                   tooltip: 'Sil',
                   onTap: onDelete,
-                  color: Colors.red,
+                  color: colorScheme.error,
                 ),
                 if (onStyle != null) ...[
-                  const _MenuDivider(),
+                  _MenuDivider(color: colorScheme.outlineVariant),
                   _MenuButton(
                     icon: StarNoteIcons.palette,
                     tooltip: 'Stil',
                     onTap: onStyle!,
                   ),
                 ],
-                const _MenuDivider(),
+                _MenuDivider(color: colorScheme.outlineVariant),
                 _MenuButton(
                   icon: StarNoteIcons.copy,
                   tooltip: 'Kopyala',
                   onTap: onDuplicate,
                 ),
-                const _MenuDivider(),
+                _MenuDivider(color: colorScheme.outlineVariant),
                 _MenuButton(
                   icon: StarNoteIcons.move,
                   tooltip: 'Taşı',
                   onTap: onMove,
-                  color: Colors.blue,
+                  color: colorScheme.primary,
                 ),
               ],
             ),
@@ -120,6 +122,7 @@ class _MenuButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Tooltip(
       message: tooltip,
       child: GestureDetector(
@@ -135,7 +138,7 @@ class _MenuButton extends StatelessWidget {
           child: PhosphorIcon(
             icon,
             size: 20,
-            color: color ?? Colors.black87,
+            color: color ?? colorScheme.onSurface,
           ),
         ),
       ),
@@ -145,14 +148,16 @@ class _MenuButton extends StatelessWidget {
 
 /// Vertical divider between menu buttons
 class _MenuDivider extends StatelessWidget {
-  const _MenuDivider();
+  const _MenuDivider({this.color});
+
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: 1,
       height: 24,
-      color: Colors.grey[300],
+      color: color ?? Theme.of(context).colorScheme.outlineVariant,
     );
   }
 }

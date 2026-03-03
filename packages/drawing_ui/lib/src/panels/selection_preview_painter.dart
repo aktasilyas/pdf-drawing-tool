@@ -16,24 +16,26 @@ class SelectionPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final selectionColor = Theme.of(context).colorScheme.primary;
     return SizedBox(
       width: double.infinity,
       height: 100,
       child: CustomPaint(
         size: const Size(double.infinity, 100),
-        painter: _SelectionPreviewPainter(mode),
+        painter: _SelectionPreviewPainter(mode, selectionColor),
       ),
     );
   }
 }
 
 class _SelectionPreviewPainter extends CustomPainter {
-  _SelectionPreviewPainter(this.mode);
+  _SelectionPreviewPainter(this.mode, this.selectionColor);
 
   final LassoMode mode;
+  final Color selectionColor;
 
-  static const _selectionBlue = Color(0xFF448AFF);
-  static const _selectionFill = Color(0x10448AFF);
+  late final Color _selectionFill =
+      selectionColor.withValues(alpha: 0.06);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -129,7 +131,7 @@ class _SelectionPreviewPainter extends CustomPainter {
     var d = 0.0;
     var draw = true;
     final dashPaint = Paint()
-      ..color = _selectionBlue
+      ..color = selectionColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5
       ..strokeCap = StrokeCap.round;
@@ -146,5 +148,6 @@ class _SelectionPreviewPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_SelectionPreviewPainter o) => mode != o.mode;
+  bool shouldRepaint(_SelectionPreviewPainter o) =>
+      mode != o.mode || selectionColor != o.selectionColor;
 }

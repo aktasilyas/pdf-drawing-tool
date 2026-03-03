@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 
@@ -70,6 +69,7 @@ class _AIAssistantPanelState extends ConsumerState<AIAssistantPanel> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Column(
@@ -77,7 +77,7 @@ class _AIAssistantPanelState extends ConsumerState<AIAssistantPanel> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(children: [
-            Text('Ask AI', style: GoogleFonts.sourceSerif4(
+            Text('Ask AI', style: textTheme.bodyMedium?.copyWith(
               fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSurface)),
             const Spacer(),
             const _PremiumBadge(),
@@ -100,7 +100,7 @@ class _AIAssistantPanelState extends ConsumerState<AIAssistantPanel> {
 
           // Quick suggestions
           if (_response == null && !_isLoading) ...[
-            Text('SUGGESTIONS', style: GoogleFonts.sourceSerif4(fontSize: 11,
+            Text('SUGGESTIONS', style: textTheme.labelSmall?.copyWith(
                 fontWeight: FontWeight.w600, color: cs.onSurfaceVariant,
                 letterSpacing: 0.5)),
             const SizedBox(height: 6),
@@ -185,8 +185,7 @@ class _PremiumBadge extends StatelessWidget {
           const SizedBox(width: 4),
           Text(
             'Pro',
-            style: GoogleFonts.sourceSerif4(
-              fontSize: 12,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
               fontWeight: FontWeight.w600,
               color: colorScheme.tertiary,
             ),
@@ -235,7 +234,7 @@ class _SelectionIndicator extends StatelessWidget {
               hasSelection
                   ? selectionDescription
                   : 'Select content to ask AI about',
-              style: GoogleFonts.sourceSerif4(
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 fontSize: 13,
                 color: hasSelection ? colorScheme.primary : colorScheme.outline,
               ),
@@ -270,7 +269,7 @@ class _QuestionInput extends StatelessWidget {
             controller: controller,
             decoration: InputDecoration(
               hintText: 'Ask a question about your selection...',
-              hintStyle: GoogleFonts.sourceSerif4(color: colorScheme.onSurfaceVariant),
+              hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
               filled: true,
               fillColor: colorScheme.surfaceContainerLowest,
               border: OutlineInputBorder(
@@ -344,7 +343,7 @@ class _QuickSuggestions extends StatelessWidget {
             ),
             child: Text(
               suggestion,
-              style: GoogleFonts.sourceSerif4(
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 fontSize: 13,
                 color: colorScheme.onSurface,
               ),
@@ -383,7 +382,7 @@ class _LoadingIndicator extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             'AI is thinking...',
-            style: GoogleFonts.sourceSerif4(
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
               fontSize: 13,
               color: colorScheme.outline,
             ),
@@ -426,9 +425,8 @@ class _ResponseArea extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 'AI Response',
-                style: GoogleFonts.sourceSerif4(
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   fontSize: 13,
-                  fontWeight: FontWeight.w600,
                   color: colorScheme.primary,
                 ),
               ),
@@ -447,8 +445,7 @@ class _ResponseArea extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             response,
-            style: GoogleFonts.sourceSerif4(
-              fontSize: 14,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: colorScheme.onSurface,
               height: 1.5,
             ),
@@ -481,8 +478,7 @@ class _PremiumNotice extends StatelessWidget {
           Expanded(
             child: Text(
               'AI features are limited in free plan. Upgrade for unlimited access.',
-              style: GoogleFonts.sourceSerif4(
-                fontSize: 12,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: colorScheme.tertiary,
               ),
             ),

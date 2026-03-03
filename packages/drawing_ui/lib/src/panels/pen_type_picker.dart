@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
@@ -72,7 +71,7 @@ class PenTypePicker extends ConsumerWidget {
                   // Label
                   Text(
                     label,
-                    style: GoogleFonts.sourceSerif4(
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
                       fontSize: 10,
                       fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                       color: isSelected

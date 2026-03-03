@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/models/selection_action.dart';
+import 'package:drawing_ui/src/theme/drawing_shadows.dart';
 
 /// GoodNotes-style overflow menu for selection actions.
 ///
@@ -29,20 +29,16 @@ class SelectionOverflowMenu extends StatelessWidget {
         actions.where((a) => !a.isDestructive).toList();
     final destructiveActions =
         actions.where((a) => a.isDestructive).toList();
+    final colorScheme = Theme.of(context).colorScheme;
+    final brightness = Theme.of(context).brightness;
 
     return Container(
       width: 230,
       constraints: const BoxConstraints(maxHeight: 480),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.15),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: DrawingShadows.panel(brightness),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
@@ -93,10 +89,12 @@ class SelectionOverflowMenu extends StatelessWidget {
     );
   }
 
-  Widget _divider() => Divider(
-        height: 1,
-        thickness: 0.5,
-        color: Colors.grey.shade200,
+  Widget _divider() => Builder(
+        builder: (context) => Divider(
+          height: 1,
+          thickness: 0.5,
+          color: Theme.of(context).colorScheme.outlineVariant,
+        ),
       );
 }
 
@@ -110,7 +108,9 @@ class _TopRowButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final enabled = action.isEnabled;
-    final color = enabled ? Colors.black87 : Colors.black38;
+    final cs = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final color = enabled ? cs.onSurface : cs.onSurface.withValues(alpha: 0.38);
 
     return GestureDetector(
       onTap: enabled ? onTap : null,
@@ -131,7 +131,7 @@ class _TopRowButton extends StatelessWidget {
               ),
               Text(
                 action.label,
-                style: GoogleFonts.sourceSerif4(fontSize: 11, color: color),
+                style: textTheme.labelSmall?.copyWith(color: color),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -152,9 +152,11 @@ class _OverflowListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final enabled = action.isEnabled;
+    final cs = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     final color = action.isDestructive
-        ? (enabled ? Colors.red : Colors.red.withValues(alpha: 0.38))
-        : (enabled ? Colors.black87 : Colors.black38);
+        ? (enabled ? cs.error : cs.error.withValues(alpha: 0.38))
+        : (enabled ? cs.onSurface : cs.onSurface.withValues(alpha: 0.38));
 
     return GestureDetector(
       onTap: enabled ? onTap : null,
@@ -169,7 +171,7 @@ class _OverflowListItem extends StatelessWidget {
               Expanded(
                 child: Text(
                   action.label,
-                  style: GoogleFonts.sourceSerif4(fontSize: 15, color: color),
+                  style: textTheme.bodyMedium?.copyWith(fontSize: 15, color: color),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),

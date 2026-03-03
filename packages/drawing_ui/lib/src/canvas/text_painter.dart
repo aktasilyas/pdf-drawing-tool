@@ -8,9 +8,11 @@ class TextElementPainter extends CustomPainter {
   final TextElement? activeText; // Editing preview
   final bool showCursor;
   final Set<String> excludedTextIds;
+  final Color selectionColor;
 
   TextElementPainter({
     required this.texts,
+    required this.selectionColor,
     this.activeText,
     this.showCursor = false,
     this.excludedTextIds = const {},
@@ -80,7 +82,7 @@ class TextElementPainter extends CustomPainter {
   void _drawEditingIndicator(
       Canvas canvas, TextElement text, ui.Paragraph paragraph) {
     final paint = Paint()
-      ..color = const Color(0xFF2196F3)
+      ..color = selectionColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0;
 
@@ -124,6 +126,7 @@ class TextElementPainter extends CustomPainter {
     return oldDelegate.texts != texts ||
         oldDelegate.activeText != activeText ||
         oldDelegate.showCursor != showCursor ||
-        oldDelegate.excludedTextIds != excludedTextIds;
+        oldDelegate.excludedTextIds != excludedTextIds ||
+        oldDelegate.selectionColor != selectionColor;
   }
 }

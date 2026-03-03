@@ -18,22 +18,24 @@ class EraserPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final selectionColor = Theme.of(context).colorScheme.primary;
     return SizedBox(
       width: double.infinity,
       height: 100,
       child: CustomPaint(
         size: const Size(double.infinity, 100),
-        painter: _EraserPreviewPainter(mode, size),
+        painter: _EraserPreviewPainter(mode, size, selectionColor),
       ),
     );
   }
 }
 
 class _EraserPreviewPainter extends CustomPainter {
-  _EraserPreviewPainter(this.mode, this.eraserSize);
+  _EraserPreviewPainter(this.mode, this.eraserSize, this.selectionColor);
 
   final EraserMode mode;
   final double eraserSize;
+  final Color selectionColor;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -137,7 +139,7 @@ class _EraserPreviewPainter extends CustomPainter {
     canvas.drawPath(
       lassoPath,
       Paint()
-        ..color = const Color(0x10448AFF)
+        ..color = selectionColor.withValues(alpha: 0.06)
         ..style = PaintingStyle.fill,
     );
 
@@ -149,7 +151,7 @@ class _EraserPreviewPainter extends CustomPainter {
     var d = 0.0;
     var draw = true;
     final dashPaint = Paint()
-      ..color = const Color(0xFF448AFF)
+      ..color = selectionColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5
       ..strokeCap = StrokeCap.round;
@@ -167,5 +169,6 @@ class _EraserPreviewPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_EraserPreviewPainter o) =>
-      mode != o.mode || eraserSize != o.eraserSize;
+      mode != o.mode || eraserSize != o.eraserSize ||
+      selectionColor != o.selectionColor;
 }

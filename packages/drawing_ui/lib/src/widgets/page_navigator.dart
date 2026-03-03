@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart' hide Page;
-import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/theme/drawing_shadows.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
 import 'package:drawing_ui/src/services/thumbnail_cache.dart';
+import 'package:drawing_ui/src/panels/page_options_widgets.dart';
 import 'package:drawing_ui/src/widgets/page_thumbnail.dart';
 
 /// A navigation bar widget that displays page thumbnails and allows page management.
@@ -110,28 +111,36 @@ class _PageNavigatorState extends State<PageNavigator> {
     showModalBottomSheet(
       context: context,
       backgroundColor: colorScheme.surface,
-      builder: (context) => SafeArea(
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            const SizedBox(height: 12),
             if (widget.onDuplicatePage != null)
-              ListTile(
-                leading: PhosphorIcon(StarNoteIcons.copy, color: colorScheme.onSurface),
-                title: Text('Duplicate Page', style: GoogleFonts.sourceSerif4(color: colorScheme.onSurface)),
+              PageOptionsMenuItem(
+                icon: StarNoteIcons.copy,
+                label: 'Sayfayı çoğalt',
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.pop(ctx);
                   widget.onDuplicatePage!(index);
                 },
               ),
+            if (widget.onDuplicatePage != null && widget.onDeletePage != null)
+              pageOptionsDivider(colorScheme),
             if (widget.onDeletePage != null)
-              ListTile(
-                leading: PhosphorIcon(StarNoteIcons.trash, color: colorScheme.error),
-                title: Text('Delete Page', style: GoogleFonts.sourceSerif4(color: colorScheme.error)),
+              PageOptionsMenuItem(
+                icon: StarNoteIcons.trash,
+                label: 'Sayfayı sil',
+                isDestructive: true,
                 onTap: () {
-                  Navigator.pop(context);
+                  Navigator.pop(ctx);
                   _confirmDelete(index);
                 },
               ),
+            const SizedBox(height: 8),
           ],
         ),
       ),
@@ -147,13 +156,14 @@ class _PageNavigatorState extends State<PageNavigator> {
     }
 
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: colorScheme.surface,
-        title: Text('Delete Page', style: GoogleFonts.sourceSerif4(color: colorScheme.onSurface)),
-        content: Text('Delete page ${index + 1}?', style: GoogleFonts.sourceSerif4(color: colorScheme.onSurfaceVariant)),
+        title: Text('Delete Page', style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface)),
+        content: Text('Delete page ${index + 1}?', style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -191,13 +201,7 @@ class _PageNavigatorState extends State<PageNavigator> {
             width: 1,
           ),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.1),
-            blurRadius: 4,
-            offset: const Offset(0, -2),
-          ),
-        ],
+        boxShadow: DrawingShadows.floating(theme.brightness),
       ),
       child: Column(
         children: [
@@ -219,7 +223,7 @@ class _PageNavigatorState extends State<PageNavigator> {
                 ? Center(
                     child: Text(
                       'No pages',
-                      style: GoogleFonts.sourceSerif4(color: colorScheme.onSurfaceVariant),
+                      style: theme.textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
                     ),
                   )
                 : ListView.builder(
@@ -265,7 +269,8 @@ class _PageNavigatorState extends State<PageNavigator> {
 
   Widget _buildAddButton() {
     final colorScheme = Theme.of(context).colorScheme;
-    
+    final textTheme = Theme.of(context).textTheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
       child: GestureDetector(
@@ -292,8 +297,7 @@ class _PageNavigatorState extends State<PageNavigator> {
               const SizedBox(height: 4),
               Text(
                 'Add Page',
-                style: GoogleFonts.sourceSerif4(
-                  fontSize: 12,
+                style: textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurfaceVariant,
                 ),
               ),

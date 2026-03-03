@@ -1,7 +1,6 @@
 import 'package:drawing_core/drawing_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import 'package:drawing_ui/src/providers/audio_recording_provider.dart';
@@ -153,13 +152,13 @@ class _TitleAndMeta extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           title,
-          style: GoogleFonts.sourceSerif4(
-            fontSize: 14,
+          style: textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.w600,
             color: cs.onSurface,
           ),
@@ -169,7 +168,7 @@ class _TitleAndMeta extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           '$duration  ·  Sayfa ${pageIndex + 1}  ·  $date',
-          style: GoogleFonts.sourceSerif4(fontSize: 11, color: cs.onSurfaceVariant),
+          style: textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -190,6 +189,7 @@ class _MoreMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return PopupMenuButton<String>(
       icon: PhosphorIcon(
         StarNoteIcons.moreVert,
@@ -220,7 +220,7 @@ class _MoreMenu extends StatelessWidget {
             children: [
               PhosphorIcon(StarNoteIcons.trash, size: 18, color: cs.error),
               const SizedBox(width: 12),
-              Text('Sil', style: GoogleFonts.sourceSerif4(color: cs.error)),
+              Text('Sil', style: textTheme.bodyMedium?.copyWith(color: cs.error)),
             ],
           ),
         ),

@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:example_app/core/theme/index.dart';
-import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
 import 'package:example_app/features/documents/domain/entities/trashed_page.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
+import 'package:example_app/features/documents/presentation/widgets/menu_tile.dart';
 import 'package:example_app/features/documents/presentation/widgets/move_to_folder_dialog.dart';
 
 /// Shows the appropriate document menu based on whether it's in trash.
@@ -28,18 +28,25 @@ void _showTrashDocumentMenu(
   WidgetRef ref,
   DocumentInfo document,
 ) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  final surfaceColor =
+      isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+
   showModalBottomSheet(
     context: context,
+    backgroundColor: surfaceColor,
     shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      borderRadius:
+          BorderRadius.vertical(top: Radius.circular(AppRadius.bottomSheet)),
     ),
     builder: (ctx) => SafeArea(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ListTile(
-            leading: const Icon(Icons.restore_from_trash),
-            title: Text('Kurtar', style: AppTypography.bodyMedium),
+          const SizedBox(height: AppSpacing.md),
+          MenuTile(
+            icon: Icons.restore_from_trash,
+            label: 'Kurtar',
             onTap: () async {
               Navigator.pop(ctx);
               final controller =
@@ -50,48 +57,30 @@ void _showTrashDocumentMenu(
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                      result ? 'Belge geri yüklendi' : 'Belge geri yüklenemedi',
+                      result
+                          ? 'Belge geri yüklendi'
+                          : 'Belge geri yüklenemedi',
                     ),
-                    backgroundColor: result ? null : Theme.of(context).colorScheme.error,
+                    backgroundColor:
+                        result ? null : Theme.of(context).colorScheme.error,
                     behavior: SnackBarBehavior.floating,
                   ),
                 );
               }
             },
           ),
-          const AppDivider(),
-          ListTile(
-            leading: Icon(Icons.delete_forever, color: Theme.of(context).colorScheme.error),
-            title: Text(
-              'Kalıcı Sil',
-              style: AppTypography.bodyMedium.copyWith(
-                color: Theme.of(context).colorScheme.error,
-              ),
-            ),
+          _softDivider(isDark),
+          MenuTile(
+            icon: Icons.delete_forever,
+            label: 'Kalıcı Sil',
+            isDestructive: true,
             onTap: () async {
               Navigator.pop(ctx);
-              final confirmed = await showDialog<bool>(
-                context: context,
-                builder: (ctx2) => AlertDialog(
-                  title: const Text('Kalıcı Olarak Sil'),
-                  content: const Text(
+              final confirmed = await _showDeleteConfirmDialog(
+                context,
+                title: 'Kalıcı Olarak Sil',
+                message:
                     'Bu belge kalıcı olarak silinecek. Bu işlem geri alınamaz!',
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(ctx2, false),
-                      child: const Text('İptal'),
-                    ),
-                    FilledButton(
-                      onPressed: () => Navigator.pop(ctx2, true),
-                      style: FilledButton.styleFrom(
-                        backgroundColor:
-                            Theme.of(ctx2).colorScheme.error,
-                      ),
-                      child: const Text('Kalıcı Sil'),
-                    ),
-                  ],
-                ),
               );
               if (confirmed == true && context.mounted) {
                 final controller =
@@ -112,26 +101,34 @@ void _showNormalDocumentMenu(
   WidgetRef ref,
   DocumentInfo document,
 ) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  final surfaceColor =
+      isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+
   showModalBottomSheet(
     context: context,
+    backgroundColor: surfaceColor,
     shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      borderRadius:
+          BorderRadius.vertical(top: Radius.circular(AppRadius.bottomSheet)),
     ),
     builder: (ctx) => SafeArea(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ListTile(
-            leading: const Icon(Icons.edit_outlined),
-            title: Text('Yeniden Adlandır', style: AppTypography.bodyMedium),
+          const SizedBox(height: AppSpacing.md),
+          MenuTile(
+            icon: Icons.edit_outlined,
+            label: 'Yeniden Adlandır',
             onTap: () {
               Navigator.pop(ctx);
               showRenameDocumentDialog(context, ref, document);
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.content_copy),
-            title: Text('Çoğalt', style: AppTypography.bodyMedium),
+          _softDivider(isDark),
+          MenuTile(
+            icon: Icons.content_copy,
+            label: 'Çoğalt',
             onTap: () async {
               Navigator.pop(ctx);
               final controller =
@@ -142,18 +139,22 @@ void _showNormalDocumentMenu(
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                      result ? 'Belge çoğaltıldı' : 'Belge çoğaltılamadı',
+                      result
+                          ? 'Belge çoğaltıldı'
+                          : 'Belge çoğaltılamadı',
                     ),
-                    backgroundColor: result ? null : Theme.of(context).colorScheme.error,
+                    backgroundColor:
+                        result ? null : Theme.of(context).colorScheme.error,
                     behavior: SnackBarBehavior.floating,
                   ),
                 );
               }
             },
           ),
-          ListTile(
-            leading: const Icon(Icons.drive_file_move_outlined),
-            title: Text('Taşı', style: AppTypography.bodyMedium),
+          _softDivider(isDark),
+          MenuTile(
+            icon: Icons.drive_file_move_outlined,
+            label: 'Taşı',
             onTap: () async {
               Navigator.pop(ctx);
               final messenger = ScaffoldMessenger.of(context);
@@ -175,16 +176,12 @@ void _showNormalDocumentMenu(
               }
             },
           ),
-          ListTile(
-            leading: Icon(
-              document.isFavorite ? Icons.star : Icons.star_outline,
-            ),
-            title: Text(
-              document.isFavorite
-                  ? 'Favorilerden Kaldır'
-                  : 'Favorilere Ekle',
-              style: AppTypography.bodyMedium,
-            ),
+          _softDivider(isDark),
+          MenuTile(
+            icon: document.isFavorite ? Icons.star : Icons.star_outline,
+            label: document.isFavorite
+                ? 'Favorilerden Kaldır'
+                : 'Favorilere Ekle',
             onTap: () {
               Navigator.pop(ctx);
               ref
@@ -192,16 +189,11 @@ void _showNormalDocumentMenu(
                   .toggleFavorite(document.id);
             },
           ),
-          const AppDivider(),
-          ListTile(
-            leading:
-                Icon(Icons.delete_outline, color: Theme.of(context).colorScheme.error),
-            title: Text(
-              'Çöpe Taşı',
-              style: AppTypography.bodyMedium.copyWith(
-                color: Theme.of(context).colorScheme.error,
-              ),
-            ),
+          _softDivider(isDark),
+          MenuTile(
+            icon: Icons.delete_outline,
+            label: 'Çöpe Taşı',
+            isDestructive: true,
             onTap: () {
               Navigator.pop(ctx);
               ref
@@ -222,28 +214,40 @@ void showTrashedPageMenu(
   WidgetRef ref,
   TrashedPage trashedPage,
 ) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  final surfaceColor =
+      isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+  final textPrimary =
+      isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+
   showModalBottomSheet(
     context: context,
+    backgroundColor: surfaceColor,
     shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      borderRadius:
+          BorderRadius.vertical(top: Radius.circular(AppRadius.bottomSheet)),
     ),
     builder: (ctx) => SafeArea(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          const SizedBox(height: AppSpacing.md),
           Padding(
-            padding: const EdgeInsets.all(AppSpacing.lg),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.sm,
+            ),
             child: Text(
               '${trashedPage.sourceDocumentTitle} — Sayfa ${trashedPage.originalPageIndex + 1}',
-              style: AppTypography.titleMedium,
+              style: AppTypography.titleLarge.copyWith(color: textPrimary),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          const AppDivider(),
-          ListTile(
-            leading: const Icon(Icons.restore_from_trash),
-            title: Text('Kurtar', style: AppTypography.bodyMedium),
+          _softDivider(isDark),
+          MenuTile(
+            icon: Icons.restore_from_trash,
+            label: 'Kurtar',
             onTap: () async {
               Navigator.pop(ctx);
               final controller =
@@ -279,42 +283,18 @@ void showTrashedPageMenu(
               }
             },
           ),
-          const AppDivider(),
-          ListTile(
-            leading: Icon(
-              Icons.delete_forever,
-              color: Theme.of(context).colorScheme.error,
-            ),
-            title: Text(
-              'Kalıcı Sil',
-              style: AppTypography.bodyMedium.copyWith(
-                color: Theme.of(context).colorScheme.error,
-              ),
-            ),
+          _softDivider(isDark),
+          MenuTile(
+            icon: Icons.delete_forever,
+            label: 'Kalıcı Sil',
+            isDestructive: true,
             onTap: () async {
               Navigator.pop(ctx);
-              final confirmed = await showDialog<bool>(
-                context: context,
-                builder: (ctx2) => AlertDialog(
-                  title: const Text('Kalıcı Olarak Sil'),
-                  content: const Text(
+              final confirmed = await _showDeleteConfirmDialog(
+                context,
+                title: 'Kalıcı Olarak Sil',
+                message:
                     'Bu sayfa kalıcı olarak silinecek. Bu işlem geri alınamaz!',
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(ctx2, false),
-                      child: const Text('İptal'),
-                    ),
-                    FilledButton(
-                      onPressed: () => Navigator.pop(ctx2, true),
-                      style: FilledButton.styleFrom(
-                        backgroundColor:
-                            Theme.of(ctx2).colorScheme.error,
-                      ),
-                      child: const Text('Kalıcı Sil'),
-                    ),
-                  ],
-                ),
               );
               if (confirmed == true) {
                 await ref
@@ -371,6 +351,55 @@ void showRenameDocumentDialog(
             Navigator.pop(ctx);
           },
           child: const Text('Kaydet'),
+        ),
+      ],
+    ),
+  );
+}
+
+/// Soft divider matching settings/sidebar pattern (0.5px, outlineVariant).
+Widget _softDivider(bool isDark) {
+  return Divider(
+    height: 0.5,
+    thickness: 0.5,
+    color: isDark
+        ? AppColors.outlineVariantDark
+        : AppColors.outlineVariantLight,
+    indent: 56,
+  );
+}
+
+/// Confirmation dialog for permanent delete actions.
+Future<bool?> _showDeleteConfirmDialog(
+  BuildContext context, {
+  required String title,
+  required String message,
+}) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  final surfaceColor =
+      isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+  final textPrimary =
+      isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+
+  return showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      backgroundColor: surfaceColor,
+      title: Text(title,
+          style: AppTypography.titleLarge.copyWith(color: textPrimary)),
+      content: Text(message,
+          style: AppTypography.bodyMedium.copyWith(color: textPrimary)),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx, false),
+          child: const Text('İptal'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(ctx, true),
+          style: FilledButton.styleFrom(
+            backgroundColor: Theme.of(ctx).colorScheme.error,
+          ),
+          child: const Text('Kalıcı Sil'),
         ),
       ],
     ),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import 'package:drawing_ui/src/providers/providers.dart';
@@ -16,6 +15,7 @@ class PageOptionsHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: compact ? 16 : 20,
@@ -23,11 +23,16 @@ class PageOptionsHeader extends StatelessWidget {
       ),
       child: Text(
         title,
-        style: GoogleFonts.sourceSerif4(
-          fontSize: compact ? 14 : 16,
-          fontWeight: FontWeight.w600,
-          color: cs.onSurface,
-        ),
+        style: compact
+            ? textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: cs.onSurface,
+              )
+            : textTheme.titleMedium?.copyWith(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: cs.onSurface,
+              ),
       ),
     );
   }
@@ -56,8 +61,32 @@ class PageOptionsMenuItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final disabled = onTap == null;
-    final color =
-        disabled ? cs.onSurface.withValues(alpha: 0.38) : isDestructive ? cs.error : cs.onSurface;
+
+    // Icon color
+    final Color iconColor;
+    // Icon background color
+    final Color iconBgColor;
+
+    if (disabled) {
+      iconColor = cs.onSurface.withValues(alpha: 0.38);
+      iconBgColor = cs.onSurface.withValues(alpha: 0.05);
+    } else if (isDestructive) {
+      iconColor = cs.error;
+      iconBgColor = cs.error.withValues(alpha: 0.1);
+    } else {
+      iconColor = cs.primary;
+      iconBgColor = cs.surfaceContainerHigh;
+    }
+
+    // Label color: destructive/disabled affect label, normal stays onSurface
+    final labelColor = disabled
+        ? cs.onSurface.withValues(alpha: 0.38)
+        : isDestructive
+            ? cs.error
+            : cs.onSurface;
+
+    final circleSize = compact ? 30.0 : 36.0;
+    final iconSize = compact ? 18.0 : 20.0;
 
     return InkWell(
       onTap: onTap,
@@ -67,12 +96,24 @@ class PageOptionsMenuItem extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: compact ? 16 : 20),
           child: Row(
             children: [
-              PhosphorIcon(icon, size: compact ? 20 : 22, color: color),
-              SizedBox(width: compact ? 12 : 16),
+              Container(
+                width: circleSize,
+                height: circleSize,
+                decoration: BoxDecoration(
+                  color: iconBgColor,
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: PhosphorIcon(icon, size: iconSize, color: iconColor),
+                ),
+              ),
+              const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   label,
-                  style: GoogleFonts.sourceSerif4(fontSize: compact ? 13 : 15, color: color),
+                  style: compact
+                      ? Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 13, color: labelColor)
+                      : Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 15, color: labelColor),
                 ),
               ),
               if (trailing != null) trailing!,
@@ -97,11 +138,15 @@ class PageOptionsSectionHeader extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(compact ? 16 : 20, compact ? 2 : 4, compact ? 16 : 20, compact ? 1 : 2),
       child: Text(
         title,
-        style: GoogleFonts.sourceSerif4(
-          fontSize: compact ? 12 : 13,
-          fontWeight: FontWeight.w600,
-          color: cs.onSurfaceVariant,
-        ),
+        style: compact
+            ? Theme.of(context).textTheme.labelMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: cs.onSurfaceVariant,
+              )
+            : Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontSize: 13,
+                color: cs.onSurfaceVariant,
+              ),
       ),
     );
   }
@@ -144,11 +189,17 @@ class PageOptionsToggleItem extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(label, style: GoogleFonts.sourceSerif4(fontSize: compact ? 13 : 15, color: cs.onSurface)),
-                        Text(subtitle!, style: GoogleFonts.sourceSerif4(fontSize: compact ? 11 : 12, color: cs.onSurfaceVariant)),
+                        Text(label, style: compact
+                            ? Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 13, color: cs.onSurface)
+                            : Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 15, color: cs.onSurface)),
+                        Text(subtitle!, style: compact
+                            ? Theme.of(context).textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant)
+                            : Theme.of(context).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
                       ],
                     )
-                  : Text(label, style: GoogleFonts.sourceSerif4(fontSize: compact ? 13 : 15, color: cs.onSurface)),
+                  : Text(label, style: compact
+                      ? Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 13, color: cs.onSurface)
+                      : Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 15, color: cs.onSurface)),
             ),
             Switch.adaptive(
               value: value,
@@ -243,19 +294,24 @@ class ScrollDirectionItem extends ConsumerWidget {
 // ═══════════════════════════════════════════
 
 /// Chevron trailing widget with optional label (e.g. "3 / 10 >").
-Widget pageOptionsChevronTrailing(ColorScheme cs, [String? label]) {
+Widget pageOptionsChevronTrailing(ColorScheme cs, [String? label, TextTheme? textTheme]) {
   return Row(mainAxisSize: MainAxisSize.min, children: [
     if (label != null) ...[
-      Text(label, style: GoogleFonts.sourceSerif4(fontSize: 13, color: cs.onSurfaceVariant)),
+      Text(label, style: textTheme?.bodySmall?.copyWith(fontSize: 13, color: cs.onSurfaceVariant)),
       const SizedBox(width: 4),
     ],
     PhosphorIcon(StarNoteIcons.chevronRight, size: 18, color: cs.onSurfaceVariant),
   ]);
 }
 
-/// Thin divider between menu items.
-Widget pageOptionsDivider(ColorScheme cs) =>
-    Divider(height: 0.5, thickness: 0.5, color: cs.outlineVariant);
+/// Thin divider between menu items with indent matching circular icon layout.
+Widget pageOptionsDivider(ColorScheme cs, {bool compact = false}) =>
+    Divider(
+      height: 0.5,
+      thickness: 0.5,
+      color: cs.outlineVariant,
+      indent: compact ? 46 : 56,
+    );
 
 /// Thick divider separating sections.
 Widget pageOptionsThickDivider(ColorScheme cs, {bool compact = false}) =>

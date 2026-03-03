@@ -44,34 +44,34 @@ class DrawingColors {
   ];
 
   /// Toolbar background color.
-  static const Color toolbarBackground = Color(0xFFF0F1F8);
+  static const Color toolbarBackground = Color(0xFFE9F1EB);
 
   /// Toolbar icon color (default state).
-  static const Color toolbarIcon = Color(0xFF505081);
+  static const Color toolbarIcon = Color(0xFF3E4943);
 
   /// Toolbar icon color (selected state).
-  static const Color toolbarIconSelected = Color(0xFF505081);
+  static const Color toolbarIconSelected = Color(0xFF006B53);
 
   /// Toolbar icon color (disabled state).
-  static const Color toolbarIconDisabled = Color(0xFFB8B9D0);
+  static const Color toolbarIconDisabled = Color(0xFFBECAC3);
 
   /// Pen box background color.
   static const Color penBoxBackground = Color(0xFFFFFFFF);
 
   /// Pen box slot selected background.
-  static const Color penBoxSlotSelected = Color(0xFFE8E9F3);
+  static const Color penBoxSlotSelected = Color(0xFFEEF6F0);
 
   /// Panel background color.
   static const Color panelBackground = Color(0xFFFFFFFF);
 
   /// Panel border color.
-  static const Color panelBorder = Color(0xFFD0D1E3);
+  static const Color panelBorder = Color(0xFFBECAC3);
 
   /// Canvas background color.
   static const Color canvasBackground = Color(0xFFFFFFFF);
 
-  /// Selection highlight color — lacivert tint.
-  static const Color selectionHighlight = Color(0x40505081);
+  /// Selection highlight color — emerald tint.
+  static const Color selectionHighlight = Color(0x40006B53);
 
   /// Eraser preview color.
   static const Color eraserPreview = Color(0x40EF4444);

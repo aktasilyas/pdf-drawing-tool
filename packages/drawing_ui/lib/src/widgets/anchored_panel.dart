@@ -196,7 +196,10 @@ class _PositionedPanelOverlay extends StatelessWidget {
                         ),
                         child: CustomPaint(
                           size: const Size(24, 12),
-                          painter: _ArrowPainter(),
+                          painter: _ArrowPainter(
+                            color: Theme.of(context).colorScheme.surface,
+                            shadowColor: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.1),
+                          ),
                         ),
                       ),
                     ),
@@ -218,14 +221,18 @@ class _PositionedPanelOverlay extends StatelessWidget {
 
 /// Simple arrow painter pointing up
 class _ArrowPainter extends CustomPainter {
+  const _ArrowPainter({required this.color, required this.shadowColor});
+  final Color color;
+  final Color shadowColor;
+
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = Colors.white
+      ..color = color
       ..style = PaintingStyle.fill;
 
     final shadowPaint = Paint()
-      ..color = Colors.black.withValues(alpha: 25.0 / 255.0)
+      ..color = shadowColor
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2);
 
     final path = Path()
@@ -239,7 +246,8 @@ class _ArrowPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _ArrowPainter oldDelegate) =>
+      color != oldDelegate.color || shadowColor != oldDelegate.shadowColor;
 }
 
 // Keep old AnchoredPanel for backwards compatibility but mark as deprecated

@@ -1,7 +1,6 @@
 /// Self-contained document title pill with popover menu.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import 'package:drawing_ui/src/panels/document_options_panel.dart';
@@ -63,6 +62,7 @@ class _DocumentTitleButtonState extends ConsumerState<DocumentTitleButton> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     final label = widget.title ?? 'İsimsiz Not';
 
     return Tooltip(
@@ -86,9 +86,8 @@ class _DocumentTitleButtonState extends ConsumerState<DocumentTitleButton> {
                   label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.sourceSerif4(
+                  style: textTheme.bodySmall?.copyWith(
                     fontSize: 13,
-                    fontWeight: FontWeight.w500,
                     color: colorScheme.onSurface,
                   ),
                 ),

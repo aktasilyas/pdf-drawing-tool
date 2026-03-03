@@ -18,8 +18,9 @@ class SelectionToolbarButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final enabled = action.isEnabled;
-    final color = action.isDestructive ? Colors.red : Colors.black87;
+    final color = action.isDestructive ? colorScheme.error : colorScheme.onSurface;
 
     final child = action.colorIndicator != null
         ? Container(
@@ -28,7 +29,7 @@ class SelectionToolbarButton extends StatelessWidget {
             decoration: BoxDecoration(
               color: Color(action.colorIndicator!),
               shape: BoxShape.circle,
-              border: Border.all(color: Colors.grey.shade300, width: 1.5),
+              border: Border.all(color: colorScheme.outlineVariant, width: 1.5),
             ),
           )
         : PhosphorIcon(action.icon, size: 20, color: color);
@@ -64,6 +65,7 @@ class SelectionToolbarIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Tooltip(
       message: tooltip,
       child: GestureDetector(
@@ -74,7 +76,7 @@ class SelectionToolbarIconButton extends StatelessWidget {
           height: 40,
           child: Center(
             child: PhosphorIcon(icon, size: 20,
-              color: isActive ? const Color(0xFF2196F3) : Colors.black87),
+              color: isActive ? colorScheme.primary : colorScheme.onSurface),
           ),
         ),
       ),

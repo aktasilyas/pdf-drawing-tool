@@ -32,17 +32,15 @@ class GoodNotesSlider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Column(mainAxisSize: MainAxisSize.min, children: [
       Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        Text(label, style: TextStyle(
-          fontSize: 11,
+        Text(label, style: textTheme.labelSmall?.copyWith(
           fontWeight: FontWeight.w600,
           color: cs.onSurfaceVariant,
           letterSpacing: 0.5,
         )),
-        Text(displayValue, style: TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
+        Text(displayValue, style: textTheme.labelMedium?.copyWith(
           color: cs.onSurface,
         )),
       ]),

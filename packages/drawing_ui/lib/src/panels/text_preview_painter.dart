@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 // ---------------------------------------------------------------------------
 // Text Preview
@@ -44,7 +43,7 @@ class TextPreview extends StatelessWidget {
         child: Center(
           child: Text(
             'Merhaba',
-            style: GoogleFonts.sourceSerif4(
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               fontSize: previewSize,
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
               fontStyle: isItalic ? FontStyle.italic : FontStyle.normal,

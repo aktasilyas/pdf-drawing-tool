@@ -72,6 +72,7 @@ class TopNavigationBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
+    final drawingTheme = DrawingTheme.of(context);
     final isReaderMode = ref.watch(readerModeProvider);
     final topPadding = compact ? MediaQuery.of(context).padding.top : 0.0;
 
@@ -79,10 +80,10 @@ class TopNavigationBar extends ConsumerWidget {
       height: 48 + topPadding,
       padding: EdgeInsets.only(top: topPadding),
       decoration: BoxDecoration(
-        color: colorScheme.surface,
+        color: drawingTheme.toolbarBackground,
         border: Border(
           bottom: BorderSide(
-            color: colorScheme.outlineVariant,
+            color: drawingTheme.toolbarIconColor.withValues(alpha: 0.15),
             width: 0.5,
           ),
         ),

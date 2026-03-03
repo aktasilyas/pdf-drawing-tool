@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:drawing_ui/src/theme/drawing_shadows.dart';
 
 /// Popover placement direction.
 enum _Placement { below, above, right }
@@ -184,7 +185,7 @@ class _PopoverOverlayState extends State<_PopoverOverlay>
       color: bg,
       borderRadius: BorderRadius.circular(16),
       border: Border.all(color: border, width: 0.5),
-      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.12), blurRadius: 12, offset: const Offset(0, 4))],
+      boxShadow: DrawingShadows.panel(Theme.of(context).brightness),
     ),
     child: ClipRRect(
       borderRadius: BorderRadius.circular(16),

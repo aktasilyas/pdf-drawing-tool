@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
@@ -80,9 +79,8 @@ class _ToolbarSettingsPanelState extends ConsumerState<ToolbarSettingsPanel>
           Expanded(
             child: Text(
               'Araç Çubuğu Ayarları',
-              style: GoogleFonts.sourceSerif4(
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
                 fontSize: 13,
-                fontWeight: FontWeight.w600,
                 color: cs.onSurface,
               ),
               overflow: TextOverflow.ellipsis,
@@ -109,9 +107,9 @@ class _ToolbarSettingsPanelState extends ConsumerState<ToolbarSettingsPanel>
       controller: _tabController,
       labelColor: cs.primary,
       unselectedLabelColor: cs.onSurfaceVariant,
-      labelStyle: GoogleFonts.sourceSerif4(fontSize: 13, fontWeight: FontWeight.w600),
+      labelStyle: Theme.of(context).textTheme.titleSmall?.copyWith(fontSize: 13),
       unselectedLabelStyle:
-          GoogleFonts.sourceSerif4(fontSize: 13, fontWeight: FontWeight.w400),
+          Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 13),
       indicatorSize: TabBarIndicatorSize.tab,
       indicatorWeight: 2,
       dividerHeight: 0.5,
@@ -145,7 +143,7 @@ class _ToolbarSettingsPanelState extends ConsumerState<ToolbarSettingsPanel>
               Flexible(
                 child: Text(
                   'Araçları sıralayın ve gizleyin',
-                  style: GoogleFonts.sourceSerif4(fontSize: 11, color: cs.onSurfaceVariant),
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -176,7 +174,7 @@ class _ToolbarSettingsPanelState extends ConsumerState<ToolbarSettingsPanel>
               Flexible(
                 child: Text(
                   'Ek araçları sıralayın ve gizleyin',
-                  style: GoogleFonts.sourceSerif4(fontSize: 11, color: cs.onSurfaceVariant),
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -208,7 +206,7 @@ class _ToolbarSettingsPanelState extends ConsumerState<ToolbarSettingsPanel>
           icon: PhosphorIcon(StarNoteIcons.rotate, size: 13),
           label: Text(
             'Varsayılana Sıfırla',
-            style: GoogleFonts.sourceSerif4(fontSize: 12),
+            style: Theme.of(context).textTheme.bodySmall,
           ),
           style: OutlinedButton.styleFrom(
             foregroundColor: cs.onSurfaceVariant,

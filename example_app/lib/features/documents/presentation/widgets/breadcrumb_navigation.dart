@@ -48,12 +48,16 @@ class BreadcrumbNavigation extends StatelessWidget {
   /// Geri butonuna tıklandığında çağrılır
   final VoidCallback? onBackPressed;
 
+  /// İç padding (inline kullanımda EdgeInsets.zero verilebilir)
+  final EdgeInsetsGeometry? padding;
+
   const BreadcrumbNavigation({
     super.key,
     required this.items,
     this.onItemTap,
     this.showBackButton = true,
     this.onBackPressed,
+    this.padding,
   });
 
   @override
@@ -62,7 +66,8 @@ class BreadcrumbNavigation extends StatelessWidget {
 
     return Container(
       height: AppSpacing.minTouchTarget,
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      padding: padding ??
+          const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Row(
         children: [
           // Back button

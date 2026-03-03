@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/widgets/reorderable_tool_list.dart';
 
@@ -11,6 +10,7 @@ class ToolbarEditorPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Column(
@@ -18,20 +18,20 @@ class ToolbarEditorPanel extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(children: [
-            Text('Customize Toolbar', style: GoogleFonts.sourceSerif4(
+            Text('Customize Toolbar', style: textTheme.bodyMedium?.copyWith(
               fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSurface)),
             const Spacer(),
             GestureDetector(
               onTap: () async {
                 await ref.read(toolbarConfigProvider.notifier).resetToDefault();
               },
-              child: Text('Reset', style: GoogleFonts.sourceSerif4(
-                fontSize: 14, color: cs.primary, fontWeight: FontWeight.w500)),
+              child: Text('Reset', style: textTheme.bodyMedium?.copyWith(
+                color: cs.primary, fontWeight: FontWeight.w500)),
             ),
           ]),
           const SizedBox(height: 10),
           Text('Drag to reorder tools. Toggle visibility with the switch.',
-            style: GoogleFonts.sourceSerif4(fontSize: 13, color: cs.onSurfaceVariant)),
+            style: textTheme.bodySmall?.copyWith(fontSize: 13, color: cs.onSurfaceVariant)),
           const SizedBox(height: 16),
           const ReorderableToolList(),
         ],

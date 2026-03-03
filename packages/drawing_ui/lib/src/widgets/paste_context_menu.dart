@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/providers/selection_clipboard_provider.dart';
 import 'package:drawing_ui/src/providers/selection_actions_provider.dart';
+import 'package:drawing_ui/src/theme/drawing_shadows.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
 
 /// Floating pill that appears on long press to paste clipboard content.
@@ -13,6 +13,8 @@ class PasteContextMenu extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final cs = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     const menuWidth = 120.0;
     const menuHeight = 40.0;
     final screenSize = MediaQuery.of(context).size;
@@ -41,28 +43,20 @@ class PasteContextMenu extends ConsumerWidget {
               width: menuWidth,
               height: menuHeight,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: cs.surface,
                 borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.15),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+                boxShadow: DrawingShadows.floating(Theme.of(context).brightness),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   PhosphorIcon(StarNoteIcons.paste, size: 18,
-                      color: Colors.black87),
+                      color: cs.onSurface),
                   const SizedBox(width: 6),
                   Text(
                     'Yapıştır',
-                    style: GoogleFonts.sourceSerif4(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black87,
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: cs.onSurface,
                     ),
                   ),
                 ],

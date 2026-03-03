@@ -28,7 +28,7 @@ class FloatingUndoRedo extends ConsumerWidget {
               : null,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.1),
+              color: colorScheme.shadow.withValues(alpha: isDark ? 0.3 : 0.1),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),

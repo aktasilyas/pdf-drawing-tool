@@ -1,9 +1,9 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart' hide Page;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/theme/drawing_shadows.dart';
 import 'package:drawing_ui/src/theme/starnote_icons.dart';
 import 'package:drawing_ui/src/services/thumbnail_cache.dart';
 import 'package:drawing_ui/src/services/thumbnail_generator.dart';
@@ -162,20 +162,11 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
           borderRadius: BorderRadius.circular(8),
           color: widget.backgroundColor,
           boxShadow: widget.isSelected
-              ? [
-                  BoxShadow(
-                    color: colorScheme.primary.withValues(alpha: 0.3),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.1),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+              ? DrawingShadows.selection(
+                  Theme.of(context).brightness,
+                  colorScheme.primary,
+                )
+              : DrawingShadows.page(Theme.of(context).brightness),
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(7),
@@ -194,14 +185,13 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.6),
+                      color: colorScheme.scrim.withValues(alpha: 0.6),
                       borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
                       '${widget.page.index + 1}',
-                      style: GoogleFonts.sourceSerif4(
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
                         color: Colors.white,
-                        fontSize: 12,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -245,9 +235,8 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
             Text(
               'Failed to\ngenerate',
               textAlign: TextAlign.center,
-              style: GoogleFonts.sourceSerif4(
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: colorScheme.onSurfaceVariant,
-                fontSize: 12,
               ),
             ),
           ],
@@ -300,13 +289,14 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
         }
         
         // 3. Basit placeholder
+        final placeholderCs = Theme.of(context).colorScheme;
         return Container(
-          color: Colors.grey[200],
+          color: placeholderCs.surfaceContainerHighest,
           child: Center(
             child: PhosphorIcon(
               StarNoteIcons.pdfFile,
               size: 24,
-              color: Colors.grey[400],
+              color: placeholderCs.outlineVariant,
             ),
           ),
         );

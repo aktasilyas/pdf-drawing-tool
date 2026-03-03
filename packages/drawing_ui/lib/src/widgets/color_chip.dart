@@ -34,6 +34,7 @@ class ColorChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = DrawingTheme.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
     final chipSize = size ?? theme.colorChipSize;
 
     return GestureDetector(
@@ -47,7 +48,7 @@ class ColorChip extends StatelessWidget {
               height: chipSize,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.grey.shade200,
+                color: colorScheme.surfaceContainerHighest,
               ),
               child: ClipOval(
                 child: CustomPaint(
@@ -69,7 +70,7 @@ class ColorChip extends StatelessWidget {
                 color: isSelected
                     ? theme.toolbarIconSelectedColor
                     : color.computeLuminance() > 0.8
-                        ? Colors.grey.shade300
+                        ? colorScheme.outlineVariant
                         : Colors.transparent,
                 width: isSelected ? 3 : 1,
               ),

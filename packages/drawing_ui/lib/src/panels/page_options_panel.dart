@@ -383,7 +383,7 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
         children: [
           if (widget.documentTitle != null) ...[
             PageOptionsHeader(title: widget.documentTitle!, compact: c),
-            pageOptionsDivider(cs),
+            pageOptionsDivider(cs, compact: c),
             PageOptionsMenuItem(
               icon: StarNoteIcons.editPencil,
               label: 'Yeniden Adlandır',
@@ -413,7 +413,7 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
             pageOptionsThickDivider(cs, compact: c),
           ],
           PageOptionsHeader(title: 'Sayfa ${pageIndex + 1}', compact: c),
-          pageOptionsDivider(cs),
+          pageOptionsDivider(cs, compact: c),
           if (widget.onAddPage != null)
             PageOptionsMenuItem(
               icon: StarNoteIcons.pageAdd,
@@ -457,7 +457,7 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
             icon: StarNoteIcons.goToPage,
             label: 'Sayfaya git',
             compact: c,
-            trailing: pageOptionsChevronTrailing(cs, '${pageIndex + 1} / $pageCount'),
+            trailing: pageOptionsChevronTrailing(cs, '${pageIndex + 1} / $pageCount', Theme.of(context).textTheme),
             onTap: () => _showGoToPageDialog(context),
           ),
           PageOptionsMenuItem(
@@ -466,7 +466,7 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
             compact: c,
             onTap: _exportPageAsPdf,
           ),
-          pageOptionsDivider(cs),
+          pageOptionsDivider(cs, compact: c),
           PageOptionsMenuItem(
             icon: StarNoteIcons.pageClear,
             label: 'Sayfayı temizle',
@@ -516,7 +516,7 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
       borderRadius: BorderRadius.circular(16),
       clipBehavior: Clip.antiAlias,
       elevation: 8,
-      shadowColor: Colors.black26,
+      shadowColor: cs.shadow.withValues(alpha: 0.26),
       child: SizedBox(width: 320, child: content),
     );
   }

@@ -10,6 +10,7 @@ class SelectionHandlesPainter extends CustomPainter {
   final double rotation;
   final double scaleX;
   final double scaleY;
+  final Color selectionColor;
 
   /// Corner handle radius (bigger for easier touch-to-scale).
   static const double handleRadius = 10.0;
@@ -28,6 +29,7 @@ class SelectionHandlesPainter extends CustomPainter {
     required this.bounds,
     required this.moveDelta,
     required this.rotation,
+    required this.selectionColor,
     this.scaleX = 1.0,
     this.scaleY = 1.0,
   });
@@ -50,7 +52,7 @@ class SelectionHandlesPainter extends CustomPainter {
     canvas.translate(-cx, -cy);
 
     final border = Paint()
-      ..color = const Color(0xFF2196F3)
+      ..color = selectionColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5;
     canvas.drawRect(rect, border);
@@ -59,7 +61,7 @@ class SelectionHandlesPainter extends CustomPainter {
       ..color = Colors.white
       ..style = PaintingStyle.fill;
     final handleStroke = Paint()
-      ..color = const Color(0xFF2196F3)
+      ..color = selectionColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5;
 
@@ -114,7 +116,7 @@ class SelectionHandlesPainter extends CustomPainter {
           fontFamily: iconData.fontFamily,
           package: iconData.fontPackage,
           fontSize: rotHandleRadius * 1.4,
-          color: const Color(0xFF2196F3),
+          color: selectionColor,
         ),
       ),
       textDirection: TextDirection.ltr,
@@ -132,6 +134,7 @@ class SelectionHandlesPainter extends CustomPainter {
         old.moveDelta != moveDelta ||
         old.rotation != rotation ||
         old.scaleX != scaleX ||
-        old.scaleY != scaleY;
+        old.scaleY != scaleY ||
+        old.selectionColor != selectionColor;
   }
 }

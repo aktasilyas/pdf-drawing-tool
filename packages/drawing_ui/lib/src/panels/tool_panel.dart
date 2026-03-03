@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 
@@ -35,6 +34,7 @@ class ToolPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = DrawingTheme.of(context);
     final colorScheme = Theme.of(context).colorScheme;
+    final brightness = Theme.of(context).brightness;
 
     // Yatay/dikey ekrana göre maxHeight ayarla
     final screenSize = MediaQuery.of(context).size;
@@ -53,20 +53,7 @@ class ToolPanel extends StatelessWidget {
         decoration: BoxDecoration(
           color: colorScheme.surface,
           borderRadius: BorderRadius.circular(theme.panelBorderRadius),
-          boxShadow: [
-            // Main shadow
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 20.0 / 255.0),
-              blurRadius: theme.panelElevation,
-              offset: const Offset(0, 4),
-            ),
-            // Subtle ambient shadow
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 8.0 / 255.0),
-              blurRadius: theme.panelElevation * 2,
-              spreadRadius: 2,
-            ),
-          ],
+          boxShadow: DrawingShadows.panel(brightness),
         ),
         clipBehavior: Clip.antiAlias,
         child: Column(
@@ -120,8 +107,9 @@ class _PanelHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Container(
       padding: const EdgeInsets.only(left: 16, right: 8, top: 12, bottom: 12),
       child: Row(
@@ -129,7 +117,7 @@ class _PanelHeader extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style: GoogleFonts.sourceSerif4(
+              style: textTheme.titleMedium?.copyWith(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 color: colorScheme.onSurface,
@@ -189,7 +177,8 @@ class PanelSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+    final textTheme = Theme.of(context).textTheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -197,8 +186,7 @@ class PanelSection extends StatelessWidget {
           children: [
             Text(
               title,
-              style: GoogleFonts.sourceSerif4(
-                fontSize: 12,
+              style: textTheme.labelMedium?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: colorScheme.onSurfaceVariant,
                 letterSpacing: 0.5,
@@ -219,7 +207,7 @@ class PanelSection extends StatelessWidget {
                     const SizedBox(width: 2),
                     Text(
                       'PRO',
-                      style: GoogleFonts.sourceSerif4(
+                      style: textTheme.labelSmall?.copyWith(
                         fontSize: 9,
                         fontWeight: FontWeight.w700,
                         color: colorScheme.tertiary,
@@ -279,9 +267,7 @@ class _LockedSectionOverlay extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       'Premium',
-                      style: GoogleFonts.sourceSerif4(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
                         color: colorScheme.tertiary,
                       ),
                     ),
@@ -314,7 +300,8 @@ class PanelToggleRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+    final textTheme = Theme.of(context).textTheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -322,9 +309,7 @@ class PanelToggleRow extends StatelessWidget {
         children: [
           Text(
             label,
-            style: GoogleFonts.sourceSerif4(
-              fontSize: 14,
-              fontWeight: FontWeight.w400,
+            style: textTheme.bodyMedium?.copyWith(
               color: enabled ? colorScheme.onSurface : colorScheme.outline,
             ),
           ),
@@ -395,8 +380,7 @@ class PanelActionButton extends StatelessWidget {
               ],
               Text(
                 label,
-                style: GoogleFonts.sourceSerif4(
-                  fontSize: 14,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: fgColor,
                 ),
