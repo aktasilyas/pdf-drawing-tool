@@ -25,6 +25,8 @@ class DocumentOptionsPanel extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
 
+    final isInfinite = ref.watch(isInfiniteCanvasProvider);
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -34,32 +36,31 @@ class DocumentOptionsPanel extends ConsumerWidget {
           color: cs.onSurface,
           onTap: () { onClose(); onRename(); },
         ),
-        // TODO: PDF export disabled — re-enable after fixing infinite mode rendering
-        // _OptionTile(
-        //   icon: StarNoteIcons.pdfFile,
-        //   label: 'PDF Olarak Dışa Aktar',
-        //   color: cs.onSurface,
-        //   onTap: () {
-        //     onClose();
-        //     final document = ref.read(documentProvider);
-        //     final notifier = ref.read(exportProgressProvider.notifier);
-        //     final isInfinite = ref.read(isInfiniteCanvasProvider);
-        //     performPDFExport(notifier, document,
-        //         isInfiniteCanvas: isInfinite);
-        //   },
-        // ),
-        _OptionTile(
-          icon: StarNoteIcons.image,
-          label: 'PNG Olarak Dışa Aktar',
-          color: cs.onSurface,
-          onTap: () {
-            onClose();
-            final document = ref.read(documentProvider);
-            final notifier = ref.read(exportProgressProvider.notifier);
-            final boundaryKey = ref.read(canvasBoundaryKeyProvider);
-            performPNGExport(notifier, boundaryKey, title: document.title);
-          },
-        ),
+        if (isInfinite)
+          _OptionTile(
+            icon: StarNoteIcons.image,
+            label: 'PNG Olarak Dışa Aktar',
+            color: cs.onSurface,
+            onTap: () {
+              onClose();
+              final document = ref.read(documentProvider);
+              final notifier = ref.read(exportProgressProvider.notifier);
+              final boundaryKey = ref.read(canvasBoundaryKeyProvider);
+              performPNGExport(notifier, boundaryKey, title: document.title);
+            },
+          )
+        else
+          _OptionTile(
+            icon: StarNoteIcons.pdfFile,
+            label: 'PDF Olarak Dışa Aktar',
+            color: cs.onSurface,
+            onTap: () {
+              onClose();
+              final document = ref.read(documentProvider);
+              final notifier = ref.read(exportProgressProvider.notifier);
+              performPDFExport(notifier, document);
+            },
+          ),
         Divider(height: 1, indent: 16, endIndent: 16,
             color: cs.outlineVariant.withValues(alpha: 0.5)),
         _OptionTile(
