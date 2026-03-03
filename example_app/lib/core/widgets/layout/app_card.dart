@@ -92,7 +92,11 @@ class AppCard extends StatelessWidget {
           border: isSelected
               ? Border.all(color: AppColors.primary, width: 2)
               : null,
-          boxShadow: isSelected ? null : AppShadows.sm,
+          boxShadow: isSelected
+              ? null
+              : AppShadows.cardResting(
+                  isDark ? Brightness.dark : Brightness.light,
+                ),
         );
 
       case AppCardVariant.filled:

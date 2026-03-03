@@ -34,7 +34,7 @@ class AuthBrandingPanel extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: AppColors.surfaceLight,
                         borderRadius: BorderRadius.circular(AppRadius.xl),
-                        boxShadow: AppShadows.lg,
+                        boxShadow: AppShadows.cardElevated(Brightness.light),
                       ),
                       child: const Icon(
                         Icons.edit_note_rounded,

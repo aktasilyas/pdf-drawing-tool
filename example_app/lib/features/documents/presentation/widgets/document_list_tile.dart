@@ -39,70 +39,82 @@ class DocumentListTile extends ConsumerWidget {
     final hoverColor =
         isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariantLight;
 
-    return Material(
-      color: surfaceColor,
-      child: InkWell(
-        onTap: onTap,
-        onLongPress: onLongPress,
-        hoverColor: hoverColor,
-        splashColor: hoverColor,
-        borderRadius: BorderRadius.circular(AppRadius.sm),
-        child: Container(
-          height: 64,
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-          child: Row(
-            children: [
-              if (isSelectionMode)
-                SelectionCheckbox(isSelected: isSelected)
-              else
-                CompactDocumentThumbnail(document: document),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      document.title,
-                      style: AppTypography.bodyMedium.copyWith(
-                        color: textPrimary,
-                        fontWeight: FontWeight.w500,
+    return Container(
+      decoration: BoxDecoration(
+        color: surfaceColor,
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        boxShadow: AppShadows.cardResting(
+            isDark ? Brightness.dark : Brightness.light),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        child: InkWell(
+          onTap: onTap,
+          onLongPress: onLongPress,
+          hoverColor: hoverColor,
+          splashColor: hoverColor,
+          borderRadius: BorderRadius.circular(AppRadius.card),
+          child: Container(
+            height: 64,
+            padding:
+                const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+            child: Row(
+              children: [
+                if (isSelectionMode)
+                  SelectionCheckbox(isSelected: isSelected)
+                else
+                  CompactDocumentThumbnail(document: document),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        document.title,
+                        style: AppTypography.bodyMedium.copyWith(
+                          color: textPrimary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      document.pageCount > 1
-                          ? '${DocumentDateFormatter.format(document.updatedAt)} · ${document.pageCount} sayfa'
-                          : DocumentDateFormatter.format(document.updatedAt),
-                      style: AppTypography.caption
-                          .copyWith(color: textTertiary),
-                    ),
-                  ],
-                ),
-              ),
-              if (!isSelectionMode && document.isFavorite)
-                Padding(
-                  padding: const EdgeInsets.only(right: AppSpacing.xs),
-                  child: GestureDetector(
-                    onTap: () => ref
-                        .read(documentsControllerProvider.notifier)
-                        .toggleFavorite(document.id),
-                    child: const Icon(
-                      Icons.star_rounded,
-                      size: 18,
-                      color: AppColors.accent,
-                    ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        document.pageCount > 1
+                            ? '${DocumentDateFormatter.format(document.updatedAt)} · ${document.pageCount} sayfa'
+                            : DocumentDateFormatter.format(
+                                document.updatedAt),
+                        style: AppTypography.caption
+                            .copyWith(color: textTertiary),
+                      ),
+                    ],
                   ),
                 ),
-              if (!isSelectionMode)
-                Icon(
-                  Icons.chevron_right_rounded,
-                  size: 20,
-                  color: textTertiary,
-                ),
-            ],
+                if (!isSelectionMode && document.isFavorite)
+                  Padding(
+                    padding:
+                        const EdgeInsets.only(right: AppSpacing.xs),
+                    child: GestureDetector(
+                      onTap: () => ref
+                          .read(documentsControllerProvider.notifier)
+                          .toggleFavorite(document.id),
+                      child: const Icon(
+                        Icons.star_rounded,
+                        size: 18,
+                        color: AppColors.accent,
+                      ),
+                    ),
+                  ),
+                if (!isSelectionMode)
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    size: 20,
+                    color: textTertiary,
+                  ),
+              ],
+            ),
           ),
         ),
       ),
@@ -264,7 +276,9 @@ class _CompactWhiteboardThumbnail extends StatelessWidget {
       padding: const EdgeInsets.all(2),
       color: frameColor,
       child: Container(
-        color: isDark ? const Color(0xFF2A2A2A) : Colors.white,
+        color: isDark
+            ? AppColors.surfaceContainerHighDark
+            : AppColors.surfaceLight,
         child: CustomPaint(
           painter: WhiteboardGridPainter(dotColor: dotColor, spacing: 10),
           size: const Size(36, 44),

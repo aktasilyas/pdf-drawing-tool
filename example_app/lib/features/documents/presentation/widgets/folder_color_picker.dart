@@ -38,7 +38,7 @@ class FolderColorPicker extends StatelessWidget {
           runSpacing: AppSpacing.md,
           alignment: WrapAlignment.center,
           children: AppColors.folderColors.map((color) {
-            final colorValue = color.value;
+            final colorValue = color.toARGB32();
             final isSelected = colorValue == currentColor;
             return _ColorItem(
               color: color,
@@ -104,7 +104,7 @@ class _ColorItem extends StatelessWidget {
         child: isSelected
             ? const Icon(
                 Icons.check,
-                color: Colors.white,
+                color: AppColors.onPrimary,
                 size: AppIconSize.md,
               )
             : null,

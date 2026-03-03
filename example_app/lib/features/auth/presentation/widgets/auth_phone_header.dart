@@ -30,7 +30,9 @@ class AuthPhoneHeader extends StatelessWidget {
               decoration: BoxDecoration(
                 color: AppColors.primary,
                 borderRadius: BorderRadius.circular(AppRadius.lg),
-                boxShadow: AppShadows.sm,
+                boxShadow: AppShadows.cardResting(
+                  isDark ? Brightness.dark : Brightness.light,
+                ),
               ),
               child: const Icon(
                 Icons.edit_note_rounded,

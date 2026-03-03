@@ -77,7 +77,9 @@ class _TrashedPageCardState extends State<TrashedPageCard> {
           color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
           borderRadius: BorderRadius.circular(AppRadius.sm),
           border: Border.all(color: outlineColor),
-          boxShadow: AppShadows.sm,
+          boxShadow: AppShadows.cardResting(
+            isDark ? Brightness.dark : Brightness.light,
+          ),
         ),
         clipBehavior: Clip.antiAlias,
         child: Stack(

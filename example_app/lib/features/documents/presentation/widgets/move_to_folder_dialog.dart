@@ -204,7 +204,7 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
                   color: color,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: isSelected ? Colors.white : Colors.transparent,
+                    color: isSelected ? AppColors.onPrimary : Colors.transparent,
                     width: 2.5,
                   ),
                   boxShadow: isSelected
@@ -218,7 +218,7 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
                 ),
                 child: isSelected
                     ? const Icon(Icons.check,
-                        color: Colors.white, size: AppIconSize.xs)
+                        color: AppColors.onPrimary, size: AppIconSize.xs)
                     : null,
               ),
             ),

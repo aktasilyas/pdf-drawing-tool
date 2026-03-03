@@ -1,44 +1,89 @@
 /// ElyaNotes Design System - Color Tokens
 ///
-/// Bu dosya tüm uygulama renklerini içerir.
-/// Onay tarihi: 1 Şubat 2026
+/// #00B988 (Emerald Green) bazlı M3 renk paleti.
+/// Onay tarihi: 3 Mart 2026
 ///
 /// Kullanım:
 /// ```dart
 /// import 'package:example_app/core/theme/tokens/app_colors.dart';
-///
 /// Container(color: AppColors.primary)
 /// ```
 library;
 
 import 'package:flutter/material.dart';
 
-/// ElyaNotes renk paleti.
+/// ElyaNotes renk paleti — #00B988 Emerald Green
 ///
 /// Tüm renkler bu sınıftan alınmalıdır.
 /// Hardcoded renk kullanımı yasaktır!
 abstract class AppColors {
   // ══════════════════════════════════════════════════════════════════════════
-  // BRAND COLORS — Slate Charcoal
+  // SEED COLOR
   // ══════════════════════════════════════════════════════════════════════════
 
-  /// Ana marka rengi — Slate
-  static const Color primary = Color(0xFF38434F);
+  /// Marka seed rengi — UI'da doğrudan kullanılmaz, referans amaçlı
+  static const Color seed = Color(0xFF00B988);
 
-  /// Primary hover — Açık slate
-  static const Color primaryLight = Color(0xFF4F5B68);
+  // ══════════════════════════════════════════════════════════════════════════
+  // BRAND COLORS — Emerald Green
+  // ══════════════════════════════════════════════════════════════════════════
 
-  /// Primary pressed — Koyu charcoal
-  static const Color primaryDark = Color(0xFF242930);
+  /// Ana marka rengi — M3 accessible primary (light mode)
+  /// #00B988 seed'den türetilmiş, WCAG AA uyumlu (beyaz üzerinde 6.8:1)
+  static const Color primary = Color(0xFF006B53);
+
+  /// Primary hover — Açık emerald
+  static const Color primaryLight = Color(0xFF7DF7CC);
+
+  /// Primary pressed — Koyu emerald
+  static const Color primaryDark = Color(0xFF005140);
 
   /// Primary üzerindeki text/icon
   static const Color onPrimary = Color(0xFFFFFFFF);
 
-  /// Vurgu rengi — Cool Blue (linkler, aktif elementler)
-  static const Color accent = Color(0xFF4A8AF7);
+  /// Primary container — Soft mint (chips, selection bg)
+  static const Color primaryContainer = Color(0xFF7DF7CC);
+
+  /// Primary container üzerindeki text
+  static const Color onPrimaryContainer = Color(0xFF002018);
+
+  /// Dark mode primary — Parlak emerald
+  static const Color primaryDarkMode = Color(0xFF5FDAB1);
+
+  /// Dark mode onPrimary
+  static const Color onPrimaryDarkMode = Color(0xFF003829);
+
+  /// Dark mode primary container
+  static const Color primaryContainerDarkMode = Color(0xFF005140);
+
+  /// Dark mode onPrimaryContainer
+  static const Color onPrimaryContainerDarkMode = Color(0xFF7DF7CC);
+
+  /// Vurgu rengi — Soft Blue (tertiary, tags, kategoriler)
+  static const Color accent = Color(0xFF535F79);
 
   /// Accent üzerindeki text
   static const Color onAccent = Color(0xFFFFFFFF);
+
+  /// Accent container — Soft blue
+  static const Color accentContainer = Color(0xFFD7E3FF);
+
+  /// Accent container üzerindeki text
+  static const Color onAccentContainer = Color(0xFF0F1B30);
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // SECONDARY — Desaturated green-gray
+  // ══════════════════════════════════════════════════════════════════════════
+
+  static const Color secondary = Color(0xFF506459);
+  static const Color onSecondary = Color(0xFFFFFFFF);
+  static const Color secondaryContainer = Color(0xFFD3E8DC);
+  static const Color onSecondaryContainer = Color(0xFF0E1F17);
+
+  static const Color secondaryDarkMode = Color(0xFFB7CCC0);
+  static const Color onSecondaryDarkMode = Color(0xFF233530);
+  static const Color secondaryContainerDarkMode = Color(0xFF394C42);
+  static const Color onSecondaryContainerDarkMode = Color(0xFFD3E8DC);
 
   // ══════════════════════════════════════════════════════════════════════════
   // SEMANTIC COLORS
@@ -46,95 +91,125 @@ abstract class AppColors {
 
   /// Başarı durumu - Green
   static const Color success = Color(0xFF4ADE80);
-
-  /// Success üzerindeki metin/icon rengi
   static const Color onSuccess = Color(0xFFFFFFFF);
 
   /// Uyarı durumu - Yellow
   static const Color warning = Color(0xFFFACC15);
-
-  /// Warning üzerindeki metin/icon rengi
   static const Color onWarning = Color(0xFF1B1F23);
 
   /// Hata durumu - Red
-  static const Color error = Color(0xFFEF4444);
-
-  /// Error üzerindeki metin/icon rengi
+  static const Color error = Color(0xFFBA1A1A);
   static const Color onError = Color(0xFFFFFFFF);
+  static const Color errorContainer = Color(0xFFFFDAD6);
+  static const Color onErrorContainer = Color(0xFF410002);
 
-  /// Bilgi durumu - Cool Blue
-  static const Color info = Color(0xFF4A8AF7);
-
-  /// Info üzerindeki metin/icon rengi
+  /// Bilgi durumu — Primary ile aynı
+  static const Color info = Color(0xFF006B53);
   static const Color onInfo = Color(0xFFFFFFFF);
 
   // ══════════════════════════════════════════════════════════════════════════
-  // LIGHT THEME — Beyaz içerik + açık gri background
+  // LIGHT THEME — Green-tinted neutrals
   // ══════════════════════════════════════════════════════════════════════════
 
-  /// Arka plan — Soğuk açık gri
-  static const Color backgroundLight = Color(0xFFF2F3F6);
+  /// Arka plan — Saf beyaz
+  static const Color backgroundLight = Color(0xFFFFFFFF);
 
-  /// Yüzey — Saf beyaz (card, modal, panel)
+  /// Yüzey — Beyaz (card, modal, panel)
   static const Color surfaceLight = Color(0xFFFFFFFF);
 
-  /// Yüzey varyant — Açık gri (search bar, input bg)
-  static const Color surfaceVariantLight = Color(0xFFE8EAEF);
+  /// Yüzey varyant — Hafif yeşil tint
+  static const Color surfaceVariantLight = Color(0xFFE3EBE5);
 
-  /// Ana metin — Charcoal
-  static const Color textPrimaryLight = Color(0xFF1B1F23);
+  /// Surface container lowest
+  static const Color surfaceContainerLowestLight = Color(0xFFFFFFFF);
 
-  /// İkincil metin — Slate gri
-  static const Color textSecondaryLight = Color(0xFF6B7685);
+  /// Surface container low — Card'lar
+  static const Color surfaceContainerLowLight = Color(0xFFEEF6F0);
 
-  /// Üçüncül metin — Açık slate
-  static const Color textTertiaryLight = Color(0xFF8D96A1);
+  /// Surface container — Navigation bar
+  static const Color surfaceContainerLight = Color(0xFFE9F1EB);
+
+  /// Surface container high — Search bar, elevated
+  static const Color surfaceContainerHighLight = Color(0xFFE3EBE5);
+
+  /// Surface container highest — Text field
+  static const Color surfaceContainerHighestLight = Color(0xFFDDE5DF);
+
+  /// Ana metin — Koyu yeşil-siyah
+  static const Color textPrimaryLight = Color(0xFF161D19);
+
+  /// İkincil metin — Orta yeşil-gri
+  static const Color textSecondaryLight = Color(0xFF3E4943);
+
+  /// Üçüncül metin
+  static const Color textTertiaryLight = Color(0xFF6F7A74);
 
   /// Disabled metin
-  static const Color textDisabledLight = Color(0xFFB4BAC3);
+  static const Color textDisabledLight = Color(0xFFBECAC3);
 
-  /// Border — Açık gri
-  static const Color outlineLight = Color(0xFFD6DAE0);
+  /// Border — Yeşil-gri
+  static const Color outlineLight = Color(0xFF6F7A74);
 
-  /// Border varyant
-  static const Color outlineVariantLight = Color(0xFFB4BAC3);
+  /// Border varyant — Açık yeşil-gri
+  static const Color outlineVariantLight = Color(0xFFBECAC3);
+
+  /// Inverse surface — Snackbar bg
+  static const Color inverseSurfaceLight = Color(0xFF2B322E);
+
+  /// Inverse primary — Snackbar accent
+  static const Color inversePrimaryLight = Color(0xFF5FDAB1);
 
   // ══════════════════════════════════════════════════════════════════════════
-  // DARK THEME — Siyah bg + Charcoal header + Slate card
+  // DARK THEME — Green-tinted dark neutrals
   // ══════════════════════════════════════════════════════════════════════════
 
-  /// Arka plan — Siyah
-  static const Color backgroundDark = Color(0xFF000000);
+  /// Arka plan — Yeşil tonlu koyu (saf siyah DEĞİL)
+  static const Color backgroundDark = Color(0xFF0C1511);
 
-  /// Yüzey — Slate (card, modal, panel)
-  static const Color surfaceDark = Color(0xFF38434F);
+  /// Yüzey — Koyu yeşil-gri (card, modal, panel)
+  static const Color surfaceDark = Color(0xFF1B221E);
 
-  /// Yüzey varyant — Charcoal (header, sidebar, toolbar, nav)
-  static const Color surfaceVariantDark = Color(0xFF1B1F23);
+  /// Yüzey varyant — Biraz daha açık
+  static const Color surfaceVariantDark = Color(0xFF303733);
 
-  /// Dark surface container — Charcoal
-  static const Color surfaceContainerDark = Color(0xFF1B1F23);
+  /// Surface container lowest
+  static const Color surfaceContainerLowestDark = Color(0xFF060F0B);
 
-  /// Dark surface container high — Charcoal+1
-  static const Color surfaceContainerHighDark = Color(0xFF242930);
+  /// Surface container low
+  static const Color surfaceContainerLowDark = Color(0xFF161D19);
+
+  /// Surface container
+  static const Color surfaceContainerDark = Color(0xFF1B221E);
+
+  /// Surface container high
+  static const Color surfaceContainerHighDark = Color(0xFF262D29);
+
+  /// Surface container highest
+  static const Color surfaceContainerHighestDark = Color(0xFF303733);
 
   /// Ana metin — Açık gri (koyu yüzeylerde)
-  static const Color textPrimaryDark = Color(0xFFF2F3F6);
+  static const Color textPrimaryDark = Color(0xFFDDE5DF);
 
   /// İkincil metin — Mist
-  static const Color textSecondaryDark = Color(0xFFB4BAC3);
+  static const Color textSecondaryDark = Color(0xFFBECAC3);
 
-  /// Üçüncül metin — Slate+3
-  static const Color textTertiaryDark = Color(0xFF8D96A1);
+  /// Üçüncül metin
+  static const Color textTertiaryDark = Color(0xFF88948D);
 
-  /// Disabled metin — Slate+2
-  static const Color textDisabledDark = Color(0xFF6B7685);
+  /// Disabled metin
+  static const Color textDisabledDark = Color(0xFF3E4943);
 
-  /// Border — Slate+1
-  static const Color outlineDark = Color(0xFF4F5B68);
+  /// Border
+  static const Color outlineDark = Color(0xFF88948D);
 
-  /// Border varyant — Charcoal+2
-  static const Color outlineVariantDark = Color(0xFF2E353D);
+  /// Border varyant
+  static const Color outlineVariantDark = Color(0xFF3E4943);
+
+  /// Inverse surface — Snackbar bg
+  static const Color inverseSurfaceDark = Color(0xFFDDE5DF);
+
+  /// Inverse primary — Snackbar accent
+  static const Color inversePrimaryDark = Color(0xFF006B53);
 
   // ══════════════════════════════════════════════════════════════════════════
   // PAPER COLORS
@@ -147,11 +222,9 @@ abstract class AppColors {
   // FOLDER COLORS (12)
   // ══════════════════════════════════════════════════════════════════════════
 
-  /// Klasör renk seçenekleri
-  ///
-  /// Kullanıcının klasörlerine atayabileceği 12 renk.
+  /// Klasör renk seçenekleri — ilk renk artık emerald
   static const List<Color> folderColors = [
-    Color(0xFF5B7CFF), // Primary Blue
+    Color(0xFF00B988), // Emerald (brand)
     Color(0xFF8B5CF6), // Purple
     Color(0xFFEC4899), // Pink
     Color(0xFFEF4444), // Red
@@ -179,7 +252,7 @@ abstract class AppColors {
     Color(0xFFF97316), // Orange
     Color(0xFFFACC15), // Yellow
     Color(0xFF4ADE80), // Green
-    Color(0xFF5B7CFF), // Blue
+    Color(0xFF006B53), // Emerald (was Blue)
     Color(0xFF8B5CF6), // Purple
   ];
 
@@ -193,7 +266,7 @@ abstract class AppColors {
   static const List<Color> highlighterColors = [
     Color(0x80FACC15), // Yellow
     Color(0x804ADE80), // Green
-    Color(0x805B7CFF), // Blue
+    Color(0x80006B53), // Emerald (was Blue)
     Color(0x80EC4899), // Pink
     Color(0x808B5CF6), // Purple
     Color(0x80F97316), // Orange

@@ -39,15 +39,27 @@ class DocumentCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(child: _buildThumbnailCard(context, ref)),
-        Padding(
-          padding: const EdgeInsets.only(top: AppSpacing.xs),
-          child: _buildInfoSection(context),
-        ),
-      ],
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final brightness = isDark ? Brightness.dark : Brightness.light;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        boxShadow: AppShadows.cardResting(brightness),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(child: _buildThumbnailCard(context, ref)),
+          Padding(
+            padding: const EdgeInsets.only(
+                top: AppSpacing.xs, bottom: AppSpacing.sm,
+                left: AppSpacing.sm, right: AppSpacing.sm),
+            child: _buildInfoSection(context),
+          ),
+        ],
+      ),
     );
   }
 
@@ -61,19 +73,13 @@ class DocumentCard extends ConsumerWidget {
   }
 
   Widget _buildThumbnailCard(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final outlineColor =
-        isDark ? AppColors.outlineDark : AppColors.outlineLight;
-
     return Container(
       decoration: BoxDecoration(
         color: DocumentPaperColors.fromName(document.paperColor),
-        borderRadius: BorderRadius.circular(AppRadius.sm),
-        border: Border.all(
-          color: isSelected ? AppColors.primary : outlineColor,
-          width: isSelected ? 2 : 1,
-        ),
-        boxShadow: isSelected ? null : AppShadows.sm,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.card)),
+        border: isSelected
+            ? Border.all(color: AppColors.primary, width: 2)
+            : null,
       ),
       child: Stack(
         children: [
@@ -84,7 +90,8 @@ class DocumentCard extends ConsumerWidget {
               onTap: onTap,
               onLongPress: () => _handleLongPress(ref),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(AppRadius.sm - 1),
+                borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(AppRadius.card)),
                 child: _buildThumbnail(context),
               ),
             ),
@@ -128,7 +135,8 @@ class DocumentCard extends ConsumerWidget {
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.primary.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(AppRadius.sm - 1),
+          borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(AppRadius.card)),
         ),
       ),
     );
@@ -229,7 +237,9 @@ class DocumentCard extends ConsumerWidget {
       padding: const EdgeInsets.all(4),
       color: frameColor,
       child: Container(
-        color: isDark ? const Color(0xFF2A2A2A) : Colors.white,
+        color: isDark
+            ? AppColors.surfaceContainerHighDark
+            : AppColors.surfaceLight,
         child: CustomPaint(
           painter: WhiteboardGridPainter(dotColor: dotColor),
           size: Size.infinite,

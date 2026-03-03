@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:example_app/core/theme/index.dart';
+
 // A small badge indicating premium status.
 class PremiumBadge extends StatelessWidget {
   const PremiumBadge({super.key});
@@ -15,11 +17,14 @@ class PremiumBadge extends StatelessWidget {
       child: const Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.star, size: 16, color: Colors.white),
+          Icon(Icons.star, size: 16, color: AppColors.onPrimary),
           SizedBox(width: 4),
           Text(
             'Premium',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: AppColors.onPrimary,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),

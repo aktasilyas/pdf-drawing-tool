@@ -31,9 +31,9 @@ void showNewDocumentDropdown(BuildContext context, GlobalKey buttonKey) {
       position.dx + button.size.width,
       position.dy + button.size.height + 300,
     ),
-    elevation: 8,
+    elevation: 4,
     shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(AppRadius.card),
     ),
     items: [
       _buildMenuItem(NewDocumentOption.notebook, Icons.book_outlined, 'Not Defteri'),
@@ -57,39 +57,42 @@ PopupMenuItem<NewDocumentOption> _buildMenuItem(
 ) {
   return PopupMenuItem<NewDocumentOption>(
     value: option,
-    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+    padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
     height: 52,
     child: Builder(
-      builder: (context) => Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.sm),
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.5),
-              borderRadius: BorderRadius.circular(10),
+      builder: (context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final iconColor =
+            isDark ? AppColors.primaryDarkMode : AppColors.primary;
+        final iconBg = isDark
+            ? AppColors.surfaceContainerHighDark
+            : AppColors.surfaceContainerHighLight;
+        final textPrimary =
+            isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+
+        return Row(
+          children: [
+            Container(
+              width: 32,
+              height: 32,
+              decoration: BoxDecoration(
+                color: iconBg,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: AppIconSize.sm, color: iconColor),
             ),
-            child: Icon(
-              icon,
-              size: 22,
-              color: Theme.of(context).colorScheme.onPrimaryContainer,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Text(
-              label,
-              style: AppTypography.titleLarge.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Text(
+                label,
+                style:
+                    AppTypography.bodyMedium.copyWith(color: textPrimary),
               ),
             ),
-          ),
-          Icon(
-            Icons.arrow_forward_ios_rounded,
-            size: 14,
-            color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-          ),
-        ],
-      ),
+          ],
+        );
+      },
     ),
   );
 }

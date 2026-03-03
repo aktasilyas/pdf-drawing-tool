@@ -29,15 +29,27 @@ class FolderCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(child: _buildThumbnailCard(context, ref)),
-        Padding(
-          padding: const EdgeInsets.only(top: AppSpacing.xs),
-          child: _buildInfoSection(context),
-        ),
-      ],
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final brightness = isDark ? Brightness.dark : Brightness.light;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+        borderRadius: BorderRadius.circular(AppRadius.card),
+        boxShadow: AppShadows.cardResting(brightness),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(child: _buildThumbnailCard(context, ref)),
+          Padding(
+            padding: const EdgeInsets.only(
+                top: AppSpacing.xs, bottom: AppSpacing.sm,
+                left: AppSpacing.sm, right: AppSpacing.sm),
+            child: _buildInfoSection(context),
+          ),
+        ],
+      ),
     );
   }
 
@@ -68,7 +80,7 @@ class FolderCard extends ConsumerWidget {
                 child: Text(
                   '${folder.documentCount}',
                   style: AppTypography.labelMedium.copyWith(
-                    color: Colors.white.withValues(alpha: 0.9),
+                    color: AppColors.onPrimary.withValues(alpha: 0.9),
                     fontWeight: FontWeight.w700,
                   ),
                 ),

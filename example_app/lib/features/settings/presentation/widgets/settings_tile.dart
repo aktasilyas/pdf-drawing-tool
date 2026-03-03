@@ -36,8 +36,15 @@ class SettingsTile extends StatelessWidget {
         ? (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)
         : (isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight);
     final iconColor = enabled
-        ? (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)
+        ? (isDark ? AppColors.primaryDarkMode : AppColors.primary)
         : (isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight);
+    final iconBgColor = enabled
+        ? (isDark
+            ? AppColors.surfaceContainerHighDark
+            : AppColors.surfaceContainerHighLight)
+        : (isDark
+            ? AppColors.surfaceVariantDark
+            : AppColors.surfaceVariantLight);
 
     return InkWell(
       onTap: enabled ? onTap : null,
@@ -49,7 +56,15 @@ class SettingsTile extends StatelessWidget {
         ),
         child: Row(
           children: [
-            Icon(icon, size: AppIconSize.md, color: iconColor),
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: iconBgColor,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, size: AppIconSize.sm, color: iconColor),
+            ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
               child: Column(

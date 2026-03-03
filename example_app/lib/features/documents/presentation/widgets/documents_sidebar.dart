@@ -1,4 +1,4 @@
-/// ElyaNotes Documents Sidebar - Design system sidebar component
+/// ElyaNotes Documents Sidebar - Settings-style card layout
 library;
 
 import 'package:flutter/material.dart';
@@ -8,6 +8,7 @@ import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/sidebar_item.dart';
+import 'package:example_app/features/documents/presentation/widgets/sidebar_tile.dart';
 
 /// Sidebar bölüm tipleri
 enum SidebarSection { documents, favorites, shared, store, trash, folder }
@@ -19,8 +20,8 @@ class DocumentsSidebar extends ConsumerWidget {
   final String? selectedFolderId;
   final ValueChanged<String>? onFolderSelected;
   final VoidCallback? onCreateFolder;
-  final VoidCallback? onCollapse; // Sidebar collapse/close callback
-  final bool isDrawer; // true = phone drawer, false = tablet sidebar
+  final VoidCallback? onCollapse;
+  final bool isDrawer;
 
   const DocumentsSidebar({
     super.key,
@@ -40,58 +41,84 @@ class DocumentsSidebar extends ConsumerWidget {
 
     return Container(
       width: AppSpacing.sidebarWidth,
-      color: isDark ? AppColors.surfaceVariantDark : AppColors.surfaceLight,
+      color: isDark
+          ? AppColors.surfaceContainerLowDark
+          : AppColors.surfaceContainerLowLight,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildHeader(context),
-          const SizedBox(height: AppSpacing.xs),
-          // Sabit menü öğeleri
-          SidebarItem(
-            icon: Icons.description_outlined,
-            selectedIcon: Icons.description,
-            label: 'Tüm Notlar',
-            isSelected: selectedSection == SidebarSection.documents,
-            onTap: () => onSectionChanged(SidebarSection.documents),
-          ),
-          SidebarItem(
-            icon: Icons.star_outline,
-            selectedIcon: Icons.star,
-            label: 'Favoriler',
-            isSelected: selectedSection == SidebarSection.favorites,
-            onTap: () => onSectionChanged(SidebarSection.favorites),
-            iconColor: selectedSection == SidebarSection.favorites
-                ? AppColors.accent
-                : null,
-          ),
-          SidebarItem(
-            icon: Icons.delete_outline,
-            selectedIcon: Icons.delete,
-            label: 'Son Silinenler',
-            isSelected: selectedSection == SidebarSection.trash,
-            onTap: () => onSectionChanged(SidebarSection.trash),
-          ),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
-            child: AppDivider(),
-          ),
-          // Klasörler başlığı (sabit)
+          const SizedBox(height: AppSpacing.sm),
+          // Navigasyon kartı
+          _buildNavCard(context, isDark),
+          const SizedBox(height: AppSpacing.md),
           _buildFoldersHeader(context),
-          // Klasör listesi (sadece burası scroll)
           Expanded(
             child: SingleChildScrollView(
               child: _buildFoldersList(context, foldersAsync),
             ),
           ),
-          // Alt bölüm (sabit)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
-            child: AppDivider(),
-          ),
-          _buildTagsPlaceholder(context),
           const SizedBox(height: AppSpacing.lg),
         ],
       ),
+    );
+  }
+
+  Widget _buildNavCard(BuildContext context, bool isDark) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+      child: AppCard(
+        variant: AppCardVariant.elevated,
+        padding: EdgeInsets.zero,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SidebarTile(
+              icon: Icons.description_outlined,
+              label: 'Tüm Notlar',
+              isSelected: selectedSection == SidebarSection.documents,
+              onTap: () => onSectionChanged(SidebarSection.documents),
+            ),
+            _divider(isDark),
+            SidebarTile(
+              icon: Icons.star_outline,
+              label: 'Favoriler',
+              isSelected: selectedSection == SidebarSection.favorites,
+              onTap: () => onSectionChanged(SidebarSection.favorites),
+            ),
+            _divider(isDark),
+            SidebarTile(
+              icon: Icons.delete_outline,
+              label: 'Son Silinenler',
+              isSelected: selectedSection == SidebarSection.trash,
+              onTap: () => onSectionChanged(SidebarSection.trash),
+            ),
+            _divider(isDark),
+            SidebarTile(
+              icon: Icons.label_outline,
+              label: 'Etiketler',
+              isSelected: false,
+              enabled: false,
+              trailing: Text('Yakında',
+                  style: AppTypography.caption.copyWith(
+                      color: isDark
+                          ? AppColors.textTertiaryDark
+                          : AppColors.textTertiaryLight)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _divider(bool isDark) {
+    return Divider(
+      height: 0.5,
+      thickness: 0.5,
+      color: isDark
+          ? AppColors.outlineVariantDark
+          : AppColors.outlineVariantLight,
+      indent: 52,
     );
   }
 
@@ -132,7 +159,6 @@ class DocumentsSidebar extends ConsumerWidget {
               ],
             ),
           ),
-          // Collapse/Close button instead of Settings
           if (onCollapse != null)
             AppIconButton(
               icon: isDrawer ? Icons.close : Icons.chevron_left,
@@ -238,36 +264,6 @@ class DocumentsSidebar extends ConsumerWidget {
                   ? (isDark ? AppColors.accent : AppColors.primary)
                   : tertiaryColor)),
       onTap: () => onFolderSelected?.call(folder.id),
-    );
-  }
-
-  Widget _buildTagsPlaceholder(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final tertiaryColor =
-        isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const AppSectionHeader(
-          title: 'Etiketler',
-          padding: EdgeInsets.symmetric(
-              horizontal: AppSpacing.md, vertical: AppSpacing.xs),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md, vertical: AppSpacing.xs),
-          child: Row(
-            children: [
-              Icon(Icons.label_outline,
-                  size: AppIconSize.sm, color: tertiaryColor),
-              const SizedBox(width: AppSpacing.sm),
-              Text('Yakında...',
-                  style: AppTypography.caption.copyWith(color: tertiaryColor)),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }

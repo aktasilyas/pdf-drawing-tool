@@ -12,7 +12,7 @@
 /// AppRadius.md
 /// AppTypography.bodyMedium
 /// AppIconSize.lg
-/// AppShadows.md
+/// AppShadows.cardResting(brightness)
 /// AppDurations.normal
 /// AppCurves.standard
 ///

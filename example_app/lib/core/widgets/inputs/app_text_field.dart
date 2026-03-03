@@ -166,15 +166,9 @@ class _AppTextFieldState extends State<AppTextField> {
           DecoratedBox(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(AppRadius.textField),
-              boxShadow: isDark
-                  ? []
-                  : const [
-                      BoxShadow(
-                        color: Color(0x0D000000),
-                        blurRadius: 4,
-                        offset: Offset(0, 1),
-                      ),
-                    ],
+              boxShadow: AppShadows.toolbar(
+                isDark ? Brightness.dark : Brightness.light,
+              ),
             ),
             child: ConstrainedBox(
               constraints: const BoxConstraints(minHeight: 48),

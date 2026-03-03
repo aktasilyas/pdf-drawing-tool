@@ -57,10 +57,8 @@ class Sidebar extends ConsumerWidget {
                 const SizedBox(width: AppSpacing.sm),
                 Text(
                   'elyanotes',
-                  style: TextStyle(
-                    fontFamily: 'ComicRelief',
+                  style: AppTypography.logo(
                     fontSize: 22,
-                    fontWeight: FontWeight.w700,
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),

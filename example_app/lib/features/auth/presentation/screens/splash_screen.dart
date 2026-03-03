@@ -134,7 +134,9 @@ class _LogoWidget extends AnimatedWidget {
                 decoration: BoxDecoration(
                   color: surfaceColor,
                   borderRadius: BorderRadius.circular(AppRadius.bottomSheet),
-                  boxShadow: AppShadows.lg,
+                  boxShadow: AppShadows.cardElevated(
+                    isDark ? Brightness.dark : Brightness.light,
+                  ),
                 ),
                 child: const Icon(
                   Icons.edit_note_rounded,
@@ -146,10 +148,8 @@ class _LogoWidget extends AnimatedWidget {
             const SizedBox(height: AppSpacing.lg),
             Text(
               'ElyaNotes',
-              style: TextStyle(
-                fontFamily: 'ComicRelief',
+              style: AppTypography.logo(
                 fontSize: 32,
-                fontWeight: FontWeight.w700,
                 color: textColor,
               ),
             ),

@@ -35,7 +35,7 @@ class SettingsSection extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           child: AppCard(
-            variant: AppCardVariant.filled,
+            variant: AppCardVariant.elevated,
             padding: EdgeInsets.zero,
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -53,10 +53,12 @@ class SettingsSection extends StatelessWidget {
       result.add(children[i]);
       if (i < children.length - 1) {
         result.add(Divider(
-          height: 1,
-          thickness: 1,
-          color: isDark ? AppColors.outlineDark : AppColors.outlineLight,
-          indent: AppSpacing.lg,
+          height: 0.5,
+          thickness: 0.5,
+          color: isDark
+              ? AppColors.outlineVariantDark
+              : AppColors.outlineVariantLight,
+          indent: 56,
         ));
       }
     }

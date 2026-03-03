@@ -18,7 +18,10 @@ class CanvasThemeSetting extends ConsumerWidget {
     final textColor =
         isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
     final iconColor =
-        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+        isDark ? AppColors.primaryDarkMode : AppColors.primary;
+    final iconBgColor = isDark
+        ? AppColors.surfaceContainerHighDark
+        : AppColors.surfaceContainerHighLight;
 
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -30,8 +33,16 @@ class CanvasThemeSetting extends ConsumerWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.palette_outlined,
-                  size: AppIconSize.md, color: iconColor),
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: iconBgColor,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(Icons.palette_outlined,
+                    size: AppIconSize.sm, color: iconColor),
+              ),
               const SizedBox(width: AppSpacing.md),
               Text('Canvas Teması',
                   style: AppTypography.titleMedium.copyWith(color: textColor)),

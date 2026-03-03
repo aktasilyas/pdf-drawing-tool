@@ -82,16 +82,8 @@ class ElyaNotesApp extends ConsumerWidget {
         }
         return child!;
       },
-      theme: ThemeData(
-        colorSchemeSeed: const Color(0xFF38434F),
-        useMaterial3: true,
-        brightness: Brightness.light,
-      ),
-      darkTheme: ThemeData(
-        colorSchemeSeed: const Color(0xFF38434F),
-        useMaterial3: true,
-        brightness: Brightness.dark,
-      ),
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
       themeMode: themeMode,
       routerConfig: appRouter,
     );

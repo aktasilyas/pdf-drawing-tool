@@ -129,33 +129,33 @@ class AppToast {
         return const _ToastConfig(
           icon: Icons.check_circle_outline,
           backgroundColor: AppColors.success,
-          iconColor: Colors.white,
-          textColor: Colors.white,
-          actionColor: Colors.white,
+          iconColor: AppColors.onSuccess,
+          textColor: AppColors.onSuccess,
+          actionColor: AppColors.onSuccess,
         );
       case AppToastType.error:
         return const _ToastConfig(
           icon: Icons.error_outline,
           backgroundColor: AppColors.error,
-          iconColor: Colors.white,
-          textColor: Colors.white,
-          actionColor: Colors.white,
+          iconColor: AppColors.onError,
+          textColor: AppColors.onError,
+          actionColor: AppColors.onError,
         );
       case AppToastType.warning:
         return const _ToastConfig(
           icon: Icons.warning_amber_outlined,
           backgroundColor: AppColors.warning,
-          iconColor: AppColors.textPrimaryLight,
-          textColor: AppColors.textPrimaryLight,
-          actionColor: AppColors.textPrimaryLight,
+          iconColor: AppColors.onWarning,
+          textColor: AppColors.onWarning,
+          actionColor: AppColors.onWarning,
         );
       case AppToastType.info:
         return const _ToastConfig(
           icon: Icons.info_outline,
           backgroundColor: AppColors.info,
-          iconColor: Colors.white,
-          textColor: Colors.white,
-          actionColor: Colors.white,
+          iconColor: AppColors.onInfo,
+          textColor: AppColors.onInfo,
+          actionColor: AppColors.onInfo,
         );
     }
   }

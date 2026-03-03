@@ -74,7 +74,7 @@ class AppBadge extends StatelessWidget {
         decoration: BoxDecoration(
           color: badgeColor,
           shape: BoxShape.circle,
-          border: Border.all(color: Colors.white, width: 1.5),
+          border: Border.all(color: AppColors.onPrimary, width: 1.5),
         ),
       );
     }
@@ -91,7 +91,7 @@ class AppBadge extends StatelessWidget {
       decoration: BoxDecoration(
         color: badgeColor,
         borderRadius: BorderRadius.circular(AppRadius.full),
-        border: Border.all(color: Colors.white, width: 1.5),
+        border: Border.all(color: AppColors.onPrimary, width: 1.5),
       ),
       child: Center(
         child: Text(
@@ -99,7 +99,7 @@ class AppBadge extends StatelessWidget {
           style: const TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.w600,
-            color: Colors.white,
+            color: AppColors.onPrimary,
             height: 1.0,
           ),
           textAlign: TextAlign.center,

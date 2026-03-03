@@ -5,3 +5,4 @@ export 'presentation/widgets/settings_section.dart';
 export 'presentation/widgets/settings_tile.dart';
 export 'presentation/widgets/profile_header.dart';
 export 'presentation/widgets/canvas_theme_setting.dart';
+export 'presentation/widgets/settings_dialogs.dart';

@@ -12,6 +12,7 @@ import 'package:example_app/features/documents/domain/entities/sort_option.dart'
 import 'package:example_app/features/documents/domain/entities/view_mode.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/selection_mode_header.dart';
+import 'sort_popup_button.dart';
 
 class DocumentsHeader extends ConsumerWidget {
   final String title;
@@ -58,15 +59,96 @@ class DocumentsHeader extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildHeaderRow(context, ref, isPhone),
+          _buildTitleRow(context, isPhone),
           if (isTrashSection) ...[
             const SizedBox(height: AppSpacing.sm),
             _buildTrashInfo(context),
           ],
-          const SizedBox(height: AppSpacing.lg),
-          _buildSearchField(ref),
+          const SizedBox(height: AppSpacing.md),
+          _buildActionRow(context, ref),
         ],
       ),
+    );
+  }
+
+  Widget _buildTitleRow(BuildContext context, bool isPhone) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            title,
+            style: (isPhone
+                    ? AppTypography.headlineMedium
+                    : AppTypography.headlineLarge)
+                .copyWith(color: textPrimary),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        if (!isPhone)
+          _CircleIconButton(
+            icon: Icons.settings_outlined,
+            tooltip: 'Ayarlar',
+            onPressed: () => context.push('/settings'),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildActionRow(BuildContext context, WidgetRef ref) {
+    final viewMode = ref.watch(viewModeProvider);
+    final sortDirection = ref.watch(sortDirectionProvider);
+    final pinFavorites = ref.watch(pinFavoritesProvider);
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        if (!isTrashSection)
+          _CircleIconButton(
+            key: newButtonKey,
+            icon: Icons.add,
+            tooltip: 'Yeni Belge',
+            onPressed: onNewPressed,
+          ),
+        if (!isTrashSection) const SizedBox(width: AppSpacing.sm),
+        SortPopupButton(
+          sortOption: sortOption,
+          sortDirection: sortDirection,
+          pinFavorites: pinFavorites,
+          onSortChanged: onSortChanged,
+          onDirectionChanged: () {
+            final newDir = sortDirection == SortDirection.descending
+                ? SortDirection.ascending
+                : SortDirection.descending;
+            ref.read(sortDirectionProvider.notifier).set(newDir);
+          },
+          onPinFavoritesChanged: () {
+            ref.read(pinFavoritesProvider.notifier).toggle();
+          },
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        _CircleIconButton(
+          icon: viewMode == ViewMode.grid ? Icons.view_list : Icons.grid_view,
+          tooltip:
+              viewMode == ViewMode.grid ? 'Liste görünümü' : 'Grid görünümü',
+          onPressed: () {
+            final newMode =
+                viewMode == ViewMode.grid ? ViewMode.list : ViewMode.grid;
+            ref.read(viewModeProvider.notifier).set(newMode);
+          },
+        ),
+        const SizedBox(width: AppSpacing.sm),
+        _CircleIconButton(
+          icon: Icons.check_circle_outline,
+          tooltip: 'Seçim modu',
+          onPressed: () {
+            ref.read(selectionModeProvider.notifier).state = true;
+          },
+        ),
+      ],
     );
   }
 
@@ -86,11 +168,8 @@ class DocumentsHeader extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          const Icon(
-            Icons.info_outline,
-            size: AppIconSize.sm,
-            color: AppColors.warning,
-          ),
+          const Icon(Icons.info_outline,
+              size: AppIconSize.sm, color: AppColors.warning),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
@@ -109,220 +188,43 @@ class DocumentsHeader extends ConsumerWidget {
       ),
     );
   }
-
-  Widget _buildHeaderRow(BuildContext context, WidgetRef ref, bool isPhone) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final viewMode = ref.watch(viewModeProvider);
-    final sortDirection = ref.watch(sortDirectionProvider);
-    final pinFavorites = ref.watch(pinFavoritesProvider);
-    final textPrimary =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
-
-    return Row(
-      children: [
-        // Title
-        Expanded(
-          child: Text(
-            title,
-            style: (isPhone
-                    ? AppTypography.headlineMedium
-                    : AppTypography.headlineLarge)
-                .copyWith(color: textPrimary),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        // Actions
-        if (!isTrashSection)
-          AppIconButton(
-            key: newButtonKey,
-            icon: Icons.add,
-            variant: AppIconButtonVariant.ghost,
-            tooltip: 'Yeni Belge',
-            onPressed: onNewPressed,
-          ),
-        const SizedBox(width: AppSpacing.xs),
-        _SortPopupButton(
-          sortOption: sortOption,
-          sortDirection: sortDirection,
-          pinFavorites: pinFavorites,
-          onSortChanged: onSortChanged,
-          onDirectionChanged: () {
-            final newDir = sortDirection == SortDirection.descending
-                ? SortDirection.ascending
-                : SortDirection.descending;
-            ref.read(sortDirectionProvider.notifier).set(newDir);
-          },
-          onPinFavoritesChanged: () {
-            ref.read(pinFavoritesProvider.notifier).toggle();
-          },
-        ),
-        const SizedBox(width: AppSpacing.xs),
-        AppIconButton(
-          icon: viewMode == ViewMode.grid ? Icons.view_list : Icons.grid_view,
-          variant: AppIconButtonVariant.ghost,
-          tooltip:
-              viewMode == ViewMode.grid ? 'Liste görünümü' : 'Grid görünümü',
-          onPressed: () {
-            final newMode =
-                viewMode == ViewMode.grid ? ViewMode.list : ViewMode.grid;
-            ref.read(viewModeProvider.notifier).set(newMode);
-          },
-        ),
-        const SizedBox(width: AppSpacing.xs),
-        AppIconButton(
-          icon: Icons.check_circle_outline,
-          variant: AppIconButtonVariant.ghost,
-          tooltip: 'Seçim modu',
-          onPressed: () {
-            ref.read(selectionModeProvider.notifier).state = true;
-          },
-        ),
-        // Settings button (tablet only - phone has it in mobile header)
-        if (!isPhone) ...[
-          const SizedBox(width: AppSpacing.xs),
-          AppIconButton(
-            icon: Icons.settings_outlined,
-            variant: AppIconButtonVariant.ghost,
-            tooltip: 'Ayarlar',
-            onPressed: () => context.push('/settings'),
-          ),
-        ],
-      ],
-    );
-  }
-
-  Widget _buildSearchField(WidgetRef ref) {
-    final searchQuery = ref.watch(searchQueryProvider);
-    return AppSearchField(
-      hint: 'Belgelerde ara...',
-      text: searchQuery,
-      onChanged: (query) {
-        ref.read(searchQueryProvider.notifier).state = query;
-      },
-    );
-  }
 }
 
-/// Sort popup button with options
-class _SortPopupButton extends StatelessWidget {
-  final SortOption sortOption;
-  final SortDirection sortDirection;
-  final bool pinFavorites;
-  final ValueChanged<SortOption> onSortChanged;
-  final VoidCallback onDirectionChanged;
-  final VoidCallback onPinFavoritesChanged;
+/// Circle-background icon button matching sidebar tile style.
+class _CircleIconButton extends StatelessWidget {
+  final IconData icon;
+  final String tooltip;
+  final VoidCallback? onPressed;
 
-  const _SortPopupButton({
-    required this.sortOption,
-    required this.sortDirection,
-    required this.pinFavorites,
-    required this.onSortChanged,
-    required this.onDirectionChanged,
-    required this.onPinFavoritesChanged,
+  const _CircleIconButton({
+    super.key,
+    required this.icon,
+    required this.tooltip,
+    this.onPressed,
   });
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textSecondary =
-        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
-    final textPrimary =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final iconColor = isDark ? AppColors.primaryDarkMode : AppColors.primary;
+    final bgColor = isDark
+        ? AppColors.surfaceContainerHighDark
+        : AppColors.surfaceContainerHighLight;
 
-    return PopupMenuButton<String>(
-      icon: Icon(Icons.sort, size: AppIconSize.lg, color: textSecondary),
-      tooltip: 'Sıralama',
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.card),
-      ),
-      onSelected: (value) {
-        if (value == 'pin_favorites') {
-          onPinFavoritesChanged();
-        } else if (value == 'direction') {
-          onDirectionChanged();
-        } else {
-          onSortChanged(SortOption.values.firstWhere((e) => e.name == value));
-        }
-      },
-      itemBuilder: (context) => [
-        _buildSortItem(
-            context, 'date', 'Tarihe göre', sortOption == SortOption.date),
-        _buildSortItem(
-            context, 'name', 'İsme göre', sortOption == SortOption.name),
-        _buildSortItem(
-            context, 'size', 'Boyuta göre', sortOption == SortOption.size),
-        const PopupMenuDivider(),
-        PopupMenuItem(
-          value: 'direction',
-          child: Row(
-            children: [
-              Icon(
-                sortDirection == SortDirection.descending
-                    ? Icons.arrow_downward
-                    : Icons.arrow_upward,
-                size: AppIconSize.md,
-                color: textSecondary,
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Text(
-                  sortDirection == SortDirection.descending
-                      ? 'Yeniden eskiye'
-                      : 'Eskiden yeniye',
-                  style: AppTypography.bodyMedium.copyWith(color: textPrimary),
-                ),
-              ),
-            ],
+    return Tooltip(
+      message: tooltip,
+      child: Material(
+        color: bgColor,
+        shape: const CircleBorder(),
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: onPressed,
+          child: SizedBox(
+            width: 36,
+            height: 36,
+            child: Icon(icon, size: 20, color: iconColor),
           ),
         ),
-        const PopupMenuDivider(),
-        PopupMenuItem(
-          value: 'pin_favorites',
-          child: Row(
-            children: [
-              Icon(
-                pinFavorites ? Icons.push_pin : Icons.push_pin_outlined,
-                size: AppIconSize.md,
-                color: pinFavorites ? AppColors.accent : textSecondary,
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Text(
-                  'Favorileri üste sabitle',
-                  style: AppTypography.bodyMedium.copyWith(color: textPrimary),
-                ),
-              ),
-              if (pinFavorites)
-                const Icon(Icons.check,
-                    size: AppIconSize.md, color: AppColors.primary),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  PopupMenuItem<String> _buildSortItem(
-      BuildContext context, String value, String label, bool isSelected) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textPrimary =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
-
-    return PopupMenuItem(
-      value: value,
-      child: Row(
-        children: [
-          SizedBox(
-            width: AppIconSize.md,
-            child: isSelected
-                ? const Icon(Icons.check,
-                    size: AppIconSize.md, color: AppColors.primary)
-                : null,
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Text(label,
-              style: AppTypography.bodyMedium.copyWith(color: textPrimary)),
-        ],
       ),
     );
   }

@@ -71,10 +71,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
               _navigateToFolder,
             ),
           _buildHeader(),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
-            child: AppDivider(),
-          ),
+          _buildSoftDivider(),
           Expanded(child: _buildContentView()),
         ],
       ),
@@ -98,18 +95,13 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
             child: _buildSidebarContent(isDrawer: false),
           ),
         ),
-        if (!_isSidebarCollapsed)
-          Container(
-            width: 1,
-            color: isDark ? AppColors.outlineDark : AppColors.outlineLight,
-          ),
         Expanded(
           child: GestureDetector(
             onTap: () => FocusScope.of(context).unfocus(),
             child: Container(
               color: isDark
                   ? AppColors.backgroundDark
-                  : AppColors.backgroundLight,
+                  : AppColors.surfaceLight,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -122,11 +114,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                       _navigateToFolder,
                     ),
                   _buildHeader(),
-                  const Padding(
-                    padding:
-                        EdgeInsets.symmetric(vertical: AppSpacing.md),
-                    child: AppDivider(),
-                  ),
+                  _buildSoftDivider(),
                   Expanded(child: _buildContentView()),
                 ],
               ),
@@ -164,6 +152,18 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
       allFolderIds:
           getCurrentFolderIds(ref, _selectedSection, _selectedFolderId),
       isTrashSection: _selectedSection == SidebarSection.trash,
+    );
+  }
+
+  Widget _buildSoftDivider() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+      child: Divider(
+        height: 1,
+        thickness: 0.5,
+        color: isDark ? AppColors.outlineVariantDark : AppColors.outlineVariantLight,
+      ),
     );
   }
 
@@ -225,32 +225,22 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
   }
 
   void _navigateToRoot() {
-    setState(() {
-      _selectedSection = SidebarSection.documents;
-      _selectedFolderId = null;
-    });
+    setState(() { _selectedSection = SidebarSection.documents; _selectedFolderId = null; });
     ref.read(currentFolderIdProvider.notifier).state = null;
   }
 
   void _navigateToFolder(String folderId) {
-    setState(() {
-      _selectedSection = SidebarSection.folder;
-      _selectedFolderId = folderId;
-    });
+    setState(() { _selectedSection = SidebarSection.folder; _selectedFolderId = folderId; });
     ref.read(currentFolderIdProvider.notifier).state = folderId;
   }
 
-  void _handleFolderTap(Folder folder) =>
-      handleFolderTap(folder, _navigateToFolder);
+  void _handleFolderTap(Folder folder) => handleFolderTap(folder, _navigateToFolder);
   void _handleDocumentTap(DocumentInfo doc) => handleDocumentTap(doc);
 }
 
 /// Mobile header with hamburger menu and settings.
 class _MobileHeader extends StatelessWidget {
-  const _MobileHeader({
-    required this.onSettingsTap,
-  });
-
+  const _MobileHeader({required this.onSettingsTap});
   final VoidCallback onSettingsTap;
 
   @override
@@ -286,10 +276,8 @@ class _MobileHeader extends StatelessWidget {
           const SizedBox(width: AppSpacing.xs),
           Text(
             'elyanotes',
-            style: TextStyle(
-              fontFamily: 'ComicRelief',
+            style: AppTypography.logo(
               fontSize: 20,
-              fontWeight: FontWeight.w700,
               color: textPrimary,
             ),
           ),
