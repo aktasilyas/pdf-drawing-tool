@@ -104,7 +104,7 @@ class QuickColorChips extends ConsumerWidget {
                     ),
                   ),
                   child: PhosphorIcon(
-                    StarNoteIcons.more,
+                    ElyanotesIcons.more,
                     size: 14,
                     color: colorScheme.onSurfaceVariant,
                     semanticLabel: 'Daha Fazla Renk',
@@ -233,7 +233,7 @@ class _QuickColorChip extends StatelessWidget {
             ),
             child: isSelected
                 ? PhosphorIcon(
-                    StarNoteIcons.check,
+                    ElyanotesIcons.check,
                     size: 12,
                     color: color.computeLuminance() > 0.5
                         ? colorScheme.onSurface

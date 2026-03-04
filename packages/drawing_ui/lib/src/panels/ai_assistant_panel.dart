@@ -181,7 +181,7 @@ class _PremiumBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          PhosphorIcon(StarNoteIcons.sparkle, size: 14, color: colorScheme.tertiary),
+          PhosphorIcon(ElyanotesIcons.sparkle, size: 14, color: colorScheme.tertiary),
           const SizedBox(width: 4),
           Text(
             'Pro',
@@ -224,7 +224,7 @@ class _SelectionIndicator extends StatelessWidget {
       child: Row(
         children: [
           PhosphorIcon(
-            hasSelection ? StarNoteIcons.checkCircle : StarNoteIcons.info,
+            hasSelection ? ElyanotesIcons.checkCircle : ElyanotesIcons.info,
             size: 20,
             color: hasSelection ? colorScheme.primary : colorScheme.outline,
           ),
@@ -298,7 +298,7 @@ class _QuestionInput extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             child: PhosphorIcon(
-              isLoading ? StarNoteIcons.hourglass : StarNoteIcons.send,
+              isLoading ? ElyanotesIcons.hourglass : ElyanotesIcons.send,
               color: colorScheme.onPrimary,
               size: 20,
             ),
@@ -421,7 +421,7 @@ class _ResponseArea extends StatelessWidget {
         children: [
           Row(
             children: [
-              PhosphorIcon(StarNoteIcons.sparkle, size: 16, color: colorScheme.primary),
+              PhosphorIcon(ElyanotesIcons.sparkle, size: 16, color: colorScheme.primary),
               const SizedBox(width: 8),
               Text(
                 'AI Response',
@@ -433,12 +433,12 @@ class _ResponseArea extends StatelessWidget {
               const Spacer(),
               GestureDetector(
                 onTap: onCopy,
-                child: PhosphorIcon(StarNoteIcons.copy, size: 18, color: colorScheme.primary),
+                child: PhosphorIcon(ElyanotesIcons.copy, size: 18, color: colorScheme.primary),
               ),
               const SizedBox(width: 12),
               GestureDetector(
                 onTap: onRetry,
-                child: PhosphorIcon(StarNoteIcons.refresh, size: 18, color: colorScheme.primary),
+                child: PhosphorIcon(ElyanotesIcons.refresh, size: 18, color: colorScheme.primary),
               ),
             ],
           ),
@@ -473,7 +473,7 @@ class _PremiumNotice extends StatelessWidget {
       ),
       child: Row(
         children: [
-          PhosphorIcon(StarNoteIcons.info, size: 18, color: colorScheme.tertiary),
+          PhosphorIcon(ElyanotesIcons.info, size: 18, color: colorScheme.tertiary),
           const SizedBox(width: 8),
           Expanded(
             child: Text(

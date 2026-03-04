@@ -158,7 +158,7 @@ class _StickerPanelState extends ConsumerState<StickerPanel>
           // Insert button
           _CompactActionButton(
             label: 'Çıkartma Ekle',
-            icon: StarNoteIcons.plus,
+            icon: ElyanotesIcons.plus,
             enabled: _selectedStickerIndex >= 0,
             onPressed: () {
               final emoji = _getSelectedEmoji();

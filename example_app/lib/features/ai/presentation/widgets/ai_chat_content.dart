@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/drawing_ui.dart'
     show canvasBoundaryKeyProvider, pendingSelectionImageProvider;
 import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/features/ai/domain/entities/ai_entities.dart';
 import 'package:example_app/features/ai/presentation/providers/ai_providers.dart';
 import 'package:example_app/features/ai/presentation/widgets/ai_widgets.dart';
 
@@ -62,7 +63,7 @@ class _AIChatContentState extends ConsumerState<AIChatContent> {
 
     final pendingImage = ref.read(pendingSelectionImageProvider);
     if (pendingImage != null) {
-      final message = text.isEmpty ? 'Bu secimi analiz et.' : text;
+      final message = text.isEmpty ? 'Bu seçimi analiz et.' : text;
       ref.read(aiChatProvider.notifier).sendWithImageBytes(
             message, pendingImage);
       ref.read(pendingSelectionImageProvider.notifier).state = null;
@@ -81,7 +82,7 @@ class _AIChatContentState extends ConsumerState<AIChatContent> {
     }
     final canvasKey = ref.read(canvasBoundaryKeyProvider);
     ref.read(aiChatProvider.notifier).sendWithCanvas(
-      'Bu cizimi analiz et ve acikla.',
+      'Bu çizimi analiz et ve açıkla.',
       canvasBoundaryKey: canvasKey,
     );
     _scrollToBottom();
@@ -193,7 +194,27 @@ class _AIChatContentState extends ConsumerState<AIChatContent> {
         if (index == chatState.messages.length && chatState.isStreaming) {
           return AIStreamingBubble(content: chatState.streamingContent);
         }
-        return AIChatBubble(message: chatState.messages[index]);
+        final msg = chatState.messages[index];
+        final isLastAssistant =
+            index == chatState.messages.length - 1 &&
+                msg.role == MessageRole.assistant &&
+                !chatState.isStreaming;
+
+        if (isLastAssistant) {
+          final parsed = AIParsedResponse.parse(msg.content);
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AIChatBubble(
+                  message: msg.copyWith(content: parsed.content)),
+              AISuggestionChips(
+                suggestions: parsed.suggestions,
+                onTap: _handleSend,
+              ),
+            ],
+          );
+        }
+        return AIChatBubble(message: msg);
       },
     );
   }
@@ -206,11 +227,11 @@ class _AIChatContentState extends ConsumerState<AIChatContent> {
           Icon(Icons.auto_awesome, size: AppIconSize.emptyState,
               color: theme.colorScheme.primary.withValues(alpha: 0.5)),
           SizedBox(height: AppSpacing.lg),
-          Text('ElyaNotes AI', style: theme.textTheme.headlineSmall
+          Text('Elyanotes AI', style: theme.textTheme.headlineSmall
               ?.copyWith(fontWeight: FontWeight.w600)),
           SizedBox(height: AppSpacing.sm),
           Text(
-            'Sorularinizi sorun, notlarinizi ozetleyin\n'
+            'Sorularınızı sorun, notlarınızı özetleyin\n'
             "veya canvas'i AI ile analiz edin.",
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyMedium?.copyWith(

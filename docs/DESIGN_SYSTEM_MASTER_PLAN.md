@@ -1,4 +1,4 @@
-# 🎨 StarNote Design System & UI Refactoring Master Plan
+# Elyanotes Design System & UI Refactoring Master Plan
 
 > **Versiyon:** 1.0  
 > **Tarih:** 1 Şubat 2026  
@@ -46,7 +46,7 @@ GoodNotes, Flexcil ve Notability ile rekabet edebilecek, kullanıcı deneyimi od
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    STARNOTE COLOR PALETTE                       │
+│                    ELYANOTES COLOR PALETTE                      │
 ├─────────────────────────────────────────────────────────────────┤
 │  PRIMARY         │  #5B7CFF  │  Light Indigo / Creative Blue   │
 │  PRIMARY LIGHT   │  #7B96FF  │  Hover states                   │
@@ -93,7 +93,7 @@ Amber (#FFB547) çok dikkat çekici, sadece şu durumlarda kullan:
 ```dart
 import 'package:flutter/material.dart';
 
-/// StarNote Design System - Color Tokens
+/// Elyanotes Design System - Color Tokens
 /// Onay: 1 Şubat 2026
 abstract class AppColors {
   // BRAND
@@ -355,7 +355,7 @@ expanded: 840px+       // Tablet
 ### 6.1 Splash Screen
 - Background: Primary (#5B7CFF)
 - Logo: White container, shadow
-- Title: "StarNote" (white, bold)
+- Title: "Elyanotes" (white, bold)
 - Duration: 2 seconds
 
 ### 6.2 Auth Screens

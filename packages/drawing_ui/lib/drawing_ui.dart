@@ -1,4 +1,4 @@
-/// Flutter UI components for the StarNote drawing library.
+/// Flutter UI components for the Elyanotes drawing library.
 ///
 /// This package provides ready-to-use widgets for building drawing applications:
 /// - [DrawingScreen] - The main drawing screen widget
@@ -13,7 +13,7 @@ export 'src/models/tool_type.dart';
 // Theme
 export 'src/theme/drawing_theme.dart';
 export 'src/theme/drawing_colors.dart';
-export 'src/theme/starnote_icons.dart';
+export 'src/theme/elyanotes_icons.dart';
 
 // Re-export phosphor_flutter for PhosphorIcon widget
 export 'package:phosphor_flutter/phosphor_flutter.dart';
@@ -49,7 +49,7 @@ export 'src/widgets/widgets.dart';
 export 'src/widgets/template_picker/template_picker_widgets.dart';
 
 // Toolbar (Two-row layout)
-export 'src/toolbar/starnote_nav_button.dart';
+export 'src/toolbar/elyanotes_nav_button.dart';
 export 'src/toolbar/top_navigation_bar.dart';
 export 'src/toolbar/top_nav_menus.dart';
 export 'src/toolbar/tool_bar.dart';

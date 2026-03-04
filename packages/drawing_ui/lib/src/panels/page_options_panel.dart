@@ -385,7 +385,7 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
             PageOptionsHeader(title: widget.documentTitle!, compact: c),
             pageOptionsDivider(cs, compact: c),
             PageOptionsMenuItem(
-              icon: StarNoteIcons.editPencil,
+              icon: ElyanotesIcons.editPencil,
               label: 'Yeniden Adlandır',
               compact: c,
               onTap: () {
@@ -394,7 +394,7 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
               },
             ),
             PageOptionsMenuItem(
-              icon: StarNoteIcons.trash,
+              icon: ElyanotesIcons.trash,
               label: 'Çöpe Taşı',
               isDestructive: true,
               compact: c,
@@ -405,7 +405,7 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
             ),
             if (widget.onExport != null)
               PageOptionsMenuItem(
-                icon: StarNoteIcons.exportIcon,
+                icon: ElyanotesIcons.exportIcon,
                 label: 'Dışa Aktar',
                 compact: c,
                 onTap: widget.onExport,
@@ -416,66 +416,66 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
           pageOptionsDivider(cs, compact: c),
           if (widget.onAddPage != null)
             PageOptionsMenuItem(
-              icon: StarNoteIcons.pageAdd,
+              icon: ElyanotesIcons.pageAdd,
               label: 'Sayfa Ekle',
               compact: c,
               onTap: widget.onAddPage,
             ),
           PageOptionsMenuItem(
             icon: isBookmarked
-                ? StarNoteIcons.bookmarkFilled
-                : StarNoteIcons.bookmark,
+                ? ElyanotesIcons.bookmarkFilled
+                : ElyanotesIcons.bookmark,
             label: isBookmarked ? 'Yer imini kaldır' : 'Yer imi koy',
             compact: c,
             onTap: _toggleBookmark,
           ),
           PageOptionsMenuItem(
-            icon: StarNoteIcons.copy,
+            icon: ElyanotesIcons.copy,
             label: 'Sayfayı kopyala',
             compact: c,
             onTap: () => _copyPage(context),
           ),
           PageOptionsMenuItem(
-            icon: StarNoteIcons.paste,
+            icon: ElyanotesIcons.paste,
             label: 'Sayfayı yapıştır',
             compact: c,
             onTap: hasCopiedPage ? () => _pastePage(context) : null,
           ),
           PageOptionsMenuItem(
-            icon: StarNoteIcons.duplicate,
+            icon: ElyanotesIcons.duplicate,
             label: 'Sayfayı çoğalt',
             compact: c,
             onTap: _duplicatePage,
           ),
           PageOptionsMenuItem(
-            icon: StarNoteIcons.template,
+            icon: ElyanotesIcons.template,
             label: 'Şablonu değiştir',
             compact: c,
             onTap: () => _changeTemplate(context),
           ),
           PageOptionsMenuItem(
-            icon: StarNoteIcons.goToPage,
+            icon: ElyanotesIcons.goToPage,
             label: 'Sayfaya git',
             compact: c,
             trailing: pageOptionsChevronTrailing(cs, '${pageIndex + 1} / $pageCount', Theme.of(context).textTheme),
             onTap: () => _showGoToPageDialog(context),
           ),
           PageOptionsMenuItem(
-            icon: StarNoteIcons.pdfFile,
+            icon: ElyanotesIcons.pdfFile,
             label: 'PDF olarak dışa aktar',
             compact: c,
             onTap: _exportPageAsPdf,
           ),
           pageOptionsDivider(cs, compact: c),
           PageOptionsMenuItem(
-            icon: StarNoteIcons.pageClear,
+            icon: ElyanotesIcons.pageClear,
             label: 'Sayfayı temizle',
             isDestructive: true,
             compact: c,
             onTap: () => _clearPage(context),
           ),
           PageOptionsMenuItem(
-            icon: StarNoteIcons.trash,
+            icon: ElyanotesIcons.trash,
             label: 'Çöpe taşı',
             isDestructive: true,
             compact: c,
@@ -487,7 +487,7 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
           // DualPageModeItem(onClose: widget.onClose),
           ScrollDirectionItem(onClose: widget.onClose, compact: c),
           PageOptionsMenuItem(
-            icon: StarNoteIcons.sliders,
+            icon: ElyanotesIcons.sliders,
             label: 'Araç Çubuğunu Düzenle',
             compact: c,
             onTap: () {

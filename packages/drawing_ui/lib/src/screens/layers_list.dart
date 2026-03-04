@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_core/drawing_core.dart' show Layer;
 import 'package:drawing_ui/src/providers/providers.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 
 /// Layer management panel shown when the layers filter is selected.
 class LayersList extends ConsumerWidget {
@@ -78,7 +78,7 @@ class _LayerListHeader extends ConsumerWidget {
         SizedBox(height: 48, child: TextButton.icon(
           onPressed: () =>
               ref.read(documentProvider.notifier).addLayer('Katman ${layerCount + 1}'),
-          icon: PhosphorIcon(StarNoteIcons.plus, size: 18, color: cs.primary),
+          icon: PhosphorIcon(ElyanotesIcons.plus, size: 18, color: cs.primary),
           label: Text('Katman Ekle', style: textTheme.bodySmall?.copyWith(color: cs.primary)),
           style: TextButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -157,7 +157,7 @@ class _LayerRowState extends ConsumerState<_LayerRow> {
             child: SizedBox(
               width: 48, height: 48,
               child: Center(
-                child: PhosphorIcon(StarNoteIcons.dragHandle, size: 18, color: cs.onSurfaceVariant),
+                child: PhosphorIcon(ElyanotesIcons.dragHandle, size: 18, color: cs.onSurfaceVariant),
               ),
             ),
           ),
@@ -172,7 +172,7 @@ class _LayerRowState extends ConsumerState<_LayerRow> {
           _IconToggle(
             onPressed: () =>
                 ref.read(documentProvider.notifier).toggleLayerLocked(widget.dataIndex),
-            icon: layer.isLocked ? StarNoteIcons.lock : StarNoteIcons.lockOpen,
+            icon: layer.isLocked ? ElyanotesIcons.lock : ElyanotesIcons.lockOpen,
             color: layer.isLocked ? cs.primary : cs.onSurfaceVariant,
             tooltip: layer.isLocked ? 'Kilidi Ac' : 'Kilitle',
           ),
@@ -285,7 +285,7 @@ class _LayerFooter extends ConsumerWidget {
             onPressed: canDelete
                 ? () => ref.read(documentProvider.notifier).removeLayer(activeIndex)
                 : null,
-            icon: PhosphorIcon(StarNoteIcons.trash, size: 18,
+            icon: PhosphorIcon(ElyanotesIcons.trash, size: 18,
                 color: canDelete ? cs.error : cs.onSurfaceVariant.withValues(alpha: 0.3)),
             tooltip: 'Katmani Sil',
             constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
@@ -293,7 +293,7 @@ class _LayerFooter extends ConsumerWidget {
           const SizedBox(width: 16),
           IconButton(
             onPressed: () => ref.read(documentProvider.notifier).duplicateLayer(activeIndex),
-            icon: PhosphorIcon(StarNoteIcons.duplicate, size: 18, color: cs.onSurface),
+            icon: PhosphorIcon(ElyanotesIcons.duplicate, size: 18, color: cs.onSurface),
             tooltip: 'Katmani Kopyala',
             constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
           ),

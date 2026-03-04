@@ -4,7 +4,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../providers/export_progress_provider.dart';
 import '../theme/drawing_shadows.dart';
-import '../theme/starnote_icons.dart';
+import '../theme/elyanotes_icons.dart';
 
 /// Floating progress indicator for PDF export operations.
 ///
@@ -161,7 +161,7 @@ class _ExportingBody extends ConsumerWidget {
             iconSize: 16,
             splashRadius: 16,
             icon: PhosphorIcon(
-              StarNoteIcons.close,
+              ElyanotesIcons.close,
               size: 16,
               color: cs.onSurfaceVariant,
             ),
@@ -188,7 +188,7 @@ class _CompletedBody extends StatelessWidget {
     return Row(
       children: [
         PhosphorIcon(
-          StarNoteIcons.checkCircle,
+          ElyanotesIcons.checkCircle,
           size: 18,
           color: Colors.green,
         ),
@@ -218,7 +218,7 @@ class _ErrorBody extends StatelessWidget {
     return Row(
       children: [
         PhosphorIcon(
-          StarNoteIcons.warningCircle,
+          ElyanotesIcons.warningCircle,
           size: 18,
           color: cs.error,
         ),
@@ -249,7 +249,7 @@ class _CancelledBody extends StatelessWidget {
     return Row(
       children: [
         PhosphorIcon(
-          StarNoteIcons.close,
+          ElyanotesIcons.close,
           size: 18,
           color: cs.onSurfaceVariant,
         ),

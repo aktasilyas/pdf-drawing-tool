@@ -17,7 +17,7 @@ export 'eraser_settings_provider.dart';
 // =============================================================================
 
 /// SharedPreferences key for persisting selected tool.
-const _currentToolKey = 'starnote_current_tool';
+const _currentToolKey = 'elyanotes_current_tool';
 
 /// Currently selected tool type with SharedPreferences persistence.
 final currentToolProvider =
@@ -417,7 +417,7 @@ class LaserSettings {
 }
 
 /// SharedPreferences key for lasso settings.
-const _lassoSettingsKey = 'starnote_lasso_settings';
+const _lassoSettingsKey = 'elyanotes_lasso_settings';
 
 /// Lasso settings provider with SharedPreferences persistence.
 final lassoSettingsProvider =
@@ -470,7 +470,7 @@ class LassoSettingsNotifier extends StateNotifier<LassoSettings> {
 }
 
 /// SharedPreferences key for laser settings.
-const _laserSettingsKey = 'starnote_laser_settings';
+const _laserSettingsKey = 'elyanotes_laser_settings';
 
 /// Laser settings provider with SharedPreferences persistence.
 final laserSettingsProvider =

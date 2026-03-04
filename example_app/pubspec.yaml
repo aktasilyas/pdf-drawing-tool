@@ -1,5 +1,5 @@
 name: example_app
-description: StarNote-like drawing application demonstrating the drawing_toolkit library.
+description: Elyanotes drawing application demonstrating the drawing_toolkit library.
 version: 0.1.0
 publish_to: 'none'
 

@@ -9,7 +9,7 @@ import '../providers/page_provider.dart';
 import '../providers/sidebar_filter_provider.dart';
 import '../services/audio_recording_service.dart';
 import '../theme/drawing_shadows.dart';
-import '../theme/starnote_icons.dart';
+import '../theme/elyanotes_icons.dart';
 
 /// Floating recording bar shown during active audio recording.
 ///
@@ -189,7 +189,7 @@ class _PauseResumeButton extends StatelessWidget {
           },
           child: Center(
             child: PhosphorIcon(
-              isPaused ? StarNoteIcons.play : StarNoteIcons.pause,
+              isPaused ? ElyanotesIcons.play : ElyanotesIcons.pause,
               size: 18,
               color: cs.onSurface,
             ),

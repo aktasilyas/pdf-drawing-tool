@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'package:drawing_ui/src/models/toolbar_config.dart';
 import 'package:drawing_ui/src/models/tool_type.dart';
 import 'package:drawing_ui/src/providers/toolbar_config_provider.dart';
@@ -85,7 +85,7 @@ class ReorderableToolList extends ConsumerWidget {
         return _CompactToolItem(
           key: ValueKey(toolConfig.toolType),
           index: index,
-          icon: StarNoteIcons.iconForTool(toolConfig.toolType),
+          icon: ElyanotesIcons.iconForTool(toolConfig.toolType),
           label: _labelFor(toolConfig),
           isVisible: toolConfig.isVisible,
           onVisibilityToggle: () async {
@@ -112,8 +112,8 @@ class ReorderableExtraToolList extends ConsumerWidget {
   const ReorderableExtraToolList({super.key});
 
   static const _extraToolMeta = <String, ({IconData icon, String label})>{
-    'ruler': (icon: StarNoteIcons.ruler, label: 'Cetvel'),
-    'audio': (icon: StarNoteIcons.microphone, label: 'Ses Kaydı'),
+    'ruler': (icon: ElyanotesIcons.ruler, label: 'Cetvel'),
+    'audio': (icon: ElyanotesIcons.microphone, label: 'Ses Kaydı'),
   };
 
   @override
@@ -135,7 +135,7 @@ class ReorderableExtraToolList extends ConsumerWidget {
         return _CompactToolItem(
           key: ValueKey(extra.key),
           index: index,
-          icon: meta?.icon ?? StarNoteIcons.settings,
+          icon: meta?.icon ?? ElyanotesIcons.settings,
           label: meta?.label ?? extra.key,
           isVisible: extra.isVisible,
           onVisibilityToggle: () async {
@@ -197,7 +197,7 @@ class _CompactToolItem extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 6),
                 child: PhosphorIcon(
-                  StarNoteIcons.dragHandle,
+                  ElyanotesIcons.dragHandle,
                   color: cs.onSurfaceVariant,
                   size: 14,
                 ),

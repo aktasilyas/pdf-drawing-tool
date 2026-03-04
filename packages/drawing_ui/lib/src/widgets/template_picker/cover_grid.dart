@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_core/drawing_core.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'package:drawing_ui/src/widgets/cover_preview_widget.dart';
 
 /// Kapak seçim grid'i — Kapak tab'ında kullanılır.
@@ -110,7 +110,7 @@ class _CoverCard extends StatelessWidget {
                         .withValues(alpha: 0.9),
                     borderRadius: BorderRadius.circular(4),
                   ),
-                  child: PhosphorIcon(StarNoteIcons.lock,
+                  child: PhosphorIcon(ElyanotesIcons.lock,
                       size: 12, color: cs.onSurfaceVariant),
                 ),
               ),
@@ -157,7 +157,7 @@ class _CoverCard extends StatelessWidget {
                     color: cs.primary,
                     shape: BoxShape.circle,
                   ),
-                  child: PhosphorIcon(StarNoteIcons.check,
+                  child: PhosphorIcon(ElyanotesIcons.check,
                       size: 10, color: cs.onPrimary),
                 ),
               ),

@@ -24,8 +24,8 @@ void main() {
       ),
     );
 
-    expect(find.byIcon(StarNoteIcons.undo), findsOneWidget);
-    expect(find.byIcon(StarNoteIcons.redo), findsOneWidget);
+    expect(find.byIcon(ElyanotesIcons.undo), findsOneWidget);
+    expect(find.byIcon(ElyanotesIcons.redo), findsOneWidget);
   });
 
   testWidgets('ToolbarVerticalDivider renders', (tester) async {
@@ -37,7 +37,7 @@ void main() {
     await tester.pumpWidget(
       buildWithTheme(
         const ToolbarIconButton(
-          icon: StarNoteIcons.pencil,
+          icon: ElyanotesIcons.pencil,
           tooltip: 'Edit',
           enabled: true,
         ),

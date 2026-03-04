@@ -10,7 +10,7 @@ import 'package:drawing_ui/src/panels/page_options_panel.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/screens/layers_list.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
-import 'package:drawing_ui/src/toolbar/starnote_nav_button.dart';
+import 'package:drawing_ui/src/toolbar/elyanotes_nav_button.dart';
 import 'package:drawing_ui/src/widgets/document_title_button.dart';
 import 'package:drawing_ui/src/widgets/popover_panel.dart';
 
@@ -49,16 +49,16 @@ class ToolbarNavLeft extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        StarNoteNavButton(
-          icon: StarNoteIcons.home,
+        ElyanotesNavButton(
+          icon: ElyanotesIcons.home,
           tooltip: 'Ana Sayfa',
           onPressed: onHomePressed ?? () {},
         ),
         if (pageCount > 1)
-          StarNoteNavButton(
+          ElyanotesNavButton(
             icon: isSidebarOpen
-                ? StarNoteIcons.sidebarActive
-                : StarNoteIcons.sidebar,
+                ? ElyanotesIcons.sidebarActive
+                : ElyanotesIcons.sidebar,
             tooltip: 'Sayfa Paneli',
             onPressed: onSidebarToggle ?? () {},
             isActive: isSidebarOpen,
@@ -227,19 +227,19 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        StarNoteNavButton(
+        ElyanotesNavButton(
           icon: widget.isReaderMode
-              ? StarNoteIcons.readerModeActive
-              : StarNoteIcons.readerMode,
+              ? ElyanotesIcons.readerModeActive
+              : ElyanotesIcons.readerMode,
           tooltip: widget.isReaderMode ? 'Duzenleme Modu' : 'Okuyucu Modu',
           onPressed: widget.onReaderToggle ?? () {},
           isActive: widget.isReaderMode,
         ),
         if (!widget.isReaderMode && rulerEnabled)
-          StarNoteNavButton(
+          ElyanotesNavButton(
             icon: rulerVisible
-                ? StarNoteIcons.rulerActive
-                : StarNoteIcons.ruler,
+                ? ElyanotesIcons.rulerActive
+                : ElyanotesIcons.ruler,
             tooltip: 'Cetvel',
             onPressed: () => ref
                 .read(rulerVisibleProvider.notifier)
@@ -247,40 +247,40 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
             isActive: rulerVisible,
           ),
         if (!widget.isReaderMode && !ref.watch(isInfiniteCanvasProvider))
-          StarNoteNavButton(
+          ElyanotesNavButton(
             key: _layersKey,
-            icon: StarNoteIcons.layers,
+            icon: ElyanotesIcons.layers,
             tooltip: 'Katmanlar',
             onPressed: () => _togglePanel(_NavPanel.layers),
             isActive: _activePanel == _NavPanel.layers,
           ),
         if (!widget.isReaderMode && widget.showAddPage && !ref.watch(isInfiniteCanvasProvider))
-          StarNoteNavButton(
+          ElyanotesNavButton(
             key: _addPageKey,
-            icon: StarNoteIcons.pageAdd,
+            icon: ElyanotesIcons.pageAdd,
             tooltip: 'Sayfa Ekle',
             onPressed: () => _togglePanel(_NavPanel.addPage),
             isActive: _activePanel == _NavPanel.addPage,
           ),
         if (!widget.isReaderMode && audioEnabled && !ref.watch(isInfiniteCanvasProvider))
-          StarNoteNavButton(
+          ElyanotesNavButton(
             key: _micKey,
-            icon: StarNoteIcons.microphone,
+            icon: ElyanotesIcons.microphone,
             tooltip: 'Ses Kaydi',
             onPressed: () => _togglePanel(_NavPanel.audioRecording),
             isActive: _activePanel == _NavPanel.audioRecording,
           ),
         if (widget.showExport)
-          StarNoteNavButton(
+          ElyanotesNavButton(
             key: _exportKey,
-            icon: StarNoteIcons.exportIcon,
+            icon: ElyanotesIcons.exportIcon,
             tooltip: 'Dışa Aktar',
             onPressed: () => _togglePanel(_NavPanel.export),
             isActive: _activePanel == _NavPanel.export,
           ),
-        StarNoteNavButton(
+        ElyanotesNavButton(
           key: _moreKey,
-          icon: StarNoteIcons.more,
+          icon: ElyanotesIcons.more,
           tooltip: 'Daha Fazla',
           onPressed: () => _togglePanel(_NavPanel.more),
           isActive: _activePanel == _NavPanel.more,
@@ -306,7 +306,7 @@ class _ReaderBadge extends StatelessWidget {
         decoration: BoxDecoration(
             color: cs.secondaryContainer, borderRadius: BorderRadius.circular(10)),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
-          PhosphorIcon(StarNoteIcons.readerMode, size: 12,
+          PhosphorIcon(ElyanotesIcons.readerMode, size: 12,
               color: cs.onSecondaryContainer),
           const SizedBox(width: 3),
           Text('Salt okunur', style: textTheme.labelSmall?.copyWith(

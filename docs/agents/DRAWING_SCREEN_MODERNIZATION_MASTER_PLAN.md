@@ -3,7 +3,7 @@
 > **Oluşturulma:** 2025-02-12
 > **Yazar:** Senior Architect (Opus 4.6)
 > **Kaynak:** GoodNotes + Notability + Flexcil + Samsung Notes karşılaştırmalı analiz
-> **Amaç:** StarNote çizim ekranını production-ready, responsive, modern hale getirmek
+> **Amaç:** Elyanotes çizim ekranını production-ready, responsive, modern hale getirmek
 > **Kural:** Her phase branch'te geliştirilir, test edilir, main'e merge edilir
 
 ---
@@ -644,7 +644,7 @@ Her phase için Cursor'a şu formatta talimat verilecek:
 
 ## 📊 KARŞILAŞTIRMA MATRİSİ: HEDEF vs RAKİPLER
 
-| Özellik | GoodNotes | Notability | Flexcil | Samsung | StarNote Hedef |
+| Özellik | GoodNotes | Notability | Flexcil | Samsung | Elyanotes Hedef |
 |---------|-----------|------------|---------|---------|----------------|
 | Responsive toolbar | ❌ Overflow | ✅ Float | ⚠️ Toggle | ⚠️ Scroll | ✅ 3-tier adaptive |
 | Canvas dark mode | ❌ | ✅ | ❌ | ⚠️ | ✅ 3-mod |
@@ -657,7 +657,7 @@ Her phase için Cursor'a şu formatta talimat verilecek:
 | Zoom-out-to-grid | ❌ | ❌ | ✅ | ❌ | ✅ |
 | Cross-platform | iOS+Android+Mac+Win | iOS+Mac | iOS+Android | Android+Win | ✅ Flutter (tümü) |
 
-**StarNote Farklılaşma:** Opacity slider (tüm araçlarda), 3-tier responsive toolbar, canvas dark mode + responsive + cross-platform kombinasyonu. Hiçbir rakip bu üçünü birlikte sunmuyor.
+**Elyanotes Farklılaşma:** Opacity slider (tüm araçlarda), 3-tier responsive toolbar, canvas dark mode + responsive + cross-platform kombinasyonu. Hiçbir rakip bu üçünü birlikte sunmuyor.
 
 ---
 

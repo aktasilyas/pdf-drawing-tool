@@ -143,7 +143,7 @@ class SelectionCaptureService {
       final result = await ImageGallerySaverPlus.saveImage(
         bytes,
         quality: 100,
-        name: 'starnote_${DateTime.now().millisecondsSinceEpoch}',
+        name: 'elyanotes_${DateTime.now().millisecondsSinceEpoch}',
       );
       if (result is Map) {
         return result['isSuccess'] == true;

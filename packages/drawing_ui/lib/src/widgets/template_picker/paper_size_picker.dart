@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_core/drawing_core.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 
 /// Kagit boyutu secici - dropdown style
 class PaperSizePicker extends StatelessWidget {
@@ -67,7 +67,7 @@ class PaperSizePicker extends StatelessWidget {
             child: DropdownButton<PaperSizePreset>(
               value: selectedSize.preset,
               isDense: dense,
-              icon: PhosphorIcon(StarNoteIcons.caretDown,
+              icon: PhosphorIcon(ElyanotesIcons.caretDown,
                   size: iconSize, color: cs.onSurfaceVariant),
               style: TextStyle(fontSize: fontSize, color: cs.onSurface),
               dropdownColor: cs.surfaceContainerHighest,
@@ -98,7 +98,7 @@ class PaperSizePicker extends StatelessWidget {
               child: DropdownButton<bool>(
                 value: selectedSize.isLandscape,
                 isDense: dense,
-                icon: PhosphorIcon(StarNoteIcons.caretDown,
+                icon: PhosphorIcon(ElyanotesIcons.caretDown,
                     size: iconSize, color: cs.onSurfaceVariant),
                 style: TextStyle(fontSize: fontSize, color: cs.onSurface),
                 dropdownColor: cs.surfaceContainerHighest,

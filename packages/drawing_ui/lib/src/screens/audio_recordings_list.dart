@@ -5,7 +5,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/providers/audio_recording_provider.dart';
 import 'package:drawing_ui/src/providers/document_provider.dart';
 import 'package:drawing_ui/src/providers/page_provider.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 
 import 'audio_recording_list_item.dart';
 import 'audio_rename_dialog.dart';
@@ -84,7 +84,7 @@ class _EmptyState extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           PhosphorIcon(
-            StarNoteIcons.waveform,
+            ElyanotesIcons.waveform,
             size: 48,
             color: cs.onSurfaceVariant.withValues(alpha: 0.4),
           ),

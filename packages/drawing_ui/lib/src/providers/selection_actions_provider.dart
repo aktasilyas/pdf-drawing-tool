@@ -14,7 +14,7 @@ import 'package:drawing_ui/src/providers/pending_selection_image_provider.dart';
 import 'package:drawing_ui/src/providers/selection_clipboard_provider.dart';
 import 'package:drawing_ui/src/services/selection_capture_service.dart';
 import 'package:drawing_ui/src/screens/drawing_screen_layout.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'package:drawing_ui/src/widgets/screenshot_preview_dialog.dart';
 
 // ============================================================
@@ -378,7 +378,7 @@ SelectionActionConfig buildSelectionActionConfig(
       toolbarActions: [
         SelectionAction(
           id: 'ai',
-          icon: StarNoteIcons.sparkle,
+          icon: ElyanotesIcons.sparkle,
           label: 'AI Asistan',
           isEnabled: resolvedAICallback != null,
           onExecute: resolvedAICallback != null
@@ -388,7 +388,7 @@ SelectionActionConfig buildSelectionActionConfig(
         ),
         SelectionAction(
           id: 'screenshot',
-          icon: StarNoteIcons.camera,
+          icon: ElyanotesIcons.camera,
           label: 'Ekran Resmi',
           isEnabled: cacheManager != null,
           onExecute: cacheManager != null
@@ -424,7 +424,7 @@ SelectionActionConfig buildSelectionActionConfig(
   final toolbarActions = <SelectionAction>[
     SelectionAction(
       id: 'ai',
-      icon: StarNoteIcons.sparkle,
+      icon: ElyanotesIcons.sparkle,
       label: 'AI Asistan',
       isEnabled: resolvedAICallback != null,
       onExecute: resolvedAICallback != null
@@ -434,14 +434,14 @@ SelectionActionConfig buildSelectionActionConfig(
     ),
     SelectionAction(
       id: 'color',
-      icon: StarNoteIcons.palette,
+      icon: ElyanotesIcons.palette,
       label: 'Renk',
       colorIndicator: selectedColor,
       onExecute: () {},
     ),
     SelectionAction(
       id: 'screenshot',
-      icon: StarNoteIcons.camera,
+      icon: ElyanotesIcons.camera,
       label: 'Ekran Resmi',
       isEnabled: cacheManager != null,
       onExecute: cacheManager != null
@@ -450,19 +450,19 @@ SelectionActionConfig buildSelectionActionConfig(
     ),
     SelectionAction(
       id: 'cut',
-      icon: StarNoteIcons.scissors,
+      icon: ElyanotesIcons.scissors,
       label: 'Kes',
       onExecute: () => _cutToClipboard(ref, selection),
     ),
     SelectionAction(
       id: 'duplicate',
-      icon: StarNoteIcons.duplicate,
+      icon: ElyanotesIcons.duplicate,
       label: 'Cogalt',
       onExecute: () => _duplicateSelection(ref, selection),
     ),
     SelectionAction(
       id: 'delete',
-      icon: StarNoteIcons.trash,
+      icon: ElyanotesIcons.trash,
       label: 'Sil',
       isDestructive: true,
       onExecute: () => _deleteSelection(ref, selection),
@@ -473,19 +473,19 @@ SelectionActionConfig buildSelectionActionConfig(
   final topRowActions = <SelectionAction>[
     SelectionAction(
       id: 'overflow_cut',
-      icon: StarNoteIcons.scissors,
+      icon: ElyanotesIcons.scissors,
       label: 'Kes',
       onExecute: () => _cutToClipboard(ref, selection),
     ),
     SelectionAction(
       id: 'overflow_front',
-      icon: StarNoteIcons.bringToFront,
+      icon: ElyanotesIcons.bringToFront,
       label: 'Öne Getir',
       onExecute: () => _bringToFront(ref, selection),
     ),
     SelectionAction(
       id: 'overflow_back',
-      icon: StarNoteIcons.sendToBack,
+      icon: ElyanotesIcons.sendToBack,
       label: 'Arkaya Gönder',
       onExecute: () => _sendToBack(ref, selection),
     ),
@@ -495,26 +495,26 @@ SelectionActionConfig buildSelectionActionConfig(
   final overflowActions = <SelectionAction>[
     SelectionAction(
       id: 'overflow_copy',
-      icon: StarNoteIcons.copy,
+      icon: ElyanotesIcons.copy,
       label: 'Kopyala',
       onExecute: () => _copyToClipboard(ref, selection),
     ),
     SelectionAction(
       id: 'overflow_duplicate',
-      icon: StarNoteIcons.duplicate,
+      icon: ElyanotesIcons.duplicate,
       label: 'Çoğalt',
       onExecute: () => _duplicateSelection(ref, selection),
     ),
     SelectionAction(
       id: 'overflow_paste',
-      icon: StarNoteIcons.paste,
+      icon: ElyanotesIcons.paste,
       label: 'Yapıştır',
       isEnabled: hasClipboard,
       onExecute: hasClipboard ? () => _pasteFromClipboard(ref) : null,
     ),
     SelectionAction(
       id: 'overflow_ai',
-      icon: StarNoteIcons.sparkle,
+      icon: ElyanotesIcons.sparkle,
       label: 'Yapay zekaya sor',
       isEnabled: resolvedAICallback != null,
       onExecute: resolvedAICallback != null
@@ -524,7 +524,7 @@ SelectionActionConfig buildSelectionActionConfig(
     ),
     SelectionAction(
       id: 'overflow_screenshot',
-      icon: StarNoteIcons.camera,
+      icon: ElyanotesIcons.camera,
       label: 'Ekran Resmi Çek',
       isEnabled: cacheManager != null,
       onExecute: cacheManager != null
@@ -533,7 +533,7 @@ SelectionActionConfig buildSelectionActionConfig(
     ),
     SelectionAction(
       id: 'overflow_delete',
-      icon: StarNoteIcons.trash,
+      icon: ElyanotesIcons.trash,
       label: 'Sil',
       isDestructive: true,
       onExecute: () => _deleteSelection(ref, selection),

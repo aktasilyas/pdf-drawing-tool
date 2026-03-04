@@ -1,7 +1,7 @@
 # Code Reviewer Memory
 
 ## Project Context
-- StarNote is a Flutter note-taking app targeting GoodNotes/Flexcil quality
+- Elyanotes is a Flutter note-taking app targeting GoodNotes/Flexcil quality
 - Design system uses explicit Light/Dark token pairs (e.g., `textPrimaryLight`/`textPrimaryDark`)
 - Theme detection pattern: `final isDark = Theme.of(context).brightness == Brightness.dark;`
 - `.cursorrules` and `docs/DESIGN_SYSTEM_MASTER_PLAN.md` are the source of truth

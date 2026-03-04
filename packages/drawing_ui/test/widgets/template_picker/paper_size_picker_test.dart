@@ -49,7 +49,7 @@ void main() {
       );
 
       final orientationIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.orientationPortrait,
+        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.orientationPortrait,
       );
       expect(orientationIcon, findsOneWidget);
     });
@@ -68,10 +68,10 @@ void main() {
       );
 
       final portraitIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.orientationPortrait,
+        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.orientationPortrait,
       );
       final landscapeIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.orientationLandscape,
+        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.orientationLandscape,
       );
       expect(portraitIcon, findsNothing);
       expect(landscapeIcon, findsNothing);
@@ -90,10 +90,10 @@ void main() {
       );
 
       final portraitIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.orientationPortrait,
+        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.orientationPortrait,
       );
       final landscapeIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.orientationLandscape,
+        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.orientationLandscape,
       );
       expect(portraitIcon, findsOneWidget);
       expect(landscapeIcon, findsNothing);
@@ -112,10 +112,10 @@ void main() {
       );
 
       final landscapeIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.orientationLandscape,
+        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.orientationLandscape,
       );
       final portraitIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.orientationPortrait,
+        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.orientationPortrait,
       );
       expect(landscapeIcon, findsOneWidget);
       expect(portraitIcon, findsNothing);
@@ -196,7 +196,7 @@ void main() {
 
       // Tap orientation toggle
       final orientationIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.orientationPortrait,
+        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.orientationPortrait,
       );
       await tester.tap(orientationIcon);
       await tester.pumpAndSettle();
@@ -224,7 +224,7 @@ void main() {
 
       // Tap orientation toggle
       final orientationIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.orientationLandscape,
+        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.orientationLandscape,
       );
       await tester.tap(orientationIcon);
       await tester.pumpAndSettle();
@@ -341,7 +341,7 @@ void main() {
       );
 
       final orientationIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.orientationPortrait,
+        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.orientationPortrait,
       );
       final container = tester.widget<Container>(
         find.ancestor(

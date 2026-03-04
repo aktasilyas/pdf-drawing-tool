@@ -2,7 +2,7 @@ import 'package:flutter/material.dart' hide Page;
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/theme/drawing_shadows.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'package:drawing_ui/src/services/thumbnail_cache.dart';
 import 'package:drawing_ui/src/panels/page_options_widgets.dart';
 import 'package:drawing_ui/src/widgets/page_thumbnail.dart';
@@ -121,7 +121,7 @@ class _PageNavigatorState extends State<PageNavigator> {
             const SizedBox(height: 12),
             if (widget.onDuplicatePage != null)
               PageOptionsMenuItem(
-                icon: StarNoteIcons.copy,
+                icon: ElyanotesIcons.copy,
                 label: 'Sayfayı çoğalt',
                 onTap: () {
                   Navigator.pop(ctx);
@@ -132,7 +132,7 @@ class _PageNavigatorState extends State<PageNavigator> {
               pageOptionsDivider(colorScheme),
             if (widget.onDeletePage != null)
               PageOptionsMenuItem(
-                icon: StarNoteIcons.trash,
+                icon: ElyanotesIcons.trash,
                 label: 'Sayfayı sil',
                 isDestructive: true,
                 onTap: () {
@@ -290,7 +290,7 @@ class _PageNavigatorState extends State<PageNavigator> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               PhosphorIcon(
-                StarNoteIcons.plus,
+                ElyanotesIcons.plus,
                 size: 32,
                 color: colorScheme.onSurfaceVariant,
               ),

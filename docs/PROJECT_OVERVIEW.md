@@ -2,7 +2,7 @@
 
 ## What is this project?
 
-This project is a **StarNote-like drawing and note-taking platform** built with Flutter.
+This project is a **Elyanotes-like drawing and note-taking platform** built with Flutter.
 
 It has TWO equally important goals:
 
@@ -66,7 +66,7 @@ The same codebase serves both purposes.
 
 ## Reference Products
 
-- StarNote (primary UX reference)
+- Elyanotes (primary UX reference)
 - GoodNotes
 - Notability
 

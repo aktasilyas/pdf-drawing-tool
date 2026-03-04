@@ -1070,7 +1070,7 @@ class _AIChatModalState extends ConsumerState<AIChatModal> {
           Icon(Icons.auto_awesome, color: theme.colorScheme.primary, size: 20),
           const SizedBox(width: 8),
           Text(
-            'StarNote AI',
+            'Elyanotes AI',
             style: theme.textTheme.titleMedium?.copyWith(
               fontWeight: FontWeight.w600,
             ),
@@ -1122,7 +1122,7 @@ class _AIChatModalState extends ConsumerState<AIChatModal> {
             ),
             const SizedBox(height: 16),
             Text(
-              'StarNote AI',
+              'Elyanotes AI',
               style: theme.textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w600,
               ),

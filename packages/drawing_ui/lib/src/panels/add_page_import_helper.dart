@@ -54,7 +54,7 @@ Future<List<Page>> _importPdf(String path, int insertIndex) async {
 Future<List<Page>> _importImage(String path, int insertIndex) async {
   try {
     final appDir = await getApplicationDocumentsDirectory();
-    final dir = Directory('${appDir.path}/starnote_images');
+    final dir = Directory('${appDir.path}/elyanotes_images');
     if (!dir.existsSync()) dir.createSync(recursive: true);
     final dest = '${dir.path}/${DateTime.now().microsecondsSinceEpoch}'
         '.${path.split('.').last}';

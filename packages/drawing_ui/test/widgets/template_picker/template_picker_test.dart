@@ -134,7 +134,7 @@ void main() {
 
       expect(find.text('Şablon Seç'), findsOneWidget);
 
-      await tester.tap(find.byIcon(StarNoteIcons.close));
+      await tester.tap(find.byIcon(ElyanotesIcons.close));
       await tester.pumpAndSettle();
 
       expect(find.text('Şablon Seç'), findsNothing);
@@ -243,7 +243,7 @@ void main() {
         ),
       );
 
-      expect(find.byIcon(StarNoteIcons.close), findsOneWidget);
+      expect(find.byIcon(ElyanotesIcons.close), findsOneWidget);
     });
 
     testWidgets('has confirm button in bottom bar', (tester) async {
@@ -258,9 +258,9 @@ void main() {
       // FilledButton.icon creates multiple widgets, find by the button text
       expect(find.text('Uygula'), findsOneWidget);
 
-      // Verify it has an icon (plus icon from StarNoteIcons)
+      // Verify it has an icon (plus icon from ElyanotesIcons)
       final plusIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.plus,
+        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.plus,
       );
       expect(plusIcon, findsOneWidget);
     });

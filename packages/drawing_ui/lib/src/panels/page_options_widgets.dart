@@ -221,11 +221,11 @@ Future<RotationAngle?> showRotatePageDialog(BuildContext context) {
       return SimpleDialog(
         title: const Text('Sayfayı Döndür'),
         children: [
-          _rotateOption(ctx, cs, StarNoteIcons.rotateCW,
+          _rotateOption(ctx, cs, ElyanotesIcons.rotateCW,
               'Saat yönünde (90°)', RotationAngle.cw90),
-          _rotateOption(ctx, cs, StarNoteIcons.rotateCCW,
+          _rotateOption(ctx, cs, ElyanotesIcons.rotateCCW,
               'Saat yönünün tersine (90°)', RotationAngle.ccw90),
-          _rotateOption(ctx, cs, StarNoteIcons.rotateHalf,
+          _rotateOption(ctx, cs, ElyanotesIcons.rotateHalf,
               '180°', RotationAngle.half),
         ],
       );
@@ -257,7 +257,7 @@ class DualPageModeItem extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final isDual = ref.watch(dualPageModeProvider);
     return PageOptionsToggleItem(
-      icon: StarNoteIcons.splitView,
+      icon: ElyanotesIcons.splitView,
       label: 'Çift sayfa görünümü',
       value: isDual,
       onChanged: (v) => ref.read(dualPageModeProvider.notifier).state = v,
@@ -277,8 +277,8 @@ class ScrollDirectionItem extends ConsumerWidget {
     final isHorizontal = direction == Axis.horizontal;
     return PageOptionsToggleItem(
       icon: isHorizontal
-          ? StarNoteIcons.scrollDirection
-          : StarNoteIcons.scrollDirectionVertical,
+          ? ElyanotesIcons.scrollDirection
+          : ElyanotesIcons.scrollDirectionVertical,
       label: 'Kaydırma yönü',
       subtitle: isHorizontal ? 'Yatay' : 'Dikey',
       value: isHorizontal,
@@ -300,7 +300,7 @@ Widget pageOptionsChevronTrailing(ColorScheme cs, [String? label, TextTheme? tex
       Text(label, style: textTheme?.bodySmall?.copyWith(fontSize: 13, color: cs.onSurfaceVariant)),
       const SizedBox(width: 4),
     ],
-    PhosphorIcon(StarNoteIcons.chevronRight, size: 18, color: cs.onSurfaceVariant),
+    PhosphorIcon(ElyanotesIcons.chevronRight, size: 18, color: cs.onSurfaceVariant),
   ]);
 }
 

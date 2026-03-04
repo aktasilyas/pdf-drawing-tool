@@ -139,7 +139,7 @@ void main() {
 
       // Crown icons should not appear (premium badges removed)
       final crownIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.crown,
+        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.crown,
       );
       expect(crownIcon, findsNothing);
     });

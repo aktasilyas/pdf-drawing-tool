@@ -37,7 +37,7 @@ void showExportMenu(BuildContext context, WidgetRef ref) {
           ),
           const SizedBox(height: 12),
           PageOptionsMenuItem(
-            icon: StarNoteIcons.exportIcon,
+            icon: ElyanotesIcons.exportIcon,
             label: 'PDF İçe Aktar',
             onTap: () {
               Navigator.pop(ctx);
@@ -46,7 +46,7 @@ void showExportMenu(BuildContext context, WidgetRef ref) {
           ),
           pageOptionsDivider(colorScheme),
           PageOptionsMenuItem(
-            icon: StarNoteIcons.pdfFile,
+            icon: ElyanotesIcons.pdfFile,
             label: 'PDF Olarak Dışa Aktar',
             onTap: () {
               Navigator.pop(ctx);
@@ -55,12 +55,12 @@ void showExportMenu(BuildContext context, WidgetRef ref) {
           ),
           pageOptionsDivider(colorScheme),
           PageOptionsMenuItem(
-            icon: StarNoteIcons.image,
+            icon: ElyanotesIcons.image,
             label: 'Resim Olarak Dışa Aktar',
           ),
           pageOptionsDivider(colorScheme),
           PageOptionsMenuItem(
-            icon: StarNoteIcons.share,
+            icon: ElyanotesIcons.share,
             label: 'Paylaş',
           ),
           const SizedBox(height: 8),
@@ -246,7 +246,7 @@ void showAudioMenu(
           if (isActive)
             ListTile(
               leading: PhosphorIcon(
-                StarNoteIcons.recordCircle,
+                ElyanotesIcons.recordCircle,
                 color: colorScheme.onSurface,
               ),
               title: const Text('Kayit devam ediyor...'),
@@ -255,7 +255,7 @@ void showAudioMenu(
           else
             ListTile(
               leading: PhosphorIcon(
-                StarNoteIcons.recordCircle,
+                ElyanotesIcons.recordCircle,
                 color: colorScheme.onSurface,
               ),
               title: const Text('Kaydet'),
@@ -282,7 +282,7 @@ void showAudioMenu(
             ),
           ListTile(
             leading: PhosphorIcon(
-              StarNoteIcons.waveform,
+              ElyanotesIcons.waveform,
               color: colorScheme.onSurface,
             ),
             title: const Text('Kayitlari goster'),

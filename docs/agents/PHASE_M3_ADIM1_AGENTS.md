@@ -1,7 +1,7 @@
 # PHASE M3 — ADIM 1/6: İkon Sistemi Modernizasyonu
 
 ## ÖZET
-Phosphor Icons paketini ekle. StarNoteIcons sınıfı oluştur. Tüm Material Icons referanslarını değiştir. GoodNotes kalitesinde ince outline ikonlar.
+Phosphor Icons paketini ekle. ElyanotesIcons sınıfı oluştur. Tüm Material Icons referanslarını değiştir. GoodNotes kalitesinde ince outline ikonlar.
 
 ## BRANCH
 ```bash
@@ -14,7 +14,7 @@ git checkout -b feature/toolbar-professional
 
 Phosphor Icons `light` stilini kullanıyoruz — en ince, en elegant, GoodNotes estetiğine en yakın stil. `regular` değil `light` — bu önemli. Aktif/seçili durumda `regular` veya `bold` kullanabiliriz.
 
-Tüm ikonları StarNoteIcons sınıfında merkezi olarak tanımlıyoruz. Widget'lar doğrudan PhosphorIcons kullanmaz — her zaman StarNoteIcons üzerinden erişir. Bu sayede ikon değişikliği tek dosyadan yapılır.
+Tüm ikonları ElyanotesIcons sınıfında merkezi olarak tanımlıyoruz. Widget'lar doğrudan PhosphorIcons kullanmaz — her zaman ElyanotesIcons üzerinden erişir. Bu sayede ikon değişikliği tek dosyadan yapılır.
 
 ---
 
@@ -45,7 +45,7 @@ dependencies:
 
 Ayrıca example_app'te de dependency'ye ihtiyaç olabilir — kontrol et.
 
-**2) YENİ DOSYA: `packages/drawing_ui/lib/src/theme/starnote_icons.dart`**
+**2) YENİ DOSYA: `packages/drawing_ui/lib/src/theme/elyanotes_icons.dart`**
 
 Tüm ikonları merkezi olarak tanımlayan sınıf. Max 250 satır.
 
@@ -53,13 +53,13 @@ Tüm ikonları merkezi olarak tanımlayan sınıf. Max 250 satır.
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:flutter/material.dart';
 
-/// Centralized icon definitions for StarNote.
+/// Centralized icon definitions for Elyanotes.
 ///
 /// All icons use Phosphor Light style for thin, elegant appearance.
 /// Active/selected states use Phosphor Regular for slightly bolder look.
 /// 
-/// Never use PhosphorIcons directly in widgets — always use StarNoteIcons.
-abstract final class StarNoteIcons {
+/// Never use PhosphorIcons directly in widgets — always use ElyanotesIcons.
+abstract final class ElyanotesIcons {
   // ═══════════════════════════════════════════
   // Navigation Bar Icons (Row 1)
   // ═══════════════════════════════════════════
@@ -233,7 +233,7 @@ abstract final class StarNoteIcons {
 
 **3) GÜNCELLE: `packages/drawing_ui/lib/src/toolbar/tool_button.dart`**
 
-Material Icons → StarNoteIcons ile değiştir:
+Material Icons → ElyanotesIcons ile değiştir:
 
 ```dart
 // Eski:
@@ -241,13 +241,13 @@ Icon(Icons.edit, size: 20)
 
 // Yeni:
 PhosphorIcon(
-  StarNoteIcons.iconForTool(toolType, active: isSelected),
-  size: StarNoteIcons.toolSize,
+  ElyanotesIcons.iconForTool(toolType, active: isSelected),
+  size: ElyanotesIcons.toolSize,
   color: isSelected ? selectedColor : defaultColor,
 )
 ```
 
-ToolButton widget'ında mevcut `_getIconForTool` veya benzer mapping fonksiyonunu kaldır, `StarNoteIcons.iconForTool()` kullan.
+ToolButton widget'ında mevcut `_getIconForTool` veya benzer mapping fonksiyonunu kaldır, `ElyanotesIcons.iconForTool()` kullan.
 
 **4) GÜNCELLE: `packages/drawing_ui/lib/src/toolbar/top_navigation_bar.dart`**
 
@@ -255,15 +255,15 @@ Tüm _NavButton ikonlarını değiştir:
 
 ```dart
 // Eski:
-Icons.home_rounded        → StarNoteIcons.home
-Icons.menu_book_outlined  → StarNoteIcons.readerMode
-Icons.layers_outlined     → StarNoteIcons.layers
-Icons.grid_on/grid_off    → StarNoteIcons.gridOn / StarNoteIcons.gridOff
-Icons.share_outlined      → StarNoteIcons.share
-Icons.settings_outlined   → StarNoteIcons.settings
-Icons.more_horiz          → StarNoteIcons.more
-Icons.keyboard_arrow_down → StarNoteIcons.caretDown
-Icons.search              → StarNoteIcons.search
+Icons.home_rounded        → ElyanotesIcons.home
+Icons.menu_book_outlined  → ElyanotesIcons.readerMode
+Icons.layers_outlined     → ElyanotesIcons.layers
+Icons.grid_on/grid_off    → ElyanotesIcons.gridOn / ElyanotesIcons.gridOff
+Icons.share_outlined      → ElyanotesIcons.share
+Icons.settings_outlined   → ElyanotesIcons.settings
+Icons.more_horiz          → ElyanotesIcons.more
+Icons.keyboard_arrow_down → ElyanotesIcons.caretDown
+Icons.search              → ElyanotesIcons.search
 ```
 
 _NavButton'daki `Icon` widget'ını `PhosphorIcon` ile değiştir:
@@ -272,29 +272,29 @@ _NavButton'daki `Icon` widget'ını `PhosphorIcon` ile değiştir:
 Icon(icon, size: 18, color: color)
 
 // Yeni:
-PhosphorIcon(icon, size: StarNoteIcons.navSize, color: color)
+PhosphorIcon(icon, size: ElyanotesIcons.navSize, color: color)
 ```
 
 **5) GÜNCELLE: `packages/drawing_ui/lib/src/toolbar/tool_bar.dart`**
 
-Mevcut ikon referanslarını StarNoteIcons ile değiştir. Undo/redo butonlarındaki ikonlar:
+Mevcut ikon referanslarını ElyanotesIcons ile değiştir. Undo/redo butonlarındaki ikonlar:
 ```dart
 // Eski:
-Icons.undo → StarNoteIcons.undo
-Icons.redo → StarNoteIcons.redo
+Icons.undo → ElyanotesIcons.undo
+Icons.redo → ElyanotesIcons.redo
 ```
 
 **6) GÜNCELLE: `packages/drawing_ui/lib/src/toolbar/toolbar_widgets.dart`**
 
 ToolbarUndoRedoButtons, ToolbarVerticalDivider gibi widget'lardaki ikonlar:
 ```dart
-Icons.undo → StarNoteIcons.undo
-Icons.redo → StarNoteIcons.redo
+Icons.undo → ElyanotesIcons.undo
+Icons.redo → ElyanotesIcons.redo
 ```
 
 **7) GÜNCELLE: `packages/drawing_ui/lib/src/toolbar/medium_toolbar.dart`**
 
-MediumToolbar'daki ikon referansları StarNoteIcons ile değiştir. Özellikle undo/redo ve settings ikonları.
+MediumToolbar'daki ikon referansları ElyanotesIcons ile değiştir. Özellikle undo/redo ve settings ikonları.
 
 **8) GÜNCELLE: `packages/drawing_ui/lib/src/toolbar/compact_bottom_bar.dart`**
 
@@ -302,11 +302,11 @@ CompactBottomBar'daki ikon referansları değiştir.
 
 **9) GÜNCELLE: `packages/drawing_ui/lib/src/toolbar/toolbar_overflow_menu.dart`**
 
-Overflow menüdeki `Icons.more_horiz` → `StarNoteIcons.more`.
+Overflow menüdeki `Icons.more_horiz` → `ElyanotesIcons.more`.
 
 **10) GÜNCELLE: Paneller (varsa ikon referansı)**
 
-Panel dosyalarında Material Icons varsa StarNoteIcons ile değiştir:
+Panel dosyalarında Material Icons varsa ElyanotesIcons ile değiştir:
 - pen_settings_panel.dart
 - highlighter_settings_panel.dart
 - eraser_settings_panel.dart
@@ -317,7 +317,7 @@ Panel dosyalarında Material Icons varsa StarNoteIcons ile değiştir:
 
 `packages/drawing_ui/lib/src/theme/theme.dart` (barrel):
 ```dart
-export 'starnote_icons.dart';
+export 'elyanotes_icons.dart';
 ```
 
 `packages/drawing_ui/lib/drawing_ui.dart`:
@@ -330,9 +330,9 @@ cd example_app && flutter analyze
 ```
 
 **KURALLAR:**
-- Widget'larda doğrudan `PhosphorIcons*` kullanMA — her zaman `StarNoteIcons` üzerinden
+- Widget'larda doğrudan `PhosphorIcons*` kullanMA — her zaman `ElyanotesIcons` üzerinden
 - PhosphorIcon widget'ı kullan (Icon değil) — duotone desteği için
-- İkon boyutları: StarNoteIcons.navSize (20), toolSize (22), panelSize (18)
+- İkon boyutları: ElyanotesIcons.navSize (20), toolSize (22), panelSize (18)
 - Light stil default, active/selected durumda Regular stil
 - Mevcut testlerde `find.byIcon(Icons.undo)` gibi aramalar kırılabilir — güncelle
 - `phosphor_flutter` sadece drawing_ui'da dependency, example_app'te drawing_ui üzerinden erişilir
@@ -350,34 +350,34 @@ expect(find.byIcon(Icons.undo), findsOneWidget);
 
 // Yeni: PhosphorIcon kullanıldığı için:
 expect(find.byWidgetPredicate(
-  (widget) => widget is PhosphorIcon && widget.data == StarNoteIcons.undo,
+  (widget) => widget is PhosphorIcon && widget.data == ElyanotesIcons.undo,
 ), findsOneWidget);
 
 // VEYA daha basit: find.byType(PhosphorIcon) kullan
 ```
 
-**2) Yeni test: `packages/drawing_ui/test/starnote_icons_test.dart`**
+**2) Yeni test: `packages/drawing_ui/test/elyanotes_icons_test.dart`**
 
 ```dart
 void main() {
-  group('StarNoteIcons', () {
+  group('ElyanotesIcons', () {
     test('iconForTool returns correct icon for each tool type', () {
-      expect(StarNoteIcons.iconForTool(ToolType.pencil), StarNoteIcons.pencil);
-      expect(StarNoteIcons.iconForTool(ToolType.highlighter), StarNoteIcons.highlighter);
-      expect(StarNoteIcons.iconForTool(ToolType.eraser), StarNoteIcons.eraser);
+      expect(ElyanotesIcons.iconForTool(ToolType.pencil), ElyanotesIcons.pencil);
+      expect(ElyanotesIcons.iconForTool(ToolType.highlighter), ElyanotesIcons.highlighter);
+      expect(ElyanotesIcons.iconForTool(ToolType.eraser), ElyanotesIcons.eraser);
     });
 
     test('active icons differ from default', () {
       expect(
-        StarNoteIcons.iconForTool(ToolType.pencil, active: true),
-        isNot(StarNoteIcons.iconForTool(ToolType.pencil, active: false)),
+        ElyanotesIcons.iconForTool(ToolType.pencil, active: true),
+        isNot(ElyanotesIcons.iconForTool(ToolType.pencil, active: false)),
       );
     });
 
     test('size constants are defined', () {
-      expect(StarNoteIcons.navSize, 20.0);
-      expect(StarNoteIcons.toolSize, 22.0);
-      expect(StarNoteIcons.panelSize, 18.0);
+      expect(ElyanotesIcons.navSize, 20.0);
+      expect(ElyanotesIcons.toolSize, 22.0);
+      expect(ElyanotesIcons.panelSize, 18.0);
     });
   });
 }
@@ -388,7 +388,7 @@ void main() {
 ### 🔍 @code-reviewer — Review
 
 1. phosphor_flutter dependency doğru eklendi
-2. StarNoteIcons abstract final class, instance oluşturulamaz
+2. ElyanotesIcons abstract final class, instance oluşturulamaz
 3. Tüm Material Icons referansları kaldırıldı (grep -r "Icons\." packages/drawing_ui/lib/src/toolbar/)
 4. PhosphorIcon widget'ı kullanılıyor (Icon değil)
 5. Light stil default, Regular aktif durumda
@@ -408,10 +408,10 @@ grep -rn "Icons\." packages/drawing_ui/lib/src/panels/ --include="*.dart"
 
 ## COMMIT
 ```
-feat(ui): add Phosphor Icons system with StarNoteIcons
+feat(ui): add Phosphor Icons system with ElyanotesIcons
 
 - Add phosphor_flutter dependency
-- Create StarNoteIcons: centralized icon definitions (light/regular)
+- Create ElyanotesIcons: centralized icon definitions (light/regular)
 - Replace all Material Icons in toolbar, nav bar, and panels
 - Use PhosphorIcon widget with consistent sizing
 - Light style default, Regular for active/selected states

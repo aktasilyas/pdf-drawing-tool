@@ -156,10 +156,10 @@ void main() {
         buildTestWidget(const TopNavigationBar(compact: false), width: 800),
       );
 
-      expect(find.byIcon(StarNoteIcons.readerMode), findsOneWidget);
-      expect(find.byIcon(StarNoteIcons.gridOn), findsOneWidget);
-      expect(find.byIcon(StarNoteIcons.exportIcon), findsOneWidget);
-      expect(find.byIcon(StarNoteIcons.more), findsOneWidget);
+      expect(find.byIcon(ElyanotesIcons.readerMode), findsOneWidget);
+      expect(find.byIcon(ElyanotesIcons.gridOn), findsOneWidget);
+      expect(find.byIcon(ElyanotesIcons.exportIcon), findsOneWidget);
+      expect(find.byIcon(ElyanotesIcons.more), findsOneWidget);
     });
 
     testWidgets('compact_true_shows_minimal_buttons', (tester) async {
@@ -167,12 +167,12 @@ void main() {
         buildTestWidget(const TopNavigationBar(compact: true), width: 400),
       );
 
-      expect(find.byIcon(StarNoteIcons.home), findsOneWidget);
-      expect(find.byIcon(StarNoteIcons.exportIcon), findsOneWidget);
-      expect(find.byIcon(StarNoteIcons.more), findsOneWidget);
+      expect(find.byIcon(ElyanotesIcons.home), findsOneWidget);
+      expect(find.byIcon(ElyanotesIcons.exportIcon), findsOneWidget);
+      expect(find.byIcon(ElyanotesIcons.more), findsOneWidget);
       // Full-mode buttons should not appear in compact mode
-      expect(find.byIcon(StarNoteIcons.readerMode), findsNothing);
-      expect(find.byIcon(StarNoteIcons.gridOn), findsNothing);
+      expect(find.byIcon(ElyanotesIcons.readerMode), findsNothing);
+      expect(find.byIcon(ElyanotesIcons.gridOn), findsNothing);
     });
 
     testWidgets('shows_document_title_in_both_modes', (tester) async {

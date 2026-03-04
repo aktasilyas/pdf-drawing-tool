@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_core/drawing_core.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'package:drawing_ui/src/widgets/template_preview_widget.dart';
 
 /// Paper color presets for the dropdown.
@@ -119,7 +119,7 @@ class PaperColorDropdown extends StatelessWidget {
         child: DropdownButton<Color>(
           value: selectedColor,
           isDense: true,
-          icon: PhosphorIcon(StarNoteIcons.caretDown,
+          icon: PhosphorIcon(ElyanotesIcons.caretDown,
               size: 14, color: cs.onSurfaceVariant),
           style: TextStyle(fontSize: 12, color: cs.onSurface),
           dropdownColor: cs.surfaceContainerHighest,

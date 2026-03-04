@@ -171,7 +171,7 @@ final activeLayerTextsProvider = Provider<List<TextElement>>((ref) {
 // ---------------------------------------------------------------------------
 
 /// SharedPreferences key for text settings.
-const _textSettingsKey = 'starnote_text_settings';
+const _textSettingsKey = 'elyanotes_text_settings';
 
 /// Default text settings.
 const _defaultTextSettings = TextSettings();

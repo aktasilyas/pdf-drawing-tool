@@ -1,5 +1,5 @@
 name: drawing_ui
-description: Flutter UI widgets for the StarNote drawing library. Includes toolbar, pen box, tool panels, and canvas components.
+description: Flutter UI widgets for the Elyanotes drawing library. Includes toolbar, pen box, tool panels, and canvas components.
 version: 0.1.0
 publish_to: 'none' # Remove this when ready for pub.dev
 

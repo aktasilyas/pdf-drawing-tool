@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/drawing_shadows.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 
 /// Compact floating page indicator bar shown below the canvas.
 ///
@@ -84,7 +84,7 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
               boxShadow: DrawingShadows.toolbar(Theme.of(context).brightness),
             ),
             child: Row(mainAxisSize: MainAxisSize.min, children: [
-              _NavArrow(icon: scrollDir == Axis.horizontal ? StarNoteIcons.chevronLeft : StarNoteIcons.caretUp, tooltip: 'Önceki Sayfa', onTap: canPrev ? () { _navigateTo(isDual ? (currentIndex - 2).clamp(0, pageCount - 1) : currentIndex - 1, ref); } : null),
+              _NavArrow(icon: scrollDir == Axis.horizontal ? ElyanotesIcons.chevronLeft : ElyanotesIcons.caretUp, tooltip: 'Önceki Sayfa', onTap: canPrev ? () { _navigateTo(isDual ? (currentIndex - 2).clamp(0, pageCount - 1) : currentIndex - 1, ref); } : null),
               Tooltip(
                 message: 'Sayfaya Git',
                 child: Semantics(
@@ -100,7 +100,7 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
                   ),
                 ),
               ),
-              _NavArrow(icon: scrollDir == Axis.horizontal ? StarNoteIcons.chevronRight : StarNoteIcons.caretDown, tooltip: 'Sonraki Sayfa', onTap: effectiveCanNext ? () { _navigateTo(isDual ? (currentIndex + 2).clamp(0, pageCount - 1) : currentIndex + 1, ref); } : null),
+              _NavArrow(icon: scrollDir == Axis.horizontal ? ElyanotesIcons.chevronRight : ElyanotesIcons.caretDown, tooltip: 'Sonraki Sayfa', onTap: effectiveCanNext ? () { _navigateTo(isDual ? (currentIndex + 2).clamp(0, pageCount - 1) : currentIndex + 1, ref); } : null),
             ]),
           )),
         ),

@@ -10,7 +10,7 @@ import 'package:drawing_ui/src/providers/toolbar_config_provider.dart';
 // =============================================================================
 
 /// SharedPreferences key for highlighter settings.
-const _highlighterSettingsKey = 'starnote_highlighter';
+const _highlighterSettingsKey = 'elyanotes_highlighter';
 
 /// Default highlighter settings.
 const _defaultHighlighterSettings = HighlighterSettings(

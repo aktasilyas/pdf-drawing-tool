@@ -12,7 +12,7 @@ const corsHeaders = {
 
 // ─── Model Routing Config ───────────────────────────────
 interface ModelConfig {
-  provider: "openai" | "google";
+  provider: "openai" | "google" | "deepseek" | "groq";
   model: string;
   maxTokens: number;
   temperature: number;
@@ -29,40 +29,135 @@ const RATE_LIMITS: Record<UserTier, number> = {
 };
 
 function selectModel(task: TaskType, tier: UserTier): ModelConfig {
-  // Free tier → GPT-4o-mini (cheap + reliable: $0.15/MTok input, $0.60/MTok output)
+  // ─── FREE TIER ────────────────────────────────────
+  // Gemini 2.5 Flash-Lite: Ücretsiz, vision destekli, 1M context
+  // Maliyet: $0 (free tier limitleri dahilinde)
   if (tier === "free") {
     return {
-      provider: "openai",
-      model: "gpt-4o-mini",
+      provider: "google",
+      model: "gemini-2.5-flash-lite",
       maxTokens: task.startsWith("summarize") ? 2048 : 1024,
       temperature: task.includes("math") || task.includes("ocr") ? 0.2 : 0.7,
     };
   }
 
-  // Premium → GPT-4o-mini default, GPT-4o for advanced
+  // ─── PREMIUM TIER ─────────────────────────────────
+  // OCR → Gemini 2.5 Flash (vision gerekli, $0.30/$2.50 per MTok)
+  // Text/Math → DeepSeek V3.2 ($0.28/$0.42 per MTok, 97.3% MATH-500)
   if (tier === "premium") {
-    const advancedTasks = ["math_advanced", "ocr_complex"];
-    if (advancedTasks.includes(task)) {
-      return { provider: "openai", model: "gpt-4o", maxTokens: 4096, temperature: 0.2 };
+    if (task.includes("ocr")) {
+      return {
+        provider: "google",
+        model: "gemini-2.5-flash",
+        maxTokens: 4096,
+        temperature: 0.2,
+      };
     }
     return {
-      provider: "openai",
-      model: "gpt-4o-mini",
-      maxTokens: 2048,
-      temperature: task.includes("math") || task.includes("ocr") ? 0.2 : 0.7,
+      provider: "deepseek",
+      model: "deepseek-chat",
+      maxTokens: task.includes("math") ? 8192 : 4096,
+      temperature: task.includes("math") ? 0.2 : 0.7,
     };
   }
 
-  // PremiumPlus → GPT-4o default, o4-mini for competition math
-  if (task === "math_advanced") {
-    return { provider: "openai", model: "gpt-4o", maxTokens: 8192, temperature: 0.2 };
+  // ─── PREMIUM PLUS (PRO) TIER ──────────────────────
+  // OCR → Gemini 2.5 Flash (Pro'da da Gemini, Qwen opsiyonel)
+  // Math → DeepSeek reasoner mode (en iyi matematik performansı)
+  // Chat → GPT-5-mini (genel amaçlı, çok dilli)
+  if (task.includes("ocr")) {
+    return {
+      provider: "google",
+      model: "gemini-2.5-flash",
+      maxTokens: 4096,
+      temperature: 0.2,
+    };
   }
+  if (task.includes("math")) {
+    return {
+      provider: "deepseek",
+      model: "deepseek-reasoner",
+      maxTokens: 8192,
+      temperature: 0.2,
+    };
+  }
+  // Summarize → Gemini Flash (1M context — uzun dokümanlar için ideal)
+  if (task.startsWith("summarize")) {
+    return {
+      provider: "google",
+      model: "gemini-2.5-flash",
+      maxTokens: 4096,
+      temperature: 0.3,
+    };
+  }
+  // Default chat → GPT-5-mini
   return {
     provider: "openai",
-    model: "gpt-4o",
+    model: "gpt-5-mini",
     maxTokens: 4096,
-    temperature: task.includes("math") || task.includes("ocr") ? 0.2 : 0.7,
+    temperature: 0.7,
   };
+}
+
+/// Free tier fallback: Gemini başarısız olursa Groq Llama 4 Scout'a düş.
+function getFallbackModel(originalConfig: ModelConfig): ModelConfig | null {
+  if (originalConfig.provider === "google") {
+    return {
+      provider: "groq",
+      model: "meta-llama/llama-4-scout-17b-16e-instruct",
+      maxTokens: originalConfig.maxTokens,
+      temperature: originalConfig.temperature,
+    };
+  }
+  return null; // Diğer provider'lar için fallback yok
+}
+
+function buildSystemPrompt(config: ModelConfig, task: TaskType): { role: string; content: string } {
+  const base = `Sen Elyanotes yapay zeka asistanısın. Kullanıcılara not alma, çalışma ve öğrenme konularında yardımcı oluyorsun.`;
+
+  const rules = `
+Kurallar:
+- Kısa ve öz yanıtlar ver, gereksiz uzatma
+- Türkçe yanıt ver (kullanıcı başka dilde yazarsa o dilde yanıtla)
+- Eğitim odaklı ol, sadece cevap verme, açıkla
+- Samimi ve anlaşılır bir dil kullan, lise öğrencisine anlatır gibi yaz
+
+Matematik kuralları:
+- Sadece karmaşık formüllerde LaTeX kullan (örn: kesirler, karekök, üs)
+- Basit işlemleri düz metin yaz: "2x + 5 = 0" gibi, "$2x + 5 = 0$" değil
+- Her adımı kısa ve net açıkla, profesör gibi değil arkadaş gibi anlat
+- Çözümün sonunda kısa bir özet ver: "Sonuç: x = 3"
+- Gereksiz terim kullanma (diskriminant yerine "delta değeri" de)
+
+Takip soruları:
+- Her yanıtının EN SONUNA şu formatla 2-3 kısa takip sorusu ekle:
+- "---suggestions---" satırından sonra her soruyu yeni satıra yaz
+- Sorular kısa olsun (max 60 karakter), kullanıcının tıklayıp sorabileceği türden
+- Sorular mevcut konuyla alakalı olsun
+- Örnek format:
+---suggestions---
+Bu konuyu daha detaylı açıklar mısın?
+Başka bir yöntemle çözebilir miyiz?
+Benzer bir soru çözer misin?`;
+
+  // DeepSeek math modunda: İngilizce düşün, Türkçe yanıtla
+  // (DeepSeek Türkçe'de ~15-20% performans kaybı yaşıyor)
+  if (config.provider === "deepseek" && task.includes("math")) {
+    return {
+      role: "system",
+      content: `${base}\n${rules}\n\nÖNEMLİ: Matematik çözümlerinde İNGİLİZCE düşün ve hesapla, ama TÜRKÇE açıkla. Bu doğruluğu artırır.`,
+    };
+  }
+
+  // OCR modunda: Yapılandırılmış çıktı iste
+  if (task.includes("ocr")) {
+    return {
+      role: "system",
+      content: `${base}\n${rules}\n\nGörüntüdeki metni ve formülleri doğru bir şekilde tanı. Matematiksel ifadeleri LaTeX formatında yaz. Tablo varsa markdown tablo olarak yaz.`,
+    };
+  }
+
+  return { role: "system", content: `${base}\n${rules}` };
 }
 
 // ─── Provider Callers ──────────────────────────────────
@@ -149,6 +244,52 @@ async function callGemini(
       body: JSON.stringify(body),
     },
   );
+}
+
+async function callDeepSeek(
+  config: ModelConfig,
+  messages: Array<{ role: string; content: any }>,
+): Promise<Response> {
+  const apiKey = Deno.env.get("DEEPSEEK_API_KEY");
+  if (!apiKey) throw new Error("DEEPSEEK_API_KEY not set");
+
+  return fetch("https://api.deepseek.com/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: config.model,
+      messages,
+      max_tokens: config.maxTokens,
+      temperature: config.temperature,
+      stream: true,
+    }),
+  });
+}
+
+async function callGroq(
+  config: ModelConfig,
+  messages: Array<{ role: string; content: any }>,
+): Promise<Response> {
+  const apiKey = Deno.env.get("GROQ_API_KEY");
+  if (!apiKey) throw new Error("GROQ_API_KEY not set");
+
+  return fetch("https://api.groq.com/openai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      model: config.model,
+      messages,
+      max_tokens: config.maxTokens,
+      temperature: config.temperature,
+      stream: true,
+    }),
+  });
 }
 
 // ─── SSE Transformer ───────────────────────────────────
@@ -291,17 +432,9 @@ Deno.serve(async (req) => {
     }
 
     // 5. Build messages with system prompt
-    const systemPrompt = {
-      role: "system",
-      content: `Sen StarNote yapay zeka asistanısın. Kullanıcılara not alma, çalışma ve öğrenme konularında yardımcı oluyorsun.
-
-Kurallar:
-- Kısa ve öz yanıtlar ver
-- Matematik sorularında adım adım çözüm göster
-- LaTeX formülleri için $...$ (inline) ve $$...$$ (block) kullan
-- Türkçe yanıt ver (kullanıcı başka dilde yazarsa o dilde yanıtla)
-- Eğitim odaklı ol, sadece cevap verme, açıkla`,
-    };
+    const config = selectModel(taskType as TaskType, tier);
+    const systemPrompt = buildSystemPrompt(config, taskType as TaskType);
+    console.log(`[AI] Request: tier=${tier}, task=${taskType}, model=${config.model}, provider=${config.provider}, messages=${messages.length}, remaining=${remaining}`);
 
     // If image is provided, add it to the last user message
     const processedMessages = [systemPrompt, ...messages];
@@ -315,24 +448,45 @@ Kurallar:
       }
     }
 
-    // 6. Select model and call provider
-    const config = selectModel(taskType as TaskType, tier);
+    // 6. Call provider with fallback
+    // ─── Provider Call with Fallback ────────────────────
     let aiResponse: Response;
     let transformer: TransformStream<Uint8Array, Uint8Array>;
 
-    if (config.provider === "openai") {
-      aiResponse = await callOpenAI(config, processedMessages);
-      transformer = createOpenAIToSSETransformer();
-    } else {
-      aiResponse = await callGemini(config, processedMessages);
-      transformer = createGeminiToSSETransformer();
+    async function callProvider(cfg: ModelConfig, msgs: typeof processedMessages) {
+      if (cfg.provider === "openai") {
+        return { response: await callOpenAI(cfg, msgs), transformer: createOpenAIToSSETransformer() };
+      } else if (cfg.provider === "deepseek") {
+        return { response: await callDeepSeek(cfg, msgs), transformer: createOpenAIToSSETransformer() };
+      } else if (cfg.provider === "groq") {
+        return { response: await callGroq(cfg, msgs), transformer: createOpenAIToSSETransformer() };
+      } else {
+        return { response: await callGemini(cfg, msgs), transformer: createGeminiToSSETransformer() };
+      }
+    }
+
+    console.log(`[AI] Calling ${config.provider}/${config.model}...`);
+    let result = await callProvider(config, processedMessages);
+    aiResponse = result.response;
+    transformer = result.transformer;
+    console.log(`[AI] Provider response status: ${aiResponse.status}`);
+
+    // Fallback: Primary provider başarısız olursa
+    if (!aiResponse.ok) {
+      const fallback = getFallbackModel(config);
+      if (fallback) {
+        console.warn(`Primary provider ${config.provider}/${config.model} failed (${aiResponse.status}), falling back to ${fallback.provider}/${fallback.model}`);
+        result = await callProvider(fallback, processedMessages);
+        aiResponse = result.response;
+        transformer = result.transformer;
+      }
     }
 
     if (!aiResponse.ok) {
       const errorBody = await aiResponse.text();
-      console.error(`AI provider error (${config.provider}/${config.model}):`, errorBody);
+      console.error(`AI provider error:`, errorBody);
       return new Response(
-        JSON.stringify({ error: "ai_provider_error", details: `${config.provider} returned ${aiResponse.status}` }),
+        JSON.stringify({ error: "ai_provider_error", details: `Provider returned ${aiResponse.status}` }),
         { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } },
       );
     }

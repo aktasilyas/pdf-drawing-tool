@@ -1,6 +1,6 @@
 # Phase 1 UI Reference Specification
 
-> **Source**: StarNote/Fenci app screenshots (10 reference images)
+> **Source**: Elyanotes/Fenci app screenshots (10 reference images)
 > **Purpose**: Exact UI specification for Cursor implementation
 > **Status**: BINDING DOCUMENT - All Phase 1 work must match this spec
 
@@ -702,4 +702,4 @@ enum ShapeType {
 ---
 
 *Document created: 2025-01-13*
-*Reference: StarNote/Fenci app screenshots (10 images)*
+*Reference: Elyanotes/Fenci app screenshots (10 images)*

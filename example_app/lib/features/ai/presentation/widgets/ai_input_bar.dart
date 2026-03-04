@@ -63,50 +63,6 @@ class _AIInputBarState extends State<AIInputBar> {
     _controller.clear();
   }
 
-  Widget _buildQuickChips(ThemeData theme) {
-    final isEnabled = widget.enabled && !widget.isStreaming;
-    void sendQuick(String t) { if (isEnabled) widget.onSend(t); }
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: EdgeInsets.fromLTRB(
-        AppSpacing.md, AppSpacing.sm, AppSpacing.md, 0,
-      ),
-      child: Row(
-        spacing: AppSpacing.sm,
-        children: [
-          _chip(theme, 'Bunu coz', Icons.lightbulb_outline,
-              isEnabled, () => sendQuick('Bunu coz')),
-          _chip(theme, 'Bana anlat', Icons.chat_bubble_outline,
-              isEnabled, () => sendQuick('Bana anlat')),
-          _chip(theme, 'Ozetle', Icons.short_text,
-              isEnabled, () => sendQuick('Ozetle')),
-        ],
-      ),
-    );
-  }
-
-  Widget _chip(
-    ThemeData theme,
-    String label,
-    IconData icon,
-    bool isEnabled,
-    VoidCallback onTap,
-  ) {
-    return ActionChip(
-      avatar: Icon(icon, size: AppIconSize.sm),
-      label: Text(label, style: theme.textTheme.labelMedium),
-      onPressed: isEnabled ? onTap : null,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppRadius.full),
-        side: BorderSide(
-          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
-        ),
-      ),
-      backgroundColor: Colors.transparent,
-      visualDensity: VisualDensity.compact,
-    );
-  }
-
   Widget _buildPendingImagePreview(ThemeData theme) {
     return Padding(
       padding: EdgeInsets.fromLTRB(
@@ -119,14 +75,14 @@ class _AIInputBarState extends State<AIInputBar> {
         ),
         SizedBox(width: AppSpacing.sm),
         Expanded(
-          child: Text('Secim ekran goruntusu',
+          child: Text('Seçim ekran görüntüsü',
               style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant)),
         ),
         IconButton(
           onPressed: widget.onClearPendingImage,
           icon: Icon(Icons.close, size: AppIconSize.sm),
-          tooltip: 'Kaldir',
+          tooltip: 'Kaldır',
           visualDensity: VisualDensity.compact,
         ),
       ]),
@@ -156,7 +112,7 @@ class _AIInputBarState extends State<AIInputBar> {
           child: Row(children: [
             Icon(Icons.center_focus_strong, size: AppIconSize.md),
             SizedBox(width: AppSpacing.md),
-            const Text('Canvas ekran goruntusu'),
+            const Text('Canvas ekran görüntüsü'),
           ]),
         ),
         PopupMenuItem(
@@ -164,7 +120,7 @@ class _AIInputBarState extends State<AIInputBar> {
           child: Row(children: [
             Icon(Icons.image_outlined, size: AppIconSize.md),
             SizedBox(width: AppSpacing.md),
-            const Text('Resim yukle'),
+            const Text('Resim yükle'),
           ]),
         ),
       ],
@@ -184,35 +140,63 @@ class _AIInputBarState extends State<AIInputBar> {
             maxLines: 4,
             minLines: 1,
             textInputAction: TextInputAction.newline,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurface,
+            ),
             decoration: InputDecoration(
               hintText: widget.isStreaming
-                  ? 'Yanit aliniyor...'
-                  : 'Mesajinizi yazin...',
-              filled: true,
-              fillColor: theme.colorScheme.surfaceContainerHighest
-                  .withValues(alpha: 0.5),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppRadius.full),
-                borderSide: BorderSide.none,
-              ),
+                  ? 'Yanıt alınıyor...'
+                  : 'Mesajınızı yazın...',
+              filled: false,
+              border: InputBorder.none,
+              enabledBorder: InputBorder.none,
+              focusedBorder: InputBorder.none,
+              disabledBorder: InputBorder.none,
               contentPadding: EdgeInsets.symmetric(
-                horizontal: AppSpacing.lg,
+                horizontal: AppSpacing.xs,
                 vertical: AppSpacing.md,
               ),
             ),
           ),
         ),
-        SizedBox(width: AppSpacing.xs),
-        IconButton.filled(
-          onPressed: _canSend ? _handleSend : null,
-          icon: widget.isStreaming
-              ? SizedBox(
-                  width: AppIconSize.sm + 2,
-                  height: AppIconSize.sm + 2,
-                  child: const CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(Icons.send),
-          tooltip: 'Gonder',
+        Padding(
+          padding: const EdgeInsets.only(
+            right: AppSpacing.xs,
+            bottom: AppSpacing.xs,
+          ),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: _canSend
+                  ? theme.colorScheme.primary
+                  : theme.colorScheme.surfaceContainerHighest,
+            ),
+            child: IconButton(
+              onPressed: _canSend ? _handleSend : null,
+              padding: EdgeInsets.zero,
+              iconSize: AppIconSize.sm + 2,
+              icon: widget.isStreaming
+                  ? SizedBox(
+                      width: AppIconSize.sm,
+                      height: AppIconSize.sm,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: theme.colorScheme.onPrimary,
+                      ),
+                    )
+                  : Icon(
+                      Icons.arrow_upward_rounded,
+                      color: _canSend
+                          ? theme.colorScheme.onPrimary
+                          : theme.colorScheme.onSurfaceVariant
+                              .withValues(alpha: 0.4),
+                    ),
+              tooltip: 'Gönder',
+            ),
+          ),
         ),
       ],
     );
@@ -237,7 +221,7 @@ class _AIInputBarState extends State<AIInputBar> {
             SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text(
-                'Gunluk limit doldu — Premium ile devam et',
+                'Günlük limit doldu — Premium ile devam et',
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: theme.colorScheme.error,
                 ),
@@ -258,18 +242,20 @@ class _AIInputBarState extends State<AIInputBar> {
     return Container(
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
-        border: Border(
-          top: BorderSide(
-            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+        boxShadow: [
+          BoxShadow(
+            color: theme.colorScheme.shadow.withValues(alpha: 0.15),
+            blurRadius: 12,
+            spreadRadius: 1,
+            offset: const Offset(0, -3),
           ),
-        ),
+        ],
       ),
       child: SafeArea(
         top: false,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (widget.enabled) _buildQuickChips(theme),
             if (widget.pendingImage != null)
               _buildPendingImagePreview(theme),
             Padding(

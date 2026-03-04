@@ -14,7 +14,7 @@ import 'package:drawing_ui/src/canvas/shape_painter.dart';
 import 'package:drawing_ui/src/canvas/sticky_note_painter.dart';
 import 'package:drawing_ui/src/providers/pdf_render_provider.dart';
 import 'package:drawing_ui/src/rendering/rendering.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 
 /// Builds the content layers for the secondary canvas.
 ///
@@ -219,7 +219,7 @@ Widget _buildPdfBackground(core.Page page, WidgetRef ref) {
     height: pageSize.height,
     color: Colors.white,
     child: Center(
-      child: PhosphorIcon(StarNoteIcons.pdfFile,
+      child: PhosphorIcon(ElyanotesIcons.pdfFile,
           size: 32, color: Colors.grey.shade300),
     ),
   );

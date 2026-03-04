@@ -7,8 +7,8 @@ import 'package:drawing_ui/src/theme/theme.dart';
 ///
 /// Used in [TopNavigationBar] and reusable in other toolbars.
 /// Visual size is [size] (default 36dp) with 48dp touch target via padding.
-class StarNoteNavButton extends StatelessWidget {
-  const StarNoteNavButton({
+class ElyanotesNavButton extends StatelessWidget {
+  const ElyanotesNavButton({
     super.key,
     required this.icon,
     required this.tooltip,
@@ -38,7 +38,7 @@ class StarNoteNavButton extends StatelessWidget {
   /// Visual size of the button container (default 36dp).
   final double size;
 
-  /// Override icon size (defaults to [StarNoteIcons.navSize]).
+  /// Override icon size (defaults to [ElyanotesIcons.navSize]).
   final double? iconSize;
 
   /// Optional badge widget (e.g. notification dot).
@@ -47,7 +47,7 @@ class StarNoteNavButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = DrawingTheme.of(context);
-    final effectiveIconSize = iconSize ?? StarNoteIcons.navSize;
+    final effectiveIconSize = iconSize ?? ElyanotesIcons.navSize;
 
     final iconColor = isDisabled
         ? theme.toolbarIconDisabledColor

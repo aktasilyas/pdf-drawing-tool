@@ -103,7 +103,7 @@ void main() {
         final metadata = exportService.createMetadata(doc);
 
         expect(metadata.title, 'Export Test');
-        expect(metadata.creator, 'StarNote');
+        expect(metadata.creator, 'Elyanotes');
 
         exportService.dispose();
       });

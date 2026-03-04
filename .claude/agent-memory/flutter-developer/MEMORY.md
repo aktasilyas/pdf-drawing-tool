@@ -45,14 +45,14 @@ customIcon: isPenGroup && _penTools.contains(currentTool)
 - Always use barrel exports: `toolbar/toolbar.dart` not direct file paths
 - Avoid unused imports - analyzer will warn
 - DrawingTheme imported from `theme/theme.dart` barrel
-- `starnote_icons.dart` is re-exported by `theme/theme.dart` -- do NOT add both imports
+- `elyanotes_icons.dart` is re-exported by `theme/theme.dart` -- do NOT add both imports
 - `flutter/material.dart` re-exports `debugPrint` -- do NOT add separate `foundation.dart` import
 - `flutter/foundation.dart` re-exports `dart:typed_data` -- adding foundation makes typed_data redundant
 
 ## Icon System
-- All icons use `PhosphorIcon` widget + `StarNoteIcons.*` constants
+- All icons use `PhosphorIcon` widget + `ElyanotesIcons.*` constants
 - Never use Material `Icons.*` (exception: `Icons.format_bold/italic/underlined`)
-- Use `StarNoteIcons.iconForTool(ToolType)` for tool-to-icon mapping
+- Use `ElyanotesIcons.iconForTool(ToolType)` for tool-to-icon mapping
 - `PhosphorIcon` is NOT const-compatible; remove `const` when replacing `const Icon(Icons.*)`
 
 ## Reader Mode (Phase M3 Adim 4)

@@ -1,4 +1,4 @@
-# 📂 StarNote Klasör Sistemi - Yeni Spec
+# Elyanotes Klasör Sistemi - Yeni Spec
 
 > **Tarih:** 3 Şubat 2026  
 > **Referans:** Samsung Notes folder system  
@@ -276,7 +276,7 @@ Tags sistemi Phase 7'nin son part'ı olarak veya ayrı bir phase olarak implemen
 
 ```
 ┌──────────────────────────────────────┐
-│  ★ StarNote          ⚙️             │  ← Logo + Settings
+│  ★ Elyanotes         ⚙️             │  ← Logo + Settings
 │──────────────────────────────────────│
 │  🔍 Not ara...                       │  ← AppSearchField
 │──────────────────────────────────────│

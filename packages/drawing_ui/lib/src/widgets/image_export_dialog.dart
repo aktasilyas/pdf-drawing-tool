@@ -1,7 +1,7 @@
 /// Dialog for image export / share options.
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 
 /// Supported image export formats.
 enum ImageFormat {
@@ -248,7 +248,7 @@ class _BackgroundToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(children: [
-      PhosphorIcon(StarNoteIcons.image, size: 18, color: cs.onSurfaceVariant),
+      PhosphorIcon(ElyanotesIcons.image, size: 18, color: cs.onSurfaceVariant),
       const SizedBox(width: 8),
       Expanded(child: Text('Arka planı dahil et',
           style: Theme.of(context).textTheme.bodySmall?.copyWith(color: cs.onSurface))),

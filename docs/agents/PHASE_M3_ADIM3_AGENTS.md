@@ -58,7 +58,7 @@ class ToolButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
     
-    final iconSize = compact ? 20.0 : StarNoteIcons.toolSize;
+    final iconSize = compact ? 20.0 : ElyanotesIcons.toolSize;
     final buttonSize = compact ? 36.0 : 40.0;
     
     // GoodNotes tarzı seçim renkleri
@@ -85,7 +85,7 @@ class ToolButton extends ConsumerWidget {
           ),
           child: Center(
             child: PhosphorIcon(
-              StarNoteIcons.iconForTool(toolType, active: isSelected),
+              ElyanotesIcons.iconForTool(toolType, active: isSelected),
               size: iconSize,
               color: iconColor,
             ),
@@ -102,8 +102,8 @@ class ToolButton extends ConsumerWidget {
 ```dart
 // Undo/Redo butonları — disabled state ile:
 PhosphorIcon(
-  StarNoteIcons.undo,
-  size: StarNoteIcons.actionSize,
+  ElyanotesIcons.undo,
+  size: ElyanotesIcons.actionSize,
   color: canUndo 
       ? colorScheme.onSurfaceVariant 
       : colorScheme.onSurface.withValues(alpha: 0.25),
@@ -161,7 +161,7 @@ class _ColorChip extends StatelessWidget {
         child: isSelected
             ? Center(
                 child: PhosphorIcon(
-                  StarNoteIcons.check,
+                  ElyanotesIcons.check,
                   size: 12,
                   color: color.computeLuminance() > 0.5
                       ? Colors.black87

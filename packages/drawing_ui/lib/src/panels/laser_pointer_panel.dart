@@ -329,7 +329,7 @@ class _LaserTypeSelector extends StatelessWidget {
           onTap: () => onSelected(LaserMode.line, LaserLineStyle.rainbow),
         ),
         _PillCard(
-          icon: StarNoteIcons.circle,
+          icon: ElyanotesIcons.circle,
           isSelected: mode == LaserMode.dot,
           cs: cs,
           onTap: () => onSelected(LaserMode.dot, lineStyle),
@@ -368,7 +368,7 @@ class _PillCard extends StatelessWidget {
         child: Center(
           child: PhosphorIcon(
             icon,
-            size: StarNoteIcons.toolSize,
+            size: ElyanotesIcons.toolSize,
             color: isSelected ? cs.onPrimary : cs.onSurfaceVariant,
           ),
         ),

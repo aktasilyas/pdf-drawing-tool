@@ -12,7 +12,7 @@ export 'tool_button.dart';
 export 'toolbar_layout_mode.dart';
 export 'toolbar_overflow_menu.dart';
 export 'toolbar_widgets.dart';
-export 'starnote_nav_button.dart';
+export 'elyanotes_nav_button.dart';
 export 'top_navigation_bar.dart';
 export 'top_nav_menus.dart';
 export 'toolbar_logic.dart';

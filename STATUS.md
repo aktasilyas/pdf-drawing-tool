@@ -1,4 +1,4 @@
-# STATUS.md - StarNote Project Status
+# STATUS.md - Elyanotes Project Status
 
 > **Son Güncelleme:** 2025-01-22  
 > **Güncelleyen:** Architect

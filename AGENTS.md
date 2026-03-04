@@ -1,4 +1,4 @@
-# AGENTS.md - StarNote Coding Guidelines
+# AGENTS.md - Elyanotes Coding Guidelines
 
 > Bu dosya tüm AI coding assistant'lar tarafından okunmalıdır.
 > Cursor, Claude, GPT, Gemini - hepsi bu kurallara uymalıdır.
@@ -7,11 +7,11 @@
 
 ## Project Overview
 
-**Project:** StarNote - Flutter drawing/note-taking application  
+**Project:** Elyanotes - Flutter drawing/note-taking application  
 **Owner:** İlyas Aktaş  
 **Architect:** Claude Opus
 
-StarNote iki bileşenden oluşur:
+Elyanotes iki bileşenden oluşur:
 1. **pub.dev kütüphanesi** (packages/) - Çizim motoru
 2. **Uygulama** (example_app/) - Tam özellikli not uygulaması
 

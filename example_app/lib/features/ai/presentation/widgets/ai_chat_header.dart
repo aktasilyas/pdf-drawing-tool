@@ -27,7 +27,6 @@ class AIChatHeader extends ConsumerWidget {
         horizontal: AppSpacing.sm, vertical: AppSpacing.xs,
       ),
       child: LayoutBuilder(builder: (context, constraints) {
-        final isCompact = constraints.maxWidth < 320;
         return Row(
           children: [
             PopupMenuButton<String>(
@@ -49,13 +48,13 @@ class AIChatHeader extends ConsumerWidget {
                 _viewModeItem(
                   context,
                   value: 'sidebar', icon: Icons.view_sidebar,
-                  label: 'Sidebar gorunumu',
+                  label: 'Sidebar görünümü',
                   isActive: viewMode == AIChatViewMode.sidebar,
                 ),
                 _viewModeItem(
                   context,
                   value: 'floating', icon: Icons.picture_in_picture,
-                  label: 'Yuzen pencere',
+                  label: 'Yüzen pencere',
                   isActive: viewMode == AIChatViewMode.floating,
                 ),
                 const PopupMenuDivider(),
@@ -70,41 +69,23 @@ class AIChatHeader extends ConsumerWidget {
               ],
             ),
             SizedBox(width: AppSpacing.xs),
-            Flexible(
-              child: Text('ElyaNotes AI',
+            Expanded(
+              child: Text('Elyanotes AI',
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.titleSmall
                       ?.copyWith(fontWeight: FontWeight.w600)),
             ),
-            const Spacer(),
             IconButton(
               onPressed: onToggleHistory,
               icon: Icon(Icons.history, size: AppIconSize.md),
-              tooltip: 'Sohbet gecmisi',
+              tooltip: 'Sohbet geçmişi',
             ),
-            if (isCompact)
-              IconButton(
-                onPressed: onNewChat,
-                icon: Icon(Icons.add_comment_outlined,
-                    size: AppIconSize.md),
-                tooltip: 'Yeni Chat',
-              )
-            else
-              TextButton.icon(
-                onPressed: onNewChat,
-                icon: Icon(Icons.add_comment_outlined,
-                    size: AppIconSize.sm),
-                label: const Text('Yeni Chat'),
-                style: TextButton.styleFrom(
-                  foregroundColor: theme.colorScheme.primary,
-                  padding: EdgeInsets.symmetric(
-                    horizontal: AppSpacing.md, vertical: AppSpacing.xs,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppRadius.sm),
-                  ),
-                ),
-              ),
+            IconButton(
+              onPressed: onNewChat,
+              icon: Icon(Icons.add_comment_outlined,
+                  size: AppIconSize.md),
+              tooltip: 'Yeni Chat',
+            ),
           ],
         );
       }),

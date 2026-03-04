@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:example_app/core/utils/logger.dart';
 import 'package:example_app/features/ai/domain/entities/ai_entities.dart';
 import 'package:example_app/features/ai/data/services/canvas_capture_service.dart';
 import 'package:example_app/features/ai/domain/repositories/ai_repository.dart';
@@ -64,6 +65,8 @@ class AIChatNotifier extends StateNotifier<AIChatState> {
 
   /// Initialize with a new or existing conversation.
   Future<void> initialize({String? existingConversationId}) async {
+    logger.d('[AIChatNotifier] Initialize: '
+        'existingId=$existingConversationId');
     await _streamSubscription?.cancel();
 
     if (existingConversationId != null) {
@@ -74,15 +77,21 @@ class AIChatNotifier extends StateNotifier<AIChatState> {
       try {
         final messages =
             await _repository.getMessages(existingConversationId);
+        logger.d('[AIChatNotifier] Loaded ${messages.length} messages');
         state = state.copyWith(messages: messages, isLoading: false);
-      } catch (e) {
+      } catch (e, st) {
+        logger.e('[AIChatNotifier] Failed to load messages',
+            error: e, stackTrace: st);
         state = state.copyWith(error: e.toString(), isLoading: false);
       }
     } else {
       try {
         final conversation = await _repository.createConversation();
+        logger.i('[AIChatNotifier] New conversation: ${conversation.id}');
         state = state.copyWith(conversationId: conversation.id);
-      } catch (e) {
+      } catch (e, st) {
+        logger.e('[AIChatNotifier] Failed to create conversation',
+            error: e, stackTrace: st);
         state = state.copyWith(error: 'Sohbet oluşturulamadı: $e');
       }
     }
@@ -136,9 +145,13 @@ class AIChatNotifier extends StateNotifier<AIChatState> {
     String? imageBase64,
   }) async {
     if (state.conversationId == null) {
+      logger.e('[AIChatNotifier] No conversation ID — not initialized');
       state = state.copyWith(error: 'Sohbet başlatılmadı');
       return;
     }
+
+    logger.i('[AIChatNotifier] Sending: convId=${state.conversationId}, '
+        'taskType=$taskType, textLen=${text.length}');
 
     // Cancel any existing stream
     await _streamSubscription?.cancel();
@@ -178,6 +191,9 @@ class AIChatNotifier extends StateNotifier<AIChatState> {
           state = state.copyWith(streamingContent: buffer.toString());
         },
         onDone: () {
+          logger.i('[AIChatNotifier] Stream done. '
+              'Response length: ${buffer.length}');
+
           final assistantMessage = AIMessage(
             id: '${DateTime.now().millisecondsSinceEpoch}_ai',
             conversationId: state.conversationId!,
@@ -194,7 +210,9 @@ class AIChatNotifier extends StateNotifier<AIChatState> {
 
           _autoTitleIfNeeded(text);
         },
-        onError: (error) {
+        onError: (error, stackTrace) {
+          logger.e('[AIChatNotifier] Stream error',
+              error: error, stackTrace: stackTrace);
           state = state.copyWith(
             isStreaming: false,
             streamingContent: '',
@@ -202,7 +220,8 @@ class AIChatNotifier extends StateNotifier<AIChatState> {
           );
         },
       );
-    } catch (e) {
+    } catch (e, st) {
+      logger.e('[AIChatNotifier] Send failed', error: e, stackTrace: st);
       state = state.copyWith(
         isStreaming: false,
         streamingContent: '',

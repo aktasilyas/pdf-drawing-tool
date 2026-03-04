@@ -36,8 +36,8 @@
 **İçerik:**
 - Phosphor Icons veya Lucide Icons paketi ekle (pub.dev'den) — ince outline stil, GoodNotes estetiğine en yakın
 - VEYA: Custom SVG icon set oluştur (flutter_svg ile)
-- StarNoteIcons sınıfı oluştur — tüm ikonları tek yerden yönet
-- Tüm Material Icons referanslarını StarNoteIcons ile değiştir:
+- ElyanotesIcons sınıfı oluştur — tüm ikonları tek yerden yönet
+- Tüm Material Icons referanslarını ElyanotesIcons ile değiştir:
   - TopNavigationBar: home, book, layers, grid, settings, export, more, search
   - ToolBar: pen (dolma kalem), pencil, ballpoint, gel, brush, highlighter, eraser, shapes, text, image, lasso, sticker, laser, selection
   - Paneller: close, check, add, remove, color wheel, thickness

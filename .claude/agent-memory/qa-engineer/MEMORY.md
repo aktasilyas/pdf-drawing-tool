@@ -1,4 +1,4 @@
-# QA Engineer Memory - StarNote Flutter Testing
+# QA Engineer Memory - Elyanotes Flutter Testing
 
 ## Widget Testing Patterns
 

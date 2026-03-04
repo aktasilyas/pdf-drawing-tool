@@ -31,8 +31,8 @@ class ToolbarOverflowMenu extends ConsumerWidget {
 
     return PopupMenuButton<ToolType>(
       icon: PhosphorIcon(
-        StarNoteIcons.moreVert,
-        size: StarNoteIcons.actionSize,
+        ElyanotesIcons.moreVert,
+        size: ElyanotesIcons.actionSize,
         color: hasSelectedHidden
             ? theme.toolbarIconSelectedColor
             : theme.toolbarIconColor,
@@ -61,8 +61,8 @@ class ToolbarOverflowMenu extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               PhosphorIcon(
-                StarNoteIcons.iconForTool(tool, active: isSelected),
-                size: StarNoteIcons.actionSize,
+                ElyanotesIcons.iconForTool(tool, active: isSelected),
+                size: ElyanotesIcons.actionSize,
                 color: isSelected
                     ? theme.toolbarIconSelectedColor
                     : theme.toolbarIconColor,

@@ -6,7 +6,7 @@
 
 ## Overview
 
-Phase 1 implements the complete UI skeleton of a StarNote-like drawing application.
+Phase 1 implements the complete UI skeleton of a Elyanotes-like drawing application.
 All UI components are functional but **NO real drawing logic** is implemented.
 
 ---

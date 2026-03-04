@@ -25,12 +25,12 @@ grep -rn "Icons\." packages/drawing_ui/lib/src/widgets/page_indicator_bar.dart
 grep -rn "Icons\." packages/drawing_ui/lib/src/screens/ --include="*.dart"
 ```
 
-Bulunan Material Icons referanslarını StarNoteIcons ile değiştir. Özellikle:
+Bulunan Material Icons referanslarını ElyanotesIcons ile değiştir. Özellikle:
 - PageNavigator widget'ındaki Icons.content_copy, Icons.delete gibi ikonlar
 - Panel dosyalarında kalan Icons.* referansları
 - drawing_screen.dart veya layout dosyalarında kalan Icons.*
 
-**NOT:** Bazı yerlerde Material Icons bilerek bırakılmış olabilir (Flutter widget'lar içinde, mesela AlertDialog action'ları). Bunları da StarNoteIcons ile değiştir.
+**NOT:** Bazı yerlerde Material Icons bilerek bırakılmış olabilir (Flutter widget'lar içinde, mesela AlertDialog action'ları). Bunları da ElyanotesIcons ile değiştir.
 
 **2) THEME UYUMU KONTROLÜ**
 
@@ -56,7 +56,7 @@ wc -l packages/drawing_ui/lib/src/widgets/page_indicator_bar.dart
 **4) BARREL EXPORT KONTROLÜ**
 
 Tüm yeni dosyalar export ediliyor mu:
-- starnote_icons.dart → theme.dart barrel → drawing_ui.dart ✓
+- elyanotes_icons.dart → theme.dart barrel → drawing_ui.dart ✓
 - starnote_nav_button.dart → toolbar.dart barrel → drawing_ui.dart ✓
 - top_nav_menus.dart → toolbar.dart barrel → drawing_ui.dart ✓
 - reader_mode_provider.dart → providers.dart barrel ✓
@@ -80,7 +80,7 @@ Eksik tooltip/semantic label ekle.
 - Compact (<600px): CompactBottomBar yeni ikonlar doğru mu?
 
 Her variant'ta:
-- StarNoteIcons kullanılıyor mu?
+- ElyanotesIcons kullanılıyor mu?
 - Seçili tool primary bg gösteriyor mu?
 - Undo/redo doğru ikon ve disabled state?
 
@@ -116,35 +116,35 @@ import 'package:drawing_ui/drawing_ui.dart';
 
 void main() {
   // ═══════════════════════════════════════════
-  // StarNoteIcons Tests
+  // ElyanotesIcons Tests
   // ═══════════════════════════════════════════
-  group('StarNoteIcons', () {
+  group('ElyanotesIcons', () {
     test('iconForTool returns correct icon for each ToolType', () {
       // Test birkaç critical tool type
-      expect(StarNoteIcons.iconForTool(ToolType.pencil), isNotNull);
-      expect(StarNoteIcons.iconForTool(ToolType.highlighter), isNotNull);
-      expect(StarNoteIcons.iconForTool(ToolType.eraser), isNotNull);
-      expect(StarNoteIcons.iconForTool(ToolType.shapes), isNotNull);
+      expect(ElyanotesIcons.iconForTool(ToolType.pencil), isNotNull);
+      expect(ElyanotesIcons.iconForTool(ToolType.highlighter), isNotNull);
+      expect(ElyanotesIcons.iconForTool(ToolType.eraser), isNotNull);
+      expect(ElyanotesIcons.iconForTool(ToolType.shapes), isNotNull);
     });
 
     test('active icons differ from inactive', () {
-      final inactive = StarNoteIcons.iconForTool(ToolType.pencil, active: false);
-      final active = StarNoteIcons.iconForTool(ToolType.pencil, active: true);
+      final inactive = ElyanotesIcons.iconForTool(ToolType.pencil, active: false);
+      final active = ElyanotesIcons.iconForTool(ToolType.pencil, active: true);
       expect(active, isNot(equals(inactive)));
     });
 
     test('all tool types have mappings (no fallback)', () {
       for (final tool in ToolType.values) {
-        final icon = StarNoteIcons.iconForTool(tool);
+        final icon = ElyanotesIcons.iconForTool(tool);
         expect(icon, isNotNull, reason: '$tool should have icon mapping');
       }
     });
 
     test('size constants defined correctly', () {
-      expect(StarNoteIcons.navSize, 20.0);
-      expect(StarNoteIcons.toolSize, 22.0);
-      expect(StarNoteIcons.panelSize, 18.0);
-      expect(StarNoteIcons.actionSize, 20.0);
+      expect(ElyanotesIcons.navSize, 20.0);
+      expect(ElyanotesIcons.toolSize, 22.0);
+      expect(ElyanotesIcons.panelSize, 18.0);
+      expect(ElyanotesIcons.actionSize, 20.0);
     });
   });
 
@@ -157,7 +157,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: StarNoteNavButton(
-              icon: StarNoteIcons.home,
+              icon: ElyanotesIcons.home,
               tooltip: 'Home',
               onPressed: () {},
             ),
@@ -173,7 +173,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: StarNoteNavButton(
-              icon: StarNoteIcons.home,
+              icon: ElyanotesIcons.home,
               tooltip: 'Home',
               onPressed: () => tapped = true,
               isDisabled: true,
@@ -190,7 +190,7 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: StarNoteNavButton(
-              icon: StarNoteIcons.gridOn,
+              icon: ElyanotesIcons.gridOn,
               tooltip: 'Grid',
               onPressed: () {},
               isActive: true,
@@ -258,21 +258,21 @@ void main() {
   // Integration: No Material Icons in toolbar
   // ═══════════════════════════════════════════
   group('Icon Migration Verification', () {
-    test('StarNoteIcons has nav icons', () {
-      expect(StarNoteIcons.home, isNotNull);
-      expect(StarNoteIcons.sidebar, isNotNull);
-      expect(StarNoteIcons.search, isNotNull);
-      expect(StarNoteIcons.readerMode, isNotNull);
-      expect(StarNoteIcons.export, isNotNull);
-      expect(StarNoteIcons.more, isNotNull);
+    test('ElyanotesIcons has nav icons', () {
+      expect(ElyanotesIcons.home, isNotNull);
+      expect(ElyanotesIcons.sidebar, isNotNull);
+      expect(ElyanotesIcons.search, isNotNull);
+      expect(ElyanotesIcons.readerMode, isNotNull);
+      expect(ElyanotesIcons.export, isNotNull);
+      expect(ElyanotesIcons.more, isNotNull);
     });
 
-    test('StarNoteIcons has action icons', () {
-      expect(StarNoteIcons.undo, isNotNull);
-      expect(StarNoteIcons.redo, isNotNull);
-      expect(StarNoteIcons.close, isNotNull);
-      expect(StarNoteIcons.check, isNotNull);
-      expect(StarNoteIcons.trash, isNotNull);
+    test('ElyanotesIcons has action icons', () {
+      expect(ElyanotesIcons.undo, isNotNull);
+      expect(ElyanotesIcons.redo, isNotNull);
+      expect(ElyanotesIcons.close, isNotNull);
+      expect(ElyanotesIcons.check, isNotNull);
+      expect(ElyanotesIcons.trash, isNotNull);
     });
   });
 }

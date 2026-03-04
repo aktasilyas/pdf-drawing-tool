@@ -49,19 +49,19 @@ void main() {
       await tester.pumpWidget(createToolBarWidget());
 
       // Verify undo/redo buttons exist
-      expect(find.byIcon(StarNoteIcons.undo), findsOneWidget);
-      expect(find.byIcon(StarNoteIcons.redo), findsOneWidget);
+      expect(find.byIcon(ElyanotesIcons.undo), findsOneWidget);
+      expect(find.byIcon(ElyanotesIcons.redo), findsOneWidget);
 
       // Verify config button exists (settings icon)
-      expect(find.byIcon(StarNoteIcons.settings), findsOneWidget);
+      expect(find.byIcon(ElyanotesIcons.settings), findsOneWidget);
     });
 
     testWidgets('undo and redo buttons are disabled by default', (tester) async {
       await tester.pumpWidget(createToolBarWidget());
 
       // Both should be disabled (canUndo and canRedo are false by default)
-      final undoIcon = tester.widget<PhosphorIcon>(find.byIcon(StarNoteIcons.undo));
-      final redoIcon = tester.widget<PhosphorIcon>(find.byIcon(StarNoteIcons.redo));
+      final undoIcon = tester.widget<PhosphorIcon>(find.byIcon(ElyanotesIcons.undo));
+      final redoIcon = tester.widget<PhosphorIcon>(find.byIcon(ElyanotesIcons.redo));
 
       // Icons should have reduced alpha (disabled look)
       expect(undoIcon.color, isNotNull);
@@ -72,7 +72,7 @@ void main() {
       await tester.pumpWidget(createToolBarWidget());
 
       // Tap on eraser tool (not grouped, directly visible)
-      await tester.tap(find.byIcon(StarNoteIcons.iconForTool(ToolType.pixelEraser)));
+      await tester.tap(find.byIcon(ElyanotesIcons.iconForTool(ToolType.pixelEraser)));
       await tester.pump();
 
       // Verify the tool is now selected (would need to verify via provider)
@@ -84,31 +84,31 @@ void main() {
       await tester.pumpWidget(createTopNavBarWidget());
 
       // Verify navigation buttons exist
-      expect(find.byIcon(StarNoteIcons.home), findsOneWidget);
+      expect(find.byIcon(ElyanotesIcons.home), findsOneWidget);
     });
 
     testWidgets('renders right action buttons', (tester) async {
       await tester.pumpWidget(createTopNavBarWidget());
 
       // Verify right action buttons exist (full layout)
-      expect(find.byIcon(StarNoteIcons.readerMode), findsOneWidget);
-      expect(find.byIcon(StarNoteIcons.gridOn), findsOneWidget);
-      expect(find.byIcon(StarNoteIcons.exportIcon), findsOneWidget);
-      expect(find.byIcon(StarNoteIcons.more), findsOneWidget);
+      expect(find.byIcon(ElyanotesIcons.readerMode), findsOneWidget);
+      expect(find.byIcon(ElyanotesIcons.gridOn), findsOneWidget);
+      expect(find.byIcon(ElyanotesIcons.exportIcon), findsOneWidget);
+      expect(find.byIcon(ElyanotesIcons.more), findsOneWidget);
     });
 
     testWidgets('grid toggle works', (tester) async {
       await tester.pumpWidget(createTopNavBarWidget());
 
       // Grid should be on by default
-      expect(find.byIcon(StarNoteIcons.gridOn), findsOneWidget);
+      expect(find.byIcon(ElyanotesIcons.gridOn), findsOneWidget);
 
       // Tap to toggle
-      await tester.tap(find.byIcon(StarNoteIcons.gridOn));
+      await tester.tap(find.byIcon(ElyanotesIcons.gridOn));
       await tester.pump();
 
       // Grid should now be off
-      expect(find.byIcon(StarNoteIcons.gridOff), findsOneWidget);
+      expect(find.byIcon(ElyanotesIcons.gridOff), findsOneWidget);
     });
 
     testWidgets('document tab is displayed', (tester) async {
@@ -139,7 +139,7 @@ void main() {
       // Find the container with selected background
       final container = tester.widget<Container>(
         find.ancestor(
-          of: find.byIcon(StarNoteIcons.iconForTool(ToolType.ballpointPen, active: true)),
+          of: find.byIcon(ElyanotesIcons.iconForTool(ToolType.ballpointPen, active: true)),
           matching: find.byType(Container),
         ).first,
       );
@@ -166,7 +166,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byIcon(StarNoteIcons.iconForTool(ToolType.brushPen)));
+      await tester.tap(find.byIcon(ElyanotesIcons.iconForTool(ToolType.brushPen)));
       expect(pressed, isTrue);
     });
 
@@ -190,7 +190,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byIcon(StarNoteIcons.iconForTool(ToolType.brushPen, active: true)));
+      await tester.tap(find.byIcon(ElyanotesIcons.iconForTool(ToolType.brushPen, active: true)));
       await tester.pump();
       expect(panelTapped, isTrue);
     });

@@ -86,7 +86,7 @@ class ColorChip extends StatelessWidget {
             ),
             child: isSelected
                 ? PhosphorIcon(
-                    StarNoteIcons.check,
+                    ElyanotesIcons.check,
                     size: chipSize * 0.5,
                     color: color.computeLuminance() > 0.5
                         ? Colors.black87

@@ -129,7 +129,7 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
         .pickImage(source: source, imageQuality: 85);
     if (picked == null) return;
     final appDir = await getApplicationDocumentsDirectory();
-    final dir = Directory('${appDir.path}/starnote_images');
+    final dir = Directory('${appDir.path}/elyanotes_images');
     if (!dir.existsSync()) dir.createSync(recursive: true);
     final dest = '${dir.path}/${DateTime.now().microsecondsSinceEpoch}'
         '.${picked.path.split('.').last}';
@@ -254,7 +254,7 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
 
   Widget _buildActionItems(ColorScheme cs) {
     final chevron = PhosphorIcon(
-      StarNoteIcons.chevronRight,
+      ElyanotesIcons.chevronRight,
       size: 18,
       color: cs.onSurfaceVariant,
     );
@@ -263,25 +263,25 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
       mainAxisSize: MainAxisSize.min,
       children: [
         PageOptionsMenuItem(
-          icon: StarNoteIcons.template,
+          icon: ElyanotesIcons.template,
           label: 'Daha Fazla Şablon',
           trailing: chevron,
           onTap: _openTemplatePicker,
         ),
         PageOptionsMenuItem(
-          icon: StarNoteIcons.image,
+          icon: ElyanotesIcons.image,
           label: 'Resim',
           trailing: chevron,
           onTap: () => _addImagePage(ImageSource.gallery),
         ),
         PageOptionsMenuItem(
-          icon: StarNoteIcons.camera,
+          icon: ElyanotesIcons.camera,
           label: 'Fotoğraf çek',
           trailing: chevron,
           onTap: () => _addImagePage(ImageSource.camera),
         ),
         PageOptionsMenuItem(
-          icon: StarNoteIcons.uploadFile,
+          icon: ElyanotesIcons.uploadFile,
           label: 'İçe aktar',
           trailing: chevron,
           onTap: _handleImport,
