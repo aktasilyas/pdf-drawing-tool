@@ -69,6 +69,7 @@ class _RecordingBarContent extends ConsumerWidget {
           _PulsatingDot(isPaused: isPaused),
           const SizedBox(width: 10),
           _TimerDisplay(elapsed: elapsed, cs: cs),
+          _RemainingTime(elapsed: elapsed, ref: ref, cs: cs),
           const SizedBox(width: 16),
           _PauseResumeButton(isPaused: isPaused, cs: cs, ref: ref),
           const SizedBox(width: 8),
@@ -155,6 +156,41 @@ class _TimerDisplay extends StatelessWidget {
         fontWeight: FontWeight.w600,
         fontFeatures: const [FontFeature.tabularFigures()],
         color: cs.onSurface,
+      ),
+    );
+  }
+}
+
+class _RemainingTime extends StatelessWidget {
+  const _RemainingTime({
+    required this.elapsed,
+    required this.ref,
+    required this.cs,
+  });
+  final Duration elapsed;
+  final WidgetRef ref;
+  final ColorScheme cs;
+
+  @override
+  Widget build(BuildContext context) {
+    final maxDuration = ref.watch(recordingMaxDurationProvider);
+    if (maxDuration == null) return const SizedBox.shrink();
+
+    final remaining = maxDuration - elapsed;
+    final seconds = remaining.inSeconds.clamp(0, maxDuration.inSeconds);
+    final mins = (seconds ~/ 60).toString().padLeft(2, '0');
+    final secs = (seconds % 60).toString().padLeft(2, '0');
+    final isUrgent = seconds < 60;
+
+    return Padding(
+      padding: const EdgeInsets.only(left: 6),
+      child: Text(
+        '($mins:$secs)',
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: isUrgent ? cs.error : cs.onSurfaceVariant,
+              fontWeight: isUrgent ? FontWeight.w600 : FontWeight.normal,
+              fontFeatures: const [FontFeature.tabularFigures()],
+            ),
       ),
     );
   }

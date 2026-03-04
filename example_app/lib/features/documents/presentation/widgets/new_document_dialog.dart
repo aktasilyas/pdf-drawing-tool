@@ -7,6 +7,7 @@ import 'package:example_app/core/routing/route_names.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/new_document_importers.dart';
+import 'package:example_app/features/premium/premium.dart';
 
 /// Dropdown menü item'ları
 enum NewDocumentOption {
@@ -98,32 +99,62 @@ PopupMenuItem<NewDocumentOption> _buildMenuItem(
 }
 
 void _handleNewDocumentOption(BuildContext context, NewDocumentOption option) async {
+  // Document creation options require notebook limit check.
+  const creationOptions = {
+    NewDocumentOption.notebook,
+    NewDocumentOption.whiteboard,
+    NewDocumentOption.quickNote,
+  };
+
+  if (creationOptions.contains(option)) {
+    final blocked = await _checkNotebookLimit(context);
+    if (blocked) return;
+  }
+
+  if (!context.mounted) return;
+
   switch (option) {
     case NewDocumentOption.notebook:
-      // Template Selection Screen'e yönlendir (Not Defteri)
-      if (context.mounted) {
-        context.push(RouteNames.templateSelection);
-      }
-      break;
-
+      context.push(RouteNames.templateSelection);
     case NewDocumentOption.whiteboard:
-      // Beyaz tahta - direkt aç (infinite canvas + blank background)
       _createWhiteboard(context);
-      break;
-
     case NewDocumentOption.quickNote:
-      // Hızlı not oluştur
       _createQuickNote(context);
-      break;
     case NewDocumentOption.importPdf:
-      // PDF içe aktar
       importPdf(context);
-      break;
     case NewDocumentOption.importImage:
-      // Resim içe aktar
       importImage(context);
-      break;
   }
+}
+
+/// Checks the notebook creation limit and shows upgrade prompt if blocked.
+/// Returns true if creation is blocked.
+Future<bool> _checkNotebookLimit(BuildContext context) async {
+  final container = ProviderScope.containerOf(context);
+  final notebookCount =
+      await container.read(notebookCountProvider.future);
+  final access = container.read(featureAccessProvider(
+    FeatureAccessParams(
+      feature: GatedFeature.createNotebook,
+      currentUsage: notebookCount,
+    ),
+  ));
+
+  if (!access.isAllowed && context.mounted) {
+    await UpgradePromptSheet.show(
+      context,
+      access: access,
+      featureIcon: Icons.book_outlined,
+      featureTitle: 'Defter Limitine Ulaştınız',
+      onUpgrade: () {
+        Navigator.pop(context);
+        context.push(RouteNames.paywall);
+      },
+    );
+    return true;
+  }
+
+  return false;
 }
 
 void _createQuickNote(BuildContext context) async {

@@ -7,6 +7,10 @@ abstract class DocumentRepository {
   /// Get all documents, optionally filtered by folder
   Future<Either<Failure, List<DocumentInfo>>> getDocuments({String? folderId});
 
+  /// Get total count of non-trash documents (across all folders).
+  /// Optionally filter by [documentType].
+  Future<Either<Failure, int>> getDocumentCount({DocumentType? documentType});
+
   /// Get single document by ID
   Future<Either<Failure, DocumentInfo>> getDocument(String id);
 

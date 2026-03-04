@@ -47,12 +47,17 @@ class PDFExportOptions {
   final PDFPageFormat? pageFormat;
   final bool isInfiniteCanvas;
 
+  /// When true, adds a small "ElyaNotes" watermark to the bottom-right corner
+  /// of each page. Used for free-tier exports.
+  final bool addWatermark;
+
   const PDFExportOptions({
     this.includeBackground = true,
     this.exportMode = PDFExportMode.hybrid,
     this.quality = PDFExportQuality.medium,
     this.pageFormat,
     this.isInfiniteCanvas = false,
+    this.addWatermark = false,
   });
 
   PDFExportOptions copyWith({
@@ -61,6 +66,7 @@ class PDFExportOptions {
     PDFExportQuality? quality,
     PDFPageFormat? pageFormat,
     bool? isInfiniteCanvas,
+    bool? addWatermark,
   }) {
     return PDFExportOptions(
       includeBackground: includeBackground ?? this.includeBackground,
@@ -68,6 +74,7 @@ class PDFExportOptions {
       quality: quality ?? this.quality,
       pageFormat: pageFormat ?? this.pageFormat,
       isInfiniteCanvas: isInfiniteCanvas ?? this.isInfiniteCanvas,
+      addWatermark: addWatermark ?? this.addWatermark,
     );
   }
 }

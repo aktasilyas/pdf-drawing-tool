@@ -18,6 +18,7 @@ import 'package:example_app/features/documents/presentation/screens/documents_sc
 import 'package:example_app/features/documents/presentation/screens/manage_folders_screen.dart';
 import 'package:example_app/features/documents/presentation/screens/template_selection_screen.dart';
 import 'package:example_app/features/editor/presentation/screens/editor_screen.dart';
+import 'package:example_app/features/premium/presentation/screens/paywall_placeholder_screen.dart';
 import 'package:example_app/features/settings/settings.dart';
 
 /// Global router configuration
@@ -123,7 +124,9 @@ final appRouter = GoRouter(
     GoRoute(
       path: RouteNames.paywall,
       name: 'paywall',
-      builder: (context, state) => const _PlaceholderScreen(title: 'Paywall'),
+      builder: (context, state) => const Scaffold(
+        body: SafeArea(child: PaywallPlaceholderScreen()),
+      ),
     ),
     GoRoute(
       path: RouteNames.subscription,

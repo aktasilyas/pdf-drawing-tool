@@ -13,6 +13,8 @@ import 'package:example_app/features/documents/presentation/widgets/documents_me
 import 'package:example_app/features/documents/presentation/widgets/documents_sidebar.dart';
 import 'package:example_app/features/documents/presentation/widgets/folder_menus.dart';
 import 'package:example_app/features/documents/presentation/widgets/new_document_dialog.dart';
+import 'package:example_app/core/routing/route_names.dart';
+import 'package:example_app/features/premium/premium.dart';
 import 'documents_screen_helpers.dart';
 
 class DocumentsScreen extends ConsumerStatefulWidget {
@@ -28,6 +30,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
   SidebarSection _selectedSection = SidebarSection.documents;
   String? _selectedFolderId;
   bool _isSidebarCollapsed = false;
+  bool _nearLimitBannerDismissed = false;
 
   @override
   Widget build(BuildContext context) {
@@ -74,6 +77,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
           ),
           _buildHeader(),
           _buildSoftDivider(),
+          _buildNearLimitBanner(),
           Expanded(child: _buildContentView()),
         ],
       ),
@@ -138,6 +142,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
                   ),
                   _buildHeader(),
                   _buildSoftDivider(),
+                  _buildNearLimitBanner(),
                   Expanded(child: _buildContentView()),
                 ],
               ),
@@ -184,6 +189,35 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
         height: 1,
         thickness: 0.5,
         color: isDark ? AppColors.outlineVariantDark : AppColors.outlineVariantLight,
+      ),
+    );
+  }
+
+  Widget _buildNearLimitBanner() {
+    if (_nearLimitBannerDismissed) return const SizedBox.shrink();
+
+    final countAsync = ref.watch(notebookCountProvider);
+    final count = countAsync.valueOrNull ?? 0;
+    final access = ref.watch(featureAccessProvider(
+      FeatureAccessParams(
+        feature: GatedFeature.createNotebook,
+        currentUsage: count,
+      ),
+    ));
+
+    if (!access.isAllowed || !access.isNearLimit) return const SizedBox.shrink();
+
+    final remaining = (access.maxUsage ?? 0) - (access.currentUsage ?? 0);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.xs,
+      ),
+      child: NearLimitBanner(
+        message: '$remaining defter hakkınız kaldı',
+        onUpgrade: () => context.push(RouteNames.paywall),
+        onDismiss: () => setState(() => _nearLimitBannerDismissed = true),
       ),
     );
   }

@@ -17,8 +17,21 @@ enum AudioRecordingState {
 /// Service for managing audio recording using the `record` package.
 ///
 /// Follows the PDFImportService pattern with StreamController + state enum.
+/// Supports optional [maxDuration] to auto-stop recording at a time limit.
 class AudioRecordingService {
-  AudioRecordingService();
+  AudioRecordingService({
+    this.maxDuration,
+    this.onMaxDurationReached,
+  });
+
+  /// Optional maximum recording duration. When reached, recording auto-stops.
+  /// The recording is always saved — only further recording is prevented.
+  final Duration? maxDuration;
+
+  /// Called when recording is auto-stopped due to [maxDuration].
+  /// Receives the saved file path (null if save failed) and elapsed duration.
+  final void Function(String? filePath, Duration elapsed)?
+      onMaxDurationReached;
 
   final AudioRecorder _recorder = AudioRecorder();
 
@@ -29,6 +42,7 @@ class AudioRecordingService {
   Timer? _timer;
   Duration _elapsed = Duration.zero;
   bool _isPaused = false;
+  bool _autoStopped = false;
 
   /// Stream of recording state changes.
   Stream<AudioRecordingState> get stateStream => _stateController.stream;
@@ -38,6 +52,16 @@ class AudioRecordingService {
 
   /// Current elapsed duration.
   Duration get elapsed => _elapsed;
+
+  /// Whether the last recording was auto-stopped due to max duration.
+  bool get wasAutoStopped => _autoStopped;
+
+  /// Remaining duration before hitting the limit, or `null` if unlimited.
+  Duration? get remaining {
+    if (maxDuration == null) return null;
+    final diff = maxDuration! - _elapsed;
+    return diff.isNegative ? Duration.zero : diff;
+  }
 
   /// Whether the recorder has microphone permission.
   Future<bool> hasPermission() => _recorder.hasPermission();
@@ -69,6 +93,7 @@ class AudioRecordingService {
 
       _elapsed = Duration.zero;
       _isPaused = false;
+      _autoStopped = false;
       _durationController.add(_elapsed);
       _startTimer();
       _stateController.add(AudioRecordingState.recording);
@@ -125,6 +150,15 @@ class AudioRecordingService {
       if (!_isPaused) {
         _elapsed += const Duration(seconds: 1);
         _durationController.add(_elapsed);
+
+        // Auto-stop when max duration is reached.
+        if (maxDuration != null && _elapsed >= maxDuration!) {
+          _autoStopped = true;
+          final duration = _elapsed;
+          stopRecording().then((filePath) {
+            onMaxDurationReached?.call(filePath, duration);
+          });
+        }
       }
     });
   }

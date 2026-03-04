@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/settings/settings.dart';
+import 'package:example_app/features/premium/premium.dart';
 import 'package:example_app/features/sync/presentation/providers/sync_provider.dart';
 import 'package:drawing_ui/drawing_ui.dart' as drawing_ui;
 
@@ -41,6 +42,17 @@ void main() async {
       overrides: [
         sharedPreferencesProvider.overrideWithValue(prefs),
         drawing_ui.sharedPreferencesProvider.overrideWithValue(prefs),
+        drawing_ui.recordingMaxDurationProvider.overrideWith((ref) {
+          final tier = ref.watch(currentTierProvider);
+          if (tier == SubscriptionTier.free) {
+            return const Duration(minutes: 5);
+          }
+          return null; // unlimited for premium
+        }),
+        drawing_ui.exportWatermarkProvider.overrideWith((ref) {
+          final tier = ref.watch(currentTierProvider);
+          return tier == SubscriptionTier.free;
+        }),
       ],
       child: const ElyaNotesApp(),
     ),

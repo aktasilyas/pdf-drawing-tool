@@ -8,10 +8,36 @@ import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/routing/route_names.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
+import 'package:example_app/features/premium/premium.dart';
 import 'dart:ui' as ui;
 
 /// PDF içe aktarma işlemini yönetir
 Future<void> importPdf(BuildContext context) async {
+  // Check PDF import limit for free users.
+  final container = ProviderScope.containerOf(context);
+  final pdfCount = await container.read(pdfImportCountProvider.future);
+  final access = container.read(featureAccessProvider(
+    FeatureAccessParams(
+      feature: GatedFeature.importPdf,
+      currentUsage: pdfCount,
+    ),
+  ));
+
+  if (!access.isAllowed) {
+    if (!context.mounted) return;
+    await UpgradePromptSheet.show(
+      context,
+      access: access,
+      featureIcon: Icons.picture_as_pdf_outlined,
+      featureTitle: 'PDF Import Limitine Ulaştınız',
+      onUpgrade: () {
+        Navigator.pop(context);
+        GoRouter.of(context).push(RouteNames.paywall);
+      },
+    );
+    return;
+  }
+
   // 1. PDF dosyası seç (withData: false - RAM'e yüklemeden sadece yol al)
   final result = await FilePicker.platform.pickFiles(
     type: FileType.custom,
