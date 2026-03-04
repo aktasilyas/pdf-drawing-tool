@@ -121,6 +121,6 @@ class PDFDocumentMetadata {
   const PDFDocumentMetadata({
     this.title,
     this.author,
-    this.creator = 'StarNote',
+    this.creator = 'Elyanotes',
   });
 }

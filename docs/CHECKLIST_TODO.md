@@ -1,4 +1,4 @@
-# StarNote Drawing Library - Development Checklist
+# Elyanotes Drawing Library - Development Checklist
 
 > **Single Source of Truth** for all development progress.  
 > Update this file as features are implemented.

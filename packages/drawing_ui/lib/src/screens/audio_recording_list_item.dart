@@ -5,7 +5,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import 'package:drawing_ui/src/providers/audio_recording_provider.dart';
 import 'package:drawing_ui/src/services/audio_playback_service.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 
 /// A single audio recording row in the sidebar recordings list.
 class AudioRecordingListItem extends ConsumerWidget {
@@ -124,7 +124,7 @@ class _PlayButton extends StatelessWidget {
         ),
         child: Center(
           child: PhosphorIcon(
-            isPlaying ? StarNoteIcons.pause : StarNoteIcons.play,
+            isPlaying ? ElyanotesIcons.pause : ElyanotesIcons.play,
             size: 16,
             color: enabled
                 ? cs.onPrimaryContainer
@@ -192,7 +192,7 @@ class _MoreMenu extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     return PopupMenuButton<String>(
       icon: PhosphorIcon(
-        StarNoteIcons.moreVert,
+        ElyanotesIcons.moreVert,
         size: 18,
         color: cs.onSurfaceVariant,
       ),
@@ -207,7 +207,7 @@ class _MoreMenu extends StatelessWidget {
           value: 'rename',
           child: Row(
             children: [
-              PhosphorIcon(StarNoteIcons.editPencil, size: 18,
+              PhosphorIcon(ElyanotesIcons.editPencil, size: 18,
                   color: cs.onSurface),
               const SizedBox(width: 12),
               const Text('Yeniden adlandir'),
@@ -218,7 +218,7 @@ class _MoreMenu extends StatelessWidget {
           value: 'delete',
           child: Row(
             children: [
-              PhosphorIcon(StarNoteIcons.trash, size: 18, color: cs.error),
+              PhosphorIcon(ElyanotesIcons.trash, size: 18, color: cs.error),
               const SizedBox(width: 12),
               Text('Sil', style: textTheme.bodyMedium?.copyWith(color: cs.error)),
             ],

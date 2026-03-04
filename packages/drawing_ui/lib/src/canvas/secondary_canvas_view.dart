@@ -9,7 +9,7 @@ import 'package:drawing_ui/src/canvas/secondary_canvas_layers.dart';
 import 'package:drawing_ui/src/providers/canvas_transform_provider.dart';
 import 'package:drawing_ui/src/providers/page_provider.dart';
 import 'package:drawing_ui/src/rendering/rendering.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 
 /// Interactive mirror of the primary canvas for dual-page mode.
 ///
@@ -281,7 +281,7 @@ class _LastPagePlaceholder extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            PhosphorIcon(StarNoteIcons.page,
+            PhosphorIcon(ElyanotesIcons.page,
                 size: 40, color: cs.outlineVariant),
             const SizedBox(height: 8),
             Text('Son sayfa',

@@ -14,7 +14,7 @@ void main() {
     true,
     '2024-01-01T00:00:00Z',
     '2023-01-01T00:00:00Z',
-    'starnote_premium_monthly',
+    'elyanotes_premium_monthly',
     false,
     expirationDate: '2025-01-01T00:00:00Z',
   );
@@ -37,7 +37,7 @@ void main() {
   );
 
   const storeProduct = StoreProduct(
-    'starnote_premium_monthly',
+    'elyanotes_premium_monthly',
     'Monthly premium access',
     'Premium Monthly',
     9.99,

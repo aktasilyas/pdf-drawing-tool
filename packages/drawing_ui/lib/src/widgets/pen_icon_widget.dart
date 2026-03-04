@@ -3,7 +3,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:flutter_pen_toolbar/flutter_pen_toolbar.dart' as toolbar;
 import 'package:drawing_ui/src/models/tool_type.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'package:drawing_ui/src/utils/pen_type_mapper.dart';
 
 /// Orientation of the pen icon.
@@ -138,7 +138,7 @@ class ToolPenIcon extends StatelessWidget {
       return SizedBox(
         width: size,
         height: size,
-        child: PhosphorIcon(StarNoteIcons.editPencil, size: size * 0.5),
+        child: PhosphorIcon(ElyanotesIcons.editPencil, size: size * 0.5),
       );
     }
 

@@ -4,7 +4,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/providers/selection_clipboard_provider.dart';
 import 'package:drawing_ui/src/providers/selection_actions_provider.dart';
 import 'package:drawing_ui/src/theme/drawing_shadows.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 
 /// Floating pill that appears on long press to paste clipboard content.
 class PasteContextMenu extends ConsumerWidget {
@@ -50,7 +50,7 @@ class PasteContextMenu extends ConsumerWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  PhosphorIcon(StarNoteIcons.paste, size: 18,
+                  PhosphorIcon(ElyanotesIcons.paste, size: 18,
                       color: cs.onSurface),
                   const SizedBox(width: 6),
                   Text(

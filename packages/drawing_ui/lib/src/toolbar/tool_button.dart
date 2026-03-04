@@ -56,7 +56,7 @@ class ToolButton extends StatelessWidget {
     final theme = DrawingTheme.of(context);
 
     final buttonSize = compact ? 36.0 : 40.0;
-    final iconSize = compact ? 20.0 : StarNoteIcons.toolSize;
+    final iconSize = compact ? 20.0 : ElyanotesIcons.toolSize;
 
     final Color bgColor;
     final Color iconColor;
@@ -73,7 +73,7 @@ class ToolButton extends StatelessWidget {
     }
 
     final iconData =
-        customIcon ?? StarNoteIcons.iconForTool(toolType, active: isSelected);
+        customIcon ?? ElyanotesIcons.iconForTool(toolType, active: isSelected);
 
     return Semantics(
       label: toolType.displayName,
@@ -111,6 +111,6 @@ class ToolButton extends StatelessWidget {
 
   /// Returns the default icon for a given [ToolType].
   static IconData getIconForTool(ToolType type) {
-    return StarNoteIcons.iconForTool(type);
+    return ElyanotesIcons.iconForTool(type);
   }
 }

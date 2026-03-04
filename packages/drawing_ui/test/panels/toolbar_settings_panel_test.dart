@@ -40,7 +40,7 @@ void main() {
     await tester.pumpWidget(createTestWidget());
     await tester.pumpAndSettle();
 
-    expect(find.byIcon(StarNoteIcons.settings), findsOneWidget);
+    expect(find.byIcon(ElyanotesIcons.settings), findsOneWidget);
     expect(find.text('Araç Çubuğu Ayarları'), findsOneWidget);
   });
 
@@ -73,6 +73,6 @@ void main() {
       find.widgetWithText(OutlinedButton, 'Varsayılana Sıfırla'),
       findsOneWidget,
     );
-    expect(find.byIcon(StarNoteIcons.rotate), findsOneWidget);
+    expect(find.byIcon(ElyanotesIcons.rotate), findsOneWidget);
   });
 }

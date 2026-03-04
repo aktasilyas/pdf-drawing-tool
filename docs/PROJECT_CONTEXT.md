@@ -1,4 +1,4 @@
-# StarNote Drawing Library - Project Context
+# Elyanotes Drawing Library - Project Context
 
 > **Tek dosya bağlam referansı** - Claude Project için optimize edildi
 > Son güncelleme: 2025-01-15
@@ -8,7 +8,7 @@
 ## 🎯 Proje Özeti
 
 **Amaç:** Flutter drawing/annotation kütüphanesi (pub.dev için)  
-**Referans:** StarNote, GoodNotes, Notability, Samsung Notes, OneNote
+**Referans:** Elyanotes, GoodNotes, Notability, Samsung Notes, OneNote
 
 ---
 

@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:example_app/core/utils/logger.dart';
 import 'package:example_app/features/ai/data/datasources/ai_exceptions.dart';
 
 /// Remote data source for AI operations via Supabase Edge Functions.
@@ -30,12 +31,32 @@ class AIRemoteDataSource {
     String tier = 'free',
     String? imageBase64,
   }) async* {
-    final session = _supabase.auth.currentSession;
-    if (session == null) throw Exception('Not authenticated');
+    // Mevcut session'ı al, expire olduysa refresh et
+    var session = _supabase.auth.currentSession;
+    if (session == null) {
+      logger.e('[AI] Not authenticated — no active session');
+      throw Exception('Not authenticated');
+    }
 
-    final uri = Uri.parse(
-      '$_supabaseUrl/functions/v1/ai-chat',
-    );
+    logger.d('[AI] Token expired=${session.isExpired}, '
+        'expiresAt=${DateTime.fromMillisecondsSinceEpoch(session.expiresAt! * 1000)}');
+
+    // Token expire olduysa refresh dene
+    if (session.isExpired) {
+      logger.w('[AI] JWT expired, refreshing...');
+      await _supabase.auth.refreshSession();
+      session = _supabase.auth.currentSession;
+      if (session == null) {
+        logger.e('[AI] Session refresh failed — no new session');
+        throw Exception('Session expired. Please sign in again.');
+      }
+      logger.i('[AI] Session refreshed successfully');
+    }
+
+    final uri = Uri.parse('$_supabaseUrl/functions/v1/ai-chat');
+
+    logger.i('[AI] Sending request: taskType=$taskType, tier=$tier, '
+        'messages=${messages.length}, hasImage=${imageBase64 != null}');
 
     final body = jsonEncode({
       'messages': messages,
@@ -55,10 +76,22 @@ class AIRemoteDataSource {
 
     final client = http.Client();
     try {
-      final response = await client.send(request);
+      final response = await client.send(request).timeout(
+            const Duration(seconds: 30),
+            onTimeout: () {
+              logger.e('[AI] HTTP request timed out after 30s');
+              throw TimeoutException('AI request timed out', const Duration(seconds: 30));
+            },
+          );
+
+      logger.i('[AI] Response status: ${response.statusCode}, '
+          'model: ${response.headers['x-model']}, '
+          'provider: ${response.headers['x-provider']}, '
+          'remaining: ${response.headers['x-ratelimit-remaining']}');
 
       if (response.statusCode == 429) {
         final errorBody = await response.stream.bytesToString();
+        logger.w('[AI] Rate limit hit: $errorBody');
         final errorJson = jsonDecode(errorBody);
         throw AIRateLimitException(
           message: errorJson['message'] ?? 'Rate limit exceeded',
@@ -71,32 +104,60 @@ class AIRemoteDataSource {
 
       if (response.statusCode != 200) {
         final errorBody = await response.stream.bytesToString();
+        logger.e('[AI] Server error ${response.statusCode}: $errorBody');
         throw AIProviderException(
           'AI service error (${response.statusCode}): $errorBody',
         );
       }
 
-      // Parse SSE stream
+      // Parse SSE stream with line buffering to handle chunk boundaries
+      var sseBuffer = '';
+      int chunkCount = 0;
+      int yieldCount = 0;
+
       await for (final chunk in response.stream.transform(utf8.decoder)) {
-        for (final line in chunk.split('\n')) {
-          if (!line.startsWith('data: ')) continue;
+        chunkCount++;
+        sseBuffer += chunk;
+
+        // Process complete lines only (split on double newline for SSE)
+        while (sseBuffer.contains('\n')) {
+          final newlineIndex = sseBuffer.indexOf('\n');
+          final line = sseBuffer.substring(0, newlineIndex).trim();
+          sseBuffer = sseBuffer.substring(newlineIndex + 1);
+
+          if (line.isEmpty || !line.startsWith('data: ')) continue;
+
           final data = line.substring(6).trim();
           if (data.isEmpty) continue;
 
           try {
             final json = jsonDecode(data) as Map<String, dynamic>;
 
-            if (json['done'] == true) return;
+            if (json['done'] == true) {
+              logger.i('[AI] Stream done. '
+                  'Chunks: $chunkCount, yields: $yieldCount, '
+                  'usage: ${json['usage']}');
+              return;
+            }
 
             final content = json['content'] as String?;
             if (content != null && content.isNotEmpty) {
+              yieldCount++;
               yield content;
             }
-          } catch (_) {
-            // Skip malformed SSE lines
+          } catch (e) {
+            logger.w('[AI] Malformed SSE data: "$data", error: $e');
           }
         }
       }
+
+      logger.w('[AI] Stream ended without done signal. '
+          'Chunks: $chunkCount, yields: $yieldCount');
+    } on TimeoutException {
+      rethrow;
+    } catch (e, st) {
+      logger.e('[AI] Stream error', error: e, stackTrace: st);
+      rethrow;
     } finally {
       client.close();
     }

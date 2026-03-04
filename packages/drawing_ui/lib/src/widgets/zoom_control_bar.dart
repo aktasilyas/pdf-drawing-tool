@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 
 /// Centered zoom overlay shown during and briefly after pinch zoom.
 ///
@@ -143,8 +143,8 @@ class _ZoomControlBarState extends ConsumerState<ZoomControlBar>
         children: [
           _BarIconButton(
             icon: isLocked
-                ? StarNoteIcons.lockFilled
-                : StarNoteIcons.lockOpen,
+                ? ElyanotesIcons.lockFilled
+                : ElyanotesIcons.lockOpen,
             isActive: isLocked,
             onTap: () => _onIconTap(
               () => ref.read(zoomLockedProvider.notifier).state = !isLocked,
@@ -169,8 +169,8 @@ class _ZoomControlBarState extends ConsumerState<ZoomControlBar>
                   const SizedBox(width: 4),
                   PhosphorIcon(
                     _isDropdownOpen
-                        ? StarNoteIcons.caretUp
-                        : StarNoteIcons.caretDown,
+                        ? ElyanotesIcons.caretUp
+                        : ElyanotesIcons.caretDown,
                     size: 14,
                     color: Colors.white.withValues(alpha: 0.6),
                   ),
@@ -180,8 +180,8 @@ class _ZoomControlBarState extends ConsumerState<ZoomControlBar>
           ),
           _BarIconButton(
             icon: isFavorite
-                ? StarNoteIcons.starFilled
-                : StarNoteIcons.star,
+                ? ElyanotesIcons.starFilled
+                : ElyanotesIcons.star,
             isActive: isFavorite,
             onTap: () => _onIconTap(
               () => ref
@@ -226,7 +226,7 @@ class _ZoomControlBarState extends ConsumerState<ZoomControlBar>
                 width: 16,
                 child: isActive
                     ? const PhosphorIcon(
-                        StarNoteIcons.check,
+                        ElyanotesIcons.check,
                         size: 14,
                         color: Colors.white,
                       )
@@ -288,7 +288,7 @@ class _BarIconButton extends StatelessWidget {
         child: Center(
           child: PhosphorIcon(
             icon,
-            size: StarNoteIcons.actionSize,
+            size: ElyanotesIcons.actionSize,
             color: isActive
                 ? Colors.white
                 : Colors.white.withValues(alpha: 0.6),

@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/theme/drawing_theme.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 
 /// Undo/Redo button group for toolbar.
 class ToolbarUndoRedoButtons extends StatelessWidget {
@@ -25,14 +25,14 @@ class ToolbarUndoRedoButtons extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         ToolbarIconButton(
-          icon: StarNoteIcons.undo,
+          icon: ElyanotesIcons.undo,
           tooltip: 'Geri al',
           enabled: canUndo,
           onPressed: onUndo,
         ),
         const SizedBox(width: 4),
         ToolbarIconButton(
-          icon: StarNoteIcons.redo,
+          icon: ElyanotesIcons.redo,
           tooltip: 'İleri al',
           enabled: canRedo,
           onPressed: onRedo,
@@ -97,7 +97,7 @@ class ToolbarIconButton extends StatelessWidget {
               ),
               child: PhosphorIcon(
                 icon,
-                size: StarNoteIcons.actionSize,
+                size: ElyanotesIcons.actionSize,
                 color: enabled
                     ? theme.toolbarIconColor
                     : theme.toolbarIconDisabledColor,

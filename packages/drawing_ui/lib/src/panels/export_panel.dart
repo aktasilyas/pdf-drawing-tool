@@ -31,13 +31,13 @@ class ExportPanel extends ConsumerWidget {
         _PanelHeader(cs: cs),
         if (isInfinite)
           PageOptionsMenuItem(
-            icon: StarNoteIcons.image,
+            icon: ElyanotesIcons.image,
             label: 'PNG Olarak Dışa Aktar',
             onTap: () => _exportPNG(context, ref),
           )
         else
           PageOptionsMenuItem(
-            icon: StarNoteIcons.pdfFile,
+            icon: ElyanotesIcons.pdfFile,
             label: 'PDF Olarak Dışa Aktar',
             onTap: () => _exportPDF(context, ref),
           ),

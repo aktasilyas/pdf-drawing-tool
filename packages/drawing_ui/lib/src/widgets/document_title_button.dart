@@ -94,7 +94,7 @@ class _DocumentTitleButtonState extends ConsumerState<DocumentTitleButton> {
               ),
               const SizedBox(width: 3),
               PhosphorIcon(
-                StarNoteIcons.caretDown,
+                ElyanotesIcons.caretDown,
                 size: 12,
                 color: colorScheme.onSurfaceVariant,
               ),

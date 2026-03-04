@@ -147,7 +147,7 @@ class _AddPresetButton extends StatelessWidget {
           ),
         ),
         child: PhosphorIcon(
-          StarNoteIcons.plus,
+          ElyanotesIcons.plus,
           color: colorScheme.onSurfaceVariant,
           size: 20,
         ),
@@ -197,7 +197,7 @@ class _PresetOptionsSheet extends ConsumerWidget {
           if (!preset.isEmpty) ...[
             _buildOptionTile(
               context: context,
-              icon: StarNoteIcons.editPencil,
+              icon: ElyanotesIcons.editPencil,
               label: 'Düzenle',
               color: colorScheme.primary,
               onTap: () {
@@ -208,7 +208,7 @@ class _PresetOptionsSheet extends ConsumerWidget {
             const SizedBox(height: 4),
             _buildOptionTile(
               context: context,
-              icon: StarNoteIcons.trash,
+              icon: ElyanotesIcons.trash,
               label: 'Sil',
               color: colorScheme.error,
               onTap: () {
@@ -220,7 +220,7 @@ class _PresetOptionsSheet extends ConsumerWidget {
           if (preset.isEmpty)
             _buildOptionTile(
               context: context,
-              icon: StarNoteIcons.addCircle,
+              icon: ElyanotesIcons.addCircle,
               label: 'Mevcut Ayarları Ekle',
               color: colorScheme.primary,
               onTap: () {
@@ -293,7 +293,7 @@ class _PresetOptionsSheet extends ConsumerWidget {
                 ),
               ),
               PhosphorIcon(
-                StarNoteIcons.chevronRight,
+                ElyanotesIcons.chevronRight,
                 color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                 size: 20,
               ),

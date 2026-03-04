@@ -6,7 +6,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/panels/tool_panel.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'package:drawing_ui/src/widgets/color_picker_strip.dart';
 import 'package:drawing_ui/src/widgets/compact_toggle.dart';
 import 'package:drawing_ui/src/widgets/goodnotes_slider.dart';
@@ -236,7 +236,7 @@ class _HighlighterTypeSelector extends StatelessWidget {
         final selected = t == selectedType;
         final icon = t == ToolType.neonHighlighter
             ? PhosphorIconsLight.lightning
-            : StarNoteIcons.highlighter;
+            : ElyanotesIcons.highlighter;
         return GestureDetector(
           onTap: () => onTypeSelected(t),
           behavior: HitTestBehavior.opaque,

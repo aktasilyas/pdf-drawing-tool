@@ -142,7 +142,7 @@ class PenSettingsPanel extends ConsumerWidget {
             height: 36,
             child: OutlinedButton.icon(
               onPressed: () => _addToPenBox(context, ref, settings),
-              icon: PhosphorIcon(StarNoteIcons.plus, size: 16),
+              icon: PhosphorIcon(ElyanotesIcons.plus, size: 16),
               label: const Text(
                 'Kalem kutusuna ekle',
                 style: TextStyle(fontSize: 13),
@@ -355,7 +355,7 @@ Row(
           border: Border.all(color: colorScheme.outline.withValues(alpha: 0.3)),
         ),
         child: PhosphorIcon(
-          StarNoteIcons.palette,
+          ElyanotesIcons.palette,
           size: 14,
           color: colorScheme.onSurfaceVariant,
         ),

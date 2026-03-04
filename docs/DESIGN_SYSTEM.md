@@ -1,5 +1,5 @@
 # Design System
-## StarNote-Inspired Drawing UI
+## Elyanotes-Inspired Drawing UI
 
 This document defines the **visual language, interaction principles,
 and UI constraints** for this project.

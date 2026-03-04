@@ -1,4 +1,4 @@
-# StarNote - Current Status
+# Elyanotes - Current Status
 
 > **Bu dosyayı her commit sonrası güncelle!**
 > **Yeni chat'te Claude'a sadece bu dosyayı oku dedirt.**

@@ -188,7 +188,7 @@ void main() {
 
       // Find the selected card by checking for the checkmark icon
       final checkIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.check,
+        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.check,
       );
       expect(checkIcon, findsOneWidget);
     });
@@ -207,7 +207,7 @@ void main() {
 
       // Premium template should show lock icon
       final lockIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.lock,
+        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.lock,
       );
       expect(lockIcon, findsOneWidget);
     });
@@ -227,7 +227,7 @@ void main() {
 
       // Only first template should be locked
       final lockIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.lock,
+        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.lock,
       );
       expect(lockIcon, findsOneWidget);
     });
@@ -385,7 +385,7 @@ void main() {
       );
 
       final checkIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.check,
+        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.check,
       );
       expect(checkIcon, findsNothing);
     });

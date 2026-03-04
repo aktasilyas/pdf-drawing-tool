@@ -137,7 +137,7 @@ class PenPresetSlot extends StatelessWidget {
         ),
         child: Center(
           child: PhosphorIcon(
-            StarNoteIcons.plus,
+            ElyanotesIcons.plus,
             size: slotSize * 0.4,
             color: colorScheme.onSurfaceVariant,
           ),
@@ -199,7 +199,7 @@ class CompactPenPreview extends StatelessWidget {
           shape: BoxShape.circle,
         ),
         child: PhosphorIcon(
-          StarNoteIcons.plus,
+          ElyanotesIcons.plus,
           size: size * 0.5,
           color: colorScheme.onSurfaceVariant,
         ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'package:drawing_ui/src/widgets/compact_color_picker.dart';
 import 'package:drawing_ui/src/widgets/color_presets.dart';
 
@@ -150,7 +150,7 @@ class _ColorChip extends StatelessWidget {
         ),
         child: isSelected
             ? PhosphorIcon(
-                StarNoteIcons.check,
+                ElyanotesIcons.check,
                 size: size * 0.5,
                 color: color.computeLuminance() > 0.5
                     ? Colors.black
@@ -188,7 +188,7 @@ class _MoreButton extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             PhosphorIcon(
-              StarNoteIcons.palette,
+              ElyanotesIcons.palette,
               size: 12,
               color: colorScheme.primary,
             ),

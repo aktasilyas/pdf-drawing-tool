@@ -1,6 +1,6 @@
 # Phase 4E-2: Pen Icon Design Specification
 
-> **Referans:** Fenci/StarNote app pen toolbar
+> **Referans:** Fenci/Elyanotes app pen toolbar
 > **Hedef:** Premium, soft, 3D hissi veren kalem ikonları
 
 ---

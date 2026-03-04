@@ -42,14 +42,14 @@ class ImagePanel extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           _ImageSourceTile(
-            icon: StarNoteIcons.images,
+            icon: ElyanotesIcons.images,
             label: 'Galeriden Se\u00e7',
             subtitle: 'Alb\u00fcmden bir resim se\u00e7in',
             onTap: () => _pickImage(context, ref, ImageSource.gallery),
           ),
           const SizedBox(height: 8),
           _ImageSourceTile(
-            icon: StarNoteIcons.camera,
+            icon: ElyanotesIcons.camera,
             label: 'Foto\u011fraf \u00c7ek',
             subtitle: 'Kamera ile yeni foto\u011fraf \u00e7ekin',
             onTap: () => _pickImage(context, ref, ImageSource.camera),
@@ -70,7 +70,7 @@ class ImagePanel extends ConsumerWidget {
 
     // Copy to app documents directory for persistence
     final appDir = await getApplicationDocumentsDirectory();
-    final imagesDir = Directory('${appDir.path}/starnote_images');
+    final imagesDir = Directory('${appDir.path}/elyanotes_images');
     if (!imagesDir.existsSync()) {
       imagesDir.createSync(recursive: true);
     }

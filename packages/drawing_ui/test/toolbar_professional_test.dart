@@ -4,61 +4,61 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/drawing_ui.dart';
 
 void main() {
-  group('StarNoteIcons', () {
+  group('ElyanotesIcons', () {
     test('should_have_home_icon', () {
-      expect(StarNoteIcons.home, equals(PhosphorIconsLight.house));
+      expect(ElyanotesIcons.home, equals(PhosphorIconsLight.house));
     });
 
     test('should_have_sidebar_icons_with_active_variant', () {
-      expect(StarNoteIcons.sidebar, equals(PhosphorIconsLight.sidebar));
-      expect(StarNoteIcons.sidebarActive, equals(PhosphorIconsRegular.sidebar));
+      expect(ElyanotesIcons.sidebar, equals(PhosphorIconsLight.sidebar));
+      expect(ElyanotesIcons.sidebarActive, equals(PhosphorIconsRegular.sidebar));
     });
 
     test('should_have_reader_mode_icons_with_active_variant', () {
-      expect(StarNoteIcons.readerMode, equals(PhosphorIconsLight.bookOpen));
-      expect(StarNoteIcons.readerModeActive, equals(PhosphorIconsRegular.bookOpen));
+      expect(ElyanotesIcons.readerMode, equals(PhosphorIconsLight.bookOpen));
+      expect(ElyanotesIcons.readerModeActive, equals(PhosphorIconsRegular.bookOpen));
     });
 
     test('should_have_correct_icon_sizes', () {
-      expect(StarNoteIcons.navSize, equals(20.0));
-      expect(StarNoteIcons.toolSize, equals(22.0));
-      expect(StarNoteIcons.panelSize, equals(18.0));
-      expect(StarNoteIcons.actionSize, equals(20.0));
+      expect(ElyanotesIcons.navSize, equals(20.0));
+      expect(ElyanotesIcons.toolSize, equals(22.0));
+      expect(ElyanotesIcons.panelSize, equals(18.0));
+      expect(ElyanotesIcons.actionSize, equals(20.0));
     });
 
     test('should_map_tool_types_to_icons', () {
       expect(
-        StarNoteIcons.iconForTool(ToolType.pencil),
+        ElyanotesIcons.iconForTool(ToolType.pencil),
         equals(PhosphorIconsLight.pencilSimple),
       );
       expect(
-        StarNoteIcons.iconForTool(ToolType.pencil, active: true),
+        ElyanotesIcons.iconForTool(ToolType.pencil, active: true),
         equals(PhosphorIconsRegular.pencilSimple),
       );
       expect(
-        StarNoteIcons.iconForTool(ToolType.highlighter),
+        ElyanotesIcons.iconForTool(ToolType.highlighter),
         equals(PhosphorIconsLight.highlighterCircle),
       );
       expect(
-        StarNoteIcons.iconForTool(ToolType.highlighter, active: true),
+        ElyanotesIcons.iconForTool(ToolType.highlighter, active: true),
         equals(PhosphorIconsRegular.highlighterCircle),
       );
     });
 
     test('should_have_navigation_arrow_icons', () {
-      expect(StarNoteIcons.chevronLeft, equals(PhosphorIconsLight.caretLeft));
-      expect(StarNoteIcons.chevronRight, equals(PhosphorIconsLight.caretRight));
+      expect(ElyanotesIcons.chevronLeft, equals(PhosphorIconsLight.caretLeft));
+      expect(ElyanotesIcons.chevronRight, equals(PhosphorIconsLight.caretRight));
     });
   });
 
-  group('StarNoteNavButton', () {
+  group('ElyanotesNavButton', () {
     testWidgets('should_render_with_icon_and_tooltip', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(useMaterial3: true),
           home: Scaffold(
-            body: StarNoteNavButton(
-              icon: StarNoteIcons.home,
+            body: ElyanotesNavButton(
+              icon: ElyanotesIcons.home,
               tooltip: 'Home',
               onPressed: () {},
             ),
@@ -77,8 +77,8 @@ void main() {
         MaterialApp(
           theme: ThemeData(useMaterial3: true),
           home: Scaffold(
-            body: StarNoteNavButton(
-              icon: StarNoteIcons.home,
+            body: ElyanotesNavButton(
+              icon: ElyanotesIcons.home,
               tooltip: 'Home',
               onPressed: () {
                 tapped = true;
@@ -88,7 +88,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byType(StarNoteNavButton));
+      await tester.tap(find.byType(ElyanotesNavButton));
       expect(tapped, isTrue);
     });
 
@@ -97,8 +97,8 @@ void main() {
         MaterialApp(
           theme: ThemeData(useMaterial3: true),
           home: Scaffold(
-            body: StarNoteNavButton(
-              icon: StarNoteIcons.sidebar,
+            body: ElyanotesNavButton(
+              icon: ElyanotesIcons.sidebar,
               tooltip: 'Sidebar',
               onPressed: () {},
               isActive: true,
@@ -109,7 +109,7 @@ void main() {
 
       final container = tester.widget<Container>(
         find.descendant(
-          of: find.byType(StarNoteNavButton),
+          of: find.byType(ElyanotesNavButton),
           matching: find.byType(Container).last,
         ),
       );
@@ -124,8 +124,8 @@ void main() {
         MaterialApp(
           theme: ThemeData(useMaterial3: true),
           home: Scaffold(
-            body: StarNoteNavButton(
-              icon: StarNoteIcons.home,
+            body: ElyanotesNavButton(
+              icon: ElyanotesIcons.home,
               tooltip: 'Home',
               onPressed: () {
                 tapped = true;
@@ -136,7 +136,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byType(StarNoteNavButton));
+      await tester.tap(find.byType(ElyanotesNavButton));
       expect(tapped, isFalse);
     });
 
@@ -145,8 +145,8 @@ void main() {
         MaterialApp(
           theme: ThemeData(useMaterial3: true),
           home: Scaffold(
-            body: StarNoteNavButton(
-              icon: StarNoteIcons.home,
+            body: ElyanotesNavButton(
+              icon: ElyanotesIcons.home,
               tooltip: 'Home',
               onPressed: () {},
               badge: Container(
@@ -528,9 +528,9 @@ void main() {
       );
 
       // In reader mode, grid button should not be present
-      // Count StarNoteNavButton widgets
-      final navButtons = tester.widgetList<StarNoteNavButton>(
-        find.byType(StarNoteNavButton),
+      // Count ElyanotesNavButton widgets
+      final navButtons = tester.widgetList<ElyanotesNavButton>(
+        find.byType(ElyanotesNavButton),
       );
 
       // Should have: Home, Reader, Export, More (no Grid button)
@@ -556,7 +556,7 @@ void main() {
       // Find caret icon
       final caretIcons = tester.widgetList<PhosphorIcon>(
         find.byWidgetPredicate(
-          (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.caretDown,
+          (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.caretDown,
         ),
       );
       expect(caretIcons.length, greaterThanOrEqualTo(1));

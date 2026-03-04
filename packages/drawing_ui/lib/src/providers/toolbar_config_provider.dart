@@ -4,7 +4,7 @@ import 'package:drawing_ui/src/models/toolbar_config.dart';
 import 'package:drawing_ui/src/models/tool_type.dart';
 
 /// Key for storing toolbar config in SharedPreferences
-const _toolbarConfigKey = 'starnote_toolbar_config';
+const _toolbarConfigKey = 'elyanotes_toolbar_config';
 
 /// Provider for SharedPreferences instance for toolbar config
 ///

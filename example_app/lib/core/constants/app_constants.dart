@@ -37,9 +37,9 @@ abstract class AppConstants {
 
 /// RevenueCat product IDs
 abstract class ProductIds {
-  static const String premiumMonthly = 'starnote_premium_monthly';
-  static const String premiumYearly = 'starnote_premium_yearly';
-  static const String premiumLifetime = 'starnote_premium_lifetime';
+  static const String premiumMonthly = 'elyanotes_premium_monthly';
+  static const String premiumYearly = 'elyanotes_premium_yearly';
+  static const String premiumLifetime = 'elyanotes_premium_lifetime';
 }
 
 /// RevenueCat entitlement IDs

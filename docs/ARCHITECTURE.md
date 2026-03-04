@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project follows a **library-first, multi-package architecture** designed to produce both a reusable pub.dev library and a full-featured StarNote-like application from the same codebase.
+This project follows a **library-first, multi-package architecture** designed to produce both a reusable pub.dev library and a full-featured Elyanotes-like application from the same codebase.
 
 ## Package Structure
 
@@ -12,7 +12,7 @@ starnote_drawing_workspace/
 │   ├── drawing_core/      # Pure logic, data structures, tool abstractions
 │   ├── drawing_ui/        # Flutter widgets, painters, panels
 │   └── drawing_toolkit/   # Umbrella package for public API
-├── example_app/           # StarNote-like consumer application
+├── example_app/           # Elyanotes-like consumer application
 └── docs/                  # Documentation
 ```
 

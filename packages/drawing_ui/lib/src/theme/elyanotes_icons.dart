@@ -1,16 +1,16 @@
-/// Centralized icon definitions for StarNote.
+/// Centralized icon definitions for Elyanotes.
 ///
 /// All icons use Phosphor Light style for thin, elegant appearance.
 /// Active/selected states use Phosphor Regular for slightly bolder look.
 ///
-/// Never use PhosphorIcons directly in widgets — always use StarNoteIcons.
+/// Never use PhosphorIcons directly in widgets — always use ElyanotesIcons.
 library;
 
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
 import '../models/tool_type.dart';
 
-abstract final class StarNoteIcons {
+abstract final class ElyanotesIcons {
   // ═══════════════════════════════════════════
   // Navigation Bar Icons (Row 1)
   // ═══════════════════════════════════════════

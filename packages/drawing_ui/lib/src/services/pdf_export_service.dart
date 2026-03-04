@@ -214,7 +214,7 @@ class PDFExportService {
   PDFDocumentMetadata createMetadata(DrawingDocument document) {
     return PDFDocumentMetadata(
       title: document.title.isEmpty ? 'Untitled Document' : document.title,
-      creator: 'StarNote',
+      creator: 'Elyanotes',
     );
   }
 

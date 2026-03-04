@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/theme/drawing_shadows.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'unified_color_picker.dart';
 
 /// Popup for editing text style (color, bold, italic, underline)
@@ -105,7 +105,7 @@ class _TextStylePopupState extends State<TextStylePopup> {
                       const Spacer(),
                       GestureDetector(
                         onTap: widget.onClose,
-                        child: PhosphorIcon(StarNoteIcons.close, size: 18, color: cs.onSurfaceVariant),
+                        child: PhosphorIcon(ElyanotesIcons.close, size: 18, color: cs.onSurfaceVariant),
                       ),
                     ],
                   ),

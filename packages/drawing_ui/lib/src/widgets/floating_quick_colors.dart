@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/drawing_providers.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'package:drawing_ui/src/toolbar/tool_groups.dart';
 import 'package:drawing_ui/src/widgets/color_presets.dart';
 import 'package:drawing_ui/src/widgets/compact_color_picker.dart';
@@ -282,7 +282,7 @@ class _PaletteButton extends StatelessWidget {
         height: 48,
         child: Center(
           child: PhosphorIcon(
-            StarNoteIcons.palette,
+            ElyanotesIcons.palette,
             size: 22,
             color: colorScheme.onSurfaceVariant,
           ),

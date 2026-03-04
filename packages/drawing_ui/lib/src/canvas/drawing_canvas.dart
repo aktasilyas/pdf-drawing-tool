@@ -36,7 +36,7 @@ import 'package:drawing_ui/src/providers/history_provider.dart';
 import 'package:drawing_ui/src/providers/selection_clipboard_provider.dart';
 import 'package:drawing_ui/src/providers/infinite_canvas_provider.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'package:drawing_ui/src/widgets/widgets.dart';
 
 // =============================================================================
@@ -487,7 +487,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            PhosphorIcon(StarNoteIcons.pdfFile, size: 40, color: colorScheme.outlineVariant),
+            PhosphorIcon(ElyanotesIcons.pdfFile, size: 40, color: colorScheme.outlineVariant),
             const SizedBox(height: 8),
             Text(
               'PDF Sayfası',
@@ -524,7 +524,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              PhosphorIcon(StarNoteIcons.warningCircle, size: 40, color: colorScheme.error),
+              PhosphorIcon(ElyanotesIcons.warningCircle, size: 40, color: colorScheme.error),
               const SizedBox(height: 8),
               Text(
                 'PDF Yüklenemedi',
@@ -1353,7 +1353,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          PhosphorIcon(StarNoteIcons.image,
+                          PhosphorIcon(ElyanotesIcons.image,
                               color: Colors.white, size: 18),
                           const SizedBox(width: 8),
                           Text(
@@ -1480,7 +1480,7 @@ class _StickyNoteContextMenu extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          PhosphorIcon(StarNoteIcons.trash,
+                          PhosphorIcon(ElyanotesIcons.trash,
                               size: 16, color: Colors.red),
                           const SizedBox(width: 4),
                           Text('Sil',

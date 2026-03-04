@@ -70,7 +70,7 @@ class _ToolbarSettingsPanelState extends ConsumerState<ToolbarSettingsPanel>
               borderRadius: BorderRadius.circular(6),
             ),
             child: Icon(
-              StarNoteIcons.settings,
+              ElyanotesIcons.settings,
               size: 14,
               color: cs.primary,
             ),
@@ -88,7 +88,7 @@ class _ToolbarSettingsPanelState extends ConsumerState<ToolbarSettingsPanel>
           ),
           IconButton(
             icon: PhosphorIcon(
-              StarNoteIcons.close,
+              ElyanotesIcons.close,
               size: 16,
               color: cs.onSurfaceVariant,
             ),
@@ -149,7 +149,7 @@ class _ToolbarSettingsPanelState extends ConsumerState<ToolbarSettingsPanel>
               ),
               const Spacer(),
               PhosphorIcon(
-                StarNoteIcons.dragHandle,
+                ElyanotesIcons.dragHandle,
                 size: 12,
                 color: cs.onSurfaceVariant,
               ),
@@ -180,7 +180,7 @@ class _ToolbarSettingsPanelState extends ConsumerState<ToolbarSettingsPanel>
               ),
               const Spacer(),
               PhosphorIcon(
-                StarNoteIcons.dragHandle,
+                ElyanotesIcons.dragHandle,
                 size: 12,
                 color: cs.onSurfaceVariant,
               ),
@@ -203,7 +203,7 @@ class _ToolbarSettingsPanelState extends ConsumerState<ToolbarSettingsPanel>
           onPressed: () {
             ref.read(toolbarConfigProvider.notifier).resetToDefault();
           },
-          icon: PhosphorIcon(StarNoteIcons.rotate, size: 13),
+          icon: PhosphorIcon(ElyanotesIcons.rotate, size: 13),
           label: Text(
             'Varsayılana Sıfırla',
             style: Theme.of(context).textTheme.bodySmall,

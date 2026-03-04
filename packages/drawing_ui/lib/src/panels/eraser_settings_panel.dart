@@ -112,7 +112,7 @@ class EraserSettingsPanel extends ConsumerWidget {
           // -- Clear page action --
           _CompactActionButton(
             label: 'Sayfay\u0131 Temizle',
-            icon: StarNoteIcons.trash,
+            icon: ElyanotesIcons.trash,
             isDestructive: true,
             onPressed: () => _showClearConfirmation(context, ref),
           ),

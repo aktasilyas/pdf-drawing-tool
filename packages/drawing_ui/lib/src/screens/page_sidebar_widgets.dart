@@ -8,7 +8,7 @@ import 'package:drawing_ui/src/panels/panels.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/services/thumbnail_cache.dart';
 import 'package:drawing_ui/src/theme/drawing_shadows.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'package:drawing_ui/src/widgets/widgets.dart';
 
 /// Single page thumbnail in the sidebar grid.
@@ -135,8 +135,8 @@ class _PageGridItemState extends ConsumerState<PageGridItem> {
                       child: Center(
                         child: PhosphorIcon(
                           page.isBookmarked
-                              ? StarNoteIcons.bookmarkFilled
-                              : StarNoteIcons.bookmark,
+                              ? ElyanotesIcons.bookmarkFilled
+                              : ElyanotesIcons.bookmark,
                           size: 16,
                           color: page.isBookmarked
                               ? cs.primary
@@ -169,7 +169,7 @@ class _PageGridItemState extends ConsumerState<PageGridItem> {
                   height: 28,
                   child: Center(
                     child: PhosphorIcon(
-                      StarNoteIcons.more,
+                      ElyanotesIcons.more,
                       size: 20,
                       color: cs.onSurfaceVariant,
                     ),
@@ -239,7 +239,7 @@ class _AddPageCellState extends State<AddPageCell> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  PhosphorIcon(StarNoteIcons.plus, size: 24, color: cs.primary),
+                  PhosphorIcon(ElyanotesIcons.plus, size: 24, color: cs.primary),
                   const SizedBox(height: 4),
                   Text(
                     'Sayfa ekle',

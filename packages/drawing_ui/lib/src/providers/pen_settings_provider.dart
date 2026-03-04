@@ -12,7 +12,7 @@ import 'package:drawing_ui/src/providers/toolbar_config_provider.dart';
 // =============================================================================
 
 /// SharedPreferences key prefix for pen settings.
-const _penSettingsKeyPrefix = 'starnote_pen_';
+const _penSettingsKeyPrefix = 'elyanotes_pen_';
 
 /// Nib shape type for UI representation.
 enum NibShapeType { circle, ellipse, rectangle }

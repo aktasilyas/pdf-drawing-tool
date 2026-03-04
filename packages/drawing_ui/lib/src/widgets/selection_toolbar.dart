@@ -7,7 +7,7 @@ import 'package:drawing_ui/src/providers/document_provider.dart';
 import 'package:drawing_ui/src/providers/selection_actions_provider.dart';
 import 'package:drawing_ui/src/providers/canvas_transform_provider.dart';
 import 'package:drawing_ui/src/theme/drawing_shadows.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'package:drawing_ui/src/widgets/selection_overflow_menu.dart';
 import 'package:drawing_ui/src/widgets/selection_toolbar_buttons.dart';
 import 'package:drawing_ui/src/widgets/compact_color_picker.dart';
@@ -125,7 +125,7 @@ class _SelectionToolbarState extends ConsumerState<SelectionToolbar> {
             Container(
               key: _moreKey,
               child: SelectionToolbarIconButton(
-                icon: StarNoteIcons.more,
+                icon: ElyanotesIcons.more,
                 tooltip: 'Daha fazla',
                 onTap: () => _toggleOverflow(config),
                 isActive: _isOverflowOpen,

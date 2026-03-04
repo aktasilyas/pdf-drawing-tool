@@ -2,7 +2,7 @@ import 'package:drawing_core/drawing_core.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'package:drawing_ui/src/widgets/template_preview_widget.dart';
 
 /// Position where the new page should be inserted.
@@ -136,7 +136,7 @@ class AddPageHeader extends StatelessWidget {
           ),
           IconButton(
             icon: PhosphorIcon(
-              StarNoteIcons.close,
+              ElyanotesIcons.close,
               size: 20,
               color: cs.onSurfaceVariant,
             ),

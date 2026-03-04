@@ -472,7 +472,7 @@ Deno.serve(async (req) => {
     // 5. Build messages with system prompt
     const systemPrompt = {
       role: "system",
-      content: `Sen StarNote yapay zeka asistanısın. Kullanıcılara not alma, çalışma ve öğrenme konularında yardımcı oluyorsun.
+      content: `Sen Elyanotes yapay zeka asistanısın. Kullanıcılara not alma, çalışma ve öğrenme konularında yardımcı oluyorsun.
 
 Kurallar:
 - Kısa ve öz yanıtlar ver

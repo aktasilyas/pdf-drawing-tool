@@ -902,7 +902,7 @@ Uygulamada logo/brand text gösteren yerleri bul (muhtemelen AppBar title, splas
 ```dart
 // Mevcut logo text'i
 Text(
-  'StarNote',
+  'Elyanotes',
   style: AppTypography.logo(
     fontSize: 22,
     color: theme.colorScheme.primary,

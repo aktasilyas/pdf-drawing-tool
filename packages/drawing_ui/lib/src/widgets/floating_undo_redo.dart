@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/providers/history_provider.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 
 /// Floating undo/redo pill button (GoodNotes style)
 /// Positioned at top-left of canvas, above content
@@ -38,7 +38,7 @@ class FloatingUndoRedo extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             _UndoRedoButton(
-              icon: StarNoteIcons.undo,
+              icon: ElyanotesIcons.undo,
               tooltip: 'Geri al',
               enabled: canUndo,
               onPressed: () => ref.read(historyManagerProvider.notifier).undo(),
@@ -50,7 +50,7 @@ class FloatingUndoRedo extends ConsumerWidget {
               color: colorScheme.outlineVariant,
             ),
             _UndoRedoButton(
-              icon: StarNoteIcons.redo,
+              icon: ElyanotesIcons.redo,
               tooltip: 'İleri al',
               enabled: canRedo,
               onPressed: () => ref.read(historyManagerProvider.notifier).redo(),

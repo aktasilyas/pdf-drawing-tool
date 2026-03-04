@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 
 /// Mode for PDF import.
 enum PDFImportMode {
@@ -172,7 +172,7 @@ class _PDFImportDialogState extends State<PDFImportDialog> {
                 child: Row(
                   children: [
                     PhosphorIcon(
-                      StarNoteIcons.warningCircle,
+                      ElyanotesIcons.warningCircle,
                       color: Theme.of(context).colorScheme.error,
                     ),
                     const SizedBox(width: 12),
@@ -193,7 +193,7 @@ class _PDFImportDialogState extends State<PDFImportDialog> {
             // File selector
             ElevatedButton.icon(
               onPressed: _isLoading ? null : _handleFileSelect,
-              icon: PhosphorIcon(StarNoteIcons.uploadFile),
+              icon: PhosphorIcon(ElyanotesIcons.uploadFile),
               label: Text(
                 _selectedFilePath == null
                     ? 'Select PDF File'

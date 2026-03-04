@@ -9,7 +9,7 @@ import 'package:drawing_ui/src/providers/toolbar_config_provider.dart';
 // =============================================================================
 
 /// SharedPreferences key for eraser settings.
-const _eraserSettingsKey = 'starnote_eraser';
+const _eraserSettingsKey = 'elyanotes_eraser';
 
 /// Eraser mode enum.
 enum EraserMode { pixel, stroke, lasso }

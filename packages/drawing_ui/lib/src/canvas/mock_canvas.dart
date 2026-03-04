@@ -72,7 +72,7 @@ class MockCanvas extends ConsumerWidget {
   }
 
   PhosphorIconData _getToolIcon(ToolType tool) {
-    return StarNoteIcons.iconForTool(tool);
+    return ElyanotesIcons.iconForTool(tool);
   }
 }
 

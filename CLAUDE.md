@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-StarNote is a professional Flutter drawing/note-taking application (GoodNotes/Notability quality) structured as a Melos monorepo. It consists of two parts:
+Elyanotes is a professional Flutter drawing/note-taking application (GoodNotes/Notability quality) structured as a Melos monorepo. It consists of two parts:
 1. **pub.dev library** (`packages/`) - Drawing engine (drawing_core + drawing_ui)
 2. **Application** (`example_app/`) - Full-featured note-taking app
 

@@ -5,7 +5,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
-import 'package:drawing_ui/src/toolbar/starnote_nav_button.dart';
+import 'package:drawing_ui/src/toolbar/elyanotes_nav_button.dart';
 import 'package:drawing_ui/src/toolbar/tool_groups.dart';
 import 'package:drawing_ui/src/toolbar/top_nav_menus.dart';
 import 'package:drawing_ui/src/widgets/document_title_button.dart';
@@ -117,17 +117,17 @@ class TopNavigationBar extends ConsumerWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        StarNoteNavButton(
-          icon: StarNoteIcons.home,
+        ElyanotesNavButton(
+          icon: ElyanotesIcons.home,
           tooltip: 'Ana Sayfa',
           onPressed: onHomePressed ?? () {},
           size: sz,
         ),
         if (pageCount > 1)
-          StarNoteNavButton(
+          ElyanotesNavButton(
             icon: isSidebarOpen
-                ? StarNoteIcons.sidebarActive
-                : StarNoteIcons.sidebar,
+                ? ElyanotesIcons.sidebarActive
+                : ElyanotesIcons.sidebar,
             tooltip: 'Sayfa Paneli',
             onPressed: onSidebarToggle ?? () {},
             isActive: isSidebarOpen,
@@ -135,8 +135,8 @@ class TopNavigationBar extends ConsumerWidget {
           ),
         if (!isReaderMode) ...[
           if (onAIPressed != null)
-            StarNoteNavButton(
-              icon: StarNoteIcons.sparkle,
+            ElyanotesNavButton(
+              icon: ElyanotesIcons.sparkle,
               tooltip: 'Yapay Zeka',
               onPressed: onAIPressed!,
               size: sz,
@@ -145,17 +145,17 @@ class TopNavigationBar extends ConsumerWidget {
             ref: ref, tool: tool, currentTool: currentTool, size: sz,
           )),
           if (!ref.watch(isInfiniteCanvasProvider))
-            StarNoteNavButton(
-              icon: StarNoteIcons.microphone,
+            ElyanotesNavButton(
+              icon: ElyanotesIcons.microphone,
               tooltip: 'Ses Kaydi',
               onPressed: () => showAudioMenu(
                 context, ref, onSidebarToggle, isSidebarOpen),
               size: sz,
             ),
-          StarNoteNavButton(
+          ElyanotesNavButton(
             icon: rulerVisible
-                ? StarNoteIcons.rulerActive
-                : StarNoteIcons.ruler,
+                ? ElyanotesIcons.rulerActive
+                : ElyanotesIcons.ruler,
             tooltip: 'Cetvel',
             onPressed: () => ref
                 .read(rulerVisibleProvider.notifier)
@@ -165,10 +165,10 @@ class TopNavigationBar extends ConsumerWidget {
           ),
         ],
         if (isReaderMode) _buildReaderBadge(colorScheme),
-        StarNoteNavButton(
+        ElyanotesNavButton(
           icon: isReaderMode
-              ? StarNoteIcons.readerModeActive
-              : StarNoteIcons.readerMode,
+              ? ElyanotesIcons.readerModeActive
+              : ElyanotesIcons.readerMode,
           tooltip: isReaderMode ? 'Duzenleme Modu' : 'Okuyucu Modu',
           onPressed: () {
             ref.read(readerModeProvider.notifier).state = !isReaderMode;
@@ -176,8 +176,8 @@ class TopNavigationBar extends ConsumerWidget {
           isActive: isReaderMode,
           size: sz,
         ),
-        StarNoteNavButton(
-          icon: StarNoteIcons.more,
+        ElyanotesNavButton(
+          icon: ElyanotesIcons.more,
           tooltip: 'Daha Fazla',
           onPressed: () => ref.read(isInfiniteCanvasProvider)
               ? showInfiniteBackgroundMenu(context)
@@ -204,8 +204,8 @@ class TopNavigationBar extends ConsumerWidget {
     required double size,
   }) {
     final isSelected = tool == currentTool;
-    return StarNoteNavButton(
-      icon: StarNoteIcons.iconForTool(tool, active: isSelected),
+    return ElyanotesNavButton(
+      icon: ElyanotesIcons.iconForTool(tool, active: isSelected),
       tooltip: tool.displayName,
       onPressed: () {
         if (isSelected && toolsWithPanel.contains(tool)) {
@@ -232,17 +232,17 @@ class TopNavigationBar extends ConsumerWidget {
     return Row(
       children: [
         // -- Left: Home + Sidebar + Title --
-        StarNoteNavButton(
-          icon: StarNoteIcons.home,
+        ElyanotesNavButton(
+          icon: ElyanotesIcons.home,
           tooltip: 'Ana Sayfa',
           onPressed: onHomePressed ?? () {},
         ),
 
         if (pageCount > 1)
-          StarNoteNavButton(
+          ElyanotesNavButton(
             icon: isSidebarOpen
-                ? StarNoteIcons.sidebarActive
-                : StarNoteIcons.sidebar,
+                ? ElyanotesIcons.sidebarActive
+                : ElyanotesIcons.sidebar,
             tooltip: 'Sayfa Paneli',
             onPressed: onSidebarToggle ?? () {},
             isActive: isSidebarOpen,
@@ -267,10 +267,10 @@ class TopNavigationBar extends ConsumerWidget {
         const Expanded(child: SizedBox()),
 
         // -- Right: Reader + Add Page + Export + More --
-        StarNoteNavButton(
+        ElyanotesNavButton(
           icon: isReaderMode
-              ? StarNoteIcons.readerModeActive
-              : StarNoteIcons.readerMode,
+              ? ElyanotesIcons.readerModeActive
+              : ElyanotesIcons.readerMode,
           tooltip: isReaderMode ? 'Duzenleme Modu' : 'Okuyucu Modu',
           onPressed: () {
             ref.read(readerModeProvider.notifier).state = !isReaderMode;
@@ -279,28 +279,28 @@ class TopNavigationBar extends ConsumerWidget {
         ),
 
         if (!isReaderMode && !ref.watch(isInfiniteCanvasProvider))
-          StarNoteNavButton(
-            icon: StarNoteIcons.pageAdd,
+          ElyanotesNavButton(
+            icon: ElyanotesIcons.pageAdd,
             tooltip: 'Sayfa Ekle',
             onPressed: () => showAddPageMenu(context),
           ),
 
         if (!isReaderMode && !ref.watch(isInfiniteCanvasProvider))
-          StarNoteNavButton(
-            icon: StarNoteIcons.microphone,
+          ElyanotesNavButton(
+            icon: ElyanotesIcons.microphone,
             tooltip: 'Ses Kaydi',
             onPressed: () => showAudioMenu(
               context, ref, onSidebarToggle, isSidebarOpen),
           ),
 
-        StarNoteNavButton(
-          icon: StarNoteIcons.exportIcon,
+        ElyanotesNavButton(
+          icon: ElyanotesIcons.exportIcon,
           tooltip: 'Dışa Aktar',
           onPressed: () => showExportMenu(context, ref),
         ),
 
-        StarNoteNavButton(
-          icon: StarNoteIcons.more,
+        ElyanotesNavButton(
+          icon: ElyanotesIcons.more,
           tooltip: 'Daha Fazla',
           onPressed: () => ref.read(isInfiniteCanvasProvider)
               ? showInfiniteBackgroundMenu(context)
@@ -324,7 +324,7 @@ class TopNavigationBar extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           PhosphorIcon(
-            StarNoteIcons.readerMode,
+            ElyanotesIcons.readerMode,
             size: 14,
             color: colorScheme.onSecondaryContainer,
           ),

@@ -139,8 +139,8 @@ class _PanelHeader extends StatelessWidget {
                     shape: BoxShape.circle,
                   ),
                   child: PhosphorIcon(
-                    StarNoteIcons.close,
-                    size: StarNoteIcons.panelSize,
+                    ElyanotesIcons.close,
+                    size: ElyanotesIcons.panelSize,
                     color: colorScheme.onSurfaceVariant,
                   ),
                 ),
@@ -203,7 +203,7 @@ class PanelSection extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    PhosphorIcon(StarNoteIcons.lock, size: 10, color: colorScheme.tertiary),
+                    PhosphorIcon(ElyanotesIcons.lock, size: 10, color: colorScheme.tertiary),
                     const SizedBox(width: 2),
                     Text(
                       'PRO',
@@ -263,7 +263,7 @@ class _LockedSectionOverlay extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    PhosphorIcon(StarNoteIcons.lock, color: colorScheme.tertiary, size: 24),
+                    PhosphorIcon(ElyanotesIcons.lock, color: colorScheme.tertiary, size: 24),
                     const SizedBox(height: 4),
                     Text(
                       'Premium',
@@ -420,8 +420,8 @@ class PanelCloseButton extends StatelessWidget {
             shape: BoxShape.circle,
           ),
           child: PhosphorIcon(
-            StarNoteIcons.close,
-            size: StarNoteIcons.panelSize,
+            ElyanotesIcons.close,
+            size: ElyanotesIcons.panelSize,
             color: cs.onSurfaceVariant,
           ),
         ),

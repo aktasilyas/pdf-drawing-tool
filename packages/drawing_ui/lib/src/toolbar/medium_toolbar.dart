@@ -6,7 +6,7 @@ import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/toolbar/tool_button.dart';
 import 'package:drawing_ui/src/toolbar/tool_groups.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_logic.dart';
-import 'package:drawing_ui/src/toolbar/starnote_nav_button.dart';
+import 'package:drawing_ui/src/toolbar/elyanotes_nav_button.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_nav_sections.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_overflow_menu.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_widgets.dart';
@@ -157,8 +157,8 @@ class _MediumToolbarState extends ConsumerState<MediumToolbar> {
           children: [
             const ToolbarVerticalDivider(),
             if (hasAI)
-              StarNoteNavButton(
-                icon: StarNoteIcons.sparkle,
+              ElyanotesNavButton(
+                icon: ElyanotesIcons.sparkle,
                 tooltip: 'Yapay Zeka',
                 onPressed: widget.onAIPressed!,
               ),

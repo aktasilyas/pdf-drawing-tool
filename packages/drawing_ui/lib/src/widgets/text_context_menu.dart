@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_core/drawing_core.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 
 /// Context menu for text elements showing edit/delete/style/duplicate/move actions
 class TextContextMenu extends ConsumerWidget {
@@ -64,14 +64,14 @@ class TextContextMenu extends ConsumerWidget {
               children: [
                 if (onEdit != null) ...[
                   _MenuButton(
-                    icon: StarNoteIcons.editPencil,
+                    icon: ElyanotesIcons.editPencil,
                     tooltip: 'Düzenle',
                     onTap: onEdit!,
                   ),
                   _MenuDivider(color: colorScheme.outlineVariant),
                 ],
                 _MenuButton(
-                  icon: StarNoteIcons.trash,
+                  icon: ElyanotesIcons.trash,
                   tooltip: 'Sil',
                   onTap: onDelete,
                   color: colorScheme.error,
@@ -79,20 +79,20 @@ class TextContextMenu extends ConsumerWidget {
                 if (onStyle != null) ...[
                   _MenuDivider(color: colorScheme.outlineVariant),
                   _MenuButton(
-                    icon: StarNoteIcons.palette,
+                    icon: ElyanotesIcons.palette,
                     tooltip: 'Stil',
                     onTap: onStyle!,
                   ),
                 ],
                 _MenuDivider(color: colorScheme.outlineVariant),
                 _MenuButton(
-                  icon: StarNoteIcons.copy,
+                  icon: ElyanotesIcons.copy,
                   tooltip: 'Kopyala',
                   onTap: onDuplicate,
                 ),
                 _MenuDivider(color: colorScheme.outlineVariant),
                 _MenuButton(
-                  icon: StarNoteIcons.move,
+                  icon: ElyanotesIcons.move,
                   tooltip: 'Taşı',
                   onTap: onMove,
                   color: colorScheme.primary,

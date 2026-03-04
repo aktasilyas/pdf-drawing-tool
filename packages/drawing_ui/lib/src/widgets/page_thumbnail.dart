@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/theme/drawing_shadows.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'package:drawing_ui/src/services/thumbnail_cache.dart';
 import 'package:drawing_ui/src/services/thumbnail_generator.dart';
 import 'package:drawing_ui/src/providers/pdf_render_provider.dart'
@@ -227,7 +227,7 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             PhosphorIcon(
-              StarNoteIcons.warningCircle,
+              ElyanotesIcons.warningCircle,
               size: 32,
               color: colorScheme.error.withValues(alpha: 0.7),
             ),
@@ -251,7 +251,7 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
         final colorScheme = Theme.of(context).colorScheme;
         return Center(
           child: PhosphorIcon(
-            StarNoteIcons.brokenImage,
+            ElyanotesIcons.brokenImage,
             size: 32,
             color: colorScheme.error.withValues(alpha: 0.7),
           ),
@@ -294,7 +294,7 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
           color: placeholderCs.surfaceContainerHighest,
           child: Center(
             child: PhosphorIcon(
-              StarNoteIcons.pdfFile,
+              ElyanotesIcons.pdfFile,
               size: 24,
               color: placeholderCs.outlineVariant,
             ),

@@ -24,7 +24,7 @@ Mevcut _NavButton 32x32dp, generic. Yeni StarNoteNavButton:
 - Hover/pressed feedback
 - Active state gösterimi (arka plan tonu)
 - Tooltip her zaman
-- PhosphorIcon ile StarNoteIcons kullanımı
+- PhosphorIcon ile ElyanotesIcons kullanımı
 
 ---
 
@@ -68,7 +68,7 @@ class StarNoteNavButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final effectiveIconSize = iconSize ?? StarNoteIcons.navSize;
+    final effectiveIconSize = iconSize ?? ElyanotesIcons.navSize;
 
     final iconColor = isDisabled
         ? colorScheme.onSurface.withValues(alpha: 0.38)
@@ -152,7 +152,7 @@ Widget build(BuildContext context, WidgetRef ref) {
         children: [
           // ── Sol Bölge ──
           StarNoteNavButton(
-            icon: StarNoteIcons.home,
+            icon: ElyanotesIcons.home,
             tooltip: 'Ana Sayfa',
             onPressed: onHomePressed ?? () {},
           ),
@@ -160,7 +160,7 @@ Widget build(BuildContext context, WidgetRef ref) {
           // Sidebar toggle (sadece çok sayfalı doküman)
           if (pageCount > 1)
             StarNoteNavButton(
-              icon: StarNoteIcons.sidebar,
+              icon: ElyanotesIcons.sidebar,
               tooltip: 'Sayfa Paneli',
               onPressed: onSidebarToggle ?? () {},
               isActive: isSidebarOpen,
@@ -178,7 +178,7 @@ Widget build(BuildContext context, WidgetRef ref) {
           
           // Okuyucu modu (Adım 4'te aktif edilecek)
           StarNoteNavButton(
-            icon: StarNoteIcons.readerMode,
+            icon: ElyanotesIcons.readerMode,
             tooltip: 'Okuyucu Modu',
             onPressed: () => _toggleReaderMode(ref),
             isDisabled: true, // Adım 4'te enable edilecek
@@ -186,7 +186,7 @@ Widget build(BuildContext context, WidgetRef ref) {
 
           // Grid toggle
           StarNoteNavButton(
-            icon: gridVisible ? StarNoteIcons.gridOn : StarNoteIcons.gridOff,
+            icon: gridVisible ? ElyanotesIcons.gridOn : ElyanotesIcons.gridOff,
             tooltip: gridVisible ? 'Kılavuzu Gizle' : 'Kılavuzu Göster',
             onPressed: () => ref.read(gridVisibilityProvider.notifier).state = !gridVisible,
             isActive: gridVisible,
@@ -194,14 +194,14 @@ Widget build(BuildContext context, WidgetRef ref) {
 
           // Export/Share
           StarNoteNavButton(
-            icon: StarNoteIcons.export,
+            icon: ElyanotesIcons.export,
             tooltip: 'Dışa Aktar',
             onPressed: () => _showExportMenu(context, ref),
           ),
 
           // More menüsü
           StarNoteNavButton(
-            icon: StarNoteIcons.more,
+            icon: ElyanotesIcons.more,
             tooltip: 'Daha Fazla',
             onPressed: () => _showMoreMenu(context, ref),
           ),
@@ -227,7 +227,7 @@ void _showExportMenu(BuildContext context, WidgetRef ref) {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: PhosphorIcon(StarNoteIcons.pdfFile, color: colorScheme.onSurface),
+              leading: PhosphorIcon(ElyanotesIcons.pdfFile, color: colorScheme.onSurface),
               title: const Text('PDF Olarak Dışa Aktar'),
               onTap: () {
                 Navigator.pop(context);
@@ -235,7 +235,7 @@ void _showExportMenu(BuildContext context, WidgetRef ref) {
               },
             ),
             ListTile(
-              leading: PhosphorIcon(StarNoteIcons.image, color: colorScheme.onSurface),
+              leading: PhosphorIcon(ElyanotesIcons.image, color: colorScheme.onSurface),
               title: const Text('Resim Olarak Dışa Aktar'),
               onTap: () {
                 Navigator.pop(context);
@@ -243,7 +243,7 @@ void _showExportMenu(BuildContext context, WidgetRef ref) {
               },
             ),
             ListTile(
-              leading: PhosphorIcon(StarNoteIcons.share, color: colorScheme.onSurface),
+              leading: PhosphorIcon(ElyanotesIcons.share, color: colorScheme.onSurface),
               title: const Text('Paylaş'),
               onTap: () {
                 Navigator.pop(context);
@@ -272,7 +272,7 @@ void _showMoreMenu(BuildContext context, WidgetRef ref) {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              leading: PhosphorIcon(StarNoteIcons.template, color: colorScheme.onSurface),
+              leading: PhosphorIcon(ElyanotesIcons.template, color: colorScheme.onSurface),
               title: const Text('Şablon Değiştir'),
               onTap: () {
                 Navigator.pop(context);
@@ -280,7 +280,7 @@ void _showMoreMenu(BuildContext context, WidgetRef ref) {
               },
             ),
             ListTile(
-              leading: PhosphorIcon(StarNoteIcons.page, color: colorScheme.onSurface),
+              leading: PhosphorIcon(ElyanotesIcons.page, color: colorScheme.onSurface),
               title: const Text('Sayfa Ayarları'),
               onTap: () {
                 Navigator.pop(context);
@@ -288,7 +288,7 @@ void _showMoreMenu(BuildContext context, WidgetRef ref) {
               },
             ),
             ListTile(
-              leading: PhosphorIcon(StarNoteIcons.sliders, color: colorScheme.onSurface),
+              leading: PhosphorIcon(ElyanotesIcons.sliders, color: colorScheme.onSurface),
               title: const Text('Belge Ayarları'),
               onTap: () {
                 Navigator.pop(context);

@@ -1,5 +1,5 @@
-name: starnote_drawing_workspace
-repository: https://github.com/your-org/starnote_drawing
+name: elyanotes_drawing_workspace
+repository: https://github.com/your-org/elyanotes_drawing
 
 packages:
   - packages/**

@@ -47,7 +47,7 @@ void main() {
       expect(eraserConfig.isVisible, isFalse);
 
       // Check persistence
-      final savedJson = prefs.getString('starnote_toolbar_config');
+      final savedJson = prefs.getString('elyanotes_toolbar_config');
       expect(savedJson, isNotNull);
     });
 
@@ -128,7 +128,7 @@ void main() {
       final savedConfig =
           ToolbarConfig.defaultConfig().toggleToolVisibility(ToolType.shapes);
       await prefs.setString(
-          'starnote_toolbar_config', savedConfig.toJsonString());
+          'elyanotes_toolbar_config', savedConfig.toJsonString());
 
       // Create new container (simulates app restart)
       final container = createContainer();
@@ -143,7 +143,7 @@ void main() {
 
     test('handles corrupted JSON gracefully', () async {
       // Save invalid JSON
-      await prefs.setString('starnote_toolbar_config', 'invalid json {{{');
+      await prefs.setString('elyanotes_toolbar_config', 'invalid json {{{');
 
       // Should load default config instead of crashing
       final container = createContainer();

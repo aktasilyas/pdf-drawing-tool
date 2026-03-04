@@ -10,7 +10,7 @@
 
 ## 📋 Executive Summary
 
-StarNote uygulaması için **offline-first senkronizasyon modülü** başarıyla geliştirildi. Modül, Clean Architecture prensipleri ve AGENTS.md kurallarına uygun olarak 3 katmanda (Domain, Data, Presentation) oluşturuldu.
+Elyanotes uygulaması için **offline-first senkronizasyon modülü** başarıyla geliştirildi. Modül, Clean Architecture prensipleri ve AGENTS.md kurallarına uygun olarak 3 katmanda (Domain, Data, Presentation) oluşturuldu.
 
 ### Temel Özellikler
 

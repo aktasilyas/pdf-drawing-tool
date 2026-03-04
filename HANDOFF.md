@@ -1,4 +1,4 @@
-# HANDOFF.md - StarNote Project Handoff Document
+# HANDOFF.md - Elyanotes Project Handoff Document
 
 > **Son Guncelleme:** 2026-02-12
 > **Amac:** Yeni chat session'inda kaldigimiz yerden devam etmek icin ozet
@@ -71,7 +71,7 @@
 
 ## 🎉 PROJE DURUMU
 
-**Proje:** StarNote - Flutter drawing/note-taking uygulamasi
+**Proje:** Elyanotes - Flutter drawing/note-taking uygulamasi
 **Yapi:** pub.dev kutuphanesi (packages/) + uygulama (example_app/)
 **Sahip:** Ilyas Aktas (Product Owner)
 **Mimar:** Claude Opus
@@ -148,7 +148,7 @@ example_app/lib/
 ## 🚀 Yeni Chat'te Baslarken
 
 ```
-StarNote projesine devam ediyoruz. HANDOFF.md dosyasini paylasiyorum.
+Elyanotes projesine devam ediyoruz. HANDOFF.md dosyasini paylasiyorum.
 
 SON DURUM: UI Polish & Bug Fixes sprint'i tamamlandi ✅
 - Dark theme, PDF, Settings fixes ✅
@@ -171,4 +171,4 @@ SIRADA NE VAR:
 
 ---
 
-*StarNote - App UI Polish & Bug Fixes Sprint Complete*
+*Elyanotes - App UI Polish & Bug Fixes Sprint Complete*

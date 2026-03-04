@@ -130,19 +130,19 @@ void main() {
         const metadata = PDFDocumentMetadata(title: 'Test Document');
 
         expect(metadata.title, 'Test Document');
-        expect(metadata.creator, 'StarNote');
+        expect(metadata.creator, 'Elyanotes');
       });
 
       test('should create metadata with all fields', () {
         const metadata = PDFDocumentMetadata(
           title: 'Test',
           author: 'John Doe',
-          creator: 'StarNote',
+          creator: 'Elyanotes',
         );
 
         expect(metadata.title, 'Test');
         expect(metadata.author, 'John Doe');
-        expect(metadata.creator, 'StarNote');
+        expect(metadata.creator, 'Elyanotes');
       });
     });
   });

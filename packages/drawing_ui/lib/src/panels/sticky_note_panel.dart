@@ -7,7 +7,7 @@ import 'package:drawing_ui/src/providers/document_provider.dart';
 import 'package:drawing_ui/src/providers/history_provider.dart';
 import 'package:drawing_ui/src/providers/page_provider.dart';
 import 'package:drawing_ui/src/providers/canvas_transform_provider.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 
 /// Settings panel for the sticky note tool.
 ///
@@ -45,7 +45,7 @@ class StickyNotePanel extends ConsumerWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    PhosphorIcon(StarNoteIcons.stickyNote,
+                    PhosphorIcon(ElyanotesIcons.stickyNote,
                         size: 22, color: const Color(0xFFD4A017)),
                     const SizedBox(height: 4),
                     const Text(

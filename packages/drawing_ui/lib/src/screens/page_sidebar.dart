@@ -6,7 +6,7 @@ import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/services/thumbnail_cache.dart';
 import 'package:drawing_ui/src/theme/drawing_shadows.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 
 import 'audio_recordings_list.dart';
 import 'page_sidebar_widgets.dart';
@@ -241,7 +241,7 @@ class _FilterBar extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               _FilterTab(
-                icon: StarNoteIcons.gridOn,
+                icon: ElyanotesIcons.gridOn,
                 isActive: filter == SidebarFilter.allPages,
                 cs: cs,
                 tooltip: 'Tum sayfalar',
@@ -249,15 +249,15 @@ class _FilterBar extends StatelessWidget {
               ),
               _FilterTab(
                 icon: filter == SidebarFilter.bookmarked
-                    ? StarNoteIcons.bookmarkFilled
-                    : StarNoteIcons.bookmark,
+                    ? ElyanotesIcons.bookmarkFilled
+                    : ElyanotesIcons.bookmark,
                 isActive: filter == SidebarFilter.bookmarked,
                 cs: cs,
                 tooltip: 'Yer imleri',
                 onTap: () => onFilterChanged(SidebarFilter.bookmarked),
               ),
               _FilterTab(
-                icon: StarNoteIcons.waveform,
+                icon: ElyanotesIcons.waveform,
                 isActive: filter == SidebarFilter.recordings,
                 cs: cs,
                 tooltip: 'Ses kayitlari',

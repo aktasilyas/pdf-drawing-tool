@@ -168,14 +168,14 @@ class _SelectableTypesGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final types = [
-      (SelectableType.handwriting, 'El yazısı', StarNoteIcons.pencil),
-      (SelectableType.shape, 'Şekil', StarNoteIcons.shapes),
-      (SelectableType.imageSticker, 'Resim', StarNoteIcons.image),
-      (SelectableType.highlighter, 'Vurgulayıcı', StarNoteIcons.highlighter),
-      (SelectableType.textBox, 'Metin', StarNoteIcons.textT),
-      (SelectableType.tape, 'Bant', StarNoteIcons.ruler),
-      (SelectableType.link, 'Link', StarNoteIcons.link),
-      (SelectableType.label, 'Etiket', StarNoteIcons.tag),
+      (SelectableType.handwriting, 'El yazısı', ElyanotesIcons.pencil),
+      (SelectableType.shape, 'Şekil', ElyanotesIcons.shapes),
+      (SelectableType.imageSticker, 'Resim', ElyanotesIcons.image),
+      (SelectableType.highlighter, 'Vurgulayıcı', ElyanotesIcons.highlighter),
+      (SelectableType.textBox, 'Metin', ElyanotesIcons.textT),
+      (SelectableType.tape, 'Bant', ElyanotesIcons.ruler),
+      (SelectableType.link, 'Link', ElyanotesIcons.link),
+      (SelectableType.label, 'Etiket', ElyanotesIcons.tag),
     ];
 
     return Wrap(

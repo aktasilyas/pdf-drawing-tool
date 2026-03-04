@@ -156,8 +156,8 @@ class PenCard extends StatelessWidget {
         ),
         child: Center(
           child: PhosphorIcon(
-            StarNoteIcons.iconForTool(type, active: isSelected),
-            size: StarNoteIcons.toolSize,
+            ElyanotesIcons.iconForTool(type, active: isSelected),
+            size: ElyanotesIcons.toolSize,
             color: isSelected ? cs.onPrimary : cs.onSurfaceVariant,
           ),
         ),

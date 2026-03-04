@@ -2,7 +2,7 @@
 # https://supabase.com/docs/guides/local-development/cli/config
 # A string used to distinguish different Supabase projects on the same host. Defaults to the
 # working directory name when running `supabase init`.
-project_id = "starnote_drawing_workspace"
+project_id = "elyanotes_drawing_workspace"
 
 [api]
 enabled = true
@@ -385,7 +385,7 @@ s3_secret_key = "env(S3_SECRET_KEY)"
 
 [functions.ai-chat]
 enabled = true
-verify_jwt = true
+verify_jwt = false
 import_map = "./functions/ai-chat/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx
@@ -396,7 +396,7 @@ entrypoint = "./functions/ai-chat/index.ts"
 
 [functions.ai-analyze]
 enabled = true
-verify_jwt = true
+verify_jwt = false
 import_map = "./functions/ai-analyze/deno.json"
 # Uncomment to specify a custom file path to the entrypoint.
 # Supported file extensions are: .ts, .js, .mjs, .jsx, .tsx

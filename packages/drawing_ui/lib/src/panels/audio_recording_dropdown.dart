@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:drawing_ui/src/panels/page_options_widgets.dart';
 import 'package:drawing_ui/src/providers/audio_recording_provider.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 
 /// Dropdown panel for the microphone toolbar button.
 ///
@@ -34,18 +34,18 @@ class AudioRecordingDropdown extends ConsumerWidget {
           Divider(height: 0.5, thickness: 0.5, color: cs.outlineVariant),
           if (isActive)
             PageOptionsMenuItem(
-              icon: StarNoteIcons.recordCircle,
+              icon: ElyanotesIcons.recordCircle,
               label: 'Kayit devam ediyor...',
               onTap: null,
             )
           else
             PageOptionsMenuItem(
-              icon: StarNoteIcons.recordCircle,
+              icon: ElyanotesIcons.recordCircle,
               label: 'Kaydet',
               onTap: () => _startRecording(context, ref),
             ),
           PageOptionsMenuItem(
-            icon: StarNoteIcons.waveform,
+            icon: ElyanotesIcons.waveform,
             label: 'Kayitlari goster',
             onTap: () {
               onClose();

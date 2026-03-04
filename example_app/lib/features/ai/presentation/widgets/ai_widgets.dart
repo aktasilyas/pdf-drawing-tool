@@ -3,6 +3,7 @@ library;
 
 export 'ai_chat_bubble.dart';
 export 'ai_chat_content.dart';
+export 'ai_suggestion_chips.dart';
 export 'ai_chat_floating.dart';
 export 'ai_chat_header.dart';
 export 'ai_chat_sidebar.dart';

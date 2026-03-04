@@ -48,7 +48,7 @@ void main() {
 
       // Check for checkmark icon (selection indicator)
       final checkIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.check,
+        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.check,
       );
       expect(checkIcon, findsOneWidget);
     });
@@ -66,7 +66,7 @@ void main() {
       );
 
       final checkIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.check,
+        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.check,
       );
       expect(checkIcon, findsNothing);
     });
@@ -84,7 +84,7 @@ void main() {
       );
 
       final lockIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.lock,
+        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.lock,
       );
       expect(lockIcon, findsOneWidget);
     });
@@ -102,7 +102,7 @@ void main() {
       );
 
       final lockIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.lock,
+        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.lock,
       );
       expect(lockIcon, findsNothing);
     });
@@ -244,10 +244,10 @@ void main() {
       );
 
       final checkIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.check,
+        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.check,
       );
       final lockIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.lock,
+        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.lock,
       );
       expect(checkIcon, findsOneWidget);
       expect(lockIcon, findsOneWidget);
@@ -296,7 +296,7 @@ void main() {
       );
 
       final lockIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == StarNoteIcons.lock,
+        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.lock,
       );
       expect(lockIcon, findsOneWidget);
     });

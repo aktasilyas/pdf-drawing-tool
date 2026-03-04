@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/theme/drawing_shadows.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'package:drawing_ui/src/providers/recent_colors_provider.dart';
 import 'package:drawing_ui/src/widgets/color_swatch_grid.dart';
 import 'package:drawing_ui/src/widgets/spectrum_picker.dart';
@@ -304,7 +304,7 @@ class _RecentColorsRow extends StatelessWidget {
               border: Border.all(color: outlineColor),
             ),
             child: PhosphorIcon(
-                StarNoteIcons.colorize, size: 16, color: iconColor),
+                ElyanotesIcons.colorize, size: 16, color: iconColor),
           ),
         ]);
       }),

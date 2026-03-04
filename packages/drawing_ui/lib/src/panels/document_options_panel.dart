@@ -30,13 +30,13 @@ class DocumentOptionsPanel extends ConsumerWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         PageOptionsMenuItem(
-          icon: StarNoteIcons.editPencil,
+          icon: ElyanotesIcons.editPencil,
           label: 'Yeniden Adlandır',
           onTap: () { onClose(); onRename(); },
         ),
         if (isInfinite)
           PageOptionsMenuItem(
-            icon: StarNoteIcons.image,
+            icon: ElyanotesIcons.image,
             label: 'PNG Olarak Dışa Aktar',
             onTap: () {
               onClose();
@@ -48,7 +48,7 @@ class DocumentOptionsPanel extends ConsumerWidget {
           )
         else
           PageOptionsMenuItem(
-            icon: StarNoteIcons.pdfFile,
+            icon: ElyanotesIcons.pdfFile,
             label: 'PDF Olarak Dışa Aktar',
             onTap: () {
               onClose();
@@ -59,7 +59,7 @@ class DocumentOptionsPanel extends ConsumerWidget {
           ),
         pageOptionsDivider(cs),
         PageOptionsMenuItem(
-          icon: StarNoteIcons.trash,
+          icon: ElyanotesIcons.trash,
           label: 'Çöpe Taşı',
           isDestructive: true,
           onTap: () { onClose(); onDelete(); },

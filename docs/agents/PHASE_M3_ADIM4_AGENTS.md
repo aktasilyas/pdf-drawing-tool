@@ -59,8 +59,8 @@ Okuyucu modu butonunu aktif et (isDisabled: false) ve toggle logic ekle:
 // Sağ bölgede:
 StarNoteNavButton(
   icon: isReaderMode
-      ? StarNoteIcons.readerModeActive  // Bold/filled ikon
-      : StarNoteIcons.readerMode,
+      ? ElyanotesIcons.readerModeActive  // Bold/filled ikon
+      : ElyanotesIcons.readerMode,
   tooltip: isReaderMode ? 'Düzenleme Modu' : 'Okuyucu Modu',
   onPressed: () {
     ref.read(readerModeProvider.notifier).state = !isReaderMode;
@@ -84,7 +84,7 @@ if (isReaderMode)
       mainAxisSize: MainAxisSize.min,
       children: [
         PhosphorIcon(
-          StarNoteIcons.readerMode,
+          ElyanotesIcons.readerMode,
           size: 14,
           color: colorScheme.onSecondaryContainer,
         ),
@@ -110,7 +110,7 @@ Okuyucu modunda sağ bölgeden bazı butonları gizle (Grid toggle gereksiz, Oku
 // Gizle: Grid toggle (çizim yok, grid gereksiz)
 if (!isReaderMode)
   StarNoteNavButton(
-    icon: gridVisible ? StarNoteIcons.gridOn : StarNoteIcons.gridOff,
+    icon: gridVisible ? ElyanotesIcons.gridOn : ElyanotesIcons.gridOff,
     ...
   ),
 ```

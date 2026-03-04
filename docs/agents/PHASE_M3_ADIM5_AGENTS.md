@@ -33,7 +33,7 @@ Swipe navigasyonu: PageView kullanmıyoruz (her sayfa farklı canvas state'e sah
 - packages/drawing_ui/lib/src/screens/drawing_screen.dart — canvas layout
 - packages/drawing_ui/lib/src/screens/drawing_screen_layout.dart — buildDrawingCanvasArea
 - packages/drawing_ui/lib/src/widgets/page_navigator.dart — mevcut PageNavigator (referans)
-- packages/drawing_ui/lib/src/theme/starnote_icons.dart — ikon tanımları
+- packages/drawing_ui/lib/src/theme/elyanotes_icons.dart — ikon tanımları
 
 **1) YENİ DOSYA: `packages/drawing_ui/lib/src/widgets/page_indicator_bar.dart`**
 
@@ -44,7 +44,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
-import 'package:drawing_ui/src/theme/starnote_icons.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 
 /// Compact page indicator bar shown below the canvas.
 ///
@@ -155,7 +155,7 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
                 children: [
                   // Sol ok — önceki sayfa
                   _PageNavButton(
-                    icon: StarNoteIcons.chevronLeft,
+                    icon: ElyanotesIcons.chevronLeft,
                     onPressed: canGoPrevious
                         ? () {
                             ref.read(pageManagerProvider.notifier).previousPage();
@@ -182,7 +182,7 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
 
                   // Sağ ok — sonraki sayfa
                   _PageNavButton(
-                    icon: StarNoteIcons.chevronRight,
+                    icon: ElyanotesIcons.chevronRight,
                     onPressed: canGoNext
                         ? () {
                             ref.read(pageManagerProvider.notifier).nextPage();
