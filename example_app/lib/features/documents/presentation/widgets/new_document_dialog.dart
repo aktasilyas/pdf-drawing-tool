@@ -18,8 +18,36 @@ enum NewDocumentOption {
   importImage, // 🖼️ Resim İçe Aktar - dosya seç, direkt aç
 }
 
-/// Yeni doküman dropdown menüsünü gösterir
-void showNewDocumentDropdown(BuildContext context, GlobalKey buttonKey) {
+/// Yeni doküman dropdown menüsünü gösterir.
+/// Eğer toplam belge limiti aşıldıysa dropdown yerine upgrade sheet gösterir.
+void showNewDocumentDropdown(BuildContext context, GlobalKey buttonKey) async {
+  // Unified total document limit check
+  final container = ProviderScope.containerOf(context);
+  final totalCount = await container.read(totalDocumentCountProvider.future);
+  final access = container.read(featureAccessProvider(
+    FeatureAccessParams(
+      feature: GatedFeature.createDocument,
+      currentUsage: totalCount,
+    ),
+  ));
+
+  if (!context.mounted) return;
+
+  // If limit reached, show general upgrade sheet instead of dropdown
+  if (!access.isAllowed) {
+    await UpgradePromptSheet.show(
+      context,
+      access: access,
+      featureIcon: Icons.note_add_outlined,
+      featureTitle: 'Belge Limitine Ulaştınız',
+      onUpgrade: () {
+        Navigator.pop(context);
+        GoRouter.of(context).push(RouteNames.paywall);
+      },
+    );
+    return;
+  }
+
   final RenderBox button = buttonKey.currentContext!.findRenderObject() as RenderBox;
   final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
   final Offset position = button.localToGlobal(Offset.zero, ancestor: overlay);
@@ -99,18 +127,8 @@ PopupMenuItem<NewDocumentOption> _buildMenuItem(
 }
 
 void _handleNewDocumentOption(BuildContext context, NewDocumentOption option) async {
-  // Document creation options require notebook limit check.
-  const creationOptions = {
-    NewDocumentOption.notebook,
-    NewDocumentOption.whiteboard,
-    NewDocumentOption.quickNote,
-  };
-
-  if (creationOptions.contains(option)) {
-    final blocked = await _checkNotebookLimit(context);
-    if (blocked) return;
-  }
-
+  // Unified total document limit already checked in showNewDocumentDropdown.
+  // If dropdown is shown, user is within limit.
   if (!context.mounted) return;
 
   switch (option) {
@@ -125,36 +143,6 @@ void _handleNewDocumentOption(BuildContext context, NewDocumentOption option) as
     case NewDocumentOption.importImage:
       importImage(context);
   }
-}
-
-/// Checks the notebook creation limit and shows upgrade prompt if blocked.
-/// Returns true if creation is blocked.
-Future<bool> _checkNotebookLimit(BuildContext context) async {
-  final container = ProviderScope.containerOf(context);
-  final notebookCount =
-      await container.read(notebookCountProvider.future);
-  final access = container.read(featureAccessProvider(
-    FeatureAccessParams(
-      feature: GatedFeature.createNotebook,
-      currentUsage: notebookCount,
-    ),
-  ));
-
-  if (!access.isAllowed && context.mounted) {
-    await UpgradePromptSheet.show(
-      context,
-      access: access,
-      featureIcon: Icons.book_outlined,
-      featureTitle: 'Defter Limitine Ulaştınız',
-      onUpgrade: () {
-        Navigator.pop(context);
-        context.push(RouteNames.paywall);
-      },
-    );
-    return true;
-  }
-
-  return false;
 }
 
 void _createQuickNote(BuildContext context) async {
@@ -178,6 +166,8 @@ void _createQuickNote(BuildContext context) async {
   if (documentId != null) {
     container.invalidate(foldersProvider);
     container.invalidate(documentsProvider);
+    container.invalidate(totalDocumentCountProvider);
+    container.invalidate(notebookCountProvider);
   }
 
   // Doküman oluşturulduysa direkt editor'e git
@@ -207,6 +197,8 @@ void _createWhiteboard(BuildContext context) async {
   if (documentId != null) {
     container.invalidate(foldersProvider);
     container.invalidate(documentsProvider);
+    container.invalidate(totalDocumentCountProvider);
+    container.invalidate(notebookCountProvider);
   }
 
   // Doküman oluşturulduysa direkt editor'e git

@@ -76,6 +76,16 @@ class _FakeSubscriptionRepository implements SubscriptionRepository {
   Stream<Subscription> watchSubscription() {
     return Stream.value(subscriptionResult.fold((_) => Subscription.freeUser, (value) => value));
   }
+
+  @override
+  Future<Either<Failure, void>> loginUser(String userId) async {
+    return const Right(null);
+  }
+
+  @override
+  Future<Either<Failure, void>> logoutUser() async {
+    return const Right(null);
+  }
 }
 
 void main() {

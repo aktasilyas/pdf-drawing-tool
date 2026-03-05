@@ -53,3 +53,94 @@ final hasEntitlementProvider = FutureProvider.family<bool, String>((ref, entitle
   final either = await ref.watch(hasEntitlementUseCaseProvider).call(entitlementId);
   return either.fold((failure) => false, (hasIt) => hasIt);
 });
+
+/// Purchase operation state.
+class PurchaseState {
+  final bool isLoading;
+  final String? error;
+  final bool purchaseSuccess;
+
+  const PurchaseState({
+    this.isLoading = false,
+    this.error,
+    this.purchaseSuccess = false,
+  });
+
+  PurchaseState copyWith({
+    bool? isLoading,
+    String? error,
+    bool? purchaseSuccess,
+  }) {
+    return PurchaseState(
+      isLoading: isLoading ?? this.isLoading,
+      error: error,
+      purchaseSuccess: purchaseSuccess ?? this.purchaseSuccess,
+    );
+  }
+}
+
+/// Manages purchase and restore operations with loading/error state.
+class PurchaseNotifier extends StateNotifier<PurchaseState> {
+  final SubscriptionRepository _repo;
+
+  PurchaseNotifier(this._repo) : super(const PurchaseState());
+
+  /// Purchase a product by its store product ID.
+  Future<void> purchase(String productId) async {
+    state = state.copyWith(
+      isLoading: true,
+      error: null,
+      purchaseSuccess: false,
+    );
+
+    final either = await _repo.purchase(productId);
+    either.fold(
+      (failure) => state = state.copyWith(
+        isLoading: false,
+        error: _mapError(failure.message),
+      ),
+      (subscription) => state = state.copyWith(
+        isLoading: false,
+        purchaseSuccess: subscription.isPremium,
+      ),
+    );
+  }
+
+  /// Restore previous purchases.
+  Future<void> restore() async {
+    state = state.copyWith(
+      isLoading: true,
+      error: null,
+      purchaseSuccess: false,
+    );
+
+    final either = await _repo.restorePurchases();
+    either.fold(
+      (failure) => state = state.copyWith(
+        isLoading: false,
+        error: 'Satın almalar geri yüklenemedi. Lütfen tekrar deneyin.',
+      ),
+      (subscription) => state = state.copyWith(
+        isLoading: false,
+        purchaseSuccess: subscription.isPremium,
+      ),
+    );
+  }
+
+  String _mapError(String message) {
+    if (message.contains('StoreProblem')) {
+      return 'Mağaza bağlantısında sorun var. Lütfen tekrar deneyin.';
+    }
+    if (message.contains('Network')) {
+      return 'İnternet bağlantınızı kontrol edin.';
+    }
+    return 'Satın alma işlemi başarısız. Lütfen tekrar deneyin.';
+  }
+}
+
+/// Provider for managing purchase operations.
+final purchaseStateProvider =
+    StateNotifierProvider<PurchaseNotifier, PurchaseState>((ref) {
+  final repo = ref.watch(subscriptionRepositoryProvider);
+  return PurchaseNotifier(repo);
+});

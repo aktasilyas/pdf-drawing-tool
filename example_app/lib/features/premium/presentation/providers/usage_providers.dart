@@ -13,6 +13,18 @@ final notebookCountProvider = FutureProvider<int>((ref) async {
   );
 });
 
+/// Unified total document count (all types, including trash).
+/// Trash documents count towards the limit because users can restore them.
+/// Used by the unified feature gate to enforce the single document limit.
+final totalDocumentCountProvider = FutureProvider<int>((ref) async {
+  final repository = ref.watch(documentRepositoryProvider);
+  final result = await repository.getDocumentCount(includeTrash: true);
+  return result.fold(
+    (failure) => 0,
+    (count) => count,
+  );
+});
+
 /// Count of imported PDF documents (non-trash).
 /// Used by the feature gate to enforce PDF import limits.
 final pdfImportCountProvider = FutureProvider<int>((ref) async {

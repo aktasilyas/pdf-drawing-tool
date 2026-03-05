@@ -5,6 +5,7 @@ library;
 enum GatedFeature {
   createNotebook,
   importPdf,
+  createDocument, // Unified: total document count (any type)
   audioRecording,
   aiChat,
   exportWithoutWatermark,

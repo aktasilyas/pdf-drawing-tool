@@ -2,6 +2,7 @@
 library;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -49,6 +50,7 @@ class AuthController extends StateNotifier<AsyncValue<void>> {
         return 'Kayıt başarısız';
       }
 
+      await _syncRevenueCatUser(response.user!.id);
       logger.i('Sign up successful: ${response.user?.email}');
       return null; // Success
     } on AuthException catch (e) {
@@ -80,6 +82,7 @@ class AuthController extends StateNotifier<AsyncValue<void>> {
         return 'Giriş başarısız';
       }
 
+      await _syncRevenueCatUser(response.user!.id);
       logger.i('Sign in successful: ${response.user?.email}');
       return null; // Success
     } on AuthException catch (e) {
@@ -98,6 +101,7 @@ class AuthController extends StateNotifier<AsyncValue<void>> {
     state = const AsyncValue.loading();
     try {
       await _supabase.auth.signOut();
+      await _logoutRevenueCat();
       state = const AsyncValue.data(null);
       logger.i('Sign out successful');
     } catch (e) {
@@ -170,6 +174,7 @@ class AuthController extends StateNotifier<AsyncValue<void>> {
         return 'Google girişi başarısız';
       }
 
+      await _syncRevenueCatUser(response.user!.id);
       logger.i('Google sign in successful: ${response.user?.email}');
       return null; // Success
     } on AuthException catch (e) {
@@ -180,6 +185,27 @@ class AuthController extends StateNotifier<AsyncValue<void>> {
       state = AsyncValue.error(e, StackTrace.current);
       logger.e('Google sign in error: $e');
       return e.toString();
+    }
+  }
+
+  /// Associate Supabase user ID with RevenueCat for cross-device sync.
+  Future<void> _syncRevenueCatUser(String userId) async {
+    try {
+      await Purchases.logIn(userId);
+      logger.i('RevenueCat user synced: $userId');
+    } catch (e) {
+      logger.e('RevenueCat login sync failed: $e');
+      // Non-fatal — app continues without sync
+    }
+  }
+
+  /// Clear RevenueCat user association on logout.
+  Future<void> _logoutRevenueCat() async {
+    try {
+      await Purchases.logOut();
+      logger.i('RevenueCat user logged out');
+    } catch (e) {
+      logger.e('RevenueCat logout failed: $e');
     }
   }
 

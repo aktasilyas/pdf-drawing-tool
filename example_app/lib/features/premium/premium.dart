@@ -14,6 +14,7 @@ export 'domain/usecases/restore_purchases_usecase.dart';
 export 'domain/usecases/get_products_usecase.dart';
 
 // Data
+export 'data/constants/revenuecat_constants.dart';
 export 'data/datasources/revenue_cat_datasource.dart';
 export 'data/repositories/subscription_repository_impl.dart';
 
@@ -24,5 +25,6 @@ export 'presentation/providers/usage_providers.dart';
 export 'presentation/screens/paywall_screen.dart';
 export 'presentation/widgets/feature_gate.dart';
 export 'presentation/widgets/near_limit_banner.dart';
+export 'presentation/widgets/plan_card.dart';
 export 'presentation/widgets/premium_badge.dart';
 export 'presentation/widgets/upgrade_prompt_sheet.dart';

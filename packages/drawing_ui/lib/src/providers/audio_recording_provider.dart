@@ -1,4 +1,5 @@
 import 'package:drawing_core/drawing_core.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/audio_playback_service.dart';
@@ -60,6 +61,17 @@ void renameRecording(
 /// Maximum recording duration. `null` means unlimited (premium).
 /// Override this provider from the host app to set free-tier limits.
 final recordingMaxDurationProvider = Provider<Duration?>((ref) => null);
+
+/// Whether the user is allowed to start a new recording.
+/// Override from the host app to enforce total recording time limits.
+/// Defaults to `true` (no restriction).
+final canStartRecordingProvider = Provider<bool>((ref) => true);
+
+/// Callback invoked when a recording is blocked due to limit.
+/// Receives a [BuildContext] so the host app can show a dialog/sheet.
+/// Override from the host app to show an upgrade prompt.
+final onRecordingBlockedProvider =
+    Provider<void Function(BuildContext)?>((_) => null);
 
 /// Callback invoked when recording is auto-stopped due to time limit.
 /// Receives the saved file path and elapsed duration.

@@ -45,10 +45,14 @@ class DocumentRepositoryImpl implements DocumentRepository {
   @override
   Future<Either<Failure, int>> getDocumentCount({
     DocumentType? documentType,
+    bool includeTrash = false,
   }) async {
     try {
       final documents = await _localDatasource.getAllDocuments();
-      var filtered = documents.where((doc) => !doc.isInTrash);
+      Iterable<DocumentModel> filtered = documents;
+      if (!includeTrash) {
+        filtered = filtered.where((doc) => !doc.isInTrash);
+      }
       if (documentType != null) {
         filtered =
             filtered.where((doc) => doc.documentType == documentType.name);

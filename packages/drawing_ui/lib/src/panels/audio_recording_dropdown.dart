@@ -59,6 +59,23 @@ class AudioRecordingDropdown extends ConsumerWidget {
   }
 
   Future<void> _startRecording(BuildContext context, WidgetRef ref) async {
+    // Check total recording limit before starting
+    final canStart = ref.read(canStartRecordingProvider);
+    if (!canStart) {
+      final callback = ref.read(onRecordingBlockedProvider);
+      // Capture the navigator's overlay context before closing dropdown.
+      // This context survives dropdown disposal.
+      final overlayContext =
+          Navigator.of(context).overlay?.context ?? context;
+      onClose();
+      if (callback != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (overlayContext.mounted) callback(overlayContext);
+        });
+      }
+      return;
+    }
+
     final service = ref.read(audioRecordingServiceProvider);
 
     final hasPerms = await service.hasPermission();

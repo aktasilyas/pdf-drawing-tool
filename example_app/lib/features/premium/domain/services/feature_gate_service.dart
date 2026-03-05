@@ -12,6 +12,7 @@ class FeatureGateService {
   static const _freeLimits = {
     GatedFeature.createNotebook: 3,
     GatedFeature.importPdf: 3,
+    GatedFeature.createDocument: 3, // Unified total document limit
     GatedFeature.audioRecording: 5, // minutes
     GatedFeature.aiChat: 15, // messages/day
   };
@@ -20,6 +21,7 @@ class FeatureGateService {
   static const _premiumLimits = {
     GatedFeature.createNotebook: 999, // practically unlimited
     GatedFeature.importPdf: 999,
+    GatedFeature.createDocument: 999,
     GatedFeature.audioRecording: 999,
     GatedFeature.aiChat: 150,
   };
@@ -28,6 +30,7 @@ class FeatureGateService {
   static const _proLimits = {
     GatedFeature.createNotebook: 999,
     GatedFeature.importPdf: 999,
+    GatedFeature.createDocument: 999,
     GatedFeature.audioRecording: 999,
     GatedFeature.aiChat: 1000,
   };
@@ -110,11 +113,14 @@ class FeatureGateService {
   String _upgradeMessage(GatedFeature feature) {
     return switch (feature) {
       GatedFeature.createNotebook =>
-        "Ücretsiz planda en fazla 3 defter oluşturabilirsiniz. "
-            "Premium'a geçerek sınırsız defter oluşturun.",
+        "Ücretsiz planda en fazla 3 belge oluşturabilirsiniz. "
+            "Premium'a geçerek sınırsız belge oluşturun.",
       GatedFeature.importPdf =>
-        'Ücretsiz planda en fazla 3 PDF içe aktarabilirsiniz. '
-            'Premium ile sınırsız PDF kullanın.',
+        'Ücretsiz planda en fazla 3 belge oluşturabilirsiniz. '
+            'Premium ile sınırsız belge oluşturun.',
+      GatedFeature.createDocument =>
+        'Ücretsiz planda en fazla 3 belge oluşturabilirsiniz. '
+            "Premium'a geçerek sınırsız belge oluşturun.",
       GatedFeature.audioRecording =>
         'Ücretsiz planda ses kaydı 5 dakika ile sınırlıdır. '
             'Premium ile sınırsız kayıt yapın.',

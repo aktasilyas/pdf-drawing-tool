@@ -196,16 +196,36 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
   Widget _buildNearLimitBanner() {
     if (_nearLimitBannerDismissed) return const SizedBox.shrink();
 
-    final countAsync = ref.watch(notebookCountProvider);
+    final countAsync = ref.watch(totalDocumentCountProvider);
     final count = countAsync.valueOrNull ?? 0;
     final access = ref.watch(featureAccessProvider(
       FeatureAccessParams(
-        feature: GatedFeature.createNotebook,
+        feature: GatedFeature.createDocument,
         currentUsage: count,
       ),
     ));
 
-    if (!access.isAllowed || !access.isNearLimit) return const SizedBox.shrink();
+    // At limit: show trash hint if there are trashed documents
+    if (!access.isAllowed) {
+      final trashDocs = ref.watch(trashDocumentsProvider).valueOrNull ?? [];
+      if (trashDocs.isNotEmpty) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.xs,
+          ),
+          child: NearLimitBanner(
+            message: 'Çöp kutusundaki belgeler limite dahildir. '
+                'Yer açmak için kalıcı olarak silin veya',
+            onUpgrade: () => context.push(RouteNames.paywall),
+          ),
+        );
+      }
+      return const SizedBox.shrink();
+    }
+
+    // Near limit: show remaining count
+    if (!access.isNearLimit) return const SizedBox.shrink();
 
     final remaining = (access.maxUsage ?? 0) - (access.currentUsage ?? 0);
 
@@ -215,7 +235,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
         vertical: AppSpacing.xs,
       ),
       child: NearLimitBanner(
-        message: '$remaining defter hakkınız kaldı',
+        message: '$remaining belge hakkınız kaldı',
         onUpgrade: () => context.push(RouteNames.paywall),
         onDismiss: () => setState(() => _nearLimitBannerDismissed = true),
       ),
