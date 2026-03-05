@@ -43,6 +43,29 @@ class DocumentRepositoryImpl implements DocumentRepository {
   }
 
   @override
+  Future<Either<Failure, int>> getDocumentCount({
+    DocumentType? documentType,
+    bool includeTrash = false,
+  }) async {
+    try {
+      final documents = await _localDatasource.getAllDocuments();
+      Iterable<DocumentModel> filtered = documents;
+      if (!includeTrash) {
+        filtered = filtered.where((doc) => !doc.isInTrash);
+      }
+      if (documentType != null) {
+        filtered =
+            filtered.where((doc) => doc.documentType == documentType.name);
+      }
+      return Right(filtered.length);
+    } on CacheException catch (e) {
+      return Left(CacheFailure(e.message));
+    } catch (e) {
+      return Left(CacheFailure('Failed to get document count: $e'));
+    }
+  }
+
+  @override
   Future<Either<Failure, DocumentInfo>> getDocument(String id) async {
     try {
       final document = await _localDatasource.getDocument(id);

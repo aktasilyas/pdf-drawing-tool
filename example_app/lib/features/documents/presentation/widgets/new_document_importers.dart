@@ -8,10 +8,13 @@ import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/routing/route_names.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
+import 'package:example_app/features/premium/premium.dart';
 import 'dart:ui' as ui;
 
 /// PDF içe aktarma işlemini yönetir
 Future<void> importPdf(BuildContext context) async {
+  // Unified document limit is already checked in showNewDocumentDropdown.
+
   // 1. PDF dosyası seç (withData: false - RAM'e yüklemeden sadece yol al)
   final result = await FilePicker.platform.pickFiles(
     type: FileType.custom,
@@ -124,6 +127,9 @@ Future<void> importPdf(BuildContext context) async {
     if (documentId != null) {
       container.invalidate(foldersProvider);
       container.invalidate(documentsProvider);
+      container.invalidate(totalDocumentCountProvider);
+      container.invalidate(pdfImportCountProvider);
+      container.invalidate(notebookCountProvider);
     }
     // Editor'e git
     if (documentId != null && context.mounted) {
@@ -265,6 +271,9 @@ Future<void> importImage(BuildContext context) async {
     if (documentId != null) {
       container.invalidate(foldersProvider);
       container.invalidate(documentsProvider);
+      container.invalidate(totalDocumentCountProvider);
+      container.invalidate(pdfImportCountProvider);
+      container.invalidate(notebookCountProvider);
     }
 
     // Loading kapat

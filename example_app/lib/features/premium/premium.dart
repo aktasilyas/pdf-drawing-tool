@@ -2,9 +2,11 @@
 // Domain
 export 'domain/entities/subscription.dart';
 export 'domain/entities/entitlement.dart';
+export 'domain/entities/feature_gate.dart';
 export 'domain/entities/limits.dart';
 export 'domain/entities/product.dart';
 export 'domain/repositories/subscription_repository.dart';
+export 'domain/services/feature_gate_service.dart';
 export 'domain/usecases/check_subscription_usecase.dart';
 export 'domain/usecases/has_entitlement_usecase.dart';
 export 'domain/usecases/purchase_usecase.dart';
@@ -12,11 +14,17 @@ export 'domain/usecases/restore_purchases_usecase.dart';
 export 'domain/usecases/get_products_usecase.dart';
 
 // Data
+export 'data/constants/revenuecat_constants.dart';
 export 'data/datasources/revenue_cat_datasource.dart';
 export 'data/repositories/subscription_repository_impl.dart';
 
 // Presentation
+export 'presentation/providers/feature_gate_provider.dart';
 export 'presentation/providers/subscription_provider.dart';
+export 'presentation/providers/usage_providers.dart';
 export 'presentation/screens/paywall_screen.dart';
 export 'presentation/widgets/feature_gate.dart';
+export 'presentation/widgets/near_limit_banner.dart';
+export 'presentation/widgets/plan_card.dart';
 export 'presentation/widgets/premium_badge.dart';
+export 'presentation/widgets/upgrade_prompt_sheet.dart';

@@ -7,6 +7,7 @@ import 'package:example_app/core/routing/route_names.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/new_document_importers.dart';
+import 'package:example_app/features/premium/premium.dart';
 
 /// Dropdown menü item'ları
 enum NewDocumentOption {
@@ -17,8 +18,36 @@ enum NewDocumentOption {
   importImage, // 🖼️ Resim İçe Aktar - dosya seç, direkt aç
 }
 
-/// Yeni doküman dropdown menüsünü gösterir
-void showNewDocumentDropdown(BuildContext context, GlobalKey buttonKey) {
+/// Yeni doküman dropdown menüsünü gösterir.
+/// Eğer toplam belge limiti aşıldıysa dropdown yerine upgrade sheet gösterir.
+void showNewDocumentDropdown(BuildContext context, GlobalKey buttonKey) async {
+  // Unified total document limit check
+  final container = ProviderScope.containerOf(context);
+  final totalCount = await container.read(totalDocumentCountProvider.future);
+  final access = container.read(featureAccessProvider(
+    FeatureAccessParams(
+      feature: GatedFeature.createDocument,
+      currentUsage: totalCount,
+    ),
+  ));
+
+  if (!context.mounted) return;
+
+  // If limit reached, show general upgrade sheet instead of dropdown
+  if (!access.isAllowed) {
+    await UpgradePromptSheet.show(
+      context,
+      access: access,
+      featureIcon: Icons.note_add_outlined,
+      featureTitle: 'Belge Limitine Ulaştınız',
+      onUpgrade: () {
+        Navigator.pop(context);
+        GoRouter.of(context).push(RouteNames.paywall);
+      },
+    );
+    return;
+  }
+
   final RenderBox button = buttonKey.currentContext!.findRenderObject() as RenderBox;
   final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
   final Offset position = button.localToGlobal(Offset.zero, ancestor: overlay);
@@ -98,31 +127,21 @@ PopupMenuItem<NewDocumentOption> _buildMenuItem(
 }
 
 void _handleNewDocumentOption(BuildContext context, NewDocumentOption option) async {
+  // Unified total document limit already checked in showNewDocumentDropdown.
+  // If dropdown is shown, user is within limit.
+  if (!context.mounted) return;
+
   switch (option) {
     case NewDocumentOption.notebook:
-      // Template Selection Screen'e yönlendir (Not Defteri)
-      if (context.mounted) {
-        context.push(RouteNames.templateSelection);
-      }
-      break;
-
+      context.push(RouteNames.templateSelection);
     case NewDocumentOption.whiteboard:
-      // Beyaz tahta - direkt aç (infinite canvas + blank background)
       _createWhiteboard(context);
-      break;
-
     case NewDocumentOption.quickNote:
-      // Hızlı not oluştur
       _createQuickNote(context);
-      break;
     case NewDocumentOption.importPdf:
-      // PDF içe aktar
       importPdf(context);
-      break;
     case NewDocumentOption.importImage:
-      // Resim içe aktar
       importImage(context);
-      break;
   }
 }
 
@@ -147,6 +166,8 @@ void _createQuickNote(BuildContext context) async {
   if (documentId != null) {
     container.invalidate(foldersProvider);
     container.invalidate(documentsProvider);
+    container.invalidate(totalDocumentCountProvider);
+    container.invalidate(notebookCountProvider);
   }
 
   // Doküman oluşturulduysa direkt editor'e git
@@ -176,6 +197,8 @@ void _createWhiteboard(BuildContext context) async {
   if (documentId != null) {
     container.invalidate(foldersProvider);
     container.invalidate(documentsProvider);
+    container.invalidate(totalDocumentCountProvider);
+    container.invalidate(notebookCountProvider);
   }
 
   // Doküman oluşturulduysa direkt editor'e git

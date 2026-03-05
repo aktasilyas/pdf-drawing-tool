@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/core/routing/route_names.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
 import 'package:example_app/features/documents/domain/entities/trashed_page.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/menu_tile.dart';
 import 'package:example_app/features/documents/presentation/widgets/move_to_folder_dialog.dart';
+import 'package:example_app/features/premium/premium.dart';
 
 /// Shows the appropriate document menu based on whether it's in trash.
 void showDocumentMenu(
@@ -131,6 +134,30 @@ void _showNormalDocumentMenu(
             label: 'Çoğalt',
             onTap: () async {
               Navigator.pop(ctx);
+              // Check unified document limit before duplicating
+              final totalCount = await ref.read(
+                totalDocumentCountProvider.future,
+              );
+              final access = ref.read(featureAccessProvider(
+                FeatureAccessParams(
+                  feature: GatedFeature.createDocument,
+                  currentUsage: totalCount,
+                ),
+              ));
+              if (!access.isAllowed) {
+                if (!context.mounted) return;
+                await UpgradePromptSheet.show(
+                  context,
+                  access: access,
+                  featureIcon: Icons.note_add_outlined,
+                  featureTitle: 'Belge Limitine Ulaştınız',
+                  onUpgrade: () {
+                    Navigator.pop(context);
+                    GoRouter.of(context).push(RouteNames.paywall);
+                  },
+                );
+                return;
+              }
               final controller =
                   ref.read(documentsControllerProvider.notifier);
               final result =

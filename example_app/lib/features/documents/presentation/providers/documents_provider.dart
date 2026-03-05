@@ -12,6 +12,7 @@ import 'package:example_app/features/documents/domain/entities/view_mode.dart';
 import 'package:example_app/features/documents/domain/entities/sort_option.dart';
 import 'package:example_app/features/documents/domain/repositories/document_repository.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
+import 'package:example_app/features/premium/premium.dart';
 
 // Repository provider using GetIt
 final documentRepositoryProvider = Provider<DocumentRepository>((ref) {
@@ -457,21 +458,30 @@ class DocumentsController extends StateNotifier<AsyncValue<void>> {
     _ref.invalidate(recentDocumentsProvider);
     _ref.invalidate(trashDocumentsProvider);
     _ref.invalidate(foldersProvider); // Folder counts need refresh too!
+    _ref.invalidate(totalDocumentCountProvider);
+    _ref.invalidate(notebookCountProvider);
   }
 
-  /// Invalidate only specific providers based on the operation
+  /// Invalidate only specific providers based on the operation.
+  /// Set [documentCount] to true when the total document count changes
+  /// (create, duplicate, permanent delete — NOT move to trash).
   void _invalidateSpecific({
     bool documents = false,
     bool favorites = false,
     bool recent = false,
     bool trash = false,
     bool folders = false,
+    bool documentCount = false,
   }) {
     if (documents) _ref.invalidate(documentsProvider);
     if (favorites) _ref.invalidate(favoriteDocumentsProvider);
     if (recent) _ref.invalidate(recentDocumentsProvider);
     if (trash) _ref.invalidate(trashDocumentsProvider);
     if (folders) _ref.invalidate(foldersProvider);
+    if (documentCount) {
+      _ref.invalidate(totalDocumentCountProvider);
+      _ref.invalidate(notebookCountProvider);
+    }
   }
 
   // Bulk move to trash (soft delete)
@@ -505,8 +515,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>> {
           (_) {},
         );
       }
-      // Only trash needs refresh for permanent delete
-      _invalidateSpecific(trash: true);
+      _invalidateSpecific(trash: true, documentCount: true);
       state = const AsyncData(null);
     } catch (e) {
       state = AsyncError(e, StackTrace.current);
@@ -590,8 +599,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>> {
           return false;
         },
         (_) {
-          // Only trash needs refresh for permanent delete
-          _invalidateSpecific(trash: true);
+          _invalidateSpecific(trash: true, documentCount: true);
           return true;
         },
       );

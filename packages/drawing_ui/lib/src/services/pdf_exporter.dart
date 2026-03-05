@@ -79,6 +79,30 @@ class PDFExporter {
       if (!layer.isVisible) continue;
       await _renderLayer(g, doc, layer, pdfW, pdfH, options);
     }
+
+    if (options.addWatermark) {
+      _drawWatermark(g, doc, pdfW, pdfH);
+    }
+  }
+
+  /// Draws a small, semi-transparent "ElyaNotes" watermark at the
+  /// bottom-right corner of the page. Subtle enough not to obstruct content.
+  void _drawWatermark(PdfGraphics g, PdfDocument doc, double w, double h) {
+    const text = 'ElyaNotes';
+    const fontSize = 10.0;
+    const margin = 12.0;
+
+    g.saveContext();
+    g.setGraphicState(PdfGraphicState(opacity: 0.3));
+    g.setColor(PdfColor.fromInt(0xFF9E9E9E)); // grey
+    g.drawString(
+      PdfFont.helvetica(doc),
+      fontSize,
+      text,
+      w - margin - (fontSize * text.length * 0.55),
+      margin,
+    );
+    g.restoreContext();
   }
 
   Future<void> _renderLayer(

@@ -32,4 +32,12 @@ class RevenueCatDatasource {
     );
     return _customerInfoController!.stream;
   }
+
+  Future<void> loginUser(String userId) async {
+    await Purchases.logIn(userId);
+  }
+
+  Future<void> logoutUser() async {
+    await Purchases.logOut();
+  }
 }

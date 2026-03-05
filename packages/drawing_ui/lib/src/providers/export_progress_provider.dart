@@ -132,3 +132,7 @@ final exportProgressProvider =
     StateNotifierProvider<ExportProgressNotifier, ExportProgressState>(
   (ref) => ExportProgressNotifier(),
 );
+
+/// Whether exports should include a watermark (free-tier).
+/// Override from the host app to control based on subscription tier.
+final exportWatermarkProvider = Provider<bool>((ref) => false);

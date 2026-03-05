@@ -10,6 +10,7 @@ import 'package:example_app/features/documents/domain/entities/sort_option.dart'
 import 'package:example_app/features/documents/domain/entities/view_mode.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/selection_mode_header.dart';
+import 'package:example_app/features/premium/premium.dart';
 import 'sort_popup_button.dart';
 
 class DocumentsHeader extends ConsumerWidget {
@@ -70,14 +71,23 @@ class DocumentsHeader extends ConsumerWidget {
     final sortDirection = ref.watch(sortDirectionProvider);
     final pinFavorites = ref.watch(pinFavoritesProvider);
 
+    // Watch total document count for lock icon on "Yeni" button
+    final totalCount = ref.watch(totalDocumentCountProvider).valueOrNull ?? 0;
+    final docAccess = ref.watch(featureAccessProvider(
+      FeatureAccessParams(
+        feature: GatedFeature.createDocument,
+        currentUsage: totalCount,
+      ),
+    ));
+    final isLocked = !docAccess.isAllowed;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         if (!isTrashSection)
-          _CircleIconButton(
+          _NewDocumentButton(
             key: newButtonKey,
-            icon: Icons.add,
-            tooltip: 'Yeni Belge',
+            isLocked: isLocked,
             onPressed: onNewPressed,
           ),
         if (!isTrashSection) const SizedBox(width: AppSpacing.sm),
@@ -157,6 +167,71 @@ class DocumentsHeader extends ConsumerWidget {
   }
 }
 
+/// "Yeni +" button with lock icon when document limit is reached.
+class _NewDocumentButton extends StatelessWidget {
+  final bool isLocked;
+  final VoidCallback? onPressed;
+
+  const _NewDocumentButton({
+    super.key,
+    required this.isLocked,
+    this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final iconColor = isDark ? AppColors.primaryDarkMode : AppColors.primary;
+    final bgColor = isDark
+        ? AppColors.surfaceContainerHighDark
+        : AppColors.surfaceContainerHighLight;
+    final textColor = isDark
+        ? AppColors.textPrimaryDark
+        : AppColors.textPrimaryLight;
+
+    return Tooltip(
+      message: isLocked ? 'Belge limiti doldu' : 'Yeni Belge',
+      child: Material(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(18),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(18),
+          onTap: onPressed,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Yeni',
+                  style: AppTypography.labelMedium.copyWith(color: textColor),
+                ),
+                const SizedBox(width: AppSpacing.xs),
+                Icon(
+                  isLocked ? Icons.lock_outline : Icons.add,
+                  size: 18,
+                  color: isLocked
+                      ? Theme.of(context).colorScheme.onSurfaceVariant
+                      : iconColor,
+                ),
+                const SizedBox(width: AppSpacing.xxs),
+                Icon(
+                  Icons.keyboard_arrow_down,
+                  size: 16,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// Circle-background icon button matching sidebar tile style.
 class _CircleIconButton extends StatelessWidget {
   final IconData icon;
@@ -164,7 +239,6 @@ class _CircleIconButton extends StatelessWidget {
   final VoidCallback? onPressed;
 
   const _CircleIconButton({
-    super.key,
     required this.icon,
     required this.tooltip,
     this.onPressed,

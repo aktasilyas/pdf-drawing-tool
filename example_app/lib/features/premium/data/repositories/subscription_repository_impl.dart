@@ -1,6 +1,8 @@
 // RevenueCat-backed implementation of subscription repository.
 import 'package:dartz/dartz.dart';
+import 'package:flutter/services.dart';
 import 'package:example_app/core/errors/failures.dart';
+import 'package:example_app/features/premium/data/constants/revenuecat_constants.dart';
 import 'package:example_app/features/premium/domain/entities/entitlement.dart';
 import 'package:example_app/features/premium/domain/entities/product.dart';
 import 'package:example_app/features/premium/domain/entities/subscription.dart';
@@ -75,6 +77,14 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
       }
       final info = await _datasource.purchase(package);
       return Right(_mapCustomerInfo(info));
+    } on PlatformException catch (e) {
+      // User cancelled purchase — not an error.
+      if (e.code == 'PURCHASE_CANCELLED' ||
+          e.message?.contains('userCancelled') == true) {
+        final info = await _datasource.getCustomerInfo();
+        return Right(_mapCustomerInfo(info));
+      }
+      return Left(PremiumFailure.purchaseFailed());
     } catch (_) {
       return Left(PremiumFailure.purchaseFailed());
     }
@@ -100,6 +110,26 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
     return const Right(null);
   }
 
+  @override
+  Future<Either<Failure, void>> loginUser(String userId) async {
+    try {
+      await _datasource.loginUser(userId);
+      return const Right(null);
+    } catch (_) {
+      return const Left(PremiumFailure('RevenueCat kullanıcı eşleştirmesi başarısız'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> logoutUser() async {
+    try {
+      await _datasource.logoutUser();
+      return const Right(null);
+    } catch (_) {
+      return const Left(PremiumFailure('RevenueCat çıkışı başarısız'));
+    }
+  }
+
   Future<Package?> _findPackage(String productId) async {
     final offerings = await _datasource.getOfferings();
     final packages = offerings.current?.availablePackages ?? [];
@@ -112,18 +142,27 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
   }
 
   Subscription _mapCustomerInfo(CustomerInfo info) {
-    final activeEntitlements =
-        info.entitlements.all.values.where((e) => e.isActive).toList();
-    final entitlement = activeEntitlements.isNotEmpty
-        ? activeEntitlements.first
-        : null;
+    final active = info.entitlements.active;
 
-    final isActive = activeEntitlements.isNotEmpty;
-    final tier = isActive ? SubscriptionTier.premium : SubscriptionTier.free;
+    // Pro entitlement → premiumPlus tier.
+    // Premium entitlement → premium tier.
+    // No active entitlement → free tier.
+    SubscriptionTier tier;
+    EntitlementInfo? entitlement;
+
+    if (active.containsKey(RevenueCatConstants.entitlementPro)) {
+      tier = SubscriptionTier.premiumPlus;
+      entitlement = active[RevenueCatConstants.entitlementPro];
+    } else if (active.containsKey(RevenueCatConstants.entitlementPremium)) {
+      tier = SubscriptionTier.premium;
+      entitlement = active[RevenueCatConstants.entitlementPremium];
+    } else {
+      tier = SubscriptionTier.free;
+    }
 
     return Subscription(
       tier: tier,
-      isActive: isActive,
+      isActive: tier != SubscriptionTier.free,
       expiresAt: _parseDateTime(entitlement?.expirationDate),
       productId: entitlement?.productIdentifier,
       willRenew: entitlement?.willRenew ?? false,

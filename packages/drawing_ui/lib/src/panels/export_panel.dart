@@ -58,7 +58,8 @@ class ExportPanel extends ConsumerWidget {
     onClose();
     final document = ref.read(documentProvider);
     final notifier = ref.read(exportProgressProvider.notifier);
-    performPDFExport(notifier, document);
+    final watermark = ref.read(exportWatermarkProvider);
+    performPDFExport(notifier, document, addWatermark: watermark);
   }
 
   /// Captures canvas screenshot and saves as PNG.
@@ -78,12 +79,14 @@ Future<void> performPDFExport(
   ExportProgressNotifier progress,
   DrawingDocument document, {
   bool isInfiniteCanvas = false,
+  bool addWatermark = false,
 }) {
   return performPagesPDFExport(
     progress,
     pages: document.pages,
     title: document.title,
     isInfiniteCanvas: isInfiniteCanvas,
+    addWatermark: addWatermark,
   );
 }
 
@@ -96,6 +99,7 @@ Future<void> performPagesPDFExport(
   required List<Page> pages,
   required String title,
   bool isInfiniteCanvas = false,
+  bool addWatermark = false,
 }) async {
   progress.start(pages.length);
 
@@ -104,7 +108,10 @@ Future<void> performPagesPDFExport(
     final result = await exporter.exportPages(
       pages: pages,
       metadata: PDFDocumentMetadata(title: title),
-      options: PDFExportOptions(isInfiniteCanvas: isInfiniteCanvas),
+      options: PDFExportOptions(
+        isInfiniteCanvas: isInfiniteCanvas,
+        addWatermark: addWatermark,
+      ),
       onProgress: progress.updateProgress,
       isCancelled: () => progress.isCancelRequested,
     );

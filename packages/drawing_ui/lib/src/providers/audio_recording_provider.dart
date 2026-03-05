@@ -1,9 +1,12 @@
 import 'package:drawing_core/drawing_core.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../services/audio_playback_service.dart';
 import '../services/audio_recording_service.dart';
 import 'document_provider.dart';
+import 'page_provider.dart';
+import 'sidebar_filter_provider.dart';
 
 // =============================================================================
 // DOCUMENT-LEVEL RECORDING PROVIDERS (existing)
@@ -55,10 +58,61 @@ void renameRecording(
 // SERVICE SINGLETONS
 // =============================================================================
 
+/// Maximum recording duration. `null` means unlimited (premium).
+/// Override this provider from the host app to set free-tier limits.
+final recordingMaxDurationProvider = Provider<Duration?>((ref) => null);
+
+/// Whether the user is allowed to start a new recording.
+/// Override from the host app to enforce total recording time limits.
+/// Defaults to `true` (no restriction).
+final canStartRecordingProvider = Provider<bool>((ref) => true);
+
+/// Callback invoked when a recording is blocked due to limit.
+/// Receives a [BuildContext] so the host app can show a dialog/sheet.
+/// Override from the host app to show an upgrade prompt.
+final onRecordingBlockedProvider =
+    Provider<void Function(BuildContext)?>((_) => null);
+
+/// Callback invoked when recording is auto-stopped due to time limit.
+/// Receives the saved file path and elapsed duration.
+/// Override from the host app to save the recording and show an upgrade prompt.
+final onRecordingLimitReachedProvider =
+    Provider<void Function(String? filePath, Duration elapsed)?>(
+        (ref) => null);
+
 /// Audio recording service singleton with auto-cleanup.
+/// Respects [recordingMaxDurationProvider] for free-tier time limits.
+/// When auto-stopped, saves the recording to the document and opens sidebar.
 final audioRecordingServiceProvider =
     Provider.autoDispose<AudioRecordingService>((ref) {
-  final service = AudioRecordingService();
+  final maxDuration = ref.watch(recordingMaxDurationProvider);
+  final onLimitReached = ref.watch(onRecordingLimitReachedProvider);
+  final service = AudioRecordingService(
+    maxDuration: maxDuration,
+    onMaxDurationReached: (filePath, elapsed) {
+      // Save the recording to the document (same as manual stop).
+      if (filePath != null) {
+        final docNotifier = ref.read(documentProvider.notifier);
+        final pageIndex = ref.read(currentPageIndexProvider);
+        final count = ref.read(audioRecordingCountProvider);
+
+        final recording = AudioRecording.create(
+          title: 'Kayit ${count + 1}',
+          pageIndex: pageIndex,
+        ).copyWith(filePath: filePath, duration: elapsed);
+
+        addRecording(docNotifier, recording);
+
+        // Open sidebar with recordings tab.
+        ref.read(sidebarFilterProvider.notifier).state =
+            SidebarFilter.recordings;
+        ref.read(sidebarOpenProvider.notifier).state = true;
+      }
+
+      // Notify the host app (e.g. to show upgrade prompt).
+      onLimitReached?.call(filePath, elapsed);
+    },
+  );
   ref.onDispose(service.dispose);
   return service;
 });

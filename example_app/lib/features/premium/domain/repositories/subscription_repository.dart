@@ -15,4 +15,10 @@ abstract class SubscriptionRepository {
   Future<Either<Failure, Subscription>> restorePurchases();
   Stream<Subscription> watchSubscription();
   Future<Either<Failure, String?>> getManagementUrl();
+
+  /// Associate a Supabase user ID with RevenueCat for cross-device sync.
+  Future<Either<Failure, void>> loginUser(String userId);
+
+  /// Clear the RevenueCat user association on logout.
+  Future<Either<Failure, void>> logoutUser();
 }
