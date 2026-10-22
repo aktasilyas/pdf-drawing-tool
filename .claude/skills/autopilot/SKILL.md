@@ -1,7 +1,6 @@
 ---
 name: autopilot
 description: Unattended backlog runner for scheduled routines - tends open agent PRs, then picks the next ready GitHub issue and ships it, and logs the run. Invoke as /autopilot.
-disable-model-invocation: true
 ---
 # Autopilot
 
