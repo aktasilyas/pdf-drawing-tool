@@ -1,132 +1,76 @@
-# CLAUDE.md
+# Elyanotes
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Flutter note-taking app (GoodNotes/Flexcil class) for tablets first, phones second.
+Melos monorepo: `packages/drawing_core` (pure Dart models, tools, history) →
+`packages/drawing_ui` (canvas, painters, toolbar) → `example_app` (the product).
 
-## Project Overview
+Talk to the user in Turkish. Code, comments, commits and docs in English.
 
-Elyanotes is a professional Flutter drawing/note-taking application (GoodNotes/Notability quality) structured as a Melos monorepo. It consists of two parts:
-1. **pub.dev library** (`packages/`) - Drawing engine (drawing_core + drawing_ui)
-2. **Application** (`example_app/`) - Full-featured note-taking app
+## Current goal
+Ship v1.0 to the stores. Status and priorities live in GitHub Issues and the
+milestones in `docs/ROADMAP.md` — not in markdown status files. Do not create
+new STATUS/HANDOFF/PHASE documents; old ones are in `docs/archive/` and are
+historical only (do not read them unless asked).
 
-**Current Phase:** Design System Implementation. Phases 0-9 complete. Phase 10 (Drawing/Editor Screen) is next.
+v1.0 scope: ink engine, notebooks + covers, PDF import/annotate/export, local storage.
+Frozen behind flags until after v1.0: AI chat, cloud sync, premium, audio recording.
 
-## Build & Development Commands
-
+## Commands
 ```bash
-# Monorepo-wide (from workspace root)
-melos analyze          # Lint all packages
-melos test             # Test all packages
-melos format           # Format all packages
-melos clean            # Clean all packages
-melos build:runner     # Run build_runner (code generation) in all packages
-
-# Per-package (from example_app/)
-flutter run            # Run the app
-flutter analyze        # Lint
-flutter test           # Run all tests
-flutter test test/path/to/specific_test.dart  # Single test file
-dart format lib/       # Format
-dart run build_runner build --delete-conflicting-outputs  # Code generation
+./scripts/check.sh pub          # pub get in dependency order (once per clone / pubspec change)
+./scripts/check.sh analyze      # dart analyze all packages (what CI runs)
+./scripts/check.sh test         # dart test / flutter test per package (what CI runs)
+cd example_app && flutter run   # needs example_app/.env (SUPABASE_URL, SUPABASE_ANON_KEY)
+flutter test path/to/file_test.dart                 # single test
+dart run build_runner build --delete-conflicting-outputs   # example_app codegen
 ```
 
-**Environment:** Requires `.env` file in `example_app/` with `SUPABASE_URL` and `SUPABASE_ANON_KEY`.
+## Workflow (every task)
+1. Non-trivial work starts from a GitHub issue with acceptance criteria.
+2. Plan first for anything touching more than ~3 files (`writing-plans` skill);
+   plans go in `docs/plans/`, specs in `docs/specs/`.
+3. TDD for logic (`test-driven-development` skill). UI changes need a widget test
+   or golden test.
+4. Before saying "done": run analyze + the affected tests and show the output
+   (`verification-before-completion`). A Stop hook enforces this.
+5. One branch + one PR per issue: `feat/…`, `fix/…`, `refactor/…`, `chore/…`.
+   Commits: `type(scope): message`. Never push to `main` directly.
 
-## Architecture
+Subagents: `architect` (technical design, plans), `ui-designer` (visual specs
+and reviews of rendered goldens), `implementer` (scoped coding),
+`reviewer` (final diff before a PR).
 
-### Package Dependency Graph
+## Design
+Visual direction and decisions: `docs/design/BRIEF.md` (owner-approved; do not
+change without asking). Any UI work follows the `design-loop` skill: spec from
+`ui-designer` → golden test → render → review the PNGs → fix. Quality bar:
+`flutter-ui-craft` skill. Tokens and theming: `design-tokens` skill.
 
-```
-example_app (Application)
-    └── drawing_toolkit (Umbrella - stable public API)
-            ├── drawing_core (Pure Dart, no Flutter - models, tools, history)
-            └── drawing_ui (Flutter widgets, painters - depends on drawing_core)
-```
+## Architecture rules
+- Feature-first Clean Architecture in `example_app/lib/features/<f>/{data,domain,presentation}`.
+  `presentation → domain ← data`. Cross-feature access only via domain interfaces.
+- Riverpod for state, `Either<Failure, T>` (dartz) in repositories/use cases,
+  GetIt + Injectable for DI, Drift for local DB, GoRouter for navigation.
+- `drawing_core` never imports Flutter. `drawing_ui` never imports `example_app`.
+- Import through barrel files (`.../index.dart`, `feature.dart`); no relative `../../` imports.
 
-### Clean Architecture (Feature-First)
+## Code constraints
+- Max ~300 lines per file. Known offenders to split when touched:
+  `drawing_canvas_gesture_handlers.dart` (2.2k), `drawing_canvas.dart` (1.5k).
+- No hardcoded colors or spacing in widgets: colors from theme tokens, spacing
+  from `AppSpacing` (4dp grid). Do not add new `isDark ? … : …` ternaries —
+  the theme is being migrated to a `ThemeExtension` (see `design-tokens` skill).
+- Touch targets ≥ 48dp. No `print()` (use `logger`). No business logic in widgets.
+- Entities immutable. Tests use `mocktail`.
 
-Each feature under `example_app/lib/features/` follows:
+## Ink / canvas performance (see `ink-engine` skill before touching canvas code)
+- No `setState` in pointer handlers; no allocation in `paint()`;
+  never `shouldRepaint => true`.
+- Committed strokes are cached (raster/picture); only the active stroke is drawn as vectors.
+- Hit tests use bounding-box pre-filter. History commands are batched per stroke.
 
-```
-feature_name/
-├── data/          # Datasources, models, repository implementations
-├── domain/        # Entities, abstract repository interfaces, use cases
-└── presentation/  # Providers (Riverpod), screens, widgets
-```
-
-**Dependency rules:**
-- `presentation → domain` and `data → domain` are allowed
-- `domain → presentation` and `domain → data` are forbidden
-- Cross-feature imports only via domain layer (entities/repository interfaces)
-- All layers can import from `core/`
-
-### Core Module (`example_app/lib/core/`)
-
-- `theme/tokens/` - Design tokens: AppColors, AppSpacing, AppRadius, AppTypography, AppIconSizes, AppShadows, AppDurations
-- `theme/app_theme.dart` - ThemeData for light and dark modes
-- `widgets/` - Reusable component library (buttons, inputs, feedback, layout, navigation)
-- `utils/responsive.dart` - Breakpoints and device type detection
-- `routing/` - GoRouter configuration
-- `di/` - GetIt + Injectable dependency injection setup
-- `errors/` - Failure/Exception classes for Either pattern
-
-### Key Technical Patterns
-
-- **State management:** Riverpod (`flutter_riverpod`). Providers suffixed with `Provider`.
-- **Error handling:** `Either<Failure, T>` from dartz throughout repositories and use cases.
-- **DI:** GetIt + Injectable. Repositories annotated with `@Injectable(as: RepositoryInterface)`.
-- **Database:** Drift (SQLite) for local storage.
-- **Backend:** Supabase for auth and cloud sync.
-- **Responsive:** Phone (<600px) uses BottomNavigationBar; Tablet (>=600px) uses NavigationRail. Modals render as bottom sheets on phone, center dialogs on tablet.
-
-## Critical Rules
-
-**Read before any implementation:** `docs/DESIGN_SYSTEM_MASTER_PLAN.md` and `.cursorrules`.
-
-**Interface contracts** between features are defined in `CONTRACTS.md` — architect approval required to change them.
-
-### Code Constraints
-
-- **Max 300 lines per file.** Split if exceeding.
-- **No hardcoded colors** — use `AppColors.*` or `Theme.of(context).colorScheme.*`
-- **No hardcoded spacing** — use `AppSpacing.*` (4dp grid: xxs=2, xs=4, sm=8, md=12, lg=16, xl=24, xxl=32, xxxl=48)
-- **Minimum 48x48dp touch targets** — non-negotiable
-- **No `print()` statements** — use `logger`
-- **No business logic in widgets** — delegate to providers
-- **Entities must be immutable** — use `final` fields
-
-### Import Conventions
-
-```dart
-// Use barrel exports, not direct file paths
-import 'package:example_app/core/theme/index.dart';    // ✅
-import 'package:example_app/core/widgets/index.dart';   // ✅
-import 'package:example_app/features/auth/auth.dart';   // ✅
-
-// Don't use relative imports or direct src paths
-import '../../../core/database/app_database.dart';                    // ❌
-import 'package:example_app/core/theme/tokens/app_colors.dart';      // ❌
-import 'package:example_app/features/auth/data/models/user_model.dart'; // ❌
-```
-
-### Drawing Canvas Performance Rules
-
-- No `setState` in pointer handlers — use `ChangeNotifier`/`ValueNotifier`
-- No allocation in `paint()`, no `shouldRepaint => true`
-- Use `RepaintBoundary` isolation
-- Cache Paint/Path objects
-- Bounding box pre-filter for hit tests
-- Command batching (not one command per pointer move)
-
-## Testing
-
-Every component requires: widget test (renders), interaction test (taps/focus), state test (loading/disabled/error), and theme test (light + dark). Test both phone and tablet sizes.
-
-Mock library: `mocktail`.
-
-## Git Conventions
-
-**Branch naming:** `feature/<name>`, `fix/<description>`, `refactor/<scope>`
-
-**Commit format:** `type(scope): message` — e.g., `feat(widgets): add AppButton with 5 variants`
-
-**Pre-commit:** Run `flutter analyze` and `flutter test` before committing.
+## Environment notes
+- The owner develops on Windows (WSL paths like `/mnt/c/...`). Cloud sessions run
+  Ubuntu with Flutter installed by `scripts/cloud-setup.sh`.
+- No `ios/` folder yet; Android is the first release target.
+- `flutter_pen_toolbar` is a git dependency (github.com/aktasilyas/flutter_pen_toolbar).
