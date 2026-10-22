@@ -21,7 +21,3 @@ flutter --version            # downloads the Dart SDK on first run
 # Host artifacts for analyze/test only; no Android/iOS SDKs in the cloud VM.
 flutter precache --universal --no-android --no-ios || true
 
-# melos.yaml uses the v6 format (no pub workspace), so stay on melos 6.
-dart pub global activate melos ">=6.3.0 <7.0.0"
-ln -sf "$HOME/.pub-cache/bin/melos" /usr/local/bin/melos
-echo 'export PATH="$HOME/.pub-cache/bin:$PATH"' > /etc/profile.d/pub-cache.sh

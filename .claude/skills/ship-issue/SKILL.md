@@ -14,7 +14,7 @@ Deliver GitHub issue #$ARGUMENTS for Elyanotes.
    - Otherwise: ask the `architect` subagent for a plan, save it to
      `docs/plans/<issue>-<slug>.md`, then hand each step to the `implementer`
      subagent in order (see `subagent-driven-development`).
-4. Verify: `melos analyze` and tests for every touched package must pass.
+4. Verify: `./scripts/check.sh analyze` and the tests of every touched package must pass.
    Paste the command output summary — no claims without evidence.
 5. Ask the `reviewer` subagent to review `origin/main...HEAD` against the issue.
    Fix blocking findings, re-verify.

@@ -21,21 +21,18 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Install melos
-        run: dart pub global activate melos ">=6.3.0 <7.0.0"
-
       - name: Placeholder .env (declared as an asset in example_app)
         run: printf 'SUPABASE_URL=https://example.supabase.co\nSUPABASE_ANON_KEY=placeholder\n' > example_app/.env
 
-      - name: Bootstrap
-        run: melos bootstrap
+      - name: Dependencies
+        run: ./scripts/check.sh pub
 
-      - name: Format check
+      - name: Format check (report-only until the baseline is clean, M3)
         run: dart format --output=none --set-exit-if-changed packages example_app/lib example_app/test
-        continue-on-error: true   # report-only until the baseline is clean (M3)
+        continue-on-error: true
 
       - name: Analyze
-        run: melos run analyze
+        run: ./scripts/check.sh analyze
 
       - name: Test
-        run: melos run test
+        run: ./scripts/check.sh test

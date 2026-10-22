@@ -17,9 +17,9 @@ Frozen behind flags until after v1.0: AI chat, cloud sync, premium, audio record
 
 ## Commands
 ```bash
-melos bootstrap                 # once per clone
-melos analyze                   # dart analyze all packages
-melos test                      # flutter test all packages
+./scripts/check.sh pub          # pub get in dependency order (once per clone / pubspec change)
+./scripts/check.sh analyze      # dart analyze all packages (what CI runs)
+./scripts/check.sh test         # dart test / flutter test per package (what CI runs)
 cd example_app && flutter run   # needs example_app/.env (SUPABASE_URL, SUPABASE_ANON_KEY)
 flutter test path/to/file_test.dart                 # single test
 dart run build_runner build --delete-conflicting-outputs   # example_app codegen
