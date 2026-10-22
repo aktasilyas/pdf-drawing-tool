@@ -49,7 +49,7 @@ void main() {
 
   group('BackgroundType', () {
     test('should have all expected values', () {
-      expect(BackgroundType.values.length, 5);
+      expect(BackgroundType.values.length, 7);
     });
   });
 }

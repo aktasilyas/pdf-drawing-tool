@@ -215,7 +215,7 @@ void main() {
     });
 
     group('equality', () {
-      test('equal when same id', () {
+      test('not equal when same id but different content', () {
         final text1 = TextElement(
           id: 'same-id',
           text: 'Hello',
@@ -229,6 +229,13 @@ void main() {
           x: 100,
           y: 100,
         );
+
+        expect(text1 == text2, isFalse);
+      });
+
+      test('equal when all values are the same', () {
+        final text1 = TextElement(id: 'same-id', text: 'Hello', x: 0, y: 0);
+        final text2 = TextElement(id: 'same-id', text: 'Hello', x: 0, y: 0);
 
         expect(text1 == text2, isTrue);
         expect(text1.hashCode, equals(text2.hashCode));

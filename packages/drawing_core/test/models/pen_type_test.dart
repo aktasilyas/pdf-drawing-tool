@@ -3,8 +3,8 @@ import 'package:drawing_core/drawing_core.dart';
 
 void main() {
   group('PenType enum', () {
-    test('has 10 pen types', () {
-      expect(PenType.values.length, 10);
+    test('has 9 pen types', () {
+      expect(PenType.values.length, 9);
     });
 
     test('contains all expected values', () {

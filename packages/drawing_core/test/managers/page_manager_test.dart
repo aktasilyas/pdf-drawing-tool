@@ -317,9 +317,10 @@ void main() {
 
         manager.reorderPage(0, 2);
 
-        expect(manager.pages[0], page1);
-        expect(manager.pages[1], page2);
-        expect(manager.pages[2], page0);
+        // Compare by id: reorderPage re-indexes pages, so == would differ.
+        expect(manager.pages[0].id, page1.id);
+        expect(manager.pages[1].id, page2.id);
+        expect(manager.pages[2].id, page0.id);
         // Indices should be updated
         expect(manager.pages[0].index, 0);
         expect(manager.pages[1].index, 1);
@@ -341,8 +342,7 @@ void main() {
         expect(manager.currentIndex, 2);
       });
 
-      test('reorderPage adjusts current index when moving around current',
-          () {
+      test('reorderPage adjusts current index when moving around current', () {
         final manager = PageManager(
           pages: [
             Page.create(index: 0),

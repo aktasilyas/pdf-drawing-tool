@@ -1,4 +1,5 @@
 import 'package:test/test.dart';
+import '../helpers/document_helpers.dart';
 import 'package:drawing_core/src/history/clear_layer_command.dart';
 import 'package:drawing_core/src/models/document.dart';
 import 'package:drawing_core/src/models/layer.dart';
@@ -18,17 +19,17 @@ void main() {
         style: StrokeStyle(thickness: 2.0, color: 0xFF000000),
         createdAt: DateTime.now(),
       );
-      
-      final document = DrawingDocument.emptyMultiPage('Test').copyWith(
-        layers: [Layer.empty('Layer 1').copyWith(strokes: [stroke])],
-      );
-      
+
+      final document = multiPageDocWithLayers('Test', [
+        Layer.empty('Layer 1').copyWith(strokes: [stroke])
+      ]);
+
       final command = ClearLayerCommand(layerIndex: 0);
       final result = command.execute(document);
-      
+
       expect(result.layers[0].strokes, isEmpty);
     });
-    
+
     test('undo restores original content', () {
       final stroke = Stroke(
         id: 'test',
@@ -39,25 +40,25 @@ void main() {
         style: StrokeStyle(thickness: 2.0, color: 0xFF000000),
         createdAt: DateTime.now(),
       );
-      
-      final document = DrawingDocument.emptyMultiPage('Test').copyWith(
-        layers: [Layer.empty('Layer 1').copyWith(strokes: [stroke])],
-      );
-      
+
+      final document = multiPageDocWithLayers('Test', [
+        Layer.empty('Layer 1').copyWith(strokes: [stroke])
+      ]);
+
       final command = ClearLayerCommand(layerIndex: 0);
       final clearedDoc = command.execute(document);
       final restoredDoc = command.undo(clearedDoc);
-      
+
       expect(restoredDoc.layers[0].strokes.length, equals(1));
       expect(restoredDoc.layers[0].strokes.first.id, equals('test'));
     });
-    
+
     test('handles invalid layer index gracefully', () {
       final document = DrawingDocument.emptyMultiPage('Test');
-      
+
       final command = ClearLayerCommand(layerIndex: 99);
       final result = command.execute(document);
-      
+
       expect(result, equals(document));
     });
   });

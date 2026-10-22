@@ -1,4 +1,5 @@
 import 'package:test/test.dart';
+import '../helpers/document_helpers.dart';
 import 'package:drawing_core/drawing_core.dart';
 
 void main() {
@@ -36,9 +37,7 @@ void main() {
           .addStroke(stroke2)
           .addStroke(stroke3);
 
-      document = DrawingDocument.emptyMultiPage('Test').copyWith(
-        layers: [layer],
-      );
+      document = multiPageDocWithLayers('Test', [layer]);
     });
 
     group('execute', () {
@@ -198,8 +197,8 @@ void main() {
 
         final afterRedo = command.execute(afterUndo);
         expect(afterRedo.layers[0].strokes.length, equals(2));
-        expect(
-            afterRedo.layers[0].strokes.any((s) => s.id == stroke2.id), isFalse);
+        expect(afterRedo.layers[0].strokes.any((s) => s.id == stroke2.id),
+            isFalse);
       });
 
       test('multiple undo/redo cycles', () {
