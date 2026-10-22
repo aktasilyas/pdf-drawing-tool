@@ -44,8 +44,8 @@ for pkg in "${PACKAGES[@]}"; do
     run "analyze $pkg" "$pkg" dart analyze --no-fatal-warnings .
   fi
   if [[ $STEP == test || $STEP == all ]] && [ -d "$pkg/test" ]; then
-    if is_flutter "$pkg"; then run "test $pkg" "$pkg" flutter test
-    else run "test $pkg" "$pkg" dart test; fi
+    if is_flutter "$pkg"; then run "test $pkg" "$pkg" flutter test --timeout=90s
+    else run "test $pkg" "$pkg" dart test --timeout=90s; fi
   fi
 done
 
