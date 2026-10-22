@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install melos
+        run: dart pub global activate melos ">=6.3.0 <7.0.0"
+
+      - name: Placeholder .env (declared as an asset in example_app)
+        run: printf 'SUPABASE_URL=https://example.supabase.co\nSUPABASE_ANON_KEY=placeholder\n' > example_app/.env
+
+      - name: Bootstrap
+        run: melos bootstrap
+
+      - name: Format check
+        run: dart format --output=none --set-exit-if-changed packages example_app/lib example_app/test
+        continue-on-error: true   # report-only until the baseline is clean (M3)
+
+      - name: Analyze
+        run: melos run analyze
+
+      - name: Test
+        run: melos run test

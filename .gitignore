@@ -87,3 +87,8 @@ coverage/
 
 # Cursor
 .cursor/
+
+# Claude Code
+.claude/settings.local.json
+.superpowers/
+.claude/.stop_gate_*

@@ -1,5 +1,5 @@
 name: elyanotes_drawing_workspace
-repository: https://github.com/your-org/elyanotes_drawing
+repository: https://github.com/aktasilyas/pdf-drawing-tool
 
 packages:
   - packages/**
@@ -23,8 +23,10 @@ scripts:
     description: Analyze all packages
 
   test:
-    run: melos exec -- flutter test
-    description: Run tests in all packages
+    run: |
+      melos exec --no-flutter --dir-exists=test -- dart test &&
+      melos exec --flutter --dir-exists=test -- flutter test
+    description: Run tests in all packages (dart test for pure Dart, flutter test otherwise)
 
   format:
     run: melos exec -- dart format .
