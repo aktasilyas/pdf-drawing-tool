@@ -1,5 +1,5 @@
 #!/bin/bash
-# Workspace checks without melos: ./scripts/check.sh [pub|analyze|test|all]
+# Workspace checks without melos: ./scripts/check.sh [pub|analyze|test|all] [package-dir]
 # Order matters: drawing_core → drawing_ui → example_app (path dependencies).
 # In GitHub Actions, failures are also emitted as annotations so they are
 # readable from the PR page and the API.
@@ -8,6 +8,7 @@ set -uo pipefail
 cd "$(dirname "$0")/.." || exit 1
 PACKAGES=(packages/drawing_core packages/drawing_ui example_app)
 STEP="${1:-all}"
+ONLY="${2:-}"
 status=0
 
 is_flutter() { grep -qE 'sdk:[[:space:]]*flutter' "$1/pubspec.yaml"; }
@@ -36,15 +37,17 @@ run() { # $1=title $2=dir rest=command
 }
 
 for pkg in "${PACKAGES[@]}"; do
+  # pub get always covers every package (path deps); analyze/test can be scoped.
   if [[ $STEP == pub || $STEP == all ]]; then
     if is_flutter "$pkg"; then run "pub get $pkg" "$pkg" flutter pub get
     else run "pub get $pkg" "$pkg" dart pub get; fi
   fi
+  if [ -n "$ONLY" ] && [ "$pkg" != "$ONLY" ]; then continue; fi
   if [[ $STEP == analyze || $STEP == all ]]; then
     run "analyze $pkg" "$pkg" dart analyze --no-fatal-warnings .
   fi
   if [[ $STEP == test || $STEP == all ]] && [ -d "$pkg/test" ]; then
-    if is_flutter "$pkg"; then run "test $pkg" "$pkg" flutter test --timeout=90s
+    if is_flutter "$pkg"; then run "test $pkg" "$pkg" flutter test --timeout=90s --concurrency=4
     else run "test $pkg" "$pkg" dart test --timeout=90s; fi
   fi
 done

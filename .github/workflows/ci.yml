@@ -11,8 +11,13 @@ concurrency:
 
 jobs:
   analyze-and-test:
+    name: ${{ matrix.package }}
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [packages/drawing_core, packages/drawing_ui, example_app]
     steps:
       - uses: actions/checkout@v4
 
@@ -32,7 +37,7 @@ jobs:
         continue-on-error: true
 
       - name: Analyze
-        run: ./scripts/check.sh analyze
+        run: ./scripts/check.sh analyze ${{ matrix.package }}
 
       - name: Test
-        run: ./scripts/check.sh test
+        run: ./scripts/check.sh test ${{ matrix.package }}
