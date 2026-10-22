@@ -92,3 +92,9 @@ coverage/
 .claude/settings.local.json
 .superpowers/
 .claude/.stop_gate_*
+
+# Local (real-font) golden renders; only CI goldens are committed
+**/goldens/macos/
+**/goldens/windows/
+**/goldens/linux/
+**/test/**/failures/

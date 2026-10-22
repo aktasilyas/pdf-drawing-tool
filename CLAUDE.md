@@ -36,8 +36,15 @@ dart run build_runner build --delete-conflicting-outputs   # example_app codegen
 5. One branch + one PR per issue: `feat/…`, `fix/…`, `refactor/…`, `chore/…`.
    Commits: `type(scope): message`. Never push to `main` directly.
 
-Use the `architect` subagent for design decisions, `implementer` for scoped
-coding tasks, `reviewer` on the final diff before opening a PR.
+Subagents: `architect` (technical design, plans), `ui-designer` (visual specs
+and reviews of rendered goldens), `implementer` (scoped coding),
+`reviewer` (final diff before a PR).
+
+## Design
+Visual direction and decisions: `docs/design/BRIEF.md` (owner-approved; do not
+change without asking). Any UI work follows the `design-loop` skill: spec from
+`ui-designer` → golden test → render → review the PNGs → fix. Quality bar:
+`flutter-ui-craft` skill. Tokens and theming: `design-tokens` skill.
 
 ## Architecture rules
 - Feature-first Clean Architecture in `example_app/lib/features/<f>/{data,domain,presentation}`.
