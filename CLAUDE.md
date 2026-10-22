@@ -33,8 +33,16 @@ dart run build_runner build --delete-conflicting-outputs   # example_app codegen
    or golden test.
 4. Before saying "done": run analyze + the affected tests and show the output
    (`verification-before-completion`). A Stop hook enforces this.
-5. One branch + one PR per issue: `feat/…`, `fix/…`, `refactor/…`, `chore/…`.
+5. One branch + one PR per issue, branch `claude/<issue>-<slug>`.
    Commits: `type(scope): message`. Never push to `main` directly.
+6. GitHub access via `gh api` REST only (GraphQL is unavailable in cloud sessions).
+
+## Autopilot
+The backlog is the GitHub issue list (milestones M0b…M5). Labels:
+`agent-ready` (agents may take it), `needs-owner` / `needs-decision` (agents must not),
+`in-progress`, `in-review`, `auto-merge-ok` (agent may merge when CI is green).
+A scheduled routine runs `/autopilot` (see that skill); its log is the
+"Autopilot status" issue. Never pick up an issue without `agent-ready`.
 
 Subagents: `architect` (technical design, plans), `ui-designer` (visual specs
 and reviews of rendered goldens), `implementer` (scoped coding),
