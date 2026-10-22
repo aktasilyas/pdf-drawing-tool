@@ -12,7 +12,12 @@ if [ ! -f example_app/.env ]; then
   printf 'SUPABASE_URL=https://example.supabase.co\nSUPABASE_ANON_KEY=placeholder\n' > example_app/.env
 fi
 
-command -v flutter >/dev/null 2>&1 || exit 0
+# Install Flutter when the environment has no setup script (e.g. routines on
+# the Default environment). A setup script that already installed it makes this a no-op.
+if ! command -v flutter >/dev/null 2>&1; then
+  bash "$CLAUDE_PROJECT_DIR/scripts/cloud-setup.sh" >/tmp/flutter-setup.log 2>&1 \
+    || { echo "Flutter install failed; see /tmp/flutter-setup.log" >&2; exit 0; }
+fi
 
 # Skip when pubspecs are unchanged since the last successful pub get.
 stamp=.dart_tool/.bootstrap.sha256

@@ -1,7 +1,8 @@
 # Roadmap to v1.0
 
-Each milestone maps to a GitHub milestone; each bullet becomes an issue with
-acceptance criteria. This file changes only when scope changes.
+Each milestone is a GitHub milestone and every bullet is an issue with
+acceptance criteria and dependencies (issues #35–#62). The issue list is the
+source of truth for status; this file changes only when scope changes.
 
 ## M0 — Development system (done when merged)
 CLAUDE.md, subagents, vendored skills, hooks, CI, cloud setup script.
