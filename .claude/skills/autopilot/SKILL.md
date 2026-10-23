@@ -52,9 +52,8 @@ If none is eligible, log "queue empty or blocked" with the reason and stop.
 ## 4. Ship it
 - Add label `in-progress` (`gh api -X POST $R/issues/<n>/labels -f "labels[]=in-progress"`).
 - Follow the `ship-issue` skill for issue <n>.
-- If you hit a product decision you cannot make from the issue, CLAUDE.md or
-  `docs/design/BRIEF.md`: comment the specific question on the issue, replace
-  `agent-ready` with `needs-decision`, remove `in-progress`, log it, stop.
+- If you hit a decision you cannot make (see "Decide before asking"): label
+  `needs-architect` as described there, log it, stop.
 - If the work is too big for one run, open a draft-quality PR with what is done
   and verified, list the remaining steps in the PR body, keep the issue open.
 - On success: remove `in-progress`, add `in-review`.

@@ -1,0 +1,28 @@
+name: Architect merge
+
+# The owner delegated PR approval to the architect routine. When it labels a
+# claude/* PR `architect-approved`, merge it. Agents themselves never merge.
+on:
+  pull_request:
+    types: [labeled]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  merge:
+    if: >-
+      github.event.label.name == 'architect-approved' &&
+      startsWith(github.event.pull_request.head.ref, 'claude/') &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - name: Squash-merge
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          gh api -X PUT "repos/${{ github.repository }}/pulls/$PR/merge" \
+            -f merge_method=squash
+          gh api -X DELETE "repos/${{ github.repository }}/git/refs/heads/${{ github.event.pull_request.head.ref }}" || true
