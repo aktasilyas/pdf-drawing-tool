@@ -31,10 +31,12 @@ Widget _sheet(ThemeData theme) {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Elyanotes', style: Theme.of(context).textTheme.headlineLarge),
+              Text('Elyanotes',
+                  style: Theme.of(context).textTheme.headlineLarge),
               Text('Notebook title in serif',
                   style: Theme.of(context).textTheme.titleLarge),
-              Text('UI label in Inter', style: Theme.of(context).textTheme.labelLarge),
+              Text('UI label in Inter',
+                  style: Theme.of(context).textTheme.labelLarge),
               const SizedBox(height: AppSpacing.md),
               Expanded(
                 child: Wrap(

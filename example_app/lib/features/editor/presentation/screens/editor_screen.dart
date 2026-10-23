@@ -161,10 +161,14 @@ class EditorScreen extends ConsumerWidget {
         backgroundColor:
             isDark ? colorScheme.surfaceContainerHighest : colorScheme.surface,
         title: Text('Yeniden Adlandır',
-            style: TextStyle(fontFamily: AppTypography.headingFontFamily, color: colorScheme.onSurface)),
+            style: TextStyle(
+                fontFamily: AppTypography.headingFontFamily,
+                color: colorScheme.onSurface)),
         content: TextField(
           controller: controller,
-          style: TextStyle(fontFamily: AppTypography.headingFontFamily, color: colorScheme.onSurface),
+          style: TextStyle(
+              fontFamily: AppTypography.headingFontFamily,
+              color: colorScheme.onSurface),
           decoration: InputDecoration(
             labelText: 'Belge Adı',
             border: const OutlineInputBorder(),
@@ -213,10 +217,14 @@ class EditorScreen extends ConsumerWidget {
         backgroundColor:
             isDark ? colorScheme.surfaceContainerHighest : colorScheme.surface,
         title: Text('Çöpe Taşı',
-            style: TextStyle(fontFamily: AppTypography.headingFontFamily, color: colorScheme.onSurface)),
+            style: TextStyle(
+                fontFamily: AppTypography.headingFontFamily,
+                color: colorScheme.onSurface)),
         content: Text(
           'Bu belge çöpe taşınacak. Daha sonra geri yükleyebilirsiniz.',
-          style: TextStyle(fontFamily: AppTypography.headingFontFamily, color: colorScheme.onSurfaceVariant),
+          style: TextStyle(
+              fontFamily: AppTypography.headingFontFamily,
+              color: colorScheme.onSurfaceVariant),
         ),
         actions: [
           TextButton(

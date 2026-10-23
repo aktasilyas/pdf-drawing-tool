@@ -196,7 +196,7 @@ abstract class AppTypography {
   /// Logo/branding için özel stil
   static TextStyle logo({double fontSize = 24, Color? color}) {
     return TextStyle(
-        fontFamily: headingFontFamily,
+      fontFamily: headingFontFamily,
       fontSize: fontSize,
       fontWeight: FontWeight.w800,
       letterSpacing: 1.5,
@@ -207,7 +207,7 @@ abstract class AppTypography {
   /// Not başlığı için özel stil (editor içinde)
   static TextStyle noteTitle({Color? color}) {
     return TextStyle(
-        fontFamily: headingFontFamily,
+      fontFamily: headingFontFamily,
       fontSize: 28,
       fontWeight: FontWeight.w600,
       height: 1.29,
