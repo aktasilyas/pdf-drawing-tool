@@ -142,11 +142,10 @@ class TextElement {
       final runes = line.runes.toList();
       final hasEmoji = runes.any((r) => r > 0xFF);
       if (hasEmoji) {
-        maxLineWidth = math.max(maxLineWidth,
-            _countVisibleGlyphs(runes) * fontSize);
+        maxLineWidth =
+            math.max(maxLineWidth, _countVisibleGlyphs(runes) * fontSize);
       } else {
-        maxLineWidth = math.max(maxLineWidth,
-            runes.length * fontSize * 0.6);
+        maxLineWidth = math.max(maxLineWidth, runes.length * fontSize * 0.6);
       }
     }
 
@@ -165,7 +164,10 @@ class TextElement {
     double minX = double.infinity, maxX = double.negativeInfinity;
     double minY = double.infinity, maxY = double.negativeInfinity;
     for (final corner in [
-      (x, y), (x + w, y), (x + w, y + h), (x, y + h),
+      (x, y),
+      (x + w, y),
+      (x + w, y + h),
+      (x, y + h),
     ]) {
       final dx = corner.$1 - cx;
       final dy = corner.$2 - cy;
@@ -185,7 +187,10 @@ class TextElement {
     int count = 0;
     bool joinedToPrev = false;
     for (final rune in runes) {
-      if (rune == 0x200D) { joinedToPrev = true; continue; } // ZWJ
+      if (rune == 0x200D) {
+        joinedToPrev = true;
+        continue;
+      } // ZWJ
       if (_isInvisibleModifier(rune)) continue;
       if (!joinedToPrev) count++;
       joinedToPrev = false;
@@ -269,7 +274,7 @@ class TextElement {
       if (value is num) return value.toDouble();
       return defaultValue;
     }
-    
+
     int parseInt(dynamic value, int defaultValue) {
       if (value == null) return defaultValue;
       if (value is int) return value;
@@ -278,7 +283,7 @@ class TextElement {
       if (value is num) return value.toInt();
       return defaultValue;
     }
-    
+
     return TextElement(
       id: json['id'],
       text: json['text'],

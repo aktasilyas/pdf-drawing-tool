@@ -16,8 +16,7 @@ class AudioPlaybackService {
 
   final AudioPlayer _player = AudioPlayer();
 
-  final _stateController =
-      StreamController<AudioPlaybackState>.broadcast();
+  final _stateController = StreamController<AudioPlaybackState>.broadcast();
 
   /// ID of the recording currently loaded/playing.
   String? _currentRecordingId;

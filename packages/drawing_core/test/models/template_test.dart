@@ -30,8 +30,10 @@ void main() {
           pattern: TemplatePattern.mediumLines,
         );
 
-        expect(template.spacingMm, TemplatePattern.mediumLines.defaultSpacingMm);
-        expect(template.lineWidth, TemplatePattern.mediumLines.defaultLineWidth);
+        expect(
+            template.spacingMm, TemplatePattern.mediumLines.defaultSpacingMm);
+        expect(
+            template.lineWidth, TemplatePattern.mediumLines.defaultLineWidth);
       });
 
       test('allows custom spacing and lineWidth', () {
@@ -268,7 +270,8 @@ void main() {
         expect(restored.spacingMm, original.spacingMm);
         expect(restored.lineWidth, original.lineWidth);
         expect(restored.defaultLineColor, original.defaultLineColor);
-        expect(restored.defaultBackgroundColor, original.defaultBackgroundColor);
+        expect(
+            restored.defaultBackgroundColor, original.defaultBackgroundColor);
         expect(restored.extraData, original.extraData);
       });
     });

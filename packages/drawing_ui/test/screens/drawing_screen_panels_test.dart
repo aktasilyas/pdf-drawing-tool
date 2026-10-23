@@ -4,7 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/drawing_ui.dart';
 
 void main() {
-  testWidgets('buildActivePanel renders placeholder panels', (tester) async {
+  testWidgets('buildActivePanel renders the laser pointer panel',
+      (tester) async {
     await tester.pumpWidget(
       ProviderScope(
         child: MaterialApp(
@@ -20,6 +21,6 @@ void main() {
       ),
     );
 
-    expect(find.text('Lazer işaretleyici'), findsOneWidget);
+    expect(find.text('Lazer Çizgi'), findsOneWidget);
   });
 }

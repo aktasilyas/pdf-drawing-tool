@@ -6,7 +6,9 @@ import 'package:example_app/features/documents/documents.dart';
 import 'package:example_app/features/premium/premium.dart';
 
 class MockFolderRepository extends Mock implements FolderRepository {}
-class MockSubscriptionRepository extends Mock implements SubscriptionRepository {}
+
+class MockSubscriptionRepository extends Mock
+    implements SubscriptionRepository {}
 
 void main() {
   late CreateFolderUseCase useCase;

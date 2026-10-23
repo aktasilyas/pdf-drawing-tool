@@ -104,8 +104,8 @@ Widget buildSecondaryCanvasLayers({
                     width: pageSize.width,
                     height: pageSize.height,
                     decoration: BoxDecoration(
-                      color: colorScheme?.effectiveBackground(
-                              page.background.color) ??
+                      color: colorScheme
+                              ?.effectiveBackground(page.background.color) ??
                           Color(page.background.color),
                       border: canvasMode.pageBorderWidth > 0
                           ? Border.all(

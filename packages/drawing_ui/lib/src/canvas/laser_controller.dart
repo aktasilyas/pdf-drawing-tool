@@ -21,8 +21,7 @@ class LaserController extends ChangeNotifier {
   List<LaserStroke> get fadingStrokes => _fadingStrokes;
 
   /// Whether there are any visible strokes (active or fading).
-  bool get hasStrokes =>
-      _activeStroke != null || _fadingStrokes.isNotEmpty;
+  bool get hasStrokes => _activeStroke != null || _fadingStrokes.isNotEmpty;
 
   /// Whether the ticker should be running.
   bool get needsAnimation => hasStrokes;

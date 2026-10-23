@@ -27,8 +27,7 @@ class ImageResizeHandles extends ConsumerStatefulWidget {
   const ImageResizeHandles({super.key, required this.image});
 
   @override
-  ConsumerState<ImageResizeHandles> createState() =>
-      _ImageResizeHandlesState();
+  ConsumerState<ImageResizeHandles> createState() => _ImageResizeHandlesState();
 }
 
 class _ImageResizeHandlesState extends ConsumerState<ImageResizeHandles> {
@@ -242,8 +241,7 @@ class _ImageResizeHandlesState extends ConsumerState<ImageResizeHandles> {
     _lastDragPos = null;
   }
 
-  ImageElement _calcResize(
-      _Corner corner, ImageElement orig, Offset local) {
+  ImageElement _calcResize(_Corner corner, ImageElement orig, Offset local) {
     double newX = orig.x, newY = orig.y;
     double newW = orig.width, newH = orig.height;
 
@@ -316,7 +314,10 @@ class _ImageHandlesPainter extends CustomPainter {
       ..strokeWidth = 2.0;
 
     for (final c in [
-      rect.topLeft, rect.topRight, rect.bottomLeft, rect.bottomRight,
+      rect.topLeft,
+      rect.topRight,
+      rect.bottomLeft,
+      rect.bottomRight,
     ]) {
       canvas.drawCircle(c, _r, fill);
       canvas.drawCircle(c, _r, handleStroke);

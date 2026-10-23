@@ -134,9 +134,8 @@ class _TrashedPageCardState extends State<TrashedPageCard> {
       child: Icon(
         Icons.description_outlined,
         size: 40,
-        color: isDark
-            ? AppColors.textTertiaryDark
-            : AppColors.textTertiaryLight,
+        color:
+            isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight,
       ),
     );
   }
@@ -188,8 +187,7 @@ class _TrashedPageCardState extends State<TrashedPageCard> {
               children: [
                 Text(
                   widget.trashedPage.sourceDocumentTitle,
-                  style:
-                      AppTypography.titleMedium.copyWith(color: textPrimary),
+                  style: AppTypography.titleMedium.copyWith(color: textPrimary),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),

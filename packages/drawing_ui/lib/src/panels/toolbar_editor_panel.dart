@@ -18,20 +18,25 @@ class ToolbarEditorPanel extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(children: [
-            Text('Customize Toolbar', style: textTheme.bodyMedium?.copyWith(
-              fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSurface)),
+            Text('Customize Toolbar',
+                style: textTheme.bodyMedium?.copyWith(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurface)),
             const Spacer(),
             GestureDetector(
               onTap: () async {
                 await ref.read(toolbarConfigProvider.notifier).resetToDefault();
               },
-              child: Text('Reset', style: textTheme.bodyMedium?.copyWith(
-                color: cs.primary, fontWeight: FontWeight.w500)),
+              child: Text('Reset',
+                  style: textTheme.bodyMedium?.copyWith(
+                      color: cs.primary, fontWeight: FontWeight.w500)),
             ),
           ]),
           const SizedBox(height: 10),
           Text('Drag to reorder tools. Toggle visibility with the switch.',
-            style: textTheme.bodySmall?.copyWith(fontSize: 13, color: cs.onSurfaceVariant)),
+              style: textTheme.bodySmall
+                  ?.copyWith(fontSize: 13, color: cs.onSurfaceVariant)),
           const SizedBox(height: 16),
           const ReorderableToolList(),
         ],
@@ -39,4 +44,3 @@ class ToolbarEditorPanel extends ConsumerWidget {
     );
   }
 }
-

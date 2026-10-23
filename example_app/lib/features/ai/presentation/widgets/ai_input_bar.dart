@@ -65,7 +65,7 @@ class _AIInputBarState extends State<AIInputBar> {
 
   Widget _buildPendingImagePreview(ThemeData theme) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(
+      padding: const EdgeInsets.fromLTRB(
           AppSpacing.md, AppSpacing.sm, AppSpacing.md, 0),
       child: Row(children: [
         ClipRRect(
@@ -73,15 +73,15 @@ class _AIInputBarState extends State<AIInputBar> {
           child: Image.memory(widget.pendingImage!,
               width: 56, height: 56, fit: BoxFit.cover),
         ),
-        SizedBox(width: AppSpacing.sm),
+        const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: Text('Seçim ekran görüntüsü',
-              style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant)),
+              style: theme.textTheme.bodySmall
+                  ?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
         ),
         IconButton(
           onPressed: widget.onClearPendingImage,
-          icon: Icon(Icons.close, size: AppIconSize.sm),
+          icon: const Icon(Icons.close, size: AppIconSize.sm),
           tooltip: 'Kaldır',
           visualDensity: VisualDensity.compact,
         ),
@@ -91,7 +91,7 @@ class _AIInputBarState extends State<AIInputBar> {
 
   Widget _buildAttachButton(ThemeData theme) {
     return PopupMenuButton<String>(
-      icon: Icon(Icons.add_circle_outline, size: AppIconSize.lg),
+      icon: const Icon(Icons.add_circle_outline, size: AppIconSize.lg),
       tooltip: 'Ekle',
       style: IconButton.styleFrom(
         foregroundColor: theme.colorScheme.onSurfaceVariant,
@@ -107,20 +107,20 @@ class _AIInputBarState extends State<AIInputBar> {
         }
       },
       itemBuilder: (context) => [
-        PopupMenuItem(
+        const PopupMenuItem(
           value: 'canvas',
           child: Row(children: [
             Icon(Icons.center_focus_strong, size: AppIconSize.md),
             SizedBox(width: AppSpacing.md),
-            const Text('Canvas ekran görüntüsü'),
+            Text('Canvas ekran görüntüsü'),
           ]),
         ),
-        PopupMenuItem(
+        const PopupMenuItem(
           value: 'image',
           child: Row(children: [
             Icon(Icons.image_outlined, size: AppIconSize.md),
             SizedBox(width: AppSpacing.md),
-            const Text('Resim yükle'),
+            Text('Resim yükle'),
           ]),
         ),
       ],
@@ -152,7 +152,7 @@ class _AIInputBarState extends State<AIInputBar> {
               enabledBorder: InputBorder.none,
               focusedBorder: InputBorder.none,
               disabledBorder: InputBorder.none,
-              contentPadding: EdgeInsets.symmetric(
+              contentPadding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.xs,
                 vertical: AppSpacing.md,
               ),
@@ -207,8 +207,9 @@ class _AIInputBarState extends State<AIInputBar> {
       onTap: widget.onLimitReached,
       borderRadius: BorderRadius.circular(AppRadius.full),
       child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: AppSpacing.lg, vertical: AppSpacing.md,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: AppSpacing.md,
         ),
         decoration: BoxDecoration(
           color: theme.colorScheme.errorContainer.withValues(alpha: 0.3),
@@ -218,7 +219,7 @@ class _AIInputBarState extends State<AIInputBar> {
           children: [
             Icon(Icons.lock_outline,
                 size: AppIconSize.sm + 2, color: theme.colorScheme.error),
-            SizedBox(width: AppSpacing.sm),
+            const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text(
                 'Günlük limit doldu — Premium ile devam et',
@@ -256,21 +257,20 @@ class _AIInputBarState extends State<AIInputBar> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (widget.pendingImage != null)
-              _buildPendingImagePreview(theme),
+            if (widget.pendingImage != null) _buildPendingImagePreview(theme),
             Padding(
-              padding: EdgeInsets.all(AppSpacing.sm),
+              padding: const EdgeInsets.all(AppSpacing.sm),
               child: widget.enabled
                   ? _buildInputRow(theme)
                   : _buildUpgradeBanner(theme),
             ),
             Padding(
-              padding: EdgeInsets.only(bottom: AppSpacing.sm),
+              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
               child: Text(
                 'Yapay zeka hata yapabilir.',
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant
-                      .withValues(alpha: 0.6),
+                  color:
+                      theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
                 ),
               ),
             ),

@@ -120,8 +120,7 @@ class _TemplateSelectionScreenState
                     category: _category,
                     selectedTemplate: _template,
                     paperColor: _paperColor,
-                    onTemplateSelected: (t) =>
-                        setState(() => _template = t),
+                    onTemplateSelected: (t) => setState(() => _template = t),
                   ),
           ),
         ],
@@ -139,8 +138,8 @@ class _TemplateSelectionScreenState
         children: [
           Text(
             _isSelectingCover ? 'Kapak' : 'Sablon',
-            style: AppTypography.titleMedium
-                .copyWith(fontWeight: FontWeight.w600),
+            style:
+                AppTypography.titleMedium.copyWith(fontWeight: FontWeight.w600),
           ),
           const Spacer(),
           if (!_isSelectingCover)

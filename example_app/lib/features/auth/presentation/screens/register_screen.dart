@@ -165,8 +165,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             children: [
               const Expanded(child: AppDivider()),
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                 child: Text(
                   AuthStrings.orDivider,
                   style: AppTypography.labelMedium.copyWith(
@@ -193,8 +192,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             children: [
               Text(
                 AuthStrings.alreadyHaveAccount,
-                style:
-                    AppTypography.bodyMedium.copyWith(color: textSecondary),
+                style: AppTypography.bodyMedium.copyWith(color: textSecondary),
               ),
               TextButton(
                 onPressed: _isLoading ? null : _goToLogin,

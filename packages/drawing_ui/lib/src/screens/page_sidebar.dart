@@ -51,8 +51,8 @@ class _PageSidebarState extends ConsumerState<PageSidebar> {
     if (!_scrollController.hasClients) return;
     // During AnimatedSwitcher transitions two GridViews share this controller.
     if (_scrollController.positions.length != 1) return;
-    final target =
-        _offsetForIndex(index).clamp(0.0, _scrollController.position.maxScrollExtent);
+    final target = _offsetForIndex(index)
+        .clamp(0.0, _scrollController.position.maxScrollExtent);
     if (animate) {
       _scrollController.animateTo(target,
           duration: const Duration(milliseconds: 200), curve: Curves.easeInOut);
@@ -110,8 +110,7 @@ class _PageSidebarState extends ConsumerState<PageSidebar> {
       width: kPageSidebarWidth,
       decoration: BoxDecoration(
         color: isDark ? cs.surfaceContainerLow : cs.surfaceContainerLowest,
-        border: Border(
-            right: BorderSide(color: cs.outlineVariant, width: 0.5)),
+        border: Border(right: BorderSide(color: cs.outlineVariant, width: 0.5)),
       ),
       child: Column(
         children: [
@@ -185,8 +184,7 @@ class _PageSidebarState extends ConsumerState<PageSidebar> {
           return PageGridItem(
             page: entry.page,
             index: entry.originalIndex,
-            isSelected:
-                entry.originalIndex == pageManager.currentIndex,
+            isSelected: entry.originalIndex == pageManager.currentIndex,
             thumbnailCache: widget.thumbnailCache,
             onPageTap: widget.onPageTap,
           );
@@ -226,8 +224,8 @@ class _FilterBar extends StatelessWidget {
     return Container(
       height: 44,
       decoration: BoxDecoration(
-        border: Border(
-            bottom: BorderSide(color: cs.outlineVariant, width: 0.5)),
+        border:
+            Border(bottom: BorderSide(color: cs.outlineVariant, width: 0.5)),
       ),
       child: Center(
         child: Container(
@@ -301,9 +299,7 @@ class _FilterTab extends StatelessWidget {
           decoration: BoxDecoration(
             color: isActive ? cs.surface : Colors.transparent,
             borderRadius: BorderRadius.circular(6),
-            boxShadow: isActive
-                ? DrawingShadows.floating(brightness)
-                : null,
+            boxShadow: isActive ? DrawingShadows.floating(brightness) : null,
           ),
           child: Center(
             child: PhosphorIcon(

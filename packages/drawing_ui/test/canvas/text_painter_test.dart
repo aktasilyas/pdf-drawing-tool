@@ -6,18 +6,20 @@ import 'package:drawing_ui/src/internal.dart';
 void main() {
   group('TextElementPainter', () {
     test('creates without error', () {
-      final painter = TextElementPainter(selectionColor: const Color(0xFF10B981),texts: []);
+      final painter = TextElementPainter(
+          selectionColor: const Color(0xFF10B981), texts: []);
       expect(painter, isNotNull);
     });
 
     test('shouldRepaint returns true when texts change', () {
-      final text1 =
-          const TextElement(id: 'text-1', text: 'Hello', x: 0, y: 0);
+      final text1 = const TextElement(id: 'text-1', text: 'Hello', x: 0, y: 0);
       final text2 =
           const TextElement(id: 'text-2', text: 'World', x: 100, y: 100);
 
-      final painter1 = TextElementPainter(selectionColor: const Color(0xFF10B981),texts: [text1]);
-      final painter2 = TextElementPainter(selectionColor: const Color(0xFF10B981),texts: [text1, text2]);
+      final painter1 = TextElementPainter(
+          selectionColor: const Color(0xFF10B981), texts: [text1]);
+      final painter2 = TextElementPainter(
+          selectionColor: const Color(0xFF10B981), texts: [text1, text2]);
 
       expect(painter2.shouldRepaint(painter1), isTrue);
     });
@@ -27,25 +29,32 @@ void main() {
         const TextElement(id: 'text-1', text: 'Hello', x: 0, y: 0),
       ];
 
-      final painter1 = TextElementPainter(selectionColor: const Color(0xFF10B981),texts: texts);
-      final painter2 = TextElementPainter(selectionColor: const Color(0xFF10B981),texts: texts);
+      final painter1 = TextElementPainter(
+          selectionColor: const Color(0xFF10B981), texts: texts);
+      final painter2 = TextElementPainter(
+          selectionColor: const Color(0xFF10B981), texts: texts);
 
       expect(painter2.shouldRepaint(painter1), isFalse);
     });
 
     test('shouldRepaint returns true when activeText changes', () {
-      final text =
-          const TextElement(id: 'text-1', text: 'Active', x: 0, y: 0);
+      final text = const TextElement(id: 'text-1', text: 'Active', x: 0, y: 0);
 
-      final painter1 = TextElementPainter(selectionColor: const Color(0xFF10B981),texts: [], activeText: null);
-      final painter2 = TextElementPainter(selectionColor: const Color(0xFF10B981),texts: [], activeText: text);
+      final painter1 = TextElementPainter(
+          selectionColor: const Color(0xFF10B981), texts: [], activeText: null);
+      final painter2 = TextElementPainter(
+          selectionColor: const Color(0xFF10B981), texts: [], activeText: text);
 
       expect(painter2.shouldRepaint(painter1), isTrue);
     });
 
     test('shouldRepaint returns true when showCursor changes', () {
-      final painter1 = TextElementPainter(selectionColor: const Color(0xFF10B981),texts: [], showCursor: false);
-      final painter2 = TextElementPainter(selectionColor: const Color(0xFF10B981),texts: [], showCursor: true);
+      final painter1 = TextElementPainter(
+          selectionColor: const Color(0xFF10B981),
+          texts: [],
+          showCursor: false);
+      final painter2 = TextElementPainter(
+          selectionColor: const Color(0xFF10B981), texts: [], showCursor: true);
 
       expect(painter2.shouldRepaint(painter1), isTrue);
     });
@@ -63,7 +72,8 @@ void main() {
           home: Scaffold(
             body: CustomPaint(
               size: const Size(200, 200),
-              painter: TextElementPainter(selectionColor: const Color(0xFF10B981),texts: [text]),
+              painter: TextElementPainter(
+                  selectionColor: const Color(0xFF10B981), texts: [text]),
             ),
           ),
         ),
@@ -99,7 +109,8 @@ void main() {
           home: Scaffold(
             body: CustomPaint(
               size: const Size(200, 200),
-              painter: TextElementPainter(selectionColor: const Color(0xFF10B981),texts: texts),
+              painter: TextElementPainter(
+                  selectionColor: const Color(0xFF10B981), texts: texts),
             ),
           ),
         ),
@@ -120,7 +131,8 @@ void main() {
           home: Scaffold(
             body: CustomPaint(
               size: const Size(200, 200),
-              painter: TextElementPainter(selectionColor: const Color(0xFF10B981),
+              painter: TextElementPainter(
+                selectionColor: const Color(0xFF10B981),
                 texts: [],
                 activeText: activeText,
                 showCursor: true,
@@ -160,7 +172,8 @@ void main() {
           home: Scaffold(
             body: CustomPaint(
               size: const Size(200, 200),
-              painter: TextElementPainter(selectionColor: const Color(0xFF10B981),texts: texts),
+              painter: TextElementPainter(
+                  selectionColor: const Color(0xFF10B981), texts: texts),
             ),
           ),
         ),

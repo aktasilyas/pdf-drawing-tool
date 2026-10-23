@@ -54,7 +54,7 @@ class DocumentPreview extends ConsumerWidget {
     try {
       final loadUseCase = ref.read(loadDocumentUseCaseProvider);
       final result = await loadUseCase(document.id);
-      return result.fold((_) => null, (doc) => doc);
+      return await result.fold((_) => null, (doc) => doc);
     } catch (_) {
       return null;
     }

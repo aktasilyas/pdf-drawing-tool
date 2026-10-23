@@ -107,11 +107,19 @@ class Layer extends Equatable {
 
   /// Whether this layer has no strokes, shapes, texts, or images.
   bool get isEmpty =>
-      strokes.isEmpty && shapes.isEmpty && texts.isEmpty && images.isEmpty && stickyNotes.isEmpty;
+      strokes.isEmpty &&
+      shapes.isEmpty &&
+      texts.isEmpty &&
+      images.isEmpty &&
+      stickyNotes.isEmpty;
 
   /// Whether this layer has at least one stroke, shape, text, image, or sticky note.
   bool get isNotEmpty =>
-      strokes.isNotEmpty || shapes.isNotEmpty || texts.isNotEmpty || images.isNotEmpty || stickyNotes.isNotEmpty;
+      strokes.isNotEmpty ||
+      shapes.isNotEmpty ||
+      texts.isNotEmpty ||
+      images.isNotEmpty ||
+      stickyNotes.isNotEmpty;
 
   /// The number of strokes in this layer.
   int get strokeCount => strokes.length;
@@ -627,10 +635,9 @@ class Layer extends Equatable {
               ?.map((n) => StickyNote.fromJson(n as Map<String, dynamic>))
               .toList() ??
           const [],
-      elementOrder: (json['elementOrder'] as List?)
-              ?.map((e) => e as String)
-              .toList() ??
-          const [],
+      elementOrder:
+          (json['elementOrder'] as List?)?.map((e) => e as String).toList() ??
+              const [],
       isVisible: json['isVisible'] as bool? ?? true,
       isLocked: json['isLocked'] as bool? ?? false,
       opacity: (json['opacity'] as num?)?.toDouble() ?? 1.0,
@@ -638,8 +645,19 @@ class Layer extends Equatable {
   }
 
   @override
-  List<Object?> get props =>
-      [id, name, strokes, shapes, texts, images, stickyNotes, elementOrder, isVisible, isLocked, opacity];
+  List<Object?> get props => [
+        id,
+        name,
+        strokes,
+        shapes,
+        texts,
+        images,
+        stickyNotes,
+        elementOrder,
+        isVisible,
+        isLocked,
+        opacity
+      ];
 
   @override
   String toString() {

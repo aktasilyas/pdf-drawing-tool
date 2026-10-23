@@ -54,8 +54,7 @@ class PageOptionsPanel extends ConsumerStatefulWidget {
 
 class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
   /// Resolved page index: either the explicit [pageIndex] or current.
-  int get _pageIndex =>
-      widget.pageIndex ?? ref.read(currentPageIndexProvider);
+  int get _pageIndex => widget.pageIndex ?? ref.read(currentPageIndexProvider);
 
   void _toggleBookmark() {
     final doc = ref.read(documentProvider);
@@ -121,9 +120,8 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
     final newCover = result.cover;
     final coverChanged = newCover != currentCover;
     if (coverChanged && newCover != null) {
-      _applyCoverChange(
-          newCover, result.paperSize.toPageSize(),
-          docNotifier, pageManager, currentIdx);
+      _applyCoverChange(newCover, result.paperSize.toPageSize(), docNotifier,
+          pageManager, currentIdx);
     }
 
     // Apply template/paper change only if something changed
@@ -201,8 +199,7 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
       final coverPage = doc.pages[coverIdx];
       docNotifier.updatePageBackground(coverPage.id, coverBg);
       if (coverIdx == currentIdx) {
-        pageManager.updateCurrentPage(
-            coverPage.copyWith(background: coverBg));
+        pageManager.updateCurrentPage(coverPage.copyWith(background: coverBg));
       }
     } else {
       final coverPage = Page.createCover(
@@ -226,8 +223,12 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
   /// Resolve PageSize (px) → PaperSize (mm) by matching known presets.
   static PaperSize _resolvePaperSize(PageSize pageSize) {
     const presets = [
-      PaperSize.a4, PaperSize.a5, PaperSize.a6,
-      PaperSize.letter, PaperSize.legal, PaperSize.square,
+      PaperSize.a4,
+      PaperSize.a5,
+      PaperSize.a6,
+      PaperSize.letter,
+      PaperSize.legal,
+      PaperSize.square,
       PaperSize.widescreen,
     ];
     for (final ps in presets) {
@@ -280,10 +281,11 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
     );
     final doc = ref.read(documentProvider);
     final newPages = List<Page>.from(doc.pages)..insert(pageIndex + 1, clone);
-    final newDoc = doc.copyWith(pages: newPages, currentPageIndex: pageIndex + 1);
+    final newDoc =
+        doc.copyWith(pages: newPages, currentPageIndex: pageIndex + 1);
     ref.read(documentProvider.notifier).updateDocument(newDoc);
-    ref.read(pageManagerProvider.notifier).initializeFromDocument(
-          newDoc.pages, currentIndex: newDoc.currentPageIndex);
+    ref.read(pageManagerProvider.notifier).initializeFromDocument(newDoc.pages,
+        currentIndex: newDoc.currentPageIndex);
     widget.onClose();
   }
 
@@ -329,9 +331,9 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
     final newDoc = freshDoc.removePage(pageIndex);
     docNotifier.updateDocument(newDoc);
     pageManager.initializeFromDocument(
-          newDoc.pages,
-          currentIndex: newDoc.currentPageIndex,
-        );
+      newDoc.pages,
+      currentIndex: newDoc.currentPageIndex,
+    );
   }
 
   void _clearPage(BuildContext context) {
@@ -356,9 +358,11 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
-              historyManager.execute(ClearLayerCommand(layerIndex: doc.activeLayerIndex));
+              historyManager
+                  .execute(ClearLayerCommand(layerIndex: doc.activeLayerIndex));
             },
-            style: TextButton.styleFrom(foregroundColor: Theme.of(ctx).colorScheme.error),
+            style: TextButton.styleFrom(
+                foregroundColor: Theme.of(ctx).colorScheme.error),
             child: const Text('Temizle'),
           ),
         ],
@@ -369,7 +373,8 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final int pageIndex = widget.pageIndex ?? ref.watch(currentPageIndexProvider);
+    final int pageIndex =
+        widget.pageIndex ?? ref.watch(currentPageIndexProvider);
     final pageCount = ref.watch(pageCountProvider);
     final doc = ref.watch(documentProvider);
     final isBookmarked = doc.pages[pageIndex].isBookmarked;
@@ -457,7 +462,8 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
             icon: ElyanotesIcons.goToPage,
             label: 'Sayfaya git',
             compact: c,
-            trailing: pageOptionsChevronTrailing(cs, '${pageIndex + 1} / $pageCount', Theme.of(context).textTheme),
+            trailing: pageOptionsChevronTrailing(cs,
+                '${pageIndex + 1} / $pageCount', Theme.of(context).textTheme),
             onTap: () => _showGoToPageDialog(context),
           ),
           PageOptionsMenuItem(

@@ -30,7 +30,8 @@ class SelectionClipboardData {
 }
 
 /// Provider for in-memory selection clipboard.
-final selectionClipboardProvider = StateProvider<SelectionClipboardData?>((ref) {
+final selectionClipboardProvider =
+    StateProvider<SelectionClipboardData?>((ref) {
   return null;
 });
 

@@ -71,7 +71,7 @@ void main() {
   group('DocumentsEmptySearchResult', () {
     testWidgets('should_render_without_error', (tester) async {
       await tester.pumpWidget(
-        ProviderScope(
+        const ProviderScope(
           child: MaterialApp(
             home: Scaffold(
               body: DocumentsEmptySearchResult(query: 'test'),

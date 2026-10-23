@@ -75,28 +75,40 @@ class _GoogleLogoPainter extends CustomPainter {
     paint.color = const Color(0xFF4285F4);
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius - strokeWidth / 2),
-      -0.4, -1.2, false, paint,
+      -0.4,
+      -1.2,
+      false,
+      paint,
     );
 
     // Green (bottom-right arc)
     paint.color = const Color(0xFF34A853);
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius - strokeWidth / 2),
-      0.4, 1.2, false, paint,
+      0.4,
+      1.2,
+      false,
+      paint,
     );
 
     // Yellow (bottom-left arc)
     paint.color = const Color(0xFFFBBC05);
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius - strokeWidth / 2),
-      1.6, 1.0, false, paint,
+      1.6,
+      1.0,
+      false,
+      paint,
     );
 
     // Red (top-left arc)
     paint.color = const Color(0xFFEA4335);
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: radius - strokeWidth / 2),
-      -1.6, -1.0, false, paint,
+      -1.6,
+      -1.0,
+      false,
+      paint,
     );
 
     // Horizontal bar (blue)
@@ -105,8 +117,10 @@ class _GoogleLogoPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
     canvas.drawRect(
       Rect.fromLTRB(
-        center.dx, center.dy - strokeWidth / 2,
-        size.width, center.dy + strokeWidth / 2,
+        center.dx,
+        center.dy - strokeWidth / 2,
+        size.width,
+        center.dy + strokeWidth / 2,
       ),
       barPaint,
     );

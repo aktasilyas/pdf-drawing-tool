@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:phosphor_icons/phosphor_icons.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'package:drawing_ui/src/widgets/pdf_import_dialog.dart';
 
 void main() {
@@ -79,7 +81,8 @@ void main() {
       expect(find.text('Import PDF'), findsNothing);
     });
 
-    testWidgets('should disable import button when no file selected', (tester) async {
+    testWidgets('should disable import button when no file selected',
+        (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -143,17 +146,21 @@ void main() {
       );
 
       // Initially all pages should be selected
-      final allPagesRadio = find.byType(RadioListTile<PDFImportMode>).first;
-      RadioListTile<PDFImportMode> radioWidget = tester.widget(allPagesRadio);
-      expect(radioWidget.value, PDFImportMode.allPages);
+      final radios = find.byType(RadioListTile<PDFImportMode>);
+      RadioGroup<PDFImportMode> group() =>
+          tester.widget(find.byType(RadioGroup<PDFImportMode>));
+      expect(
+        tester.widget<RadioListTile<PDFImportMode>>(radios.first).value,
+        PDFImportMode.allPages,
+      );
+      expect(group().groupValue, PDFImportMode.allPages);
 
       // Tap on page range option
       await tester.tap(find.text('Select page range'));
       await tester.pump();
 
       // Now page range should be selected
-      RadioListTile<PDFImportMode> updatedWidget = tester.widget(allPagesRadio.at(1));
-      expect(updatedWidget.selected, true);
+      expect(group().groupValue, PDFImportMode.pageRange);
     });
   });
 
@@ -194,7 +201,8 @@ void main() {
         ),
       );
 
-      final selectButton = find.widgetWithText(ElevatedButton, 'Select PDF File');
+      final selectButton =
+          find.widgetWithText(ElevatedButton, 'Select PDF File');
       final cancelButton = find.widgetWithText(TextButton, 'Cancel');
       final importButton = find.widgetWithText(ElevatedButton, 'Import');
 
@@ -230,7 +238,11 @@ void main() {
         ),
       );
 
-      expect(find.byIcon(Icons.error_outline), findsOneWidget);
+      expect(
+          find.byWidgetPredicate(
+            (w) => w is PhosphorIcon && w.icon == ElyanotesIcons.warningCircle,
+          ),
+          findsOneWidget);
     });
 
     testWidgets('should allow retry after error', (tester) async {
@@ -245,8 +257,9 @@ void main() {
       );
 
       expect(find.text('Select PDF File'), findsOneWidget);
-      
-      final selectButton = find.widgetWithText(ElevatedButton, 'Select PDF File');
+
+      final selectButton =
+          find.widgetWithText(ElevatedButton, 'Select PDF File');
       expect(tester.widget<ElevatedButton>(selectButton).onPressed, isNotNull);
     });
   });

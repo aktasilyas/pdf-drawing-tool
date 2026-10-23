@@ -75,8 +75,7 @@ class AIChatNotifier extends StateNotifier<AIChatState> {
         conversationId: existingConversationId,
       );
       try {
-        final messages =
-            await _repository.getMessages(existingConversationId);
+        final messages = await _repository.getMessages(existingConversationId);
         logger.d('[AIChatNotifier] Loaded ${messages.length} messages');
         state = state.copyWith(messages: messages, isLoading: false);
       } catch (e, st) {

@@ -50,9 +50,9 @@ class EditorScreen extends ConsumerWidget {
           ref.read(documentProvider.notifier).updateDocument(document);
           ref.read(currentDocumentProvider.notifier).state = document;
           ref.read(pageManagerProvider.notifier).initializeFromDocument(
-            document.pages,
-            currentIndex: document.currentPageIndex,
-          );
+                document.pages,
+                currentIndex: document.currentPageIndex,
+              );
 
           // Set page trash callback for soft-delete support
           ref.read(pageTrashCallbackProvider.notifier).state =
@@ -73,12 +73,13 @@ class EditorScreen extends ConsumerWidget {
             final screenSize = MediaQuery.of(context).size;
             final currentPage = document.currentPage;
             if (currentPage != null) {
-              final pageSize = Size(currentPage.size.width, currentPage.size.height);
+              final pageSize =
+                  Size(currentPage.size.width, currentPage.size.height);
 
               ref.read(canvasTransformProvider.notifier).initializeForPage(
-                viewportSize: screenSize,
-                pageSize: pageSize,
-              );
+                    viewportSize: screenSize,
+                    pageSize: pageSize,
+                  );
             }
           }
         });
@@ -153,12 +154,14 @@ class EditorScreen extends ConsumerWidget {
     final controller = TextEditingController(text: document.title);
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: isDark ? colorScheme.surfaceContainerHighest : colorScheme.surface,
-        title: Text('Yeniden Adlandır', style: GoogleFonts.sourceSerif4(color: colorScheme.onSurface)),
+        backgroundColor:
+            isDark ? colorScheme.surfaceContainerHighest : colorScheme.surface,
+        title: Text('Yeniden Adlandır',
+            style: GoogleFonts.sourceSerif4(color: colorScheme.onSurface)),
         content: TextField(
           controller: controller,
           style: GoogleFonts.sourceSerif4(color: colorScheme.onSurface),
@@ -207,9 +210,8 @@ class EditorScreen extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        backgroundColor: isDark
-            ? colorScheme.surfaceContainerHighest
-            : colorScheme.surface,
+        backgroundColor:
+            isDark ? colorScheme.surfaceContainerHighest : colorScheme.surface,
         title: Text('Çöpe Taşı',
             style: GoogleFonts.sourceSerif4(color: colorScheme.onSurface)),
         content: Text(

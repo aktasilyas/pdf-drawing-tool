@@ -133,7 +133,8 @@ class ThumbnailGenerator {
       case BackgroundType.template:
         if (background.templatePattern != null) {
           _drawTemplatePattern(
-            canvas, pageSize,
+            canvas,
+            pageSize,
             background.templatePattern!,
             background.templateSpacingMm ?? 8.0,
             background.templateLineWidth ?? 0.5,
@@ -153,7 +154,9 @@ class ThumbnailGenerator {
 
   /// Loads cover image from assets and draws it on canvas.
   static Future<void> _renderCoverImage(
-    Canvas canvas, Size size, String? coverId,
+    Canvas canvas,
+    Size size,
+    String? coverId,
   ) async {
     if (coverId == null) return;
     final cover = CoverRegistry.byId(coverId);
@@ -317,8 +320,12 @@ class ThumbnailGenerator {
 
       return pageImage?.bytes;
     } finally {
-      try { await pdfPage?.close(); } catch (_) {}
-      try { await document?.close(); } catch (_) {}
+      try {
+        await pdfPage?.close();
+      } catch (_) {}
+      try {
+        await document?.close();
+      } catch (_) {}
     }
   }
 

@@ -67,8 +67,7 @@ class _PageGridItemState extends ConsumerState<PageGridItem> {
     final doc = ref.read(documentProvider);
     final page = doc.pages[widget.index];
     final updated = page.copyWith(isBookmarked: !page.isBookmarked);
-    final newPages = List<core.Page>.from(doc.pages)
-      ..[widget.index] = updated;
+    final newPages = List<core.Page>.from(doc.pages)..[widget.index] = updated;
     final newDoc = doc.copyWith(pages: newPages);
     ref.read(documentProvider.notifier).updateDocument(newDoc);
     ref.read(pageManagerProvider.notifier).initializeFromDocument(
@@ -239,7 +238,8 @@ class _AddPageCellState extends State<AddPageCell> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  PhosphorIcon(ElyanotesIcons.plus, size: 24, color: cs.primary),
+                  PhosphorIcon(ElyanotesIcons.plus,
+                      size: 24, color: cs.primary),
                   const SizedBox(height: 4),
                   Text(
                     'Sayfa ekle',

@@ -145,7 +145,8 @@ class SelectionUiState {
       rotation: rotation ?? this.rotation,
       scaleX: scaleX ?? this.scaleX,
       scaleY: scaleY ?? this.scaleY,
-      activeHandle: clearActiveHandle ? null : (activeHandle ?? this.activeHandle),
+      activeHandle:
+          clearActiveHandle ? null : (activeHandle ?? this.activeHandle),
       showMenu: showMenu ?? this.showMenu,
     );
   }

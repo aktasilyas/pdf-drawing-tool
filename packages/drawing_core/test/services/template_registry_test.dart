@@ -99,27 +99,36 @@ void main() {
 
     group('getByCategory', () {
       test('returns correct templates for basic', () {
-        final templates = TemplateRegistry.getByCategory(TemplateCategory.basic);
+        final templates =
+            TemplateRegistry.getByCategory(TemplateCategory.basic);
         expect(templates.length, 8);
-        expect(templates.every((t) => t.category == TemplateCategory.basic), true);
+        expect(
+            templates.every((t) => t.category == TemplateCategory.basic), true);
       });
 
       test('returns correct templates for productivity', () {
-        final templates = TemplateRegistry.getByCategory(TemplateCategory.productivity);
+        final templates =
+            TemplateRegistry.getByCategory(TemplateCategory.productivity);
         expect(templates.length, 2);
-        expect(templates.every((t) => t.category == TemplateCategory.productivity), true);
+        expect(
+            templates.every((t) => t.category == TemplateCategory.productivity),
+            true);
       });
 
       test('returns correct templates for creative', () {
-        final templates = TemplateRegistry.getByCategory(TemplateCategory.creative);
+        final templates =
+            TemplateRegistry.getByCategory(TemplateCategory.creative);
         expect(templates.length, 5);
-        expect(templates.every((t) => t.category == TemplateCategory.creative), true);
+        expect(templates.every((t) => t.category == TemplateCategory.creative),
+            true);
       });
 
       test('returns correct templates for special', () {
-        final templates = TemplateRegistry.getByCategory(TemplateCategory.special);
+        final templates =
+            TemplateRegistry.getByCategory(TemplateCategory.special);
         expect(templates.length, 6);
-        expect(templates.every((t) => t.category == TemplateCategory.special), true);
+        expect(templates.every((t) => t.category == TemplateCategory.special),
+            true);
       });
 
       test('should have templates for all 8 categories', () {
@@ -150,17 +159,21 @@ void main() {
       test('returns templates with blank pattern', () {
         final templates = TemplateRegistry.getByPattern(TemplatePattern.blank);
         expect(templates.length, greaterThan(0));
-        expect(templates.every((t) => t.pattern == TemplatePattern.blank), true);
+        expect(
+            templates.every((t) => t.pattern == TemplatePattern.blank), true);
       });
 
       test('returns templates with medium lines pattern', () {
-        final templates = TemplateRegistry.getByPattern(TemplatePattern.mediumLines);
+        final templates =
+            TemplateRegistry.getByPattern(TemplatePattern.mediumLines);
         expect(templates.length, greaterThan(0));
-        expect(templates.every((t) => t.pattern == TemplatePattern.mediumLines), true);
+        expect(templates.every((t) => t.pattern == TemplatePattern.mediumLines),
+            true);
       });
 
       test('returns templates with cornell pattern', () {
-        final templates = TemplateRegistry.getByPattern(TemplatePattern.cornell);
+        final templates =
+            TemplateRegistry.getByPattern(TemplatePattern.cornell);
         expect(templates.length, greaterThanOrEqualTo(1));
         expect(templates.any((t) => t.id == 'cornell'), true);
       });
@@ -209,7 +222,7 @@ void main() {
       test('all templates have unique IDs', () {
         final ids = <String>{};
         for (final template in TemplateRegistry.all) {
-          expect(ids.contains(template.id), false, 
+          expect(ids.contains(template.id), false,
               reason: 'Duplicate ID: ${template.id}');
           ids.add(template.id);
         }
@@ -260,8 +273,7 @@ void main() {
       });
 
       test('education templates should exist', () {
-        final edu =
-            TemplateRegistry.getByCategory(TemplateCategory.education);
+        final edu = TemplateRegistry.getByCategory(TemplateCategory.education);
         expect(edu.length, 3);
       });
 

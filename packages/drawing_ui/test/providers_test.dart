@@ -18,7 +18,9 @@ void main() {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
-      container.read(currentToolProvider.notifier).selectTool(ToolType.highlighter);
+      container
+          .read(currentToolProvider.notifier)
+          .selectTool(ToolType.highlighter);
       expect(container.read(currentToolProvider), ToolType.highlighter);
     });
   });
@@ -123,12 +125,12 @@ void main() {
   });
 
   group('Eraser Settings Provider', () {
-    test('stroke mode is default', () {
+    test('pixel mode is default', () {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
       final settings = container.read(eraserSettingsProvider);
-      expect(settings.mode, EraserMode.stroke);
+      expect(settings.mode, EraserMode.pixel);
     });
 
     test('can change eraser mode', () {
@@ -319,15 +321,15 @@ void main() {
       await container.read(toolbarConfigProvider.notifier).reorderTools(0, 3);
       await container
           .read(toolbarConfigProvider.notifier)
-          .toggleToolVisibility(ToolType.brushPen);
+          .toggleToolVisibility(ToolType.shapes);
 
       // Reset
       await container.read(toolbarConfigProvider.notifier).resetToDefault();
 
       final config = container.read(toolbarConfigProvider);
-      final brushPenConfig =
-          config.tools.firstWhere((t) => t.toolType == ToolType.brushPen);
-      expect(brushPenConfig.isVisible, true);
+      final shapesConfig =
+          config.tools.firstWhere((t) => t.toolType == ToolType.shapes);
+      expect(shapesConfig.isVisible, true);
     });
   });
 

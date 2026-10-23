@@ -51,9 +51,8 @@ class EditorBody extends ConsumerWidget {
       onDeleteDocument: onDeleteDocument,
       onAIPressed: () => _toggleAI(ref, isAIOpen),
       onDocumentChanged: onDocumentChanged,
-      externalLeftSidebar: isSidebar
-          ? AIChatSidebar(onClose: () => _closeAI(ref))
-          : null,
+      externalLeftSidebar:
+          isSidebar ? AIChatSidebar(onClose: () => _closeAI(ref)) : null,
       isExternalLeftSidebarOpen: isSidebar && isAIOpen,
       externalLeftSidebarWidth: kAISidebarWidth,
       onExternalLeftSidebarClose: () => _closeAI(ref),

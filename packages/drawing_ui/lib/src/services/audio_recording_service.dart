@@ -30,13 +30,11 @@ class AudioRecordingService {
 
   /// Called when recording is auto-stopped due to [maxDuration].
   /// Receives the saved file path (null if save failed) and elapsed duration.
-  final void Function(String? filePath, Duration elapsed)?
-      onMaxDurationReached;
+  final void Function(String? filePath, Duration elapsed)? onMaxDurationReached;
 
   final AudioRecorder _recorder = AudioRecorder();
 
-  final _stateController =
-      StreamController<AudioRecordingState>.broadcast();
+  final _stateController = StreamController<AudioRecordingState>.broadcast();
   final _durationController = StreamController<Duration>.broadcast();
 
   Timer? _timer;

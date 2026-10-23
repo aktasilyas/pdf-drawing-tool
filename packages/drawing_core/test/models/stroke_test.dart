@@ -93,8 +93,10 @@ void main() {
         final stroke = Stroke.create(style: defaultStyle);
         final after = DateTime.now();
 
-        expect(stroke.createdAt.isAfter(before) || stroke.createdAt == before, true);
-        expect(stroke.createdAt.isBefore(after) || stroke.createdAt == after, true);
+        expect(stroke.createdAt.isAfter(before) || stroke.createdAt == before,
+            true);
+        expect(stroke.createdAt.isBefore(after) || stroke.createdAt == after,
+            true);
       });
     });
 
@@ -378,7 +380,13 @@ void main() {
         final json = {
           'id': 'restored-id',
           'points': [
-            {'x': 10.0, 'y': 20.0, 'pressure': 0.5, 'tilt': 0.0, 'timestamp': 0},
+            {
+              'x': 10.0,
+              'y': 20.0,
+              'pressure': 0.5,
+              'tilt': 0.0,
+              'timestamp': 0
+            },
           ],
           'style': {
             'color': 0xFF000000,

@@ -85,8 +85,10 @@ void main() {
       });
 
       test('clamps opacity to valid range', () {
-        final tooLow = StrokeStyle(color: 0xFF000000, thickness: 2.0, opacity: -0.5);
-        final tooHigh = StrokeStyle(color: 0xFF000000, thickness: 2.0, opacity: 1.5);
+        final tooLow =
+            StrokeStyle(color: 0xFF000000, thickness: 2.0, opacity: -0.5);
+        final tooHigh =
+            StrokeStyle(color: 0xFF000000, thickness: 2.0, opacity: 1.5);
 
         expect(tooLow.opacity, 0.0);
         expect(tooHigh.opacity, 1.0);

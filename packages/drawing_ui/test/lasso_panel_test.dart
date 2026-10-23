@@ -16,7 +16,8 @@ void main() {
         ),
       );
 
-      expect(find.text('Kement'), findsOneWidget);
+      // Title reflects the current mode (freeform by default).
+      expect(find.text('Serbest Seçim'), findsOneWidget);
     });
 
     testWidgets('renders mode selector with two options', (tester) async {
@@ -30,9 +31,10 @@ void main() {
         ),
       );
 
-      // New compact mode labels
-      expect(find.text('Serbest'), findsOneWidget);
-      expect(find.text('Dikdörtgen'), findsOneWidget);
+      // Mode selector is icon-based: selected freeform uses the regular
+      // lasso icon, unselected rectangle uses the light bounding box icon.
+      expect(find.byIcon(PhosphorIconsRegular.lasso), findsOneWidget);
+      expect(find.byIcon(PhosphorIconsLight.boundingBox), findsOneWidget);
     });
 
     testWidgets('renders all 8 selectable type chips', (tester) async {
@@ -48,7 +50,8 @@ void main() {
 
       // Check all Turkish chip labels (new compact names)
       expect(find.text('Şekil'), findsOneWidget);
-      expect(find.text('Resim'), findsOneWidget); // Changed from "Resim/Çıkartma"
+      expect(
+          find.text('Resim'), findsOneWidget); // Changed from "Resim/Çıkartma"
       expect(find.text('Bant'), findsOneWidget);
       expect(find.text('Metin'), findsOneWidget); // Changed from "Metin kutusu"
       expect(find.text('El yazısı'), findsOneWidget);
@@ -105,12 +108,14 @@ void main() {
       // Initially freeform
       expect(find.text('Mode: freeform'), findsOneWidget);
 
-      // Tap rectangle option
-      await tester.tap(find.text('Dikdörtgen'));
+      // Tap rectangle option (icon-based selector)
+      await tester.tap(find.byIcon(PhosphorIconsLight.boundingBox));
       await tester.pump();
 
-      // Should be rectangle now
+      // Should be rectangle now, and the title follows the mode
       expect(find.text('Mode: rectangle'), findsOneWidget);
+      expect(find.text('Dikdörtgen Seçim'), findsOneWidget);
+      expect(find.byIcon(PhosphorIconsRegular.boundingBox), findsOneWidget);
     });
 
     testWidgets('highlighter toggle is OFF by default', (tester) async {
@@ -121,8 +126,9 @@ void main() {
               body: Consumer(
                 builder: (context, ref, _) {
                   final settings = ref.watch(lassoSettingsProvider);
-                  final highlighterOn = 
-                      settings.selectableTypes[SelectableType.highlighter] ?? false;
+                  final highlighterOn =
+                      settings.selectableTypes[SelectableType.highlighter] ??
+                          false;
                   return Column(
                     children: [
                       Text('Highlighter: $highlighterOn'),
@@ -148,7 +154,7 @@ void main() {
               body: Consumer(
                 builder: (context, ref, _) {
                   final settings = ref.watch(lassoSettingsProvider);
-                  final shapeOn = 
+                  final shapeOn =
                       settings.selectableTypes[SelectableType.shape] ?? false;
                   return Column(
                     children: [
@@ -175,7 +181,7 @@ void main() {
               body: Consumer(
                 builder: (context, ref, _) {
                   final settings = ref.watch(lassoSettingsProvider);
-                  final shapeOn = 
+                  final shapeOn =
                       settings.selectableTypes[SelectableType.shape] ?? false;
                   return Column(
                     children: [
@@ -235,7 +241,7 @@ void main() {
       addTearDown(container.dispose);
 
       final settings = container.read(lassoSettingsProvider);
-      
+
       expect(settings.selectableTypes[SelectableType.shape], true);
       expect(settings.selectableTypes[SelectableType.imageSticker], true);
       expect(settings.selectableTypes[SelectableType.tape], true);
@@ -250,8 +256,10 @@ void main() {
       final container = ProviderContainer();
       addTearDown(container.dispose);
 
-      container.read(lassoSettingsProvider.notifier).setMode(LassoMode.rectangle);
-      
+      container
+          .read(lassoSettingsProvider.notifier)
+          .setMode(LassoMode.rectangle);
+
       expect(container.read(lassoSettingsProvider).mode, LassoMode.rectangle);
     });
 
@@ -261,16 +269,21 @@ void main() {
 
       // Initially shape is ON
       expect(
-        container.read(lassoSettingsProvider).selectableTypes[SelectableType.shape],
+        container
+            .read(lassoSettingsProvider)
+            .selectableTypes[SelectableType.shape],
         true,
       );
 
       // Turn it OFF
-      container.read(lassoSettingsProvider.notifier)
+      container
+          .read(lassoSettingsProvider.notifier)
           .setSelectableType(SelectableType.shape, false);
-      
+
       expect(
-        container.read(lassoSettingsProvider).selectableTypes[SelectableType.shape],
+        container
+            .read(lassoSettingsProvider)
+            .selectableTypes[SelectableType.shape],
         false,
       );
     });
@@ -280,16 +293,20 @@ void main() {
       addTearDown(container.dispose);
 
       // Turn all OFF
-      container.read(lassoSettingsProvider.notifier).setAllSelectableTypes(false);
-      
+      container
+          .read(lassoSettingsProvider.notifier)
+          .setAllSelectableTypes(false);
+
       final settings = container.read(lassoSettingsProvider);
       for (final type in SelectableType.values) {
         expect(settings.selectableTypes[type], false);
       }
 
       // Turn all ON
-      container.read(lassoSettingsProvider.notifier).setAllSelectableTypes(true);
-      
+      container
+          .read(lassoSettingsProvider.notifier)
+          .setAllSelectableTypes(true);
+
       final settingsOn = container.read(lassoSettingsProvider);
       for (final type in SelectableType.values) {
         expect(settingsOn.selectableTypes[type], true);

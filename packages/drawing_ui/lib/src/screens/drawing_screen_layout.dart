@@ -44,31 +44,41 @@ Widget buildDrawingCanvasArea({
   VoidCallback? onDragReverted,
   Widget? addPagePreview,
 }) {
-
   // Core canvas content: background + drawing canvas (wrapped in transition)
   Widget canvasContent = Stack(
     children: [
-      Positioned.fill(child: RepaintBoundary(child: CustomPaint(
-        painter: InfiniteBackgroundPainter(background: currentPage.background,
-            zoom: transform.zoom, offset: transform.offset, colorScheme: colorScheme),
-        size: Size.infinite))),
-      Positioned.fill(child: DrawingCanvas(
+      Positioned.fill(
+          child: RepaintBoundary(
+              child: CustomPaint(
+                  painter: InfiniteBackgroundPainter(
+                      background: currentPage.background,
+                      zoom: transform.zoom,
+                      offset: transform.offset,
+                      colorScheme: colorScheme),
+                  size: Size.infinite))),
+      Positioned.fill(
+          child: DrawingCanvas(
         canvasMode: canvasMode,
         isReadOnly: isReadOnly,
-        onPageSwipe: isReadOnly ? null : (direction) {
-          final idx = ref.read(currentPageIndexProvider);
-          final count = ref.read(pageCountProvider);
-          final target = idx + direction;
-          if (target >= 0 && target < count) {
-            (onPageChanged ?? (_) {})(target);
-          }
-        },
+        onPageSwipe: isReadOnly
+            ? null
+            : (direction) {
+                final idx = ref.read(currentPageIndexProvider);
+                final count = ref.read(pageCountProvider);
+                final target = idx + direction;
+                if (target >= 0 && target < count) {
+                  (onPageChanged ?? (_) {})(target);
+                }
+              },
         onPageSwipeDragBegin: isReadOnly || pageTransitionKey == null
-            ? null : () => pageTransitionKey.currentState?.beginDrag(),
+            ? null
+            : () => pageTransitionKey.currentState?.beginDrag(),
         onPageSwipeDragUpdate: isReadOnly || pageTransitionKey == null
-            ? null : (d) => pageTransitionKey.currentState?.updateDrag(d),
+            ? null
+            : (d) => pageTransitionKey.currentState?.updateDrag(d),
         onPageSwipeDragEnd: isReadOnly || pageTransitionKey == null
-            ? null : (v) => pageTransitionKey.currentState?.endDrag(v),
+            ? null
+            : (v) => pageTransitionKey.currentState?.endDrag(v),
       )),
     ],
   );
@@ -95,21 +105,27 @@ Widget buildDrawingCanvasArea({
       children: [
         Positioned.fill(child: canvasContent),
         if (!isReadOnly)
-          Positioned.fill(child: IgnorePointer(
+          Positioned.fill(
+              child: IgnorePointer(
             ignoring: ref.watch(activePanelProvider) == null,
-            child: GestureDetector(behavior: HitTestBehavior.translucent, onTap: onClosePanel,
+            child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: onClosePanel,
                 child: const SizedBox.expand()),
           )),
         if (!isReadOnly)
-          Positioned(left: penBoxPosition.dx, top: penBoxPosition.dy, child: FloatingPenBox(
-            position: penBoxPosition,
-            onPositionChanged: (delta) {
-              final p = penBoxPosition + delta;
-              onPenBoxPositionChanged(Offset(
-                p.dx.clamp(0, MediaQuery.of(context).size.width - 60),
-                p.dy.clamp(0, MediaQuery.of(context).size.height - 200)));
-            },
-          )),
+          Positioned(
+              left: penBoxPosition.dx,
+              top: penBoxPosition.dy,
+              child: FloatingPenBox(
+                position: penBoxPosition,
+                onPositionChanged: (delta) {
+                  final p = penBoxPosition + delta;
+                  onPenBoxPositionChanged(Offset(
+                      p.dx.clamp(0, MediaQuery.of(context).size.width - 60),
+                      p.dy.clamp(0, MediaQuery.of(context).size.height - 200)));
+                },
+              )),
         if (!isReadOnly && !isCompactMode) const FloatingUndoRedo(),
         if (!isReadOnly) const FloatingRecordingBar(),
         if (!isReadOnly) const FloatingExportProgress(),
@@ -119,11 +135,14 @@ Widget buildDrawingCanvasArea({
           Positioned.fill(
             child: Center(
               key: const ValueKey('zoom-indicator'),
-              child: ZoomIndicator(zoomPercentage: ref.watch(zoomPercentageProvider)),
+              child: ZoomIndicator(
+                  zoomPercentage: ref.watch(zoomPercentageProvider)),
             ),
           ),
         Positioned(
-          left: 0, right: 0, bottom: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
           child: PageIndicatorBar(onPageChanged: onPageChanged),
         ),
       ],
@@ -144,25 +163,23 @@ Widget buildDrawingCanvasArea({
   if (isReadOnly) {
     final isHoriz = scrollDirection == Axis.horizontal;
     return GestureDetector(
-      onHorizontalDragStart: isHoriz
-          ? (_) => pageTransitionKey?.currentState?.beginDrag()
-          : null,
+      onHorizontalDragStart:
+          isHoriz ? (_) => pageTransitionKey?.currentState?.beginDrag() : null,
       onHorizontalDragUpdate: isHoriz
           ? (d) => pageTransitionKey?.currentState?.updateDrag(d.delta.dx)
           : null,
       onHorizontalDragEnd: isHoriz
-          ? (d) => pageTransitionKey?.currentState
-              ?.endDrag(d.primaryVelocity ?? 0)
+          ? (d) =>
+              pageTransitionKey?.currentState?.endDrag(d.primaryVelocity ?? 0)
           : null,
-      onVerticalDragStart: !isHoriz
-          ? (_) => pageTransitionKey?.currentState?.beginDrag()
-          : null,
+      onVerticalDragStart:
+          !isHoriz ? (_) => pageTransitionKey?.currentState?.beginDrag() : null,
       onVerticalDragUpdate: !isHoriz
           ? (d) => pageTransitionKey?.currentState?.updateDrag(d.delta.dy)
           : null,
       onVerticalDragEnd: !isHoriz
-          ? (d) => pageTransitionKey?.currentState
-              ?.endDrag(d.primaryVelocity ?? 0)
+          ? (d) =>
+              pageTransitionKey?.currentState?.endDrag(d.primaryVelocity ?? 0)
           : null,
       child: canvasStack,
     );
@@ -188,7 +205,11 @@ class ZoomIndicator extends StatelessWidget {
           borderRadius: BorderRadius.circular(12),
           boxShadow: DrawingShadows.floating(brightness),
         ),
-        child: Text(zoomPercentage, style: Theme.of(context).textTheme.headlineMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.w600, letterSpacing: 1)),
+        child: Text(zoomPercentage,
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1)),
       ),
     );
   }
@@ -213,10 +234,10 @@ void handlePanelChange({
     panelController.hide();
   } else if (panel != ToolType.panZoom && panel != ToolType.toolbarSettings) {
     var anchorKey = penToolsSet.contains(panel)
-            ? penGroupButtonKey
-            : highlighterToolsSet.contains(panel)
-                ? highlighterGroupButtonKey
-                : toolButtonKeys[panel] ?? GlobalKey();
+        ? penGroupButtonKey
+        : highlighterToolsSet.contains(panel)
+            ? highlighterGroupButtonKey
+            : toolButtonKeys[panel] ?? GlobalKey();
     // Fallback for tools hidden in the overflow menu: their key has no
     // context because no ToolButton widget exists for them.  Use the last
     // visible tool button as anchor (closest to the overflow icon).
@@ -246,11 +267,18 @@ void handlePanelChange({
 void openAIPanel(BuildContext context) {
   final surface = Theme.of(context).colorScheme.surface;
   showModalBottomSheet(
-    context: context, isScrollControlled: true, backgroundColor: Colors.transparent,
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
     builder: (context) => DraggableScrollableSheet(
-      initialChildSize: 0.6, maxChildSize: 0.9, minChildSize: 0.3,
+      initialChildSize: 0.6,
+      maxChildSize: 0.9,
+      minChildSize: 0.3,
       builder: (_, __) => Container(
-        decoration: BoxDecoration(color: surface, borderRadius: const BorderRadius.vertical(top: Radius.circular(16))),
+        decoration: BoxDecoration(
+            color: surface,
+            borderRadius:
+                const BorderRadius.vertical(top: Radius.circular(16))),
         child: const AIAssistantPanel(),
       ),
     ),

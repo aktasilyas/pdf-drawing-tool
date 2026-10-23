@@ -32,8 +32,7 @@ void _showTrashDocumentMenu(
   DocumentInfo document,
 ) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
-  final surfaceColor =
-      isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+  final surfaceColor = isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
 
   showModalBottomSheet(
     context: context,
@@ -52,17 +51,13 @@ void _showTrashDocumentMenu(
             label: 'Kurtar',
             onTap: () async {
               Navigator.pop(ctx);
-              final controller =
-                  ref.read(documentsControllerProvider.notifier);
-              final result =
-                  await controller.restoreFromTrash(document.id);
+              final controller = ref.read(documentsControllerProvider.notifier);
+              final result = await controller.restoreFromTrash(document.id);
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                      result
-                          ? 'Belge geri yüklendi'
-                          : 'Belge geri yüklenemedi',
+                      result ? 'Belge geri yüklendi' : 'Belge geri yüklenemedi',
                     ),
                     backgroundColor:
                         result ? null : Theme.of(context).colorScheme.error,
@@ -105,8 +100,7 @@ void _showNormalDocumentMenu(
   DocumentInfo document,
 ) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
-  final surfaceColor =
-      isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+  final surfaceColor = isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
 
   showModalBottomSheet(
     context: context,
@@ -158,17 +152,13 @@ void _showNormalDocumentMenu(
                 );
                 return;
               }
-              final controller =
-                  ref.read(documentsControllerProvider.notifier);
-              final result =
-                  await controller.duplicateDocument(document.id);
+              final controller = ref.read(documentsControllerProvider.notifier);
+              final result = await controller.duplicateDocument(document.id);
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                      result
-                          ? 'Belge çoğaltıldı'
-                          : 'Belge çoğaltılamadı',
+                      result ? 'Belge çoğaltıldı' : 'Belge çoğaltılamadı',
                     ),
                     backgroundColor:
                         result ? null : Theme.of(context).colorScheme.error,
@@ -206,9 +196,8 @@ void _showNormalDocumentMenu(
           _softDivider(isDark),
           MenuTile(
             icon: document.isFavorite ? Icons.star : Icons.star_outline,
-            label: document.isFavorite
-                ? 'Favorilerden Kaldır'
-                : 'Favorilere Ekle',
+            label:
+                document.isFavorite ? 'Favorilerden Kaldır' : 'Favorilere Ekle',
             onTap: () {
               Navigator.pop(ctx);
               ref
@@ -242,8 +231,7 @@ void showTrashedPageMenu(
   TrashedPage trashedPage,
 ) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
-  final surfaceColor =
-      isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+  final surfaceColor = isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
   final textPrimary =
       isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
 
@@ -277,8 +265,7 @@ void showTrashedPageMenu(
             label: 'Kurtar',
             onTap: () async {
               Navigator.pop(ctx);
-              final controller =
-                  ref.read(documentsControllerProvider.notifier);
+              final controller = ref.read(documentsControllerProvider.notifier);
               final docExists = await controller
                   .trashedPageDocumentExists(trashedPage.sourceDocumentId);
               if (!docExists) {
@@ -298,9 +285,7 @@ void showTrashedPageMenu(
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                      result
-                          ? 'Sayfa geri yüklendi'
-                          : 'Sayfa geri yüklenemedi',
+                      result ? 'Sayfa geri yüklendi' : 'Sayfa geri yüklenemedi',
                     ),
                     backgroundColor:
                         result ? null : Theme.of(context).colorScheme.error,
@@ -389,9 +374,8 @@ Widget _softDivider(bool isDark) {
   return Divider(
     height: 0.5,
     thickness: 0.5,
-    color: isDark
-        ? AppColors.outlineVariantDark
-        : AppColors.outlineVariantLight,
+    color:
+        isDark ? AppColors.outlineVariantDark : AppColors.outlineVariantLight,
     indent: 56,
   );
 }
@@ -403,8 +387,7 @@ Future<bool?> _showDeleteConfirmDialog(
   required String message,
 }) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
-  final surfaceColor =
-      isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+  final surfaceColor = isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
   final textPrimary =
       isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
 

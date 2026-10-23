@@ -22,8 +22,7 @@ class AIStreamingBubble extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 16,
-            backgroundColor:
-                theme.colorScheme.secondary.withValues(alpha: 0.1),
+            backgroundColor: theme.colorScheme.secondary.withValues(alpha: 0.1),
             child: Icon(
               Icons.auto_awesome,
               size: 18,
@@ -34,8 +33,7 @@ class AIStreamingBubble extends StatelessWidget {
           Flexible(
             child: Container(
               constraints: const BoxConstraints(maxWidth: 600),
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 14, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
                 color: isDark
                     ? theme.colorScheme.surface
@@ -56,8 +54,7 @@ class AIStreamingBubble extends StatelessWidget {
                         MarkdownBody(
                           data: content,
                           styleSheet:
-                              MarkdownStyleSheet.fromTheme(theme)
-                                  .copyWith(
+                              MarkdownStyleSheet.fromTheme(theme).copyWith(
                             p: theme.textTheme.bodyMedium,
                           ),
                         ),

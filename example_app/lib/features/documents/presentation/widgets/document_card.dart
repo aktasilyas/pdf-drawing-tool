@@ -54,8 +54,10 @@ class DocumentCard extends ConsumerWidget {
           Expanded(child: _buildThumbnailCard(context, ref)),
           Padding(
             padding: const EdgeInsets.only(
-                top: AppSpacing.xs, bottom: AppSpacing.sm,
-                left: AppSpacing.sm, right: AppSpacing.sm),
+                top: AppSpacing.xs,
+                bottom: AppSpacing.sm,
+                left: AppSpacing.sm,
+                right: AppSpacing.sm),
             child: _buildInfoSection(context),
           ),
         ],
@@ -76,10 +78,10 @@ class DocumentCard extends ConsumerWidget {
     return Container(
       decoration: BoxDecoration(
         color: DocumentPaperColors.fromName(document.paperColor),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.card)),
-        border: isSelected
-            ? Border.all(color: AppColors.primary, width: 2)
-            : null,
+        borderRadius:
+            const BorderRadius.vertical(top: Radius.circular(AppRadius.card)),
+        border:
+            isSelected ? Border.all(color: AppColors.primary, width: 2) : null,
       ),
       child: Stack(
         children: [
@@ -135,8 +137,8 @@ class DocumentCard extends ConsumerWidget {
       child: Container(
         decoration: BoxDecoration(
           color: AppColors.primary.withValues(alpha: 0.1),
-          borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(AppRadius.card)),
+          borderRadius:
+              const BorderRadius.vertical(top: Radius.circular(AppRadius.card)),
         ),
       ),
     );

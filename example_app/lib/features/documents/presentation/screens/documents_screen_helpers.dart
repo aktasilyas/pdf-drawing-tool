@@ -225,8 +225,8 @@ List<String> getCurrentFolderIds(
       }
       if (searchQuery.isNotEmpty) {
         visible = visible
-            .where((f) =>
-                f.name.toLowerCase().contains(searchQuery.toLowerCase()))
+            .where(
+                (f) => f.name.toLowerCase().contains(searchQuery.toLowerCase()))
             .toList();
       }
       return visible.map((f) => f.id).toList();

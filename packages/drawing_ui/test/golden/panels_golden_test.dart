@@ -5,7 +5,8 @@ import 'package:drawing_ui/drawing_ui.dart';
 
 void main() {
   // Skip golden tests - UI has changed significantly and needs new goldens
-  group('Pen Settings Panel Golden Tests', skip: 'UI redesign - golden files need update', () {
+  group('Pen Settings Panel Golden Tests',
+      skip: 'UI redesign - golden files need update', () {
     testWidgets('pen settings panel layout', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
@@ -71,7 +72,8 @@ void main() {
     });
   });
 
-  group('Highlighter Panel Golden Tests', skip: 'UI redesign - golden files need update', () {
+  group('Highlighter Panel Golden Tests',
+      skip: 'UI redesign - golden files need update', () {
     testWidgets('highlighter panel layout', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
@@ -103,7 +105,8 @@ void main() {
     });
   });
 
-  group('Eraser Panel Golden Tests', skip: 'UI redesign - golden files need update', () {
+  group('Eraser Panel Golden Tests',
+      skip: 'UI redesign - golden files need update', () {
     testWidgets('eraser panel layout', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
@@ -135,7 +138,8 @@ void main() {
     });
   });
 
-  group('Shapes Panel Golden Tests', skip: 'UI redesign - golden files need update', () {
+  group('Shapes Panel Golden Tests',
+      skip: 'UI redesign - golden files need update', () {
     testWidgets('shapes panel layout', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
@@ -167,7 +171,8 @@ void main() {
     });
   });
 
-  group('AI Assistant Panel Golden Tests', skip: 'UI redesign - golden files need update', () {
+  group('AI Assistant Panel Golden Tests',
+      skip: 'UI redesign - golden files need update', () {
     testWidgets('AI panel initial state', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
@@ -199,7 +204,8 @@ void main() {
     });
   });
 
-  group('Sticker Panel Golden Tests', skip: 'UI redesign - golden files need update', () {
+  group('Sticker Panel Golden Tests',
+      skip: 'UI redesign - golden files need update', () {
     testWidgets('sticker panel layout', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
@@ -231,7 +237,8 @@ void main() {
     });
   });
 
-  group('Image Panel Golden Tests', skip: 'UI redesign - golden files need update', () {
+  group('Image Panel Golden Tests',
+      skip: 'UI redesign - golden files need update', () {
     testWidgets('image panel layout', (tester) async {
       await tester.pumpWidget(
         ProviderScope(

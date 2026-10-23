@@ -71,12 +71,8 @@ class ToolbarOverflowMenu extends ConsumerWidget {
               Text(
                 tool.displayName,
                 style: TextStyle(
-                  color: isSelected
-                      ? theme.toolbarIconSelectedColor
-                      : null,
-                  fontWeight: isSelected
-                      ? FontWeight.w600
-                      : FontWeight.normal,
+                  color: isSelected ? theme.toolbarIconSelectedColor : null,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 ),
               ),
             ],

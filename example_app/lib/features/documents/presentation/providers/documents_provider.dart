@@ -328,7 +328,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>> {
         documentType: documentType,
       );
 
-      return result.fold(
+      return await result.fold(
         (failure) {
           state = AsyncValue.error(failure, StackTrace.current);
           return null;
@@ -552,7 +552,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>> {
   Future<bool> restoreFromTrash(String id) async {
     try {
       final result = await _repository.restoreFromTrash(id);
-      return result.fold(
+      return await result.fold(
         (failure) {
           state = AsyncError(failure, StackTrace.current);
           return false;
@@ -573,7 +573,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>> {
   Future<bool> duplicateDocument(String id) async {
     try {
       final result = await _repository.duplicateDocument(id);
-      return result.fold(
+      return await result.fold(
         (failure) {
           state = AsyncError(failure, StackTrace.current);
           return false;
@@ -593,7 +593,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>> {
   Future<bool> permanentlyDeleteDocument(String id) async {
     try {
       final result = await _repository.permanentlyDelete(id);
-      return result.fold(
+      return await result.fold(
         (failure) {
           state = AsyncError(failure, StackTrace.current);
           return false;

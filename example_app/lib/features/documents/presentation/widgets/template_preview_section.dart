@@ -181,8 +181,7 @@ class TemplatePreviewSection extends StatelessWidget {
                   Text(
                     '${paperSize.isLandscape ? "Yatay" : "Dikey"}, '
                     '${_getPresetName(paperSize.preset)}',
-                    style: AppTypography.caption
-                        .copyWith(color: textSecondary),
+                    style: AppTypography.caption.copyWith(color: textSecondary),
                   ),
                   const SizedBox(width: AppSpacing.xxs),
                   Icon(Icons.keyboard_arrow_down,
@@ -205,14 +204,22 @@ class TemplatePreviewSection extends StatelessWidget {
 
   String _getPresetName(PaperSizePreset preset) {
     switch (preset) {
-      case PaperSizePreset.a4: return 'A4';
-      case PaperSizePreset.a5: return 'A5';
-      case PaperSizePreset.a6: return 'A6';
-      case PaperSizePreset.letter: return 'Letter';
-      case PaperSizePreset.legal: return 'Legal';
-      case PaperSizePreset.square: return 'Kare';
-      case PaperSizePreset.widescreen: return 'Geniş';
-      case PaperSizePreset.custom: return 'Özel';
+      case PaperSizePreset.a4:
+        return 'A4';
+      case PaperSizePreset.a5:
+        return 'A5';
+      case PaperSizePreset.a6:
+        return 'A6';
+      case PaperSizePreset.letter:
+        return 'Letter';
+      case PaperSizePreset.legal:
+        return 'Legal';
+      case PaperSizePreset.square:
+        return 'Kare';
+      case PaperSizePreset.widescreen:
+        return 'Geniş';
+      case PaperSizePreset.custom:
+        return 'Özel';
     }
   }
 }

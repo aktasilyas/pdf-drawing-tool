@@ -24,8 +24,7 @@ void main() {
         final selection = Selection.create(
           type: SelectionType.rectangle,
           selectedStrokeIds: ['stroke1'],
-          bounds:
-              const BoundingBox(left: 0, top: 0, right: 100, bottom: 100),
+          bounds: const BoundingBox(left: 0, top: 0, right: 100, bottom: 100),
         );
 
         container.read(selectionProvider.notifier).setSelection(selection);
@@ -39,8 +38,7 @@ void main() {
         final selection = Selection.create(
           type: SelectionType.rectangle,
           selectedStrokeIds: ['stroke1'],
-          bounds:
-              const BoundingBox(left: 0, top: 0, right: 100, bottom: 100),
+          bounds: const BoundingBox(left: 0, top: 0, right: 100, bottom: 100),
         );
 
         container.read(selectionProvider.notifier).setSelection(selection);
@@ -53,8 +51,7 @@ void main() {
         final selection = Selection.create(
           type: SelectionType.rectangle,
           selectedStrokeIds: ['stroke1'],
-          bounds:
-              const BoundingBox(left: 0, top: 0, right: 100, bottom: 100),
+          bounds: const BoundingBox(left: 0, top: 0, right: 100, bottom: 100),
         );
 
         container.read(selectionProvider.notifier).setSelection(selection);
@@ -78,8 +75,7 @@ void main() {
         final selection = Selection.create(
           type: SelectionType.rectangle,
           selectedStrokeIds: ['stroke1'],
-          bounds:
-              const BoundingBox(left: 0, top: 0, right: 100, bottom: 100),
+          bounds: const BoundingBox(left: 0, top: 0, right: 100, bottom: 100),
         );
 
         container.read(selectionProvider.notifier).setSelection(selection);
@@ -101,8 +97,7 @@ void main() {
         final selection = Selection.create(
           type: SelectionType.rectangle,
           selectedStrokeIds: ['stroke1'],
-          bounds:
-              const BoundingBox(left: 0, top: 0, right: 100, bottom: 100),
+          bounds: const BoundingBox(left: 0, top: 0, right: 100, bottom: 100),
         );
 
         container.read(selectionProvider.notifier).setSelection(selection);
@@ -118,8 +113,7 @@ void main() {
         final selection = Selection.create(
           type: SelectionType.rectangle,
           selectedStrokeIds: ['stroke1', 'stroke2', 'stroke3'],
-          bounds:
-              const BoundingBox(left: 0, top: 0, right: 100, bottom: 100),
+          bounds: const BoundingBox(left: 0, top: 0, right: 100, bottom: 100),
         );
 
         container.read(selectionProvider.notifier).setSelection(selection);
@@ -153,8 +147,7 @@ void main() {
         final selection = Selection.create(
           type: SelectionType.rectangle,
           selectedStrokeIds: ['stroke1', 'stroke2'],
-          bounds:
-              const BoundingBox(left: 0, top: 0, right: 100, bottom: 100),
+          bounds: const BoundingBox(left: 0, top: 0, right: 100, bottom: 100),
         );
 
         container.read(selectionProvider.notifier).setSelection(selection);
@@ -165,7 +158,8 @@ void main() {
     });
 
     group('selection tool providers', () {
-      test('default selection tool type is lasso (matches LassoMode.freeform)', () {
+      test('default selection tool type is lasso (matches LassoMode.freeform)',
+          () {
         // Default should be lasso to match LassoSettings.defaultSettings().mode = freeform
         expect(container.read(activeSelectionToolTypeProvider),
             equals(SelectionType.lasso));
@@ -189,14 +183,14 @@ void main() {
         expect(tool.selectionType, equals(SelectionType.rectangle));
       });
 
-      test('activeSelectionToolProvider returns lasso tool by default',
-          () {
+      test('activeSelectionToolProvider returns lasso tool by default', () {
         // Default should be lasso to match LassoSettings.defaultSettings().mode = freeform
         final tool = container.read(activeSelectionToolProvider);
         expect(tool.selectionType, equals(SelectionType.lasso));
       });
 
-      test('activeSelectionToolProvider returns rectangle tool when selected', () {
+      test('activeSelectionToolProvider returns rectangle tool when selected',
+          () {
         container.read(activeSelectionToolTypeProvider.notifier).state =
             SelectionType.rectangle;
 

@@ -17,7 +17,16 @@ class ColorSwatchGrid extends StatelessWidget {
   static List<List<Color>> _buildGrid() {
     const hues = [0.0, 30.0, 55.0, 120.0, 175.0, 210.0, 240.0, 275.0, 310.0];
     const levels = [
-      0.94, 0.86, 0.76, 0.66, 0.56, 0.46, 0.36, 0.26, 0.16, 0.08,
+      0.94,
+      0.86,
+      0.76,
+      0.66,
+      0.56,
+      0.46,
+      0.36,
+      0.26,
+      0.16,
+      0.08,
     ];
 
     return levels.map((l) {

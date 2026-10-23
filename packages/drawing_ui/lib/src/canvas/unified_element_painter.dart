@@ -80,7 +80,8 @@ class UnifiedElementPainter extends CustomPainter {
       // Paint in explicit order.
       for (final id in elementOrder) {
         painted.add(id);
-        if (_tryPaintElement(canvas, id, strokeMap, shapeMap, imageMap, textMap)) {
+        if (_tryPaintElement(
+            canvas, id, strokeMap, shapeMap, imageMap, textMap)) {
           continue;
         }
       }
@@ -303,8 +304,8 @@ class UnifiedElementPainter extends CustomPainter {
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.0;
       canvas.drawRect(
-        Rect.fromLTWH(text.x - 2, text.y - 2,
-            paragraph.maxIntrinsicWidth + 4, paragraph.height + 4),
+        Rect.fromLTWH(text.x - 2, text.y - 2, paragraph.maxIntrinsicWidth + 4,
+            paragraph.height + 4),
         paint,
       );
     }

@@ -80,7 +80,7 @@ class DrawingPoint extends Equatable {
       if (value is num) return value.toDouble();
       return defaultValue;
     }
-    
+
     int parseInt(dynamic value, int defaultValue) {
       if (value == null) return defaultValue;
       if (value is int) return value;
@@ -89,7 +89,7 @@ class DrawingPoint extends Equatable {
       if (value is num) return value.toInt();
       return defaultValue;
     }
-    
+
     return DrawingPoint(
       x: parseDouble(json['x'], 0.0),
       y: parseDouble(json['y'], 0.0),

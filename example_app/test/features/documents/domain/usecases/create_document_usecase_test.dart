@@ -6,7 +6,9 @@ import 'package:example_app/features/documents/documents.dart';
 import 'package:example_app/features/premium/premium.dart';
 
 class MockDocumentRepository extends Mock implements DocumentRepository {}
-class MockSubscriptionRepository extends Mock implements SubscriptionRepository {}
+
+class MockSubscriptionRepository extends Mock
+    implements SubscriptionRepository {}
 
 void main() {
   late CreateDocumentUseCase useCase;
@@ -114,7 +116,8 @@ void main() {
           )).called(1);
     });
 
-    test('should return failure when free user exceeds document limit', () async {
+    test('should return failure when free user exceeds document limit',
+        () async {
       // Arrange
       final existingDocs = List.generate(
         FreeTierLimits.maxDocuments,

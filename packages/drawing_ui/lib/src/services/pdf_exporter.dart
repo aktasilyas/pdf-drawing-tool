@@ -54,7 +54,9 @@ class PDFExporter {
   }
 
   Future<void> _exportPage(
-    PdfDocument doc, Page page, PDFExportOptions options,
+    PdfDocument doc,
+    Page page,
+    PDFExportOptions options,
   ) async {
     double pdfW, pdfH;
     if (options.isInfiniteCanvas) {
@@ -106,8 +108,12 @@ class PDFExporter {
   }
 
   Future<void> _renderLayer(
-    PdfGraphics g, PdfDocument doc, Layer layer,
-    double w, double h, PDFExportOptions options,
+    PdfGraphics g,
+    PdfDocument doc,
+    Layer layer,
+    double w,
+    double h,
+    PDFExportOptions options,
   ) async {
     final hasOpacity = layer.opacity < 1.0;
     if (hasOpacity) {
@@ -123,13 +129,17 @@ class PDFExporter {
   }
 
   Future<void> _renderRasterOverlay(
-    PdfGraphics g, PdfDocument doc, Layer layer,
-    double w, double h, PDFExportOptions options,
+    PdfGraphics g,
+    PdfDocument doc,
+    Layer layer,
+    double w,
+    double h,
+    PDFExportOptions options,
   ) async {
     final raw = await _renderLayerToRaw(layer, w, h, options);
     if (raw == null) return;
-    final img = PdfImage(doc,
-        image: raw.bytes, width: raw.width, height: raw.height);
+    final img =
+        PdfImage(doc, image: raw.bytes, width: raw.width, height: raw.height);
     g.drawImage(img, 0, 0, w, h);
   }
 
@@ -139,7 +149,10 @@ class PDFExporter {
 
   /// Renders layer content to raw RGBA pixels via Flutter Canvas.
   Future<_RawImageData?> _renderLayerToRaw(
-    Layer layer, double w, double h, PDFExportOptions options,
+    Layer layer,
+    double w,
+    double h,
+    PDFExportOptions options,
   ) async {
     final scale = _scaleFromDpi(options.quality.dpi);
     var renderW = (w * scale).toInt();
@@ -181,8 +194,12 @@ class PDFExporter {
   }
 
   Future<void> _embedPdfBackground(
-    PdfGraphics g, PdfDocument doc, Page page,
-    double w, double h, PDFExportOptions options,
+    PdfGraphics g,
+    PdfDocument doc,
+    Page page,
+    double w,
+    double h,
+    PDFExportOptions options,
   ) async {
     if (page.background.pdfPageIndex == null) return;
 
@@ -206,13 +223,15 @@ class PDFExporter {
     if (pngData == null) return;
     final raw = await _decodeToRawRgba(pngData);
     if (raw == null) return;
-    final img = PdfImage(doc,
-        image: raw.bytes, width: raw.width, height: raw.height);
+    final img =
+        PdfImage(doc, image: raw.bytes, width: raw.width, height: raw.height);
     g.drawImage(img, 0, 0, w, h);
   }
 
   Future<Uint8List?> _renderPdfPageAsJpeg(
-    String path, int index, double renderScale,
+    String path,
+    int index,
+    double renderScale,
   ) async {
     if (!await File(path).exists()) return null;
     pdfx.PdfDocument? pdfDoc;
@@ -228,8 +247,12 @@ class PDFExporter {
       );
       return img?.bytes;
     } finally {
-      try { await pg?.close(); } catch (_) {}
-      try { await pdfDoc?.close(); } catch (_) {}
+      try {
+        await pg?.close();
+      } catch (_) {}
+      try {
+        await pdfDoc?.close();
+      } catch (_) {}
     }
   }
 
@@ -241,16 +264,25 @@ class PDFExporter {
       maxX = maxX == null ? b.right : max(maxX!, b.right);
       maxY = maxY == null ? b.bottom : max(maxY!, b.bottom);
     }
+
     for (final layer in page.layers) {
       if (!layer.isVisible) continue;
       for (final stroke in layer.strokes) {
         final b = stroke.bounds;
         if (b != null) expand(b);
       }
-      for (final shape in layer.shapes) { expand(shape.bounds); }
-      for (final img in layer.images) { expand(img.bounds); }
-      for (final text in layer.texts) { expand(text.bounds); }
-      for (final note in layer.stickyNotes) { expand(note.bounds); }
+      for (final shape in layer.shapes) {
+        expand(shape.bounds);
+      }
+      for (final img in layer.images) {
+        expand(img.bounds);
+      }
+      for (final text in layer.texts) {
+        expand(text.bounds);
+      }
+      for (final note in layer.stickyNotes) {
+        expand(note.bounds);
+      }
     }
     if (minX == null) return null;
     return Rect.fromLTRB(minX!, minY!, maxX!, maxY!);
@@ -269,7 +301,10 @@ class PDFExporter {
       right = max(pageW, contentRect.right + padding);
       bottom = max(pageH, contentRect.bottom + padding);
     } else {
-      left = 0; top = 0; right = pageW; bottom = pageH;
+      left = 0;
+      top = 0;
+      right = pageW;
+      bottom = pageH;
     }
     return (
       width: right - left,

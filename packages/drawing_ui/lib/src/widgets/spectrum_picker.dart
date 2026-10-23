@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 /// Full-spectrum color picker: Hue × Saturation 2D area + Value slider.
 /// Optionally shows an opacity slider for highlighter tools.
 class SpectrumPicker extends StatelessWidget {

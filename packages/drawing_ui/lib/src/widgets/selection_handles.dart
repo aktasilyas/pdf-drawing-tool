@@ -91,8 +91,8 @@ class _SelectionHandlesState extends ConsumerState<SelectionHandles> {
       (SelectionHandle.middleLeft, Offset(b.left, cy)),
       (SelectionHandle.middleRight, Offset(b.right, cy)),
     ];
-    handles.sort(
-        (a, b) => (pt - a.$2).distance.compareTo((pt - b.$2).distance));
+    handles
+        .sort((a, b) => (pt - a.$2).distance.compareTo((pt - b.$2).distance));
     return (pt - handles.first.$2).distance <= _hitR ? handles.first : null;
   }
 

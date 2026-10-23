@@ -19,7 +19,8 @@ void main() {
 
     test('copyWith creates new instance with updated values', () {
       const original = CanvasTransform(zoom: 1.0, offset: Offset.zero);
-      final updated = original.copyWith(zoom: 2.0, offset: const Offset(100, 50));
+      final updated =
+          original.copyWith(zoom: 2.0, offset: const Offset(100, 50));
 
       expect(updated.zoom, 2.0);
       expect(updated.offset, const Offset(100, 50));
@@ -76,7 +77,8 @@ void main() {
       const t1 = CanvasTransform(zoom: 1.5, offset: Offset(10, 20));
       const t2 = CanvasTransform(zoom: 1.5, offset: Offset(10, 20));
       const t3 = CanvasTransform(zoom: 2.0, offset: Offset(10, 20));
-      const t4 = CanvasTransform(zoom: 1.5, offset: Offset(10, 20), baselineZoom: 0.9);
+      const t4 =
+          CanvasTransform(zoom: 1.5, offset: Offset(10, 20), baselineZoom: 0.9);
 
       expect(t1, equals(t2));
       expect(t1, isNot(equals(t3)));
@@ -140,43 +142,60 @@ void main() {
 
     test('setZoom clamps to minimum', () {
       container.read(canvasTransformProvider.notifier).setZoom(0.1);
-      expect(container.read(canvasTransformProvider).zoom, CanvasTransform.minZoom);
+      expect(container.read(canvasTransformProvider).zoom,
+          CanvasTransform.minZoom);
     });
 
     test('setZoom clamps to maximum', () {
       container.read(canvasTransformProvider.notifier).setZoom(10.0);
-      expect(container.read(canvasTransformProvider).zoom, CanvasTransform.maxZoom);
+      expect(container.read(canvasTransformProvider).zoom,
+          CanvasTransform.maxZoom);
     });
 
     test('setOffset updates offset', () {
-      container.read(canvasTransformProvider.notifier).setOffset(const Offset(100, 50));
-      expect(container.read(canvasTransformProvider).offset, const Offset(100, 50));
+      container
+          .read(canvasTransformProvider.notifier)
+          .setOffset(const Offset(100, 50));
+      expect(container.read(canvasTransformProvider).offset,
+          const Offset(100, 50));
     });
 
     test('applyPanDelta adds to existing offset', () {
-      container.read(canvasTransformProvider.notifier).setOffset(const Offset(50, 50));
-      container.read(canvasTransformProvider.notifier).applyPanDelta(const Offset(25, 25));
+      container
+          .read(canvasTransformProvider.notifier)
+          .setOffset(const Offset(50, 50));
+      container
+          .read(canvasTransformProvider.notifier)
+          .applyPanDelta(const Offset(25, 25));
 
-      expect(container.read(canvasTransformProvider).offset, const Offset(75, 75));
+      expect(
+          container.read(canvasTransformProvider).offset, const Offset(75, 75));
     });
 
     test('applyZoomDelta multiplies zoom', () {
       container.read(canvasTransformProvider.notifier).setZoom(1.0);
-      container.read(canvasTransformProvider.notifier).applyZoomDelta(1.5, Offset.zero);
+      container
+          .read(canvasTransformProvider.notifier)
+          .applyZoomDelta(1.5, Offset.zero);
 
       expect(container.read(canvasTransformProvider).zoom, 1.5);
     });
 
     test('applyZoomDelta clamps result', () {
       container.read(canvasTransformProvider.notifier).setZoom(4.0);
-      container.read(canvasTransformProvider.notifier).applyZoomDelta(2.0, Offset.zero);
+      container
+          .read(canvasTransformProvider.notifier)
+          .applyZoomDelta(2.0, Offset.zero);
 
-      expect(container.read(canvasTransformProvider).zoom, CanvasTransform.maxZoom);
+      expect(container.read(canvasTransformProvider).zoom,
+          CanvasTransform.maxZoom);
     });
 
     test('reset returns to default state', () {
       container.read(canvasTransformProvider.notifier).setZoom(2.0);
-      container.read(canvasTransformProvider.notifier).setOffset(const Offset(100, 100));
+      container
+          .read(canvasTransformProvider.notifier)
+          .setOffset(const Offset(100, 100));
       container.read(canvasTransformProvider.notifier).reset();
 
       final transform = container.read(canvasTransformProvider);
@@ -186,7 +205,9 @@ void main() {
 
     test('fitToScreen returns to default state', () {
       container.read(canvasTransformProvider.notifier).setZoom(3.0);
-      container.read(canvasTransformProvider.notifier).setOffset(const Offset(200, 200));
+      container
+          .read(canvasTransformProvider.notifier)
+          .setOffset(const Offset(200, 200));
       container.read(canvasTransformProvider.notifier).fitToScreen();
 
       final transform = container.read(canvasTransformProvider);
@@ -322,7 +343,9 @@ void main() {
 
       expect(container.read(canZoomInProvider), true);
 
-      container.read(canvasTransformProvider.notifier).setZoom(CanvasTransform.maxZoom);
+      container
+          .read(canvasTransformProvider.notifier)
+          .setZoom(CanvasTransform.maxZoom);
       expect(container.read(canZoomInProvider), false);
 
       container.dispose();
@@ -333,7 +356,9 @@ void main() {
 
       expect(container.read(canZoomOutProvider), true);
 
-      container.read(canvasTransformProvider.notifier).setZoom(CanvasTransform.minZoom);
+      container
+          .read(canvasTransformProvider.notifier)
+          .setZoom(CanvasTransform.minZoom);
       expect(container.read(canZoomOutProvider), false);
 
       container.dispose();

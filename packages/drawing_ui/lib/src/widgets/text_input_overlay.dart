@@ -99,7 +99,8 @@ class _TextInputOverlayState extends ConsumerState<TextInputOverlay> {
           ),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.9),
-            border: Border.all(color: Theme.of(context).colorScheme.primary, width: 2),
+            border: Border.all(
+                color: Theme.of(context).colorScheme.primary, width: 2),
             borderRadius: BorderRadius.circular(4),
           ),
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

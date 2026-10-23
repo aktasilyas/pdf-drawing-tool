@@ -1,5 +1,3 @@
-import 'dart:ui' show Offset;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -216,7 +214,11 @@ void main() {
       );
 
       final text = tester.widget<Text>(find.text('Yapıştır'));
-      expect(text.style?.fontWeight, equals(FontWeight.w500));
+      // Style now derives from the theme's bodyMedium.
+      final bodyMedium =
+          Theme.of(tester.element(find.text('Yapıştır'))).textTheme.bodyMedium!;
+      expect(text.style?.fontWeight, equals(bodyMedium.fontWeight));
+      expect(text.style?.fontWeight, equals(FontWeight.w400));
       expect(text.style?.fontSize, equals(14));
     });
 
@@ -237,7 +239,7 @@ void main() {
       expect(icon.size, equals(18));
     });
 
-    testWidgets('should_render_white_container_background', (tester) async {
+    testWidgets('should_render_surface_container_background', (tester) async {
       _setWindowSize(tester);
       _ignoreOverflow();
 
@@ -250,19 +252,21 @@ void main() {
         ),
       );
 
+      final surface =
+          Theme.of(tester.element(find.text('Yapıştır'))).colorScheme.surface;
       final containers =
           tester.widgetList<Container>(find.byType(Container)).toList();
       BoxDecoration? pillDecoration;
       for (final container in containers) {
         final deco = container.decoration;
-        if (deco is BoxDecoration && deco.color == Colors.white) {
+        if (deco is BoxDecoration && deco.color == surface) {
           pillDecoration = deco;
           break;
         }
       }
 
       expect(pillDecoration, isNotNull);
-      expect(pillDecoration!.color, equals(Colors.white));
+      expect(pillDecoration!.color, equals(surface));
     });
 
     testWidgets('should_render_rounded_corners_on_pill', (tester) async {
@@ -278,12 +282,14 @@ void main() {
         ),
       );
 
+      final surface =
+          Theme.of(tester.element(find.text('Yapıştır'))).colorScheme.surface;
       final containers =
           tester.widgetList<Container>(find.byType(Container)).toList();
       BorderRadius? borderRadius;
       for (final container in containers) {
         final deco = container.decoration;
-        if (deco is BoxDecoration && deco.color == Colors.white) {
+        if (deco is BoxDecoration && deco.color == surface) {
           borderRadius = deco.borderRadius as BorderRadius?;
           break;
         }
@@ -401,7 +407,8 @@ void main() {
       expect(positioned.left, equals(672.0));
     });
 
-    testWidgets('should_center_menu_horizontally_on_press_point', (tester) async {
+    testWidgets('should_center_menu_horizontally_on_press_point',
+        (tester) async {
       _setWindowSize(tester);
       _ignoreOverflow();
 
@@ -426,7 +433,8 @@ void main() {
       expect(positioned.left, equals(340.0));
     });
 
-    testWidgets('should_place_correctly_at_center_screen_position', (tester) async {
+    testWidgets('should_place_correctly_at_center_screen_position',
+        (tester) async {
       _setWindowSize(tester);
       _ignoreOverflow();
 
@@ -548,14 +556,14 @@ void main() {
         ),
       );
 
-      final opaqueListener = listeners
-          .where((l) => l.behavior == HitTestBehavior.opaque)
-          .toList();
+      final opaqueListener =
+          listeners.where((l) => l.behavior == HitTestBehavior.opaque).toList();
 
       expect(opaqueListener, isNotEmpty);
     });
 
-    testWidgets('should_not_throw_when_tapped_with_no_clipboard', (tester) async {
+    testWidgets('should_not_throw_when_tapped_with_no_clipboard',
+        (tester) async {
       _setWindowSize(tester);
       _ignoreOverflow();
 
@@ -624,7 +632,8 @@ void main() {
       expect(widget.state.canvasPos, equals(const Offset(75, 125)));
     });
 
-    testWidgets('should_expose_canvasPos_to_pasteFromClipboardAt', (tester) async {
+    testWidgets('should_expose_canvasPos_to_pasteFromClipboardAt',
+        (tester) async {
       _setWindowSize(tester);
       _ignoreOverflow();
 

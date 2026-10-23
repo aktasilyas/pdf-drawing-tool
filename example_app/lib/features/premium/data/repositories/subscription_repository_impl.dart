@@ -116,7 +116,8 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
       await _datasource.loginUser(userId);
       return const Right(null);
     } catch (_) {
-      return const Left(PremiumFailure('RevenueCat kullanıcı eşleştirmesi başarısız'));
+      return const Left(
+          PremiumFailure('RevenueCat kullanıcı eşleştirmesi başarısız'));
     }
   }
 
@@ -179,8 +180,9 @@ class SubscriptionRepositoryImpl implements SubscriptionRepository {
       description: product.description,
       price: product.priceString,
       currencyCode: product.currencyCode,
-      type:
-          subscriptionPeriod == null ? ProductType.lifetime : ProductType.subscription,
+      type: subscriptionPeriod == null
+          ? ProductType.lifetime
+          : ProductType.subscription,
       subscriptionPeriod: subscriptionPeriod,
     );
   }

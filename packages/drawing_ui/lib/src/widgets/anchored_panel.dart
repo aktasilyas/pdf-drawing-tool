@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 enum AnchorAlignment {
   /// Panel aligned to left edge of anchor
   left,
+
   /// Panel centered below anchor
   center,
+
   /// Panel aligned to right edge of anchor
   right,
 }
@@ -28,7 +30,8 @@ class AnchoredPanelController {
     hide();
 
     // Get anchor position
-    final renderBox = anchorKey.currentContext?.findRenderObject() as RenderBox?;
+    final renderBox =
+        anchorKey.currentContext?.findRenderObject() as RenderBox?;
     if (renderBox == null) {
       debugPrint('WARNING: Could not find anchor RenderBox');
       return;
@@ -91,15 +94,15 @@ class _PositionedPanelOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     // Calculate panel position based on anchor
     final panelTop = anchorPosition.dy + anchorSize.height + verticalOffset;
-    
+
     // Calculate horizontal position based on alignment
     double? panelLeft;
     double? panelRight;
-    
+
     // Panel max width
     const panelMaxWidth = 300.0;
     const horizontalPadding = 16.0;
-    
+
     switch (alignment) {
       case AnchorAlignment.left:
         // Align panel's left edge with anchor's left edge
@@ -113,7 +116,7 @@ class _PositionedPanelOverlay extends StatelessWidget {
           panelLeft = horizontalPadding;
         }
         break;
-        
+
       case AnchorAlignment.right:
         // Align panel's right edge with anchor's right edge
         panelRight = screenSize.width - (anchorPosition.dx + anchorSize.width);
@@ -126,7 +129,7 @@ class _PositionedPanelOverlay extends StatelessWidget {
           panelRight = horizontalPadding;
         }
         break;
-        
+
       case AnchorAlignment.center:
         // Center panel below anchor
         final anchorCenterX = anchorPosition.dx + anchorSize.width / 2;
@@ -144,10 +147,11 @@ class _PositionedPanelOverlay extends StatelessWidget {
     // Calculate arrow position (points to anchor center)
     final anchorCenterX = anchorPosition.dx + anchorSize.width / 2;
     final double arrowLeftPosition;
-    
+
     if (panelLeft != null) {
       // Panel positioned from left - arrow relative to panelLeft
-      arrowLeftPosition = anchorCenterX - panelLeft - 12; // 12 = half of arrow width
+      arrowLeftPosition =
+          anchorCenterX - panelLeft - 12; // 12 = half of arrow width
     } else if (panelRight != null) {
       // Panel positioned from right - calculate panel's actual left position first
       final actualPanelLeft = screenSize.width - panelRight - panelMaxWidth;
@@ -167,7 +171,7 @@ class _PositionedPanelOverlay extends StatelessWidget {
             child: const SizedBox.expand(),
           ),
         ),
-        
+
         // Panel positioned below anchor
         Positioned(
           top: panelTop,
@@ -198,7 +202,10 @@ class _PositionedPanelOverlay extends StatelessWidget {
                           size: const Size(24, 12),
                           painter: _ArrowPainter(
                             color: Theme.of(context).colorScheme.surface,
-                            shadowColor: Theme.of(context).colorScheme.shadow.withValues(alpha: 0.1),
+                            shadowColor: Theme.of(context)
+                                .colorScheme
+                                .shadow
+                                .withValues(alpha: 0.1),
                           ),
                         ),
                       ),

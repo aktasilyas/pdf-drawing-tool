@@ -68,12 +68,10 @@ class Documents extends Table {
   BoolColumn get hasCover => boolean().withDefault(const Constant(true))();
 
   /// Paper width in millimeters (default A4: 210mm)
-  RealColumn get paperWidthMm =>
-      real().withDefault(const Constant(210.0))();
+  RealColumn get paperWidthMm => real().withDefault(const Constant(210.0))();
 
   /// Paper height in millimeters (default A4: 297mm)
-  RealColumn get paperHeightMm =>
-      real().withDefault(const Constant(297.0))();
+  RealColumn get paperHeightMm => real().withDefault(const Constant(297.0))();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -144,21 +142,14 @@ class SyncMetadata extends Table {
 class AiConversationsLocal extends Table {
   TextColumn get id => text()();
   TextColumn get userId => text()();
-  TextColumn get title =>
-      text().withDefault(const Constant('Yeni Sohbet'))();
+  TextColumn get title => text().withDefault(const Constant('Yeni Sohbet'))();
   TextColumn get documentId => text().nullable()();
-  TextColumn get taskType =>
-      text().withDefault(const Constant('chat'))();
-  IntColumn get totalInputTokens =>
-      integer().withDefault(const Constant(0))();
-  IntColumn get totalOutputTokens =>
-      integer().withDefault(const Constant(0))();
-  IntColumn get messageCount =>
-      integer().withDefault(const Constant(0))();
-  BoolColumn get isPinned =>
-      boolean().withDefault(const Constant(false))();
-  BoolColumn get isSynced =>
-      boolean().withDefault(const Constant(false))();
+  TextColumn get taskType => text().withDefault(const Constant('chat'))();
+  IntColumn get totalInputTokens => integer().withDefault(const Constant(0))();
+  IntColumn get totalOutputTokens => integer().withDefault(const Constant(0))();
+  IntColumn get messageCount => integer().withDefault(const Constant(0))();
+  BoolColumn get isPinned => boolean().withDefault(const Constant(false))();
+  BoolColumn get isSynced => boolean().withDefault(const Constant(false))();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
 
@@ -175,15 +166,11 @@ class AiMessagesLocal extends Table {
   TextColumn get content => text()();
   TextColumn get model => text().nullable()();
   TextColumn get provider => text().nullable()();
-  IntColumn get inputTokens =>
-      integer().withDefault(const Constant(0))();
-  IntColumn get outputTokens =>
-      integer().withDefault(const Constant(0))();
-  BoolColumn get hasImage =>
-      boolean().withDefault(const Constant(false))();
+  IntColumn get inputTokens => integer().withDefault(const Constant(0))();
+  IntColumn get outputTokens => integer().withDefault(const Constant(0))();
+  BoolColumn get hasImage => boolean().withDefault(const Constant(false))();
   TextColumn get imagePath => text().nullable()();
-  BoolColumn get isSynced =>
-      boolean().withDefault(const Constant(false))();
+  BoolColumn get isSynced => boolean().withDefault(const Constant(false))();
   DateTimeColumn get createdAt => dateTime()();
 
   @override

@@ -26,10 +26,13 @@ class UserModel {
     return UserModel(
       id: user.id,
       email: user.email ?? '',
-      displayName: _readString(metadata, const ['display_name', 'full_name', 'name']),
-      photoUrl: _readString(metadata, const ['avatar_url', 'photo_url', 'picture']),
+      displayName:
+          _readString(metadata, const ['display_name', 'full_name', 'name']),
+      photoUrl:
+          _readString(metadata, const ['avatar_url', 'photo_url', 'picture']),
       createdAt: DateTime.parse(user.createdAt),
-      lastLoginAt: user.lastSignInAt == null ? null : DateTime.parse(user.lastSignInAt!),
+      lastLoginAt:
+          user.lastSignInAt == null ? null : DateTime.parse(user.lastSignInAt!),
     );
   }
 

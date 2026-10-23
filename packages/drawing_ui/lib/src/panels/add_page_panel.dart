@@ -75,11 +75,10 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
     for (int i = insertIndex; i < newPages.length; i++) {
       newPages[i] = newPages[i].copyWith(index: i);
     }
-    final newDoc = doc.copyWith(
-        pages: newPages, currentPageIndex: insertIndex);
+    final newDoc = doc.copyWith(pages: newPages, currentPageIndex: insertIndex);
     ref.read(documentProvider.notifier).updateDocument(newDoc);
-    ref.read(pageManagerProvider.notifier).initializeFromDocument(
-        newDoc.pages, currentIndex: newDoc.currentPageIndex);
+    ref.read(pageManagerProvider.notifier).initializeFromDocument(newDoc.pages,
+        currentIndex: newDoc.currentPageIndex);
   }
 
   void _addPageFromTemplate(String templateId) {
@@ -110,14 +109,17 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
     final bg = PageBackground(
       type: BackgroundType.template,
       color: result.backgroundColor?.toARGB32() ?? t.defaultBackgroundColor,
-      templatePattern: t.pattern, templateSpacingMm: t.spacingMm,
+      templatePattern: t.pattern,
+      templateSpacingMm: t.spacingMm,
       templateLineWidth: t.lineWidth,
       lineColor: result.lineColor?.toARGB32() ?? t.defaultLineColor,
     );
     final idx = _resolveInsertionIndex(curIdx, doc.pages.length);
     final np = List<Page>.from(doc.pages)
-      ..insert(idx, Page.create(
-          index: idx, size: doc.settings.defaultPageSize, background: bg));
+      ..insert(
+          idx,
+          Page.create(
+              index: idx, size: doc.settings.defaultPageSize, background: bg));
     for (int i = idx; i < np.length; i++) np[i] = np[i].copyWith(index: i);
     final nd = doc.copyWith(pages: np, currentPageIndex: idx);
     docNotifier.updateDocument(nd);
@@ -125,8 +127,8 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
   }
 
   Future<void> _addImagePage(ImageSource source) async {
-    final picked = await ImagePicker()
-        .pickImage(source: source, imageQuality: 85);
+    final picked =
+        await ImagePicker().pickImage(source: source, imageQuality: 85);
     if (picked == null) return;
     final appDir = await getApplicationDocumentsDirectory();
     final dir = Directory('${appDir.path}/elyanotes_images');

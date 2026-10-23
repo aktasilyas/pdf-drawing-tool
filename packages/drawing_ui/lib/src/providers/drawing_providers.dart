@@ -275,8 +275,8 @@ class LassoSettings {
       } catch (_) {}
     }
 
-    final selectableTypes = Map<SelectableType, bool>.from(
-        defaults.selectableTypes);
+    final selectableTypes =
+        Map<SelectableType, bool>.from(defaults.selectableTypes);
     if (json['selectableTypes'] is Map) {
       final map = json['selectableTypes'] as Map;
       for (final type in SelectableType.values) {
@@ -404,7 +404,8 @@ class LaserSettings {
       lineStyle: lineStyle,
       thickness: (json['thickness'] as num?)?.toDouble() ?? defaults.thickness,
       duration: (json['duration'] as num?)?.toDouble() ?? defaults.duration,
-      color: json['color'] is int ? Color(json['color'] as int) : defaults.color,
+      color:
+          json['color'] is int ? Color(json['color'] as int) : defaults.color,
     );
   }
 

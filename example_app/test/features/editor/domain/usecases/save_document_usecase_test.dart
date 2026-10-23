@@ -50,7 +50,7 @@ void main() {
 
       // Assert
       expect(result.isRight(), true);
-      
+
       verify(() => mockRepository.saveDocumentContent(
             id: testDocument.id,
             content: any(named: 'content'),
@@ -77,7 +77,7 @@ void main() {
 
       // Assert
       expect(result.isLeft(), true);
-      
+
       verify(() => mockRepository.saveDocumentContent(
             id: any(named: 'id'),
             content: any(named: 'content'),
@@ -99,7 +99,8 @@ void main() {
             coverId: any(named: 'coverId'),
             updateCover: any(named: 'updateCover'),
           )).thenAnswer((invocation) async {
-        capturedContent = invocation.namedArguments[#content] as Map<String, dynamic>;
+        capturedContent =
+            invocation.namedArguments[#content] as Map<String, dynamic>;
         return const Right(null);
       });
 

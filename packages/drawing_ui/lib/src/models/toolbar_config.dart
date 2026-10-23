@@ -28,10 +28,10 @@ class ToolConfig {
   }
 
   Map<String, dynamic> toJson() => {
-    'toolType': toolType.name,
-    'isVisible': isVisible,
-    'order': order,
-  };
+        'toolType': toolType.name,
+        'isVisible': isVisible,
+        'order': order,
+      };
 
   factory ToolConfig.fromJson(Map<String, dynamic> json) {
     return ToolConfig(
@@ -79,10 +79,10 @@ class ExtraToolConfig {
   }
 
   Map<String, dynamic> toJson() => {
-    'key': key,
-    'isVisible': isVisible,
-    'order': order,
-  };
+        'key': key,
+        'isVisible': isVisible,
+        'order': order,
+      };
 
   factory ExtraToolConfig.fromJson(Map<String, dynamic> json) {
     return ExtraToolConfig(
@@ -125,9 +125,9 @@ class ToolbarConfig {
   /// Whether an extra tool is visible (defaults to true).
   bool extraToolVisible(String key) {
     final tool = extraTools.cast<ExtraToolConfig?>().firstWhere(
-      (t) => t!.key == key,
-      orElse: () => null,
-    );
+          (t) => t!.key == key,
+          orElse: () => null,
+        );
     return tool?.isVisible ?? true;
   }
 
@@ -139,9 +139,9 @@ class ToolbarConfig {
 
   /// Default extra tools.
   static List<ExtraToolConfig> defaultExtraTools() => const [
-    ExtraToolConfig(key: 'ruler', isVisible: true, order: 0),
-    ExtraToolConfig(key: 'audio', isVisible: true, order: 1),
-  ];
+        ExtraToolConfig(key: 'ruler', isVisible: true, order: 0),
+        ExtraToolConfig(key: 'audio', isVisible: true, order: 1),
+      ];
 
   /// Default toolbar configuration
   factory ToolbarConfig.defaultConfig() {
@@ -158,14 +158,22 @@ class ToolbarConfig {
     ];
 
     return ToolbarConfig(
-      tools: defaultTools.asMap().entries.map((e) => ToolConfig(
-        toolType: e.value,
-        isVisible: true,
-        order: e.key,
-      )).toList(),
+      tools: defaultTools
+          .asMap()
+          .entries
+          .map((e) => ToolConfig(
+                toolType: e.value,
+                isVisible: true,
+                order: e.key,
+              ))
+          .toList(),
       showQuickAccess: true,
       quickAccessColors: const [
-        0xFF000000, 0xFF2196F3, 0xFFF44336, 0xFF4CAF50, 0xFFFF9800,
+        0xFF000000,
+        0xFF2196F3,
+        0xFFF44336,
+        0xFF4CAF50,
+        0xFFFF9800,
       ],
       quickAccessThicknesses: const [1.0, 2.0, 4.0],
       extraTools: defaultExtraTools(),
@@ -195,13 +203,15 @@ class ToolbarConfig {
       tools: tools ?? this.tools,
       showQuickAccess: showQuickAccess ?? this.showQuickAccess,
       quickAccessColors: quickAccessColors ?? this.quickAccessColors,
-      quickAccessThicknesses: quickAccessThicknesses ?? this.quickAccessThicknesses,
+      quickAccessThicknesses:
+          quickAccessThicknesses ?? this.quickAccessThicknesses,
       extraTools: extraTools ?? this.extraTools,
     );
   }
 
   /// Update a specific tool's config
-  ToolbarConfig updateTool(ToolType toolType, ToolConfig Function(ToolConfig) update) {
+  ToolbarConfig updateTool(
+      ToolType toolType, ToolConfig Function(ToolConfig) update) {
     final newTools = tools.map((t) {
       if (t.toolType == toolType) return update(t);
       return t;
@@ -249,32 +259,39 @@ class ToolbarConfig {
   ToolbarConfig reset() => ToolbarConfig.defaultConfig();
 
   Map<String, dynamic> toJson() => {
-    'tools': tools.map((t) => t.toJson()).toList(),
-    'showQuickAccess': showQuickAccess,
-    'quickAccessColors': quickAccessColors,
-    'quickAccessThicknesses': quickAccessThicknesses,
-    'extraTools': extraTools.map((t) => t.toJson()).toList(),
-  };
+        'tools': tools.map((t) => t.toJson()).toList(),
+        'showQuickAccess': showQuickAccess,
+        'quickAccessColors': quickAccessColors,
+        'quickAccessThicknesses': quickAccessThicknesses,
+        'extraTools': extraTools.map((t) => t.toJson()).toList(),
+      };
 
   factory ToolbarConfig.fromJson(Map<String, dynamic> json) {
     return ToolbarConfig(
       tools: (json['tools'] as List<dynamic>?)
-          ?.map((t) => ToolConfig.fromJson(t as Map<String, dynamic>))
-          .toList() ?? ToolbarConfig.defaultConfig().tools,
+              ?.map((t) => ToolConfig.fromJson(t as Map<String, dynamic>))
+              .toList() ??
+          ToolbarConfig.defaultConfig().tools,
       showQuickAccess: json['showQuickAccess'] ?? true,
       quickAccessColors: (json['quickAccessColors'] as List<dynamic>?)
-          ?.map((c) => c as int).toList() ?? const [],
+              ?.map((c) => c as int)
+              .toList() ??
+          const [],
       quickAccessThicknesses: (json['quickAccessThicknesses'] as List<dynamic>?)
-          ?.map((t) => (t as num).toDouble()).toList() ?? const [],
+              ?.map((t) => (t as num).toDouble())
+              .toList() ??
+          const [],
       extraTools: (json['extraTools'] as List<dynamic>?)
-          ?.map((t) => ExtraToolConfig.fromJson(t as Map<String, dynamic>))
-          .toList() ?? ToolbarConfig.defaultExtraTools(),
+              ?.map((t) => ExtraToolConfig.fromJson(t as Map<String, dynamic>))
+              .toList() ??
+          ToolbarConfig.defaultExtraTools(),
     );
   }
 
   String toJsonString() => jsonEncode(toJson());
 
   factory ToolbarConfig.fromJsonString(String jsonString) {
-    return ToolbarConfig.fromJson(jsonDecode(jsonString) as Map<String, dynamic>);
+    return ToolbarConfig.fromJson(
+        jsonDecode(jsonString) as Map<String, dynamic>);
   }
 }

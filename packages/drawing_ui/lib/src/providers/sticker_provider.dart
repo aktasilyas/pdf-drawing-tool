@@ -10,7 +10,8 @@ class StickerPlacementState {
 
   const StickerPlacementState({this.selectedEmoji});
 
-  StickerPlacementState copyWith({String? selectedEmoji, bool clearEmoji = false}) {
+  StickerPlacementState copyWith(
+      {String? selectedEmoji, bool clearEmoji = false}) {
     return StickerPlacementState(
       selectedEmoji: clearEmoji ? null : (selectedEmoji ?? this.selectedEmoji),
     );

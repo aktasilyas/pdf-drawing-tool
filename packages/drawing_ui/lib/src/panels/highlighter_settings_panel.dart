@@ -72,11 +72,11 @@ class HighlighterSettingsPanel extends ConsumerWidget {
                 .clamp(isNeon ? 8.0 : 10.0, isNeon ? 30.0 : 40.0),
             min: isNeon ? 8.0 : 10.0,
             max: isNeon ? 30.0 : 40.0,
-            displayValue: '${settings.thickness.clamp(isNeon ? 8.0 : 10.0, isNeon ? 30.0 : 40.0).toStringAsFixed(0)}mm',
+            displayValue:
+                '${settings.thickness.clamp(isNeon ? 8.0 : 10.0, isNeon ? 30.0 : 40.0).toStringAsFixed(0)}mm',
             activeColor: cs.primary,
-            onChanged: (v) => ref
-                .read(highlighterSettingsProvider.notifier)
-                .setThickness(v),
+            onChanged: (v) =>
+                ref.read(highlighterSettingsProvider.notifier).setThickness(v),
           ),
           const SizedBox(height: 8),
 
@@ -110,9 +110,8 @@ class HighlighterSettingsPanel extends ConsumerWidget {
           ColorPickerStrip(
             selectedColor: settings.color,
             isHighlighter: true,
-            onColorSelected: (c) => ref
-                .read(highlighterSettingsProvider.notifier)
-                .setColor(c),
+            onColorSelected: (c) =>
+                ref.read(highlighterSettingsProvider.notifier).setColor(c),
           ),
         ],
       ),

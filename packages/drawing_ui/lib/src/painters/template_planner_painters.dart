@@ -18,7 +18,11 @@ mixin TemplatePlannerPainters {
 
   /// Yatay ayırıcı çizgi (kalın)
   void drawDividerLine(
-    Canvas canvas, double y, double startX, double endX, Paint paint,
+    Canvas canvas,
+    double y,
+    double startX,
+    double endX,
+    Paint paint,
   ) {
     canvas.drawLine(
       Offset(startX, y),
@@ -29,7 +33,10 @@ mixin TemplatePlannerPainters {
 
   /// Checkbox (boş kare, rounded)
   void drawCheckboxRect(
-    Canvas canvas, Offset topLeft, double size, Paint paint,
+    Canvas canvas,
+    Offset topLeft,
+    double size,
+    Paint paint,
   ) {
     final rect = RRect.fromRectAndRadius(
       Rect.fromLTWH(topLeft.dx, topLeft.dy, size, size),
@@ -90,13 +97,18 @@ mixin TemplatePlannerPainters {
     }
 
     // Sağ üst: Hedef checkbox'ları
-    _drawDailyPlannerRightPanel(canvas, size, headerH, dividerX, margin,
-        availableH, paint);
+    _drawDailyPlannerRightPanel(
+        canvas, size, headerH, dividerX, margin, availableH, paint);
   }
 
   void _drawDailyPlannerRightPanel(
-    Canvas canvas, Size size, double headerH, double dividerX,
-    double margin, double availableH, Paint paint,
+    Canvas canvas,
+    Size size,
+    double headerH,
+    double dividerX,
+    double margin,
+    double availableH,
+    Paint paint,
   ) {
     final rightStart = dividerX + margin;
     final rightEnd = size.width - margin;
@@ -166,8 +178,7 @@ mixin TemplatePlannerPainters {
     for (var y = headerH + spacingPx;
         y < size.height - footerH;
         y += spacingPx) {
-      canvas.drawLine(
-          Offset(margin, y), Offset(size.width - margin, y), paint);
+      canvas.drawLine(Offset(margin, y), Offset(size.width - margin, y), paint);
     }
 
     // Footer: not çizgileri
@@ -175,8 +186,7 @@ mixin TemplatePlannerPainters {
     for (var y = size.height - footerH + spacingPx;
         y < size.height - margin;
         y += spacingPx) {
-      canvas.drawLine(
-          Offset(margin, y), Offset(size.width - margin, y), paint);
+      canvas.drawLine(Offset(margin, y), Offset(size.width - margin, y), paint);
     }
   }
 
@@ -221,8 +231,7 @@ mixin TemplatePlannerPainters {
     for (var y = size.height - footerH + spacingPx;
         y < size.height - margin;
         y += spacingPx) {
-      canvas.drawLine(
-          Offset(margin, y), Offset(size.width - margin, y), paint);
+      canvas.drawLine(Offset(margin, y), Offset(size.width - margin, y), paint);
     }
   }
 
@@ -257,8 +266,7 @@ mixin TemplatePlannerPainters {
       ..color = lineColor.withValues(alpha: 0.3)
       ..strokeWidth = lineWidth * 0.5;
     for (var y = headerH + rowH; y < size.height - margin; y += rowH) {
-      canvas.drawLine(
-          Offset(margin, y), Offset(size.width - margin, y), paint);
+      canvas.drawLine(Offset(margin, y), Offset(size.width - margin, y), paint);
       // Checkbox
       final cbY = y - rowH * 0.5 - checkboxSize * 0.5;
       final cbX = margin + priorityW + (checkboxW - checkboxSize) * 0.5;
@@ -282,8 +290,8 @@ mixin TemplatePlannerPainters {
       ..strokeWidth = lineWidth * 0.5;
     for (var y = headerH + rowH; y < size.height - margin; y += rowH) {
       final cbY = y - rowH * 0.5 - checkboxSize * 0.5;
-      drawCheckboxRect(
-          canvas, Offset(margin, cbY), checkboxSize, Paint()..color = lineColor);
+      drawCheckboxRect(canvas, Offset(margin, cbY), checkboxSize,
+          Paint()..color = lineColor);
       canvas.drawLine(
           Offset(checkboxMargin, y), Offset(size.width - margin, y), paint);
     }

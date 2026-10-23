@@ -165,7 +165,8 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
         // Cap height to 60% of screen, min 280, max 420
         final screenH = MediaQuery.of(context).size.height;
         final layersH = (screenH * 0.6).clamp(280.0, 420.0);
-        child = SizedBox(width: 260, height: layersH, child: const LayersList());
+        child =
+            SizedBox(width: 260, height: layersH, child: const LayersList());
       case _NavPanel.export:
         anchorKey = widget.showExport ? _exportKey : _moreKey;
         child = ExportPanel(onClose: _closePanel, embedded: true);
@@ -241,9 +242,8 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
                 ? ElyanotesIcons.rulerActive
                 : ElyanotesIcons.ruler,
             tooltip: 'Cetvel',
-            onPressed: () => ref
-                .read(rulerVisibleProvider.notifier)
-                .state = !rulerVisible,
+            onPressed: () =>
+                ref.read(rulerVisibleProvider.notifier).state = !rulerVisible,
             isActive: rulerVisible,
           ),
         if (!widget.isReaderMode && !ref.watch(isInfiniteCanvasProvider))
@@ -254,7 +254,9 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
             onPressed: () => _togglePanel(_NavPanel.layers),
             isActive: _activePanel == _NavPanel.layers,
           ),
-        if (!widget.isReaderMode && widget.showAddPage && !ref.watch(isInfiniteCanvasProvider))
+        if (!widget.isReaderMode &&
+            widget.showAddPage &&
+            !ref.watch(isInfiniteCanvasProvider))
           ElyanotesNavButton(
             key: _addPageKey,
             icon: ElyanotesIcons.pageAdd,
@@ -262,7 +264,9 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
             onPressed: () => _togglePanel(_NavPanel.addPage),
             isActive: _activePanel == _NavPanel.addPage,
           ),
-        if (!widget.isReaderMode && audioEnabled && !ref.watch(isInfiniteCanvasProvider))
+        if (!widget.isReaderMode &&
+            audioEnabled &&
+            !ref.watch(isInfiniteCanvasProvider))
           ElyanotesNavButton(
             key: _micKey,
             icon: ElyanotesIcons.microphone,
@@ -304,13 +308,15 @@ class _ReaderBadge extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
         decoration: BoxDecoration(
-            color: cs.secondaryContainer, borderRadius: BorderRadius.circular(10)),
+            color: cs.secondaryContainer,
+            borderRadius: BorderRadius.circular(10)),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
-          PhosphorIcon(ElyanotesIcons.readerMode, size: 12,
-              color: cs.onSecondaryContainer),
+          PhosphorIcon(ElyanotesIcons.readerMode,
+              size: 12, color: cs.onSecondaryContainer),
           const SizedBox(width: 3),
-          Text('Salt okunur', style: textTheme.labelSmall?.copyWith(
-              color: cs.onSecondaryContainer)),
+          Text('Salt okunur',
+              style: textTheme.labelSmall
+                  ?.copyWith(color: cs.onSecondaryContainer)),
         ]),
       ),
     );

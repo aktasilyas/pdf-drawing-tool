@@ -121,7 +121,7 @@ class BoundingBox extends Equatable {
       if (value is num) return value.toDouble();
       return defaultValue;
     }
-    
+
     return BoundingBox(
       left: parseDouble(json['left'], 0.0),
       top: parseDouble(json['top'], 0.0),

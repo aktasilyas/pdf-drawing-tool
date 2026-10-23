@@ -109,8 +109,10 @@ class _PDFExportDialogState extends State<PDFExportDialog> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text('PDF Olarak Dışa Aktar',
-            style: textTheme.titleMedium?.copyWith(fontSize: 16,
-                fontWeight: FontWeight.w600, color: cs.onSurface)),
+            style: textTheme.titleMedium?.copyWith(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: cs.onSurface)),
         const SizedBox(height: 2),
         Text('${widget.totalPages} sayfa',
             style: textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
@@ -149,9 +151,10 @@ class _PDFExportDialogState extends State<PDFExportDialog> {
                 color: selected ? cs.primary : cs.outlineVariant, width: 1),
           ),
           alignment: Alignment.center,
-          child: Text(label, style: textTheme.bodySmall?.copyWith(
-              fontWeight: selected ? FontWeight.w600 : null,
-              color: selected ? cs.onPrimaryContainer : cs.onSurface)),
+          child: Text(label,
+              style: textTheme.bodySmall?.copyWith(
+                  fontWeight: selected ? FontWeight.w600 : null,
+                  color: selected ? cs.onPrimaryContainer : cs.onSurface)),
         ),
       ),
     );
@@ -176,8 +179,8 @@ class _PDFExportDialogState extends State<PDFExportDialog> {
     );
   }
 
-  Widget _qualityCard(String label, String dpi, PDFExportQuality q,
-      ColorScheme cs) {
+  Widget _qualityCard(
+      String label, String dpi, PDFExportQuality q, ColorScheme cs) {
     final selected = _quality == q;
     return Expanded(
       child: GestureDetector(
@@ -191,15 +194,23 @@ class _PDFExportDialogState extends State<PDFExportDialog> {
                 color: selected ? cs.primary : cs.outlineVariant, width: 1),
           ),
           alignment: Alignment.center,
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            Text(label, style: textTheme.labelSmall?.copyWith(
-                fontWeight: selected ? FontWeight.w600 : null,
-                color: selected ? cs.onPrimaryContainer : cs.onSurface)),
-            Text('$dpi DPI', style: textTheme.labelSmall?.copyWith(fontSize: 9,
-                color: selected
-                    ? cs.onPrimaryContainer.withValues(alpha: 0.7)
-                    : cs.onSurfaceVariant)),
-          ]),
+          // FittedBox keeps the card from overflowing with wide fonts or
+          // large text scale settings.
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              Text(label,
+                  style: textTheme.labelSmall?.copyWith(
+                      fontWeight: selected ? FontWeight.w600 : null,
+                      color: selected ? cs.onPrimaryContainer : cs.onSurface)),
+              Text('$dpi DPI',
+                  style: textTheme.labelSmall?.copyWith(
+                      fontSize: 9,
+                      color: selected
+                          ? cs.onPrimaryContainer.withValues(alpha: 0.7)
+                          : cs.onSurfaceVariant)),
+            ]),
+          ),
         ),
       ),
     );
@@ -222,7 +233,8 @@ class _PDFExportDialogState extends State<PDFExportDialog> {
             child: DropdownButton<PDFPageFormat>(
               value: _pageFormat,
               isExpanded: true,
-              style: textTheme.bodySmall?.copyWith(fontSize: 13, color: cs.onSurface),
+              style: textTheme.bodySmall
+                  ?.copyWith(fontSize: 13, color: cs.onSurface),
               items: const [
                 DropdownMenuItem(value: PDFPageFormat.a4, child: Text('A4')),
                 DropdownMenuItem(value: PDFPageFormat.a5, child: Text('A5')),
@@ -231,7 +243,9 @@ class _PDFExportDialogState extends State<PDFExportDialog> {
                 DropdownMenuItem(
                     value: PDFPageFormat.legal, child: Text('Legal')),
               ],
-              onChanged: (f) { if (f != null) setState(() => _pageFormat = f); },
+              onChanged: (f) {
+                if (f != null) setState(() => _pageFormat = f);
+              },
             ),
           ),
         ),
@@ -241,8 +255,10 @@ class _PDFExportDialogState extends State<PDFExportDialog> {
 
   Widget _buildBackgroundToggle(ColorScheme cs) {
     return Row(children: [
-      Expanded(child: Text('Arka planı dahil et',
-          style: textTheme.bodySmall?.copyWith(fontSize: 13, color: cs.onSurface))),
+      Expanded(
+          child: Text('Arka planı dahil et',
+              style: textTheme.bodySmall
+                  ?.copyWith(fontSize: 13, color: cs.onSurface))),
       Switch(
         value: _includeBackground,
         onChanged: (v) => setState(() => _includeBackground = v),
@@ -251,16 +267,18 @@ class _PDFExportDialogState extends State<PDFExportDialog> {
   }
 
   Widget _buildActions(ColorScheme cs) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
+    return Wrap(
+      alignment: WrapAlignment.end,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: 12,
       children: [
         TextButton(
           onPressed: () =>
               Navigator.of(context).pop(ExportDialogResult.cancelled()),
           child: Text('İptal',
-              style: textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant)),
+              style:
+                  textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant)),
         ),
-        const SizedBox(width: 12),
         FilledButton(
           onPressed: _handleExport,
           child: const Text('Dışa Aktar'),
@@ -270,7 +288,7 @@ class _PDFExportDialogState extends State<PDFExportDialog> {
   }
 
   Widget _sectionLabel(String text, ColorScheme cs) {
-    return Text(text, style: textTheme.labelMedium?.copyWith(
-        color: cs.onSurface));
+    return Text(text,
+        style: textTheme.labelMedium?.copyWith(color: cs.onSurface));
   }
 }

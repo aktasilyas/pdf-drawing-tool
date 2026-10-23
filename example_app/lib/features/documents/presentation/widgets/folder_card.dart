@@ -44,8 +44,10 @@ class FolderCard extends ConsumerWidget {
           Expanded(child: _buildThumbnailCard(context, ref)),
           Padding(
             padding: const EdgeInsets.only(
-                top: AppSpacing.xs, bottom: AppSpacing.sm,
-                left: AppSpacing.sm, right: AppSpacing.sm),
+                top: AppSpacing.xs,
+                bottom: AppSpacing.sm,
+                left: AppSpacing.sm,
+                right: AppSpacing.sm),
             child: _buildInfoSection(context),
           ),
         ],
@@ -139,16 +141,14 @@ class FolderCard extends ConsumerWidget {
               children: [
                 Text(
                   folder.name,
-                  style:
-                      AppTypography.titleMedium.copyWith(color: textPrimary),
+                  style: AppTypography.titleMedium.copyWith(color: textPrimary),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: AppSpacing.xxs),
                 Text(
                   '${folder.documentCount} belge',
-                  style:
-                      AppTypography.caption.copyWith(color: textSecondary),
+                  style: AppTypography.caption.copyWith(color: textSecondary),
                 ),
               ],
             ),
@@ -187,9 +187,8 @@ class _FavoriteButton extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(AppSpacing.xs),
             decoration: BoxDecoration(
-              color:
-                  (isDark ? AppColors.surfaceDark : AppColors.surfaceLight)
-                      .withValues(alpha: 0.9),
+              color: (isDark ? AppColors.surfaceDark : AppColors.surfaceLight)
+                  .withValues(alpha: 0.9),
               shape: BoxShape.circle,
             ),
             child: Icon(

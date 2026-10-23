@@ -48,7 +48,7 @@ class DocumentGrid extends StatelessWidget {
       itemCount: documents.length,
       itemBuilder: (context, index) {
         final document = documents[index];
-        
+
         return DocumentCard(
           document: document,
           onTap: () => onDocumentTap?.call(document),

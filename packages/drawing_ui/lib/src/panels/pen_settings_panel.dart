@@ -33,8 +33,7 @@ class PenSettingsPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentTool = ref.watch(currentToolProvider);
-    final active =
-        _penTools.contains(currentTool) ? currentTool : toolType;
+    final active = _penTools.contains(currentTool) ? currentTool : toolType;
     final s = ref.watch(penSettingsProvider(active));
     final cs = Theme.of(context).colorScheme;
 
@@ -51,10 +50,10 @@ class PenSettingsPanel extends ConsumerWidget {
                 child: Text(
                   active.penType?.config.displayNameTr ?? 'Kalem',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: cs.onSurface,
-                  ),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: cs.onSurface,
+                      ),
                 ),
               ),
               PanelCloseButton(
@@ -67,7 +66,9 @@ class PenSettingsPanel extends ConsumerWidget {
 
           // ── Stroke Preview — GoodNotes calligraphic swoosh ──
           _StrokePreview(
-            color: s.color, thickness: s.thickness, toolType: active,
+            color: s.color,
+            thickness: s.thickness,
+            toolType: active,
           ),
           const SizedBox(height: 16),
 
@@ -86,7 +87,8 @@ class PenSettingsPanel extends ConsumerWidget {
             value: s.thickness.clamp(_minTh(active), _maxTh(active)),
             min: _minTh(active),
             max: _maxTh(active),
-            displayValue: '${_pct(s.thickness, _minTh(active), _maxTh(active))}%',
+            displayValue:
+                '${_pct(s.thickness, _minTh(active), _maxTh(active))}%',
             activeColor: cs.primary,
             onChanged: (v) =>
                 ref.read(penSettingsProvider(active).notifier).setThickness(v),
@@ -101,8 +103,9 @@ class PenSettingsPanel extends ConsumerWidget {
             max: 1,
             displayValue: '${(s.pressureSensitivity * 100).round()}%',
             activeColor: cs.primary,
-            onChanged: (v) =>
-                ref.read(penSettingsProvider(active).notifier).setPressureSensitivity(v),
+            onChanged: (v) => ref
+                .read(penSettingsProvider(active).notifier)
+                .setPressureSensitivity(v),
           ),
           const SizedBox(height: 8),
 
@@ -114,8 +117,9 @@ class PenSettingsPanel extends ConsumerWidget {
             max: 1,
             displayValue: '${(s.stabilization * 100).round()}%',
             activeColor: cs.primary,
-            onChanged: (v) =>
-                ref.read(penSettingsProvider(active).notifier).setStabilization(v),
+            onChanged: (v) => ref
+                .read(penSettingsProvider(active).notifier)
+                .setStabilization(v),
           ),
           const SizedBox(height: 16),
 

@@ -6,9 +6,7 @@ import 'package:phosphor_icons/phosphor_icons.dart';
 /// Darkens a color by the given amount (0.0 to 1.0).
 Color darkenColor(Color c, double amt) {
   final h = HSLColor.fromColor(c);
-  return h
-      .withLightness((h.lightness * (1 - amt)).clamp(0.0, 1.0))
-      .toColor();
+  return h.withLightness((h.lightness * (1 - amt)).clamp(0.0, 1.0)).toColor();
 }
 
 /// Live stroke preview — 50dp height sine wave.

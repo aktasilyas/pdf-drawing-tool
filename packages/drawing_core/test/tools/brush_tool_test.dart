@@ -89,7 +89,8 @@ void main() {
         // Simulate pressure curve: light start, heavy middle, light end
         final pressureValues = [0.1, 0.3, 0.6, 0.9, 1.0, 0.8, 0.5, 0.2];
 
-        tool.onPointerDown(DrawingPoint(x: 0, y: 0, pressure: pressureValues[0]));
+        tool.onPointerDown(
+            DrawingPoint(x: 0, y: 0, pressure: pressureValues[0]));
         for (var i = 1; i < pressureValues.length; i++) {
           tool.onPointerMove(
             DrawingPoint(

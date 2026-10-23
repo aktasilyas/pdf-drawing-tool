@@ -17,20 +17,26 @@ void main() {
     });
 
     group('eraserModeProvider', () {
-      test('default mode is stroke', () {
+      test('default mode is pixel', () {
         final mode = container.read(eraserModeProvider);
-        expect(mode, equals(EraserMode.stroke));
+        expect(mode, equals(EraserMode.pixel));
       });
 
-      test('can change to pixel mode', () {
-        container.read(eraserSettingsProvider.notifier).setMode(EraserMode.pixel);
-        expect(container.read(eraserModeProvider), equals(EraserMode.pixel));
-      });
-
-      test('can change back to stroke mode', () {
-        container.read(eraserSettingsProvider.notifier).setMode(EraserMode.pixel);
-        container.read(eraserSettingsProvider.notifier).setMode(EraserMode.stroke);
+      test('can change to stroke mode', () {
+        container
+            .read(eraserSettingsProvider.notifier)
+            .setMode(EraserMode.stroke);
         expect(container.read(eraserModeProvider), equals(EraserMode.stroke));
+      });
+
+      test('can change back to pixel mode', () {
+        container
+            .read(eraserSettingsProvider.notifier)
+            .setMode(EraserMode.stroke);
+        container
+            .read(eraserSettingsProvider.notifier)
+            .setMode(EraserMode.pixel);
+        expect(container.read(eraserModeProvider), equals(EraserMode.pixel));
       });
     });
 
@@ -60,12 +66,14 @@ void main() {
       test('creates EraserTool with default settings', () {
         final tool = container.read(eraserToolProvider);
 
-        expect(tool.mode, equals(core.EraserMode.stroke));
+        expect(tool.mode, equals(core.EraserMode.pixel));
         expect(tool.eraserSize, equals(20.0));
       });
 
       test('updates when mode changes', () {
-        container.read(eraserSettingsProvider.notifier).setMode(EraserMode.pixel);
+        container
+            .read(eraserSettingsProvider.notifier)
+            .setMode(EraserMode.pixel);
 
         final tool = container.read(eraserToolProvider);
         expect(tool.mode, equals(core.EraserMode.pixel));
@@ -79,7 +87,9 @@ void main() {
       });
 
       test('updates when both mode and size change', () {
-        container.read(eraserSettingsProvider.notifier).setMode(EraserMode.pixel);
+        container
+            .read(eraserSettingsProvider.notifier)
+            .setMode(EraserMode.pixel);
         container.read(eraserSettingsProvider.notifier).setSize(35.0);
 
         final tool = container.read(eraserToolProvider);

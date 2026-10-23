@@ -42,10 +42,10 @@ class EraserSettingsPanel extends ConsumerWidget {
                 child: Text(
                   _titleForMode(active),
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: cs.onSurface,
-                  ),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: cs.onSurface,
+                      ),
                 ),
               ),
               PanelCloseButton(
@@ -154,11 +154,17 @@ class EraserSettingsPanel extends ConsumerWidget {
       builder: (ctx) => AlertDialog(
         backgroundColor: cs.surface,
         title: Text('Sayfay\u0131 Temizle?',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: cs.onSurface)),
+            style: Theme.of(context)
+                .textTheme
+                .bodyMedium
+                ?.copyWith(color: cs.onSurface)),
         content: Text(
           'Bu sayfa i\u00e7eri\u011fini tamamen silecek. '
           'Bu i\u015flem geri al\u0131namaz.',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
+          style: Theme.of(context)
+              .textTheme
+              .bodyMedium
+              ?.copyWith(color: cs.onSurfaceVariant),
         ),
         actions: [
           TextButton(
@@ -169,8 +175,7 @@ class EraserSettingsPanel extends ConsumerWidget {
             onPressed: () {
               Navigator.pop(ctx);
               historyManager.execute(
-                core.ClearLayerCommand(
-                    layerIndex: document.activeLayerIndex),
+                core.ClearLayerCommand(layerIndex: document.activeLayerIndex),
               );
             },
             style: TextButton.styleFrom(foregroundColor: cs.error),
@@ -233,12 +238,10 @@ class _EraserTypeSelector extends StatelessWidget {
 
   static IconData _iconFor(ToolType type, bool selected) {
     return switch (type) {
-      ToolType.pixelEraser => selected
-          ? PhosphorIconsRegular.sparkle
-          : PhosphorIconsLight.sparkle,
-      ToolType.strokeEraser => selected
-          ? PhosphorIconsRegular.broom
-          : PhosphorIconsLight.broom,
+      ToolType.pixelEraser =>
+        selected ? PhosphorIconsRegular.sparkle : PhosphorIconsLight.sparkle,
+      ToolType.strokeEraser =>
+        selected ? PhosphorIconsRegular.broom : PhosphorIconsLight.broom,
       ToolType.lassoEraser => selected
           ? PhosphorIconsRegular.selection
           : PhosphorIconsLight.selection,
@@ -283,8 +286,11 @@ class _CompactActionButton extends StatelessWidget {
           children: [
             Icon(icon, size: 14, color: color),
             const SizedBox(width: 4),
-            Text(label, style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: color)),
+            Text(label,
+                style: Theme.of(context)
+                    .textTheme
+                    .labelSmall
+                    ?.copyWith(color: color)),
           ],
         ),
       ),

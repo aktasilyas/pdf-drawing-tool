@@ -35,14 +35,16 @@ class DocumentSettings {
 
   /// JSON serialization
   Map<String, dynamic> toJson() => {
-    'defaultPageSize': defaultPageSize.toJson(),
-    'defaultBackground': defaultBackground.toJson(),
-  };
+        'defaultPageSize': defaultPageSize.toJson(),
+        'defaultBackground': defaultBackground.toJson(),
+      };
 
   factory DocumentSettings.fromJson(Map<String, dynamic> json) {
     return DocumentSettings(
-      defaultPageSize: PageSize.fromJson(json['defaultPageSize'] as Map<String, dynamic>),
-      defaultBackground: PageBackground.fromJson(json['defaultBackground'] as Map<String, dynamic>),
+      defaultPageSize:
+          PageSize.fromJson(json['defaultPageSize'] as Map<String, dynamic>),
+      defaultBackground: PageBackground.fromJson(
+          json['defaultBackground'] as Map<String, dynamic>),
     );
   }
 }

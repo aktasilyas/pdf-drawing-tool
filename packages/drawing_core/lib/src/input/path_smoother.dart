@@ -56,7 +56,8 @@ class PathSmoother {
         // Interpolate between original and smoothed based on tension
         final newX = curr.x + (avgX - curr.x) * tension;
         final newY = curr.y + (avgY - curr.y) * tension;
-        final newPressure = curr.pressure + (avgPressure - curr.pressure) * tension;
+        final newPressure =
+            curr.pressure + (avgPressure - curr.pressure) * tension;
         final newTilt = curr.tilt + (avgTilt - curr.tilt) * tension;
 
         smoothed.add(DrawingPoint(

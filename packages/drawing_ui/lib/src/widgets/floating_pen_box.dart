@@ -57,10 +57,12 @@ class _FloatingPenBoxState extends ConsumerState<FloatingPenBox> {
       decoration: BoxDecoration(
         color: isDark ? colorScheme.surfaceContainer : colorScheme.surface,
         borderRadius: BorderRadius.circular(10),
-        border: isDark ? Border.all(
-          color: colorScheme.outline.withValues(alpha: 0.2),
-          width: 1,
-        ) : null,
+        border: isDark
+            ? Border.all(
+                color: colorScheme.outline.withValues(alpha: 0.2),
+                width: 1,
+              )
+            : null,
         boxShadow: [
           BoxShadow(
             color: colorScheme.shadow.withValues(alpha: isDark ? 0.4 : 0.07),
@@ -90,7 +92,7 @@ class _FloatingPenBoxState extends ConsumerState<FloatingPenBox> {
 
   Widget _buildCollapsedView(int count) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return GestureDetector(
       onTap: () => setState(() => _isExpanded = true),
       child: SizedBox(
@@ -182,7 +184,7 @@ class _FloatingPenBoxState extends ConsumerState<FloatingPenBox> {
 
   Widget _buildBottomBar() {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
       child: Row(
@@ -193,7 +195,9 @@ class _FloatingPenBoxState extends ConsumerState<FloatingPenBox> {
             child: PhosphorIcon(
               _isEditMode ? ElyanotesIcons.check : ElyanotesIcons.editPencil,
               size: 14,
-              color: _isEditMode ? colorScheme.primary : colorScheme.onSurfaceVariant,
+              color: _isEditMode
+                  ? colorScheme.primary
+                  : colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(width: 12),
@@ -215,7 +219,7 @@ class _FloatingPenBoxState extends ConsumerState<FloatingPenBox> {
 
   Widget _buildRightBar() {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
       child: Column(
@@ -226,7 +230,9 @@ class _FloatingPenBoxState extends ConsumerState<FloatingPenBox> {
             child: PhosphorIcon(
               _isEditMode ? ElyanotesIcons.check : ElyanotesIcons.editPencil,
               size: 14,
-              color: _isEditMode ? colorScheme.primary : colorScheme.onSurfaceVariant,
+              color: _isEditMode
+                  ? colorScheme.primary
+                  : colorScheme.onSurfaceVariant,
             ),
           ),
           const SizedBox(height: 8),
@@ -314,10 +320,12 @@ class _VerticalPenSlot extends StatelessWidget {
       child: Container(
         width: _slotWidth,
         height: _slotHeight,
-        decoration: isSelected ? BoxDecoration(
-          color: colorScheme.primaryContainer.withValues(alpha: 0.3),
-          borderRadius: BorderRadius.circular(8),
-        ) : null,
+        decoration: isSelected
+            ? BoxDecoration(
+                color: colorScheme.primaryContainer.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(8),
+              )
+            : null,
         child: Stack(
           clipBehavior: Clip.hardEdge,
           children: [
@@ -349,7 +357,8 @@ class _VerticalPenSlot extends StatelessWidget {
                       color: Theme.of(context).colorScheme.error,
                       shape: BoxShape.circle,
                     ),
-                    child: PhosphorIcon(ElyanotesIcons.minus, size: 10, color: Colors.white),
+                    child: PhosphorIcon(ElyanotesIcons.minus,
+                        size: 10, color: Colors.white),
                   ),
                 ),
               ),
@@ -400,10 +409,12 @@ class _HorizontalPenSlot extends StatelessWidget {
       child: Container(
         width: _slotWidth,
         height: _slotHeight,
-        decoration: isSelected ? BoxDecoration(
-          color: colorScheme.primaryContainer.withValues(alpha: 0.3),
-          borderRadius: BorderRadius.circular(8),
-        ) : null,
+        decoration: isSelected
+            ? BoxDecoration(
+                color: colorScheme.primaryContainer.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(8),
+              )
+            : null,
         child: Stack(
           clipBehavior: Clip.hardEdge,
           children: [
@@ -438,7 +449,8 @@ class _HorizontalPenSlot extends StatelessWidget {
                       color: Theme.of(context).colorScheme.error,
                       shape: BoxShape.circle,
                     ),
-                    child: PhosphorIcon(ElyanotesIcons.minus, size: 10, color: Colors.white),
+                    child: PhosphorIcon(ElyanotesIcons.minus,
+                        size: 10, color: Colors.white),
                   ),
                 ),
               ),

@@ -100,8 +100,7 @@ class FlutterStrokeRenderer {
         var paint = _createPaint(style);
         paint = _buildPaintWithGlow(style, paint);
         var path = _createPath(subPoints, style);
-        if (style.pattern != StrokePattern.solid &&
-            style.dashPattern != null) {
+        if (style.pattern != StrokePattern.solid && style.dashPattern != null) {
           path = _createDashedPath(path, style.dashPattern!);
         }
         canvas.drawPath(path, paint);

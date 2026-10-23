@@ -92,18 +92,18 @@ void main() {
         );
 
         // Find Stack that is descendant of DrawingCanvas
-        // Now has 2 Stacks: one for outer layout (with Transform and TextInputOverlay)
-        // and one inside Transform for canvas layers
+        // 3 Stacks: outer layout (Transform + TextInputOverlay), the canvas
+        // layers inside Transform, and the active-layer group.
         expect(
           find.descendant(
             of: find.byType(DrawingCanvas),
             matching: find.byType(Stack),
           ),
-          findsNWidgets(2),
+          findsNWidgets(3),
         );
       });
 
-      testWidgets('has 6 RepaintBoundary layers', (tester) async {
+      testWidgets('has 5 RepaintBoundary layers', (tester) async {
         await tester.pumpWidget(
           const ProviderScope(
             child: MaterialApp(
@@ -114,17 +114,18 @@ void main() {
           ),
         );
 
-        // Grid + Committed Strokes + Shapes + Texts + Active + Selection = 6 RepaintBoundary
+        // Empty-state layers (unified elements, active stroke, selection, ...)
+        // = 5 RepaintBoundary; committed strokes are cached separately.
         expect(
           find.descendant(
             of: find.byType(DrawingCanvas),
             matching: find.byType(RepaintBoundary),
           ),
-          findsNWidgets(6),
+          findsNWidgets(5),
         );
       });
 
-      testWidgets('has 6 CustomPaint widgets', (tester) async {
+      testWidgets('has 4 CustomPaint widgets', (tester) async {
         await tester.pumpWidget(
           const ProviderScope(
             child: MaterialApp(
@@ -135,13 +136,13 @@ void main() {
           ),
         );
 
-        // Grid + Committed Strokes + Shapes + Texts + Active + Selection = 6 CustomPaint
+        // Empty-state painters = 4 CustomPaint.
         expect(
           find.descendant(
             of: find.byType(DrawingCanvas),
             matching: find.byType(CustomPaint),
           ),
-          findsNWidgets(6),
+          findsNWidgets(4),
         );
       });
 

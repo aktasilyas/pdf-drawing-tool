@@ -100,7 +100,7 @@ class _PanelArrowPainter extends CustomPainter {
 
     // Draw shadow
     canvas.drawPath(path, shadowPaint);
-    
+
     // Draw arrow
     canvas.drawPath(path, paint);
   }

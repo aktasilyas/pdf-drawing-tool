@@ -31,10 +31,10 @@ class TextSettingsPanel extends ConsumerWidget {
                 child: Text(
                   'Metin Aracı',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: cs.onSurface,
-                  ),
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: cs.onSurface,
+                      ),
                 ),
               ),
               PanelCloseButton(
@@ -47,8 +47,8 @@ class TextSettingsPanel extends ConsumerWidget {
           Text(
             'Tuvale dokunarak metin kutusu ekleyin.',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: cs.onSurfaceVariant,
-            ),
+                  color: cs.onSurfaceVariant,
+                ),
           ),
           const SizedBox(height: 16),
 
@@ -80,10 +80,10 @@ class TextSettingsPanel extends ConsumerWidget {
           Text(
             'Renk',
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: cs.onSurfaceVariant,
-              letterSpacing: 0.5,
-            ),
+                  fontWeight: FontWeight.w600,
+                  color: cs.onSurfaceVariant,
+                  letterSpacing: 0.5,
+                ),
           ),
           const SizedBox(height: 8),
           ColorPickerStrip(
@@ -98,10 +98,10 @@ class TextSettingsPanel extends ConsumerWidget {
           Text(
             'Stil',
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: cs.onSurfaceVariant,
-              letterSpacing: 0.5,
-            ),
+                  fontWeight: FontWeight.w600,
+                  color: cs.onSurfaceVariant,
+                  letterSpacing: 0.5,
+                ),
           ),
           const SizedBox(height: 8),
           _StyleButtonRow(
@@ -210,12 +210,12 @@ class _StyleToggle extends StatelessWidget {
           child: Text(
             label,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontSize: 18,
-              fontWeight: fontWeight ?? FontWeight.normal,
-              fontStyle: fontStyle,
-              decoration: decoration,
-              color: isSelected ? cs.onPrimary : cs.onSurfaceVariant,
-            ),
+                  fontSize: 18,
+                  fontWeight: fontWeight ?? FontWeight.normal,
+                  fontStyle: fontStyle,
+                  decoration: decoration,
+                  color: isSelected ? cs.onPrimary : cs.onSurfaceVariant,
+                ),
           ),
         ),
       ),

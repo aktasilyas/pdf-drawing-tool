@@ -22,7 +22,7 @@ class CreateDocumentUseCase {
   }) async {
     // Check document limit for free users
     final subscriptionResult = await _subscriptionRepository.getSubscription();
-    
+
     return subscriptionResult.fold(
       (failure) => Left(failure),
       (subscription) async {

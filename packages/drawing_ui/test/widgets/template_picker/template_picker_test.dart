@@ -15,7 +15,8 @@ void main() {
       );
 
       expect(find.byType(TemplatePicker), findsOneWidget);
-      expect(find.text('Şablon Seç'), findsOneWidget);
+      expect(find.text('Kapak'), findsOneWidget);
+      expect(find.text('Kâğıt'), findsOneWidget);
       expect(find.byType(CategoryTabs), findsOneWidget);
       expect(find.byType(TemplateGrid), findsOneWidget);
       expect(find.byType(PaperSizePicker), findsOneWidget);
@@ -75,7 +76,8 @@ void main() {
       );
 
       // Initially shows all templates
-      final initialTemplateCount = tester.widgetList(find.byType(TemplateCard)).length;
+      final initialTemplateCount =
+          tester.widgetList(find.byType(TemplateCard)).length;
       expect(initialTemplateCount, greaterThan(0));
 
       // Select a category
@@ -107,7 +109,7 @@ void main() {
       expect(find.text('A5'), findsWidgets);
     });
 
-    testWidgets('closes when close button tapped', (tester) async {
+    testWidgets('closes when cancel button tapped', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -132,12 +134,12 @@ void main() {
       await tester.tap(find.text('Open'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Şablon Seç'), findsOneWidget);
+      expect(find.byType(TemplatePicker), findsOneWidget);
 
-      await tester.tap(find.byIcon(ElyanotesIcons.close));
+      await tester.tap(find.text('İptal'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Şablon Seç'), findsNothing);
+      expect(find.byType(TemplatePicker), findsNothing);
     });
 
     testWidgets('returns result when confirm button tapped', (tester) async {
@@ -149,7 +151,8 @@ void main() {
             body: Builder(
               builder: (context) => ElevatedButton(
                 onPressed: () async {
-                  result = await Navigator.of(context).push<TemplatePickerResult>(
+                  result =
+                      await Navigator.of(context).push<TemplatePickerResult>(
                     MaterialPageRoute(
                       builder: (_) => const Scaffold(
                         body: TemplatePicker(),
@@ -206,16 +209,19 @@ void main() {
         await tester.pumpAndSettle();
 
         // Should have exactly one selected
-        final selected = tester.widgetList<TemplateCard>(
-          find.byWidgetPredicate(
-            (widget) => widget is TemplateCard && widget.isSelected,
-          ),
-        ).length;
+        final selected = tester
+            .widgetList<TemplateCard>(
+              find.byWidgetPredicate(
+                (widget) => widget is TemplateCard && widget.isSelected,
+              ),
+            )
+            .length;
         expect(selected, 1);
       }
     });
 
-    testWidgets('shows all templates when no category selected', (tester) async {
+    testWidgets('shows all templates when no category selected',
+        (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -224,17 +230,19 @@ void main() {
         ),
       );
 
-      final allTemplatesCount = TemplateRegistry.all.length;
-      
+      // The picker de-duplicates templates that share the same pattern.
+      final allTemplatesCount =
+          TemplateRegistry.all.map((t) => t.pattern).toSet().length;
+
       // GridView.builder lazily builds items, so we can't count actual widgets
       // Instead, verify that grid has correct itemCount
       final gridView = tester.widget<GridView>(find.byType(GridView));
       final builder = gridView.childrenDelegate as SliverChildBuilderDelegate;
-      
+
       expect(builder.estimatedChildCount, allTemplatesCount);
     });
 
-    testWidgets('has close button in header', (tester) async {
+    testWidgets('has cancel button in bottom bar', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -243,7 +251,7 @@ void main() {
         ),
       );
 
-      expect(find.byIcon(ElyanotesIcons.close), findsOneWidget);
+      expect(find.text('İptal'), findsOneWidget);
     });
 
     testWidgets('has confirm button in bottom bar', (tester) async {
@@ -255,14 +263,14 @@ void main() {
         ),
       );
 
-      // FilledButton.icon creates multiple widgets, find by the button text
       expect(find.text('Uygula'), findsOneWidget);
-
-      // Verify it has an icon (plus icon from ElyanotesIcons)
-      final plusIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.plus,
+      expect(
+        find.ancestor(
+          of: find.text('Uygula'),
+          matching: find.byType(FilledButton),
+        ),
+        findsOneWidget,
       );
-      expect(plusIcon, findsOneWidget);
     });
   });
 
@@ -289,6 +297,9 @@ void main() {
 
   group('TemplatePicker static methods', () {
     testWidgets('show method uses bottom sheet on phone', (tester) async {
+      tester.view.physicalSize = const Size(500, 800);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
       await tester.pumpWidget(
         MaterialApp(
           home: Builder(
@@ -311,7 +322,7 @@ void main() {
 
       // Should show as bottom sheet (DraggableScrollableSheet)
       expect(find.byType(DraggableScrollableSheet), findsOneWidget);
-      expect(find.text('Şablon Seç'), findsOneWidget);
+      expect(find.byType(TemplatePicker), findsOneWidget);
     });
 
     testWidgets('show method uses dialog on tablet', (tester) async {
@@ -337,7 +348,7 @@ void main() {
 
       // Should show as dialog
       expect(find.byType(Dialog), findsOneWidget);
-      expect(find.text('Şablon Seç'), findsOneWidget);
+      expect(find.byType(TemplatePicker), findsOneWidget);
     });
   });
 }

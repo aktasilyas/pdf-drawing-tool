@@ -72,7 +72,8 @@ class SelectionModeHeader extends ConsumerWidget {
             AppIconButton(
               icon: Icons.content_copy,
               variant: AppIconButtonVariant.ghost,
-              size: isPhone ? AppIconButtonSize.small : AppIconButtonSize.medium,
+              size:
+                  isPhone ? AppIconButtonSize.small : AppIconButtonSize.medium,
               tooltip: 'Çoğalt',
               onPressed: hasSelection
                   ? () => _duplicateSelected(context, ref, selectedDocs)
@@ -81,7 +82,8 @@ class SelectionModeHeader extends ConsumerWidget {
             AppIconButton(
               icon: Icons.drive_file_move_outline,
               variant: AppIconButtonVariant.ghost,
-              size: isPhone ? AppIconButtonSize.small : AppIconButtonSize.medium,
+              size:
+                  isPhone ? AppIconButtonSize.small : AppIconButtonSize.medium,
               tooltip: 'Taşı',
               onPressed: hasSelection
                   ? () =>
@@ -250,9 +252,8 @@ class _SelectAllButton extends ConsumerWidget {
       icon: Icon(
         allSelected ? Icons.check_box : Icons.check_box_outline_blank,
         size: AppIconSize.md,
-        color: isDark
-            ? AppColors.textSecondaryDark
-            : AppColors.textSecondaryLight,
+        color:
+            isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight,
       ),
       label: Text(
         'Tümü',
