@@ -333,6 +333,14 @@ class PDFImportService {
       throw ArgumentError('File path cannot be empty');
     }
 
+    // Fail fast on configs that can never be valid, whatever the page count.
+    if (config.pageSelection == PDFPageSelection.range &&
+        config.startPage != null &&
+        config.endPage != null &&
+        config.startPage! > config.endPage!) {
+      throw ArgumentError('Invalid import configuration');
+    }
+
     try {
       _updateState(PDFImportState.loadingPDF);
 
@@ -426,7 +434,7 @@ class PDFImportService {
   }
 
   /// Imports PDF from bytes.
-  /// 
+  ///
   /// If [useLazyLoading] is true (default), pages will not be rendered immediately.
   /// Instead, the PDF is saved to device storage and pages are rendered on-demand.
   /// This significantly improves import performance for large PDFs.
@@ -531,7 +539,7 @@ class PDFImportService {
         _updateState(PDFImportState.completed);
         return PDFImportServiceResult.success(pages);
       }
-      
+
       // ═══════════════════════════════════════════════════════════════════
       // IMMEDIATE MODE: Legacy approach - render all pages now
       // ═══════════════════════════════════════════════════════════════════

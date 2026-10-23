@@ -25,7 +25,7 @@ void main() {
       await tester.tap(find.text('Open'));
       await tester.pumpAndSettle();
 
-      expect(find.text('PDF Olarak Disa Aktar'), findsOneWidget);
+      expect(find.text('PDF Olarak Dışa Aktar'), findsOneWidget);
     });
 
     testWidgets('should display total pages count', (tester) async {
@@ -38,15 +38,16 @@ void main() {
       expect(find.text('5 sayfa'), findsOneWidget);
     });
 
-    testWidgets('should display export mode options in Turkish', (tester) async {
+    testWidgets('should display export mode options in Turkish',
+        (tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(body: PDFExportDialog(totalPages: 5)),
         ),
       );
 
-      expect(find.text('Disa Aktarma Modu'), findsOneWidget);
-      expect(find.text('Vektor'), findsOneWidget);
+      expect(find.text('Dışa Aktarma Modu'), findsOneWidget);
+      expect(find.text('Vektör'), findsOneWidget);
       expect(find.text('Raster'), findsOneWidget);
       expect(find.text('Karma'), findsOneWidget);
     });
@@ -59,10 +60,10 @@ void main() {
       );
 
       expect(find.text('Kalite'), findsOneWidget);
-      expect(find.text('Dusuk'), findsOneWidget);
+      expect(find.text('Düşük'), findsOneWidget);
       expect(find.text('Orta'), findsOneWidget);
-      expect(find.text('Yuksek'), findsOneWidget);
-      expect(find.text('Baski'), findsOneWidget);
+      expect(find.text('Yüksek'), findsOneWidget);
+      expect(find.text('Baskı'), findsOneWidget);
     });
 
     testWidgets('should display page format section', (tester) async {
@@ -72,7 +73,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Sayfa Formati'), findsOneWidget);
+      expect(find.text('Sayfa Formatı'), findsOneWidget);
       expect(find.text('A4'), findsOneWidget);
     });
 
@@ -83,7 +84,7 @@ void main() {
         ),
       );
 
-      expect(find.text('Arka plani dahil et'), findsOneWidget);
+      expect(find.text('Arka planı dahil et'), findsOneWidget);
       expect(find.byType(Switch), findsOneWidget);
     });
 
@@ -107,8 +108,8 @@ void main() {
         ),
       );
 
-      expect(find.text('Iptal'), findsOneWidget);
-      expect(find.text('Disa Aktar'), findsOneWidget);
+      expect(find.text('İptal'), findsOneWidget);
+      expect(find.text('Dışa Aktar'), findsOneWidget);
     });
 
     testWidgets('should close dialog on cancel', (tester) async {
@@ -131,12 +132,12 @@ void main() {
       await tester.tap(find.text('Open'));
       await tester.pumpAndSettle();
 
-      expect(find.text('PDF Olarak Disa Aktar'), findsOneWidget);
+      expect(find.text('PDF Olarak Dışa Aktar'), findsOneWidget);
 
-      await tester.tap(find.text('Iptal'));
+      await tester.tap(find.text('İptal'));
       await tester.pumpAndSettle();
 
-      expect(find.text('PDF Olarak Disa Aktar'), findsNothing);
+      expect(find.text('PDF Olarak Dışa Aktar'), findsNothing);
     });
 
     testWidgets('should call onExport callback', (tester) async {
@@ -164,7 +165,7 @@ void main() {
       await tester.tap(find.text('Open'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Disa Aktar'));
+      await tester.tap(find.text('Dışa Aktar'));
       await tester.pumpAndSettle();
 
       expect(exportedConfig, isNotNull);

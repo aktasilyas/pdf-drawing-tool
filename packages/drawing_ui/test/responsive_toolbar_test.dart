@@ -18,9 +18,12 @@ void main() {
     });
 
     test('values_are_distinct', () {
-      expect(ToolbarLayoutMode.expanded, isNot(equals(ToolbarLayoutMode.medium)));
-      expect(ToolbarLayoutMode.expanded, isNot(equals(ToolbarLayoutMode.compact)));
-      expect(ToolbarLayoutMode.medium, isNot(equals(ToolbarLayoutMode.compact)));
+      expect(
+          ToolbarLayoutMode.expanded, isNot(equals(ToolbarLayoutMode.medium)));
+      expect(
+          ToolbarLayoutMode.expanded, isNot(equals(ToolbarLayoutMode.compact)));
+      expect(
+          ToolbarLayoutMode.medium, isNot(equals(ToolbarLayoutMode.compact)));
     });
 
     test('compactBreakpoint_is_600', () {
@@ -60,7 +63,8 @@ void main() {
       expect(find.byType(MediumToolbar), findsNothing);
     });
 
-    testWidgets('renders_medium_toolbar_when_width_600_to_839px', (tester) async {
+    testWidgets('renders_medium_toolbar_when_width_600_to_839px',
+        (tester) async {
       tester.view.physicalSize = const Size(700, 600);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -114,7 +118,8 @@ void main() {
       expect(find.byType(MediumToolbar), findsNothing);
     });
 
-    testWidgets('shouldUseCompactMode_returns_true_when_width_lt_600px', (tester) async {
+    testWidgets('shouldUseCompactMode_returns_true_when_width_lt_600px',
+        (tester) async {
       tester.view.physicalSize = const Size(500, 800);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.resetPhysicalSize);
@@ -137,9 +142,17 @@ void main() {
   });
 
   group('TopNavigationBar compact mode', () {
-    Widget buildTestWidget(Widget child, {double width = 800, double height = 600}) {
+    Widget buildTestWidget(
+      Widget child, {
+      double width = 800,
+      double height = 600,
+      bool infiniteCanvas = true,
+    }) {
       return ProviderScope(
-        overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+        overrides: [
+          sharedPreferencesProvider.overrideWithValue(prefs),
+          isInfiniteCanvasProvider.overrideWith((ref) => infiniteCanvas),
+        ],
         child: MaterialApp(
           home: Scaffold(
             body: DrawingThemeProvider(
@@ -153,11 +166,17 @@ void main() {
 
     testWidgets('compact_false_shows_all_buttons', (tester) async {
       await tester.pumpWidget(
-        buildTestWidget(const TopNavigationBar(compact: false), width: 800),
+        buildTestWidget(
+          const TopNavigationBar(compact: false),
+          width: 800,
+          // Add page / audio buttons only exist for paged documents.
+          infiniteCanvas: false,
+        ),
       );
 
       expect(find.byIcon(ElyanotesIcons.readerMode), findsOneWidget);
-      expect(find.byIcon(ElyanotesIcons.gridOn), findsOneWidget);
+      expect(find.byIcon(ElyanotesIcons.pageAdd), findsOneWidget);
+      expect(find.byIcon(ElyanotesIcons.microphone), findsOneWidget);
       expect(find.byIcon(ElyanotesIcons.exportIcon), findsOneWidget);
       expect(find.byIcon(ElyanotesIcons.more), findsOneWidget);
     });
@@ -168,14 +187,13 @@ void main() {
       );
 
       expect(find.byIcon(ElyanotesIcons.home), findsOneWidget);
-      expect(find.byIcon(ElyanotesIcons.exportIcon), findsOneWidget);
       expect(find.byIcon(ElyanotesIcons.more), findsOneWidget);
-      // Full-mode buttons should not appear in compact mode
-      expect(find.byIcon(ElyanotesIcons.readerMode), findsNothing);
-      expect(find.byIcon(ElyanotesIcons.gridOn), findsNothing);
+      // Export and add-page are consolidated into the "More" popup.
+      expect(find.byIcon(ElyanotesIcons.exportIcon), findsNothing);
+      expect(find.byIcon(ElyanotesIcons.pageAdd), findsNothing);
     });
 
-    testWidgets('shows_document_title_in_both_modes', (tester) async {
+    testWidgets('shows_document_title_only_in_full_mode', (tester) async {
       const title = 'Test Document';
 
       await tester.pumpWidget(
@@ -184,7 +202,8 @@ void main() {
           width: 400,
         ),
       );
-      expect(find.text(title), findsOneWidget);
+      // Compact bar has no title; it lives in the "More" popup instead.
+      expect(find.text(title), findsNothing);
 
       await tester.pumpWidget(
         buildTestWidget(

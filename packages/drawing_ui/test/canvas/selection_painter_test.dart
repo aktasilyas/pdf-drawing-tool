@@ -78,7 +78,7 @@ void main() {
         expect(painter2.shouldRepaint(painter1), isFalse);
       });
 
-      test('returns true when zoom changes', () {
+      test('returns false when only zoom changes (zoom is unused by paint)', () {
         final selection = Selection.create(
           type: SelectionType.rectangle,
           selectedStrokeIds: ['stroke1'],
@@ -88,7 +88,7 @@ void main() {
         final painter1 = SelectionPainter(selectionColor: const Color(0xFF10B981),selection: selection, zoom: 1.0);
         final painter2 = SelectionPainter(selectionColor: const Color(0xFF10B981),selection: selection, zoom: 2.0);
 
-        expect(painter2.shouldRepaint(painter1), isTrue);
+        expect(painter2.shouldRepaint(painter1), isFalse);
       });
 
       test('returns false when zoom is same', () {

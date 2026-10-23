@@ -201,7 +201,7 @@ void main() {
         await tester.pump(const Duration(milliseconds: 500));
 
         // Should show bottom sheet with delete option
-        expect(find.text('Delete Page'), findsOneWidget);
+        expect(find.text('Sayfayı sil'), findsOneWidget);
       }
     });
 
