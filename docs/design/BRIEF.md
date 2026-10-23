@@ -4,7 +4,8 @@ Decided by the product owner on 2026-10-22. Change only with their approval.
 
 ## Direction: warm paper
 A calm stationery feel. The page is the hero; chrome is quiet, rounded and
-floating. Peers for quality bar: Flexcil (pens), GoodNotes (library, panels).
+floating. Baseline apps (owner rule, 2026-10-23): GoodNotes, StarNote and Flexcil;
+follow their conventions unless there is a stated reason (see CLAUDE.md).
 Originality: never copy their icons, cover art or exact layouts.
 
 ## Decisions
