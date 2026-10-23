@@ -333,7 +333,7 @@ void main() {
     late DrawingController controller;
 
     setUp(() {
-      controller = DrawingController();
+      controller = DrawingController(inputFilter: null);
     });
 
     tearDown(() {

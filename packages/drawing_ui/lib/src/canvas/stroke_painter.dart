@@ -188,6 +188,16 @@ class ActiveStrokePainter extends CustomPainter {
 /// )
 /// ```
 class DrawingController extends ChangeNotifier {
+  /// Creates a controller.
+  ///
+  /// [inputFilter] tunes the One Euro + resampling input stage applied to
+  /// every stroke; pass null to disable it (raw points, legacy smoothing).
+  DrawingController({this.inputFilter = const StrokeInputFilterConfig()});
+
+  /// Input filter tuning, or null when filtering is disabled.
+  final StrokeInputFilterConfig? inputFilter;
+
+  StrokeInputFilter? _filter;
   final List<DrawingPoint> _activePoints = [];
   final List<DrawingPoint> _rawPoints = []; // Raw points for smoothing
   StrokeStyle _activeStyle = StrokeStyle.pen();
@@ -225,13 +235,27 @@ class DrawingController extends ChangeNotifier {
       {double stabilization = 0.0, bool straightLine = false}) {
     _activePoints.clear();
     _rawPoints.clear();
-    _activePoints.add(point);
-    _rawPoints.add(point);
     _firstPoint = point;
     _activeStyle = style;
     _isDrawing = true;
     _stabilization = stabilization;
     _straightLineMode = straightLine;
+    final config = inputFilter;
+    if (config != null && !straightLine) {
+      // Stabilization lowers the cutoff instead of stacking a second smoother.
+      _filter = StrokeInputFilter(StrokeInputFilterConfig(
+        minCutoff: config.minCutoff / (1 + 4 * stabilization.clamp(0.0, 1.0)),
+        beta: config.beta,
+        spacing: config.spacing,
+        pressureCutoff: config.pressureCutoff,
+        fallbackDt: config.fallbackDt,
+      ));
+      _activePoints.add(_filter!.begin(point));
+    } else {
+      _filter = null;
+      _activePoints.add(point);
+    }
+    _rawPoints.add(point);
     notifyListeners();
   }
 
@@ -249,6 +273,8 @@ class DrawingController extends ChangeNotifier {
       _activePoints.clear();
       _activePoints.add(_firstPoint!);
       _activePoints.add(point);
+    } else if (_filter != null) {
+      _activePoints.addAll(_filter!.add(point));
     } else if (_stabilization > 0.0) {
       // Apply smoothing
       final smoothedPoints = _applySmoothing(_rawPoints, _stabilization);
@@ -312,6 +338,10 @@ class DrawingController extends ChangeNotifier {
       _isDrawing = false;
       return null;
     }
+
+    final tail = _filter?.end();
+    if (tail != null) _activePoints.add(tail);
+    _filter = null;
 
     final stroke = Stroke.create(
       points: List.from(_activePoints),
