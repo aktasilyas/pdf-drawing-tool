@@ -153,9 +153,10 @@ class FolderCard extends ConsumerWidget {
               ],
             ),
           ),
-          if (onMorePressed != null)
+          if (onMorePressed != null && !isSelectionMode)
             Icon(
               Icons.keyboard_arrow_down,
+              key: const Key('folder_card_more_button'),
               size: AppIconSize.md,
               color: textTertiary,
             ),

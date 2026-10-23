@@ -337,7 +337,7 @@ void main() {
         );
 
         // Act
-        await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
+        await tester.tap(find.byKey(const Key('folder_card_more_button')));
         await tester.pump();
 
         // Assert
@@ -356,7 +356,7 @@ void main() {
         );
 
         // Assert
-        expect(find.byIcon(Icons.more_vert), findsNothing);
+        expect(find.byKey(const Key('folder_card_more_button')), findsNothing);
       });
 
       testWidgets('should_display_folder_name_with_max_1_line', (tester) async {
