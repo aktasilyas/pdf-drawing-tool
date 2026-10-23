@@ -359,6 +359,7 @@ class DrawingController extends ChangeNotifier {
   ///
   /// Clears all active points and resets drawing state.
   void cancelStroke() {
+    _filter = null;
     _activePoints.clear();
     _isDrawing = false;
     notifyListeners();
