@@ -21,14 +21,13 @@ For each, newest first:
 - **Review comments from the owner** (`gh api $R/pulls/<n>/comments` and
   `$R/issues/<n>/comments` newer than the last commit) → address them, push,
   reply on each thread. Done.
-- **Merge rule**: if the linked issue has label `auto-merge-ok`, every check is
-  green or pre-existing-failing, and the `reviewer` subagent finds nothing
-  blocking, merge it: `gh api -X PUT $R/pulls/<n>/merge -f merge_method=squash`.
-  Then close the issue if it did not auto-close. Done.
-  Never merge PRs without that label; they wait for the owner.
+- **Ready**: if every check is green or pre-existing-failing and the `reviewer`
+  subagent finds nothing blocking, add label `ready-to-merge` to the PR and list
+  it in the log. Never merge, and never try another way to merge: merging is
+  the owner's step (the session's permission policy blocks it).
 
 ## 2. Throttle
-If 3 or more `claude/` PRs are open and waiting for the owner, start no new
+If 3 or more `claude/` PRs are open and labeled `ready-to-merge`, start no new
 work: log "waiting for owner review" with the PR list and stop.
 
 ## 3. Pick the next issue
