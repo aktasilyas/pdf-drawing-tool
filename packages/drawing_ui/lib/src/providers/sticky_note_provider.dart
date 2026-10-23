@@ -23,8 +23,7 @@ class StickyNotePlacementState {
 /// Notifier for sticky note placement state.
 class StickyNotePlacementNotifier
     extends StateNotifier<StickyNotePlacementState> {
-  StickyNotePlacementNotifier()
-      : super(const StickyNotePlacementState());
+  StickyNotePlacementNotifier() : super(const StickyNotePlacementState());
 
   /// Select a sticky note (shows handles only, no context menu).
   void selectNote(StickyNote note) {

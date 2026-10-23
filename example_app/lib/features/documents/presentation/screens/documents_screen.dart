@@ -56,8 +56,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
   }
 
   Widget _buildMobileLayout() {
-    final isInFolder = _selectedSection == SidebarSection.folder &&
-        _selectedFolderId != null;
+    final isInFolder =
+        _selectedSection == SidebarSection.folder && _selectedFolderId != null;
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -98,8 +98,8 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
 
   Widget _buildDesktopLayout() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final isInFolder = _selectedSection == SidebarSection.folder &&
-        _selectedFolderId != null;
+    final isInFolder =
+        _selectedSection == SidebarSection.folder && _selectedFolderId != null;
 
     return Row(
       children: [
@@ -120,9 +120,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
           child: GestureDetector(
             onTap: () => FocusScope.of(context).unfocus(),
             child: Container(
-              color: isDark
-                  ? AppColors.backgroundDark
-                  : AppColors.surfaceLight,
+              color: isDark ? AppColors.backgroundDark : AppColors.surfaceLight,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -188,7 +186,9 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
       child: Divider(
         height: 1,
         thickness: 0.5,
-        color: isDark ? AppColors.outlineVariantDark : AppColors.outlineVariantLight,
+        color: isDark
+            ? AppColors.outlineVariantDark
+            : AppColors.outlineVariantLight,
       ),
     );
   }
@@ -300,16 +300,23 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
   }
 
   void _navigateToRoot() {
-    setState(() { _selectedSection = SidebarSection.documents; _selectedFolderId = null; });
+    setState(() {
+      _selectedSection = SidebarSection.documents;
+      _selectedFolderId = null;
+    });
     ref.read(currentFolderIdProvider.notifier).state = null;
   }
 
   void _navigateToFolder(String folderId) {
-    setState(() { _selectedSection = SidebarSection.folder; _selectedFolderId = folderId; });
+    setState(() {
+      _selectedSection = SidebarSection.folder;
+      _selectedFolderId = folderId;
+    });
     ref.read(currentFolderIdProvider.notifier).state = folderId;
   }
 
-  void _handleFolderTap(Folder folder) => handleFolderTap(folder, _navigateToFolder);
+  void _handleFolderTap(Folder folder) =>
+      handleFolderTap(folder, _navigateToFolder);
   void _handleDocumentTap(DocumentInfo doc) => handleDocumentTap(doc);
 }
 

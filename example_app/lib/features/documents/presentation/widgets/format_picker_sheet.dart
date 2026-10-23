@@ -20,8 +20,7 @@ class FormatPickerSheet extends StatefulWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return showModalBottomSheet<PaperSize>(
       context: context,
-      backgroundColor:
-          isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+      backgroundColor: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(AppRadius.bottomSheet),
@@ -182,14 +181,22 @@ class _FormatPickerSheetState extends State<FormatPickerSheet> {
 
   String _getPresetName(PaperSizePreset preset) {
     switch (preset) {
-      case PaperSizePreset.a4: return 'A4';
-      case PaperSizePreset.a5: return 'A5';
-      case PaperSizePreset.a6: return 'A6';
-      case PaperSizePreset.letter: return 'Letter';
-      case PaperSizePreset.legal: return 'Legal';
-      case PaperSizePreset.square: return 'Kare';
-      case PaperSizePreset.widescreen: return 'Geniş';
-      case PaperSizePreset.custom: return 'Özel';
+      case PaperSizePreset.a4:
+        return 'A4';
+      case PaperSizePreset.a5:
+        return 'A5';
+      case PaperSizePreset.a6:
+        return 'A6';
+      case PaperSizePreset.letter:
+        return 'Letter';
+      case PaperSizePreset.legal:
+        return 'Legal';
+      case PaperSizePreset.square:
+        return 'Kare';
+      case PaperSizePreset.widescreen:
+        return 'Geniş';
+      case PaperSizePreset.custom:
+        return 'Özel';
     }
   }
 }

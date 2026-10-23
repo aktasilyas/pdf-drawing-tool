@@ -43,7 +43,10 @@ class SelectionHandlesPainter extends CustomPainter {
     final halfW = (bounds.right - bounds.left) / 2 * scaleX;
     final halfH = (bounds.bottom - bounds.top) / 2 * scaleY;
     final rect = Rect.fromLTRB(
-      cx - halfW, cy - halfH, cx + halfW, cy + halfH,
+      cx - halfW,
+      cy - halfH,
+      cx + halfW,
+      cy + halfH,
     );
 
     canvas.save();
@@ -67,21 +70,24 @@ class SelectionHandlesPainter extends CustomPainter {
 
     // Corner handles (circles)
     for (final c in [
-      rect.topLeft, rect.topRight, rect.bottomLeft, rect.bottomRight,
+      rect.topLeft,
+      rect.topRight,
+      rect.bottomLeft,
+      rect.bottomRight,
     ]) {
       canvas.drawCircle(c, handleRadius, fill);
       canvas.drawCircle(c, handleRadius, handleStroke);
     }
 
     // Edge handles (rounded rectangles)
-    _drawEdgeHandle(canvas, fill, handleStroke,
-        Offset(rect.center.dx, rect.top), true);
-    _drawEdgeHandle(canvas, fill, handleStroke,
-        Offset(rect.center.dx, rect.bottom), true);
-    _drawEdgeHandle(canvas, fill, handleStroke,
-        Offset(rect.left, rect.center.dy), false);
-    _drawEdgeHandle(canvas, fill, handleStroke,
-        Offset(rect.right, rect.center.dy), false);
+    _drawEdgeHandle(
+        canvas, fill, handleStroke, Offset(rect.center.dx, rect.top), true);
+    _drawEdgeHandle(
+        canvas, fill, handleStroke, Offset(rect.center.dx, rect.bottom), true);
+    _drawEdgeHandle(
+        canvas, fill, handleStroke, Offset(rect.left, rect.center.dy), false);
+    _drawEdgeHandle(
+        canvas, fill, handleStroke, Offset(rect.right, rect.center.dy), false);
 
     // Rotation handle: line + large circle with refresh icon
     final topCenter = Offset(rect.center.dx, rect.top);
@@ -95,7 +101,11 @@ class SelectionHandlesPainter extends CustomPainter {
   }
 
   void _drawEdgeHandle(
-    Canvas canvas, Paint fill, Paint stroke, Offset center, bool horizontal,
+    Canvas canvas,
+    Paint fill,
+    Paint stroke,
+    Offset center,
+    bool horizontal,
   ) {
     final w = horizontal ? edgeHandleWidth : edgeHandleHeight;
     final h = horizontal ? edgeHandleHeight : edgeHandleWidth;

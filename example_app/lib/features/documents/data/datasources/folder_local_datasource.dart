@@ -77,7 +77,7 @@ class FolderLocalDatasourceImpl implements FolderLocalDatasource {
     try {
       final folders = await getFolders();
       final index = folders.indexWhere((f) => f.id == folder.id);
-      
+
       if (index == -1) {
         throw const CacheException('Folder not found');
       }

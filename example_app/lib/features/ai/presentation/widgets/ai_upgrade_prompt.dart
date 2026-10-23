@@ -50,18 +50,19 @@ class AIUpgradePrompt extends StatelessWidget {
     final config = _getConfig(reason);
 
     return Container(
-      margin: EdgeInsets.all(AppSpacing.lg),
+      margin: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(AppRadius.bottomSheet),
       ),
       child: SingleChildScrollView(
-        padding: EdgeInsets.all(AppSpacing.xl),
+        padding: const EdgeInsets.all(AppSpacing.xl),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: AppSpacing.toolbarHeight, height: AppSpacing.toolbarHeight,
+              width: AppSpacing.toolbarHeight,
+              height: AppSpacing.toolbarHeight,
               decoration: BoxDecoration(
                 gradient: LinearGradient(colors: [
                   theme.colorScheme.primary,
@@ -72,29 +73,27 @@ class AIUpgradePrompt extends StatelessWidget {
               child: Icon(Icons.auto_awesome,
                   color: theme.colorScheme.onPrimary, size: AppIconSize.xl),
             ),
-            SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.lg),
             Text(config.title,
                 style: theme.textTheme.titleLarge
                     ?.copyWith(fontWeight: FontWeight.w700),
                 textAlign: TextAlign.center),
-            SizedBox(height: AppSpacing.sm),
+            const SizedBox(height: AppSpacing.sm),
             Text(config.description,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant),
+                style: theme.textTheme.bodyMedium
+                    ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
                 textAlign: TextAlign.center),
-            SizedBox(height: AppSpacing.xl),
+            const SizedBox(height: AppSpacing.xl),
             ...config.features.map((f) => Padding(
-                  padding: EdgeInsets.symmetric(vertical: AppSpacing.xs),
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
                   child: Row(children: [
                     Icon(Icons.check_circle,
-                        size: AppIconSize.md,
-                        color: theme.colorScheme.primary),
-                    SizedBox(width: AppSpacing.md),
-                    Expanded(child: Text(f,
-                        style: theme.textTheme.bodyMedium)),
+                        size: AppIconSize.md, color: theme.colorScheme.primary),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(child: Text(f, style: theme.textTheme.bodyMedium)),
                   ]),
                 )),
-            SizedBox(height: AppSpacing.xl),
+            const SizedBox(height: AppSpacing.xl),
             SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
@@ -103,13 +102,13 @@ class AIUpgradePrompt extends StatelessWidget {
                 label: Text(config.ctaText),
                 style: FilledButton.styleFrom(
                   padding:
-                      EdgeInsets.symmetric(vertical: AppSpacing.md + 2),
+                      const EdgeInsets.symmetric(vertical: AppSpacing.md + 2),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppRadius.lg)),
                 ),
               ),
             ),
-            SizedBox(height: AppSpacing.sm),
+            const SizedBox(height: AppSpacing.sm),
             TextButton(
               onPressed: onDismiss,
               child: Text(config.dismissText),
@@ -123,43 +122,42 @@ class AIUpgradePrompt extends StatelessWidget {
   _UpgradeConfig _getConfig(AIUpgradeReason reason) {
     return switch (reason) {
       AIUpgradeReason.dailyLimitReached => const _UpgradeConfig(
-            title: 'Gunluk Limitine Ulastin',
-            description: "Premium'a yukselterek daha fazla AI "
-                'mesaji gonder ve guclu modellere eris.',
-            features: [
-              'Gunde 150 mesaj (15 yerine)',
-              'GPT-4o mini ile daha akilli yanitlar',
-              'Gelismis matematik cozumu',
-              'Gorsel analiz',
-            ],
-            ctaText: "Premium'a Yukselt",
-            dismissText: 'Yarin tekrar dene',
-          ),
+          title: 'Gunluk Limitine Ulastin',
+          description: "Premium'a yukselterek daha fazla AI "
+              'mesaji gonder ve guclu modellere eris.',
+          features: [
+            'Gunde 150 mesaj (15 yerine)',
+            'GPT-4o mini ile daha akilli yanitlar',
+            'Gelismis matematik cozumu',
+            'Gorsel analiz',
+          ],
+          ctaText: "Premium'a Yukselt",
+          dismissText: 'Yarin tekrar dene',
+        ),
       AIUpgradeReason.premiumModelRequested => const _UpgradeConfig(
-            title: 'Premium Model Gerekli',
-            description:
-                'Bu ozellik premium AI modelleri gerektirir.',
-            features: [
-              'GPT-4o ile ileri duzey analiz',
-              'Karmasik matematik problemleri',
-              'Daha dogru el yazisi tanima',
-              'Oncelikli yanit suresi',
-            ],
-            ctaText: "Premium'a Yukselt",
-            dismissText: 'Ucretsiz model ile devam',
-          ),
+          title: 'Premium Model Gerekli',
+          description: 'Bu ozellik premium AI modelleri gerektirir.',
+          features: [
+            'GPT-4o ile ileri duzey analiz',
+            'Karmasik matematik problemleri',
+            'Daha dogru el yazisi tanima',
+            'Oncelikli yanit suresi',
+          ],
+          ctaText: "Premium'a Yukselt",
+          dismissText: 'Ucretsiz model ile devam',
+        ),
       AIUpgradeReason.advancedFeature => const _UpgradeConfig(
-            title: 'Pro Ozellik',
-            description: 'Bu ozellik Pro abonelere ozeldir.',
-            features: [
-              'Sinirsiz AI mesaji',
-              'GPT-4o ve o4-mini erisimi',
-              'Flashcard olusturma',
-              'Sinav hazirlik modu',
-            ],
-            ctaText: "Pro'ya Yukselt",
-            dismissText: 'Daha sonra',
-          ),
+          title: 'Pro Ozellik',
+          description: 'Bu ozellik Pro abonelere ozeldir.',
+          features: [
+            'Sinirsiz AI mesaji',
+            'GPT-4o ve o4-mini erisimi',
+            'Flashcard olusturma',
+            'Sinav hazirlik modu',
+          ],
+          ctaText: "Pro'ya Yukselt",
+          dismissText: 'Daha sonra',
+        ),
     };
   }
 }

@@ -141,80 +141,81 @@ class _AppPasswordFieldState extends State<AppPasswordField> {
             child: ConstrainedBox(
               constraints: const BoxConstraints(minHeight: 48),
               child: TextFormField(
-              controller: widget.controller,
-              focusNode: _focusNode,
-              enabled: widget.enabled,
-              obscureText: _obscureText,
-              onChanged: widget.onChanged,
-              validator: widget.validator,
-              textInputAction: widget.textInputAction,
-              style: AppTypography.bodyMedium.copyWith(color: textColor),
-              decoration: InputDecoration(
-                hintText: widget.hint,
-                hintStyle: AppTypography.bodyMedium.copyWith(color: hintColor),
-                prefixIcon: Icon(
-                  Icons.lock_outline,
-                  size: AppIconSize.md,
-                  color: hasError ? AppColors.error : iconColor,
-                ),
-                suffixIcon: IconButton(
-                  onPressed: _toggleVisibility,
-                  icon: Icon(
-                    _obscureText
-                        ? Icons.visibility_outlined
-                        : Icons.visibility_off_outlined,
+                controller: widget.controller,
+                focusNode: _focusNode,
+                enabled: widget.enabled,
+                obscureText: _obscureText,
+                onChanged: widget.onChanged,
+                validator: widget.validator,
+                textInputAction: widget.textInputAction,
+                style: AppTypography.bodyMedium.copyWith(color: textColor),
+                decoration: InputDecoration(
+                  hintText: widget.hint,
+                  hintStyle:
+                      AppTypography.bodyMedium.copyWith(color: hintColor),
+                  prefixIcon: Icon(
+                    Icons.lock_outline,
                     size: AppIconSize.md,
-                    color: isDark
-                        ? AppColors.textSecondaryDark
-                        : AppColors.textSecondaryLight,
+                    color: hasError ? AppColors.error : iconColor,
                   ),
-                  splashRadius: AppSpacing.lg,
-                ),
-                filled: true,
-                fillColor: fillColor,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.lg,
-                  vertical: 14, // 14dp vertical padding
-                ),
-                // Default: border yok
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppRadius.textField),
-                  borderSide: BorderSide.none,
-                ),
-                // Enabled: border yok (modern minimal)
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppRadius.textField),
-                  borderSide: hasError
-                      ? const BorderSide(color: AppColors.error, width: 1.5)
-                      : BorderSide.none,
-                ),
-                // Focus: 1.5px primary border
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppRadius.textField),
-                  borderSide: BorderSide(
-                    color: hasError ? AppColors.error : AppColors.primary,
-                    width: 1.5,
+                  suffixIcon: IconButton(
+                    onPressed: _toggleVisibility,
+                    icon: Icon(
+                      _obscureText
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                      size: AppIconSize.md,
+                      color: isDark
+                          ? AppColors.textSecondaryDark
+                          : AppColors.textSecondaryLight,
+                    ),
+                    splashRadius: AppSpacing.lg,
                   ),
-                ),
-                // Error states
-                errorBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppRadius.textField),
-                  borderSide:
-                      const BorderSide(color: AppColors.error, width: 1.5),
-                ),
-                focusedErrorBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppRadius.textField),
-                  borderSide:
-                      const BorderSide(color: AppColors.error, width: 1.5),
-                ),
-                // Disabled
-                disabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppRadius.textField),
-                  borderSide: BorderSide.none,
+                  filled: true,
+                  fillColor: fillColor,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                    vertical: 14, // 14dp vertical padding
+                  ),
+                  // Default: border yok
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.textField),
+                    borderSide: BorderSide.none,
+                  ),
+                  // Enabled: border yok (modern minimal)
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.textField),
+                    borderSide: hasError
+                        ? const BorderSide(color: AppColors.error, width: 1.5)
+                        : BorderSide.none,
+                  ),
+                  // Focus: 1.5px primary border
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.textField),
+                    borderSide: BorderSide(
+                      color: hasError ? AppColors.error : AppColors.primary,
+                      width: 1.5,
+                    ),
+                  ),
+                  // Error states
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.textField),
+                    borderSide:
+                        const BorderSide(color: AppColors.error, width: 1.5),
+                  ),
+                  focusedErrorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.textField),
+                    borderSide:
+                        const BorderSide(color: AppColors.error, width: 1.5),
+                  ),
+                  // Disabled
+                  disabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.textField),
+                    borderSide: BorderSide.none,
+                  ),
                 ),
               ),
             ),
-          ),
           ),
           if (hasError) ...[
             const SizedBox(height: AppSpacing.xs),

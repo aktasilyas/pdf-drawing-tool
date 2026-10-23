@@ -4,7 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/drawing_ui.dart';
 
 void main() {
-  group('DrawingScreen Integration Tests', skip: 'UI redesign - toolbar and panel interactions changed', () {
+  group('DrawingScreen Integration Tests',
+      skip: 'UI redesign - toolbar and panel interactions changed', () {
     testWidgets('renders all main components', (tester) async {
       await tester.pumpWidget(
         const ProviderScope(
@@ -194,7 +195,8 @@ void main() {
     });
   });
 
-  group('Panel State Management Tests', skip: 'UI redesign - panels changed significantly', () {
+  group('Panel State Management Tests',
+      skip: 'UI redesign - panels changed significantly', () {
     testWidgets('thickness slider updates state', (tester) async {
       await tester.pumpWidget(
         const ProviderScope(

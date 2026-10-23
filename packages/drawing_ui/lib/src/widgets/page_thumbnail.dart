@@ -139,7 +139,7 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return GestureDetector(
       onTap: widget.onTap,
       onLongPress: widget.onLongPress,
@@ -154,9 +154,9 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
           border: widget.isSelected
               ? Border.all(color: colorScheme.primary, width: 3)
               : Border.all(
-                  color: isDark 
-                    ? colorScheme.outline.withValues(alpha: 0.5)
-                    : colorScheme.outline.withValues(alpha: 0.3),
+                  color: isDark
+                      ? colorScheme.outline.withValues(alpha: 0.5)
+                      : colorScheme.outline.withValues(alpha: 0.3),
                   width: 1,
                 ),
           borderRadius: BorderRadius.circular(8),
@@ -191,9 +191,9 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
                     child: Text(
                       '${widget.page.index + 1}',
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
                     ),
                   ),
                 ),
@@ -206,7 +206,7 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
 
   Widget _buildThumbnailContent() {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     // SPECIAL CASE: PDF pages - use pdfPageRenderProvider directly
     if (widget.page.background.type == BackgroundType.pdf &&
         widget.page.background.pdfFilePath != null &&
@@ -236,8 +236,8 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
               'Failed to\ngenerate',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
+                    color: colorScheme.onSurfaceVariant,
+                  ),
             ),
           ],
         ),
@@ -262,8 +262,9 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
 
   /// Build PDF thumbnail using renderThumbnail (low-res)
   Widget _buildPdfThumbnail() {
-    final cacheKey = '${widget.page.background.pdfFilePath}|${widget.page.background.pdfPageIndex}';
-    
+    final cacheKey =
+        '${widget.page.background.pdfFilePath}|${widget.page.background.pdfPageIndex}';
+
     return Consumer(
       builder: (context, ref, child) {
         // 1. Önce thumbnail cache'e bak
@@ -277,9 +278,10 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
             gaplessPlayback: true,
           );
         }
-        
+
         // 2. Scroll sırasında loading yapma
-        final shouldDefer = Scrollable.recommendDeferredLoadingForContext(context);
+        final shouldDefer =
+            Scrollable.recommendDeferredLoadingForContext(context);
         if (!shouldDefer) {
           // ProviderContainer kullan (dispose-safe)
           final container = ProviderScope.containerOf(context);
@@ -287,7 +289,7 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
             renderThumbnail(container, cacheKey);
           });
         }
-        
+
         // 3. Basit placeholder
         final placeholderCs = Theme.of(context).colorScheme;
         return Container(

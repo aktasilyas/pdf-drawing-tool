@@ -33,7 +33,9 @@ void main() {
       addTearDown(container.dispose);
 
       // Set mode to on
-      container.read(canvasDarkModeProvider.notifier).setMode(CanvasDarkMode.on);
+      container
+          .read(canvasDarkModeProvider.notifier)
+          .setMode(CanvasDarkMode.on);
 
       final scheme = container.read(canvasColorSchemeProvider);
 
@@ -51,7 +53,9 @@ void main() {
       addTearDown(container.dispose);
 
       // Set mode to followSystem
-      container.read(canvasDarkModeProvider.notifier).setMode(CanvasDarkMode.followSystem);
+      container
+          .read(canvasDarkModeProvider.notifier)
+          .setMode(CanvasDarkMode.followSystem);
 
       final scheme = container.read(canvasColorSchemeProvider);
 
@@ -59,7 +63,8 @@ void main() {
       expect(scheme.patternLine, equals(const Color(0xFF4A4A4A)));
     });
 
-    test('should_return_light_scheme_when_followSystem_and_light_brightness', () {
+    test('should_return_light_scheme_when_followSystem_and_light_brightness',
+        () {
       final container = ProviderContainer(
         overrides: [
           sharedPreferencesProvider.overrideWithValue(null),
@@ -69,7 +74,9 @@ void main() {
       addTearDown(container.dispose);
 
       // Set mode to followSystem
-      container.read(canvasDarkModeProvider.notifier).setMode(CanvasDarkMode.followSystem);
+      container
+          .read(canvasDarkModeProvider.notifier)
+          .setMode(CanvasDarkMode.followSystem);
 
       final scheme = container.read(canvasColorSchemeProvider);
 

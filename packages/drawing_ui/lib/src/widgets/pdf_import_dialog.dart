@@ -180,8 +180,10 @@ class _PDFImportDialogState extends State<PDFImportDialog> {
                       child: Text(
                         _errorMessage!,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onErrorContainer,
-                        ),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onErrorContainer,
+                            ),
                       ),
                     ),
                   ],
@@ -244,8 +246,7 @@ class _PDFImportDialogState extends State<PDFImportDialog> {
               ),
             ),
 
-            if (_importMode == PDFImportMode.pageRange &&
-                _totalPages > 0) ...[
+            if (_importMode == PDFImportMode.pageRange && _totalPages > 0) ...[
               const SizedBox(height: 12),
               PageRangeSelector(
                 totalPages: _totalPages,

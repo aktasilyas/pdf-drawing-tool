@@ -92,7 +92,8 @@ void main() {
     });
   });
 
-  group('PenSettingsPanel', skip: 'UI redesign - color picker and layout changed', () {
+  group('PenSettingsPanel',
+      skip: 'UI redesign - color picker and layout changed', () {
     testWidgets('renders thickness slider', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
@@ -382,7 +383,7 @@ void main() {
 
       expect(find.text('ŞEKİLLER'), findsOneWidget);
       expect(find.byType(GridView), findsOneWidget);
-      
+
       // Grid should have 24 shape options (ShapeType.values.length)
       expect(find.byType(GestureDetector), findsAtLeast(24));
     });
@@ -403,7 +404,8 @@ void main() {
         ),
       );
 
-      expect(find.text('Favorilere eklemek için şekli sürükleyin'), findsOneWidget);
+      expect(find.text('Favorilere eklemek için şekli sürükleyin'),
+          findsOneWidget);
     });
 
     testWidgets('has Turkish section titles', (tester) async {

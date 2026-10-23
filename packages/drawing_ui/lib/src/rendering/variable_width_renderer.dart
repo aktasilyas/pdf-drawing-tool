@@ -25,7 +25,8 @@ class VariableWidthStrokeRenderer {
 
     if (points.length == 1) {
       final w = _widthAt(base, s, points.first.pressure, 1.0);
-      canvas.drawCircle(Offset(points.first.x, points.first.y), w / 2, _fillPaint);
+      canvas.drawCircle(
+          Offset(points.first.x, points.first.y), w / 2, _fillPaint);
       return;
     }
 
@@ -42,13 +43,17 @@ class VariableWidthStrokeRenderer {
       ..color = Color(style.color).withValues(alpha: style.opacity)
       ..blendMode = _blendMode(style.blendMode)
       ..maskFilter = (style.glowRadius > 0 && style.glowIntensity > 0)
-          ? MaskFilter.blur(BlurStyle.normal, style.glowRadius * style.glowIntensity)
+          ? MaskFilter.blur(
+              BlurStyle.normal, style.glowRadius * style.glowIntensity)
           : null;
   }
 
   /// Two points: trapezoid with rounded caps.
   void _renderTwoPoints(
-    Canvas canvas, List<DrawingPoint> pts, double base, double s,
+    Canvas canvas,
+    List<DrawingPoint> pts,
+    double base,
+    double s,
   ) {
     final p0 = pts[0], p1 = pts[1];
     final dx = p1.x - p0.x, dy = p1.y - p0.y;
@@ -78,7 +83,10 @@ class VariableWidthStrokeRenderer {
 
   /// Main polygon rendering for 3+ points.
   void _renderPolygon(
-    Canvas canvas, List<DrawingPoint> pts, double base, double s,
+    Canvas canvas,
+    List<DrawingPoint> pts,
+    double base,
+    double s,
   ) {
     final n = pts.length;
     final taperLen = math.min(8, n ~/ 3).toDouble();
@@ -103,8 +111,8 @@ class VariableWidthStrokeRenderer {
 
     // Start cap
     final t0 = _tangentAt(pts, 0);
-    _addCap(path, pts[0].x, pts[0].y, widths[0] / 2,
-        norms[0].dx, norms[0].dy, t0.dx, t0.dy, true);
+    _addCap(path, pts[0].x, pts[0].y, widths[0] / 2, norms[0].dx, norms[0].dy,
+        t0.dx, t0.dy, true);
 
     // Left edge with quadratic bezier smoothing
     for (int i = 1; i < n - 1; i++) {
@@ -137,8 +145,14 @@ class VariableWidthStrokeRenderer {
 
   /// Adds a semicircular cap using two cubic bezier quarter-arcs.
   void _addCap(
-    Path path, double cx, double cy, double r,
-    double nx, double ny, double tx, double ty,
+    Path path,
+    double cx,
+    double cy,
+    double r,
+    double nx,
+    double ny,
+    double tx,
+    double ty,
     bool isStart,
   ) {
     if (r < 0.5) {
@@ -155,26 +169,38 @@ class VariableWidthStrokeRenderer {
       // Arc from left-of-normal to right-of-normal through back
       path.moveTo(cx + nx * r, cy + ny * r);
       path.cubicTo(
-        cx + nx * r - tx * r * k, cy + ny * r - ty * r * k,
-        cx - tx * r + nx * r * k, cy - ty * r + ny * r * k,
-        cx - tx * r, cy - ty * r,
+        cx + nx * r - tx * r * k,
+        cy + ny * r - ty * r * k,
+        cx - tx * r + nx * r * k,
+        cy - ty * r + ny * r * k,
+        cx - tx * r,
+        cy - ty * r,
       );
       path.cubicTo(
-        cx - tx * r - nx * r * k, cy - ty * r - ny * r * k,
-        cx - nx * r - tx * r * k, cy - ny * r - ty * r * k,
-        cx - nx * r, cy - ny * r,
+        cx - tx * r - nx * r * k,
+        cy - ty * r - ny * r * k,
+        cx - nx * r - tx * r * k,
+        cy - ny * r - ty * r * k,
+        cx - nx * r,
+        cy - ny * r,
       );
     } else {
       // Arc from left-edge to right-edge through front
       path.cubicTo(
-        cx + nx * r + tx * r * k, cy + ny * r + ty * r * k,
-        cx + tx * r + nx * r * k, cy + ty * r + ny * r * k,
-        cx + tx * r, cy + ty * r,
+        cx + nx * r + tx * r * k,
+        cy + ny * r + ty * r * k,
+        cx + tx * r + nx * r * k,
+        cy + ty * r + ny * r * k,
+        cx + tx * r,
+        cy + ty * r,
       );
       path.cubicTo(
-        cx + tx * r - nx * r * k, cy + ty * r - ny * r * k,
-        cx - nx * r + tx * r * k, cy - ny * r + ty * r * k,
-        cx - nx * r, cy - ny * r,
+        cx + tx * r - nx * r * k,
+        cy + ty * r - ny * r * k,
+        cx - nx * r + tx * r * k,
+        cy - ny * r + ty * r * k,
+        cx - nx * r,
+        cy - ny * r,
       );
     }
   }
@@ -226,12 +252,18 @@ class VariableWidthStrokeRenderer {
 
   BlendMode _blendMode(DrawingBlendMode mode) {
     switch (mode) {
-      case DrawingBlendMode.normal: return BlendMode.srcOver;
-      case DrawingBlendMode.multiply: return BlendMode.multiply;
-      case DrawingBlendMode.screen: return BlendMode.screen;
-      case DrawingBlendMode.overlay: return BlendMode.overlay;
-      case DrawingBlendMode.darken: return BlendMode.darken;
-      case DrawingBlendMode.lighten: return BlendMode.lighten;
+      case DrawingBlendMode.normal:
+        return BlendMode.srcOver;
+      case DrawingBlendMode.multiply:
+        return BlendMode.multiply;
+      case DrawingBlendMode.screen:
+        return BlendMode.screen;
+      case DrawingBlendMode.overlay:
+        return BlendMode.overlay;
+      case DrawingBlendMode.darken:
+        return BlendMode.darken;
+      case DrawingBlendMode.lighten:
+        return BlendMode.lighten;
     }
   }
 }

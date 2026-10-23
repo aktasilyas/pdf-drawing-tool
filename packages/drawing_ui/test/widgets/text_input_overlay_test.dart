@@ -165,8 +165,10 @@ void main() {
 
     test('updateText updates active text', () {
       container.read(textToolProvider.notifier).startNewText(0, 0);
-      final updatedText =
-          container.read(textToolProvider).activeText!.copyWith(text: 'Updated');
+      final updatedText = container
+          .read(textToolProvider)
+          .activeText!
+          .copyWith(text: 'Updated');
       container.read(textToolProvider.notifier).updateText(updatedText);
 
       final state = container.read(textToolProvider);
@@ -176,7 +178,10 @@ void main() {
     test('finishEditing returns text and clears state', () {
       container.read(textToolProvider.notifier).startNewText(0, 0);
       container.read(textToolProvider.notifier).updateText(
-            container.read(textToolProvider).activeText!.copyWith(text: 'Final'),
+            container
+                .read(textToolProvider)
+                .activeText!
+                .copyWith(text: 'Final'),
           );
 
       final result = container.read(textToolProvider.notifier).finishEditing();

@@ -23,17 +23,20 @@ void main() {
   });
 
   test('should forward credentials to repository', () async {
-    final result = await useCase(email: 'foo@example.com', password: 'p4ssw0rd');
+    final result =
+        await useCase(email: 'foo@example.com', password: 'p4ssw0rd');
     expect(repository.loginCalled, isTrue);
     expect(repository.lastEmail, 'foo@example.com');
     expect(result, Right(testUser));
   });
 
   test('should propagate repository failure', () async {
-    repository = _FakeAuthRepository(loginResult: const Left(AuthFailure('iptal')));
+    repository =
+        _FakeAuthRepository(loginResult: const Left(AuthFailure('iptal')));
     useCase = LoginUseCase(repository);
 
-    final result = await useCase(email: 'foo@example.com', password: 'p4ssw0rd');
+    final result =
+        await useCase(email: 'foo@example.com', password: 'p4ssw0rd');
 
     expect(result, const Left(AuthFailure('iptal')));
   });

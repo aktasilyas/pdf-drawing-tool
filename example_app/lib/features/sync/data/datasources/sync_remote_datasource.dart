@@ -188,7 +188,8 @@ class SyncRemoteDatasource {
         'last_sync_at': timestamp.toIso8601String(),
       });
     } on PostgrestException catch (e) {
-      throw ServerException('Failed to update last sync timestamp: ${e.message}');
+      throw ServerException(
+          'Failed to update last sync timestamp: ${e.message}');
     } catch (e) {
       throw ServerException('Failed to update last sync timestamp: $e');
     }

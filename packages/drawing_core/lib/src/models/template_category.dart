@@ -1,16 +1,16 @@
 /// Template kategorileri.
-/// 
+///
 /// Basic kategorisi Free, diğerleri Premium.
 enum TemplateCategory {
   /// Boş, çizgili, kareli, noktalı - FREE
   basic,
-  
+
   /// Cornell, To-Do, Meeting Notes - PREMIUM
   productivity,
-  
+
   /// Storyboard, Music, Art - PREMIUM
   creative,
-  
+
   /// Isometric, Hexagonal, Calligraphy - PREMIUM
   special,
 
@@ -31,10 +31,10 @@ enum TemplateCategory {
 extension TemplateCategoryExtension on TemplateCategory {
   /// Kategori Free mi?
   bool get isFree => this == TemplateCategory.basic;
-  
+
   /// Kategori Premium mı?
   bool get isPremium => !isFree;
-  
+
   /// Türkçe kategori adı
   String get displayName {
     switch (this) {

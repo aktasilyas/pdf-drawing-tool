@@ -156,9 +156,8 @@ class TemplateGridItem extends StatelessWidget {
                           child: Icon(
                             Icons.lock_outline,
                             size: 10,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurfaceVariant,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ),

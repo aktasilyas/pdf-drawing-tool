@@ -50,7 +50,8 @@ void main() {
         expect(text.style?.color, equals(AppColors.textPrimaryLight));
       });
 
-      testWidgets('should_use_textSecondaryLight_for_description', (tester) async {
+      testWidgets('should_use_textSecondaryLight_for_description',
+          (tester) async {
         // Arrange & Act
         await tester.pumpWidget(
           buildTestWidget(
@@ -150,7 +151,8 @@ void main() {
         expect(text.style?.color, equals(AppColors.textPrimaryDark));
       });
 
-      testWidgets('should_use_textSecondaryDark_for_description', (tester) async {
+      testWidgets('should_use_textSecondaryDark_for_description',
+          (tester) async {
         // Arrange & Act
         await tester.pumpWidget(
           buildTestWidget(

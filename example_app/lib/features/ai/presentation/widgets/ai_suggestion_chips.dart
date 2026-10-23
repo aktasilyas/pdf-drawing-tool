@@ -36,8 +36,7 @@ class AISuggestionChips extends StatelessWidget {
                 color: theme.colorScheme.primary,
               ),
             ),
-            backgroundColor:
-                theme.colorScheme.primary.withValues(alpha: 0.08),
+            backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.08),
             side: BorderSide(
               color: theme.colorScheme.primary.withValues(alpha: 0.2),
             ),

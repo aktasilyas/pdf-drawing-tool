@@ -58,9 +58,7 @@ class _RecordingBarContent extends ConsumerWidget {
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(22),
-        border: isDark
-            ? Border.all(color: cs.outlineVariant)
-            : null,
+        border: isDark ? Border.all(color: cs.outlineVariant) : null,
         boxShadow: DrawingShadows.floating(Theme.of(context).brightness),
       ),
       child: Row(
@@ -187,10 +185,10 @@ class _RemainingTime extends StatelessWidget {
       child: Text(
         '($mins:$secs)',
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: isUrgent ? cs.error : cs.onSurfaceVariant,
-              fontWeight: isUrgent ? FontWeight.w600 : FontWeight.normal,
-              fontFeatures: const [FontFeature.tabularFigures()],
-            ),
+          color: isUrgent ? cs.error : cs.onSurfaceVariant,
+          fontWeight: isUrgent ? FontWeight.w600 : FontWeight.normal,
+          fontFeatures: const [FontFeature.tabularFigures()],
+        ),
       ),
     );
   }

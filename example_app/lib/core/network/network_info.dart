@@ -13,8 +13,8 @@ abstract class NetworkInfo {
 /// Implementation using connectivity_plus package
 class NetworkInfoImpl implements NetworkInfo {
   // final Connectivity _connectivity;
-  
-  // NetworkInfoImpl([Connectivity? connectivity]) 
+
+  // NetworkInfoImpl([Connectivity? connectivity])
   //     : _connectivity = connectivity ?? Connectivity();
 
   @override

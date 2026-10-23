@@ -62,10 +62,13 @@ class _PDFExportDialogState extends State<PDFExportDialog> {
                       border: OutlineInputBorder(),
                     ),
                     keyboardType: TextInputType.number,
-                    controller: TextEditingController(text: _startPage.toString()),
+                    controller:
+                        TextEditingController(text: _startPage.toString()),
                     onChanged: (value) {
                       final page = int.tryParse(value);
-                      if (page != null && page >= 1 && page <= widget.totalPages) {
+                      if (page != null &&
+                          page >= 1 &&
+                          page <= widget.totalPages) {
                         setState(() {
                           _startPage = page;
                         });
@@ -81,10 +84,13 @@ class _PDFExportDialogState extends State<PDFExportDialog> {
                       border: OutlineInputBorder(),
                     ),
                     keyboardType: TextInputType.number,
-                    controller: TextEditingController(text: _endPage.toString()),
+                    controller:
+                        TextEditingController(text: _endPage.toString()),
                     onChanged: (value) {
                       final page = int.tryParse(value);
-                      if (page != null && page >= 1 && page <= widget.totalPages) {
+                      if (page != null &&
+                          page >= 1 &&
+                          page <= widget.totalPages) {
                         setState(() {
                           _endPage = page;
                         });
@@ -107,7 +113,8 @@ class _PDFExportDialogState extends State<PDFExportDialog> {
             // TODO: Implement PDF export with drawing_ui
             Navigator.pop(context);
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('PDF dışa aktarma yakında eklenecek')),
+              const SnackBar(
+                  content: Text('PDF dışa aktarma yakında eklenecek')),
             );
           },
           child: const Text('Dışa Aktar'),

@@ -49,7 +49,8 @@ class ShapePainter extends CustomPainter {
     }
   }
 
-  static void _paintShapeImpl(Canvas canvas, Shape shape, {bool isPreview = false}) {
+  static void _paintShapeImpl(Canvas canvas, Shape shape,
+      {bool isPreview = false}) {
     final previewOpacity = isPreview ? 0.5 : 1.0;
 
     // Filled shapes: önce dolgu, sonra kontur çiz

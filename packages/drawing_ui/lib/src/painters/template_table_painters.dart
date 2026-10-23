@@ -12,7 +12,11 @@ mixin TemplateTablePainters {
   Paint get linePaint;
 
   void _drawTableDivider(
-    Canvas canvas, double y, double startX, double endX, Paint paint,
+    Canvas canvas,
+    double y,
+    double startX,
+    double endX,
+    Paint paint,
   ) {
     canvas.drawLine(
       Offset(startX, y),
@@ -52,8 +56,7 @@ mixin TemplateTablePainters {
     for (var y = headerH + colHeaderH + rowH;
         y < size.height - margin;
         y += rowH) {
-      canvas.drawLine(
-          Offset(margin, y), Offset(size.width - margin, y), paint);
+      canvas.drawLine(Offset(margin, y), Offset(size.width - margin, y), paint);
     }
   }
 
@@ -91,8 +94,7 @@ mixin TemplateTablePainters {
     for (var y = headerH + colHeaderH + spacingPx;
         y < size.height - margin;
         y += spacingPx) {
-      canvas.drawLine(
-          Offset(margin, y), Offset(size.width - margin, y), paint);
+      canvas.drawLine(Offset(margin, y), Offset(size.width - margin, y), paint);
     }
   }
 }

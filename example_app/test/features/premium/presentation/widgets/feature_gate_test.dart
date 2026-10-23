@@ -20,7 +20,8 @@ Override _overrideHasEntitlementLoading() {
 }
 
 void main() {
-  testWidgets('FeatureGate renders child when entitlement granted', (tester) async {
+  testWidgets('FeatureGate renders child when entitlement granted',
+      (tester) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
@@ -39,7 +40,8 @@ void main() {
     expect(find.byIcon(Icons.lock), findsNothing);
   });
 
-  testWidgets('FeatureGate shows locked child when entitlement missing', (tester) async {
+  testWidgets('FeatureGate shows locked child when entitlement missing',
+      (tester) async {
     var tapped = false;
 
     await tester.pumpWidget(
@@ -63,7 +65,8 @@ void main() {
     expect(tapped, true);
   });
 
-  testWidgets('FeatureGate shows child while entitlement loading', (tester) async {
+  testWidgets('FeatureGate shows child while entitlement loading',
+      (tester) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [

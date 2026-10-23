@@ -139,7 +139,8 @@ class _ToolBarState extends ConsumerState<ToolBar> {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              ...visibleTools.map((tool) => _buildToolButton(tool, currentTool)),
+              ...visibleTools
+                  .map((tool) => _buildToolButton(tool, currentTool)),
             ],
           ),
         ),
@@ -190,8 +191,7 @@ class _ToolBarState extends ConsumerState<ToolBar> {
 
   void _onPanelTap(ToolType tool) {
     final active = ref.read(activePanelProvider);
-    ref.read(activePanelProvider.notifier).state =
-        active == tool ? null : tool;
+    ref.read(activePanelProvider.notifier).state = active == tool ? null : tool;
   }
 
   void _openRecordingsTab(WidgetRef ref) {

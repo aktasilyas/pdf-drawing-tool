@@ -94,7 +94,9 @@ void main() {
           pages: [
             Page.create(index: 0),
             Page.create(index: 1),
-          ], createdAt: DateTime.now(), updatedAt: DateTime.now(),
+          ],
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
         );
 
         final exportService = PDFExportService();

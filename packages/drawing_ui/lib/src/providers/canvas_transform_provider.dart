@@ -40,7 +40,8 @@ class CanvasTransform {
   double get displayPercentage => (zoom / baselineZoom) * 100;
 
   /// Creates a copy with updated values
-  CanvasTransform copyWith({double? zoom, Offset? offset, double? baselineZoom}) {
+  CanvasTransform copyWith(
+      {double? zoom, Offset? offset, double? baselineZoom}) {
     return CanvasTransform(
       zoom: zoom ?? this.zoom,
       offset: offset ?? this.offset,
@@ -102,7 +103,7 @@ class CanvasTransformNotifier extends StateNotifier<CanvasTransform> {
   CanvasTransformNotifier() : super(const CanvasTransform());
 
   /// Set absolute zoom level (clamped to min/max).
-  /// 
+  ///
   /// [minZoom] minimum zoom limit (defaults to legacy 0.25)
   /// [maxZoom] maximum zoom limit (defaults to legacy 5.0)
   void setZoom(double zoom, {double minZoom = 0.25, double maxZoom = 5.0}) {
@@ -122,7 +123,7 @@ class CanvasTransformNotifier extends StateNotifier<CanvasTransform> {
   /// [minZoom] minimum zoom limit (defaults to legacy 0.25)
   /// [maxZoom] maximum zoom limit (defaults to legacy 5.0)
   void applyZoomDelta(
-    double delta, 
+    double delta,
     Offset focalPoint, {
     double minZoom = 0.25,
     double maxZoom = 5.0,
@@ -134,7 +135,8 @@ class CanvasTransformNotifier extends StateNotifier<CanvasTransform> {
     final focalCanvasPoint = state.screenToCanvas(focalPoint);
     final newOffset = focalPoint - focalCanvasPoint * newZoom;
 
-    state = CanvasTransform(zoom: newZoom, offset: newOffset, baselineZoom: state.baselineZoom);
+    state = CanvasTransform(
+        zoom: newZoom, offset: newOffset, baselineZoom: state.baselineZoom);
   }
 
   /// Apply zoom delta with custom limits from CanvasMode.
@@ -198,7 +200,8 @@ class CanvasTransformNotifier extends StateNotifier<CanvasTransform> {
       }
     }
 
-    state = CanvasTransform(zoom: newZoom, offset: newOffset, baselineZoom: state.baselineZoom);
+    state = CanvasTransform(
+        zoom: newZoom, offset: newOffset, baselineZoom: state.baselineZoom);
   }
 
   /// Apply pan delta (for drag gesture).
@@ -358,9 +361,8 @@ class CanvasTransformNotifier extends StateNotifier<CanvasTransform> {
     final newBaselineZoom = _fitZoom(viewportSize, pageSize);
 
     // Preserve relative zoom (e.g. 150% stays 150%)
-    final currentRelativeZoom = state.baselineZoom > 0
-        ? state.zoom / state.baselineZoom
-        : 1.0;
+    final currentRelativeZoom =
+        state.baselineZoom > 0 ? state.zoom / state.baselineZoom : 1.0;
     final newZoom = newBaselineZoom * currentRelativeZoom;
 
     state = state.copyWith(
@@ -430,7 +432,7 @@ class CanvasTransformNotifier extends StateNotifier<CanvasTransform> {
 
   // NOTE: The following methods are kept for reference but not currently used
   // since we now use 1.0 (100%) as default zoom instead of fit-to-height/fit-to-screen
-  
+
   /*
   /// Calculate zoom to fit page height to viewport height.
   /// 
@@ -468,10 +470,9 @@ class CanvasTransformNotifier extends StateNotifier<CanvasTransform> {
   }
   */
 
-
   // NOTE: The following methods are kept for reference but not currently used
   // since we now use _clampOffsetLimitedCanvas for limited canvas mode
-  
+
   /*
   /// Clamp offset to keep page within bounds (centers page if smaller than viewport).
   void _clampOffset(Size viewportSize, Size pageSize) {

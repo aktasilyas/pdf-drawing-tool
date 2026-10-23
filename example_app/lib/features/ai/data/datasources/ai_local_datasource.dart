@@ -116,8 +116,7 @@ class AILocalDataSource {
 
   /// Mark messages as synced.
   Future<void> markMessagesSynced(List<String> messageIds) async {
-    await (_db.update(_db.aiMessagesLocal)
-          ..where((t) => t.id.isIn(messageIds)))
+    await (_db.update(_db.aiMessagesLocal)..where((t) => t.id.isIn(messageIds)))
         .write(const AiMessagesLocalCompanion(isSynced: Value(true)));
   }
 

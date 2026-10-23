@@ -13,7 +13,7 @@ enum PaperSizePreset {
 }
 
 /// Kağıt boyutu modeli (mm cinsinden)
-/// 
+///
 /// Template seçimi için kullanılır, daha sonra PageSize'a dönüştürülür.
 class PaperSize {
   final double widthMm;
@@ -30,16 +30,16 @@ class PaperSize {
 
   /// Pixel cinsinden genişlik (72 DPI)
   double get widthPx => widthMm * 72 / 25.4;
-  
+
   /// Pixel cinsinden yükseklik (72 DPI)
   double get heightPx => heightMm * 72 / 25.4;
-  
+
   /// En-boy oranı
   double get aspectRatio => widthMm / heightMm;
 
   /// Landscape versiyonu
-  PaperSize get landscape => isLandscape 
-      ? this 
+  PaperSize get landscape => isLandscape
+      ? this
       : PaperSize(
           widthMm: heightMm,
           heightMm: widthMm,
@@ -48,8 +48,8 @@ class PaperSize {
         );
 
   /// Portrait versiyonu
-  PaperSize get portrait => !isLandscape 
-      ? this 
+  PaperSize get portrait => !isLandscape
+      ? this
       : PaperSize(
           widthMm: heightMm,
           heightMm: widthMm,
@@ -58,26 +58,41 @@ class PaperSize {
         );
 
   // === STANDART BOYUTLAR ===
-  
-  static const a4 = PaperSize(widthMm: 210, heightMm: 297, preset: PaperSizePreset.a4);
-  static const a5 = PaperSize(widthMm: 148, heightMm: 210, preset: PaperSizePreset.a5);
-  static const a6 = PaperSize(widthMm: 105, heightMm: 148, preset: PaperSizePreset.a6);
-  static const letter = PaperSize(widthMm: 215.9, heightMm: 279.4, preset: PaperSizePreset.letter);
-  static const legal = PaperSize(widthMm: 215.9, heightMm: 355.6, preset: PaperSizePreset.legal);
-  static const square = PaperSize(widthMm: 210, heightMm: 210, preset: PaperSizePreset.square);
-  static const widescreen = PaperSize(widthMm: 297, heightMm: 167, preset: PaperSizePreset.widescreen);
+
+  static const a4 =
+      PaperSize(widthMm: 210, heightMm: 297, preset: PaperSizePreset.a4);
+  static const a5 =
+      PaperSize(widthMm: 148, heightMm: 210, preset: PaperSizePreset.a5);
+  static const a6 =
+      PaperSize(widthMm: 105, heightMm: 148, preset: PaperSizePreset.a6);
+  static const letter = PaperSize(
+      widthMm: 215.9, heightMm: 279.4, preset: PaperSizePreset.letter);
+  static const legal =
+      PaperSize(widthMm: 215.9, heightMm: 355.6, preset: PaperSizePreset.legal);
+  static const square =
+      PaperSize(widthMm: 210, heightMm: 210, preset: PaperSizePreset.square);
+  static const widescreen = PaperSize(
+      widthMm: 297, heightMm: 167, preset: PaperSizePreset.widescreen);
 
   /// Preset'ten PaperSize oluştur
   static PaperSize fromPreset(PaperSizePreset preset) {
     switch (preset) {
-      case PaperSizePreset.a4: return a4;
-      case PaperSizePreset.a5: return a5;
-      case PaperSizePreset.a6: return a6;
-      case PaperSizePreset.letter: return letter;
-      case PaperSizePreset.legal: return legal;
-      case PaperSizePreset.square: return square;
-      case PaperSizePreset.widescreen: return widescreen;
-      case PaperSizePreset.custom: return a4; // Default
+      case PaperSizePreset.a4:
+        return a4;
+      case PaperSizePreset.a5:
+        return a5;
+      case PaperSizePreset.a6:
+        return a6;
+      case PaperSizePreset.letter:
+        return letter;
+      case PaperSizePreset.legal:
+        return legal;
+      case PaperSizePreset.square:
+        return square;
+      case PaperSizePreset.widescreen:
+        return widescreen;
+      case PaperSizePreset.custom:
+        return a4; // Default
     }
   }
 
@@ -94,11 +109,11 @@ class PaperSize {
   }
 
   Map<String, dynamic> toJson() => {
-    'widthMm': widthMm,
-    'heightMm': heightMm,
-    'preset': preset.name,
-    'isLandscape': isLandscape,
-  };
+        'widthMm': widthMm,
+        'heightMm': heightMm,
+        'preset': preset.name,
+        'isLandscape': isLandscape,
+      };
 
   @override
   bool operator ==(Object other) =>
@@ -116,7 +131,7 @@ class PaperSize {
 extension PaperSizeToPageSize on PaperSize {
   /// PageSize'a dönüştür (pixel cinsinden)
   PageSize toPageSize() => PageSize(
-    width: widthPx, 
-    height: heightPx,
-  );
+        width: widthPx,
+        height: heightPx,
+      );
 }

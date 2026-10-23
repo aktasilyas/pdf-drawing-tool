@@ -1,5 +1,6 @@
 /// Compact toggle widget for panel settings.
 import 'package:flutter/material.dart';
+
 /// Compact toggle (switch) with label.
 ///
 /// Commonly used in tool settings panels for boolean options

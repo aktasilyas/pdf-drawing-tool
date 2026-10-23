@@ -80,7 +80,8 @@ class LassoSelectionPanel extends ConsumerWidget {
           _SelectableTypesGrid(
             selectableTypes: settings.selectableTypes,
             onTypeChanged: (type, value) {
-              ref.read(lassoSettingsProvider.notifier)
+              ref
+                  .read(lassoSettingsProvider.notifier)
                   .setSelectableType(type, value);
             },
           ),
@@ -142,9 +143,8 @@ class _SelectionTypeSelector extends StatelessWidget {
 
   static IconData _iconFor(LassoMode mode, bool selected) {
     return switch (mode) {
-      LassoMode.freeform => selected
-          ? PhosphorIconsRegular.lasso
-          : PhosphorIconsLight.lasso,
+      LassoMode.freeform =>
+        selected ? PhosphorIconsRegular.lasso : PhosphorIconsLight.lasso,
       LassoMode.rectangle => selected
           ? PhosphorIconsRegular.boundingBox
           : PhosphorIconsLight.boundingBox,
@@ -219,9 +219,7 @@ class _TypeChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected
               ? cs.primaryContainer
-              : (isDark
-                  ? cs.surfaceContainerHigh
-                  : cs.surfaceContainerHighest),
+              : (isDark ? cs.surfaceContainerHigh : cs.surfaceContainerHighest),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected
@@ -244,9 +242,7 @@ class _TypeChip extends StatelessWidget {
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
-                color: isSelected
-                    ? cs.onPrimaryContainer
-                    : cs.onSurfaceVariant,
+                color: isSelected ? cs.onPrimaryContainer : cs.onSurfaceVariant,
               ),
             ),
           ],

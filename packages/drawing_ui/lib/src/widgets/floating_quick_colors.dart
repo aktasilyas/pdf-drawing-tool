@@ -52,9 +52,7 @@ class FloatingQuickColors extends ConsumerWidget {
         decoration: BoxDecoration(
           color: colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
-          border: isDark
-              ? Border.all(color: colorScheme.outlineVariant)
-              : null,
+          border: isDark ? Border.all(color: colorScheme.outlineVariant) : null,
           boxShadow: [
             BoxShadow(
               color: colorScheme.shadow.withValues(alpha: isDark ? 0.3 : 0.1),
@@ -73,7 +71,10 @@ class FloatingQuickColors extends ConsumerWidget {
                   isSelected: (currentThickness - t).abs() < 0.01,
                   color: currentColor,
                   onTap: () => _onThicknessTap(
-                    ref, t, currentTool, isPen,
+                    ref,
+                    t,
+                    currentTool,
+                    isPen,
                   ),
                 )),
             // Divider
@@ -88,10 +89,15 @@ class FloatingQuickColors extends ConsumerWidget {
             ...colors.map((color) => _ColorDot(
                   color: color,
                   isSelected: _isColorSelected(
-                    color, currentColor, isHighlighter,
+                    color,
+                    currentColor,
+                    isHighlighter,
                   ),
                   onTap: () => _onQuickColorTap(
-                    ref, color, currentTool, isPen,
+                    ref,
+                    color,
+                    currentTool,
+                    isPen,
                   ),
                 )),
             // Divider
@@ -111,10 +117,12 @@ class FloatingQuickColors extends ConsumerWidget {
                 if (isLaser) {
                   ref.read(laserSettingsProvider.notifier).setColor(color);
                 } else if (isPen) {
-                  ref.read(penSettingsProvider(currentTool).notifier)
+                  ref
+                      .read(penSettingsProvider(currentTool).notifier)
                       .setColor(color);
                 } else {
-                  ref.read(highlighterSettingsProvider.notifier)
+                  ref
+                      .read(highlighterSettingsProvider.notifier)
                       .setColor(color);
                 }
               },
@@ -128,15 +136,18 @@ class FloatingQuickColors extends ConsumerWidget {
   bool _isColorSelected(Color preset, Color current, bool isHighlighter) {
     if (isHighlighter) {
       // Compare RGB only — highlighter colors carry alpha
-      return preset.r == current.r
-          && preset.g == current.g
-          && preset.b == current.b;
+      return preset.r == current.r &&
+          preset.g == current.g &&
+          preset.b == current.b;
     }
     return preset == current;
   }
 
   void _onThicknessTap(
-    WidgetRef ref, double thickness, ToolType tool, bool isPen,
+    WidgetRef ref,
+    double thickness,
+    ToolType tool,
+    bool isPen,
   ) {
     if (tool == ToolType.laserPointer) {
       ref.read(laserSettingsProvider.notifier).setThickness(thickness);
@@ -148,7 +159,10 @@ class FloatingQuickColors extends ConsumerWidget {
   }
 
   void _onQuickColorTap(
-    WidgetRef ref, Color color, ToolType tool, bool isPen,
+    WidgetRef ref,
+    Color color,
+    ToolType tool,
+    bool isPen,
   ) {
     if (tool == ToolType.laserPointer) {
       ref.read(laserSettingsProvider.notifier).setColor(color);
@@ -157,8 +171,8 @@ class FloatingQuickColors extends ConsumerWidget {
     } else {
       // Apply standard highlighter transparency for quick colors
       ref.read(highlighterSettingsProvider.notifier).setColor(
-        color.withValues(alpha: 0.5),
-      );
+            color.withValues(alpha: 0.5),
+          );
     }
   }
 }

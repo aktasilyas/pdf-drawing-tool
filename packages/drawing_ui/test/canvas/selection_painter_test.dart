@@ -6,7 +6,8 @@ import 'package:drawing_ui/src/canvas/selection_painter.dart';
 void main() {
   group('SelectionPainter', () {
     test('creates without error', () {
-      final painter = SelectionPainter(selectionColor: const Color(0xFF10B981),
+      final painter = SelectionPainter(
+        selectionColor: const Color(0xFF10B981),
         selection: null,
         zoom: 1.0,
       );
@@ -21,7 +22,8 @@ void main() {
         bounds: const BoundingBox(left: 0, top: 0, right: 100, bottom: 100),
       );
 
-      final painter = SelectionPainter(selectionColor: const Color(0xFF10B981),
+      final painter = SelectionPainter(
+        selectionColor: const Color(0xFF10B981),
         selection: selection,
         zoom: 1.0,
       );
@@ -36,7 +38,8 @@ void main() {
         DrawingPoint(x: 100, y: 100),
       ];
 
-      final painter = SelectionPainter(selectionColor: const Color(0xFF10B981),
+      final painter = SelectionPainter(
+        selectionColor: const Color(0xFF10B981),
         selection: null,
         previewPath: previewPath,
       );
@@ -55,12 +58,13 @@ void main() {
         final selection2 = Selection.create(
           type: SelectionType.rectangle,
           selectedStrokeIds: ['stroke2'],
-          bounds:
-              const BoundingBox(left: 50, top: 50, right: 150, bottom: 150),
+          bounds: const BoundingBox(left: 50, top: 50, right: 150, bottom: 150),
         );
 
-        final painter1 = SelectionPainter(selectionColor: const Color(0xFF10B981),selection: selection1);
-        final painter2 = SelectionPainter(selectionColor: const Color(0xFF10B981),selection: selection2);
+        final painter1 = SelectionPainter(
+            selectionColor: const Color(0xFF10B981), selection: selection1);
+        final painter2 = SelectionPainter(
+            selectionColor: const Color(0xFF10B981), selection: selection2);
 
         expect(painter2.shouldRepaint(painter1), isTrue);
       });
@@ -72,21 +76,30 @@ void main() {
           bounds: const BoundingBox(left: 0, top: 0, right: 100, bottom: 100),
         );
 
-        final painter1 = SelectionPainter(selectionColor: const Color(0xFF10B981),selection: selection);
-        final painter2 = SelectionPainter(selectionColor: const Color(0xFF10B981),selection: selection);
+        final painter1 = SelectionPainter(
+            selectionColor: const Color(0xFF10B981), selection: selection);
+        final painter2 = SelectionPainter(
+            selectionColor: const Color(0xFF10B981), selection: selection);
 
         expect(painter2.shouldRepaint(painter1), isFalse);
       });
 
-      test('returns false when only zoom changes (zoom is unused by paint)', () {
+      test('returns false when only zoom changes (zoom is unused by paint)',
+          () {
         final selection = Selection.create(
           type: SelectionType.rectangle,
           selectedStrokeIds: ['stroke1'],
           bounds: const BoundingBox(left: 0, top: 0, right: 100, bottom: 100),
         );
 
-        final painter1 = SelectionPainter(selectionColor: const Color(0xFF10B981),selection: selection, zoom: 1.0);
-        final painter2 = SelectionPainter(selectionColor: const Color(0xFF10B981),selection: selection, zoom: 2.0);
+        final painter1 = SelectionPainter(
+            selectionColor: const Color(0xFF10B981),
+            selection: selection,
+            zoom: 1.0);
+        final painter2 = SelectionPainter(
+            selectionColor: const Color(0xFF10B981),
+            selection: selection,
+            zoom: 2.0);
 
         expect(painter2.shouldRepaint(painter1), isFalse);
       });
@@ -98,8 +111,14 @@ void main() {
           bounds: const BoundingBox(left: 0, top: 0, right: 100, bottom: 100),
         );
 
-        final painter1 = SelectionPainter(selectionColor: const Color(0xFF10B981),selection: selection, zoom: 1.5);
-        final painter2 = SelectionPainter(selectionColor: const Color(0xFF10B981),selection: selection, zoom: 1.5);
+        final painter1 = SelectionPainter(
+            selectionColor: const Color(0xFF10B981),
+            selection: selection,
+            zoom: 1.5);
+        final painter2 = SelectionPainter(
+            selectionColor: const Color(0xFF10B981),
+            selection: selection,
+            zoom: 1.5);
 
         expect(painter2.shouldRepaint(painter1), isFalse);
       });
@@ -108,8 +127,14 @@ void main() {
         final path1 = [DrawingPoint(x: 0, y: 0)];
         final path2 = [DrawingPoint(x: 100, y: 100)];
 
-        final painter1 = SelectionPainter(selectionColor: const Color(0xFF10B981),selection: null, previewPath: path1);
-        final painter2 = SelectionPainter(selectionColor: const Color(0xFF10B981),selection: null, previewPath: path2);
+        final painter1 = SelectionPainter(
+            selectionColor: const Color(0xFF10B981),
+            selection: null,
+            previewPath: path1);
+        final painter2 = SelectionPainter(
+            selectionColor: const Color(0xFF10B981),
+            selection: null,
+            previewPath: path2);
 
         expect(painter2.shouldRepaint(painter1), isTrue);
       });
@@ -121,8 +146,10 @@ void main() {
           bounds: const BoundingBox(left: 0, top: 0, right: 100, bottom: 100),
         );
 
-        final painter1 = SelectionPainter(selectionColor: const Color(0xFF10B981),selection: selection);
-        final painter2 = SelectionPainter(selectionColor: const Color(0xFF10B981),selection: null);
+        final painter1 = SelectionPainter(
+            selectionColor: const Color(0xFF10B981), selection: selection);
+        final painter2 = SelectionPainter(
+            selectionColor: const Color(0xFF10B981), selection: null);
 
         expect(painter2.shouldRepaint(painter1), isTrue);
       });
@@ -134,8 +161,10 @@ void main() {
           bounds: const BoundingBox(left: 0, top: 0, right: 100, bottom: 100),
         );
 
-        final painter1 = SelectionPainter(selectionColor: const Color(0xFF10B981),selection: null);
-        final painter2 = SelectionPainter(selectionColor: const Color(0xFF10B981),selection: selection);
+        final painter1 = SelectionPainter(
+            selectionColor: const Color(0xFF10B981), selection: null);
+        final painter2 = SelectionPainter(
+            selectionColor: const Color(0xFF10B981), selection: selection);
 
         expect(painter2.shouldRepaint(painter1), isTrue);
       });
@@ -147,7 +176,8 @@ void main() {
           home: Scaffold(
             body: CustomPaint(
               size: const Size(200, 200),
-              painter: SelectionPainter(selectionColor: const Color(0xFF10B981),selection: null),
+              painter: SelectionPainter(
+                  selectionColor: const Color(0xFF10B981), selection: null),
             ),
           ),
         ),
@@ -171,7 +201,9 @@ void main() {
           home: Scaffold(
             body: CustomPaint(
               size: const Size(200, 200),
-              painter: SelectionPainter(selectionColor: const Color(0xFF10B981),selection: selection),
+              painter: SelectionPainter(
+                  selectionColor: const Color(0xFF10B981),
+                  selection: selection),
             ),
           ),
         ),
@@ -201,7 +233,9 @@ void main() {
           home: Scaffold(
             body: CustomPaint(
               size: const Size(200, 200),
-              painter: SelectionPainter(selectionColor: const Color(0xFF10B981),selection: selection),
+              painter: SelectionPainter(
+                  selectionColor: const Color(0xFF10B981),
+                  selection: selection),
             ),
           ),
         ),
@@ -223,7 +257,8 @@ void main() {
           home: Scaffold(
             body: CustomPaint(
               size: const Size(200, 200),
-              painter: SelectionPainter(selectionColor: const Color(0xFF10B981),
+              painter: SelectionPainter(
+                selectionColor: const Color(0xFF10B981),
                 selection: null,
                 previewPath: previewPath,
               ),
@@ -248,7 +283,8 @@ void main() {
           home: Scaffold(
             body: CustomPaint(
               size: const Size(200, 200),
-              painter: SelectionPainter(selectionColor: const Color(0xFF10B981),
+              painter: SelectionPainter(
+                selectionColor: const Color(0xFF10B981),
                 selection: selection,
                 zoom: 2.0,
               ),

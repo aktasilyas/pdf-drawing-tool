@@ -1,10 +1,7 @@
-import 'dart:ui' show Offset;
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/providers/selection_clipboard_provider.dart';
-import 'package:drawing_ui/src/providers/selection_actions_provider.dart';
 import 'package:drawing_ui/src/providers/document_provider.dart';
 
 void main() {
@@ -93,8 +90,10 @@ void main() {
       container.read(pasteMenuProvider.notifier).state = state;
 
       expect(container.read(pasteMenuProvider), isNotNull);
-      expect(container.read(pasteMenuProvider)!.screenPos, equals(const Offset(100, 200)));
-      expect(container.read(pasteMenuProvider)!.canvasPos, equals(const Offset(300, 400)));
+      expect(container.read(pasteMenuProvider)!.screenPos,
+          equals(const Offset(100, 200)));
+      expect(container.read(pasteMenuProvider)!.canvasPos,
+          equals(const Offset(300, 400)));
     });
 
     test('should_clear_state_when_set_to_null', () {
@@ -237,8 +236,10 @@ void main() {
       // Shape from (20,20) to (80,80). Bounds center = (50, 50).
       // Target point = (200, 200). Delta = (150, 150).
       final shape = _makeShape(
-        startX: 20, startY: 20,
-        endX: 80, endY: 80,
+        startX: 20,
+        startY: 20,
+        endX: 80,
+        endY: 80,
       );
       const bounds = BoundingBox(left: 20, top: 20, right: 80, bottom: 80);
       // center = (50, 50)
@@ -422,7 +423,8 @@ void main() {
           SelectionClipboardData(
         strokes: [],
         shapes: [],
-        originalBounds: const BoundingBox(left: 0, top: 0, right: 10, bottom: 10),
+        originalBounds:
+            const BoundingBox(left: 0, top: 0, right: 10, bottom: 10),
       );
 
       expect(container.read(selectionClipboardProvider), isNotNull);

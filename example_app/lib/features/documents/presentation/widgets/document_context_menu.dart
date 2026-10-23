@@ -29,15 +29,15 @@ class DocumentContextMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
-      padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           // Document title
           Padding(
-            padding: EdgeInsets.fromLTRB(
+            padding: const EdgeInsets.fromLTRB(
               AppSpacing.lg,
               0,
               AppSpacing.lg,
@@ -63,9 +63,9 @@ class DocumentContextMenu extends StatelessWidget {
               ],
             ),
           ),
-          
+
           const Divider(height: 1),
-          
+
           if (isInTrash) ...[
             // Trash actions
             _MenuItem(
@@ -73,7 +73,7 @@ class DocumentContextMenu extends StatelessWidget {
               title: DocumentsStrings.restore,
               onTap: onRestore,
             ),
-            
+
             _MenuItem(
               icon: Icons.delete_forever,
               title: DocumentsStrings.deleteForever,
@@ -87,25 +87,24 @@ class DocumentContextMenu extends StatelessWidget {
               title: DocumentsStrings.rename,
               onTap: onRename,
             ),
-            
+
             _MenuItem(
               icon: Icons.drive_file_move_outlined,
               title: DocumentsStrings.move,
               onTap: onMove,
             ),
-            
+
             _MenuItem(
-              icon: document.isFavorite
-                  ? Icons.favorite
-                  : Icons.favorite_border,
+              icon:
+                  document.isFavorite ? Icons.favorite : Icons.favorite_border,
               title: document.isFavorite
                   ? DocumentsStrings.removeFromFavorites
                   : DocumentsStrings.addToFavorites,
               onTap: onToggleFavorite,
             ),
-            
+
             const Divider(height: 1),
-            
+
             _MenuItem(
               icon: Icons.delete_outline,
               title: DocumentsStrings.moveToTrash,
@@ -136,7 +135,7 @@ class _MenuItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final color = isDestructive ? theme.colorScheme.error : null;
-    
+
     return ListTile(
       leading: Icon(icon, color: color),
       title: Text(

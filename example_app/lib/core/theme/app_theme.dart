@@ -314,8 +314,9 @@ abstract class AppTheme {
         backgroundColor: isLight
             ? AppColors.inverseSurfaceLight
             : AppColors.inverseSurfaceDark,
-        actionTextColor:
-            isLight ? AppColors.inversePrimaryLight : AppColors.inversePrimaryDark,
+        actionTextColor: isLight
+            ? AppColors.inversePrimaryLight
+            : AppColors.inversePrimaryDark,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.sm),
         ),
@@ -385,8 +386,9 @@ abstract class AppTheme {
         backgroundColor: isLight
             ? AppColors.surfaceContainerLight
             : AppColors.surfaceContainerDark,
-        selectedColor:
-            isLight ? AppColors.primaryContainer : AppColors.primaryContainerDarkMode,
+        selectedColor: isLight
+            ? AppColors.primaryContainer
+            : AppColors.primaryContainerDarkMode,
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
           vertical: AppSpacing.xs,

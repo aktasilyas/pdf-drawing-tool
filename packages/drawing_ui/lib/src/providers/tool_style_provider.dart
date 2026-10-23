@@ -77,7 +77,7 @@ final activeStrokeStyleProvider = Provider<StrokeStyle>((ref) {
 });
 
 /// Converts UI NibShapeType to drawing_core NibShape.
-/// 
+///
 /// Note: This is kept for compatibility but may not be needed
 /// since PenType.toStrokeStyle() handles this internally.
 // ignore: unused_element
@@ -108,7 +108,8 @@ final isDrawingToolProvider = Provider<bool>((ref) {
   if (toolType.isPenTool && toolType != ToolType.neonHighlighter) return true;
 
   // Highlighter tools
-  if (toolType == ToolType.highlighter || toolType == ToolType.neonHighlighter) {
+  if (toolType == ToolType.highlighter ||
+      toolType == ToolType.neonHighlighter) {
     return true;
   }
 

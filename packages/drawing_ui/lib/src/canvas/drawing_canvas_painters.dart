@@ -24,15 +24,15 @@ class DynamicBackgroundPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     // 1. Fill background color
-    final bgColor = colorScheme?.effectiveBackground(background.color)
-        ?? Color(background.color);
+    final bgColor = colorScheme?.effectiveBackground(background.color) ??
+        Color(background.color);
     final bgPaint = Paint()..color = bgColor;
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), bgPaint);
 
     // 2. Draw pattern based on type
     final rawLineColor = background.lineColor ?? 0xFFE0E0E0;
-    final lineColor = colorScheme?.effectiveLineColor(background.lineColor)
-        ?? Color(rawLineColor);
+    final lineColor = colorScheme?.effectiveLineColor(background.lineColor) ??
+        Color(rawLineColor);
     final linePaint = Paint()
       ..color = lineColor
       ..strokeWidth = 0.5
@@ -52,8 +52,8 @@ class DynamicBackgroundPainter extends CustomPainter {
         break;
 
       case BackgroundType.dotted:
-        final dotColor = colorScheme?.effectiveDotColor(background.lineColor)
-            ?? lineColor;
+        final dotColor =
+            colorScheme?.effectiveDotColor(background.lineColor) ?? lineColor;
         final dotLinePaint = Paint()
           ..color = dotColor
           ..strokeWidth = 0.5
@@ -82,7 +82,7 @@ class DynamicBackgroundPainter extends CustomPainter {
           templatePainter.paint(canvas, size);
         }
         break;
-        
+
       case BackgroundType.cover:
         // Cover backgrounds are rendered via PageBackgroundPatternPainter
         // Drawing canvas painters don't handle cover rendering
@@ -112,9 +112,9 @@ class DynamicBackgroundPainter extends CustomPainter {
     final dotPaint = Paint()
       ..color = paint.color
       ..style = PaintingStyle.fill;
-    
+
     const double dotRadius = 1.5;
-    
+
     for (double x = spacing; x <= size.width; x += spacing) {
       for (double y = spacing; y <= size.height; y += spacing) {
         canvas.drawCircle(Offset(x, y), dotRadius, dotPaint);
@@ -124,9 +124,10 @@ class DynamicBackgroundPainter extends CustomPainter {
 
   void _drawPdfImage(Canvas canvas, Size size, ui.Image image) {
     // Draw image to fill the entire size
-    final srcRect = Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
+    final srcRect =
+        Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble());
     final dstRect = Rect.fromLTWH(0, 0, size.width, size.height);
-    
+
     canvas.drawImageRect(image, srcRect, dstRect, Paint());
   }
 

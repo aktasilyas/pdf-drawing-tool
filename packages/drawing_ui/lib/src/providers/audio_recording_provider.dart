@@ -77,8 +77,7 @@ final onRecordingBlockedProvider =
 /// Receives the saved file path and elapsed duration.
 /// Override from the host app to save the recording and show an upgrade prompt.
 final onRecordingLimitReachedProvider =
-    Provider<void Function(String? filePath, Duration elapsed)?>(
-        (ref) => null);
+    Provider<void Function(String? filePath, Duration elapsed)?>((ref) => null);
 
 /// Audio recording service singleton with auto-cleanup.
 /// Respects [recordingMaxDurationProvider] for free-tier time limits.
@@ -137,8 +136,7 @@ final audioRecordingStateProvider =
 });
 
 /// Elapsed recording duration (ticks every second).
-final recordingDurationProvider =
-    StreamProvider.autoDispose<Duration>((ref) {
+final recordingDurationProvider = StreamProvider.autoDispose<Duration>((ref) {
   final service = ref.watch(audioRecordingServiceProvider);
   return service.durationStream;
 });

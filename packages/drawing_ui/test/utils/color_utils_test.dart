@@ -13,7 +13,7 @@ void main() {
 
     test('withAlphaSafe clamps values', () {
       final red = Colors.red;
-      
+
       final fullyTransparent = red.withAlphaSafe(0.0);
       expect(fullyTransparent.alphaInt, 0);
 

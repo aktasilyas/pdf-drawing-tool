@@ -64,8 +64,7 @@ class NoteShapeRenderer {
     }
   }
 
-  static void _drawArrow(
-      Canvas canvas, Offset s, Offset e, double thickness) {
+  static void _drawArrow(Canvas canvas, Offset s, Offset e, double thickness) {
     canvas.drawLine(s, e, _paint);
     final dx = e.dx - s.dx;
     final dy = e.dy - s.dy;

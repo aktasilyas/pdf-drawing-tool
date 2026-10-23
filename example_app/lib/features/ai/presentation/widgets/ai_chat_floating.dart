@@ -68,8 +68,7 @@ class _AIFloatingChatState extends ConsumerState<AIFloatingChat> {
           color: theme.colorScheme.surface,
           child: DecoratedBox(
             decoration: BoxDecoration(
-              border: Border.all(
-                  color: theme.colorScheme.outlineVariant),
+              border: Border.all(color: theme.colorScheme.outlineVariant),
               borderRadius: BorderRadius.circular(AppRadius.lg),
             ),
             child: Stack(
@@ -108,12 +107,12 @@ class _AIFloatingChatState extends ConsumerState<AIFloatingChat> {
             child: Align(
               alignment: Alignment.bottomRight,
               child: Padding(
-                padding: EdgeInsets.all(AppSpacing.xs),
+                padding: const EdgeInsets.all(AppSpacing.xs),
                 child: Icon(
                   Icons.open_in_full,
                   size: AppIconSize.xs + 2,
-                  color: theme.colorScheme.onSurfaceVariant
-                      .withValues(alpha: 0.4),
+                  color:
+                      theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
                 ),
               ),
             ),

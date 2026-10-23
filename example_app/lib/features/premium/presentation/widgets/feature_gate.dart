@@ -30,7 +30,8 @@ class FeatureGate extends ConsumerWidget {
 
   Widget _lockedWidget(BuildContext context) {
     return GestureDetector(
-      onTap: onLocked ?? () => Navigator.pushNamed(context, PaywallScreen.routeName),
+      onTap: onLocked ??
+          () => Navigator.pushNamed(context, PaywallScreen.routeName),
       child: lockedChild ?? const Icon(Icons.lock),
     );
   }

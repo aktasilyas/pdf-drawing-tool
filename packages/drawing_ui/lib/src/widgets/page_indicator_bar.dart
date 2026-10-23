@@ -11,7 +11,10 @@ import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 /// Displays current page number, total pages, and navigation arrows.
 /// Hidden for single-page documents. Auto-hides after 3 seconds.
 class PageIndicatorBar extends ConsumerStatefulWidget {
-  const PageIndicatorBar({super.key, this.autoHideDuration = const Duration(seconds: 3), this.onPageChanged});
+  const PageIndicatorBar(
+      {super.key,
+      this.autoHideDuration = const Duration(seconds: 3),
+      this.onPageChanged});
   final Duration autoHideDuration;
   final ValueChanged<int>? onPageChanged;
 
@@ -27,20 +30,28 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
   @override
   void initState() {
     super.initState();
-    _fade = AnimationController(vsync: this, duration: const Duration(milliseconds: 300), value: 1.0);
+    _fade = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 300), value: 1.0);
     _scheduleHide();
   }
 
   @override
-  void dispose() { _hideTimer?.cancel(); _fade.dispose(); super.dispose(); }
+  void dispose() {
+    _hideTimer?.cancel();
+    _fade.dispose();
+    super.dispose();
+  }
 
   void _scheduleHide() {
     _hideTimer?.cancel();
-    _hideTimer = Timer(widget.autoHideDuration, () { if (mounted) _fade.reverse(); });
+    _hideTimer = Timer(widget.autoHideDuration, () {
+      if (mounted) _fade.reverse();
+    });
   }
 
   void _showBar() {
-    if (_fade.isDismissed || _fade.status == AnimationStatus.reverse) _fade.forward();
+    if (_fade.isDismissed || _fade.status == AnimationStatus.reverse)
+      _fade.forward();
     _scheduleHide();
   }
 
@@ -65,9 +76,8 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
     }
 
     // In dual mode: can go next if there are 2+ pages beyond current
-    final bool effectiveCanNext = isDual
-        ? currentIndex + 2 < pageCount
-        : canNext;
+    final bool effectiveCanNext =
+        isDual ? currentIndex + 2 < pageCount : canNext;
 
     return GestureDetector(
       onTap: _showBar,
@@ -76,7 +86,8 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
         child: Container(
           height: 48,
           margin: const EdgeInsets.only(bottom: 8),
-          child: Center(child: Container(
+          child: Center(
+              child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
             decoration: BoxDecoration(
               color: cs.surfaceContainerHigh.withValues(alpha: 0.92),
@@ -84,7 +95,20 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
               boxShadow: DrawingShadows.toolbar(Theme.of(context).brightness),
             ),
             child: Row(mainAxisSize: MainAxisSize.min, children: [
-              _NavArrow(icon: scrollDir == Axis.horizontal ? ElyanotesIcons.chevronLeft : ElyanotesIcons.caretUp, tooltip: 'Önceki Sayfa', onTap: canPrev ? () { _navigateTo(isDual ? (currentIndex - 2).clamp(0, pageCount - 1) : currentIndex - 1, ref); } : null),
+              _NavArrow(
+                  icon: scrollDir == Axis.horizontal
+                      ? ElyanotesIcons.chevronLeft
+                      : ElyanotesIcons.caretUp,
+                  tooltip: 'Önceki Sayfa',
+                  onTap: canPrev
+                      ? () {
+                          _navigateTo(
+                              isDual
+                                  ? (currentIndex - 2).clamp(0, pageCount - 1)
+                                  : currentIndex - 1,
+                              ref);
+                        }
+                      : null),
               Tooltip(
                 message: 'Sayfaya Git',
                 child: Semantics(
@@ -95,12 +119,28 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Text(pageLabel,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 13, color: cs.onSurface)),
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(fontSize: 13, color: cs.onSurface)),
                     ),
                   ),
                 ),
               ),
-              _NavArrow(icon: scrollDir == Axis.horizontal ? ElyanotesIcons.chevronRight : ElyanotesIcons.caretDown, tooltip: 'Sonraki Sayfa', onTap: effectiveCanNext ? () { _navigateTo(isDual ? (currentIndex + 2).clamp(0, pageCount - 1) : currentIndex + 1, ref); } : null),
+              _NavArrow(
+                  icon: scrollDir == Axis.horizontal
+                      ? ElyanotesIcons.chevronRight
+                      : ElyanotesIcons.caretDown,
+                  tooltip: 'Sonraki Sayfa',
+                  onTap: effectiveCanNext
+                      ? () {
+                          _navigateTo(
+                              isDual
+                                  ? (currentIndex + 2).clamp(0, pageCount - 1)
+                                  : currentIndex + 1,
+                              ref);
+                        }
+                      : null),
             ]),
           )),
         ),
@@ -119,18 +159,35 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
 
   void _showGoToPageDialog(BuildContext context, WidgetRef ref, int pageCount) {
     final controller = TextEditingController();
-    showDialog(context: context, builder: (ctx) => AlertDialog(
-      title: const Text('Sayfaya Git'),
-      content: TextField(
-        controller: controller, keyboardType: TextInputType.number, autofocus: true,
-        decoration: InputDecoration(hintText: '1 - $pageCount', border: const OutlineInputBorder()),
-        onSubmitted: (v) { _goTo(v, pageCount, ref, ctx); },
-      ),
-      actions: [
-        TextButton(onPressed: () => Navigator.pop(ctx), child: Text('İptal', style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(color: Theme.of(ctx).colorScheme.onSurfaceVariant))),
-        FilledButton(onPressed: () { _goTo(controller.text, pageCount, ref, ctx); }, child: const Text('Git')),
-      ],
-    ));
+    showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+              title: const Text('Sayfaya Git'),
+              content: TextField(
+                controller: controller,
+                keyboardType: TextInputType.number,
+                autofocus: true,
+                decoration: InputDecoration(
+                    hintText: '1 - $pageCount',
+                    border: const OutlineInputBorder()),
+                onSubmitted: (v) {
+                  _goTo(v, pageCount, ref, ctx);
+                },
+              ),
+              actions: [
+                TextButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: Text('İptal',
+                        style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(
+                            color:
+                                Theme.of(ctx).colorScheme.onSurfaceVariant))),
+                FilledButton(
+                    onPressed: () {
+                      _goTo(controller.text, pageCount, ref, ctx);
+                    },
+                    child: const Text('Git')),
+              ],
+            ));
   }
 
   void _goTo(String value, int pageCount, WidgetRef ref, BuildContext ctx) {
@@ -144,7 +201,8 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
 
 /// Small circular navigation arrow for page indicator.
 class _NavArrow extends StatelessWidget {
-  const _NavArrow({required this.icon, required this.onTap, required this.tooltip});
+  const _NavArrow(
+      {required this.icon, required this.onTap, required this.tooltip});
   final PhosphorIconData icon;
   final VoidCallback? onTap;
   final String tooltip;
@@ -161,10 +219,18 @@ class _NavArrow extends StatelessWidget {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: onTap, borderRadius: BorderRadius.circular(24),
-            child: SizedBox(width: 48, height: 48, child: Center(
-              child: PhosphorIcon(icon, size: 16, color: onTap != null ? cs.onSurface : cs.onSurface.withValues(alpha: 0.25)),
-            )),
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(24),
+            child: SizedBox(
+                width: 48,
+                height: 48,
+                child: Center(
+                  child: PhosphorIcon(icon,
+                      size: 16,
+                      color: onTap != null
+                          ? cs.onSurface
+                          : cs.onSurface.withValues(alpha: 0.25)),
+                )),
           ),
         ),
       ),

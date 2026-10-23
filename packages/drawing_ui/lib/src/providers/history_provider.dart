@@ -175,9 +175,9 @@ class HistoryNotifier extends StateNotifier<HistoryState> {
   /// Sync page manager with the latest document state.
   void _syncPageManager(DrawingDocument document) {
     _ref.read(pageManagerProvider.notifier).initializeFromDocument(
-      document.pages,
-      currentIndex: document.currentPageIndex,
-    );
+          document.pages,
+          currentIndex: document.currentPageIndex,
+        );
   }
 
   /// Update state from history manager.

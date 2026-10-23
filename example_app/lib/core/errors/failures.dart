@@ -1,5 +1,5 @@
 /// Failure classes for error handling with Either pattern.
-/// 
+///
 /// Usage:
 /// ```dart
 /// Future<Either<Failure, User>> login() async {
@@ -44,73 +44,76 @@ class NetworkFailure extends Failure {
 /// Authentication failures
 class AuthFailure extends Failure {
   const AuthFailure(super.message, {super.code});
-  
-  factory AuthFailure.invalidCredentials() => 
-      const AuthFailure('E-posta veya şifre hatalı', code: 'invalid_credentials');
-  
-  factory AuthFailure.emailInUse() => 
+
+  factory AuthFailure.invalidCredentials() =>
+      const AuthFailure('E-posta veya şifre hatalı',
+          code: 'invalid_credentials');
+
+  factory AuthFailure.emailInUse() =>
       const AuthFailure('Bu e-posta zaten kullanımda', code: 'email_in_use');
-  
-  factory AuthFailure.weakPassword() => 
+
+  factory AuthFailure.weakPassword() =>
       const AuthFailure('Şifre çok zayıf', code: 'weak_password');
-  
-  factory AuthFailure.userNotFound() => 
+
+  factory AuthFailure.userNotFound() =>
       const AuthFailure('Kullanıcı bulunamadı', code: 'user_not_found');
-  
-  factory AuthFailure.sessionExpired() => 
+
+  factory AuthFailure.sessionExpired() =>
       const AuthFailure('Oturum süresi doldu', code: 'session_expired');
 }
 
 /// Validation failures
 class ValidationFailure extends Failure {
   const ValidationFailure(super.message);
-  
-  factory ValidationFailure.emptyField(String fieldName) => 
+
+  factory ValidationFailure.emptyField(String fieldName) =>
       ValidationFailure('$fieldName boş olamaz');
-  
-  factory ValidationFailure.invalidEmail() => 
+
+  factory ValidationFailure.invalidEmail() =>
       const ValidationFailure('Geçersiz e-posta adresi');
-  
-  factory ValidationFailure.passwordTooShort() => 
+
+  factory ValidationFailure.passwordTooShort() =>
       const ValidationFailure('Şifre en az 6 karakter olmalı');
 }
 
 /// Premium/subscription failures
 class PremiumFailure extends Failure {
   const PremiumFailure(super.message, {super.code});
-  
-  factory PremiumFailure.required(String feature) => 
+
+  factory PremiumFailure.required(String feature) =>
       PremiumFailure('$feature için Premium gerekli', code: 'premium_required');
-  
-  factory PremiumFailure.limitExceeded(String limit) => 
+
+  factory PremiumFailure.limitExceeded(String limit) =>
       PremiumFailure('$limit sınırına ulaştınız', code: 'limit_exceeded');
-  
-  factory PremiumFailure.purchaseFailed() => 
+
+  factory PremiumFailure.purchaseFailed() =>
       const PremiumFailure('Satın alma başarısız', code: 'purchase_failed');
 }
 
 /// Sync failures
 class SyncFailure extends Failure {
   const SyncFailure(super.message, {super.code});
-  
-  factory SyncFailure.conflict() => 
+
+  factory SyncFailure.conflict() =>
       const SyncFailure('Senkronizasyon çakışması', code: 'conflict');
-  
-  factory SyncFailure.offline() => 
-      const SyncFailure('Çevrimdışı - senkronizasyon bekliyor', code: 'offline');
+
+  factory SyncFailure.offline() =>
+      const SyncFailure('Çevrimdışı - senkronizasyon bekliyor',
+          code: 'offline');
 }
 
 /// Document operation failures
 class DocumentFailure extends Failure {
   const DocumentFailure(super.message, {super.code});
-  
-  factory DocumentFailure.notFound() => 
+
+  factory DocumentFailure.notFound() =>
       const DocumentFailure('Belge bulunamadı', code: 'not_found');
-  
-  factory DocumentFailure.accessDenied() => 
-      const DocumentFailure('Bu belgeye erişim izniniz yok', code: 'access_denied');
-  
-  factory DocumentFailure.corrupted() => 
+
+  factory DocumentFailure.accessDenied() =>
+      const DocumentFailure('Bu belgeye erişim izniniz yok',
+          code: 'access_denied');
+
+  factory DocumentFailure.corrupted() =>
       const DocumentFailure('Belge hasarlı', code: 'corrupted');
 }
 

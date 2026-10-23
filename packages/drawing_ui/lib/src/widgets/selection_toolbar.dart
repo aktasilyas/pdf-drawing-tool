@@ -79,8 +79,7 @@ class _SelectionToolbarState extends ConsumerState<SelectionToolbar> {
     );
     final hasOverflow =
         config.topRowActions.isNotEmpty || config.overflowActions.isNotEmpty;
-    final buttonCount =
-        config.toolbarActions.length + (hasOverflow ? 1 : 0);
+    final buttonCount = config.toolbarActions.length + (hasOverflow ? 1 : 0);
     const buttonWidth = 40.0;
     final toolbarWidth = buttonCount * buttonWidth + 16;
     final screenWidth = MediaQuery.of(context).size.width;
@@ -139,7 +138,10 @@ class _SelectionToolbarState extends ConsumerState<SelectionToolbar> {
   // ── Overflow menu (Overlay-based, auto-positioned) ──
 
   void _toggleOverflow(SelectionActionConfig config) {
-    if (_isOverflowOpen) { _closeOverflow(); return; }
+    if (_isOverflowOpen) {
+      _closeOverflow();
+      return;
+    }
     _openOverflow(config);
   }
 
@@ -218,7 +220,10 @@ class _SelectionToolbarState extends ConsumerState<SelectionToolbar> {
 
   void _handleAction(SelectionAction action) {
     if (!action.isEnabled) return;
-    if (action.id == 'color') { _openColorPicker(); return; }
+    if (action.id == 'color') {
+      _openColorPicker();
+      return;
+    }
     action.onExecute?.call();
   }
 
@@ -243,8 +248,7 @@ class _SelectionToolbarState extends ConsumerState<SelectionToolbar> {
                 child: CompactColorPicker(
                   selectedColor: currentColor,
                   onColorSelected: (color) {
-                    executeColorChange(
-                        ref, widget.selection, color.toARGB32());
+                    executeColorChange(ref, widget.selection, color.toARGB32());
                     entry.remove();
                   },
                   onClose: () => entry.remove(),

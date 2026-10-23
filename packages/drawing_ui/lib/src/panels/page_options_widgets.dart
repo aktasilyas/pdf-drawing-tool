@@ -8,7 +8,8 @@ import 'package:drawing_ui/src/theme/theme.dart';
 
 /// Header widget for page options panel.
 class PageOptionsHeader extends StatelessWidget {
-  const PageOptionsHeader({super.key, required this.title, this.compact = false});
+  const PageOptionsHeader(
+      {super.key, required this.title, this.compact = false});
   final String title;
   final bool compact;
 
@@ -112,8 +113,14 @@ class PageOptionsMenuItem extends StatelessWidget {
                 child: Text(
                   label,
                   style: compact
-                      ? Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 13, color: labelColor)
-                      : Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 15, color: labelColor),
+                      ? Theme.of(context)
+                          .textTheme
+                          .bodySmall
+                          ?.copyWith(fontSize: 13, color: labelColor)
+                      : Theme.of(context)
+                          .textTheme
+                          .bodyMedium
+                          ?.copyWith(fontSize: 15, color: labelColor),
                 ),
               ),
               if (trailing != null) trailing!,
@@ -127,7 +134,8 @@ class PageOptionsMenuItem extends StatelessWidget {
 
 /// Section header for settings area.
 class PageOptionsSectionHeader extends StatelessWidget {
-  const PageOptionsSectionHeader({super.key, required this.title, this.compact = false});
+  const PageOptionsSectionHeader(
+      {super.key, required this.title, this.compact = false});
   final String title;
   final bool compact;
 
@@ -135,18 +143,19 @@ class PageOptionsSectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     return Padding(
-      padding: EdgeInsets.fromLTRB(compact ? 16 : 20, compact ? 2 : 4, compact ? 16 : 20, compact ? 1 : 2),
+      padding: EdgeInsets.fromLTRB(compact ? 16 : 20, compact ? 2 : 4,
+          compact ? 16 : 20, compact ? 1 : 2),
       child: Text(
         title,
         style: compact
             ? Theme.of(context).textTheme.labelMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: cs.onSurfaceVariant,
-              )
+                  fontWeight: FontWeight.w600,
+                  color: cs.onSurfaceVariant,
+                )
             : Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontSize: 13,
-                color: cs.onSurfaceVariant,
-              ),
+                  fontSize: 13,
+                  color: cs.onSurfaceVariant,
+                ),
       ),
     );
   }
@@ -189,17 +198,40 @@ class PageOptionsToggleItem extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(label, style: compact
-                            ? Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 13, color: cs.onSurface)
-                            : Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 15, color: cs.onSurface)),
-                        Text(subtitle!, style: compact
-                            ? Theme.of(context).textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant)
-                            : Theme.of(context).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
+                        Text(label,
+                            style: compact
+                                ? Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(
+                                        fontSize: 13, color: cs.onSurface)
+                                : Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                        fontSize: 15, color: cs.onSurface)),
+                        Text(subtitle!,
+                            style: compact
+                                ? Theme.of(context)
+                                    .textTheme
+                                    .labelSmall
+                                    ?.copyWith(color: cs.onSurfaceVariant)
+                                : Theme.of(context)
+                                    .textTheme
+                                    .bodySmall
+                                    ?.copyWith(color: cs.onSurfaceVariant)),
                       ],
                     )
-                  : Text(label, style: compact
-                      ? Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 13, color: cs.onSurface)
-                      : Theme.of(context).textTheme.bodyMedium?.copyWith(fontSize: 15, color: cs.onSurface)),
+                  : Text(label,
+                      style: compact
+                          ? Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(fontSize: 13, color: cs.onSurface)
+                          : Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(fontSize: 15, color: cs.onSurface)),
             ),
             Switch.adaptive(
               value: value,
@@ -221,12 +253,12 @@ Future<RotationAngle?> showRotatePageDialog(BuildContext context) {
       return SimpleDialog(
         title: const Text('Sayfayı Döndür'),
         children: [
-          _rotateOption(ctx, cs, ElyanotesIcons.rotateCW,
-              'Saat yönünde (90°)', RotationAngle.cw90),
+          _rotateOption(ctx, cs, ElyanotesIcons.rotateCW, 'Saat yönünde (90°)',
+              RotationAngle.cw90),
           _rotateOption(ctx, cs, ElyanotesIcons.rotateCCW,
               'Saat yönünün tersine (90°)', RotationAngle.ccw90),
-          _rotateOption(ctx, cs, ElyanotesIcons.rotateHalf,
-              '180°', RotationAngle.half),
+          _rotateOption(
+              ctx, cs, ElyanotesIcons.rotateHalf, '180°', RotationAngle.half),
         ],
       );
     },
@@ -267,7 +299,8 @@ class DualPageModeItem extends ConsumerWidget {
 
 /// Scroll direction toggle for page options settings.
 class ScrollDirectionItem extends ConsumerWidget {
-  const ScrollDirectionItem({super.key, required this.onClose, this.compact = false});
+  const ScrollDirectionItem(
+      {super.key, required this.onClose, this.compact = false});
   final VoidCallback onClose;
   final bool compact;
 
@@ -294,19 +327,22 @@ class ScrollDirectionItem extends ConsumerWidget {
 // ═══════════════════════════════════════════
 
 /// Chevron trailing widget with optional label (e.g. "3 / 10 >").
-Widget pageOptionsChevronTrailing(ColorScheme cs, [String? label, TextTheme? textTheme]) {
+Widget pageOptionsChevronTrailing(ColorScheme cs,
+    [String? label, TextTheme? textTheme]) {
   return Row(mainAxisSize: MainAxisSize.min, children: [
     if (label != null) ...[
-      Text(label, style: textTheme?.bodySmall?.copyWith(fontSize: 13, color: cs.onSurfaceVariant)),
+      Text(label,
+          style: textTheme?.bodySmall
+              ?.copyWith(fontSize: 13, color: cs.onSurfaceVariant)),
       const SizedBox(width: 4),
     ],
-    PhosphorIcon(ElyanotesIcons.chevronRight, size: 18, color: cs.onSurfaceVariant),
+    PhosphorIcon(ElyanotesIcons.chevronRight,
+        size: 18, color: cs.onSurfaceVariant),
   ]);
 }
 
 /// Thin divider between menu items with indent matching circular icon layout.
-Widget pageOptionsDivider(ColorScheme cs, {bool compact = false}) =>
-    Divider(
+Widget pageOptionsDivider(ColorScheme cs, {bool compact = false}) => Divider(
       height: 0.5,
       thickness: 0.5,
       color: cs.outlineVariant,
@@ -348,8 +384,11 @@ void showGoToPageDialog({
         onSubmitted: (v) => goTo(v, ctx),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('İptal')),
-        FilledButton(onPressed: () => goTo(controller.text, ctx), child: const Text('Git')),
+        TextButton(
+            onPressed: () => Navigator.pop(ctx), child: const Text('İptal')),
+        FilledButton(
+            onPressed: () => goTo(controller.text, ctx),
+            child: const Text('Git')),
       ],
     ),
   );

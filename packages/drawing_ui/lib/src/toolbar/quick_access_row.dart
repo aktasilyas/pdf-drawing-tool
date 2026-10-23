@@ -187,8 +187,9 @@ class _QuickColorChip extends StatelessWidget {
     final g = (c.g * 255).round();
     final b = (c.b * 255).round();
     return '#${r.toRadixString(16).padLeft(2, '0')}'
-        '${g.toRadixString(16).padLeft(2, '0')}'
-        '${b.toRadixString(16).padLeft(2, '0')}'.toUpperCase();
+            '${g.toRadixString(16).padLeft(2, '0')}'
+            '${b.toRadixString(16).padLeft(2, '0')}'
+        .toUpperCase();
   }
 
   @override
@@ -246,4 +247,3 @@ class _QuickColorChip extends StatelessWidget {
     );
   }
 }
-

@@ -77,8 +77,7 @@ class _PageNavigatorState extends State<PageNavigator> {
   void didUpdateWidget(PageNavigator oldWidget) {
     super.didUpdateWidget(oldWidget);
     // Scroll to current page when it changes
-    if (oldWidget.pageManager.currentIndex !=
-        widget.pageManager.currentIndex) {
+    if (oldWidget.pageManager.currentIndex != widget.pageManager.currentIndex) {
       _scrollToCurrentPage();
     }
   }
@@ -162,8 +161,12 @@ class _PageNavigatorState extends State<PageNavigator> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: colorScheme.surface,
-        title: Text('Delete Page', style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface)),
-        content: Text('Delete page ${index + 1}?', style: textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant)),
+        title: Text('Delete Page',
+            style:
+                textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface)),
+        content: Text('Delete page ${index + 1}?',
+            style: textTheme.bodyMedium
+                ?.copyWith(color: colorScheme.onSurfaceVariant)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -187,7 +190,7 @@ class _PageNavigatorState extends State<PageNavigator> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
-    final backgroundColor = widget.backgroundColor ?? 
+    final backgroundColor = widget.backgroundColor ??
         (isDark ? colorScheme.surfaceContainerLow : colorScheme.surface);
 
     return Container(
@@ -223,7 +226,8 @@ class _PageNavigatorState extends State<PageNavigator> {
                 ? Center(
                     child: Text(
                       'No pages',
-                      style: theme.textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+                      style: theme.textTheme.bodyMedium
+                          ?.copyWith(color: colorScheme.onSurfaceVariant),
                     ),
                   )
                 : ListView.builder(

@@ -128,12 +128,13 @@ class PaperColorDropdown extends StatelessWidget {
               value: e.value,
               child: Row(mainAxisSize: MainAxisSize.min, children: [
                 Container(
-                  width: 14, height: 14,
+                  width: 14,
+                  height: 14,
                   decoration: BoxDecoration(
                     color: e.value,
                     shape: BoxShape.circle,
-                    border: Border.all(
-                        color: cs.outline.withValues(alpha: 0.5)),
+                    border:
+                        Border.all(color: cs.outline.withValues(alpha: 0.5)),
                   ),
                 ),
                 const SizedBox(width: 6),

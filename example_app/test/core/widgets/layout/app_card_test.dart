@@ -76,7 +76,8 @@ void main() {
           final container = tester.widget<Container>(find.byType(Container));
           final decoration = container.decoration as BoxDecoration;
           expect(decoration.border, isNotNull);
-          expect((decoration.border as Border).top.color, equals(AppColors.primary));
+          expect((decoration.border as Border).top.color,
+              equals(AppColors.primary));
           expect((decoration.border as Border).top.width, equals(2));
           expect(decoration.boxShadow, isNull);
         });
@@ -132,7 +133,8 @@ void main() {
           final container = tester.widget<Container>(find.byType(Container));
           final decoration = container.decoration as BoxDecoration;
           expect(decoration.border, isNotNull);
-          expect((decoration.border as Border).top.color, equals(AppColors.primary));
+          expect((decoration.border as Border).top.color,
+              equals(AppColors.primary));
           expect((decoration.border as Border).top.width, equals(2));
           expect(decoration.boxShadow, isNull);
         });
@@ -189,7 +191,8 @@ void main() {
           final container = tester.widget<Container>(find.byType(Container));
           final decoration = container.decoration as BoxDecoration;
           expect(decoration.border, isNotNull);
-          expect((decoration.border as Border).top.color, equals(AppColors.primary));
+          expect((decoration.border as Border).top.color,
+              equals(AppColors.primary));
           expect((decoration.border as Border).top.width, equals(2));
         });
       });
@@ -243,7 +246,8 @@ void main() {
           final container = tester.widget<Container>(find.byType(Container));
           final decoration = container.decoration as BoxDecoration;
           expect(decoration.border, isNotNull);
-          expect((decoration.border as Border).top.color, equals(AppColors.primary));
+          expect((decoration.border as Border).top.color,
+              equals(AppColors.primary));
           expect((decoration.border as Border).top.width, equals(2));
         });
       });
@@ -267,7 +271,8 @@ void main() {
           expect(decoration.color, equals(AppColors.surfaceLight));
         });
 
-        testWidgets('should_use_outlineLight_border_when_not_selected', (tester) async {
+        testWidgets('should_use_outlineLight_border_when_not_selected',
+            (tester) async {
           // Arrange & Act
           await tester.pumpWidget(
             buildTestWidget(
@@ -282,7 +287,8 @@ void main() {
           final container = tester.widget<Container>(find.byType(Container));
           final decoration = container.decoration as BoxDecoration;
           expect(decoration.border, isNotNull);
-          expect((decoration.border as Border).top.color, equals(AppColors.outlineLight));
+          expect((decoration.border as Border).top.color,
+              equals(AppColors.outlineLight));
           expect((decoration.border as Border).top.width, equals(1));
         });
 
@@ -301,7 +307,8 @@ void main() {
           final container = tester.widget<Container>(find.byType(Container));
           final decoration = container.decoration as BoxDecoration;
           expect(decoration.border, isNotNull);
-          expect((decoration.border as Border).top.color, equals(AppColors.primary));
+          expect((decoration.border as Border).top.color,
+              equals(AppColors.primary));
           expect((decoration.border as Border).top.width, equals(2));
         });
       });
@@ -323,7 +330,8 @@ void main() {
           expect(decoration.color, equals(AppColors.surfaceDark));
         });
 
-        testWidgets('should_use_outlineDark_border_when_not_selected', (tester) async {
+        testWidgets('should_use_outlineDark_border_when_not_selected',
+            (tester) async {
           // Arrange & Act
           await tester.pumpWidget(
             buildTestWidget(
@@ -338,7 +346,8 @@ void main() {
           final container = tester.widget<Container>(find.byType(Container));
           final decoration = container.decoration as BoxDecoration;
           expect(decoration.border, isNotNull);
-          expect((decoration.border as Border).top.color, equals(AppColors.outlineDark));
+          expect((decoration.border as Border).top.color,
+              equals(AppColors.outlineDark));
           expect((decoration.border as Border).top.width, equals(1));
         });
 
@@ -357,7 +366,8 @@ void main() {
           final container = tester.widget<Container>(find.byType(Container));
           final decoration = container.decoration as BoxDecoration;
           expect(decoration.border, isNotNull);
-          expect((decoration.border as Border).top.color, equals(AppColors.primary));
+          expect((decoration.border as Border).top.color,
+              equals(AppColors.primary));
           expect((decoration.border as Border).top.width, equals(2));
         });
       });

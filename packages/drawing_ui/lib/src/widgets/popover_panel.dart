@@ -34,7 +34,10 @@ class PopoverController {
         anchorSize: box.size,
         screenSize: MediaQuery.of(context).size,
         maxWidth: maxWidth,
-        onDismiss: () { hide(); onDismiss?.call(); },
+        onDismiss: () {
+          hide();
+          onDismiss?.call();
+        },
         child: child,
       ),
     );
@@ -81,7 +84,8 @@ class _PopoverOverlayState extends State<_PopoverOverlay>
   void initState() {
     super.initState();
     _anim = AnimationController(
-      vsync: this, duration: const Duration(milliseconds: 150),
+      vsync: this,
+      duration: const Duration(milliseconds: 150),
     );
     final curve = CurvedAnimation(parent: _anim, curve: Curves.easeOut);
     _scale = Tween<double>(begin: 0.95, end: 1.0).animate(curve);
@@ -90,7 +94,10 @@ class _PopoverOverlayState extends State<_PopoverOverlay>
   }
 
   @override
-  void dispose() { _anim.dispose(); super.dispose(); }
+  void dispose() {
+    _anim.dispose();
+    super.dispose();
+  }
 
   _Placement _decidePlacement() {
     const edge = 12.0, gap = 8.0, minSpace = 300.0;
@@ -132,7 +139,8 @@ class _PopoverOverlayState extends State<_PopoverOverlay>
     final anchorTop = widget.anchorPosition.dy;
     final cx = widget.anchorPosition.dx + widget.anchorSize.width / 2;
     final left = (cx - widget.maxWidth / 2).clamp(
-      edge, widget.screenSize.width - widget.maxWidth - edge,
+      edge,
+      widget.screenSize.width - widget.maxWidth - edge,
     );
     final bg = cs.surface;
     final border = cs.outlineVariant;
@@ -149,7 +157,10 @@ class _PopoverOverlayState extends State<_PopoverOverlay>
     );
 
     return openAbove
-        ? Positioned(bottom: widget.screenSize.height - anchorTop + gap, left: left, child: animated)
+        ? Positioned(
+            bottom: widget.screenSize.height - anchorTop + gap,
+            left: left,
+            child: animated)
         : Positioned(top: anchorBottom + gap, left: left, child: animated);
   }
 
@@ -165,7 +176,8 @@ class _PopoverOverlayState extends State<_PopoverOverlay>
     final left = anchorRight + gap;
 
     final maxHeight = widget.screenSize.height - edge * 2;
-    final top = (anchorCy - maxHeight / 2).clamp(edge, widget.screenSize.height - maxHeight - edge);
+    final top = (anchorCy - maxHeight / 2)
+        .clamp(edge, widget.screenSize.height - maxHeight - edge);
 
     final panel = _panelBox(bg, border, maxHeight: maxHeight);
 
@@ -177,32 +189,31 @@ class _PopoverOverlayState extends State<_PopoverOverlay>
   }
 
   Widget _panelBox(Color bg, Color border, {double? maxHeight}) => Container(
-    constraints: BoxConstraints(
-      maxWidth: widget.maxWidth,
-      maxHeight: maxHeight ?? double.infinity,
-    ),
-    decoration: BoxDecoration(
-      color: bg,
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: border, width: 0.5),
-      boxShadow: DrawingShadows.panel(Theme.of(context).brightness),
-    ),
-    child: ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: Material(
-        type: MaterialType.transparency,
-        child: SingleChildScrollView(child: widget.child),
-      ),
-    ),
-  );
+        constraints: BoxConstraints(
+          maxWidth: widget.maxWidth,
+          maxHeight: maxHeight ?? double.infinity,
+        ),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: border, width: 0.5),
+          boxShadow: DrawingShadows.panel(Theme.of(context).brightness),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Material(
+            type: MaterialType.transparency,
+            child: SingleChildScrollView(child: widget.child),
+          ),
+        ),
+      );
 
   Widget _animatedWrap(Widget child, Alignment alignment) => FadeTransition(
-    opacity: _fade,
-    child: ScaleTransition(
-      scale: _scale,
-      alignment: alignment,
-      child: GestureDetector(onTap: () {}, child: child),
-    ),
-  );
+        opacity: _fade,
+        child: ScaleTransition(
+          scale: _scale,
+          alignment: alignment,
+          child: GestureDetector(onTap: () {}, child: child),
+        ),
+      );
 }
-

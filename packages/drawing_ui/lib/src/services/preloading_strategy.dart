@@ -56,9 +56,7 @@ class PreloadingStrategy {
     required int currentIndex,
     required int totalPages,
   }) {
-    if (currentIndex < 0 ||
-        currentIndex >= totalPages ||
-        totalPages <= 0) {
+    if (currentIndex < 0 || currentIndex >= totalPages || totalPages <= 0) {
       return [];
     }
 

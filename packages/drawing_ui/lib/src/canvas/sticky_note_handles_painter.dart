@@ -32,7 +32,9 @@ class StickyNoteHandlesPainter extends CustomPainter {
         RRect.fromRectAndRadius(rect, const Radius.circular(8)), border);
 
     // Bottom-right resize handle
-    final fill = Paint()..color = Colors.white..style = PaintingStyle.fill;
+    final fill = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.fill;
     final stroke = Paint()
       ..color = selectionColor
       ..style = PaintingStyle.stroke
@@ -45,7 +47,10 @@ class StickyNoteHandlesPainter extends CustomPainter {
     // Top-right icon buttons
     final right = note.x + note.width;
     final shrinkCenter = Offset(
-      right - stickyNoteIconBtnSize * 2 - stickyNoteIconGap - 6 +
+      right -
+          stickyNoteIconBtnSize * 2 -
+          stickyNoteIconGap -
+          6 +
           stickyNoteIconBtnSize / 2,
       note.y + 6 + stickyNoteIconBtnSize / 2,
     );
@@ -100,8 +105,7 @@ class StickyNoteHandlesPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round;
 
     // Single horizontal line at center
-    canvas.drawLine(
-        Offset(c.dx - 5, c.dy + 2), Offset(c.dx + 5, c.dy + 2), p);
+    canvas.drawLine(Offset(c.dx - 5, c.dy + 2), Offset(c.dx + 5, c.dy + 2), p);
   }
 
   /// Three vertical dots icon

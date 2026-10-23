@@ -9,7 +9,9 @@ import 'template_table_painters.dart';
 /// Template pattern'larını çizen base painter.
 /// Tema renklerini dışarıdan alır, hardcoded renk kullanmaz.
 class TemplatePatternPainter extends CustomPainter
-    with TemplatePlannerPainters, TemplateCreativePainters,
+    with
+        TemplatePlannerPainters,
+        TemplateCreativePainters,
         TemplateTablePainters {
   final TemplatePattern pattern;
   final double spacingMm;
@@ -198,10 +200,10 @@ class TemplatePatternPainter extends CustomPainter
   void _drawIsometric(Canvas canvas, Size size) {
     final paint = _linePaint;
     final spacing = _spacingPx;
-    
+
     // 30° açılı çizgiler (tan(30°) ≈ 0.577)
     final angle = 0.577;
-    
+
     // Sol üstten sağ alta
     for (double x = -size.height; x < size.width; x += spacing) {
       canvas.drawLine(
@@ -210,7 +212,7 @@ class TemplatePatternPainter extends CustomPainter
         paint,
       );
     }
-    
+
     // Sağ üstten sol alta
     for (double x = 0; x < size.width + size.height; x += spacing) {
       canvas.drawLine(
@@ -219,7 +221,7 @@ class TemplatePatternPainter extends CustomPainter
         paint,
       );
     }
-    
+
     // Yatay çizgiler
     for (double y = spacing; y < size.height; y += spacing) {
       canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
@@ -231,10 +233,12 @@ class TemplatePatternPainter extends CustomPainter
     final radius = _spacingPx / 2;
     final hexHeight = radius * 1.732; // sqrt(3)
     final hexWidth = radius * 2;
-    
+
     for (double y = radius; y < size.height + radius; y += hexHeight * 0.75) {
       final rowOffset = (y ~/ (hexHeight * 0.75)) % 2 == 0 ? 0.0 : radius * 1.5;
-      for (double x = rowOffset; x < size.width + hexWidth; x += hexWidth * 1.5) {
+      for (double x = rowOffset;
+          x < size.width + hexWidth;
+          x += hexWidth * 1.5) {
         _drawHexagon(canvas, Offset(x, y), radius, paint);
       }
     }
@@ -261,39 +265,42 @@ class TemplatePatternPainter extends CustomPainter
   void _drawCornell(Canvas canvas, Size size) {
     final paint = _linePaint;
     final marginLeft = extraData?['marginLeft'] as double? ?? size.width * 0.3;
-    final marginBottom = extraData?['marginBottom'] as double? ?? size.height * 0.2;
-    
+    final marginBottom =
+        extraData?['marginBottom'] as double? ?? size.height * 0.2;
+
     // Sol dikey çizgi (cue column)
     canvas.drawLine(
       Offset(marginLeft, 0),
       Offset(marginLeft, size.height - marginBottom),
       paint..strokeWidth = lineWidth * 2,
     );
-    
+
     // Alt yatay çizgi (summary)
     canvas.drawLine(
       Offset(0, size.height - marginBottom),
       Offset(size.width, size.height - marginBottom),
       paint..strokeWidth = lineWidth * 2,
     );
-    
+
     // Not alma alanında yatay çizgiler
     paint.strokeWidth = lineWidth;
-    for (double y = _spacingPx * 2; y < size.height - marginBottom; y += _spacingPx) {
+    for (double y = _spacingPx * 2;
+        y < size.height - marginBottom;
+        y += _spacingPx) {
       canvas.drawLine(Offset(marginLeft + 10, y), Offset(size.width, y), paint);
     }
   }
 
   void _drawMusic(Canvas canvas, Size size) {
     final paint = _linePaint;
-    
+
     // Staff içi çizgi aralığı (her staff 5 çizgiden oluşur)
     final staffLineSpacing = _spacingPx * 0.25; // 2mm arası (8mm / 4 = 2mm)
     final staffHeight = staffLineSpacing * 4; // 5 çizgi = 4 aralık
     final staffGroupSpacing = _spacingPx * 2; // Staff grupları arası 16mm
-    
+
     double y = _spacingPx; // Üstten başlangıç
-    
+
     while (y + staffHeight < size.height) {
       // 5 çizgili staff çiz
       for (int i = 0; i < 5; i++) {
@@ -312,11 +319,11 @@ class TemplatePatternPainter extends CustomPainter
   void _drawHandwriting(Canvas canvas, Size size) {
     final paint = _linePaint;
     final topMargin = _spacingPx * 2;
-    
+
     for (double y = topMargin; y < size.height; y += _spacingPx) {
       // Ana baseline
       canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-      
+
       // Orta çizgi (dashed effect için daha açık renk)
       final midY = y - _spacingPx * 0.4;
       if (midY > topMargin) {
@@ -346,7 +353,10 @@ class TemplatePatternPainter extends CustomPainter
   }
 
   void _drawStandardCalligraphy(
-    Canvas canvas, Size size, Paint paint, double tanAngle,
+    Canvas canvas,
+    Size size,
+    Paint paint,
+    double tanAngle,
   ) {
     // Yatay baseline'lar
     for (double y = _spacingPx * 2; y < size.height; y += _spacingPx) {
@@ -365,7 +375,10 @@ class TemplatePatternPainter extends CustomPainter
   }
 
   void _drawCopperplateCalligraphy(
-    Canvas canvas, Size size, Paint paint, double tanAngle,
+    Canvas canvas,
+    Size size,
+    Paint paint,
+    double tanAngle,
   ) {
     // Ratio: ascender:x-height:descender (default 3:2:3)
     final ratioStr = (extraData?['ratio'] as String?) ?? '3:2:3';
@@ -397,13 +410,16 @@ class TemplatePatternPainter extends CustomPainter
       final descLine = y + ascenderH + xHeightH + descenderH;
 
       // Ascender line (kalın)
-      canvas.drawLine(Offset(0, ascLine), Offset(size.width, ascLine), basePaint);
+      canvas.drawLine(
+          Offset(0, ascLine), Offset(size.width, ascLine), basePaint);
       // x-height line (ince)
       canvas.drawLine(Offset(0, xLine), Offset(size.width, xLine), zonePaint);
       // Baseline (kalın)
-      canvas.drawLine(Offset(0, baseLine), Offset(size.width, baseLine), basePaint);
+      canvas.drawLine(
+          Offset(0, baseLine), Offset(size.width, baseLine), basePaint);
       // Descender line (ince)
-      canvas.drawLine(Offset(0, descLine), Offset(size.width, descLine), zonePaint);
+      canvas.drawLine(
+          Offset(0, descLine), Offset(size.width, descLine), zonePaint);
     }
 
     // Açılı rehber çizgiler

@@ -89,22 +89,26 @@ class _ImageExportDialogState extends State<ImageExportDialog> {
             _DialogHeader(title: title, pageCount: widget.totalPages, cs: cs),
             const SizedBox(height: 20),
             _FormatSelector(
-              selected: _format, cs: cs,
+              selected: _format,
+              cs: cs,
               onChanged: (f) => setState(() => _format = f),
             ),
             const SizedBox(height: 16),
             _QualitySelector(
-              selected: _quality, cs: cs,
+              selected: _quality,
+              cs: cs,
               onChanged: (q) => setState(() => _quality = q),
             ),
             const SizedBox(height: 16),
             _BackgroundToggle(
-              value: _includeBackground, cs: cs,
+              value: _includeBackground,
+              cs: cs,
               onChanged: (v) => setState(() => _includeBackground = v),
             ),
             const SizedBox(height: 24),
             _ActionButtons(
-              cs: cs, buttonLabel: buttonLabel,
+              cs: cs,
+              buttonLabel: buttonLabel,
               onCancel: () => Navigator.of(context).pop(),
               onExport: _handleExport,
             ),
@@ -117,7 +121,9 @@ class _ImageExportDialogState extends State<ImageExportDialog> {
 
 class _DialogHeader extends StatelessWidget {
   const _DialogHeader({
-    required this.title, required this.pageCount, required this.cs,
+    required this.title,
+    required this.pageCount,
+    required this.cs,
   });
   final String title;
   final int pageCount;
@@ -131,7 +137,10 @@ class _DialogHeader extends StatelessWidget {
         Text(title, style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 4),
         Text('$pageCount sayfa',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
+            style: Theme.of(context)
+                .textTheme
+                .bodySmall
+                ?.copyWith(color: cs.onSurfaceVariant)),
       ],
     );
   }
@@ -139,7 +148,9 @@ class _DialogHeader extends StatelessWidget {
 
 class _FormatSelector extends StatelessWidget {
   const _FormatSelector({
-    required this.selected, required this.cs, required this.onChanged,
+    required this.selected,
+    required this.cs,
+    required this.onChanged,
   });
   final ImageFormat selected;
   final ColorScheme cs;
@@ -150,17 +161,23 @@ class _FormatSelector extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Format', style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            fontWeight: FontWeight.w600, color: cs.onSurface)),
+        Text('Format',
+            style: Theme.of(context)
+                .textTheme
+                .bodySmall
+                ?.copyWith(fontWeight: FontWeight.w600, color: cs.onSurface)),
         const SizedBox(height: 8),
-        Row(children: ImageFormat.values.map((fmt) {
+        Row(
+            children: ImageFormat.values.map((fmt) {
           final isSelected = fmt == selected;
           return Expanded(
             child: Padding(
               padding: EdgeInsets.only(
                   right: fmt != ImageFormat.values.last ? 8 : 0),
               child: _SelectableCard(
-                label: fmt.label, isSelected: isSelected, cs: cs,
+                label: fmt.label,
+                isSelected: isSelected,
+                cs: cs,
                 onTap: () => onChanged(fmt),
               ),
             ),
@@ -173,7 +190,9 @@ class _FormatSelector extends StatelessWidget {
 
 class _QualitySelector extends StatelessWidget {
   const _QualitySelector({
-    required this.selected, required this.cs, required this.onChanged,
+    required this.selected,
+    required this.cs,
+    required this.onChanged,
   });
   final ImageQuality selected;
   final ColorScheme cs;
@@ -184,17 +203,23 @@ class _QualitySelector extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Kalite', style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            fontWeight: FontWeight.w600, color: cs.onSurface)),
+        Text('Kalite',
+            style: Theme.of(context)
+                .textTheme
+                .bodySmall
+                ?.copyWith(fontWeight: FontWeight.w600, color: cs.onSurface)),
         const SizedBox(height: 8),
-        Row(children: ImageQuality.values.map((q) {
+        Row(
+            children: ImageQuality.values.map((q) {
           final isSelected = q == selected;
           return Expanded(
             child: Padding(
-              padding: EdgeInsets.only(
-                  right: q != ImageQuality.values.last ? 8 : 0),
+              padding:
+                  EdgeInsets.only(right: q != ImageQuality.values.last ? 8 : 0),
               child: _SelectableCard(
-                label: q.label, isSelected: isSelected, cs: cs,
+                label: q.label,
+                isSelected: isSelected,
+                cs: cs,
                 onTap: () => onChanged(q),
               ),
             ),
@@ -207,8 +232,10 @@ class _QualitySelector extends StatelessWidget {
 
 class _SelectableCard extends StatelessWidget {
   const _SelectableCard({
-    required this.label, required this.isSelected,
-    required this.cs, required this.onTap,
+    required this.label,
+    required this.isSelected,
+    required this.cs,
+    required this.onTap,
   });
   final String label;
   final bool isSelected;
@@ -225,13 +252,14 @@ class _SelectableCard extends StatelessWidget {
           color: isSelected ? cs.primaryContainer : cs.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isSelected ? cs.primary : cs.outlineVariant, width: 1),
+              color: isSelected ? cs.primary : cs.outlineVariant, width: 1),
         ),
         alignment: Alignment.center,
-        child: Text(label, style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-          color: isSelected ? cs.onPrimaryContainer : cs.onSurface,
-        )),
+        child: Text(label,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                  color: isSelected ? cs.onPrimaryContainer : cs.onSurface,
+                )),
       ),
     );
   }
@@ -239,7 +267,9 @@ class _SelectableCard extends StatelessWidget {
 
 class _BackgroundToggle extends StatelessWidget {
   const _BackgroundToggle({
-    required this.value, required this.cs, required this.onChanged,
+    required this.value,
+    required this.cs,
+    required this.onChanged,
   });
   final bool value;
   final ColorScheme cs;
@@ -250,8 +280,12 @@ class _BackgroundToggle extends StatelessWidget {
     return Row(children: [
       PhosphorIcon(ElyanotesIcons.image, size: 18, color: cs.onSurfaceVariant),
       const SizedBox(width: 8),
-      Expanded(child: Text('Arka planı dahil et',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: cs.onSurface))),
+      Expanded(
+          child: Text('Arka planı dahil et',
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.copyWith(color: cs.onSurface))),
       Switch(value: value, onChanged: onChanged),
     ]);
   }
@@ -259,8 +293,10 @@ class _BackgroundToggle extends StatelessWidget {
 
 class _ActionButtons extends StatelessWidget {
   const _ActionButtons({
-    required this.cs, required this.buttonLabel,
-    required this.onCancel, required this.onExport,
+    required this.cs,
+    required this.buttonLabel,
+    required this.onCancel,
+    required this.onExport,
   });
   final ColorScheme cs;
   final String buttonLabel;
@@ -274,7 +310,11 @@ class _ActionButtons extends StatelessWidget {
       children: [
         TextButton(
           onPressed: onCancel,
-          child: Text('İptal', style: Theme.of(context).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
+          child: Text('İptal',
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.copyWith(color: cs.onSurfaceVariant)),
         ),
         const SizedBox(width: 12),
         FilledButton(onPressed: onExport, child: Text(buttonLabel)),

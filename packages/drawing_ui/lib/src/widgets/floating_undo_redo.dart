@@ -23,9 +23,7 @@ class FloatingUndoRedo extends ConsumerWidget {
         decoration: BoxDecoration(
           color: colorScheme.surface,
           borderRadius: BorderRadius.circular(22),
-          border: isDark
-              ? Border.all(color: colorScheme.outlineVariant)
-              : null,
+          border: isDark ? Border.all(color: colorScheme.outlineVariant) : null,
           boxShadow: [
             BoxShadow(
               color: colorScheme.shadow.withValues(alpha: isDark ? 0.3 : 0.1),
@@ -96,8 +94,7 @@ class _UndoRedoButton extends StatelessWidget {
               right: isFirst ? Radius.zero : const Radius.circular(22),
             ),
             child: Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               child: PhosphorIcon(
                 icon,
                 size: 20,

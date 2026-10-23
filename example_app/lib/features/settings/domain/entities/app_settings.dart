@@ -1,7 +1,9 @@
 import 'package:equatable/equatable.dart';
 
 enum AppThemeMode { light, dark, system }
+
 enum AppLanguage { tr, en }
+
 enum PaperSize { a4, a5, letter }
 
 class AppSettings extends Equatable {
@@ -32,11 +34,11 @@ class AppSettings extends Equatable {
   }
 
   Map<String, dynamic> toJson() => {
-    'themeMode': themeMode.name,
-    'language': language.name,
-    'defaultPaperSize': defaultPaperSize.name,
-    'autoSaveEnabled': autoSaveEnabled,
-  };
+        'themeMode': themeMode.name,
+        'language': language.name,
+        'defaultPaperSize': defaultPaperSize.name,
+        'autoSaveEnabled': autoSaveEnabled,
+      };
 
   factory AppSettings.fromJson(Map<String, dynamic> json) {
     return AppSettings(
@@ -57,5 +59,6 @@ class AppSettings extends Equatable {
   }
 
   @override
-  List<Object?> get props => [themeMode, language, defaultPaperSize, autoSaveEnabled];
+  List<Object?> get props =>
+      [themeMode, language, defaultPaperSize, autoSaveEnabled];
 }

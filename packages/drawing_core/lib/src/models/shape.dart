@@ -257,8 +257,7 @@ class Shape {
       final innerDist = innerRx > 0 && innerRy > 0
           ? pow((x - cx) / innerRx, 2) + pow((y - cy) / innerRy, 2)
           : 0.0;
-      final outerDist =
-          pow((x - cx) / outerRx, 2) + pow((y - cy) / outerRy, 2);
+      final outerDist = pow((x - cx) / outerRx, 2) + pow((y - cy) / outerRy, 2);
 
       return outerDist <= 1.0 + tolerance / min(rx, ry) &&
           innerDist >= 1.0 - tolerance / min(rx, ry);
@@ -330,14 +329,13 @@ class Shape {
       if (value is num) return value.toInt();
       return null;
     }
-    
+
     return Shape(
       id: json['id'] as String,
       type: ShapeType.values.byName(json['type'] as String),
       startPoint:
           DrawingPoint.fromJson(json['startPoint'] as Map<String, dynamic>),
-      endPoint:
-          DrawingPoint.fromJson(json['endPoint'] as Map<String, dynamic>),
+      endPoint: DrawingPoint.fromJson(json['endPoint'] as Map<String, dynamic>),
       style: StrokeStyle.fromJson(json['style'] as Map<String, dynamic>),
       isFilled: (json['isFilled'] as bool?) ?? false,
       fillColor: parseInt(json['fillColor']),

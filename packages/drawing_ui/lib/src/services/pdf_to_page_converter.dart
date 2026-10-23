@@ -166,7 +166,7 @@ class PDFToPageConverter {
   /// Converts a single PDF page to a Drawing Page.
   ///
   /// The PDF page is rendered and embedded as the page background.
-  /// 
+  ///
   /// If [useLazyLoading] is true (default), the page will not be rendered immediately.
   /// The page will be marked as PDF type with just the page index, and rendering
   /// happens on-demand when the page is displayed.
@@ -255,7 +255,7 @@ class PDFToPageConverter {
   /// Converts multiple PDF pages to Drawing Pages.
   ///
   /// Returns a list of successfully converted pages.
-  /// 
+  ///
   /// If [useLazyLoading] is true (default), pages are not rendered immediately.
   Future<List<Page>> convertPages(
     PdfDocument document,

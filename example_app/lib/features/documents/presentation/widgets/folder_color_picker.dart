@@ -21,14 +21,12 @@ class FolderColorPicker extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AlertDialog(
-      backgroundColor:
-          isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+      backgroundColor: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
       title: Text(
         'Renk Seç',
         style: AppTypography.titleLarge.copyWith(
-          color: isDark
-              ? AppColors.textPrimaryDark
-              : AppColors.textPrimaryLight,
+          color:
+              isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
         ),
       ),
       content: SizedBox(

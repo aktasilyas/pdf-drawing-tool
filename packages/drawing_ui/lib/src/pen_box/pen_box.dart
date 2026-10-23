@@ -49,7 +49,8 @@ class PenBox extends ConsumerWidget {
                       preset: preset,
                       isSelected: index == selectedIndex,
                       onTap: () => _onPresetTapped(ref, index, preset),
-                      onLongPress: () => _onPresetLongPressed(context, ref, index),
+                      onLongPress: () =>
+                          _onPresetLongPressed(context, ref, index),
                     ),
                   );
                 },
@@ -90,11 +91,12 @@ class PenBox extends ConsumerWidget {
   void _onPresetLongPressed(BuildContext context, WidgetRef ref, int index) {
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     // Show preset edit options
     showModalBottomSheet(
       context: context,
-      backgroundColor: isDark ? colorScheme.surfaceContainerLow : colorScheme.surface,
+      backgroundColor:
+          isDark ? colorScheme.surfaceContainerLow : colorScheme.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -137,8 +139,8 @@ class _AddPresetButton extends StatelessWidget {
         width: theme.penSlotSize,
         height: theme.penSlotSize,
         decoration: BoxDecoration(
-          color: isDark 
-              ? colorScheme.surfaceContainerHigh.withValues(alpha: 0.5) 
+          color: isDark
+              ? colorScheme.surfaceContainerHigh.withValues(alpha: 0.5)
               : colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
@@ -183,17 +185,17 @@ class _PresetOptionsSheet extends ConsumerWidget {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          
+
           // Title
           Text(
             preset.isEmpty ? 'Boş Slot' : 'Kalem Seçenekleri',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: colorScheme.onSurface,
-              fontWeight: FontWeight.w600,
-            ),
+                  color: colorScheme.onSurface,
+                  fontWeight: FontWeight.w600,
+                ),
           ),
           const SizedBox(height: 16),
-          
+
           if (!preset.isEmpty) ...[
             _buildOptionTile(
               context: context,
@@ -243,7 +245,7 @@ class _PresetOptionsSheet extends ConsumerWidget {
       ),
     );
   }
-  
+
   Widget _buildOptionTile({
     required BuildContext context,
     required PhosphorIconData icon,
@@ -253,7 +255,7 @@ class _PresetOptionsSheet extends ConsumerWidget {
   }) {
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -286,10 +288,10 @@ class _PresetOptionsSheet extends ConsumerWidget {
                 child: Text(
                   label,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurface,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
-                  ),
+                        color: colorScheme.onSurface,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                      ),
                 ),
               ),
               PhosphorIcon(

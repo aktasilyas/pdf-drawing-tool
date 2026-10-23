@@ -277,8 +277,16 @@ class Selection extends Equatable {
   }
 
   @override
-  List<Object?> get props =>
-      [id, type, selectedStrokeIds, selectedShapeIds, selectedImageIds, selectedTextIds, bounds, lassoPath];
+  List<Object?> get props => [
+        id,
+        type,
+        selectedStrokeIds,
+        selectedShapeIds,
+        selectedImageIds,
+        selectedTextIds,
+        bounds,
+        lassoPath
+      ];
 
   @override
   String toString() {

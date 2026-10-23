@@ -182,8 +182,7 @@ class _CompletedBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final sizeText =
-        state.fileSize != null ? ' (${state.fileSize})' : '';
+    final sizeText = state.fileSize != null ? ' (${state.fileSize})' : '';
 
     return Row(
       children: [

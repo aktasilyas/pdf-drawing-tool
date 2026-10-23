@@ -1,7 +1,7 @@
 import 'package:logger/logger.dart';
 
 /// Global logger instance for the application.
-/// 
+///
 /// Usage:
 /// ```dart
 /// logger.d('Debug message');

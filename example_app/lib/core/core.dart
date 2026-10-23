@@ -1,5 +1,5 @@
 /// Core module - shared infrastructure for the app.
-/// 
+///
 /// This module contains:
 /// - Error handling (Failures, Exceptions)
 /// - Database setup (Drift)

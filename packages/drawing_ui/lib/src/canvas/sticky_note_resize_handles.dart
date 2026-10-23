@@ -185,11 +185,9 @@ class _StickyNoteResizeHandlesState
       case _DragMode.move:
         final delta = pos - _lastDragPos!;
         _lastDragPos = pos;
-        final cur =
-            ref.read(stickyNotePlacementProvider).selectedNote ??
-                _originalNote!;
-        final moved =
-            cur.copyWith(x: cur.x + delta.dx, y: cur.y + delta.dy);
+        final cur = ref.read(stickyNotePlacementProvider).selectedNote ??
+            _originalNote!;
+        final moved = cur.copyWith(x: cur.x + delta.dx, y: cur.y + delta.dy);
         ref
             .read(stickyNotePlacementProvider.notifier)
             .updateSelectedNote(_clampToPage(moved));

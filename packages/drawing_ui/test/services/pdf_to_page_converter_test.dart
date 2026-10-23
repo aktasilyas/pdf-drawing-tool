@@ -106,7 +106,8 @@ void main() {
         expect(index, 5);
       });
 
-      test('should derive index from PDF page number when target not provided', () {
+      test('should derive index from PDF page number when target not provided',
+          () {
         final index = converter.determinePageIndex(
           targetIndex: null,
           pdfPageNumber: 3,

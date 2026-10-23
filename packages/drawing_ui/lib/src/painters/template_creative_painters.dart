@@ -14,7 +14,11 @@ mixin TemplateCreativePainters {
 
   /// Yatay ayırıcı çizgi (kalın) — library-private duplicate
   void _drawCreativeDivider(
-    Canvas canvas, double y, double startX, double endX, Paint paint,
+    Canvas canvas,
+    double y,
+    double startX,
+    double endX,
+    Paint paint,
   ) {
     canvas.drawLine(
       Offset(startX, y),
@@ -75,8 +79,11 @@ mixin TemplateCreativePainters {
   }
 
   void _drawBulletDotGrid(
-    Canvas canvas, Size size, double headerH,
-    double bulletMargin, double margin,
+    Canvas canvas,
+    Size size,
+    double headerH,
+    double bulletMargin,
+    double margin,
   ) {
     final dotPaint = Paint()
       ..color = lineColor.withValues(alpha: 0.15)
@@ -137,8 +144,7 @@ mixin TemplateCreativePainters {
     for (var y = section2Y + spacingPx;
         y < section3Y - margin * 0.5;
         y += spacingPx) {
-      canvas.drawLine(
-          Offset(margin, y), Offset(size.width - margin, y), paint);
+      canvas.drawLine(Offset(margin, y), Offset(size.width - margin, y), paint);
     }
 
     // Bölüm 3: Mood scale + not çizgileri
@@ -146,7 +152,10 @@ mixin TemplateCreativePainters {
   }
 
   void _drawGratitudeMoodSection(
-    Canvas canvas, Size size, double section3Y, double margin,
+    Canvas canvas,
+    Size size,
+    double section3Y,
+    double margin,
   ) {
     // Mood scale (5 daire)
     if (extraData?['showMoodScale'] != false) {
@@ -198,17 +207,24 @@ mixin TemplateCreativePainters {
 
     for (var row = 0; row < rows; row++) {
       for (var col = 0; col < cols; col++) {
-        _drawStoryboardFrame(
-            canvas, size, margin, headerH, row, col, cellW, cellH,
-            framePadding, aspect, paint);
+        _drawStoryboardFrame(canvas, size, margin, headerH, row, col, cellW,
+            cellH, framePadding, aspect, paint);
       }
     }
   }
 
   void _drawStoryboardFrame(
-    Canvas canvas, Size size, double margin, double headerH,
-    int row, int col, double cellW, double cellH,
-    double framePadding, double aspect, Paint paint,
+    Canvas canvas,
+    Size size,
+    double margin,
+    double headerH,
+    int row,
+    int col,
+    double cellW,
+    double cellH,
+    double framePadding,
+    double aspect,
+    Paint paint,
   ) {
     final cellX = margin + (col * cellW);
     final cellY = headerH + (row * cellH);
@@ -270,8 +286,13 @@ mixin TemplateCreativePainters {
   }
 
   void _drawWireframeDevice(
-    Canvas canvas, double frameX, double frameY,
-    double frameW, double frameH, double margin, Paint paint,
+    Canvas canvas,
+    double frameX,
+    double frameY,
+    double frameW,
+    double frameH,
+    double margin,
+    Paint paint,
   ) {
     // Device outline
     final deviceRect = RRect.fromRectAndRadius(
@@ -316,5 +337,4 @@ mixin TemplateCreativePainters {
         ..strokeWidth = lineWidth * 0.3,
     );
   }
-
 }

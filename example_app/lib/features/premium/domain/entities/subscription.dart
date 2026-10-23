@@ -21,7 +21,8 @@ class Subscription {
 
   bool get isFree => tier == SubscriptionTier.free;
   bool get isPremium => tier != SubscriptionTier.free && isActive;
-  bool get isExpired => expiresAt != null && expiresAt!.isBefore(DateTime.now());
+  bool get isExpired =>
+      expiresAt != null && expiresAt!.isBefore(DateTime.now());
 
   static const Subscription freeUser = Subscription(
     tier: SubscriptionTier.free,

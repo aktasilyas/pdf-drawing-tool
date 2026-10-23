@@ -173,7 +173,8 @@ void main() {
           id: 'p1',
           index: 0,
           size: PageSize(width: 0, height: 0),
-          background: PageBackground(type: BackgroundType.blank, color: 0xFFFFFFFF),
+          background:
+              PageBackground(type: BackgroundType.blank, color: 0xFFFFFFFF),
           layers: [],
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
@@ -231,7 +232,9 @@ void main() {
         final doc = DrawingDocument.multiPage(
           id: 'd1',
           title: 'Test Document',
-          pages: [Page.create(index: 0)], createdAt: DateTime.now(), updatedAt: DateTime.now(),
+          pages: [Page.create(index: 0)],
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
         );
 
         final metadata = service.createMetadata(doc);
@@ -243,7 +246,9 @@ void main() {
         final doc = DrawingDocument.multiPage(
           id: 'd1',
           title: '',
-          pages: [Page.create(index: 0)], createdAt: DateTime.now(), updatedAt: DateTime.now(),
+          pages: [Page.create(index: 0)],
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
         );
 
         final metadata = service.createMetadata(doc);
@@ -308,7 +313,8 @@ void main() {
           id: 'p1',
           index: 0,
           size: PageSize(width: -1, height: -1),
-          background: PageBackground(type: BackgroundType.blank, color: 0xFFFFFFFF),
+          background:
+              PageBackground(type: BackgroundType.blank, color: 0xFFFFFFFF),
           layers: [],
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),

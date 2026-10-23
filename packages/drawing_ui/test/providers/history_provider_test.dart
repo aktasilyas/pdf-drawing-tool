@@ -239,9 +239,7 @@ void main() {
       container.read(historyManagerProvider.notifier).addStroke(stroke);
       expect(container.read(strokeCountProvider), 1);
 
-      container
-          .read(historyManagerProvider.notifier)
-          .removeStroke(stroke.id);
+      container.read(historyManagerProvider.notifier).removeStroke(stroke.id);
       expect(container.read(strokeCountProvider), 0);
 
       // Can undo the removal

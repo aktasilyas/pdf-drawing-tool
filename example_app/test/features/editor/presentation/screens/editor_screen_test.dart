@@ -10,6 +10,7 @@ import 'package:example_app/core/core.dart';
 import 'package:example_app/features/editor/editor.dart';
 
 class MockLoadDocumentUseCase extends Mock implements LoadDocumentUseCase {}
+
 class MockSaveDocumentUseCase extends Mock implements SaveDocumentUseCase {}
 
 void main() {

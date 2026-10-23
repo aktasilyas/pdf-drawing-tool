@@ -3,8 +3,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:uuid/uuid.dart';
 import 'package:example_app/features/documents/documents.dart';
 
-class MockFolderLocalDatasource extends Mock
-    implements FolderLocalDatasource {}
+class MockFolderLocalDatasource extends Mock implements FolderLocalDatasource {}
 
 class MockDocumentLocalDatasource extends Mock
     implements DocumentLocalDatasource {}

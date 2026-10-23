@@ -143,7 +143,7 @@ class ActiveStrokePainter extends CustomPainter {
     // 3. Points content changed (for straight line mode where count stays 2 but positions change)
     if (oldDelegate._pointCount != _pointCount) return true;
     if (oldDelegate.style != style) return true;
-    
+
     // Check if point positions changed (important for straight line preview)
     if (_pointCount > 0 && _pointCount == oldDelegate._pointCount) {
       // Compare last point position (most likely to change)
@@ -151,7 +151,7 @@ class ActiveStrokePainter extends CustomPainter {
       final newLast = points.last;
       if (oldLast.x != newLast.x || oldLast.y != newLast.y) return true;
     }
-    
+
     return false;
   }
 }
@@ -221,7 +221,8 @@ class DrawingController extends ChangeNotifier {
   /// Starts a new stroke at the given point with the given style.
   ///
   /// Clears any existing active points and begins a new stroke.
-  void startStroke(DrawingPoint point, StrokeStyle style, {double stabilization = 0.0, bool straightLine = false}) {
+  void startStroke(DrawingPoint point, StrokeStyle style,
+      {double stabilization = 0.0, bool straightLine = false}) {
     _activePoints.clear();
     _rawPoints.clear();
     _activePoints.add(point);
@@ -240,7 +241,7 @@ class DrawingController extends ChangeNotifier {
   /// This is called on every pointer move event.
   void addPoint(DrawingPoint point) {
     if (!_isDrawing) return;
-    
+
     _rawPoints.add(point);
 
     if (_straightLineMode) {
@@ -257,7 +258,7 @@ class DrawingController extends ChangeNotifier {
       // No processing
       _activePoints.add(point);
     }
-    
+
     notifyListeners(); // Only ActiveStrokePainter will repaint
   }
 
@@ -267,7 +268,7 @@ class DrawingController extends ChangeNotifier {
 
     final smoothed = <DrawingPoint>[];
     final windowSize = (3 + (factor * 5).round()).clamp(3, 8);
-    
+
     for (int i = 0; i < points.length; i++) {
       if (i == 0 || i == points.length - 1) {
         // Keep first and last points unchanged
@@ -277,7 +278,7 @@ class DrawingController extends ChangeNotifier {
         final start = (i - windowSize ~/ 2).clamp(0, points.length - 1);
         final end = (i + windowSize ~/ 2 + 1).clamp(0, points.length);
         final window = points.sublist(start, end);
-        
+
         double avgX = 0, avgY = 0, avgPressure = 0;
         for (final p in window) {
           avgX += p.x;
@@ -287,17 +288,18 @@ class DrawingController extends ChangeNotifier {
         avgX /= window.length;
         avgY /= window.length;
         avgPressure /= window.length;
-        
+
         // Blend with original based on factor
         final blendFactor = factor;
         smoothed.add(DrawingPoint(
           x: points[i].x * (1 - blendFactor) + avgX * blendFactor,
           y: points[i].y * (1 - blendFactor) + avgY * blendFactor,
-          pressure: points[i].pressure * (1 - blendFactor) + avgPressure * blendFactor,
+          pressure: points[i].pressure * (1 - blendFactor) +
+              avgPressure * blendFactor,
         ));
       }
     }
-    
+
     return smoothed;
   }
 

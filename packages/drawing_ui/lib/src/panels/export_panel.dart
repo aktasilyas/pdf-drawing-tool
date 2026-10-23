@@ -244,10 +244,12 @@ class _PanelHeader extends StatelessWidget {
       ),
       child: Align(
         alignment: Alignment.centerLeft,
-        child: Text('Dışa Aktar', style: TextStyle(
-            fontSize: 13, fontWeight: FontWeight.w600, color: cs.onSurface)),
+        child: Text('Dışa Aktar',
+            style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: cs.onSurface)),
       ),
     );
   }
 }
-

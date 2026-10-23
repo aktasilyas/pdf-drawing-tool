@@ -5,7 +5,8 @@ import 'package:example_app/features/settings/domain/entities/app_settings.dart'
 
 const _settingsKey = 'app_settings';
 
-final settingsProvider = StateNotifierProvider<SettingsNotifier, AppSettings>((ref) {
+final settingsProvider =
+    StateNotifierProvider<SettingsNotifier, AppSettings>((ref) {
   return SettingsNotifier();
 });
 

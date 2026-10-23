@@ -43,8 +43,8 @@ class DocumentListTile extends ConsumerWidget {
       decoration: BoxDecoration(
         color: surfaceColor,
         borderRadius: BorderRadius.circular(AppRadius.card),
-        boxShadow: AppShadows.cardResting(
-            isDark ? Brightness.dark : Brightness.light),
+        boxShadow:
+            AppShadows.cardResting(isDark ? Brightness.dark : Brightness.light),
       ),
       child: Material(
         color: Colors.transparent,
@@ -57,8 +57,7 @@ class DocumentListTile extends ConsumerWidget {
           borderRadius: BorderRadius.circular(AppRadius.card),
           child: Container(
             height: 64,
-            padding:
-                const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
             child: Row(
               children: [
                 if (isSelectionMode)
@@ -84,18 +83,16 @@ class DocumentListTile extends ConsumerWidget {
                       Text(
                         document.pageCount > 1
                             ? '${DocumentDateFormatter.format(document.updatedAt)} · ${document.pageCount} sayfa'
-                            : DocumentDateFormatter.format(
-                                document.updatedAt),
-                        style: AppTypography.caption
-                            .copyWith(color: textTertiary),
+                            : DocumentDateFormatter.format(document.updatedAt),
+                        style:
+                            AppTypography.caption.copyWith(color: textTertiary),
                       ),
                     ],
                   ),
                 ),
                 if (!isSelectionMode && document.isFavorite)
                   Padding(
-                    padding:
-                        const EdgeInsets.only(right: AppSpacing.xs),
+                    padding: const EdgeInsets.only(right: AppSpacing.xs),
                     child: GestureDetector(
                       onTap: () => ref
                           .read(documentsControllerProvider.notifier)

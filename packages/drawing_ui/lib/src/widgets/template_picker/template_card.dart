@@ -30,9 +30,7 @@ class TemplateCard extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isSelected
-                ? cs.primary
-                : cs.outline.withValues(alpha: 0.2),
+            color: isSelected ? cs.primary : cs.outline.withValues(alpha: 0.2),
             width: isSelected ? 2 : 1,
           ),
           boxShadow: isSelected
@@ -61,8 +59,7 @@ class TemplateCard extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(3),
                   decoration: BoxDecoration(
-                    color: cs.surfaceContainerHighest
-                        .withValues(alpha: 0.9),
+                    color: cs.surfaceContainerHighest.withValues(alpha: 0.9),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: PhosphorIcon(ElyanotesIcons.lock,
@@ -74,8 +71,7 @@ class TemplateCard extends StatelessWidget {
               right: 0,
               bottom: 0,
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topCenter,
@@ -85,8 +81,8 @@ class TemplateCard extends StatelessWidget {
                       cs.surface.withValues(alpha: 0.95),
                     ],
                   ),
-                  borderRadius: const BorderRadius.vertical(
-                      bottom: Radius.circular(7)),
+                  borderRadius:
+                      const BorderRadius.vertical(bottom: Radius.circular(7)),
                 ),
                 child: Text(
                   template.name,

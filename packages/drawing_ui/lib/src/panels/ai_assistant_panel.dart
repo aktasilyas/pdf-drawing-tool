@@ -77,8 +77,11 @@ class _AIAssistantPanelState extends ConsumerState<AIAssistantPanel> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(children: [
-            Text('Ask AI', style: textTheme.bodyMedium?.copyWith(
-              fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSurface)),
+            Text('Ask AI',
+                style: textTheme.bodyMedium?.copyWith(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurface)),
             const Spacer(),
             const _PremiumBadge(),
           ]),
@@ -100,9 +103,11 @@ class _AIAssistantPanelState extends ConsumerState<AIAssistantPanel> {
 
           // Quick suggestions
           if (_response == null && !_isLoading) ...[
-            Text('SUGGESTIONS', style: textTheme.labelSmall?.copyWith(
-                fontWeight: FontWeight.w600, color: cs.onSurfaceVariant,
-                letterSpacing: 0.5)),
+            Text('SUGGESTIONS',
+                style: textTheme.labelSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurfaceVariant,
+                    letterSpacing: 0.5)),
             const SizedBox(height: 6),
             _QuickSuggestions(
               onSuggestionTap: (suggestion) {
@@ -181,14 +186,15 @@ class _PremiumBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          PhosphorIcon(ElyanotesIcons.sparkle, size: 14, color: colorScheme.tertiary),
+          PhosphorIcon(ElyanotesIcons.sparkle,
+              size: 14, color: colorScheme.tertiary),
           const SizedBox(width: 4),
           Text(
             'Pro',
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: colorScheme.tertiary,
-            ),
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.tertiary,
+                ),
           ),
         ],
       ),
@@ -209,16 +215,17 @@ class _SelectionIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: hasSelection 
+        color: hasSelection
             ? colorScheme.primary.withValues(alpha: 0.1)
             : colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: hasSelection ? colorScheme.primary : colorScheme.outlineVariant,
+          color:
+              hasSelection ? colorScheme.primary : colorScheme.outlineVariant,
         ),
       ),
       child: Row(
@@ -235,9 +242,11 @@ class _SelectionIndicator extends StatelessWidget {
                   ? selectionDescription
                   : 'Select content to ask AI about',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontSize: 13,
-                color: hasSelection ? colorScheme.primary : colorScheme.outline,
-              ),
+                    fontSize: 13,
+                    color: hasSelection
+                        ? colorScheme.primary
+                        : colorScheme.outline,
+                  ),
             ),
           ),
         ],
@@ -261,7 +270,7 @@ class _QuestionInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Row(
       children: [
         Expanded(
@@ -269,7 +278,10 @@ class _QuestionInput extends StatelessWidget {
             controller: controller,
             decoration: InputDecoration(
               hintText: 'Ask a question about your selection...',
-              hintStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(color: colorScheme.onSurfaceVariant),
+              hintStyle: Theme.of(context)
+                  .textTheme
+                  .bodyMedium
+                  ?.copyWith(color: colorScheme.onSurfaceVariant),
               filled: true,
               fillColor: colorScheme.surfaceContainerLowest,
               border: OutlineInputBorder(
@@ -327,7 +339,7 @@ class _QuickSuggestions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Wrap(
       spacing: 8,
       runSpacing: 8,
@@ -344,9 +356,9 @@ class _QuickSuggestions extends StatelessWidget {
             child: Text(
               suggestion,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontSize: 13,
-                color: colorScheme.onSurface,
-              ),
+                    fontSize: 13,
+                    color: colorScheme.onSurface,
+                  ),
             ),
           ),
         );
@@ -362,7 +374,7 @@ class _LoadingIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -383,9 +395,9 @@ class _LoadingIndicator extends StatelessWidget {
           Text(
             'AI is thinking...',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              fontSize: 13,
-              color: colorScheme.outline,
-            ),
+                  fontSize: 13,
+                  color: colorScheme.outline,
+                ),
           ),
         ],
       ),
@@ -408,7 +420,7 @@ class _ResponseArea extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -421,24 +433,27 @@ class _ResponseArea extends StatelessWidget {
         children: [
           Row(
             children: [
-              PhosphorIcon(ElyanotesIcons.sparkle, size: 16, color: colorScheme.primary),
+              PhosphorIcon(ElyanotesIcons.sparkle,
+                  size: 16, color: colorScheme.primary),
               const SizedBox(width: 8),
               Text(
                 'AI Response',
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                  fontSize: 13,
-                  color: colorScheme.primary,
-                ),
+                      fontSize: 13,
+                      color: colorScheme.primary,
+                    ),
               ),
               const Spacer(),
               GestureDetector(
                 onTap: onCopy,
-                child: PhosphorIcon(ElyanotesIcons.copy, size: 18, color: colorScheme.primary),
+                child: PhosphorIcon(ElyanotesIcons.copy,
+                    size: 18, color: colorScheme.primary),
               ),
               const SizedBox(width: 12),
               GestureDetector(
                 onTap: onRetry,
-                child: PhosphorIcon(ElyanotesIcons.refresh, size: 18, color: colorScheme.primary),
+                child: PhosphorIcon(ElyanotesIcons.refresh,
+                    size: 18, color: colorScheme.primary),
               ),
             ],
           ),
@@ -446,9 +461,9 @@ class _ResponseArea extends StatelessWidget {
           Text(
             response,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurface,
-              height: 1.5,
-            ),
+                  color: colorScheme.onSurface,
+                  height: 1.5,
+                ),
           ),
         ],
       ),
@@ -473,14 +488,15 @@ class _PremiumNotice extends StatelessWidget {
       ),
       child: Row(
         children: [
-          PhosphorIcon(ElyanotesIcons.info, size: 18, color: colorScheme.tertiary),
+          PhosphorIcon(ElyanotesIcons.info,
+              size: 18, color: colorScheme.tertiary),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               'AI features are limited in free plan. Upgrade for unlimited access.',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: colorScheme.tertiary,
-              ),
+                    color: colorScheme.tertiary,
+                  ),
             ),
           ),
         ],

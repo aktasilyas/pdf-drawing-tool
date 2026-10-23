@@ -52,7 +52,8 @@ void main() {
       final result = await useCase('');
 
       // Assert
-      result.fold((_) => fail('expected Right'), (docs) => expect(docs, isEmpty));
+      result.fold(
+          (_) => fail('expected Right'), (docs) => expect(docs, isEmpty));
       verifyNever(() => mockRepository.search(any()));
     });
 
@@ -61,7 +62,8 @@ void main() {
       final result = await useCase('   ');
 
       // Assert
-      result.fold((_) => fail('expected Right'), (docs) => expect(docs, isEmpty));
+      result.fold(
+          (_) => fail('expected Right'), (docs) => expect(docs, isEmpty));
       verifyNever(() => mockRepository.search(any()));
     });
 
@@ -83,14 +85,15 @@ void main() {
     test('should return empty list when no matches found', () async {
       // Arrange
       const query = 'nonexistent';
-      when(() => mockRepository.search(query))
-          .thenAnswer((_) async => const Right<Failure, List<DocumentInfo>>([]));
+      when(() => mockRepository.search(query)).thenAnswer(
+          (_) async => const Right<Failure, List<DocumentInfo>>([]));
 
       // Act
       final result = await useCase(query);
 
       // Assert
-      result.fold((_) => fail('expected Right'), (docs) => expect(docs, isEmpty));
+      result.fold(
+          (_) => fail('expected Right'), (docs) => expect(docs, isEmpty));
       result.fold(
         (_) => fail('Should return empty list'),
         (documents) => expect(documents, isEmpty),

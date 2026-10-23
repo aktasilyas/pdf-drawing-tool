@@ -46,8 +46,8 @@ class SidebarItem extends StatelessWidget {
     final selectedBg = selectedColor.withValues(alpha: 0.12);
 
     // Icon color: custom veya seçime göre
-    final effectiveIconColor = iconColor ??
-        (isSelected ? selectedColor : textSecondary);
+    final effectiveIconColor =
+        iconColor ?? (isSelected ? selectedColor : textSecondary);
 
     final iconSz = isSubfolder ? AppIconSize.sm : AppIconSize.sm;
 

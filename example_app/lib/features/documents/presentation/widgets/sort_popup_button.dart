@@ -62,12 +62,12 @@ class SortPopupButton extends StatelessWidget {
             }
           },
           itemBuilder: (context) => [
-            _sortItem(context, 'date', 'Tarihe göre',
-                sortOption == SortOption.date),
-            _sortItem(context, 'name', 'İsme göre',
-                sortOption == SortOption.name),
-            _sortItem(context, 'size', 'Boyuta göre',
-                sortOption == SortOption.size),
+            _sortItem(
+                context, 'date', 'Tarihe göre', sortOption == SortOption.date),
+            _sortItem(
+                context, 'name', 'İsme göre', sortOption == SortOption.name),
+            _sortItem(
+                context, 'size', 'Boyuta göre', sortOption == SortOption.size),
             const PopupMenuDivider(),
             PopupMenuItem(
               value: 'direction',

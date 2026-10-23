@@ -40,8 +40,8 @@ class ToolPanel extends StatelessWidget {
     final screenSize = MediaQuery.of(context).size;
     final isLandscape = screenSize.width > screenSize.height;
     final maxPanelHeight = isLandscape
-        ? screenSize.height * 0.85  // Yatay: ekranın %85'i
-        : screenSize.height * 0.7;  // Dikey: ekranın %70'i
+        ? screenSize.height * 0.85 // Yatay: ekranın %85'i
+        : screenSize.height * 0.7; // Dikey: ekranın %70'i
 
     return Material(
       color: Colors.transparent,
@@ -135,7 +135,9 @@ class _PanelHeader extends StatelessWidget {
                   width: 32,
                   height: 32,
                   decoration: BoxDecoration(
-                    color: isDark ? colorScheme.surfaceContainerHigh : colorScheme.surfaceContainerHighest,
+                    color: isDark
+                        ? colorScheme.surfaceContainerHigh
+                        : colorScheme.surfaceContainerHighest,
                     shape: BoxShape.circle,
                   ),
                   child: PhosphorIcon(
@@ -203,7 +205,8 @@ class PanelSection extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    PhosphorIcon(ElyanotesIcons.lock, size: 10, color: colorScheme.tertiary),
+                    PhosphorIcon(ElyanotesIcons.lock,
+                        size: 10, color: colorScheme.tertiary),
                     const SizedBox(width: 2),
                     Text(
                       'PRO',
@@ -242,7 +245,7 @@ class _LockedSectionOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return GestureDetector(
       onTap: onTap,
       child: Stack(
@@ -256,20 +259,22 @@ class _LockedSectionOverlay extends StatelessWidget {
           Positioned.fill(
             child: Container(
               decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                color:
+                    colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    PhosphorIcon(ElyanotesIcons.lock, color: colorScheme.tertiary, size: 24),
+                    PhosphorIcon(ElyanotesIcons.lock,
+                        color: colorScheme.tertiary, size: 24),
                     const SizedBox(height: 4),
                     Text(
                       'Premium',
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                        color: colorScheme.tertiary,
-                      ),
+                            color: colorScheme.tertiary,
+                          ),
                     ),
                   ],
                 ),
@@ -348,7 +353,7 @@ class PanelActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     final bgColor = isPrimary
         ? colorScheme.primary
         : isDestructive
@@ -381,9 +386,9 @@ class PanelActionButton extends StatelessWidget {
               Text(
                 label,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: fgColor,
-                ),
+                      fontWeight: FontWeight.w600,
+                      color: fgColor,
+                    ),
               ),
             ],
           ),
@@ -414,9 +419,8 @@ class PanelCloseButton extends StatelessWidget {
           width: 32,
           height: 32,
           decoration: BoxDecoration(
-            color: isDark
-                ? cs.surfaceContainerHigh
-                : cs.surfaceContainerHighest,
+            color:
+                isDark ? cs.surfaceContainerHigh : cs.surfaceContainerHighest,
             shape: BoxShape.circle,
           ),
           child: PhosphorIcon(

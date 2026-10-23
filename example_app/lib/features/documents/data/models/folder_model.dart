@@ -80,9 +80,7 @@ class FolderModel {
     return FolderModel(
       id: id ?? this.id,
       name: name ?? this.name,
-      parentId: parentId == _sentinel
-          ? this.parentId
-          : parentId as String?,
+      parentId: parentId == _sentinel ? this.parentId : parentId as String?,
       colorValue: colorValue ?? this.colorValue,
       sortOrder: sortOrder ?? this.sortOrder,
       createdAt: createdAt ?? this.createdAt,

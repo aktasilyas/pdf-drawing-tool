@@ -33,9 +33,8 @@ jobs:
       - name: Dependencies
         run: ./scripts/check.sh pub
 
-      - name: Format check (report-only until the baseline is clean, M3)
+      - name: Format check
         run: dart format --output=none --set-exit-if-changed packages example_app/lib example_app/test
-        continue-on-error: true
 
       - name: Analyze
         run: ./scripts/check.sh analyze ${{ matrix.package }}

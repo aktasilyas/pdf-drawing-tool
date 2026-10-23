@@ -89,7 +89,8 @@ void main() {
       expect(find.byType(DocumentsCombinedGridView), findsOneWidget);
     });
 
-    testWidgets('should_render_with_both_folders_and_documents', (tester) async {
+    testWidgets('should_render_with_both_folders_and_documents',
+        (tester) async {
       final folder = Folder(
         id: 'folder-1',
         name: 'Test Folder',

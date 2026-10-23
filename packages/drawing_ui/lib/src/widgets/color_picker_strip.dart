@@ -81,8 +81,7 @@ class ColorPickerStrip extends StatelessWidget {
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
                     maxWidth: 320,
-                    maxHeight:
-                        MediaQuery.of(overlayContext).size.height * 0.85,
+                    maxHeight: MediaQuery.of(overlayContext).size.height * 0.85,
                   ),
                   child: CompactColorPicker(
                     selectedColor: selectedColor,
