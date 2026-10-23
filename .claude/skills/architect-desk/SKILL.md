@@ -49,6 +49,12 @@ If autopilot logged the queue as empty or blocked, look at why (dependencies,
 missing criteria) and fix the issues so work can continue; you may edit issue
 bodies, labels and dependencies, and open new issues for gaps you find.
 
+## 3b. Owner tasks that became unblocked
+For open issues labeled `needs-owner`: when every `Depends on:` issue is closed
+and you have not announced it yet, comment on that issue in Turkish with exact
+step-by-step instructions for the owner (commands, what to look for), and
+escalate it in the log.
+
 ## 4. Log
 Comment on the "Autopilot status" issue, in Turkish, at most 6 lines, starting
 with `Mimar:` — decisions made, PRs approved, anything escalated. If an item
