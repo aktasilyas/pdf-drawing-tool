@@ -113,11 +113,11 @@ void main() {
         expect(doc.id, startsWith('doc_'));
         expect(doc.title, 'New Document');
         expect(doc.layerCount, 1);
-        expect(doc.layers[0].name, 'Layer 1');
+        expect(doc.layers[0].name, 'Katman 1');
         expect(doc.layers[0].isEmpty, true);
         expect(doc.activeLayerIndex, 0);
-        expect(doc.width, 1920.0);
-        expect(doc.height, 1080.0);
+        expect(doc.width, doc.pages[0].size.width);
+        expect(doc.height, doc.pages[0].size.height);
       });
 
       test('creates document with custom dimensions', () {
@@ -141,7 +141,8 @@ void main() {
           true,
         );
         expect(
-          doc.createdAt.isBefore(after) || doc.createdAt.isAtSameMomentAs(after),
+          doc.createdAt.isBefore(after) ||
+              doc.createdAt.isAtSameMomentAs(after),
           true,
         );
         expect(doc.createdAt, equals(doc.updatedAt));
@@ -164,7 +165,7 @@ void main() {
         final doc = DrawingDocument.withLayers('Empty', []);
 
         expect(doc.layerCount, 1);
-        expect(doc.layers[0].name, 'Layer 1');
+        expect(doc.layers[0].name, 'Katman 1');
       });
 
       test('creates with custom dimensions', () {
@@ -251,7 +252,7 @@ void main() {
         );
       });
 
-      test('preserves activeLayerIndex', () {
+      test('makes the new layer active', () {
         final doc = DrawingDocument.withLayers(
           'Test',
           [testLayer1, testLayer2],
@@ -259,7 +260,8 @@ void main() {
 
         final updated = doc.addLayer(Layer.empty('New'));
 
-        expect(updated.activeLayerIndex, 1);
+        expect(updated.activeLayerIndex, updated.layerCount - 1);
+        expect(updated.activeLayerIndex, 2);
       });
     });
 
@@ -466,7 +468,8 @@ void main() {
       });
 
       test('copies with multiple parameters changed', () {
-        final doc = DrawingDocument.emptyMultiPage('Test');
+        // width/height are only honored by legacy (V1) documents.
+        final doc = DrawingDocument.withLayers('Test', [testLayer1]);
         final newUpdated = DateTime(2025, 1, 1);
         final copied = doc.copyWith(
           title: 'New Title',

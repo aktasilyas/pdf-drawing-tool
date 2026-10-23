@@ -1,4 +1,5 @@
 import 'package:test/test.dart';
+import '../helpers/document_helpers.dart';
 import 'package:drawing_core/drawing_core.dart';
 
 void main() {
@@ -30,9 +31,7 @@ void main() {
 
       var layer = Layer.empty('Layer 1').addStroke(stroke1).addStroke(stroke2);
 
-      document = DrawingDocument.emptyMultiPage('Test').copyWith(
-        layers: [layer],
-      );
+      document = multiPageDocWithLayers('Test', [layer]);
     });
 
     test('execute moves stroke points by delta', () {
@@ -65,7 +64,7 @@ void main() {
       );
 
       var layer = Layer.empty('Layer').addStroke(strokeWithPressure);
-      var doc = DrawingDocument.emptyMultiPage('Test').copyWith(layers: [layer]);
+      var doc = multiPageDocWithLayers('Test', [layer]);
 
       final command = MoveSelectionCommand(
         layerIndex: 0,
@@ -210,9 +209,7 @@ void main() {
           .addStroke(stroke2)
           .addStroke(stroke3);
 
-      document = DrawingDocument.emptyMultiPage('Test').copyWith(
-        layers: [layer],
-      );
+      document = multiPageDocWithLayers('Test', [layer]);
     });
 
     test('execute removes selected stroke', () {

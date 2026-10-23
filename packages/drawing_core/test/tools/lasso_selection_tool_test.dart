@@ -66,17 +66,18 @@ void main() {
         expect(tool.isSelecting, isFalse);
       });
 
-      test('returns null when no strokes provided', () {
+      test('returns empty selection when no strokes provided', () {
         tool.startSelection(DrawingPoint(x: 0, y: 0));
         tool.updateSelection(DrawingPoint(x: 100, y: 0));
         tool.updateSelection(DrawingPoint(x: 50, y: 100));
 
         final result = tool.endSelection([]);
 
-        expect(result, isNull);
+        expect(result, isNotNull);
+        expect(result!.isEmpty, isTrue);
       });
 
-      test('returns null when no strokes selected', () {
+      test('returns empty selection when no strokes selected', () {
         // Create lasso area (triangle)
         tool.startSelection(DrawingPoint(x: 0, y: 0));
         tool.updateSelection(DrawingPoint(x: 100, y: 0));
@@ -89,7 +90,8 @@ void main() {
 
         final result = tool.endSelection([stroke]);
 
-        expect(result, isNull);
+        expect(result, isNotNull);
+        expect(result!.isEmpty, isTrue);
       });
 
       test('returns selection when stroke is inside lasso', () {

@@ -7,6 +7,7 @@ import 'package:drawing_core/src/models/shape.dart';
 import 'package:drawing_core/src/models/shape_type.dart';
 import 'package:drawing_core/src/models/stroke_style.dart';
 import 'package:test/test.dart';
+import '../helpers/document_helpers.dart';
 
 void main() {
   group('AddShapeCommand', () {
@@ -15,9 +16,7 @@ void main() {
 
     setUp(() {
       final layer = Layer.empty('Layer 1');
-      document = DrawingDocument.emptyMultiPage('Test').copyWith(
-        layers: [layer],
-      );
+      document = multiPageDocWithLayers('Test', [layer]);
 
       shape = Shape.create(
         type: ShapeType.rectangle,
@@ -98,9 +97,7 @@ void main() {
       );
 
       final layer = Layer.empty('Layer 1').addShape(shape);
-      document = DrawingDocument.emptyMultiPage('Test').copyWith(
-        layers: [layer],
-      );
+      document = multiPageDocWithLayers('Test', [layer]);
     });
 
     test('execute removes shape from layer', () {
