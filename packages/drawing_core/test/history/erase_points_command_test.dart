@@ -23,9 +23,7 @@ void main() {
         createdAt: DateTime.now(),
       );
       
-      final document = DrawingDocument.emptyMultiPage('Test').copyWith(
-        layers: [Layer.empty('Layer 1').copyWith(strokes: [original])],
-      );
+      final document = _docWithLayer([original]);
       
       final command = ErasePointsCommand(
         layerIndex: 0,
@@ -54,9 +52,7 @@ void main() {
         createdAt: DateTime.now(),
       );
       
-      final documentAfterErase = DrawingDocument.emptyMultiPage('Test').copyWith(
-        layers: [Layer.empty('Layer 1').copyWith(strokes: [split1])],
-      );
+      final documentAfterErase = _docWithLayer([split1]);
       
       final command = ErasePointsCommand(
         layerIndex: 0,
@@ -220,4 +216,12 @@ List<DrawingPoint> _createPoints(int count) {
     pressure: 1.0,
     timestamp: i,
   ));
+}
+
+DrawingDocument _docWithLayer(List<Stroke> strokes) {
+  final doc = DrawingDocument.emptyMultiPage('Test');
+  final page = doc.pages.first.copyWith(
+    layers: [Layer.empty('Layer 1').copyWith(strokes: strokes)],
+  );
+  return doc.copyWith(pages: [page]);
 }

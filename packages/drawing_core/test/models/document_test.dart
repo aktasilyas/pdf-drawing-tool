@@ -648,5 +648,35 @@ void main() {
         expect(str, contains('strokeCount: 1'));
       });
     });
+
+    group('copyWith on multi-page documents', () {
+      test('throws ArgumentError when layers is passed', () {
+        final doc = DrawingDocument.emptyMultiPage('Multi');
+        expect(
+          () => doc.copyWith(layers: [testLayer1]),
+          throwsA(isA<ArgumentError>()
+              .having((e) => e.message, 'message', contains('Page'))),
+        );
+      });
+
+      test('throws ArgumentError when width or height is passed', () {
+        final doc = DrawingDocument.emptyMultiPage('Multi');
+        expect(() => doc.copyWith(width: 100), throwsArgumentError);
+        expect(() => doc.copyWith(height: 100), throwsArgumentError);
+      });
+
+      test('still copies other fields', () {
+        final doc = DrawingDocument.emptyMultiPage('Multi');
+        expect(doc.copyWith(title: 'Renamed').title, 'Renamed');
+      });
+
+      test('legacy documents still accept layers, width and height', () {
+        final doc = DrawingDocument.withLayers('Legacy', [testLayer1]);
+        final copy = doc.copyWith(layers: [testLayer2], width: 10, height: 20);
+        expect(copy.layerCount, 1);
+        expect(copy.width, 10);
+        expect(copy.height, 20);
+      });
+    });
   });
 }
