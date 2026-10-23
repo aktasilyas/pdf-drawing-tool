@@ -3,6 +3,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/services/thumbnail_generator.dart';
 
+/// Thumbnail generation uses real async (picture.toImage, file I/O), which
+/// never completes under the FakeAsync zone of a plain [testWidgets].
+void testGenerate(String name, Future<void> Function() body) {
+  testWidgets(name, (tester) async {
+    await tester.runAsync(body);
+  });
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -46,8 +54,8 @@ void main() {
     });
 
     group('generate', () {
-      testWidgets('should generate thumbnail with correct dimensions',
-          (tester) async {
+      testGenerate('should generate thumbnail with correct dimensions',
+          () async {
         final page = Page.create(index: 0);
 
         final thumbnail = await ThumbnailGenerator.generate(
@@ -60,8 +68,8 @@ void main() {
         expect(thumbnail!.isNotEmpty, true);
       });
 
-      testWidgets('should generate thumbnail with default dimensions',
-          (tester) async {
+      testGenerate('should generate thumbnail with default dimensions',
+          () async {
         final page = Page.create(index: 0);
 
         final thumbnail = await ThumbnailGenerator.generate(page);
@@ -70,7 +78,7 @@ void main() {
         expect(thumbnail!.isNotEmpty, true);
       });
 
-      testWidgets('should generate thumbnail for empty page', (tester) async {
+      testGenerate('should generate thumbnail for empty page', () async {
         final page = Page.create(index: 0);
 
         final thumbnail = await ThumbnailGenerator.generate(page);
@@ -79,8 +87,8 @@ void main() {
         expect(thumbnail!.isNotEmpty, true);
       });
 
-      testWidgets('should generate thumbnail for page with single stroke',
-          (tester) async {
+      testGenerate('should generate thumbnail for page with single stroke',
+          () async {
         final stroke = Stroke.create(
           points: [
             DrawingPoint(x: 10, y: 10),
@@ -96,8 +104,8 @@ void main() {
         expect(thumbnail!.isNotEmpty, true);
       });
 
-      testWidgets('should generate thumbnail for page with multiple strokes',
-          (tester) async {
+      testGenerate('should generate thumbnail for page with multiple strokes',
+          () async {
         final stroke1 = Stroke.create(
           points: [DrawingPoint(x: 0, y: 0), DrawingPoint(x: 100, y: 100)],
           style: StrokeStyle.pen(color: 0xFF000000),
@@ -116,8 +124,8 @@ void main() {
         expect(thumbnail!.isNotEmpty, true);
       });
 
-      testWidgets('should generate thumbnail for page with shapes',
-          (tester) async {
+      testGenerate('should generate thumbnail for page with shapes',
+          () async {
         final shape = Shape.create(
           type: ShapeType.rectangle,
           startPoint: DrawingPoint(x: 10, y: 10),
@@ -139,8 +147,8 @@ void main() {
         expect(thumbnail!.isNotEmpty, true);
       });
 
-      testWidgets('should generate different thumbnails for different content',
-          (tester) async {
+      testGenerate('should generate different thumbnails for different content',
+          () async {
         final page1 = Page.create(index: 0);
         final page2 = Page.create(index: 1).addStroke(
           Stroke.create(
@@ -158,7 +166,7 @@ void main() {
         expect(thumb1, isNot(equals(thumb2)));
       });
 
-      testWidgets('should scale content proportionally', (tester) async {
+      testGenerate('should scale content proportionally', () async {
         // Create a page with A4 portrait size
         final page = Page.create(
           index: 0,
@@ -183,7 +191,7 @@ void main() {
         expect(thumbnail!.isNotEmpty, true);
       });
 
-      testWidgets('should handle custom background color', (tester) async {
+      testGenerate('should handle custom background color', () async {
         final page = Page.create(index: 0);
 
         final thumbnail = await ThumbnailGenerator.generate(
@@ -195,7 +203,7 @@ void main() {
         expect(thumbnail!.isNotEmpty, true);
       });
 
-      testWidgets('should return null on error', (tester) async {
+      testGenerate('should return null on error', () async {
         // This is hard to test directly, but we can at least verify
         // the method doesn't throw and handles errors gracefully
         final page = Page.create(index: 0);
@@ -208,7 +216,7 @@ void main() {
     });
 
     group('Edge Cases', () {
-      testWidgets('should handle very small dimensions', (tester) async {
+      testGenerate('should handle very small dimensions', () async {
         final page = Page.create(index: 0);
 
         final thumbnail = await ThumbnailGenerator.generate(
@@ -220,7 +228,7 @@ void main() {
         expect(thumbnail, isNotNull);
       });
 
-      testWidgets('should handle very large dimensions', (tester) async {
+      testGenerate('should handle very large dimensions', () async {
         final page = Page.create(index: 0);
 
         final thumbnail = await ThumbnailGenerator.generate(
@@ -232,8 +240,8 @@ void main() {
         expect(thumbnail, isNotNull);
       });
 
-      testWidgets('should handle page with single point stroke',
-          (tester) async {
+      testGenerate('should handle page with single point stroke',
+          () async {
         final stroke = Stroke.create(
           points: [DrawingPoint(x: 50, y: 50)],
           style: StrokeStyle.pen(),
@@ -245,7 +253,7 @@ void main() {
         expect(thumbnail, isNotNull);
       });
 
-      testWidgets('should handle page with many strokes', (tester) async {
+      testGenerate('should handle page with many strokes', () async {
         var page = Page.create(index: 0);
 
         // Add 100 strokes
