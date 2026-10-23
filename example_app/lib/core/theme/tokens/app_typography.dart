@@ -1,25 +1,24 @@
 /// ElyaNotes Design System - Typography Tokens
 ///
-/// Plus Jakarta Sans: Display, Headline, Title Large (branding/headings)
+/// Source Serif 4: Display, Headline, Title Large (titles, notebook names)
 /// Inter: Title Medium/Small, Body, Label (okuma/UI)
 ///
 /// Onay: 3 Mart 2026
 library;
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 /// Uygulama tipografi sistemi.
 ///
-/// M3 type scale'i Plus Jakarta Sans + Inter ile yapılandırır.
+/// M3 type scale'i Source Serif 4 + Inter ile yapılandırır.
 /// [create] ile tam TextTheme üretir (ThemeData için).
 /// Convenience getter'lar widget'lar içinde doğrudan kullanılabilir.
 abstract class AppTypography {
   /// Heading font ailesi
-  static String get headingFontFamily => 'Plus Jakarta Sans';
+  static const String headingFontFamily = 'SourceSerif4';
 
   /// Body font ailesi
-  static String get bodyFontFamily => 'Inter';
+  static const String bodyFontFamily = 'Inter';
 
   // ══════════════════════════════════════════════════════════════════════════
   // FULL TEXTTHEME BUILDER — ThemeData'da kullanılır
@@ -31,13 +30,13 @@ abstract class AppTypography {
         ? ThemeData.light().textTheme
         : ThemeData.dark().textTheme;
 
-    final interTheme = GoogleFonts.interTextTheme(base);
+    final interTheme = base.apply(fontFamily: bodyFontFamily);
 
     return interTheme.copyWith(
       displayLarge: displayLarge,
       displayMedium: displayMedium,
-      displaySmall: GoogleFonts.plusJakartaSans(
-        textStyle: base.displaySmall,
+      displaySmall: (base.displaySmall ?? const TextStyle()).copyWith(
+        fontFamily: headingFontFamily,
         fontWeight: FontWeight.w400,
       ),
       headlineLarge: headlineLarge,
@@ -45,8 +44,8 @@ abstract class AppTypography {
       headlineSmall: headlineSmall,
       titleLarge: titleLarge,
       titleMedium: titleMedium,
-      titleSmall: GoogleFonts.inter(
-        textStyle: base.titleSmall,
+      titleSmall: (base.titleSmall ?? const TextStyle()).copyWith(
+        fontFamily: bodyFontFamily,
         fontWeight: FontWeight.w500,
         letterSpacing: 0.1,
       ),
@@ -55,8 +54,8 @@ abstract class AppTypography {
       bodySmall: caption,
       labelLarge: labelLarge,
       labelMedium: labelMedium,
-      labelSmall: GoogleFonts.inter(
-        textStyle: base.labelSmall,
+      labelSmall: (base.labelSmall ?? const TextStyle()).copyWith(
+        fontFamily: bodyFontFamily,
         fontWeight: FontWeight.w500,
         letterSpacing: 0.5,
       ),
@@ -64,11 +63,12 @@ abstract class AppTypography {
   }
 
   // ══════════════════════════════════════════════════════════════════════════
-  // DISPLAY — Plus Jakarta Sans
+  // DISPLAY — Source Serif 4
   // ══════════════════════════════════════════════════════════════════════════
 
   /// 32dp - En büyük başlık
-  static TextStyle get displayLarge => GoogleFonts.plusJakartaSans(
+  static TextStyle get displayLarge => const TextStyle(
+        fontFamily: headingFontFamily,
         fontSize: 32,
         fontWeight: FontWeight.w400,
         height: 1.25,
@@ -76,50 +76,56 @@ abstract class AppTypography {
       );
 
   /// 28dp - Büyük display metni
-  static TextStyle get displayMedium => GoogleFonts.plusJakartaSans(
+  static TextStyle get displayMedium => const TextStyle(
+        fontFamily: headingFontFamily,
         fontSize: 28,
         fontWeight: FontWeight.w400,
         height: 1.29,
       );
 
   // ══════════════════════════════════════════════════════════════════════════
-  // HEADLINE — Plus Jakarta Sans
+  // HEADLINE — Source Serif 4
   // ══════════════════════════════════════════════════════════════════════════
 
   /// 24dp - Ekran başlığı
-  static TextStyle get headlineLarge => GoogleFonts.plusJakartaSans(
+  static TextStyle get headlineLarge => const TextStyle(
+        fontFamily: headingFontFamily,
         fontSize: 24,
         fontWeight: FontWeight.w600,
         height: 1.33,
       );
 
   /// 20dp - Alt ekran başlığı
-  static TextStyle get headlineMedium => GoogleFonts.plusJakartaSans(
+  static TextStyle get headlineMedium => const TextStyle(
+        fontFamily: headingFontFamily,
         fontSize: 20,
         fontWeight: FontWeight.w600,
         height: 1.4,
       );
 
   /// 18dp - Küçük başlık
-  static TextStyle get headlineSmall => GoogleFonts.plusJakartaSans(
+  static TextStyle get headlineSmall => const TextStyle(
+        fontFamily: headingFontFamily,
         fontSize: 18,
         fontWeight: FontWeight.w600,
         height: 1.44,
       );
 
   // ══════════════════════════════════════════════════════════════════════════
-  // TITLE — titleLarge: Plus Jakarta Sans, titleMedium: Inter
+  // TITLE — titleLarge: Source Serif 4, titleMedium: Inter
   // ══════════════════════════════════════════════════════════════════════════
 
   /// 16dp - Card/Liste başlığı
-  static TextStyle get titleLarge => GoogleFonts.plusJakartaSans(
+  static TextStyle get titleLarge => const TextStyle(
+        fontFamily: headingFontFamily,
         fontSize: 16,
         fontWeight: FontWeight.w600,
         height: 1.5,
       );
 
   /// 14dp - Küçük başlık
-  static TextStyle get titleMedium => GoogleFonts.inter(
+  static TextStyle get titleMedium => const TextStyle(
+        fontFamily: bodyFontFamily,
         fontSize: 14,
         fontWeight: FontWeight.w500,
         height: 1.43,
@@ -131,7 +137,8 @@ abstract class AppTypography {
   // ══════════════════════════════════════════════════════════════════════════
 
   /// 16dp - Büyük body metni
-  static TextStyle get bodyLarge => GoogleFonts.inter(
+  static TextStyle get bodyLarge => const TextStyle(
+        fontFamily: bodyFontFamily,
         fontSize: 16,
         fontWeight: FontWeight.normal,
         height: 1.5,
@@ -139,7 +146,8 @@ abstract class AppTypography {
       );
 
   /// 14dp - Standart body metni
-  static TextStyle get bodyMedium => GoogleFonts.inter(
+  static TextStyle get bodyMedium => const TextStyle(
+        fontFamily: bodyFontFamily,
         fontSize: 14,
         fontWeight: FontWeight.normal,
         height: 1.43,
@@ -151,7 +159,8 @@ abstract class AppTypography {
   // ══════════════════════════════════════════════════════════════════════════
 
   /// 14dp - Buton metni, form label
-  static TextStyle get labelLarge => GoogleFonts.inter(
+  static TextStyle get labelLarge => const TextStyle(
+        fontFamily: bodyFontFamily,
         fontSize: 14,
         fontWeight: FontWeight.w500,
         height: 1.43,
@@ -159,7 +168,8 @@ abstract class AppTypography {
       );
 
   /// 12dp - Küçük label
-  static TextStyle get labelMedium => GoogleFonts.inter(
+  static TextStyle get labelMedium => const TextStyle(
+        fontFamily: bodyFontFamily,
         fontSize: 12,
         fontWeight: FontWeight.w500,
         height: 1.33,
@@ -171,7 +181,8 @@ abstract class AppTypography {
   // ══════════════════════════════════════════════════════════════════════════
 
   /// 12dp - Caption, yardımcı metin, tarih/saat
-  static TextStyle get caption => GoogleFonts.inter(
+  static TextStyle get caption => const TextStyle(
+        fontFamily: bodyFontFamily,
         fontSize: 12,
         fontWeight: FontWeight.normal,
         height: 1.33,
@@ -184,7 +195,8 @@ abstract class AppTypography {
 
   /// Logo/branding için özel stil
   static TextStyle logo({double fontSize = 24, Color? color}) {
-    return GoogleFonts.plusJakartaSans(
+    return TextStyle(
+        fontFamily: headingFontFamily,
       fontSize: fontSize,
       fontWeight: FontWeight.w800,
       letterSpacing: 1.5,
@@ -194,7 +206,8 @@ abstract class AppTypography {
 
   /// Not başlığı için özel stil (editor içinde)
   static TextStyle noteTitle({Color? color}) {
-    return GoogleFonts.plusJakartaSans(
+    return TextStyle(
+        fontFamily: headingFontFamily,
       fontSize: 28,
       fontWeight: FontWeight.w600,
       height: 1.29,
