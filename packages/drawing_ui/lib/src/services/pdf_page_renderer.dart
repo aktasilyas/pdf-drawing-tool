@@ -63,7 +63,8 @@ class PDFRenderOptions {
           quality == other.quality;
 
   @override
-  int get hashCode => Object.hash(zoom, devicePixelRatio, backgroundColor, quality);
+  int get hashCode =>
+      Object.hash(zoom, devicePixelRatio, backgroundColor, quality);
 }
 
 /// Service for rendering PDF pages with zoom support.

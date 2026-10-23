@@ -135,7 +135,8 @@ class DocumentNotifier extends StateNotifier<DrawingDocument> {
     final layers = state.layers;
     if (index < 0 || index >= layers.length) return;
     final layer = layers[index];
-    state = state.updateLayer(index, layer.copyWith(isVisible: !layer.isVisible));
+    state =
+        state.updateLayer(index, layer.copyWith(isVisible: !layer.isVisible));
   }
 
   /// Toggle layer locked state.
@@ -246,16 +247,16 @@ class DocumentNotifier extends StateNotifier<DrawingDocument> {
   void updatePageBackground(String pageId, PageBackground background) {
     final pages = state.pages;
     final pageIndex = pages.indexWhere((p) => p.id == pageId);
-    
+
     if (pageIndex == -1) {
       debugPrint('WARNING: Page not found: $pageId');
       return;
     }
-    
+
     final updatedPage = pages[pageIndex].copyWith(background: background);
     final updatedPages = List<Page>.from(pages);
     updatedPages[pageIndex] = updatedPage;
-    
+
     state = state.copyWith(pages: updatedPages);
   }
 

@@ -79,7 +79,8 @@ class SettingsTile extends StatelessWidget {
                     const SizedBox(height: AppSpacing.xxs),
                     Text(
                       subtitle!,
-                      style: AppTypography.caption.copyWith(color: subtitleColor),
+                      style:
+                          AppTypography.caption.copyWith(color: subtitleColor),
                     ),
                   ],
                 ],

@@ -166,15 +166,11 @@ class VectorPDFRenderer {
         final mt2 = mt * mt;
         final mt3 = mt2 * mt;
 
-        final x = mt3 * p1.x +
-            3 * mt2 * t * cp1x +
-            3 * mt * t2 * cp2x +
-            t3 * p2.x;
+        final x =
+            mt3 * p1.x + 3 * mt2 * t * cp1x + 3 * mt * t2 * cp2x + t3 * p2.x;
 
-        final y = mt3 * p1.y +
-            3 * mt2 * t * cp1y +
-            3 * mt * t2 * cp2y +
-            t3 * p2.y;
+        final y =
+            mt3 * p1.y + 3 * mt2 * t * cp1y + 3 * mt * t2 * cp2y + t3 * p2.y;
 
         smoothed.add(DrawingPoint(x: x, y: y));
       }
@@ -274,14 +270,12 @@ class VectorPDFRenderer {
     if (dx == 0 && dy == 0) {
       // Line is a point
       return math.sqrt(
-        math.pow(point.x - lineStart.x, 2) +
-            math.pow(point.y - lineStart.y, 2),
+        math.pow(point.x - lineStart.x, 2) + math.pow(point.y - lineStart.y, 2),
       );
     }
 
-    final numerator = ((point.x - lineStart.x) * dy -
-            (point.y - lineStart.y) * dx)
-        .abs();
+    final numerator =
+        ((point.x - lineStart.x) * dy - (point.y - lineStart.y) * dx).abs();
     final denominator = math.sqrt(dx * dx + dy * dy);
 
     return numerator / denominator;

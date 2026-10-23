@@ -34,7 +34,8 @@ class CanvasMode {
     this.surroundingAreaColor = 0xFFF5F5F0, // Warm off-white (kirli beyaz)
     this.pageBorderColor = 0x1A000000, // Black 10%
     this.pageBorderWidth = 1.0,
-    this.minZoom = 0.01, // Allow extreme zoom out for large images/PDFs (was 0.25)
+    this.minZoom =
+        0.01, // Allow extreme zoom out for large images/PDFs (was 0.25)
     this.maxZoom = 5.0,
     this.unlimitedPan = false,
   });

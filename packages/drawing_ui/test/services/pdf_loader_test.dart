@@ -7,7 +7,15 @@ void main() {
     late PDFLoader loader;
 
     setUp(() {
-      loader = PDFLoader();
+      // pdfx has no platform implementation under flutter_test, so the
+      // platform openers are replaced with ones that reject like pdfx does
+      // for unparsable data.
+      loader = PDFLoader(
+        openData: (bytes) async =>
+            throw const FormatException('Invalid PDF data'),
+        openFile: (path) async =>
+            throw const FormatException('Invalid PDF data'),
+      );
     });
 
     tearDown(() {
@@ -50,7 +58,7 @@ void main() {
 
       test('should throw on invalid PDF bytes', () async {
         final invalidBytes = Uint8List.fromList([1, 2, 3, 4]);
-        
+
         expect(
           () => loader.loadFromBytes(invalidBytes),
           throwsA(isA<PDFLoaderException>()),
@@ -59,7 +67,7 @@ void main() {
 
       test('should throw on empty bytes', () async {
         final emptyBytes = Uint8List(0);
-        
+
         expect(
           () => loader.loadFromBytes(emptyBytes),
           throwsA(isA<PDFLoaderException>()),
@@ -71,7 +79,7 @@ void main() {
         final corruptedBytes = Uint8List.fromList(
           '%PDF-1.4\n'.codeUnits + [0, 0, 0, 0],
         );
-        
+
         expect(
           () => loader.loadFromBytes(corruptedBytes),
           throwsA(isA<PDFLoaderException>()),
@@ -91,7 +99,7 @@ void main() {
 
       test('should not allow operations after dispose', () {
         loader.dispose();
-        
+
         expect(
           () => loader.loadFromFile('/test.pdf'),
           throwsA(isA<PDFLoaderException>()),
@@ -147,7 +155,7 @@ void main() {
     test('should create with message and cause', () {
       final cause = Exception('Original error');
       final exception = PDFLoaderException('Wrapped error', cause: cause);
-      
+
       expect(exception.message, 'Wrapped error');
       expect(exception.cause, cause);
     });

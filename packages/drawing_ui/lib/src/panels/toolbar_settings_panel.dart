@@ -80,9 +80,9 @@ class _ToolbarSettingsPanelState extends ConsumerState<ToolbarSettingsPanel>
             child: Text(
               'Araç Çubuğu Ayarları',
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontSize: 13,
-                color: cs.onSurface,
-              ),
+                    fontSize: 13,
+                    color: cs.onSurface,
+                  ),
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -107,7 +107,8 @@ class _ToolbarSettingsPanelState extends ConsumerState<ToolbarSettingsPanel>
       controller: _tabController,
       labelColor: cs.primary,
       unselectedLabelColor: cs.onSurfaceVariant,
-      labelStyle: Theme.of(context).textTheme.titleSmall?.copyWith(fontSize: 13),
+      labelStyle:
+          Theme.of(context).textTheme.titleSmall?.copyWith(fontSize: 13),
       unselectedLabelStyle:
           Theme.of(context).textTheme.bodySmall?.copyWith(fontSize: 13),
       indicatorSize: TabBarIndicatorSize.tab,
@@ -143,7 +144,10 @@ class _ToolbarSettingsPanelState extends ConsumerState<ToolbarSettingsPanel>
               Flexible(
                 child: Text(
                   'Araçları sıralayın ve gizleyin',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant),
+                  style: Theme.of(context)
+                      .textTheme
+                      .labelSmall
+                      ?.copyWith(color: cs.onSurfaceVariant),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -174,7 +178,10 @@ class _ToolbarSettingsPanelState extends ConsumerState<ToolbarSettingsPanel>
               Flexible(
                 child: Text(
                   'Ek araçları sıralayın ve gizleyin',
-                  style: Theme.of(context).textTheme.labelSmall?.copyWith(color: cs.onSurfaceVariant),
+                  style: Theme.of(context)
+                      .textTheme
+                      .labelSmall
+                      ?.copyWith(color: cs.onSurfaceVariant),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),

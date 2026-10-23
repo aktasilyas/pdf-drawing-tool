@@ -27,6 +27,19 @@ class PDFLoaderException implements Exception {
 /// Provides methods to load PDFs from file or bytes, extract metadata,
 /// and manage document lifecycle.
 class PDFLoader {
+  /// Creates a loader.
+  ///
+  /// [openData] and [openFile] default to the pdfx platform implementations
+  /// and can be overridden (e.g. in tests where no PDF plugin is available).
+  PDFLoader({
+    Future<PdfDocument> Function(Uint8List bytes)? openData,
+    Future<PdfDocument> Function(String path)? openFile,
+  })  : _openData = openData ?? PdfDocument.openData,
+        _openFile = openFile ?? PdfDocument.openFile;
+
+  final Future<PdfDocument> Function(Uint8List bytes) _openData;
+  final Future<PdfDocument> Function(String path) _openFile;
+
   /// Loaded documents cache.
   final List<PdfDocument> _loadedDocuments = [];
 
@@ -54,9 +67,9 @@ class PDFLoader {
       }
 
       // Load PDF document
-      final document = await PdfDocument.openFile(path);
+      final document = await _openFile(path);
       _loadedDocuments.add(document);
-      
+
       return document;
     } catch (e) {
       if (e is PDFLoaderException) rethrow;
@@ -77,9 +90,9 @@ class PDFLoader {
 
     try {
       // Load PDF document from bytes
-      final document = await PdfDocument.openData(bytes);
+      final document = await _openData(bytes);
       _loadedDocuments.add(document);
-      
+
       return document;
     } catch (e) {
       throw PDFLoaderException('Failed to load PDF from bytes', cause: e);

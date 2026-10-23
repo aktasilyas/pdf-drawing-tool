@@ -126,12 +126,16 @@ class SelectedElementsPainter extends CustomPainter {
     }
 
     final src = Rect.fromLTWH(
-      0, 0,
+      0,
+      0,
       cachedImage.width.toDouble(),
       cachedImage.height.toDouble(),
     );
     final dst = Rect.fromLTWH(
-      element.x, element.y, element.width, element.height,
+      element.x,
+      element.y,
+      element.width,
+      element.height,
     );
     canvas.drawImageRect(cachedImage, src, dst, Paint());
     canvas.restore();

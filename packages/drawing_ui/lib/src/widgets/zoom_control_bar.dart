@@ -142,9 +142,8 @@ class _ZoomControlBarState extends ConsumerState<ZoomControlBar>
         mainAxisSize: MainAxisSize.min,
         children: [
           _BarIconButton(
-            icon: isLocked
-                ? ElyanotesIcons.lockFilled
-                : ElyanotesIcons.lockOpen,
+            icon:
+                isLocked ? ElyanotesIcons.lockFilled : ElyanotesIcons.lockOpen,
             isActive: isLocked,
             onTap: () => _onIconTap(
               () => ref.read(zoomLockedProvider.notifier).state = !isLocked,
@@ -179,9 +178,7 @@ class _ZoomControlBarState extends ConsumerState<ZoomControlBar>
             ),
           ),
           _BarIconButton(
-            icon: isFavorite
-                ? ElyanotesIcons.starFilled
-                : ElyanotesIcons.star,
+            icon: isFavorite ? ElyanotesIcons.starFilled : ElyanotesIcons.star,
             isActive: isFavorite,
             onTap: () => _onIconTap(
               () => ref
@@ -289,9 +286,8 @@ class _BarIconButton extends StatelessWidget {
           child: PhosphorIcon(
             icon,
             size: ElyanotesIcons.actionSize,
-            color: isActive
-                ? Colors.white
-                : Colors.white.withValues(alpha: 0.6),
+            color:
+                isActive ? Colors.white : Colors.white.withValues(alpha: 0.6),
           ),
         ),
       ),

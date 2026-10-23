@@ -115,9 +115,8 @@ class DocumentsSidebar extends ConsumerWidget {
     return Divider(
       height: 0.5,
       thickness: 0.5,
-      color: isDark
-          ? AppColors.outlineVariantDark
-          : AppColors.outlineVariantLight,
+      color:
+          isDark ? AppColors.outlineVariantDark : AppColors.outlineVariantLight,
       indent: 52,
     );
   }

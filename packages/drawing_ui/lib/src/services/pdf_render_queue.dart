@@ -110,7 +110,8 @@ class PdfRenderQueue {
   }
 
   /// Görünen sayfa değiştiğinde çağır
-  void onVisiblePageChanged(int visibleIndex, String pdfFilePath, int totalPages) {
+  void onVisiblePageChanged(
+      int visibleIndex, String pdfFilePath, int totalPages) {
     // Eski prefetch'leri iptal et (visible olmayan ve adjacent olmayan)
     _cancelStaleRequests(visibleIndex);
 
@@ -249,6 +250,5 @@ class PdfRenderQueue {
   bool isInProgress(String cacheKey) => _inProgress.contains(cacheKey);
 
   /// Bir sayfa queue'da mı?
-  bool isQueued(String cacheKey) =>
-      _queue.any((r) => r.cacheKey == cacheKey);
+  bool isQueued(String cacheKey) => _queue.any((r) => r.cacheKey == cacheKey);
 }

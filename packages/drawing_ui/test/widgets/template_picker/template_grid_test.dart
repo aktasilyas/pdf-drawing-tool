@@ -65,7 +65,7 @@ void main() {
       expect(find.byType(TemplateCard), findsNWidgets(testTemplates.length));
     });
 
-    testWidgets('uses 3 columns on phone width', (tester) async {
+    testWidgets('uses 4 columns on phone width', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -81,12 +81,13 @@ void main() {
       );
 
       final gridView = tester.widget<GridView>(find.byType(GridView));
-      final delegate = gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
-      
-      expect(delegate.crossAxisCount, 3);
+      final delegate =
+          gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
+
+      expect(delegate.crossAxisCount, 4);
     });
 
-    testWidgets('uses 5 columns on tablet width', (tester) async {
+    testWidgets('uses 6 columns on tablet width', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -102,9 +103,10 @@ void main() {
       );
 
       final gridView = tester.widget<GridView>(find.byType(GridView));
-      final delegate = gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
-      
-      expect(delegate.crossAxisCount, 5);
+      final delegate =
+          gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
+
+      expect(delegate.crossAxisCount, 6);
     });
 
     testWidgets('uses correct spacing for phone', (tester) async {
@@ -123,10 +125,11 @@ void main() {
       );
 
       final gridView = tester.widget<GridView>(find.byType(GridView));
-      final delegate = gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
-      
-      expect(delegate.crossAxisSpacing, 12.0);
-      expect(delegate.mainAxisSpacing, 12.0);
+      final delegate =
+          gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
+
+      expect(delegate.crossAxisSpacing, 8.0);
+      expect(delegate.mainAxisSpacing, 8.0);
     });
 
     testWidgets('uses correct spacing for tablet', (tester) async {
@@ -145,13 +148,15 @@ void main() {
       );
 
       final gridView = tester.widget<GridView>(find.byType(GridView));
-      final delegate = gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
-      
-      expect(delegate.crossAxisSpacing, 16.0);
-      expect(delegate.mainAxisSpacing, 16.0);
+      final delegate =
+          gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
+
+      expect(delegate.crossAxisSpacing, 8.0);
+      expect(delegate.mainAxisSpacing, 8.0);
     });
 
-    testWidgets('calls onTemplateSelected when template tapped', (tester) async {
+    testWidgets('calls onTemplateSelected when template tapped',
+        (tester) async {
       Template? selectedTemplate;
 
       await tester.pumpWidget(
@@ -188,7 +193,8 @@ void main() {
 
       // Find the selected card by checking for the checkmark icon
       final checkIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.check,
+        (widget) =>
+            widget is PhosphorIcon && widget.icon == ElyanotesIcons.check,
       );
       expect(checkIcon, findsOneWidget);
     });
@@ -207,7 +213,8 @@ void main() {
 
       // Premium template should show lock icon
       final lockIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.lock,
+        (widget) =>
+            widget is PhosphorIcon && widget.icon == ElyanotesIcons.lock,
       );
       expect(lockIcon, findsOneWidget);
     });
@@ -227,7 +234,8 @@ void main() {
 
       // Only first template should be locked
       final lockIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.lock,
+        (widget) =>
+            widget is PhosphorIcon && widget.icon == ElyanotesIcons.lock,
       );
       expect(lockIcon, findsOneWidget);
     });
@@ -263,9 +271,10 @@ void main() {
       );
 
       final gridView = tester.widget<GridView>(find.byType(GridView));
-      final delegate = gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
-      
-      expect(delegate.childAspectRatio, 0.72);
+      final delegate =
+          gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
+
+      expect(delegate.childAspectRatio, 0.68);
     });
 
     testWidgets('has correct aspect ratio for tablet', (tester) async {
@@ -284,9 +293,10 @@ void main() {
       );
 
       final gridView = tester.widget<GridView>(find.byType(GridView));
-      final delegate = gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
-      
-      expect(delegate.childAspectRatio, 0.75);
+      final delegate =
+          gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
+
+      expect(delegate.childAspectRatio, 0.7);
     });
 
     testWidgets('uses LayoutBuilder for responsive design', (tester) async {
@@ -321,8 +331,9 @@ void main() {
       );
 
       var gridView = tester.widget<GridView>(find.byType(GridView));
-      var delegate = gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
-      expect(delegate.crossAxisCount, 3);
+      var delegate =
+          gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
+      expect(delegate.crossAxisCount, 4);
 
       // Change to tablet width
       await tester.pumpWidget(
@@ -340,8 +351,9 @@ void main() {
       );
 
       gridView = tester.widget<GridView>(find.byType(GridView));
-      delegate = gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
-      expect(delegate.crossAxisCount, 5);
+      delegate =
+          gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
+      expect(delegate.crossAxisCount, 6);
     });
 
     testWidgets('renders with many templates', (tester) async {
@@ -385,7 +397,8 @@ void main() {
       );
 
       final checkIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.check,
+        (widget) =>
+            widget is PhosphorIcon && widget.icon == ElyanotesIcons.check,
       );
       expect(checkIcon, findsNothing);
     });

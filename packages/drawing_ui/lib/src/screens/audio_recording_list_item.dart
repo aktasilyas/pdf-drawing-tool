@@ -45,8 +45,8 @@ class AudioRecordingListItem extends ConsumerWidget {
     final isThisPlaying = isThisActive &&
         (playbackState.valueOrNull == AudioPlaybackState.playing ||
             playbackState.valueOrNull == AudioPlaybackState.paused);
-    final isPlaying = isThisActive &&
-        playbackState.valueOrNull == AudioPlaybackState.playing;
+    final isPlaying =
+        isThisActive && playbackState.valueOrNull == AudioPlaybackState.playing;
     final hasFile = recording.filePath.isNotEmpty;
 
     final displayDuration = isThisPlaying && position.valueOrNull != null
@@ -118,9 +118,7 @@ class _PlayButton extends StatelessWidget {
         height: 36,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: enabled
-              ? cs.primaryContainer
-              : cs.surfaceContainerHighest,
+          color: enabled ? cs.primaryContainer : cs.surfaceContainerHighest,
         ),
         child: Center(
           child: PhosphorIcon(
@@ -207,8 +205,8 @@ class _MoreMenu extends StatelessWidget {
           value: 'rename',
           child: Row(
             children: [
-              PhosphorIcon(ElyanotesIcons.editPencil, size: 18,
-                  color: cs.onSurface),
+              PhosphorIcon(ElyanotesIcons.editPencil,
+                  size: 18, color: cs.onSurface),
               const SizedBox(width: 12),
               const Text('Yeniden adlandir'),
             ],
@@ -220,7 +218,8 @@ class _MoreMenu extends StatelessWidget {
             children: [
               PhosphorIcon(ElyanotesIcons.trash, size: 18, color: cs.error),
               const SizedBox(width: 12),
-              Text('Sil', style: textTheme.bodyMedium?.copyWith(color: cs.error)),
+              Text('Sil',
+                  style: textTheme.bodyMedium?.copyWith(color: cs.error)),
             ],
           ),
         ),

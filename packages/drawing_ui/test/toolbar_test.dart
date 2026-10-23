@@ -45,34 +45,60 @@ void main() {
   }
 
   group('ToolBar', () {
-    testWidgets('renders all visible tool buttons', (tester) async {
+    testWidgets('renders nav buttons and tool buttons', (tester) async {
       await tester.pumpWidget(createToolBarWidget());
 
-      // Verify undo/redo buttons exist
-      expect(find.byIcon(ElyanotesIcons.undo), findsOneWidget);
-      expect(find.byIcon(ElyanotesIcons.redo), findsOneWidget);
+      // Nav buttons live inside the single-row toolbar.
+      expect(find.byIcon(ElyanotesIcons.home), findsOneWidget);
+      expect(find.byIcon(ElyanotesIcons.readerMode), findsOneWidget);
+      expect(find.byIcon(ElyanotesIcons.exportIcon), findsOneWidget);
+      expect(find.byIcon(ElyanotesIcons.more), findsOneWidget);
 
-      // Verify config button exists (settings icon)
-      expect(find.byIcon(ElyanotesIcons.settings), findsOneWidget);
+      // Default tool (ballpoint pen group) and eraser are visible.
+      expect(find.byType(ToolButton), findsWidgets);
+      expect(
+        find.byIcon(ElyanotesIcons.iconForTool(ToolType.pixelEraser)),
+        findsOneWidget,
+      );
+
+      // Undo/redo moved to FloatingUndoRedo; settings button was removed.
+      expect(find.byIcon(ElyanotesIcons.undo), findsNothing);
+      expect(find.byIcon(ElyanotesIcons.redo), findsNothing);
+      expect(find.byIcon(ElyanotesIcons.settings), findsNothing);
     });
 
-    testWidgets('undo and redo buttons are disabled by default', (tester) async {
-      await tester.pumpWidget(createToolBarWidget());
+    testWidgets('floating undo and redo buttons are disabled by default',
+        (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
+          ],
+          child: const MaterialApp(
+            home: Scaffold(body: Stack(children: [FloatingUndoRedo()])),
+          ),
+        ),
+      );
 
-      // Both should be disabled (canUndo and canRedo are false by default)
-      final undoIcon = tester.widget<PhosphorIcon>(find.byIcon(ElyanotesIcons.undo));
-      final redoIcon = tester.widget<PhosphorIcon>(find.byIcon(ElyanotesIcons.redo));
+      final scheme =
+          Theme.of(tester.element(find.byType(Scaffold))).colorScheme;
+      final undoIcon =
+          tester.widget<PhosphorIcon>(find.byIcon(ElyanotesIcons.undo));
+      final redoIcon =
+          tester.widget<PhosphorIcon>(find.byIcon(ElyanotesIcons.redo));
 
-      // Icons should have reduced alpha (disabled look)
-      expect(undoIcon.color, isNotNull);
-      expect(redoIcon.color, isNotNull);
+      // canUndo / canRedo are false by default -> reduced alpha (disabled look).
+      final disabled = scheme.onSurface.withValues(alpha: 0.25);
+      expect(undoIcon.color, disabled);
+      expect(redoIcon.color, disabled);
     });
 
     testWidgets('tool selection updates current tool provider', (tester) async {
       await tester.pumpWidget(createToolBarWidget());
 
       // Tap on eraser tool (not grouped, directly visible)
-      await tester.tap(find.byIcon(ElyanotesIcons.iconForTool(ToolType.pixelEraser)));
+      await tester
+          .tap(find.byIcon(ElyanotesIcons.iconForTool(ToolType.pixelEraser)));
       await tester.pump();
 
       // Verify the tool is now selected (would need to verify via provider)
@@ -92,23 +118,24 @@ void main() {
 
       // Verify right action buttons exist (full layout)
       expect(find.byIcon(ElyanotesIcons.readerMode), findsOneWidget);
-      expect(find.byIcon(ElyanotesIcons.gridOn), findsOneWidget);
+      // Add-page is hidden in infinite canvas mode (the default).
+      expect(find.byIcon(ElyanotesIcons.pageAdd), findsNothing);
       expect(find.byIcon(ElyanotesIcons.exportIcon), findsOneWidget);
       expect(find.byIcon(ElyanotesIcons.more), findsOneWidget);
+      // Grid toggle is no longer part of the top bar (moved to page sidebar).
+      expect(find.byIcon(ElyanotesIcons.gridOn), findsNothing);
     });
 
-    testWidgets('grid toggle works', (tester) async {
+    testWidgets('reader mode toggle switches the reader icon', (tester) async {
       await tester.pumpWidget(createTopNavBarWidget());
 
-      // Grid should be on by default
-      expect(find.byIcon(ElyanotesIcons.gridOn), findsOneWidget);
+      expect(find.byIcon(ElyanotesIcons.readerMode), findsOneWidget);
+      expect(find.byIcon(ElyanotesIcons.readerModeActive), findsNothing);
 
-      // Tap to toggle
-      await tester.tap(find.byIcon(ElyanotesIcons.gridOn));
+      await tester.tap(find.byIcon(ElyanotesIcons.readerMode));
       await tester.pump();
 
-      // Grid should now be off
-      expect(find.byIcon(ElyanotesIcons.gridOff), findsOneWidget);
+      expect(find.byIcon(ElyanotesIcons.readerModeActive), findsOneWidget);
     });
 
     testWidgets('document tab is displayed', (tester) async {
@@ -138,10 +165,13 @@ void main() {
 
       // Find the container with selected background
       final container = tester.widget<Container>(
-        find.ancestor(
-          of: find.byIcon(ElyanotesIcons.iconForTool(ToolType.ballpointPen, active: true)),
-          matching: find.byType(Container),
-        ).first,
+        find
+            .ancestor(
+              of: find.byIcon(ElyanotesIcons.iconForTool(ToolType.ballpointPen,
+                  active: true)),
+              matching: find.byType(Container),
+            )
+            .first,
       );
 
       // Verify selected state styling is applied
@@ -166,7 +196,8 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byIcon(ElyanotesIcons.iconForTool(ToolType.brushPen)));
+      await tester
+          .tap(find.byIcon(ElyanotesIcons.iconForTool(ToolType.brushPen)));
       expect(pressed, isTrue);
     });
 
@@ -190,7 +221,8 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byIcon(ElyanotesIcons.iconForTool(ToolType.brushPen, active: true)));
+      await tester.tap(find
+          .byIcon(ElyanotesIcons.iconForTool(ToolType.brushPen, active: true)));
       await tester.pump();
       expect(panelTapped, isTrue);
     });

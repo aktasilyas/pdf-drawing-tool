@@ -109,8 +109,7 @@ void main() {
     });
 
     group('extraData configurations', () {
-      testWidgets('storyboard renders with 16:9 aspect ratio',
-          (tester) async {
+      testWidgets('storyboard renders with 16:9 aspect ratio', (tester) async {
         final painter = TemplatePatternPainter(
           pattern: TemplatePattern.storyboard,
           spacingMm: 0,
@@ -135,8 +134,7 @@ void main() {
         expect(tester.takeException(), isNull);
       });
 
-      testWidgets('storyboard renders with 4:3 aspect ratio',
-          (tester) async {
+      testWidgets('storyboard renders with 4:3 aspect ratio', (tester) async {
         final painter = TemplatePatternPainter(
           pattern: TemplatePattern.storyboard,
           spacingMm: 0,
@@ -161,8 +159,7 @@ void main() {
         expect(tester.takeException(), isNull);
       });
 
-      testWidgets('vocabulary list uses custom column ratios',
-          (tester) async {
+      testWidgets('vocabulary list uses custom column ratios', (tester) async {
         final painter = TemplatePatternPainter(
           pattern: TemplatePattern.vocabularyList,
           spacingMm: 8,
@@ -294,7 +291,8 @@ void main() {
     });
 
     group('grid margin support', () {
-      testWidgets('grid renders with left margin (engineer_pad)', (tester) async {
+      testWidgets('grid renders with left margin (engineer_pad)',
+          (tester) async {
         final painter = TemplatePatternPainter(
           pattern: TemplatePattern.smallGrid,
           spacingMm: 5,
@@ -367,8 +365,7 @@ void main() {
         expect(painter.extraData?['angle'], 55);
       });
 
-      testWidgets('copperplate calligraphy renders zone lines',
-          (tester) async {
+      testWidgets('copperplate calligraphy renders zone lines', (tester) async {
         final painter = TemplatePatternPainter(
           pattern: TemplatePattern.calligraphy,
           spacingMm: 12,

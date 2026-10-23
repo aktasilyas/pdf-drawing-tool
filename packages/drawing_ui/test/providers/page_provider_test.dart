@@ -159,7 +159,9 @@ void main() {
           Page.create(index: 0),
           Page.create(index: 1),
           Page.create(index: 2),
-        ], createdAt: DateTime.now(), updatedAt: DateTime.now(),
+        ],
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
       );
 
       final notifier = container.read(pageManagerProvider.notifier);
@@ -206,9 +208,15 @@ void main() {
     });
 
     test('should dispose properly', () {
-      final notifier = container.read(pageManagerProvider.notifier);
+      // Use a dedicated container: disposing it disposes the notifier, and
+      // StateNotifier throws when disposed twice (tearDown disposes [container]).
+      final localContainer = ProviderContainer();
+      final notifier = localContainer.read(pageManagerProvider.notifier);
+      expect(notifier.mounted, isTrue);
 
-      expect(() => notifier.dispose(), returnsNormally);
+      expect(localContainer.dispose, returnsNormally);
+
+      expect(notifier.mounted, isFalse);
     });
   });
 }

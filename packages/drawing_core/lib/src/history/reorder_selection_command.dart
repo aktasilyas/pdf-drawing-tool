@@ -86,8 +86,10 @@ class ReorderSelectionCommand implements DrawingCommand {
     // Reorder strokes
     if (strokeIds.isNotEmpty) {
       final strokeIdSet = strokeIds.toSet();
-      final selected = layer.strokes.where((s) => strokeIdSet.contains(s.id)).toList();
-      final others = layer.strokes.where((s) => !strokeIdSet.contains(s.id)).toList();
+      final selected =
+          layer.strokes.where((s) => strokeIdSet.contains(s.id)).toList();
+      final others =
+          layer.strokes.where((s) => !strokeIdSet.contains(s.id)).toList();
 
       final reordered = direction == ReorderDirection.bringToFront
           ? [...others, ...selected]
@@ -99,8 +101,10 @@ class ReorderSelectionCommand implements DrawingCommand {
     // Reorder shapes
     if (shapeIds.isNotEmpty) {
       final shapeIdSet = shapeIds.toSet();
-      final selected = layer.shapes.where((s) => shapeIdSet.contains(s.id)).toList();
-      final others = layer.shapes.where((s) => !shapeIdSet.contains(s.id)).toList();
+      final selected =
+          layer.shapes.where((s) => shapeIdSet.contains(s.id)).toList();
+      final others =
+          layer.shapes.where((s) => !shapeIdSet.contains(s.id)).toList();
 
       final reordered = direction == ReorderDirection.bringToFront
           ? [...others, ...selected]
@@ -112,8 +116,10 @@ class ReorderSelectionCommand implements DrawingCommand {
     // Reorder images
     if (imageIds.isNotEmpty) {
       final imageIdSet = imageIds.toSet();
-      final selected = layer.images.where((i) => imageIdSet.contains(i.id)).toList();
-      final others = layer.images.where((i) => !imageIdSet.contains(i.id)).toList();
+      final selected =
+          layer.images.where((i) => imageIdSet.contains(i.id)).toList();
+      final others =
+          layer.images.where((i) => !imageIdSet.contains(i.id)).toList();
 
       final reordered = direction == ReorderDirection.bringToFront
           ? [...others, ...selected]
@@ -125,8 +131,10 @@ class ReorderSelectionCommand implements DrawingCommand {
     // Reorder texts
     if (textIds.isNotEmpty) {
       final textIdSet = textIds.toSet();
-      final selected = layer.texts.where((t) => textIdSet.contains(t.id)).toList();
-      final others = layer.texts.where((t) => !textIdSet.contains(t.id)).toList();
+      final selected =
+          layer.texts.where((t) => textIdSet.contains(t.id)).toList();
+      final others =
+          layer.texts.where((t) => !textIdSet.contains(t.id)).toList();
 
       final reordered = direction == ReorderDirection.bringToFront
           ? [...others, ...selected]
@@ -161,26 +169,30 @@ class ReorderSelectionCommand implements DrawingCommand {
 
     // Restore strokes to original positions using ID-to-index rebuild
     if (_originalStrokeIndices.isNotEmpty) {
-      layer = layer.copyWith(strokes: _restoreOrder<Stroke>(
-        layer.strokes, _originalStrokeIndices, (s) => s.id));
+      layer = layer.copyWith(
+          strokes: _restoreOrder<Stroke>(
+              layer.strokes, _originalStrokeIndices, (s) => s.id));
     }
 
     // Restore shapes to original positions using ID-to-index rebuild
     if (_originalShapeIndices.isNotEmpty) {
-      layer = layer.copyWith(shapes: _restoreOrder<Shape>(
-        layer.shapes, _originalShapeIndices, (s) => s.id));
+      layer = layer.copyWith(
+          shapes: _restoreOrder<Shape>(
+              layer.shapes, _originalShapeIndices, (s) => s.id));
     }
 
     // Restore images to original positions using ID-to-index rebuild
     if (_originalImageIndices.isNotEmpty) {
-      layer = layer.copyWith(images: _restoreOrder<ImageElement>(
-        layer.images, _originalImageIndices, (i) => i.id));
+      layer = layer.copyWith(
+          images: _restoreOrder<ImageElement>(
+              layer.images, _originalImageIndices, (i) => i.id));
     }
 
     // Restore texts to original positions using ID-to-index rebuild
     if (_originalTextIndices.isNotEmpty) {
-      layer = layer.copyWith(texts: _restoreOrder<TextElement>(
-        layer.texts, _originalTextIndices, (t) => t.id));
+      layer = layer.copyWith(
+          texts: _restoreOrder<TextElement>(
+              layer.texts, _originalTextIndices, (t) => t.id));
     }
 
     // Restore elementOrder
@@ -194,7 +206,9 @@ class ReorderSelectionCommand implements DrawingCommand {
   /// Rebuilds [items] so that cached items land at their original indices
   /// and non-cached items fill the remaining slots in their current order.
   List<T> _restoreOrder<T>(
-    List<T> items, Map<String, int> originalIndices, String Function(T) getId,
+    List<T> items,
+    Map<String, int> originalIndices,
+    String Function(T) getId,
   ) {
     final idToItem = {for (final item in items) getId(item): item};
     final result = List<T?>.filled(items.length, null);

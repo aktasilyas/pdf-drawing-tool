@@ -44,8 +44,7 @@ class MenuTile extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Container(
-        constraints:
-            const BoxConstraints(minHeight: AppSpacing.minTouchTarget),
+        constraints: const BoxConstraints(minHeight: AppSpacing.minTouchTarget),
         padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.lg,
           vertical: AppSpacing.md,

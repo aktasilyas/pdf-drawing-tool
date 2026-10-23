@@ -6,8 +6,7 @@ import 'package:example_app/features/documents/documents.dart';
 class MockDocumentLocalDatasource extends Mock
     implements DocumentLocalDatasource {}
 
-class MockFolderLocalDatasource extends Mock
-    implements FolderLocalDatasource {}
+class MockFolderLocalDatasource extends Mock implements FolderLocalDatasource {}
 
 class MockUuid extends Mock implements Uuid {}
 

@@ -74,9 +74,11 @@ class PenSettings {
     };
   }
 
-  factory PenSettings.fromJson(Map<String, dynamic> json, PenSettings defaults) {
+  factory PenSettings.fromJson(
+      Map<String, dynamic> json, PenSettings defaults) {
     return PenSettings(
-      color: json['color'] is int ? Color(json['color'] as int) : defaults.color,
+      color:
+          json['color'] is int ? Color(json['color'] as int) : defaults.color,
       thickness: (json['thickness'] as num?)?.toDouble() ?? defaults.thickness,
       stabilization:
           (json['stabilization'] as num?)?.toDouble() ?? defaults.stabilization,

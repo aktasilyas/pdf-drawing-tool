@@ -65,8 +65,7 @@ class AudioRecordingDropdown extends ConsumerWidget {
       final callback = ref.read(onRecordingBlockedProvider);
       // Capture the navigator's overlay context before closing dropdown.
       // This context survives dropdown disposal.
-      final overlayContext =
-          Navigator.of(context).overlay?.context ?? context;
+      final overlayContext = Navigator.of(context).overlay?.context ?? context;
       onClose();
       if (callback != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {

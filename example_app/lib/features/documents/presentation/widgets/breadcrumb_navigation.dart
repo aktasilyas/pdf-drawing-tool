@@ -66,8 +66,7 @@ class BreadcrumbNavigation extends StatelessWidget {
 
     return Container(
       height: AppSpacing.minTouchTarget,
-      padding: padding ??
-          const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      padding: padding ?? const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Row(
         children: [
           // Back button
@@ -161,9 +160,8 @@ class _Separator extends StatelessWidget {
       child: Icon(
         Icons.chevron_right,
         size: 16,
-        color: isDark
-            ? AppColors.textTertiaryDark
-            : AppColors.textTertiaryLight,
+        color:
+            isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight,
       ),
     );
   }

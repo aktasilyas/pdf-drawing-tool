@@ -31,62 +31,59 @@ void main() {
   }
 
   group('MediumToolbar', () {
-    testWidgets('renders_with_undo_redo_buttons', (tester) async {
+    testWidgets('renders_nav_buttons_without_undo_redo', (tester) async {
       await tester.pumpWidget(
         buildTestWidget(const MediumToolbar(), width: 700),
       );
 
-      expect(find.byIcon(ElyanotesIcons.undo), findsOneWidget);
-      expect(find.byIcon(ElyanotesIcons.redo), findsOneWidget);
+      expect(find.byIcon(ElyanotesIcons.home), findsOneWidget);
+      expect(find.byIcon(ElyanotesIcons.readerMode), findsOneWidget);
+      expect(find.byIcon(ElyanotesIcons.more), findsOneWidget);
+      // Undo/redo live in FloatingUndoRedo, not in the toolbar.
+      expect(find.byIcon(ElyanotesIcons.undo), findsNothing);
+      expect(find.byIcon(ElyanotesIcons.redo), findsNothing);
     });
 
-    testWidgets('shows_settings_button', (tester) async {
+    testWidgets('does_not_show_settings_button', (tester) async {
       await tester.pumpWidget(
         buildTestWidget(const MediumToolbar(), width: 700),
       );
 
-      expect(find.byIcon(ElyanotesIcons.settings), findsOneWidget);
+      expect(find.byIcon(ElyanotesIcons.settings), findsNothing);
     });
 
-    testWidgets('shows_quick_access_toggle_chevron', (tester) async {
+    testWidgets('shows_tool_buttons', (tester) async {
       await tester.pumpWidget(
         buildTestWidget(const MediumToolbar(), width: 700),
       );
 
-      expect(find.byIcon(ElyanotesIcons.caretDown), findsWidgets);
+      expect(find.byType(ToolButton), findsWidgets);
     });
 
-    testWidgets('quick_access_row_toggles_on_chevron_tap', (tester) async {
+    testWidgets('hides_tools_in_reader_mode', (tester) async {
       await tester.pumpWidget(
         buildTestWidget(const MediumToolbar(), width: 700),
       );
-
-      expect(find.byType(QuickAccessRow), findsNothing);
-
-      final chevronIcon = find.byWidgetPredicate(
-        (widget) =>
-            widget is PhosphorIcon &&
-            widget.icon == ElyanotesIcons.caretDown &&
-            widget.size == 20,
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(MediumToolbar)),
       );
-      expect(chevronIcon, findsOneWidget);
-
-      await tester.tap(chevronIcon);
+      container.read(readerModeProvider.notifier).state = true;
       await tester.pump();
 
-      expect(find.byType(QuickAccessRow), findsOneWidget);
-      final expandLessIcon = find.byWidgetPredicate(
-        (widget) =>
-            widget is PhosphorIcon &&
-            widget.icon == ElyanotesIcons.caretUp &&
-            widget.size == 20,
-      );
-      expect(expandLessIcon, findsOneWidget);
+      expect(find.byType(ToolButton), findsNothing);
     });
 
-    testWidgets('shows_overflow_menu_when_more_than_6_tools', (tester) async {
+    testWidgets('no_overflow_menu_when_all_tools_fit', (tester) async {
       await tester.pumpWidget(
-        buildTestWidget(const MediumToolbar(), width: 700),
+        buildTestWidget(const MediumToolbar(), width: 840),
+      );
+
+      expect(find.byType(ToolbarOverflowMenu), findsNothing);
+    });
+
+    testWidgets('shows_overflow_menu_when_tools_do_not_fit', (tester) async {
+      await tester.pumpWidget(
+        buildTestWidget(const MediumToolbar(), width: 450),
       );
 
       expect(find.byType(ToolbarOverflowMenu), findsOneWidget);
@@ -125,15 +122,25 @@ void main() {
       expect(toolButtons.evaluate().length, greaterThan(0));
     });
 
-    testWidgets('shows_overflow_menu_when_needed', (tester) async {
+    testWidgets('no_overflow_menu_when_all_tools_fit', (tester) async {
+      // Laser/shapes/text moved to the top nav, so the rest fit at 400px.
       await tester.pumpWidget(
         buildTestWidget(const CompactToolRow(), width: 400),
+      );
+
+      expect(find.byType(ToolbarOverflowMenu), findsNothing);
+    });
+
+    testWidgets('shows_overflow_menu_when_needed', (tester) async {
+      await tester.pumpWidget(
+        buildTestWidget(const CompactToolRow(), width: 250),
       );
 
       expect(find.byType(ToolbarOverflowMenu), findsOneWidget);
     });
 
-    testWidgets('calls_onPanelRequested_when_tool_tapped_twice', (tester) async {
+    testWidgets('calls_onPanelRequested_when_tool_tapped_twice',
+        (tester) async {
       ToolType? requestedPanel;
 
       await tester.pumpWidget(

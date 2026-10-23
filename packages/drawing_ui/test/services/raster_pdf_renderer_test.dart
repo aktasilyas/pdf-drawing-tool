@@ -112,17 +112,23 @@ void main() {
       });
 
       test('should detect complex page with many points', () {
-        final stroke = Stroke(
-          id: 's1',
-          points: List.generate(
-            10000,
-            (i) => DrawingPoint(x: i.toDouble(), y: 0),
-          ),
-          style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
-          createdAt: DateTime.now(),
-        );
-
-        final page = Page.create(index: 0).addStroke(stroke);
+        // Score = (strokes/1000 + points/50000) / 2, so points alone cannot
+        // exceed 0.5; combine many points with a moderate stroke count:
+        // (0.1 + 1.0) / 2 = 0.55.
+        var page = Page.create(index: 0);
+        for (int i = 0; i < 100; i++) {
+          page = page.addStroke(
+            Stroke(
+              id: 's$i',
+              points: List.generate(
+                1000,
+                (j) => DrawingPoint(x: j.toDouble(), y: 0),
+              ),
+              style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
+              createdAt: DateTime.now(),
+            ),
+          );
+        }
 
         expect(renderer.isPageComplex(page), true);
       });
@@ -342,7 +348,8 @@ void main() {
       test('should calculate total point count', () {
         final stroke = Stroke(
           id: 's1',
-          points: List.generate(100, (i) => DrawingPoint(x: i.toDouble(), y: 0)),
+          points:
+              List.generate(100, (i) => DrawingPoint(x: i.toDouble(), y: 0)),
           style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
           createdAt: DateTime.now(),
         );
@@ -356,7 +363,9 @@ void main() {
       test('should calculate complexity score', () {
         var page = Page.create(index: 0);
 
-        for (int i = 0; i < 100; i++) {
+        // 500 strokes x 100 points = 50000 points:
+        // (0.5 + 1.0) / 2 = 0.75.
+        for (int i = 0; i < 500; i++) {
           page = page.addStroke(
             Stroke(
               id: 's$i',
@@ -371,7 +380,7 @@ void main() {
         }
 
         final metrics = renderer.calculateComplexityMetrics(page);
-        expect(metrics.complexityScore, greaterThan(0.5));
+        expect(metrics.complexityScore, closeTo(0.75, 1e-9));
       });
     });
 

@@ -72,7 +72,9 @@ void main() {
             Page.create(index: 0),
             Page.create(index: 1),
             Page.create(index: 2),
-          ], createdAt: DateTime.now(), updatedAt: DateTime.now(),
+          ],
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
         );
 
         final json = doc.toJson();
@@ -134,7 +136,7 @@ void main() {
 
         budget.allocate('page1', 1 * 1024 * 1024); // 1MB
         // Note: MemoryBudget doesn't expose usedBytes/availableBytes getters
-        
+
         budget.deallocate('page1');
         // Verify allocation/deallocation works
       });
@@ -146,9 +148,12 @@ void main() {
         budget.allocate('page2', 2 * 1024 * 1024);
 
         final stats = budget.getStatistics();
-        expect(stats['totalBytes'], 10 * 1024 * 1024);
-        expect(stats['usedBytes'], 5 * 1024 * 1024);
+        expect(stats['maxBytes'], 10 * 1024 * 1024);
+        expect(stats['currentBytes'], 5 * 1024 * 1024);
+        expect(stats['remainingBytes'], 5 * 1024 * 1024);
         expect(stats['usagePercentage'], 50.0);
+        expect(stats['allocationCount'], 2);
+        expect(stats['isOverBudget'], isFalse);
       });
     });
 
@@ -192,7 +197,9 @@ void main() {
         final doc = DrawingDocument.multiPage(
           id: 'd1',
           title: 'Workflow Test',
-          pages: [Page.create(index: 0)], createdAt: DateTime.now(), updatedAt: DateTime.now(),
+          pages: [Page.create(index: 0)],
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
         );
 
         expect(doc.pages.length, 1);

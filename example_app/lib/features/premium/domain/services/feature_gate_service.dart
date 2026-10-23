@@ -124,14 +124,12 @@ class FeatureGateService {
       GatedFeature.audioRecording =>
         'Ücretsiz planda ses kaydı 5 dakika ile sınırlıdır. '
             'Premium ile sınırsız kayıt yapın.',
-      GatedFeature.aiChat =>
-        "Günlük AI mesaj limitinize ulaştınız. "
-            "Premium'a geçerek daha fazla soru sorun.",
+      GatedFeature.aiChat => "Günlük AI mesaj limitinize ulaştınız. "
+          "Premium'a geçerek daha fazla soru sorun.",
       GatedFeature.exportWithoutWatermark =>
         'Filigransız dışa aktarım Premium özelliğidir.',
-      GatedFeature.cloudSync =>
-        'Bulut senkronizasyonu Premium özelliğidir. '
-            'Notlarınız tüm cihazlarınızda olsun.',
+      GatedFeature.cloudSync => 'Bulut senkronizasyonu Premium özelliğidir. '
+          'Notlarınız tüm cihazlarınızda olsun.',
       GatedFeature.advancedPdfAnnotation =>
         'Gelişmiş PDF araçları Premium özelliğidir.',
       GatedFeature.aiTranscription =>

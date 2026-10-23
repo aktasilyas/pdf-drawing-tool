@@ -8,4 +8,5 @@ typedef PageTrashCallback = Future<void> Function(int pageIndex, Page page);
 
 /// Provider that the host app sets to enable page soft-delete.
 /// When null, page deletion falls back to hard-delete (backward compat).
-final pageTrashCallbackProvider = StateProvider<PageTrashCallback?>((_) => null);
+final pageTrashCallbackProvider =
+    StateProvider<PageTrashCallback?>((_) => null);

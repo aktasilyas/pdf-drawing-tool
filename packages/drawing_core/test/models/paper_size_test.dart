@@ -38,7 +38,8 @@ void main() {
       test('widescreen is landscape by default', () {
         expect(PaperSize.widescreen.widthMm, 297);
         expect(PaperSize.widescreen.heightMm, 167);
-        expect(PaperSize.widescreen.widthMm > PaperSize.widescreen.heightMm, true);
+        expect(
+            PaperSize.widescreen.widthMm > PaperSize.widescreen.heightMm, true);
       });
     });
 
@@ -110,7 +111,8 @@ void main() {
         expect(PaperSize.fromPreset(PaperSizePreset.letter), PaperSize.letter);
         expect(PaperSize.fromPreset(PaperSizePreset.legal), PaperSize.legal);
         expect(PaperSize.fromPreset(PaperSizePreset.square), PaperSize.square);
-        expect(PaperSize.fromPreset(PaperSizePreset.widescreen), PaperSize.widescreen);
+        expect(PaperSize.fromPreset(PaperSizePreset.widescreen),
+            PaperSize.widescreen);
       });
 
       test('returns a4 for custom preset', () {

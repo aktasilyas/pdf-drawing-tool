@@ -79,7 +79,8 @@ class PaywallScreen extends ConsumerWidget {
     );
   }
 
-  void _purchaseProduct(BuildContext context, WidgetRef ref, Product product) async {
+  void _purchaseProduct(
+      BuildContext context, WidgetRef ref, Product product) async {
     final result = await ref.read(purchaseUseCaseProvider).call(product.id);
 
     result.fold(
@@ -108,8 +109,14 @@ class PaywallScreen extends ConsumerWidget {
   Widget _buildFeatureComparison(WidgetRef ref) {
     final rows = [
       {'label': 'Cloud Sync', 'entitlement': Entitlements.cloudSync},
-      {'label': 'Unlimited Documents', 'entitlement': Entitlements.unlimitedDocuments},
-      {'label': 'Premium Templates', 'entitlement': Entitlements.premiumTemplates},
+      {
+        'label': 'Unlimited Documents',
+        'entitlement': Entitlements.unlimitedDocuments
+      },
+      {
+        'label': 'Premium Templates',
+        'entitlement': Entitlements.premiumTemplates
+      },
       {'label': 'AI Features', 'entitlement': Entitlements.aiFeatures},
       {'label': 'Advanced Export', 'entitlement': Entitlements.advancedExport},
     ];
@@ -122,7 +129,8 @@ class PaywallScreen extends ConsumerWidget {
           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
-        ...rows.map((row) => _buildFeatureRow(ref, row['label']!, row['entitlement']!)),
+        ...rows.map(
+            (row) => _buildFeatureRow(ref, row['label']!, row['entitlement']!)),
       ],
     );
   }
@@ -133,7 +141,8 @@ class PaywallScreen extends ConsumerWidget {
     return status.when(
       data: (hasAccess) => ListTile(
         contentPadding: EdgeInsets.zero,
-        leading: Icon(hasAccess ? Icons.check_circle : Icons.lock, color: hasAccess ? Colors.green : Colors.grey),
+        leading: Icon(hasAccess ? Icons.check_circle : Icons.lock,
+            color: hasAccess ? Colors.green : Colors.grey),
         title: Text(label),
       ),
       loading: () => const ListTile(

@@ -26,8 +26,11 @@ class ShapesSettingsPanel extends ConsumerWidget {
           Row(
             children: [
               Expanded(
-                child: Text('Şekil', style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  fontSize: 15, fontWeight: FontWeight.w600, color: cs.onSurface)),
+                child: Text('Şekil',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: cs.onSurface)),
               ),
               PanelCloseButton(
                 onTap: () =>
@@ -38,30 +41,34 @@ class ShapesSettingsPanel extends ConsumerWidget {
           const SizedBox(height: 10),
           _ShapeGrid(
             selectedShape: settings.selectedShape,
-            onShapeSelected: (s) => ref.read(
-                shapesSettingsProvider.notifier).setSelectedShape(s),
+            onShapeSelected: (s) =>
+                ref.read(shapesSettingsProvider.notifier).setSelectedShape(s),
           ),
           const SizedBox(height: 12),
           GoodNotesSlider(
-            label: 'Kontur Kalınlığı', activeColor: cs.primary,
-            value: settings.strokeThickness, min: 0.1, max: 10.0,
+            label: 'Kontur Kalınlığı',
+            activeColor: cs.primary,
+            value: settings.strokeThickness,
+            min: 0.1,
+            max: 10.0,
             displayValue: '${settings.strokeThickness.toStringAsFixed(1)}mm',
-            onChanged: (v) => ref.read(
-                shapesSettingsProvider.notifier).setStrokeThickness(v),
+            onChanged: (v) =>
+                ref.read(shapesSettingsProvider.notifier).setStrokeThickness(v),
           ),
           const SizedBox(height: 10),
           _StripLabel(label: 'Kontur Rengi'),
           const SizedBox(height: 6),
           ColorPickerStrip(
             selectedColor: settings.strokeColor,
-            onColorSelected: (c) => ref.read(
-                shapesSettingsProvider.notifier).setStrokeColor(c),
+            onColorSelected: (c) =>
+                ref.read(shapesSettingsProvider.notifier).setStrokeColor(c),
           ),
           const SizedBox(height: 8),
           CompactToggle(
-            label: 'Şekil dolgusu', value: settings.fillEnabled,
-            onChanged: (v) => ref.read(
-                shapesSettingsProvider.notifier).setFillEnabled(v),
+            label: 'Şekil dolgusu',
+            value: settings.fillEnabled,
+            onChanged: (v) =>
+                ref.read(shapesSettingsProvider.notifier).setFillEnabled(v),
           ),
           if (settings.fillEnabled) ...[
             const SizedBox(height: 8),
@@ -69,8 +76,8 @@ class ShapesSettingsPanel extends ConsumerWidget {
             const SizedBox(height: 6),
             ColorPickerStrip(
               selectedColor: settings.fillColor,
-              onColorSelected: (c) => ref.read(
-                  shapesSettingsProvider.notifier).setFillColor(c),
+              onColorSelected: (c) =>
+                  ref.read(shapesSettingsProvider.notifier).setFillColor(c),
             ),
           ],
         ],
@@ -87,15 +94,19 @@ class _StripLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Text(label, style: Theme.of(context).textTheme.labelSmall?.copyWith(fontWeight: FontWeight.w600,
-        color: cs.onSurfaceVariant, letterSpacing: 0.5));
+    return Text(label,
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: cs.onSurfaceVariant,
+            letterSpacing: 0.5));
   }
 }
 
 /// Grid of available shapes.
 class _ShapeGrid extends StatelessWidget {
   const _ShapeGrid({
-    required this.selectedShape, required this.onShapeSelected,
+    required this.selectedShape,
+    required this.onShapeSelected,
   });
   final ShapeType selectedShape;
   final ValueChanged<ShapeType> onShapeSelected;
@@ -105,11 +116,16 @@ class _ShapeGrid extends StatelessWidget {
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 5, mainAxisSpacing: 6, crossAxisSpacing: 6,
-      children: ShapeType.values.map((shape) => _ShapeOption(
-        shape: shape, isSelected: shape == selectedShape,
-        onTap: () => onShapeSelected(shape),
-      )).toList(),
+      crossAxisCount: 5,
+      mainAxisSpacing: 6,
+      crossAxisSpacing: 6,
+      children: ShapeType.values
+          .map((shape) => _ShapeOption(
+                shape: shape,
+                isSelected: shape == selectedShape,
+                onTap: () => onShapeSelected(shape),
+              ))
+          .toList(),
     );
   }
 }
@@ -117,7 +133,9 @@ class _ShapeGrid extends StatelessWidget {
 /// A single shape option in the grid.
 class _ShapeOption extends StatelessWidget {
   const _ShapeOption({
-    required this.shape, required this.isSelected, required this.onTap,
+    required this.shape,
+    required this.isSelected,
+    required this.onTap,
   });
   final ShapeType shape;
   final bool isSelected;
@@ -131,20 +149,21 @@ class _ShapeOption extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: isSelected ? cs.primaryContainer
+          color: isSelected
+              ? cs.primaryContainer
               : (dk ? cs.surfaceContainerHigh : cs.surfaceContainerHighest),
           borderRadius: BorderRadius.circular(4),
           border: Border.all(
-            color: isSelected ? cs.primary
-                : cs.outline.withValues(alpha: 0.3),
+            color: isSelected ? cs.primary : cs.outline.withValues(alpha: 0.3),
             width: isSelected ? 1.5 : 1,
           ),
         ),
-        child: Center(child: CustomPaint(
+        child: Center(
+            child: CustomPaint(
           size: const Size(18, 18),
           painter: _ShapeIconPainter(
-            shape: shape,
-            color: isSelected ? cs.primary : cs.onSurfaceVariant),
+              shape: shape,
+              color: isSelected ? cs.primary : cs.onSurfaceVariant),
         )),
       ),
     );
@@ -160,8 +179,10 @@ class _ShapeIconPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = color..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5..strokeCap = StrokeCap.round;
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5
+      ..strokeCap = StrokeCap.round;
     final cx = size.width / 2, cy = size.height / 2;
     final w = size.width, h = size.height;
 
@@ -177,12 +198,19 @@ class _ShapeIconPainter extends CustomPainter {
       case ShapeType.ellipse:
         canvas.drawOval(Rect.fromLTRB(3, 4, w - 3, h - 4), paint);
       case ShapeType.triangle:
-        final p = Path()..moveTo(w / 2, 3)..lineTo(3, h - 3)
-            ..lineTo(w - 3, h - 3)..close();
+        final p = Path()
+          ..moveTo(w / 2, 3)
+          ..lineTo(3, h - 3)
+          ..lineTo(w - 3, h - 3)
+          ..close();
         canvas.drawPath(p, paint);
       case ShapeType.diamond:
-        final p = Path()..moveTo(w / 2, 3)..lineTo(w - 3, cy)
-            ..lineTo(w / 2, h - 3)..lineTo(3, cy)..close();
+        final p = Path()
+          ..moveTo(w / 2, 3)
+          ..lineTo(w - 3, cy)
+          ..lineTo(w / 2, h - 3)
+          ..lineTo(3, cy)
+          ..close();
         canvas.drawPath(p, paint);
       case ShapeType.star:
         _drawStar(canvas, Offset(cx, cy), 8, paint);

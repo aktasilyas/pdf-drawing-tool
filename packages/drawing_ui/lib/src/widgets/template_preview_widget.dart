@@ -26,10 +26,11 @@ class TemplatePreviewWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     // Override varsa onu kullan, yoksa template'in default renklerini kullan
     final lineColor = lineColorOverride ?? Color(template.defaultLineColor);
-    final backgroundColor = backgroundColorOverride ?? Color(template.defaultBackgroundColor);
+    final backgroundColor =
+        backgroundColorOverride ?? Color(template.defaultBackgroundColor);
     final borderColor = colorScheme.outline.withValues(alpha: 0.3);
 
     return Container(

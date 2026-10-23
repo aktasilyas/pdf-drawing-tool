@@ -37,7 +37,7 @@ void main() {
         const options = PDFExportOptions();
 
         expect(options.includeBackground, true);
-        expect(options.exportMode, PDFExportMode.raster);
+        expect(options.exportMode, PDFExportMode.hybrid);
         expect(options.quality, PDFExportQuality.medium);
       });
 

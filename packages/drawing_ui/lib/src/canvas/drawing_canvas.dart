@@ -487,11 +487,15 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            PhosphorIcon(ElyanotesIcons.pdfFile, size: 40, color: colorScheme.outlineVariant),
+            PhosphorIcon(ElyanotesIcons.pdfFile,
+                size: 40, color: colorScheme.outlineVariant),
             const SizedBox(height: 8),
             Text(
               'PDF Sayfası',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodySmall
+                  ?.copyWith(color: colorScheme.onSurfaceVariant),
             ),
           ],
         ),
@@ -524,16 +528,20 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              PhosphorIcon(ElyanotesIcons.warningCircle, size: 40, color: colorScheme.error),
+              PhosphorIcon(ElyanotesIcons.warningCircle,
+                  size: 40, color: colorScheme.error),
               const SizedBox(height: 8),
               Text(
                 'PDF Yüklenemedi',
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(fontWeight: FontWeight.bold, color: colorScheme.onErrorContainer),
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onErrorContainer),
               ),
               const SizedBox(height: 4),
               Text(
                 error,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(fontSize: 10, color: colorScheme.onErrorContainer),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    fontSize: 10, color: colorScheme.onErrorContainer),
                 textAlign: TextAlign.center,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
@@ -651,7 +659,8 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
   @override
   VoidCallback? get onPageSwipeDragBegin => widget.onPageSwipeDragBegin;
   @override
-  ValueChanged<double>? get onPageSwipeDragUpdate => widget.onPageSwipeDragUpdate;
+  ValueChanged<double>? get onPageSwipeDragUpdate =>
+      widget.onPageSwipeDragUpdate;
   @override
   ValueChanged<double>? get onPageSwipeDragEnd => widget.onPageSwipeDragEnd;
 
@@ -667,13 +676,12 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
     // Watch providers
     final allLayers = ref.watch(allLayersProvider);
     final activeLayerIndex = ref.watch(activeLayerIndexProvider);
-    final activeLayerValid = activeLayerIndex >= 0 &&
-        activeLayerIndex < allLayers.length;
-    final activeLayerVisible = activeLayerValid &&
-        allLayers[activeLayerIndex].isVisible;
-    final activeLayerOpacity = activeLayerValid
-        ? allLayers[activeLayerIndex].opacity
-        : 1.0;
+    final activeLayerValid =
+        activeLayerIndex >= 0 && activeLayerIndex < allLayers.length;
+    final activeLayerVisible =
+        activeLayerValid && allLayers[activeLayerIndex].isVisible;
+    final activeLayerOpacity =
+        activeLayerValid ? allLayers[activeLayerIndex].opacity : 1.0;
     final strokes = ref.watch(activeLayerStrokesProvider);
     final shapes = ref.watch(activeLayerShapesProvider);
     final texts = ref.watch(activeLayerTextsProvider);
@@ -745,18 +753,14 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
       excludedImageIds = selection.selectedImageIds.toSet();
       excludedTextIds = selection.selectedTextIds.toSet();
 
-      selectedStrokes = strokes
-          .where((s) => excludedStrokeIds.contains(s.id))
-          .toList();
-      selectedShapes = shapes
-          .where((s) => excludedShapeIds.contains(s.id))
-          .toList();
-      selectedImages = images
-          .where((i) => excludedImageIds.contains(i.id))
-          .toList();
-      selectedTexts = texts
-          .where((t) => excludedTextIds.contains(t.id))
-          .toList();
+      selectedStrokes =
+          strokes.where((s) => excludedStrokeIds.contains(s.id)).toList();
+      selectedShapes =
+          shapes.where((s) => excludedShapeIds.contains(s.id)).toList();
+      selectedImages =
+          images.where((i) => excludedImageIds.contains(i.id)).toList();
+      selectedTexts =
+          texts.where((t) => excludedTextIds.contains(t.id)).toList();
     }
 
     // Shape preview
@@ -789,9 +793,16 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
     final isLaserTool = currentTool == ToolType.laserPointer;
     final isStickyNoteTool = currentTool == ToolType.stickyNote;
     final enablePointerEvents = !widget.isReadOnly &&
-        (isDrawingTool || isSelectionTool || isShapeTool || isTextTool ||
-            isStickerTool || isStickerPlacing ||
-            isImageTool || isImagePlacing || isLaserTool || isStickyNoteTool);
+        (isDrawingTool ||
+            isSelectionTool ||
+            isShapeTool ||
+            isTextTool ||
+            isStickerTool ||
+            isStickerPlacing ||
+            isImageTool ||
+            isImagePlacing ||
+            isLaserTool ||
+            isStickyNoteTool);
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -806,7 +817,7 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
         if (!canvasMode.isInfinite) {
           _initializeCanvasForLimitedMode(size, currentPage);
         }
-        
+
         // CRITICAL FIX: Use computed transform if still at default state
         // This prevents "small square" bug on first render
         CanvasTransform effectiveTransform = transform;
@@ -815,13 +826,13 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
               transform.zoom == 1.0 && transform.offset == Offset.zero;
           if (isDefaultTransform) {
             // Compute fit-to-screen transform for first frame
-            final pageSize = Size(currentPage.size.width, currentPage.size.height);
+            final pageSize =
+                Size(currentPage.size.width, currentPage.size.height);
             final fitWidth = size.width / pageSize.width;
             final fitHeight = size.height / pageSize.height;
             // Use fit-width with padding on narrow (portrait) screens
-            final fitZoom = (fitWidth < fitHeight)
-                ? fitWidth * 0.96
-                : fitHeight;
+            final fitZoom =
+                (fitWidth < fitHeight) ? fitWidth * 0.96 : fitHeight;
 
             final pageScreenWidth = pageSize.width * fitZoom;
             final pageScreenHeight = pageSize.height * fitZoom;
@@ -864,324 +875,354 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                 onScaleEnd: handleScaleEnd,
                 behavior: HitTestBehavior.opaque,
                 child: RepaintBoundary(
-                key: ref.read(canvasBoundaryKeyProvider),
-                child: ClipRect(
-                child: SizedBox(
-                  width: size.width,
-                  height: size.height,
-                  child: Transform(
-                    // Apply zoom and pan transformation
-                    transform: effectiveTransform.matrix,
-                    alignment: Alignment.topLeft,
-                      child: Stack(
-                        clipBehavior: Clip.none, // Allow content outside bounds
-                        children: [
-                          // ═══════════════════════════════════════════════════════════
-                          // LAYER 0: Page Container (LIMITED mod için)
-                          // ═══════════════════════════════════════════════════════════
-                          if (!canvasMode.isInfinite) ...[
-                            // Sayfa gölgesi - PDF için KAPALI
-                            if (canvasMode.showPageShadow &&
-                                currentPage.background.type !=
-                                    BackgroundType.pdf)
-                              Positioned(
-                                left: 0,
-                                top: 0,
-                                child: IgnorePointer(
-                                  child: Container(
-                                    width: currentPage.size.width,
-                                    height: currentPage.size.height,
-                                    decoration: BoxDecoration(
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withValues(alpha: 0.15),
-                                          blurRadius: 20,
-                                          spreadRadius: 2,
-                                          offset: const Offset(0, 4),
-                                        ),
-                                      ],
+                  key: ref.read(canvasBoundaryKeyProvider),
+                  child: ClipRect(
+                    child: SizedBox(
+                      width: size.width,
+                      height: size.height,
+                      child: Transform(
+                        // Apply zoom and pan transformation
+                        transform: effectiveTransform.matrix,
+                        alignment: Alignment.topLeft,
+                        child: Stack(
+                          clipBehavior:
+                              Clip.none, // Allow content outside bounds
+                          children: [
+                            // ═══════════════════════════════════════════════════════════
+                            // LAYER 0: Page Container (LIMITED mod için)
+                            // ═══════════════════════════════════════════════════════════
+                            if (!canvasMode.isInfinite) ...[
+                              // Sayfa gölgesi - PDF için KAPALI
+                              if (canvasMode.showPageShadow &&
+                                  currentPage.background.type !=
+                                      BackgroundType.pdf)
+                                Positioned(
+                                  left: 0,
+                                  top: 0,
+                                  child: IgnorePointer(
+                                    child: Container(
+                                      width: currentPage.size.width,
+                                      height: currentPage.size.height,
+                                      decoration: BoxDecoration(
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black
+                                                .withValues(alpha: 0.15),
+                                            blurRadius: 20,
+                                            spreadRadius: 2,
+                                            offset: const Offset(0, 4),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
 
-                            // PDF BACKGROUND - Lazy Loading destekli
-                            if (currentPage.background.type ==
-                                BackgroundType.pdf) ...[
-                              Positioned(
-                                left: 0,
-                                top: 0,
-                                child: IgnorePointer(
-                                  child: _buildPdfBackground(currentPage),
+                              // PDF BACKGROUND - Lazy Loading destekli
+                              if (currentPage.background.type ==
+                                  BackgroundType.pdf) ...[
+                                Positioned(
+                                  left: 0,
+                                  top: 0,
+                                  child: IgnorePointer(
+                                    child: _buildPdfBackground(currentPage),
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
 
-                            // Sayfa arka planı + pattern (PDF DEĞİLSE göster)
-                            if (currentPage.background.type !=
-                                BackgroundType.pdf)
-                              Positioned(
-                                left: 0,
-                                top: 0,
-                                child: IgnorePointer(
-                                  child: RepaintBoundary(
-                                    child: ClipRect(
-                                      child: Container(
-                                        width: currentPage.size.width,
-                                        height: currentPage.size.height,
-                                        decoration: BoxDecoration(
-                                          color: colorScheme.effectiveBackground(
-                                              currentPage.background.color),
-                                          border: canvasMode.pageBorderWidth > 0
-                                              ? Border.all(
-                                                  color: Color(
-                                                      canvasMode.pageBorderColor),
-                                                  width: canvasMode.pageBorderWidth,
-                                                )
-                                              : null,
-                                        ),
-                                        child: PageBackgroundView(
-                                          background: currentPage.background,
-                                          colorScheme: colorScheme,
-                                          pageSize: Size(currentPage.size.width,
-                                              currentPage.size.height),
+                              // Sayfa arka planı + pattern (PDF DEĞİLSE göster)
+                              if (currentPage.background.type !=
+                                  BackgroundType.pdf)
+                                Positioned(
+                                  left: 0,
+                                  top: 0,
+                                  child: IgnorePointer(
+                                    child: RepaintBoundary(
+                                      child: ClipRect(
+                                        child: Container(
+                                          width: currentPage.size.width,
+                                          height: currentPage.size.height,
+                                          decoration: BoxDecoration(
+                                            color: colorScheme
+                                                .effectiveBackground(currentPage
+                                                    .background.color),
+                                            border:
+                                                canvasMode.pageBorderWidth > 0
+                                                    ? Border.all(
+                                                        color: Color(canvasMode
+                                                            .pageBorderColor),
+                                                        width: canvasMode
+                                                            .pageBorderWidth,
+                                                      )
+                                                    : null,
+                                          ),
+                                          child: PageBackgroundView(
+                                            background: currentPage.background,
+                                            colorScheme: colorScheme,
+                                            pageSize: Size(
+                                                currentPage.size.width,
+                                                currentPage.size.height),
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                          ],
+                            ],
 
-                          // ─────────────────────────────────────────────────────────
-                          // PASSIVE LAYERS BELOW ACTIVE
-                          // ─────────────────────────────────────────────────────────
-                          for (int i = 0; i < activeLayerIndex && i < allLayers.length; i++)
-                            if (allLayers[i].isVisible)
-                              PassiveLayerStack(
-                                layer: allLayers[i],
-                                renderer: _renderer,
-                                imageCacheManager: _imageCacheManager,
-                              ),
-
-                          // ─────────────────────────────────────────────────────────
-                          // ACTIVE LAYER: Committed content (hidden when !isVisible)
-                          // ─────────────────────────────────────────────────────────
-                          if (activeLayerVisible)
-                            _wrapOpacity(activeLayerOpacity, Stack(
-                              clipBehavior: Clip.none,
-                              children: [
-                                // Unified element painter: strokes, shapes, images, texts
-                                RepaintBoundary(
-                                  child: CustomPaint(
-                                    size: size,
-                                    painter: UnifiedElementPainter(
-                                      strokes: strokes,
-                                      shapes: shapes,
-                                      images: images,
-                                      texts: texts,
-                                      elementOrder: elementOrder,
-                                      renderer: _renderer,
-                                      cacheManager: _imageCacheManager,
-                                      activeShape: previewShape,
-                                      activeText: textToolState.isEditing
-                                          ? textToolState.activeText
-                                          : null,
-                                      excludedStrokeIds: strokeEraserPreview.isNotEmpty
-                                          ? {...excludedStrokeIds, ...strokeEraserPreview}
-                                          : excludedStrokeIds,
-                                      excludedShapeIds: excludedShapeIds,
-                                      excludedImageIds: excludedImageIds,
-                                      excludedTextIds: excludedTextIds,
-                                      pixelEraserPreview: pixelEraserPreview,
-                                      strokeEraserPreview: strokeEraserPreview,
-                                      selectionColor: Theme.of(context).colorScheme.primary,
-                                    ),
-                                    isComplex: true,
-                                    willChange: pixelEraserPreview.isNotEmpty ||
-                                        strokeEraserPreview.isNotEmpty ||
-                                        previewShape != null ||
-                                        textToolState.isEditing ||
-                                        hasLiveTransform,
-                                  ),
+                            // ─────────────────────────────────────────────────────────
+                            // PASSIVE LAYERS BELOW ACTIVE
+                            // ─────────────────────────────────────────────────────────
+                            for (int i = 0;
+                                i < activeLayerIndex && i < allLayers.length;
+                                i++)
+                              if (allLayers[i].isVisible)
+                                PassiveLayerStack(
+                                  layer: allLayers[i],
+                                  renderer: _renderer,
+                                  imageCacheManager: _imageCacheManager,
                                 ),
-                                // Committed Sticky Notes
-                                if (stickyNotes.isNotEmpty)
-                                  Consumer(
-                                    builder: (context, ref, _) {
-                                      final liveNote = ref.watch(
-                                        stickyNotePlacementProvider
-                                            .select((s) => s.selectedNote),
-                                      );
-                                      return RepaintBoundary(
+
+                            // ─────────────────────────────────────────────────────────
+                            // ACTIVE LAYER: Committed content (hidden when !isVisible)
+                            // ─────────────────────────────────────────────────────────
+                            if (activeLayerVisible)
+                              _wrapOpacity(
+                                  activeLayerOpacity,
+                                  Stack(
+                                    clipBehavior: Clip.none,
+                                    children: [
+                                      // Unified element painter: strokes, shapes, images, texts
+                                      RepaintBoundary(
                                         child: CustomPaint(
                                           size: size,
-                                          painter: StickyNotePainter(
-                                            stickyNotes: stickyNotes,
+                                          painter: UnifiedElementPainter(
+                                            strokes: strokes,
+                                            shapes: shapes,
+                                            images: images,
+                                            texts: texts,
+                                            elementOrder: elementOrder,
                                             renderer: _renderer,
-                                            overrideNote: liveNote,
+                                            cacheManager: _imageCacheManager,
+                                            activeShape: previewShape,
+                                            activeText: textToolState.isEditing
+                                                ? textToolState.activeText
+                                                : null,
+                                            excludedStrokeIds:
+                                                strokeEraserPreview.isNotEmpty
+                                                    ? {
+                                                        ...excludedStrokeIds,
+                                                        ...strokeEraserPreview
+                                                      }
+                                                    : excludedStrokeIds,
+                                            excludedShapeIds: excludedShapeIds,
+                                            excludedImageIds: excludedImageIds,
+                                            excludedTextIds: excludedTextIds,
+                                            pixelEraserPreview:
+                                                pixelEraserPreview,
+                                            strokeEraserPreview:
+                                                strokeEraserPreview,
+                                            selectionColor: Theme.of(context)
+                                                .colorScheme
+                                                .primary,
                                           ),
                                           isComplex: true,
-                                          willChange: liveNote != null,
+                                          willChange: pixelEraserPreview
+                                                  .isNotEmpty ||
+                                              strokeEraserPreview.isNotEmpty ||
+                                              previewShape != null ||
+                                              textToolState.isEditing ||
+                                              hasLiveTransform,
                                         ),
+                                      ),
+                                      // Committed Sticky Notes
+                                      if (stickyNotes.isNotEmpty)
+                                        Consumer(
+                                          builder: (context, ref, _) {
+                                            final liveNote = ref.watch(
+                                              stickyNotePlacementProvider
+                                                  .select(
+                                                      (s) => s.selectedNote),
+                                            );
+                                            return RepaintBoundary(
+                                              child: CustomPaint(
+                                                size: size,
+                                                painter: StickyNotePainter(
+                                                  stickyNotes: stickyNotes,
+                                                  renderer: _renderer,
+                                                  overrideNote: liveNote,
+                                                ),
+                                                isComplex: true,
+                                                willChange: liveNote != null,
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                    ],
+                                  )),
+
+                            // ─────────────────────────────────────────────────────────
+                            // PASSIVE LAYERS ABOVE ACTIVE
+                            // ─────────────────────────────────────────────────────────
+                            for (int i = activeLayerIndex + 1;
+                                i < allLayers.length;
+                                i++)
+                              if (allLayers[i].isVisible)
+                                PassiveLayerStack(
+                                  layer: allLayers[i],
+                                  renderer: _renderer,
+                                  imageCacheManager: _imageCacheManager,
+                                ),
+
+                            // ─────────────────────────────────────────────────────────
+                            // ACTIVE LAYER: Active Stroke (Live Drawing)
+                            // ─────────────────────────────────────────────────────────
+                            // Uses ListenableBuilder to listen to DrawingController
+                            // for optimal performance during drawing
+                            if (activeLayerVisible)
+                              _wrapOpacity(
+                                activeLayerOpacity,
+                                RepaintBoundary(
+                                  child: ListenableBuilder(
+                                    listenable: _drawingController,
+                                    builder: (context, _) {
+                                      return CustomPaint(
+                                        size: size,
+                                        painter: ActiveStrokePainter(
+                                          points:
+                                              _drawingController.activePoints,
+                                          style: _drawingController.activeStyle,
+                                          renderer: _renderer,
+                                        ),
+                                        isComplex: false,
+                                        willChange: true,
                                       );
                                     },
                                   ),
-                              ],
-                            )),
-
-                          // ─────────────────────────────────────────────────────────
-                          // PASSIVE LAYERS ABOVE ACTIVE
-                          // ─────────────────────────────────────────────────────────
-                          for (int i = activeLayerIndex + 1; i < allLayers.length; i++)
-                            if (allLayers[i].isVisible)
-                              PassiveLayerStack(
-                                layer: allLayers[i],
-                                renderer: _renderer,
-                                imageCacheManager: _imageCacheManager,
-                              ),
-
-                          // ─────────────────────────────────────────────────────────
-                          // ACTIVE LAYER: Active Stroke (Live Drawing)
-                          // ─────────────────────────────────────────────────────────
-                          // Uses ListenableBuilder to listen to DrawingController
-                          // for optimal performance during drawing
-                          if (activeLayerVisible)
-                            _wrapOpacity(
-                              activeLayerOpacity,
-                              RepaintBoundary(
-                                child: ListenableBuilder(
-                                  listenable: _drawingController,
-                                  builder: (context, _) {
-                                    return CustomPaint(
-                                      size: size,
-                                      painter: ActiveStrokePainter(
-                                        points: _drawingController.activePoints,
-                                        style: _drawingController.activeStyle,
-                                        renderer: _renderer,
-                                      ),
-                                      isComplex: false,
-                                      willChange: true,
-                                    );
-                                  },
                                 ),
                               ),
+
+                            // ─────────────────────────────────────────────────────────
+                            // LAYER 4.5: Laser Pointer Overlay
+                            // ─────────────────────────────────────────────────────────
+                            LaserOverlayWidget(
+                              controller: _laserController,
+                              size: size,
                             ),
 
-                          // ─────────────────────────────────────────────────────────
-                          // LAYER 4.5: Laser Pointer Overlay
-                          // ─────────────────────────────────────────────────────────
-                          LaserOverlayWidget(
-                            controller: _laserController,
-                            size: size,
-                          ),
+                            // ─────────────────────────────────────────────────────────
+                            // LAYER 5: Straight Line Preview (for highlighter)
+                            // ─────────────────────────────────────────────────────────
+                            if (straightLinePreviewPoints != null &&
+                                straightLinePreviewStyle != null)
+                              RepaintBoundary(
+                                child: CustomPaint(
+                                  size: size,
+                                  painter: ActiveStrokePainter(
+                                    points: straightLinePreviewPoints,
+                                    style: straightLinePreviewStyle,
+                                    renderer: _renderer,
+                                  ),
+                                  isComplex: false,
+                                  willChange: true,
+                                ),
+                              ),
 
-                          // ─────────────────────────────────────────────────────────
-                          // LAYER 5: Straight Line Preview (for highlighter)
-                          // ─────────────────────────────────────────────────────────
-                          if (straightLinePreviewPoints != null &&
-                              straightLinePreviewStyle != null)
+                            // ─────────────────────────────────────────────────────────
+                            // LAYER 6: Selection Overlay
+                            // ─────────────────────────────────────────────────────────
+                            // Selection path and bounding box
                             RepaintBoundary(
                               child: CustomPaint(
                                 size: size,
-                                painter: ActiveStrokePainter(
-                                  points: straightLinePreviewPoints,
-                                  style: straightLinePreviewStyle,
-                                  renderer: _renderer,
+                                painter: SelectionPainter(
+                                  selection: selection,
+                                  selectionColor:
+                                      Theme.of(context).colorScheme.primary,
+                                  previewPath: selectionPreviewPath,
+                                  zoom: transform.zoom,
+                                  hasLiveTransform: hasLiveTransform,
                                 ),
                                 isComplex: false,
                                 willChange: true,
                               ),
                             ),
 
-                          // ─────────────────────────────────────────────────────────
-                          // LAYER 6: Selection Overlay
-                          // ─────────────────────────────────────────────────────────
-                          // Selection path and bounding box
-                          RepaintBoundary(
-                            child: CustomPaint(
-                              size: size,
-                              painter: SelectionPainter(
-                                selection: selection,
-                                selectionColor: Theme.of(context).colorScheme.primary,
-                                previewPath: selectionPreviewPath,
-                                zoom: transform.zoom,
-                                hasLiveTransform: hasLiveTransform,
-                              ),
-                              isComplex: false,
-                              willChange: true,
-                            ),
-                          ),
-
-                          // ─────────────────────────────────────────────────────────
-                          // LAYER 7: Selected Elements with Live Transform
-                          // ─────────────────────────────────────────────────────────
-                          if (hasLiveTransform && selection != null)
-                            RepaintBoundary(
-                              child: CustomPaint(
-                                size: size,
-                                painter: SelectedElementsPainter(
-                                  selectedStrokes: selectedStrokes,
-                                  selectedShapes: selectedShapes,
-                                  selectedImages: selectedImages,
-                                  selectedTexts: selectedTexts,
-                                  imageCacheManager: _imageCacheManager,
-                                  moveDelta: selectionUi.moveDelta,
-                                  rotation: selectionUi.rotation,
-                                  scaleX: selectionUi.scaleX,
-                                  scaleY: selectionUi.scaleY,
-                                  centerX: (selection.bounds.left + selection.bounds.right) / 2,
-                                  centerY: (selection.bounds.top + selection.bounds.bottom) / 2,
-                                  renderer: _renderer,
-                                ),
-                                isComplex: true,
-                                willChange: true,
-                              ),
-                            ),
-
-                          // ─────────────────────────────────────────────────────────
-                          // LAYER 8: Selection Handles (for drag interactions)
-                          // ─────────────────────────────────────────────────────────
-                          if (selection != null && selection.isNotEmpty)
-                            SelectionHandles(
-                              selection: selection,
-                              onSelectionChanged: () => setState(() {}),
-                            ),
-
-                          // ─────────────────────────────────────────────────────────
-                          // LAYER 9: Sticky Note Resize Handles
-                          // ─────────────────────────────────────────────────────────
-                          Builder(
-                            builder: (context) {
-                              final noteState =
-                                  ref.watch(stickyNotePlacementProvider);
-                              final selected = noteState.selectedNote;
-                              if (selected == null ||
-                                  noteState.isMoving ||
-                                  selected.minimized) {
-                                return const SizedBox.shrink();
-                              }
-                              // On stickyNote tool: full interactive handles.
-                              // On other tools: paint-only (visible but no gesture).
-                              if (isStickyNoteTool) {
-                                return StickyNoteResizeHandles(note: selected);
-                              }
-                              return IgnorePointer(
+                            // ─────────────────────────────────────────────────────────
+                            // LAYER 7: Selected Elements with Live Transform
+                            // ─────────────────────────────────────────────────────────
+                            if (hasLiveTransform && selection != null)
+                              RepaintBoundary(
                                 child: CustomPaint(
-                                  painter: StickyNoteHandlesPainter(
-                                    note: selected,
-                                    selectionColor: Theme.of(context).colorScheme.primary,
+                                  size: size,
+                                  painter: SelectedElementsPainter(
+                                    selectedStrokes: selectedStrokes,
+                                    selectedShapes: selectedShapes,
+                                    selectedImages: selectedImages,
+                                    selectedTexts: selectedTexts,
+                                    imageCacheManager: _imageCacheManager,
+                                    moveDelta: selectionUi.moveDelta,
+                                    rotation: selectionUi.rotation,
+                                    scaleX: selectionUi.scaleX,
+                                    scaleY: selectionUi.scaleY,
+                                    centerX: (selection.bounds.left +
+                                            selection.bounds.right) /
+                                        2,
+                                    centerY: (selection.bounds.top +
+                                            selection.bounds.bottom) /
+                                        2,
+                                    renderer: _renderer,
                                   ),
-                                  child: const SizedBox.expand(),
+                                  isComplex: true,
+                                  willChange: true,
                                 ),
-                              );
-                            },
-                          ),
-                        ],
+                              ),
+
+                            // ─────────────────────────────────────────────────────────
+                            // LAYER 8: Selection Handles (for drag interactions)
+                            // ─────────────────────────────────────────────────────────
+                            if (selection != null && selection.isNotEmpty)
+                              SelectionHandles(
+                                selection: selection,
+                                onSelectionChanged: () => setState(() {}),
+                              ),
+
+                            // ─────────────────────────────────────────────────────────
+                            // LAYER 9: Sticky Note Resize Handles
+                            // ─────────────────────────────────────────────────────────
+                            Builder(
+                              builder: (context) {
+                                final noteState =
+                                    ref.watch(stickyNotePlacementProvider);
+                                final selected = noteState.selectedNote;
+                                if (selected == null ||
+                                    noteState.isMoving ||
+                                    selected.minimized) {
+                                  return const SizedBox.shrink();
+                                }
+                                // On stickyNote tool: full interactive handles.
+                                // On other tools: paint-only (visible but no gesture).
+                                if (isStickyNoteTool) {
+                                  return StickyNoteResizeHandles(
+                                      note: selected);
+                                }
+                                return IgnorePointer(
+                                  child: CustomPaint(
+                                    painter: StickyNoteHandlesPainter(
+                                      note: selected,
+                                      selectionColor:
+                                          Theme.of(context).colorScheme.primary,
+                                    ),
+                                    child: const SizedBox.expand(),
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
                 ),
               ),
             ),
@@ -1296,8 +1337,10 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                           const SizedBox(width: 8),
                           Text(
                             'Yerleştirmek için dokunun',
-                            style:
-                                Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(color: Colors.white),
                           ),
                           const SizedBox(width: 12),
                           GestureDetector(
@@ -1358,8 +1401,10 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                           const SizedBox(width: 8),
                           Text(
                             'Resmi yerlesirmek icin dokunun',
-                            style:
-                                Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.white),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(color: Colors.white),
                           ),
                           const SizedBox(width: 12),
                           GestureDetector(
@@ -1454,13 +1499,11 @@ class _StickyNoteContextMenu extends StatelessWidget {
               children: [
                 // Color dots row
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 6, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
-                    children: _noteColors
-                        .map((c) => _colorDot(c))
-                        .toList(),
+                    children: _noteColors.map((c) => _colorDot(c)).toList(),
                   ),
                 ),
                 // Delete button
@@ -1484,8 +1527,10 @@ class _StickyNoteContextMenu extends StatelessWidget {
                               size: 16, color: Colors.red),
                           const SizedBox(width: 4),
                           Text('Sil',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Colors.red)),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(color: Colors.red)),
                         ],
                       ),
                     ),

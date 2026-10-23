@@ -219,8 +219,7 @@ class _PaywallState extends ConsumerState<PaywallPlaceholderScreen> {
       PlanData(
         title: 'Pro',
         price: _isYearly ? '\u20BA167/ay' : '\u20BA299/ay',
-        priceSuffix:
-            _isYearly ? '(\u20BA1.999/yil olarak faturalanir)' : null,
+        priceSuffix: _isYearly ? '(\u20BA1.999/yil olarak faturalanir)' : null,
         productId: _isYearly
             ? PaywallProductIds.proYearly
             : PaywallProductIds.proMonthly,

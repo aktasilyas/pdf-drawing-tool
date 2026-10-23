@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+
 /// Dialog that shows a screenshot preview before saving.
 ///
 /// Returns `true` if the user taps "Kaydet", `false`/`null` otherwise.
@@ -51,7 +52,10 @@ class ScreenshotPreviewDialog extends StatelessWidget {
                   onPressed: () => Navigator.of(context).pop(false),
                   child: Text(
                     'İptal',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodySmall
+                        ?.copyWith(color: cs.onSurfaceVariant),
                   ),
                 ),
                 const SizedBox(width: 12),

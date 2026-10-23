@@ -71,10 +71,10 @@ void main() {
     group('Constructor', () {
       test('should create with default settings', () {
         final q = BackgroundThumbnailQueue(cache: cache);
-        
+
         expect(q.isProcessing, false);
         expect(q.queueLength, 0);
-        
+
         q.dispose();
       });
 
@@ -83,9 +83,9 @@ void main() {
           cache: cache,
           maxConcurrent: 3,
         );
-        
+
         expect(q.maxConcurrent, 3);
-        
+
         q.dispose();
       });
     });
@@ -183,7 +183,7 @@ void main() {
         expect(queue.isProcessing, true);
 
         queue.dispose();
-        
+
         // Queue is disposed
         expect(queue.queueLength, 0);
       });

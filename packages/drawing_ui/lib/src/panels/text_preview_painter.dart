@@ -44,15 +44,16 @@ class TextPreview extends StatelessWidget {
           child: Text(
             'Merhaba',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontSize: previewSize,
-              fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-              fontStyle: isItalic ? FontStyle.italic : FontStyle.normal,
-              decoration:
-                  isUnderline ? TextDecoration.underline : TextDecoration.none,
-              decorationColor: color,
-              color: color,
-              height: 1.2,
-            ),
+                  fontSize: previewSize,
+                  fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+                  fontStyle: isItalic ? FontStyle.italic : FontStyle.normal,
+                  decoration: isUnderline
+                      ? TextDecoration.underline
+                      : TextDecoration.none,
+                  decorationColor: color,
+                  color: color,
+                  height: 1.2,
+                ),
           ),
         ),
       ),

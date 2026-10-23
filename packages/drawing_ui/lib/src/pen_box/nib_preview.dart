@@ -77,7 +77,8 @@ class _NibPreviewPainter extends CustomPainter {
 
     // Scale thickness to fit preview
     final scaleFactor = (size.width * 0.4) / maxThickness;
-    final scaledThickness = (thickness * scaleFactor).clamp(2.0, size.width * 0.8);
+    final scaledThickness =
+        (thickness * scaleFactor).clamp(2.0, size.width * 0.8);
 
     switch (nibShape) {
       case NibShapeType.circle:

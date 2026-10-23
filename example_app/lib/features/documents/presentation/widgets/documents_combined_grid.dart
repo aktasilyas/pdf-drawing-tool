@@ -34,8 +34,10 @@ class DocumentsCombinedGridView extends ConsumerWidget {
         final width = constraints.maxWidth;
         // Card width constants for grid layout
         final cardWidth = width < 600 ? 160.0 : 180.0;
-        final spacing = width < 600 ? AppSpacing.lg.toDouble() : AppSpacing.xl.toDouble();
-        final padding = width < 600 ? AppSpacing.lg.toDouble() : AppSpacing.xxl.toDouble();
+        final spacing =
+            width < 600 ? AppSpacing.lg.toDouble() : AppSpacing.xl.toDouble();
+        final padding =
+            width < 600 ? AppSpacing.lg.toDouble() : AppSpacing.xxl.toDouble();
         final isPhone = width < 600;
 
         final isSelectionMode = ref.watch(selectionModeProvider);

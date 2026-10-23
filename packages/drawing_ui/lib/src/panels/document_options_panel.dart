@@ -32,7 +32,10 @@ class DocumentOptionsPanel extends ConsumerWidget {
         PageOptionsMenuItem(
           icon: ElyanotesIcons.editPencil,
           label: 'Yeniden Adlandır',
-          onTap: () { onClose(); onRename(); },
+          onTap: () {
+            onClose();
+            onRename();
+          },
         ),
         if (isInfinite)
           PageOptionsMenuItem(
@@ -62,10 +65,12 @@ class DocumentOptionsPanel extends ConsumerWidget {
           icon: ElyanotesIcons.trash,
           label: 'Çöpe Taşı',
           isDestructive: true,
-          onTap: () { onClose(); onDelete(); },
+          onTap: () {
+            onClose();
+            onDelete();
+          },
         ),
       ],
     );
   }
 }
-

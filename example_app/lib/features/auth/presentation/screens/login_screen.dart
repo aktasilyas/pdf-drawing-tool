@@ -165,8 +165,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             children: [
               const Expanded(child: AppDivider()),
               Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                 child: Text(
                   AuthStrings.orDivider,
                   style: AppTypography.labelMedium.copyWith(
@@ -187,8 +186,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             children: [
               Text(
                 AuthStrings.noAccount,
-                style:
-                    AppTypography.bodyMedium.copyWith(color: textSecondary),
+                style: AppTypography.bodyMedium.copyWith(color: textSecondary),
               ),
               TextButton(
                 onPressed: _isLoading ? null : _goToRegister,

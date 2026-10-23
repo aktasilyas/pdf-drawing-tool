@@ -112,14 +112,12 @@ class _DocumentsWithFolders extends ConsumerWidget {
                         .contains(searchQuery.toLowerCase()))
                     .toList();
             // Filter folders by parent
-            var filteredFolders = folders
-                .where((f) => f.parentId == parentFolderId)
-                .toList();
+            var filteredFolders =
+                folders.where((f) => f.parentId == parentFolderId).toList();
             if (searchQuery.isNotEmpty) {
               filteredFolders = filteredFolders
-                  .where((f) => f.name
-                      .toLowerCase()
-                      .contains(searchQuery.toLowerCase()))
+                  .where((f) =>
+                      f.name.toLowerCase().contains(searchQuery.toLowerCase()))
                   .toList();
             }
             // Empty states

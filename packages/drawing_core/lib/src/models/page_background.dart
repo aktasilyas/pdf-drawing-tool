@@ -10,8 +10,10 @@ enum BackgroundType {
   lined,
   dotted,
   pdf,
+
   /// Template-based background (uses TemplatePattern for rendering)
   template,
+
   /// Cover-based background (uses Cover model for rendering)
   cover,
 }
@@ -23,25 +25,25 @@ class PageBackground {
   final double? gridSpacing;
   final double? lineSpacing;
   final int? lineColor;
-  
+
   /// Template pattern for template-based backgrounds
   final TemplatePattern? templatePattern;
-  
+
   /// Template spacing in mm (for template-based backgrounds)
   final double? templateSpacingMm;
-  
+
   /// Template line width (for template-based backgrounds)
   final double? templateLineWidth;
-  
+
   /// Cover ID for cover-based backgrounds
   final String? coverId;
-  
+
   /// Rendered PDF image data (cache - lazy loaded)
   final Uint8List? pdfData;
-  
+
   /// PDF page number (1-based)
   final int? pdfPageIndex;
-  
+
   /// PDF file path for lazy loading (stored on device)
   final String? pdfFilePath;
 
@@ -95,7 +97,7 @@ class PageBackground {
       pdfPageIndex: pageIndex,
     );
   }
-  
+
   /// Create PDF background for lazy loading (with file path)
   factory PageBackground.pdfLazy({
     required int pageIndex,
@@ -148,7 +150,7 @@ class PageBackground {
     // - If pdfFilePath exists: NO (lazy loading for PDFs)
     // - If pdfFilePath is null but pdfData exists: YES (images stored in memory)
     final shouldSerializePdfData = pdfFilePath == null && pdfData != null;
-    
+
     return {
       'type': type.name,
       'color': color,
@@ -174,7 +176,7 @@ class PageBackground {
       if (value is num) return value.toInt();
       return null;
     }
-    
+
     // Helper to parse double safely
     double? parseDouble(dynamic value) {
       if (value == null) return null;
@@ -183,17 +185,18 @@ class PageBackground {
       if (value is num) return value.toDouble();
       return null;
     }
-    
+
     // Decode pdfData from base64 if present (for images)
     Uint8List? pdfData;
     if (json['pdfDataBase64'] != null) {
       try {
         pdfData = base64Decode(json['pdfDataBase64'] as String);
       } catch (e) {
-        developer.log('Failed to decode pdfDataBase64: $e', name: 'PageBackground');
+        developer.log('Failed to decode pdfDataBase64: $e',
+            name: 'PageBackground');
       }
     }
-    
+
     // Parse template pattern
     TemplatePattern? templatePattern;
     if (json['templatePattern'] != null) {
@@ -202,10 +205,11 @@ class PageBackground {
           (p) => p.name == json['templatePattern'],
         );
       } catch (e) {
-        developer.log('Unknown template pattern: ${json['templatePattern']}', name: 'PageBackground');
+        developer.log('Unknown template pattern: ${json['templatePattern']}',
+            name: 'PageBackground');
       }
     }
-    
+
     return PageBackground(
       type: BackgroundType.values.firstWhere(
         (t) => t.name == json['type'],

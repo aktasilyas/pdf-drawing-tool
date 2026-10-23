@@ -44,7 +44,7 @@ void main() {
       expect(document.id, testDocId);
       expect(document.title, 'Test Document');
       expect(document.pageCount, 1);
-      
+
       verify(() => mockRepository.getDocument(testDocId)).called(1);
       verify(() => mockRepository.getDocumentContent(testDocId)).called(1);
     });
@@ -72,22 +72,22 @@ void main() {
       final document = result.getOrElse(() => throw Exception());
       expect(document.id, testDocId);
       expect(document.title, 'Test Document');
-      
+
       verify(() => mockRepository.getDocument(testDocId)).called(1);
       verify(() => mockRepository.getDocumentContent(testDocId)).called(1);
     });
 
     test('should return failure when document not found', () async {
       // Arrange
-      when(() => mockRepository.getDocument(testDocId))
-          .thenAnswer((_) async => const Left(CacheFailure('Document not found')));
+      when(() => mockRepository.getDocument(testDocId)).thenAnswer(
+          (_) async => const Left(CacheFailure('Document not found')));
 
       // Act
       final result = await useCase(testDocId);
 
       // Assert
       expect(result.isLeft(), true);
-      
+
       verify(() => mockRepository.getDocument(testDocId)).called(1);
       verifyNever(() => mockRepository.getDocumentContent(any()));
     });
@@ -95,7 +95,7 @@ void main() {
     test('should return failure when content is corrupted', () async {
       // Arrange
       const invalidContent = {'invalid': 'data'};
-      
+
       when(() => mockRepository.getDocument(testDocId))
           .thenAnswer((_) async => Right(testDocInfo));
       when(() => mockRepository.getDocumentContent(testDocId))
@@ -106,7 +106,7 @@ void main() {
 
       // Assert
       expect(result.isLeft(), true);
-      
+
       verify(() => mockRepository.getDocument(testDocId)).called(1);
       verify(() => mockRepository.getDocumentContent(testDocId)).called(1);
     });

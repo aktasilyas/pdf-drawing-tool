@@ -19,7 +19,8 @@ final saveDocumentUseCaseProvider = Provider<SaveDocumentUseCase>((ref) {
 final currentDocumentProvider = StateProvider<DrawingDocument?>((ref) => null);
 
 // Document loading state (autoDispose prevents stale cache on re-entry)
-final documentLoaderProvider = FutureProvider.autoDispose.family<DrawingDocument, String>((ref, documentId) async {
+final documentLoaderProvider = FutureProvider.autoDispose
+    .family<DrawingDocument, String>((ref, documentId) async {
   final useCase = ref.watch(loadDocumentUseCaseProvider);
   final result = await useCase(documentId);
   return result.fold(
@@ -36,7 +37,7 @@ final autoSaveProvider = StateNotifierProvider<AutoSaveNotifier, bool>((ref) {
 class AutoSaveNotifier extends StateNotifier<bool> {
   final Ref _ref;
   Timer? _debounceTimer;
-  
+
   AutoSaveNotifier(this._ref) : super(false);
 
   void documentChanged(DrawingDocument document) {

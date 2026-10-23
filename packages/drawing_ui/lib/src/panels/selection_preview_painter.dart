@@ -34,8 +34,7 @@ class _SelectionPreviewPainter extends CustomPainter {
   final LassoMode mode;
   final Color selectionColor;
 
-  late final Color _selectionFill =
-      selectionColor.withValues(alpha: 0.06);
+  late final Color _selectionFill = selectionColor.withValues(alpha: 0.06);
 
   @override
   void paint(Canvas canvas, Size size) {

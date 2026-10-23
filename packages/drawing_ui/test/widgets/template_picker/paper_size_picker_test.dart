@@ -48,13 +48,12 @@ void main() {
         ),
       );
 
-      final orientationIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.orientationPortrait,
-      );
-      expect(orientationIcon, findsOneWidget);
+      expect(find.byType(DropdownButton<bool>), findsOneWidget);
+      expect(find.text('Dikey'), findsOneWidget);
     });
 
-    testWidgets('hides orientation toggle when showLandscapeToggle is false', (tester) async {
+    testWidgets('hides orientation toggle when showLandscapeToggle is false',
+        (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -67,17 +66,13 @@ void main() {
         ),
       );
 
-      final portraitIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.orientationPortrait,
-      );
-      final landscapeIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.orientationLandscape,
-      );
-      expect(portraitIcon, findsNothing);
-      expect(landscapeIcon, findsNothing);
+      expect(find.byType(DropdownButton<bool>), findsNothing);
+      expect(find.text('Dikey'), findsNothing);
+      expect(find.text('Yatay'), findsNothing);
     });
 
-    testWidgets('shows portrait icon for portrait orientation', (tester) async {
+    testWidgets('shows portrait label for portrait orientation',
+        (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -89,17 +84,16 @@ void main() {
         ),
       );
 
-      final portraitIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.orientationPortrait,
+      final dropdown = tester.widget<DropdownButton<bool>>(
+        find.byType(DropdownButton<bool>),
       );
-      final landscapeIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.orientationLandscape,
-      );
-      expect(portraitIcon, findsOneWidget);
-      expect(landscapeIcon, findsNothing);
+      expect(dropdown.value, false);
+      expect(find.text('Dikey'), findsOneWidget);
+      expect(find.text('Yatay'), findsNothing);
     });
 
-    testWidgets('shows landscape icon for landscape orientation', (tester) async {
+    testWidgets('shows landscape label for landscape orientation',
+        (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -111,14 +105,12 @@ void main() {
         ),
       );
 
-      final landscapeIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.orientationLandscape,
+      final dropdown = tester.widget<DropdownButton<bool>>(
+        find.byType(DropdownButton<bool>),
       );
-      final portraitIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.orientationPortrait,
-      );
-      expect(landscapeIcon, findsOneWidget);
-      expect(portraitIcon, findsNothing);
+      expect(dropdown.value, true);
+      expect(find.text('Yatay'), findsOneWidget);
+      expect(find.text('Dikey'), findsNothing);
     });
 
     testWidgets('calls onSizeSelected when preset changes', (tester) async {
@@ -178,7 +170,8 @@ void main() {
       expect(newSize?.isLandscape, true);
     });
 
-    testWidgets('toggles orientation when toggle button tapped', (tester) async {
+    testWidgets('toggles orientation when toggle button tapped',
+        (tester) async {
       PaperSize? newSize;
 
       await tester.pumpWidget(
@@ -195,10 +188,9 @@ void main() {
       );
 
       // Tap orientation toggle
-      final orientationIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.orientationPortrait,
-      );
-      await tester.tap(orientationIcon);
+      await tester.tap(find.byType(DropdownButton<bool>));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Yatay').last);
       await tester.pumpAndSettle();
 
       expect(newSize, isNotNull);
@@ -223,10 +215,9 @@ void main() {
       );
 
       // Tap orientation toggle
-      final orientationIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.orientationLandscape,
-      );
-      await tester.tap(orientationIcon);
+      await tester.tap(find.byType(DropdownButton<bool>));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Dikey').last);
       await tester.pumpAndSettle();
 
       expect(newSize, isNotNull);
@@ -328,7 +319,7 @@ void main() {
       }
     });
 
-    testWidgets('orientation toggle has correct padding', (tester) async {
+    testWidgets('orientation dropdown has correct padding', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -340,17 +331,16 @@ void main() {
         ),
       );
 
-      final orientationIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.orientationPortrait,
-      );
       final container = tester.widget<Container>(
-        find.ancestor(
-          of: orientationIcon,
-          matching: find.byType(Container),
-        ).first,
+        find
+            .ancestor(
+              of: find.byType(DropdownButton<bool>),
+              matching: find.byType(Container),
+            )
+            .first,
       );
 
-      expect(container.padding, const EdgeInsets.all(8));
+      expect(container.padding, const EdgeInsets.symmetric(horizontal: 12));
     });
 
     testWidgets('dropdown has correct styling', (tester) async {

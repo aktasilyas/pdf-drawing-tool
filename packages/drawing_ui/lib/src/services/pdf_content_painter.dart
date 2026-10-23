@@ -63,7 +63,11 @@ class PdfContentPainter {
 
   /// Paints all layer content as vector operations using [elementOrder].
   Future<void> paintLayerContent(
-    PdfGraphics g, PdfDocument doc, Layer layer, double w, double h,
+    PdfGraphics g,
+    PdfDocument doc,
+    Layer layer,
+    double w,
+    double h,
   ) async {
     final strokeMap = {for (final s in layer.strokes) s.id: s};
     final shapeMap = {for (final s in layer.shapes) s.id: s};
@@ -115,7 +119,8 @@ class PdfContentPainter {
     g.setLineWidth(style.thickness);
 
     final penType = _penTypeFromStyle(style);
-    g.setLineCap(PdfLineCap.values[_vectorHelper.getRecommendedLineCap(penType)]);
+    g.setLineCap(
+        PdfLineCap.values[_vectorHelper.getRecommendedLineCap(penType)]);
     g.setLineJoin(
       PdfLineJoin.values[_vectorHelper.getRecommendedLineJoin(penType)],
     );
@@ -216,7 +221,11 @@ class PdfContentPainter {
   }
 
   Future<void> _paintImage(
-    PdfGraphics g, PdfDocument doc, ImageElement img, double w, double h,
+    PdfGraphics g,
+    PdfDocument doc,
+    ImageElement img,
+    double w,
+    double h,
   ) async {
     try {
       final file = File(img.filePath);
@@ -235,7 +244,11 @@ class PdfContentPainter {
         g.setTransform(m);
       }
       g.drawImage(
-        pdfImg, img.x, _flipY(img.y + img.height, h), img.width, img.height,
+        pdfImg,
+        img.x,
+        _flipY(img.y + img.height, h),
+        img.width,
+        img.height,
       );
       g.restoreContext();
     } catch (_) {}
@@ -264,8 +277,8 @@ class PdfContentPainter {
     g.strokePath();
   }
 
-  void _drawDots(PdfGraphics g, double w, double h, double spacing,
-      PdfColor color) {
+  void _drawDots(
+      PdfGraphics g, double w, double h, double spacing, PdfColor color) {
     g.setFillColor(color);
     for (double x = spacing; x < w; x += spacing) {
       for (double y = spacing; y < h; y += spacing) {

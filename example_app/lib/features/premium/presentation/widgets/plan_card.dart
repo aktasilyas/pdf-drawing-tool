@@ -130,9 +130,8 @@ class PlanCard extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       child: FilledButton(
-        onPressed: plan.productId != null
-            ? () => onPurchase(plan.productId!)
-            : null,
+        onPressed:
+            plan.productId != null ? () => onPurchase(plan.productId!) : null,
         style: plan.isHighlighted
             ? null
             : FilledButton.styleFrom(

@@ -109,9 +109,8 @@ class FlipSelectionCommand implements DrawingCommand {
       final imgCy = image.y + image.height / 2;
       final newCx = axis == FlipAxis.horizontal ? 2 * centerX - imgCx : imgCx;
       final newCy = axis == FlipAxis.vertical ? 2 * centerY - imgCy : imgCy;
-      final newRot = axis == FlipAxis.horizontal
-          ? -image.rotation
-          : image.rotation;
+      final newRot =
+          axis == FlipAxis.horizontal ? -image.rotation : image.rotation;
       layer = layer.updateImage(image.copyWith(
         x: newCx - image.width / 2,
         y: newCy - image.height / 2,
@@ -131,9 +130,8 @@ class FlipSelectionCommand implements DrawingCommand {
       final halfH = cy - text.y;
       final newCx = axis == FlipAxis.horizontal ? 2 * centerX - cx : cx;
       final newCy = axis == FlipAxis.vertical ? 2 * centerY - cy : cy;
-      final newRot = axis == FlipAxis.horizontal
-          ? -text.rotation
-          : text.rotation;
+      final newRot =
+          axis == FlipAxis.horizontal ? -text.rotation : text.rotation;
       layer = layer.updateText(text.copyWith(
         x: newCx - halfW,
         y: newCy - halfH,

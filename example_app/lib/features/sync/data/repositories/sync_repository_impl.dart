@@ -132,7 +132,7 @@ class SyncRepositoryImpl implements SyncRepository {
 
   /// Pulls changes from remote server
   Future<void> _pullChangesFromRemote() async {
-    final lastSync = await _localDatasource.getLastSyncTime() ?? 
+    final lastSync = await _localDatasource.getLastSyncTime() ??
         DateTime.fromMillisecondsSinceEpoch(0);
 
     // Pull documents from remote
@@ -154,7 +154,7 @@ class SyncRepositoryImpl implements SyncRepository {
       try {
         await _processSyncQueueItem(item);
         await _localDatasource.removeFromQueue(item.id);
-        
+
         processedCount++;
         _updateSyncStatus(_currentStatus.copyWith(
           progress: processedCount / items.length,
@@ -274,7 +274,7 @@ class SyncRepositoryImpl implements SyncRepository {
   Future<Either<Failure, void>> addToQueue(SyncQueueItem item) async {
     try {
       await _localDatasource.addToQueue(item);
-      
+
       // Update pending count
       final status = await getSyncStatus();
       status.fold(

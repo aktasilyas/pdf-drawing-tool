@@ -16,8 +16,7 @@ import 'package:drawing_ui/src/providers/drawing_providers.dart';
 /// Performance: Paint objects are created per-stroke (not per-frame)
 /// only when color/thickness change. No allocations in tight loops.
 class LaserPainter extends CustomPainter {
-  LaserPainter({required this.controller})
-      : super(repaint: controller);
+  LaserPainter({required this.controller}) : super(repaint: controller);
 
   final LaserController controller;
 

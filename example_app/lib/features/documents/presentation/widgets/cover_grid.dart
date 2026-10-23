@@ -110,15 +110,13 @@ class _CoverGridItem extends StatelessWidget {
                                 .colorScheme
                                 .surfaceContainerHighest
                                 .withValues(alpha: 0.85),
-                            borderRadius:
-                                BorderRadius.circular(AppRadius.xs),
+                            borderRadius: BorderRadius.circular(AppRadius.xs),
                           ),
                           child: Icon(
                             Icons.lock,
                             size: AppIconSize.xs,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurfaceVariant,
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ),

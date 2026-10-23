@@ -21,6 +21,7 @@ class PageSlideTransition extends StatefulWidget {
   final Axis scrollDirection;
   final Color? nextPagePreviewColor;
   final Color? prevPagePreviewColor;
+
   /// Widget shown when swiping forward on the last page (add new page).
   final Widget? addPagePreview;
   final bool canSwipeForward;
@@ -46,7 +47,10 @@ class PageSlideTransitionState extends State<PageSlideTransition>
   bool _directionDetermined = false, _pagePreSwitched = false;
   int _determinedDirection = 0;
   ui.Image? _dragSnapshot;
-  double _dragOffset = 0.0, _startOffset = 0.0, _targetOffset = 0.0, _extent = 0.0;
+  double _dragOffset = 0.0,
+      _startOffset = 0.0,
+      _targetOffset = 0.0,
+      _extent = 0.0;
   VoidCallback? _dragAnimListener;
 
   bool get _isHorizontal => widget.scrollDirection == Axis.horizontal;
@@ -54,15 +58,16 @@ class PageSlideTransitionState extends State<PageSlideTransition>
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(vsync: this,
-        duration: const Duration(milliseconds: 300))
+    _controller = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 300))
       ..addStatusListener(_onAnimationStatus);
   }
 
   @override
   void dispose() {
     _controller.removeStatusListener(_onAnimationStatus);
-    if (_dragAnimListener != null) _controller.removeListener(_dragAnimListener!);
+    if (_dragAnimListener != null)
+      _controller.removeListener(_dragAnimListener!);
     _controller.dispose();
     _snapshot?.dispose();
     _dragSnapshot?.dispose();
@@ -74,22 +79,33 @@ class PageSlideTransitionState extends State<PageSlideTransition>
     if (_isAnimatingDrag) {
       _finalizeDrag();
     } else if (_snapshot != null) {
-      setState(() { _snapshot?.dispose(); _snapshot = null; });
+      setState(() {
+        _snapshot?.dispose();
+        _snapshot = null;
+      });
     }
   }
 
   Future<void> captureSnapshot({required bool forward}) async {
     if (_isDragging) return;
     if (_snapshot != null) {
-      _controller.value = 1.0; _snapshot?.dispose(); _snapshot = null;
+      _controller.value = 1.0;
+      _snapshot?.dispose();
+      _snapshot = null;
     }
     final boundary = _boundaryKey.currentContext?.findRenderObject()
         as RenderRepaintBoundary?;
     if (boundary == null || !boundary.hasSize) return;
     try {
       final image = await boundary.toImage(pixelRatio: 1.0);
-      if (!mounted) { image.dispose(); return; }
-      setState(() { _snapshot = image; _isForward = forward; });
+      if (!mounted) {
+        image.dispose();
+        return;
+      }
+      setState(() {
+        _snapshot = image;
+        _isForward = forward;
+      });
     } catch (_) {}
   }
 
@@ -102,11 +118,16 @@ class PageSlideTransitionState extends State<PageSlideTransition>
   Future<void> beginDrag() async {
     if (_isDragging) return;
     if (_snapshot != null) {
-      _controller.value = 1.0; _snapshot?.dispose(); _snapshot = null;
+      _controller.value = 1.0;
+      _snapshot?.dispose();
+      _snapshot = null;
     }
     setState(() {
-      _isDragging = true; _isAnimatingDrag = false; _dragOffset = 0;
-      _directionDetermined = false; _pagePreSwitched = false;
+      _isDragging = true;
+      _isAnimatingDrag = false;
+      _dragOffset = 0;
+      _directionDetermined = false;
+      _pagePreSwitched = false;
       _determinedDirection = 0;
     });
     final boundary = _boundaryKey.currentContext?.findRenderObject()
@@ -114,7 +135,10 @@ class PageSlideTransitionState extends State<PageSlideTransition>
     if (boundary == null || !boundary.hasSize) return;
     try {
       final image = await boundary.toImage(pixelRatio: 1.0);
-      if (!mounted || !_isDragging) { image.dispose(); return; }
+      if (!mounted || !_isDragging) {
+        image.dispose();
+        return;
+      }
       setState(() => _dragSnapshot = image);
     } catch (_) {}
   }
@@ -125,7 +149,8 @@ class PageSlideTransitionState extends State<PageSlideTransition>
       var n = _dragOffset + delta;
       // Direction lock: once determined, can't reverse past zero
       if (_directionDetermined) {
-        n = _determinedDirection == 1 ? n.clamp(double.negativeInfinity, 0.0)
+        n = _determinedDirection == 1
+            ? n.clamp(double.negativeInfinity, 0.0)
             : n.clamp(0.0, double.infinity);
       }
       // Resistance for disallowed directions
@@ -139,14 +164,18 @@ class PageSlideTransitionState extends State<PageSlideTransition>
         _determinedDirection = _dragOffset < 0 ? 1 : -1;
         _directionDetermined = true;
         _pagePreSwitched =
-            widget.onDragDirectionDetermined?.call(_determinedDirection) ?? false;
+            widget.onDragDirectionDetermined?.call(_determinedDirection) ??
+                false;
       }
     });
   }
 
   void endDrag(double velocity) {
     if (!_isDragging || _isAnimatingDrag) return;
-    if (_extent <= 0) { _cancelDrag(); return; }
+    if (_extent <= 0) {
+      _cancelDrag();
+      return;
+    }
     final progress = _dragOffset.abs() / _extent;
     final isForward = _dragOffset < 0;
     _isForward = isForward;
@@ -163,14 +192,17 @@ class PageSlideTransitionState extends State<PageSlideTransition>
     _targetOffset = target;
     _isAnimatingDrag = true;
     final dist = (target - _dragOffset).abs();
-    final ms = _extent <= 0 ? 250
-        : absVel > 300 ? (dist / absVel * 1000).clamp(100, 350).toInt()
-        : (dist / _extent * 300).clamp(150, 350).toInt();
+    final ms = _extent <= 0
+        ? 250
+        : absVel > 300
+            ? (dist / absVel * 1000).clamp(100, 350).toInt()
+            : (dist / _extent * 300).clamp(150, 350).toInt();
     _controller.duration = Duration(milliseconds: ms);
     _dragAnimListener = () {
       if (!_isAnimatingDrag) return;
       final t = Curves.easeOut.transform(_controller.value);
-      setState(() => _dragOffset = _startOffset + (_targetOffset - _startOffset) * t);
+      setState(() =>
+          _dragOffset = _startOffset + (_targetOffset - _startOffset) * t);
     };
     _controller.addListener(_dragAnimListener!);
     _controller.forward(from: 0.0);
@@ -210,15 +242,20 @@ class PageSlideTransitionState extends State<PageSlideTransition>
 
   void _removeDragListener() {
     if (_dragAnimListener != null) {
-      _controller.removeListener(_dragAnimListener!); _dragAnimListener = null;
+      _controller.removeListener(_dragAnimListener!);
+      _dragAnimListener = null;
     }
   }
 
   void _resetDragState() {
-    _isDragging = false; _isAnimatingDrag = false;
-    _directionDetermined = false; _pagePreSwitched = false;
+    _isDragging = false;
+    _isAnimatingDrag = false;
+    _directionDetermined = false;
+    _pagePreSwitched = false;
     _determinedDirection = 0;
-    _dragSnapshot?.dispose(); _dragSnapshot = null; _dragOffset = 0;
+    _dragSnapshot?.dispose();
+    _dragSnapshot = null;
+    _dragOffset = 0;
   }
 
   @override
@@ -231,14 +268,15 @@ class PageSlideTransitionState extends State<PageSlideTransition>
   }
 
   Widget _buildDragFallback(Widget child) => ClipRect(
-    child: LayoutBuilder(builder: (_, c) {
-      _extent = _isHorizontal ? c.maxWidth : c.maxHeight;
-      return Transform.translate(
-        offset: _isHorizontal ? Offset(_dragOffset, 0) : Offset(0, _dragOffset),
-        child: child,
+        child: LayoutBuilder(builder: (_, c) {
+          _extent = _isHorizontal ? c.maxWidth : c.maxHeight;
+          return Transform.translate(
+            offset:
+                _isHorizontal ? Offset(_dragOffset, 0) : Offset(0, _dragOffset),
+            child: child,
+          );
+        }),
       );
-    }),
-  );
 
   Widget _buildDragOverlay(Widget child) {
     return ClipRect(child: LayoutBuilder(builder: (_, c) {
@@ -255,26 +293,41 @@ class PageSlideTransitionState extends State<PageSlideTransition>
       bool childUsedInAdj = false;
       if (_pagePreSwitched) {
         childUsedInAdj = true;
-        adjWidget = Transform.translate(offset: adj,
-          child: SizedBox(width: c.maxWidth, height: c.maxHeight, child: child));
+        adjWidget = Transform.translate(
+            offset: adj,
+            child:
+                SizedBox(width: c.maxWidth, height: c.maxHeight, child: child));
       } else if (fwd && widget.addPagePreview != null) {
-        adjWidget = Transform.translate(offset: adj, child: SizedBox(
-            width: c.maxWidth, height: c.maxHeight, child: widget.addPagePreview));
+        adjWidget = Transform.translate(
+            offset: adj,
+            child: SizedBox(
+                width: c.maxWidth,
+                height: c.maxHeight,
+                child: widget.addPagePreview));
       } else {
-        final color = fwd ? widget.nextPagePreviewColor : widget.prevPagePreviewColor;
+        final color =
+            fwd ? widget.nextPagePreviewColor : widget.prevPagePreviewColor;
         if (color != null) {
-          adjWidget = Transform.translate(offset: adj, child: SizedBox(
-              width: c.maxWidth, height: c.maxHeight, child: ColoredBox(color: color)));
+          adjWidget = Transform.translate(
+              offset: adj,
+              child: SizedBox(
+                  width: c.maxWidth,
+                  height: c.maxHeight,
+                  child: ColoredBox(color: color)));
         } else {
           childUsedInAdj = true;
-          adjWidget = SizedBox(width: c.maxWidth, height: c.maxHeight, child: child);
+          adjWidget =
+              SizedBox(width: c.maxWidth, height: c.maxHeight, child: child);
         }
       }
       return Stack(children: [
         adjWidget,
-        Transform.translate(offset: cur, child: SizedBox(
-          width: c.maxWidth, height: c.maxHeight,
-          child: RawImage(image: _dragSnapshot, fit: BoxFit.none))),
+        Transform.translate(
+            offset: cur,
+            child: SizedBox(
+                width: c.maxWidth,
+                height: c.maxHeight,
+                child: RawImage(image: _dragSnapshot, fit: BoxFit.none))),
         if (!childUsedInAdj) Offstage(child: child),
       ]);
     }));
@@ -282,19 +335,25 @@ class PageSlideTransitionState extends State<PageSlideTransition>
 
   Widget _buildAutoAnimation(Widget child) {
     final dir = _isForward ? -1.0 : 1.0;
-    return AnimatedBuilder(animation: _controller, builder: (_, __) {
-      final t = Curves.easeInOut.transform(_controller.value);
-      return ClipRect(child: LayoutBuilder(builder: (_, c) {
-        final ext = _isHorizontal ? c.maxWidth : c.maxHeight;
-        final old = _isHorizontal ? Offset(dir * t * ext, 0) : Offset(0, dir * t * ext);
-        final nw = _isHorizontal
-            ? Offset(-dir * (1 - t) * ext, 0) : Offset(0, -dir * (1 - t) * ext);
-        return Stack(children: [
-          Transform.translate(offset: old,
-              child: RawImage(image: _snapshot, fit: BoxFit.none)),
-          Transform.translate(offset: nw, child: child),
-        ]);
-      }));
-    });
+    return AnimatedBuilder(
+        animation: _controller,
+        builder: (_, __) {
+          final t = Curves.easeInOut.transform(_controller.value);
+          return ClipRect(child: LayoutBuilder(builder: (_, c) {
+            final ext = _isHorizontal ? c.maxWidth : c.maxHeight;
+            final old = _isHorizontal
+                ? Offset(dir * t * ext, 0)
+                : Offset(0, dir * t * ext);
+            final nw = _isHorizontal
+                ? Offset(-dir * (1 - t) * ext, 0)
+                : Offset(0, -dir * (1 - t) * ext);
+            return Stack(children: [
+              Transform.translate(
+                  offset: old,
+                  child: RawImage(image: _snapshot, fit: BoxFit.none)),
+              Transform.translate(offset: nw, child: child),
+            ]);
+          }));
+        });
   }
 }

@@ -165,8 +165,7 @@ abstract class SettingsDialogs {
     AppToast.info(context, '$type sayfası yakında eklenecek');
   }
 
-  static Future<void> handleLogout(
-      BuildContext context, WidgetRef ref) async {
+  static Future<void> handleLogout(BuildContext context, WidgetRef ref) async {
     final result = await AppConfirmDialog.show(
       context: context,
       title: 'Çıkış Yap',

@@ -25,7 +25,8 @@ final sharedPreferencesProvider = Provider<SharedPreferences?>((ref) {
 });
 
 /// Provider for toolbar configuration with persistence
-final toolbarConfigProvider = StateNotifierProvider<ToolbarConfigNotifier, ToolbarConfig>((ref) {
+final toolbarConfigProvider =
+    StateNotifierProvider<ToolbarConfigNotifier, ToolbarConfig>((ref) {
   final prefs = ref.watch(sharedPreferencesProvider);
   return ToolbarConfigNotifier(prefs);
 });

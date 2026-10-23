@@ -236,7 +236,8 @@ void main() {
       });
 
       test('roundtrip preserves values', () {
-        final original = BoundingBox(left: 10.5, top: 20.5, right: 30.5, bottom: 40.5);
+        final original =
+            BoundingBox(left: 10.5, top: 20.5, right: 30.5, bottom: 40.5);
         final restored = BoundingBox.fromJson(original.toJson());
 
         expect(restored, equals(original));
@@ -246,7 +247,8 @@ void main() {
     group('toString', () {
       test('returns correct string representation', () {
         final box = BoundingBox(left: 10, top: 20, right: 30, bottom: 40);
-        expect(box.toString(), 'BoundingBox(left: 10.0, top: 20.0, right: 30.0, bottom: 40.0)');
+        expect(box.toString(),
+            'BoundingBox(left: 10.0, top: 20.0, right: 30.0, bottom: 40.0)');
       });
     });
   });

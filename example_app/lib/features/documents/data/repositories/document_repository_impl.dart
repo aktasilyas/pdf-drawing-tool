@@ -32,7 +32,7 @@ class DocumentRepositoryImpl implements DocumentRepository {
           .where((doc) => !doc.isInTrash)
           .map((model) => model.toEntity())
           .toList();
-      
+
       // Return unsorted list - UI will handle sorting based on user preference
       return Right(nonTrashDocs);
     } on CacheException catch (e) {
@@ -131,7 +131,7 @@ class DocumentRepositoryImpl implements DocumentRepository {
   }) async {
     try {
       final document = await _localDatasource.getDocument(id);
-      
+
       // Manually create updated document to handle null folderId correctly
       final updated = DocumentModel(
         id: document.id,
@@ -180,7 +180,7 @@ class DocumentRepositoryImpl implements DocumentRepository {
     try {
       // Get the original document
       final original = await _localDatasource.getDocument(id);
-      
+
       // Create a copy with new ID and updated timestamps
       final now = DateTime.now();
       final duplicate = original.copyWith(
@@ -193,7 +193,7 @@ class DocumentRepositoryImpl implements DocumentRepository {
 
       // Save the duplicate
       final created = await _localDatasource.createDocument(duplicate);
-      
+
       // Copy document content if exists
       try {
         final content = await _localDatasource.getDocumentContent(id);
@@ -214,7 +214,8 @@ class DocumentRepositoryImpl implements DocumentRepository {
   }
 
   @override
-  Future<Either<Failure, void>> moveDocument(String id, String? folderId) async {
+  Future<Either<Failure, void>> moveDocument(
+      String id, String? folderId) async {
     try {
       final document = await _localDatasource.getDocument(id);
       final updated = document.copyWith(
@@ -255,10 +256,10 @@ class DocumentRepositoryImpl implements DocumentRepository {
           .where((doc) => doc.isFavorite && !doc.isInTrash)
           .map((model) => model.toEntity())
           .toList();
-      
+
       // Sort by updated date (most recent first)
       favorites.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
-      
+
       return Right(favorites);
     } on CacheException catch (e) {
       return Left(CacheFailure(e.message));
@@ -268,17 +269,18 @@ class DocumentRepositoryImpl implements DocumentRepository {
   }
 
   @override
-  Future<Either<Failure, List<DocumentInfo>>> getRecent({int limit = 10}) async {
+  Future<Either<Failure, List<DocumentInfo>>> getRecent(
+      {int limit = 10}) async {
     try {
       final documents = await _localDatasource.getAllDocuments();
       final recent = documents
           .where((doc) => !doc.isInTrash)
           .map((model) => model.toEntity())
           .toList();
-      
+
       // Sort by updated date (most recent first)
       recent.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
-      
+
       return Right(recent.take(limit).toList());
     } on CacheException catch (e) {
       return Left(CacheFailure(e.message));
@@ -294,11 +296,10 @@ class DocumentRepositoryImpl implements DocumentRepository {
       final lowerQuery = query.toLowerCase();
       final results = documents
           .where((doc) =>
-              !doc.isInTrash &&
-              doc.title.toLowerCase().contains(lowerQuery))
+              !doc.isInTrash && doc.title.toLowerCase().contains(lowerQuery))
           .map((model) => model.toEntity())
           .toList();
-      
+
       // Sort by relevance (exact match first, then by updated date)
       results.sort((a, b) {
         final aExact = a.title.toLowerCase() == lowerQuery;
@@ -307,7 +308,7 @@ class DocumentRepositoryImpl implements DocumentRepository {
         if (!aExact && bExact) return 1;
         return b.updatedAt.compareTo(a.updatedAt);
       });
-      
+
       return Right(results);
     } on CacheException catch (e) {
       return Left(CacheFailure(e.message));
@@ -318,17 +319,15 @@ class DocumentRepositoryImpl implements DocumentRepository {
 
   @override
   Stream<List<DocumentInfo>> watchDocuments({String? folderId}) {
-    return _localDatasource
-        .watchDocuments(folderId: folderId)
-        .map((documents) {
+    return _localDatasource.watchDocuments(folderId: folderId).map((documents) {
       final nonTrashDocs = documents
           .where((doc) => !doc.isInTrash)
           .map((model) => model.toEntity())
           .toList();
-      
+
       // Sort by updated date (most recent first)
       nonTrashDocs.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
-      
+
       return nonTrashDocs;
     });
   }
@@ -342,10 +341,10 @@ class DocumentRepositoryImpl implements DocumentRepository {
           .where((doc) => doc.isInTrash)
           .map((model) => model.toEntity())
           .toList();
-      
+
       // Sort by updated date (most recent first)
       trash.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
-      
+
       return Right(trash);
     } on CacheException catch (e) {
       return Left(CacheFailure(e.message));
@@ -429,7 +428,8 @@ class DocumentRepositoryImpl implements DocumentRepository {
   }
 
   @override
-  Future<Either<Failure, Map<String, dynamic>?>> getDocumentContent(String id) async {
+  Future<Either<Failure, Map<String, dynamic>?>> getDocumentContent(
+      String id) async {
     try {
       final content = await _localDatasource.getDocumentContent(id);
       return Right(content);

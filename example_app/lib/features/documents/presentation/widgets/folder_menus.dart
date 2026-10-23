@@ -18,8 +18,7 @@ void showFolderMenu(
   required VoidCallback? onDeleted,
 }) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
-  final surfaceColor =
-      isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+  final surfaceColor = isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
 
   showModalBottomSheet(
     context: context,
@@ -116,8 +115,7 @@ Widget _buildDeleteFolderTile(
   VoidCallback? onDeleted,
 ) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
-  final surfaceColor =
-      isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+  final surfaceColor = isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
   final textPrimary =
       isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
 
@@ -132,8 +130,7 @@ Widget _buildDeleteFolderTile(
         builder: (ctx) => AlertDialog(
           backgroundColor: surfaceColor,
           title: Text('Klasörü Sil',
-              style:
-                  AppTypography.titleLarge.copyWith(color: textPrimary)),
+              style: AppTypography.titleLarge.copyWith(color: textPrimary)),
           content: Text(
             folder.documentCount > 0
                 ? 'Bu klasörde ${folder.documentCount} belge var. '
@@ -165,8 +162,7 @@ Widget _buildDeleteFolderTile(
           }
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content:
-                  Text(success ? 'Klasör silindi' : 'Klasör silinemedi'),
+              content: Text(success ? 'Klasör silindi' : 'Klasör silinemedi'),
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -182,14 +178,12 @@ void _showRenameFolderDialog(
   Folder folder,
 ) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
-  final surfaceColor =
-      isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+  final surfaceColor = isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
   final textPrimary =
       isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
   final textSecondary =
       isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
-  final outlineColor =
-      isDark ? AppColors.outlineDark : AppColors.outlineLight;
+  final outlineColor = isDark ? AppColors.outlineDark : AppColors.outlineLight;
   final accentColor = isDark ? AppColors.accent : AppColors.primary;
 
   final controller = TextEditingController(text: folder.name);
@@ -212,8 +206,7 @@ void _showRenameFolderDialog(
           cursorColor: accentColor,
           decoration: InputDecoration(
             labelText: 'Klasör Adı',
-            labelStyle:
-                AppTypography.bodyMedium.copyWith(color: textSecondary),
+            labelStyle: AppTypography.bodyMedium.copyWith(color: textSecondary),
             floatingLabelStyle:
                 AppTypography.caption.copyWith(color: accentColor),
             border: OutlineInputBorder(
@@ -269,9 +262,8 @@ Widget _softDivider(bool isDark) {
   return Divider(
     height: 0.5,
     thickness: 0.5,
-    color: isDark
-        ? AppColors.outlineVariantDark
-        : AppColors.outlineVariantLight,
+    color:
+        isDark ? AppColors.outlineVariantDark : AppColors.outlineVariantLight,
     indent: 56,
   );
 }

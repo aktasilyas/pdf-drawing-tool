@@ -10,15 +10,24 @@ import 'package:example_app/core/widgets/index.dart';
 /// TemplateCategory.iconName → IconData mapping
 IconData categoryIcon(String iconName) {
   switch (iconName) {
-    case 'description': return Icons.description_outlined;
-    case 'work': return Icons.work_outline;
-    case 'palette': return Icons.palette_outlined;
-    case 'star': return Icons.star_outline;
-    case 'calendar_today': return Icons.calendar_today_outlined;
-    case 'auto_stories': return Icons.auto_stories_outlined;
-    case 'school': return Icons.school_outlined;
-    case 'checklist': return Icons.checklist_outlined;
-    default: return Icons.description_outlined;
+    case 'description':
+      return Icons.description_outlined;
+    case 'work':
+      return Icons.work_outline;
+    case 'palette':
+      return Icons.palette_outlined;
+    case 'star':
+      return Icons.star_outline;
+    case 'calendar_today':
+      return Icons.calendar_today_outlined;
+    case 'auto_stories':
+      return Icons.auto_stories_outlined;
+    case 'school':
+      return Icons.school_outlined;
+    case 'checklist':
+      return Icons.checklist_outlined;
+    default:
+      return Icons.description_outlined;
   }
 }
 

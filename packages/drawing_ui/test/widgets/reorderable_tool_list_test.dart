@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'package:drawing_ui/src/widgets/reorderable_tool_list.dart';
 import 'package:drawing_ui/src/providers/toolbar_config_provider.dart';
 
@@ -20,7 +22,10 @@ void main() {
       ],
       child: const MaterialApp(
         home: Scaffold(
-          body: SingleChildScrollView(
+          // ReorderableToolList scrolls itself; give it bounded height
+          // like the settings panel does (Expanded).
+          body: SizedBox(
+            height: 900,
             child: ReorderableToolList(),
           ),
         ),
@@ -32,8 +37,9 @@ void main() {
     await tester.pumpWidget(createTestWidget());
     await tester.pumpAndSettle();
 
-    // Check for tool names (using displayName from ToolType)
-    expect(find.text('Tükenmez Kalem'), findsOneWidget);
+    // Grouped tools (pens, highlighters, erasers) are collapsed into one row.
+    expect(find.text('Kalem'), findsOneWidget);
+    expect(find.text('Fosforlu Kalem'), findsOneWidget);
     expect(find.text('Silgi'), findsOneWidget);
     expect(find.text('Şekiller'), findsOneWidget);
   });
@@ -59,7 +65,11 @@ void main() {
     await tester.pumpWidget(createTestWidget());
     await tester.pumpAndSettle();
 
-    expect(find.byIcon(Icons.drag_handle), findsWidgets);
+    expect(
+        find.byWidgetPredicate(
+          (w) => w is PhosphorIcon && w.icon == ElyanotesIcons.dragHandle,
+        ),
+        findsWidgets);
   });
 
   testWidgets('shows tool icons', (tester) async {
@@ -67,15 +77,15 @@ void main() {
     await tester.pumpAndSettle();
 
     // Check that icons are displayed
-    expect(find.bySubtype<Icon>(), findsWidgets);
+    expect(find.byType(PhosphorIcon), findsWidgets);
   });
 
   testWidgets('displays correct number of tools', (tester) async {
     await tester.pumpWidget(createTestWidget());
     await tester.pumpAndSettle();
 
-    // Default config has 10 tools
-    final listItems = find.byType(ListTile);
-    expect(listItems, findsNWidgets(10));
+    // Default config has 9 tools; each group collapses into a single row.
+    final listItems = find.byType(ReorderableDragStartListener);
+    expect(listItems, findsNWidgets(9));
   });
 }

@@ -48,7 +48,8 @@ void main() {
 
       // Check for checkmark icon (selection indicator)
       final checkIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.check,
+        (widget) =>
+            widget is PhosphorIcon && widget.icon == ElyanotesIcons.check,
       );
       expect(checkIcon, findsOneWidget);
     });
@@ -66,7 +67,8 @@ void main() {
       );
 
       final checkIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.check,
+        (widget) =>
+            widget is PhosphorIcon && widget.icon == ElyanotesIcons.check,
       );
       expect(checkIcon, findsNothing);
     });
@@ -84,7 +86,8 @@ void main() {
       );
 
       final lockIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.lock,
+        (widget) =>
+            widget is PhosphorIcon && widget.icon == ElyanotesIcons.lock,
       );
       expect(lockIcon, findsOneWidget);
     });
@@ -102,7 +105,8 @@ void main() {
       );
 
       final lockIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.lock,
+        (widget) =>
+            widget is PhosphorIcon && widget.icon == ElyanotesIcons.lock,
       );
       expect(lockIcon, findsNothing);
     });
@@ -225,12 +229,14 @@ void main() {
       );
 
       // Text widget should exist with overflow ellipsis
-      final textWidget = tester.widget<Text>(find.text('Çok Uzun Bir Şablon Adı Burada Yazıyor'));
+      final textWidget = tester
+          .widget<Text>(find.text('Çok Uzun Bir Şablon Adı Burada Yazıyor'));
       expect(textWidget.overflow, TextOverflow.ellipsis);
       expect(textWidget.maxLines, 1);
     });
 
-    testWidgets('shows both checkmark and lock icon when selected and locked', (tester) async {
+    testWidgets('shows both checkmark and lock icon when selected and locked',
+        (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -244,10 +250,12 @@ void main() {
       );
 
       final checkIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.check,
+        (widget) =>
+            widget is PhosphorIcon && widget.icon == ElyanotesIcons.check,
       );
       final lockIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.lock,
+        (widget) =>
+            widget is PhosphorIcon && widget.icon == ElyanotesIcons.lock,
       );
       expect(checkIcon, findsOneWidget);
       expect(lockIcon, findsOneWidget);
@@ -296,7 +304,8 @@ void main() {
       );
 
       final lockIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.lock,
+        (widget) =>
+            widget is PhosphorIcon && widget.icon == ElyanotesIcons.lock,
       );
       expect(lockIcon, findsOneWidget);
     });

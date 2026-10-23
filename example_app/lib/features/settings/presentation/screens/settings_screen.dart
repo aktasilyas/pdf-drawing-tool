@@ -116,8 +116,7 @@ class SettingsScreen extends ConsumerWidget {
           icon: Icons.palette_outlined,
           title: 'Tema',
           subtitle: SettingsDialogs.getThemeText(settings.themeMode),
-          onTap: () =>
-              SettingsDialogs.showThemeDialog(context, ref, settings),
+          onTap: () => SettingsDialogs.showThemeDialog(context, ref, settings),
         ),
         const CanvasThemeSetting(),
         SettingsTile(
@@ -127,16 +126,14 @@ class SettingsScreen extends ConsumerWidget {
           trailing: Switch(
             value: pinFavorites,
             activeTrackColor: AppColors.primary,
-            onChanged: (v) =>
-                ref.read(pinFavoritesProvider.notifier).toggle(),
+            onChanged: (v) => ref.read(pinFavoritesProvider.notifier).toggle(),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildAccountSection(
-      BuildContext context, WidgetRef ref, User? user) {
+  Widget _buildAccountSection(BuildContext context, WidgetRef ref, User? user) {
     return SettingsSection(
       title: 'HESAP',
       children: [

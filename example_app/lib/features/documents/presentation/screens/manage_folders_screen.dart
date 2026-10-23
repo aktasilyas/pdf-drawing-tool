@@ -45,9 +45,8 @@ class _ManageFoldersScreenState extends ConsumerState<ManageFoldersScreen> {
         title: Text(
           'Klasörleri Yönet',
           style: AppTypography.titleLarge.copyWith(
-            color: isDark
-                ? AppColors.textPrimaryDark
-                : AppColors.textPrimaryLight,
+            color:
+                isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
           ),
         ),
         actions: [

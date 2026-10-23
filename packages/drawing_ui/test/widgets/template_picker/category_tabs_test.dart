@@ -18,7 +18,7 @@ void main() {
 
       expect(find.byType(CategoryTabs), findsOneWidget);
       expect(find.text('Tümü'), findsOneWidget);
-      
+
       // Verify ListView is rendered
       expect(find.byType(ListView), findsOneWidget);
     });
@@ -37,7 +37,8 @@ void main() {
       expect(find.text('Tümü'), findsOneWidget);
     });
 
-    testWidgets('hides "Tümü" option when showAllOption is false', (tester) async {
+    testWidgets('hides "Tümü" option when showAllOption is false',
+        (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -64,7 +65,8 @@ void main() {
         ),
       );
 
-      expect(find.text(TemplateCategory.productivity.displayName), findsOneWidget);
+      expect(
+          find.text(TemplateCategory.productivity.displayName), findsOneWidget);
     });
 
     testWidgets('highlights "Tümü" when no category selected', (tester) async {
@@ -83,7 +85,8 @@ void main() {
       expect(find.text('Tümü'), findsOneWidget);
     });
 
-    testWidgets('calls onCategorySelected when category tapped', (tester) async {
+    testWidgets('calls onCategorySelected when category tapped',
+        (tester) async {
       TemplateCategory? selectedCategory;
 
       await tester.pumpWidget(
@@ -104,7 +107,8 @@ void main() {
       expect(selectedCategory, TemplateCategory.creative);
     });
 
-    testWidgets('calls onCategorySelected with null when "Tümü" tapped', (tester) async {
+    testWidgets('calls onCategorySelected with null when "Tümü" tapped',
+        (tester) async {
       TemplateCategory? selectedCategory = TemplateCategory.basic;
 
       await tester.pumpWidget(
@@ -139,7 +143,8 @@ void main() {
 
       // Crown icons should not appear (premium badges removed)
       final crownIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.crown,
+        (widget) =>
+            widget is PhosphorIcon && widget.icon == ElyanotesIcons.crown,
       );
       expect(crownIcon, findsNothing);
     });
@@ -171,10 +176,12 @@ void main() {
       );
 
       final sizedBox = tester.widget<SizedBox>(
-        find.ancestor(
-          of: find.byType(ListView),
-          matching: find.byType(SizedBox),
-        ).first,
+        find
+            .ancestor(
+              of: find.byType(ListView),
+              matching: find.byType(SizedBox),
+            )
+            .first,
       );
 
       expect(sizedBox.height, 40);
@@ -271,7 +278,8 @@ void main() {
       }
     });
 
-    testWidgets('tap on already selected category does not crash', (tester) async {
+    testWidgets('tap on already selected category does not crash',
+        (tester) async {
       TemplateCategory? selectedCategory = TemplateCategory.creative;
 
       await tester.pumpWidget(

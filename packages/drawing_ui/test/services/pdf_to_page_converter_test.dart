@@ -106,7 +106,8 @@ void main() {
         expect(index, 5);
       });
 
-      test('should derive index from PDF page number when target not provided', () {
+      test('should derive index from PDF page number when target not provided',
+          () {
         final index = converter.determinePageIndex(
           targetIndex: null,
           pdfPageNumber: 3,
@@ -310,7 +311,9 @@ void main() {
         expect(page.index, 0);
         expect(page.size.width, 595.0);
         expect(page.size.height, 842.0);
-        expect(page.layers, isEmpty);
+        // PDF pages always get one default drawing layer.
+        expect(page.layers, hasLength(1));
+        expect(page.layers.first.isEmpty, true);
       });
 
       test('should create page with default background', () {

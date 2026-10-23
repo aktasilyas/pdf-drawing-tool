@@ -111,7 +111,7 @@ void main() {
 
         tool.onPointerDown(DrawingPoint(x: 0, y: 0));
         tool.onPointerMove(DrawingPoint(x: 50, y: 0));
-        
+
         expect(tool.isDrawing, true);
         expect(tool.currentPointCount, 2);
 

@@ -680,9 +680,8 @@ void main() {
       });
 
       test('can chain multiple addShape calls', () {
-        final layer = Layer.empty('Test')
-            .addShape(testShape1)
-            .addShape(testShape2);
+        final layer =
+            Layer.empty('Test').addShape(testShape1).addShape(testShape2);
 
         expect(layer.shapeCount, 2);
       });
@@ -1060,8 +1059,10 @@ void main() {
 
     group('removeText', () {
       test('removes text by id', () {
-        final text1 = const TextElement(id: 'text-1', text: 'Hello', x: 0, y: 0);
-        final text2 = const TextElement(id: 'text-2', text: 'World', x: 100, y: 100);
+        final text1 =
+            const TextElement(id: 'text-1', text: 'Hello', x: 0, y: 0);
+        final text2 =
+            const TextElement(id: 'text-2', text: 'World', x: 100, y: 100);
         final original = Layer(
           id: 'id',
           name: 'name',
@@ -1109,7 +1110,8 @@ void main() {
 
     group('updateText', () {
       test('updates text by id', () {
-        final text = const TextElement(id: 'text-1', text: 'Original', x: 0, y: 0);
+        final text =
+            const TextElement(id: 'text-1', text: 'Original', x: 0, y: 0);
         final original = Layer(
           id: 'id',
           name: 'name',
@@ -1147,8 +1149,10 @@ void main() {
       });
 
       test('preserves text order', () {
-        final text1 = const TextElement(id: 'text-1', text: 'First', x: 0, y: 0);
-        final text2 = const TextElement(id: 'text-2', text: 'Second', x: 100, y: 100);
+        final text1 =
+            const TextElement(id: 'text-1', text: 'First', x: 0, y: 0);
+        final text2 =
+            const TextElement(id: 'text-2', text: 'Second', x: 100, y: 100);
         final original = Layer(
           id: 'id',
           name: 'name',
@@ -1167,8 +1171,10 @@ void main() {
 
     group('getTextById', () {
       test('returns text when found', () {
-        final text1 = const TextElement(id: 'text-1', text: 'Hello', x: 0, y: 0);
-        final text2 = const TextElement(id: 'text-2', text: 'World', x: 100, y: 100);
+        final text1 =
+            const TextElement(id: 'text-1', text: 'Hello', x: 0, y: 0);
+        final text2 =
+            const TextElement(id: 'text-2', text: 'World', x: 100, y: 100);
         final layer = Layer(
           id: 'id',
           name: 'name',

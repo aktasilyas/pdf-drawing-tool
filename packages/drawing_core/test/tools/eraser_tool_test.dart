@@ -169,7 +169,8 @@ void main() {
 
     group('pixel mode', () {
       test('pixel mode works same as stroke mode for now', () {
-        final pixelEraser = EraserTool(mode: EraserMode.pixel, eraserSize: 20.0);
+        final pixelEraser =
+            EraserTool(mode: EraserMode.pixel, eraserSize: 20.0);
 
         final stroke = Stroke.create(style: StrokeStyle.pen(thickness: 2.0))
             .addPoint(DrawingPoint(x: 0, y: 50))

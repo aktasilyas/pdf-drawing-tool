@@ -17,8 +17,7 @@ class CanvasThemeSetting extends ConsumerWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor =
         isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
-    final iconColor =
-        isDark ? AppColors.primaryDarkMode : AppColors.primary;
+    final iconColor = isDark ? AppColors.primaryDarkMode : AppColors.primary;
     final iconBgColor = isDark
         ? AppColors.surfaceContainerHighDark
         : AppColors.surfaceContainerHighLight;

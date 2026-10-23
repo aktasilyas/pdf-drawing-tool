@@ -11,10 +11,10 @@ import 'package:example_app/features/premium/premium.dart';
 
 /// Dropdown menü item'ları
 enum NewDocumentOption {
-  notebook,    // 📓 Not Defteri - şablon seçimi göster
-  whiteboard,  // 🔲 Beyaz Tahta - direkt aç (infinite canvas + blank)
-  quickNote,   // ✏️ Hızlı Not - direkt aç
-  importPdf,   // 📄 PDF İçe Aktar - dosya seç, direkt aç
+  notebook, // 📓 Not Defteri - şablon seçimi göster
+  whiteboard, // 🔲 Beyaz Tahta - direkt aç (infinite canvas + blank)
+  quickNote, // ✏️ Hızlı Not - direkt aç
+  importPdf, // 📄 PDF İçe Aktar - dosya seç, direkt aç
   importImage, // 🖼️ Resim İçe Aktar - dosya seç, direkt aç
 }
 
@@ -48,8 +48,10 @@ void showNewDocumentDropdown(BuildContext context, GlobalKey buttonKey) async {
     return;
   }
 
-  final RenderBox button = buttonKey.currentContext!.findRenderObject() as RenderBox;
-  final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
+  final RenderBox button =
+      buttonKey.currentContext!.findRenderObject() as RenderBox;
+  final RenderBox overlay =
+      Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
   final Offset position = button.localToGlobal(Offset.zero, ancestor: overlay);
 
   showMenu<NewDocumentOption>(
@@ -65,12 +67,17 @@ void showNewDocumentDropdown(BuildContext context, GlobalKey buttonKey) async {
       borderRadius: BorderRadius.circular(AppRadius.card),
     ),
     items: [
-      _buildMenuItem(NewDocumentOption.notebook, Icons.book_outlined, 'Not Defteri'),
-      _buildMenuItem(NewDocumentOption.whiteboard, Icons.space_dashboard_outlined, 'Beyaz Tahta'),
-      _buildMenuItem(NewDocumentOption.quickNote, Icons.note_outlined, 'Hızlı Not'),
+      _buildMenuItem(
+          NewDocumentOption.notebook, Icons.book_outlined, 'Not Defteri'),
+      _buildMenuItem(NewDocumentOption.whiteboard,
+          Icons.space_dashboard_outlined, 'Beyaz Tahta'),
+      _buildMenuItem(
+          NewDocumentOption.quickNote, Icons.note_outlined, 'Hızlı Not'),
       const PopupMenuDivider(height: 1),
-      _buildMenuItem(NewDocumentOption.importPdf, Icons.picture_as_pdf_outlined, 'PDF İçe Aktar'),
-      _buildMenuItem(NewDocumentOption.importImage, Icons.image_outlined, 'Resim İçe Aktar'),
+      _buildMenuItem(NewDocumentOption.importPdf, Icons.picture_as_pdf_outlined,
+          'PDF İçe Aktar'),
+      _buildMenuItem(NewDocumentOption.importImage, Icons.image_outlined,
+          'Resim İçe Aktar'),
     ],
   ).then((value) {
     if (value == null) return;
@@ -115,8 +122,7 @@ PopupMenuItem<NewDocumentOption> _buildMenuItem(
             Expanded(
               child: Text(
                 label,
-                style:
-                    AppTypography.bodyMedium.copyWith(color: textPrimary),
+                style: AppTypography.bodyMedium.copyWith(color: textPrimary),
               ),
             ),
           ],
@@ -126,7 +132,8 @@ PopupMenuItem<NewDocumentOption> _buildMenuItem(
   );
 }
 
-void _handleNewDocumentOption(BuildContext context, NewDocumentOption option) async {
+void _handleNewDocumentOption(
+    BuildContext context, NewDocumentOption option) async {
   // Unified total document limit already checked in showNewDocumentDropdown.
   // If dropdown is shown, user is within limit.
   if (!context.mounted) return;

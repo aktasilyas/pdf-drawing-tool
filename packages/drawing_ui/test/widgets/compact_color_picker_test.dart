@@ -18,7 +18,7 @@ void main() {
       ),
     );
 
-    expect(find.text('Renk paleti'), findsOneWidget);
-    expect(find.text('Renk Seti'), findsOneWidget);
+    expect(find.text('Kartelalar'), findsOneWidget);
+    expect(find.text('Spektrum'), findsOneWidget);
   });
 }

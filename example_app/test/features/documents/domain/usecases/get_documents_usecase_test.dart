@@ -50,7 +50,7 @@ void main() {
       // Arrange
       const folderId = 'folder-1';
       final folderDocuments = [testDocuments.first];
-      
+
       when(() => mockRepository.getDocuments(folderId: folderId))
           .thenAnswer((_) async => Right(folderDocuments));
 
@@ -78,14 +78,15 @@ void main() {
 
     test('should return empty list when no documents exist', () async {
       // Arrange
-      when(() => mockRepository.getDocuments(folderId: null))
-          .thenAnswer((_) async => const Right<Failure, List<DocumentInfo>>([]));
+      when(() => mockRepository.getDocuments(folderId: null)).thenAnswer(
+          (_) async => const Right<Failure, List<DocumentInfo>>([]));
 
       // Act
       final result = await useCase();
 
       // Assert
-      result.fold((_) => fail('expected Right'), (docs) => expect(docs, isEmpty));
+      result.fold(
+          (_) => fail('expected Right'), (docs) => expect(docs, isEmpty));
       result.fold(
         (_) => fail('Should return empty list'),
         (documents) => expect(documents, isEmpty),

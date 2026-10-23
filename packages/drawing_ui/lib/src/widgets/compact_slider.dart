@@ -1,5 +1,6 @@
 /// Compact slider widget for panel settings.
 import 'package:flutter/material.dart';
+
 /// Compact slider with inline title and value label.
 ///
 /// Commonly used in tool settings panels for adjusting numeric values
@@ -100,8 +101,10 @@ class CompactSlider extends StatelessWidget {
           child: SliderTheme(
             data: SliderThemeData(
               trackHeight: trackHeight,
-              thumbShape: RoundSliderThumbShape(enabledThumbRadius: thumbRadius),
-              overlayShape: RoundSliderOverlayShape(overlayRadius: thumbRadius * 2),
+              thumbShape:
+                  RoundSliderThumbShape(enabledThumbRadius: thumbRadius),
+              overlayShape:
+                  RoundSliderOverlayShape(overlayRadius: thumbRadius * 2),
               activeTrackColor: activeColor ?? colorScheme.primary,
               inactiveTrackColor: inactiveColor ?? colorScheme.outlineVariant,
               thumbColor: activeColor ?? colorScheme.primary,

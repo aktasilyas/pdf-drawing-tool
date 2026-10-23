@@ -52,8 +52,8 @@ class TemplatePicker extends StatefulWidget {
         context: context,
         builder: (_) => Dialog(
           backgroundColor: Theme.of(context).colorScheme.surface,
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           child: SizedBox(width: 780, height: 620, child: picker),
         ),
       );
@@ -67,7 +67,9 @@ class TemplatePicker extends StatefulWidget {
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (_) => DraggableScrollableSheet(
-        initialChildSize: 0.90, minChildSize: 0.5, maxChildSize: 0.95,
+        initialChildSize: 0.90,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
         expand: false,
         builder: (_, __) => picker,
       ),
@@ -163,8 +165,8 @@ class _TemplatePickerState extends State<TemplatePicker>
         controller: _tabController,
         labelColor: cs.primary,
         unselectedLabelColor: cs.onSurfaceVariant,
-        labelStyle: theme.textTheme.titleSmall
-            ?.copyWith(fontWeight: FontWeight.w600),
+        labelStyle:
+            theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
         unselectedLabelStyle: theme.textTheme.titleSmall,
         indicatorColor: cs.primary,
         indicatorWeight: 2.5,
@@ -197,8 +199,8 @@ class _TemplatePickerState extends State<TemplatePicker>
     return Container(
       decoration: BoxDecoration(
         color: cs.surfaceContainerLow,
-        border: Border(
-            top: BorderSide(color: cs.outline.withValues(alpha: 0.2))),
+        border:
+            Border(top: BorderSide(color: cs.outline.withValues(alpha: 0.2))),
       ),
       child: SafeArea(
         top: false,
@@ -252,8 +254,8 @@ class _TemplatePickerState extends State<TemplatePicker>
                     shape: RoundedRectangleBorder(borderRadius: radius),
                   ),
                   child: const Text('Uygula',
-                      style: TextStyle(
-                          fontSize: 14, fontWeight: FontWeight.w600)),
+                      style:
+                          TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                 ),
               ],
             ),

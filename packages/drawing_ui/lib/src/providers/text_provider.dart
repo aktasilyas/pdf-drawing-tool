@@ -10,7 +10,8 @@ import 'package:drawing_ui/src/providers/toolbar_config_provider.dart';
 class TextToolState {
   final bool isEditing;
   final TextElement? activeText;
-  final bool isNewText; // true = yeni oluşturuluyor, false = mevcut düzenleniyor
+  final bool
+      isNewText; // true = yeni oluşturuluyor, false = mevcut düzenleniyor
   final bool showMenu; // Menu gösteriliyor mu?
   final TextElement? menuText; // Hangi text için menu gösteriliyor?
   final bool showStylePopup; // Stil popup gösteriliyor mu?
