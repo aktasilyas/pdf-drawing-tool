@@ -7,7 +7,9 @@ void main() {
   group('PenTool', () {
     group('Constructor', () {
       test('creates with default pen style', () {
-        final tool = PenTool();
+        final tool = PenTool(
+          inputFilter: null,
+        );
 
         expect(tool.style.color, 0xFF000000); // black
         expect(tool.style.thickness, 2.0);
@@ -20,7 +22,7 @@ void main() {
           color: 0xFFFF0000,
           thickness: 5.0,
         );
-        final tool = PenTool(style: customStyle);
+        final tool = PenTool(inputFilter: null, style: customStyle);
 
         expect(tool.style.color, 0xFFFF0000);
         expect(tool.style.thickness, 5.0);
@@ -29,7 +31,9 @@ void main() {
 
     group('onPointerDown', () {
       test('starts drawing operation', () {
-        final tool = PenTool();
+        final tool = PenTool(
+          inputFilter: null,
+        );
         final point = DrawingPoint(x: 10, y: 20);
 
         expect(tool.isDrawing, false);
@@ -42,7 +46,9 @@ void main() {
       });
 
       test('clears previous points on new drawing', () {
-        final tool = PenTool();
+        final tool = PenTool(
+          inputFilter: null,
+        );
 
         // First drawing
         tool.onPointerDown(DrawingPoint(x: 0, y: 0));
@@ -60,7 +66,9 @@ void main() {
 
     group('onPointerMove', () {
       test('adds point when drawing', () {
-        final tool = PenTool();
+        final tool = PenTool(
+          inputFilter: null,
+        );
 
         tool.onPointerDown(DrawingPoint(x: 0, y: 0));
         tool.onPointerMove(DrawingPoint(x: 10, y: 10));
@@ -70,7 +78,9 @@ void main() {
       });
 
       test('ignores move when not drawing', () {
-        final tool = PenTool();
+        final tool = PenTool(
+          inputFilter: null,
+        );
 
         tool.onPointerMove(DrawingPoint(x: 10, y: 10));
 
@@ -79,7 +89,9 @@ void main() {
       });
 
       test('adds multiple points correctly', () {
-        final tool = PenTool();
+        final tool = PenTool(
+          inputFilter: null,
+        );
         final points = [
           DrawingPoint(x: 0, y: 0),
           DrawingPoint(x: 10, y: 10),
@@ -103,7 +115,9 @@ void main() {
 
     group('onPointerUp', () {
       test('returns stroke and ends drawing', () {
-        final tool = PenTool();
+        final tool = PenTool(
+          inputFilter: null,
+        );
 
         tool.onPointerDown(DrawingPoint(x: 0, y: 0));
         tool.onPointerMove(DrawingPoint(x: 10, y: 10));
@@ -118,7 +132,9 @@ void main() {
       });
 
       test('returns null when not drawing', () {
-        final tool = PenTool();
+        final tool = PenTool(
+          inputFilter: null,
+        );
 
         final stroke = tool.onPointerUp();
 
@@ -130,7 +146,7 @@ void main() {
           color: 0xFF00FF00,
           thickness: 8.0,
         );
-        final tool = PenTool(style: customStyle);
+        final tool = PenTool(inputFilter: null, style: customStyle);
 
         tool.onPointerDown(DrawingPoint(x: 0, y: 0));
         final stroke = tool.onPointerUp();
@@ -140,7 +156,9 @@ void main() {
       });
 
       test('returns stroke with single point', () {
-        final tool = PenTool();
+        final tool = PenTool(
+          inputFilter: null,
+        );
 
         tool.onPointerDown(DrawingPoint(x: 50, y: 50));
         final stroke = tool.onPointerUp();
@@ -150,7 +168,9 @@ void main() {
       });
 
       test('clears points after creating stroke', () {
-        final tool = PenTool();
+        final tool = PenTool(
+          inputFilter: null,
+        );
 
         tool.onPointerDown(DrawingPoint(x: 0, y: 0));
         tool.onPointerMove(DrawingPoint(x: 10, y: 10));
@@ -167,7 +187,9 @@ void main() {
 
     group('updateStyle', () {
       test('updates style for future strokes', () {
-        final tool = PenTool();
+        final tool = PenTool(
+          inputFilter: null,
+        );
 
         expect(tool.style.color, 0xFF000000);
 
@@ -177,7 +199,8 @@ void main() {
       });
 
       test('does not affect current drawing', () {
-        final tool = PenTool(style: StrokeStyle.pen(color: 0xFF000000));
+        final tool = PenTool(
+            inputFilter: null, style: StrokeStyle.pen(color: 0xFF000000));
 
         tool.onPointerDown(DrawingPoint(x: 0, y: 0));
         tool.onPointerMove(DrawingPoint(x: 10, y: 10));
@@ -195,7 +218,9 @@ void main() {
 
     group('cancel', () {
       test('clears current points', () {
-        final tool = PenTool();
+        final tool = PenTool(
+          inputFilter: null,
+        );
 
         tool.onPointerDown(DrawingPoint(x: 0, y: 0));
         tool.onPointerMove(DrawingPoint(x: 10, y: 10));
@@ -211,7 +236,9 @@ void main() {
       });
 
       test('can start new drawing after cancel', () {
-        final tool = PenTool();
+        final tool = PenTool(
+          inputFilter: null,
+        );
 
         tool.onPointerDown(DrawingPoint(x: 0, y: 0));
         tool.cancel();
@@ -224,7 +251,9 @@ void main() {
       });
 
       test('cancel when not drawing has no effect', () {
-        final tool = PenTool();
+        final tool = PenTool(
+          inputFilter: null,
+        );
 
         tool.cancel(); // Should not throw
 
@@ -235,7 +264,9 @@ void main() {
 
     group('currentPoints immutability', () {
       test('currentPoints returns unmodifiable list', () {
-        final tool = PenTool();
+        final tool = PenTool(
+          inputFilter: null,
+        );
 
         tool.onPointerDown(DrawingPoint(x: 0, y: 0));
         final points = tool.currentPoints;
@@ -247,7 +278,9 @@ void main() {
       });
 
       test('modifying returned list does not affect tool', () {
-        final tool = PenTool();
+        final tool = PenTool(
+          inputFilter: null,
+        );
 
         tool.onPointerDown(DrawingPoint(x: 0, y: 0));
         tool.onPointerMove(DrawingPoint(x: 10, y: 10));
@@ -269,6 +302,7 @@ void main() {
     group('Complete drawing flow', () {
       test('full drawing cycle produces correct stroke', () {
         final tool = PenTool(
+          inputFilter: null,
           style: StrokeStyle.pen(color: 0xFF0000FF, thickness: 3.0),
         );
 
@@ -292,7 +326,9 @@ void main() {
       });
 
       test('multiple drawing cycles', () {
-        final tool = PenTool();
+        final tool = PenTool(
+          inputFilter: null,
+        );
 
         // First stroke
         tool.onPointerDown(DrawingPoint(x: 0, y: 0));
@@ -311,7 +347,9 @@ void main() {
       });
 
       test('style change between strokes', () {
-        final tool = PenTool();
+        final tool = PenTool(
+          inputFilter: null,
+        );
 
         // First stroke with default style
         tool.onPointerDown(DrawingPoint(x: 0, y: 0));
