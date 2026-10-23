@@ -116,7 +116,7 @@ void main() {
       );
 
       expect(find.byType(PenIconWidget), findsNothing);
-      expect(find.byType(Icon), findsOneWidget);
+      expect(find.bySubtype<Icon>(), findsOneWidget);
     });
 
     testWidgets('uses custom color when provided', (tester) async {

@@ -86,5 +86,7 @@ change without asking). Any UI work follows the `design-loop` skill: spec from
 ## Environment notes
 - The owner develops on Windows (WSL paths like `/mnt/c/...`). Cloud sessions run
   Ubuntu with Flutter installed by `scripts/cloud-setup.sh`.
+- Flutter SDK is pinned in `.flutter-version` (read by CI and cloud-setup). Bump it
+  there only, together with regenerated `pubspec.lock` files.
 - No `ios/` folder yet; Android is the first release target.
 - `flutter_pen_toolbar` is a git dependency (github.com/aktasilyas/flutter_pen_toolbar).
