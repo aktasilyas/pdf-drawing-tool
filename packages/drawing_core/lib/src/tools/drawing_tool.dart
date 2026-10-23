@@ -16,8 +16,17 @@ abstract class DrawingTool {
   /// Whether a drawing operation is currently in progress.
   bool _isDrawing = false;
 
+  /// Optional input stabilization (One Euro filter + resampling).
+  /// Null disables it and raw points are recorded.
+  final StrokeInputFilter? _inputFilter;
+
   /// Creates a new [DrawingTool] with the given style.
-  DrawingTool(StrokeStyle style) : _style = style;
+  ///
+  /// Pass [inputFilter] to stabilize and resample incoming points.
+  DrawingTool(StrokeStyle style, {StrokeInputFilterConfig? inputFilter})
+      : _style = style,
+        _inputFilter =
+            inputFilter == null ? null : StrokeInputFilter(inputFilter);
 
   /// Whether a drawing operation is currently in progress.
   bool get isDrawing => _isDrawing;
@@ -39,7 +48,7 @@ abstract class DrawingTool {
   void onPointerDown(DrawingPoint point) {
     _isDrawing = true;
     _currentPoints.clear();
-    _currentPoints.add(point);
+    _currentPoints.add(_inputFilter?.begin(point) ?? point);
   }
 
   /// Called when the pointer moves (touch move / mouse move).
@@ -47,7 +56,12 @@ abstract class DrawingTool {
   /// Records additional points if a drawing operation is in progress.
   void onPointerMove(DrawingPoint point) {
     if (_isDrawing) {
-      _currentPoints.add(point);
+      final filter = _inputFilter;
+      if (filter == null) {
+        _currentPoints.add(point);
+      } else {
+        _currentPoints.addAll(filter.add(point));
+      }
     }
   }
 
@@ -62,6 +76,9 @@ abstract class DrawingTool {
     }
 
     _isDrawing = false;
+
+    final tail = _inputFilter?.end();
+    if (tail != null) _currentPoints.add(tail);
 
     if (_currentPoints.isEmpty) {
       return null;

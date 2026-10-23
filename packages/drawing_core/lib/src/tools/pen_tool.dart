@@ -7,8 +7,13 @@ import 'package:drawing_core/src/internal.dart';
 class PenTool extends DrawingTool {
   /// Creates a new [PenTool].
   ///
+  /// Input stabilization is on by default; pass `inputFilter: null` to disable.
+  ///
   /// If no [style] is provided, uses [StrokeStyle.pen] as the default.
-  PenTool({StrokeStyle? style}) : super(style ?? StrokeStyle.pen());
+  PenTool({
+    StrokeStyle? style,
+    StrokeInputFilterConfig? inputFilter = const StrokeInputFilterConfig(),
+  }) : super(style ?? StrokeStyle.pen(), inputFilter: inputFilter);
 
   @override
   Stroke createStroke(List<DrawingPoint> points, StrokeStyle style) {

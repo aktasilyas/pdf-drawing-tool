@@ -7,7 +7,9 @@ void main() {
   group('BrushTool', () {
     group('Constructor', () {
       test('creates with default brush style', () {
-        final tool = BrushTool();
+        final tool = BrushTool(
+          inputFilter: null,
+        );
 
         expect(tool.style.color, 0xFF000000); // black
         expect(tool.style.thickness, 5.0);
@@ -21,7 +23,7 @@ void main() {
           color: 0xFFFF0000, // red
           thickness: 10.0,
         );
-        final tool = BrushTool(style: customStyle);
+        final tool = BrushTool(inputFilter: null, style: customStyle);
 
         expect(tool.style.color, 0xFFFF0000);
         expect(tool.style.thickness, 10.0);
@@ -29,14 +31,18 @@ void main() {
       });
 
       test('nibShape is ellipse for default brush', () {
-        final tool = BrushTool();
+        final tool = BrushTool(
+          inputFilter: null,
+        );
         expect(tool.style.nibShape, NibShape.ellipse);
       });
     });
 
     group('Drawing flow', () {
       test('complete drawing cycle produces correct stroke', () {
-        final tool = BrushTool();
+        final tool = BrushTool(
+          inputFilter: null,
+        );
 
         tool.onPointerDown(DrawingPoint(x: 0, y: 0, pressure: 0.3));
         tool.onPointerMove(DrawingPoint(x: 10, y: 5, pressure: 0.5));
@@ -54,6 +60,7 @@ void main() {
 
       test('stroke preserves brush style properties', () {
         final tool = BrushTool(
+          inputFilter: null,
           style: StrokeStyle.brush(color: 0xFF00FF00, thickness: 8.0),
         );
 
@@ -68,7 +75,9 @@ void main() {
 
     group('Pressure sensitivity', () {
       test('pressure values are preserved in stroke points', () {
-        final tool = BrushTool();
+        final tool = BrushTool(
+          inputFilter: null,
+        );
 
         tool.onPointerDown(DrawingPoint(x: 0, y: 0, pressure: 0.2));
         tool.onPointerMove(DrawingPoint(x: 10, y: 10, pressure: 0.5));
@@ -84,7 +93,9 @@ void main() {
       });
 
       test('varying pressure creates correct stroke data', () {
-        final tool = BrushTool();
+        final tool = BrushTool(
+          inputFilter: null,
+        );
 
         // Simulate pressure curve: light start, heavy middle, light end
         final pressureValues = [0.1, 0.3, 0.6, 0.9, 1.0, 0.8, 0.5, 0.2];
@@ -112,7 +123,9 @@ void main() {
 
     group('Style updates', () {
       test('updateStyle changes future strokes', () {
-        final tool = BrushTool();
+        final tool = BrushTool(
+          inputFilter: null,
+        );
 
         tool.updateStyle(StrokeStyle.brush(color: 0xFF0000FF, thickness: 15.0));
 
@@ -126,7 +139,9 @@ void main() {
 
     group('Multiple strokes', () {
       test('multiple drawing cycles work correctly', () {
-        final tool = BrushTool();
+        final tool = BrushTool(
+          inputFilter: null,
+        );
 
         // First stroke
         tool.onPointerDown(DrawingPoint(x: 0, y: 0, pressure: 0.5));
@@ -149,7 +164,9 @@ void main() {
 
     group('Cancel', () {
       test('cancel clears drawing state', () {
-        final tool = BrushTool();
+        final tool = BrushTool(
+          inputFilter: null,
+        );
 
         tool.onPointerDown(DrawingPoint(x: 0, y: 0, pressure: 0.5));
         tool.onPointerMove(DrawingPoint(x: 10, y: 10, pressure: 0.7));
@@ -164,7 +181,9 @@ void main() {
       });
 
       test('can draw after cancel', () {
-        final tool = BrushTool();
+        final tool = BrushTool(
+          inputFilter: null,
+        );
 
         tool.onPointerDown(DrawingPoint(x: 0, y: 0));
         tool.cancel();

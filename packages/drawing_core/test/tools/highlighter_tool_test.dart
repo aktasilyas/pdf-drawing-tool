@@ -7,7 +7,9 @@ void main() {
   group('HighlighterTool', () {
     group('Constructor', () {
       test('creates with default highlighter style', () {
-        final tool = HighlighterTool();
+        final tool = HighlighterTool(
+          inputFilter: null,
+        );
 
         expect(tool.style.color, 0xFFFFEB3B); // yellow
         expect(tool.style.thickness, 20.0);
@@ -21,7 +23,7 @@ void main() {
           color: 0xFF00FF00, // green
           thickness: 15.0,
         );
-        final tool = HighlighterTool(style: customStyle);
+        final tool = HighlighterTool(inputFilter: null, style: customStyle);
 
         expect(tool.style.color, 0xFF00FF00);
         expect(tool.style.thickness, 15.0);
@@ -30,19 +32,25 @@ void main() {
       });
 
       test('opacity is 0.5 for default highlighter', () {
-        final tool = HighlighterTool();
+        final tool = HighlighterTool(
+          inputFilter: null,
+        );
         expect(tool.style.opacity, 0.5);
       });
 
       test('nibShape is rectangle for default highlighter', () {
-        final tool = HighlighterTool();
+        final tool = HighlighterTool(
+          inputFilter: null,
+        );
         expect(tool.style.nibShape, NibShape.rectangle);
       });
     });
 
     group('Drawing flow', () {
       test('complete drawing cycle produces correct stroke', () {
-        final tool = HighlighterTool();
+        final tool = HighlighterTool(
+          inputFilter: null,
+        );
 
         tool.onPointerDown(DrawingPoint(x: 0, y: 0));
         tool.onPointerMove(DrawingPoint(x: 50, y: 5));
@@ -61,6 +69,7 @@ void main() {
 
       test('stroke preserves highlighter style properties', () {
         final tool = HighlighterTool(
+          inputFilter: null,
           style: StrokeStyle.highlighter(color: 0xFFFF00FF),
         );
 
@@ -73,7 +82,9 @@ void main() {
       });
 
       test('multiple strokes work correctly', () {
-        final tool = HighlighterTool();
+        final tool = HighlighterTool(
+          inputFilter: null,
+        );
 
         // First stroke
         tool.onPointerDown(DrawingPoint(x: 0, y: 0));
@@ -94,7 +105,9 @@ void main() {
 
     group('Style updates', () {
       test('updateStyle changes future strokes', () {
-        final tool = HighlighterTool();
+        final tool = HighlighterTool(
+          inputFilter: null,
+        );
 
         tool.updateStyle(StrokeStyle.highlighter(color: 0xFF0000FF));
 
@@ -107,7 +120,9 @@ void main() {
 
     group('Cancel', () {
       test('cancel clears drawing state', () {
-        final tool = HighlighterTool();
+        final tool = HighlighterTool(
+          inputFilter: null,
+        );
 
         tool.onPointerDown(DrawingPoint(x: 0, y: 0));
         tool.onPointerMove(DrawingPoint(x: 50, y: 0));
