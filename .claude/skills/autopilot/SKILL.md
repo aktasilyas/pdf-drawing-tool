@@ -16,6 +16,16 @@ GitHub: REST only via `gh api` (no GraphQL). `R=repos/aktasilyas/pdf-drawing-too
   close PRs, delete branches, change repository settings.
 - If any action is denied: do not retry it or try another route. Note it in the
   log and continue with the next step of this skill.
+- The VM is discarded after the run. Never clean, reset, checkout or stash files
+  to tidy up; leftover uncommitted files are harmless. Only commit what the task needs.
+
+## Decide before asking
+Ask the owner (`needs-decision`) only for product or business choices
+(scope, naming, visuals, money, accounts). Technical choices are yours: weigh
+the options against CLAUDE.md and the `architect` subagent, pick the one that
+keeps the codebase on current stable tooling with the least churn, explain it
+in the PR, and proceed. Before proposing options, search for a maintained
+replacement or upstream fix.
 Find the status issue: `gh api "$R/issues?labels=autopilot-status&state=open"`.
 
 ## 1. Tend open agent PRs first
