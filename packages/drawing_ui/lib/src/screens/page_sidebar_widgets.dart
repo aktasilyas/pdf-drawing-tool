@@ -1,7 +1,7 @@
 /// Widgets for the page navigator sidebar: grid item and add-page cell.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
 
 import 'package:drawing_ui/src/panels/panels.dart';

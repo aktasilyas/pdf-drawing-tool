@@ -20,7 +20,7 @@ dependencies:
       url: https://github.com/aktasilyas/flutter_pen_toolbar.git
       ref: main
   flex_color_picker: ^3.8.0
-  phosphor_flutter: ^2.1.0
+  phosphor_icons: ^3.0.1
   file_picker: ^8.0.0  # File import (PDF, images) from device storage
   image_picker: ^1.0.0  # Image selection from gallery/camera
   pdfx: ^2.6.0  # PDF rendering and import

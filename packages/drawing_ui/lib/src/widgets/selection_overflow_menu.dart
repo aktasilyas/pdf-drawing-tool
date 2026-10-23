@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_ui/src/models/selection_action.dart';
 import 'package:drawing_ui/src/theme/drawing_shadows.dart';
 

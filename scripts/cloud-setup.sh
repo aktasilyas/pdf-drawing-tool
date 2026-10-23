@@ -5,7 +5,8 @@
 set -euo pipefail
 
 FLUTTER_DIR=/opt/flutter
-FLUTTER_BRANCH="${FLUTTER_BRANCH:-stable}"
+# Pinned SDK tag; keep in sync with .flutter-version (CI reads the same file).
+FLUTTER_BRANCH="${FLUTTER_BRANCH:-$(cat "$(dirname "$0")/../.flutter-version")}"
 
 if [ ! -x "$FLUTTER_DIR/bin/flutter" ]; then
   git clone --depth 1 --branch "$FLUTTER_BRANCH" https://github.com/flutter/flutter.git "$FLUTTER_DIR"

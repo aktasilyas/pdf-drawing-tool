@@ -43,7 +43,7 @@ void main() {
       final result = await useCase(query);
 
       // Assert
-      expect(result, Right([testDocuments.first]));
+      expect(result.getOrElse(() => []), [testDocuments.first]);
       verify(() => mockRepository.search(query)).called(1);
     });
 
@@ -52,7 +52,7 @@ void main() {
       final result = await useCase('');
 
       // Assert
-      expect(result, const Right([]));
+      result.fold((_) => fail('expected Right'), (docs) => expect(docs, isEmpty));
       verifyNever(() => mockRepository.search(any()));
     });
 
@@ -61,7 +61,7 @@ void main() {
       final result = await useCase('   ');
 
       // Assert
-      expect(result, const Right([]));
+      result.fold((_) => fail('expected Right'), (docs) => expect(docs, isEmpty));
       verifyNever(() => mockRepository.search(any()));
     });
 
@@ -76,7 +76,7 @@ void main() {
       final result = await useCase(query);
 
       // Assert
-      expect(result, const Left(failure));
+      expect(result, const Left<Failure, List<DocumentInfo>>(failure));
       verify(() => mockRepository.search(query)).called(1);
     });
 
@@ -84,13 +84,13 @@ void main() {
       // Arrange
       const query = 'nonexistent';
       when(() => mockRepository.search(query))
-          .thenAnswer((_) async => const Right([]));
+          .thenAnswer((_) async => const Right<Failure, List<DocumentInfo>>([]));
 
       // Act
       final result = await useCase(query);
 
       // Assert
-      expect(result, const Right([]));
+      result.fold((_) => fail('expected Right'), (docs) => expect(docs, isEmpty));
       result.fold(
         (_) => fail('Should return empty list'),
         (documents) => expect(documents, isEmpty),

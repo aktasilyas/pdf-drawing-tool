@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:phosphor_icons/phosphor_icons.dart';
 
 /// Darkens a color by the given amount (0.0 to 1.0).
 Color darkenColor(Color c, double amt) {

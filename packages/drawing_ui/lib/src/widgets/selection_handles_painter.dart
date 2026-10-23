@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:drawing_core/drawing_core.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:phosphor_icons/phosphor_icons.dart';
 
 /// Paints selection handles: blue border, 4 corner circles, 4 edge rectangles,
 /// and rotation handle with refresh icon. Supports live move/rotation/scale preview.

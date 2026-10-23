@@ -23,6 +23,7 @@ jobs:
 
       - uses: subosito/flutter-action@v2
         with:
+          flutter-version-file: .flutter-version
           channel: stable
           cache: true
 

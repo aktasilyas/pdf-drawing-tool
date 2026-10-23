@@ -67,7 +67,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Check that icons are displayed
-    expect(find.byType(Icon), findsWidgets);
+    expect(find.bySubtype<Icon>(), findsWidgets);
   });
 
   testWidgets('displays correct number of tools', (tester) async {

@@ -65,7 +65,9 @@ void main() {
           ),
         ),
       );
-      await tester.pumpAndSettle();
+      // The spinner animates forever, so pumpAndSettle would time out.
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
 
       // Assert
       expect(find.byType(CircularProgressIndicator), findsOneWidget);

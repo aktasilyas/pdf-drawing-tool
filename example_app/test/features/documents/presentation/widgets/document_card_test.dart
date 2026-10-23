@@ -41,22 +41,22 @@ void main() {
       expect(find.textContaining('5 sayfa'), findsOneWidget);
     });
 
-    testWidgets('should show favorite icon when favorited', (tester) async {
+    testWidgets('should show star icon when favorited', (tester) async {
       // Arrange
       final favDocument = testDocument.copyWith(isFavorite: true);
       await tester.pumpWidget(createTestWidget(favDocument));
 
       // Assert
-      expect(find.byIcon(Icons.favorite), findsOneWidget);
+      expect(find.byIcon(Icons.star), findsOneWidget);
     });
 
-    testWidgets('should show favorite_border icon when not favorited',
+    testWidgets('should show star_outline icon when not favorited',
         (tester) async {
       // Arrange
       await tester.pumpWidget(createTestWidget(testDocument));
 
       // Assert
-      expect(find.byIcon(Icons.favorite_border), findsOneWidget);
+      expect(find.byIcon(Icons.star_outline), findsOneWidget);
     });
 
     testWidgets('should call onTap when card is tapped', (tester) async {
@@ -98,7 +98,7 @@ void main() {
       );
 
       // Act
-      await tester.tap(find.byIcon(Icons.favorite_border));
+      await tester.tap(find.byIcon(Icons.star_outline));
       await tester.pump();
 
       // Assert
@@ -122,7 +122,7 @@ void main() {
       );
 
       // Act
-      await tester.tap(find.byIcon(Icons.more_vert));
+      await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
       await tester.pump();
 
       // Assert

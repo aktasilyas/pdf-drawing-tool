@@ -78,7 +78,7 @@ void main() {
         );
 
         // Assert
-        final icon = tester.widget<Icon>(find.byIcon(Icons.folder));
+        final icon = tester.widget<Icon>(find.byIcon(Icons.folder_rounded));
         expect(icon.color, equals(Color(testFolder.colorValue)));
       });
     });
@@ -122,7 +122,7 @@ void main() {
         );
 
         // Assert
-        final icon = tester.widget<Icon>(find.byIcon(Icons.folder));
+        final icon = tester.widget<Icon>(find.byIcon(Icons.folder_rounded));
         expect(icon.color, equals(Color(testFolder.colorValue)));
       });
     });
@@ -145,7 +145,8 @@ void main() {
             (widget) =>
                 widget is Container &&
                 widget.decoration is BoxDecoration &&
-                (widget.decoration as BoxDecoration).shape == BoxShape.circle,
+                (widget.decoration as BoxDecoration).shape == BoxShape.circle &&
+                widget.constraints == const BoxConstraints.tightFor(width: 24, height: 24),
           ),
           findsNothing,
         );
@@ -168,7 +169,8 @@ void main() {
             (widget) =>
                 widget is Container &&
                 widget.decoration is BoxDecoration &&
-                (widget.decoration as BoxDecoration).shape == BoxShape.circle,
+                (widget.decoration as BoxDecoration).shape == BoxShape.circle &&
+                widget.constraints == const BoxConstraints.tightFor(width: 24, height: 24),
           ),
         );
         final decoration = container.decoration as BoxDecoration;
@@ -193,7 +195,8 @@ void main() {
             (widget) =>
                 widget is Container &&
                 widget.decoration is BoxDecoration &&
-                (widget.decoration as BoxDecoration).shape == BoxShape.circle,
+                (widget.decoration as BoxDecoration).shape == BoxShape.circle &&
+                widget.constraints == const BoxConstraints.tightFor(width: 24, height: 24),
           ),
         );
         final decoration = container.decoration as BoxDecoration;
@@ -222,7 +225,8 @@ void main() {
             (widget) =>
                 widget is Container &&
                 widget.decoration is BoxDecoration &&
-                (widget.decoration as BoxDecoration).shape == BoxShape.circle,
+                (widget.decoration as BoxDecoration).shape == BoxShape.circle &&
+                widget.constraints == const BoxConstraints.tightFor(width: 24, height: 24),
           ),
           findsNothing,
         );
@@ -245,7 +249,8 @@ void main() {
             (widget) =>
                 widget is Container &&
                 widget.decoration is BoxDecoration &&
-                (widget.decoration as BoxDecoration).shape == BoxShape.circle,
+                (widget.decoration as BoxDecoration).shape == BoxShape.circle &&
+                widget.constraints == const BoxConstraints.tightFor(width: 24, height: 24),
           ),
         );
         final decoration = container.decoration as BoxDecoration;
@@ -270,12 +275,13 @@ void main() {
             (widget) =>
                 widget is Container &&
                 widget.decoration is BoxDecoration &&
-                (widget.decoration as BoxDecoration).shape == BoxShape.circle,
+                (widget.decoration as BoxDecoration).shape == BoxShape.circle &&
+                widget.constraints == const BoxConstraints.tightFor(width: 24, height: 24),
           ),
         );
         final decoration = container.decoration as BoxDecoration;
-        expect(decoration.color, equals(AppColors.primary));
-        expect(decoration.border?.top.color, equals(AppColors.primary));
+        expect(decoration.color, equals(AppColors.accent));
+        expect(decoration.border?.top.color, equals(AppColors.accent));
 
         // Should show check icon
         expect(find.byIcon(Icons.check), findsOneWidget);
@@ -313,7 +319,7 @@ void main() {
         );
 
         // Act
-        await tester.tap(find.byIcon(Icons.more_vert));
+        await tester.tap(find.byIcon(Icons.keyboard_arrow_down));
         await tester.pump();
 
         // Assert
@@ -334,7 +340,7 @@ void main() {
         expect(find.byIcon(Icons.more_vert), findsNothing);
       });
 
-      testWidgets('should_display_folder_name_with_max_2_lines', (tester) async {
+      testWidgets('should_display_folder_name_with_max_1_line', (tester) async {
         // Arrange
         final longNameFolder = testFolder.copyWith(
           name: 'Very Long Folder Name That Should Be Truncated After Two Lines',
@@ -347,7 +353,7 @@ void main() {
 
         // Assert
         final text = tester.widget<Text>(find.text(longNameFolder.name));
-        expect(text.maxLines, equals(2));
+        expect(text.maxLines, equals(1));
         expect(text.overflow, equals(TextOverflow.ellipsis));
       });
     });

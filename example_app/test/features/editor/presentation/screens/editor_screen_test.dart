@@ -1,7 +1,12 @@
+import 'dart:async';
+
+import 'package:dartz/dartz.dart';
+import 'package:drawing_core/drawing_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:example_app/core/core.dart';
 import 'package:example_app/features/editor/editor.dart';
 
 class MockLoadDocumentUseCase extends Mock implements LoadDocumentUseCase {}
@@ -37,11 +42,9 @@ void main() {
 
     testWidgets('should show loading indicator while loading', (tester) async {
       // Arrange
+      final completer = Completer<Either<Failure, DrawingDocument>>();
       when(() => mockLoadUseCase(testDocId))
-          .thenAnswer((_) async => Future.delayed(
-                const Duration(seconds: 1),
-                () => throw Exception('Loading'),
-              ));
+          .thenAnswer((_) => completer.future);
 
       // Act
       await tester.pumpWidget(createTestWidget(testDocId));
@@ -49,6 +52,10 @@ void main() {
 
       // Assert
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+      // Finish loading so no timers or futures outlive the test.
+      completer.complete(const Left(CacheFailure('Loading')));
+      await tester.pumpAndSettle();
     });
 
     testWidgets('should show error message when loading fails', (tester) async {
@@ -61,7 +68,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Assert
-      expect(find.text('Hata'), findsOneWidget);
+      expect(find.textContaining('Belge yüklenemedi'), findsOneWidget);
       expect(find.byIcon(Icons.error_outline), findsOneWidget);
       expect(find.text('Geri Dön'), findsOneWidget);
     });

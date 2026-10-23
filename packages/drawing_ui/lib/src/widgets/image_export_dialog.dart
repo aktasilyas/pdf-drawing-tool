@@ -1,6 +1,6 @@
 /// Dialog for image export / share options.
 import 'package:flutter/material.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 
 /// Supported image export formats.

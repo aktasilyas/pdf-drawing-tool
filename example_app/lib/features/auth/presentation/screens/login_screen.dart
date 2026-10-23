@@ -114,6 +114,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ),
           const SizedBox(height: AppSpacing.xl),
           AppTextField(
+            key: loginEmailFieldKey,
             controller: _emailController,
             label: AuthStrings.emailLabel,
             hint: AuthStrings.emailHint,
@@ -125,6 +126,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ),
           const SizedBox(height: AppSpacing.md),
           AppPasswordField(
+            key: loginPasswordFieldKey,
             controller: _passwordController,
             label: AuthStrings.passwordLabel,
             hint: '••••••••',
