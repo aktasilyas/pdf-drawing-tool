@@ -659,6 +659,11 @@ class DrawingDocument extends Equatable {
   }
 
   /// Creates a copy of this [DrawingDocument] with the given fields replaced.
+  ///
+  /// For multi-page (V2) documents, [layers], [width] and [height] live on the
+  /// [Page]s and cannot be set here; passing them throws an [ArgumentError].
+  /// Update the page instead, e.g.
+  /// `doc.copyWith(pages: [...pages]..[i] = page.copyWith(layers: layers))`.
   DrawingDocument copyWith({
     String? id,
     String? title,
@@ -675,6 +680,13 @@ class DrawingDocument extends Equatable {
     List<AudioRecording>? audioRecordings,
   }) {
     if (isMultiPage) {
+      if (layers != null || width != null || height != null) {
+        throw ArgumentError(
+          'layers, width and height are ignored on multi-page documents; '
+          'update the Page (page.copyWith(layers: ...)) and pass pages: '
+          'instead.',
+        );
+      }
       // V2: Copy as multi-page
       return DrawingDocument.multiPage(
         id: id ?? this.id,
@@ -721,8 +733,7 @@ class DrawingDocument extends Equatable {
         'createdAt': createdAt.toIso8601String(),
         'updatedAt': updatedAt.toIso8601String(),
         if (audioRecordings.isNotEmpty)
-          'audioRecordings':
-              audioRecordings.map((r) => r.toJson()).toList(),
+          'audioRecordings': audioRecordings.map((r) => r.toJson()).toList(),
       };
     } else {
       // V1: Legacy format (no version for backward compat)
@@ -773,8 +784,7 @@ class DrawingDocument extends Equatable {
         updatedAt: DateTime.parse(json['updatedAt'] as String),
         documentType: documentType,
         audioRecordings: (json['audioRecordings'] as List?)
-            ?.map(
-                (r) => AudioRecording.fromJson(r as Map<String, dynamic>))
+            ?.map((r) => AudioRecording.fromJson(r as Map<String, dynamic>))
             .toList(),
       );
     }
