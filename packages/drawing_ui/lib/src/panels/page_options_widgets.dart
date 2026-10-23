@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:phosphor_icons/phosphor_icons.dart';
 
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/services/page_rotation_service.dart';

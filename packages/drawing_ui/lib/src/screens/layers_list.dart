@@ -1,7 +1,7 @@
 /// Procreate/GoodNotes-style layer management panel for the page sidebar.
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_core/drawing_core.dart' show Layer;
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';

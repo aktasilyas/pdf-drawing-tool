@@ -6,7 +6,7 @@
 /// Never use PhosphorIcons directly in widgets — always use ElyanotesIcons.
 library;
 
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:phosphor_icons/phosphor_icons.dart';
 
 import '../models/tool_type.dart';
 

@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:phosphor_icons/phosphor_icons.dart';
 
 /// A single action that can be performed on a selection.
 class SelectionAction {

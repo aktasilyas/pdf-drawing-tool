@@ -41,6 +41,8 @@ void main() {
             content: any(named: 'content'),
             pageCount: any(named: 'pageCount'),
             updatedAt: any(named: 'updatedAt'),
+            coverId: any(named: 'coverId'),
+            updateCover: any(named: 'updateCover'),
           )).thenAnswer((_) async => const Right(null));
 
       // Act
@@ -54,6 +56,8 @@ void main() {
             content: any(named: 'content'),
             pageCount: testDocument.pageCount,
             updatedAt: any(named: 'updatedAt'),
+            coverId: any(named: 'coverId'),
+            updateCover: any(named: 'updateCover'),
           )).called(1);
     });
 
@@ -64,6 +68,8 @@ void main() {
             content: any(named: 'content'),
             pageCount: any(named: 'pageCount'),
             updatedAt: any(named: 'updatedAt'),
+            coverId: any(named: 'coverId'),
+            updateCover: any(named: 'updateCover'),
           )).thenAnswer((_) async => const Left(CacheFailure('Save failed')));
 
       // Act
@@ -77,6 +83,8 @@ void main() {
             content: any(named: 'content'),
             pageCount: any(named: 'pageCount'),
             updatedAt: any(named: 'updatedAt'),
+            coverId: any(named: 'coverId'),
+            updateCover: any(named: 'updateCover'),
           )).called(1);
     });
 
@@ -88,6 +96,8 @@ void main() {
             content: any(named: 'content'),
             pageCount: any(named: 'pageCount'),
             updatedAt: any(named: 'updatedAt'),
+            coverId: any(named: 'coverId'),
+            updateCover: any(named: 'updateCover'),
           )).thenAnswer((invocation) async {
         capturedContent = invocation.namedArguments[#content] as Map<String, dynamic>;
         return const Right(null);

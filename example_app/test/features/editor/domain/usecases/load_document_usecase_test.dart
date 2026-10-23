@@ -4,6 +4,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/documents.dart';
 import 'package:example_app/features/editor/editor.dart';
+import 'package:drawing_core/drawing_core.dart';
 
 class MockDocumentRepository extends Mock implements DocumentRepository {}
 
@@ -50,17 +51,14 @@ void main() {
 
     test('should return deserialized document when content exists', () async {
       // Arrange
-      final testContent = {
-        'id': testDocId,
-        'title': 'Test Document',
-        'pages': [
-          {
-            'index': 0,
-            'elements': <Map<String, dynamic>>[],
-          }
-        ],
-      };
-      
+      final testContent = DrawingDocument.multiPage(
+        id: testDocId,
+        title: 'Test Document',
+        pages: [Page.create(index: 0)],
+        createdAt: DateTime(2024, 1, 1),
+        updatedAt: DateTime(2024, 1, 1),
+      ).toJson();
+
       when(() => mockRepository.getDocument(testDocId))
           .thenAnswer((_) async => Right(testDocInfo));
       when(() => mockRepository.getDocumentContent(testDocId))

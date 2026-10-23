@@ -1,7 +1,7 @@
 /// Shared UI components for the color picker.
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:phosphor_flutter/phosphor_flutter.dart';
+import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 
 /// HSV Picker Box - 160x160 gradient for color selection

@@ -42,7 +42,7 @@ void main() {
       final result = await useCase();
 
       // Assert
-      expect(result, Right(testDocuments));
+      expect(result.getOrElse(() => []), testDocuments);
       verify(() => mockRepository.getDocuments(folderId: null)).called(1);
     });
 
@@ -58,7 +58,7 @@ void main() {
       final result = await useCase(folderId: folderId);
 
       // Assert
-      expect(result, Right(folderDocuments));
+      expect(result.getOrElse(() => []), folderDocuments);
       verify(() => mockRepository.getDocuments(folderId: folderId)).called(1);
     });
 
@@ -72,20 +72,20 @@ void main() {
       final result = await useCase();
 
       // Assert
-      expect(result, const Left(failure));
+      expect(result, const Left<Failure, List<DocumentInfo>>(failure));
       verify(() => mockRepository.getDocuments(folderId: null)).called(1);
     });
 
     test('should return empty list when no documents exist', () async {
       // Arrange
       when(() => mockRepository.getDocuments(folderId: null))
-          .thenAnswer((_) async => const Right([]));
+          .thenAnswer((_) async => const Right<Failure, List<DocumentInfo>>([]));
 
       // Act
       final result = await useCase();
 
       // Assert
-      expect(result, const Right([]));
+      result.fold((_) => fail('expected Right'), (docs) => expect(docs, isEmpty));
       result.fold(
         (_) => fail('Should return empty list'),
         (documents) => expect(documents, isEmpty),

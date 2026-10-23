@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 
 void main() {
@@ -12,6 +13,7 @@ void main() {
   late _FakeAuthController fakeAuthController;
 
   setUpAll(() async {
+    SharedPreferences.setMockInitialValues({});
     // Initialize Supabase with fake credentials for testing
     try {
       await supabase.Supabase.initialize(
@@ -58,14 +60,14 @@ void main() {
     await tester.pumpWidget(createTestApp());
 
     // Find and tap the "Giriş Yap" button
-    final loginButton = find.widgetWithText(FilledButton, 'Giriş Yap');
+    final loginButton = find.widgetWithText(ElevatedButton, 'Giriş Yap');
     expect(loginButton, findsOneWidget);
     
     await tester.tap(loginButton);
     await tester.pumpAndSettle();
 
     // Should show validation error
-    expect(find.text('E-posta gerekli'), findsOneWidget);
+    expect(find.text('E-posta adresi gerekli'), findsOneWidget);
   });
 
   testWidgets('shows validation error for invalid email', (tester) async {
@@ -75,10 +77,10 @@ void main() {
     await tester.enterText(find.byKey(loginEmailFieldKey), 'invalid-email');
     await tester.enterText(find.byKey(loginPasswordFieldKey), 'password123');
     
-    await tester.tap(find.widgetWithText(FilledButton, 'Giriş Yap'));
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Giriş Yap'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Geçerli bir e-posta girin'), findsOneWidget);
+    expect(find.text('Geçerli bir e-posta adresi girin'), findsOneWidget);
   });
 
   testWidgets('shows validation error for short password', (tester) async {
@@ -87,10 +89,10 @@ void main() {
     await tester.enterText(find.byKey(loginEmailFieldKey), 'test@example.com');
     await tester.enterText(find.byKey(loginPasswordFieldKey), '123');
     
-    await tester.tap(find.widgetWithText(FilledButton, 'Giriş Yap'));
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Giriş Yap'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Şifre en az 6 karakter olmalıdır'), findsOneWidget);
+    expect(find.text('Şifre en az 6 karakter olmalı'), findsOneWidget);
   });
 
   testWidgets('calls auth controller on valid login', (tester) async {
@@ -99,7 +101,7 @@ void main() {
     await tester.enterText(find.byKey(loginEmailFieldKey), 'test@example.com');
     await tester.enterText(find.byKey(loginPasswordFieldKey), 'password123');
     
-    await tester.tap(find.widgetWithText(FilledButton, 'Giriş Yap'));
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Giriş Yap'));
     await tester.pumpAndSettle();
 
     expect(fakeAuthController.signInCalled, isTrue);
@@ -115,7 +117,7 @@ void main() {
     await tester.enterText(find.byKey(loginEmailFieldKey), 'test@example.com');
     await tester.enterText(find.byKey(loginPasswordFieldKey), 'password123');
     
-    await tester.tap(find.widgetWithText(FilledButton, 'Giriş Yap'));
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Giriş Yap'));
     await tester.pumpAndSettle();
 
     // Should navigate to documents
@@ -131,7 +133,7 @@ void main() {
     await tester.enterText(find.byKey(loginEmailFieldKey), 'test@example.com');
     await tester.enterText(find.byKey(loginPasswordFieldKey), 'wrongpassword');
     
-    await tester.tap(find.widgetWithText(FilledButton, 'Giriş Yap'));
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Giriş Yap'));
     await tester.pumpAndSettle();
 
     // Should show error snackbar
@@ -141,7 +143,7 @@ void main() {
   testWidgets('skip button navigates to documents', (tester) async {
     await tester.pumpWidget(createTestApp());
 
-    await tester.tap(find.widgetWithText(OutlinedButton, 'Atla (Geliştirme)'));
+    await tester.tap(find.widgetWithText(TextButton, 'Atla (Geliştirme)'));
     await tester.pumpAndSettle();
 
     expect(find.text('Documents'), findsOneWidget);
@@ -154,7 +156,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Şifre Sıfırlama'), findsOneWidget);
-    expect(find.widgetWithText(FilledButton, 'Gönder'), findsOneWidget);
+    expect(find.widgetWithText(ElevatedButton, 'Gönder'), findsOneWidget);
   });
 }
 
