@@ -26,12 +26,15 @@ GitHub: REST only via `gh api` (no GraphQL). `R=repos/aktasilyas/pdf-drawing-too
   to tidy up; leftover uncommitted files are harmless. Only commit what the task needs.
 
 ## Decide before asking
-Ask the owner (`needs-decision`) only for product or business choices
-(scope, naming, visuals, money, accounts). Technical choices are yours: weigh
-the options against CLAUDE.md and the `architect` subagent, pick the one that
-keeps the codebase on current stable tooling with the least churn, explain it
-in the PR, and proceed. Before proposing options, search for a maintained
-replacement or upstream fix.
+Technical choices are yours: weigh the options against CLAUDE.md with the
+`architect` subagent, prefer current stable tooling with the least churn,
+search for a maintained replacement or upstream fix first, explain the choice
+in the PR, and proceed. If you truly cannot decide (product, scope, visuals,
+money, accounts, or genuinely unclear requirements): comment the question with
+your recommendation on the issue, replace `agent-ready`/`in-progress` with
+`needs-architect`, log it, stop. Never ask the owner directly and never use
+`needs-decision`; the architect desk escalates when needed.
+
 Find the status issue: `gh api "$R/issues?labels=autopilot-status&state=open"`.
 
 ## 1. Tend open agent PRs first
@@ -53,11 +56,11 @@ architect desk count the same as the owner's):
   subagent (already run when the PR was opened; re-run only after new commits)
   found nothing blocking, add label `ready-to-merge` to the PR and list
   it in the log. Never merge, and never try another way to merge: merging is
-  the owner's step (the session's permission policy blocks it).
+  done by a workflow after the architect desk approves.
 
 ## 2. Throttle
 If 4 or more `claude/` PRs are open and labeled `ready-to-merge`, start no new
-work: log "waiting for owner review" with the PR list and stop.
+work: log "waiting for architect review" with the PR list and stop.
 
 ## 3. Pick the next issue
 Open issues with label `agent-ready` and without `in-progress`/`in-review`:
@@ -79,5 +82,5 @@ If none is eligible, log "queue empty or blocked" with the reason and stop.
 
 ## 5. Log the run
 Comment on the status issue, in Turkish, at most 8 lines:
-what you did (issue/PR links), PRs waiting for the owner, questions asked,
+what you did (issue/PR links), PRs waiting for review, questions asked,
 anything that failed. If nothing happened, say why in one line.
