@@ -75,7 +75,7 @@ void main() {
       final input = _noisyLine();
       final out = _run(StrokeInputFilter(), input);
       expect(out.first.x, input.first.x);
-      expect(out.last.x, greaterThan(input.last.x - 15));
+      expect(out.last, input.last);
     });
   });
 
