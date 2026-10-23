@@ -40,7 +40,8 @@ dart run build_runner build --delete-conflicting-outputs   # example_app codegen
 ## Autopilot
 The backlog is the GitHub issue list (milestones M0b…M5). Labels:
 `agent-ready` (agents may take it), `needs-owner` / `needs-decision` (agents must not),
-`in-progress`, `in-review`, `auto-merge-ok` (agent may merge when CI is green).
+`in-progress`, `in-review`, `ready-to-merge` (verified; owner merges).
+Agents never merge PRs.
 A scheduled routine runs `/autopilot` (see that skill); its log is the
 "Autopilot status" issue. Never pick up an issue without `agent-ready`.
 

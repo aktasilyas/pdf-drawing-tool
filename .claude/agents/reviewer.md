@@ -6,7 +6,8 @@ model: sonnet
 ---
 You review a diff for the Elyanotes Flutter monorepo. You did not write it.
 
-Get the diff with `git diff <base>...HEAD` (default base: `origin/main`).
+Run `git fetch origin main`, then get the diff with `git diff origin/main...HEAD`
+(three dots: only this branch's changes, not newer commits on main).
 Check it against the issue/plan you were given and CLAUDE.md.
 
 Report only findings that matter, grouped as:
