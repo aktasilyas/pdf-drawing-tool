@@ -96,7 +96,7 @@ class CoverPreviewWidget extends StatelessWidget {
 
   Widget _buildPatternBackground() {
     final bgColor = Color(cover.primaryColor);
-    
+
     // Desenli kapak için CustomPaint
     return CustomPaint(
       painter: _CoverPatternPainter(
@@ -114,7 +114,7 @@ class CoverPreviewWidget extends StatelessWidget {
     // Minimal: Açık arka plan + koyu çerçeve veya tam tersi
     final frameColor = luminance > 0.5 ? bgColor : surface;
     final backgroundColor = luminance > 0.5 ? surface : bgColor;
-    
+
     return Container(
       color: backgroundColor,
       padding: const EdgeInsets.all(16),
@@ -213,7 +213,9 @@ class CoverPreviewWidget extends StatelessWidget {
           builder: (context, constraints) {
             final dotSize = 6.0;
             final minSpacing = 4.0;
-            final maxDots = (constraints.maxHeight / (dotSize + minSpacing)).floor().clamp(0, 8);
+            final maxDots = (constraints.maxHeight / (dotSize + minSpacing))
+                .floor()
+                .clamp(0, 8);
             return Column(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: List.generate(
@@ -254,7 +256,7 @@ class _CoverPatternPainter extends CustomPainter {
 
     // Desen rengi (kontrast)
     final luminance = backgroundColor.computeLuminance();
-    final patternColor = luminance > 0.5 
+    final patternColor = luminance > 0.5
         ? backgroundColor.withValues(alpha: 0.3)
         : Colors.white.withValues(alpha: 0.15);
 

@@ -31,7 +31,7 @@ class Sidebar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final foldersAsync = ref.watch(foldersProvider);
-    
+
     return Container(
       width: 240,
       color: Theme.of(context).colorScheme.surfaceContainerHighest,
@@ -87,7 +87,7 @@ class Sidebar extends ConsumerWidget {
                     isSelected: selectedSection == SidebarSection.favorites,
                     onTap: () => onSectionChanged(SidebarSection.favorites),
                   ),
-                  
+
                   // Folders section header
                   Padding(
                     padding: const EdgeInsets.fromLTRB(24, 16, 16, 8),
@@ -96,9 +96,10 @@ class Sidebar extends ConsumerWidget {
                         Text(
                           'Klasörler',
                           style: AppTypography.labelMedium.copyWith(
-                                color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                letterSpacing: 0.5,
-                              ),
+                            color:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
+                            letterSpacing: 0.5,
+                          ),
                         ),
                         const Spacer(),
                         IconButton(
@@ -112,40 +113,46 @@ class Sidebar extends ConsumerWidget {
                           ),
                           iconSize: 18,
                           style: IconButton.styleFrom(
-                            foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant,
+                            foregroundColor:
+                                Theme.of(context).colorScheme.onSurfaceVariant,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  
+
                   // Folders list
                   foldersAsync.when(
                     data: (folders) {
                       // Only show root folders (parentId == null) in sidebar
-                      final rootFolders = folders.where((f) => f.parentId == null).toList();
-                      
+                      final rootFolders =
+                          folders.where((f) => f.parentId == null).toList();
+
                       if (rootFolders.isEmpty) {
                         return Padding(
-                          padding: EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                             horizontal: AppSpacing.xl,
                             vertical: AppSpacing.sm,
                           ),
                           child: Text(
                             'Klasör yok',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                ),
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurfaceVariant,
+                                    ),
                           ),
                         );
                       }
-                      
+
                       return Column(
                         mainAxisSize: MainAxisSize.min,
                         children: rootFolders.map((folder) {
-                          final isSelected = selectedSection == SidebarSection.folder && 
-                                           selectedFolderId == folder.id;
-                          
+                          final isSelected =
+                              selectedSection == SidebarSection.folder &&
+                                  selectedFolderId == folder.id;
+
                           return _SidebarItem(
                             icon: Icons.folder_outlined,
                             selectedIcon: Icons.folder,
@@ -155,8 +162,12 @@ class Sidebar extends ConsumerWidget {
                               '${folder.documentCount}',
                               style: AppTypography.caption.copyWith(
                                 color: isSelected
-                                    ? Theme.of(context).colorScheme.onPrimaryContainer
-                                    : Theme.of(context).colorScheme.onSurfaceVariant,
+                                    ? Theme.of(context)
+                                        .colorScheme
+                                        .onPrimaryContainer
+                                    : Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant,
                               ),
                             ),
                             iconColor: Color(folder.colorValue),
@@ -179,7 +190,7 @@ class Sidebar extends ConsumerWidget {
                     ),
                     error: (_, __) => const SizedBox.shrink(),
                   ),
-                  
+
                   _SidebarItem(
                     icon: Icons.people_outline,
                     selectedIcon: Icons.people,
@@ -240,20 +251,18 @@ class _SidebarItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     return Padding(
-      padding: EdgeInsets.symmetric(
+      padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
         vertical: AppSpacing.xxs,
       ),
       child: Material(
-        color: isSelected
-            ? colorScheme.primaryContainer
-            : Colors.transparent,
+        color: isSelected ? colorScheme.primaryContainer : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(8),
           child: Padding(
-            padding: EdgeInsets.symmetric(
+            padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.md,
               vertical: 10,
             ),
@@ -262,16 +271,18 @@ class _SidebarItem extends StatelessWidget {
                 Icon(
                   isSelected ? selectedIcon : icon,
                   size: 20,
-                  color: iconColor ?? (isSelected
-                      ? colorScheme.primary
-                      : colorScheme.onSurfaceVariant),
+                  color: iconColor ??
+                      (isSelected
+                          ? colorScheme.primary
+                          : colorScheme.onSurfaceVariant),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     label,
                     style: AppTypography.titleLarge.copyWith(
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.w500,
                       color: isSelected
                           ? colorScheme.primary
                           : colorScheme.onSurface,

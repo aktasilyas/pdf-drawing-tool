@@ -58,11 +58,14 @@ class UnifiedColorPicker extends StatelessWidget {
     // This ensures it appears above all panels and is centered on screen
     final overlay = Overlay.of(context);
     late OverlayEntry overlayEntry;
-    
+
     overlayEntry = OverlayEntry(
       builder: (overlayContext) {
         return Material(
-          color: Theme.of(overlayContext).colorScheme.scrim.withValues(alpha: 0.54),
+          color: Theme.of(overlayContext)
+              .colorScheme
+              .scrim
+              .withValues(alpha: 0.54),
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () => overlayEntry.remove(),
@@ -90,14 +93,17 @@ class UnifiedColorPicker extends StatelessWidget {
         );
       },
     );
-    
+
     overlay.insert(overlayEntry);
   }
 
   bool _colorsMatch(Color a, Color b) {
-    return (a.r * 255.0).round().clamp(0, 255) == (b.r * 255.0).round().clamp(0, 255) && 
-        (a.g * 255.0).round().clamp(0, 255) == (b.g * 255.0).round().clamp(0, 255) && 
-        (a.b * 255.0).round().clamp(0, 255) == (b.b * 255.0).round().clamp(0, 255);
+    return (a.r * 255.0).round().clamp(0, 255) ==
+            (b.r * 255.0).round().clamp(0, 255) &&
+        (a.g * 255.0).round().clamp(0, 255) ==
+            (b.g * 255.0).round().clamp(0, 255) &&
+        (a.b * 255.0).round().clamp(0, 255) ==
+            (b.b * 255.0).round().clamp(0, 255);
   }
 }
 
@@ -120,7 +126,7 @@ class _ColorChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return GestureDetector(
       onTap: onTap,
       onDoubleTap: onDoubleTap,
@@ -172,13 +178,15 @@ class _MoreButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
-          color: isDark ? colorScheme.surfaceContainerHighest : colorScheme.surfaceContainerHigh,
+          color: isDark
+              ? colorScheme.surfaceContainerHighest
+              : colorScheme.surfaceContainerHigh,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: colorScheme.outline.withValues(alpha: 0.3),
@@ -196,9 +204,9 @@ class _MoreButton extends StatelessWidget {
             Text(
               'Daha fazla',
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                fontSize: 10,
-                color: colorScheme.primary,
-              ),
+                    fontSize: 10,
+                    color: colorScheme.primary,
+                  ),
             ),
           ],
         ),

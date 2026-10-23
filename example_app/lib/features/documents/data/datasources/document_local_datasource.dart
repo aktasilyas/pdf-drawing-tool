@@ -7,7 +7,8 @@ import 'package:example_app/features/documents/data/models/document_model.dart';
 
 abstract class DocumentLocalDatasource {
   Future<List<DocumentModel>> getDocuments({String? folderId});
-  Future<List<DocumentModel>> getAllDocuments(); // Get ALL documents regardless of folder
+  Future<List<DocumentModel>>
+      getAllDocuments(); // Get ALL documents regardless of folder
   Future<DocumentModel> getDocument(String id);
   Future<DocumentModel> createDocument(DocumentModel document);
   Future<DocumentModel> updateDocument(DocumentModel document);
@@ -101,7 +102,7 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
       // Get ALL documents (not filtered by folderId)
       final documents = await getAllDocuments();
       final index = documents.indexWhere((doc) => doc.id == document.id);
-      
+
       if (index == -1) {
         throw const CacheException('Document not found');
       }
@@ -145,7 +146,8 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
     }
 
     return _controller.stream.map(
-      (documents) => documents.where((doc) => doc.folderId == folderId).toList(),
+      (documents) =>
+          documents.where((doc) => doc.folderId == folderId).toList(),
     );
   }
 
@@ -164,7 +166,8 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
   }
 
   @override
-  Future<void> saveDocumentContent(String id, Map<String, dynamic> content) async {
+  Future<void> saveDocumentContent(
+      String id, Map<String, dynamic> content) async {
     try {
       final key = 'document_content_$id';
       final jsonString = json.encode(content);

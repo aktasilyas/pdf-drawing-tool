@@ -20,8 +20,8 @@ class PasteContextMenu extends ConsumerWidget {
     final screenSize = MediaQuery.of(context).size;
 
     // Center menu horizontally on press point, clamp to screen
-    final left =
-        (state.screenPos.dx - menuWidth / 2).clamp(8.0, screenSize.width - menuWidth - 8.0);
+    final left = (state.screenPos.dx - menuWidth / 2)
+        .clamp(8.0, screenSize.width - menuWidth - 8.0);
     // Position above the press point
     var top = state.screenPos.dy - menuHeight - 12;
     if (top < 8) top = state.screenPos.dy + 12;
@@ -45,13 +45,14 @@ class PasteContextMenu extends ConsumerWidget {
               decoration: BoxDecoration(
                 color: cs.surface,
                 borderRadius: BorderRadius.circular(12),
-                boxShadow: DrawingShadows.floating(Theme.of(context).brightness),
+                boxShadow:
+                    DrawingShadows.floating(Theme.of(context).brightness),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  PhosphorIcon(ElyanotesIcons.paste, size: 18,
-                      color: cs.onSurface),
+                  PhosphorIcon(ElyanotesIcons.paste,
+                      size: 18, color: cs.onSurface),
                   const SizedBox(width: 6),
                   Text(
                     'Yapıştır',

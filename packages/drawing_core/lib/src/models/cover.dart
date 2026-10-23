@@ -1,10 +1,10 @@
 /// Kapak stilleri
 enum CoverStyle {
-  solid,      // Düz renk
-  gradient,   // Gradient
-  pattern,    // Desenli (çizgili, noktalı vs)
-  minimal,    // Minimalist çerçeve
-  image,      // Görsel kapak (asset)
+  solid, // Düz renk
+  gradient, // Gradient
+  pattern, // Desenli (çizgili, noktalı vs)
+  minimal, // Minimalist çerçeve
+  image, // Görsel kapak (asset)
 }
 
 /// Kapak modeli
@@ -14,7 +14,8 @@ class Cover {
   final CoverStyle style;
   final int primaryColor;
   final int? secondaryColor; // Gradient için
-  final String? imagePath; // Asset path (örn: 'assets/covers/cover_01_kraft.webp')
+  final String?
+      imagePath; // Asset path (örn: 'assets/covers/cover_01_kraft.webp')
   final bool isPremium;
   final bool showTitle; // Başlık gösterilsin mi
 
@@ -46,15 +47,15 @@ class Cover {
   }
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'name': name,
-    'style': style.name,
-    'primaryColor': primaryColor,
-    if (secondaryColor != null) 'secondaryColor': secondaryColor,
-    if (imagePath != null) 'imagePath': imagePath,
-    'isPremium': isPremium,
-    'showTitle': showTitle,
-  };
+        'id': id,
+        'name': name,
+        'style': style.name,
+        'primaryColor': primaryColor,
+        if (secondaryColor != null) 'secondaryColor': secondaryColor,
+        if (imagePath != null) 'imagePath': imagePath,
+        'isPremium': isPremium,
+        'showTitle': showTitle,
+      };
 
   @override
   bool operator ==(Object other) =>

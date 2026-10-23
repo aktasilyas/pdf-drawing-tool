@@ -86,10 +86,8 @@ class ImageElementPainter extends CustomPainter {
     canvas.drawRect(rect, borderPaint);
 
     // Small icon indicator in center
-    final iconSize = (element.width < element.height
-            ? element.width
-            : element.height) *
-        0.3;
+    final iconSize =
+        (element.width < element.height ? element.width : element.height) * 0.3;
     final iconRect = Rect.fromCenter(
       center: rect.center,
       width: iconSize,

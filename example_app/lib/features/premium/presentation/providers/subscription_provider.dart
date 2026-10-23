@@ -49,8 +49,10 @@ final hasEntitlementUseCaseProvider = Provider(
   (ref) => HasEntitlementUseCase(ref.watch(subscriptionRepositoryProvider)),
 );
 
-final hasEntitlementProvider = FutureProvider.family<bool, String>((ref, entitlementId) async {
-  final either = await ref.watch(hasEntitlementUseCaseProvider).call(entitlementId);
+final hasEntitlementProvider =
+    FutureProvider.family<bool, String>((ref, entitlementId) async {
+  final either =
+      await ref.watch(hasEntitlementUseCaseProvider).call(entitlementId);
   return either.fold((failure) => false, (hasIt) => hasIt);
 });
 

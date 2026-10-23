@@ -1,52 +1,52 @@
 /// Template pattern türleri.
-/// 
+///
 /// Her pattern, sayfada çizilecek arka plan desenini belirler.
 enum TemplatePattern {
   /// Boş sayfa - hiçbir desen yok
   blank,
-  
+
   /// İnce çizgili (6mm spacing)
   thinLines,
-  
+
   /// Orta çizgili (8mm spacing)
   mediumLines,
-  
+
   /// Kalın çizgili (10mm spacing)
   thickLines,
-  
+
   /// Küçük kareli (5mm spacing)
   smallGrid,
-  
+
   /// Orta kareli (7mm spacing)
   mediumGrid,
-  
+
   /// Büyük kareli (10mm spacing)
   largeGrid,
-  
+
   /// Küçük noktalı (5mm spacing)
   smallDots,
-  
+
   /// Orta noktalı (7mm spacing)
   mediumDots,
-  
+
   /// Büyük noktalı (10mm spacing)
   largeDots,
-  
+
   /// İzometrik grid (30° açılı)
   isometric,
-  
+
   /// Altıgen grid
   hexagonal,
-  
+
   /// Cornell notes (margin + summary)
   cornell,
-  
+
   /// Müzik nota kağıdı (5 çizgi staff)
   music,
-  
+
   /// El yazısı (baseline + midline)
   handwriting,
-  
+
   /// Kaligrafi (açılı çizgiler)
   calligraphy,
 
@@ -166,37 +166,37 @@ extension TemplatePatternExtension on TemplatePattern {
         return 0.5;
     }
   }
-  
+
   /// Pattern çizgi içeriyor mu?
   bool get hasLines {
     return this == TemplatePattern.thinLines ||
-           this == TemplatePattern.mediumLines ||
-           this == TemplatePattern.thickLines ||
-           this == TemplatePattern.cornell ||
-           this == TemplatePattern.music ||
-           this == TemplatePattern.handwriting ||
-           this == TemplatePattern.calligraphy ||
-           this == TemplatePattern.meetingNotes ||
-           this == TemplatePattern.readingLog;
+        this == TemplatePattern.mediumLines ||
+        this == TemplatePattern.thickLines ||
+        this == TemplatePattern.cornell ||
+        this == TemplatePattern.music ||
+        this == TemplatePattern.handwriting ||
+        this == TemplatePattern.calligraphy ||
+        this == TemplatePattern.meetingNotes ||
+        this == TemplatePattern.readingLog;
   }
-  
+
   /// Pattern grid içeriyor mu?
   bool get hasGrid {
     return this == TemplatePattern.smallGrid ||
-           this == TemplatePattern.mediumGrid ||
-           this == TemplatePattern.largeGrid ||
-           this == TemplatePattern.isometric ||
-           this == TemplatePattern.hexagonal ||
-           this == TemplatePattern.monthlyPlanner ||
-           this == TemplatePattern.storyboard ||
-           this == TemplatePattern.wireframe;
+        this == TemplatePattern.mediumGrid ||
+        this == TemplatePattern.largeGrid ||
+        this == TemplatePattern.isometric ||
+        this == TemplatePattern.hexagonal ||
+        this == TemplatePattern.monthlyPlanner ||
+        this == TemplatePattern.storyboard ||
+        this == TemplatePattern.wireframe;
   }
-  
+
   /// Pattern nokta içeriyor mu?
   bool get hasDots {
     return this == TemplatePattern.smallDots ||
-           this == TemplatePattern.mediumDots ||
-           this == TemplatePattern.largeDots;
+        this == TemplatePattern.mediumDots ||
+        this == TemplatePattern.largeDots;
   }
 
   /// Bu pattern yapısal mı (header, bölge, checkbox içerir)?

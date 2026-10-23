@@ -36,10 +36,10 @@ void main() {
 
       test('should generate different keys for updated pages', () async {
         final page1 = Page.create(index: 0);
-        
+
         // Wait a bit to ensure different timestamp
         await Future.delayed(const Duration(milliseconds: 2));
-        
+
         final stroke = Stroke.create(
           points: [DrawingPoint(x: 0, y: 0)],
           style: StrokeStyle.pen(),
@@ -114,9 +114,8 @@ void main() {
           points: [DrawingPoint(x: 100, y: 0), DrawingPoint(x: 0, y: 100)],
           style: StrokeStyle.pen(color: 0xFFFF0000),
         );
-        final page = Page.create(index: 0)
-            .addStroke(stroke1)
-            .addStroke(stroke2);
+        final page =
+            Page.create(index: 0).addStroke(stroke1).addStroke(stroke2);
 
         final thumbnail = await ThumbnailGenerator.generate(page);
 
@@ -124,8 +123,7 @@ void main() {
         expect(thumbnail!.isNotEmpty, true);
       });
 
-      testGenerate('should generate thumbnail for page with shapes',
-          () async {
+      testGenerate('should generate thumbnail for page with shapes', () async {
         final shape = Shape.create(
           type: ShapeType.rectangle,
           startPoint: DrawingPoint(x: 10, y: 10),
@@ -240,8 +238,7 @@ void main() {
         expect(thumbnail, isNotNull);
       });
 
-      testGenerate('should handle page with single point stroke',
-          () async {
+      testGenerate('should handle page with single point stroke', () async {
         final stroke = Stroke.create(
           points: [DrawingPoint(x: 50, y: 50)],
           style: StrokeStyle.pen(),

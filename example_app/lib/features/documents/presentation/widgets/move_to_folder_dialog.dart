@@ -204,7 +204,8 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
                   color: color,
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: isSelected ? AppColors.onPrimary : Colors.transparent,
+                    color:
+                        isSelected ? AppColors.onPrimary : Colors.transparent,
                     width: 2.5,
                   ),
                   boxShadow: isSelected
@@ -260,8 +261,8 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
 
     final sel = _selectedFolderId == null;
     return ListTile(
-      leading: Icon(Icons.home_outlined,
-          color: sel ? accentColor : textSecondary),
+      leading:
+          Icon(Icons.home_outlined, color: sel ? accentColor : textSecondary),
       title: Text(_isMovingFolder ? 'Ana Klasörler' : 'Belgeler (Klasörsüz)',
           style: AppTypography.bodyLarge.copyWith(
               fontWeight: sel ? FontWeight.w600 : FontWeight.normal,

@@ -65,19 +65,23 @@ class Page {
   }
 
   /// Total stroke count across all layers
-  int get strokeCount => layers.fold<int>(0, (sum, layer) => sum + layer.strokes.length);
+  int get strokeCount =>
+      layers.fold<int>(0, (sum, layer) => sum + layer.strokes.length);
 
   /// Total shape count across all layers
-  int get shapeCount => layers.fold<int>(0, (sum, layer) => sum + layer.shapes.length);
+  int get shapeCount =>
+      layers.fold<int>(0, (sum, layer) => sum + layer.shapes.length);
 
   /// Total text count across all layers
-  int get textCount => layers.fold<int>(0, (sum, layer) => sum + layer.texts.length);
+  int get textCount =>
+      layers.fold<int>(0, (sum, layer) => sum + layer.texts.length);
 
   /// Is empty (no content)
   bool get isEmpty => strokeCount == 0 && shapeCount == 0 && textCount == 0;
 
   /// Active layer (last one)
-  Layer get activeLayer => layers.isNotEmpty ? layers.last : Layer.empty('Katman');
+  Layer get activeLayer =>
+      layers.isNotEmpty ? layers.last : Layer.empty('Katman');
 
   /// Copy with
   Page copyWith({
@@ -116,7 +120,7 @@ class Page {
         texts: [],
       );
     }).toList();
-    
+
     return copyWith(
       layers: cleanLayers,
       updatedAt: DateTime.now(),
@@ -137,17 +141,17 @@ class Page {
 
   /// JSON serialization
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'index': index,
-    'size': size.toJson(),
-    'background': background.toJson(),
-    'layers': layers.map((l) => l.toJson()).toList(),
-    'createdAt': createdAt.toIso8601String(),
-    'updatedAt': updatedAt.toIso8601String(),
-    'isCover': isCover,
-    'isBookmarked': isBookmarked,
-    // thumbnail is stored separately
-  };
+        'id': id,
+        'index': index,
+        'size': size.toJson(),
+        'background': background.toJson(),
+        'layers': layers.map((l) => l.toJson()).toList(),
+        'createdAt': createdAt.toIso8601String(),
+        'updatedAt': updatedAt.toIso8601String(),
+        'isCover': isCover,
+        'isBookmarked': isBookmarked,
+        // thumbnail is stored separately
+      };
 
   factory Page.fromJson(Map<String, dynamic> json) {
     // Helper to parse int safely
@@ -157,18 +161,19 @@ class Page {
       if (value is num) return value.toInt();
       return defaultValue;
     }
-    
+
     return Page(
       id: json['id'] as String,
       index: parseInt(json['index'], 0),
       size: PageSize.fromJson(json['size'] as Map<String, dynamic>),
-      background: PageBackground.fromJson(json['background'] as Map<String, dynamic>),
+      background:
+          PageBackground.fromJson(json['background'] as Map<String, dynamic>),
       layers: (json['layers'] as List)
           .map((l) => Layer.fromJson(l as Map<String, dynamic>))
           .toList(),
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
-      isCover: json['isCover'] as bool? ?? false,  // Backward compatible
+      isCover: json['isCover'] as bool? ?? false, // Backward compatible
       isBookmarked: json['isBookmarked'] as bool? ?? false,
     );
   }

@@ -105,7 +105,8 @@ class _TextStylePopupState extends State<TextStylePopup> {
                       const Spacer(),
                       GestureDetector(
                         onTap: widget.onClose,
-                        child: PhosphorIcon(ElyanotesIcons.close, size: 18, color: cs.onSurfaceVariant),
+                        child: PhosphorIcon(ElyanotesIcons.close,
+                            size: 18, color: cs.onSurfaceVariant),
                       ),
                     ],
                   ),
@@ -121,7 +122,8 @@ class _TextStylePopupState extends State<TextStylePopup> {
                       children: [
                         Text(
                           'Renk',
-                          style: textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                          style: textTheme.bodySmall
+                              ?.copyWith(color: cs.onSurfaceVariant),
                         ),
                         const SizedBox(height: 8),
                         UnifiedColorPicker(
@@ -147,12 +149,14 @@ class _TextStylePopupState extends State<TextStylePopup> {
                         children: [
                           Text(
                             'Boyut',
-                            style: textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                            style: textTheme.bodySmall
+                                ?.copyWith(color: cs.onSurfaceVariant),
                           ),
                           const Spacer(),
                           Text(
                             '${_fontSize.round()}',
-                            style: textTheme.labelMedium?.copyWith(color: cs.onSurface),
+                            style: textTheme.labelMedium
+                                ?.copyWith(color: cs.onSurface),
                           ),
                         ],
                       ),
@@ -160,8 +164,10 @@ class _TextStylePopupState extends State<TextStylePopup> {
                       SliderTheme(
                         data: SliderTheme.of(context).copyWith(
                           trackHeight: 4,
-                          thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8),
-                          overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
+                          thumbShape: const RoundSliderThumbShape(
+                              enabledThumbRadius: 8),
+                          overlayShape:
+                              const RoundSliderOverlayShape(overlayRadius: 16),
                         ),
                         child: Slider(
                           value: _fontSize,
@@ -179,54 +185,55 @@ class _TextStylePopupState extends State<TextStylePopup> {
 
                 // Style Buttons Section (hidden in sticker mode)
                 if (!widget.stickerMode)
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Stil',
-                        style: textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          _StyleButton(
-                            icon: Icons.format_bold,
-                            label: 'B',
-                            isSelected: _isBold,
-                            onTap: () {
-                              setState(() => _isBold = !_isBold);
-                              _updateStyle();
-                            },
-                          ),
-                          const SizedBox(width: 8),
-                          _StyleButton(
-                            icon: Icons.format_italic,
-                            label: 'I',
-                            isSelected: _isItalic,
-                            fontStyle: FontStyle.italic,
-                            onTap: () {
-                              setState(() => _isItalic = !_isItalic);
-                              _updateStyle();
-                            },
-                          ),
-                          const SizedBox(width: 8),
-                          _StyleButton(
-                            icon: Icons.format_underlined,
-                            label: 'U',
-                            isSelected: _isUnderline,
-                            decoration: TextDecoration.underline,
-                            onTap: () {
-                              setState(() => _isUnderline = !_isUnderline);
-                              _updateStyle();
-                            },
-                          ),
-                        ],
-                      ),
-                    ],
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Stil',
+                          style: textTheme.bodySmall
+                              ?.copyWith(color: cs.onSurfaceVariant),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            _StyleButton(
+                              icon: Icons.format_bold,
+                              label: 'B',
+                              isSelected: _isBold,
+                              onTap: () {
+                                setState(() => _isBold = !_isBold);
+                                _updateStyle();
+                              },
+                            ),
+                            const SizedBox(width: 8),
+                            _StyleButton(
+                              icon: Icons.format_italic,
+                              label: 'I',
+                              isSelected: _isItalic,
+                              fontStyle: FontStyle.italic,
+                              onTap: () {
+                                setState(() => _isItalic = !_isItalic);
+                                _updateStyle();
+                              },
+                            ),
+                            const SizedBox(width: 8),
+                            _StyleButton(
+                              icon: Icons.format_underlined,
+                              label: 'U',
+                              isSelected: _isUnderline,
+                              decoration: TextDecoration.underline,
+                              onTap: () {
+                                setState(() => _isUnderline = !_isUnderline);
+                                _updateStyle();
+                              },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
               ],
             ),
           ),

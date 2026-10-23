@@ -140,8 +140,7 @@ class _MediumToolbarState extends ConsumerState<MediumToolbar> {
         if (hasAI) available -= aiButtonWidth + dividerWidth;
 
         final totalTools = allTools.length;
-        var max =
-            (available / toolSlotWidth).floor().clamp(0, totalTools);
+        var max = (available / toolSlotWidth).floor().clamp(0, totalTools);
         var shownTools = allTools.take(max).toList();
         var hiddenTools = allTools.skip(max).toList();
 
@@ -163,8 +162,7 @@ class _MediumToolbarState extends ConsumerState<MediumToolbar> {
                 onPressed: widget.onAIPressed!,
               ),
             if (hasAI) const ToolbarVerticalDivider(),
-            ...shownTools
-                .map((tool) => _buildToolButton(tool, currentTool)),
+            ...shownTools.map((tool) => _buildToolButton(tool, currentTool)),
             if (hiddenTools.isNotEmpty)
               ToolbarOverflowMenu(hiddenTools: hiddenTools),
             const Spacer(),
@@ -216,8 +214,7 @@ class _MediumToolbarState extends ConsumerState<MediumToolbar> {
 
   void _onPanelTap(ToolType tool) {
     final active = ref.read(activePanelProvider);
-    ref.read(activePanelProvider.notifier).state =
-        active == tool ? null : tool;
+    ref.read(activePanelProvider.notifier).state = active == tool ? null : tool;
   }
 
   void _openRecordingsTab(WidgetRef ref) {

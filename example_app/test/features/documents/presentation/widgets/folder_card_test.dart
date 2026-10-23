@@ -40,7 +40,8 @@ void main() {
     }
 
     group('Light Theme', () {
-      testWidgets('should_use_textPrimaryLight_for_folder_name', (tester) async {
+      testWidgets('should_use_textPrimaryLight_for_folder_name',
+          (tester) async {
         // Arrange & Act
         await tester.pumpWidget(
           buildTestWidget(
@@ -54,7 +55,8 @@ void main() {
         expect(text.style?.color, equals(AppColors.textPrimaryLight));
       });
 
-      testWidgets('should_use_textSecondaryLight_for_document_count', (tester) async {
+      testWidgets('should_use_textSecondaryLight_for_document_count',
+          (tester) async {
         // Arrange & Act
         await tester.pumpWidget(
           buildTestWidget(
@@ -68,7 +70,8 @@ void main() {
         expect(text.style?.color, equals(AppColors.textSecondaryLight));
       });
 
-      testWidgets('should_display_folder_icon_with_custom_color', (tester) async {
+      testWidgets('should_display_folder_icon_with_custom_color',
+          (tester) async {
         // Arrange & Act
         await tester.pumpWidget(
           buildTestWidget(
@@ -98,7 +101,8 @@ void main() {
         expect(text.style?.color, equals(AppColors.textPrimaryDark));
       });
 
-      testWidgets('should_use_textSecondaryDark_for_document_count', (tester) async {
+      testWidgets('should_use_textSecondaryDark_for_document_count',
+          (tester) async {
         // Arrange & Act
         await tester.pumpWidget(
           buildTestWidget(
@@ -112,7 +116,8 @@ void main() {
         expect(text.style?.color, equals(AppColors.textSecondaryDark));
       });
 
-      testWidgets('should_display_folder_icon_with_custom_color', (tester) async {
+      testWidgets('should_display_folder_icon_with_custom_color',
+          (tester) async {
         // Arrange & Act
         await tester.pumpWidget(
           buildTestWidget(
@@ -128,7 +133,8 @@ void main() {
     });
 
     group('Selection Checkbox - Light Theme', () {
-      testWidgets('should_not_show_checkbox_when_not_in_selection_mode', (tester) async {
+      testWidgets('should_not_show_checkbox_when_not_in_selection_mode',
+          (tester) async {
         // Arrange & Act
         await tester.pumpWidget(
           buildTestWidget(
@@ -146,13 +152,15 @@ void main() {
                 widget is Container &&
                 widget.decoration is BoxDecoration &&
                 (widget.decoration as BoxDecoration).shape == BoxShape.circle &&
-                widget.constraints == const BoxConstraints.tightFor(width: 24, height: 24),
+                widget.constraints ==
+                    const BoxConstraints.tightFor(width: 24, height: 24),
           ),
           findsNothing,
         );
       });
 
-      testWidgets('should_show_unselected_checkbox_with_surfaceLight_color', (tester) async {
+      testWidgets('should_show_unselected_checkbox_with_surfaceLight_color',
+          (tester) async {
         // Arrange & Act
         await tester.pumpWidget(
           buildTestWidget(
@@ -170,7 +178,8 @@ void main() {
                 widget is Container &&
                 widget.decoration is BoxDecoration &&
                 (widget.decoration as BoxDecoration).shape == BoxShape.circle &&
-                widget.constraints == const BoxConstraints.tightFor(width: 24, height: 24),
+                widget.constraints ==
+                    const BoxConstraints.tightFor(width: 24, height: 24),
           ),
         );
         final decoration = container.decoration as BoxDecoration;
@@ -178,7 +187,8 @@ void main() {
         expect(decoration.border?.top.color, equals(AppColors.outlineLight));
       });
 
-      testWidgets('should_show_selected_checkbox_with_primary_color', (tester) async {
+      testWidgets('should_show_selected_checkbox_with_primary_color',
+          (tester) async {
         // Arrange & Act
         await tester.pumpWidget(
           buildTestWidget(
@@ -196,7 +206,8 @@ void main() {
                 widget is Container &&
                 widget.decoration is BoxDecoration &&
                 (widget.decoration as BoxDecoration).shape == BoxShape.circle &&
-                widget.constraints == const BoxConstraints.tightFor(width: 24, height: 24),
+                widget.constraints ==
+                    const BoxConstraints.tightFor(width: 24, height: 24),
           ),
         );
         final decoration = container.decoration as BoxDecoration;
@@ -209,7 +220,8 @@ void main() {
     });
 
     group('Selection Checkbox - Dark Theme', () {
-      testWidgets('should_not_show_checkbox_when_not_in_selection_mode', (tester) async {
+      testWidgets('should_not_show_checkbox_when_not_in_selection_mode',
+          (tester) async {
         // Arrange & Act
         await tester.pumpWidget(
           buildTestWidget(
@@ -226,13 +238,15 @@ void main() {
                 widget is Container &&
                 widget.decoration is BoxDecoration &&
                 (widget.decoration as BoxDecoration).shape == BoxShape.circle &&
-                widget.constraints == const BoxConstraints.tightFor(width: 24, height: 24),
+                widget.constraints ==
+                    const BoxConstraints.tightFor(width: 24, height: 24),
           ),
           findsNothing,
         );
       });
 
-      testWidgets('should_show_unselected_checkbox_with_surfaceDark_color', (tester) async {
+      testWidgets('should_show_unselected_checkbox_with_surfaceDark_color',
+          (tester) async {
         // Arrange & Act
         await tester.pumpWidget(
           buildTestWidget(
@@ -250,7 +264,8 @@ void main() {
                 widget is Container &&
                 widget.decoration is BoxDecoration &&
                 (widget.decoration as BoxDecoration).shape == BoxShape.circle &&
-                widget.constraints == const BoxConstraints.tightFor(width: 24, height: 24),
+                widget.constraints ==
+                    const BoxConstraints.tightFor(width: 24, height: 24),
           ),
         );
         final decoration = container.decoration as BoxDecoration;
@@ -258,7 +273,8 @@ void main() {
         expect(decoration.border?.top.color, equals(AppColors.outlineDark));
       });
 
-      testWidgets('should_show_selected_checkbox_with_primary_color', (tester) async {
+      testWidgets('should_show_selected_checkbox_with_primary_color',
+          (tester) async {
         // Arrange & Act
         await tester.pumpWidget(
           buildTestWidget(
@@ -276,7 +292,8 @@ void main() {
                 widget is Container &&
                 widget.decoration is BoxDecoration &&
                 (widget.decoration as BoxDecoration).shape == BoxShape.circle &&
-                widget.constraints == const BoxConstraints.tightFor(width: 24, height: 24),
+                widget.constraints ==
+                    const BoxConstraints.tightFor(width: 24, height: 24),
           ),
         );
         final decoration = container.decoration as BoxDecoration;
@@ -307,7 +324,8 @@ void main() {
         expect(tapped, true);
       });
 
-      testWidgets('should_call_onMorePressed_when_more_button_is_tapped', (tester) async {
+      testWidgets('should_call_onMorePressed_when_more_button_is_tapped',
+          (tester) async {
         // Arrange
         bool morePressed = false;
         await tester.pumpWidget(
@@ -326,7 +344,8 @@ void main() {
         expect(morePressed, true);
       });
 
-      testWidgets('should_not_show_more_button_in_selection_mode', (tester) async {
+      testWidgets('should_not_show_more_button_in_selection_mode',
+          (tester) async {
         // Arrange & Act
         await tester.pumpWidget(
           buildTestWidget(
@@ -343,7 +362,8 @@ void main() {
       testWidgets('should_display_folder_name_with_max_1_line', (tester) async {
         // Arrange
         final longNameFolder = testFolder.copyWith(
-          name: 'Very Long Folder Name That Should Be Truncated After Two Lines',
+          name:
+              'Very Long Folder Name That Should Be Truncated After Two Lines',
         );
 
         // Act

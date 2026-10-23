@@ -12,23 +12,23 @@ class EraserCursorWidget extends ConsumerWidget {
     required this.isVisible,
     this.lassoPoints = const [],
   });
-  
+
   final Offset cursorPosition;
   final bool isVisible;
   final List<Offset> lassoPoints;
-  
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (!isVisible) return const SizedBox.shrink();
-    
+
     final eraserSettings = ref.watch(eraserSettingsProvider);
-    
+
     final mode = switch (eraserSettings.mode) {
       EraserMode.pixel => EraserCursorMode.pixel,
       EraserMode.stroke => EraserCursorMode.stroke,
       EraserMode.lasso => EraserCursorMode.lasso,
     };
-    
+
     return IgnorePointer(
       child: CustomPaint(
         painter: EraserCursorPainter(

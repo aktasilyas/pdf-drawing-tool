@@ -53,9 +53,14 @@ class InterleavedObjectPainter extends CustomPainter {
       for (final id in elementOrder) {
         painted.add(id);
         final img = imageMap[id];
-        if (img != null) { _drawImage(canvas, img); continue; }
+        if (img != null) {
+          _drawImage(canvas, img);
+          continue;
+        }
         final txt = textMap[id];
-        if (txt != null) { _drawText(canvas, txt); }
+        if (txt != null) {
+          _drawText(canvas, txt);
+        }
       }
       // Remaining elements not in elementOrder: sorted by ID.
       final remaining = <_PaintEntry>[];
@@ -71,8 +76,11 @@ class InterleavedObjectPainter extends CustomPainter {
       }
       remaining.sort((a, b) => a.id.compareTo(b.id));
       for (final e in remaining) {
-        if (e.image != null) { _drawImage(canvas, e.image!); }
-        else { _drawText(canvas, e.text!); }
+        if (e.image != null) {
+          _drawImage(canvas, e.image!);
+        } else {
+          _drawText(canvas, e.text!);
+        }
       }
     } else {
       // Fallback: sort by ID (microsecond timestamp) — oldest first.
@@ -85,8 +93,11 @@ class InterleavedObjectPainter extends CustomPainter {
       }
       entries.sort((a, b) => a.id.compareTo(b.id));
       for (final e in entries) {
-        if (e.image != null) { _drawImage(canvas, e.image!); }
-        else { _drawText(canvas, e.text!); }
+        if (e.image != null) {
+          _drawImage(canvas, e.image!);
+        } else {
+          _drawText(canvas, e.text!);
+        }
       }
     }
 
@@ -126,8 +137,7 @@ class InterleavedObjectPainter extends CustomPainter {
   void _drawPlaceholder(Canvas canvas, ImageElement element) {
     final rect =
         Rect.fromLTWH(element.x, element.y, element.width, element.height);
-    canvas.drawRect(
-        rect, Paint()..color = const Color(0xFFE0E0E0));
+    canvas.drawRect(rect, Paint()..color = const Color(0xFFE0E0E0));
     canvas.drawRect(
         rect,
         Paint()
@@ -188,8 +198,8 @@ class InterleavedObjectPainter extends CustomPainter {
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1.0;
       canvas.drawRect(
-        Rect.fromLTWH(text.x - 2, text.y - 2,
-            paragraph.maxIntrinsicWidth + 4, paragraph.height + 4),
+        Rect.fromLTWH(text.x - 2, text.y - 2, paragraph.maxIntrinsicWidth + 4,
+            paragraph.height + 4),
         paint,
       );
     }

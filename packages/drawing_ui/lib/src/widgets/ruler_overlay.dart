@@ -60,8 +60,9 @@ class _RulerOverlayState extends ConsumerState<RulerOverlay> {
 
     // Convert radians to degrees for display (normalise to -180..180).
     final degrees = (angle * 180 / math.pi) % 360;
-    final displayDeg =
-        degrees > 180 ? degrees - 360 : (degrees < -180 ? degrees + 360 : degrees);
+    final displayDeg = degrees > 180
+        ? degrees - 360
+        : (degrees < -180 ? degrees + 360 : degrees);
 
     return Positioned(
       left: center.dx - rulerStripLength / 2,
@@ -166,8 +167,10 @@ class _RulerOverlayState extends ConsumerState<RulerOverlay> {
     final halfLen = rulerStripLength / 2;
     final dir = Offset(math.cos(angle), math.sin(angle));
     final corners = [
-      Offset.zero, Offset(screen.width, 0),
-      Offset(0, screen.height), Offset(screen.width, screen.height),
+      Offset.zero,
+      Offset(screen.width, 0),
+      Offset(0, screen.height),
+      Offset(screen.width, screen.height),
     ];
     var minProj = double.infinity;
     var maxProj = double.negativeInfinity;
@@ -216,7 +219,11 @@ class _RulerMarkingsPainter extends CustomPainter {
 
         final bool isCm = mm == 0;
         final bool isHalf = mm == 5;
-        final double h = isCm ? 28.0 : isHalf ? 18.0 : 8.0;
+        final double h = isCm
+            ? 28.0
+            : isHalf
+                ? 18.0
+                : 8.0;
 
         // Top edge
         canvas.drawLine(Offset(x, 0), Offset(x, h), tickPaint);
@@ -276,9 +283,9 @@ class _AngleBadge extends StatelessWidget {
       child: Text(
         '${degrees.toStringAsFixed(1)}°',
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: textColor,
-          fontWeight: FontWeight.w600,
-        ),
+              color: textColor,
+              fontWeight: FontWeight.w600,
+            ),
       ),
     );
   }

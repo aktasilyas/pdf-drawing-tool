@@ -32,14 +32,22 @@ class PaperSizePicker extends StatelessWidget {
 
   String _getPresetName(PaperSizePreset preset) {
     switch (preset) {
-      case PaperSizePreset.a4: return 'A4';
-      case PaperSizePreset.a5: return 'A5';
-      case PaperSizePreset.a6: return 'A6';
-      case PaperSizePreset.letter: return 'Letter';
-      case PaperSizePreset.legal: return 'Legal';
-      case PaperSizePreset.square: return 'Kare';
-      case PaperSizePreset.widescreen: return 'Geniş (16:9)';
-      case PaperSizePreset.custom: return 'Özel';
+      case PaperSizePreset.a4:
+        return 'A4';
+      case PaperSizePreset.a5:
+        return 'A5';
+      case PaperSizePreset.a6:
+        return 'A6';
+      case PaperSizePreset.letter:
+        return 'Letter';
+      case PaperSizePreset.legal:
+        return 'Legal';
+      case PaperSizePreset.square:
+        return 'Kare';
+      case PaperSizePreset.widescreen:
+        return 'Geniş (16:9)';
+      case PaperSizePreset.custom:
+        return 'Özel';
     }
   }
 
@@ -53,7 +61,9 @@ class PaperSizePicker extends StatelessWidget {
     final border = Border.all(color: cs.outline.withValues(alpha: 0.2));
     final radius = BorderRadius.circular(8);
     final decoration = BoxDecoration(
-      color: cs.surfaceContainerHigh, borderRadius: radius, border: border,
+      color: cs.surfaceContainerHigh,
+      borderRadius: radius,
+      border: border,
     );
 
     return Row(

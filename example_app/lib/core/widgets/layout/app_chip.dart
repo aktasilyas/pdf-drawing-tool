@@ -58,9 +58,8 @@ class AppChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final effectiveColor = color ?? AppColors.primary;
-    final unselectedBg = isDark
-        ? AppColors.surfaceVariantDark
-        : AppColors.surfaceVariantLight;
+    final unselectedBg =
+        isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariantLight;
 
     return Material(
       color: isSelected ? effectiveColor : unselectedBg,

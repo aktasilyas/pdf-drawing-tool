@@ -62,4 +62,3 @@ Widget buildActivePanel({
       return const ToolbarSettingsPanel();
   }
 }
-

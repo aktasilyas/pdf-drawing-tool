@@ -91,8 +91,7 @@ final highlighterSettingsProvider =
 
 /// Notifier for highlighter settings with persistence.
 class HighlighterSettingsNotifier extends StateNotifier<HighlighterSettings> {
-  HighlighterSettingsNotifier(this._prefs)
-      : super(_load(_prefs));
+  HighlighterSettingsNotifier(this._prefs) : super(_load(_prefs));
 
   final SharedPreferences? _prefs;
 

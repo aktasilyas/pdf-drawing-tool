@@ -62,7 +62,7 @@ void main() {
     // Find and tap the "Giriş Yap" button
     final loginButton = find.widgetWithText(ElevatedButton, 'Giriş Yap');
     expect(loginButton, findsOneWidget);
-    
+
     await tester.tap(loginButton);
     await tester.pumpAndSettle();
 
@@ -76,7 +76,7 @@ void main() {
     // Enter invalid email
     await tester.enterText(find.byKey(loginEmailFieldKey), 'invalid-email');
     await tester.enterText(find.byKey(loginPasswordFieldKey), 'password123');
-    
+
     await tester.tap(find.widgetWithText(ElevatedButton, 'Giriş Yap'));
     await tester.pumpAndSettle();
 
@@ -88,7 +88,7 @@ void main() {
 
     await tester.enterText(find.byKey(loginEmailFieldKey), 'test@example.com');
     await tester.enterText(find.byKey(loginPasswordFieldKey), '123');
-    
+
     await tester.tap(find.widgetWithText(ElevatedButton, 'Giriş Yap'));
     await tester.pumpAndSettle();
 
@@ -100,7 +100,7 @@ void main() {
 
     await tester.enterText(find.byKey(loginEmailFieldKey), 'test@example.com');
     await tester.enterText(find.byKey(loginPasswordFieldKey), 'password123');
-    
+
     await tester.tap(find.widgetWithText(ElevatedButton, 'Giriş Yap'));
     await tester.pumpAndSettle();
 
@@ -111,12 +111,12 @@ void main() {
 
   testWidgets('navigates to documents on successful login', (tester) async {
     fakeAuthController.shouldSucceed = true;
-    
+
     await tester.pumpWidget(createTestApp());
 
     await tester.enterText(find.byKey(loginEmailFieldKey), 'test@example.com');
     await tester.enterText(find.byKey(loginPasswordFieldKey), 'password123');
-    
+
     await tester.tap(find.widgetWithText(ElevatedButton, 'Giriş Yap'));
     await tester.pumpAndSettle();
 
@@ -127,12 +127,12 @@ void main() {
   testWidgets('shows error snackbar on failed login', (tester) async {
     fakeAuthController.shouldSucceed = false;
     fakeAuthController.errorMessage = 'E-posta veya şifre hatalı';
-    
+
     await tester.pumpWidget(createTestApp());
 
     await tester.enterText(find.byKey(loginEmailFieldKey), 'test@example.com');
     await tester.enterText(find.byKey(loginPasswordFieldKey), 'wrongpassword');
-    
+
     await tester.tap(find.widgetWithText(ElevatedButton, 'Giriş Yap'));
     await tester.pumpAndSettle();
 

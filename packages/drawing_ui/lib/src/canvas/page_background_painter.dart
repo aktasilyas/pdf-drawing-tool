@@ -7,7 +7,7 @@ import 'package:drawing_ui/src/painters/template_pattern_painter.dart';
 /// Sayfa içi arka plan pattern çizici (LIMITED mod için).
 /// Transform zaten zoom/pan uyguladığı için bu painter
 /// sadece sayfa boyutları içinde pattern çizer.
-/// 
+///
 /// PERFORMANCE: Uses Picture caching to avoid redrawing patterns
 class PageBackgroundPatternPainter extends CustomPainter {
   final PageBackground background;
@@ -21,7 +21,7 @@ class PageBackgroundPatternPainter extends CustomPainter {
     required this.background,
     this.colorScheme,
   });
-  
+
   /// Generate cache key from background properties
   String _getCacheKey(Size size) {
     return '${background.type}_${background.lineColor}_'
@@ -34,40 +34,40 @@ class PageBackgroundPatternPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     // For PDF and blank, no caching needed
-    if (background.type == BackgroundType.pdf || 
+    if (background.type == BackgroundType.pdf ||
         background.type == BackgroundType.blank) {
       return;
     }
-    
+
     // Try to get from cache
     final cacheKey = _getCacheKey(size);
     ui.Picture? cachedPicture = _pictureCache[cacheKey];
-    
+
     if (cachedPicture == null) {
       // Cache miss - draw and cache
       final recorder = ui.PictureRecorder();
       final recordingCanvas = Canvas(recorder);
-      
+
       _drawPattern(recordingCanvas, size);
-      
+
       cachedPicture = recorder.endRecording();
-      
+
       // Evict oldest if cache is full
       if (_pictureCache.length >= _maxCacheSize) {
         _pictureCache.remove(_pictureCache.keys.first);
       }
-      
+
       _pictureCache[cacheKey] = cachedPicture;
     }
-    
+
     // Draw cached picture
     canvas.drawPicture(cachedPicture);
   }
-  
+
   void _drawPattern(Canvas canvas, Size size) {
     final rawLineColor = background.lineColor ?? 0xFFE0E0E0;
-    final lineColor = colorScheme?.effectiveLineColor(background.lineColor)
-        ?? Color(rawLineColor);
+    final lineColor = colorScheme?.effectiveLineColor(background.lineColor) ??
+        Color(rawLineColor);
     final linePaint = Paint()
       ..color = lineColor
       ..strokeWidth = 0.5
@@ -87,8 +87,8 @@ class PageBackgroundPatternPainter extends CustomPainter {
         break;
 
       case BackgroundType.dotted:
-        final dotColor = colorScheme?.effectiveDotColor(background.lineColor)
-            ?? lineColor;
+        final dotColor =
+            colorScheme?.effectiveDotColor(background.lineColor) ?? lineColor;
         _drawDots(canvas, size, background.gridSpacing ?? 20.0, dotColor);
         break;
 
@@ -110,7 +110,7 @@ class PageBackgroundPatternPainter extends CustomPainter {
           templatePainter.paint(canvas, size);
         }
         break;
-        
+
       case BackgroundType.cover:
         // Render cover background similar to CoverPreviewWidget
         if (background.coverId != null) {
@@ -139,7 +139,8 @@ class PageBackgroundPatternPainter extends CustomPainter {
             Color(cover.secondaryColor ?? cover.primaryColor),
           ],
         );
-        final paint = Paint()..shader = gradient.createShader(Offset.zero & size);
+        final paint = Paint()
+          ..shader = gradient.createShader(Offset.zero & size);
         canvas.drawRect(Offset.zero & size, paint);
         break;
 
@@ -284,8 +285,7 @@ class PageBackgroundView extends StatelessWidget {
   }
 
   String? get _coverImagePath {
-    if (background.type != BackgroundType.cover ||
-        background.coverId == null) {
+    if (background.type != BackgroundType.cover || background.coverId == null) {
       return null;
     }
     final cover = CoverRegistry.byId(background.coverId!);

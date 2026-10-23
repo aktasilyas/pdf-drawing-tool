@@ -13,11 +13,14 @@ import 'package:example_app/features/premium/domain/usecases/restore_purchases_u
 
 class _FakeSubscriptionRepository implements SubscriptionRepository {
   _FakeSubscriptionRepository({
-    this.subscriptionResult = const Right<Failure, Subscription>(Subscription.freeUser),
+    this.subscriptionResult =
+        const Right<Failure, Subscription>(Subscription.freeUser),
     this.entitlementResult = const Right<Failure, bool>(false),
     this.productsResult = const Right<Failure, List<Product>>([]),
-    this.purchaseResult = const Right<Failure, Subscription>(Subscription.freeUser),
-    this.restoreResult = const Right<Failure, Subscription>(Subscription.freeUser),
+    this.purchaseResult =
+        const Right<Failure, Subscription>(Subscription.freeUser),
+    this.restoreResult =
+        const Right<Failure, Subscription>(Subscription.freeUser),
   });
 
   final Either<Failure, Subscription> subscriptionResult;
@@ -74,7 +77,8 @@ class _FakeSubscriptionRepository implements SubscriptionRepository {
 
   @override
   Stream<Subscription> watchSubscription() {
-    return Stream.value(subscriptionResult.fold((_) => Subscription.freeUser, (value) => value));
+    return Stream.value(subscriptionResult.fold(
+        (_) => Subscription.freeUser, (value) => value));
   }
 
   @override
@@ -147,7 +151,8 @@ void main() {
     expect(repository.getProductsCalled, true);
   });
 
-  test('PurchaseUseCase returns purchase result and calls repository', () async {
+  test('PurchaseUseCase returns purchase result and calls repository',
+      () async {
     final useCase = PurchaseUseCase(repository);
     final result = await useCase('monthly');
     expect(repository.hasPurchaseCalled, true);

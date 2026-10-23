@@ -87,12 +87,12 @@ class AnchorPositionCalculator {
     Size anchorSize,
   ) {
     final result = _calculatePosition(direction, anchorPosition, anchorSize);
-    
+
     // Check if panel fits on screen
     if (_fitsOnScreen(result.offset)) {
       return result;
     }
-    
+
     return null;
   }
 

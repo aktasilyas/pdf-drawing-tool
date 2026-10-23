@@ -127,8 +127,7 @@ class UpgradePromptSheet extends StatelessWidget {
 
   Widget _buildDescription(ThemeData theme) {
     return Text(
-      access.upgradeMessage ??
-          'Bu özellik Premium planla kullanılabilir.',
+      access.upgradeMessage ?? 'Bu özellik Premium planla kullanılabilir.',
       style: theme.textTheme.bodyMedium?.copyWith(
         color: theme.colorScheme.onSurfaceVariant,
       ),

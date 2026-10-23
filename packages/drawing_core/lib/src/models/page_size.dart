@@ -64,10 +64,10 @@ class PageSize {
 
   /// JSON serialization
   Map<String, dynamic> toJson() => {
-    'width': width,
-    'height': height,
-    'preset': preset?.name,
-  };
+        'width': width,
+        'height': height,
+        'preset': preset?.name,
+      };
 
   factory PageSize.fromJson(Map<String, dynamic> json) {
     final presetName = json['preset'] as String?;
@@ -77,14 +77,14 @@ class PageSize {
             orElse: () => PagePreset.custom,
           )
         : null;
-    
+
     // Handle String/int/double parsing safely
     double parseNumber(dynamic value) {
       if (value is num) return value.toDouble();
       if (value is String) return double.parse(value);
       throw ArgumentError('Invalid number: $value');
     }
-    
+
     return PageSize(
       width: parseNumber(json['width']),
       height: parseNumber(json['height']),
@@ -95,9 +95,7 @@ class PageSize {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is PageSize &&
-          width == other.width &&
-          height == other.height;
+      other is PageSize && width == other.width && height == other.height;
 
   @override
   int get hashCode => Object.hash(width, height);

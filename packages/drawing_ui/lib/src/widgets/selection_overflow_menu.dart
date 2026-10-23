@@ -25,10 +25,8 @@ class SelectionOverflowMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Separate destructive action(s) for bottom section
-    final normalActions =
-        actions.where((a) => !a.isDestructive).toList();
-    final destructiveActions =
-        actions.where((a) => a.isDestructive).toList();
+    final normalActions = actions.where((a) => !a.isDestructive).toList();
+    final destructiveActions = actions.where((a) => a.isDestructive).toList();
     final colorScheme = Theme.of(context).colorScheme;
     final brightness = Theme.of(context).brightness;
 
@@ -171,7 +169,8 @@ class _OverflowListItem extends StatelessWidget {
               Expanded(
                 child: Text(
                   action.label,
-                  style: textTheme.bodyMedium?.copyWith(fontSize: 15, color: color),
+                  style: textTheme.bodyMedium
+                      ?.copyWith(fontSize: 15, color: color),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),

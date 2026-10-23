@@ -43,12 +43,16 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
   Set<String> get erasedShapeIds;
   Map<String, List<int>> get pixelEraseHits;
   List<core.Stroke> get pixelEraseOriginalStrokes;
+
   /// Note ID -> set of internal stroke IDs erased in current gesture.
   Map<String, Set<String>> get erasedNoteStrokeIds;
+
   /// Note ID -> set of internal shape IDs erased in current gesture.
   Map<String, Set<String>> get erasedNoteShapeIds;
+
   /// Note ID -> (stroke ID -> segment indices) for pixel erasure inside notes.
   Map<String, Map<String, List<int>>> get pixelEraseNoteHits;
+
   /// Note ID -> original strokes for pixel erasure inside notes.
   Map<String, List<core.Stroke>> get pixelEraseNoteOriginalStrokes;
   Offset? get lastFocalPoint;
@@ -85,8 +89,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     final notes = ref.read(activeLayerStickyNotesProvider);
     drawingInsideNote = null;
     for (final note in notes.reversed) {
-      if (!note.minimized &&
-          note.containsPoint(cp.dx, cp.dy, 0)) {
+      if (!note.minimized && note.containsPoint(cp.dx, cp.dy, 0)) {
         drawingInsideNote = note;
         return;
       }
@@ -152,8 +155,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     // Top edge origin in screen space.
     final topScreen = center + Offset(-perpX * halfH, -perpY * halfH);
 
-    final pointScreen =
-        transform.canvasToScreen(Offset(point.x, point.y));
+    final pointScreen = transform.canvasToScreen(Offset(point.x, point.y));
     final dirX = math.cos(angle);
     final dirY = math.sin(angle);
 
@@ -292,7 +294,8 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
 
     // Block drawing on locked or hidden active layer
     final activeLayer = ref.read(documentProvider).activeLayer;
-    if (activeLayer != null && (activeLayer.isLocked || !activeLayer.isVisible)) {
+    if (activeLayer != null &&
+        (activeLayer.isLocked || !activeLayer.isVisible)) {
       return;
     }
 
@@ -357,8 +360,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
         toolType != ToolType.stickyNote) {
       final transform = ref.read(canvasTransformProvider);
       final cp = transform.screenToCanvas(event.localPosition);
-      if (!stickyNoteState.selectedNote!
-          .containsPoint(cp.dx, cp.dy, 0)) {
+      if (!stickyNoteState.selectedNote!.containsPoint(cp.dx, cp.dy, 0)) {
         _minimizeAndDeselectNote(stickyNoteState.selectedNote!);
       }
     }
@@ -473,7 +475,9 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
               newNote: maximized,
             );
             ref.read(historyManagerProvider.notifier).execute(command);
-            ref.read(stickyNotePlacementProvider.notifier).selectNote(maximized);
+            ref
+                .read(stickyNotePlacementProvider.notifier)
+                .selectNote(maximized);
             return;
           }
           ref.read(stickyNotePlacementProvider.notifier).selectNote(note);
@@ -597,7 +601,6 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       final penSettings = ref.read(penSettingsProvider(toolType));
       stabilization = penSettings.stabilization;
     }
-
 
     drawingController.startStroke(
       point,
@@ -875,7 +878,11 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       final canvasPoint =
           (event.localPosition - transform.offset) / transform.zoom;
       selection = _hitTestElementsAtPoint(
-        canvasPoint, strokes, shapes, images, texts,
+        canvasPoint,
+        strokes,
+        shapes,
+        images,
+        texts,
       );
     }
 
@@ -933,8 +940,10 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       final shape = shapes.where((s) => s.id == id).firstOrNull;
       if (shape != null) {
         final b = shape.bounds;
-        if (px >= b.left - tolerance && px <= b.right + tolerance &&
-            py >= b.top - tolerance && py <= b.bottom + tolerance) {
+        if (px >= b.left - tolerance &&
+            px <= b.right + tolerance &&
+            py >= b.top - tolerance &&
+            py <= b.bottom + tolerance) {
           return core.Selection.create(
             type: core.SelectionType.rectangle,
             selectedStrokeIds: const [],
@@ -949,8 +958,10 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
       if (stroke != null) {
         final b = stroke.bounds;
         if (b != null &&
-            px >= b.left - tolerance && px <= b.right + tolerance &&
-            py >= b.top - tolerance && py <= b.bottom + tolerance) {
+            px >= b.left - tolerance &&
+            px <= b.right + tolerance &&
+            py >= b.top - tolerance &&
+            py <= b.bottom + tolerance) {
           return core.Selection.create(
             type: core.SelectionType.rectangle,
             selectedStrokeIds: [id],
@@ -1394,7 +1405,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     for (final shape in shapes) {
       if (!erasedShapeIds.contains(shape.id)) {
         if (shape.containsPoint(
-          canvasPoint.dx, canvasPoint.dy, canvasTolerance)) {
+            canvasPoint.dx, canvasPoint.dy, canvasTolerance)) {
           erasedShapeIds.add(shape.id);
         }
       }
@@ -1438,8 +1449,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
 
       // Check internal shapes (whole shape removal for both modes)
       for (final shape in note.shapes) {
-        final noteShapeIds =
-            erasedNoteShapeIds.putIfAbsent(note.id, () => {});
+        final noteShapeIds = erasedNoteShapeIds.putIfAbsent(note.id, () => {});
         if (noteShapeIds.contains(shape.id)) continue;
         if (shape.containsPoint(relX, relY, tolerance)) {
           noteShapeIds.add(shape.id);
@@ -1466,8 +1476,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     );
 
     for (final hit in hits) {
-      final noteHits =
-          pixelEraseNoteHits.putIfAbsent(note.id, () => {});
+      final noteHits = pixelEraseNoteHits.putIfAbsent(note.id, () => {});
       if (!noteHits.containsKey(hit.strokeId)) {
         final origStrokes =
             pixelEraseNoteOriginalStrokes.putIfAbsent(note.id, () => []);
@@ -1494,8 +1503,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     double tolerance,
   ) {
     for (final stroke in note.strokes) {
-      final noteStrokeIds =
-          erasedNoteStrokeIds.putIfAbsent(note.id, () => {});
+      final noteStrokeIds = erasedNoteStrokeIds.putIfAbsent(note.id, () => {});
       if (noteStrokeIds.contains(stroke.id)) continue;
       for (int i = 0; i < stroke.points.length - 1; i++) {
         final p = stroke.points[i];
@@ -1506,8 +1514,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
         }
       }
       // Check last point
-      if (!noteStrokeIds.contains(stroke.id) &&
-          stroke.points.isNotEmpty) {
+      if (!noteStrokeIds.contains(stroke.id) && stroke.points.isNotEmpty) {
         final p = stroke.points.last;
         final dist = _pointDist(relX, relY, p.x, p.y);
         if (dist <= tolerance + stroke.style.thickness / 2) {
@@ -1955,8 +1962,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     // Clamp position to page bounds (skip in infinite mode)
     if (!ref.read(isInfiniteCanvasProvider)) {
       final page = ref.read(currentPageProvider);
-      final maxX =
-          (page.size.width - defaultWidth).clamp(0.0, page.size.width);
+      final maxX = (page.size.width - defaultWidth).clamp(0.0, page.size.width);
       final maxY =
           (page.size.height - defaultHeight).clamp(0.0, page.size.height);
       imgX = imgX.clamp(0.0, maxX);
@@ -2087,10 +2093,11 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     }
 
     // When swipe mode: feed interactive drag deltas to PageSlideTransition
-    final suppressZoom = !mode.isInfinite &&
-        onPageSwipe != null &&
-        !scaleGestureIsZoom;
-    if (suppressZoom && onPageSwipeDragUpdate != null && lastFocalPoint != null) {
+    final suppressZoom =
+        !mode.isInfinite && onPageSwipe != null && !scaleGestureIsZoom;
+    if (suppressZoom &&
+        onPageSwipeDragUpdate != null &&
+        lastFocalPoint != null) {
       final scrollDir = ref.read(scrollDirectionProvider);
       final isHoriz = scrollDir == Axis.horizontal;
       final panDelta = details.localFocalPoint - lastFocalPoint!;
@@ -2114,7 +2121,10 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
 
     // Apply zoom (pinch gesture) — skip if zoom is locked or gesture is swipe
     final isZoomLocked = ref.read(zoomLockedProvider);
-    if (!isZoomLocked && !suppressZoom && lastScale != null && details.scale != 1.0) {
+    if (!isZoomLocked &&
+        !suppressZoom &&
+        lastScale != null &&
+        details.scale != 1.0) {
       final scaleDelta = details.scale / lastScale!;
       if ((scaleDelta - 1.0).abs() > 0.001) {
         if (mode.isInfinite) {
@@ -2172,8 +2182,11 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     if (page.background.type == BackgroundType.pdf &&
         page.background.pdfFilePath != null &&
         page.background.pdfPageIndex != null) {
-      final cacheKey = '${page.background.pdfFilePath}|${page.background.pdfPageIndex}';
-      ref.read(zoomBasedRenderProvider.notifier).onZoomChanged(currentZoom, cacheKey);
+      final cacheKey =
+          '${page.background.pdfFilePath}|${page.background.pdfPageIndex}';
+      ref
+          .read(zoomBasedRenderProvider.notifier)
+          .onZoomChanged(currentZoom, cacheKey);
     }
 
     // End interactive swipe drag if active
@@ -2237,8 +2250,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     final displacement = endPoint - startPoint;
     final primaryDisplacement =
         isHorizontal ? displacement.dx : displacement.dy;
-    final crossDisplacement =
-        isHorizontal ? displacement.dy : displacement.dx;
+    final crossDisplacement = isHorizontal ? displacement.dy : displacement.dx;
 
     // Minimum displacement along primary axis
     if (primaryDisplacement.abs() < 30) return 0;

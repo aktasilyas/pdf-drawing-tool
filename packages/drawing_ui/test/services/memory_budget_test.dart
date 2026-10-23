@@ -7,7 +7,7 @@ void main() {
     group('Constructor', () {
       test('should create with default budget', () {
         final budget = MemoryBudget();
-        
+
         expect(budget.maxBytes, MemoryBudget.defaultMaxBytes);
         expect(budget.currentBytes, 0);
         expect(budget.isOverBudget, false);
@@ -15,7 +15,7 @@ void main() {
 
       test('should create with custom budget', () {
         final budget = MemoryBudget(maxBytes: 1024 * 1024); // 1 MB
-        
+
         expect(budget.maxBytes, 1024 * 1024);
         expect(budget.currentBytes, 0);
       });
@@ -25,7 +25,7 @@ void main() {
           () => MemoryBudget(maxBytes: 0),
           throwsArgumentError,
         );
-        
+
         expect(
           () => MemoryBudget(maxBytes: -100),
           throwsArgumentError,
@@ -60,7 +60,7 @@ void main() {
       test('should handle deallocation of non-existent key', () {
         budget.allocate('key1', 100);
         budget.deallocate('key2'); // doesn't exist
-        
+
         expect(budget.currentBytes, 100); // unchanged
       });
 
@@ -89,7 +89,7 @@ void main() {
     group('Budget Status', () {
       test('should detect over budget', () {
         final budget = MemoryBudget(maxBytes: 500);
-        
+
         budget.allocate('key1', 300);
         expect(budget.isOverBudget, false);
 
@@ -99,7 +99,7 @@ void main() {
 
       test('should calculate remaining bytes', () {
         final budget = MemoryBudget(maxBytes: 1000);
-        
+
         expect(budget.remainingBytes, 1000);
 
         budget.allocate('key1', 300);
@@ -111,7 +111,7 @@ void main() {
 
       test('should calculate usage percentage', () {
         final budget = MemoryBudget(maxBytes: 1000);
-        
+
         expect(budget.usagePercentage, 0.0);
 
         budget.allocate('key1', 250);
@@ -123,7 +123,7 @@ void main() {
 
       test('should handle usage over 100%', () {
         final budget = MemoryBudget(maxBytes: 1000);
-        
+
         budget.allocate('key1', 1200);
         expect(budget.usagePercentage, 120.0);
       });
@@ -132,23 +132,23 @@ void main() {
     group('Allocation Tracking', () {
       test('should track allocation size for key', () {
         final budget = MemoryBudget(maxBytes: 1000);
-        
+
         budget.allocate('key1', 100);
         expect(budget.getAllocationSize('key1'), 100);
-        
+
         budget.allocate('key2', 200);
         expect(budget.getAllocationSize('key2'), 200);
       });
 
       test('should return 0 for non-existent key', () {
         final budget = MemoryBudget(maxBytes: 1000);
-        
+
         expect(budget.getAllocationSize('nonexistent'), 0);
       });
 
       test('should return all allocations', () {
         final budget = MemoryBudget(maxBytes: 1000);
-        
+
         budget.allocate('key1', 100);
         budget.allocate('key2', 200);
         budget.allocate('key3', 150);
@@ -162,7 +162,7 @@ void main() {
 
       test('should return immutable allocations map', () {
         final budget = MemoryBudget(maxBytes: 1000);
-        
+
         budget.allocate('key1', 100);
         final allocations1 = budget.getAllocations();
         final allocations2 = budget.getAllocations();
@@ -174,7 +174,7 @@ void main() {
     group('Clear', () {
       test('should clear all allocations', () {
         final budget = MemoryBudget(maxBytes: 1000);
-        
+
         budget.allocate('key1', 100);
         budget.allocate('key2', 200);
         budget.allocate('key3', 150);
@@ -187,7 +187,7 @@ void main() {
 
       test('should be safe to clear empty budget', () {
         final budget = MemoryBudget(maxBytes: 1000);
-        
+
         expect(() => budget.clear(), returnsNormally);
         expect(budget.currentBytes, 0);
       });
@@ -197,7 +197,7 @@ void main() {
       test('should track Uint8List allocation', () {
         final budget = MemoryBudget(maxBytes: 1000);
         final data = Uint8List(100);
-        
+
         budget.allocateData('key1', data);
         expect(budget.currentBytes, 100);
       });
@@ -205,16 +205,16 @@ void main() {
       test('should handle empty Uint8List', () {
         final budget = MemoryBudget(maxBytes: 1000);
         final data = Uint8List(0);
-        
+
         budget.allocateData('key1', data);
         expect(budget.currentBytes, 0);
       });
 
       test('should calculate if allocation would exceed budget', () {
         final budget = MemoryBudget(maxBytes: 1000);
-        
+
         budget.allocate('key1', 800);
-        
+
         expect(budget.wouldExceedBudget(100), false);
         expect(budget.wouldExceedBudget(200), false);
         expect(budget.wouldExceedBudget(300), true);
@@ -222,7 +222,7 @@ void main() {
 
       test('should suggest eviction count', () {
         final budget = MemoryBudget(maxBytes: 1000);
-        
+
         budget.allocate('key1', 200);
         budget.allocate('key2', 300);
         budget.allocate('key3', 400);
@@ -240,13 +240,13 @@ void main() {
     group('Statistics', () {
       test('should provide memory statistics', () {
         final budget = MemoryBudget(maxBytes: 1000);
-        
+
         budget.allocate('key1', 200);
         budget.allocate('key2', 300);
         budget.allocate('key3', 100);
 
         final stats = budget.getStatistics();
-        
+
         expect(stats['maxBytes'], 1000);
         expect(stats['currentBytes'], 600);
         expect(stats['remainingBytes'], 400);
@@ -267,7 +267,7 @@ void main() {
     group('Edge Cases', () {
       test('should handle maximum integer allocation', () {
         final budget = MemoryBudget(maxBytes: 1000000000);
-        
+
         expect(
           () => budget.allocate('key1', 999999999),
           returnsNormally,
@@ -276,23 +276,23 @@ void main() {
 
       test('should handle many small allocations', () {
         final budget = MemoryBudget(maxBytes: 10000);
-        
+
         for (int i = 0; i < 100; i++) {
           budget.allocate('key$i', 50);
         }
-        
+
         expect(budget.currentBytes, 5000);
         expect(budget.getAllocations().length, 100);
       });
 
       test('should handle rapid allocation and deallocation', () {
         final budget = MemoryBudget(maxBytes: 1000);
-        
+
         for (int i = 0; i < 100; i++) {
           budget.allocate('key1', 100);
           budget.deallocate('key1');
         }
-        
+
         expect(budget.currentBytes, 0);
       });
     });

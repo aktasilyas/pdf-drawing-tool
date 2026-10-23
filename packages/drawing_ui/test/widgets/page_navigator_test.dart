@@ -100,7 +100,7 @@ void main() {
       );
 
       await tester.pump();
-      
+
       // Wait for thumbnails to load
       await tester.runAsync(() async {
         await Future.delayed(const Duration(milliseconds: 100));
@@ -135,8 +135,7 @@ void main() {
       expect(find.text('Add Page'), findsOneWidget);
     });
 
-    testWidgets('should call onAddPage when add button tapped',
-        (tester) async {
+    testWidgets('should call onAddPage when add button tapped', (tester) async {
       bool addCalled = false;
 
       await tester.pumpWidget(

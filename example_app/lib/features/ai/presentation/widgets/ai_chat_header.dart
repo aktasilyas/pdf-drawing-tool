@@ -23,14 +23,15 @@ class AIChatHeader extends ConsumerWidget {
     final viewMode = ref.watch(aiChatViewModeProvider);
 
     return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm, vertical: AppSpacing.xs,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xs,
       ),
       child: LayoutBuilder(builder: (context, constraints) {
         return Row(
           children: [
             PopupMenuButton<String>(
-              icon: Icon(Icons.more_vert, size: AppIconSize.md),
+              icon: const Icon(Icons.more_vert, size: AppIconSize.md),
               tooltip: 'Menu',
               onSelected: (value) {
                 switch (value) {
@@ -47,28 +48,30 @@ class AIChatHeader extends ConsumerWidget {
               itemBuilder: (context) => [
                 _viewModeItem(
                   context,
-                  value: 'sidebar', icon: Icons.view_sidebar,
+                  value: 'sidebar',
+                  icon: Icons.view_sidebar,
                   label: 'Sidebar görünümü',
                   isActive: viewMode == AIChatViewMode.sidebar,
                 ),
                 _viewModeItem(
                   context,
-                  value: 'floating', icon: Icons.picture_in_picture,
+                  value: 'floating',
+                  icon: Icons.picture_in_picture,
                   label: 'Yüzen pencere',
                   isActive: viewMode == AIChatViewMode.floating,
                 ),
                 const PopupMenuDivider(),
-                PopupMenuItem(
+                const PopupMenuItem(
                   value: 'close',
                   child: Row(children: [
                     Icon(Icons.close, size: AppIconSize.md),
                     SizedBox(width: AppSpacing.md),
-                    const Text('Kapat'),
+                    Text('Kapat'),
                   ]),
                 ),
               ],
             ),
-            SizedBox(width: AppSpacing.xs),
+            const SizedBox(width: AppSpacing.xs),
             Expanded(
               child: Text('Elyanotes AI',
                   overflow: TextOverflow.ellipsis,
@@ -77,13 +80,13 @@ class AIChatHeader extends ConsumerWidget {
             ),
             IconButton(
               onPressed: onToggleHistory,
-              icon: Icon(Icons.history, size: AppIconSize.md),
+              icon: const Icon(Icons.history, size: AppIconSize.md),
               tooltip: 'Sohbet geçmişi',
             ),
             IconButton(
               onPressed: onNewChat,
-              icon: Icon(Icons.add_comment_outlined,
-                  size: AppIconSize.md),
+              icon:
+                  const Icon(Icons.add_comment_outlined, size: AppIconSize.md),
               tooltip: 'Yeni Chat',
             ),
           ],
@@ -94,17 +97,20 @@ class AIChatHeader extends ConsumerWidget {
 
   PopupMenuItem<String> _viewModeItem(
     BuildContext context, {
-    required String value, required IconData icon,
-    required String label, required bool isActive,
+    required String value,
+    required IconData icon,
+    required String label,
+    required bool isActive,
   }) {
     return PopupMenuItem(
       value: value,
       child: Row(children: [
         Icon(icon, size: AppIconSize.md),
-        SizedBox(width: AppSpacing.md),
+        const SizedBox(width: AppSpacing.md),
         Expanded(child: Text(label)),
         if (isActive)
-          Icon(Icons.check, size: AppIconSize.sm + 2,
+          Icon(Icons.check,
+              size: AppIconSize.sm + 2,
               color: Theme.of(context).colorScheme.primary),
       ]),
     );

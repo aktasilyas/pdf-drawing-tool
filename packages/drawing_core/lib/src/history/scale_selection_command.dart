@@ -101,9 +101,10 @@ class ScaleSelectionCommand implements DrawingCommand {
         );
       }).toList();
 
-      final newThickness = restoreThickness && _originalThicknesses.containsKey(id)
-          ? _originalThicknesses[id]!
-          : (stroke.style.thickness * thicknessScale).clamp(0.1, 50.0);
+      final newThickness =
+          restoreThickness && _originalThicknesses.containsKey(id)
+              ? _originalThicknesses[id]!
+              : (stroke.style.thickness * thicknessScale).clamp(0.1, 50.0);
 
       layer = layer.updateStroke(stroke.copyWith(
         points: scaledPoints,

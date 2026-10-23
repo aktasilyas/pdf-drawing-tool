@@ -35,8 +35,20 @@ void main() {
         'id': 'doc2',
         'title': 'Multi Layer Doc',
         'layers': [
-          {'id': 'l1', 'name': 'Layer 1', 'strokes': [], 'shapes': [], 'texts': []},
-          {'id': 'l2', 'name': 'Layer 2', 'strokes': [], 'shapes': [], 'texts': []},
+          {
+            'id': 'l1',
+            'name': 'Layer 1',
+            'strokes': [],
+            'shapes': [],
+            'texts': []
+          },
+          {
+            'id': 'l2',
+            'name': 'Layer 2',
+            'strokes': [],
+            'shapes': [],
+            'texts': []
+          },
         ],
         'activeLayerIndex': 1,
         'createdAt': '2024-01-01T00:00:00.000',
@@ -64,7 +76,13 @@ void main() {
             'size': {'width': 595.0, 'height': 842.0, 'preset': 'a4Portrait'},
             'background': {'type': 'blank', 'color': 0xFFFFFFFF},
             'layers': [
-              {'id': 'l1', 'name': 'Layer 1', 'strokes': [], 'shapes': [], 'texts': []},
+              {
+                'id': 'l1',
+                'name': 'Layer 1',
+                'strokes': [],
+                'shapes': [],
+                'texts': []
+              },
             ],
             'createdAt': '2024-01-01T00:00:00.000',
             'updatedAt': '2024-01-01T00:00:00.000',
@@ -72,7 +90,11 @@ void main() {
         ],
         'currentPageIndex': 0,
         'settings': {
-          'defaultPageSize': {'width': 595.0, 'height': 842.0, 'preset': 'a4Portrait'},
+          'defaultPageSize': {
+            'width': 595.0,
+            'height': 842.0,
+            'preset': 'a4Portrait'
+          },
           'defaultBackground': {'type': 'blank', 'color': 0xFFFFFFFF},
         },
         'createdAt': '2024-01-01T00:00:00.000',
@@ -88,7 +110,7 @@ void main() {
     test('should export as v2 format', () {
       final doc = DrawingDocument.emptyMultiPage('Test Doc');
       final json = doc.toJson();
-      
+
       expect(json['version'], 2);
       expect(json['pages'], isNotNull);
       expect(json['currentPageIndex'], isNotNull);
@@ -98,7 +120,7 @@ void main() {
 
     test('should support deprecated layers getter', () {
       final doc = DrawingDocument.emptyMultiPage('Test Doc');
-      
+
       // Deprecated but working
       expect(doc.layers, isNotEmpty);
       expect(doc.layers, doc.pages.first.layers);
@@ -106,7 +128,7 @@ void main() {
 
     test('should support deprecated activeLayerIndex getter', () {
       final doc = DrawingDocument.emptyMultiPage('Test Doc');
-      
+
       // Deprecated but working
       expect(doc.activeLayerIndex, 0);
     });

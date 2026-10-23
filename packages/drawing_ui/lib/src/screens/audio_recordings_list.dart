@@ -39,11 +39,12 @@ class AudioRecordingsList extends ConsumerWidget {
         final recording = recordings[index];
         return AudioRecordingListItem(
           recording: recording,
-          onRename: () => _handleRename(context, ref, recording.id,
-              recording.title),
+          onRename: () =>
+              _handleRename(context, ref, recording.id, recording.title),
           onDelete: () => _handleDelete(context, ref, recording.id),
           onGoToPage: () {
-            ref.read(pageManagerProvider.notifier)
+            ref
+                .read(pageManagerProvider.notifier)
                 .goToPage(recording.pageIndex);
           },
         );

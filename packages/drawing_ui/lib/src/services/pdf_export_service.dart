@@ -266,7 +266,8 @@ class PDFExportService {
         return PDFExportServiceResult.success(result.pdfBytes);
       } else {
         _setError(result.errorMessage ?? 'Unknown error');
-        return PDFExportServiceResult.error(result.errorMessage ?? 'Unknown error');
+        return PDFExportServiceResult.error(
+            result.errorMessage ?? 'Unknown error');
       }
     } catch (e) {
       _setError(e.toString());
@@ -296,10 +297,10 @@ class PDFExportService {
   }) {
     // Sanitize filename
     var filename = documentTitle.isEmpty ? 'document' : documentTitle;
-    
+
     // Remove invalid characters
     filename = filename.replaceAll(RegExp(r'[<>:"/\\|?*]'), '');
-    
+
     // Limit length
     if (filename.length > 200) {
       filename = filename.substring(0, 200);

@@ -60,9 +60,8 @@ class ManageFolderListItem extends StatelessWidget {
         title: Text(
           folder.name,
           style: AppTypography.titleMedium.copyWith(
-            color: isDark
-                ? AppColors.textPrimaryDark
-                : AppColors.textPrimaryLight,
+            color:
+                isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
           ),
         ),
         trailing: Row(
@@ -110,7 +109,7 @@ class ManageFolderListItem extends StatelessWidget {
                     child: Text('Alt Klasör Ekle'),
                   ),
                 const PopupMenuDivider(),
-                PopupMenuItem(
+                const PopupMenuItem(
                   value: 'delete',
                   child: Text(
                     'Sil',

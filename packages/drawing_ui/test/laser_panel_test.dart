@@ -165,7 +165,7 @@ void main() {
 
     testWidgets('can change color via provider', (tester) async {
       late WidgetRef testRef;
-      
+
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
@@ -176,7 +176,8 @@ void main() {
                   final settings = ref.watch(laserSettingsProvider);
                   return Column(
                     children: [
-                      Text('ColorHex: ${settings.color.toARGB32().toRadixString(16)}'),
+                      Text(
+                          'ColorHex: ${settings.color.toARGB32().toRadixString(16)}'),
                       const Expanded(
                         child: SingleChildScrollView(
                           child: LaserPointerPanel(),
@@ -195,7 +196,9 @@ void main() {
       expect(find.text('ColorHex: ff29b6f6'), findsOneWidget);
 
       // Change color via provider
-      testRef.read(laserSettingsProvider.notifier).setColor(const Color(0xFF4CAF50));
+      testRef
+          .read(laserSettingsProvider.notifier)
+          .setColor(const Color(0xFF4CAF50));
       await tester.pump();
 
       // Color should change to green

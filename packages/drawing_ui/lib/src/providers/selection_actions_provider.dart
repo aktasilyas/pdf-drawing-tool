@@ -77,8 +77,7 @@ void _copyToClipboard(WidgetRef ref, Selection selection) {
     if (t != null) texts.add(t);
   }
 
-  ref.read(selectionClipboardProvider.notifier).state =
-      SelectionClipboardData(
+  ref.read(selectionClipboardProvider.notifier).state = SelectionClipboardData(
     strokes: strokes,
     shapes: shapes,
     images: images,
@@ -200,8 +199,8 @@ void _sendToBack(WidgetRef ref, Selection selection) {
 }
 
 void _changeColor(WidgetRef ref, Selection selection, int color) {
-  if (selection.selectedStrokeIds.isEmpty &&
-      selection.selectedTextIds.isEmpty) return;
+  if (selection.selectedStrokeIds.isEmpty && selection.selectedTextIds.isEmpty)
+    return;
   final document = ref.read(documentProvider);
   final command = ChangeSelectionStyleCommand(
     layerIndex: document.activeLayerIndex,
@@ -239,8 +238,7 @@ Future<void> _screenshotSelection(
         pdfImageBytes = background.pdfData;
       } else if (background.pdfFilePath != null &&
           background.pdfPageIndex != null) {
-        final cacheKey =
-            '${background.pdfFilePath}|${background.pdfPageIndex}';
+        final cacheKey = '${background.pdfFilePath}|${background.pdfPageIndex}';
         final cache = ref.read(pdfPageCacheProvider);
         pdfImageBytes = cache[cacheKey];
       }
@@ -322,8 +320,7 @@ Future<void> _captureAndOpenAI(
         pdfImageBytes = background.pdfData;
       } else if (background.pdfFilePath != null &&
           background.pdfPageIndex != null) {
-        final cacheKey =
-            '${background.pdfFilePath}|${background.pdfPageIndex}';
+        final cacheKey = '${background.pdfFilePath}|${background.pdfPageIndex}';
         final cache = ref.read(pdfPageCacheProvider);
         pdfImageBytes = cache[cacheKey];
       }
@@ -368,9 +365,9 @@ SelectionActionConfig buildSelectionActionConfig(
   VoidCallback? onAIPressed,
 }) {
   // Resolve AI callback: prefer explicit param, then provider, then fallback
-  final resolvedAICallback = onAIPressed
-      ?? ref.read(onAIPressedCallbackProvider)
-      ?? (context != null ? () => openAIPanel(context) : null);
+  final resolvedAICallback = onAIPressed ??
+      ref.read(onAIPressedCallbackProvider) ??
+      (context != null ? () => openAIPanel(context) : null);
 
   // Empty selection: only AI + Screenshot actions
   if (selection.isEmpty) {
@@ -383,7 +380,7 @@ SelectionActionConfig buildSelectionActionConfig(
           isEnabled: resolvedAICallback != null,
           onExecute: resolvedAICallback != null
               ? () => _captureAndOpenAI(
-                    ref, selection, cacheManager, resolvedAICallback)
+                  ref, selection, cacheManager, resolvedAICallback)
               : null,
         ),
         SelectionAction(
@@ -392,7 +389,8 @@ SelectionActionConfig buildSelectionActionConfig(
           label: 'Ekran Resmi',
           isEnabled: cacheManager != null,
           onExecute: cacheManager != null
-              ? () => _screenshotSelection(ref, selection, cacheManager, context)
+              ? () =>
+                  _screenshotSelection(ref, selection, cacheManager, context)
               : null,
         ),
       ],
@@ -411,12 +409,19 @@ SelectionActionConfig buildSelectionActionConfig(
   bool foundColor = false;
   for (final id in selection.selectedStrokeIds) {
     final s = layer.getStrokeById(id);
-    if (s != null) { selectedColor = s.style.color; foundColor = true; break; }
+    if (s != null) {
+      selectedColor = s.style.color;
+      foundColor = true;
+      break;
+    }
   }
   if (!foundColor) {
     for (final id in selection.selectedTextIds) {
       final t = layer.getTextById(id);
-      if (t != null) { selectedColor = t.color; break; }
+      if (t != null) {
+        selectedColor = t.color;
+        break;
+      }
     }
   }
 
@@ -429,7 +434,7 @@ SelectionActionConfig buildSelectionActionConfig(
       isEnabled: resolvedAICallback != null,
       onExecute: resolvedAICallback != null
           ? () => _captureAndOpenAI(
-                ref, selection, cacheManager, resolvedAICallback)
+              ref, selection, cacheManager, resolvedAICallback)
           : null,
     ),
     SelectionAction(
@@ -519,7 +524,7 @@ SelectionActionConfig buildSelectionActionConfig(
       isEnabled: resolvedAICallback != null,
       onExecute: resolvedAICallback != null
           ? () => _captureAndOpenAI(
-                ref, selection, cacheManager, resolvedAICallback)
+              ref, selection, cacheManager, resolvedAICallback)
           : null,
     ),
     SelectionAction(

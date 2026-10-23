@@ -51,24 +51,25 @@ class Template {
       spacingMm: (json['spacingMm'] as num?)?.toDouble(),
       lineWidth: (json['lineWidth'] as num?)?.toDouble(),
       defaultLineColor: json['defaultLineColor'] as int? ?? 0xFFE0E0E0,
-      defaultBackgroundColor: json['defaultBackgroundColor'] as int? ?? 0xFFFFFFFF,
+      defaultBackgroundColor:
+          json['defaultBackgroundColor'] as int? ?? 0xFFFFFFFF,
       extraData: json['extraData'] as Map<String, dynamic>?,
     );
   }
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'name': name,
-    'nameEn': nameEn,
-    'category': category.name,
-    'pattern': pattern.name,
-    'isPremium': isPremium,
-    'spacingMm': spacingMm,
-    'lineWidth': lineWidth,
-    'defaultLineColor': defaultLineColor,
-    'defaultBackgroundColor': defaultBackgroundColor,
-    if (extraData != null) 'extraData': extraData,
-  };
+        'id': id,
+        'name': name,
+        'nameEn': nameEn,
+        'category': category.name,
+        'pattern': pattern.name,
+        'isPremium': isPremium,
+        'spacingMm': spacingMm,
+        'lineWidth': lineWidth,
+        'defaultLineColor': defaultLineColor,
+        'defaultBackgroundColor': defaultBackgroundColor,
+        if (extraData != null) 'extraData': extraData,
+      };
 
   Template copyWith({
     String? id,
@@ -93,7 +94,8 @@ class Template {
       spacingMm: spacingMm ?? this.spacingMm,
       lineWidth: lineWidth ?? this.lineWidth,
       defaultLineColor: defaultLineColor ?? this.defaultLineColor,
-      defaultBackgroundColor: defaultBackgroundColor ?? this.defaultBackgroundColor,
+      defaultBackgroundColor:
+          defaultBackgroundColor ?? this.defaultBackgroundColor,
       extraData: extraData ?? this.extraData,
     );
   }

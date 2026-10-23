@@ -67,8 +67,7 @@ class SelectionCaptureService {
         clipPath.close();
       } else {
         clipPath = Path()
-          ..addRect(Rect.fromLTRB(
-              bounds.left - padding, bounds.top - padding,
+          ..addRect(Rect.fromLTRB(bounds.left - padding, bounds.top - padding,
               bounds.right + padding, bounds.bottom + padding));
       }
 
@@ -99,8 +98,7 @@ class SelectionCaptureService {
       final imgW = (w * _exportScale).ceil();
       final imgH = (h * _exportScale).ceil();
       final image = await picture.toImage(imgW, imgH);
-      final byteData =
-          await image.toByteData(format: ui.ImageByteFormat.png);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
 
       return byteData?.buffer.asUint8List();
     } catch (e) {
@@ -177,8 +175,7 @@ class SelectionCaptureService {
         ..strokeCap = StrokeCap.round
         ..strokeJoin = StrokeJoin.round
         ..style = PaintingStyle.stroke;
-      final path = Path()
-        ..moveTo(stroke.points.first.x, stroke.points.first.y);
+      final path = Path()..moveTo(stroke.points.first.x, stroke.points.first.y);
       for (int i = 1; i < stroke.points.length; i++) {
         path.lineTo(stroke.points[i].x, stroke.points[i].y);
       }
@@ -196,7 +193,9 @@ class SelectionCaptureService {
         ..style = PaintingStyle.stroke;
       Paint? fp;
       if (shape.isFilled && shape.fillColor != null) {
-        fp = Paint()..color = Color(shape.fillColor!)..style = PaintingStyle.fill;
+        fp = Paint()
+          ..color = Color(shape.fillColor!)
+          ..style = PaintingStyle.fill;
       }
       final s = Offset(shape.startPoint.x, shape.startPoint.y);
       final e = Offset(shape.endPoint.x, shape.endPoint.y);
@@ -209,9 +208,11 @@ class SelectionCaptureService {
           final angle = math.atan2(e.dy - s.dy, e.dx - s.dx);
           final al = sp.strokeWidth * 3;
           for (final aa in [0.5, -0.5]) {
-            canvas.drawLine(e,
+            canvas.drawLine(
+                e,
                 Offset(e.dx - al * math.cos(angle - aa),
-                    e.dy - al * math.sin(angle - aa)), sp);
+                    e.dy - al * math.sin(angle - aa)),
+                sp);
           }
         case ShapeType.rectangle:
           if (fp != null) canvas.drawRect(rect, fp);
@@ -237,8 +238,8 @@ class SelectionCaptureService {
         canvas.rotate(el.rotation);
         canvas.translate(-cx, -cy);
       }
-      final src = Rect.fromLTWH(
-          0, 0, img.width.toDouble(), img.height.toDouble());
+      final src =
+          Rect.fromLTWH(0, 0, img.width.toDouble(), img.height.toDouble());
       canvas.drawImageRect(
           img, src, Rect.fromLTWH(el.x, el.y, el.width, el.height), Paint());
       canvas.restore();
@@ -249,10 +250,13 @@ class SelectionCaptureService {
     for (final t in texts) {
       if (t.text.isEmpty) continue;
       final style = ui.TextStyle(
-        color: Color(t.color), fontSize: t.fontSize, fontFamily: t.fontFamily,
+        color: Color(t.color),
+        fontSize: t.fontSize,
+        fontFamily: t.fontFamily,
         fontWeight: t.isBold ? FontWeight.bold : FontWeight.normal,
         fontStyle: t.isItalic ? FontStyle.italic : FontStyle.normal,
-        decoration: t.isUnderline ? TextDecoration.underline : TextDecoration.none,
+        decoration:
+            t.isUnderline ? TextDecoration.underline : TextDecoration.none,
       );
       final align = switch (t.alignment) {
         TextAlignment.left => ui.TextAlign.left,
@@ -260,9 +264,11 @@ class SelectionCaptureService {
         TextAlignment.right => ui.TextAlign.right,
       };
       final p = (ui.ParagraphBuilder(
-          ui.ParagraphStyle(textAlign: align, maxLines: null))
-            ..pushStyle(style)..addText(t.text))
-          .build()..layout(ui.ParagraphConstraints(width: t.width ?? 1000.0));
+              ui.ParagraphStyle(textAlign: align, maxLines: null))
+            ..pushStyle(style)
+            ..addText(t.text))
+          .build()
+        ..layout(ui.ParagraphConstraints(width: t.width ?? 1000.0));
       canvas.save();
       if (t.rotation != 0.0) {
         final cx = t.x + p.maxIntrinsicWidth / 2;
@@ -290,7 +296,10 @@ class SelectionCaptureService {
   }
 
   static void _renderBackground(
-    Canvas canvas, PageBackground bg, ui.Image? pdfImage, Size? pageSize,
+    Canvas canvas,
+    PageBackground bg,
+    ui.Image? pdfImage,
+    Size? pageSize,
   ) {
     final size = pageSize ?? const Size(2000, 2000);
     final linePaint = Paint()
@@ -298,8 +307,9 @@ class SelectionCaptureService {
       ..strokeWidth = 0.5;
 
     switch (bg.type) {
-      case BackgroundType.blank || BackgroundType.cover ||
-           BackgroundType.template:
+      case BackgroundType.blank ||
+            BackgroundType.cover ||
+            BackgroundType.template:
         break; // Color already filled / not supported
       case BackgroundType.grid:
         final sp = bg.gridSpacing ?? 25.0;
@@ -328,8 +338,7 @@ class SelectionCaptureService {
         if (pdfImage != null) {
           final src = Rect.fromLTWH(
               0, 0, pdfImage.width.toDouble(), pdfImage.height.toDouble());
-          canvas.drawImageRect(
-              pdfImage, src, Offset.zero & size, Paint());
+          canvas.drawImageRect(pdfImage, src, Offset.zero & size, Paint());
         }
     }
   }

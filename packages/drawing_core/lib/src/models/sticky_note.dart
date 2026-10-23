@@ -35,12 +35,9 @@ class StickyNote {
     this.minimized = false,
     List<Stroke>? strokes,
     List<Shape>? shapes,
-  })  : strokes = strokes != null
-            ? List<Stroke>.unmodifiable(strokes)
-            : const [],
-        shapes = shapes != null
-            ? List<Shape>.unmodifiable(shapes)
-            : const [];
+  })  : strokes =
+            strokes != null ? List<Stroke>.unmodifiable(strokes) : const [],
+        shapes = shapes != null ? List<Shape>.unmodifiable(shapes) : const [];
 
   /// Creates a new sticky note with a generated ID.
   factory StickyNote.create({
@@ -178,6 +175,5 @@ class StickyNote {
 
   @override
   int get hashCode => Object.hash(
-      id, x, y, width, height, color, minimized,
-      strokes.length, shapes.length);
+      id, x, y, width, height, color, minimized, strokes.length, shapes.length);
 }

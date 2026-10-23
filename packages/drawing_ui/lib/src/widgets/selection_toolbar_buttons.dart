@@ -20,7 +20,8 @@ class SelectionToolbarButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final enabled = action.isEnabled;
-    final color = action.isDestructive ? colorScheme.error : colorScheme.onSurface;
+    final color =
+        action.isDestructive ? colorScheme.error : colorScheme.onSurface;
 
     final child = action.colorIndicator != null
         ? Container(
@@ -75,8 +76,9 @@ class SelectionToolbarIconButton extends StatelessWidget {
           width: 40,
           height: 40,
           child: Center(
-            child: PhosphorIcon(icon, size: 20,
-              color: isActive ? colorScheme.primary : colorScheme.onSurface),
+            child: PhosphorIcon(icon,
+                size: 20,
+                color: isActive ? colorScheme.primary : colorScheme.onSurface),
           ),
         ),
       ),

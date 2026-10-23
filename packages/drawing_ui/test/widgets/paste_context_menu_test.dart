@@ -1,5 +1,3 @@
-import 'dart:ui' show Offset;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -254,9 +252,8 @@ void main() {
         ),
       );
 
-      final surface = Theme.of(tester.element(find.text('Yapıştır')))
-          .colorScheme
-          .surface;
+      final surface =
+          Theme.of(tester.element(find.text('Yapıştır'))).colorScheme.surface;
       final containers =
           tester.widgetList<Container>(find.byType(Container)).toList();
       BoxDecoration? pillDecoration;
@@ -285,9 +282,8 @@ void main() {
         ),
       );
 
-      final surface = Theme.of(tester.element(find.text('Yapıştır')))
-          .colorScheme
-          .surface;
+      final surface =
+          Theme.of(tester.element(find.text('Yapıştır'))).colorScheme.surface;
       final containers =
           tester.widgetList<Container>(find.byType(Container)).toList();
       BorderRadius? borderRadius;
@@ -411,7 +407,8 @@ void main() {
       expect(positioned.left, equals(672.0));
     });
 
-    testWidgets('should_center_menu_horizontally_on_press_point', (tester) async {
+    testWidgets('should_center_menu_horizontally_on_press_point',
+        (tester) async {
       _setWindowSize(tester);
       _ignoreOverflow();
 
@@ -436,7 +433,8 @@ void main() {
       expect(positioned.left, equals(340.0));
     });
 
-    testWidgets('should_place_correctly_at_center_screen_position', (tester) async {
+    testWidgets('should_place_correctly_at_center_screen_position',
+        (tester) async {
       _setWindowSize(tester);
       _ignoreOverflow();
 
@@ -558,14 +556,14 @@ void main() {
         ),
       );
 
-      final opaqueListener = listeners
-          .where((l) => l.behavior == HitTestBehavior.opaque)
-          .toList();
+      final opaqueListener =
+          listeners.where((l) => l.behavior == HitTestBehavior.opaque).toList();
 
       expect(opaqueListener, isNotEmpty);
     });
 
-    testWidgets('should_not_throw_when_tapped_with_no_clipboard', (tester) async {
+    testWidgets('should_not_throw_when_tapped_with_no_clipboard',
+        (tester) async {
       _setWindowSize(tester);
       _ignoreOverflow();
 
@@ -634,7 +632,8 @@ void main() {
       expect(widget.state.canvasPos, equals(const Offset(75, 125)));
     });
 
-    testWidgets('should_expose_canvasPos_to_pasteFromClipboardAt', (tester) async {
+    testWidgets('should_expose_canvasPos_to_pasteFromClipboardAt',
+        (tester) async {
       _setWindowSize(tester);
       _ignoreOverflow();
 

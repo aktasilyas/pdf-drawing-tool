@@ -13,35 +13,37 @@ class LoadDocumentUseCase {
   Future<Either<Failure, DrawingDocument>> call(String documentId) async {
     // 1. Get document info from DB
     final result = await _repository.getDocument(documentId);
-    
+
     return await result.fold(
       (failure) async => Left(failure),
       (docInfo) async {
         // 2. Load document content (blob) and deserialize
         try {
-          final contentResult = await _repository.getDocumentContent(documentId);
-          
-          return contentResult.fold(
+          final contentResult =
+              await _repository.getDocumentContent(documentId);
+
+          return await contentResult.fold(
             (failure) => Left(failure),
             (content) {
               if (content == null) {
                 // New document - create with template background
                 // CRITICAL: Create page size that fills viewport at 1.0 zoom
                 // Use aspect ratio from paper dimensions, but scale to reasonable screen size
-                final aspectRatio = docInfo.paperWidthMm / docInfo.paperHeightMm;
-                
+                final aspectRatio =
+                    docInfo.paperWidthMm / docInfo.paperHeightMm;
+
                 // Standard viewport height (portrait tablet ~1024px)
                 // Page will fill viewport height at 1.0 zoom
                 const targetHeight = 1024.0;
                 final targetWidth = targetHeight * aspectRatio;
-                
+
                 final pageSize = PageSize(
                   width: targetWidth,
                   height: targetHeight,
                 );
-                
+
                 final List<Page> pages = [];
-                
+
                 // If document has a cover, create cover page first
                 if (docInfo.hasCover && docInfo.coverId != null) {
                   final coverBackground = _getBackgroundForCover(
@@ -54,7 +56,7 @@ class LoadDocumentUseCase {
                     background: coverBackground,
                   ));
                 }
-                
+
                 // Add template page
                 final templateBackground = _getBackgroundForTemplate(
                   docInfo.templateId,
@@ -65,9 +67,10 @@ class LoadDocumentUseCase {
                   size: pageSize,
                   background: templateBackground,
                 ));
-                
-                logger.i('Created new document: ${docInfo.id} with ${pages.length} pages');
-                
+
+                logger.i(
+                    'Created new document: ${docInfo.id} with ${pages.length} pages');
+
                 return Right(DrawingDocument.multiPage(
                   id: docInfo.id,
                   title: docInfo.title,
@@ -96,13 +99,14 @@ class LoadDocumentUseCase {
   }
 
   /// Convert template ID to PageBackground
-  PageBackground _getBackgroundForTemplate(String templateId, {String paperColor = 'Sarı kağıt'}) {
+  PageBackground _getBackgroundForTemplate(String templateId,
+      {String paperColor = 'Sarı kağıt'}) {
     // Convert paper color string to hex
     final bgColor = _getPaperColor(paperColor);
-    
+
     // Try to get template from registry
     final template = TemplateRegistry.getById(templateId);
-    
+
     if (template == null) {
       logger.w('Template not found: $templateId, using blank');
       return PageBackground(
@@ -110,7 +114,7 @@ class LoadDocumentUseCase {
         color: bgColor,
       );
     }
-    
+
     // Use template-based background for ALL patterns
     // This ensures all 16 patterns render correctly
     return PageBackground(
@@ -122,12 +126,13 @@ class LoadDocumentUseCase {
       templateLineWidth: template.lineWidth,
     );
   }
-  
+
   /// Convert cover ID to PageBackground
-  PageBackground _getBackgroundForCover(String coverId, {String paperColor = 'Sarı kağıt'}) {
+  PageBackground _getBackgroundForCover(String coverId,
+      {String paperColor = 'Sarı kağıt'}) {
     // Try to get cover from registry
     final cover = CoverRegistry.byId(coverId);
-    
+
     if (cover == null) {
       logger.w('Cover not found: $coverId, using blank black');
       return const PageBackground(
@@ -135,7 +140,7 @@ class LoadDocumentUseCase {
         color: 0xFF000000, // Black fallback
       );
     }
-    
+
     // Use cover type to render proper background on canvas
     return PageBackground(
       type: BackgroundType.cover,
@@ -143,7 +148,7 @@ class LoadDocumentUseCase {
       coverId: coverId,
     );
   }
-  
+
   /// Convert paper color string to hex color
   int _getPaperColor(String paperColor) {
     switch (paperColor) {

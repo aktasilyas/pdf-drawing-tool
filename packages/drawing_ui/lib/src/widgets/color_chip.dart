@@ -77,7 +77,8 @@ class ColorChip extends StatelessWidget {
               boxShadow: isSelected
                   ? [
                       BoxShadow(
-                        color: theme.toolbarIconSelectedColor.withValues(alpha: 60.0 / 255.0),
+                        color: theme.toolbarIconSelectedColor
+                            .withValues(alpha: 60.0 / 255.0),
                         blurRadius: 8,
                         spreadRadius: 2,
                       )

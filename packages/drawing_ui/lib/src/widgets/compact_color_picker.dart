@@ -47,8 +47,9 @@ class _CompactColorPickerState extends ConsumerState<CompactColorPicker>
     super.dispose();
   }
 
-  Color get _currentColor =>
-      _hsvColor.toColor().withValues(alpha: widget.showOpacity ? _opacity : 1.0);
+  Color get _currentColor => _hsvColor
+      .toColor()
+      .withValues(alpha: widget.showOpacity ? _opacity : 1.0);
 
   void _selectColor(Color color) {
     setState(() {
@@ -65,7 +66,8 @@ class _CompactColorPickerState extends ConsumerState<CompactColorPicker>
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final maxH = (MediaQuery.of(context).size.height * 0.65).clamp(380.0, 560.0);
+    final maxH =
+        (MediaQuery.of(context).size.height * 0.65).clamp(380.0, 560.0);
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -153,8 +155,7 @@ class _CompactColorPickerState extends ConsumerState<CompactColorPicker>
           ),
           indicatorSize: TabBarIndicatorSize.tab,
           dividerHeight: 0,
-          labelStyle:
-              textTheme.titleSmall?.copyWith(fontSize: 13),
+          labelStyle: textTheme.titleSmall?.copyWith(fontSize: 13),
           unselectedLabelStyle: textTheme.bodySmall?.copyWith(fontSize: 13),
           tabs: const [Tab(text: 'Kartelalar'), Tab(text: 'Spektrum')],
         ),
@@ -204,16 +205,17 @@ class _ColorInfoBar extends StatelessWidget {
     );
   }
 
-  Widget _infoCol(String label, String value, ColorScheme cs, TextTheme textTheme) {
+  Widget _infoCol(
+      String label, String value, ColorScheme cs, TextTheme textTheme) {
     return Expanded(
       child: Column(children: [
         Text(label,
-            style: textTheme.labelSmall?.copyWith(fontSize: 9, color: cs.onSurfaceVariant)),
+            style: textTheme.labelSmall
+                ?.copyWith(fontSize: 9, color: cs.onSurfaceVariant)),
         const SizedBox(height: 2),
         Text(value,
-            style: textTheme.labelSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: cs.onSurface)),
+            style: textTheme.labelSmall
+                ?.copyWith(fontWeight: FontWeight.w600, color: cs.onSurface)),
       ]),
     );
   }
@@ -303,8 +305,8 @@ class _RecentColorsRow extends StatelessWidget {
               shape: BoxShape.circle,
               border: Border.all(color: outlineColor),
             ),
-            child: PhosphorIcon(
-                ElyanotesIcons.colorize, size: 16, color: iconColor),
+            child: PhosphorIcon(ElyanotesIcons.colorize,
+                size: 16, color: iconColor),
           ),
         ]);
       }),
@@ -345,7 +347,8 @@ class _ActionButtons extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 child: Text('İptal et',
-                    style: textTheme.bodyMedium?.copyWith(fontSize: 15, color: textColor)),
+                    style: textTheme.bodyMedium
+                        ?.copyWith(fontSize: 15, color: textColor)),
               ),
             ),
           ),

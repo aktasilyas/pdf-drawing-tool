@@ -52,7 +52,8 @@ void main() {
       expect(find.text('Dikey'), findsOneWidget);
     });
 
-    testWidgets('hides orientation toggle when showLandscapeToggle is false', (tester) async {
+    testWidgets('hides orientation toggle when showLandscapeToggle is false',
+        (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -70,7 +71,8 @@ void main() {
       expect(find.text('Yatay'), findsNothing);
     });
 
-    testWidgets('shows portrait label for portrait orientation', (tester) async {
+    testWidgets('shows portrait label for portrait orientation',
+        (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -90,7 +92,8 @@ void main() {
       expect(find.text('Yatay'), findsNothing);
     });
 
-    testWidgets('shows landscape label for landscape orientation', (tester) async {
+    testWidgets('shows landscape label for landscape orientation',
+        (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -167,7 +170,8 @@ void main() {
       expect(newSize?.isLandscape, true);
     });
 
-    testWidgets('toggles orientation when toggle button tapped', (tester) async {
+    testWidgets('toggles orientation when toggle button tapped',
+        (tester) async {
       PaperSize? newSize;
 
       await tester.pumpWidget(
@@ -328,10 +332,12 @@ void main() {
       );
 
       final container = tester.widget<Container>(
-        find.ancestor(
-          of: find.byType(DropdownButton<bool>),
-          matching: find.byType(Container),
-        ).first,
+        find
+            .ancestor(
+              of: find.byType(DropdownButton<bool>),
+              matching: find.byType(Container),
+            )
+            .first,
       );
 
       expect(container.padding, const EdgeInsets.symmetric(horizontal: 12));

@@ -133,9 +133,8 @@ class PencilTextureRenderer {
 
   /// Deterministic hash for pseudo-random grain offset.
   int _hash(double x, double y, int i) {
-    var h = (x * 374761393).toInt() ^
-        (y * 668265263).toInt() ^
-        (i * 1274126177);
+    var h =
+        (x * 374761393).toInt() ^ (y * 668265263).toInt() ^ (i * 1274126177);
     h = ((h ^ (h >> 13)) * 1103515245 + 12345) & 0x7FFFFFFF;
     return h;
   }

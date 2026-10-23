@@ -5,7 +5,7 @@ import 'package:drawing_ui/src/providers/drawing_providers.dart' as dp;
 
 // EraserSettings ve EraserSettingsNotifier drawing_providers.dart'ta tanımlı
 // Burada sadece re-export ediyoruz
-export 'package:drawing_ui/src/providers/drawing_providers.dart' 
+export 'package:drawing_ui/src/providers/drawing_providers.dart'
     show EraserSettings, EraserSettingsNotifier, eraserSettingsProvider;
 
 /// Eraser mode state - stroke, pixel veya lasso (backward compatibility)
@@ -23,7 +23,7 @@ final eraserSizeProvider = StateProvider<double>((ref) {
 /// Mode veya size değiştiğinde otomatik yeniden oluşturulur.
 final eraserToolProvider = Provider<EraserTool>((ref) {
   final settings = ref.watch(dp.eraserSettingsProvider);
-  
+
   // drawing_providers.dart'taki EraserMode'u drawing_core'daki EraserMode'a çevir
   final coreMode = switch (settings.mode) {
     dp.EraserMode.stroke => EraserMode.stroke,
@@ -55,7 +55,8 @@ final eraserCursorPositionProvider = StateProvider<Offset?>((ref) => null);
 final lassoEraserPointsProvider = StateProvider<List<Offset>>((ref) => []);
 
 /// Pixel eraser preview - affected segments (strokeId -> segment indices)
-final pixelEraserPreviewProvider = StateProvider<Map<String, List<int>>>((ref) => {});
+final pixelEraserPreviewProvider =
+    StateProvider<Map<String, List<int>>>((ref) => {});
 
 /// Stroke eraser preview - stroke IDs to visually hide during gesture
 final strokeEraserPreviewProvider = StateProvider<Set<String>>((ref) => {});

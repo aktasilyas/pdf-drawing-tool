@@ -142,14 +142,17 @@ class TopNavigationBar extends ConsumerWidget {
               size: sz,
             ),
           ...compactTopBarTools.map((tool) => _buildCompactToolButton(
-            ref: ref, tool: tool, currentTool: currentTool, size: sz,
-          )),
+                ref: ref,
+                tool: tool,
+                currentTool: currentTool,
+                size: sz,
+              )),
           if (!ref.watch(isInfiniteCanvasProvider))
             ElyanotesNavButton(
               icon: ElyanotesIcons.microphone,
               tooltip: 'Ses Kaydi',
-              onPressed: () => showAudioMenu(
-                context, ref, onSidebarToggle, isSidebarOpen),
+              onPressed: () =>
+                  showAudioMenu(context, ref, onSidebarToggle, isSidebarOpen),
               size: sz,
             ),
           ElyanotesNavButton(
@@ -157,9 +160,8 @@ class TopNavigationBar extends ConsumerWidget {
                 ? ElyanotesIcons.rulerActive
                 : ElyanotesIcons.ruler,
             tooltip: 'Cetvel',
-            onPressed: () => ref
-                .read(rulerVisibleProvider.notifier)
-                .state = !rulerVisible,
+            onPressed: () =>
+                ref.read(rulerVisibleProvider.notifier).state = !rulerVisible,
             isActive: rulerVisible,
             size: sz,
           ),
@@ -182,7 +184,8 @@ class TopNavigationBar extends ConsumerWidget {
           onPressed: () => ref.read(isInfiniteCanvasProvider)
               ? showInfiniteBackgroundMenu(context)
               : showMoreMenu(
-                  context, ref,
+                  context,
+                  ref,
                   documentTitle: documentTitle,
                   onRenameDocument: onRenameDocument,
                   onDeleteDocument: onDeleteDocument,
@@ -289,8 +292,8 @@ class TopNavigationBar extends ConsumerWidget {
           ElyanotesNavButton(
             icon: ElyanotesIcons.microphone,
             tooltip: 'Ses Kaydi',
-            onPressed: () => showAudioMenu(
-              context, ref, onSidebarToggle, isSidebarOpen),
+            onPressed: () =>
+                showAudioMenu(context, ref, onSidebarToggle, isSidebarOpen),
           ),
 
         ElyanotesNavButton(
@@ -315,32 +318,31 @@ class TopNavigationBar extends ConsumerWidget {
     return Semantics(
       label: 'Salt okunur mod aktif',
       child: Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: colorScheme.secondaryContainer,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          PhosphorIcon(
-            ElyanotesIcons.readerMode,
-            size: 14,
-            color: colorScheme.onSecondaryContainer,
-          ),
-          const SizedBox(width: 4),
-          Text(
-            'Salt okunur',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: colorScheme.secondaryContainer,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            PhosphorIcon(
+              ElyanotesIcons.readerMode,
+              size: 14,
               color: colorScheme.onSecondaryContainer,
             ),
-          ),
-        ],
+            const SizedBox(width: 4),
+            Text(
+              'Salt okunur',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: colorScheme.onSecondaryContainer,
+              ),
+            ),
+          ],
+        ),
       ),
-    ),
     );
   }
-
 }

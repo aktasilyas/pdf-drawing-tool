@@ -81,8 +81,9 @@ void main() {
       );
 
       final gridView = tester.widget<GridView>(find.byType(GridView));
-      final delegate = gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
-      
+      final delegate =
+          gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
+
       expect(delegate.crossAxisCount, 4);
     });
 
@@ -102,8 +103,9 @@ void main() {
       );
 
       final gridView = tester.widget<GridView>(find.byType(GridView));
-      final delegate = gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
-      
+      final delegate =
+          gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
+
       expect(delegate.crossAxisCount, 6);
     });
 
@@ -123,8 +125,9 @@ void main() {
       );
 
       final gridView = tester.widget<GridView>(find.byType(GridView));
-      final delegate = gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
-      
+      final delegate =
+          gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
+
       expect(delegate.crossAxisSpacing, 8.0);
       expect(delegate.mainAxisSpacing, 8.0);
     });
@@ -145,13 +148,15 @@ void main() {
       );
 
       final gridView = tester.widget<GridView>(find.byType(GridView));
-      final delegate = gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
-      
+      final delegate =
+          gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
+
       expect(delegate.crossAxisSpacing, 8.0);
       expect(delegate.mainAxisSpacing, 8.0);
     });
 
-    testWidgets('calls onTemplateSelected when template tapped', (tester) async {
+    testWidgets('calls onTemplateSelected when template tapped',
+        (tester) async {
       Template? selectedTemplate;
 
       await tester.pumpWidget(
@@ -188,7 +193,8 @@ void main() {
 
       // Find the selected card by checking for the checkmark icon
       final checkIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.check,
+        (widget) =>
+            widget is PhosphorIcon && widget.icon == ElyanotesIcons.check,
       );
       expect(checkIcon, findsOneWidget);
     });
@@ -207,7 +213,8 @@ void main() {
 
       // Premium template should show lock icon
       final lockIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.lock,
+        (widget) =>
+            widget is PhosphorIcon && widget.icon == ElyanotesIcons.lock,
       );
       expect(lockIcon, findsOneWidget);
     });
@@ -227,7 +234,8 @@ void main() {
 
       // Only first template should be locked
       final lockIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.lock,
+        (widget) =>
+            widget is PhosphorIcon && widget.icon == ElyanotesIcons.lock,
       );
       expect(lockIcon, findsOneWidget);
     });
@@ -263,8 +271,9 @@ void main() {
       );
 
       final gridView = tester.widget<GridView>(find.byType(GridView));
-      final delegate = gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
-      
+      final delegate =
+          gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
+
       expect(delegate.childAspectRatio, 0.68);
     });
 
@@ -284,8 +293,9 @@ void main() {
       );
 
       final gridView = tester.widget<GridView>(find.byType(GridView));
-      final delegate = gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
-      
+      final delegate =
+          gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
+
       expect(delegate.childAspectRatio, 0.7);
     });
 
@@ -321,7 +331,8 @@ void main() {
       );
 
       var gridView = tester.widget<GridView>(find.byType(GridView));
-      var delegate = gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
+      var delegate =
+          gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
       expect(delegate.crossAxisCount, 4);
 
       // Change to tablet width
@@ -340,7 +351,8 @@ void main() {
       );
 
       gridView = tester.widget<GridView>(find.byType(GridView));
-      delegate = gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
+      delegate =
+          gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
       expect(delegate.crossAxisCount, 6);
     });
 
@@ -385,7 +397,8 @@ void main() {
       );
 
       final checkIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.check,
+        (widget) =>
+            widget is PhosphorIcon && widget.icon == ElyanotesIcons.check,
       );
       expect(checkIcon, findsNothing);
     });

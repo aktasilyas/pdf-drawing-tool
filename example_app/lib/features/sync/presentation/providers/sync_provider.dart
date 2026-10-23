@@ -146,9 +146,9 @@ class SyncController extends StateNotifier<AsyncValue<void>> {
   /// Triggers a full sync
   Future<void> syncAll() async {
     state = const AsyncLoading();
-    
+
     final result = await _repository.syncAll();
-    
+
     state = result.fold(
       (failure) => AsyncError(failure, StackTrace.current),
       (_) => const AsyncData(null),
@@ -158,9 +158,9 @@ class SyncController extends StateNotifier<AsyncValue<void>> {
   /// Syncs a specific document
   Future<void> syncDocument(String documentId) async {
     state = const AsyncLoading();
-    
+
     final result = await _repository.syncDocument(documentId);
-    
+
     state = result.fold(
       (failure) => AsyncError(failure, StackTrace.current),
       (_) => const AsyncData(null),
@@ -170,7 +170,7 @@ class SyncController extends StateNotifier<AsyncValue<void>> {
   /// Toggles auto sync
   Future<void> toggleAutoSync(bool enabled) async {
     final result = await _repository.setAutoSync(enabled);
-    
+
     result.fold(
       (failure) => state = AsyncError(failure, StackTrace.current),
       (_) {},
@@ -183,12 +183,12 @@ class SyncController extends StateNotifier<AsyncValue<void>> {
     required ConflictResolution resolution,
   }) async {
     state = const AsyncLoading();
-    
+
     final result = await _repository.resolveConflict(
       documentId: documentId,
       resolution: resolution,
     );
-    
+
     state = result.fold(
       (failure) => AsyncError(failure, StackTrace.current),
       (_) => const AsyncData(null),

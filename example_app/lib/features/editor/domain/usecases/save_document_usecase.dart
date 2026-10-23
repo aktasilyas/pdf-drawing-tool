@@ -30,9 +30,7 @@ class SaveDocumentUseCase {
       final content = cleanedDocument.toJson();
 
       // 3. Extract coverId from cover page for metadata sync
-      final coverPage = document.pages
-          .where((p) => p.isCover)
-          .firstOrNull;
+      final coverPage = document.pages.where((p) => p.isCover).firstOrNull;
       final coverId = coverPage?.background.coverId;
 
       // 4. Save to DB
@@ -52,7 +50,8 @@ class SaveDocumentUseCase {
 
       return result;
     } catch (e) {
-      logger.e('Save document exception', error: e, stackTrace: StackTrace.current);
+      logger.e('Save document exception',
+          error: e, stackTrace: StackTrace.current);
       return Left(CacheFailure('Failed to save document: $e'));
     }
   }

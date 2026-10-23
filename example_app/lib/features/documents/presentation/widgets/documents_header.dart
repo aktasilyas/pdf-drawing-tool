@@ -185,9 +185,8 @@ class _NewDocumentButton extends StatelessWidget {
     final bgColor = isDark
         ? AppColors.surfaceContainerHighDark
         : AppColors.surfaceContainerHighLight;
-    final textColor = isDark
-        ? AppColors.textPrimaryDark
-        : AppColors.textPrimaryLight;
+    final textColor =
+        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
 
     return Tooltip(
       message: isLocked ? 'Belge limiti doldu' : 'Yeni Belge',

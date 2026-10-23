@@ -77,7 +77,8 @@ class ReorderableToolList extends ConsumerWidget {
             }
           }
         }
-        await ref.read(toolbarConfigProvider.notifier)
+        await ref
+            .read(toolbarConfigProvider.notifier)
             .updateConfig(config.copyWith(tools: newTools));
       },
       itemBuilder: (context, index) {
@@ -98,7 +99,8 @@ class ReorderableToolList extends ConsumerWidget {
                 (t) => t.copyWith(isVisible: newVisible),
               );
             }
-            await ref.read(toolbarConfigProvider.notifier)
+            await ref
+                .read(toolbarConfigProvider.notifier)
                 .updateConfig(updated);
           },
         );
@@ -126,7 +128,8 @@ class ReorderableExtraToolList extends ConsumerWidget {
       itemCount: sorted.length,
       onReorder: (oldIndex, newIndex) async {
         if (newIndex > oldIndex) newIndex -= 1;
-        await ref.read(toolbarConfigProvider.notifier)
+        await ref
+            .read(toolbarConfigProvider.notifier)
             .reorderExtraTools(oldIndex, newIndex);
       },
       itemBuilder: (context, index) {
@@ -139,7 +142,8 @@ class ReorderableExtraToolList extends ConsumerWidget {
           label: meta?.label ?? extra.key,
           isVisible: extra.isVisible,
           onVisibilityToggle: () async {
-            await ref.read(toolbarConfigProvider.notifier)
+            await ref
+                .read(toolbarConfigProvider.notifier)
                 .toggleExtraTool(extra.key);
           },
         );

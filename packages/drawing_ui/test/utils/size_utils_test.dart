@@ -46,7 +46,8 @@ void main() {
       expect(isPortrait, true);
     });
 
-    testWidgets('screenWidth and screenHeight return correct values', (tester) async {
+    testWidgets('screenWidth and screenHeight return correct values',
+        (tester) async {
       tester.view.physicalSize = const Size(800, 600);
       tester.view.devicePixelRatio = 1.0;
       addTearDown(tester.view.reset);

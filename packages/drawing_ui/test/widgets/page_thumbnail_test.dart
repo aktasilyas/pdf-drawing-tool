@@ -131,7 +131,11 @@ void main() {
       // Unselected pages get a subtle 1px outline, not the 3px primary border.
       final border = decoration.border! as Border;
       expect(border.top.width, 1);
-      expect(border.top.color, isNot(Theme.of(tester.element(find.byType(PageThumbnail))).colorScheme.primary));
+      expect(
+          border.top.color,
+          isNot(Theme.of(tester.element(find.byType(PageThumbnail)))
+              .colorScheme
+              .primary));
     });
 
     testWidgets('should trigger onTap callback', (tester) async {
@@ -196,7 +200,7 @@ void main() {
       await tester.runAsync(() async {
         await Future.delayed(const Duration(milliseconds: 500));
       });
-      
+
       await tester.pump();
 
       // Should have image now (or error widget if generation failed)

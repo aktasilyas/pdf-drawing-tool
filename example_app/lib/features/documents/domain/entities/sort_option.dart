@@ -5,10 +5,10 @@ library;
 enum SortOption {
   /// Sort by date (updatedAt)
   date,
-  
+
   /// Sort by name (title)
   name,
-  
+
   /// Sort by size (pageCount)
   size,
 }
@@ -17,7 +17,7 @@ enum SortOption {
 enum SortDirection {
   /// Ascending order (A→Z, old→new, small→large)
   ascending,
-  
+
   /// Descending order (Z→A, new→old, large→small)
   descending,
 }
@@ -46,7 +46,7 @@ extension SortDirectionExtension on SortDirection {
         return '↓';
     }
   }
-  
+
   /// Get description for UI
   String getDescription(SortOption option) {
     switch (option) {
@@ -55,7 +55,9 @@ extension SortDirectionExtension on SortDirection {
       case SortOption.name:
         return this == SortDirection.descending ? 'Z → A' : 'A → Z';
       case SortOption.size:
-        return this == SortDirection.descending ? 'Büyük → Küçük' : 'Küçük → Büyük';
+        return this == SortDirection.descending
+            ? 'Büyük → Küçük'
+            : 'Küçük → Büyük';
     }
   }
 }

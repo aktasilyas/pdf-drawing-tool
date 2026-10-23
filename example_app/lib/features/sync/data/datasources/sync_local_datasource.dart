@@ -34,7 +34,7 @@ class SyncLocalDatasource {
   Future<void> addToQueue(SyncQueueItem item) async {
     final prefs = await _prefs;
     final jsonList = prefs.getStringList(_queueKey) ?? [];
-    
+
     final itemJson = jsonEncode({
       'id': item.id,
       'entity_id': item.entityId,
@@ -44,7 +44,7 @@ class SyncLocalDatasource {
       'retry_count': item.retryCount,
       'error_message': item.errorMessage,
     });
-    
+
     jsonList.add(itemJson);
     await prefs.setStringList(_queueKey, jsonList);
   }
@@ -52,19 +52,19 @@ class SyncLocalDatasource {
   Future<void> removeFromQueue(String itemId) async {
     final prefs = await _prefs;
     final jsonList = prefs.getStringList(_queueKey) ?? [];
-    
+
     jsonList.removeWhere((json) {
       final map = jsonDecode(json) as Map<String, dynamic>;
       return map['id'] == itemId;
     });
-    
+
     await prefs.setStringList(_queueKey, jsonList);
   }
 
   Future<void> updateRetryCount(String itemId, int count, String? error) async {
     final prefs = await _prefs;
     final jsonList = prefs.getStringList(_queueKey) ?? [];
-    
+
     final updatedList = jsonList.map((json) {
       final map = jsonDecode(json) as Map<String, dynamic>;
       if (map['id'] == itemId) {
@@ -74,7 +74,7 @@ class SyncLocalDatasource {
       }
       return json;
     }).toList();
-    
+
     await prefs.setStringList(_queueKey, updatedList);
   }
 

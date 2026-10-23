@@ -111,7 +111,7 @@ class AIRepositoryImpl implements AIRepository {
         final conv = AIConversation.fromJson(_mapKeys(json));
         await _localDataSource.upsertConversation(conv);
       }
-      return _localDataSource.getConversations(userId);
+      return await _localDataSource.getConversations(userId);
     } catch (_) {
       return local;
     }
@@ -130,7 +130,7 @@ class AIRepositoryImpl implements AIRepository {
         final msg = AIMessage.fromJson(_mapKeys(json));
         await _localDataSource.insertMessage(msg);
       }
-      return _localDataSource.getMessages(conversationId);
+      return await _localDataSource.getMessages(conversationId);
     } catch (_) {
       return local;
     }
@@ -190,8 +190,7 @@ class AIRepositoryImpl implements AIRepository {
     try {
       await Supabase.instance.client
           .from('ai_conversations')
-          .update({'title': title})
-          .eq('id', conversationId);
+          .update({'title': title}).eq('id', conversationId);
     } catch (_) {
       // Offline — local already updated
     }

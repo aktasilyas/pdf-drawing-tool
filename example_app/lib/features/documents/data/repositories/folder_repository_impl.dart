@@ -35,9 +35,13 @@ class FolderRepositoryImpl implements FolderRepository {
 
       // Calculate recursive document count (includes subfolder documents)
       final entities = targetFolders.map((model) {
-        final folderIds = {model.id, ..._getDescendantIds(model.id, allFolders)};
-        final docCount =
-            nonTrashedDocs.where((doc) => folderIds.contains(doc.folderId)).length;
+        final folderIds = {
+          model.id,
+          ..._getDescendantIds(model.id, allFolders)
+        };
+        final docCount = nonTrashedDocs
+            .where((doc) => folderIds.contains(doc.folderId))
+            .length;
         return model.copyWith(documentCount: docCount).toEntity();
       }).toList();
 

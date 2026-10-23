@@ -33,10 +33,9 @@ class StickyNotePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     for (final note in stickyNotes) {
-      final effective =
-          (overrideNote != null && overrideNote!.id == note.id)
-              ? overrideNote!
-              : note;
+      final effective = (overrideNote != null && overrideNote!.id == note.id)
+          ? overrideNote!
+          : note;
       _drawStickyNote(canvas, effective);
     }
   }
@@ -51,8 +50,8 @@ class StickyNotePainter extends CustomPainter {
     final rrect = RRect.fromRectAndRadius(rect, const Radius.circular(8));
 
     // Shadow (offset down by 3px)
-    final shadowRect = Rect.fromLTWH(
-        note.x + 1, note.y + 3, note.width - 2, note.height);
+    final shadowRect =
+        Rect.fromLTWH(note.x + 1, note.y + 3, note.width - 2, note.height);
     final shadowRRect =
         RRect.fromRectAndRadius(shadowRect, const Radius.circular(8));
     _shadowPaint.color = Colors.black.withValues(alpha: 0.12);
@@ -213,6 +212,7 @@ class StickyNotePainter extends CustomPainter {
                 overrideNote!.width != oldDelegate.overrideNote!.width ||
                 overrideNote!.height != oldDelegate.overrideNote!.height ||
                 overrideNote!.color != oldDelegate.overrideNote!.color ||
-                overrideNote!.minimized != oldDelegate.overrideNote!.minimized));
+                overrideNote!.minimized !=
+                    oldDelegate.overrideNote!.minimized));
   }
 }

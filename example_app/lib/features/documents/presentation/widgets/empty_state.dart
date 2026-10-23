@@ -19,7 +19,7 @@ class EmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.xxl),
       child: Column(
@@ -30,9 +30,7 @@ class EmptyState extends StatelessWidget {
             size: 80,
             color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
           ),
-
           const SizedBox(height: AppSpacing.lg),
-
           Text(
             title,
             style: theme.textTheme.titleLarge?.copyWith(
@@ -40,9 +38,7 @@ class EmptyState extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
-
           const SizedBox(height: AppSpacing.sm),
-
           Text(
             description,
             style: theme.textTheme.bodyMedium?.copyWith(
@@ -50,7 +46,6 @@ class EmptyState extends StatelessWidget {
             ),
             textAlign: TextAlign.center,
           ),
-
           if (action != null) ...[
             const SizedBox(height: AppSpacing.xl),
             action!,

@@ -48,9 +48,8 @@ class AIChatBubble extends StatelessWidget {
       child: Icon(
         _isUser ? Icons.person : Icons.auto_awesome,
         size: 18,
-        color: _isUser
-            ? theme.colorScheme.primary
-            : theme.colorScheme.secondary,
+        color:
+            _isUser ? theme.colorScheme.primary : theme.colorScheme.secondary,
       ),
     );
   }
@@ -60,8 +59,7 @@ class AIChatBubble extends StatelessWidget {
         ? theme.colorScheme.primary.withValues(alpha: isDark ? 0.3 : 0.1)
         : isDark
             ? theme.colorScheme.surface
-            : theme.colorScheme.surfaceContainerHighest
-                .withValues(alpha: 0.5);
+            : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5);
 
     return Container(
       constraints: const BoxConstraints(maxWidth: 600),
@@ -75,8 +73,7 @@ class AIChatBubble extends StatelessWidget {
           bottomRight: Radius.circular(_isUser ? 4 : 16),
         ),
       ),
-      child:
-          _isUser ? _buildUserContent(theme) : _buildAssistantContent(theme),
+      child: _isUser ? _buildUserContent(theme) : _buildAssistantContent(theme),
     );
   }
 
@@ -96,8 +93,7 @@ class AIChatBubble extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.image,
-                      size: 14, color: theme.colorScheme.primary),
+                  Icon(Icons.image, size: 14, color: theme.colorScheme.primary),
                   const SizedBox(width: 4),
                   Text(
                     'Canvas ekran görüntüsü',
@@ -128,8 +124,7 @@ class AIChatBubble extends StatelessWidget {
             p: theme.textTheme.bodyMedium,
             code: theme.textTheme.bodySmall?.copyWith(
               fontFamily: 'monospace',
-              backgroundColor:
-                  theme.colorScheme.surfaceContainerHighest,
+              backgroundColor: theme.colorScheme.surfaceContainerHighest,
             ),
             codeblockDecoration: BoxDecoration(
               color: theme.colorScheme.surfaceContainerHighest,
@@ -138,8 +133,7 @@ class AIChatBubble extends StatelessWidget {
           ),
         ),
         if (isStreaming) _buildTypingCursor(theme),
-        if (!isStreaming && message.content.isNotEmpty)
-          _buildCopyButton(theme),
+        if (!isStreaming && message.content.isNotEmpty) _buildCopyButton(theme),
       ],
     );
   }

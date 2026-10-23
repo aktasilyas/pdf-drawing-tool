@@ -54,12 +54,15 @@ class _Header extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 14, 8, 10),
       child: Row(children: [
-        Expanded(child: Text('Arka Plan',
-          style: textTheme.titleMedium?.copyWith(fontSize: 16,
-            fontWeight: FontWeight.w600, color: cs.onSurface))),
+        Expanded(
+            child: Text('Arka Plan',
+                style: textTheme.titleMedium?.copyWith(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: cs.onSurface))),
         IconButton(
-          icon: PhosphorIcon(PhosphorIconsLight.x, size: 20,
-            color: cs.onSurfaceVariant),
+          icon: PhosphorIcon(PhosphorIconsLight.x,
+              size: 20, color: cs.onSurfaceVariant),
           onPressed: onClose,
           visualDensity: VisualDensity.compact,
         ),
@@ -105,24 +108,29 @@ class _PatternSection extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.only(left: 4, bottom: 10),
             child: Text('Arka Plan Deseni',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(fontSize: 13,
-                color: cs.onSurfaceVariant)),
+                style: Theme.of(context)
+                    .textTheme
+                    .titleSmall
+                    ?.copyWith(fontSize: 13, color: cs.onSurfaceVariant)),
           ),
           Row(children: [
             _PatternChip(
-              label: 'Düz', type: _PatternType.plain,
+              label: 'Düz',
+              type: _PatternType.plain,
               isSelected: current == _PatternType.plain,
               onTap: () => _apply(ref, _PatternType.plain),
             ),
             const SizedBox(width: 8),
             _PatternChip(
-              label: 'Noktalı', type: _PatternType.dotted,
+              label: 'Noktalı',
+              type: _PatternType.dotted,
               isSelected: current == _PatternType.dotted,
               onTap: () => _apply(ref, _PatternType.dotted),
             ),
             const SizedBox(width: 8),
             _PatternChip(
-              label: 'Izgara', type: _PatternType.grid,
+              label: 'Izgara',
+              type: _PatternType.grid,
               isSelected: current == _PatternType.grid,
               onTap: () => _apply(ref, _PatternType.grid),
             ),
@@ -140,15 +148,22 @@ class _PatternSection extends ConsumerWidget {
       case _PatternType.plain:
         newBg = PageBackground(type: BackgroundType.blank, color: currentColor);
       case _PatternType.dotted:
-        newBg = PageBackground(type: BackgroundType.dotted, color: currentColor,
-          gridSpacing: 20.0, lineColor: 0xFFCCCCCC);
+        newBg = PageBackground(
+            type: BackgroundType.dotted,
+            color: currentColor,
+            gridSpacing: 20.0,
+            lineColor: 0xFFCCCCCC);
       case _PatternType.grid:
-        newBg = PageBackground(type: BackgroundType.grid, color: currentColor,
-          gridSpacing: 25.0, lineColor: 0xFFCCCCCC);
+        newBg = PageBackground(
+            type: BackgroundType.grid,
+            color: currentColor,
+            gridSpacing: 25.0,
+            lineColor: 0xFFCCCCCC);
     }
     ref.read(documentProvider.notifier).updatePageBackground(page.id, newBg);
-    ref.read(pageManagerProvider.notifier).updateCurrentPage(
-      page.copyWith(background: newBg));
+    ref
+        .read(pageManagerProvider.notifier)
+        .updateCurrentPage(page.copyWith(background: newBg));
   }
 }
 
@@ -189,21 +204,29 @@ class _ColorSection extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.only(left: 4, bottom: 10),
             child: Text('Arka Plan Rengi',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(fontSize: 13,
-                color: cs.onSurfaceVariant)),
+                style: Theme.of(context)
+                    .textTheme
+                    .titleSmall
+                    ?.copyWith(fontSize: 13, color: cs.onSurfaceVariant)),
           ),
           Row(children: [
-            _ColorChip(label: 'Beyaz', color: _white,
-              isSelected: current == _white,
-              onTap: () => _applyColor(ref, _white)),
+            _ColorChip(
+                label: 'Beyaz',
+                color: _white,
+                isSelected: current == _white,
+                onTap: () => _applyColor(ref, _white)),
             const SizedBox(width: 8),
-            _ColorChip(label: 'Sarı', color: _yellow,
-              isSelected: current == _yellow,
-              onTap: () => _applyColor(ref, _yellow)),
+            _ColorChip(
+                label: 'Sarı',
+                color: _yellow,
+                isSelected: current == _yellow,
+                onTap: () => _applyColor(ref, _yellow)),
             const SizedBox(width: 8),
-            _ColorChip(label: 'Siyah', color: _black,
-              isSelected: current == _black,
-              onTap: () => _applyColor(ref, _black)),
+            _ColorChip(
+                label: 'Siyah',
+                color: _black,
+                isSelected: current == _black,
+                onTap: () => _applyColor(ref, _black)),
           ]),
         ],
       ),
@@ -224,8 +247,9 @@ class _ColorSection extends ConsumerWidget {
       templateLineWidth: bg.templateLineWidth,
     );
     ref.read(documentProvider.notifier).updatePageBackground(page.id, newBg);
-    ref.read(pageManagerProvider.notifier).updateCurrentPage(
-      page.copyWith(background: newBg));
+    ref
+        .read(pageManagerProvider.notifier)
+        .updateCurrentPage(page.copyWith(background: newBg));
   }
 
   /// Adjusts line color for dark/light backgrounds.
@@ -239,8 +263,10 @@ enum _PatternType { plain, dotted, grid }
 
 class _PatternChip extends StatelessWidget {
   const _PatternChip({
-    required this.label, required this.type,
-    required this.isSelected, required this.onTap,
+    required this.label,
+    required this.type,
+    required this.isSelected,
+    required this.onTap,
   });
   final String label;
   final _PatternType type;
@@ -265,12 +291,18 @@ class _PatternChip extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              _PatternIcon(type: type, color: isSelected
-                  ? cs.onPrimaryContainer : cs.onSurfaceVariant),
+              _PatternIcon(
+                  type: type,
+                  color:
+                      isSelected ? cs.onPrimaryContainer : cs.onSurfaceVariant),
               const SizedBox(height: 4),
-              Text(label, style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color: isSelected ? cs.onPrimaryContainer : cs.onSurfaceVariant)),
+              Text(label,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.normal,
+                      color: isSelected
+                          ? cs.onPrimaryContainer
+                          : cs.onSurfaceVariant)),
             ],
           ),
         ),
@@ -287,8 +319,10 @@ class _PatternIcon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 24, height: 24,
-      child: CustomPaint(painter: _MiniPatternPainter(type: type, color: color)),
+      width: 24,
+      height: 24,
+      child:
+          CustomPaint(painter: _MiniPatternPainter(type: type, color: color)),
     );
   }
 }
@@ -300,14 +334,17 @@ class _MiniPatternPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = color..strokeWidth = 1;
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1;
     switch (type) {
       case _PatternType.plain:
         // Simple rectangle outline
         paint.style = PaintingStyle.stroke;
         canvas.drawRRect(
-          RRect.fromRectAndRadius(Offset.zero & size, const Radius.circular(3)),
-          paint);
+            RRect.fromRectAndRadius(
+                Offset.zero & size, const Radius.circular(3)),
+            paint);
       case _PatternType.dotted:
         paint.style = PaintingStyle.fill;
         const spacing = 6.0;
@@ -336,8 +373,10 @@ class _MiniPatternPainter extends CustomPainter {
 
 class _ColorChip extends StatelessWidget {
   const _ColorChip({
-    required this.label, required this.color,
-    required this.isSelected, required this.onTap,
+    required this.label,
+    required this.color,
+    required this.isSelected,
+    required this.onTap,
   });
   final String label;
   final int color;
@@ -349,12 +388,9 @@ class _ColorChip extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final isDark = _ColorSection._isDark(color);
     // Use contrast-safe colors based on chip background, not theme
-    final textColor = isDark
-        ? const Color(0xFFF2F3F6)
-        : const Color(0xFF1B1F23);
-    final checkColor = isDark
-        ? const Color(0xFFF2F3F6)
-        : cs.primary;
+    final textColor =
+        isDark ? const Color(0xFFF2F3F6) : const Color(0xFF1B1F23);
+    final checkColor = isDark ? const Color(0xFFF2F3F6) : cs.primary;
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
@@ -375,9 +411,11 @@ class _ColorChip extends StatelessWidget {
                 Icon(Icons.check, size: 14, color: checkColor),
                 const SizedBox(width: 4),
               ],
-              Text(label, style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                color: textColor)),
+              Text(label,
+                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.normal,
+                      color: textColor)),
             ],
           ),
         ),

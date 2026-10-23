@@ -177,8 +177,7 @@ class _SecondaryCanvasViewState extends ConsumerState<SecondaryCanvasView> {
 
       ref.read(canvasTransformProvider.notifier).snapBackForPage(
             viewportSize: viewportSize,
-            pageSize:
-                Size(primaryPage.size.width, primaryPage.size.height),
+            pageSize: Size(primaryPage.size.width, primaryPage.size.height),
           );
     }
 
@@ -285,7 +284,8 @@ class _LastPagePlaceholder extends StatelessWidget {
                 size: 40, color: cs.outlineVariant),
             const SizedBox(height: 8),
             Text('Son sayfa',
-                style: textTheme.bodySmall?.copyWith(fontSize: 13, color: cs.onSurfaceVariant)),
+                style: textTheme.bodySmall
+                    ?.copyWith(fontSize: 13, color: cs.onSurfaceVariant)),
           ],
         ),
       ),

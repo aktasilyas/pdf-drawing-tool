@@ -34,13 +34,10 @@ class AIConversationList extends ConsumerWidget {
           ),
           Expanded(
             child: conversationsAsync.when(
-              data: (conversations) =>
-                  _buildList(conversations, theme, ref),
-              loading: () =>
-                  const Center(child: CircularProgressIndicator()),
+              data: (conversations) => _buildList(conversations, theme, ref),
+              loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => Center(
-                child:
-                    Text('Hata: $e', style: theme.textTheme.bodySmall),
+                child: Text('Hata: $e', style: theme.textTheme.bodySmall),
               ),
             ),
           ),
@@ -51,12 +48,12 @@ class AIConversationList extends ConsumerWidget {
 
   Widget _buildHeader(ThemeData theme) {
     return Padding(
-      padding: EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       child: Row(
         children: [
           Icon(Icons.history,
               size: AppIconSize.md, color: theme.colorScheme.primary),
-          SizedBox(width: AppSpacing.sm),
+          const SizedBox(width: AppSpacing.sm),
           Text('Sohbet Gecmisi',
               style: theme.textTheme.titleSmall?.copyWith(
                 fontWeight: FontWeight.w600,
@@ -83,7 +80,7 @@ class AIConversationList extends ConsumerWidget {
     }
 
     return ListView.builder(
-      padding: EdgeInsets.symmetric(vertical: AppSpacing.xs),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
       itemCount: conversations.length,
       itemBuilder: (context, index) {
         final conv = conversations[index];
@@ -123,10 +120,10 @@ class _ConversationTile extends StatelessWidget {
     return ListTile(
       dense: true,
       selected: isActive,
-      selectedTileColor:
-          theme.colorScheme.primary.withValues(alpha: 0.1),
-      contentPadding: EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg, vertical: AppSpacing.xxs,
+      selectedTileColor: theme.colorScheme.primary.withValues(alpha: 0.1),
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.xxs,
       ),
       title: Text(
         conversation.title,
@@ -143,7 +140,7 @@ class _ConversationTile extends StatelessWidget {
         ),
       ),
       trailing: IconButton(
-        icon: Icon(Icons.delete_outline, size: AppIconSize.sm + 2),
+        icon: const Icon(Icons.delete_outline, size: AppIconSize.sm + 2),
         onPressed: onDelete,
         visualDensity: VisualDensity.compact,
         tooltip: 'Sil',

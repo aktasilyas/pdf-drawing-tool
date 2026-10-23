@@ -192,45 +192,59 @@ class _LaserPreviewPainter extends CustomPainter {
   void _drawSolid(Canvas canvas, Path path, double t) {
     final p = _strokePaint();
     // Layer 1: Wide outer glow
-    canvas.drawPath(path, p
-      ..color = color.withValues(alpha: 0.5)
-      ..strokeWidth = t * 10
-      ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, t * 6));
+    canvas.drawPath(
+        path,
+        p
+          ..color = color.withValues(alpha: 0.5)
+          ..strokeWidth = t * 10
+          ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, t * 6));
     // Layer 2: Middle glow
-    canvas.drawPath(path, p
-      ..color = color.withValues(alpha: 0.85)
-      ..strokeWidth = t * 5
-      ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, t * 2));
+    canvas.drawPath(
+        path,
+        p
+          ..color = color.withValues(alpha: 0.85)
+          ..strokeWidth = t * 5
+          ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, t * 2));
     // Layer 3: Tight bright glow
-    canvas.drawPath(path, p
-      ..color = color.withValues(alpha: 0.95)
-      ..strokeWidth = t * 2.5
-      ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, t * 0.5));
+    canvas.drawPath(
+        path,
+        p
+          ..color = color.withValues(alpha: 0.95)
+          ..strokeWidth = t * 2.5
+          ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, t * 0.5));
     // Layer 4: White core
     final coreColor = Color.lerp(color, Colors.white, 0.7)!;
-    canvas.drawPath(path, p
-      ..color = coreColor
-      ..strokeWidth = t * 1.2
-      ..maskFilter = null);
+    canvas.drawPath(
+        path,
+        p
+          ..color = coreColor
+          ..strokeWidth = t * 1.2
+          ..maskFilter = null);
   }
 
   void _drawHollow(Canvas canvas, Path path, double t) {
     final p = _strokePaint();
     // Layer 1: Subtle outer glow (narrow)
-    canvas.drawPath(path, p
-      ..color = color.withValues(alpha: 0.3)
-      ..strokeWidth = t * 6
-      ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, t * 3));
+    canvas.drawPath(
+        path,
+        p
+          ..color = color.withValues(alpha: 0.3)
+          ..strokeWidth = t * 6
+          ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, t * 3));
     // Layer 2: Tight inner glow
-    canvas.drawPath(path, p
-      ..color = color.withValues(alpha: 0.6)
-      ..strokeWidth = t * 3
-      ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, t * 0.8));
+    canvas.drawPath(
+        path,
+        p
+          ..color = color.withValues(alpha: 0.6)
+          ..strokeWidth = t * 3
+          ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, t * 0.8));
     // Layer 3: Sharp solid color core (dominant)
-    canvas.drawPath(path, p
-      ..color = color
-      ..strokeWidth = t * 1.8
-      ..maskFilter = null);
+    canvas.drawPath(
+        path,
+        p
+          ..color = color
+          ..strokeWidth = t * 1.8
+          ..maskFilter = null);
   }
 
   void _drawRainbow(Canvas canvas, Path path, double t) {
@@ -246,30 +260,42 @@ class _LaserPreviewPainter extends CustomPainter {
     );
     final p = _strokePaint();
     // Outer glow
-    canvas.drawPath(path, p
-      ..shader = gradient
-      ..strokeWidth = t * 10
-      ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, t * 6));
+    canvas.drawPath(
+        path,
+        p
+          ..shader = gradient
+          ..strokeWidth = t * 10
+          ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, t * 6));
     // Middle glow
-    canvas.drawPath(path, p
-      ..strokeWidth = t * 5
-      ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, t * 2));
+    canvas.drawPath(
+        path,
+        p
+          ..strokeWidth = t * 5
+          ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, t * 2));
     p.shader = null;
     // White core
-    canvas.drawPath(path, p
-      ..color = Colors.white.withValues(alpha: 0.9)
-      ..strokeWidth = t * 1.2
-      ..maskFilter = null);
+    canvas.drawPath(
+        path,
+        p
+          ..color = Colors.white.withValues(alpha: 0.9)
+          ..strokeWidth = t * 1.2
+          ..maskFilter = null);
   }
 
   void _drawDot(Canvas canvas, Offset center, double t) {
     final r = t * 1.5;
-    canvas.drawCircle(center, r * 5, Paint()
-      ..color = color.withValues(alpha: 0.5)
-      ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, r * 5));
-    canvas.drawCircle(center, r * 2.5, Paint()
-      ..color = color.withValues(alpha: 0.85)
-      ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, r * 2));
+    canvas.drawCircle(
+        center,
+        r * 5,
+        Paint()
+          ..color = color.withValues(alpha: 0.5)
+          ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, r * 5));
+    canvas.drawCircle(
+        center,
+        r * 2.5,
+        Paint()
+          ..color = color.withValues(alpha: 0.85)
+          ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, r * 2));
     final coreColor = Color.lerp(color, Colors.white, 0.7)!;
     canvas.drawCircle(center, r, Paint()..color = coreColor);
   }
@@ -281,8 +307,10 @@ class _LaserPreviewPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_LaserPreviewPainter o) =>
-      color != o.color || thickness != o.thickness ||
-      mode != o.mode || lineStyle != o.lineStyle;
+      color != o.color ||
+      thickness != o.thickness ||
+      mode != o.mode ||
+      lineStyle != o.lineStyle;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -309,22 +337,22 @@ class _LaserTypeSelector extends StatelessWidget {
       children: [
         _PillCard(
           icon: PhosphorIconsLight.lineSegment,
-          isSelected: mode == LaserMode.line &&
-              lineStyle == LaserLineStyle.solid,
+          isSelected:
+              mode == LaserMode.line && lineStyle == LaserLineStyle.solid,
           cs: cs,
           onTap: () => onSelected(LaserMode.line, LaserLineStyle.solid),
         ),
         _PillCard(
           icon: PhosphorIconsLight.lineSegments,
-          isSelected: mode == LaserMode.line &&
-              lineStyle == LaserLineStyle.hollow,
+          isSelected:
+              mode == LaserMode.line && lineStyle == LaserLineStyle.hollow,
           cs: cs,
           onTap: () => onSelected(LaserMode.line, LaserLineStyle.hollow),
         ),
         _PillCard(
           icon: PhosphorIconsLight.rainbow,
-          isSelected: mode == LaserMode.line &&
-              lineStyle == LaserLineStyle.rainbow,
+          isSelected:
+              mode == LaserMode.line && lineStyle == LaserLineStyle.rainbow,
           cs: cs,
           onTap: () => onSelected(LaserMode.line, LaserLineStyle.rainbow),
         ),

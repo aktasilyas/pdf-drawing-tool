@@ -8,7 +8,7 @@ class ErasePointsCommand implements DrawingCommand {
     required this.originalStrokes,
     required this.resultingStrokes,
   });
-  
+
   final int layerIndex;
 
   /// Original strokes before erasing
@@ -19,7 +19,7 @@ class ErasePointsCommand implements DrawingCommand {
 
   /// Cached elementOrder before execute (for undo z-order restore).
   List<String> _originalElementOrder = const [];
-  
+
   @override
   DrawingDocument execute(DrawingDocument document) {
     if (layerIndex < 0 || layerIndex >= document.layers.length) {
@@ -69,7 +69,7 @@ class ErasePointsCommand implements DrawingCommand {
 
     return document.updateLayer(layerIndex, updatedLayer);
   }
-  
+
   @override
   DrawingDocument undo(DrawingDocument document) {
     if (layerIndex < 0 || layerIndex >= document.layers.length) {
@@ -90,16 +90,16 @@ class ErasePointsCommand implements DrawingCommand {
     // Restore original elementOrder
     final updatedLayer = layer.copyWith(
       strokes: newStrokes,
-      elementOrder: _originalElementOrder.isNotEmpty
-          ? _originalElementOrder
-          : null,
+      elementOrder:
+          _originalElementOrder.isNotEmpty ? _originalElementOrder : null,
     );
 
     return document.updateLayer(layerIndex, updatedLayer);
   }
-  
+
   @override
-  String get description => 'Erase points (${originalStrokes.length} strokes affected)';
+  String get description =>
+      'Erase points (${originalStrokes.length} strokes affected)';
 }
 
 /// Utility to split stroke at erased segments
@@ -113,21 +113,21 @@ class StrokeSplitter {
     if (segmentIndicesToRemove.isEmpty) {
       return [stroke];
     }
-    
+
     final points = stroke.points;
     if (points.length < 2) {
       return [];
     }
-    
+
     // Sort indices for easier processing
     final sortedIndices = segmentIndicesToRemove.toSet().toList()..sort();
-    
+
     final pieces = <List<DrawingPoint>>[];
     var currentPiece = <DrawingPoint>[];
-    
+
     for (int i = 0; i < points.length; i++) {
       final segmentIndex = i > 0 ? i - 1 : 0;
-      
+
       if (i == 0 || !sortedIndices.contains(segmentIndex)) {
         currentPiece.add(points[i]);
       } else {
@@ -138,12 +138,12 @@ class StrokeSplitter {
         currentPiece = [points[i]];
       }
     }
-    
+
     // Add last piece
     if (currentPiece.length >= 2) {
       pieces.add(currentPiece);
     }
-    
+
     // Convert pieces to strokes
     return pieces.asMap().entries.map((entry) {
       return Stroke(
@@ -154,7 +154,7 @@ class StrokeSplitter {
       );
     }).toList();
   }
-  
+
   /// Split multiple strokes based on segment hits
   /// Returns map of original stroke -> resulting strokes
   static Map<Stroke, List<Stroke>> splitStrokes(
@@ -162,14 +162,14 @@ class StrokeSplitter {
     Map<String, List<int>> affectedSegments,
   ) {
     final result = <Stroke, List<Stroke>>{};
-    
+
     for (final stroke in strokes) {
       final segments = affectedSegments[stroke.id];
       if (segments != null && segments.isNotEmpty) {
         result[stroke] = splitStroke(stroke, segments);
       }
     }
-    
+
     return result;
   }
 }

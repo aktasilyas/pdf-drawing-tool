@@ -56,16 +56,16 @@ class _AIChatContentState extends ConsumerState<AIChatContent> {
 
   void _handleSend(String text) {
     if (!ref.read(canSendAIMessageProvider)) {
-      AIUpgradePrompt.show(context,
-          reason: AIUpgradeReason.dailyLimitReached);
+      AIUpgradePrompt.show(context, reason: AIUpgradeReason.dailyLimitReached);
       return;
     }
 
     final pendingImage = ref.read(pendingSelectionImageProvider);
     if (pendingImage != null) {
       final message = text.isEmpty ? 'Bu seçimi analiz et.' : text;
-      ref.read(aiChatProvider.notifier).sendWithImageBytes(
-            message, pendingImage);
+      ref
+          .read(aiChatProvider.notifier)
+          .sendWithImageBytes(message, pendingImage);
       ref.read(pendingSelectionImageProvider.notifier).state = null;
     } else {
       if (text.isEmpty) return;
@@ -76,15 +76,14 @@ class _AIChatContentState extends ConsumerState<AIChatContent> {
 
   void _handleCanvasCapture() {
     if (!ref.read(canSendAIMessageProvider)) {
-      AIUpgradePrompt.show(context,
-          reason: AIUpgradeReason.dailyLimitReached);
+      AIUpgradePrompt.show(context, reason: AIUpgradeReason.dailyLimitReached);
       return;
     }
     final canvasKey = ref.read(canvasBoundaryKeyProvider);
     ref.read(aiChatProvider.notifier).sendWithCanvas(
-      'Bu çizimi analiz et ve açıkla.',
-      canvasBoundaryKey: canvasKey,
-    );
+          'Bu çizimi analiz et ve açıkla.',
+          canvasBoundaryKey: canvasKey,
+        );
     _scrollToBottom();
   }
 
@@ -94,8 +93,7 @@ class _AIChatContentState extends ConsumerState<AIChatContent> {
 
   void _handleConversationSelected(String id) {
     ref.read(pendingSelectionImageProvider.notifier).state = null;
-    ref.read(aiChatProvider.notifier)
-        .initialize(existingConversationId: id);
+    ref.read(aiChatProvider.notifier).initialize(existingConversationId: id);
     setState(() => _showHistory = false);
   }
 
@@ -129,8 +127,7 @@ class _AIChatContentState extends ConsumerState<AIChatContent> {
         children: [
           AIChatHeader(
             onClose: widget.onClose,
-            onToggleHistory: () =>
-                setState(() => _showHistory = !_showHistory),
+            onToggleHistory: () => setState(() => _showHistory = !_showHistory),
             onNewChat: _handleNewChat,
           ),
           Divider(
@@ -149,8 +146,7 @@ class _AIChatContentState extends ConsumerState<AIChatContent> {
                 if (isWide && _showHistory) {
                   return Row(children: [
                     SizedBox(
-                        width: AppSpacing.sidebarWidth,
-                        child: historyPanel),
+                        width: AppSpacing.sidebarWidth, child: historyPanel),
                     Expanded(child: _buildChatArea(chatState, theme)),
                   ]);
                 }
@@ -187,26 +183,23 @@ class _AIChatContentState extends ConsumerState<AIChatContent> {
     }
     return ListView.builder(
       controller: _scrollController,
-      padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
-      itemCount:
-          chatState.messages.length + (chatState.isStreaming ? 1 : 0),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+      itemCount: chatState.messages.length + (chatState.isStreaming ? 1 : 0),
       itemBuilder: (context, index) {
         if (index == chatState.messages.length && chatState.isStreaming) {
           return AIStreamingBubble(content: chatState.streamingContent);
         }
         final msg = chatState.messages[index];
-        final isLastAssistant =
-            index == chatState.messages.length - 1 &&
-                msg.role == MessageRole.assistant &&
-                !chatState.isStreaming;
+        final isLastAssistant = index == chatState.messages.length - 1 &&
+            msg.role == MessageRole.assistant &&
+            !chatState.isStreaming;
 
         if (isLastAssistant) {
           final parsed = AIParsedResponse.parse(msg.content);
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              AIChatBubble(
-                  message: msg.copyWith(content: parsed.content)),
+              AIChatBubble(message: msg.copyWith(content: parsed.content)),
               AISuggestionChips(
                 suggestions: parsed.suggestions,
                 onTap: _handleSend,
@@ -222,20 +215,22 @@ class _AIChatContentState extends ConsumerState<AIChatContent> {
   Widget _buildEmptyState(ThemeData theme) {
     return Center(
       child: SingleChildScrollView(
-        padding: EdgeInsets.all(AppSpacing.xxl),
+        padding: const EdgeInsets.all(AppSpacing.xxl),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Icon(Icons.auto_awesome, size: AppIconSize.emptyState,
+          Icon(Icons.auto_awesome,
+              size: AppIconSize.emptyState,
               color: theme.colorScheme.primary.withValues(alpha: 0.5)),
-          SizedBox(height: AppSpacing.lg),
-          Text('Elyanotes AI', style: theme.textTheme.headlineSmall
-              ?.copyWith(fontWeight: FontWeight.w600)),
-          SizedBox(height: AppSpacing.sm),
+          const SizedBox(height: AppSpacing.lg),
+          Text('Elyanotes AI',
+              style: theme.textTheme.headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.w600)),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             'Sorularınızı sorun, notlarınızı özetleyin\n'
             "veya canvas'i AI ile analiz edin.",
             textAlign: TextAlign.center,
-            style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant),
+            style: theme.textTheme.bodyMedium
+                ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
           ),
         ]),
       ),
@@ -245,24 +240,25 @@ class _AIChatContentState extends ConsumerState<AIChatContent> {
   Widget _buildErrorBanner(String error, ThemeData theme) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(
-        horizontal: AppSpacing.lg, vertical: AppSpacing.sm,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.sm,
       ),
       color: theme.colorScheme.errorContainer,
       child: Row(
         children: [
           Icon(Icons.error_outline,
               size: AppIconSize.sm, color: theme.colorScheme.error),
-          SizedBox(width: AppSpacing.sm),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
-            child: Text(error, style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onErrorContainer,
-            )),
+            child: Text(error,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.colorScheme.onErrorContainer,
+                )),
           ),
           IconButton(
-            icon: Icon(Icons.close, size: AppIconSize.sm),
-            onPressed: () =>
-                ref.read(aiChatProvider.notifier).clearError(),
+            icon: const Icon(Icons.close, size: AppIconSize.sm),
+            onPressed: () => ref.read(aiChatProvider.notifier).clearError(),
             visualDensity: VisualDensity.compact,
           ),
         ],

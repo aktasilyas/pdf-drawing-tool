@@ -120,10 +120,8 @@ class _EraserPreviewPainter extends CustomPainter {
     final cx = w * 0.50;
     final cy = h * 0.38;
     const r = 12.0;
-    canvas.drawLine(
-      Offset(cx - r, cy - r), Offset(cx + r, cy + r), crossPaint);
-    canvas.drawLine(
-      Offset(cx + r, cy - r), Offset(cx - r, cy + r), crossPaint);
+    canvas.drawLine(Offset(cx - r, cy - r), Offset(cx + r, cy + r), crossPaint);
+    canvas.drawLine(Offset(cx + r, cy - r), Offset(cx - r, cy + r), crossPaint);
   }
 
   /// Lasso eraser: dashed lasso selection area.
@@ -169,6 +167,7 @@ class _EraserPreviewPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_EraserPreviewPainter o) =>
-      mode != o.mode || eraserSize != o.eraserSize ||
+      mode != o.mode ||
+      eraserSize != o.eraserSize ||
       selectionColor != o.selectionColor;
 }

@@ -31,9 +31,7 @@ class SidebarTile extends StatelessWidget {
         ? (isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight)
         : isSelected
             ? selectedColor
-            : (isDark
-                ? AppColors.textPrimaryDark
-                : AppColors.textPrimaryLight);
+            : (isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight);
     final iconColor = !enabled
         ? (isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight)
         : isSelected
@@ -56,8 +54,7 @@ class SidebarTile extends StatelessWidget {
             Container(
               width: 32,
               height: 32,
-              decoration:
-                  BoxDecoration(color: iconBg, shape: BoxShape.circle),
+              decoration: BoxDecoration(color: iconBg, shape: BoxShape.circle),
               child: Icon(icon, size: 18, color: iconColor),
             ),
             const SizedBox(width: AppSpacing.sm),
@@ -65,8 +62,7 @@ class SidebarTile extends StatelessWidget {
               child: Text(label,
                   style: AppTypography.bodyMedium.copyWith(
                     color: textColor,
-                    fontWeight:
-                        isSelected ? FontWeight.w700 : FontWeight.w500,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis),

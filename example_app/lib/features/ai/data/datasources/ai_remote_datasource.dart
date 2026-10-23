@@ -77,12 +77,13 @@ class AIRemoteDataSource {
     final client = http.Client();
     try {
       final response = await client.send(request).timeout(
-            const Duration(seconds: 30),
-            onTimeout: () {
-              logger.e('[AI] HTTP request timed out after 30s');
-              throw TimeoutException('AI request timed out', const Duration(seconds: 30));
-            },
-          );
+        const Duration(seconds: 30),
+        onTimeout: () {
+          logger.e('[AI] HTTP request timed out after 30s');
+          throw TimeoutException(
+              'AI request timed out', const Duration(seconds: 30));
+        },
+      );
 
       logger.i('[AI] Response status: ${response.statusCode}, '
           'model: ${response.headers['x-model']}, '
@@ -171,11 +172,15 @@ class AIRemoteDataSource {
     final user = _supabase.auth.currentUser;
     if (user == null) throw Exception('Not authenticated');
 
-    final response = await _supabase.from('ai_conversations').insert({
-      'user_id': user.id,
-      'document_id': documentId,
-      'task_type': taskType,
-    }).select().single();
+    final response = await _supabase
+        .from('ai_conversations')
+        .insert({
+          'user_id': user.id,
+          'document_id': documentId,
+          'task_type': taskType,
+        })
+        .select()
+        .single();
 
     return response;
   }
@@ -215,17 +220,21 @@ class AIRemoteDataSource {
     bool hasImage = false,
     String? imagePath,
   }) async {
-    final response = await _supabase.from('ai_messages').insert({
-      'conversation_id': conversationId,
-      'role': role,
-      'content': content,
-      'model': model,
-      'provider': provider,
-      'input_tokens': inputTokens,
-      'output_tokens': outputTokens,
-      'has_image': hasImage,
-      'image_path': imagePath,
-    }).select().single();
+    final response = await _supabase
+        .from('ai_messages')
+        .insert({
+          'conversation_id': conversationId,
+          'role': role,
+          'content': content,
+          'model': model,
+          'provider': provider,
+          'input_tokens': inputTokens,
+          'output_tokens': outputTokens,
+          'has_image': hasImage,
+          'image_path': imagePath,
+        })
+        .select()
+        .single();
 
     await _supabase.rpc('increment_token_usage', params: {
       'p_user_id': _supabase.auth.currentUser!.id,
@@ -242,10 +251,7 @@ class AIRemoteDataSource {
 
   /// Delete a conversation.
   Future<void> deleteConversation(String conversationId) async {
-    await _supabase
-        .from('ai_conversations')
-        .delete()
-        .eq('id', conversationId);
+    await _supabase.from('ai_conversations').delete().eq('id', conversationId);
   }
 
   /// Get daily message count for current user.

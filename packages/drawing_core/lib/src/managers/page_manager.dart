@@ -164,7 +164,7 @@ class PageManager {
     }
 
     final original = _pages[index];
-    
+
     // Create a copy with updated index (will be adjusted by _reindexPages)
     final duplicate = Page(
       id: 'page_${DateTime.now().microsecondsSinceEpoch}',

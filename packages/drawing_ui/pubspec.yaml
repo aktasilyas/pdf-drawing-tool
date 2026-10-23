@@ -32,6 +32,7 @@ dependencies:
   pasteboard: ^0.3.0  # Clipboard image copy (cross-platform)
   google_fonts: ^6.2.1  # Source Serif 4 typography
 
+  vector_math: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

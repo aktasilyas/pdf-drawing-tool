@@ -541,7 +541,8 @@ void main() {
         expect(painter.pattern, TemplatePattern.music);
       });
 
-      testWidgets('handwriting pattern draws baseline and midline', (tester) async {
+      testWidgets('handwriting pattern draws baseline and midline',
+          (tester) async {
         final painter = TemplatePatternPainter(
           pattern: TemplatePattern.handwriting,
           spacingMm: 10,

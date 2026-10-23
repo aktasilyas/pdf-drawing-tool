@@ -81,9 +81,8 @@ mixin DrawingCanvasHelpers<T extends ConsumerStatefulWidget>
     if (allowHandwriting && allowHighlighter) return strokes;
 
     return strokes.where((stroke) {
-      final isHighlighter =
-          stroke.style.nibShape == core.NibShape.rectangle &&
-              stroke.style.opacity < 1.0;
+      final isHighlighter = stroke.style.nibShape == core.NibShape.rectangle &&
+          stroke.style.opacity < 1.0;
       return isHighlighter ? allowHighlighter : allowHandwriting;
     }).toList();
   }

@@ -54,11 +54,14 @@ class DrawingScreen extends ConsumerStatefulWidget {
 }
 
 class _DrawingScreenState extends ConsumerState<DrawingScreen> {
-  final Map<ToolType, GlobalKey> _toolButtonKeys = {for (final tool in ToolType.values) tool: GlobalKey()};
+  final Map<ToolType, GlobalKey> _toolButtonKeys = {
+    for (final tool in ToolType.values) tool: GlobalKey()
+  };
   final GlobalKey _penGroupButtonKey = GlobalKey();
   final GlobalKey _highlighterGroupButtonKey = GlobalKey();
   final GlobalKey _settingsButtonKey = GlobalKey();
-  final GlobalKey<PageSlideTransitionState> _pageTransitionKey = GlobalKey<PageSlideTransitionState>();
+  final GlobalKey<PageSlideTransitionState> _pageTransitionKey =
+      GlobalKey<PageSlideTransitionState>();
   final PopoverController _panelController = PopoverController();
   final ThumbnailCache _thumbnailCache = ThumbnailCache(maxSize: 20);
   Offset _penBoxPosition = const Offset(12, 12);
@@ -198,9 +201,9 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
     );
     ref.read(documentProvider.notifier).updateDocument(newDoc);
     ref.read(pageManagerProvider.notifier).initializeFromDocument(
-      newDoc.pages,
-      currentIndex: newDoc.currentPageIndex,
-    );
+          newDoc.pages,
+          currentIndex: newDoc.currentPageIndex,
+        );
   }
 
   bool get _isSidebarOpen => ref.read(sidebarOpenProvider);
@@ -230,16 +233,18 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
     var canvasWidth = size.width - sidebarWidth - externalInset;
     // Use the actual canvas height from LayoutBuilder, not full screen height
     final canvasHeight = ref.read(canvasViewportSizeProvider).height;
-    final viewportSize = Size(canvasWidth, canvasHeight > 0 ? canvasHeight : size.height);
+    final viewportSize =
+        Size(canvasWidth, canvasHeight > 0 ? canvasHeight : size.height);
     ref.read(canvasViewportSizeProvider.notifier).state = viewportSize;
     final currentPage = ref.read(currentPageProvider);
     final pageSize = Size(currentPage.size.width, currentPage.size.height);
-    final canvasMode = widget.canvasMode ?? const core.CanvasMode(isInfinite: true);
+    final canvasMode =
+        widget.canvasMode ?? const core.CanvasMode(isInfinite: true);
     if (!canvasMode.isInfinite) {
       ref.read(canvasTransformProvider.notifier).recenterForViewport(
-        viewportSize: viewportSize,
-        pageSize: pageSize,
-      );
+            viewportSize: viewportSize,
+            pageSize: pageSize,
+          );
     }
   }
 
@@ -269,14 +274,17 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
       if (previous != null && previous != current) {
         final doc = ref.read(documentProvider);
         if (doc.isMultiPage && doc.currentPageIndex != current) {
-          ref.read(documentProvider.notifier).updateDocument(doc.setCurrentPage(current));
+          ref
+              .read(documentProvider.notifier)
+              .updateDocument(doc.setCurrentPage(current));
         }
       }
     });
 
     // Listen to document changes for PDF prefetch and canvas transform
     ref.listen<core.DrawingDocument>(documentProvider, (previous, current) {
-      if (previous != null && previous.currentPageIndex != current.currentPageIndex) {
+      if (previous != null &&
+          previous.currentPageIndex != current.currentPageIndex) {
         _handleDocumentPageChange(current);
       }
     });
@@ -284,7 +292,8 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
     final isReaderMode = ref.watch(readerModeProvider);
     final currentPage = ref.watch(currentPageProvider);
     final transform = ref.watch(canvasTransformProvider);
-    final canvasMode = widget.canvasMode ?? const core.CanvasMode(isInfinite: true);
+    final canvasMode =
+        widget.canvasMode ?? const core.CanvasMode(isInfinite: true);
     // Defer provider modification to after build completes
     final isInfinite = canvasMode.isInfinite;
     final aiCallback = widget.onAIPressed ?? () => openAIPanel(context);
@@ -311,9 +320,8 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
       toolbarIconColor: colorScheme.onPrimary.withValues(alpha: 0.7),
       toolbarIconSelectedColor: colorScheme.onPrimary,
       toolbarIconDisabledColor: colorScheme.onPrimary.withValues(alpha: 0.3),
-      panelBackground: isDark
-          ? colorScheme.surfaceContainerHigh
-          : colorScheme.surface,
+      panelBackground:
+          isDark ? colorScheme.surfaceContainerHigh : colorScheme.surface,
       panelBorderColor: colorScheme.outlineVariant,
       penBoxBackground: colorScheme.surface,
       penBoxSlotSelectedColor: colorScheme.primaryContainer,
@@ -331,7 +339,8 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
               Column(
                 children: [
                   AdaptiveToolbar(
-                    onAIPressed: widget.onAIPressed ?? () => openAIPanel(context),
+                    onAIPressed:
+                        widget.onAIPressed ?? () => openAIPanel(context),
                     onSettingsPressed: _onSettingsPressed,
                     settingsButtonKey: _settingsButtonKey,
                     toolButtonKeys: _toolButtonKeys,
@@ -344,7 +353,8 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                     onSidebarToggle: _toggleSidebar,
                     isSidebarOpen: isSidebarOpen,
                     onToolPanelRequested: isCompactMode
-                        ? (tool) => showToolPanelSheet(context: context, ref: ref, tool: tool)
+                        ? (tool) => showToolPanelSheet(
+                            context: context, ref: ref, tool: tool)
                         : null,
                     onUndoPressed: _onUndoPressed,
                     onRedoPressed: _onRedoPressed,
@@ -353,7 +363,8 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                     child: Row(
                       children: [
                         // External left sidebar (e.g. AI chat) — tablet only
-                        if (!isCompactMode && widget.externalLeftSidebar != null)
+                        if (!isCompactMode &&
+                            widget.externalLeftSidebar != null)
                           AnimatedContainer(
                             duration: const Duration(milliseconds: 300),
                             curve: Curves.easeInOut,
@@ -395,7 +406,8 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                             transform: transform,
                             canvasMode: widget.canvasMode,
                             penBoxPosition: _penBoxPosition,
-                            onPenBoxPositionChanged: (p) => setState(() => _penBoxPosition = p),
+                            onPenBoxPositionChanged: (p) =>
+                                setState(() => _penBoxPosition = p),
                             onClosePanel: _closePanel,
                             pageTransitionKey: _pageTransitionKey,
                             onPageChanged: _navigateToPage,
@@ -410,11 +422,14 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                             canSwipeForward: true,
                             canSwipeBack: ref.watch(canGoPreviousProvider),
                             onSwipeNavigate: _handleSwipeNavigate,
-                            onDragDirectionDetermined: _onDragDirectionDetermined,
+                            onDragDirectionDetermined:
+                                _onDragDirectionDetermined,
                             onDragReverted: _onDragReverted,
-                            addPagePreview: ref.watch(currentPageIndexProvider) >=
-                                ref.watch(pageCountProvider) - 1
-                                ? _buildAddPagePreview() : null,
+                            addPagePreview:
+                                ref.watch(currentPageIndexProvider) >=
+                                        ref.watch(pageCountProvider) - 1
+                                    ? _buildAddPagePreview()
+                                    : null,
                           ),
                         ),
                       ],
@@ -474,7 +489,9 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                   top: 0,
                   bottom: 0,
                   width: kPageSidebarWidth,
-                  child: PageSidebar(thumbnailCache: _thumbnailCache, onPageTap: _navigateToPage),
+                  child: PageSidebar(
+                      thumbnailCache: _thumbnailCache,
+                      onPageTap: _navigateToPage),
                 ),
             ],
           ),
@@ -482,14 +499,16 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
       ),
     );
   }
+
   void _handleDocumentPageChange(core.DrawingDocument current) {
-    final hasPdfPages = current.pages.any(
-        (p) => p.background.type == core.BackgroundType.pdf && p.background.pdfFilePath != null);
+    final hasPdfPages = current.pages.any((p) =>
+        p.background.type == core.BackgroundType.pdf &&
+        p.background.pdfFilePath != null);
     if (hasPdfPages) {
       ref.read(pdfPrefetchManagerProvider).prefetchAround(
-        currentPageIndex: current.currentPageIndex,
-        allPages: current.pages,
-      );
+            currentPageIndex: current.currentPageIndex,
+            allPages: current.pages,
+          );
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) _recalculateCanvasTransform();
@@ -523,10 +542,12 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
   Widget _buildAddPagePreview() {
     final bg = _resolveNewPageBackground();
     final cs = ref.read(canvasColorSchemeProvider);
-    final canvasMode = widget.canvasMode ?? const core.CanvasMode(isInfinite: true);
+    final canvasMode =
+        widget.canvasMode ?? const core.CanvasMode(isInfinite: true);
     final pageSize = ref.read(documentProvider).settings.defaultPageSize;
     final surroundColor = canvasMode.isInfinite
-        ? Color(bg.color) : Color(canvasMode.surroundingAreaColor);
+        ? Color(bg.color)
+        : Color(canvasMode.surroundingAreaColor);
     final materialTheme = Theme.of(context);
     final previewColorScheme = materialTheme.colorScheme;
     final brightness = materialTheme.brightness;
@@ -541,37 +562,46 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
       final pageW = pw * fitZoom;
       final pageH = ph * fitZoom;
 
-      return Container(color: surroundColor, child: Stack(children: [
-        // Centered page with correct aspect ratio
-        Positioned(
-          left: (vw - pageW) / 2, top: (vh - pageH) / 2,
-          width: pageW, height: pageH,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Color(bg.color),
-              border: Border.all(color: previewColorScheme.outlineVariant, width: 0.5),
-              boxShadow: DrawingShadows.page(brightness),
+      return Container(
+          color: surroundColor,
+          child: Stack(children: [
+            // Centered page with correct aspect ratio
+            Positioned(
+              left: (vw - pageW) / 2,
+              top: (vh - pageH) / 2,
+              width: pageW,
+              height: pageH,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Color(bg.color),
+                  border: Border.all(
+                      color: previewColorScheme.outlineVariant, width: 0.5),
+                  boxShadow: DrawingShadows.page(brightness),
+                ),
+                child: PageBackgroundView(
+                    background: bg,
+                    colorScheme: cs,
+                    pageSize: Size(pageW, pageH)),
+              ),
             ),
-            child: PageBackgroundView(
-              background: bg, colorScheme: cs,
-              pageSize: Size(pageW, pageH)),
-          ),
-        ),
-        // Hint overlay
-        Positioned.fill(child: Center(child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          decoration: BoxDecoration(
-            color: previewColorScheme.scrim.withValues(alpha: 0.55),
-            borderRadius: BorderRadius.circular(12)),
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            const Icon(Icons.add_rounded, color: Colors.white, size: 32),
-            const SizedBox(height: 6),
-            Text('Yeni sayfa eklemek için\nsürükleyip bırakın',
-              textAlign: TextAlign.center,
-              style: materialTheme.textTheme.bodySmall?.copyWith(fontSize: 13, color: Colors.white)),
-          ]),
-        ))),
-      ]));
+            // Hint overlay
+            Positioned.fill(
+                child: Center(
+                    child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+              decoration: BoxDecoration(
+                  color: previewColorScheme.scrim.withValues(alpha: 0.55),
+                  borderRadius: BorderRadius.circular(12)),
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                const Icon(Icons.add_rounded, color: Colors.white, size: 32),
+                const SizedBox(height: 6),
+                Text('Yeni sayfa eklemek için\nsürükleyip bırakın',
+                    textAlign: TextAlign.center,
+                    style: materialTheme.textTheme.bodySmall
+                        ?.copyWith(fontSize: 13, color: Colors.white)),
+              ]),
+            ))),
+          ]));
     });
   }
 
@@ -602,6 +632,4 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
       }
     });
   }
-
-
 }

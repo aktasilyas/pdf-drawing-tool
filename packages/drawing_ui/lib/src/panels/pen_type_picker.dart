@@ -12,11 +12,11 @@ class PenTypePicker extends ConsumerWidget {
 
   /// Gösterilecek 5 kalem tipi (sıralı)
   static const _pickerPens = [
-    ToolType.pencil,        // Kurşun Kalem
-    ToolType.ballpointPen,  // Tükenmez Kalem
-    ToolType.dashedPen,     // Kesik Çizgi
-    ToolType.brushPen,      // Fırça Kalem
-    ToolType.rulerPen,      // Cetvelli Kalem
+    ToolType.pencil, // Kurşun Kalem
+    ToolType.ballpointPen, // Tükenmez Kalem
+    ToolType.dashedPen, // Kesik Çizgi
+    ToolType.brushPen, // Fırça Kalem
+    ToolType.rulerPen, // Cetvelli Kalem
   ];
 
   @override
@@ -31,7 +31,8 @@ class PenTypePicker extends ConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: _pickerPens.map((pen) {
           final isSelected = pen == currentTool ||
-              (!_pickerPens.contains(currentTool) && pen == ToolType.ballpointPen);
+              (!_pickerPens.contains(currentTool) &&
+                  pen == ToolType.ballpointPen);
           final label = _getLabel(pen);
 
           return Expanded(
@@ -72,12 +73,13 @@ class PenTypePicker extends ConsumerWidget {
                   Text(
                     label,
                     style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      fontSize: 10,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                      color: isSelected
-                          ? colorScheme.primary
-                          : colorScheme.onSurfaceVariant,
-                    ),
+                          fontSize: 10,
+                          fontWeight:
+                              isSelected ? FontWeight.w600 : FontWeight.w400,
+                          color: isSelected
+                              ? colorScheme.primary
+                              : colorScheme.onSurfaceVariant,
+                        ),
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -93,23 +95,35 @@ class PenTypePicker extends ConsumerWidget {
 
   static String _getLabel(ToolType type) {
     switch (type) {
-      case ToolType.pencil: return 'Kurşun\nKalem';
-      case ToolType.ballpointPen: return 'Tükenmez\nKalem';
-      case ToolType.dashedPen: return 'Kesik\nÇizgi';
-      case ToolType.brushPen: return 'Fırça\nKalem';
-      case ToolType.rulerPen: return 'Cetvelli\nKalem';
-      default: return type.displayName;
+      case ToolType.pencil:
+        return 'Kurşun\nKalem';
+      case ToolType.ballpointPen:
+        return 'Tükenmez\nKalem';
+      case ToolType.dashedPen:
+        return 'Kesik\nÇizgi';
+      case ToolType.brushPen:
+        return 'Fırça\nKalem';
+      case ToolType.rulerPen:
+        return 'Cetvelli\nKalem';
+      default:
+        return type.displayName;
     }
   }
 
   static PhosphorIconData _getIcon(ToolType type) {
     switch (type) {
-      case ToolType.pencil: return PhosphorIconsLight.pencilSimple;
-      case ToolType.ballpointPen: return PhosphorIconsLight.pen;
-      case ToolType.dashedPen: return PhosphorIconsLight.penNibStraight;
-      case ToolType.brushPen: return PhosphorIconsLight.paintBrush;
-      case ToolType.rulerPen: return PhosphorIconsLight.ruler;
-      default: return PhosphorIconsLight.pen;
+      case ToolType.pencil:
+        return PhosphorIconsLight.pencilSimple;
+      case ToolType.ballpointPen:
+        return PhosphorIconsLight.pen;
+      case ToolType.dashedPen:
+        return PhosphorIconsLight.penNibStraight;
+      case ToolType.brushPen:
+        return PhosphorIconsLight.paintBrush;
+      case ToolType.rulerPen:
+        return PhosphorIconsLight.ruler;
+      default:
+        return PhosphorIconsLight.pen;
     }
   }
 }

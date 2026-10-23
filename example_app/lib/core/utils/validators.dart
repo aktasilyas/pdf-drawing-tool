@@ -86,7 +86,8 @@ abstract class Validators {
   }
 
   /// Min length validator
-  static String? Function(String?) minLength(int min, [String fieldName = 'Bu alan']) {
+  static String? Function(String?) minLength(int min,
+      [String fieldName = 'Bu alan']) {
     return (String? value) {
       if (value != null && value.length < min) {
         return '$fieldName en az $min karakter olmalı';
@@ -96,7 +97,8 @@ abstract class Validators {
   }
 
   /// Max length validator
-  static String? Function(String?) maxLength(int max, [String fieldName = 'Bu alan']) {
+  static String? Function(String?) maxLength(int max,
+      [String fieldName = 'Bu alan']) {
     return (String? value) {
       if (value != null && value.length > max) {
         return '$fieldName en fazla $max karakter olabilir';
@@ -106,7 +108,8 @@ abstract class Validators {
   }
 
   /// Combine multiple validators
-  static String? Function(String?) combine(List<String? Function(String?)> validators) {
+  static String? Function(String?) combine(
+      List<String? Function(String?)> validators) {
     return (String? value) {
       for (final validator in validators) {
         final error = validator(value);

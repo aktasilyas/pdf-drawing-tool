@@ -38,8 +38,7 @@ abstract class AuthStrings {
       'E-posta adresinize şifre sıfırlama bağlantısı göndereceğiz.';
   static const String send = 'Gönder';
   static const String cancel = 'İptal';
-  static const String resetEmailSent =
-      'Şifre sıfırlama e-postası gönderildi';
+  static const String resetEmailSent = 'Şifre sıfırlama e-postası gönderildi';
   static const String enterValidEmail = 'Geçerli bir e-posta girin';
 
   // Common

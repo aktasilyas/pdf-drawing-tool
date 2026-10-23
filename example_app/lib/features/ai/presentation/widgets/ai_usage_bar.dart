@@ -21,8 +21,7 @@ class AIUsageBar extends ConsumerWidget {
       data: (usage) {
         final used = usage.dailyMessagesUsed;
         final limit = usage.dailyMessagesLimit;
-        final percent =
-            limit > 0 ? (used / limit).clamp(0.0, 1.0) : 0.0;
+        final percent = limit > 0 ? (used / limit).clamp(0.0, 1.0) : 0.0;
 
         final color = percent < 0.6
             ? theme.colorScheme.primary
@@ -31,7 +30,7 @@ class AIUsageBar extends ConsumerWidget {
                 : theme.colorScheme.error;
 
         return Padding(
-          padding: EdgeInsets.symmetric(
+          padding: const EdgeInsets.symmetric(
               horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -39,11 +38,10 @@ class AIUsageBar extends ConsumerWidget {
               Row(
                 children: [
                   Container(
-                    padding: EdgeInsets.symmetric(
+                    padding: const EdgeInsets.symmetric(
                         horizontal: AppSpacing.sm, vertical: AppSpacing.xxs),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.primary
-                          .withValues(alpha: 0.1),
+                      color: theme.colorScheme.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(AppRadius.lg),
                     ),
                     child: Text(
@@ -64,20 +62,18 @@ class AIUsageBar extends ConsumerWidget {
                   ),
                 ],
               ),
-              SizedBox(height: AppSpacing.xs),
+              const SizedBox(height: AppSpacing.xs),
               ClipRRect(
                 borderRadius: BorderRadius.circular(AppRadius.xs),
                 child: LinearProgressIndicator(
                   value: percent,
                   minHeight: 3,
-                  backgroundColor:
-                      theme.colorScheme.surfaceContainerHighest,
-                  valueColor:
-                      AlwaysStoppedAnimation<Color>(color),
+                  backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                  valueColor: AlwaysStoppedAnimation<Color>(color),
                 ),
               ),
               if (used >= limit) ...[
-                SizedBox(height: AppSpacing.xs),
+                const SizedBox(height: AppSpacing.xs),
                 Text(
                   "Yarin 00:00'da yenilenir",
                   style: theme.textTheme.labelSmall?.copyWith(

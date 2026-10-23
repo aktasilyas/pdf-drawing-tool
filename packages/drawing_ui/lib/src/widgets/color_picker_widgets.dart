@@ -20,14 +20,17 @@ class HSVPickerBox extends StatefulWidget {
 }
 
 class _HSVPickerBoxState extends State<HSVPickerBox> {
-  void _handlePositionUpdate(Offset globalPosition, BoxConstraints constraints) {
+  void _handlePositionUpdate(
+      Offset globalPosition, BoxConstraints constraints) {
     final RenderBox? box = context.findRenderObject() as RenderBox?;
     if (box == null) return;
-    
+
     final localPosition = box.globalToLocal(globalPosition);
-    final saturation = (localPosition.dx / constraints.maxWidth).clamp(0.0, 1.0);
-    final value = 1.0 - (localPosition.dy / constraints.maxHeight).clamp(0.0, 1.0);
-    
+    final saturation =
+        (localPosition.dx / constraints.maxWidth).clamp(0.0, 1.0);
+    final value =
+        1.0 - (localPosition.dy / constraints.maxHeight).clamp(0.0, 1.0);
+
     widget.onColorChanged(
       widget.hsvColor.withSaturation(saturation).withValue(value),
     );
@@ -39,9 +42,12 @@ class _HSVPickerBoxState extends State<HSVPickerBox> {
       builder: (context, constraints) {
         return GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTapDown: (details) => _handlePositionUpdate(details.globalPosition, constraints),
-          onPanStart: (details) => _handlePositionUpdate(details.globalPosition, constraints),
-          onPanUpdate: (details) => _handlePositionUpdate(details.globalPosition, constraints),
+          onTapDown: (details) =>
+              _handlePositionUpdate(details.globalPosition, constraints),
+          onPanStart: (details) =>
+              _handlePositionUpdate(details.globalPosition, constraints),
+          onPanUpdate: (details) =>
+              _handlePositionUpdate(details.globalPosition, constraints),
           child: Container(
             width: 160,
             height: 160,
@@ -258,11 +264,13 @@ class CheckerboardPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     const squareSize = 8.0;
     final paint = Paint();
-    
+
     for (double y = 0; y < size.height; y += squareSize) {
       for (double x = 0; x < size.width; x += squareSize) {
-        final isEven = ((x / squareSize).floor() + (y / squareSize).floor()) % 2 == 0;
-        paint.color = isEven ? const Color(0xFFCCCCCC) : const Color(0xFFFFFFFF);
+        final isEven =
+            ((x / squareSize).floor() + (y / squareSize).floor()) % 2 == 0;
+        paint.color =
+            isEven ? const Color(0xFFCCCCCC) : const Color(0xFFFFFFFF);
         canvas.drawRect(
           Rect.fromLTWH(x, y, squareSize, squareSize),
           paint,
@@ -436,7 +444,8 @@ class _HexOpacityInputState extends State<HexOpacityInput> {
                       onSubmitted: (value) {
                         final opacity = (int.tryParse(value) ?? 100) / 100;
                         widget.onColorChanged(
-                          widget.color.withValues(alpha: opacity.clamp(0.0, 1.0)),
+                          widget.color
+                              .withValues(alpha: opacity.clamp(0.0, 1.0)),
                         );
                       },
                     ),
@@ -505,9 +514,8 @@ class RecentColorsRow extends StatelessWidget {
               color: color,
               shape: BoxShape.circle,
               border: Border.all(
-                color: isSelected
-                    ? const Color(0xFF4FC3F7)
-                    : Colors.transparent,
+                color:
+                    isSelected ? const Color(0xFF4FC3F7) : Colors.transparent,
                 width: 2,
               ),
             ),
