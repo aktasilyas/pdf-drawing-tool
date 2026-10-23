@@ -7,6 +7,7 @@ import 'dart:ui' as ui;
 
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/rendering/flutter_stroke_renderer.dart';
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter_test/flutter_test.dart';
 
 const _strokeCount = 1000;
@@ -98,8 +99,7 @@ void main() {
       active.add(_ms(sw));
     }
 
-    // ignore: avoid_print
-    print([
+    debugPrint([
       '── Ink benchmark ($_strokeCount strokes x $_pointsPerStroke pts) ──',
       _Stats(build).format('committed build '),
       _Stats(raster).format('committed raster'),
