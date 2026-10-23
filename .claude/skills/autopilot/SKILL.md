@@ -8,13 +8,24 @@ You run unattended. Nobody will answer questions during the run. Do at most
 ONE unit of work per run (one PR fixed or one issue shipped), then log and stop.
 
 GitHub: REST only via `gh api` (no GraphQL). `R=repos/aktasilyas/pdf-drawing-tool`.
+
+## Allowed operations (the session's permission policy blocks the rest)
+- Git: commit, `git merge origin/main`, plain `git push` of `claude/*` branches.
+- GitHub API: read anything; create PRs, issue/PR comments, labels.
+- Never: rebase or amend pushed commits, force-push, push to `main`, merge or
+  close PRs, delete branches, change repository settings.
+- If any action is denied: do not retry it or try another route. Note it in the
+  log and continue with the next step of this skill.
 Find the status issue: `gh api "$R/issues?labels=autopilot-status&state=open"`.
 
 ## 1. Tend open agent PRs first
 List open PRs whose head branch starts with `claude/`:
 `gh api "$R/pulls?state=open&per_page=50"`.
-For each, newest first:
-- **Behind or conflicting with main** → rebase on `origin/main`, re-verify, push. Done.
+For each, newest first (skip PRs already labeled `ready-to-merge` unless
+they got new commits, conflicts or owner comments since):
+- **Behind main**: not a problem; do nothing. GitHub merges it as is.
+- **Conflicts with main** (`gh api $R/pulls/<n>` → `mergeable` is false):
+  `git merge origin/main` into the branch, resolve, re-verify, normal `git push`. Done.
 - **Failing checks** (`gh api $R/commits/<head_sha>/check-runs`): compare with the
   same check names on main's HEAD. A check that also fails on main is pre-existing;
   ignore it. Otherwise fix the failure (use `systematic-debugging`), push. Done.
@@ -22,7 +33,8 @@ For each, newest first:
   `$R/issues/<n>/comments` newer than the last commit) → address them, push,
   reply on each thread. Done.
 - **Ready**: if every check is green or pre-existing-failing and the `reviewer`
-  subagent finds nothing blocking, add label `ready-to-merge` to the PR and list
+  subagent (already run when the PR was opened; re-run only after new commits)
+  found nothing blocking, add label `ready-to-merge` to the PR and list
   it in the log. Never merge, and never try another way to merge: merging is
   the owner's step (the session's permission policy blocks it).
 

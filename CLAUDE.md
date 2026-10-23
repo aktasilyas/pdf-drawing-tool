@@ -36,12 +36,14 @@ dart run build_runner build --delete-conflicting-outputs   # example_app codegen
 5. One branch + one PR per issue, branch `claude/<issue>-<slug>`.
    Commits: `type(scope): message`. Never push to `main` directly.
 6. GitHub access via `gh api` REST only (GraphQL is unavailable in cloud sessions).
+7. History is append-only: to update a branch use `git merge origin/main`, never
+   rebase/amend/force-push a pushed branch. Agents never merge PRs or push to main.
+   A denied action is reported, never retried another way.
 
 ## Autopilot
 The backlog is the GitHub issue list (milestones M0b…M5). Labels:
 `agent-ready` (agents may take it), `needs-owner` / `needs-decision` (agents must not),
 `in-progress`, `in-review`, `ready-to-merge` (verified; owner merges).
-Agents never merge PRs.
 A scheduled routine runs `/autopilot` (see that skill); its log is the
 "Autopilot status" issue. Never pick up an issue without `agent-ready`.
 
