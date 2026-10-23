@@ -11,12 +11,14 @@ void main() {
 
     test('should_have_sidebar_icons_with_active_variant', () {
       expect(ElyanotesIcons.sidebar, equals(PhosphorIconsLight.sidebar));
-      expect(ElyanotesIcons.sidebarActive, equals(PhosphorIconsRegular.sidebar));
+      expect(
+          ElyanotesIcons.sidebarActive, equals(PhosphorIconsRegular.sidebar));
     });
 
     test('should_have_reader_mode_icons_with_active_variant', () {
       expect(ElyanotesIcons.readerMode, equals(PhosphorIconsLight.bookOpen));
-      expect(ElyanotesIcons.readerModeActive, equals(PhosphorIconsRegular.bookOpen));
+      expect(ElyanotesIcons.readerModeActive,
+          equals(PhosphorIconsRegular.bookOpen));
     });
 
     test('should_have_correct_icon_sizes', () {
@@ -47,7 +49,8 @@ void main() {
 
     test('should_have_navigation_arrow_icons', () {
       expect(ElyanotesIcons.chevronLeft, equals(PhosphorIconsLight.caretLeft));
-      expect(ElyanotesIcons.chevronRight, equals(PhosphorIconsLight.caretRight));
+      expect(
+          ElyanotesIcons.chevronRight, equals(PhosphorIconsLight.caretRight));
     });
   });
 
@@ -92,7 +95,8 @@ void main() {
       expect(tapped, isTrue);
     });
 
-    testWidgets('should_show_active_state_with_background_color', (tester) async {
+    testWidgets('should_show_active_state_with_background_color',
+        (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(useMaterial3: true),
@@ -185,7 +189,8 @@ void main() {
       expect(container.read(readerModeProvider), isFalse);
     });
 
-    testWidgets('should_display_reader_badge_in_top_nav_when_active', (tester) async {
+    testWidgets('should_display_reader_badge_in_top_nav_when_active',
+        (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -206,7 +211,8 @@ void main() {
       expect(find.byType(Semantics), findsWidgets);
     });
 
-    testWidgets('should_not_display_reader_badge_when_inactive', (tester) async {
+    testWidgets('should_not_display_reader_badge_when_inactive',
+        (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
@@ -225,7 +231,8 @@ void main() {
   });
 
   group('Page Navigation', () {
-    testWidgets('should_display_page_counter_with_current_and_total', (tester) async {
+    testWidgets('should_display_page_counter_with_current_and_total',
+        (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -267,7 +274,8 @@ void main() {
       expect(icons.length, greaterThanOrEqualTo(2));
     });
 
-    testWidgets('should_hide_page_indicator_for_single_page_document', (tester) async {
+    testWidgets('should_hide_page_indicator_for_single_page_document',
+        (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -323,13 +331,15 @@ void main() {
 
       // Find the specific Semantics widget with the tool name label
       final semanticsWithLabel = find.byWidgetPredicate(
-        (widget) => widget is Semantics &&
-                    widget.properties.label == ToolType.highlighter.displayName,
+        (widget) =>
+            widget is Semantics &&
+            widget.properties.label == ToolType.highlighter.displayName,
       );
       expect(semanticsWithLabel, findsOneWidget);
     });
 
-    testWidgets('should_show_disabled_state_with_reduced_opacity', (tester) async {
+    testWidgets('should_show_disabled_state_with_reduced_opacity',
+        (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(useMaterial3: true),
@@ -344,8 +354,10 @@ void main() {
         ),
       );
 
+      // Disabled state uses the dedicated disabled token, not the normal one.
       final icon = tester.widget<PhosphorIcon>(find.byType(PhosphorIcon));
-      expect(icon.color?.a, lessThan(0.5));
+      expect(icon.color, DrawingTheme.defaultTheme.toolbarIconDisabledColor);
+      expect(icon.color, isNot(DrawingTheme.defaultTheme.toolbarIconColor));
     });
 
     testWidgets('should_show_primary_background_when_selected', (tester) async {
@@ -425,7 +437,8 @@ void main() {
       expect(find.byType(QuickThicknessChip), findsNWidgets(3));
     });
 
-    testWidgets('should_show_selected_chip_with_primary_border', (tester) async {
+    testWidgets('should_show_selected_chip_with_primary_border',
+        (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -468,7 +481,8 @@ void main() {
   });
 
   group('TopNavigationBar', () {
-    testWidgets('should_render_in_compact_mode_with_minimal_buttons', (tester) async {
+    testWidgets('should_render_in_compact_mode_with_minimal_buttons',
+        (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
@@ -484,10 +498,14 @@ void main() {
       );
 
       expect(find.byType(TopNavigationBar), findsOneWidget);
-      expect(find.text('Test Document'), findsOneWidget);
+      // Title is consolidated into the "More" menu in compact mode.
+      expect(find.text('Test Document'), findsNothing);
+      expect(find.byIcon(ElyanotesIcons.home), findsOneWidget);
+      expect(find.byIcon(ElyanotesIcons.more), findsOneWidget);
     });
 
-    testWidgets('should_render_reader_mode_badge_in_compact_mode_when_active', (tester) async {
+    testWidgets('should_render_reader_mode_badge_in_compact_mode_when_active',
+        (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -537,7 +555,8 @@ void main() {
       expect(navButtons.length, lessThanOrEqualTo(5));
     });
 
-    testWidgets('should_display_document_title_with_caret_icon', (tester) async {
+    testWidgets('should_display_document_title_with_caret_icon',
+        (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
@@ -556,13 +575,15 @@ void main() {
       // Find caret icon
       final caretIcons = tester.widgetList<PhosphorIcon>(
         find.byWidgetPredicate(
-          (widget) => widget is PhosphorIcon && widget.icon == ElyanotesIcons.caretDown,
+          (widget) =>
+              widget is PhosphorIcon && widget.icon == ElyanotesIcons.caretDown,
         ),
       );
       expect(caretIcons.length, greaterThanOrEqualTo(1));
     });
 
-    testWidgets('should_show_sidebar_button_only_for_multi_page_documents', (tester) async {
+    testWidgets('should_show_sidebar_button_only_for_multi_page_documents',
+        (tester) async {
       // Multi-page document should show sidebar button
       await tester.pumpWidget(
         ProviderScope(
@@ -583,9 +604,10 @@ void main() {
 
       // Find sidebar icon in multi-page document
       final sidebarIcon = find.byWidgetPredicate(
-        (widget) => widget is PhosphorIcon &&
-                    (widget.icon == PhosphorIconsLight.sidebar ||
-                     widget.icon == PhosphorIconsRegular.sidebar),
+        (widget) =>
+            widget is PhosphorIcon &&
+            (widget.icon == PhosphorIconsLight.sidebar ||
+                widget.icon == PhosphorIconsRegular.sidebar),
       );
       expect(sidebarIcon, findsOneWidget);
     });

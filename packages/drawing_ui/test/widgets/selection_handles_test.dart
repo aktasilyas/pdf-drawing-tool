@@ -33,7 +33,7 @@ void main() {
       expect(find.byType(SelectionHandles), findsOneWidget);
     });
 
-    testWidgets('has GestureDetector for interaction', (tester) async {
+    testWidgets('has Listener for interaction', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
@@ -46,7 +46,22 @@ void main() {
         ),
       );
 
-      expect(find.byType(GestureDetector), findsOneWidget);
+      // Raw Listener is used instead of GestureDetector to bypass the
+      // gesture arena (see SelectionHandles docs).
+      expect(
+        find.descendant(
+          of: find.byType(SelectionHandles),
+          matching: find.byType(Listener),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byType(SelectionHandles),
+          matching: find.byType(GestureDetector),
+        ),
+        findsNothing,
+      );
     });
 
     testWidgets('expands to fill available space', (tester) async {

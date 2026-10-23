@@ -6,7 +6,6 @@ import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/providers/selection_clipboard_provider.dart';
 import 'package:drawing_ui/src/providers/selection_actions_provider.dart';
 import 'package:drawing_ui/src/providers/document_provider.dart';
-import 'package:drawing_ui/src/providers/history_provider.dart';
 
 void main() {
   // ===========================================================================

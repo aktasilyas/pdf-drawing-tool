@@ -65,7 +65,7 @@ void main() {
       expect(find.byType(TemplateCard), findsNWidgets(testTemplates.length));
     });
 
-    testWidgets('uses 3 columns on phone width', (tester) async {
+    testWidgets('uses 4 columns on phone width', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -83,10 +83,10 @@ void main() {
       final gridView = tester.widget<GridView>(find.byType(GridView));
       final delegate = gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
       
-      expect(delegate.crossAxisCount, 3);
+      expect(delegate.crossAxisCount, 4);
     });
 
-    testWidgets('uses 5 columns on tablet width', (tester) async {
+    testWidgets('uses 6 columns on tablet width', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -104,7 +104,7 @@ void main() {
       final gridView = tester.widget<GridView>(find.byType(GridView));
       final delegate = gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
       
-      expect(delegate.crossAxisCount, 5);
+      expect(delegate.crossAxisCount, 6);
     });
 
     testWidgets('uses correct spacing for phone', (tester) async {
@@ -125,8 +125,8 @@ void main() {
       final gridView = tester.widget<GridView>(find.byType(GridView));
       final delegate = gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
       
-      expect(delegate.crossAxisSpacing, 12.0);
-      expect(delegate.mainAxisSpacing, 12.0);
+      expect(delegate.crossAxisSpacing, 8.0);
+      expect(delegate.mainAxisSpacing, 8.0);
     });
 
     testWidgets('uses correct spacing for tablet', (tester) async {
@@ -147,8 +147,8 @@ void main() {
       final gridView = tester.widget<GridView>(find.byType(GridView));
       final delegate = gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
       
-      expect(delegate.crossAxisSpacing, 16.0);
-      expect(delegate.mainAxisSpacing, 16.0);
+      expect(delegate.crossAxisSpacing, 8.0);
+      expect(delegate.mainAxisSpacing, 8.0);
     });
 
     testWidgets('calls onTemplateSelected when template tapped', (tester) async {
@@ -265,7 +265,7 @@ void main() {
       final gridView = tester.widget<GridView>(find.byType(GridView));
       final delegate = gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
       
-      expect(delegate.childAspectRatio, 0.72);
+      expect(delegate.childAspectRatio, 0.68);
     });
 
     testWidgets('has correct aspect ratio for tablet', (tester) async {
@@ -286,7 +286,7 @@ void main() {
       final gridView = tester.widget<GridView>(find.byType(GridView));
       final delegate = gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
       
-      expect(delegate.childAspectRatio, 0.75);
+      expect(delegate.childAspectRatio, 0.7);
     });
 
     testWidgets('uses LayoutBuilder for responsive design', (tester) async {
@@ -322,7 +322,7 @@ void main() {
 
       var gridView = tester.widget<GridView>(find.byType(GridView));
       var delegate = gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
-      expect(delegate.crossAxisCount, 3);
+      expect(delegate.crossAxisCount, 4);
 
       // Change to tablet width
       await tester.pumpWidget(
@@ -341,7 +341,7 @@ void main() {
 
       gridView = tester.widget<GridView>(find.byType(GridView));
       delegate = gridView.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
-      expect(delegate.crossAxisCount, 5);
+      expect(delegate.crossAxisCount, 6);
     });
 
     testWidgets('renders with many templates', (tester) async {

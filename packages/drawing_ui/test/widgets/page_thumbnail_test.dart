@@ -128,11 +128,10 @@ void main() {
 
       expect(container.decoration, isA<BoxDecoration>());
       final decoration = container.decoration as BoxDecoration;
-      expect(
-        decoration.border == null ||
-            decoration.border == Border.all(color: Colors.grey.shade300),
-        true,
-      );
+      // Unselected pages get a subtle 1px outline, not the 3px primary border.
+      final border = decoration.border! as Border;
+      expect(border.top.width, 1);
+      expect(border.top.color, isNot(Theme.of(tester.element(find.byType(PageThumbnail))).colorScheme.primary));
     });
 
     testWidgets('should trigger onTap callback', (tester) async {
