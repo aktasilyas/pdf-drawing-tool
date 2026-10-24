@@ -125,7 +125,7 @@ class _AppSearchFieldState extends State<AppSearchField> {
     final fillColor = palette.surface;
     final textColor = palette.textPrimary;
     final hintColor = palette.textMuted;
-    final iconColor = _isFocused ? palette.accent : (palette.textMuted);
+    final iconColor = _isFocused ? palette.accent : palette.textMuted;
 
     return ConstrainedBox(
       constraints: const BoxConstraints(minHeight: 48),

@@ -197,8 +197,9 @@ class AppButton extends StatelessWidget {
   Color _getLoadingColor(AppPalette palette) {
     switch (variant) {
       case AppButtonVariant.primary:
+        return palette.onAccent;
       case AppButtonVariant.destructive:
-        return palette.surfaceElevated;
+        return palette.onDanger;
       case AppButtonVariant.secondary:
       case AppButtonVariant.outline:
       case AppButtonVariant.text:
@@ -236,7 +237,7 @@ class AppButton extends StatelessWidget {
   ButtonStyle _primaryStyle(_ButtonSpecs specs, AppPalette palette) =>
       ElevatedButton.styleFrom(
         backgroundColor: palette.accent,
-        foregroundColor: palette.surfaceElevated,
+        foregroundColor: palette.onAccent,
         elevation: 0,
         shadowColor: palette.accent.withValues(alpha: 0.3),
         padding: EdgeInsets.symmetric(horizontal: specs.horizontalPadding),
@@ -315,7 +316,7 @@ class AppButton extends StatelessWidget {
   ButtonStyle _destructiveStyle(_ButtonSpecs specs, AppPalette palette) =>
       ElevatedButton.styleFrom(
         backgroundColor: palette.danger,
-        foregroundColor: palette.surfaceElevated,
+        foregroundColor: palette.onDanger,
         elevation: 0,
         shadowColor: palette.danger.withValues(alpha: 0.3),
         padding: EdgeInsets.symmetric(horizontal: specs.horizontalPadding),

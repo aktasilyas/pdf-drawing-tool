@@ -111,7 +111,7 @@ class _AppPasswordFieldState extends State<AppPasswordField> {
     final textColor = palette.textPrimary;
     final hintColor = palette.textMuted;
     final labelColor = palette.textMuted;
-    final iconColor = _isFocused ? palette.accent : (palette.textMuted);
+    final iconColor = _isFocused ? palette.accent : palette.textMuted;
 
     return Opacity(
       opacity: widget.enabled ? 1.0 : 0.5,

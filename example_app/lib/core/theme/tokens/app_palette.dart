@@ -18,6 +18,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
     required this.accent,
     required this.accentContainer,
     required this.danger,
+    required this.onAccent,
+    required this.onDanger,
     required this.paper,
   });
 
@@ -38,6 +40,12 @@ class AppPalette extends ThemeExtension<AppPalette> {
   final Color accentContainer;
   final Color danger;
 
+  /// Foreground on filled [accent] surfaces.
+  final Color onAccent;
+
+  /// Foreground on filled [danger] surfaces.
+  final Color onDanger;
+
   /// Default page color; stays light in dark mode.
   final Color paper;
 
@@ -51,6 +59,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
     accent: Color(0xFF2B4C7E),
     accentContainer: Color(0xFFDCE5F2),
     danger: Color(0xFFB3261E),
+    onAccent: Color(0xFFFFFFFF),
+    onDanger: Color(0xFFFFFFFF),
     paper: Color(0xFFFFFDF8),
   );
 
@@ -64,6 +74,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
     accent: Color(0xFF8FAEDB),
     accentContainer: Color(0xFF263548),
     danger: Color(0xFFF2B8B5),
+    onAccent: Color(0xFF14233A),
+    onDanger: Color(0xFF601410),
     paper: Color(0xFFF3EFE6),
   );
 
@@ -78,6 +90,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
     Color? accent,
     Color? accentContainer,
     Color? danger,
+    Color? onAccent,
+    Color? onDanger,
     Color? paper,
   }) {
     return AppPalette(
@@ -90,6 +104,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
       accent: accent ?? this.accent,
       accentContainer: accentContainer ?? this.accentContainer,
       danger: danger ?? this.danger,
+      onAccent: onAccent ?? this.onAccent,
+      onDanger: onDanger ?? this.onDanger,
       paper: paper ?? this.paper,
     );
   }
@@ -107,6 +123,8 @@ class AppPalette extends ThemeExtension<AppPalette> {
       accent: Color.lerp(accent, other.accent, t)!,
       accentContainer: Color.lerp(accentContainer, other.accentContainer, t)!,
       danger: Color.lerp(danger, other.danger, t)!,
+      onAccent: Color.lerp(onAccent, other.onAccent, t)!,
+      onDanger: Color.lerp(onDanger, other.onDanger, t)!,
       paper: Color.lerp(paper, other.paper, t)!,
     );
   }

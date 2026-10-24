@@ -59,8 +59,7 @@ class AppChip extends StatelessWidget {
     final palette = context.palette;
     final effectiveColor = color ?? palette.accent;
     final unselectedBg = palette.surface;
-    final contentColor =
-        isSelected ? palette.surfaceElevated : palette.textPrimary;
+    final contentColor = isSelected ? palette.onAccent : palette.textPrimary;
 
     return Material(
       color: isSelected ? effectiveColor : unselectedBg,

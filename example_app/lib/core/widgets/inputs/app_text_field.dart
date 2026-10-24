@@ -140,7 +140,7 @@ class _AppTextFieldState extends State<AppTextField> {
     final hintColor = palette.textMuted;
     final labelColor = palette.textMuted;
     final disabledTextColor = palette.textMuted;
-    final iconColor = _isFocused ? palette.accent : (palette.textMuted);
+    final iconColor = _isFocused ? palette.accent : palette.textMuted;
 
     return Opacity(
       opacity: widget.enabled ? 1.0 : 0.5,
