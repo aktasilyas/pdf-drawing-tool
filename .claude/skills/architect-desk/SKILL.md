@@ -44,6 +44,9 @@ Open PRs labeled `ready-to-merge` from `claude/*` branches. For each:
   Reference check and the result follows the convention of GoodNotes, StarNote
   and Flexcil, or states why it deviates. Missing → request changes.
 - Approve: add label `architect-approved` (a workflow then merges it).
+  Exception: if the PR changes anything under `.github/workflows/`, GitHub does
+  not let the merge workflow merge it. Add `needs-owner-review` instead and log
+  `⚠️ Sahibin kararı gerekiyor: PR #<n> onaylandı, workflow dosyası içerdiği için elle merge edilmeli.`
 - Request changes: comment the concrete fixes on the PR, remove `ready-to-merge`;
   autopilot picks the comments up next run.
 - Owner-only (see list): add `needs-owner-review` instead and explain in one
