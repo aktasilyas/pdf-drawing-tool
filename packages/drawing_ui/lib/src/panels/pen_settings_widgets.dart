@@ -75,9 +75,7 @@ class StrokePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(StrokePainter o) =>
-      color != o.color ||
-      thickness != o.thickness ||
-      toolType != o.toolType;
+      color != o.color || thickness != o.thickness || toolType != o.toolType;
 }
 
 /// GoodNotes-style horizontal pen type selector.

@@ -96,6 +96,5 @@ class _NotebookLinesPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_NotebookLinesPainter o) =>
-      lineColor != o.lineColor;
+  bool shouldRepaint(_NotebookLinesPainter o) => lineColor != o.lineColor;
 }

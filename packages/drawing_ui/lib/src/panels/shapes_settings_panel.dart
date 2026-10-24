@@ -149,9 +149,7 @@ class _ShapeOption extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: isSelected
-              ? cs.primaryContainer
-              : cs.controlSurface,
+          color: isSelected ? cs.primaryContainer : cs.controlSurface,
           borderRadius: BorderRadius.circular(4),
           border: Border.all(
             color: isSelected ? cs.primary : cs.outline.withValues(alpha: 0.3),

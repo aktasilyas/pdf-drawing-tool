@@ -179,9 +179,7 @@ class _CompactToolItem extends StatelessWidget {
       height: 34,
       margin: const EdgeInsets.symmetric(vertical: 1, horizontal: 6),
       decoration: BoxDecoration(
-        color: isVisible
-            ? cs.surface
-            : cs.mutedControlSurface,
+        color: isVisible ? cs.surface : cs.mutedControlSurface,
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
           color: isVisible

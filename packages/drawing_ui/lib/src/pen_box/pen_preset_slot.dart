@@ -56,8 +56,10 @@ class PenPresetSlot extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: isSelected
-                ? colorScheme.primary.withValues(alpha: colorScheme.slotSelectedAlpha)
-                : colorScheme.outline.withValues(alpha: colorScheme.slotIdleAlpha),
+                ? colorScheme.primary
+                    .withValues(alpha: colorScheme.slotSelectedAlpha)
+                : colorScheme.outline
+                    .withValues(alpha: colorScheme.slotIdleAlpha),
             width: isSelected ? 1.5 : 1,
           ),
           boxShadow: isSelected
