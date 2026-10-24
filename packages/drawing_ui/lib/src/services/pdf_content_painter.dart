@@ -1,9 +1,10 @@
 import 'dart:io';
-import 'dart:math' as math;
 
 import 'package:drawing_core/drawing_core.dart';
 import 'package:pdf/pdf.dart';
 import 'package:vector_math/vector_math_64.dart';
+
+import 'package:drawing_ui/src/rendering/variable_width_renderer.dart';
 
 import 'pdf_vector_shapes.dart';
 import 'vector_pdf_renderer.dart';
@@ -100,8 +101,9 @@ class PdfContentPainter {
     if (stroke.points.length < 2) return;
     final style = stroke.style;
 
-    if (style.pressureSensitive) {
-      _paintPressureStroke(g, stroke, w, h);
+    // Same routing predicate as the on-screen renderers.
+    if (VariableWidthStrokeRenderer.usesOutline(style)) {
+      _paintOutlineStroke(g, stroke, w, h);
       return;
     }
 
@@ -112,8 +114,11 @@ class PdfContentPainter {
 
     final pdfColor = _vectorHelper.convertColor(style.color);
     final alpha = style.opacity * _vectorHelper.extractAlpha(style.color);
-    if (alpha < 1.0) {
-      g.setGraphicState(PdfGraphicState(strokeOpacity: alpha));
+    final blend = _pdfBlendMode(style.blendMode);
+    if (alpha < 1.0 || blend != null) {
+      g.setGraphicState(
+        PdfGraphicState(strokeOpacity: alpha, blendMode: blend),
+      );
     }
     g.setStrokeColor(pdfColor);
     g.setLineWidth(style.thickness);
@@ -136,66 +141,41 @@ class PdfContentPainter {
     g.restoreContext();
   }
 
-  void _paintPressureStroke(PdfGraphics g, Stroke stroke, double w, double h) {
+  /// Fills the same [StrokeOutline] polygon the screen renderers draw.
+  void _paintOutlineStroke(PdfGraphics g, Stroke stroke, double w, double h) {
     final style = stroke.style;
-    final points = stroke.points;
-    if (points.length < 2) return;
+    final outline = StrokeOutline.build(
+      stroke.points,
+      VariableWidthStrokeRenderer.optionsFor(style),
+    );
+    if (outline.length < 3) return;
 
     g.saveContext();
-    final pdfColor = _vectorHelper.convertColor(style.color);
     final alpha = style.opacity * _vectorHelper.extractAlpha(style.color);
-    if (alpha < 1.0) {
-      g.setGraphicState(PdfGraphicState(fillOpacity: alpha));
+    final blend = _pdfBlendMode(style.blendMode);
+    if (alpha < 1.0 || blend != null) {
+      g.setGraphicState(PdfGraphicState(fillOpacity: alpha, blendMode: blend));
     }
-    g.setFillColor(pdfColor);
+    g.setFillColor(_vectorHelper.convertColor(style.color));
 
-    final baseWidth = style.thickness;
-    final sensitivity = style.pressureSensitivity;
-    final leftEdge = <({double x, double y})>[];
-    final rightEdge = <({double x, double y})>[];
-
-    for (int i = 0; i < points.length; i++) {
-      final p = points[i];
-      final width = baseWidth * (1.0 - sensitivity + sensitivity * p.pressure);
-      final halfW = width / 2;
-
-      double dx, dy;
-      if (i == 0) {
-        dx = points[1].x - p.x;
-        dy = points[1].y - p.y;
-      } else if (i == points.length - 1) {
-        dx = p.x - points[i - 1].x;
-        dy = p.y - points[i - 1].y;
-      } else {
-        dx = points[i + 1].x - points[i - 1].x;
-        dy = points[i + 1].y - points[i - 1].y;
-      }
-
-      final len = math.sqrt(dx * dx + dy * dy);
-      if (len < 0.001) continue;
-      final nx = -dy / len;
-      final ny = dx / len;
-
-      leftEdge.add((x: p.x + nx * halfW, y: _flipY(p.y + ny * halfW, h)));
-      rightEdge.add((x: p.x - nx * halfW, y: _flipY(p.y - ny * halfW, h)));
-    }
-
-    if (leftEdge.length < 2) {
-      g.restoreContext();
-      return;
-    }
-
-    g.moveTo(leftEdge.first.x, leftEdge.first.y);
-    for (int i = 1; i < leftEdge.length; i++) {
-      g.lineTo(leftEdge[i].x, leftEdge[i].y);
-    }
-    for (int i = rightEdge.length - 1; i >= 0; i--) {
-      g.lineTo(rightEdge[i].x, rightEdge[i].y);
+    g.moveTo(outline.first.x, _flipY(outline.first.y, h));
+    for (var i = 1; i < outline.length; i++) {
+      g.lineTo(outline[i].x, _flipY(outline[i].y, h));
     }
     g.closePath();
     g.fillPath();
     g.restoreContext();
   }
+
+  /// PDF blend mode for [mode]; null for normal (no graphic state needed).
+  PdfBlendMode? _pdfBlendMode(DrawingBlendMode mode) => switch (mode) {
+        DrawingBlendMode.normal => null,
+        DrawingBlendMode.multiply => PdfBlendMode.multiply,
+        DrawingBlendMode.screen => PdfBlendMode.screen,
+        DrawingBlendMode.overlay => PdfBlendMode.overlay,
+        DrawingBlendMode.darken => PdfBlendMode.darken,
+        DrawingBlendMode.lighten => PdfBlendMode.lighten,
+      };
 
   void _buildStrokePath(PdfGraphics g, List<DrawingPoint> points, double h) {
     g.moveTo(points.first.x, _flipY(points.first.y, h));
