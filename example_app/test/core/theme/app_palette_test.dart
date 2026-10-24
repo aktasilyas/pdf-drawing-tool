@@ -103,6 +103,15 @@ void main() {
       expect(AppPalette.dark.paper, const Color(0xFFF3EFE6));
     });
 
+    test('on-accent and on-danger roles', () {
+      expect(AppPalette.light.onAccent, const Color(0xFFFFFFFF));
+      expect(AppPalette.dark.onAccent, const Color(0xFF14233A));
+      expect(AppPalette.dark.onDanger, const Color(0xFF601410));
+      final mid = AppPalette.light.lerp(AppPalette.dark, 1);
+      expect(mid.onAccent, AppPalette.dark.onAccent);
+      expect(mid.onDanger, AppPalette.dark.onDanger);
+    });
+
     test('lerp endpoints', () {
       expect(AppPalette.light.lerp(AppPalette.dark, 1).surface,
           AppPalette.dark.surface);

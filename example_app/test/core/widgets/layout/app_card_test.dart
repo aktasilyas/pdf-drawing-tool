@@ -40,7 +40,7 @@ void main() {
           // Assert
           final container = tester.widget<Container>(find.byType(Container));
           final decoration = container.decoration as BoxDecoration;
-          expect(decoration.color, equals(AppColors.surfaceLight));
+          expect(decoration.color, equals(AppPalette.light.surfaceElevated));
         });
 
         testWidgets('should_have_shadow_when_not_selected', (tester) async {
@@ -77,7 +77,7 @@ void main() {
           final decoration = container.decoration as BoxDecoration;
           expect(decoration.border, isNotNull);
           expect((decoration.border as Border).top.color,
-              equals(AppColors.primary));
+              equals(AppPalette.light.accent));
           expect((decoration.border as Border).top.width, equals(2));
           expect(decoration.boxShadow, isNull);
         });
@@ -97,7 +97,7 @@ void main() {
           // Assert
           final container = tester.widget<Container>(find.byType(Container));
           final decoration = container.decoration as BoxDecoration;
-          expect(decoration.color, equals(AppColors.surfaceDark));
+          expect(decoration.color, equals(AppPalette.dark.surfaceElevated));
         });
 
         testWidgets('should_have_shadow_when_not_selected', (tester) async {
@@ -134,7 +134,7 @@ void main() {
           final decoration = container.decoration as BoxDecoration;
           expect(decoration.border, isNotNull);
           expect((decoration.border as Border).top.color,
-              equals(AppColors.primary));
+              equals(AppPalette.dark.accent));
           expect((decoration.border as Border).top.width, equals(2));
           expect(decoration.boxShadow, isNull);
         });
@@ -156,7 +156,7 @@ void main() {
           // Assert
           final container = tester.widget<Container>(find.byType(Container));
           final decoration = container.decoration as BoxDecoration;
-          expect(decoration.color, equals(AppColors.surfaceVariantLight));
+          expect(decoration.color, equals(AppPalette.light.surface));
         });
 
         testWidgets('should_not_have_border_when_not_selected', (tester) async {
@@ -192,7 +192,7 @@ void main() {
           final decoration = container.decoration as BoxDecoration;
           expect(decoration.border, isNotNull);
           expect((decoration.border as Border).top.color,
-              equals(AppColors.primary));
+              equals(AppPalette.light.accent));
           expect((decoration.border as Border).top.width, equals(2));
         });
       });
@@ -211,7 +211,7 @@ void main() {
           // Assert
           final container = tester.widget<Container>(find.byType(Container));
           final decoration = container.decoration as BoxDecoration;
-          expect(decoration.color, equals(AppColors.surfaceVariantDark));
+          expect(decoration.color, equals(AppPalette.dark.surface));
         });
 
         testWidgets('should_not_have_border_when_not_selected', (tester) async {
@@ -247,7 +247,7 @@ void main() {
           final decoration = container.decoration as BoxDecoration;
           expect(decoration.border, isNotNull);
           expect((decoration.border as Border).top.color,
-              equals(AppColors.primary));
+              equals(AppPalette.dark.accent));
           expect((decoration.border as Border).top.width, equals(2));
         });
       });
@@ -268,7 +268,7 @@ void main() {
           // Assert
           final container = tester.widget<Container>(find.byType(Container));
           final decoration = container.decoration as BoxDecoration;
-          expect(decoration.color, equals(AppColors.surfaceLight));
+          expect(decoration.color, equals(AppPalette.light.surfaceElevated));
         });
 
         testWidgets('should_use_outlineLight_border_when_not_selected',
@@ -288,7 +288,7 @@ void main() {
           final decoration = container.decoration as BoxDecoration;
           expect(decoration.border, isNotNull);
           expect((decoration.border as Border).top.color,
-              equals(AppColors.outlineLight));
+              equals(AppPalette.light.border));
           expect((decoration.border as Border).top.width, equals(1));
         });
 
@@ -308,7 +308,7 @@ void main() {
           final decoration = container.decoration as BoxDecoration;
           expect(decoration.border, isNotNull);
           expect((decoration.border as Border).top.color,
-              equals(AppColors.primary));
+              equals(AppPalette.light.accent));
           expect((decoration.border as Border).top.width, equals(2));
         });
       });
@@ -327,7 +327,7 @@ void main() {
           // Assert
           final container = tester.widget<Container>(find.byType(Container));
           final decoration = container.decoration as BoxDecoration;
-          expect(decoration.color, equals(AppColors.surfaceDark));
+          expect(decoration.color, equals(AppPalette.dark.surfaceElevated));
         });
 
         testWidgets('should_use_outlineDark_border_when_not_selected',
@@ -347,7 +347,7 @@ void main() {
           final decoration = container.decoration as BoxDecoration;
           expect(decoration.border, isNotNull);
           expect((decoration.border as Border).top.color,
-              equals(AppColors.outlineDark));
+              equals(AppPalette.dark.border));
           expect((decoration.border as Border).top.width, equals(1));
         });
 
@@ -367,7 +367,7 @@ void main() {
           final decoration = container.decoration as BoxDecoration;
           expect(decoration.border, isNotNull);
           expect((decoration.border as Border).top.color,
-              equals(AppColors.primary));
+              equals(AppPalette.dark.accent));
           expect((decoration.border as Border).top.width, equals(2));
         });
       });

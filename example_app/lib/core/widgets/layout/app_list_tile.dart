@@ -65,17 +65,11 @@ class AppListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    // Theme-aware colors
-    final textPrimary =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
-    final textSecondary =
-        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
-    final hoverColor =
-        isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariantLight;
-    final dividerColor =
-        isDark ? AppColors.outlineDark : AppColors.outlineLight;
+    final palette = context.palette;
+    final textPrimary = palette.textPrimary;
+    final textSecondary = palette.textMuted;
+    final hoverColor = palette.surface;
+    final dividerColor = palette.border;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -154,7 +148,7 @@ class AppListTile extends StatelessWidget {
                 child: Container(
                   width: 3,
                   decoration: BoxDecoration(
-                    color: AppColors.primary,
+                    color: palette.accent,
                     borderRadius: BorderRadius.circular(1.5),
                   ),
                 ),

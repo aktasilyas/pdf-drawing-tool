@@ -63,10 +63,11 @@ class AppCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final effectivePadding = padding ?? const EdgeInsets.all(AppSpacing.lg);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final palette = context.palette;
+    final brightness = Theme.of(context).brightness;
 
     return Container(
-      decoration: _buildDecoration(isDark),
+      decoration: _buildDecoration(palette, brightness),
       child: Material(
         color: Colors.transparent,
         borderRadius: BorderRadius.circular(AppRadius.card),
@@ -83,41 +84,31 @@ class AppCard extends StatelessWidget {
     );
   }
 
-  BoxDecoration _buildDecoration(bool isDark) {
+  BoxDecoration _buildDecoration(AppPalette palette, Brightness brightness) {
     switch (variant) {
       case AppCardVariant.elevated:
         return BoxDecoration(
-          color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+          color: palette.surfaceElevated,
           borderRadius: BorderRadius.circular(AppRadius.card),
-          border: isSelected
-              ? Border.all(color: AppColors.primary, width: 2)
-              : null,
-          boxShadow: isSelected
-              ? null
-              : AppShadows.cardResting(
-                  isDark ? Brightness.dark : Brightness.light,
-                ),
+          border:
+              isSelected ? Border.all(color: palette.accent, width: 2) : null,
+          boxShadow: isSelected ? null : AppShadows.cardResting(brightness),
         );
 
       case AppCardVariant.filled:
         return BoxDecoration(
-          color: isDark
-              ? AppColors.surfaceVariantDark
-              : AppColors.surfaceVariantLight,
+          color: palette.surface,
           borderRadius: BorderRadius.circular(AppRadius.card),
-          border: isSelected
-              ? Border.all(color: AppColors.primary, width: 2)
-              : null,
+          border:
+              isSelected ? Border.all(color: palette.accent, width: 2) : null,
         );
 
       case AppCardVariant.outlined:
         return BoxDecoration(
-          color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+          color: palette.surfaceElevated,
           borderRadius: BorderRadius.circular(AppRadius.card),
           border: Border.all(
-            color: isSelected
-                ? AppColors.primary
-                : (isDark ? AppColors.outlineDark : AppColors.outlineLight),
+            color: isSelected ? palette.accent : palette.border,
             width: isSelected ? 2 : 1,
           ),
         );

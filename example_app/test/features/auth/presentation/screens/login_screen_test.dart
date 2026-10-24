@@ -1,3 +1,4 @@
+import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/routing/route_names.dart';
 import 'package:example_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:example_app/features/auth/presentation/screens/login_screen.dart';
@@ -47,6 +48,7 @@ void main() {
         authControllerProvider.overrideWith((ref) => fakeAuthController),
       ],
       child: MaterialApp.router(
+        theme: AppTheme.light,
         routerConfig: router,
       ),
     );

@@ -1,3 +1,4 @@
+import 'package:example_app/core/theme/index.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -71,8 +72,9 @@ void main() {
   group('DocumentsEmptySearchResult', () {
     testWidgets('should_render_without_error', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
+        ProviderScope(
           child: MaterialApp(
+            theme: AppTheme.light,
             home: Scaffold(
               body: DocumentsEmptySearchResult(query: 'test'),
             ),
