@@ -16,6 +16,7 @@ Widget buildActivePanel({
   }
 
   switch (panel) {
+    case ToolType.fountainPen:
     case ToolType.pencil:
     case ToolType.hardPencil:
     case ToolType.ballpointPen:

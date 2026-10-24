@@ -2,6 +2,7 @@ import 'package:drawing_ui/src/models/models.dart';
 
 /// Pen tool types (grouped as one button in toolbar).
 const List<ToolType> penTools = [
+  ToolType.fountainPen,
   ToolType.pencil,
   ToolType.hardPencil,
   ToolType.ballpointPen,
@@ -26,6 +27,7 @@ const List<ToolType> eraserTools = [
 
 /// Tools that have a settings panel.
 const Set<ToolType> toolsWithPanel = {
+  ToolType.fountainPen,
   ToolType.pencil,
   ToolType.hardPencil,
   ToolType.ballpointPen,
@@ -48,6 +50,7 @@ const Set<ToolType> toolsWithPanel = {
 
 /// Pen tools as a Set (for anchor resolution in panels).
 const Set<ToolType> penToolsSet = {
+  ToolType.fountainPen,
   ToolType.pencil,
   ToolType.hardPencil,
   ToolType.ballpointPen,
