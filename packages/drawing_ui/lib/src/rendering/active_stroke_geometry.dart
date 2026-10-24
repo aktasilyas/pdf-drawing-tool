@@ -8,7 +8,7 @@ import 'variable_width_renderer.dart';
 
 /// How [ActiveStrokeGeometry] renders the live stroke.
 enum ActiveStrokeMode {
-  /// Pressure-sensitive pens: frozen outline chunks plus a recomputed tail.
+  /// Outline pens (pressure or tapered): frozen outline chunks plus a recomputed tail.
   outline,
 
   /// Solid stroked pens: quadratic segments appended one by one.
@@ -68,13 +68,13 @@ class ActiveStrokeGeometry {
         style.pattern != StrokePattern.solid && style.dashPattern != null;
     if (!incremental || dashed) {
       _mode = ActiveStrokeMode.fallback;
-    } else if (style.pressureSensitive) {
+    } else if (style.texture == StrokeTexture.pencil) {
+      _mode = ActiveStrokeMode.fallback;
+    } else if (VariableWidthStrokeRenderer.usesOutline(style)) {
       _mode = ActiveStrokeMode.outline;
       (_outline ??= IncrementalStrokeOutline(
               VariableWidthStrokeRenderer.optionsFor(style)))
           .reset(VariableWidthStrokeRenderer.optionsFor(style));
-    } else if (style.texture == StrokeTexture.pencil) {
-      _mode = ActiveStrokeMode.fallback;
     } else {
       _mode = ActiveStrokeMode.stroked;
     }
