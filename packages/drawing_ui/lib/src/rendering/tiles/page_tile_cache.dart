@@ -1,33 +1,27 @@
 import 'dart:ui' as ui;
 
-import 'package:drawing_core/drawing_core.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:drawing_ui/src/canvas/image_painter.dart';
-import 'package:drawing_ui/src/rendering/element_scene_renderer.dart';
 import 'package:drawing_ui/src/rendering/flutter_stroke_renderer.dart';
+import 'package:drawing_ui/src/rendering/tiles/cached_tile.dart';
 import 'package:drawing_ui/src/rendering/tiles/element_scene.dart';
 import 'package:drawing_ui/src/rendering/tiles/scene_diff.dart';
+import 'package:drawing_ui/src/rendering/tiles/scene_renderer_factory.dart';
 import 'package:drawing_ui/src/rendering/tiles/tile_grid.dart';
 import 'package:drawing_ui/src/rendering/tiles/tile_rasterizer.dart';
-
-/// A rasterized tile: [image] covers [rect] in page space.
-class CachedTile {
-  CachedTile(this.key, this.rect, this.image)
-      : bytes = image.width * image.height * 4;
-
-  final TileKey key;
-  final ui.Rect rect;
-  final ui.Image image;
-  final int bytes;
-  int _lastUsed = 0;
-}
+import 'package:drawing_ui/src/rendering/tiles/tile_store.dart';
 
 /// Raster cache of the committed content of one (page, layer).
 ///
 /// Owns every [ui.Image] it holds and disposes them on eviction, replacement
 /// and [dispose]. Only visible tiles are kept fresh; dirty off-screen tiles
 /// are dropped and rebuilt when they scroll into view.
+///
+/// When the raster scale changes while tiles exist, the old tiles are kept as
+/// [legacyTiles] and the visible tiles at the new scale become pending. A
+/// `TileRasterScheduler` fills them progressively via [rasterizeNextPending];
+/// the painter draws the legacy images (or vectors) in the meantime.
 class PageTileCache extends ChangeNotifier {
   PageTileCache({
     required FlutterStrokeRenderer strokeRenderer,
@@ -43,10 +37,14 @@ class PageTileCache extends ChangeNotifier {
   final TileRasterizer _rasterizer;
   final int budgetBytes;
 
-  final Map<TileKey, CachedTile> _tiles = {};
+  final TileStore _store = TileStore();
 
-  /// Visible tiles that were rasterized but hold no content.
-  final Set<TileKey> _empty = {};
+  /// Visible tiles with content that wait for the scheduler.
+  final List<TileKey> _pending = [];
+  List<ui.Rect> _pendingRects = const [];
+
+  /// Tiles of the previous scale, drawn until the new ones are ready.
+  List<CachedTile> _legacy = const [];
   ElementScene? _scene;
   TileGrid? _grid;
   ui.Rect _viewport = ui.Rect.zero;
@@ -59,6 +57,17 @@ class PageTileCache extends ChangeNotifier {
 
   /// Tiles with content that intersect the viewport. Painters iterate only.
   Iterable<CachedTile> get visibleTiles => _visible;
+
+  /// Old-scale tiles still shown while [hasPending].
+  List<CachedTile> get legacyTiles => _legacy;
+
+  /// Page rects of visible tiles that are not rasterized yet.
+  List<ui.Rect> get pendingRects => _pendingRects;
+
+  /// Whether visible tiles at the current scale still wait to be rasterized.
+  bool get hasPending => _pending.isNotEmpty;
+
+  int get pendingCount => _pending.length;
 
   /// Total tile rasterizations since creation.
   @visibleForTesting
@@ -73,21 +82,42 @@ class PageTileCache extends ChangeNotifier {
   @visibleForTesting
   List<TileKey> get debugRasterizedKeys => _lastKeys;
 
+  @visibleForTesting
+  List<TileKey> get debugPendingKeys => List.of(_pending);
+
+  @visibleForTesting
+  void debugDropLegacy() => _releaseLegacy();
+
   /// Bytes held by cached tile images.
-  int get cachedBytes => _tiles.values.fold(0, (sum, t) => sum + t.bytes);
+  int get cachedBytes => _store.bytes;
+
+  /// Paints [rect] of the current scene as vectors (cold-tile fallback).
+  void paintVectorRegion(ui.Canvas canvas, ui.Rect rect) {
+    final scene = _scene;
+    if (scene == null) return;
+    buildSceneRenderer(scene, _strokeRenderer, _cacheManager)
+        .paintRegion(canvas, rect);
+  }
 
   /// Sets the visible page rect and the raster scale (zoom * pixel ratio).
-  /// Tiles are rebuilt at a new scale; while [interacting] nothing is
-  /// rasterized.
+  ///
+  /// While [interacting] nothing is rasterized and existing tiles keep being
+  /// drawn scaled. On settle at a new scale (beyond a small epsilon) the old
+  /// tiles become [legacyTiles] and the new visible tiles become pending; if
+  /// there is nothing to fall back to they are rasterized right away.
   void setViewport(
     ui.Rect visiblePageRect,
     double targetScale, {
     required bool interacting,
   }) {
     _viewport = visiblePageRect;
-    if (interacting) return;
-    if (_grid?.scale != targetScale) {
-      _clearTiles();
+    if (interacting) {
+      _finish();
+      return;
+    }
+    final grid = _grid;
+    if (grid == null || !grid.hasScale(targetScale)) {
+      _retireTiles();
       _grid = TileGrid(
         scale: targetScale,
         tilePixels: _rasterizer.tilePixels,
@@ -112,51 +142,61 @@ class PageTileCache extends ChangeNotifier {
     _lastKeys = [];
 
     if (diff.full) {
-      _clearTiles();
+      _store.clear();
     } else if (diff.appendedOnTop.isNotEmpty) {
       _composite(scene, grid, diff.appendedOnTop);
     } else {
       for (final rect in diff.dirty) {
         for (final key in grid.keysIn(rect)) {
-          _drop(key);
+          _store.drop(key);
         }
       }
     }
+    // Legacy images show the old scene: never keep them past a change.
+    _releaseLegacy();
     _ensureVisible();
     _finish();
   }
 
+  /// Rasterizes the pending tile nearest to the viewport centre.
+  /// Returns false when nothing is pending.
+  bool rasterizeNextPending() {
+    final grid = _grid;
+    final scene = _scene;
+    if (_pending.isEmpty || grid == null || scene == null) return false;
+    final centre = _viewport.center;
+    var best = _pending.first;
+    var bestDist = double.infinity;
+    for (final k in _pending) {
+      final d = (grid.rectOf(k).center - centre).distanceSquared;
+      if (d < bestDist) {
+        best = k;
+        bestDist = d;
+      }
+    }
+    _pending.remove(best);
+    _lastRecorded = 0;
+    _lastKeys = [];
+    _rasterizeTile(grid, scene, best);
+    if (_pending.isEmpty) _releaseLegacy();
+    _finish();
+    return true;
+  }
+
   void _composite(ElementScene scene, TileGrid grid, List<String> ids) {
     final appended = [for (final id in ids) scene.byId[id]!];
-    final sub = _renderer(
-      ElementScene(
-        strokes: [
-          for (final e in appended)
-            if (e.element is Stroke) e.element as Stroke,
-        ],
-        shapes: [
-          for (final e in appended)
-            if (e.element is Shape) e.element as Shape,
-        ],
-        images: [
-          for (final e in appended)
-            if (e.element is ImageElement) e.element as ImageElement,
-        ],
-        texts: [
-          for (final e in appended)
-            if (e.element is TextElement) e.element as TextElement,
-        ],
-        elementOrder: ids,
-        pixelEraserPreview: scene.pixelEraserPreview,
-      ),
+    final sub = buildSceneRenderer(
+      subScene(scene, appended, ids),
+      _strokeRenderer,
+      _cacheManager,
     );
 
     final keys = <TileKey>{
       for (final e in appended) ...grid.keysIn(e.bounds),
     };
     for (final key in keys) {
-      final tile = _tiles[key];
-      if (tile == null && !_empty.contains(key)) continue; // built later
+      final tile = _store.tiles[key];
+      if (tile == null && !_store.has(key)) continue; // built later
       final rect = grid.rectOf(key);
       final count = appended.where((e) => e.bounds.overlaps(rect)).length;
       if (count == 0) continue;
@@ -166,101 +206,94 @@ class PageTileCache extends ChangeNotifier {
         base: tile?.image,
         paint: (canvas) => sub.paintRegion(canvas, rect),
       );
-      _drop(key);
+      _store.drop(key);
       _put(key, rect, image, count);
     }
   }
 
+  /// Rasterizes missing visible tiles, or queues them while legacy tiles
+  /// can stand in.
   void _ensureVisible() {
     final grid = _grid;
     final scene = _scene;
+    _pending.clear();
     if (grid == null || scene == null) return;
-    final keys = grid.keysIn(_viewport);
-    final full = _renderer(scene);
-    for (final key in keys) {
-      if (_tiles.containsKey(key) || _empty.contains(key)) continue;
+    final defer = _legacy.isNotEmpty;
+    for (final key in grid.keysIn(_viewport)) {
+      if (_store.has(key)) continue;
       final rect = grid.rectOf(key);
-      final count = scene.entries.where((e) => e.bounds.overlaps(rect)).length;
-      if (count == 0) {
-        _empty.add(key);
-        continue;
+      if (!scene.entries.any((e) => e.bounds.overlaps(rect))) {
+        _store.empty.add(key);
+      } else if (defer) {
+        _pending.add(key);
+      } else {
+        _rasterizeTile(grid, scene, key);
       }
-      final image = _rasterizer.rasterize(
-        pageRect: rect,
-        scale: grid.scale,
-        paint: (canvas) => full.paintRegion(canvas, rect),
-      );
-      _put(key, rect, image, count);
     }
   }
 
-  ElementSceneRenderer _renderer(ElementScene s) => ElementSceneRenderer(
-        strokes: s.strokes,
-        shapes: s.shapes,
-        images: s.images,
-        texts: s.texts,
-        elementOrder: s.elementOrder,
-        renderer: _strokeRenderer,
-        cacheManager: _cacheManager,
-        excludedStrokeIds: s.excludedIds,
-        excludedShapeIds: s.excludedIds,
-        excludedImageIds: s.excludedIds,
-        excludedTextIds: s.excludedIds,
-        pixelEraserPreview: s.pixelEraserPreview,
-        strokeEraserPreview: s.strokeEraserPreview,
-      );
+  void _rasterizeTile(TileGrid grid, ElementScene scene, TileKey key) {
+    final rect = grid.rectOf(key);
+    final count = scene.entries.where((e) => e.bounds.overlaps(rect)).length;
+    if (count == 0) {
+      _store.empty.add(key);
+      return;
+    }
+    final full = buildSceneRenderer(scene, _strokeRenderer, _cacheManager);
+    final image = _rasterizer.rasterize(
+      pageRect: rect,
+      scale: grid.scale,
+      paint: (canvas) => full.paintRegion(canvas, rect),
+    );
+    _put(key, rect, image, count);
+  }
 
   void _put(TileKey key, ui.Rect rect, ui.Image image, int recorded) {
-    _tiles[key] = CachedTile(key, rect, image);
+    _store.tiles[key] = CachedTile(key, rect, image);
     _rasterCount++;
     _lastKeys = [..._lastKeys, key];
     if (recorded > _lastRecorded) _lastRecorded = recorded;
   }
 
-  void _drop(TileKey key) {
-    _tiles.remove(key)?.image.dispose();
-    _empty.remove(key);
+  /// Moves the current tiles to [legacyTiles] ahead of a scale change. Only
+  /// tiles in the viewport are kept. If no tile exists at the current scale
+  /// yet, the older legacy tiles stay in place.
+  void _retireTiles() {
+    if (_store.tiles.isEmpty) {
+      _store.empty.clear();
+      return;
+    }
+    _releaseLegacy();
+    _legacy = _store.takeOverlapping(_viewport);
   }
 
-  void _clearTiles() {
-    for (final t in _tiles.values) {
+  void _releaseLegacy() {
+    for (final t in _legacy) {
       t.image.dispose();
     }
-    _tiles.clear();
-    _empty.clear();
+    _legacy = const [];
   }
 
   void _finish() {
     final grid = _grid;
-    final visibleKeys = grid == null ? <TileKey>{} : grid.keysIn(_viewport);
-    final visibleSet = visibleKeys.toSet();
+    final visibleKeys = grid == null ? <TileKey>[] : grid.keysIn(_viewport);
     _clock++;
     _visible = [
       for (final k in visibleKeys)
-        if (_tiles[k] != null) _tiles[k]!.._lastUsed = _clock,
+        if (_store.tiles[k] != null) _store.tiles[k]!..lastUsed = _clock,
     ];
-    _evict(visibleSet);
+    _pendingRects = [
+      if (grid != null)
+        for (final k in _pending) grid.rectOf(k),
+    ];
+    _store.evict(visibleKeys.toSet(), budgetBytes);
     notifyListeners();
-  }
-
-  /// Drops least recently used off-screen tiles until within [budgetBytes].
-  void _evict(Set<TileKey> visibleSet) {
-    var total = cachedBytes;
-    if (total <= budgetBytes) return;
-    final candidates = [
-      for (final t in _tiles.values)
-        if (!visibleSet.contains(t.key)) t,
-    ]..sort((a, b) => a._lastUsed.compareTo(b._lastUsed));
-    for (final t in candidates) {
-      if (total <= budgetBytes) break;
-      total -= t.bytes;
-      _drop(t.key);
-    }
   }
 
   @override
   void dispose() {
-    _clearTiles();
+    _store.clear();
+    _releaseLegacy();
     _visible = const [];
     super.dispose();
   }

@@ -1,8 +1,10 @@
 import 'dart:ui' as ui;
 
+import 'package:drawing_ui/src/rendering/tiles/tile_grid.dart';
+
 /// Records tile content and turns it into a [ui.Image] with `toImageSync`.
 class TileRasterizer {
-  const TileRasterizer({this.tilePixels = 512});
+  const TileRasterizer({this.tilePixels = kTilePixels});
 
   /// Edge length of the produced image in device pixels.
   final int tilePixels;

@@ -34,6 +34,10 @@ class TileGrid {
   /// Tile edge length in page units.
   final double tileExtent;
 
+  /// Whether [other] equals [scale] within a relative 1e-4 (no exact-double
+  /// compare, so float noise from zoom maths does not rebuild the grid).
+  bool hasScale(double other) => (scale - other).abs() <= other.abs() * 1e-4;
+
   /// Page-space rect of [key]. Adjacent tiles share edges exactly.
   Rect rectOf(TileKey key) => Rect.fromLTRB(
         key.col * tileExtent,
