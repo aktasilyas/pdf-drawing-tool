@@ -143,6 +143,11 @@ class FlutterStrokeRenderer {
     canvas.drawPath(path, paint);
   }
 
+  /// Paint used for solid stroked pens, including glow. Shared with the live
+  /// stroke geometry so both renders look the same.
+  Paint strokePaintFor(StrokeStyle style) =>
+      _buildPaintWithGlow(style, _createPaint(style));
+
   /// Creates a [Paint] object from a [StrokeStyle].
   Paint _createPaint(StrokeStyle style) {
     final baseColor = Color(style.color);

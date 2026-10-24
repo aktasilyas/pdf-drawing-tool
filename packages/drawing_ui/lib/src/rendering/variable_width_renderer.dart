@@ -11,6 +11,23 @@ class VariableWidthStrokeRenderer {
     ..style = PaintingStyle.fill
     ..isAntiAlias = true;
 
+  /// Outline options shared by the committed and the live render so the two
+  /// cannot drift apart.
+  static StrokeOutlineOptions optionsFor(StrokeStyle style) =>
+      StrokeOutlineOptions(
+        size: style.thickness,
+        thinning: style.pressureSensitivity,
+      );
+
+  /// Creates the fill paint used for [style].
+  static Paint fillPaintFor(StrokeStyle style) {
+    final paint = Paint()
+      ..style = PaintingStyle.fill
+      ..isAntiAlias = true;
+    _applyStyle(paint, style);
+    return paint;
+  }
+
   /// Renders a variable-width stroke on [canvas].
   void render(Canvas canvas, List<DrawingPoint> points, StrokeStyle style) {
     if (points.isEmpty) return;
@@ -18,10 +35,7 @@ class VariableWidthStrokeRenderer {
 
     final outline = StrokeOutline.build(
       points,
-      StrokeOutlineOptions(
-        size: style.thickness,
-        thinning: style.pressureSensitivity,
-      ),
+      optionsFor(style),
     );
     if (outline.length < 3) return;
 
@@ -33,8 +47,10 @@ class VariableWidthStrokeRenderer {
     canvas.drawPath(path, _fillPaint);
   }
 
-  void _configurePaint(StrokeStyle style) {
-    _fillPaint
+  void _configurePaint(StrokeStyle style) => _applyStyle(_fillPaint, style);
+
+  static void _applyStyle(Paint paint, StrokeStyle style) {
+    paint
       ..color = Color(style.color).withValues(alpha: style.opacity)
       ..blendMode = _blendMode(style.blendMode)
       ..maskFilter = (style.glowRadius > 0 && style.glowIntensity > 0)
@@ -43,7 +59,7 @@ class VariableWidthStrokeRenderer {
           : null;
   }
 
-  BlendMode _blendMode(DrawingBlendMode mode) {
+  static BlendMode _blendMode(DrawingBlendMode mode) {
     switch (mode) {
       case DrawingBlendMode.normal:
         return BlendMode.srcOver;

@@ -232,4 +232,22 @@ void main() {
       expect(covered + tailArea, lessThan(full * 1.02));
     });
   });
+
+  group('writeTail(from)', () {
+    test('starting at the last written sample covers the same stroke', () {
+      final inc = IncrementalStrokeOutline(const StrokeOutlineOptions())
+        ..addAll(_sine(300));
+      final to = inc.frozenCount - 1;
+      expect(to, greaterThan(10));
+      final full = _polygonArea(inc.toPolygon());
+      final body = <double>[];
+      inc.writeFrozen(0, to, body);
+      final tail = <double>[];
+      inc.writeTail(tail, from: to);
+      double area(List<double> o) => _polygonArea([
+            for (var i = 0; i < o.length; i += 2) Point2D(o[i], o[i + 1]),
+          ]);
+      expect(area(body) + area(tail), closeTo(full, full * 0.01));
+    });
+  });
 }

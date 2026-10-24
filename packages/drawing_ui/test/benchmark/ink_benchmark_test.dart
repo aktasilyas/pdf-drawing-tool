@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/canvas/drawing_controller.dart';
 import 'package:drawing_ui/src/rendering/flutter_stroke_renderer.dart';
 import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter_test/flutter_test.dart';
@@ -14,6 +15,8 @@ const _strokeCount = 1000;
 const _pointsPerStroke = 40;
 const _committedFrames = 20;
 const _activePoints = 300;
+const _longStrokePoints = 2000;
+const _window = 200;
 const _pageSize = ui.Size(1200, 1600);
 
 List<Stroke> _syntheticStrokes() {
@@ -108,5 +111,59 @@ void main() {
 
     expect(build, isNotEmpty);
     expect(active.length, _activePoints);
+  });
+
+  test('active stroke cost is independent of stroke length', () {
+    // Per event: controller update + paint into a PictureRecorder.
+    final styles = {
+      'pen': StrokeStyle.pen(thickness: 2),
+      'brush': StrokeStyle.brush(),
+    };
+    for (final entry in styles.entries) {
+      List<double> run(bool incremental) {
+        final controller = DrawingController();
+        final times = <double>[];
+        for (var i = 0; i < _longStrokePoints; i++) {
+          final p = DrawingPoint(
+            x: 50 + (i * 0.5) % 1000,
+            y: 800 + math.sin(i / 25) * 120,
+            pressure: 0.3 + 0.5 * math.sin(i / 60).abs(),
+          );
+          final sw = Stopwatch()..start();
+          if (i == 0) {
+            controller.startStroke(p, entry.value);
+          } else {
+            controller.addPoint(p);
+          }
+          final recorder = ui.PictureRecorder();
+          final canvas = ui.Canvas(recorder);
+          if (incremental) {
+            controller.geometry.paint(canvas);
+          } else {
+            renderer.renderActiveStroke(
+                canvas, controller.activePoints, entry.value);
+          }
+          recorder.endRecording().dispose();
+          times.add(_ms(sw));
+        }
+        controller.dispose();
+        return times;
+      }
+
+      for (final incremental in [false, true]) {
+        final t = run(incremental);
+        final first = _Stats(t.sublist(0, _window));
+        final last = _Stats(t.sublist(t.length - _window));
+        final label = incremental ? 'incremental' : 'legacy';
+        debugPrint('active-length ${entry.key} $label: '
+            'first200 p95 ${first.p95.toStringAsFixed(3)} ms, '
+            'last200 p95 ${last.p95.toStringAsFixed(3)} ms, '
+            'ratio ${(last.p95 / first.p95).toStringAsFixed(2)}');
+        if (incremental) {
+          // Generous bound: timings on shared CI machines are noisy.
+          expect(last.p95, lessThan(first.p95 * 4 + 0.5));
+        }
+      }
+    }
   });
 }

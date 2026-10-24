@@ -1,0 +1,92 @@
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
+import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/canvas/canvas.dart';
+import 'package:drawing_ui/src/rendering/rendering.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+const _w = 400, _h = 240;
+
+List<DrawingPoint> _input() => [
+      for (var i = 0; i < 160; i++)
+        DrawingPoint(
+          x: 20 + i * 2.2,
+          y: 120 + 60 * _tri(i / 40),
+          pressure: 0.3 + 0.6 * ((i % 50) / 50),
+        ),
+    ];
+
+double _tri(double t) {
+  final f = t - t.floorToDouble();
+  return f < 0.5 ? f * 4 - 1 : 3 - f * 4;
+}
+
+Future<Uint8List> _raster(void Function(ui.Canvas) draw) async {
+  final recorder = ui.PictureRecorder();
+  final canvas = ui.Canvas(recorder);
+  canvas.drawRect(
+    const ui.Rect.fromLTWH(0, 0, 400, 240),
+    ui.Paint()..color = const ui.Color(0xFFFFFFFF),
+  );
+  draw(canvas);
+  final picture = recorder.endRecording();
+  final image = await picture.toImage(_w, _h);
+  final data = await image.toByteData();
+  image.dispose();
+  picture.dispose();
+  return data!.buffer.asUint8List();
+}
+
+double _diffRatio(Uint8List a, Uint8List b) {
+  var bad = 0;
+  for (var i = 0; i < a.length; i += 4) {
+    var d = 0;
+    for (var c = 0; c < 4; c++) {
+      d = (a[i + c] - b[i + c]).abs() > d ? (a[i + c] - b[i + c]).abs() : d;
+    }
+    if (d > 8) bad++;
+  }
+  return bad / (a.length / 4);
+}
+
+void main() {
+  final styles = <String, StrokeStyle>{
+    'pen': StrokeStyle.pen(thickness: 3),
+    'highlighter': StrokeStyle.highlighter(),
+    'brush (pressure)': StrokeStyle.brush(),
+  };
+
+  for (final entry in styles.entries) {
+    test('live render matches committed render: ${entry.key}', () async {
+      final controller = DrawingController();
+      final input = _input();
+      controller.startStroke(input.first, entry.value);
+      for (final p in input.skip(1)) {
+        controller.addPoint(p);
+      }
+      final points = controller.activePoints;
+
+      final live = await _raster(controller.geometry.paint);
+      final committed = await _raster((c) => FlutterStrokeRenderer()
+          .renderActiveStroke(c, points, entry.value));
+
+      expect(_diffRatio(live, committed), lessThan(0.005));
+      controller.dispose();
+    });
+  }
+
+  test('LiveStrokePainter repaints through the listenable only', () {
+    final controller = DrawingController();
+    final a = LiveStrokePainter(
+        geometry: controller.geometry, repaint: controller);
+    final b = LiveStrokePainter(
+        geometry: controller.geometry, repaint: controller);
+    expect(b.shouldRepaint(a), isFalse);
+    final c = LiveStrokePainter(
+        geometry: ActiveStrokeGeometry(), repaint: controller);
+    expect(c.shouldRepaint(a), isTrue);
+    controller.dispose();
+  });
+}

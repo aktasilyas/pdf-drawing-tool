@@ -74,9 +74,9 @@ How it works, mirroring the stages of `StrokeOutline.build`:
 - Tail window [frozenCount, n): each call recomputes the taperEnd factor, the forward EMA from the
   frozen state, the backward EMA starting at n-1, the forward clamp (seeded by the last frozen
   radius), the backward clamp (which stops at the boundary) and the tangents.
-- Freeze rule for sample i: `n-1-i >= Kema` AND `arc[n-1]-arc[i] >= max(taperEnd, 2*size)`,
-  with `Kema = ceil(ln 1e-4 / ln(1-k))` and `k = 1-0.8*smoothing`. Kema is 10 at the default
-  smoothing and 41 at smoothing 1. The backward clamp moves values at most size/1.8 of arc length,
+- Freeze rule for sample i (as built, see section 8): `accepted-1-i >= Kema` AND `arc[last]-arc[i] >= taperEnd`,
+  with `Kema = ceil(ln 1e-6 / ln(1-k))` and `k = 1-0.8*smoothing`. Kema is 16 at the default
+  smoothing and 62 at smoothing 1. The backward clamp moves values at most size/1.8 of arc length,
   so 2*size covers it. Streamline dedup keeps a minimum spacing of minR, which bounds W at about
   27 + Kema samples. W is constant in n, which gives A2.
 - Store the arrays for each stage (f, b, forward-clamped, final r) in growable `Float64List`
@@ -171,3 +171,13 @@ committed ink (A3), which matches all three apps. There is no deviation.
 - Freezing counts accepted samples only, never the ephemeral end sample.
 - Exported from `drawing_core.dart` as well as `input.dart`.
 - Test bound: `lastRecomputed` <= 24 (default), <= 80 (smoothing 1).
+
+## 9. As built (steps 3-5)
+- `writeTail` takes an optional `from` so the tail starts at the last sample written to `body`
+  (no gap between chunks and tail).
+- `ActiveStrokeGeometry` has three modes: outline (pressure pens), stroked (solid pens, one quadratic
+  per new point) and fallback (dashed, pencil, straight line, legacy stabilization), as planned.
+  Translucent styles draw opaque into one `saveLayer` with the style alpha and blend mode.
+- `DrawingController` lives in `drawing_controller.dart` (re-exported by `stroke_painter.dart`) and
+  owns the geometry. `ActiveStrokeLayer` holds one `LiveStrokePainter` that repaints via the controller.
+- Benchmark section added (`active-length` lines). Result of the run recorded in the PR.

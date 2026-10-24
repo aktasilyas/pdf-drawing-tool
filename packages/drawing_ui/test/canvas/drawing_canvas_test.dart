@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/canvas/active_stroke_layer.dart';
 import 'package:drawing_ui/src/canvas/drawing_canvas.dart';
 import 'package:drawing_ui/src/canvas/drawing_canvas_painters.dart';
 import 'package:drawing_ui/src/canvas/stroke_painter.dart';
@@ -146,7 +147,7 @@ void main() {
         );
       });
 
-      testWidgets('uses ListenableBuilder for active stroke layer',
+      testWidgets('uses ActiveStrokeLayer for active stroke layer',
           (tester) async {
         await tester.pumpWidget(
           const ProviderScope(
@@ -158,11 +159,11 @@ void main() {
           ),
         );
 
-        // Active stroke uses ListenableBuilder (Committed strokes use provider)
+        // Active stroke uses ActiveStrokeLayer (Committed strokes use provider)
         expect(
           find.descendant(
             of: find.byType(DrawingCanvas),
-            matching: find.byType(ListenableBuilder),
+            matching: find.byType(ActiveStrokeLayer),
           ),
           findsOneWidget,
         );
@@ -250,7 +251,7 @@ void main() {
     // =========================================================================
 
     group('performance optimizations', () {
-      testWidgets('uses ListenableBuilder instead of setState', (tester) async {
+      testWidgets('uses ActiveStrokeLayer instead of setState', (tester) async {
         // This test verifies architectural decisions
 
         await tester.pumpWidget(
@@ -263,12 +264,12 @@ void main() {
           ),
         );
 
-        // ListenableBuilder used for active stroke (committed uses provider)
-        // The existence of ListenableBuilder proves no setState pattern
+        // ActiveStrokeLayer repaints via the controller (committed uses provider)
+        // The existence of the layer proves no setState pattern
         expect(
           find.descendant(
             of: find.byType(DrawingCanvas),
-            matching: find.byType(ListenableBuilder),
+            matching: find.byType(ActiveStrokeLayer),
           ),
           findsOneWidget,
         );

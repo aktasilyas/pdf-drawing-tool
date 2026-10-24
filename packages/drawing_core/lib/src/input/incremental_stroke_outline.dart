@@ -188,15 +188,19 @@ class IncrementalStrokeOutline {
 
   /// Appends the closed polygon of the unstable tail to [out]: samples from
   /// two before the frozen boundary to the end, plus the end cap (the dot
-  /// when there is a single sample).
-  void writeTail(List<double> out) {
+  /// when there is a single sample). [from] starts the polygon at an earlier
+  /// sample instead, so a caller that has drawn frozen samples only up to
+  /// [from] leaves no gap.
+  void writeTail(List<double> out, {int? from}) {
     final n = _c.length;
     if (n == 0) return;
     if (n == 1) {
       _addAll(out, _dot());
       return;
     }
-    final s = math.max(0, _frozen - 2);
+    final s = from != null
+        ? from.clamp(0, n - 2)
+        : math.max(0, _frozen - 2);
     _ribbon(s, n - 1, true, s == 0, out);
   }
 
