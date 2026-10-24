@@ -110,6 +110,7 @@ export 'src/history/reorder_selection_command.dart';
 export 'src/history/flip_selection_command.dart';
 
 // Input Processing
+export 'src/input/incremental_stroke_outline.dart';
 export 'src/input/one_euro_filter.dart';
 export 'src/input/path_smoother.dart';
 export 'src/input/stroke_input_filter.dart';

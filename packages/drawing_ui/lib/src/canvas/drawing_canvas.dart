@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
 import 'package:drawing_core/drawing_core.dart' show BackgroundType;
+import 'package:drawing_ui/src/canvas/active_stroke_layer.dart';
 import 'package:drawing_ui/src/canvas/stroke_painter.dart';
 import 'package:drawing_ui/src/canvas/passive_layer_painter.dart';
 import 'package:drawing_ui/src/canvas/selection_painter.dart';
@@ -1083,21 +1084,9 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                               _wrapOpacity(
                                 activeLayerOpacity,
                                 RepaintBoundary(
-                                  child: ListenableBuilder(
-                                    listenable: _drawingController,
-                                    builder: (context, _) {
-                                      return CustomPaint(
-                                        size: size,
-                                        painter: ActiveStrokePainter(
-                                          points:
-                                              _drawingController.activePoints,
-                                          style: _drawingController.activeStyle,
-                                          renderer: _renderer,
-                                        ),
-                                        isComplex: false,
-                                        willChange: true,
-                                      );
-                                    },
+                                  child: ActiveStrokeLayer(
+                                    controller: _drawingController,
+                                    size: size,
                                   ),
                                 ),
                               ),
