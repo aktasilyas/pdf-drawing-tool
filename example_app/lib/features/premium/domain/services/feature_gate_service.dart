@@ -5,8 +5,14 @@ import 'package:example_app/features/premium/domain/entities/subscription.dart';
 /// All premium restrictions are managed through this service.
 class FeatureGateService {
   final SubscriptionTier _tier;
+  final bool _unrestricted;
 
-  FeatureGateService(this._tier);
+  FeatureGateService(this._tier) : _unrestricted = false;
+
+  /// Gate used when the premium flag is off: nothing is limited.
+  FeatureGateService.unrestricted()
+      : _tier = SubscriptionTier.premiumPlus,
+        _unrestricted = true;
 
   /// Free tier limits.
   static const _freeLimits = {
@@ -40,6 +46,8 @@ class FeatureGateService {
     GatedFeature feature, {
     int currentUsage = 0,
   }) {
+    if (_unrestricted) return FeatureAccess.allowed();
+
     // PremiumPlus (Pro) users — only AI chat has a high limit.
     if (_tier == SubscriptionTier.premiumPlus) {
       final limit = _proLimits[feature];

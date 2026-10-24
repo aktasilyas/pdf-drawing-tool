@@ -1,7 +1,7 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:example_app/core/config/app_env.dart';
 import 'package:example_app/features/ai/data/datasources/ai_local_datasource.dart';
 import 'package:example_app/features/ai/data/datasources/ai_remote_datasource.dart';
 import 'package:example_app/features/ai/data/repositories/ai_repository_impl.dart';
@@ -24,10 +24,11 @@ final canvasCaptureServiceProvider = Provider<CanvasCaptureService>((ref) {
 
 final aiRemoteDataSourceProvider = Provider<AIRemoteDataSource>((ref) {
   final supabase = Supabase.instance.client;
+  const env = AppEnv();
   return AIRemoteDataSource(
     supabase,
-    supabaseUrl: dotenv.env['SUPABASE_URL'] ?? '',
-    supabaseKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
+    supabaseUrl: env.supabaseUrl,
+    supabaseKey: env.supabaseAnonKey,
   );
 });
 

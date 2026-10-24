@@ -7,11 +7,6 @@ fi
 
 cd "$CLAUDE_PROJECT_DIR" || exit 0
 
-# example_app declares .env as an asset; builds and tests fail without it.
-if [ ! -f example_app/.env ]; then
-  printf 'SUPABASE_URL=https://example.supabase.co\nSUPABASE_ANON_KEY=placeholder\n' > example_app/.env
-fi
-
 # Install Flutter when the environment has no setup script (e.g. routines on
 # the Default environment). A setup script that already installed it makes this a no-op.
 if ! command -v flutter >/dev/null 2>&1; then
