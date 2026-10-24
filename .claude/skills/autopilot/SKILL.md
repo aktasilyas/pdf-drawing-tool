@@ -52,6 +52,11 @@ architect desk count the same as the owner's):
 - **Review comments** (`gh api $R/pulls/<n>/comments` and
   `$R/issues/<n>/comments` newer than the last commit) → address them, push,
   reply on each thread, then continue with the next PR.
+- **Partial slice** (PR body lists remaining steps of a still-open issue, or the
+  reviewer/architect asked for missing parts): this is the main work of the run.
+  Lock the issue, implement the next remaining steps on the same branch
+  (merge `origin/main` first), verify, push, update the PR body checklist.
+  Never end a run with only a comment on such a PR.
 - **Ready**: if every check is green or pre-existing-failing and the `reviewer`
   subagent (already run when the PR was opened; re-run only after new commits)
   found nothing blocking, add label `ready-to-merge` to the PR and list
