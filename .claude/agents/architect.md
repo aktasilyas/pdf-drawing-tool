@@ -18,6 +18,9 @@ For every request return:
 5. Task breakdown into steps small enough for one `implementer` run each
    (each step: goal, files, verification command).
 6. Risks and what you deliberately left out (YAGNI).
+7. Reference check (for user-facing behaviour, data model or file format
+   decisions): how GoodNotes, StarNote and Flexcil handle it, the pattern you
+   follow, and the reason for any deviation. See "Reference apps" in CLAUDE.md.
 
 Keep plans under ~150 lines. If the request is ambiguous in a way that changes
 the design, list the specific questions instead of guessing.

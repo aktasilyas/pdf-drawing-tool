@@ -60,6 +60,18 @@ change without asking). Any UI work follows the `design-loop` skill: spec from
 `ui-designer` → golden test → render → review the PNGs → fix. Quality bar:
 `flutter-ui-craft` skill. Tokens and theming: `design-tokens` skill.
 
+## Reference apps (owner rule)
+GoodNotes, StarNote and Flexcil are the baseline for every significant product,
+UX, design or architecture decision (navigation, library/notebook model, editor
+chrome, tools and pens, PDF workflow, page model, storage/export formats).
+- Before deciding, check how these three do it (official docs, help center,
+  store pages, reviews; WebSearch) and record a short **Reference check** in the
+  plan, spec, decision comment or PR: what each app does → what we do.
+- Default to the pattern they converge on. Deviating needs a stated reason
+  (platform, v1.0 scope, performance, originality).
+- Match behaviour and conventions, never assets: no copied icons, cover art,
+  illustrations or exact layouts (see `docs/design/BRIEF.md`).
+
 ## Architecture rules
 - Feature-first Clean Architecture in `example_app/lib/features/<f>/{data,domain,presentation}`.
   `presentation → domain ← data`. Cross-feature access only via domain interfaces.
