@@ -7,7 +7,10 @@ import 'dart:ui' as ui;
 
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/canvas/drawing_controller.dart';
+import 'package:drawing_ui/src/canvas/image_painter.dart';
+import 'package:drawing_ui/src/rendering/element_scene_renderer.dart';
 import 'package:drawing_ui/src/rendering/flutter_stroke_renderer.dart';
+import 'package:drawing_ui/src/rendering/tiles/tiles.dart';
 import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter_test/flutter_test.dart';
 
@@ -17,6 +20,7 @@ const _committedFrames = 20;
 const _activePoints = 300;
 const _longStrokePoints = 2000;
 const _window = 200;
+const _penUps = 50;
 const _pageSize = ui.Size(1200, 1600);
 
 List<Stroke> _syntheticStrokes() {
@@ -165,5 +169,93 @@ void main() {
         }
       }
     }
+  });
+
+  test('pen-up on a 1,000-stroke page: tiled cache vs legacy re-record', () {
+    final base = strokes;
+    final extra = List.generate(_penUps, (i) {
+      final x0 = 40.0 + (i * 53) % 900;
+      final y0 = 60.0 + (i * 97) % 1400;
+      return Stroke(
+        id: 'new$i',
+        points: List.generate(
+          30,
+          (j) => DrawingPoint(
+            x: x0 + j * 4.0,
+            y: y0 + math.sin(j / 4) * 12,
+            pressure: 0.5,
+          ),
+        ),
+        style: StrokeStyle.pen(thickness: 2),
+        createdAt: DateTime.fromMillisecondsSinceEpoch(0),
+      );
+    });
+    List<Stroke> committed(int k) => [...base, ...extra.take(k)];
+    ElementScene sceneOf(List<Stroke> list) => ElementScene(
+          strokes: list,
+          elementOrder: [for (final s in list) s.id],
+        );
+
+    final cacheManager = ImageCacheManager();
+    final cache = PageTileCache(
+      strokeRenderer: renderer,
+      cacheManager: cacheManager,
+    );
+    final page = ui.Rect.fromLTWH(0, 0, _pageSize.width, _pageSize.height);
+    cache
+      ..setViewport(page, 1, interacting: false)
+      ..update(sceneOf(committed(0)))
+      ..setViewport(page, 1, interacting: false); // warm every tile
+
+    final tiled = <double>[];
+    final legacy = <double>[];
+    for (var k = 1; k <= _penUps; k++) {
+      final list = committed(k);
+
+      // Tiled: cache update + paint() recording tiles (+ vector fallback).
+      var sw = Stopwatch()..start();
+      cache.update(sceneOf(list));
+      final recorder = ui.PictureRecorder();
+      final canvas = ui.Canvas(recorder);
+      for (final t in cache.visibleTiles) {
+        canvas.drawImage(t.image, t.rect.topLeft, ui.Paint());
+      }
+      for (final r in cache.vectorRects) {
+        canvas.save();
+        canvas.clipRect(r);
+        cache.paintVectorRegion(canvas, r);
+        canvas.restore();
+      }
+      recorder.endRecording().dispose();
+      tiled.add(_ms(sw));
+
+      // Legacy: full re-record of every element, as UnifiedElementPainter.
+      sw = Stopwatch()..start();
+      final legacyRecorder = ui.PictureRecorder();
+      ElementSceneRenderer(
+        strokes: list,
+        shapes: const [],
+        images: const [],
+        texts: const [],
+        elementOrder: [for (final s in list) s.id],
+        renderer: renderer,
+        cacheManager: cacheManager,
+      ).paint(ui.Canvas(legacyRecorder));
+      legacyRecorder.endRecording().dispose();
+      legacy.add(_ms(sw));
+    }
+
+    final tiledStats = _Stats(tiled);
+    debugPrint([
+      '── Pen-up benchmark ($_strokeCount strokes, $_penUps pen-ups) ──',
+      'pen-up tiled : ${tiledStats.format('').substring(2)}',
+      'pen-up legacy: ${_Stats(legacy).format('').substring(2)}',
+      'pen-up vector tiles: ${cache.vectorRects.length}, '
+          'raster tiles: ${cache.visibleTiles.length}',
+    ].join('\n'));
+    cache.dispose();
+
+    // Spec target is 16 ms; bound is generous for noisy headless machines.
+    expect(tiledStats.worst, lessThan(16.0));
   });
 }
