@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart' hide Page;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:drawing_core/drawing_core.dart';
@@ -210,6 +212,37 @@ void main() {
 
         // Should either succeed or return null, not throw
         expect(thumbnail != null || thumbnail == null, true);
+      });
+    });
+
+    group('material covers', () {
+      testGenerate('renders without assets; corner is near the base color',
+          () async {
+        final page = Page.createCover(
+          index: 0,
+          background: PageBackground(
+            type: BackgroundType.cover,
+            color: 0xFFFFFFFF,
+            coverId: CoverFamily.leatherNavy.id,
+          ),
+        );
+        final bytes = await ThumbnailGenerator.generate(
+          page,
+          width: 150,
+          height: 200,
+        );
+        expect(bytes, isNotNull);
+
+        final codec = await ui.instantiateImageCodec(bytes!);
+        final image = (await codec.getNextFrame()).image;
+        final data = (await image.toByteData())!;
+        // Pixel near bottom-right, away from hinge and plate.
+        final i = (190 * image.width + 140) * 4;
+        final base = CoverFamily.leatherNavy.primaryColor;
+        expect((data.getUint8(i) - ((base >> 16) & 0xFF)).abs(), lessThan(48));
+        expect(
+            (data.getUint8(i + 1) - ((base >> 8) & 0xFF)).abs(), lessThan(48));
+        expect((data.getUint8(i + 2) - (base & 0xFF)).abs(), lessThan(48));
       });
     });
 

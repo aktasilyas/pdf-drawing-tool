@@ -1,10 +1,9 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:example_app/core/theme/index.dart';
+
+import '../../helpers/font_loader.dart';
 
 Widget _sheet(ThemeData theme) {
   return MaterialApp(
@@ -73,27 +72,9 @@ Widget _sheet(ThemeData theme) {
   );
 }
 
-Future<void> _loadFont(String family, List<String> files) async {
-  final loader = FontLoader(family);
-  for (final f in files) {
-    final bytes = File('assets/fonts/$f').readAsBytesSync();
-    loader.addFont(Future.value(ByteData.view(bytes.buffer)));
-  }
-  await loader.load();
-}
-
 void main() {
   setUpAll(() async {
-    await _loadFont('SourceSerif4', [
-      'SourceSerif4-Regular.otf',
-      'SourceSerif4-Semibold.otf',
-      'SourceSerif4-Bold.otf',
-    ]);
-    await _loadFont('Inter', [
-      'Inter-Regular.ttf',
-      'Inter-Medium.ttf',
-      'Inter-SemiBold.ttf',
-    ]);
+    await loadAppTestFonts();
   });
 
   group('AppPalette', () {

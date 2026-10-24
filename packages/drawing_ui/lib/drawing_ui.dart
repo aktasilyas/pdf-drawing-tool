@@ -32,6 +32,7 @@ export 'src/canvas/canvas_color_scheme.dart';
 
 // Painters
 export 'src/painters/template_pattern_painter.dart';
+export 'src/painters/cover/cover_renderer.dart';
 
 // Rendering
 export 'src/rendering/flutter_stroke_renderer.dart';

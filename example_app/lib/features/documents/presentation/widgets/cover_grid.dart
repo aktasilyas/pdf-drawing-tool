@@ -23,7 +23,7 @@ class CoverGridView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const covers = CoverRegistry.all;
+    const covers = CoverRegistry.pickable;
     final isPhone = Responsive.isPhone(context);
     final crossAxisCount = isPhone ? 5 : 8;
 
@@ -69,13 +69,10 @@ class _CoverGridItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final outlineColor =
-        isDark ? AppColors.outlineDark : AppColors.outlineLight;
-    final textSecondary =
-        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+    final palette = context.palette;
 
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Column(
         children: [
@@ -84,7 +81,7 @@ class _CoverGridItem extends StatelessWidget {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(AppRadius.sm),
                 border: Border.all(
-                  color: isSelected ? AppColors.primary : outlineColor,
+                  color: isSelected ? palette.accent : palette.border,
                   width: isSelected ? 2 : 1,
                 ),
               ),
@@ -127,14 +124,14 @@ class _CoverGridItem extends StatelessWidget {
                         bottom: AppSpacing.sm,
                         child: Container(
                           padding: const EdgeInsets.all(AppSpacing.xxs),
-                          decoration: const BoxDecoration(
-                            color: AppColors.primary,
+                          decoration: BoxDecoration(
+                            color: palette.accent,
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.check,
                             size: AppIconSize.xs,
-                            color: AppColors.onPrimary,
+                            color: palette.onAccent,
                           ),
                         ),
                       ),
@@ -147,7 +144,7 @@ class _CoverGridItem extends StatelessWidget {
           Text(
             cover.name,
             style: AppTypography.caption.copyWith(
-              color: isSelected ? AppColors.primary : textSecondary,
+              color: isSelected ? palette.accent : palette.textMuted,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
             ),
             textAlign: TextAlign.center,

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/painters/cover/cover_renderer.dart';
+import 'package:drawing_ui/src/painters/cover/legacy_cover_pattern_painter.dart';
 
 /// Kapak önizleme widget'ı - başlık gösterimli
 class CoverPreviewWidget extends StatelessWidget {
@@ -24,6 +26,7 @@ class CoverPreviewWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final radius = borderRadius ?? BorderRadius.circular(8);
+    final isMaterial = cover.style == CoverStyle.material;
 
     return Container(
       width: width,
@@ -52,12 +55,15 @@ class CoverPreviewWidget extends StatelessWidget {
             // Kapak arka planı
             _buildBackground(theme),
 
-            // Başlık
-            if (cover.showTitle && title != null && title!.isNotEmpty)
-              _buildTitle(theme),
+            // Title
+            // Material covers always show it (the plate exists for the title).
+            if ((isMaterial || cover.showTitle) &&
+                title != null &&
+                title!.isNotEmpty)
+              isMaterial ? _buildPlateTitle(theme) : _buildTitle(theme),
 
-            // Dekoratif çizgiler (notebook efekti)
-            _buildDecoration(theme),
+            // Ring-dot spine decoration (legacy styles only)
+            if (!isMaterial) _buildDecoration(theme),
           ],
         ),
       ),
@@ -91,6 +97,9 @@ class CoverPreviewWidget extends StatelessWidget {
 
       case CoverStyle.image:
         return _buildImageBackground();
+
+      case CoverStyle.material:
+        return CustomPaint(painter: _MaterialCoverPainter(cover));
     }
   }
 
@@ -99,7 +108,7 @@ class CoverPreviewWidget extends StatelessWidget {
 
     // Desenli kapak için CustomPaint
     return CustomPaint(
-      painter: _CoverPatternPainter(
+      painter: LegacyCoverPatternPainter(
         backgroundColor: bgColor,
         patternType: cover.id.contains('dots') ? 'dots' : 'lines',
       ),
@@ -153,6 +162,48 @@ class CoverPreviewWidget extends StatelessWidget {
     }
     // imagePath yoksa primaryColor fallback
     return Container(color: Color(cover.primaryColor));
+  }
+
+  /// Typed serif title centered on the label plate.
+  Widget _buildPlateTitle(ThemeData theme) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final plate = CoverRenderer.labelPlateRect(constraints.biggest);
+        final padding = plate.height * 0.12;
+        return Stack(
+          children: [
+            Positioned.fromRect(
+              rect: plate,
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: padding * 2,
+                  vertical: padding,
+                ),
+                child: LayoutBuilder(
+                  builder: (context, inner) => FittedBox(
+                    fit: BoxFit.scaleDown,
+                    // Width is fixed to the plate so maxLines/ellipsis apply;
+                    // FittedBox only scales down for vertical fit.
+                    child: SizedBox(
+                      width: inner.maxWidth,
+                      child: Text(
+                        title!,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          color: const Color(CoverFamily.labelInkColor),
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Widget _buildTitle(ThemeData theme) {
@@ -238,62 +289,16 @@ class CoverPreviewWidget extends StatelessWidget {
   }
 }
 
-/// Kapak deseni çizen painter
-class _CoverPatternPainter extends CustomPainter {
-  final Color backgroundColor;
-  final String patternType;
+class _MaterialCoverPainter extends CustomPainter {
+  final Cover cover;
 
-  _CoverPatternPainter({
-    required this.backgroundColor,
-    required this.patternType,
-  });
+  const _MaterialCoverPainter(this.cover);
 
   @override
-  void paint(Canvas canvas, Size size) {
-    // Arka plan
-    final bgPaint = Paint()..color = backgroundColor;
-    canvas.drawRect(Offset.zero & size, bgPaint);
-
-    // Desen rengi (kontrast)
-    final luminance = backgroundColor.computeLuminance();
-    final patternColor = luminance > 0.5
-        ? backgroundColor.withValues(alpha: 0.3)
-        : Colors.white.withValues(alpha: 0.15);
-
-    final paint = Paint()
-      ..color = patternColor
-      ..strokeWidth = 1.5
-      ..style = PaintingStyle.stroke;
-
-    if (patternType == 'dots') {
-      // Noktalı desen
-      final spacing = 15.0;
-      for (double x = spacing / 2; x < size.width; x += spacing) {
-        for (double y = spacing / 2; y < size.height; y += spacing) {
-          canvas.drawCircle(
-            Offset(x, y),
-            1.5,
-            Paint()
-              ..color = patternColor
-              ..style = PaintingStyle.fill,
-          );
-        }
-      }
-    } else {
-      // Çizgili desen (diagonal)
-      final spacing = 12.0;
-      for (double i = -size.height; i < size.width; i += spacing) {
-        canvas.drawLine(
-          Offset(i, 0),
-          Offset(i + size.height, size.height),
-          paint,
-        );
-      }
-    }
-  }
+  void paint(Canvas canvas, Size size) =>
+      CoverRenderer.paint(canvas, size, cover);
 
   @override
-  bool shouldRepaint(_CoverPatternPainter oldDelegate) =>
-      oldDelegate.backgroundColor != backgroundColor ||
-      oldDelegate.patternType != patternType;
+  bool shouldRepaint(_MaterialCoverPainter oldDelegate) =>
+      CoverRenderer.needsRepaint(oldDelegate.cover, cover);
 }

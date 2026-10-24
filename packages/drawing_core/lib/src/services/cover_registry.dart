@@ -1,4 +1,5 @@
 import 'package:drawing_core/src/models/cover.dart';
+import 'package:drawing_core/src/services/cover_family.dart';
 
 /// Kapak kayıt defteri - tüm kapak tanımları
 class CoverRegistry {
@@ -147,7 +148,14 @@ class CoverRegistry {
     isPremium: true,
   );
 
+  /// The original procedural cover family, in BRIEF order.
+  static const List<Cover> family = CoverFamily.all;
+
+  /// Covers offered by pickers. Legacy covers are resolvable but not pickable.
+  static const List<Cover> pickable = family;
+
   // === TÜM KAPAKLAR ===
+  /// Legacy covers followed by the family. Ids are a persisted contract.
   static const List<Cover> all = [
     solidNavy,
     solidBurgundy,
@@ -166,6 +174,7 @@ class CoverRegistry {
     imageCoverFloral,
     imageCoverNavyGold,
     imageCoverLeather,
+    ...CoverFamily.all,
   ];
 
   static const List<Cover> free = [
@@ -192,7 +201,7 @@ class CoverRegistry {
   ];
 
   /// Default kapak
-  static const Cover defaultCover = solidNavy;
+  static const Cover defaultCover = CoverFamily.linenSage;
 
   /// ID'ye göre kapak bul
   static Cover? byId(String id) {

@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/canvas/canvas_color_scheme.dart';
+import 'package:drawing_ui/src/painters/cover/cover_renderer.dart';
 import 'package:drawing_ui/src/painters/template_pattern_painter.dart';
 
 /// Sayfa içi arka plan pattern çizici (LIMITED mod için).
@@ -166,6 +167,10 @@ class PageBackgroundPatternPainter extends CustomPainter {
 
       case CoverStyle.image:
         // Image covers are rendered in UI layer via Image.asset widget
+        break;
+
+      case CoverStyle.material:
+        CoverRenderer.paint(canvas, size, cover);
         break;
     }
   }
