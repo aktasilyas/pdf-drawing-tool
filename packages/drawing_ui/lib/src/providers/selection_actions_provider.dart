@@ -7,6 +7,7 @@ import 'package:drawing_ui/src/canvas/image_painter.dart';
 import 'package:drawing_ui/src/models/selection_action.dart';
 import 'package:drawing_ui/src/providers/ai_callback_provider.dart';
 import 'package:drawing_ui/src/providers/document_provider.dart';
+import 'package:drawing_ui/src/providers/feature_toggles_provider.dart';
 import 'package:drawing_ui/src/providers/history_provider.dart';
 import 'package:drawing_ui/src/providers/pdf_render_provider.dart';
 import 'package:drawing_ui/src/providers/selection_provider.dart';
@@ -365,6 +366,7 @@ SelectionActionConfig buildSelectionActionConfig(
   VoidCallback? onAIPressed,
 }) {
   // Resolve AI callback: prefer explicit param, then provider, then fallback
+  final aiEnabled = ref.read(aiAssistantEnabledProvider);
   final resolvedAICallback = onAIPressed ??
       ref.read(onAIPressedCallbackProvider) ??
       (context != null ? () => openAIPanel(context) : null);
@@ -373,16 +375,17 @@ SelectionActionConfig buildSelectionActionConfig(
   if (selection.isEmpty) {
     return SelectionActionConfig(
       toolbarActions: [
-        SelectionAction(
-          id: 'ai',
-          icon: ElyanotesIcons.sparkle,
-          label: 'AI Asistan',
-          isEnabled: resolvedAICallback != null,
-          onExecute: resolvedAICallback != null
-              ? () => _captureAndOpenAI(
-                  ref, selection, cacheManager, resolvedAICallback)
-              : null,
-        ),
+        if (aiEnabled)
+          SelectionAction(
+            id: 'ai',
+            icon: ElyanotesIcons.sparkle,
+            label: 'AI Asistan',
+            isEnabled: resolvedAICallback != null,
+            onExecute: resolvedAICallback != null
+                ? () => _captureAndOpenAI(
+                    ref, selection, cacheManager, resolvedAICallback)
+                : null,
+          ),
         SelectionAction(
           id: 'screenshot',
           icon: ElyanotesIcons.camera,
@@ -427,16 +430,17 @@ SelectionActionConfig buildSelectionActionConfig(
 
   // ── Toolbar actions (quick bar) ──
   final toolbarActions = <SelectionAction>[
-    SelectionAction(
-      id: 'ai',
-      icon: ElyanotesIcons.sparkle,
-      label: 'AI Asistan',
-      isEnabled: resolvedAICallback != null,
-      onExecute: resolvedAICallback != null
-          ? () => _captureAndOpenAI(
-              ref, selection, cacheManager, resolvedAICallback)
-          : null,
-    ),
+    if (aiEnabled)
+      SelectionAction(
+        id: 'ai',
+        icon: ElyanotesIcons.sparkle,
+        label: 'AI Asistan',
+        isEnabled: resolvedAICallback != null,
+        onExecute: resolvedAICallback != null
+            ? () => _captureAndOpenAI(
+                ref, selection, cacheManager, resolvedAICallback)
+            : null,
+      ),
     SelectionAction(
       id: 'color',
       icon: ElyanotesIcons.palette,

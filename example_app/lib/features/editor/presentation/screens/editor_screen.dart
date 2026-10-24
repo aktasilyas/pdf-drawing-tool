@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:example_app/core/config/feature_flags.dart';
 import 'package:example_app/core/theme/index.dart';
 import 'package:go_router/go_router.dart';
 import 'package:drawing_core/drawing_core.dart';
@@ -140,8 +141,10 @@ class EditorScreen extends ConsumerWidget {
     ref.invalidate(autoSaveProvider);
     ref.invalidate(hasUnsavedChangesProvider);
     ref.invalidate(pageTrashCallbackProvider);
-    ref.invalidate(aiChatProvider);
-    ref.invalidate(aiSidebarOpenProvider);
+    if (ref.read(featureFlagsProvider).aiChat) {
+      ref.invalidate(aiChatProvider);
+      ref.invalidate(aiSidebarOpenProvider);
+    }
 
     // PDF state'lerini sıfırla
     ref.read(visiblePdfPageProvider.notifier).state = null;

@@ -7,6 +7,7 @@ export 'canvas_transform_provider.dart';
 export 'document_provider.dart';
 export 'drawing_providers.dart';
 export 'eraser_provider.dart';
+export 'feature_toggles_provider.dart';
 export 'eraser_settings_provider.dart';
 export 'highlighter_settings_provider.dart';
 export 'history_provider.dart';

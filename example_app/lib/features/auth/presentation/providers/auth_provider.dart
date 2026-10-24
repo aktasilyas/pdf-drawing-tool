@@ -19,6 +19,12 @@ final sessionProvider = Provider<Session?>((ref) {
   return Supabase.instance.client.auth.currentSession;
 });
 
+// Current user (null when signed out). Only read when cloud sync is on;
+// tests override this instead of touching Supabase.
+final currentUserProvider = Provider<User?>((ref) {
+  return Supabase.instance.client.auth.currentUser;
+});
+
 // Auth controller for sign in/up/out
 final authControllerProvider =
     StateNotifierProvider<AuthController, AsyncValue<void>>((ref) {
