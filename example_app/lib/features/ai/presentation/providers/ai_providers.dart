@@ -8,7 +8,7 @@ import 'package:example_app/features/ai/data/repositories/ai_repository_impl.dar
 import 'package:example_app/features/ai/data/services/canvas_capture_service.dart';
 import 'package:example_app/features/ai/domain/repositories/ai_repository.dart';
 import 'package:example_app/features/premium/domain/entities/subscription.dart';
-import 'package:example_app/features/premium/presentation/providers/subscription_provider.dart';
+import 'package:example_app/features/premium/presentation/providers/feature_gate_provider.dart';
 import 'package:example_app/features/sync/presentation/providers/sync_provider.dart';
 
 export 'ai_chat_provider.dart';
@@ -54,12 +54,8 @@ final aiRepositoryProvider = Provider<AIRepository>((ref) {
 
 /// Active user's AI tier (derived from subscription).
 final aiTierProvider = Provider<SubscriptionTier>((ref) {
-  final subscription = ref.watch(subscriptionProvider);
-  return subscription.when(
-    data: (sub) => sub.tier,
-    loading: () => SubscriptionTier.free,
-    error: (_, __) => SubscriptionTier.free,
-  );
+  // Follows the flag-aware tier: premiumPlus (no RevenueCat) when premium off.
+  return ref.watch(currentTierProvider);
 });
 
 /// Active model name for UI badge display.

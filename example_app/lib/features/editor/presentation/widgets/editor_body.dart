@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/drawing_ui.dart';
 
+import 'package:example_app/core/config/feature_flags.dart';
 import 'package:example_app/features/ai/presentation/providers/ai_sidebar_provider.dart';
 import 'package:example_app/features/ai/presentation/widgets/ai_chat_floating.dart';
 import 'package:example_app/features/ai/presentation/widgets/ai_chat_sidebar.dart';
@@ -39,9 +40,10 @@ class EditorBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isAIOpen = ref.watch(aiSidebarOpenProvider);
+    final aiEnabled = ref.watch(featureFlagsProvider).aiChat;
+    final isAIOpen = aiEnabled && ref.watch(aiSidebarOpenProvider);
     final viewMode = ref.watch(aiChatViewModeProvider);
-    final isSidebar = viewMode == AIChatViewMode.sidebar;
+    final isSidebar = aiEnabled && viewMode == AIChatViewMode.sidebar;
 
     final drawingScreen = DrawingScreen(
       documentTitle: documentTitle,
@@ -49,7 +51,7 @@ class EditorBody extends ConsumerWidget {
       onHomePressed: onHomePressed,
       onRenameDocument: onRenameDocument,
       onDeleteDocument: onDeleteDocument,
-      onAIPressed: () => _toggleAI(ref, isAIOpen),
+      onAIPressed: aiEnabled ? () => _toggleAI(ref, isAIOpen) : null,
       onDocumentChanged: onDocumentChanged,
       externalLeftSidebar:
           isSidebar ? AIChatSidebar(onClose: () => _closeAI(ref)) : null,
@@ -58,7 +60,7 @@ class EditorBody extends ConsumerWidget {
       onExternalLeftSidebarClose: () => _closeAI(ref),
     );
 
-    if (!isSidebar && isAIOpen) {
+    if (aiEnabled && !isSidebar && isAIOpen) {
       return Stack(
         children: [
           drawingScreen,

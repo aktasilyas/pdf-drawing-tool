@@ -9,7 +9,9 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:example_app/core/config/feature_flags.dart';
 import 'package:example_app/core/routing/route_names.dart';
 import 'package:example_app/features/auth/presentation/screens/splash_screen.dart';
 import 'package:example_app/features/auth/presentation/screens/login_screen.dart';
@@ -21,134 +23,160 @@ import 'package:example_app/features/editor/presentation/screens/editor_screen.d
 import 'package:example_app/features/premium/presentation/screens/paywall_placeholder_screen.dart';
 import 'package:example_app/features/settings/settings.dart';
 
-/// Global router configuration
-final appRouter = GoRouter(
-  initialLocation: RouteNames.splash,
-  debugLogDiagnostics: true,
-  routes: [
-    // Auth routes
-    GoRoute(
-      path: RouteNames.splash,
-      name: 'splash',
-      builder: (context, state) => const SplashScreen(),
-    ),
-    GoRoute(
-      path: RouteNames.login,
-      name: 'login',
-      builder: (context, state) => const LoginScreen(),
-    ),
-    GoRoute(
-      path: RouteNames.register,
-      name: 'register',
-      builder: (context, state) => const RegisterScreen(),
-    ),
-    GoRoute(
-      path: RouteNames.forgotPassword,
-      name: 'forgotPassword',
-      builder: (context, state) =>
-          const _PlaceholderScreen(title: 'Forgot Password'),
-    ),
+/// Auth routes that only exist when cloud sync is on.
+const _authPaths = {
+  RouteNames.login,
+  RouteNames.register,
+  RouteNames.forgotPassword,
+};
 
-    // Document routes
-    GoRoute(
-      path: RouteNames.documents,
-      name: 'documents',
-      builder: (context, state) => const DocumentsScreen(),
-    ),
-    GoRoute(
-      path: RouteNames.folder,
-      name: 'folder',
-      builder: (context, state) {
-        // TODO: Pass folderId to DocumentsScreen when implemented
-        // final folderId = state.pathParameters['folderId']!;
-        return const DocumentsScreen();
-      },
-    ),
-    GoRoute(
-      path: RouteNames.favorites,
-      name: 'favorites',
-      builder: (context, state) => const _PlaceholderScreen(title: 'Favorites'),
-    ),
-    GoRoute(
-      path: RouteNames.recent,
-      name: 'recent',
-      builder: (context, state) => const _PlaceholderScreen(title: 'Recent'),
-    ),
-    GoRoute(
-      path: RouteNames.trash,
-      name: 'trash',
-      builder: (context, state) => const _PlaceholderScreen(title: 'Trash'),
-    ),
-    GoRoute(
-      path: '/manage-folders',
-      name: 'manageFolders',
-      builder: (context, state) => const ManageFoldersScreen(),
-    ),
+/// Router for the app, reading the router from the flags-aware provider.
+final appRouterProvider = Provider<GoRouter>((ref) {
+  final router = buildAppRouter(ref.watch(featureFlagsProvider));
+  ref.onDispose(router.dispose);
+  return router;
+});
 
-    // Editor routes
-    GoRoute(
-      path: RouteNames.editor,
-      name: 'editor',
-      builder: (context, state) {
-        final documentId = state.pathParameters['documentId']!;
-        return EditorScreen(documentId: documentId);
-      },
-    ),
-    GoRoute(
-      path: RouteNames.newDocument,
-      name: 'newDocument',
-      builder: (context, state) {
-        // Create new document - pass empty/new document id
-        return const EditorScreen(documentId: 'new');
-      },
-    ),
-    GoRoute(
-      path: RouteNames.templateSelection,
-      name: 'templateSelection',
-      builder: (context, state) => const TemplateSelectionScreen(),
-    ),
+/// Builds the router for the given [flags].
+///
+/// Auth routes exist only with `cloudSync`, paywall/subscription routes only
+/// with `premium`. With cloud off, auth paths redirect to the documents list.
+GoRouter buildAppRouter(
+  FeatureFlags flags, {
+  String initialLocation = RouteNames.splash,
+  bool debugLog = false,
+}) {
+  return GoRouter(
+    initialLocation: initialLocation,
+    debugLogDiagnostics: debugLog,
+    routes: [
+      GoRoute(
+        path: RouteNames.splash,
+        name: 'splash',
+        builder: (context, state) => const SplashScreen(),
+      ),
+      if (flags.cloudSync) ...[
+        GoRoute(
+          path: RouteNames.login,
+          name: 'login',
+          builder: (context, state) => const LoginScreen(),
+        ),
+        GoRoute(
+          path: RouteNames.register,
+          name: 'register',
+          builder: (context, state) => const RegisterScreen(),
+        ),
+        GoRoute(
+          path: RouteNames.forgotPassword,
+          name: 'forgotPassword',
+          builder: (context, state) =>
+              const _PlaceholderScreen(title: 'Forgot Password'),
+        ),
+      ],
+      // Document routes
+      GoRoute(
+        path: RouteNames.documents,
+        name: 'documents',
+        builder: (context, state) => const DocumentsScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.folder,
+        name: 'folder',
+        builder: (context, state) {
+          // TODO: Pass folderId to DocumentsScreen when implemented
+          // final folderId = state.pathParameters['folderId']!;
+          return const DocumentsScreen();
+        },
+      ),
+      GoRoute(
+        path: RouteNames.favorites,
+        name: 'favorites',
+        builder: (context, state) =>
+            const _PlaceholderScreen(title: 'Favorites'),
+      ),
+      GoRoute(
+        path: RouteNames.recent,
+        name: 'recent',
+        builder: (context, state) => const _PlaceholderScreen(title: 'Recent'),
+      ),
+      GoRoute(
+        path: RouteNames.trash,
+        name: 'trash',
+        builder: (context, state) => const _PlaceholderScreen(title: 'Trash'),
+      ),
+      GoRoute(
+        path: '/manage-folders',
+        name: 'manageFolders',
+        builder: (context, state) => const ManageFoldersScreen(),
+      ),
 
-    // Settings routes
-    GoRoute(
-      path: RouteNames.settings,
-      name: 'settings',
-      builder: (context, state) => const SettingsScreen(),
-    ),
-    GoRoute(
-      path: RouteNames.profile,
-      name: 'profile',
-      builder: (context, state) => const _PlaceholderScreen(title: 'Profile'),
-    ),
+      // Editor routes
+      GoRoute(
+        path: RouteNames.editor,
+        name: 'editor',
+        builder: (context, state) {
+          final documentId = state.pathParameters['documentId']!;
+          return EditorScreen(documentId: documentId);
+        },
+      ),
+      GoRoute(
+        path: RouteNames.newDocument,
+        name: 'newDocument',
+        builder: (context, state) {
+          // Create new document - pass empty/new document id
+          return const EditorScreen(documentId: 'new');
+        },
+      ),
+      GoRoute(
+        path: RouteNames.templateSelection,
+        name: 'templateSelection',
+        builder: (context, state) => const TemplateSelectionScreen(),
+      ),
 
-    // Premium routes
-    GoRoute(
-      path: RouteNames.paywall,
-      name: 'paywall',
-      builder: (context, state) => const Scaffold(
-        body: SafeArea(child: PaywallPlaceholderScreen()),
+      // Settings routes
+      GoRoute(
+        path: RouteNames.settings,
+        name: 'settings',
+        builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.profile,
+        name: 'profile',
+        builder: (context, state) => const _PlaceholderScreen(title: 'Profile'),
+      ),
+
+      if (flags.premium) ...[
+        GoRoute(
+          path: RouteNames.paywall,
+          name: 'paywall',
+          builder: (context, state) => const Scaffold(
+            body: SafeArea(child: PaywallPlaceholderScreen()),
+          ),
+        ),
+        GoRoute(
+          path: RouteNames.subscription,
+          name: 'subscription',
+          builder: (context, state) =>
+              const _PlaceholderScreen(title: 'Subscription'),
+        ),
+      ],
+    ],
+
+    // Error handling
+    errorBuilder: (context, state) => Scaffold(
+      body: Center(
+        child: Text('Sayfa bulunamadı: ${state.uri}'),
       ),
     ),
-    GoRoute(
-      path: RouteNames.subscription,
-      name: 'subscription',
-      builder: (context, state) =>
-          const _PlaceholderScreen(title: 'Subscription'),
-    ),
-  ],
 
-  // Error handling
-  errorBuilder: (context, state) => Scaffold(
-    body: Center(
-      child: Text('Sayfa bulunamadı: ${state.uri}'),
-    ),
-  ),
-
-  // Redirect logic for auth
-  redirect: (context, state) {
-    // TODO: Implement auth redirect logic when auth provider is ready
-    return null;
-  },
-);
+    redirect: (context, state) {
+      if (!flags.cloudSync && _authPaths.contains(state.uri.path)) {
+        return RouteNames.documents;
+      }
+      return null;
+    },
+  );
+}
 
 /// Temporary placeholder screen for routes not yet implemented
 class _PlaceholderScreen extends StatelessWidget {

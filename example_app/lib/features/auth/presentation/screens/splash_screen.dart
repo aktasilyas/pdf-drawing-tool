@@ -4,8 +4,9 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:example_app/core/config/feature_flags.dart';
+import 'package:example_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/utils/logger.dart';
 import 'package:example_app/core/widgets/index.dart';
@@ -65,7 +66,13 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
     if (!mounted) return;
 
-    final session = Supabase.instance.client.auth.currentSession;
+    // Local-only build: no auth, never touch Supabase.
+    if (!ref.read(featureFlagsProvider).cloudSync) {
+      context.go('/documents');
+      return;
+    }
+
+    final session = ref.read(sessionProvider);
 
     if (session != null) {
       logger.i('Session found: ${session.user.email}');
