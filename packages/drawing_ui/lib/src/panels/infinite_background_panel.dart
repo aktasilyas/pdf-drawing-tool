@@ -386,11 +386,11 @@ class _ColorChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final isDark = _ColorSection._isDark(color);
+    final onDark = _ColorSection._isDark(color);
     // Use contrast-safe colors based on chip background, not theme
     final textColor =
-        isDark ? const Color(0xFFF2F3F6) : const Color(0xFF1B1F23);
-    final checkColor = isDark ? const Color(0xFFF2F3F6) : cs.primary;
+        onDark ? const Color(0xFFF2F3F6) : const Color(0xFF1B1F23);
+    final checkColor = onDark ? const Color(0xFFF2F3F6) : cs.primary;
     return Expanded(
       child: GestureDetector(
         onTap: onTap,

@@ -90,13 +90,11 @@ class PenBox extends ConsumerWidget {
 
   void _onPresetLongPressed(BuildContext context, WidgetRef ref, int index) {
     final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Show preset edit options
     showModalBottomSheet(
       context: context,
-      backgroundColor:
-          isDark ? colorScheme.surfaceContainerLow : colorScheme.surface,
+      backgroundColor: colorScheme.panelSurface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -131,7 +129,6 @@ class _AddPresetButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = DrawingTheme.of(context);
     final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: onTap,
@@ -139,9 +136,7 @@ class _AddPresetButton extends StatelessWidget {
         width: theme.penSlotSize,
         height: theme.penSlotSize,
         decoration: BoxDecoration(
-          color: isDark
-              ? colorScheme.surfaceContainerHigh.withValues(alpha: 0.5)
-              : colorScheme.surfaceContainerHighest,
+          color: colorScheme.mutedControlSurface,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: colorScheme.outline.withValues(alpha: 0.4),
@@ -254,7 +249,6 @@ class _PresetOptionsSheet extends ConsumerWidget {
     required VoidCallback onTap,
   }) {
     final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Material(
       color: Colors.transparent,
@@ -274,7 +268,7 @@ class _PresetOptionsSheet extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: isDark ? 0.2 : 0.1),
+                  color: color.withValues(alpha: colorScheme.tintAlpha),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: PhosphorIcon(

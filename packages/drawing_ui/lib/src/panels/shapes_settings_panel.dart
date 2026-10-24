@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:drawing_ui/src/theme/chrome_roles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/src/panels/tool_panel.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
@@ -144,14 +145,11 @@ class _ShapeOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final dk = Theme.of(context).brightness == Brightness.dark;
     return GestureDetector(
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: isSelected
-              ? cs.primaryContainer
-              : (dk ? cs.surfaceContainerHigh : cs.surfaceContainerHighest),
+          color: isSelected ? cs.primaryContainer : cs.controlSurface,
           borderRadius: BorderRadius.circular(4),
           border: Border.all(
             color: isSelected ? cs.primary : cs.outline.withValues(alpha: 0.3),
