@@ -75,9 +75,7 @@ class AppModal {
     required bool isDismissible,
     required bool showCloseButton,
   }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final surfaceColor =
-        isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+    final surfaceColor = context.palette.surfaceElevated;
 
     return showModalBottomSheet<T>(
       context: context,
@@ -107,9 +105,7 @@ class AppModal {
     required bool isDismissible,
     required bool showCloseButton,
   }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final surfaceColor =
-        isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+    final surfaceColor = context.palette.surfaceElevated;
 
     return showDialog<T>(
       context: context,
@@ -152,13 +148,10 @@ class _BottomSheetContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textPrimary =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
-    final textSecondary =
-        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
-    final handleColor =
-        isDark ? AppColors.outlineVariantDark : AppColors.outlineVariantLight;
+    final palette = context.palette;
+    final textPrimary = palette.textPrimary;
+    final textSecondary = palette.textMuted;
+    final handleColor = palette.border;
 
     return SafeArea(
       child: Padding(
@@ -263,11 +256,9 @@ class _DialogContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textPrimary =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
-    final textSecondary =
-        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+    final palette = context.palette;
+    final textPrimary = palette.textPrimary;
+    final textSecondary = palette.textMuted;
 
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.xl),

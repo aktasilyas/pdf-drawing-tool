@@ -56,10 +56,10 @@ class AppChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final effectiveColor = color ?? AppColors.primary;
-    final unselectedBg =
-        isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariantLight;
+    final palette = context.palette;
+    final effectiveColor = color ?? palette.accent;
+    final unselectedBg = palette.surface;
+    final contentColor = isSelected ? palette.onAccent : palette.textPrimary;
 
     return Material(
       color: isSelected ? effectiveColor : unselectedBg,
@@ -80,14 +80,14 @@ class AppChip extends StatelessWidget {
                 Icon(
                   icon,
                   size: AppIconSize.sm,
-                  color: _getContentColor(effectiveColor, isDark: isDark),
+                  color: contentColor,
                 ),
                 const SizedBox(width: AppSpacing.xs),
               ],
               Text(
                 label,
                 style: AppTypography.labelMedium.copyWith(
-                  color: _getContentColor(effectiveColor, isDark: isDark),
+                  color: contentColor,
                 ),
               ),
               if (onDelete != null) ...[
@@ -98,7 +98,7 @@ class AppChip extends StatelessWidget {
                   child: Icon(
                     Icons.close,
                     size: AppIconSize.sm,
-                    color: _getContentColor(effectiveColor, isDark: isDark),
+                    color: contentColor,
                   ),
                 ),
               ],
@@ -107,10 +107,5 @@ class AppChip extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  Color _getContentColor(Color chipColor, {bool isDark = false}) {
-    if (isSelected) return AppColors.onPrimary;
-    return isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
   }
 }

@@ -111,55 +111,55 @@ class AppButton extends StatelessWidget {
 
   Widget _buildButton(
       BuildContext context, _ButtonSpecs specs, bool isDisabled) {
-    final child = _buildContent(specs);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final palette = context.palette;
+    final child = _buildContent(specs, palette);
 
     switch (variant) {
       case AppButtonVariant.primary:
         return ElevatedButton(
           onPressed: isDisabled ? null : onPressed,
-          style: _primaryStyle(specs),
+          style: _primaryStyle(specs, palette),
           child: child,
         );
 
       case AppButtonVariant.secondary:
         return ElevatedButton(
           onPressed: isDisabled ? null : onPressed,
-          style: _secondaryStyle(specs, isDark),
+          style: _secondaryStyle(specs, palette),
           child: child,
         );
 
       case AppButtonVariant.outline:
         return OutlinedButton(
           onPressed: isDisabled ? null : onPressed,
-          style: _outlineStyle(specs, isDark),
+          style: _outlineStyle(specs, palette),
           child: child,
         );
 
       case AppButtonVariant.text:
         return TextButton(
           onPressed: isDisabled ? null : onPressed,
-          style: _textStyle(specs, isDark),
+          style: _textStyle(specs, palette),
           child: child,
         );
 
       case AppButtonVariant.destructive:
         return ElevatedButton(
           onPressed: isDisabled ? null : onPressed,
-          style: _destructiveStyle(specs),
+          style: _destructiveStyle(specs, palette),
           child: child,
         );
     }
   }
 
-  Widget _buildContent(_ButtonSpecs specs) {
+  Widget _buildContent(_ButtonSpecs specs, AppPalette palette) {
     if (isLoading) {
       return SizedBox(
         width: 20,
         height: 20,
         child: CircularProgressIndicator(
           strokeWidth: 2,
-          color: _getLoadingColor(),
+          color: _getLoadingColor(palette),
         ),
       );
     }
@@ -194,15 +194,16 @@ class AppButton extends StatelessWidget {
     );
   }
 
-  Color _getLoadingColor() {
+  Color _getLoadingColor(AppPalette palette) {
     switch (variant) {
       case AppButtonVariant.primary:
+        return palette.onAccent;
       case AppButtonVariant.destructive:
-        return AppColors.onPrimary;
+        return palette.onDanger;
       case AppButtonVariant.secondary:
       case AppButtonVariant.outline:
       case AppButtonVariant.text:
-        return AppColors.primary;
+        return palette.accent;
     }
   }
 
@@ -233,11 +234,12 @@ class AppButton extends StatelessWidget {
   }
 
   /// Primary: Flat renk, shadow yok (default), press'te çok hafif elevation
-  ButtonStyle _primaryStyle(_ButtonSpecs specs) => ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.onPrimary,
+  ButtonStyle _primaryStyle(_ButtonSpecs specs, AppPalette palette) =>
+      ElevatedButton.styleFrom(
+        backgroundColor: palette.accent,
+        foregroundColor: palette.onAccent,
         elevation: 0,
-        shadowColor: AppColors.primary.withValues(alpha: 0.3),
+        shadowColor: palette.accent.withValues(alpha: 0.3),
         padding: EdgeInsets.symmetric(horizontal: specs.horizontalPadding),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.button),
@@ -250,20 +252,17 @@ class AppButton extends StatelessWidget {
         }),
         backgroundColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.pressed)) {
-            return AppColors.primaryDark;
+            return Color.lerp(palette.accent, palette.textPrimary, 0.15);
           }
-          return AppColors.primary;
+          return palette.accent;
         }),
       );
 
   /// Secondary: surfaceVariant bg, textPrimary renk
-  ButtonStyle _secondaryStyle(_ButtonSpecs specs, bool isDark) =>
+  ButtonStyle _secondaryStyle(_ButtonSpecs specs, AppPalette palette) =>
       ElevatedButton.styleFrom(
-        backgroundColor: isDark
-            ? AppColors.surfaceVariantDark
-            : AppColors.surfaceVariantLight,
-        foregroundColor:
-            isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+        backgroundColor: palette.surface,
+        foregroundColor: palette.textPrimary,
         elevation: 0,
         padding: EdgeInsets.symmetric(horizontal: specs.horizontalPadding),
         shape: RoundedRectangleBorder(
@@ -278,14 +277,12 @@ class AppButton extends StatelessWidget {
       );
 
   /// Outline: 1px border, transparent bg, hover/press'te hafif fill
-  ButtonStyle _outlineStyle(_ButtonSpecs specs, bool isDark) {
-    final outlineColor =
-        isDark ? AppColors.outlineDark : AppColors.outlineLight;
-    final hoverFill =
-        isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariantLight;
+  ButtonStyle _outlineStyle(_ButtonSpecs specs, AppPalette palette) {
+    final outlineColor = palette.border;
+    final hoverFill = palette.surface;
 
     return OutlinedButton.styleFrom(
-      foregroundColor: isDark ? AppColors.accent : AppColors.primary,
+      foregroundColor: palette.accent,
       backgroundColor: Colors.transparent,
       padding: EdgeInsets.symmetric(horizontal: specs.horizontalPadding),
       shape: RoundedRectangleBorder(
@@ -305,9 +302,9 @@ class AppButton extends StatelessWidget {
   }
 
   /// Text: arka plan yok, border yok, sadece text + ripple
-  ButtonStyle _textStyle(_ButtonSpecs specs, bool isDark) =>
+  ButtonStyle _textStyle(_ButtonSpecs specs, AppPalette palette) =>
       TextButton.styleFrom(
-        foregroundColor: isDark ? AppColors.accent : AppColors.primary,
+        foregroundColor: palette.accent,
         padding: EdgeInsets.symmetric(horizontal: specs.horizontalPadding),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.button),
@@ -316,11 +313,12 @@ class AppButton extends StatelessWidget {
       );
 
   /// Destructive: flat error renk, beyaz text
-  ButtonStyle _destructiveStyle(_ButtonSpecs specs) => ElevatedButton.styleFrom(
-        backgroundColor: AppColors.error,
-        foregroundColor: AppColors.onError,
+  ButtonStyle _destructiveStyle(_ButtonSpecs specs, AppPalette palette) =>
+      ElevatedButton.styleFrom(
+        backgroundColor: palette.danger,
+        foregroundColor: palette.onDanger,
         elevation: 0,
-        shadowColor: AppColors.error.withValues(alpha: 0.3),
+        shadowColor: palette.danger.withValues(alpha: 0.3),
         padding: EdgeInsets.symmetric(horizontal: specs.horizontalPadding),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.button),

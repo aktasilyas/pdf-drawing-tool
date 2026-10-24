@@ -119,19 +119,13 @@ class _AppSearchFieldState extends State<AppSearchField> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final palette = context.palette;
 
     // Theme-aware colors
-    final fillColor = isDark
-        ? AppColors.surfaceContainerHighDark
-        : AppColors.surfaceVariantLight;
-    final textColor =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
-    final hintColor =
-        isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight;
-    final iconColor = _isFocused
-        ? AppColors.primary
-        : (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight);
+    final fillColor = palette.surface;
+    final textColor = palette.textPrimary;
+    final hintColor = palette.textMuted;
+    final iconColor = _isFocused ? palette.accent : palette.textMuted;
 
     return ConstrainedBox(
       constraints: const BoxConstraints(minHeight: 48),
@@ -153,9 +147,7 @@ class _AppSearchFieldState extends State<AppSearchField> {
                   icon: Icon(
                     Icons.close,
                     size: AppIconSize.md,
-                    color: isDark
-                        ? AppColors.textSecondaryDark
-                        : AppColors.textSecondaryLight,
+                    color: palette.textMuted,
                   ),
                   splashRadius: AppSpacing.lg,
                 )
@@ -179,7 +171,7 @@ class _AppSearchFieldState extends State<AppSearchField> {
           // Focus: 1.5px primary border
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppRadius.textField),
-            borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+            borderSide: BorderSide(color: palette.accent, width: 1.5),
           ),
         ),
       ),
