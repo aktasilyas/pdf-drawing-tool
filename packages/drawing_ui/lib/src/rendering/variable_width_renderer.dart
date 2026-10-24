@@ -16,7 +16,6 @@ class VariableWidthStrokeRenderer {
     if (points.isEmpty) return;
     _configurePaint(style);
 
-
     final outline = StrokeOutline.build(
       points,
       StrokeOutlineOptions(

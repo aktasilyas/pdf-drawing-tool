@@ -63,13 +63,23 @@ void main() {
   test('no kinks when sample density changes abruptly', () {
     final pts = <DrawingPoint>[
       for (var i = 0; i < 10; i++)
-        DrawingPoint(x: i * 20.0, y: 0, pressure: 0.2, timestamp: i * 8),
+        DrawingPoint(
+            x: i * 20.0,
+            y: 30 * math.sin(i / 3),
+            pressure: 0.2,
+            timestamp: i * 8),
       for (var i = 0; i < 60; i++)
         DrawingPoint(
-            x: 180 + i * 0.5, y: 0, pressure: 1.0, timestamp: 80 + i * 8),
+            x: 180 + i * 0.5,
+            y: 30 * math.sin(3 + i / 40),
+            pressure: 1.0,
+            timestamp: 80 + i * 8),
       for (var i = 1; i < 10; i++)
         DrawingPoint(
-            x: 210 + i * 25.0, y: 0, pressure: 0.3, timestamp: 600 + i * 8),
+            x: 210 + i * 25.0,
+            y: 30 * math.sin(4 + i / 3),
+            pressure: 0.3,
+            timestamp: 600 + i * 8),
     ];
     expect(_selfIntersections(StrokeOutline.build(pts, options)), 0);
   });
@@ -99,10 +109,41 @@ void main() {
   });
 
   test('tapers narrow the stroke ends', () {
-    const tapered = StrokeOutlineOptions(size: 10, taperStart: 40, taperEnd: 40);
+    const tapered =
+        StrokeOutlineOptions(size: 10, taperStart: 40, taperEnd: 40);
     final o = StrokeOutline.build(_line(60), tapered);
     final nearStart = o.where((p) => p.x < 10).map((p) => (p.y - 50).abs());
-    final mid = o.where((p) => (p.x - 100).abs() < 5).map((p) => (p.y - 50).abs());
+    final mid =
+        o.where((p) => (p.x - 100).abs() < 5).map((p) => (p.y - 50).abs());
     expect(nearStart.reduce(math.max), lessThan(mid.reduce(math.max)));
+  });
+
+  test('faster strokes are thinner than slow ones', () {
+    List<DrawingPoint> at(int dt) => [
+          for (var i = 0; i < 30; i++)
+            DrawingPoint(x: i * 10.0, y: 50, timestamp: i * dt),
+        ];
+    const o = StrokeOutlineOptions(size: 8, velocityThinning: 0.8);
+    expect(width(StrokeOutline.build(at(1), o)),
+        lessThan(width(StrokeOutline.build(at(50), o))));
+  });
+
+  test('degenerate input stays finite and non-empty', () {
+    final same = [for (var i = 0; i < 5; i++) DrawingPoint(x: 5, y: 5)];
+    final o1 = StrokeOutline.build(same, options);
+    expect(o1, isNotEmpty);
+    final close = [
+      DrawingPoint(x: 0, y: 0),
+      DrawingPoint(x: 0.01, y: 0),
+    ];
+    expect(StrokeOutline.build(close, options), isNotEmpty);
+    final zero = StrokeOutline.build(
+        _line(10), const StrokeOutlineOptions(size: 0, thinning: 0));
+    expect(zero.every((p) => p.x.isFinite && p.y.isFinite), isTrue);
+  });
+
+  test('outline reaches the true end point', () {
+    final o = StrokeOutline.build(_line(30), options);
+    expect(o.map((p) => p.x).reduce(math.max), greaterThan(199));
   });
 }
