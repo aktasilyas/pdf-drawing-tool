@@ -130,23 +130,17 @@ class _AppTextFieldState extends State<AppTextField> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final palette = context.palette;
+    final brightness = Theme.of(context).brightness;
     final hasError = widget.errorText != null && widget.errorText!.isNotEmpty;
 
     // Theme-aware colors
-    final fillColor =
-        isDark ? AppColors.surfaceVariantDark : AppColors.surfaceLight;
-    final textColor =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
-    final hintColor =
-        isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight;
-    final labelColor =
-        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
-    final disabledTextColor =
-        isDark ? AppColors.textDisabledDark : AppColors.textDisabledLight;
-    final iconColor = _isFocused
-        ? AppColors.primary
-        : (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight);
+    final fillColor = palette.surfaceElevated;
+    final textColor = palette.textPrimary;
+    final hintColor = palette.textMuted;
+    final labelColor = palette.textMuted;
+    final disabledTextColor = palette.textMuted;
+    final iconColor = _isFocused ? palette.accent : (palette.textMuted);
 
     return Opacity(
       opacity: widget.enabled ? 1.0 : 0.5,
@@ -158,7 +152,7 @@ class _AppTextFieldState extends State<AppTextField> {
             Text(
               widget.label!,
               style: AppTypography.caption.copyWith(
-                color: hasError ? AppColors.error : labelColor,
+                color: hasError ? palette.danger : labelColor,
               ),
             ),
             const SizedBox(height: AppSpacing.xs),
@@ -167,7 +161,7 @@ class _AppTextFieldState extends State<AppTextField> {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(AppRadius.textField),
               boxShadow: AppShadows.toolbar(
-                isDark ? Brightness.dark : Brightness.light,
+                brightness,
               ),
             ),
             child: ConstrainedBox(
@@ -195,7 +189,7 @@ class _AppTextFieldState extends State<AppTextField> {
                       ? Icon(
                           widget.prefixIcon,
                           size: AppIconSize.md,
-                          color: hasError ? AppColors.error : iconColor,
+                          color: hasError ? palette.danger : iconColor,
                         )
                       : null,
                   suffixIcon: widget.suffix != null
@@ -219,27 +213,25 @@ class _AppTextFieldState extends State<AppTextField> {
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppRadius.textField),
                     borderSide: hasError
-                        ? const BorderSide(color: AppColors.error, width: 1.5)
+                        ? BorderSide(color: palette.danger, width: 1.5)
                         : BorderSide.none,
                   ),
                   // Focus: 1.5px primary border
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppRadius.textField),
                     borderSide: BorderSide(
-                      color: hasError ? AppColors.error : AppColors.primary,
+                      color: hasError ? palette.danger : palette.accent,
                       width: 1.5,
                     ),
                   ),
                   // Error states
                   errorBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppRadius.textField),
-                    borderSide:
-                        const BorderSide(color: AppColors.error, width: 1.5),
+                    borderSide: BorderSide(color: palette.danger, width: 1.5),
                   ),
                   focusedErrorBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppRadius.textField),
-                    borderSide:
-                        const BorderSide(color: AppColors.error, width: 1.5),
+                    borderSide: BorderSide(color: palette.danger, width: 1.5),
                   ),
                   // Disabled
                   disabledBorder: OutlineInputBorder(
@@ -254,7 +246,7 @@ class _AppTextFieldState extends State<AppTextField> {
             const SizedBox(height: AppSpacing.xs),
             Text(
               widget.errorText!,
-              style: AppTypography.caption.copyWith(color: AppColors.error),
+              style: AppTypography.caption.copyWith(color: palette.danger),
             ),
           ] else if (widget.helperText != null) ...[
             const SizedBox(height: AppSpacing.xs),
