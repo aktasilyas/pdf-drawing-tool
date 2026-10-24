@@ -198,9 +198,7 @@ class IncrementalStrokeOutline {
       _addAll(out, _dot());
       return;
     }
-    final s = from != null
-        ? from.clamp(0, n - 2)
-        : math.max(0, _frozen - 2);
+    final s = from != null ? from.clamp(0, n - 2) : math.max(0, _frozen - 2);
     _ribbon(s, n - 1, true, s == 0, out);
   }
 

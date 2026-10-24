@@ -70,8 +70,8 @@ void main() {
       final points = controller.activePoints;
 
       final live = await _raster(controller.geometry.paint);
-      final committed = await _raster((c) => FlutterStrokeRenderer()
-          .renderActiveStroke(c, points, entry.value));
+      final committed = await _raster((c) =>
+          FlutterStrokeRenderer().renderActiveStroke(c, points, entry.value));
 
       expect(_diffRatio(live, committed), lessThan(0.005));
       controller.dispose();
@@ -80,10 +80,10 @@ void main() {
 
   test('LiveStrokePainter repaints through the listenable only', () {
     final controller = DrawingController();
-    final a = LiveStrokePainter(
-        geometry: controller.geometry, repaint: controller);
-    final b = LiveStrokePainter(
-        geometry: controller.geometry, repaint: controller);
+    final a =
+        LiveStrokePainter(geometry: controller.geometry, repaint: controller);
+    final b =
+        LiveStrokePainter(geometry: controller.geometry, repaint: controller);
     expect(b.shouldRepaint(a), isFalse);
     final c = LiveStrokePainter(
         geometry: ActiveStrokeGeometry(), repaint: controller);
@@ -103,8 +103,8 @@ void _prefixAndTransitionTests() {
       if (n > 1) controller.addPoint(input[n - 1]);
       final points = controller.activePoints;
       final live = await _raster(controller.geometry.paint);
-      final legacy = await _raster((c) =>
-          FlutterStrokeRenderer().renderActiveStroke(c, points, style));
+      final legacy = await _raster(
+          (c) => FlutterStrokeRenderer().renderActiveStroke(c, points, style));
       expect(_diffRatio(live, legacy), lessThan(0.005), reason: 'n=$n');
     }
     controller.dispose();
