@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart' show setEquals;
 import 'package:drawing_core/drawing_core.dart';
 
 import 'package:drawing_ui/src/rendering/tiles/element_bounds.dart';
@@ -12,6 +13,11 @@ class SceneEntry {
 
   /// A [Stroke], [Shape], [ImageElement] or [TextElement].
   final Object element;
+
+  /// Whether [element] blends with what is below it (non-normal blend mode).
+  bool get usesBlend =>
+      element is Stroke &&
+      (element as Stroke).style.blendMode != DrawingBlendMode.normal;
 
   /// Inflated page-space bounds of [element].
   Rect get bounds => switch (element) {
@@ -55,8 +61,24 @@ class ElementScene {
   /// Stroke ids hidden by the stroke eraser preview.
   final Set<String> strokeEraserPreview;
 
+  /// Whether [other] was built from the very same inputs (identity for lists
+  /// and maps, value for the id sets), so a diff would be empty.
+  bool isSameAs(ElementScene other) =>
+      identical(strokes, other.strokes) &&
+      identical(shapes, other.shapes) &&
+      identical(images, other.images) &&
+      identical(texts, other.texts) &&
+      identical(elementOrder, other.elementOrder) &&
+      identical(pixelEraserPreview, other.pixelEraserPreview) &&
+      setEquals(excludedIds, other.excludedIds) &&
+      setEquals(strokeEraserPreview, other.strokeEraserPreview);
+
   /// Visible elements in paint order. Computed once, O(n).
   late final List<SceneEntry> entries = _buildEntries();
+
+  /// Whether a non-normal blend element touches [rect].
+  bool hasBlendIn(Rect rect) =>
+      entries.any((e) => e.usesBlend && e.bounds.overlaps(rect));
 
   /// Visible elements by id.
   late final Map<String, SceneEntry> byId = {

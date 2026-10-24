@@ -14,6 +14,8 @@ export 'live_stroke_painter.dart';
 export 'stroke_painter.dart';
 export 'text_painter.dart';
 export 'tiled_element_painter.dart';
+export 'active_layer_content.dart';
+export 'element_preview_painter.dart';
 export 'page_background_painter.dart';
 export 'selected_elements_painter.dart';
 export 'sticky_note_handles_painter.dart';

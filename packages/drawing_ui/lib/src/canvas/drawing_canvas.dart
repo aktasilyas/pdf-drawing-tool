@@ -7,7 +7,7 @@ import 'package:drawing_ui/src/canvas/stroke_painter.dart';
 import 'package:drawing_ui/src/canvas/passive_layer_painter.dart';
 import 'package:drawing_ui/src/canvas/selection_painter.dart';
 import 'package:drawing_ui/src/canvas/image_painter.dart';
-import 'package:drawing_ui/src/canvas/unified_element_painter.dart';
+import 'package:drawing_ui/src/canvas/active_layer_content.dart';
 import 'package:drawing_ui/src/canvas/sticky_note_painter.dart';
 import 'package:drawing_ui/src/canvas/sticky_note_handles_painter.dart';
 import 'package:drawing_ui/src/canvas/sticky_note_resize_handles.dart';
@@ -993,47 +993,42 @@ class DrawingCanvasState extends ConsumerState<DrawingCanvas>
                                   Stack(
                                     clipBehavior: Clip.none,
                                     children: [
-                                      // Unified element painter: strokes, shapes, images, texts
-                                      RepaintBoundary(
-                                        child: CustomPaint(
-                                          size: size,
-                                          painter: UnifiedElementPainter(
+                                      // Tiled raster cache of committed content
+                                      Consumer(
+                                        builder: (context, ref, _) =>
+                                            ActiveLayerContent(
+                                          key: ValueKey(
+                                              '${currentPage.id}/$activeLayerIndex'),
+                                          scene: ElementScene(
                                             strokes: strokes,
                                             shapes: shapes,
                                             images: images,
                                             texts: texts,
                                             elementOrder: elementOrder,
-                                            renderer: _renderer,
-                                            cacheManager: _imageCacheManager,
-                                            activeShape: previewShape,
-                                            activeText: textToolState.isEditing
-                                                ? textToolState.activeText
-                                                : null,
-                                            excludedStrokeIds:
-                                                strokeEraserPreview.isNotEmpty
-                                                    ? {
-                                                        ...excludedStrokeIds,
-                                                        ...strokeEraserPreview
-                                                      }
-                                                    : excludedStrokeIds,
-                                            excludedShapeIds: excludedShapeIds,
-                                            excludedImageIds: excludedImageIds,
-                                            excludedTextIds: excludedTextIds,
+                                            excludedIds: {
+                                              ...excludedStrokeIds,
+                                              ...excludedShapeIds,
+                                              ...excludedImageIds,
+                                              ...excludedTextIds,
+                                            },
                                             pixelEraserPreview:
                                                 pixelEraserPreview,
                                             strokeEraserPreview:
                                                 strokeEraserPreview,
-                                            selectionColor: Theme.of(context)
-                                                .colorScheme
-                                                .primary,
                                           ),
-                                          isComplex: true,
-                                          willChange: pixelEraserPreview
-                                                  .isNotEmpty ||
-                                              strokeEraserPreview.isNotEmpty ||
-                                              previewShape != null ||
-                                              textToolState.isEditing ||
-                                              hasLiveTransform,
+                                          transform: effectiveTransform,
+                                          viewportSize: size,
+                                          isZooming:
+                                              ref.watch(isZoomingProvider),
+                                          renderer: _renderer,
+                                          cacheManager: _imageCacheManager,
+                                          activeShape: previewShape,
+                                          activeText: textToolState.isEditing
+                                              ? textToolState.activeText
+                                              : null,
+                                          selectionColor: Theme.of(context)
+                                              .colorScheme
+                                              .primary,
                                         ),
                                       ),
                                       // Committed Sticky Notes

@@ -46,6 +46,20 @@ class TileGrid {
         (key.row + 1) * tileExtent,
       );
 
+  /// The key in [keys] whose rect centre is closest to [point].
+  TileKey nearest(Iterable<TileKey> keys, Offset point) {
+    var best = keys.first;
+    var bestDist = double.infinity;
+    for (final k in keys) {
+      final d = (rectOf(k).center - point).distanceSquared;
+      if (d < bestDist) {
+        best = k;
+        bestDist = d;
+      }
+    }
+    return best;
+  }
+
   /// Keys of every tile whose rect overlaps [rect] (touching edges do not
   /// count). When [clip] is given, only tiles overlapping it are returned.
   List<TileKey> keysIn(Rect rect, {Rect? clip}) {

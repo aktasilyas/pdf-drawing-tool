@@ -11,7 +11,12 @@ class TileStore {
   /// Visible tiles that were rasterized but hold no content.
   final Set<TileKey> empty = {};
 
-  bool has(TileKey key) => tiles.containsKey(key) || empty.contains(key);
+  /// Visible tiles drawn as vectors because they hold non-normal blend
+  /// elements (a transparent tile cannot multiply against the page).
+  final Set<TileKey> vector = {};
+
+  bool has(TileKey key) =>
+      tiles.containsKey(key) || empty.contains(key) || vector.contains(key);
 
   /// Bytes held by tile images.
   int get bytes => tiles.values.fold(0, (sum, t) => sum + t.bytes);
@@ -19,6 +24,7 @@ class TileStore {
   void drop(TileKey key) {
     tiles.remove(key)?.image.dispose();
     empty.remove(key);
+    vector.remove(key);
   }
 
   void clear() {
@@ -27,6 +33,7 @@ class TileStore {
     }
     tiles.clear();
     empty.clear();
+    vector.clear();
   }
 
   /// Removes all tiles without disposing those overlapping [keepIn]; returns
@@ -42,6 +49,7 @@ class TileStore {
     }
     tiles.clear();
     empty.clear();
+    vector.clear();
     return keep;
   }
 

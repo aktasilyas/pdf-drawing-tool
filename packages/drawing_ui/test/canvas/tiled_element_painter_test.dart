@@ -98,4 +98,24 @@ void main() {
       cache.dispose();
     });
   });
+
+  testWidgets('multiply content stays vector so it blends with the page', (
+    tester,
+  ) async {
+    final stroke = Stroke(
+      id: 'm',
+      points: [DrawingPoint(x: 100, y: 100), DrawingPoint(x: 300, y: 300)],
+      style: StrokeStyle(
+        color: 0xFF2196F3,
+        thickness: 20,
+        blendMode: DrawingBlendMode.multiply,
+      ),
+      createdAt: DateTime(2024),
+    );
+    final cache = _cache()..setViewport(_page, 1, interacting: false);
+    cache.update(ElementScene(strokes: [stroke], elementOrder: const ['m']));
+    expect(cache.visibleTiles, isEmpty);
+    expect(cache.vectorRects, isNotEmpty);
+    cache.dispose();
+  });
 }
