@@ -7,4 +7,4 @@ if ! flutter test test/benchmark/ink_benchmark_test.dart >"$out" 2>&1; then
   cat "$out"
   exit 1
 fi
-grep -E '^(──|committed|active)' "$out" || true
+grep -E '^(──|committed|active|pen-up)' "$out" || true
