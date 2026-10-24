@@ -23,12 +23,15 @@ import 'package:example_app/features/editor/presentation/screens/editor_screen.d
 import 'package:example_app/features/premium/presentation/screens/paywall_placeholder_screen.dart';
 import 'package:example_app/features/settings/settings.dart';
 
-/// Auth routes that only exist when cloud sync is on.
+/// Auth routes that only exist when Supabase is initialized (cloud sync or AI).
 const _authPaths = {
   RouteNames.login,
   RouteNames.register,
   RouteNames.forgotPassword,
 };
+
+/// Premium routes that only exist when premium is on.
+const _premiumPaths = {RouteNames.paywall, RouteNames.subscription};
 
 /// Router for the app, reading the router from the flags-aware provider.
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -55,7 +58,7 @@ GoRouter buildAppRouter(
         name: 'splash',
         builder: (context, state) => const SplashScreen(),
       ),
-      if (flags.cloudSync) ...[
+      if (flags.needsSupabase) ...[
         GoRoute(
           path: RouteNames.login,
           name: 'login',
@@ -170,7 +173,10 @@ GoRouter buildAppRouter(
     ),
 
     redirect: (context, state) {
-      if (!flags.cloudSync && _authPaths.contains(state.uri.path)) {
+      if (!flags.needsSupabase && _authPaths.contains(state.uri.path)) {
+        return RouteNames.documents;
+      }
+      if (!flags.premium && _premiumPaths.contains(state.uri.path)) {
         return RouteNames.documents;
       }
       return null;
