@@ -18,6 +18,9 @@ List<Override> buildAppOverrides({
     featureFlagsProvider.overrideWithValue(flags),
     sharedPreferencesProvider.overrideWithValue(prefs),
     drawing_ui.sharedPreferencesProvider.overrideWithValue(prefs),
+    drawing_ui.aiAssistantEnabledProvider.overrideWithValue(flags.aiChat),
+    drawing_ui.audioRecordingEnabledProvider
+        .overrideWithValue(flags.audioRecording),
     if (flags.premium) ...premiumRecordingOverrides(),
   ];
 }

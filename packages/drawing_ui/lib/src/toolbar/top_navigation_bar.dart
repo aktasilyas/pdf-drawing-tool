@@ -147,7 +147,8 @@ class TopNavigationBar extends ConsumerWidget {
                 currentTool: currentTool,
                 size: sz,
               )),
-          if (!ref.watch(isInfiniteCanvasProvider))
+          if (!ref.watch(isInfiniteCanvasProvider) &&
+              ref.watch(audioRecordingEnabledProvider))
             ElyanotesNavButton(
               icon: ElyanotesIcons.microphone,
               tooltip: 'Ses Kaydi',
@@ -288,7 +289,9 @@ class TopNavigationBar extends ConsumerWidget {
             onPressed: () => showAddPageMenu(context),
           ),
 
-        if (!isReaderMode && !ref.watch(isInfiniteCanvasProvider))
+        if (!isReaderMode &&
+            !ref.watch(isInfiniteCanvasProvider) &&
+            ref.watch(audioRecordingEnabledProvider))
           ElyanotesNavButton(
             icon: ElyanotesIcons.microphone,
             tooltip: 'Ses Kaydi',

@@ -127,7 +127,8 @@ Widget buildDrawingCanvasArea({
                 },
               )),
         if (!isReadOnly && !isCompactMode) const FloatingUndoRedo(),
-        if (!isReadOnly) const FloatingRecordingBar(),
+        if (!isReadOnly && ref.watch(audioRecordingEnabledProvider))
+          const FloatingRecordingBar(),
         if (!isReadOnly) const FloatingExportProgress(),
         if (!isReadOnly && canvasMode != null && !canvasMode.isInfinite)
           const Positioned.fill(child: Center(child: ZoomControlBar()))

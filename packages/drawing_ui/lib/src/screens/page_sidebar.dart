@@ -100,7 +100,12 @@ class _PageSidebarState extends ConsumerState<PageSidebar> {
     final pageManager = ref.watch(pageManagerProvider);
     final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final filter = ref.watch(sidebarFilterProvider);
+    final audioEnabled = ref.watch(audioRecordingEnabledProvider);
+    final rawFilter = ref.watch(sidebarFilterProvider);
+    // Recordings filter is unavailable when audio is disabled.
+    final filter = !audioEnabled && rawFilter == SidebarFilter.recordings
+        ? SidebarFilter.allPages
+        : rawFilter;
 
     ref.listen<int>(currentPageIndexProvider, (prev, next) {
       if (prev != next) _scrollToPage(next);
@@ -116,6 +121,7 @@ class _PageSidebarState extends ConsumerState<PageSidebar> {
         children: [
           _FilterBar(
             filter: filter,
+            showRecordings: audioEnabled,
             onFilterChanged: (f) =>
                 ref.read(sidebarFilterProvider.notifier).state = f,
             cs: cs,
@@ -208,8 +214,10 @@ class _FilterBar extends StatelessWidget {
     required this.filter,
     required this.onFilterChanged,
     required this.cs,
+    required this.showRecordings,
   });
 
+  final bool showRecordings;
   final SidebarFilter filter;
   final ValueChanged<SidebarFilter> onFilterChanged;
   final ColorScheme cs;
@@ -254,13 +262,14 @@ class _FilterBar extends StatelessWidget {
                 tooltip: 'Yer imleri',
                 onTap: () => onFilterChanged(SidebarFilter.bookmarked),
               ),
-              _FilterTab(
-                icon: ElyanotesIcons.waveform,
-                isActive: filter == SidebarFilter.recordings,
-                cs: cs,
-                tooltip: 'Ses kayitlari',
-                onTap: () => onFilterChanged(SidebarFilter.recordings),
-              ),
+              if (showRecordings)
+                _FilterTab(
+                  icon: ElyanotesIcons.waveform,
+                  isActive: filter == SidebarFilter.recordings,
+                  cs: cs,
+                  tooltip: 'Ses kayitlari',
+                  onTap: () => onFilterChanged(SidebarFilter.recordings),
+                ),
             ],
           ),
         ),

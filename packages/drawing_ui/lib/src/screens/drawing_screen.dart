@@ -296,7 +296,9 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
         widget.canvasMode ?? const core.CanvasMode(isInfinite: true);
     // Defer provider modification to after build completes
     final isInfinite = canvasMode.isInfinite;
-    final aiCallback = widget.onAIPressed ?? () => openAIPanel(context);
+    final aiEnabled = ref.watch(aiAssistantEnabledProvider);
+    final aiCallback =
+        !aiEnabled ? null : (widget.onAIPressed ?? () => openAIPanel(context));
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         ref.read(isInfiniteCanvasProvider.notifier).state = isInfinite;
@@ -339,8 +341,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
               Column(
                 children: [
                   AdaptiveToolbar(
-                    onAIPressed:
-                        widget.onAIPressed ?? () => openAIPanel(context),
+                    onAIPressed: aiCallback,
                     onSettingsPressed: _onSettingsPressed,
                     settingsButtonKey: _settingsButtonKey,
                     toolButtonKeys: _toolButtonKeys,
