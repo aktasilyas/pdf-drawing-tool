@@ -230,6 +230,8 @@ class DrawingController extends ChangeNotifier {
 
   /// Clears all state and resets the controller.
   void reset() {
+    _filter = null;
+    _rawPoints.clear();
     _activePoints.clear();
     _activeStyle = StrokeStyle.pen();
     _isDrawing = false;

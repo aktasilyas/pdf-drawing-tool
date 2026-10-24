@@ -82,7 +82,7 @@ class ActiveStrokeGeometry {
     version++;
   }
 
-  /// Clears the geometry (no stroke).
+  /// Clears the geometry (no stroke). Call [begin] before the next [sync].
   void clear() {
     _style = null;
     _body.reset();
@@ -171,7 +171,7 @@ class ActiveStrokeGeometry {
       _bodyEnd = to;
     }
     _scratch.clear();
-    outline.writeTail(_scratch, from: _bodyEnd < 0 ? null : _bodyEnd);
+    outline.writeTail(_scratch, from: math.max(_bodyEnd, 0));
     _tail.reset();
     _addPolygon(_tail);
   }

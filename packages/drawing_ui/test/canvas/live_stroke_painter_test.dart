@@ -52,6 +52,7 @@ double _diffRatio(Uint8List a, Uint8List b) {
 }
 
 void main() {
+  _prefixAndTransitionTests();
   final styles = <String, StrokeStyle>{
     'pen': StrokeStyle.pen(thickness: 3),
     'highlighter': StrokeStyle.highlighter(),
@@ -88,5 +89,79 @@ void main() {
         geometry: ActiveStrokeGeometry(), repaint: controller);
     expect(c.shouldRepaint(a), isTrue);
     controller.dispose();
+  });
+}
+
+void _prefixAndTransitionTests() {
+  test('every early prefix of a brush stroke matches the legacy render',
+      () async {
+    final style = StrokeStyle.brush();
+    final input = _input();
+    final controller = DrawingController();
+    controller.startStroke(input.first, style);
+    for (var n = 1; n <= 70; n++) {
+      if (n > 1) controller.addPoint(input[n - 1]);
+      final points = controller.activePoints;
+      final live = await _raster(controller.geometry.paint);
+      final legacy = await _raster((c) =>
+          FlutterStrokeRenderer().renderActiveStroke(c, points, style));
+      expect(_diffRatio(live, legacy), lessThan(0.005), reason: 'n=$n');
+    }
+    controller.dispose();
+  });
+
+  group('DrawingController geometry transitions', () {
+    test('startStroke / endStroke / cancel / reset', () {
+      final c = DrawingController();
+      final input = _input();
+      c.startStroke(input.first, StrokeStyle.pen());
+      expect(c.geometry.mode, ActiveStrokeMode.stroked);
+      expect(c.geometry.consumed, 1);
+      for (final p in input.skip(1).take(9)) {
+        c.addPoint(p);
+      }
+      expect(c.geometry.consumed, c.pointCount);
+      c.endStroke();
+      expect(c.geometry.consumed, 0);
+      c.startStroke(input.first, StrokeStyle.pen());
+      c.cancelStroke();
+      expect(c.geometry.consumed, 0);
+      c.startStroke(input.first, StrokeStyle.pen());
+      c.reset();
+      expect(c.geometry.consumed, 0);
+      c.dispose();
+    });
+
+    test('updateStyle mid-stroke rebuilds in the new mode', () {
+      final c = DrawingController();
+      final input = _input();
+      c.startStroke(input.first, StrokeStyle.pen());
+      for (final p in input.skip(1).take(30)) {
+        c.addPoint(p);
+      }
+      c.updateStyle(StrokeStyle.brush());
+      expect(c.geometry.mode, ActiveStrokeMode.outline);
+      expect(c.geometry.consumed, c.pointCount);
+      c.dispose();
+    });
+
+    test('no filter and straight line use the fallback', () {
+      final off = DrawingController(inputFilter: null);
+      off.startStroke(_input().first, StrokeStyle.pen());
+      expect(off.geometry.mode, ActiveStrokeMode.fallback);
+      final line = DrawingController();
+      line.startStroke(_input().first, StrokeStyle.pen(), straightLine: true);
+      expect(line.geometry.mode, ActiveStrokeMode.fallback);
+      off.dispose();
+      line.dispose();
+    });
+
+    test('sync rebuilds when the point list shrinks', () {
+      final g = ActiveStrokeGeometry()..begin(StrokeStyle.pen());
+      final pts = _input();
+      g.sync(pts.take(20).toList());
+      g.sync(pts.take(5).toList());
+      expect(g.consumed, 5);
+    });
   });
 }
