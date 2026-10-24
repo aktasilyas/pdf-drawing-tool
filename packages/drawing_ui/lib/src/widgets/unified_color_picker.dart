@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:drawing_ui/src/theme/chrome_roles.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'package:drawing_ui/src/widgets/compact_color_picker.dart';
@@ -177,16 +178,13 @@ class _MoreButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
-          color: isDark
-              ? colorScheme.surfaceContainerHighest
-              : colorScheme.surfaceContainerHigh,
+          color: colorScheme.chipSurface,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: colorScheme.outline.withValues(alpha: 0.3),

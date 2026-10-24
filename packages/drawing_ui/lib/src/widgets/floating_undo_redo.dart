@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:drawing_ui/src/theme/chrome_roles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_ui/src/providers/history_provider.dart';
@@ -14,7 +15,6 @@ class FloatingUndoRedo extends ConsumerWidget {
     final canUndo = ref.watch(canUndoProvider);
     final canRedo = ref.watch(canRedoProvider);
     final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Positioned(
       top: 16,
@@ -23,10 +23,11 @@ class FloatingUndoRedo extends ConsumerWidget {
         decoration: BoxDecoration(
           color: colorScheme.surface,
           borderRadius: BorderRadius.circular(22),
-          border: isDark ? Border.all(color: colorScheme.outlineVariant) : null,
+          border: colorScheme.floatingBorder,
           boxShadow: [
             BoxShadow(
-              color: colorScheme.shadow.withValues(alpha: isDark ? 0.3 : 0.1),
+              color: colorScheme.shadow
+                  .withValues(alpha: colorScheme.floatingShadowAlpha),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),

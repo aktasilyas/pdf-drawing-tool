@@ -307,7 +307,6 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
     });
     final materialTheme = Theme.of(context);
     final colorScheme = materialTheme.colorScheme;
-    final isDark = materialTheme.brightness == Brightness.dark;
     final screenWidth = MediaQuery.of(context).size.width;
     final isCompactMode = screenWidth < ToolbarLayoutMode.compactBreakpoint;
     final isSidebarOpen = ref.watch(sidebarOpenProvider);
@@ -322,8 +321,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
       toolbarIconColor: colorScheme.onPrimary.withValues(alpha: 0.7),
       toolbarIconSelectedColor: colorScheme.onPrimary,
       toolbarIconDisabledColor: colorScheme.onPrimary.withValues(alpha: 0.3),
-      panelBackground:
-          isDark ? colorScheme.surfaceContainerHigh : colorScheme.surface,
+      panelBackground: colorScheme.screenSurface,
       panelBorderColor: colorScheme.outlineVariant,
       penBoxBackground: colorScheme.surface,
       penBoxSlotSelectedColor: colorScheme.primaryContainer,
