@@ -7,29 +7,14 @@ import 'package:drawing_ui/src/models/tool_type.dart';
 // TOOL STYLE PROVIDER
 // =============================================================================
 
-/// Returns the active StrokeStyle based on current tool and settings.
+/// Returns the [StrokeStyle] a given tool would draw with.
 ///
-/// This provider bridges the UI tool selection with the drawing_core
-/// StrokeStyle model. When the user changes tool, color, or thickness,
-/// this provider automatically updates to reflect those changes.
-///
-/// For pen tools, uses PenType.toStrokeStyle() for proper configuration.
-final activeStrokeStyleProvider = Provider<StrokeStyle>((ref) {
-  final toolType = ref.watch(currentToolProvider);
-
-  // Highlighter tools (special case - uses separate settings provider)
-  if (toolType == ToolType.highlighter) {
-    final settings = ref.watch(highlighterSettingsProvider);
-    return StrokeStyle(
-      color: settings.color.toARGB32(),
-      thickness: settings.thickness,
-      opacity: 0.4,
-      nibShape: NibShape.rectangle,
-      blendMode: DrawingBlendMode.normal,
-      isEraser: false,
-    );
-  }
-
+/// Unlike [activeStrokeStyleProvider] this does not depend on the selected
+/// tool, so the pen picker can preview every preset with its own settings.
+/// Pen tools (and the highlighter) are built from `PenType.toStrokeStyle` so
+/// the preset tuning (taper, blend mode) comes from drawing_core.
+final strokeStyleForToolProvider =
+    Provider.family<StrokeStyle, ToolType>((ref, toolType) {
   // Neon Highlighter (special case - uses highlighter settings + glow)
   if (toolType == ToolType.neonHighlighter) {
     final settings = ref.watch(highlighterSettingsProvider);
@@ -42,6 +27,15 @@ final activeStrokeStyleProvider = Provider<StrokeStyle>((ref) {
       isEraser: false,
       glowRadius: 4.0, // Daha az bulanık
       glowIntensity: settings.glowIntensity,
+    );
+  }
+
+  // Highlighter: separate settings provider, preset config from PenType.
+  if (toolType == ToolType.highlighter) {
+    final settings = ref.watch(highlighterSettingsProvider);
+    return PenType.highlighter.toStrokeStyle(
+      color: settings.color.toARGB32(),
+      thickness: settings.thickness,
     );
   }
 
@@ -74,6 +68,14 @@ final activeStrokeStyleProvider = Provider<StrokeStyle>((ref) {
 
   // Non-drawing tools - return default
   return StrokeStyle.pen();
+});
+
+/// Returns the active StrokeStyle based on current tool and settings.
+///
+/// This provider bridges the UI tool selection with the drawing_core
+/// StrokeStyle model. It is [strokeStyleForToolProvider] of the current tool.
+final activeStrokeStyleProvider = Provider<StrokeStyle>((ref) {
+  return ref.watch(strokeStyleForToolProvider(ref.watch(currentToolProvider)));
 });
 
 /// Converts UI NibShapeType to drawing_core NibShape.

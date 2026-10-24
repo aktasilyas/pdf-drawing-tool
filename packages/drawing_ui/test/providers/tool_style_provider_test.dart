@@ -57,6 +57,22 @@ void main() {
       container.dispose();
     });
 
+    test('highlighter style uses multiply blend', () {
+      final container = ProviderContainer(
+        overrides: [
+          currentToolProvider.overrideWith((ref) =>
+              CurrentToolNotifier(null, initialTool: ToolType.highlighter)),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final style = container.read(activeStrokeStyleProvider);
+
+      expect(style.blendMode, DrawingBlendMode.multiply);
+      expect(style.opacity, 0.4);
+      expect(style.nibShape, NibShape.rectangle);
+    });
+
     test('returns eraser style with isEraser true', () {
       final container = ProviderContainer(
         overrides: [
@@ -375,6 +391,67 @@ void main() {
         expect(container.read(isPenToolProvider), false,
             reason: '$toolType should not be a pen tool');
         container.dispose();
+      }
+    });
+  });
+
+  group('strokeStyleForToolProvider', () {
+    test('returns the style of the requested tool, not the current one', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      // Current tool is ballpointPen (round ends).
+      final fountain =
+          container.read(strokeStyleForToolProvider(ToolType.fountainPen));
+      final ballpoint =
+          container.read(strokeStyleForToolProvider(ToolType.ballpointPen));
+
+      expect(fountain.dynamics.taperStart, greaterThan(0));
+      expect(fountain.dynamics.taperEnd, greaterThan(0));
+      expect(ballpoint.dynamics.taperStart, 0);
+    });
+
+    test('uses the per-tool pen settings', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      container
+          .read(penSettingsProvider(ToolType.fountainPen).notifier)
+          .setColor(const Color(0xFF00FF00));
+
+      final style =
+          container.read(strokeStyleForToolProvider(ToolType.fountainPen));
+
+      expect(style.color, 0xFF00FF00);
+    });
+
+    test('highlighter uses highlighter settings and multiply', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final settings = container.read(highlighterSettingsProvider);
+
+      final style =
+          container.read(strokeStyleForToolProvider(ToolType.highlighter));
+
+      expect(style.color, settings.color.toARGB32());
+      expect(style.thickness, settings.thickness);
+      expect(style.blendMode, DrawingBlendMode.multiply);
+    });
+
+    test('active style equals family of the current tool', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      for (final tool in [
+        ToolType.fountainPen,
+        ToolType.highlighter,
+        ToolType.pixelEraser,
+        ToolType.shapes,
+      ]) {
+        container.read(currentToolProvider.notifier).selectTool(tool);
+        expect(
+          container.read(activeStrokeStyleProvider),
+          container.read(strokeStyleForToolProvider(tool)),
+          reason: '$tool',
+        );
       }
     });
   });
