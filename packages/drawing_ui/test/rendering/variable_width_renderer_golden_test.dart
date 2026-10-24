@@ -10,7 +10,8 @@ class _StrokePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    canvas.drawRect(Offset.zero & size, Paint()..color = const Color(0xFFFFFFFF));
+    canvas.drawRect(
+        Offset.zero & size, Paint()..color = const Color(0xFFFFFFFF));
     final style = StrokeStyle.pen(thickness: 10, color: 0xFF000000);
     final pressures = [0.15, 0.55, 1.0];
     for (var row = 0; row < pressures.length; row++) {
@@ -26,11 +27,14 @@ class _StrokePainter extends CustomPainter {
       renderer.render(canvas, pts, style);
     }
     // Pressure ramp.
-    renderer.render(canvas, [
-      for (var i = 0; i < 60; i++)
-        DrawingPoint(
-            x: 20 + i * 4.6, y: 250, pressure: i / 59, timestamp: i * 8),
-    ], style);
+    renderer.render(
+        canvas,
+        [
+          for (var i = 0; i < 60; i++)
+            DrawingPoint(
+                x: 20 + i * 4.6, y: 250, pressure: i / 59, timestamp: i * 8),
+        ],
+        style);
   }
 
   @override
