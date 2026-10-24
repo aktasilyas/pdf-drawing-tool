@@ -163,3 +163,11 @@ pen-up. The pattern we follow is the open references from the ink-engine skill: 
 in-progress stroke, which keeps a stable prefix and recomputes only the unstable tail on each
 input, and perfect-freehand's stages. The only user-visible decision is parity between live and
 committed ink (A3), which matches all three apps. There is no deviation.
+
+## 8. As built (steps 1-2)
+- Truncation threshold is 1e-6 (not 1e-4): Kema = 16 at default smoothing, 62 at smoothing 1.
+- Freeze rule: `accepted-1-i >= Kema` and `arc[last]-arc[i] >= taperEnd`. The `2*size` term and the
+  backward slope clamp were dropped (the clamp is symmetric, so it is a no-op after the forward pass).
+- Freezing counts accepted samples only, never the ephemeral end sample.
+- Exported from `drawing_core.dart` as well as `input.dart`.
+- Test bound: `lastRecomputed` <= 24 (default), <= 80 (smoothing 1).
