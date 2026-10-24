@@ -66,7 +66,6 @@ class _CompactColorPickerState extends ConsumerState<CompactColorPicker>
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final maxH =
         (MediaQuery.of(context).size.height * 0.65).clamp(380.0, 560.0);
 
@@ -80,9 +79,7 @@ class _CompactColorPickerState extends ConsumerState<CompactColorPicker>
         decoration: BoxDecoration(
           color: cs.pickerSurface,
           borderRadius: BorderRadius.circular(16),
-          border: isDark
-              ? Border.all(color: cs.outline.withValues(alpha: 0.2))
-              : null,
+          border: cs.outlinedFloatingBorder,
           boxShadow: DrawingShadows.panel(Theme.of(context).brightness),
         ),
         child: Column(

@@ -129,7 +129,6 @@ class _AddPresetButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = DrawingTheme.of(context);
     final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: onTap,
@@ -137,9 +136,7 @@ class _AddPresetButton extends StatelessWidget {
         width: theme.penSlotSize,
         height: theme.penSlotSize,
         decoration: BoxDecoration(
-          color: isDark
-              ? colorScheme.surfaceContainerHigh.withValues(alpha: 0.5)
-              : colorScheme.surfaceContainerHighest,
+          color: colorScheme.mutedControlSurface,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: colorScheme.outline.withValues(alpha: 0.4),

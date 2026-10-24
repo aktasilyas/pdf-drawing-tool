@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart' hide Page;
+import 'package:drawing_ui/src/theme/chrome_roles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_core/drawing_core.dart';
@@ -138,7 +139,6 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: widget.onTap,
@@ -154,9 +154,8 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
           border: widget.isSelected
               ? Border.all(color: colorScheme.primary, width: 3)
               : Border.all(
-                  color: isDark
-                      ? colorScheme.outline.withValues(alpha: 0.5)
-                      : colorScheme.outline.withValues(alpha: 0.3),
+                  color: colorScheme.outline
+                      .withValues(alpha: colorScheme.thumbnailBorderAlpha),
                   width: 1,
                 ),
           borderRadius: BorderRadius.circular(8),

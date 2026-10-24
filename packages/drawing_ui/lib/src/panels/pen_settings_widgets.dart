@@ -25,7 +25,6 @@ class LiveStrokePreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final darkMode = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       height: 50,
@@ -41,7 +40,7 @@ class LiveStrokePreview extends StatelessWidget {
         borderRadius: BorderRadius.circular(5),
         child: CustomPaint(
           size: const Size(double.infinity, 50),
-          painter: StrokePainter(color, thickness, toolType, darkMode),
+          painter: StrokePainter(cs.previewInk(color), thickness, toolType),
         ),
       ),
     );
@@ -50,17 +49,16 @@ class LiveStrokePreview extends StatelessWidget {
 
 /// Custom painter for the sine wave stroke preview.
 class StrokePainter extends CustomPainter {
-  StrokePainter(this.color, this.thickness, this.toolType, this.darkMode);
+  StrokePainter(this.color, this.thickness, this.toolType);
 
   final Color color;
   final double thickness;
   final ToolType toolType;
-  final bool darkMode;
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = darkMode ? darkenColor(color, 0.3) : color
+      ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = thickness * 1.5
       ..strokeCap = StrokeCap.round
@@ -79,8 +77,7 @@ class StrokePainter extends CustomPainter {
   bool shouldRepaint(StrokePainter o) =>
       color != o.color ||
       thickness != o.thickness ||
-      toolType != o.toolType ||
-      darkMode != o.darkMode;
+      toolType != o.toolType;
 }
 
 /// GoodNotes-style horizontal pen type selector.

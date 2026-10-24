@@ -186,9 +186,8 @@ class _PageGridItemState extends ConsumerState<PageGridItem> {
 /// "Sayfa ekle" cell in the sidebar grid. Uses [PopoverController] to show
 /// the same arrow-popover as the toolbar's add-page button.
 class AddPageCell extends StatefulWidget {
-  const AddPageCell({super.key, required this.cs, required this.isDark});
+  const AddPageCell({super.key, required this.cs});
   final ColorScheme cs;
-  final bool isDark;
 
   @override
   State<AddPageCell> createState() => _AddPageCellState();

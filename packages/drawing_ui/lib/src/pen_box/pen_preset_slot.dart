@@ -37,11 +37,10 @@ class PenPresetSlot extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = DrawingTheme.of(context);
     final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final slotSize = size ?? theme.penSlotSize;
 
     if (preset.isEmpty) {
-      return _buildEmptySlot(context, slotSize, theme, colorScheme, isDark);
+      return _buildEmptySlot(context, slotSize, theme, colorScheme);
     }
 
     return GestureDetector(
@@ -57,22 +56,15 @@ class PenPresetSlot extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: isSelected
-                ? (isDark
-                    ? colorScheme.primary
-                        .withValues(alpha: 0.4) // Even softer in dark mode
-                    : colorScheme.primary.withValues(alpha: 0.5))
-                : (isDark
-                    ? colorScheme.outline.withValues(alpha: 0.2)
-                    : colorScheme.outline.withValues(alpha: 0.3)),
+                ? colorScheme.primary.withValues(alpha: colorScheme.slotSelectedAlpha)
+                : colorScheme.outline.withValues(alpha: colorScheme.slotIdleAlpha),
             width: isSelected ? 1.5 : 1,
           ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: isDark
-                        ? colorScheme.primary
-                            .withValues(alpha: 0.1) // Very subtle in dark
-                        : colorScheme.primary.withValues(alpha: 0.15),
+                    color: colorScheme.primary
+                        .withValues(alpha: colorScheme.slotGlowAlpha),
                     blurRadius: 4, // Even more compact
                     spreadRadius: 0,
                   )
@@ -120,16 +112,14 @@ class PenPresetSlot extends StatelessWidget {
   }
 
   Widget _buildEmptySlot(BuildContext context, double slotSize,
-      DrawingTheme theme, ColorScheme colorScheme, bool isDark) {
+      DrawingTheme theme, ColorScheme colorScheme) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: slotSize,
         height: slotSize,
         decoration: BoxDecoration(
-          color: isDark
-              ? colorScheme.surfaceContainerHigh.withValues(alpha: 0.5)
-              : colorScheme.surfaceContainerHighest,
+          color: colorScheme.mutedControlSurface,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: colorScheme.outline.withValues(alpha: 0.3),

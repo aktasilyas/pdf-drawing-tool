@@ -100,7 +100,6 @@ class _PageSidebarState extends ConsumerState<PageSidebar> {
   Widget build(BuildContext context) {
     final pageManager = ref.watch(pageManagerProvider);
     final cs = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final audioEnabled = ref.watch(audioRecordingEnabledProvider);
     final rawFilter = ref.watch(sidebarFilterProvider);
     // Recordings filter is unavailable when audio is disabled.
@@ -148,7 +147,7 @@ class _PageSidebarState extends ConsumerState<PageSidebar> {
                 key: ValueKey(filter),
                 child: filter == SidebarFilter.recordings
                     ? const AudioRecordingsList()
-                    : _buildPageGrid(pageManager, filter, cs, isDark),
+                    : _buildPageGrid(pageManager, filter, cs),
               ),
             ),
           ),
@@ -161,7 +160,6 @@ class _PageSidebarState extends ConsumerState<PageSidebar> {
     dynamic pageManager,
     SidebarFilter filter,
     ColorScheme cs,
-    bool isDark,
   ) {
     final allPages = pageManager.pages;
     final isBookmarkFilter = filter == SidebarFilter.bookmarked;
@@ -196,7 +194,7 @@ class _PageSidebarState extends ConsumerState<PageSidebar> {
             onPageTap: widget.onPageTap,
           );
         }
-        return AddPageCell(cs: cs, isDark: isDark);
+        return AddPageCell(cs: cs);
       },
     );
   }
@@ -225,10 +223,7 @@ class _FilterBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final groupBg = isDark
-        ? cs.surfaceContainerHighest
-        : cs.surfaceContainerHigh.withValues(alpha: 0.5);
+    final groupBg = cs.sidebarGroupSurface;
 
     return Container(
       height: 44,
