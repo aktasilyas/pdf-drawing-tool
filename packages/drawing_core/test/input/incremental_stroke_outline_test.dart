@@ -125,6 +125,62 @@ void main() {
     });
   });
 
+  group('chunked and noisy input', () {
+    const base = StrokeOutlineOptions(size: 8);
+
+    void expectSame(List<DrawingPoint> pts, IncrementalStrokeOutline inc) {
+      final expected = StrokeOutline.build(pts, base);
+      final actual = inc.toPolygon();
+      expect(actual.length, expected.length);
+      for (var i = 0; i < expected.length; i++) {
+        expect(actual[i].x, closeTo(expected[i].x, 1e-3));
+        expect(actual[i].y, closeTo(expected[i].y, 1e-3));
+      }
+    }
+
+    test('multi-point addAll chunks match build at every chunk end', () {
+      final pts = _sine(200);
+      final inc = IncrementalStrokeOutline(base);
+      for (var i = 0; i < pts.length; i += 7) {
+        final end = math.min(i + 7, pts.length);
+        inc.addAll(pts.sublist(i, end));
+        expectSame(pts.sublist(0, end), inc);
+      }
+    });
+
+    test('repeated identical points are deduplicated like build', () {
+      final src = _sine(80);
+      final pts = [
+        for (final p in src) ...[p, p, p]
+      ];
+      final inc = IncrementalStrokeOutline(base);
+      for (final p in pts) {
+        inc.addAll([p]);
+      }
+      expectSame(pts, inc);
+    });
+
+    test('sub-threshold jitter is ignored like build', () {
+      final src = _sine(80);
+      final pts = [
+        for (final p in src) ...[
+          p,
+          DrawingPoint(
+            x: p.x + 0.001,
+            y: p.y - 0.001,
+            pressure: p.pressure,
+            timestamp: p.timestamp + 1,
+          ),
+        ],
+      ];
+      final inc = IncrementalStrokeOutline(base);
+      for (final p in pts) {
+        inc.addAll([p]);
+      }
+      expectSame(pts, inc);
+    });
+  });
+
   group('bounded work per update', () {
     for (final n in [50, 500, 5000]) {
       test('lastRecomputed is bounded at n = $n', () {
