@@ -40,7 +40,6 @@ dependencies:
   json_annotation: ^4.8.1
   flutter_markdown: ^0.7.4
   flutter_math_fork: ^0.7.2
-  google_fonts: ^6.2.1
 
 dev_dependencies:
   flutter_test:
@@ -84,6 +83,22 @@ flutter:
     - assets/images/
 
   fonts:
+    - family: SourceSerif4
+      fonts:
+        - asset: assets/fonts/SourceSerif4-Regular.otf
+          weight: 400
+        - asset: assets/fonts/SourceSerif4-Semibold.otf
+          weight: 600
+        - asset: assets/fonts/SourceSerif4-Bold.otf
+          weight: 700
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter-SemiBold.ttf
+          weight: 600
     - family: ComicRelief
       fonts:
         - asset: assets/fonts/ComicRelief-Bold.ttf

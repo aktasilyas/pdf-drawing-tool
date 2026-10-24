@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:example_app/core/theme/index.dart';
 import 'package:go_router/go_router.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/drawing_ui.dart';
@@ -161,10 +161,14 @@ class EditorScreen extends ConsumerWidget {
         backgroundColor:
             isDark ? colorScheme.surfaceContainerHighest : colorScheme.surface,
         title: Text('Yeniden Adlandır',
-            style: GoogleFonts.sourceSerif4(color: colorScheme.onSurface)),
+            style: TextStyle(
+                fontFamily: AppTypography.headingFontFamily,
+                color: colorScheme.onSurface)),
         content: TextField(
           controller: controller,
-          style: GoogleFonts.sourceSerif4(color: colorScheme.onSurface),
+          style: TextStyle(
+              fontFamily: AppTypography.headingFontFamily,
+              color: colorScheme.onSurface),
           decoration: InputDecoration(
             labelText: 'Belge Adı',
             border: const OutlineInputBorder(),
@@ -213,10 +217,14 @@ class EditorScreen extends ConsumerWidget {
         backgroundColor:
             isDark ? colorScheme.surfaceContainerHighest : colorScheme.surface,
         title: Text('Çöpe Taşı',
-            style: GoogleFonts.sourceSerif4(color: colorScheme.onSurface)),
+            style: TextStyle(
+                fontFamily: AppTypography.headingFontFamily,
+                color: colorScheme.onSurface)),
         content: Text(
           'Bu belge çöpe taşınacak. Daha sonra geri yükleyebilirsiniz.',
-          style: GoogleFonts.sourceSerif4(color: colorScheme.onSurfaceVariant),
+          style: TextStyle(
+              fontFamily: AppTypography.headingFontFamily,
+              color: colorScheme.onSurfaceVariant),
         ),
         actions: [
           TextButton(

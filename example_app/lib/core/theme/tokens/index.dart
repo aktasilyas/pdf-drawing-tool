@@ -20,6 +20,7 @@ library;
 
 export 'app_colors.dart';
 export 'app_durations.dart';
+export 'app_palette.dart';
 export 'app_icon_sizes.dart';
 export 'app_radius.dart';
 export 'app_shadows.dart';
