@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:example_app/core/config/feature_flags.dart';
+import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:example_app/features/settings/presentation/screens/settings_screen.dart';
 import 'package:example_app/features/sync/presentation/providers/sync_provider.dart';
@@ -35,7 +36,7 @@ void main() {
           sharedPreferencesProvider.overrideWithValue(prefs),
           currentUserProvider.overrideWith((ref) => user()),
         ],
-        child: const MaterialApp(home: SettingsScreen()),
+        child: MaterialApp(theme: AppTheme.light, home: const SettingsScreen()),
       ),
     );
     await tester.pump();
