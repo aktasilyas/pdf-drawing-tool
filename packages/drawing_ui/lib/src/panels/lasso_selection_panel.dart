@@ -210,16 +210,13 @@ class _TypeChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
         decoration: BoxDecoration(
-          color: isSelected
-              ? cs.primaryContainer
-              : (isDark ? cs.surfaceContainerHigh : cs.surfaceContainerHighest),
+          color: isSelected ? cs.primaryContainer : (cs.controlSurface),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected

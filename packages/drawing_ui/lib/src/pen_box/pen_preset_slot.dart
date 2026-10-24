@@ -188,16 +188,13 @@ class CompactPenPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     if (preset.isEmpty) {
       return Container(
         width: size,
         height: size,
         decoration: BoxDecoration(
-          color: isDark
-              ? colorScheme.surfaceContainerHigh
-              : colorScheme.surfaceContainerHighest,
+          color: colorScheme.controlSurface,
           shape: BoxShape.circle,
         ),
         child: PhosphorIcon(

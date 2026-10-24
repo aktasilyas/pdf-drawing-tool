@@ -1,5 +1,6 @@
 /// Samsung Notes-style color picker with Kartelalar (swatch) and Spektrum tabs.
 import 'package:flutter/material.dart';
+import 'package:drawing_ui/src/theme/chrome_roles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_ui/src/theme/drawing_shadows.dart';
@@ -77,7 +78,7 @@ class _CompactColorPickerState extends ConsumerState<CompactColorPicker>
         margin: const EdgeInsets.all(8),
         constraints: BoxConstraints(maxHeight: maxH),
         decoration: BoxDecoration(
-          color: isDark ? cs.surfaceContainerHighest : cs.surface,
+          color: cs.pickerSurface,
           borderRadius: BorderRadius.circular(16),
           border: isDark
               ? Border.all(color: cs.outline.withValues(alpha: 0.2))

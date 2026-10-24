@@ -1,5 +1,6 @@
 import 'package:drawing_core/drawing_core.dart';
 import 'package:flutter/material.dart';
+import 'package:drawing_ui/src/theme/chrome_roles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 
@@ -45,7 +46,6 @@ class _RecordingBarContent extends ConsumerWidget {
     if (!isActive) return const SizedBox.shrink();
 
     final cs = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final stateAsync = ref.watch(audioRecordingStateProvider);
     final durationAsync = ref.watch(recordingDurationProvider);
 
@@ -58,7 +58,7 @@ class _RecordingBarContent extends ConsumerWidget {
       decoration: BoxDecoration(
         color: cs.surface,
         borderRadius: BorderRadius.circular(22),
-        border: isDark ? Border.all(color: cs.outlineVariant) : null,
+        border: cs.floatingBorder,
         boxShadow: DrawingShadows.floating(Theme.of(context).brightness),
       ),
       child: Row(

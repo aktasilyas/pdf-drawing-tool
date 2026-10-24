@@ -1,5 +1,6 @@
 /// Page navigator sidebar with filter bar and 2-column grid layout.
 import 'package:flutter/material.dart';
+import 'package:drawing_ui/src/theme/chrome_roles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 
@@ -114,7 +115,7 @@ class _PageSidebarState extends ConsumerState<PageSidebar> {
     return Container(
       width: kPageSidebarWidth,
       decoration: BoxDecoration(
-        color: isDark ? cs.surfaceContainerLow : cs.surfaceContainerLowest,
+        color: cs.sidebarSurface,
         border: Border(right: BorderSide(color: cs.outlineVariant, width: 0.5)),
       ),
       child: Column(

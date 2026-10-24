@@ -1,5 +1,6 @@
 /// Widgets for the page navigator sidebar: grid item and add-page cell.
 import 'package:flutter/material.dart';
+import 'package:drawing_ui/src/theme/chrome_roles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
@@ -81,7 +82,6 @@ class _PageGridItemState extends ConsumerState<PageGridItem> {
     final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final brightness = Theme.of(context).brightness;
-    final isDark = brightness == Brightness.dark;
     final sel = widget.isSelected;
     final page = widget.page;
 
@@ -100,7 +100,7 @@ class _PageGridItemState extends ConsumerState<PageGridItem> {
                 Positioned.fill(
                   child: Container(
                     decoration: BoxDecoration(
-                      color: isDark ? cs.surfaceContainer : cs.surface,
+                      color: cs.floatingSurface,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
                         color: sel ? cs.primary : cs.outlineVariant,
@@ -231,7 +231,7 @@ class _AddPageCellState extends State<AddPageCell> {
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: widget.isDark ? cs.surfaceContainer : cs.surface,
+                color: cs.floatingSurface,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: cs.outlineVariant, width: 1),
               ),

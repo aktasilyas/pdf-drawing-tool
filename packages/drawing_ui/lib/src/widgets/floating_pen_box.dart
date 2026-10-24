@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:drawing_ui/src/theme/chrome_roles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_ui/src/models/models.dart';
@@ -55,7 +56,7 @@ class _FloatingPenBoxState extends ConsumerState<FloatingPenBox> {
 
     final content = Container(
       decoration: BoxDecoration(
-        color: isDark ? colorScheme.surfaceContainer : colorScheme.surface,
+        color: colorScheme.floatingSurface,
         borderRadius: BorderRadius.circular(10),
         border: isDark
             ? Border.all(
@@ -65,7 +66,8 @@ class _FloatingPenBoxState extends ConsumerState<FloatingPenBox> {
             : null,
         boxShadow: [
           BoxShadow(
-            color: colorScheme.shadow.withValues(alpha: isDark ? 0.4 : 0.07),
+            color: colorScheme.shadow
+                .withValues(alpha: colorScheme.penBoxShadowAlpha),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:drawing_ui/src/theme/chrome_roles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 
@@ -41,7 +42,6 @@ class _ExportProgressContent extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
       onTap: state.status == ExportProgressStatus.error
@@ -53,7 +53,7 @@ class _ExportProgressContent extends ConsumerWidget {
         decoration: BoxDecoration(
           color: cs.surface,
           borderRadius: BorderRadius.circular(16),
-          border: isDark ? Border.all(color: cs.outlineVariant) : null,
+          border: cs.floatingBorder,
           boxShadow: DrawingShadows.floating(Theme.of(context).brightness),
         ),
         child: Column(

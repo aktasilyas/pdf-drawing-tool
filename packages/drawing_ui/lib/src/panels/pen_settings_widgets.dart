@@ -25,12 +25,12 @@ class LiveStrokePreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final darkMode = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       height: 50,
       decoration: BoxDecoration(
-        color: isDark ? cs.surfaceContainerHigh : cs.surfaceContainerLowest,
+        color: cs.fieldSurface,
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
           color: cs.outline.withValues(alpha: 0.3),
@@ -41,7 +41,7 @@ class LiveStrokePreview extends StatelessWidget {
         borderRadius: BorderRadius.circular(5),
         child: CustomPaint(
           size: const Size(double.infinity, 50),
-          painter: StrokePainter(color, thickness, toolType, isDark),
+          painter: StrokePainter(color, thickness, toolType, darkMode),
         ),
       ),
     );
@@ -50,17 +50,17 @@ class LiveStrokePreview extends StatelessWidget {
 
 /// Custom painter for the sine wave stroke preview.
 class StrokePainter extends CustomPainter {
-  StrokePainter(this.color, this.thickness, this.toolType, this.isDark);
+  StrokePainter(this.color, this.thickness, this.toolType, this.darkMode);
 
   final Color color;
   final double thickness;
   final ToolType toolType;
-  final bool isDark;
+  final bool darkMode;
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = isDark ? darkenColor(color, 0.3) : color
+      ..color = darkMode ? darkenColor(color, 0.3) : color
       ..style = PaintingStyle.stroke
       ..strokeWidth = thickness * 1.5
       ..strokeCap = StrokeCap.round
@@ -80,7 +80,7 @@ class StrokePainter extends CustomPainter {
       color != o.color ||
       thickness != o.thickness ||
       toolType != o.toolType ||
-      isDark != o.isDark;
+      darkMode != o.darkMode;
 }
 
 /// GoodNotes-style horizontal pen type selector.
