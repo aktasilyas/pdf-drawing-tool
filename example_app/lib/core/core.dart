@@ -13,6 +13,10 @@ library;
 export 'errors/failures.dart';
 export 'errors/exceptions.dart';
 
+// Config
+export 'config/app_env.dart';
+export 'config/feature_flags.dart';
+
 // Constants
 export 'constants/app_constants.dart';
 export 'constants/storage_keys.dart';

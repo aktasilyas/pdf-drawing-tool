@@ -6,7 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:example_app/core/config/feature_flags.dart';
 import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:example_app/core/utils/responsive.dart';
 import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/settings/presentation/providers/settings_provider.dart';
@@ -22,7 +24,8 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
-    final user = Supabase.instance.client.auth.currentUser;
+    final cloud = ref.watch(featureFlagsProvider).cloudSync;
+    final user = cloud ? ref.watch(currentUserProvider) : null;
     final pinFavorites = ref.watch(pinFavoritesProvider);
     final isTablet = Responsive.isTablet(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -33,9 +36,11 @@ class SettingsScreen extends ConsumerWidget {
     final textPrimary =
         isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
 
-    final userName = user?.userMetadata?['name'] as String? ??
-        user?.email?.split('@').first ??
-        'Kullanıcı';
+    final userName = !cloud
+        ? 'ElyaNotes'
+        : user?.userMetadata?['name'] as String? ??
+            user?.email?.split('@').first ??
+            'Kullanıcı';
     final initials = userName.isNotEmpty ? userName[0].toUpperCase() : 'U';
 
     return Scaffold(
@@ -53,14 +58,18 @@ class SettingsScreen extends ConsumerWidget {
                 const SizedBox(height: AppSpacing.sectionSpacing),
                 _buildAppearanceSection(context, ref, settings, pinFavorites),
                 const SizedBox(height: AppSpacing.sectionSpacing),
-                _buildAccountSection(context, ref, user),
-                const SizedBox(height: AppSpacing.sectionSpacing),
+                if (cloud) ...[
+                  _buildAccountSection(context, ref, user),
+                  const SizedBox(height: AppSpacing.sectionSpacing),
+                ],
                 _buildDataSection(context, ref),
                 const SizedBox(height: AppSpacing.sectionSpacing),
                 _buildAboutSection(context, isDark),
                 const SizedBox(height: AppSpacing.xxl),
-                _buildLogoutButton(context, ref),
-                const SizedBox(height: AppSpacing.xxl),
+                if (cloud) ...[
+                  _buildLogoutButton(context, ref),
+                  const SizedBox(height: AppSpacing.xxl),
+                ],
               ],
             ),
           ),

@@ -1,7 +1,5 @@
 // RevenueCat configuration constants.
-import 'dart:io';
-
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:example_app/core/config/app_env.dart';
 
 /// RevenueCat entitlement IDs and API key helpers.
 abstract class RevenueCatConstants {
@@ -10,10 +8,5 @@ abstract class RevenueCatConstants {
   static const entitlementPro = 'pro';
 
   /// Returns the platform-appropriate RevenueCat public API key.
-  static String get apiKey {
-    if (Platform.isIOS || Platform.isMacOS) {
-      return dotenv.env['REVENUECAT_APPLE_KEY'] ?? '';
-    }
-    return dotenv.env['REVENUECAT_GOOGLE_KEY'] ?? '';
-  }
+  static String get apiKey => const AppEnv().revenueCatApiKey;
 }

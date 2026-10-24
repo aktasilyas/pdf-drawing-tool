@@ -26,7 +26,9 @@ test strategy, refactors, ordering of work.
 ## 1. Answer questions
 Issues labeled `needs-architect`: `gh api "$R/issues?state=open&labels=needs-architect"`.
 For each: read the question and the code involved, check for maintained
-packages or upstream fixes, then either
+packages or upstream fixes, and for product/UX/design/architecture questions
+do the **Reference check** (GoodNotes, StarNote, Flexcil; see CLAUDE.md) and
+include it in your decision. Then either
 - **decide**: comment `**Architect decision:** …` with the choice, the reason and
   concrete instructions; remove `needs-architect`, add `agent-ready`; or
 - **escalate** (owner-only matter): comment the question for the owner in
@@ -38,7 +40,13 @@ Open PRs labeled `ready-to-merge` from `claude/*` branches. For each:
 - Read the linked issue and `git diff origin/main...<branch>` (fetch first).
 - Check: acceptance criteria met, tests prove it, no layer-rule violations,
   checks green or failing identically on main, nothing outside scope.
+- For user-facing features and design work: the plan, spec or PR contains a
+  Reference check and the result follows the convention of GoodNotes, StarNote
+  and Flexcil, or states why it deviates. Missing → request changes.
 - Approve: add label `architect-approved` (a workflow then merges it).
+  Exception: if the PR changes anything under `.github/workflows/`, GitHub does
+  not let the merge workflow merge it. Add `needs-owner-review` instead and log
+  `⚠️ Sahibin kararı gerekiyor: PR #<n> onaylandı, workflow dosyası içerdiği için elle merge edilmeli.`
 - Request changes: comment the concrete fixes on the PR, remove `ready-to-merge`;
   autopilot picks the comments up next run.
 - Owner-only (see list): add `needs-owner-review` instead and explain in one

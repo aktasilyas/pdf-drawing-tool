@@ -223,7 +223,8 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
     final rulerVisible = ref.watch(rulerVisibleProvider);
     final toolbarConfig = ref.watch(toolbarConfigProvider);
     final rulerEnabled = toolbarConfig.extraToolVisible('ruler');
-    final audioEnabled = toolbarConfig.extraToolVisible('audio');
+    final audioEnabled = toolbarConfig.extraToolVisible('audio') &&
+        ref.watch(audioRecordingEnabledProvider);
 
     return Row(
       mainAxisSize: MainAxisSize.min,

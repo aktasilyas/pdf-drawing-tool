@@ -20,7 +20,9 @@ Frozen behind flags until after v1.0: AI chat, cloud sync, premium, audio record
 ./scripts/check.sh pub          # pub get in dependency order (once per clone / pubspec change)
 ./scripts/check.sh analyze      # dart analyze all packages (what CI runs)
 ./scripts/check.sh test         # dart test / flutter test per package (what CI runs)
-cd example_app && flutter run   # needs example_app/.env (SUPABASE_URL, SUPABASE_ANON_KEY)
+cd example_app && flutter run   # v1.0 scope: all feature flags off, no config needed
+# frozen features on (FF_* flags); .env must hold SUPABASE_URL, SUPABASE_ANON_KEY, REVENUECAT_*_KEY
+cd example_app && flutter run --dart-define-from-file=config/flags_all_on.json --dart-define-from-file=.env
 flutter test path/to/file_test.dart                 # single test
 dart run build_runner build --delete-conflicting-outputs   # example_app codegen
 ```
@@ -59,6 +61,18 @@ Visual direction and decisions: `docs/design/BRIEF.md` (owner-approved; do not
 change without asking). Any UI work follows the `design-loop` skill: spec from
 `ui-designer` → golden test → render → review the PNGs → fix. Quality bar:
 `flutter-ui-craft` skill. Tokens and theming: `design-tokens` skill.
+
+## Reference apps (owner rule)
+GoodNotes, StarNote and Flexcil are the baseline for every significant product,
+UX, design or architecture decision (navigation, library/notebook model, editor
+chrome, tools and pens, PDF workflow, page model, storage/export formats).
+- Before deciding, check how these three do it (official docs, help center,
+  store pages, reviews; WebSearch) and record a short **Reference check** in the
+  plan, spec, decision comment or PR: what each app does → what we do.
+- Default to the pattern they converge on. Deviating needs a stated reason
+  (platform, v1.0 scope, performance, originality).
+- Match behaviour and conventions, never assets: no copied icons, cover art,
+  illustrations or exact layouts (see `docs/design/BRIEF.md`).
 
 ## Architecture rules
 - Feature-first Clean Architecture in `example_app/lib/features/<f>/{data,domain,presentation}`.

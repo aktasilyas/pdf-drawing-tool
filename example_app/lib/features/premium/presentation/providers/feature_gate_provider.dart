@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:example_app/core/config/feature_flags.dart';
 import 'package:example_app/features/premium/domain/entities/feature_gate.dart';
 import 'package:example_app/features/premium/domain/entities/subscription.dart';
 import 'package:example_app/features/premium/domain/services/feature_gate_service.dart';
@@ -6,13 +7,20 @@ import 'package:example_app/features/premium/presentation/providers/subscription
 
 /// Derives the current [SubscriptionTier] from the subscription stream.
 /// Defaults to [SubscriptionTier.free] while loading or on error.
+/// With the premium flag off nothing is gated and RevenueCat is never read.
 final currentTierProvider = Provider<SubscriptionTier>((ref) {
+  if (!ref.watch(featureFlagsProvider).premium) {
+    return SubscriptionTier.premiumPlus;
+  }
   final sub = ref.watch(subscriptionProvider);
   return sub.whenData((s) => s.tier).valueOrNull ?? SubscriptionTier.free;
 });
 
 /// Provides a [FeatureGateService] that reacts to tier changes.
 final featureGateServiceProvider = Provider<FeatureGateService>((ref) {
+  if (!ref.watch(featureFlagsProvider).premium) {
+    return FeatureGateService.unrestricted();
+  }
   final tier = ref.watch(currentTierProvider);
   return FeatureGateService(tier);
 });
