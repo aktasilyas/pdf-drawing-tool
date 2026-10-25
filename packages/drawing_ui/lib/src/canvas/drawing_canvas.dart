@@ -13,6 +13,7 @@ import 'package:drawing_ui/src/canvas/sticky_note_handles_painter.dart';
 import 'package:drawing_ui/src/canvas/sticky_note_resize_handles.dart';
 import 'package:drawing_ui/src/canvas/selected_elements_painter.dart';
 import 'package:drawing_ui/src/canvas/page_background_painter.dart';
+import 'package:drawing_ui/src/canvas/canvas_color_scheme.dart';
 import 'package:drawing_ui/src/canvas/drawing_canvas_gesture_handlers.dart';
 import 'package:drawing_ui/src/canvas/laser_controller.dart';
 import 'package:drawing_ui/src/canvas/laser_overlay_widget.dart';
@@ -43,6 +44,8 @@ part 'drawing_canvas/canvas_fields.dart';
 part 'drawing_canvas/gesture_contract.dart';
 part 'drawing_canvas/page_init.dart';
 part 'drawing_canvas/pdf_background.dart';
+part 'drawing_canvas/canvas_frame.dart';
+part 'drawing_canvas/canvas_frame_reader.dart';
 
 // =============================================================================
 // DRAWING CANVAS WIDGET
@@ -117,7 +120,12 @@ class DrawingCanvas extends ConsumerStatefulWidget {
 /// Exposed as public for testing purposes.
 /// Uses mixins for gesture handling and helpers to keep file size manageable.
 class DrawingCanvasState extends DrawingCanvasGestureHandlers<DrawingCanvas>
-    with _CanvasFields, _GestureContract, _CanvasPageInit, _PdfBackground {
+    with
+        _CanvasFields,
+        _GestureContract,
+        _CanvasPageInit,
+        _PdfBackground,
+        _CanvasFrameReader {
   /// Exposes committed strokes from provider for testing.
   @visibleForTesting
   List<core.Stroke> get committedStrokes =>
@@ -172,34 +180,45 @@ class DrawingCanvasState extends DrawingCanvasGestureHandlers<DrawingCanvas>
 
   @override
   Widget build(BuildContext context) {
-    // Watch providers
-    final allLayers = ref.watch(allLayersProvider);
-    final activeLayerIndex = ref.watch(activeLayerIndexProvider);
-    final activeLayerValid =
-        activeLayerIndex >= 0 && activeLayerIndex < allLayers.length;
-    final activeLayerVisible =
-        activeLayerValid && allLayers[activeLayerIndex].isVisible;
-    final activeLayerOpacity =
-        activeLayerValid ? allLayers[activeLayerIndex].opacity : 1.0;
-    final strokes = ref.watch(activeLayerStrokesProvider);
-    final shapes = ref.watch(activeLayerShapesProvider);
-    final texts = ref.watch(activeLayerTextsProvider);
-    final isDrawingTool = ref.watch(isDrawingToolProvider);
-    final isSelectionTool = ref.watch(isSelectionToolProvider);
-    final isShapeTool = ref.watch(isShapeToolProvider);
-    final currentTool = ref.watch(currentToolProvider);
-    final transform = ref.watch(canvasTransformProvider);
-    final selection = ref.watch(selectionProvider);
-    final selectionUi = ref.watch(selectionUiProvider);
-    final textToolState = ref.watch(textToolProvider);
-
-    // Canvas mode configuration
-    final canvasMode =
-        widget.canvasMode ?? const core.CanvasMode(isInfinite: true);
-
-    // Current page (LIMITED mod için)
-    final currentPage = ref.watch(currentPageProvider);
-    final colorScheme = ref.watch(canvasColorSchemeProvider);
+    final f = _readFrame();
+    final allLayers = f.allLayers;
+    final activeLayerIndex = f.activeLayerIndex;
+    final activeLayerVisible = f.activeLayerVisible;
+    final activeLayerOpacity = f.activeLayerOpacity;
+    final strokes = f.strokes;
+    final shapes = f.shapes;
+    final texts = f.texts;
+    final images = f.images;
+    final elementOrder = f.elementOrder;
+    final transform = f.transform;
+    final selection = f.selection;
+    final selectionUi = f.selectionUi;
+    final textToolState = f.textToolState;
+    final canvasMode = f.canvasMode;
+    final currentPage = f.currentPage;
+    final colorScheme = f.colorScheme;
+    final eraserCursorPosition = f.eraserCursorPosition;
+    final lassoEraserPoints = f.lassoEraserPoints;
+    final isEraserTool = f.isEraserTool;
+    final pixelEraserPreview = f.pixelEraserPreview;
+    final strokeEraserPreview = f.strokeEraserPreview;
+    final selectionPreviewPath = f.selectionPreviewPath;
+    final hasLiveTransform = f.hasLiveTransform;
+    final excludedStrokeIds = f.excludedStrokeIds;
+    final excludedShapeIds = f.excludedShapeIds;
+    final excludedImageIds = f.excludedImageIds;
+    final excludedTextIds = f.excludedTextIds;
+    final selectedStrokes = f.selectedStrokes;
+    final selectedShapes = f.selectedShapes;
+    final selectedImages = f.selectedImages;
+    final selectedTexts = f.selectedTexts;
+    final previewShape = f.previewShape;
+    final straightLinePreviewPoints = f.straightLinePreviewPoints;
+    final straightLinePreviewStyle = f.straightLinePreviewStyle;
+    final stickyNotes = f.stickyNotes;
+    final isTextTool = f.isTextTool;
+    final isStickyNoteTool = f.isStickyNoteTool;
+    final enablePointerEvents = f.enablePointerEvents;
 
     // Listen to page changes - reset initialization and trigger prefetch
     ref.listen<core.Page>(currentPageProvider, (previous, current) {
@@ -215,93 +234,6 @@ class DrawingCanvasState extends DrawingCanvasGestureHandlers<DrawingCanvas>
         }
       }
     });
-
-    // Eraser cursor state
-    final eraserCursorPosition = ref.watch(eraserCursorPositionProvider);
-    final lassoEraserPoints = ref.watch(lassoEraserPointsProvider);
-    final isEraserTool = ref.watch(isEraserToolProvider);
-    final pixelEraserPreview = ref.watch(pixelEraserPreviewProvider);
-    final strokeEraserPreview = ref.watch(strokeEraserPreviewProvider);
-
-    // Selection tool preview path
-    List<core.DrawingPoint>? selectionPreviewPath;
-    if (isSelectionTool && _isSelecting) {
-      selectionPreviewPath = ref.read(activeSelectionToolProvider).currentPath;
-    }
-
-    // Watch images and elementOrder for active layer
-    final images = ref.watch(activeLayerImagesProvider);
-    final elementOrder = activeLayerValid
-        ? allLayers[activeLayerIndex].elementOrder
-        : const <String>[];
-
-    // Compute excluded IDs + selected elements for live transform
-    final hasLiveTransform = selectionUi.hasTransform;
-    Set<String> excludedStrokeIds = const {};
-    Set<String> excludedShapeIds = const {};
-    Set<String> excludedImageIds = const {};
-    Set<String> excludedTextIds = const {};
-    List<core.Stroke> selectedStrokes = const [];
-    List<core.Shape> selectedShapes = const [];
-    List<core.ImageElement> selectedImages = const [];
-    List<core.TextElement> selectedTexts = const [];
-
-    if (selection != null && hasLiveTransform) {
-      excludedStrokeIds = selection.selectedStrokeIds.toSet();
-      excludedShapeIds = selection.selectedShapeIds.toSet();
-      excludedImageIds = selection.selectedImageIds.toSet();
-      excludedTextIds = selection.selectedTextIds.toSet();
-
-      selectedStrokes =
-          strokes.where((s) => excludedStrokeIds.contains(s.id)).toList();
-      selectedShapes =
-          shapes.where((s) => excludedShapeIds.contains(s.id)).toList();
-      selectedImages =
-          images.where((i) => excludedImageIds.contains(i.id)).toList();
-      selectedTexts =
-          texts.where((t) => excludedTextIds.contains(t.id)).toList();
-    }
-
-    // Shape preview
-    core.Shape? previewShape;
-    if (_isDrawingShape && _activeShapeTool != null) {
-      previewShape = _activeShapeTool!.previewShape;
-    }
-
-    // Straight line preview (for highlighter)
-    List<core.DrawingPoint>? straightLinePreviewPoints;
-    core.StrokeStyle? straightLinePreviewStyle;
-    final start = _straightLineStart;
-    final end = _straightLineEnd;
-    if (_isStraightLineDrawing && start != null && end != null) {
-      straightLinePreviewPoints = [start, end];
-      straightLinePreviewStyle = _straightLineStyle;
-    }
-
-    // Watch sticky notes for active layer
-    final stickyNotes = ref.watch(activeLayerStickyNotesProvider);
-
-    // Enable pointer events for drawing tools, selection tool, shape tool, text tool,
-    // sticker placement mode, image tool, and image placement mode.
-    // In read-only mode, all drawing pointer events are disabled (pan/zoom still works)
-    final isTextTool = currentTool == ToolType.text;
-    final isStickerTool = currentTool == ToolType.sticker;
-    final isImageTool = currentTool == ToolType.image;
-    final isStickerPlacing = ref.watch(stickerPlacementProvider).isPlacing;
-    final isImagePlacing = ref.watch(imagePlacementProvider).isPlacing;
-    final isLaserTool = currentTool == ToolType.laserPointer;
-    final isStickyNoteTool = currentTool == ToolType.stickyNote;
-    final enablePointerEvents = !widget.isReadOnly &&
-        (isDrawingTool ||
-            isSelectionTool ||
-            isShapeTool ||
-            isTextTool ||
-            isStickerTool ||
-            isStickerPlacing ||
-            isImageTool ||
-            isImagePlacing ||
-            isLaserTool ||
-            isStickyNoteTool);
 
     return LayoutBuilder(
       builder: (context, constraints) {
