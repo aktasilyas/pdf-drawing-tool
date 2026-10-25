@@ -47,8 +47,11 @@ class ToolbarOverflowMenu extends ConsumerWidget {
       position: PopupMenuPosition.under,
       color: palette.surfaceElevated,
       surfaceTintColor: Colors.transparent,
-      elevation: 0,
-      shadowColor: Colors.transparent,
+      // PopupMenu takes a single elevation shadow, not a BoxShadow list:
+      // use the panel token's colour as the closest match.
+      elevation: ChromeSpacing.sm,
+      shadowColor:
+          DrawingShadows.panel(Theme.of(context).brightness).first.color,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(ChromeRadius.xl),
         side: BorderSide(color: palette.border),
