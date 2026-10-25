@@ -26,13 +26,10 @@ class ProfileHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final initials = name.isNotEmpty ? name[0].toUpperCase() : 'U';
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textPrimary =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
-    final textSecondary =
-        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
-    final textTertiary =
-        isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight;
+    final palette = context.palette;
+    final textPrimary = palette.textPrimary;
+    final textSecondary = palette.textMuted;
+    final textTertiary = palette.textDisabled;
 
     return AppCard(
       variant: AppCardVariant.elevated,
