@@ -55,21 +55,24 @@ dev_dependencies:
 
 flutter_launcher_icons:
   android: true
-  ios: true
+  ios: false
   image_path: "assets/images/elyanotes_app_icon.png"
   min_sdk_android: 21
-  adaptive_icon_background: "#FFFFFF"
-  adaptive_icon_foreground: "assets/images/elyanotes_app_icon.png"
-  web:
-    generate: true
-    image_path: "assets/images/elyanotes_app_icon.png"
+  adaptive_icon_background: "#F4F1EA"
+  adaptive_icon_foreground: "assets/images/elyanotes_icon_foreground.png"
+  adaptive_icon_monochrome: "assets/images/elyanotes_icon_monochrome.png"
 
 flutter_native_splash:
-  color: "#FFFFFF"
+  color: "#F4F1EA"
+  image: "assets/images/elyanotes_splash.png"
+  color_dark: "#1B1A18"
   android_12:
-    color: "#FFFFFF"
+    color: "#F4F1EA"
+    image: "assets/images/elyanotes_splash.png"
+    color_dark: "#1B1A18"
   ios: false
-  android: false
+  web: false
+  android: true
 
 flutter:
   uses-material-design: true

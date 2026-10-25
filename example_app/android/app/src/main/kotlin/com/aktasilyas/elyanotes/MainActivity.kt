@@ -1,4 +1,4 @@
-package com.example.example_app
+package com.aktasilyas.elyanotes
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 

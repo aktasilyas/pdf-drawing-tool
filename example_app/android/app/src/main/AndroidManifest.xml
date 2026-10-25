@@ -5,7 +5,7 @@
     <!-- In-app billing for RevenueCat subscription purchases -->
     <uses-permission android:name="com.android.vending.BILLING" />
     <application
-        android:label="ElyaNotes"
+        android:label="Elyanotes"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         
