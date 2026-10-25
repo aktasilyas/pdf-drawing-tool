@@ -15,6 +15,9 @@ import 'package:drawing_ui/src/models/tool_type.dart';
 import 'package:drawing_ui/src/widgets/ruler_overlay.dart'
     show rulerStripLength, rulerStripHeight;
 
+part 'gestures/ruler_snapping.dart';
+part 'gestures/sticky_note_gestures.dart';
+
 /// Shared state contract for the gesture mixins of [DrawingCanvasState].
 ///
 /// Abstract accessors are implemented by `DrawingCanvasState`; the private
@@ -85,199 +88,24 @@ mixin _GestureState<T extends ConsumerStatefulWidget>
 /// Composes the private gesture mixins of this library.
 abstract class DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     extends ConsumerState<T>
-    with DrawingCanvasHelpers<T>, _GestureState<T>, _PointerDownGestures<T> {
+    with
+        DrawingCanvasHelpers<T>,
+        _GestureState<T>,
+        _RulerSnapping<T>,
+        _StickyNoteGestures<T>,
+        _PointerDownGestures<T> {
   /// Minimum distance between points to avoid excessive point creation.
   static const double minPointDistance = 1.0;
 }
 
 /// Temporary remainder holding the not yet extracted handlers.
 mixin _PointerDownGestures<T extends ConsumerStatefulWidget>
-    on ConsumerState<T>, DrawingCanvasHelpers<T>, _GestureState<T> {
-  /// Detects if the pointer starts inside a (non-minimized) sticky note
-  /// and stores it for point clamping during the stroke.
-  void _detectDrawingInsideNote(PointerEvent event) {
-    final transform = ref.read(canvasTransformProvider);
-    final cp = transform.screenToCanvas(event.localPosition);
-    final notes = ref.read(activeLayerStickyNotesProvider);
-    drawingInsideNote = null;
-    for (final note in notes.reversed) {
-      if (!note.minimized && note.containsPoint(cp.dx, cp.dy, 0)) {
-        drawingInsideNote = note;
-        return;
-      }
-    }
-  }
-
-  /// Clamps a drawing point to the sticky note bounds when drawing inside one.
-  core.DrawingPoint _clampToNote(core.DrawingPoint point) {
-    final note = drawingInsideNote;
-    if (note == null) return point;
-    return core.DrawingPoint(
-      x: point.x.clamp(note.x, note.x + note.width),
-      y: point.y.clamp(note.y, note.y + note.height),
-      pressure: point.pressure,
-      tilt: point.tilt,
-      timestamp: point.timestamp,
-    );
-  }
-
-  /// Snap threshold in screen pixels.
-  static const double _rulerSnapThreshold = 30.0;
-
-  /// Returns true if [screenPoint] falls inside the rotated ruler strip.
-  ///
-  /// [rulerPositionProvider] stores the centre of the ruler.
-  /// Un-rotates the point around that centre and checks against the
-  /// axis-aligned bounds [-length/2, length/2] x [-height/2, height/2].
-  bool _isPointOnRuler(Offset screenPoint) {
-    if (!ref.read(rulerVisibleProvider)) return false;
-
-    final center = ref.read(rulerPositionProvider);
-    final angle = ref.read(rulerAngleProvider);
-
-    final cosA = math.cos(-angle);
-    final sinA = math.sin(-angle);
-    final d = screenPoint - center;
-    final localX = d.dx * cosA - d.dy * sinA;
-    final localY = d.dx * sinA + d.dy * cosA;
-
-    return localX.abs() <= rulerStripLength / 2 &&
-        localY.abs() <= rulerStripHeight / 2;
-  }
-
-  /// Snaps [point] to the nearest ruler edge (top or bottom).
-  ///
-  /// If the point is ON the ruler body it is always projected to the nearest
-  /// edge so the pen draws parallel to the ruler (physical ruler behaviour).
-  /// If the point is outside but within [_rulerSnapThreshold] it is snapped.
-  core.DrawingPoint _snapToRuler(core.DrawingPoint point) {
-    if (!ref.read(rulerVisibleProvider)) return point;
-
-    final transform = ref.read(canvasTransformProvider);
-    final center = ref.read(rulerPositionProvider);
-    final angle = ref.read(rulerAngleProvider);
-
-    // Perpendicular direction (un-rotated +Y → points "down" from ruler).
-    final perpX = -math.sin(angle);
-    final perpY = math.cos(angle);
-    final halfH = rulerStripHeight / 2;
-
-    // Bottom edge origin in screen space.
-    final bottomScreen = center + Offset(perpX * halfH, perpY * halfH);
-    // Top edge origin in screen space.
-    final topScreen = center + Offset(-perpX * halfH, -perpY * halfH);
-
-    final pointScreen = transform.canvasToScreen(Offset(point.x, point.y));
-    final dirX = math.cos(angle);
-    final dirY = math.sin(angle);
-
-    // Project onto bottom edge.
-    final vB = pointScreen - bottomScreen;
-    final tB = vB.dx * dirX + vB.dy * dirY;
-    final projB = bottomScreen + Offset(dirX * tB, dirY * tB);
-    final distB = (pointScreen - projB).distance;
-
-    // Project onto top edge.
-    final vT = pointScreen - topScreen;
-    final tT = vT.dx * dirX + vT.dy * dirY;
-    final projT = topScreen + Offset(dirX * tT, dirY * tT);
-    final distT = (pointScreen - projT).distance;
-
-    // If the point is on the ruler body, always project to nearest edge.
-    // If outside but near an edge, snap within threshold.
-    final onRuler = _isPointOnRuler(pointScreen);
-    final dist = math.min(distB, distT);
-    if (!onRuler && dist >= _rulerSnapThreshold) return point;
-
-    final projected = distB <= distT ? projB : projT;
-    final canvasProj = transform.screenToCanvas(projected);
-
-    return core.DrawingPoint(
-      x: canvasProj.dx,
-      y: canvasProj.dy,
-      pressure: point.pressure,
-      tilt: point.tilt,
-      timestamp: point.timestamp,
-    );
-  }
-
-  /// Converts a stroke to relative coordinates and adds it to the sticky note.
-  void _addStrokeToStickyNote(core.Stroke stroke, core.StickyNote note) {
-    final relPoints = stroke.points
-        .map((p) => core.DrawingPoint(
-              x: p.x - note.x,
-              y: p.y - note.y,
-              pressure: p.pressure,
-              tilt: p.tilt,
-              timestamp: p.timestamp,
-            ))
-        .toList();
-    final relStroke = stroke.copyWith(points: relPoints);
-
-    // Get the current note from the document (may have changed)
-    final document = ref.read(documentProvider);
-    final layer = document.layers[document.activeLayerIndex];
-    final currentNote = layer.getStickyNoteById(note.id);
-    if (currentNote == null) return;
-
-    final updated =
-        currentNote.copyWith(strokes: [...currentNote.strokes, relStroke]);
-    final command = core.UpdateStickyNoteCommand(
-      layerIndex: document.activeLayerIndex,
-      newNote: updated,
-    );
-    ref.read(historyManagerProvider.notifier).execute(command);
-
-    // Sync the selected note so overrideNote renders the updated version
-    final placement = ref.read(stickyNotePlacementProvider);
-    if (placement.selectedNote?.id == note.id) {
-      ref
-          .read(stickyNotePlacementProvider.notifier)
-          .updateSelectedNote(updated);
-    }
-  }
-
-  /// Converts a shape to relative coordinates and adds it to the sticky note.
-  void _addShapeToStickyNote(core.Shape shape, core.StickyNote note) {
-    final relShape = shape.copyWith(
-      startPoint: core.DrawingPoint(
-        x: shape.startPoint.x - note.x,
-        y: shape.startPoint.y - note.y,
-        pressure: shape.startPoint.pressure,
-        tilt: shape.startPoint.tilt,
-        timestamp: shape.startPoint.timestamp,
-      ),
-      endPoint: core.DrawingPoint(
-        x: shape.endPoint.x - note.x,
-        y: shape.endPoint.y - note.y,
-        pressure: shape.endPoint.pressure,
-        tilt: shape.endPoint.tilt,
-        timestamp: shape.endPoint.timestamp,
-      ),
-    );
-
-    final document = ref.read(documentProvider);
-    final layer = document.layers[document.activeLayerIndex];
-    final currentNote = layer.getStickyNoteById(note.id);
-    if (currentNote == null) return;
-
-    final updated =
-        currentNote.copyWith(shapes: [...currentNote.shapes, relShape]);
-    final command = core.UpdateStickyNoteCommand(
-      layerIndex: document.activeLayerIndex,
-      newNote: updated,
-    );
-    ref.read(historyManagerProvider.notifier).execute(command);
-
-    // Sync the selected note so overrideNote renders the updated version
-    final placement = ref.read(stickyNotePlacementProvider);
-    if (placement.selectedNote?.id == note.id) {
-      ref
-          .read(stickyNotePlacementProvider.notifier)
-          .updateSelectedNote(updated);
-    }
-  }
-
+    on
+        ConsumerState<T>,
+        DrawingCanvasHelpers<T>,
+        _GestureState<T>,
+        _RulerSnapping<T>,
+        _StickyNoteGestures<T> {
   // ─────────────────────────────────────────────────────────────────────────
   // POINTER EVENT HANDLERS (Single Finger Drawing)
   // ─────────────────────────────────────────────────────────────────────────
@@ -1537,19 +1365,6 @@ mixin _PointerDownGestures<T extends ConsumerStatefulWidget>
   }
 
   /// Commits all erased note strokes/shapes via UpdateStickyNoteCommand.
-  /// Minimizes (if not already) and deselects a sticky note.
-  void _minimizeAndDeselectNote(core.StickyNote note) {
-    if (!note.minimized) {
-      final document = ref.read(documentProvider);
-      final updated = note.copyWith(minimized: true);
-      final command = core.UpdateStickyNoteCommand(
-        layerIndex: document.activeLayerIndex,
-        newNote: updated,
-      );
-      ref.read(historyManagerProvider.notifier).execute(command);
-    }
-    ref.read(stickyNotePlacementProvider.notifier).deselectNote();
-  }
 
   void _commitNoteErasures(int layerIndex) {
     // 1) Pixel-level stroke erasures inside notes (split strokes)
