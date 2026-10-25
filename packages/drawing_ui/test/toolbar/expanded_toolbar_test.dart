@@ -236,6 +236,7 @@ void main() {
       expect(find.byIcon(ElyanotesIcons.home), findsOneWidget);
       expect(find.byIcon(ElyanotesIcons.readerModeActive), findsOneWidget);
     });
+  });
 
   group('ToolBar at 840', () {
     Future<ProviderContainer> pumpNarrow(WidgetTester tester) async {
