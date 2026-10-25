@@ -214,7 +214,8 @@ void main() {
 
       final marker = tester.getRect(find.byKey(key));
       final box = tester.getRect(find.byType(LibrarySelectionCheckbox));
-      expect(marker.size, const Size(80, 90));
+      expect(marker.width, closeTo(80, 0.01));
+      expect(marker.height, closeTo(90, 0.01));
       expect(box.right, closeTo(marker.right - AppSpacing.sm, 0.01));
       expect(box.top, closeTo(marker.top + AppSpacing.sm, 0.01));
     });
