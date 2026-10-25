@@ -46,16 +46,11 @@ part 'drawing_canvas/page_init.dart';
 part 'drawing_canvas/pdf_background.dart';
 part 'drawing_canvas/canvas_frame.dart';
 part 'drawing_canvas/canvas_frame_reader.dart';
+part 'drawing_canvas/ink_layers.dart';
 
 // =============================================================================
 // DRAWING CANVAS WIDGET
 // =============================================================================
-
-/// Wraps [child] with [Opacity] only when opacity < 1.0.
-Widget _wrapOpacity(double opacity, Widget child) {
-  if (opacity >= 1.0) return child;
-  return Opacity(opacity: opacity, child: child);
-}
 
 /// The main drawing canvas widget that handles stroke rendering.
 ///
@@ -125,7 +120,8 @@ class DrawingCanvasState extends DrawingCanvasGestureHandlers<DrawingCanvas>
         _GestureContract,
         _CanvasPageInit,
         _PdfBackground,
-        _CanvasFrameReader {
+        _CanvasFrameReader,
+        _CanvasInkLayers {
   /// Exposes committed strokes from provider for testing.
   @visibleForTesting
   List<core.Stroke> get committedStrokes =>
@@ -184,12 +180,6 @@ class DrawingCanvasState extends DrawingCanvasGestureHandlers<DrawingCanvas>
     final allLayers = f.allLayers;
     final activeLayerIndex = f.activeLayerIndex;
     final activeLayerVisible = f.activeLayerVisible;
-    final activeLayerOpacity = f.activeLayerOpacity;
-    final strokes = f.strokes;
-    final shapes = f.shapes;
-    final texts = f.texts;
-    final images = f.images;
-    final elementOrder = f.elementOrder;
     final transform = f.transform;
     final selection = f.selection;
     final selectionUi = f.selectionUi;
@@ -200,22 +190,12 @@ class DrawingCanvasState extends DrawingCanvasGestureHandlers<DrawingCanvas>
     final eraserCursorPosition = f.eraserCursorPosition;
     final lassoEraserPoints = f.lassoEraserPoints;
     final isEraserTool = f.isEraserTool;
-    final pixelEraserPreview = f.pixelEraserPreview;
-    final strokeEraserPreview = f.strokeEraserPreview;
     final selectionPreviewPath = f.selectionPreviewPath;
     final hasLiveTransform = f.hasLiveTransform;
-    final excludedStrokeIds = f.excludedStrokeIds;
-    final excludedShapeIds = f.excludedShapeIds;
-    final excludedImageIds = f.excludedImageIds;
-    final excludedTextIds = f.excludedTextIds;
     final selectedStrokes = f.selectedStrokes;
     final selectedShapes = f.selectedShapes;
     final selectedImages = f.selectedImages;
     final selectedTexts = f.selectedTexts;
-    final previewShape = f.previewShape;
-    final straightLinePreviewPoints = f.straightLinePreviewPoints;
-    final straightLinePreviewStyle = f.straightLinePreviewStyle;
-    final stickyNotes = f.stickyNotes;
     final isTextTool = f.isTextTool;
     final isStickyNoteTool = f.isStickyNoteTool;
     final enablePointerEvents = f.enablePointerEvents;
@@ -392,74 +372,8 @@ class DrawingCanvasState extends DrawingCanvasGestureHandlers<DrawingCanvas>
                             // ACTIVE LAYER: Committed content (hidden when !isVisible)
                             // ─────────────────────────────────────────────────────────
                             if (activeLayerVisible)
-                              _wrapOpacity(
-                                  activeLayerOpacity,
-                                  Stack(
-                                    clipBehavior: Clip.none,
-                                    children: [
-                                      // Tiled raster cache of committed content
-                                      Consumer(
-                                        builder: (context, ref, _) =>
-                                            ActiveLayerContent(
-                                          key: ValueKey(
-                                              '${currentPage.id}/$activeLayerIndex'),
-                                          scene: ElementScene(
-                                            strokes: strokes,
-                                            shapes: shapes,
-                                            images: images,
-                                            texts: texts,
-                                            elementOrder: elementOrder,
-                                            excludedIds: {
-                                              ...excludedStrokeIds,
-                                              ...excludedShapeIds,
-                                              ...excludedImageIds,
-                                              ...excludedTextIds,
-                                            },
-                                            pixelEraserPreview:
-                                                pixelEraserPreview,
-                                            strokeEraserPreview:
-                                                strokeEraserPreview,
-                                          ),
-                                          transform: effectiveTransform,
-                                          viewportSize: size,
-                                          isZooming:
-                                              ref.watch(isZoomingProvider),
-                                          renderer: _renderer,
-                                          cacheManager: _imageCacheManager,
-                                          activeShape: previewShape,
-                                          activeText: textToolState.isEditing
-                                              ? textToolState.activeText
-                                              : null,
-                                          selectionColor: Theme.of(context)
-                                              .colorScheme
-                                              .primary,
-                                        ),
-                                      ),
-                                      // Committed Sticky Notes
-                                      if (stickyNotes.isNotEmpty)
-                                        Consumer(
-                                          builder: (context, ref, _) {
-                                            final liveNote = ref.watch(
-                                              stickyNotePlacementProvider
-                                                  .select(
-                                                      (s) => s.selectedNote),
-                                            );
-                                            return RepaintBoundary(
-                                              child: CustomPaint(
-                                                size: size,
-                                                painter: StickyNotePainter(
-                                                  stickyNotes: stickyNotes,
-                                                  renderer: _renderer,
-                                                  overrideNote: liveNote,
-                                                ),
-                                                isComplex: true,
-                                                willChange: liveNote != null,
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                    ],
-                                  )),
+                              _buildActiveLayerContent(
+                                  f, size, effectiveTransform),
 
                             // ─────────────────────────────────────────────────────────
                             // PASSIVE LAYERS ABOVE ACTIVE
@@ -479,42 +393,7 @@ class DrawingCanvasState extends DrawingCanvasGestureHandlers<DrawingCanvas>
                             // ─────────────────────────────────────────────────────────
                             // Uses ListenableBuilder to listen to DrawingController
                             // for optimal performance during drawing
-                            if (activeLayerVisible)
-                              _wrapOpacity(
-                                activeLayerOpacity,
-                                RepaintBoundary(
-                                  child: ActiveStrokeLayer(
-                                    controller: _drawingController,
-                                    size: size,
-                                  ),
-                                ),
-                              ),
-
-                            // ─────────────────────────────────────────────────────────
-                            // LAYER 4.5: Laser Pointer Overlay
-                            // ─────────────────────────────────────────────────────────
-                            LaserOverlayWidget(
-                              controller: _laserController,
-                              size: size,
-                            ),
-
-                            // ─────────────────────────────────────────────────────────
-                            // LAYER 5: Straight Line Preview (for highlighter)
-                            // ─────────────────────────────────────────────────────────
-                            if (straightLinePreviewPoints != null &&
-                                straightLinePreviewStyle != null)
-                              RepaintBoundary(
-                                child: CustomPaint(
-                                  size: size,
-                                  painter: ActiveStrokePainter(
-                                    points: straightLinePreviewPoints,
-                                    style: straightLinePreviewStyle,
-                                    renderer: _renderer,
-                                  ),
-                                  isComplex: false,
-                                  willChange: true,
-                                ),
-                              ),
+                            ..._buildLiveInkLayers(f, size),
 
                             // ─────────────────────────────────────────────────────────
                             // LAYER 6: Selection Overlay
