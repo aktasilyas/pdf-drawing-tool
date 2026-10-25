@@ -192,7 +192,9 @@ class TopNavigationBar extends ConsumerWidget {
     // phones instead of overflowing (phone layout is reworked in slice 8).
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [for (final b in buttons) Flexible(child: b)],
+      children: [
+        for (final b in buttons) Flexible(child: b),
+      ],
     );
   }
 
