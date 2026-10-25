@@ -50,6 +50,9 @@ part 'drawing_canvas/ink_layers.dart';
 part 'drawing_canvas/page_layers.dart';
 part 'drawing_canvas/selection_layers.dart';
 part 'drawing_canvas/canvas_viewport.dart';
+part 'drawing_canvas/sticky_note_menu.dart';
+part 'drawing_canvas/placement_indicators.dart';
+part 'drawing_canvas/canvas_overlays.dart';
 
 // =============================================================================
 // DRAWING CANVAS WIDGET
@@ -127,7 +130,10 @@ class DrawingCanvasState extends DrawingCanvasGestureHandlers<DrawingCanvas>
         _CanvasInkLayers,
         _CanvasPageLayers,
         _CanvasSelectionLayers,
-        _CanvasViewport {
+        _CanvasViewport,
+        _StickyNoteMenu,
+        _PlacementIndicators,
+        _CanvasOverlays {
   /// Exposes committed strokes from provider for testing.
   @visibleForTesting
   List<core.Stroke> get committedStrokes =>
@@ -159,40 +165,12 @@ class DrawingCanvasState extends DrawingCanvasGestureHandlers<DrawingCanvas>
     super.dispose();
   }
 
-  void _handleStickyNoteDelete(core.StickyNote note) {
-    final document = ref.read(documentProvider);
-    final command = core.RemoveStickyNoteCommand(
-      layerIndex: document.activeLayerIndex,
-      stickyNoteId: note.id,
-    );
-    ref.read(historyManagerProvider.notifier).execute(command);
-    ref.read(stickyNotePlacementProvider.notifier).deselectNote();
-  }
-
-  void _handleStickyNoteColorChange(core.StickyNote note, int color) {
-    final updated = note.copyWith(color: color);
-    final document = ref.read(documentProvider);
-    final command = core.UpdateStickyNoteCommand(
-      layerIndex: document.activeLayerIndex,
-      newNote: updated,
-    );
-    ref.read(historyManagerProvider.notifier).execute(command);
-    ref.read(stickyNotePlacementProvider.notifier).selectNote(updated);
-  }
-
   @override
   Widget build(BuildContext context) {
     final f = _readFrame();
     final transform = f.transform;
-    final selection = f.selection;
-    final selectionUi = f.selectionUi;
-    final textToolState = f.textToolState;
     final canvasMode = f.canvasMode;
     final currentPage = f.currentPage;
-    final eraserCursorPosition = f.eraserCursorPosition;
-    final lassoEraserPoints = f.lassoEraserPoints;
-    final isEraserTool = f.isEraserTool;
-    final isTextTool = f.isTextTool;
 
     // Listen to page changes - reset initialization and trigger prefetch
     ref.listen<core.Page>(currentPageProvider, (previous, current) {
@@ -243,336 +221,10 @@ class DrawingCanvasState extends DrawingCanvasGestureHandlers<DrawingCanvas>
 
             _buildViewport(f, size, effectiveTransform),
 
-            // ───────────────────────────────────────────────────────────────────
-            // Selection Toolbar (floating toolbar with quick actions + overflow)
-            // ───────────────────────────────────────────────────────────────────
-            if (selectionUi.showMenu && selection != null)
-              SelectionToolbar(
-                selection: selection,
-                cacheManager: _imageCacheManager,
-              ),
-
-            // ───────────────────────────────────────────────────────────────────
-            // Paste Context Menu (long press on empty canvas)
-            // ───────────────────────────────────────────────────────────────────
-            Builder(
-              builder: (context) {
-                final pasteMenu = ref.watch(pasteMenuProvider);
-                if (pasteMenu == null) return const SizedBox.shrink();
-                return PasteContextMenu(state: pasteMenu);
-              },
-            ),
-
-            // ───────────────────────────────────────────────────────────────────
-            // Sticky Note Context Menu (color picker + delete)
-            // ───────────────────────────────────────────────────────────────────
-            Builder(
-              builder: (context) {
-                final noteState = ref.watch(stickyNotePlacementProvider);
-                if (!noteState.showMenu || noteState.selectedNote == null) {
-                  return const SizedBox.shrink();
-                }
-                final sn = noteState.selectedNote!;
-                final centerX = (sn.x + sn.width / 2) * transform.zoom +
-                    transform.offset.dx;
-                final screenY =
-                    sn.y * transform.zoom + transform.offset.dy - 50;
-                return _StickyNoteContextMenu(
-                  left: centerX,
-                  top: screenY,
-                  onDelete: () => _handleStickyNoteDelete(sn),
-                  onColorChange: (color) =>
-                      _handleStickyNoteColorChange(sn, color),
-                );
-              },
-            ),
-
-            // ───────────────────────────────────────────────────────────────────
-            // Text Input Overlay (must be outside gesture handlers)
-            // ───────────────────────────────────────────────────────────────────
-            if (textToolState.isEditing && textToolState.activeText != null)
-              TextInputOverlay(
-                textElement: textToolState.activeText!,
-                zoom: transform.zoom,
-                canvasOffset: transform.offset,
-                onTextChanged: (updatedText) {
-                  ref.read(textToolProvider.notifier).updateText(updatedText);
-                },
-                onEditingComplete: () => finishTextEditing(),
-                onCancel: () => cancelTextEditing(),
-              ),
-
-            // ───────────────────────────────────────────────────────────────────
-            // Text Style Popup (must be outside gesture handlers)
-            // ───────────────────────────────────────────────────────────────────
-            if (textToolState.showStylePopup && textToolState.styleText != null)
-              TextStylePopup(
-                textElement: textToolState.styleText!,
-                zoom: transform.zoom,
-                canvasOffset: transform.offset,
-                onStyleChanged: handleTextStyleChanged,
-                onClose: () =>
-                    ref.read(textToolProvider.notifier).hideStylePopup(),
-                stickerMode: !isTextTool,
-              ),
-
-            // ───────────────────────────────────────────────────────────────────
-            // Sticker Placement Mode Indicator
-            // ───────────────────────────────────────────────────────────────────
-            Builder(
-              builder: (context) {
-                final stickerState = ref.watch(stickerPlacementProvider);
-                if (!stickerState.isPlacing ||
-                    stickerState.selectedEmoji == null) {
-                  return const SizedBox.shrink();
-                }
-                return Positioned(
-                  top: 60,
-                  left: 0,
-                  right: 0,
-                  child: Center(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.2),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(stickerState.selectedEmoji!,
-                              style: Theme.of(context).textTheme.headlineSmall),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Yerleştirmek için dokunun',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(color: Colors.white),
-                          ),
-                          const SizedBox(width: 12),
-                          GestureDetector(
-                            onTap: () => ref
-                                .read(stickerPlacementProvider.notifier)
-                                .cancel(),
-                            child: Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.2),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(Icons.close,
-                                  color: Colors.white, size: 16),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-
-            // ───────────────────────────────────────────────────────────────────
-            // Image Placement Mode Indicator
-            // ───────────────────────────────────────────────────────────────────
-            Builder(
-              builder: (context) {
-                final imageState = ref.watch(imagePlacementProvider);
-                if (!imageState.isPlacing) {
-                  return const SizedBox.shrink();
-                }
-                return Positioned(
-                  top: 60,
-                  left: 0,
-                  right: 0,
-                  child: Center(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.2),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          PhosphorIcon(ElyanotesIcons.image,
-                              color: Colors.white, size: 18),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Resmi yerlesirmek icin dokunun',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(color: Colors.white),
-                          ),
-                          const SizedBox(width: 12),
-                          GestureDetector(
-                            onTap: () => ref
-                                .read(imagePlacementProvider.notifier)
-                                .cancel(),
-                            child: Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.2),
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(Icons.close,
-                                  color: Colors.white, size: 16),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-
-            // ───────────────────────────────────────────────────────────────────
-            // Eraser Cursor Overlay (using screen coordinates)
-            // ───────────────────────────────────────────────────────────────────
-            if (isEraserTool)
-              EraserCursorWidget(
-                cursorPosition: eraserCursorPosition ?? Offset.zero,
-                isVisible: eraserCursorPosition != null,
-                lassoPoints: lassoEraserPoints,
-              ),
+            ..._buildScreenOverlays(f),
           ],
         );
       },
-    );
-  }
-}
-
-// =============================================================================
-// STICKY NOTE CONTEXT MENU
-// =============================================================================
-
-/// Floating context menu for sticky note actions (color change, delete).
-class _StickyNoteContextMenu extends StatelessWidget {
-  final double left;
-  final double top;
-  final VoidCallback onDelete;
-  final ValueChanged<int> onColorChange;
-
-  static const _noteColors = [
-    0xFFFFF3CD, // Yellow
-    0xFFF8D7DA, // Pink
-    0xFFD1ECF1, // Blue
-    0xFFD4EDDA, // Green
-    0xFFFFE0CC, // Orange
-    0xFFE8D5F5, // Purple
-  ];
-
-  const _StickyNoteContextMenu({
-    required this.left,
-    required this.top,
-    required this.onDelete,
-    required this.onColorChange,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      left: left - 100,
-      top: top,
-      child: Listener(
-        behavior: HitTestBehavior.opaque,
-        onPointerDown: (_) {},
-        child: Material(
-          color: Colors.transparent,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(8),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.2),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Color dots row
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: _noteColors.map((c) => _colorDot(c)).toList(),
-                  ),
-                ),
-                // Delete button
-                Container(
-                  decoration: BoxDecoration(
-                    border: Border(
-                      top: BorderSide(color: Colors.grey[200]!),
-                    ),
-                  ),
-                  child: GestureDetector(
-                    onTap: onDelete,
-                    behavior: HitTestBehavior.opaque,
-                    child: Container(
-                      width: _noteColors.length * 28.0 + 12,
-                      height: 36,
-                      alignment: Alignment.center,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          PhosphorIcon(ElyanotesIcons.trash,
-                              size: 16, color: Colors.red),
-                          const SizedBox(width: 4),
-                          Text('Sil',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(color: Colors.red)),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _colorDot(int colorValue) {
-    return GestureDetector(
-      onTap: () => onColorChange(colorValue),
-      child: Container(
-        width: 24,
-        height: 24,
-        margin: const EdgeInsets.symmetric(horizontal: 2),
-        decoration: BoxDecoration(
-          color: Color(colorValue),
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.grey[300]!, width: 1),
-        ),
-      ),
     );
   }
 }
