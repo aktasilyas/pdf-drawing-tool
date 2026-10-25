@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:drawing_core/drawing_core.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 
 import 'flutter_stroke_renderer.dart';
 import 'variable_width_renderer.dart';
@@ -11,7 +12,9 @@ enum ActiveStrokeMode {
   /// Outline pens (pressure or tapered): frozen outline chunks plus a recomputed tail.
   outline,
 
-  /// Solid stroked pens: quadratic segments appended one by one.
+  /// Solid stroked pens: quadratic segments appended one by one; the body
+  /// is frozen every [ActiveStrokeGeometry.strokedChunk] segments so the
+  /// live (mutated) path stays short.
   stroked,
 
   /// Dashed, pencil, straight line: rebuilt from all points (O(n)).
@@ -30,8 +33,12 @@ class ActiveStrokeGeometry {
   /// Frozen outline chunks are at least this many samples long.
   static const int _chunk = 8;
 
+  /// Stroked mode freezes the live body path every this many
+  /// quadratic segments, so per-event work does not grow with the stroke.
+  static const int strokedChunk = 32;
+
   final FlutterStrokeRenderer _renderer;
-  final Path _body = Path();
+  Path _body = Path();
   final Path _tail = Path();
   final List<double> _scratch = <double>[];
   IncrementalStrokeOutline? _outline;
@@ -44,6 +51,10 @@ class ActiveStrokeGeometry {
   int _consumed = 0;
   int _bodyEnd = -1; // outline: last sample covered by [_body]
   DrawingPoint? _prev;
+  double _bodyX = 0, _bodyY = 0; // stroked: current end point of [_body]
+  int _bodySegments = 0; // stroked: segments in [_body] since last freeze
+  bool get _roundCaps => _paint?.strokeCap == StrokeCap.round;
+  final List<Path> _frozen = <Path>[]; // stroked: never mutated again
   double _minX = 0, _minY = 0, _maxX = 0, _maxY = 0;
 
   /// Bumped on every change; painters compare it in `shouldRepaint`.
@@ -53,6 +64,14 @@ class ActiveStrokeGeometry {
 
   /// Number of input points folded into the geometry so far.
   int get consumed => _consumed;
+
+  /// Stroked mode: segments in the live (not yet frozen) body path.
+  @visibleForTesting
+  int get liveSegments => _bodySegments;
+
+  /// Stroked mode: number of body chunks frozen so far.
+  @visibleForTesting
+  int get frozenChunks => _frozen.length;
 
   /// Starts a new stroke. [incremental] is false for straight-line previews
   /// and for strokes whose points are rewritten rather than appended.
@@ -64,6 +83,7 @@ class ActiveStrokeGeometry {
     _bodyEnd = -1;
     _prev = null;
     _points = const [];
+    _resetFrozen();
     final dashed =
         style.pattern != StrokePattern.solid && style.dashPattern != null;
     if (!incremental || dashed) {
@@ -90,7 +110,25 @@ class ActiveStrokeGeometry {
     _points = const [];
     _consumed = 0;
     _prev = null;
+    _resetFrozen();
     version++;
+  }
+
+  /// Drops the frozen chunks. The geometry stays usable.
+  void dispose() => _resetFrozen();
+
+  void _resetFrozen() {
+    _bodySegments = 0;
+    _frozen.clear();
+  }
+
+  /// Freezes [_body] and restarts the live body at its end point. A frozen
+  /// path is never mutated again, so recording it per frame is a cheap
+  /// reference (no copy-on-write of a growing path, no nested pictures).
+  void _freezeBody() {
+    _frozen.add(_body);
+    _body = Path()..moveTo(_bodyX, _bodyY);
+    _bodySegments = 0;
   }
 
   void _configurePaints(StrokeStyle style) {
@@ -191,9 +229,16 @@ class ActiveStrokeGeometry {
       _grow(p);
       if (i == 0) {
         _body.moveTo(p.x, p.y);
+        _bodyX = p.x;
+        _bodyY = p.y;
       } else if (i >= 2) {
         final q = _prev!;
-        _body.quadraticBezierTo(q.x, q.y, (q.x + p.x) / 2, (q.y + p.y) / 2);
+        _bodyX = (q.x + p.x) / 2;
+        _bodyY = (q.y + p.y) / 2;
+        _body.quadraticBezierTo(q.x, q.y, _bodyX, _bodyY);
+        // Joints share a tangent, so round caps meet like the round join;
+        // square caps would poke out on tight turns (one body path instead).
+        if (++_bodySegments >= strokedChunk && _roundCaps) _freezeBody();
       }
       _prev = p;
       _consumed = i + 1;
@@ -233,6 +278,9 @@ class ActiveStrokeGeometry {
         Rect.fromLTRB(_minX - pad, _minY - pad, _maxX + pad, _maxY + pad),
         layer,
       );
+    }
+    for (var i = 0; i < _frozen.length; i++) {
+      canvas.drawPath(_frozen[i], _paint!);
     }
     canvas.drawPath(_body, _paint!);
     canvas.drawPath(_tail, _paint!);
