@@ -49,7 +49,9 @@ void main() {
     const size = ui.Size(240, 320);
     final data = await _render(CoverFamily.leatherCognac, size);
     int alpha(int x, int y) => data.getUint8((y * 240 + x) * 4 + 3);
-    expect(alpha(1, 1), 0); // outside the board (margin)
+    // Outside the board: at most a trace of the soft ambient shadow, which
+    // now runs under the spine as well.
+    expect(alpha(1, 1), lessThan(8));
     expect(alpha(120, 160), 255); // board
     expect(alpha(5, 5), 255); // square spine corner
   });
