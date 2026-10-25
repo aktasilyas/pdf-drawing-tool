@@ -244,8 +244,7 @@ void _showRenameFolderDialog(
                   await folderController.renameFolder(folder.id, newName);
               // Failures are shown by LibraryErrorListener.
               if (success && context.mounted) {
-                final message =
-                    'Klasör "$newName" olarak yeniden adlandırıldı';
+                final message = 'Klasör "$newName" olarak yeniden adlandırıldı';
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(message),

@@ -250,8 +250,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
       return await result.fold(
         (failure) {
           state = AsyncError(failure, StackTrace.current);
-          reportLibraryFailure(
-              ref, failure, 'Belge kalıcı olarak silinemedi');
+          reportLibraryFailure(ref, failure, 'Belge kalıcı olarak silinemedi');
           return false;
         },
         (_) {
