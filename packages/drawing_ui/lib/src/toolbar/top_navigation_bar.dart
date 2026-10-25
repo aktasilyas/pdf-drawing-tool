@@ -108,95 +108,90 @@ class TopNavigationBar extends ConsumerWidget {
     ColorScheme colorScheme,
     bool isReaderMode,
   ) {
-    const double sz = 32;
     final currentTool = ref.watch(currentToolProvider);
     final rulerVisible = ref.watch(rulerVisibleProvider);
 
     final pageCount = ref.watch(pageCountProvider);
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
+    final buttons = <Widget>[
+      ElyanotesNavButton(
+        icon: ElyanotesIcons.home,
+        tooltip: 'Ana Sayfa',
+        onPressed: onHomePressed ?? () {},
+      ),
+      if (pageCount > 1)
         ElyanotesNavButton(
-          icon: ElyanotesIcons.home,
-          tooltip: 'Ana Sayfa',
-          onPressed: onHomePressed ?? () {},
-          size: sz,
+          icon: isSidebarOpen
+              ? ElyanotesIcons.sidebarActive
+              : ElyanotesIcons.sidebar,
+          tooltip: 'Sayfa Paneli',
+          onPressed: onSidebarToggle ?? () {},
+          isActive: isSidebarOpen,
         ),
-        if (pageCount > 1)
+      if (!isReaderMode) ...[
+        if (onAIPressed != null)
           ElyanotesNavButton(
-            icon: isSidebarOpen
-                ? ElyanotesIcons.sidebarActive
-                : ElyanotesIcons.sidebar,
-            tooltip: 'Sayfa Paneli',
-            onPressed: onSidebarToggle ?? () {},
-            isActive: isSidebarOpen,
-            size: sz,
+            icon: ElyanotesIcons.sparkle,
+            tooltip: 'Yapay Zeka',
+            onPressed: onAIPressed!,
           ),
-        if (!isReaderMode) ...[
-          if (onAIPressed != null)
-            ElyanotesNavButton(
-              icon: ElyanotesIcons.sparkle,
-              tooltip: 'Yapay Zeka',
-              onPressed: onAIPressed!,
-              size: sz,
-            ),
-          ...compactTopBarTools.map((tool) => _buildCompactToolButton(
-                ref: ref,
-                tool: tool,
-                currentTool: currentTool,
-                size: sz,
-              )),
-          if (!ref.watch(isInfiniteCanvasProvider) &&
-              ref.watch(audioRecordingEnabledProvider))
-            ElyanotesNavButton(
-              icon: ElyanotesIcons.microphone,
-              tooltip: 'Ses Kaydi',
-              onPressed: () =>
-                  showAudioMenu(context, ref, onSidebarToggle, isSidebarOpen),
-              size: sz,
-            ),
+        ...compactTopBarTools.map((tool) => _buildCompactToolButton(
+              ref: ref,
+              tool: tool,
+              currentTool: currentTool,
+            )),
+        if (!ref.watch(isInfiniteCanvasProvider) &&
+            ref.watch(audioRecordingEnabledProvider))
           ElyanotesNavButton(
-            icon: rulerVisible
-                ? ElyanotesIcons.rulerActive
-                : ElyanotesIcons.ruler,
-            tooltip: 'Cetvel',
+            icon: ElyanotesIcons.microphone,
+            tooltip: 'Ses Kaydi',
             onPressed: () =>
-                ref.read(rulerVisibleProvider.notifier).state = !rulerVisible,
-            isActive: rulerVisible,
-            size: sz,
+                showAudioMenu(context, ref, onSidebarToggle, isSidebarOpen),
           ),
-        ],
-        if (isReaderMode) _buildReaderBadge(colorScheme),
         ElyanotesNavButton(
-          icon: isReaderMode
-              ? ElyanotesIcons.readerModeActive
-              : ElyanotesIcons.readerMode,
-          tooltip: isReaderMode ? 'Duzenleme Modu' : 'Okuyucu Modu',
-          onPressed: () {
-            ref.read(readerModeProvider.notifier).state = !isReaderMode;
-          },
-          isActive: isReaderMode,
-          size: sz,
-        ),
-        ElyanotesNavButton(
-          icon: ElyanotesIcons.more,
-          tooltip: 'Daha Fazla',
-          onPressed: () => ref.read(isInfiniteCanvasProvider)
-              ? showInfiniteBackgroundMenu(context)
-              : showMoreMenu(
-                  context,
-                  ref,
-                  documentTitle: documentTitle,
-                  onRenameDocument: onRenameDocument,
-                  onDeleteDocument: onDeleteDocument,
-                  showAddPage: !isReaderMode,
-                  showExport: true,
-                  compact: true,
-                ),
-          size: sz,
+          icon: rulerVisible
+              ? ElyanotesIcons.rulerActive
+              : ElyanotesIcons.ruler,
+          tooltip: 'Cetvel',
+          onPressed: () =>
+              ref.read(rulerVisibleProvider.notifier).state = !rulerVisible,
+          isActive: rulerVisible,
         ),
       ],
+      if (isReaderMode) _buildReaderBadge(colorScheme),
+      ElyanotesNavButton(
+        icon: isReaderMode
+            ? ElyanotesIcons.readerModeActive
+            : ElyanotesIcons.readerMode,
+        tooltip: isReaderMode ? 'Duzenleme Modu' : 'Okuyucu Modu',
+        onPressed: () {
+          ref.read(readerModeProvider.notifier).state = !isReaderMode;
+        },
+        isActive: isReaderMode,
+      ),
+      ElyanotesNavButton(
+        icon: ElyanotesIcons.more,
+        tooltip: 'Daha Fazla',
+        onPressed: () => ref.read(isInfiniteCanvasProvider)
+            ? showInfiniteBackgroundMenu(context)
+            : showMoreMenu(
+                context,
+                ref,
+                documentTitle: documentTitle,
+                onRenameDocument: onRenameDocument,
+                onDeleteDocument: onDeleteDocument,
+                showAddPage: !isReaderMode,
+                showExport: true,
+                compact: true,
+              ),
+      ),
+    ];
+
+    // 48dp hit areas; Flexible lets them share the row on the narrowest
+    // phones instead of overflowing (phone layout is reworked in slice 8).
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [for (final b in buttons) Flexible(child: b)],
     );
   }
 
@@ -205,7 +200,6 @@ class TopNavigationBar extends ConsumerWidget {
     required WidgetRef ref,
     required ToolType tool,
     required ToolType currentTool,
-    required double size,
   }) {
     final isSelected = tool == currentTool;
     return ElyanotesNavButton(
@@ -220,7 +214,6 @@ class TopNavigationBar extends ConsumerWidget {
         }
       },
       isActive: isSelected,
-      size: size,
     );
   }
 

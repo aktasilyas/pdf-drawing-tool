@@ -1,8 +1,8 @@
 /// Shared widgets for the toolbar UI.
 import 'package:flutter/material.dart';
-import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_ui/src/theme/drawing_theme.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
+import 'package:drawing_ui/src/toolbar/chrome_icon_button.dart';
 
 /// Undo/Redo button group for toolbar.
 class ToolbarUndoRedoButtons extends StatelessWidget {
@@ -30,7 +30,6 @@ class ToolbarUndoRedoButtons extends StatelessWidget {
           enabled: canUndo,
           onPressed: onUndo,
         ),
-        const SizedBox(width: 4),
         ToolbarIconButton(
           icon: ElyanotesIcons.redo,
           tooltip: 'İleri al',
@@ -59,7 +58,10 @@ class ToolbarVerticalDivider extends StatelessWidget {
   }
 }
 
-/// Generic toolbar icon button.
+/// Generic toolbar icon button; renders a [ChromeIconButton].
+///
+/// 40dp visual in a 48dp hit area, colours from [ChromePalette]
+/// (docs/specs/52-editor-chrome.md, section 4).
 class ToolbarIconButton extends StatelessWidget {
   const ToolbarIconButton({
     super.key,
@@ -76,36 +78,13 @@ class ToolbarIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = DrawingTheme.of(context);
-
-    return Tooltip(
-      message: tooltip,
-      child: Semantics(
-        label: tooltip,
-        button: true,
-        enabled: enabled,
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: enabled ? onPressed : null,
-            borderRadius: BorderRadius.circular(8),
-            child: Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: PhosphorIcon(
-                icon,
-                size: ElyanotesIcons.actionSize,
-                color: enabled
-                    ? theme.toolbarIconColor
-                    : theme.toolbarIconDisabledColor,
-              ),
-            ),
-          ),
-        ),
-      ),
+    return ChromeIconButton(
+      icon: icon,
+      tooltip: tooltip,
+      onPressed: onPressed ?? _noop,
+      enabled: enabled,
     );
   }
+
+  static void _noop() {}
 }
