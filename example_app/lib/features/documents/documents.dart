@@ -9,6 +9,7 @@ export 'domain/entities/view_mode.dart';
 // Domain - Repositories
 export 'domain/repositories/document_repository.dart';
 export 'domain/repositories/folder_repository.dart';
+export 'domain/repositories/page_trash_repository.dart';
 
 // Domain - Use Cases
 export 'domain/usecases/create_document_usecase.dart';
@@ -28,10 +29,12 @@ export 'data/models/folder_model.dart';
 // Data - Datasources
 export 'data/datasources/document_local_datasource.dart';
 export 'data/datasources/folder_local_datasource.dart';
+export 'data/datasources/trashed_page_local_datasource.dart';
 
 // Data - Repositories
 export 'data/repositories/document_repository_impl.dart';
 export 'data/repositories/folder_repository_impl.dart';
+export 'data/repositories/page_trash_repository_impl.dart';
 
 // Presentation - Providers
 export 'presentation/providers/documents_provider.dart';

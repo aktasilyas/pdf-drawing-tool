@@ -1,0 +1,25 @@
+import 'package:example_app/features/documents/domain/entities/trashed_page.dart';
+
+/// Stores pages deleted from a document so they can be restored later.
+abstract class PageTrashRepository {
+  /// Trashed pages, newest first.
+  Future<List<TrashedPage>> getTrashedPages();
+
+  /// Moves [pageData] (page [pageIndex] of [documentId]) to the trash.
+  Future<void> movePageToTrash({
+    required String documentId,
+    required String documentTitle,
+    required int pageIndex,
+    required Map<String, dynamic> pageData,
+  });
+
+  /// Re-inserts the page into its document. Returns false when the trashed
+  /// page or its document no longer exists.
+  Future<bool> restorePageFromTrash(String trashedPageId);
+
+  /// Removes the page from the trash for good.
+  Future<void> permanentlyDeletePage(String trashedPageId);
+
+  /// Whether the source document of a trashed page still exists.
+  Future<bool> documentExists(String documentId);
+}
