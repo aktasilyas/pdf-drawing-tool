@@ -145,7 +145,7 @@ class _TrashedPageCardState extends State<TrashedPageCard> {
           vertical: AppSpacing.xxs,
         ),
         decoration: BoxDecoration(
-          color: (context.palette.surface).withValues(alpha: 0.85),
+          color: context.palette.surface.withValues(alpha: 0.85),
           borderRadius: BorderRadius.circular(AppRadius.xs),
         ),
         child: Text(

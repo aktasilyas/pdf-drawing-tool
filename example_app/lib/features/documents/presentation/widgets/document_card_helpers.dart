@@ -19,9 +19,9 @@ class DocumentSelectionCheckbox extends StatelessWidget {
       height: 24,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: isSelected ? AppColors.primary : (context.palette.surface),
+        color: isSelected ? AppColors.primary : context.palette.surface,
         border: Border.all(
-          color: isSelected ? AppColors.primary : (context.palette.border),
+          color: isSelected ? AppColors.primary : context.palette.border,
           width: 2,
         ),
       ),
@@ -55,7 +55,7 @@ class DocumentFavoriteButton extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(AppSpacing.xs),
             decoration: BoxDecoration(
-              color: (context.palette.surface).withValues(alpha: 0.9),
+              color: context.palette.surface.withValues(alpha: 0.9),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -63,7 +63,7 @@ class DocumentFavoriteButton extends StatelessWidget {
               size: AppIconSize.sm,
               color: isFavorite
                   ? AppColors.accent
-                  : (context.palette.textDisabled),
+                  : context.palette.textDisabled,
             ),
           ),
         ),
@@ -85,7 +85,7 @@ class DocumentPageCountBadge extends StatelessWidget {
         vertical: AppSpacing.xxs,
       ),
       decoration: BoxDecoration(
-        color: (context.palette.textPrimary).withValues(alpha: 0.7),
+        color: context.palette.textPrimary.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(AppRadius.xs),
       ),
       child: Text(

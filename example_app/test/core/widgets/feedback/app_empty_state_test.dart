@@ -30,7 +30,7 @@ void main() {
 
         // Assert
         final icon = tester.widget<Icon>(find.byIcon(Icons.inbox_outlined));
-        expect(icon.color, equals(AppColors.textSecondaryLight));
+        expect(icon.color, equals(AppPalette.light.textMuted));
       });
 
       testWidgets('should_use_textPrimaryLight_for_title', (tester) async {
@@ -47,7 +47,7 @@ void main() {
 
         // Assert
         final text = tester.widget<Text>(find.text('Test Title'));
-        expect(text.style?.color, equals(AppColors.textPrimaryLight));
+        expect(text.style?.color, equals(AppPalette.light.textPrimary));
       });
 
       testWidgets('should_use_textSecondaryLight_for_description',
@@ -66,7 +66,7 @@ void main() {
 
         // Assert
         final text = tester.widget<Text>(find.text('Test Description'));
-        expect(text.style?.color, equals(AppColors.textSecondaryLight));
+        expect(text.style?.color, equals(AppPalette.light.textMuted));
       });
 
       testWidgets('should_display_all_parameters', (tester) async {
@@ -131,7 +131,7 @@ void main() {
 
         // Assert
         final icon = tester.widget<Icon>(find.byIcon(Icons.inbox_outlined));
-        expect(icon.color, equals(AppColors.textSecondaryDark));
+        expect(icon.color, equals(AppPalette.dark.textMuted));
       });
 
       testWidgets('should_use_textPrimaryDark_for_title', (tester) async {
@@ -148,7 +148,7 @@ void main() {
 
         // Assert
         final text = tester.widget<Text>(find.text('Test Title'));
-        expect(text.style?.color, equals(AppColors.textPrimaryDark));
+        expect(text.style?.color, equals(AppPalette.dark.textPrimary));
       });
 
       testWidgets('should_use_textSecondaryDark_for_description',
@@ -167,7 +167,7 @@ void main() {
 
         // Assert
         final text = tester.widget<Text>(find.text('Test Description'));
-        expect(text.style?.color, equals(AppColors.textSecondaryDark));
+        expect(text.style?.color, equals(AppPalette.dark.textMuted));
       });
 
       testWidgets('should_display_all_parameters', (tester) async {

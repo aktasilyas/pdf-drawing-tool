@@ -78,7 +78,7 @@ class _ColorItem extends StatelessWidget {
           shape: BoxShape.circle,
           border: Border.all(
             color:
-                isSelected ? (context.palette.textPrimary) : Colors.transparent,
+                isSelected ? context.palette.textPrimary : Colors.transparent,
             width: 3,
           ),
           boxShadow: isSelected

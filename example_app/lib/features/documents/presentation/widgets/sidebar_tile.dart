@@ -27,15 +27,15 @@ class SidebarTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final selectedColor = context.palette.accent;
     final textColor = !enabled
-        ? (context.palette.textDisabled)
+        ? context.palette.textDisabled
         : isSelected
             ? selectedColor
-            : (context.palette.textPrimary);
+            : context.palette.textPrimary;
     final iconColor = !enabled
-        ? (context.palette.textDisabled)
+        ? context.palette.textDisabled
         : isSelected
             ? selectedColor
-            : (context.palette.accent);
+            : context.palette.accent;
     final iconBg = context.palette.surfaceElevated;
 
     return InkWell(

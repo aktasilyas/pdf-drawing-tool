@@ -188,8 +188,8 @@ class _BreadcrumbItemWidget extends StatelessWidget {
             item.label,
             style: AppTypography.bodyMedium.copyWith(
               color: isActive
-                  ? (context.palette.textPrimary)
-                  : (context.palette.textMuted),
+                  ? context.palette.textPrimary
+                  : context.palette.textMuted,
               fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
             ),
           ),

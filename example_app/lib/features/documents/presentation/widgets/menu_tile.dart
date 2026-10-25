@@ -28,12 +28,12 @@ class MenuTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final iconColor =
-        isDestructive ? AppColors.error : (context.palette.accent);
+        isDestructive ? AppColors.error : context.palette.accent;
     final iconBgColor = isDestructive
         ? AppColors.error.withValues(alpha: 0.1)
-        : (context.palette.surfaceElevated);
+        : context.palette.surfaceElevated;
     final textColor =
-        isDestructive ? AppColors.error : (context.palette.textPrimary);
+        isDestructive ? AppColors.error : context.palette.textPrimary;
 
     return InkWell(
       onTap: onTap,
