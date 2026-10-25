@@ -17,8 +17,7 @@ void showFolderMenu(
   Folder folder, {
   required VoidCallback? onDeleted,
 }) {
-  final isDark = Theme.of(context).brightness == Brightness.dark;
-  final surfaceColor = isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+  final surfaceColor = context.palette.surface;
 
   showModalBottomSheet(
     context: context,
@@ -40,7 +39,7 @@ void showFolderMenu(
               _showRenameFolderDialog(context, ref, folder);
             },
           ),
-          _softDivider(isDark),
+          _softDivider(context),
           MenuTile(
             icon: Icons.color_lens_outlined,
             label: 'Renk Değiştir',
@@ -49,7 +48,7 @@ void showFolderMenu(
               _showColorPicker(context, ref, folder);
             },
           ),
-          _softDivider(isDark),
+          _softDivider(context),
           MenuTile(
             icon: Icons.drive_file_move_outlined,
             label: 'Taşı',
@@ -74,7 +73,7 @@ void showFolderMenu(
               }
             },
           ),
-          _softDivider(isDark),
+          _softDivider(context),
           _buildDeleteFolderTile(context, ref, folder, onDeleted),
           const SizedBox(height: AppSpacing.sm),
         ],
@@ -114,10 +113,8 @@ Widget _buildDeleteFolderTile(
   Folder folder,
   VoidCallback? onDeleted,
 ) {
-  final isDark = Theme.of(context).brightness == Brightness.dark;
-  final surfaceColor = isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
-  final textPrimary =
-      isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+  final surfaceColor = context.palette.surface;
+  final textPrimary = context.palette.textPrimary;
 
   return MenuTile(
     icon: Icons.delete_outline,
@@ -177,14 +174,11 @@ void _showRenameFolderDialog(
   WidgetRef ref,
   Folder folder,
 ) {
-  final isDark = Theme.of(context).brightness == Brightness.dark;
-  final surfaceColor = isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
-  final textPrimary =
-      isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
-  final textSecondary =
-      isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
-  final outlineColor = isDark ? AppColors.outlineDark : AppColors.outlineLight;
-  final accentColor = isDark ? AppColors.accent : AppColors.primary;
+  final surfaceColor = context.palette.surface;
+  final textPrimary = context.palette.textPrimary;
+  final textSecondary = context.palette.textMuted;
+  final outlineColor = context.palette.border;
+  final accentColor = context.palette.accent;
 
   final controller = TextEditingController(text: folder.name);
 
@@ -258,12 +252,11 @@ void _showRenameFolderDialog(
 }
 
 /// Soft divider matching settings/sidebar pattern (0.5px, outlineVariant).
-Widget _softDivider(bool isDark) {
+Widget _softDivider(BuildContext context) {
   return Divider(
     height: 0.5,
     thickness: 0.5,
-    color:
-        isDark ? AppColors.outlineVariantDark : AppColors.outlineVariantLight,
+    color: context.palette.border,
     indent: 56,
   );
 }

@@ -26,15 +26,10 @@ class SortPopupButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final iconColor = isDark ? AppColors.primaryDarkMode : AppColors.primary;
-    final bgColor = isDark
-        ? AppColors.surfaceContainerHighDark
-        : AppColors.surfaceContainerHighLight;
-    final textPrimary =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
-    final textSecondary =
-        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+    final iconColor = context.palette.accent;
+    final bgColor = context.palette.surfaceElevated;
+    final textPrimary = context.palette.textPrimary;
+    final textSecondary = context.palette.textMuted;
 
     return Material(
       color: bgColor,
@@ -119,9 +114,7 @@ class SortPopupButton extends StatelessWidget {
 
   PopupMenuItem<String> _sortItem(
       BuildContext context, String value, String label, bool isSelected) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textPrimary =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final textPrimary = context.palette.textPrimary;
 
     return PopupMenuItem(
       value: value,

@@ -52,7 +52,7 @@ void main() {
 
         // Assert
         final text = tester.widget<Text>(find.text('Test Folder'));
-        expect(text.style?.color, equals(AppColors.textPrimaryLight));
+        expect(text.style?.color, equals(AppPalette.light.textPrimary));
       });
 
       testWidgets('should_use_textSecondaryLight_for_document_count',
@@ -67,7 +67,7 @@ void main() {
 
         // Assert
         final text = tester.widget<Text>(find.text('5 belge'));
-        expect(text.style?.color, equals(AppColors.textSecondaryLight));
+        expect(text.style?.color, equals(AppPalette.light.textMuted));
       });
 
       testWidgets('should_display_folder_icon_with_custom_color',
@@ -98,7 +98,7 @@ void main() {
 
         // Assert
         final text = tester.widget<Text>(find.text('Test Folder'));
-        expect(text.style?.color, equals(AppColors.textPrimaryDark));
+        expect(text.style?.color, equals(AppPalette.dark.textPrimary));
       });
 
       testWidgets('should_use_textSecondaryDark_for_document_count',
@@ -113,7 +113,7 @@ void main() {
 
         // Assert
         final text = tester.widget<Text>(find.text('5 belge'));
-        expect(text.style?.color, equals(AppColors.textSecondaryDark));
+        expect(text.style?.color, equals(AppPalette.dark.textMuted));
       });
 
       testWidgets('should_display_folder_icon_with_custom_color',
@@ -183,8 +183,8 @@ void main() {
           ),
         );
         final decoration = container.decoration as BoxDecoration;
-        expect(decoration.color, equals(AppColors.surfaceLight));
-        expect(decoration.border?.top.color, equals(AppColors.outlineLight));
+        expect(decoration.color, equals(AppPalette.light.surface));
+        expect(decoration.border?.top.color, equals(AppPalette.light.border));
       });
 
       testWidgets('should_show_selected_checkbox_with_primary_color',
@@ -211,8 +211,8 @@ void main() {
           ),
         );
         final decoration = container.decoration as BoxDecoration;
-        expect(decoration.color, equals(AppColors.primary));
-        expect(decoration.border?.top.color, equals(AppColors.primary));
+        expect(decoration.color, equals(AppPalette.light.accent));
+        expect(decoration.border?.top.color, equals(AppPalette.light.accent));
 
         // Should show check icon
         expect(find.byIcon(Icons.check), findsOneWidget);
@@ -269,8 +269,8 @@ void main() {
           ),
         );
         final decoration = container.decoration as BoxDecoration;
-        expect(decoration.color, equals(AppColors.surfaceDark));
-        expect(decoration.border?.top.color, equals(AppColors.outlineDark));
+        expect(decoration.color, equals(AppPalette.dark.surface));
+        expect(decoration.border?.top.color, equals(AppPalette.dark.border));
       });
 
       testWidgets('should_show_selected_checkbox_with_primary_color',
@@ -297,8 +297,8 @@ void main() {
           ),
         );
         final decoration = container.decoration as BoxDecoration;
-        expect(decoration.color, equals(AppColors.accent));
-        expect(decoration.border?.top.color, equals(AppColors.accent));
+        expect(decoration.color, equals(AppPalette.dark.accent));
+        expect(decoration.border?.top.color, equals(AppPalette.dark.accent));
 
         // Should show check icon
         expect(find.byIcon(Icons.check), findsOneWidget);

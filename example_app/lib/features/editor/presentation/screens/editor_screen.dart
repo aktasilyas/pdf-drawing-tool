@@ -156,13 +156,11 @@ class EditorScreen extends ConsumerWidget {
     final document = ref.read(documentProvider);
     final controller = TextEditingController(text: document.title);
     final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor:
-            isDark ? colorScheme.surfaceContainerHighest : colorScheme.surface,
+        backgroundColor: context.palette.surfaceElevated,
         title: Text('Yeniden Adlandır',
             style: TextStyle(
                 fontFamily: AppTypography.headingFontFamily,
@@ -212,13 +210,11 @@ class EditorScreen extends ConsumerWidget {
 
   void _showDeleteConfirmation(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        backgroundColor:
-            isDark ? colorScheme.surfaceContainerHighest : colorScheme.surface,
+        backgroundColor: context.palette.surfaceElevated,
         title: Text('Çöpe Taşı',
             style: TextStyle(
                 fontFamily: AppTypography.headingFontFamily,

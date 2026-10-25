@@ -66,28 +66,26 @@ class _TrashedPageCardState extends State<TrashedPageCard> {
   }
 
   Widget _buildThumbnailCard(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final outlineColor =
-        isDark ? AppColors.outlineDark : AppColors.outlineLight;
+    final outlineColor = context.palette.border;
 
     return GestureDetector(
       onTap: widget.onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+          color: context.palette.surface,
           borderRadius: BorderRadius.circular(AppRadius.sm),
           border: Border.all(color: outlineColor),
           boxShadow: AppShadows.cardResting(
-            isDark ? Brightness.dark : Brightness.light,
+            Theme.of(context).brightness,
           ),
         ),
         clipBehavior: Clip.antiAlias,
         child: Stack(
           children: [
             // Page thumbnail
-            Positioned.fill(child: _buildThumbnailContent(isDark)),
+            Positioned.fill(child: _buildThumbnailContent()),
             // Page number badge
-            _buildPageBadge(isDark),
+            _buildPageBadge(),
             // Days left badge
             Positioned(
               bottom: AppSpacing.sm,
@@ -102,7 +100,7 @@ class _TrashedPageCardState extends State<TrashedPageCard> {
     );
   }
 
-  Widget _buildThumbnailContent(bool isDark) {
+  Widget _buildThumbnailContent() {
     if (_isLoading) {
       return Center(
         child: SizedBox(
@@ -110,9 +108,7 @@ class _TrashedPageCardState extends State<TrashedPageCard> {
           height: 20,
           child: CircularProgressIndicator(
             strokeWidth: 2,
-            color: isDark
-                ? AppColors.textTertiaryDark
-                : AppColors.textTertiaryLight,
+            color: context.palette.textDisabled,
           ),
         ),
       );
@@ -122,25 +118,24 @@ class _TrashedPageCardState extends State<TrashedPageCard> {
       return Image.memory(
         _thumbnailData!,
         fit: BoxFit.contain,
-        errorBuilder: (_, __, ___) => _buildFallbackIcon(isDark),
+        errorBuilder: (_, __, ___) => _buildFallbackIcon(),
       );
     }
 
-    return _buildFallbackIcon(isDark);
+    return _buildFallbackIcon();
   }
 
-  Widget _buildFallbackIcon(bool isDark) {
+  Widget _buildFallbackIcon() {
     return Center(
       child: Icon(
         Icons.description_outlined,
         size: 40,
-        color:
-            isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight,
+        color: context.palette.textDisabled,
       ),
     );
   }
 
-  Widget _buildPageBadge(bool isDark) {
+  Widget _buildPageBadge() {
     return Positioned(
       top: AppSpacing.sm,
       right: AppSpacing.sm,
@@ -150,8 +145,7 @@ class _TrashedPageCardState extends State<TrashedPageCard> {
           vertical: AppSpacing.xxs,
         ),
         decoration: BoxDecoration(
-          color: (isDark ? AppColors.surfaceDark : AppColors.surfaceLight)
-              .withValues(alpha: 0.85),
+          color: context.palette.surface.withValues(alpha: 0.85),
           borderRadius: BorderRadius.circular(AppRadius.xs),
         ),
         child: Text(
@@ -159,9 +153,7 @@ class _TrashedPageCardState extends State<TrashedPageCard> {
           style: AppTypography.caption.copyWith(
             fontSize: 9,
             fontWeight: FontWeight.w600,
-            color: isDark
-                ? AppColors.textSecondaryDark
-                : AppColors.textSecondaryLight,
+            color: context.palette.textMuted,
           ),
         ),
       ),
@@ -169,13 +161,9 @@ class _TrashedPageCardState extends State<TrashedPageCard> {
   }
 
   Widget _buildInfoSection(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textPrimary =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
-    final textSecondary =
-        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
-    final textTertiary =
-        isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight;
+    final textPrimary = context.palette.textPrimary;
+    final textSecondary = context.palette.textMuted;
+    final textTertiary = context.palette.textDisabled;
 
     return GestureDetector(
       onTap: widget.onTap,

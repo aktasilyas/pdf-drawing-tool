@@ -31,8 +31,7 @@ void _showTrashDocumentMenu(
   WidgetRef ref,
   DocumentInfo document,
 ) {
-  final isDark = Theme.of(context).brightness == Brightness.dark;
-  final surfaceColor = isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+  final surfaceColor = context.palette.surface;
 
   showModalBottomSheet(
     context: context,
@@ -67,7 +66,7 @@ void _showTrashDocumentMenu(
               }
             },
           ),
-          _softDivider(isDark),
+          _softDivider(context),
           MenuTile(
             icon: Icons.delete_forever,
             label: 'Kalıcı Sil',
@@ -99,8 +98,7 @@ void _showNormalDocumentMenu(
   WidgetRef ref,
   DocumentInfo document,
 ) {
-  final isDark = Theme.of(context).brightness == Brightness.dark;
-  final surfaceColor = isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+  final surfaceColor = context.palette.surface;
 
   showModalBottomSheet(
     context: context,
@@ -122,7 +120,7 @@ void _showNormalDocumentMenu(
               showRenameDocumentDialog(context, ref, document);
             },
           ),
-          _softDivider(isDark),
+          _softDivider(context),
           MenuTile(
             icon: Icons.content_copy,
             label: 'Çoğalt',
@@ -168,7 +166,7 @@ void _showNormalDocumentMenu(
               }
             },
           ),
-          _softDivider(isDark),
+          _softDivider(context),
           MenuTile(
             icon: Icons.drive_file_move_outlined,
             label: 'Taşı',
@@ -193,7 +191,7 @@ void _showNormalDocumentMenu(
               }
             },
           ),
-          _softDivider(isDark),
+          _softDivider(context),
           MenuTile(
             icon: document.isFavorite ? Icons.star : Icons.star_outline,
             label:
@@ -205,7 +203,7 @@ void _showNormalDocumentMenu(
                   .toggleFavorite(document.id);
             },
           ),
-          _softDivider(isDark),
+          _softDivider(context),
           MenuTile(
             icon: Icons.delete_outline,
             label: 'Çöpe Taşı',
@@ -230,10 +228,8 @@ void showTrashedPageMenu(
   WidgetRef ref,
   TrashedPage trashedPage,
 ) {
-  final isDark = Theme.of(context).brightness == Brightness.dark;
-  final surfaceColor = isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
-  final textPrimary =
-      isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+  final surfaceColor = context.palette.surface;
+  final textPrimary = context.palette.textPrimary;
 
   showModalBottomSheet(
     context: context,
@@ -259,7 +255,7 @@ void showTrashedPageMenu(
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          _softDivider(isDark),
+          _softDivider(context),
           MenuTile(
             icon: Icons.restore_from_trash,
             label: 'Kurtar',
@@ -295,7 +291,7 @@ void showTrashedPageMenu(
               }
             },
           ),
-          _softDivider(isDark),
+          _softDivider(context),
           MenuTile(
             icon: Icons.delete_forever,
             label: 'Kalıcı Sil',
@@ -370,12 +366,11 @@ void showRenameDocumentDialog(
 }
 
 /// Soft divider matching settings/sidebar pattern (0.5px, outlineVariant).
-Widget _softDivider(bool isDark) {
+Widget _softDivider(BuildContext context) {
   return Divider(
     height: 0.5,
     thickness: 0.5,
-    color:
-        isDark ? AppColors.outlineVariantDark : AppColors.outlineVariantLight,
+    color: context.palette.border,
     indent: 56,
   );
 }
@@ -386,10 +381,8 @@ Future<bool?> _showDeleteConfirmDialog(
   required String title,
   required String message,
 }) {
-  final isDark = Theme.of(context).brightness == Brightness.dark;
-  final surfaceColor = isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
-  final textPrimary =
-      isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+  final surfaceColor = context.palette.surface;
+  final textPrimary = context.palette.textPrimary;
 
   return showDialog<bool>(
     context: context,

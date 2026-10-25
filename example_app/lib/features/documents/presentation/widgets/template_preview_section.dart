@@ -142,9 +142,7 @@ class TemplatePreviewSection extends StatelessWidget {
   }
 
   Widget _buildSettingsPanel(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textSecondary =
-        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+    final textSecondary = context.palette.textMuted;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

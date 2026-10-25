@@ -29,6 +29,7 @@ void main() {
         saveDocumentUseCaseProvider.overrideWithValue(mockSaveUseCase),
       ],
       child: MaterialApp(
+        theme: AppTheme.light,
         home: EditorScreen(documentId: documentId),
       ),
     );

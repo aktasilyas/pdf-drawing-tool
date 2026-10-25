@@ -39,12 +39,11 @@ class DocumentCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final brightness = isDark ? Brightness.dark : Brightness.light;
+    final brightness = Theme.of(context).brightness;
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+        color: context.palette.surface,
         borderRadius: BorderRadius.circular(AppRadius.card),
         boxShadow: AppShadows.cardResting(brightness),
       ),
@@ -145,13 +144,9 @@ class DocumentCard extends ConsumerWidget {
   }
 
   Widget _buildInfoSection(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textPrimary =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
-    final textSecondary =
-        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
-    final textTertiary =
-        isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight;
+    final textPrimary = context.palette.textPrimary;
+    final textSecondary = context.palette.textMuted;
+    final textTertiary = context.palette.textDisabled;
 
     return GestureDetector(
       onTap: onMorePressed,
@@ -227,21 +222,14 @@ class DocumentCard extends ConsumerWidget {
   }
 
   Widget _buildWhiteboardPlaceholder(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final frameColor = isDark
-        ? AppColors.outlineDark.withValues(alpha: 0.8)
-        : AppColors.outlineLight;
-    final dotColor = isDark
-        ? Colors.white.withValues(alpha: 0.08)
-        : Colors.black.withValues(alpha: 0.08);
+    final frameColor = context.palette.border;
+    final dotColor = context.palette.textPrimary.withValues(alpha: 0.08);
 
     return Container(
       padding: const EdgeInsets.all(4),
       color: frameColor,
       child: Container(
-        color: isDark
-            ? AppColors.surfaceContainerHighDark
-            : AppColors.surfaceLight,
+        color: context.palette.surfaceElevated,
         child: CustomPaint(
           painter: WhiteboardGridPainter(dotColor: dotColor),
           size: Size.infinite,
@@ -251,11 +239,8 @@ class DocumentCard extends ConsumerWidget {
   }
 
   Widget _buildSpiralBinding(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textPrimary =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
-    final textTertiary =
-        isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight;
+    final textPrimary = context.palette.textPrimary;
+    final textTertiary = context.palette.textDisabled;
 
     return Positioned(
       left: 0,

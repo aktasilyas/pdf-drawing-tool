@@ -43,7 +43,7 @@ class AppSectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final p = context.palette;
 
     return Padding(
       padding: padding,
@@ -53,9 +53,7 @@ class AppSectionHeader extends StatelessWidget {
             child: Text(
               title,
               style: AppTypography.labelLarge.copyWith(
-                color: isDark
-                    ? AppColors.textSecondaryDark
-                    : AppColors.textSecondaryLight,
+                color: p.textMuted,
                 fontWeight: FontWeight.w600,
               ),
             ),

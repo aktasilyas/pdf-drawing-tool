@@ -17,10 +17,9 @@ class FormatPickerSheet extends StatefulWidget {
   const FormatPickerSheet({super.key, required this.currentSize});
 
   static Future<PaperSize?> show(BuildContext context, PaperSize currentSize) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return showModalBottomSheet<PaperSize>(
       context: context,
-      backgroundColor: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+      backgroundColor: context.palette.surface,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(AppRadius.bottomSheet),
@@ -52,9 +51,7 @@ class _FormatPickerSheetState extends State<FormatPickerSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textSecondary =
-        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+    final textSecondary = context.palette.textMuted;
 
     return SafeArea(
       child: Padding(
@@ -63,7 +60,7 @@ class _FormatPickerSheetState extends State<FormatPickerSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildDragHandle(isDark),
+            _buildDragHandle(),
             const SizedBox(height: AppSpacing.md),
             _buildHeader(textSecondary),
             const SizedBox(height: AppSpacing.lg),
@@ -79,15 +76,13 @@ class _FormatPickerSheetState extends State<FormatPickerSheet> {
     );
   }
 
-  Widget _buildDragHandle(bool isDark) {
+  Widget _buildDragHandle() {
     return Center(
       child: Container(
         width: 36,
         height: 4,
         decoration: BoxDecoration(
-          color: isDark
-              ? AppColors.outlineDark.withValues(alpha: 0.3)
-              : AppColors.outlineLight.withValues(alpha: 0.3),
+          color: context.palette.border.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(2),
         ),
       ),

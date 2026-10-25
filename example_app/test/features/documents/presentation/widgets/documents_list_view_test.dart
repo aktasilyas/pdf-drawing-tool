@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
 import 'package:example_app/features/documents/domain/entities/folder.dart';
 import 'package:example_app/features/documents/presentation/widgets/documents_list_view.dart';
@@ -11,6 +12,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
+            theme: AppTheme.light,
             home: Scaffold(
               body: DocumentsCombinedListView(
                 folders: const [],
@@ -40,6 +42,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
+            theme: AppTheme.light,
             home: Scaffold(
               body: DocumentsCombinedListView(
                 folders: [folder],
@@ -73,6 +76,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
+            theme: AppTheme.light,
             home: Scaffold(
               body: DocumentsCombinedListView(
                 folders: const [],
@@ -103,6 +107,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
+            theme: AppTheme.light,
             home: Scaffold(
               body: DocumentsCombinedListView(
                 folders: [folder],
@@ -135,6 +140,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
+            theme: AppTheme.light,
             home: Scaffold(
               body: DocumentsCombinedListView(
                 folders: const [],

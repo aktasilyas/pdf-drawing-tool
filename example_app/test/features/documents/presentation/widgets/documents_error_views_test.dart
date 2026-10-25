@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/documents/presentation/widgets/documents_error_views.dart';
 
 void main() {
   group('DocumentsErrorView', () {
     testWidgets('should_render_without_error', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: const Scaffold(
             body: DocumentsErrorView(error: 'Test error'),
           ),
         ),
@@ -20,8 +22,9 @@ void main() {
 
     testWidgets('should_display_error_icon', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: const Scaffold(
             body: DocumentsErrorView(error: 'Network error'),
           ),
         ),
@@ -35,8 +38,9 @@ void main() {
   group('DocumentsEmptyFolderView', () {
     testWidgets('should_render_without_error', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: const Scaffold(
             body: DocumentsEmptyFolderView(),
           ),
         ),
@@ -49,8 +53,9 @@ void main() {
 
     testWidgets('should_display_folder_icon', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: const Scaffold(
             body: DocumentsEmptyFolderView(),
           ),
         ),

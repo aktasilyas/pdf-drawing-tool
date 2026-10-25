@@ -28,9 +28,7 @@ class PaperColorPalette extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final outlineColor =
-        isDark ? AppColors.outlineDark : AppColors.outlineLight;
+    final outlineColor = context.palette.border;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
