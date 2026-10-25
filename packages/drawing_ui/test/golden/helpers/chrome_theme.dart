@@ -4,9 +4,8 @@ import 'package:flutter/material.dart';
 /// Theme for chrome goldens: the brief palette registered the way
 /// example_app registers it, so goldens render the shipped colours.
 ThemeData chromeTheme(Brightness brightness) {
-  final palette = brightness == Brightness.dark
-      ? ChromePalette.dark
-      : ChromePalette.light;
+  final palette =
+      brightness == Brightness.dark ? ChromePalette.dark : ChromePalette.light;
   return ThemeData(
     useMaterial3: true,
     colorScheme: ColorScheme.fromSeed(

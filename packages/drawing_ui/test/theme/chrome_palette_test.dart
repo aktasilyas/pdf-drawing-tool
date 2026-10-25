@@ -76,8 +76,8 @@ void main() {
 
   test('equality is by value', () {
     expect(ChromePalette.light.copyWith(), ChromePalette.light);
-    expect(ChromePalette.light.copyWith().hashCode,
-        ChromePalette.light.hashCode);
+    expect(
+        ChromePalette.light.copyWith().hashCode, ChromePalette.light.hashCode);
     expect(ChromePalette.light == ChromePalette.dark, isFalse);
   });
 
