@@ -194,6 +194,8 @@ void main() {
           sharedPreferencesProvider.overrideWithValue(prefs),
           isInfiniteCanvasProvider.overrideWith((ref) => false),
           pageCountProvider.overrideWithValue(2),
+          // v1.0 configuration: audio recording is frozen.
+          audioRecordingEnabledProvider.overrideWithValue(false),
         ],
         child: MaterialApp(
           theme: ThemeData(extensions: const [_palette]),
