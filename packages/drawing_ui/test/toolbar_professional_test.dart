@@ -499,13 +499,13 @@ void main() {
       );
 
       expect(find.byType(TopNavigationBar), findsOneWidget);
-      // Title is consolidated into the "More" menu in compact mode.
-      expect(find.text('Test Document'), findsNothing);
+      // Phone row 1 shows the serif title; rename lives in the More sheet.
+      expect(find.text('Test Document'), findsOneWidget);
       expect(find.byIcon(ElyanotesIcons.home), findsOneWidget);
       expect(find.byIcon(ElyanotesIcons.more), findsOneWidget);
     });
 
-    testWidgets('should_render_reader_mode_badge_in_compact_mode_when_active',
+    testWidgets('should_show_active_reader_toggle_in_compact_mode',
         (tester) async {
       await tester.pumpWidget(
         ProviderScope(
@@ -524,7 +524,8 @@ void main() {
         ),
       );
 
-      expect(find.text('Salt okunur'), findsOneWidget);
+      // Phone shows the active Reader toggle instead of a badge.
+      expect(find.byIcon(ElyanotesIcons.readerModeActive), findsOneWidget);
     });
 
     testWidgets('should_hide_grid_button_in_reader_mode', (tester) async {

@@ -215,18 +215,20 @@ void main() {
       );
     }
 
-    testWidgets('nav buttons keep their 48dp width at 400 wide',
+    testWidgets('nav buttons keep a 48x48 hit area at 400 wide',
         (tester) async {
       await tester.pumpWidget(bar(400));
 
       expect(tester.takeException(), isNull);
       final buttons = find.byType(ChromeIconButton);
       expect(buttons, findsWidgets);
-      // Width only: the bar's 0.5dp bottom border leaves 47.5dp of height
-      // until the phone toolbar is rebuilt in slice 8.
       for (final element in buttons.evaluate()) {
         expect(
           element.size!.width,
+          greaterThanOrEqualTo(ChromeSizes.minTouchTarget),
+        );
+        expect(
+          element.size!.height,
           greaterThanOrEqualTo(ChromeSizes.minTouchTarget),
         );
       }

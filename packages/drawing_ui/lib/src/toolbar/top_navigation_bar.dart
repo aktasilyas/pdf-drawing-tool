@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 
-import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/toolbar/elyanotes_nav_button.dart';
-import 'package:drawing_ui/src/toolbar/tool_groups.dart';
-import 'package:drawing_ui/src/toolbar/toolbar_widgets.dart';
+import 'package:drawing_ui/src/toolbar/phone_nav_row.dart';
 import 'package:drawing_ui/src/toolbar/top_nav_menus.dart';
 import 'package:drawing_ui/src/widgets/document_title_button.dart';
 
@@ -18,10 +16,7 @@ import 'package:drawing_ui/src/widgets/document_title_button.dart';
 /// [Home] [Sidebar] [Title ▼]  ···spacer···  [Reader] [Grid] [Export] [More]
 /// ```
 ///
-/// Layout (compact / phone):
-/// ```
-/// [Home] [Title ▼]  ···spacer···  [Export] [More]
-/// ```
+/// Compact (phone) renders a [PhoneNavRow] instead.
 class TopNavigationBar extends ConsumerWidget {
   const TopNavigationBar({
     super.key,
@@ -32,8 +27,6 @@ class TopNavigationBar extends ConsumerWidget {
     this.onSidebarToggle,
     this.isSidebarOpen = false,
     this.compact = false,
-    this.onAIPressed,
-    this.onToolPanelRequested,
   });
 
   /// Document title to display.
@@ -54,32 +47,20 @@ class TopNavigationBar extends ConsumerWidget {
   /// Whether the sidebar is currently open.
   final bool isSidebarOpen;
 
-  /// Whether to use compact mode (phone) — minimal buttons.
+  /// Whether to use compact mode (phone): renders a [PhoneNavRow] on the
+  /// desk band instead of the legacy full row.
   final bool compact;
-
-  /// Callback when AI button is pressed (shown in compact mode).
-  final VoidCallback? onAIPressed;
-
-  /// Callback when a tool's panel should open (shown in compact mode).
-  final ValueChanged<ToolType>? onToolPanelRequested;
-
-  /// Tools shown in the compact top bar (removed from bottom bar).
-  static const List<ToolType> compactTopBarTools = [
-    ToolType.laserPointer,
-    ToolType.shapes,
-    ToolType.text,
-  ];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    if (compact) return _buildPhone(context);
+
     final colorScheme = Theme.of(context).colorScheme;
     final drawingTheme = DrawingTheme.of(context);
     final isReaderMode = ref.watch(readerModeProvider);
-    final topPadding = compact ? MediaQuery.of(context).padding.top : 0.0;
 
     return Container(
-      height: 48 + topPadding,
-      padding: EdgeInsets.only(top: topPadding),
+      height: 48,
       decoration: BoxDecoration(
         color: drawingTheme.toolbarBackground,
         border: Border(
@@ -91,125 +72,32 @@ class TopNavigationBar extends ConsumerWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 4),
-        child: compact
-            ? _buildCompactLayout(context, ref, colorScheme, isReaderMode)
-            : _buildFullLayout(context, ref, colorScheme, isReaderMode),
+        child: _buildFullLayout(context, ref, colorScheme, isReaderMode),
       ),
     );
   }
 
-  /// Compact layout (phone <600px) — all buttons evenly distributed:
-  /// ```
-  /// [Home] [AI] [Laser] [Shapes] [Text] [Mic] [Ruler] [Reader] [More]
-  /// ```
-  /// Title, Add Page and Export are consolidated into the "More" popup.
-  Widget _buildCompactLayout(
-    BuildContext context,
-    WidgetRef ref,
-    ColorScheme colorScheme,
-    bool isReaderMode,
-  ) {
-    final currentTool = ref.watch(currentToolProvider);
-    final rulerVisible = ref.watch(rulerVisibleProvider);
-
-    final pageCount = ref.watch(pageCountProvider);
-
-    return ToolbarSharedRow(
-      children: [
-        ElyanotesNavButton(
-          icon: ElyanotesIcons.home,
-          tooltip: 'Ana Sayfa',
-          onPressed: onHomePressed ?? () {},
-        ),
-        if (pageCount > 1)
-          ElyanotesNavButton(
-            icon: isSidebarOpen
-                ? ElyanotesIcons.sidebarActive
-                : ElyanotesIcons.sidebar,
-            tooltip: 'Sayfa Paneli',
-            onPressed: onSidebarToggle ?? () {},
-            isActive: isSidebarOpen,
-          ),
-        if (!isReaderMode) ...[
-          if (onAIPressed != null)
-            ElyanotesNavButton(
-              icon: ElyanotesIcons.sparkle,
-              tooltip: 'Yapay Zeka',
-              onPressed: onAIPressed!,
-            ),
-          ...compactTopBarTools.map((tool) => _buildCompactToolButton(
-                ref: ref,
-                tool: tool,
-                currentTool: currentTool,
-              )),
-          if (!ref.watch(isInfiniteCanvasProvider) &&
-              ref.watch(audioRecordingEnabledProvider))
-            ElyanotesNavButton(
-              icon: ElyanotesIcons.microphone,
-              tooltip: 'Ses Kaydi',
-              onPressed: () =>
-                  showAudioMenu(context, ref, onSidebarToggle, isSidebarOpen),
-            ),
-          ElyanotesNavButton(
-            icon: rulerVisible
-                ? ElyanotesIcons.rulerActive
-                : ElyanotesIcons.ruler,
-            tooltip: 'Cetvel',
-            onPressed: () =>
-                ref.read(rulerVisibleProvider.notifier).state = !rulerVisible,
-            isActive: rulerVisible,
-          ),
-        ],
-        if (isReaderMode) _buildReaderBadge(colorScheme),
-        ElyanotesNavButton(
-          icon: isReaderMode
-              ? ElyanotesIcons.readerModeActive
-              : ElyanotesIcons.readerMode,
-          tooltip: isReaderMode ? 'Duzenleme Modu' : 'Okuyucu Modu',
-          onPressed: () {
-            ref.read(readerModeProvider.notifier).state = !isReaderMode;
-          },
-          isActive: isReaderMode,
-        ),
-        ElyanotesNavButton(
-          icon: ElyanotesIcons.more,
-          tooltip: 'Daha Fazla',
-          onPressed: () => ref.read(isInfiniteCanvasProvider)
-              ? showInfiniteBackgroundMenu(context)
-              : showMoreMenu(
-                  context,
-                  ref,
-                  documentTitle: documentTitle,
-                  onRenameDocument: onRenameDocument,
-                  onDeleteDocument: onDeleteDocument,
-                  showAddPage: !isReaderMode,
-                  showExport: true,
-                  compact: true,
-                ),
-        ),
-      ],
-    );
-  }
-
-  /// Builds a tool button for the compact top bar.
-  Widget _buildCompactToolButton({
-    required WidgetRef ref,
-    required ToolType tool,
-    required ToolType currentTool,
-  }) {
-    final isSelected = tool == currentTool;
-    return ElyanotesNavButton(
-      icon: ElyanotesIcons.iconForTool(tool, active: isSelected),
-      tooltip: tool.displayName,
-      onPressed: () {
-        if (isSelected && toolsWithPanel.contains(tool)) {
-          onToolPanelRequested?.call(tool);
-        } else {
-          ref.read(currentToolProvider.notifier).selectTool(tool);
-          ref.read(activePanelProvider.notifier).state = null;
-        }
-      },
-      isActive: isSelected,
+  /// Phone row 1 on the desk band, below the status-bar inset
+  /// (docs/specs/52-editor-chrome.md, section 3).
+  Widget _buildPhone(BuildContext context) {
+    final topInset = MediaQuery.paddingOf(context).top;
+    return Container(
+      height: PhoneNavRow.height + topInset,
+      color: ChromePalette.of(context).background,
+      padding: EdgeInsets.fromLTRB(
+        ChromeSpacing.xs,
+        topInset,
+        ChromeSpacing.xs,
+        0,
+      ),
+      child: PhoneNavRow(
+        documentTitle: documentTitle,
+        onHomePressed: onHomePressed,
+        onRenameDocument: onRenameDocument,
+        onDeleteDocument: onDeleteDocument,
+        onSidebarToggle: onSidebarToggle,
+        isSidebarOpen: isSidebarOpen,
+      ),
     );
   }
 

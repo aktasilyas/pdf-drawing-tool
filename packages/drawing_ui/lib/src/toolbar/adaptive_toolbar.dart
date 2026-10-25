@@ -11,7 +11,8 @@ import 'package:drawing_ui/src/toolbar/top_navigation_bar.dart';
 ///
 /// - >=840px: [ToolBar] — single-row with nav + tools
 /// - 600-839px: [MediumToolbar] — single-row with nav + tools (overflow menu)
-/// - <600px: Two-row layout — [TopNavigationBar] + [CompactToolRow]
+/// - <600px: Two rows on the desk band — [TopNavigationBar] (compact: the
+///   phone nav row) + [CompactToolRow] (tool capsule)
 class AdaptiveToolbar extends StatelessWidget {
   const AdaptiveToolbar({
     super.key,
@@ -126,8 +127,6 @@ class AdaptiveToolbar extends StatelessWidget {
               onSidebarToggle: onSidebarToggle,
               isSidebarOpen: isSidebarOpen,
               compact: true,
-              onAIPressed: onAIPressed,
-              onToolPanelRequested: onToolPanelRequested,
             ),
             CompactToolRow(
               onAIPressed: onAIPressed,

@@ -30,84 +30,8 @@ void main() {
     );
   }
 
-  group('CompactToolRow', () {
-    testWidgets('has_48dp_height', (tester) async {
-      await tester.pumpWidget(
-        buildTestWidget(const CompactToolRow(), width: 400),
-      );
-
-      final container = tester.widget<Container>(
-        find.byType(Container).first,
-      );
-
-      expect(container.constraints?.maxHeight, equals(48));
-    });
-
-    testWidgets('shows_undo_redo_buttons', (tester) async {
-      await tester.pumpWidget(
-        buildTestWidget(const CompactToolRow(), width: 400),
-      );
-
-      expect(find.byIcon(ElyanotesIcons.undo), findsOneWidget);
-      expect(find.byIcon(ElyanotesIcons.redo), findsOneWidget);
-    });
-
-    testWidgets('shows_max_5_tool_buttons', (tester) async {
-      await tester.pumpWidget(
-        buildTestWidget(const CompactToolRow(), width: 400),
-      );
-
-      final toolButtons = find.byType(ToolButton);
-      // Dynamic layout — at 400px width, fits a reasonable number of tools
-      expect(toolButtons.evaluate().length, greaterThan(0));
-    });
-
-    testWidgets('no_overflow_menu_when_all_tools_fit', (tester) async {
-      // Laser/shapes/text moved to the top nav, so the rest fit at 400px.
-      await tester.pumpWidget(
-        buildTestWidget(const CompactToolRow(), width: 400),
-      );
-
-      expect(find.byType(ToolbarOverflowMenu), findsNothing);
-    });
-
-    testWidgets('shows_overflow_menu_when_needed', (tester) async {
-      await tester.pumpWidget(
-        buildTestWidget(const CompactToolRow(), width: 250),
-      );
-
-      expect(find.byType(ToolbarOverflowMenu), findsOneWidget);
-    });
-
-    testWidgets('calls_onPanelRequested_when_tool_tapped_twice',
-        (tester) async {
-      ToolType? requestedPanel;
-
-      await tester.pumpWidget(
-        buildTestWidget(
-          CompactToolRow(
-            onPanelRequested: (tool) => requestedPanel = tool,
-          ),
-          width: 400,
-        ),
-      );
-
-      final penButton = find.byWidgetPredicate(
-        (widget) =>
-            widget is ToolButton && widget.toolType == ToolType.ballpointPen,
-      );
-
-      if (penButton.evaluate().isNotEmpty) {
-        await tester.tap(penButton);
-        await tester.pump();
-
-        await tester.tap(penButton);
-        await tester.pump();
-
-        expect(requestedPanel, equals(ToolType.ballpointPen));
-      }
-    });
-  });
+  // CompactToolRow (phone tool capsule) is covered by
+  // test/toolbar/phone_toolbar_test.dart.
 
   group('ToolbarOverflowMenu', () {
     testWidgets('renders_popup_menu_button', (tester) async {
