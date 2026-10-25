@@ -8,6 +8,7 @@ import 'package:drawing_ui/drawing_ui.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/ai/presentation/providers/ai_providers.dart';
 import 'package:example_app/features/editor/presentation/providers/editor_provider.dart';
+import 'package:example_app/features/editor/presentation/providers/editor_session.dart';
 import 'package:example_app/features/editor/presentation/widgets/editor_body.dart';
 
 class EditorScreen extends ConsumerWidget {
@@ -48,12 +49,7 @@ class EditorScreen extends ConsumerWidget {
           final currentDoc = ref.read(documentProvider);
           if (currentDoc.id == document.id) return; // Already loaded
 
-          ref.read(documentProvider.notifier).updateDocument(document);
-          ref.read(currentDocumentProvider.notifier).state = document;
-          ref.read(pageManagerProvider.notifier).initializeFromDocument(
-                document.pages,
-                currentIndex: document.currentPageIndex,
-              );
+          startEditorSession(ref.read, document);
 
           // Set page trash callback for soft-delete support
           ref.read(pageTrashCallbackProvider.notifier).state =
@@ -141,6 +137,7 @@ class EditorScreen extends ConsumerWidget {
     ref.invalidate(autoSaveProvider);
     ref.invalidate(hasUnsavedChangesProvider);
     ref.invalidate(pageTrashCallbackProvider);
+    endEditorSession(ref.read);
     if (ref.read(featureFlagsProvider).aiChat) {
       ref.invalidate(aiChatProvider);
       ref.invalidate(aiSidebarOpenProvider);
