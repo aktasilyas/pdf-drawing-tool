@@ -4,13 +4,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:example_app/features/documents/data/datasources/trashed_page_local_datasource.dart';
 import 'package:example_app/features/documents/data/models/trashed_page_model.dart';
 import 'package:example_app/features/documents/domain/entities/trashed_page.dart';
+import 'package:example_app/features/documents/domain/repositories/page_trash_repository.dart';
 
-class PageTrashRepository {
+class PageTrashRepositoryImpl implements PageTrashRepository {
   final TrashedPageLocalDatasource _datasource;
   final SharedPreferences _prefs;
 
-  PageTrashRepository(this._datasource, this._prefs);
+  PageTrashRepositoryImpl(this._datasource, this._prefs);
 
+  @override
   Future<List<TrashedPage>> getTrashedPages() async {
     final models = await _datasource.getTrashedPages();
     final entities = models.map((m) => m.toEntity()).toList();
@@ -18,6 +20,7 @@ class PageTrashRepository {
     return entities;
   }
 
+  @override
   Future<void> movePageToTrash({
     required String documentId,
     required String documentTitle,
@@ -38,6 +41,7 @@ class PageTrashRepository {
     await _datasource.addTrashedPage(model);
   }
 
+  @override
   Future<bool> restorePageFromTrash(String trashedPageId) async {
     final model = await _datasource.getTrashedPage(trashedPageId);
     if (model == null) return false;
@@ -69,10 +73,12 @@ class PageTrashRepository {
     return true;
   }
 
+  @override
   Future<void> permanentlyDeletePage(String trashedPageId) async {
     await _datasource.removeTrashedPage(trashedPageId);
   }
 
+  @override
   Future<bool> documentExists(String documentId) async {
     final key = 'document_content_$documentId';
     return _prefs.getString(key) != null;
