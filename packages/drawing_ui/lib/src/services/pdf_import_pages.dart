@@ -30,6 +30,13 @@ int optimalPdfBatchSize({
   return batchSize > totalPages ? totalPages : batchSize;
 }
 
+/// Whether every 1-based page number lies within [totalPages]; an empty
+/// selection is invalid.
+bool isValidPdfPageSelection(List<int> pageNumbers, {required int totalPages}) {
+  if (pageNumbers.isEmpty) return false;
+  return pageNumbers.every((n) => n >= 1 && n <= totalPages);
+}
+
 /// Gets page numbers to import based on [config].
 List<int> pdfImportPageNumbers(PDFImportConfig config, int totalPages) {
   switch (config.pageSelection) {

@@ -81,16 +81,9 @@ class PDFImportService {
     required List<int> pageNumbers,
     required int totalPages,
   }) {
-    if (pageNumbers.isEmpty) return false;
-
-    for (final pageNumber in pageNumbers) {
-      if (pageNumber < 1 || pageNumber > totalPages) {
-        return false;
-      }
-    }
-
-    return true;
+    return isValidPdfPageSelection(pageNumbers, totalPages: totalPages);
   }
+
   /// Generates a page range.
   List<int> generatePageRange({required int start, required int end}) =>
       generatePdfPageRange(start: start, end: end);
@@ -100,8 +93,7 @@ class PDFImportService {
     required int processedPages,
     required int totalPages,
   }) {
-    if (totalPages == 0) return 0.0;
-    return processedPages / totalPages;
+    return totalPages == 0 ? 0.0 : processedPages / totalPages;
   }
 
   /// Checks if can transition to a new state.
@@ -166,9 +158,9 @@ class PDFImportService {
 
   /// Imports PDF from bytes.
   ///
-  /// If [useLazyLoading] is true (default), pages will not be rendered immediately.
-  /// Instead, the PDF is saved to device storage and pages are rendered on-demand.
-  /// This significantly improves import performance for large PDFs.
+  /// If [useLazyLoading] is true (default), pages are not rendered now: the
+  /// PDF is saved to device storage and pages are rendered on demand, which
+  /// is much faster for large PDFs.
   Future<PDFImportServiceResult> importFromBytes({
     required Uint8List bytes,
     required PDFImportConfig config,
