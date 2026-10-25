@@ -16,47 +16,50 @@ class CoverLayers {
       ui.Color.lerp(a, b, t)!;
 
   /// Two-layer drop shadow: tight contact shadow + soft ambient shadow.
+  /// Strong enough to separate the book from a dark background.
   static void shadow(ui.Canvas c, CoverGeometry g) {
-    final u = g.unit;
-    final outer = g.pageLayer(3);
+    final outer = g.pageLayer(g.pageLayers);
+    final dp = g.dp;
     c.drawRRect(
-        outer.shift(ui.Offset(u * 0.014, u * 0.026)),
+        outer.shift(ui.Offset(dp * 2, dp * 6)),
         ui.Paint()
-          ..color = const ui.Color(0x47000000)
-          ..maskFilter = ui.MaskFilter.blur(ui.BlurStyle.normal, u * 0.022));
+          ..color = const ui.Color(0x8C000000)
+          ..maskFilter = ui.MaskFilter.blur(ui.BlurStyle.normal, dp * 6));
     c.drawRRect(
-        outer.shift(ui.Offset(u * 0.003, u * 0.007)),
+        outer.shift(ui.Offset(dp * 0.5, dp * 1.5)),
         ui.Paint()
-          ..color = const ui.Color(0x73000000)
-          ..maskFilter = ui.MaskFilter.blur(ui.BlurStyle.normal, u * 0.005));
+          ..color = const ui.Color(0xB3000000)
+          ..maskFilter = ui.MaskFilter.blur(ui.BlurStyle.normal, dp * 0.8));
   }
 
-  /// Three cream page-edge layers on the fore-edge and bottom.
+  /// Page-edge layers on the fore-edge and bottom (about 80% of paper tone,
+  /// so they stay visible against both light and dark backgrounds).
   static void pages(ui.Canvas c, CoverGeometry g) {
     final line = ui.Paint()
       ..style = ui.PaintingStyle.stroke
-      ..strokeWidth = (g.unit * 0.0016).clamp(0.4, 1.0)
-      ..color = const ui.Color(0x38000000);
-    const creams = [
-      ui.Color(0xFFEFE8D6),
-      ui.Color(0xFFF7F2E4),
-      ui.Color(0xFFE9E1CD)
+      ..strokeWidth = 0.5
+      ..color = const ui.Color(0x33000000);
+    const tones = [
+      ui.Color(0xFFCFC8B8),
+      ui.Color(0xFFD9D2C2),
+      ui.Color(0xFFC4BDAC),
     ];
-    for (var k = 3; k >= 1; k--) {
+    for (var k = g.pageLayers; k >= 1; k--) {
       final r = g.pageLayer(k);
-      c.drawRRect(r, ui.Paint()..color = creams[k - 1]);
-      c.drawRRect(r, line);
+      c.drawRRect(r, ui.Paint()..color = tones[(k - 1) % 3]);
+      if (g.pageLayers > 1) c.drawRRect(r, line);
     }
   }
 
-  /// Cover body: base colour, material grain, light, vignette, spine, bevel.
-  /// Clipped to the cover shape by the caller.
+  /// Cover body: base colour, material grain, light, hue-keeping vignette,
+  /// spine and top rim. Clipped to the cover shape by the caller.
   static void body(ui.Canvas c, CoverGeometry g, Cover cover,
       {double textureScale = 1}) {
     final base = ui.Color(cover.primaryColor);
     final r = g.cover;
     c.drawRect(r, ui.Paint()..color = base);
 
+    // One continuous grain across spine and face.
     final paints = CoverMaterialStyle.paints(
       cover.material ?? CoverMaterial.linen,
       base,
@@ -71,34 +74,34 @@ class CoverLayers {
       }
     }
 
-    // Soft top-left light and bottom-right falloff.
+    // Soft top-left light.
     c.drawRect(
         r,
         ui.Paint()
           ..shader = ui.Gradient.linear(r.topLeft, r.bottomRight, const [
-            ui.Color(0x2EFFFFFF),
+            ui.Color(0x26FFFFFF),
             ui.Color(0x00FFFFFF),
-            ui.Color(0x2E000000),
           ], const [
             0,
-            0.45,
-            1
+            0.55
           ]));
-    // Gentle vignette.
+    // Vignette: multiply with a tinted, darkened cover colour so the hue is
+    // kept (never neutral black or grey).
+    final edge = mix(_white, base, 0.32);
     c.drawRect(
         r,
         ui.Paint()
-          ..shader = ui.Gradient.radial(
-              r.center,
-              r.longestSide * 0.78,
-              const [ui.Color(0x00000000), ui.Color(0x38000000)],
-              const [0.55, 1.0],
-              ui.TileMode.clamp));
+          ..blendMode = ui.BlendMode.multiply
+          ..shader = ui.Gradient.radial(r.center, r.longestSide * 0.8,
+              [_white, _white, edge], const [0, 0.5, 1.0], ui.TileMode.clamp));
+    // 1 dp top rim highlight.
+    c.drawRect(ui.Rect.fromLTWH(r.left, r.top, r.width, g.dp),
+        ui.Paint()..color = const ui.Color(0x14FFFFFF));
     spine(c, g);
   }
 
-  /// Binding band with a hinge crease: dark band, thin highlight, soft inner
-  /// shadow where the cover bends.
+  /// Binding band: hue-preserving horizontal darkening (multiply, outer edge
+  /// about -22%, about -8% at the crease) and a groove-style hinge.
   static void spine(ui.Canvas c, CoverGeometry g) {
     final r = g.cover;
     final sw = g.spineWidth;
@@ -106,42 +109,41 @@ class CoverLayers {
     c.drawRect(
         band,
         ui.Paint()
+          ..blendMode = ui.BlendMode.multiply
           ..shader =
               ui.Gradient.linear(band.centerLeft, band.centerRight, const [
-            ui.Color(0x4A000000),
-            ui.Color(0x0A000000),
-            ui.Color(0x3A000000),
-          ], const [
-            0,
-            0.4,
-            1
+            ui.Color(0xFFC7C7C7),
+            ui.Color(0xFFEBEBEB),
           ]));
-    final px = (g.unit * 0.004).clamp(0.8, 2.0);
+    final px = g.dp;
     final x = r.left + sw;
-    // Crease: dark groove, then a highlight line, then the soft inner shadow.
+    // Groove: 1 dp black ~28%, 1 dp white ~15% to its right, 6 dp soft inner
+    // shadow falling onto the front.
     c.drawRect(ui.Rect.fromLTWH(x - px, r.top, px, r.height),
-        ui.Paint()..color = const ui.Color(0x66000000));
+        ui.Paint()..color = const ui.Color(0x47000000));
     c.drawRect(ui.Rect.fromLTWH(x, r.top, px, r.height),
-        ui.Paint()..color = const ui.Color(0x40FFFFFF));
-    final soft = ui.Rect.fromLTWH(x + px, r.top, g.unit * 0.04, r.height);
+        ui.Paint()..color = const ui.Color(0x26FFFFFF));
+    final soft = ui.Rect.fromLTWH(x + px, r.top, g.dp * 6, r.height);
     c.drawRect(
         soft,
         ui.Paint()
           ..shader = ui.Gradient.linear(soft.centerLeft, soft.centerRight,
-              const [ui.Color(0x38000000), ui.Color(0x00000000)]));
+              const [ui.Color(0x33000000), ui.Color(0x00000000)]));
   }
 
-  /// Faint edge bevel: lit top-left, shaded bottom-right.
+  /// Soft bevel roll (about 1.5 dp, blurred) lit top-left, shaded bottom-right.
   static void bevel(ui.Canvas c, CoverGeometry g, {double strength = 1}) {
-    final w = (g.unit * 0.005).clamp(0.8, 3.0);
-    final rr = g.coverRRect.deflate(w / 2);
-    final a = (0x66 * strength).round().clamp(0, 255);
-    final b = (0x5C * strength).round().clamp(0, 255);
+    final w = g.dp * 1.5;
+    final a = (0x40 * strength).round().clamp(0, 255);
+    final b = (0x40 * strength).round().clamp(0, 255);
+    c.save();
+    c.clipRRect(g.coverRRect);
     c.drawRRect(
-        rr,
+        g.coverRRect.deflate(w / 2),
         ui.Paint()
           ..style = ui.PaintingStyle.stroke
           ..strokeWidth = w
+          ..maskFilter = ui.MaskFilter.blur(ui.BlurStyle.normal, g.dp * 0.6)
           ..shader = ui.Gradient.linear(g.cover.topLeft, g.cover.bottomRight, [
             ui.Color.fromARGB(a, 255, 255, 255),
             const ui.Color(0x00FFFFFF),
@@ -151,5 +153,6 @@ class CoverLayers {
             0.5,
             1
           ]));
+    c.restore();
   }
 }

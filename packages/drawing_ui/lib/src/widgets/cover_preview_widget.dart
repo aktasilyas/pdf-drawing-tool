@@ -185,7 +185,8 @@ class CoverPreviewWidget extends StatelessWidget {
                 CoverTitleOverlay(
                   cover: cover,
                   title: title!,
-                  zone: CoverRenderer.labelPlateRect(c.biggest),
+                  zone: CoverRenderer.titleZone(c.biggest, cover),
+                  scale: c.maxWidth / 240,
                 ),
               ]),
             ),

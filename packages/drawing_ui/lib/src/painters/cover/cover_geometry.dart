@@ -32,8 +32,18 @@ class CoverGeometry {
   /// Width of the spine/binding band.
   double get spineWidth => unit * 0.08;
 
-  /// Thickness of one visible page-edge layer.
-  double get pageEdge => unit * 0.007;
+  /// Small renders drop fine detail (stitching, band, ribbon, extra layers).
+  bool get compact => unit < 160;
+
+  /// 1 dp at the 240 dp reference width, at least ~0.75 px.
+  double get dp => (unit / 240).clamp(0.75, 4.0);
+
+  /// Number of visible page-edge layers: three, or one line when compact.
+  int get pageLayers => compact ? 1 : 3;
+
+  /// Thickness of one visible page-edge layer (<= 3 dp total at 240 dp,
+  /// one 1.5 dp line at 120 dp).
+  double get pageEdge => compact ? unit * 0.0125 : unit * 0.004;
 
   /// Rounded on the fore-edge side only; square at the spine.
   ui.RRect get coverRRect => ui.RRect.fromRectAndCorners(
@@ -52,6 +62,14 @@ class CoverGeometry {
     final h = w / 3;
     return ui.Rect.fromLTWH(
         face.center.dx - w / 2, cover.top + cover.height * 0.16, w, h);
+  }
+
+  /// Kraft label plate: ~55% of the face width, upper third.
+  ui.Rect get plateRect {
+    final w = face.width * 0.55;
+    final h = w / 2.4;
+    return ui.Rect.fromLTWH(
+        face.center.dx - w / 2, cover.top + cover.height * 0.15, w, h);
   }
 
   /// Rect of page-block layer [k] (1 = innermost), peeking out right/bottom.

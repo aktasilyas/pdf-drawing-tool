@@ -23,8 +23,8 @@ class CoverMaterialStyle {
   static const _styles = <CoverMaterial, CoverMaterialStyle>{
     CoverMaterial.leather: CoverMaterialStyle(0.85, 2.6, 3.2),
     CoverMaterial.linen: CoverMaterialStyle(0.42, 1.0, 1.15),
-    CoverMaterial.kraft: CoverMaterialStyle(0.9, 1.8, 2.2),
-    CoverMaterial.felt: CoverMaterialStyle(0.6, 0.7, 0.8),
+    CoverMaterial.kraft: CoverMaterialStyle(0.9, 0.55, 0.65),
+    CoverMaterial.felt: CoverMaterialStyle(0.6, 0.5, 0.55),
   };
 
   static CoverMaterialStyle of(CoverMaterial m) => _styles[m]!;

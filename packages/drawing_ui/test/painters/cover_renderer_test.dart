@@ -38,9 +38,9 @@ void main() {
     final data = await _render(CoverFamily.kraftNatural, size);
     final c = CoverRenderer.labelPlateRect(size).center;
     final i = (c.dy.round() * size.width.round() + c.dx.round()) * 4;
-    expect(data.getUint8(i), greaterThan(0xE0));
-    expect(data.getUint8(i + 1), greaterThan(0xDC));
-    expect(data.getUint8(i + 2), greaterThan(0xC8));
+    expect(data.getUint8(i), greaterThan(0xD8));
+    expect(data.getUint8(i + 1), greaterThan(0xD0));
+    expect(data.getUint8(i + 2), greaterThan(0xB0));
   });
 
   test('notebook layout: transparent corner, opaque board, square spine',

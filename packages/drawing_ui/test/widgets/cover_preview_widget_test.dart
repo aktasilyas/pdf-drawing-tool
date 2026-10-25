@@ -21,7 +21,7 @@ void main() {
 
     final root = tester.getRect(find.byType(CoverPreviewWidget));
     final plate = CoverRenderer.labelPlateRect(root.size).shift(root.topLeft);
-    final text = tester.getRect(find.text('Biology'));
+    final text = tester.getRect(find.text('Biology').last);
 
     expect(plate.inflate(0.5).contains(text.topLeft), isTrue);
     expect(plate.inflate(0.5).contains(text.bottomRight), isTrue);
@@ -60,10 +60,10 @@ void main() {
     expect(tester.takeException(), isNull);
     final root = tester.getRect(find.byType(CoverPreviewWidget));
     final plate = CoverRenderer.labelPlateRect(root.size).shift(root.topLeft);
-    final text = tester.getRect(find.byType(Text));
+    final text = tester.getRect(find.byType(Text).last);
     expect(plate.inflate(0.5).contains(text.topLeft), isTrue);
     expect(plate.inflate(0.5).contains(text.bottomRight), isTrue);
-    final render = tester.renderObject<RenderParagraph>(find.byType(RichText));
+    final render = tester.renderObject<RenderParagraph>(find.byType(RichText).last);
     expect(render.size.width, lessThanOrEqualTo(plate.width));
     expect(render.didExceedMaxLines, isTrue);
   });

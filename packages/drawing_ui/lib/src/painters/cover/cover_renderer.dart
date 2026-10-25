@@ -25,6 +25,13 @@ class CoverRenderer {
   static ui.Rect labelPlateRect(ui.Size size) =>
       CoverGeometry.of(size).titleRect;
 
+  /// Zone for the typed title of [cover]: the label plate for kraft, the
+  /// upper third of the face for everything else.
+  static ui.Rect titleZone(ui.Size size, Cover cover) {
+    final g = CoverGeometry.of(size);
+    return CoverDetails.hasLabelPlate(cover) ? g.plateRect : g.titleRect;
+  }
+
   /// Draws [cover] into [size] on [canvas]. The title is drawn by the widget.
   static void paint(ui.Canvas canvas, ui.Size size, Cover cover) {
     if (!CoverTextureStore.isLoaded) {
