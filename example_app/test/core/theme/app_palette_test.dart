@@ -112,6 +112,15 @@ void main() {
       expect(mid.onDanger, AppPalette.dark.onDanger);
     });
 
+    test('textDisabled role', () {
+      expect(AppPalette.light.textDisabled, const Color(0xFFA8A296));
+      expect(AppPalette.dark.textDisabled, const Color(0xFF6B665E));
+      expect(AppPalette.light.lerp(AppPalette.dark, 1).textDisabled,
+          AppPalette.dark.textDisabled);
+      expect(AppPalette.light.copyWith().textDisabled,
+          AppPalette.light.textDisabled);
+    });
+
     test('lerp endpoints', () {
       expect(AppPalette.light.lerp(AppPalette.dark, 1).surface,
           AppPalette.dark.surface);

@@ -15,6 +15,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     required this.border,
     required this.textPrimary,
     required this.textMuted,
+    required this.textDisabled,
     required this.accent,
     required this.accentContainer,
     required this.danger,
@@ -34,6 +35,9 @@ class AppPalette extends ThemeExtension<AppPalette> {
   final Color border;
   final Color textPrimary;
   final Color textMuted;
+
+  /// Disabled and tertiary text, icons and chevrons.
+  final Color textDisabled;
 
   /// Ink blue: selection, focus, primary actions only.
   final Color accent;
@@ -56,6 +60,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     border: Color(0xFFE4DED2),
     textPrimary: Color(0xFF22201C),
     textMuted: Color(0xFF6E685E),
+    textDisabled: Color(0xFFA8A296),
     accent: Color(0xFF2B4C7E),
     accentContainer: Color(0xFFDCE5F2),
     danger: Color(0xFFB3261E),
@@ -71,6 +76,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     border: Color(0xFF3A3834),
     textPrimary: Color(0xFFECE8E0),
     textMuted: Color(0xFFA39D92),
+    textDisabled: Color(0xFF6B665E),
     accent: Color(0xFF8FAEDB),
     accentContainer: Color(0xFF263548),
     danger: Color(0xFFF2B8B5),
@@ -87,6 +93,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
     Color? border,
     Color? textPrimary,
     Color? textMuted,
+    Color? textDisabled,
     Color? accent,
     Color? accentContainer,
     Color? danger,
@@ -101,6 +108,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
       border: border ?? this.border,
       textPrimary: textPrimary ?? this.textPrimary,
       textMuted: textMuted ?? this.textMuted,
+      textDisabled: textDisabled ?? this.textDisabled,
       accent: accent ?? this.accent,
       accentContainer: accentContainer ?? this.accentContainer,
       danger: danger ?? this.danger,
@@ -120,6 +128,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
       border: Color.lerp(border, other.border, t)!,
       textPrimary: Color.lerp(textPrimary, other.textPrimary, t)!,
       textMuted: Color.lerp(textMuted, other.textMuted, t)!,
+      textDisabled: Color.lerp(textDisabled, other.textDisabled, t)!,
       accent: Color.lerp(accent, other.accent, t)!,
       accentContainer: Color.lerp(accentContainer, other.accentContainer, t)!,
       danger: Color.lerp(danger, other.danger, t)!,
