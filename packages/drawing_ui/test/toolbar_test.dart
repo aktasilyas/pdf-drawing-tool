@@ -61,9 +61,9 @@ void main() {
         findsOneWidget,
       );
 
-      // Undo/redo moved to FloatingUndoRedo; settings button was removed.
-      expect(find.byIcon(ElyanotesIcons.undo), findsNothing);
-      expect(find.byIcon(ElyanotesIcons.redo), findsNothing);
+      // Undo/redo live in the tools capsule; settings button was removed.
+      expect(find.byIcon(ElyanotesIcons.undo), findsOneWidget);
+      expect(find.byIcon(ElyanotesIcons.redo), findsOneWidget);
       expect(find.byIcon(ElyanotesIcons.settings), findsNothing);
     });
 
