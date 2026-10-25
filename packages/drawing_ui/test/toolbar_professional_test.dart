@@ -16,8 +16,8 @@ void main() {
 
     test('should_have_reader_mode_icons_with_active_variant', () {
       expect(ElyanotesIcons.readerMode, equals(PhosphorIconsRegular.bookOpen));
-      expect(ElyanotesIcons.readerModeActive,
-          equals(PhosphorIconsFill.bookOpen));
+      expect(
+          ElyanotesIcons.readerModeActive, equals(PhosphorIconsFill.bookOpen));
     });
 
     test('should_have_correct_icon_sizes', () {
