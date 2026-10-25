@@ -11,8 +11,6 @@ import 'package:example_app/core/crash_reporting/noop_crash_reporter.dart';
 
 class _MockReporter extends Mock implements CrashReporter {}
 
-class _FakeDetails extends Fake implements FlutterErrorDetails {}
-
 const _fullEnv = AppEnv(
   firebaseApiKey: 'key',
   firebaseAppId: '1:2:android:3',
@@ -25,7 +23,7 @@ void main() {
   late int initCalls;
 
   setUpAll(() {
-    registerFallbackValue(_FakeDetails());
+    registerFallbackValue(FlutterErrorDetails(exception: Object()));
     registerFallbackValue(Object());
   });
 
