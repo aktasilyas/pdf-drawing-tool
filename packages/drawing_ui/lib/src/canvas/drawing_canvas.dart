@@ -47,6 +47,8 @@ part 'drawing_canvas/pdf_background.dart';
 part 'drawing_canvas/canvas_frame.dart';
 part 'drawing_canvas/canvas_frame_reader.dart';
 part 'drawing_canvas/ink_layers.dart';
+part 'drawing_canvas/page_layers.dart';
+part 'drawing_canvas/selection_layers.dart';
 
 // =============================================================================
 // DRAWING CANVAS WIDGET
@@ -121,7 +123,9 @@ class DrawingCanvasState extends DrawingCanvasGestureHandlers<DrawingCanvas>
         _CanvasPageInit,
         _PdfBackground,
         _CanvasFrameReader,
-        _CanvasInkLayers {
+        _CanvasInkLayers,
+        _CanvasPageLayers,
+        _CanvasSelectionLayers {
   /// Exposes committed strokes from provider for testing.
   @visibleForTesting
   List<core.Stroke> get committedStrokes =>
@@ -186,18 +190,10 @@ class DrawingCanvasState extends DrawingCanvasGestureHandlers<DrawingCanvas>
     final textToolState = f.textToolState;
     final canvasMode = f.canvasMode;
     final currentPage = f.currentPage;
-    final colorScheme = f.colorScheme;
     final eraserCursorPosition = f.eraserCursorPosition;
     final lassoEraserPoints = f.lassoEraserPoints;
     final isEraserTool = f.isEraserTool;
-    final selectionPreviewPath = f.selectionPreviewPath;
-    final hasLiveTransform = f.hasLiveTransform;
-    final selectedStrokes = f.selectedStrokes;
-    final selectedShapes = f.selectedShapes;
-    final selectedImages = f.selectedImages;
-    final selectedTexts = f.selectedTexts;
     final isTextTool = f.isTextTool;
-    final isStickyNoteTool = f.isStickyNoteTool;
     final enablePointerEvents = f.enablePointerEvents;
 
     // Listen to page changes - reset initialization and trigger prefetch
@@ -276,84 +272,7 @@ class DrawingCanvasState extends DrawingCanvasGestureHandlers<DrawingCanvas>
                             // ═══════════════════════════════════════════════════════════
                             // LAYER 0: Page Container (LIMITED mod için)
                             // ═══════════════════════════════════════════════════════════
-                            if (!canvasMode.isInfinite) ...[
-                              // Sayfa gölgesi - PDF için KAPALI
-                              if (canvasMode.showPageShadow &&
-                                  currentPage.background.type !=
-                                      BackgroundType.pdf)
-                                Positioned(
-                                  left: 0,
-                                  top: 0,
-                                  child: IgnorePointer(
-                                    child: Container(
-                                      width: currentPage.size.width,
-                                      height: currentPage.size.height,
-                                      decoration: BoxDecoration(
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black
-                                                .withValues(alpha: 0.15),
-                                            blurRadius: 20,
-                                            spreadRadius: 2,
-                                            offset: const Offset(0, 4),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-
-                              // PDF BACKGROUND - Lazy Loading destekli
-                              if (currentPage.background.type ==
-                                  BackgroundType.pdf) ...[
-                                Positioned(
-                                  left: 0,
-                                  top: 0,
-                                  child: IgnorePointer(
-                                    child: _buildPdfBackground(currentPage),
-                                  ),
-                                ),
-                              ],
-
-                              // Sayfa arka planı + pattern (PDF DEĞİLSE göster)
-                              if (currentPage.background.type !=
-                                  BackgroundType.pdf)
-                                Positioned(
-                                  left: 0,
-                                  top: 0,
-                                  child: IgnorePointer(
-                                    child: RepaintBoundary(
-                                      child: ClipRect(
-                                        child: Container(
-                                          width: currentPage.size.width,
-                                          height: currentPage.size.height,
-                                          decoration: BoxDecoration(
-                                            color: colorScheme
-                                                .effectiveBackground(currentPage
-                                                    .background.color),
-                                            border:
-                                                canvasMode.pageBorderWidth > 0
-                                                    ? Border.all(
-                                                        color: Color(canvasMode
-                                                            .pageBorderColor),
-                                                        width: canvasMode
-                                                            .pageBorderWidth,
-                                                      )
-                                                    : null,
-                                          ),
-                                          child: PageBackgroundView(
-                                            background: currentPage.background,
-                                            colorScheme: colorScheme,
-                                            pageSize: Size(
-                                                currentPage.size.width,
-                                                currentPage.size.height),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                            ],
+                            if (!canvasMode.isInfinite) ..._buildPageLayers(f),
 
                             // ─────────────────────────────────────────────────────────
                             // PASSIVE LAYERS BELOW ACTIVE
@@ -399,92 +318,12 @@ class DrawingCanvasState extends DrawingCanvasGestureHandlers<DrawingCanvas>
                             // LAYER 6: Selection Overlay
                             // ─────────────────────────────────────────────────────────
                             // Selection path and bounding box
-                            RepaintBoundary(
-                              child: CustomPaint(
-                                size: size,
-                                painter: SelectionPainter(
-                                  selection: selection,
-                                  selectionColor:
-                                      Theme.of(context).colorScheme.primary,
-                                  previewPath: selectionPreviewPath,
-                                  zoom: transform.zoom,
-                                  hasLiveTransform: hasLiveTransform,
-                                ),
-                                isComplex: false,
-                                willChange: true,
-                              ),
-                            ),
-
-                            // ─────────────────────────────────────────────────────────
-                            // LAYER 7: Selected Elements with Live Transform
-                            // ─────────────────────────────────────────────────────────
-                            if (hasLiveTransform && selection != null)
-                              RepaintBoundary(
-                                child: CustomPaint(
-                                  size: size,
-                                  painter: SelectedElementsPainter(
-                                    selectedStrokes: selectedStrokes,
-                                    selectedShapes: selectedShapes,
-                                    selectedImages: selectedImages,
-                                    selectedTexts: selectedTexts,
-                                    imageCacheManager: _imageCacheManager,
-                                    moveDelta: selectionUi.moveDelta,
-                                    rotation: selectionUi.rotation,
-                                    scaleX: selectionUi.scaleX,
-                                    scaleY: selectionUi.scaleY,
-                                    centerX: (selection.bounds.left +
-                                            selection.bounds.right) /
-                                        2,
-                                    centerY: (selection.bounds.top +
-                                            selection.bounds.bottom) /
-                                        2,
-                                    renderer: _renderer,
-                                  ),
-                                  isComplex: true,
-                                  willChange: true,
-                                ),
-                              ),
-
-                            // ─────────────────────────────────────────────────────────
-                            // LAYER 8: Selection Handles (for drag interactions)
-                            // ─────────────────────────────────────────────────────────
-                            if (selection != null && selection.isNotEmpty)
-                              SelectionHandles(
-                                selection: selection,
-                                onSelectionChanged: () => setState(() {}),
-                              ),
+                            ..._buildSelectionLayers(context, f, size),
 
                             // ─────────────────────────────────────────────────────────
                             // LAYER 9: Sticky Note Resize Handles
                             // ─────────────────────────────────────────────────────────
-                            Builder(
-                              builder: (context) {
-                                final noteState =
-                                    ref.watch(stickyNotePlacementProvider);
-                                final selected = noteState.selectedNote;
-                                if (selected == null ||
-                                    noteState.isMoving ||
-                                    selected.minimized) {
-                                  return const SizedBox.shrink();
-                                }
-                                // On stickyNote tool: full interactive handles.
-                                // On other tools: paint-only (visible but no gesture).
-                                if (isStickyNoteTool) {
-                                  return StickyNoteResizeHandles(
-                                      note: selected);
-                                }
-                                return IgnorePointer(
-                                  child: CustomPaint(
-                                    painter: StickyNoteHandlesPainter(
-                                      note: selected,
-                                      selectionColor:
-                                          Theme.of(context).colorScheme.primary,
-                                    ),
-                                    child: const SizedBox.expand(),
-                                  ),
-                                );
-                              },
-                            ),
+                            _buildStickyNoteHandlesLayer(f),
                           ],
                         ),
                       ),
