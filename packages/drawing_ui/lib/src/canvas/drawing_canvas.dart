@@ -41,6 +41,9 @@ import 'package:drawing_ui/src/widgets/widgets.dart';
 
 part 'drawing_canvas/canvas_fields.dart';
 part 'drawing_canvas/gesture_contract.dart';
+part 'drawing_canvas/page_init.dart';
+part 'drawing_canvas/pdf_background.dart';
+
 // =============================================================================
 // DRAWING CANVAS WIDGET
 // =============================================================================
@@ -114,7 +117,7 @@ class DrawingCanvas extends ConsumerStatefulWidget {
 /// Exposed as public for testing purposes.
 /// Uses mixins for gesture handling and helpers to keep file size manageable.
 class DrawingCanvasState extends DrawingCanvasGestureHandlers<DrawingCanvas>
-    with _CanvasFields, _GestureContract {
+    with _CanvasFields, _GestureContract, _CanvasPageInit, _PdfBackground {
   /// Exposes committed strokes from provider for testing.
   @visibleForTesting
   List<core.Stroke> get committedStrokes =>
@@ -165,267 +168,6 @@ class DrawingCanvasState extends DrawingCanvasGestureHandlers<DrawingCanvas>
     );
     ref.read(historyManagerProvider.notifier).execute(command);
     ref.read(stickyNotePlacementProvider.notifier).selectNote(updated);
-  }
-
-  /// Initialize canvas transform for limited mode (page centering).
-  void _initializeCanvasForLimitedMode(
-      Size viewportSize, core.Page currentPage) {
-    final canvasMode =
-        widget.canvasMode ?? const core.CanvasMode(isInfinite: true);
-    if (canvasMode.isInfinite) {
-      _hasInitialized = true;
-      _lastViewportSize = viewportSize;
-      _lastPageSize = Size(currentPage.size.width, currentPage.size.height);
-      return;
-    }
-
-    final pageSize = Size(currentPage.size.width, currentPage.size.height);
-
-    // Check if viewport or page size changed significantly
-    final needsReInit = !_hasInitialized ||
-        _isOrientationChanged(viewportSize) ||
-        _isSignificantHeightChange(viewportSize) ||
-        _isPageSizeChanged(pageSize);
-    if (!needsReInit) return;
-
-    // Mark as initialized immediately to prevent multiple calls
-    _hasInitialized = true;
-    _lastViewportSize = viewportSize;
-    _lastPageSize = pageSize;
-
-    // Schedule initialization
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      ref.read(canvasViewportSizeProvider.notifier).state = viewportSize;
-      ref.read(canvasTransformProvider.notifier).initializeForPage(
-            viewportSize: viewportSize,
-            pageSize: Size(currentPage.size.width, currentPage.size.height),
-          );
-    });
-  }
-
-  /// Check if orientation changed (width/height swapped).
-  bool _isOrientationChanged(Size newSize) {
-    final lastSize = _lastViewportSize;
-    if (lastSize == null) return false;
-
-    final wasPortrait = lastSize.height > lastSize.width;
-    final isPortrait = newSize.height > newSize.width;
-
-    return wasPortrait != isPortrait;
-  }
-
-  /// Detect significant viewport height change (keyboard show/hide).
-  /// Keyboards are typically > 200px, so 100px threshold avoids false positives.
-  bool _isSignificantHeightChange(Size newSize) {
-    final lastSize = _lastViewportSize;
-    if (lastSize == null) return false;
-    return (newSize.height - lastSize.height).abs() > 100;
-  }
-
-  /// Detect page size change (paper format or orientation change).
-  bool _isPageSizeChanged(Size newPageSize) {
-    final last = _lastPageSize;
-    if (last == null) return false;
-    return (last.width - newPageSize.width).abs() > 1 ||
-        (last.height - newPageSize.height).abs() > 1;
-  }
-
-  /// Build PDF background widget (with lazy loading + automatic prefetch).
-  Widget _buildPdfBackground(core.Page page) {
-    final background = page.background;
-
-    // Eğer pdfData cache'de varsa direkt göster (immediate render)
-    if (background.pdfData != null) {
-      return Container(
-        width: page.size.width,
-        height: page.size.height,
-        color: Colors.white,
-        child: Image.memory(
-          background.pdfData!,
-          width: page.size.width,
-          height: page.size.height,
-          fit: BoxFit.fill,
-          filterQuality: FilterQuality.high,
-          isAntiAlias: true,
-          gaplessPlayback: true, // Smooth geçiş için
-        ),
-      );
-    }
-
-    // Lazy load - provider üzerinden render
-    if (background.pdfFilePath != null && background.pdfPageIndex != null) {
-      final cacheKey = '${background.pdfFilePath}|${background.pdfPageIndex}';
-
-      return Consumer(
-        builder: (context, ref, child) {
-          // Mevcut zoom'u al
-          final currentZoom = ref.watch(zoomBasedRenderProvider);
-          final quality = getQualityForZoom(currentZoom);
-          final qualityKey = getQualityCacheKey(cacheKey, quality);
-
-          // Cache'e bak - önce kaliteli, yoksa normal
-          final cache = ref.watch(pdfPageCacheProvider);
-          final displayBytes = cache[qualityKey] ?? cache[cacheKey];
-
-          if (displayBytes != null) {
-            return Container(
-              width: page.size.width,
-              height: page.size.height,
-              color: Colors.white,
-              child: Image.memory(
-                displayBytes,
-                width: page.size.width,
-                height: page.size.height,
-                fit: BoxFit.fill,
-                filterQuality: FilterQuality.high,
-                isAntiAlias: true,
-                gaplessPlayback: true,
-              ),
-            );
-          }
-
-          // Cache'de yok - render provider'ı tetikle (standard quality)
-          final renderAsync = ref.watch(pdfPageRenderProvider(cacheKey));
-
-          return renderAsync.when(
-            data: (bytes) {
-              if (bytes != null) {
-                return Container(
-                  width: page.size.width,
-                  height: page.size.height,
-                  color: Colors.white,
-                  child: Image.memory(
-                    bytes,
-                    width: page.size.width,
-                    height: page.size.height,
-                    fit: BoxFit.fill,
-                    filterQuality: FilterQuality.high,
-                    isAntiAlias: true,
-                    gaplessPlayback: true,
-                  ),
-                );
-              }
-              return _buildPdfPlaceholder(page);
-            },
-            loading: () => _buildPdfLoading(page),
-            error: (e, st) => _buildPdfError(page, e.toString()),
-          );
-        },
-      );
-    }
-
-    return _buildPdfPlaceholder(page);
-  }
-
-  /// PDF yükleniyor widget'ı (minimal - kullanıcıyı rahatsız etmez)
-  Widget _buildPdfLoading(core.Page page) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Container(
-      width: page.size.width,
-      height: page.size.height,
-      color: Colors.white,
-      child: Center(
-        child: SizedBox(
-          width: 32,
-          height: 32,
-          child: CircularProgressIndicator(
-            strokeWidth: 3,
-            color: colorScheme.outlineVariant,
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// PDF placeholder widget'ı
-  Widget _buildPdfPlaceholder(core.Page page) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Container(
-      width: page.size.width,
-      height: page.size.height,
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerLowest,
-        // Gölge ekle
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.15),
-            blurRadius: 20,
-            spreadRadius: 2,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            PhosphorIcon(ElyanotesIcons.pdfFile,
-                size: 40, color: colorScheme.outlineVariant),
-            const SizedBox(height: 8),
-            Text(
-              'PDF Sayfası',
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall
-                  ?.copyWith(color: colorScheme.onSurfaceVariant),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  /// PDF hata widget'ı
-  Widget _buildPdfError(core.Page page, String error) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Container(
-      width: page.size.width,
-      height: page.size.height,
-      decoration: BoxDecoration(
-        color: colorScheme.errorContainer,
-        // Gölge ekle
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.15),
-            blurRadius: 20,
-            spreadRadius: 2,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              PhosphorIcon(ElyanotesIcons.warningCircle,
-                  size: 40, color: colorScheme.error),
-              const SizedBox(height: 8),
-              Text(
-                'PDF Yüklenemedi',
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: colorScheme.onErrorContainer),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                error,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontSize: 10, color: colorScheme.onErrorContainer),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   @override
@@ -575,34 +317,8 @@ class DrawingCanvasState extends DrawingCanvasGestureHandlers<DrawingCanvas>
           _initializeCanvasForLimitedMode(size, currentPage);
         }
 
-        // CRITICAL FIX: Use computed transform if still at default state
-        // This prevents "small square" bug on first render
-        CanvasTransform effectiveTransform = transform;
-        if (!canvasMode.isInfinite) {
-          final isDefaultTransform =
-              transform.zoom == 1.0 && transform.offset == Offset.zero;
-          if (isDefaultTransform) {
-            // Compute fit-to-screen transform for first frame
-            final pageSize =
-                Size(currentPage.size.width, currentPage.size.height);
-            final fitWidth = size.width / pageSize.width;
-            final fitHeight = size.height / pageSize.height;
-            // Use fit-width with padding on narrow (portrait) screens
-            final fitZoom =
-                (fitWidth < fitHeight) ? fitWidth * 0.96 : fitHeight;
-
-            final pageScreenWidth = pageSize.width * fitZoom;
-            final pageScreenHeight = pageSize.height * fitZoom;
-            final offsetX = (size.width - pageScreenWidth) / 2;
-            final offsetY = (size.height - pageScreenHeight) / 2;
-
-            effectiveTransform = CanvasTransform(
-              zoom: fitZoom,
-              offset: Offset(offsetX, offsetY),
-              baselineZoom: fitZoom,
-            );
-          }
-        }
+        final effectiveTransform =
+            _effectiveTransform(transform, canvasMode, currentPage, size);
 
         // Wrap everything in a Stack to put menu/overlay OUTSIDE gesture handlers
         return Stack(
