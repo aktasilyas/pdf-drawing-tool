@@ -6,19 +6,18 @@ import 'package:drawing_ui/drawing_ui.dart';
 void main() {
   group('ElyanotesIcons', () {
     test('should_have_home_icon', () {
-      expect(ElyanotesIcons.home, equals(PhosphorIconsLight.house));
+      expect(ElyanotesIcons.home, equals(PhosphorIconsRegular.house));
     });
 
     test('should_have_sidebar_icons_with_active_variant', () {
-      expect(ElyanotesIcons.sidebar, equals(PhosphorIconsLight.sidebar));
-      expect(
-          ElyanotesIcons.sidebarActive, equals(PhosphorIconsRegular.sidebar));
+      expect(ElyanotesIcons.sidebar, equals(PhosphorIconsRegular.sidebar));
+      expect(ElyanotesIcons.sidebarActive, equals(PhosphorIconsFill.sidebar));
     });
 
     test('should_have_reader_mode_icons_with_active_variant', () {
-      expect(ElyanotesIcons.readerMode, equals(PhosphorIconsLight.bookOpen));
+      expect(ElyanotesIcons.readerMode, equals(PhosphorIconsRegular.bookOpen));
       expect(ElyanotesIcons.readerModeActive,
-          equals(PhosphorIconsRegular.bookOpen));
+          equals(PhosphorIconsFill.bookOpen));
     });
 
     test('should_have_correct_icon_sizes', () {
@@ -31,26 +30,27 @@ void main() {
     test('should_map_tool_types_to_icons', () {
       expect(
         ElyanotesIcons.iconForTool(ToolType.pencil),
-        equals(PhosphorIconsLight.pencilSimple),
-      );
-      expect(
-        ElyanotesIcons.iconForTool(ToolType.pencil, active: true),
         equals(PhosphorIconsRegular.pencilSimple),
       );
       expect(
+        ElyanotesIcons.iconForTool(ToolType.pencil, active: true),
+        equals(PhosphorIconsFill.pencilSimple),
+      );
+      expect(
         ElyanotesIcons.iconForTool(ToolType.highlighter),
-        equals(PhosphorIconsLight.highlighterCircle),
+        equals(PhosphorIconsRegular.highlighterCircle),
       );
       expect(
         ElyanotesIcons.iconForTool(ToolType.highlighter, active: true),
-        equals(PhosphorIconsRegular.highlighterCircle),
+        equals(PhosphorIconsFill.highlighterCircle),
       );
     });
 
     test('should_have_navigation_arrow_icons', () {
-      expect(ElyanotesIcons.chevronLeft, equals(PhosphorIconsLight.caretLeft));
       expect(
-          ElyanotesIcons.chevronRight, equals(PhosphorIconsLight.caretRight));
+          ElyanotesIcons.chevronLeft, equals(PhosphorIconsRegular.caretLeft));
+      expect(
+          ElyanotesIcons.chevronRight, equals(PhosphorIconsRegular.caretRight));
     });
   });
 
@@ -400,7 +400,7 @@ void main() {
       );
 
       final icon = tester.widget<PhosphorIcon>(find.byType(PhosphorIcon));
-      expect(icon.icon, equals(PhosphorIconsRegular.pencilSimple));
+      expect(icon.icon, equals(PhosphorIconsFill.pencilSimple));
     });
   });
 
@@ -607,8 +607,8 @@ void main() {
       final sidebarIcon = find.byWidgetPredicate(
         (widget) =>
             widget is PhosphorIcon &&
-            (widget.icon == PhosphorIconsLight.sidebar ||
-                widget.icon == PhosphorIconsRegular.sidebar),
+            (widget.icon == PhosphorIconsRegular.sidebar ||
+                widget.icon == PhosphorIconsFill.sidebar),
       );
       expect(sidebarIcon, findsOneWidget);
     });
