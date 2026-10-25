@@ -1,0 +1,101 @@
+name: Update goldens
+
+# Regenerates golden PNGs on a claude/* branch for agent sessions that cannot
+# download the Flutter engine. Dispatch:
+#   gh api -X POST repos/<owner>/<repo>/actions/workflows/update-goldens.yml/dispatches \
+#     -f ref=main -f "inputs[branch]=claude/<n>-<slug>" -f "inputs[package]=packages/drawing_ui"
+# The job commits changed committed goldens back to that branch (normal push)
+# and uploads every rendered PNG (including git-ignored platform goldens) as an
+# artifact. A push made with GITHUB_TOKEN does not trigger CI, so the job
+# dispatches ci.yml on the branch afterwards.
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: Branch to update (must start with claude/)
+        required: true
+        type: string
+      package:
+        description: Package whose goldens to regenerate
+        required: true
+        type: choice
+        options:
+          - packages/drawing_ui
+          - example_app
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: update-goldens-${{ inputs.branch }}
+  cancel-in-progress: false
+
+jobs:
+  update:
+    name: update-goldens (${{ inputs.package }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      BRANCH: ${{ inputs.branch }}
+      PACKAGE: ${{ inputs.package }}
+    steps:
+      - name: Validate inputs
+        run: |
+          if [[ ! "$BRANCH" =~ ^claude/[A-Za-z0-9._/-]+$ ]] || [[ "$BRANCH" == *..* ]]; then
+            echo "::error::Refusing branch '$BRANCH': only claude/* branches may be updated."
+            exit 1
+          fi
+          case "$PACKAGE" in
+            packages/drawing_ui|example_app) ;;
+            *) echo "::error::Unknown package '$PACKAGE'."; exit 1 ;;
+          esac
+
+      - uses: actions/checkout@v4
+        with:
+          ref: refs/heads/${{ inputs.branch }}
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: .flutter-version
+          channel: stable
+          cache: true
+
+      - name: Dependencies
+        run: ./scripts/check.sh pub
+
+      - name: Regenerate goldens
+        working-directory: ${{ inputs.package }}
+        run: flutter test --update-goldens
+
+      - name: Upload rendered PNGs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: goldens-${{ github.run_id }}
+          path: ${{ inputs.package }}/test/**/*.png
+          if-no-files-found: warn
+
+      - name: Commit changed goldens
+        id: commit
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898299+github-actions[bot]@users.noreply.github.com'
+          # Only PNGs; .gitignore keeps platform goldens and failure diffs out.
+          git add -- "$PACKAGE/*.png"   # pathspec * also matches /
+          if git diff --cached --quiet; then
+            echo "No golden changed."
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git diff --cached --stat
+          git commit -m 'test(golden): regenerate goldens [workflow]'
+          git push origin "HEAD:refs/heads/$BRANCH"
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Run CI on the branch
+        if: steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: gh api -X POST "repos/$REPO/actions/workflows/ci.yml/dispatches" -f "ref=$BRANCH"
