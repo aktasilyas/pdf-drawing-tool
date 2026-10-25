@@ -35,14 +35,14 @@ Future<void> _pump(WidgetTester tester, DocumentInfo doc) {
 void main() {
   final board = CoverGeometry.of(const Size(151, 201.6)).cover;
 
-  testWidgets('landscape page is wider than tall and sits on the board bottom',
+  testWidgets('landscape page is wider than tall and centred in the board',
       (tester) async {
     await _pump(tester, _doc(isPortrait: false));
 
     final page = tester.getRect(find.byKey(LibraryPageThumbnail.pageKey));
     final root = tester.getRect(find.byType(LibraryPageThumbnail));
     expect(page.width, greaterThan(page.height));
-    expect(page.bottom, closeTo(root.top + board.bottom, 0.01));
+    expect(page.center.dy, closeTo(root.top + board.center.dy, 0.01));
     expect(page.center.dx, closeTo(root.left + board.center.dx, 0.01));
   });
 
@@ -57,10 +57,10 @@ void main() {
     expect(page.right, lessThanOrEqualTo(root.left + board.right + 0.01));
   });
 
-  test('pageRect is bottom-centred in the board for the given box', () {
+  test('pageRect is centred in the board for the given box', () {
     const box = Size(151, 201.6);
     final page = LibraryPageThumbnail.pageRect(_doc(), box);
-    expect(page.bottom, closeTo(board.bottom, 0.01));
+    expect(page.center.dy, closeTo(board.center.dy, 0.01));
     expect(page.center.dx, closeTo(board.center.dx, 0.01));
     expect(page.height, greaterThan(page.width));
   });

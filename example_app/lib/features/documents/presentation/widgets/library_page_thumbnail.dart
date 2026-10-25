@@ -13,8 +13,10 @@ import 'package:example_app/features/documents/presentation/widgets/document_thu
 /// Page thumbnail for documents without a cover (PDF, image, whiteboard,
 /// notebook without cover).
 ///
-/// The page keeps its own aspect, is contained in the cover board rect and
-/// sits on the board's bottom edge so baselines line up across a row.
+/// The page keeps its own aspect and is fitted inside the cover board rect,
+/// centred on both axes, so every tile in a row shares one box and the
+/// title baselines line up. Portrait pages fill the board; landscape pages
+/// float centred with the same soft shadow.
 class LibraryPageThumbnail extends StatelessWidget {
   const LibraryPageThumbnail({super.key, required this.document});
 
@@ -48,6 +50,13 @@ class LibraryPageThumbnail extends StatelessWidget {
                       : DocumentPaperColors.fromName(document.paperColor),
                   borderRadius: BorderRadius.circular(AppRadius.xs),
                   border: Border.all(color: palette.border),
+                  boxShadow: [
+                    BoxShadow(
+                      color: palette.textPrimary.withValues(alpha: 0.10),
+                      blurRadius: AppSpacing.sm,
+                      offset: const Offset(0, AppSpacing.xxs),
+                    ),
+                  ],
                 ),
                 child: _content(),
               ),
@@ -59,7 +68,7 @@ class LibraryPageThumbnail extends StatelessWidget {
   }
 
   /// Largest page of [d]'s aspect that fits the cover board of [box],
-  /// bottom-centred.
+  /// centred in it.
   static Rect pageRect(DocumentInfo d, Size box) {
     final board = CoverGeometry.of(box).cover;
     final short = math.min(d.paperWidthMm, d.paperHeightMm);
@@ -74,7 +83,7 @@ class LibraryPageThumbnail extends StatelessWidget {
     }
     return Rect.fromLTWH(
       board.left + (board.width - width) / 2,
-      board.bottom - height,
+      board.top + (board.height - height) / 2,
       width,
       height,
     );
