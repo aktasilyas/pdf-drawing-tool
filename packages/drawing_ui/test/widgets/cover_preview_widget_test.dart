@@ -63,7 +63,8 @@ void main() {
     final text = tester.getRect(find.byType(Text).last);
     expect(plate.inflate(0.5).contains(text.topLeft), isTrue);
     expect(plate.inflate(0.5).contains(text.bottomRight), isTrue);
-    final render = tester.renderObject<RenderParagraph>(find.byType(RichText).last);
+    final render =
+        tester.renderObject<RenderParagraph>(find.byType(RichText).last);
     expect(render.size.width, lessThanOrEqualTo(plate.width));
     expect(render.didExceedMaxLines, isTrue);
   });
