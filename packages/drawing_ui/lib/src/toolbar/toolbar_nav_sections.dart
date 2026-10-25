@@ -40,12 +40,12 @@ class ToolbarNavLeft extends StatelessWidget {
   final bool isReaderMode;
   final int pageCount;
 
-  /// When false, hides the document title button (used in MediumToolbar
-  /// where title moves to the "more" popup to save horizontal space).
+  /// When false, hides the title (MediumToolbar moves it to "more").
   final bool showTitle;
 
   /// Maximum width of the document title pill.
   final double titleMaxWidth;
+
   /// Whether reader mode shows the "Salt okunur" badge.
   final bool showReaderBadge;
 

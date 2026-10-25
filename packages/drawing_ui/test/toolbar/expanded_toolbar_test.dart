@@ -250,8 +250,7 @@ void main() {
       return container;
     }
 
-    testWidgets('long title and several pages do not overflow',
-        (tester) async {
+    testWidgets('long title and several pages do not overflow', (tester) async {
       await pumpNarrow(tester);
 
       expect(find.byIcon(ElyanotesIcons.sidebar), findsOneWidget);
