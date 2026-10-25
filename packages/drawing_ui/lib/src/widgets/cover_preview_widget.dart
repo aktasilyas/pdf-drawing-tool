@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/painters/cover/cover_renderer.dart';
+import 'package:drawing_ui/src/painters/cover/legacy_cover_pattern_painter.dart';
+import 'package:drawing_ui/src/painters/cover/cover_texture_store.dart';
+import 'package:drawing_ui/src/widgets/cover_title_overlay.dart';
 
 /// Kapak önizleme widget'ı - başlık gösterimli
 class CoverPreviewWidget extends StatelessWidget {
@@ -24,6 +28,8 @@ class CoverPreviewWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final radius = borderRadius ?? BorderRadius.circular(8);
+    final isMaterial = cover.style == CoverStyle.material;
+    if (isMaterial) return _buildMaterial();
 
     return Container(
       width: width,
@@ -52,11 +58,12 @@ class CoverPreviewWidget extends StatelessWidget {
             // Kapak arka planı
             _buildBackground(theme),
 
-            // Başlık
+            // Title
+            // Material covers always show it (the plate exists for the title).
             if (cover.showTitle && title != null && title!.isNotEmpty)
               _buildTitle(theme),
 
-            // Dekoratif çizgiler (notebook efekti)
+            // Ring-dot spine decoration (legacy styles only)
             _buildDecoration(theme),
           ],
         ),
@@ -91,6 +98,9 @@ class CoverPreviewWidget extends StatelessWidget {
 
       case CoverStyle.image:
         return _buildImageBackground();
+
+      case CoverStyle.material:
+        return const SizedBox.shrink(); // handled by _buildMaterial
     }
   }
 
@@ -99,7 +109,7 @@ class CoverPreviewWidget extends StatelessWidget {
 
     // Desenli kapak için CustomPaint
     return CustomPaint(
-      painter: _CoverPatternPainter(
+      painter: LegacyCoverPatternPainter(
         backgroundColor: bgColor,
         patternType: cover.id.contains('dots') ? 'dots' : 'lines',
       ),
@@ -153,6 +163,36 @@ class CoverPreviewWidget extends StatelessWidget {
     }
     // imagePath yoksa primaryColor fallback
     return Container(color: Color(cover.primaryColor));
+  }
+
+  /// Notebook object: the renderer draws the shadow/pages/board, so there is
+  /// no container, border or clip. The title is debossed/foiled on the board.
+  Widget _buildMaterial() {
+    return SizedBox(
+      width: width,
+      height: height,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          CustomPaint(
+            painter: _MaterialCoverPainter(cover),
+            isComplex: true,
+            willChange: false,
+          ),
+          if (title != null && title!.isNotEmpty)
+            LayoutBuilder(
+              builder: (context, c) => Stack(children: [
+                CoverTitleOverlay(
+                  cover: cover,
+                  title: title!,
+                  zone: CoverRenderer.titleZone(c.biggest, cover),
+                  scale: c.maxWidth / 240,
+                ),
+              ]),
+            ),
+        ],
+      ),
+    );
   }
 
   Widget _buildTitle(ThemeData theme) {
@@ -238,62 +278,17 @@ class CoverPreviewWidget extends StatelessWidget {
   }
 }
 
-/// Kapak deseni çizen painter
-class _CoverPatternPainter extends CustomPainter {
-  final Color backgroundColor;
-  final String patternType;
+class _MaterialCoverPainter extends CustomPainter {
+  final Cover cover;
 
-  _CoverPatternPainter({
-    required this.backgroundColor,
-    required this.patternType,
-  });
+  _MaterialCoverPainter(this.cover)
+      : super(repaint: CoverTextureStore.revision);
 
   @override
-  void paint(Canvas canvas, Size size) {
-    // Arka plan
-    final bgPaint = Paint()..color = backgroundColor;
-    canvas.drawRect(Offset.zero & size, bgPaint);
-
-    // Desen rengi (kontrast)
-    final luminance = backgroundColor.computeLuminance();
-    final patternColor = luminance > 0.5
-        ? backgroundColor.withValues(alpha: 0.3)
-        : Colors.white.withValues(alpha: 0.15);
-
-    final paint = Paint()
-      ..color = patternColor
-      ..strokeWidth = 1.5
-      ..style = PaintingStyle.stroke;
-
-    if (patternType == 'dots') {
-      // Noktalı desen
-      final spacing = 15.0;
-      for (double x = spacing / 2; x < size.width; x += spacing) {
-        for (double y = spacing / 2; y < size.height; y += spacing) {
-          canvas.drawCircle(
-            Offset(x, y),
-            1.5,
-            Paint()
-              ..color = patternColor
-              ..style = PaintingStyle.fill,
-          );
-        }
-      }
-    } else {
-      // Çizgili desen (diagonal)
-      final spacing = 12.0;
-      for (double i = -size.height; i < size.width; i += spacing) {
-        canvas.drawLine(
-          Offset(i, 0),
-          Offset(i + size.height, size.height),
-          paint,
-        );
-      }
-    }
-  }
+  void paint(Canvas canvas, Size size) =>
+      CoverRenderer.paint(canvas, size, cover);
 
   @override
-  bool shouldRepaint(_CoverPatternPainter oldDelegate) =>
-      oldDelegate.backgroundColor != backgroundColor ||
-      oldDelegate.patternType != patternType;
+  bool shouldRepaint(_MaterialCoverPainter oldDelegate) =>
+      CoverRenderer.needsRepaint(oldDelegate.cover, cover);
 }

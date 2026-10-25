@@ -142,7 +142,7 @@ class _TemplatePickerState extends State<TemplatePicker>
           controller: _tabController,
           children: [
             CoverGrid(
-              covers: CoverRegistry.all,
+              covers: CoverRegistry.pickable,
               selectedCover: _selectedCover,
               onCoverSelected: (c) => setState(() => _selectedCover = c),
             ),
