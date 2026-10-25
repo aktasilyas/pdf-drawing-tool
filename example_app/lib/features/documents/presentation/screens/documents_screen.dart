@@ -197,6 +197,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
     return DocumentsContentView(
       section: _selectedSection,
       folderId: _selectedFolderId,
+      onCreateNew: () => showNewDocumentDropdown(context, _addButtonKey),
       onFolderTap: _handleFolderTap,
       onDocumentTap: _handleDocumentTap,
       onFolderMore: (folder) => showFolderMenu(
