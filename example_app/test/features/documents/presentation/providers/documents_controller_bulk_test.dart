@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:example_app/core/core.dart';
+import 'package:example_app/features/documents/documents.dart';
 
 import 'documents_controller_harness.dart';
 
@@ -65,6 +66,8 @@ void main() {
         throwsA(isA<Exception>()),
       );
       expect(h.state.hasError, isTrue);
+      final reported = h.container.read(libraryErrorProvider);
+      expect(reported?.message, 'Belgeler kalıcı olarak silinemedi');
     });
   });
 
@@ -104,7 +107,7 @@ void main() {
       expect(rebuilt, allLists);
     });
 
-    test('a failure returns false and sets the error', () async {
+    test('a failure returns false, reports it and refreshes', () async {
       when(() => h.repo.updateDocument(id: any(named: 'id'), folderId: 'f1'))
           .thenAnswer((_) async => const Left(failure));
       late bool result;
@@ -112,8 +115,11 @@ void main() {
         result = await h.controller.moveDocumentsToFolder(ids, 'f1');
       });
       expect(result, isFalse);
-      expect(rebuilt, isEmpty);
+      // Earlier ids may have moved, so every list is refreshed.
+      expect(rebuilt, allLists);
       expect(h.state.hasError, isTrue);
+      final reported = h.container.read(libraryErrorProvider);
+      expect(reported?.message, 'Belgeler taşınamadı');
     });
   });
 }

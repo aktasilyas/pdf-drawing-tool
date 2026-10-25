@@ -341,9 +341,8 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
         _selectedColorValue = AppColors.folderColors.first.toARGB32();
       });
       AppToast.success(context, 'Klasör "$name" oluşturuldu');
-    } else if (mounted) {
-      AppToast.error(context, 'Klasör oluşturulamadı');
     }
+    // Failures are shown by LibraryErrorListener.
   }
 
   Future<void> _handleMove() async {
@@ -361,10 +360,7 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
         if (!success) break;
       }
     }
-    if (mounted) {
-      success
-          ? Navigator.pop(context, true)
-          : AppToast.error(context, 'Taşıma başarısız');
-    }
+    // Failures are shown by LibraryErrorListener.
+    if (success && mounted) Navigator.pop(context, true);
   }
 }

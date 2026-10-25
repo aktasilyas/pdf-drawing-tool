@@ -126,6 +126,10 @@ class EditorScreen extends ConsumerWidget {
     // Always save current state before leaving (cancels any pending timer)
     await ref.read(autoSaveProvider.notifier).saveNow(currentDoc);
 
+    // Stay in the editor when the save failed: leaving would drop the
+    // unsaved changes. The save failure banner offers Retry.
+    if (ref.read(saveFailureProvider) != null) return;
+
     // Navigate FIRST - this destroys EditorScreen and auto-disposes
     // documentLoaderProvider (which is autoDispose). We must NOT invalidate
     // documentLoaderProvider while the widget is still alive, because
@@ -140,6 +144,7 @@ class EditorScreen extends ConsumerWidget {
     ref.invalidate(pageManagerProvider);
     ref.invalidate(autoSaveProvider);
     ref.invalidate(hasUnsavedChangesProvider);
+    ref.invalidate(saveFailureProvider);
     ref.invalidate(pageTrashCallbackProvider);
     endEditorSession(ref.read);
     if (ref.read(featureFlagsProvider).aiChat) {

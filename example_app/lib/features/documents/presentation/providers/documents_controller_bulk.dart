@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:example_app/features/documents/domain/repositories/document_repository.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_invalidation.dart';
+import 'package:example_app/features/documents/presentation/providers/library_error.dart';
 
 /// Bulk (multi-selection) document operations of the documents controller.
 mixin DocumentsBulkOperations on StateNotifier<AsyncValue<void>> {
@@ -27,6 +28,9 @@ mixin DocumentsBulkOperations on StateNotifier<AsyncValue<void>> {
       state = const AsyncData(null);
     } catch (e) {
       state = AsyncError(e, StackTrace.current);
+      // Earlier items may have succeeded: refresh the lists either way.
+      invalidateTrashMove(ref);
+      reportLibraryError(ref, e, 'Belgeler çöpe taşınamadı');
       rethrow;
     }
   }
@@ -46,6 +50,9 @@ mixin DocumentsBulkOperations on StateNotifier<AsyncValue<void>> {
       state = const AsyncData(null);
     } catch (e) {
       state = AsyncError(e, StackTrace.current);
+      // Earlier items may have succeeded: refresh the lists either way.
+      invalidateDocumentLists(ref, trash: true, documentCount: true);
+      reportLibraryError(ref, e, 'Belgeler kalıcı olarak silinemedi');
       rethrow;
     }
   }
@@ -71,6 +78,9 @@ mixin DocumentsBulkOperations on StateNotifier<AsyncValue<void>> {
       state = const AsyncData(null);
     } catch (e) {
       state = AsyncError(e, StackTrace.current);
+      // Earlier items may have succeeded: refresh the lists either way.
+      invalidateAllDocumentLists(ref);
+      reportLibraryError(ref, e, 'Belgeler çoğaltılamadı');
       rethrow;
     }
   }
@@ -85,18 +95,20 @@ mixin DocumentsBulkOperations on StateNotifier<AsyncValue<void>> {
           id: id,
           folderId: folderId,
         );
-        result.fold(
-          (failure) {
-            throw Exception(failure.message);
-          },
-          (_) {},
-        );
+        final failure = result.fold((f) => f, (_) => null);
+        if (failure != null) {
+          state = AsyncError(failure, StackTrace.current);
+          reportLibraryFailure(ref, failure, 'Belgeler taşınamadı');
+          invalidateAllDocumentLists(ref);
+          return false;
+        }
       }
       invalidateAllDocumentLists(ref);
       state = const AsyncData(null);
       return true;
     } catch (e) {
       state = AsyncError(e, StackTrace.current);
+      reportLibraryError(ref, e, 'Belgeler taşınamadı');
       return false;
     }
   }

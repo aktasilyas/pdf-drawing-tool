@@ -125,7 +125,9 @@ class FolderLocalDatasourceImpl implements FolderLocalDatasource {
     try {
       final jsonList = folders.map((folder) => folder.toJson()).toList();
       final jsonString = json.encode(jsonList);
-      await _prefs.setString(_foldersKey, jsonString);
+      if (!await _prefs.setString(_foldersKey, jsonString)) {
+        throw const CacheException('Folders write was rejected');
+      }
     } catch (e) {
       throw CacheException('Failed to save folders: $e');
     }

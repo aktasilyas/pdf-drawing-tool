@@ -64,7 +64,7 @@ class PageTrashRepositoryImpl implements PageTrashRepository {
     }
 
     content['pages'] = pages;
-    await _prefs.setString(key, json.encode(content));
+    if (!await _prefs.setString(key, json.encode(content))) return false;
 
     // Update page count in document metadata
     await _updateDocumentPageCount(model.sourceDocumentId, pages.length);
