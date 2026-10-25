@@ -373,7 +373,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                         // Page sidebar — tablet only
                         if (isCompactMode == false)
                           AnimatedContainer(
-                            duration: const Duration(milliseconds: 250),
+                            duration: const Duration(milliseconds: 300),
                             curve: Curves.easeInOut,
                             width: showSidebar ? kPageSidebarWidth : 0.0,
                             clipBehavior: Clip.hardEdge,
