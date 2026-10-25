@@ -23,12 +23,26 @@ annotate() { # $1=title $2=logfile
   fi
 }
 
+benchmarks() { # $1=title $2=logfile: surface ink benchmark lines from a passing run
+  local lines
+  # The test reporter may prefix a line with progress output; keep from the label on.
+  lines=$(grep -oE '(committed|active|pen-up).*' "$2" | grep -E '[0-9] ms|tiles: [0-9]' || true)
+  [ -z "$lines" ] && return 0
+  echo "$lines"
+  if [ -n "${GITHUB_ACTIONS:-}" ]; then
+    local msg
+    msg=$(echo "$lines" | sed -e 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+    echo "::notice title=ink benchmark ($1)::$msg"
+  fi
+}
+
 run() { # $1=title $2=dir rest=command
   local title=$1 dir=$2; shift 2
   local log
   log=$(mktemp)
   echo "── $title"
   if (cd "$dir" && "$@") >"$log" 2>&1; then
+    benchmarks "$title" "$log"
     tail -n 3 "$log"
   else
     cat "$log"
