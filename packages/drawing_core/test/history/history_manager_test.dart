@@ -626,16 +626,17 @@ void main() {
       group('execute with pageId', () {
         DrawingDocument withStrokes() {
           var doc = manager.execute(
-              AddStrokeCommand(layerIndex: 0, stroke: createTestStroke('a')),
-              twoPages);
+            AddStrokeCommand(layerIndex: 0, stroke: createTestStroke('a')),
+            twoPages,
+          );
           doc = manager.execute(
-              AddStrokeCommand(layerIndex: 0, stroke: createTestStroke('b')),
-              doc.setCurrentPage(1));
+            AddStrokeCommand(layerIndex: 0, stroke: createTestStroke('b')),
+            doc.setCurrentPage(1),
+          );
           return doc.setCurrentPage(0);
         }
 
-        test('applies the command to that page and keeps the current page',
-            () {
+        test('runs on that page and keeps the current page', () {
           final doc = withStrokes();
           final result = manager.execute(
             ClearLayerCommand(layerIndex: 0),
