@@ -44,6 +44,8 @@ void main() {
           sharedPreferencesProvider.overrideWithValue(prefs),
           audioRecordingEnabledProvider.overrideWithValue(false),
           pdfExportRunnerProvider.overrideWithValue(runner),
+          // A paged notebook: More opens the page options, not backgrounds.
+          isInfiniteCanvasProvider.overrideWith((ref) => false),
         ],
         child: MaterialApp(
           theme: chromeTheme(Brightness.light),
