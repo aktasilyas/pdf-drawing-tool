@@ -1,9 +1,8 @@
 # Elyanotes privacy policy (draft for v1.0)
 
-Status: draft for owner approval (#59). Scope: the v1.0 Android release, built with all feature
-flags off (`example_app/lib/core/config/feature_flags.dart`). Before publishing, the owner fills in
-the placeholders `<DEVELOPER_NAME>`, `<CONTACT_EMAIL>` and `<EFFECTIVE_DATE>` and hosts this page at a
-public URL (Play Console requires one).
+Status: approved by the owner on 2026-10-25 (#59). Scope: the v1.0 Android release, built with all
+feature flags off (`example_app/lib/core/config/feature_flags.dart`). Still to do before publishing:
+host this page at a public URL (Play Console requires one).
 
 Must be revised before any release that turns on AI chat, cloud sync, premium, audio recording or
 adds crash reporting (ROADMAP M4), because each of those sends data off the device.
@@ -12,9 +11,9 @@ adds crash reporting (ROADMAP M4), because each of those sends data off the devi
 
 ## English
 
-**Effective date:** `<EFFECTIVE_DATE>`
+**Effective date:** 25 October 2026
 
-Elyanotes ("the app") is a note-taking app published by `<DEVELOPER_NAME>`. This policy explains what
+Elyanotes ("the app") is a note-taking app published by İlyas Aktaş. This policy explains what
 happens to your information when you use the app.
 
 ### Summary
@@ -52,15 +51,15 @@ If a future version adds features that send data off the device, we will update 
 app's store listing before releasing that version, and describe the change in the release notes.
 
 ### Contact
-Questions about this policy: `<CONTACT_EMAIL>`.
+Questions about this policy: elyanotes2108@gmail.com.
 
 ---
 
 ## Türkçe
 
-**Yürürlük tarihi:** `<EFFECTIVE_DATE>`
+**Yürürlük tarihi:** 25 Ekim 2026
 
-Elyanotes ("uygulama"), `<DEVELOPER_NAME>` tarafından yayınlanan bir not alma uygulamasıdır. Bu
+Elyanotes ("uygulama"), İlyas Aktaş tarafından yayınlanan bir not alma uygulamasıdır. Bu
 politika, uygulamayı kullanırken bilgilerinize ne olduğunu açıklar.
 
 ### Özet
@@ -100,4 +99,4 @@ Uygulama veri toplamadığı için çocuklardan da veri toplamaz.
 mağaza sayfasını güncelleriz ve değişikliği sürüm notlarında belirtiriz.
 
 ### İletişim
-Bu politikayla ilgili sorular: `<CONTACT_EMAIL>`.
+Bu politikayla ilgili sorular: elyanotes2108@gmail.com.
