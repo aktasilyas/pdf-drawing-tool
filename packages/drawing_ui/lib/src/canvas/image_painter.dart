@@ -143,6 +143,13 @@ class ImageCacheManager extends ChangeNotifier {
     }
   }
 
+  /// Stores [image] for [filePath] as if it had just loaded, and notifies.
+  @visibleForTesting
+  void debugPut(String filePath, ui.Image image) {
+    _cache[filePath] = image;
+    notifyListeners();
+  }
+
   @override
   void dispose() {
     for (final image in _cache.values) {

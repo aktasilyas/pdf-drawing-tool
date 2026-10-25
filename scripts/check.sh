@@ -64,8 +64,13 @@ for pkg in "${PACKAGES[@]}"; do
     run "analyze $pkg" "$pkg" dart analyze .
   fi
   if [[ $STEP == test || $STEP == all ]] && [ -d "$pkg/test" ]; then
-    if is_flutter "$pkg"; then run "test $pkg" "$pkg" flutter test --timeout=90s --concurrency=4
-    else run "test $pkg" "$pkg" dart test --timeout=90s; fi
+    if ! is_flutter "$pkg"; then run "test $pkg" "$pkg" dart test --timeout=90s
+    elif [ -d "$pkg/test/benchmark" ]; then
+      # Wall-clock benchmarks run alone so parallel test processes do not
+      # compete with them for the CPU (see dart_test.yaml).
+      run "test $pkg" "$pkg" flutter test --timeout=90s --concurrency=4 --exclude-tags benchmark
+      run "benchmark $pkg" "$pkg" flutter test --timeout=90s --concurrency=1 --tags benchmark
+    else run "test $pkg" "$pkg" flutter test --timeout=90s --concurrency=4; fi
   fi
 done
 

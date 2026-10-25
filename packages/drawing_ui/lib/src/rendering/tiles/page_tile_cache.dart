@@ -142,13 +142,20 @@ class PageTileCache extends ChangeNotifier {
     } else if (diff.appendedOnTop.isNotEmpty) {
       _composite(scene, grid, diff.appendedOnTop);
     } else {
-      for (final rect in diff.dirty) {
-        for (final key in grid.keysIn(rect)) {
-          _store.drop(key);
-        }
-      }
+      _store.dropIn(grid, diff.dirty);
     }
     // Legacy images show the old scene: never keep them past a change.
+    _releaseLegacy();
+    _ensureVisible();
+    _finish();
+  }
+
+  /// Re-rasterizes tiles in [rects] for an unchanged scene (image loaded).
+  void invalidate(Iterable<ui.Rect> rects) {
+    final grid = _grid;
+    if (grid == null || _scene == null) return;
+    _resetStats();
+    _store.dropIn(grid, rects);
     _releaseLegacy();
     _ensureVisible();
     _finish();

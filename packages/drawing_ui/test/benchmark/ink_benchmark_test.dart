@@ -2,6 +2,9 @@
 // stroke. Prints worst / p95 frame times. Timings are informational (CI smoke).
 //
 // Run: ./scripts/ink_benchmark.sh   (or `flutter test test/benchmark`)
+@Tags(['benchmark'])
+library;
+
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
