@@ -1,19 +1,27 @@
-/// ElyaNotes Documents Header - Başlık, sıralama ve görünüm modu.
+/// ElyaNotes Documents Header - title, search, sort/view/select and "Yeni".
+///
+/// Layout depends on the content pane width: `wide` (>= 720) is one row,
+/// `compact` is two rows (docs/specs/51-library-screen.md §3).
 library;
 
+import 'package:drawing_ui/drawing_ui.dart' show ElyanotesIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/index.dart';
-import 'package:example_app/core/utils/responsive.dart';
 import 'package:example_app/features/documents/domain/entities/sort_option.dart';
-import 'package:example_app/features/documents/domain/entities/view_mode.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
+import 'package:example_app/features/documents/presentation/widgets/library_header_parts.dart';
 import 'package:example_app/features/documents/presentation/widgets/selection_mode_header.dart';
 import 'package:example_app/features/premium/premium.dart';
-import 'sort_popup_button.dart';
 
 class DocumentsHeader extends ConsumerWidget {
+  /// Pane width from which the one-row layout is used.
+  static const double wideBreakpoint = 720;
+
+  /// Fixed width of the search field in the wide layout.
+  static const double searchWidth = 240;
+
   final VoidCallback onNewPressed;
   final SortOption sortOption;
   final ValueChanged<SortOption> onSortChanged;
@@ -22,6 +30,17 @@ class DocumentsHeader extends ConsumerWidget {
   final List<String> allFolderIds;
   final bool isTrashSection;
   final VoidCallback? onEmptyTrash;
+
+  /// Section title; replaced by [breadcrumb] when set.
+  final String title;
+  final Widget? breadcrumb;
+  final VoidCallback? onSettingsTap;
+
+  /// Phone drawer button.
+  final VoidCallback? onMenuTap;
+
+  /// Non-null only while the tablet sidebar is collapsed.
+  final VoidCallback? onSidebarToggle;
 
   const DocumentsHeader({
     super.key,
@@ -33,230 +52,201 @@ class DocumentsHeader extends ConsumerWidget {
     this.allFolderIds = const [],
     this.isTrashSection = false,
     this.onEmptyTrash,
+    this.title = '',
+    this.breadcrumb,
+    this.onSettingsTap,
+    this.onMenuTap,
+    this.onSidebarToggle,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isPhone = Responsive.isPhone(context);
     final isSelectionMode = ref.watch(selectionModeProvider);
-
-    if (isSelectionMode) {
-      return SelectionModeHeader(
-        allDocumentIds: allDocumentIds,
-        allFolderIds: allFolderIds,
-        isTrashSection: isTrashSection,
-      );
-    }
-
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: isPhone ? AppSpacing.lg : AppSpacing.xxl,
-        vertical: AppSpacing.sm,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (isTrashSection) ...[
-            _buildTrashInfo(context),
-            const SizedBox(height: AppSpacing.sm),
-          ],
-          _buildActionRow(context, ref),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActionRow(BuildContext context, WidgetRef ref) {
-    final viewMode = ref.watch(viewModeProvider);
-    final sortDirection = ref.watch(sortDirectionProvider);
-    final pinFavorites = ref.watch(pinFavoritesProvider);
-
-    // Watch total document count for lock icon on "Yeni" button
     final totalCount = ref.watch(totalDocumentCountProvider).valueOrNull ?? 0;
-    final docAccess = ref.watch(featureAccessProvider(
+    final access = ref.watch(featureAccessProvider(
       FeatureAccessParams(
         feature: GatedFeature.createDocument,
         currentUsage: totalCount,
       ),
     ));
-    final isLocked = !docAccess.isAllowed;
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        if (!isTrashSection)
-          _NewDocumentButton(
-            key: newButtonKey,
-            isLocked: isLocked,
-            onPressed: onNewPressed,
-          ),
-        if (!isTrashSection) const SizedBox(width: AppSpacing.sm),
-        SortPopupButton(
-          sortOption: sortOption,
-          sortDirection: sortDirection,
-          pinFavorites: pinFavorites,
-          onSortChanged: onSortChanged,
-          onDirectionChanged: () {
-            final newDir = sortDirection == SortDirection.descending
-                ? SortDirection.ascending
-                : SortDirection.descending;
-            ref.read(sortDirectionProvider.notifier).set(newDir);
-          },
-          onPinFavoritesChanged: () {
-            ref.read(pinFavoritesProvider.notifier).toggle();
-          },
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        _CircleIconButton(
-          icon: viewMode == ViewMode.grid ? Icons.view_list : Icons.grid_view,
-          tooltip:
-              viewMode == ViewMode.grid ? 'Liste görünümü' : 'Grid görünümü',
-          onPressed: () {
-            final newMode =
-                viewMode == ViewMode.grid ? ViewMode.list : ViewMode.grid;
-            ref.read(viewModeProvider.notifier).set(newMode);
-          },
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        _CircleIconButton(
-          icon: Icons.check_circle_outline,
-          tooltip: 'Seçim modu',
-          onPressed: () {
-            ref.read(selectionModeProvider.notifier).state = true;
-          },
-        ),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final wide = constraints.maxWidth >= wideBreakpoint;
+        final Widget content;
+        if (isSelectionMode) {
+          content = Padding(
+            key: const ValueKey('selection'),
+            padding: wide
+                ? const EdgeInsets.fromLTRB(
+                    AppSpacing.xl, AppSpacing.md, AppSpacing.xl, AppSpacing.sm)
+                : const EdgeInsets.fromLTRB(
+                    AppSpacing.lg, AppSpacing.sm, AppSpacing.lg, AppSpacing.sm),
+            child: SelectionModeHeader(
+              allDocumentIds: allDocumentIds,
+              allFolderIds: allFolderIds,
+              isTrashSection: isTrashSection,
+            ),
+          );
+        } else {
+          content = KeyedSubtree(
+            key: const ValueKey('normal'),
+            child: wide
+                ? _wide(context, isLocked: !access.isAllowed)
+                : _compact(
+                    context,
+                    isLocked: !access.isAllowed,
+                  ),
+          );
+        }
+        return AnimatedSwitcher(
+          duration: AppDurations.fast,
+          switchInCurve: AppCurves.fade,
+          switchOutCurve: AppCurves.fade,
+          child: content,
+        );
+      },
     );
   }
 
-  Widget _buildTrashInfo(BuildContext context) {
-    final textSecondary = context.palette.textMuted;
+  Widget _titleWidget(BuildContext context, TextStyle style) {
+    return breadcrumb ??
+        Text(
+          title,
+          style: style.copyWith(color: context.palette.textPrimary),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        );
+  }
 
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
+  Widget _sidebarToggle() => AppIconButton(
+        icon: ElyanotesIcons.librarySidebar,
+        variant: AppIconButtonVariant.ghost,
+        tooltip: 'Kenar çubuğunu aç',
+        onPressed: onSidebarToggle,
+      );
+
+  Widget _settings() => AppIconButton(
+        icon: ElyanotesIcons.librarySettings,
+        variant: AppIconButtonVariant.ghost,
+        size: AppIconButtonSize.small,
+        tooltip: 'Ayarlar',
+        onPressed: onSettingsTap,
+      );
+
+  Widget _newButton({required bool compact, required bool isLocked}) =>
+      LibraryNewButton(
+        key: newButtonKey,
+        compact: compact,
+        isLocked: isLocked,
+        onPressed: onNewPressed,
+      );
+
+  Widget _trashInfo() => Padding(
+        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+        child: LibraryTrashInfo(
+          onEmptyTrash: allDocumentIds.isNotEmpty ? onEmptyTrash : null,
+        ),
+      );
+
+  Widget _wide(BuildContext context, {required bool isLocked}) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.xl,
+        AppSpacing.md,
+        AppSpacing.xl,
+        AppSpacing.lg - AppSpacing.sm,
       ),
-      decoration: BoxDecoration(
-        color: AppColors.warning.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(AppRadius.sm),
-      ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.info_outline,
-              size: AppIconSize.sm, color: AppColors.warning),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text(
-              'Silinen notlar 30 gün sonra kalıcı olarak silinir',
-              style: AppTypography.caption.copyWith(color: textSecondary),
-            ),
+          if (isTrashSection) _trashInfo(),
+          Row(
+            children: [
+              if (onSidebarToggle != null) _sidebarToggle(),
+              Expanded(
+                child: _titleWidget(context, AppTypography.displayMedium),
+              ),
+              const SizedBox(width: AppSpacing.lg),
+              if (!isTrashSection) ...[
+                const SizedBox(
+                  width: searchWidth,
+                  child: LibrarySearchField(),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+              ],
+              LibraryViewActions(
+                sortOption: sortOption,
+                onSortChanged: onSortChanged,
+              ),
+              if (onSettingsTap != null) _settings(),
+              if (!isTrashSection) ...[
+                const SizedBox(width: AppSpacing.md),
+                _newButton(compact: false, isLocked: isLocked),
+              ],
+            ],
           ),
-          if (onEmptyTrash != null && allDocumentIds.isNotEmpty)
-            AppButton(
-              label: 'Çöpü Boşalt',
-              variant: AppButtonVariant.destructive,
-              size: AppButtonSize.small,
-              onPressed: onEmptyTrash,
-            ),
         ],
       ),
     );
   }
-}
 
-/// "Yeni +" button with lock icon when document limit is reached.
-class _NewDocumentButton extends StatelessWidget {
-  final bool isLocked;
-  final VoidCallback? onPressed;
-
-  const _NewDocumentButton({
-    super.key,
-    required this.isLocked,
-    this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final iconColor = context.palette.accent;
-    final bgColor = context.palette.surfaceElevated;
-    final textColor = context.palette.textPrimary;
-
-    return Tooltip(
-      message: isLocked ? 'Belge limiti doldu' : 'Yeni Belge',
-      child: Material(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(18),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(18),
-          onTap: onPressed,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-              vertical: AppSpacing.sm,
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Yeni',
-                  style: AppTypography.labelMedium.copyWith(color: textColor),
+  Widget _compact(BuildContext context, {required bool isLocked}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+              AppSpacing.xs, AppSpacing.sm, AppSpacing.xs, 0),
+          child: Row(
+            children: [
+              if (onMenuTap != null)
+                AppIconButton(
+                  icon: ElyanotesIcons.libraryMenu,
+                  variant: AppIconButtonVariant.ghost,
+                  tooltip: 'Menü',
+                  onPressed: onMenuTap,
                 ),
-                const SizedBox(width: AppSpacing.xs),
-                Icon(
-                  isLocked ? Icons.lock_outline : Icons.add,
-                  size: 18,
-                  color: isLocked
-                      ? Theme.of(context).colorScheme.onSurfaceVariant
-                      : iconColor,
-                ),
-                const SizedBox(width: AppSpacing.xxs),
-                Icon(
-                  Icons.keyboard_arrow_down,
-                  size: 16,
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
-              ],
-            ),
+              if (onSidebarToggle != null) _sidebarToggle(),
+              if (onMenuTap == null && onSidebarToggle == null)
+                const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: _titleWidget(context, AppTypography.headlineLarge),
+              ),
+              if (onSettingsTap != null) _settings(),
+              if (!isTrashSection)
+                _newButton(compact: true, isLocked: isLocked),
+            ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-/// Circle-background icon button matching sidebar tile style.
-class _CircleIconButton extends StatelessWidget {
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback? onPressed;
-
-  const _CircleIconButton({
-    required this.icon,
-    required this.tooltip,
-    this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final iconColor = context.palette.accent;
-    final bgColor = context.palette.surfaceElevated;
-
-    return Tooltip(
-      message: tooltip,
-      child: Material(
-        color: bgColor,
-        shape: const CircleBorder(),
-        child: InkWell(
-          customBorder: const CircleBorder(),
-          onTap: onPressed,
-          child: SizedBox(
-            width: 36,
-            height: 36,
-            child: Icon(icon, size: 20, color: iconColor),
+        const SizedBox(height: AppSpacing.xs),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.lg,
+            0,
+            AppSpacing.lg,
+            AppSpacing.md - AppSpacing.sm,
+          ),
+          child: Column(
+            children: [
+              if (isTrashSection) _trashInfo(),
+              Row(
+                children: [
+                  if (!isTrashSection) ...[
+                    const Expanded(child: LibrarySearchField()),
+                    const SizedBox(width: AppSpacing.sm),
+                  ] else
+                    const Spacer(),
+                  LibraryViewActions(
+                    sortOption: sortOption,
+                    onSortChanged: onSortChanged,
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
-      ),
+      ],
     );
   }
 }
