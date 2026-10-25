@@ -91,6 +91,8 @@ void main() {
           return const SizedBox();
         }),
       ));
+      // MaterialApp animates theme changes; settle so the target theme is built.
+      await tester.pumpAndSettle();
       return result;
     }
 
