@@ -143,6 +143,7 @@ class _ChromeIconButtonState extends State<ChromeIconButton> {
       selected: widget.selected,
       enabled: enabled,
       label: widget.tooltip,
+      focusable: enabled,
       onTap: enabled ? widget.onPressed : null,
       excludeSemantics: true,
       child: Tooltip(
