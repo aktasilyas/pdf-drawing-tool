@@ -125,7 +125,8 @@ treatment is an open BRIEF question, so this waits for the owner.
   `ACCESS_NETWORK_STATE`, `RECORD_AUDIO` and `com.android.vending.BILLING` with
   `tools:node="remove"`, so the v1.0 listing matches "offline, no microphone". The debug build keeps
   them for FF_* flag testing. The `android-manifest.yml` workflow enforces this on every PR that
-  changes the Android project or a pubspec. To re-check locally: in `example_app/android` run
+  changes the Android project or a pubspec. To re-check locally: run `flutter build apk --config-only` in
+  `example_app` (generates the Gradle wrapper), then in `example_app/android` run
   `./gradlew :app:processReleaseMainManifest :app:processDebugMainManifest`, then
   `./scripts/check-android-manifest.sh` from the repo root. Re-check the listing and the Data safety
   answers whenever a frozen feature (AI chat, cloud sync, premium, audio) is turned on for a release.
