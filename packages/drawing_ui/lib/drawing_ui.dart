@@ -11,6 +11,8 @@ library drawing_ui;
 export 'src/models/tool_type.dart';
 
 // Theme
+export 'src/theme/chrome_palette.dart';
+export 'src/theme/chrome_tokens.dart';
 export 'src/theme/drawing_theme.dart';
 export 'src/theme/drawing_colors.dart';
 export 'src/theme/elyanotes_icons.dart';
