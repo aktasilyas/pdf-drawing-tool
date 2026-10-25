@@ -61,6 +61,9 @@ mixin _GestureState<T extends ConsumerStatefulWidget>
   Map<String, List<int>> get pixelEraseHits;
   List<core.Stroke> get pixelEraseOriginalStrokes;
 
+  /// Path swept by the pixel eraser during the current gesture.
+  core.EraserSweep get pixelEraseSweep;
+
   /// Note ID -> set of internal stroke IDs erased in current gesture.
   Map<String, Set<String>> get erasedNoteStrokeIds;
 
