@@ -10,6 +10,7 @@ import 'package:example_app/features/ai/presentation/providers/ai_providers.dart
 import 'package:example_app/features/editor/presentation/providers/editor_provider.dart';
 import 'package:example_app/features/editor/presentation/providers/editor_session.dart';
 import 'package:example_app/features/editor/presentation/widgets/editor_body.dart';
+import 'package:example_app/features/editor/presentation/widgets/editor_leave_guard.dart';
 
 class EditorScreen extends ConsumerWidget {
   final String documentId;
@@ -94,22 +95,25 @@ class EditorScreen extends ConsumerWidget {
         // Get canvasMode from document (based on documentType)
         final canvasMode = document.canvasMode;
 
-        return Scaffold(
-          resizeToAvoidBottomInset: false,
-          // NO AppBar - DrawingScreen handles everything
-          body: EditorBody(
-            documentTitle: document.title,
-            canvasMode: canvasMode,
-            onHomePressed: () => _handleBack(context, ref),
-            onRenameDocument: () => _showRenameDialog(context, ref),
-            onDeleteDocument: () => _showDeleteConfirmation(context, ref),
-            onDocumentChanged: (doc) {
-              if (doc is DrawingDocument) {
-                ref.read(currentDocumentProvider.notifier).state = doc;
-                ref.read(autoSaveProvider.notifier).documentChanged(doc);
-                ref.read(hasUnsavedChangesProvider.notifier).state = true;
-              }
-            },
+        return EditorLeaveGuard(
+          onLeave: () => _handleBack(context, ref),
+          child: Scaffold(
+            resizeToAvoidBottomInset: false,
+            // NO AppBar - DrawingScreen handles everything
+            body: EditorBody(
+              documentTitle: document.title,
+              canvasMode: canvasMode,
+              onHomePressed: () => _handleBack(context, ref),
+              onRenameDocument: () => _showRenameDialog(context, ref),
+              onDeleteDocument: () => _showDeleteConfirmation(context, ref),
+              onDocumentChanged: (doc) {
+                if (doc is DrawingDocument) {
+                  ref.read(currentDocumentProvider.notifier).state = doc;
+                  ref.read(autoSaveProvider.notifier).documentChanged(doc);
+                  ref.read(hasUnsavedChangesProvider.notifier).state = true;
+                }
+              },
+            ),
           ),
         );
       },

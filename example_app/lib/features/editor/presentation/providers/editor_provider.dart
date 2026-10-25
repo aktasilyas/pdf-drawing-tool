@@ -41,18 +41,35 @@ final saveFailureProvider = StateProvider<Failure?>((ref) => null);
 class AutoSaveNotifier extends StateNotifier<bool> {
   final Ref _ref;
   Timer? _debounceTimer;
+  DrawingDocument? _pending;
+
+  /// Delay between the last change and the automatic save.
+  static const debounce = Duration(seconds: 3);
 
   /// Newest document handed to this notifier; what [retry] saves.
   DrawingDocument? _latest;
 
   AutoSaveNotifier(this._ref) : super(false);
 
+  /// Whether a change is waiting for the debounce timer.
+  bool get hasPendingSave => _pending != null;
+
   void documentChanged(DrawingDocument document) {
     _latest = document;
     _debounceTimer?.cancel();
-    _debounceTimer = Timer(const Duration(seconds: 3), () {
+    _pending = document;
+    _debounceTimer = Timer(debounce, () {
+      _pending = null;
       _save(document);
     });
+  }
+
+  /// Saves a pending change right away (app paused, back pressed).
+  /// Does nothing when there is no pending change.
+  Future<void> flush() {
+    final pending = _pending;
+    if (pending == null) return Future<void>.value();
+    return saveNow(pending);
   }
 
   Future<void> _save(DrawingDocument document) async {
@@ -67,6 +84,7 @@ class AutoSaveNotifier extends StateNotifier<bool> {
       logger.i('Document saved successfully: ${document.id}');
     }
 
+    // A lifecycle flush can outlive the editor (provider invalidated on leave).
     if (!mounted) return;
     _ref.read(saveFailureProvider.notifier).state = failure;
     state = false; // Saved
@@ -88,6 +106,7 @@ class AutoSaveNotifier extends StateNotifier<bool> {
   Future<void> saveNow(DrawingDocument document) {
     _latest = document;
     _debounceTimer?.cancel();
+    _pending = null;
     return _save(document);
   }
 
