@@ -68,8 +68,10 @@ If 4 or more `claude/` PRs are open and labeled `ready-to-merge`, start no new
 work: log "waiting for architect review" with the PR list and stop.
 
 ## 3. Pick the next issue
-Open issues with label `agent-ready` and without `in-progress`/`in-review`:
+Open issues with label `agent-ready` and without `in-progress`:
 `gh api "$R/issues?state=open&labels=agent-ready&per_page=100"` (skip PRs).
+An issue labeled `in-review` is eligible again when it has no open PR (its
+partial slices were merged but work remains): remove `in-review` and continue it.
 Skip any whose body has `Depends on: #a, #b` with an open dependency.
 Order: milestone title (M0b < M1 < M2 < M3 < M4 < M5), then lowest number.
 If none is eligible, log "queue empty or blocked" with the reason and stop.
@@ -81,6 +83,9 @@ If none is eligible, log "queue empty or blocked" with the reason and stop.
   `needs-architect` as described there, log it, stop.
 - If the work is too big for one run, open a draft-quality PR with what is done
   and verified, list the remaining steps in the PR body, keep the issue open.
+- PR body linking: write `Closes #<n>` only in the PR that completes the issue;
+  a partial slice uses `Refs #<n>`. Once a later slice completes the issue,
+  that PR must say `Closes #<n>` (the merge workflow closes issues from it).
 - Always run the `reviewer` subagent before labeling a PR `ready-to-merge`.
 - On success: remove `in-progress`, add `in-review`. Then, if this run has
   shipped only one issue so far, go back to step 3 for one more.

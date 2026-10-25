@@ -57,6 +57,10 @@ If autopilot logged the queue as empty or blocked, look at why (dependencies,
 missing criteria) and fix the issues so work can continue; you may edit issue
 bodies, labels and dependencies, and open new issues for gaps you find.
 
+Also: an open issue with `in-review` and no open PR is stalled. If its work is
+complete, comment why and leave it for the owner to close (you cannot close);
+otherwise remove `in-review` and make sure it has `agent-ready`.
+
 ## 3b. Owner tasks that became unblocked
 For open issues labeled `needs-owner`: when every `Depends on:` issue is closed
 and you have not announced it yet, comment on that issue in Turkish with exact
