@@ -135,11 +135,12 @@ class TopNavigationBar extends ConsumerWidget {
             tooltip: 'Yapay Zeka',
             onPressed: onAIPressed!,
           ),
-        ...compactTopBarTools.map((tool) => _buildCompactToolButton(
-              ref: ref,
-              tool: tool,
-              currentTool: currentTool,
-            )),
+        for (final tool in compactTopBarTools)
+          _buildCompactToolButton(
+            ref: ref,
+            tool: tool,
+            currentTool: currentTool,
+          ),
         if (!ref.watch(isInfiniteCanvasProvider) &&
             ref.watch(audioRecordingEnabledProvider))
           ElyanotesNavButton(
