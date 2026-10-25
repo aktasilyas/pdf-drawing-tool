@@ -17,6 +17,20 @@ import 'package:drawing_ui/src/toolbar/toolbar_layout_mode.dart';
 export 'layers_list.dart' show LayersList;
 export 'page_sidebar.dart' show PageSidebar, kPageSidebarWidth;
 
+/// Whether the floating undo/redo pill is shown over the canvas.
+///
+/// The expanded toolbar (>= [ToolbarLayoutMode.expandedBreakpoint]) has undo
+/// and redo in its tools capsule, so the pill only serves medium layouts.
+bool shouldShowFloatingUndoRedo({
+  required double width,
+  required bool isReadOnly,
+  required bool isCompactMode,
+}) {
+  return !isReadOnly &&
+      !isCompactMode &&
+      width < ToolbarLayoutMode.expandedBreakpoint;
+}
+
 /// Build the canvas area with all layers.
 Widget buildDrawingCanvasArea({
   required BuildContext context,
@@ -126,7 +140,12 @@ Widget buildDrawingCanvasArea({
                       p.dy.clamp(0, MediaQuery.of(context).size.height - 200)));
                 },
               )),
-        if (!isReadOnly && !isCompactMode) const FloatingUndoRedo(),
+        if (shouldShowFloatingUndoRedo(
+          width: MediaQuery.of(context).size.width,
+          isReadOnly: isReadOnly,
+          isCompactMode: isCompactMode,
+        ))
+          const FloatingUndoRedo(),
         if (!isReadOnly && ref.watch(audioRecordingEnabledProvider))
           const FloatingRecordingBar(),
         if (!isReadOnly) const FloatingExportProgress(),

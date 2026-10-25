@@ -5,6 +5,7 @@ import 'package:phosphor_icons/phosphor_icons.dart';
 
 import 'package:drawing_ui/src/panels/document_options_panel.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
+import 'package:drawing_ui/src/toolbar/chrome_icon_button.dart';
 import 'package:drawing_ui/src/widgets/popover_panel.dart';
 
 /// Tappable title pill that opens a [DocumentOptionsPanel] popover.
@@ -34,6 +35,11 @@ class DocumentTitleButton extends ConsumerStatefulWidget {
 class _DocumentTitleButtonState extends ConsumerState<DocumentTitleButton> {
   final PopoverController _popover = PopoverController();
   final GlobalKey _anchorKey = GlobalKey();
+  bool _pressed = false;
+
+  void _setPressed(bool value) {
+    if (_pressed != value) setState(() => _pressed = value);
+  }
 
   @override
   void dispose() {
@@ -61,9 +67,12 @@ class _DocumentTitleButtonState extends ConsumerState<DocumentTitleButton> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final palette = ChromePalette.of(context);
     final textTheme = Theme.of(context).textTheme;
     final label = widget.title ?? 'İsimsiz Not';
+    final fill = _pressed
+        ? palette.textPrimary.withValues(alpha: ChromeIconButton.pressedAlpha)
+        : palette.textPrimary.withValues(alpha: 0);
 
     return Tooltip(
       message: 'Doküman Seçenekleri',
@@ -71,34 +80,52 @@ class _DocumentTitleButtonState extends ConsumerState<DocumentTitleButton> {
         label: label,
         button: true,
         child: GestureDetector(
-          key: _anchorKey,
+          behavior: HitTestBehavior.opaque,
           onTap: _toggle,
-          child: Container(
-            constraints: BoxConstraints(maxWidth: widget.maxWidth),
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-            decoration: BoxDecoration(
-              color: colorScheme.onSurface.withValues(alpha: 0.06),
-              borderRadius: BorderRadius.circular(16),
+          onTapDown: (_) => _setPressed(true),
+          onTapUp: (_) => _setPressed(false),
+          onTapCancel: () => _setPressed(false),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: ChromeSizes.minTouchTarget,
+              maxWidth: widget.maxWidth,
             ),
-            child: Row(mainAxisSize: MainAxisSize.min, children: [
-              Flexible(
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: textTheme.bodySmall?.copyWith(
-                    fontSize: 13,
-                    color: colorScheme.onSurface,
-                  ),
+            child: Center(
+              widthFactor: 1,
+              child: Container(
+                key: _anchorKey,
+                height: ChromeIconButton.visualSize,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: ChromeSpacing.md,
+                ),
+                decoration: BoxDecoration(
+                  color: fill,
+                  borderRadius: BorderRadius.circular(ChromeRadius.md),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.bodySmall?.copyWith(
+                          fontSize: 13,
+                          color: palette.textPrimary,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: ChromeSpacing.xs),
+                    PhosphorIcon(
+                      ElyanotesIcons.caretDown,
+                      size: ChromeIconSizes.sm,
+                      color: palette.textMuted,
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: 3),
-              PhosphorIcon(
-                ElyanotesIcons.caretDown,
-                size: 12,
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ]),
+            ),
           ),
         ),
       ),

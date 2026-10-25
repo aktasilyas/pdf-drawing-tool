@@ -17,8 +17,12 @@ void main() {
     prefs = await SharedPreferences.getInstance();
   });
 
-  Future<ProviderContainer> pumpToolBar(WidgetTester tester) async {
-    tester.view.physicalSize = const Size(1180, 820);
+  Future<ProviderContainer> pumpToolBar(
+    WidgetTester tester, {
+    double width = 1180,
+    String? title,
+  }) async {
+    tester.view.physicalSize = Size(width, 820);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
@@ -28,12 +32,12 @@ void main() {
         overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
         child: MaterialApp(
           theme: chromeTheme(Brightness.light),
-          home: const Scaffold(
+          home: Scaffold(
             body: DrawingThemeProvider(
-              theme: DrawingTheme(),
+              theme: const DrawingTheme(),
               child: Align(
                 alignment: Alignment.topCenter,
-                child: ToolBar(),
+                child: ToolBar(documentTitle: title),
               ),
             ),
           ),
@@ -82,6 +86,34 @@ void main() {
         ),
         findsOneWidget,
       );
+    });
+
+    testWidgets('actions capsule lists the default action buttons',
+        (tester) async {
+      await pumpToolBar(tester);
+
+      final actions = find.byType(ChromeCapsule).at(2);
+      for (final icon in [
+        ElyanotesIcons.readerMode,
+        ElyanotesIcons.exportIcon,
+        ElyanotesIcons.more,
+      ]) {
+        expect(
+          find.descendant(of: actions, matching: find.byIcon(icon)),
+          findsOneWidget,
+        );
+      }
+      // Infinite canvas is the default: no page-level actions.
+      for (final icon in [
+        ElyanotesIcons.pageAdd,
+        ElyanotesIcons.layers,
+        ElyanotesIcons.microphone,
+      ]) {
+        expect(
+          find.descendant(of: actions, matching: find.byIcon(icon)),
+          findsNothing,
+        );
+      }
     });
 
     testWidgets('band is 64dp and uses the background', (tester) async {
@@ -203,6 +235,37 @@ void main() {
       expect(find.byType(ChromeCapsule), findsNWidgets(3));
       expect(find.byIcon(ElyanotesIcons.home), findsOneWidget);
       expect(find.byIcon(ElyanotesIcons.readerModeActive), findsOneWidget);
+    });
+
+  group('ToolBar at 840', () {
+    Future<ProviderContainer> pumpNarrow(WidgetTester tester) async {
+      final container = await pumpToolBar(
+        tester,
+        width: 840,
+        title: 'Cok uzun belge basligi: matematik ve fizik ders notlari 2026',
+      );
+      container.read(pageManagerProvider.notifier).addPage();
+      await tester.pump();
+      return container;
+    }
+
+    testWidgets('long title and several pages do not overflow',
+        (tester) async {
+      await pumpNarrow(tester);
+
+      expect(find.byIcon(ElyanotesIcons.sidebar), findsOneWidget);
+      expect(find.byType(ChromeCapsule), findsNWidgets(3));
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('does not overflow in reader mode', (tester) async {
+      final container = await pumpNarrow(tester);
+
+      container.read(readerModeProvider.notifier).state = true;
+      await tester.pump();
+      await tester.pump(ChromeDurations.instant);
+
+      expect(tester.takeException(), isNull);
     });
   });
 }

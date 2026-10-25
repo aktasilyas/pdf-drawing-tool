@@ -17,7 +17,7 @@ class ChromeCapsule extends StatelessWidget {
   static const double borderWidth = 1;
 
   /// Horizontal space taken by padding and border, excluding children.
-  static const double horizontalInset = 2 * (ChromeSpacing.xs + borderWidth);
+  static const double horizontalInset = 2 * (ChromeSpacing.xxs + borderWidth);
 
   final List<Widget> children;
 
@@ -28,7 +28,7 @@ class ChromeCapsule extends StatelessWidget {
 
     return Container(
       height: height,
-      padding: const EdgeInsets.symmetric(horizontal: ChromeSpacing.xs),
+      padding: const EdgeInsets.symmetric(horizontal: ChromeSpacing.xxs),
       decoration: BoxDecoration(
         color: palette.surface,
         borderRadius: BorderRadius.circular(ChromeRadius.xl),

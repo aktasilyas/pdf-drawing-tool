@@ -28,6 +28,7 @@ class ToolbarNavLeft extends StatelessWidget {
     this.pageCount = 1,
     this.showTitle = true,
     this.titleMaxWidth = 160,
+    this.showReaderBadge = true,
   });
 
   final String? documentTitle;
@@ -45,6 +46,8 @@ class ToolbarNavLeft extends StatelessWidget {
 
   /// Maximum width of the document title pill.
   final double titleMaxWidth;
+  /// Whether reader mode shows the "Salt okunur" badge.
+  final bool showReaderBadge;
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +69,7 @@ class ToolbarNavLeft extends StatelessWidget {
             isActive: isSidebarOpen,
           ),
         if (showTitle) ...[
-          const SizedBox(width: 4),
+          const SizedBox(width: ChromeSpacing.xs),
           DocumentTitleButton(
             title: documentTitle,
             onRename: onRenameDocument ?? () {},
@@ -74,8 +77,8 @@ class ToolbarNavLeft extends StatelessWidget {
             maxWidth: titleMaxWidth,
           ),
         ],
-        if (isReaderMode) ...[
-          const SizedBox(width: 8),
+        if (isReaderMode && showReaderBadge) ...[
+          const SizedBox(width: ChromeSpacing.sm),
           const ToolbarReaderBadge(),
         ],
       ],
@@ -83,7 +86,6 @@ class ToolbarNavLeft extends StatelessWidget {
   }
 }
 
-/// Which nav popover is currently open.
 enum _NavPanel { addPage, audioRecording, layers, export, more }
 
 /// Right navigation section: Reader toggle, Add Page, Export, More.
@@ -165,7 +167,6 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
         );
       case _NavPanel.layers:
         anchorKey = _layersKey;
-        // Cap height to 60% of screen, min 280, max 420
         final screenH = MediaQuery.of(context).size.height;
         final layersH = (screenH * 0.6).clamp(280.0, 420.0);
         child =

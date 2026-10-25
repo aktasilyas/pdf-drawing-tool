@@ -64,8 +64,10 @@ class _ToolBarState extends ConsumerState<ToolBar> {
   static const double _bandHeight =
       ChromeCapsule.height + ChromeSpacing.sm + ChromeSpacing.xs;
 
-  /// Maximum width of the document title pill in the nav capsule.
-  static const double _titleMaxWidth = 240;
+  /// Toolbar width from which the title pill may grow to [_wideTitleWidth].
+  static const double _wideTitleBreakpoint = 1000;
+  static const double _wideTitleWidth = 240;
+  static const double _narrowTitleWidth = 160;
 
   final Map<ToolType, GlobalKey> _toolButtonKeys = {};
 
@@ -83,44 +85,52 @@ class _ToolBarState extends ConsumerState<ToolBar> {
     final isReaderMode = ref.watch(readerModeProvider);
     final pageCount = ref.watch(pageCountProvider);
 
-    return Container(
-      height: _bandHeight,
-      color: palette.background,
-      padding: const EdgeInsets.fromLTRB(
-        ChromeSpacing.lg,
-        ChromeSpacing.sm,
-        ChromeSpacing.lg,
-        ChromeSpacing.xs,
-      ),
-      child: Row(
-        children: [
-          ChromeCapsule(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final titleMaxWidth = constraints.maxWidth >= _wideTitleBreakpoint
+            ? _wideTitleWidth
+            : _narrowTitleWidth;
+        return Container(
+          height: _bandHeight,
+          color: palette.background,
+          padding: const EdgeInsets.fromLTRB(
+            ChromeSpacing.lg,
+            ChromeSpacing.sm,
+            ChromeSpacing.lg,
+            ChromeSpacing.xs,
+          ),
+          child: Row(
             children: [
-              ToolbarNavLeft(
-                documentTitle: widget.documentTitle,
-                onHomePressed: widget.onHomePressed,
-                onRenameDocument: widget.onRenameDocument,
-                onDeleteDocument: widget.onDeleteDocument,
-                onSidebarToggle: widget.onSidebarToggle,
-                isSidebarOpen: widget.isSidebarOpen,
-                isReaderMode: isReaderMode,
-                pageCount: pageCount,
-                titleMaxWidth: _titleMaxWidth,
+              ChromeCapsule(
+                children: [
+                  ToolbarNavLeft(
+                    documentTitle: widget.documentTitle,
+                    onHomePressed: widget.onHomePressed,
+                    onRenameDocument: widget.onRenameDocument,
+                    onDeleteDocument: widget.onDeleteDocument,
+                    onSidebarToggle: widget.onSidebarToggle,
+                    isSidebarOpen: widget.isSidebarOpen,
+                    isReaderMode: isReaderMode,
+                    pageCount: pageCount,
+                    titleMaxWidth: titleMaxWidth,
+                    showReaderBadge: false,
+                  ),
+                ],
+              ),
+              Expanded(child: _buildToolsArea(isReaderMode)),
+              ChromeCapsule(
+                children: [
+                  ToolbarNavRight(
+                    isReaderMode: isReaderMode,
+                    onReaderToggle: () => _setReaderMode(!isReaderMode),
+                    onShowRecordings: () => _openRecordingsTab(ref),
+                  ),
+                ],
               ),
             ],
           ),
-          Expanded(child: _buildToolsArea(isReaderMode)),
-          ChromeCapsule(
-            children: [
-              ToolbarNavRight(
-                isReaderMode: isReaderMode,
-                onReaderToggle: () => _setReaderMode(!isReaderMode),
-                onShowRecordings: () => _openRecordingsTab(ref),
-              ),
-            ],
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -148,35 +158,38 @@ class _ToolBarState extends ConsumerState<ToolBar> {
           final hidden = tools.sublist(shown);
 
           return Center(
-            child: ExcludeFocus(
-              excluding: isReaderMode,
-              child: ExcludeSemantics(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: ExcludeFocus(
                 excluding: isReaderMode,
-                child: IgnorePointer(
-                  ignoring: isReaderMode,
-                  child: AnimatedOpacity(
-                    opacity: isReaderMode ? 0 : 1,
-                    duration: ChromeDurations.instant,
-                    child: ChromeCapsule(
-                      children: [
-                        if (hasAI)
-                          ElyanotesNavButton(
-                            icon: ElyanotesIcons.sparkle,
-                            tooltip: 'Yapay Zeka',
-                            onPressed: widget.onAIPressed!,
+                child: ExcludeSemantics(
+                  excluding: isReaderMode,
+                  child: IgnorePointer(
+                    ignoring: isReaderMode,
+                    child: AnimatedOpacity(
+                      opacity: isReaderMode ? 0 : 1,
+                      duration: ChromeDurations.instant,
+                      child: ChromeCapsule(
+                        children: [
+                          if (hasAI)
+                            ElyanotesNavButton(
+                              icon: ElyanotesIcons.sparkle,
+                              tooltip: 'Yapay Zeka',
+                              onPressed: widget.onAIPressed!,
+                            ),
+                          ToolbarUndoRedoButtons(
+                            canUndo: canUndo,
+                            canRedo: canRedo,
+                            onUndo: _undo,
+                            onRedo: _redo,
                           ),
-                        ToolbarUndoRedoButtons(
-                          canUndo: canUndo,
-                          canRedo: canRedo,
-                          onUndo: _undo,
-                          onRedo: _redo,
-                        ),
-                        const ChromeDivider(),
-                        for (final tool in tools.take(shown))
-                          _buildToolButton(tool, currentTool),
-                        if (hidden.isNotEmpty)
-                          ToolbarOverflowMenu(hiddenTools: hidden),
-                      ],
+                          const ChromeDivider(),
+                          for (final tool in tools.take(shown))
+                            _buildToolButton(tool, currentTool),
+                          if (hidden.isNotEmpty)
+                            ToolbarOverflowMenu(hiddenTools: hidden),
+                        ],
+                      ),
                     ),
                   ),
                 ),
