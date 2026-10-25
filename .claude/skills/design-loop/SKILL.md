@@ -48,3 +48,5 @@ one copy per package; keep them in sync). A golden passes when at most
 changes always fail. This absorbs CI anti-aliasing noise (tens of pixels) but
 not real changes: a 1 dp hairline across a tablet golden is ~0.12 %. Do not
 raise the threshold to make a failing golden pass; look at the diff instead.
+The count ignores colour distance, so a small recoloured icon or badge
+(a few hundred pixels) can slip through: still look at changed PNGs in review.

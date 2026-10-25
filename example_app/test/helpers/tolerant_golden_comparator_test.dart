@@ -57,6 +57,12 @@ void main() {
     expect(await comparator.compare(bytes, golden), isTrue);
   });
 
+  test('a diff exactly at the tolerance passes', () async {
+    // 5 px = 0.05 %.
+    final bytes = await _png(black: [for (var x = 0; x < 5; x++) (x, 0)]);
+    expect(await comparator.compare(bytes, golden), isTrue);
+  });
+
   test('a diff just above the tolerance fails', () async {
     // 6 px = 0.06 % > 0.05 %.
     final bytes = await _png(black: [for (var x = 0; x < 6; x++) (x, 0)]);
