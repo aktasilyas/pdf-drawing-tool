@@ -12,7 +12,7 @@ import 'package:example_app/core/theme/index.dart';
 /// with a tab, two paper sheets peeking out, and a front panel with a soft
 /// top-lit gradient in the tamed folder colour, over a soft contact shadow
 /// (same depth language as the notebook covers). Paints are built once in
-/// the initializer list; the gradient shader is created per size.
+/// the initializer list; the front-panel gradient shader is rebuilt per paint from precomputed colours.
 class FolderTileArt extends CustomPainter {
   FolderTileArt({required this.color, required this.palette})
       : _backPaint = Paint()..color = _darken(_tame(color)),
@@ -23,12 +23,17 @@ class FolderTileArt extends CustomPainter {
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1,
         _shadowPaint = Paint()
-          ..color = const Color(0x2E000000)
+          ..color = palette.textPrimary.withValues(alpha: 0.18)
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
         _sheetEdgePaint = Paint()
           ..color = palette.border
           ..style = PaintingStyle.stroke
           ..strokeWidth = 0.75,
+        _gradientColors = [
+          _lighten(_tame(color)),
+          _tame(color),
+          _darken(_tame(color), 0.05),
+        ],
         _highlightPaint = Paint()
           ..color = palette.paper.withValues(alpha: 0.25)
           ..style = PaintingStyle.stroke
@@ -42,6 +47,7 @@ class FolderTileArt extends CustomPainter {
   final Paint _frontPaint;
   final Paint _edgePaint;
   final Paint _highlightPaint;
+  final List<Color> _gradientColors;
   final Paint _shadowPaint;
   final Paint _sheetEdgePaint;
 
@@ -112,11 +118,7 @@ class FolderTileArt extends CustomPainter {
     _frontPaint.shader = LinearGradient(
       begin: Alignment.topCenter,
       end: Alignment.bottomCenter,
-      colors: [
-        _lighten(_tame(color)),
-        _tame(color),
-        _darken(_tame(color), 0.05)
-      ],
+      colors: _gradientColors,
       stops: const [0, 0.35, 1],
     ).createShader(front);
     canvas.drawRRect(RRect.fromRectAndRadius(front, radius), _frontPaint);
