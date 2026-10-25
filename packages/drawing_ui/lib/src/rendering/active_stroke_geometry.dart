@@ -13,8 +13,8 @@ enum ActiveStrokeMode {
   outline,
 
   /// Solid stroked pens: quadratic segments appended one by one; the body
-  /// is frozen into a picture every [ActiveStrokeGeometry.strokedChunk]
-  /// segments so the live path stays short.
+  /// is frozen every [ActiveStrokeGeometry.strokedChunk] segments so the
+  /// live (mutated) path stays short.
   stroked,
 
   /// Dashed, pencil, straight line: rebuilt from all points (O(n)).
@@ -33,7 +33,7 @@ class ActiveStrokeGeometry {
   /// Frozen outline chunks are at least this many samples long.
   static const int _chunk = 8;
 
-  /// Stroked mode freezes the live body into a picture every this many
+  /// Stroked mode freezes the live body path every this many
   /// quadratic segments, so per-event work does not grow with the stroke.
   static const int strokedChunk = 32;
 
@@ -54,8 +54,7 @@ class ActiveStrokeGeometry {
   double _bodyX = 0, _bodyY = 0; // stroked: current end point of [_body]
   int _bodySegments = 0; // stroked: segments in [_body] since last freeze
   bool get _roundCaps => _paint?.strokeCap == StrokeCap.round;
-  Picture? _frozen; // stroked: every frozen body chunk, nested
-  final List<Picture> _pictures = <Picture>[]; // owned, for disposal
+  final List<Path> _frozen = <Path>[]; // stroked: never mutated again
   double _minX = 0, _minY = 0, _maxX = 0, _maxY = 0;
 
   /// Bumped on every change; painters compare it in `shouldRepaint`.
@@ -70,9 +69,9 @@ class ActiveStrokeGeometry {
   @visibleForTesting
   int get liveSegments => _bodySegments;
 
-  /// Stroked mode: number of body chunks frozen into pictures so far.
+  /// Stroked mode: number of body chunks frozen so far.
   @visibleForTesting
-  int get frozenChunks => _pictures.length;
+  int get frozenChunks => _frozen.length;
 
   /// Starts a new stroke. [incremental] is false for straight-line previews
   /// and for strokes whose points are rewritten rather than appended.
@@ -115,30 +114,19 @@ class ActiveStrokeGeometry {
     version++;
   }
 
-  /// Releases the frozen pictures. The geometry stays usable.
+  /// Drops the frozen chunks. The geometry stays usable.
   void dispose() => _resetFrozen();
 
   void _resetFrozen() {
-    _frozen = null;
     _bodySegments = 0;
-    for (final picture in _pictures) {
-      picture.dispose();
-    }
-    _pictures.clear();
+    _frozen.clear();
   }
 
-  /// Records [_body] over the previous chunks (nested, kept alive until
-  /// [_resetFrozen]) and restarts the live body at its end point.
+  /// Freezes [_body] and restarts the live body at its end point. A frozen
+  /// path is never mutated again, so recording it per frame is a cheap
+  /// reference (no copy-on-write of a growing path, no nested pictures).
   void _freezeBody() {
-    final recorder = PictureRecorder();
-    final canvas = Canvas(recorder);
-    final previous = _frozen;
-    if (previous != null) canvas.drawPicture(previous);
-    canvas.drawPath(_body, _paint!);
-    final picture = recorder.endRecording();
-    _pictures.add(picture);
-    _frozen = picture;
-    // A fresh Path: the old one may still be referenced by a recorded frame.
+    _frozen.add(_body);
     _body = Path()..moveTo(_bodyX, _bodyY);
     _bodySegments = 0;
   }
@@ -291,8 +279,9 @@ class ActiveStrokeGeometry {
         layer,
       );
     }
-    final frozen = _frozen;
-    if (frozen != null) canvas.drawPicture(frozen);
+    for (var i = 0; i < _frozen.length; i++) {
+      canvas.drawPath(_frozen[i], _paint!);
+    }
     canvas.drawPath(_body, _paint!);
     canvas.drawPath(_tail, _paint!);
     if (layer != null) canvas.restore();
