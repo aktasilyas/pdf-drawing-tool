@@ -76,9 +76,9 @@ for pkg in "${PACKAGES[@]}"; do
     elif [ -d "$pkg/test/benchmark" ]; then
       # Wall-clock benchmarks run alone so parallel test processes do not
       # compete with them for the CPU (see dart_test.yaml). No coverage for them.
-      run "test $pkg" "$pkg" flutter test --timeout=90s --concurrency=4 --exclude-tags benchmark "${cov[@]}"
+      run "test $pkg" "$pkg" flutter test --timeout=90s --concurrency=4 --exclude-tags benchmark ${cov[@]+"${cov[@]}"}
       run "benchmark $pkg" "$pkg" flutter test --timeout=90s --concurrency=1 --tags benchmark
-    else run "test $pkg" "$pkg" flutter test --timeout=90s --concurrency=4 "${cov[@]}"; fi
+    else run "test $pkg" "$pkg" flutter test --timeout=90s --concurrency=4 ${cov[@]+"${cov[@]}"}; fi
   fi
 done
 
