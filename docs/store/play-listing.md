@@ -120,14 +120,14 @@ treatment is an open BRIEF question, so this waits for the owner.
 ## Release-blocking notes for the owner
 - **Depends on #45:** the fountain pen ("Dolma Kalem") and the five-pen picker (screenshots 2 and 4)
   exist only on PR #96 until #45 is merged. Publish this listing only after #45 lands.
-- **Permissions in the merged release manifest:** the app manifest declares `com.android.vending.BILLING`
-  (frozen premium), and plugins compiled in for frozen features very likely merge in more:
-  `INTERNET` and `BILLING` (`purchases_flutter`, `supabase_flutter`), `ACCESS_NETWORK_STATE`
-  (`connectivity_plus`), `RECORD_AUDIO` (`record`, used by the frozen audio feature in drawing_ui).
-  Not verified here (no Android build in this run): check the merged manifest of a release AAB
-  (`./gradlew :app:processReleaseMainManifest` or `aapt dump permissions`). Play shows these on the
-  listing, which contradicts "offline, no microphone". Recommended follow-up issue: strip them from the
-  v1.0 release with `tools:node="remove"` entries (or a flavor), then re-check this listing and the
-  Data safety answers.
+- **Permissions in the merged release manifest:** handled by #113. The release manifest
+  (`example_app/android/app/src/release/AndroidManifest.xml`) strips `INTERNET`,
+  `ACCESS_NETWORK_STATE`, `RECORD_AUDIO` and `com.android.vending.BILLING` with
+  `tools:node="remove"`, so the v1.0 listing matches "offline, no microphone". The debug build keeps
+  them for FF_* flag testing. The `android-manifest.yml` workflow enforces this on every PR that
+  changes the Android project or a pubspec. To re-check locally: in `example_app/android` run
+  `./gradlew :app:processReleaseMainManifest :app:processDebugMainManifest`, then
+  `./scripts/check-android-manifest.sh` from the repo root. Re-check the listing and the Data safety
+  answers whenever a frozen feature (AI chat, cloud sync, premium, audio) is turned on for a release.
 - The privacy policy needs a public URL and contact email (see `privacy-policy.md`).
 - Turkish strings use Title Case pen names as decided on #45 (Dolma Kalem, Fosforlu Kalem).
