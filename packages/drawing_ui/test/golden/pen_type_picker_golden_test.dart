@@ -73,7 +73,15 @@ void _extremes(ProviderContainer c, {required bool max}) {
     ..setColor(max ? const Color(0xFFFFEB3B) : const Color(0xFF80DEEA));
 }
 
-void main() {
+// Only the CI variant has committed baselines; platform goldens stay off.
+Future<void> main() => AlchemistConfig.runWithConfig(
+      config: const AlchemistConfig(
+        platformGoldensConfig: PlatformGoldensConfig(enabled: false),
+      ),
+      run: _tests,
+    );
+
+Future<void> _tests() async {
   late SharedPreferences prefs;
   setUpAll(() async {
     SharedPreferences.setMockInitialValues({});
