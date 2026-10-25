@@ -54,10 +54,15 @@ class DocumentsEmptyState extends StatelessWidget {
               ),
               if (onCreateNew != null) ...[
                 const SizedBox(height: AppSpacing.xl),
-                AppButton(
-                  label: 'Yeni not',
-                  leadingIcon: ElyanotesIcons.libraryPlus,
-                  onPressed: onCreateNew,
+                ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    minHeight: AppSpacing.minTouchTarget,
+                  ),
+                  child: AppButton(
+                    label: 'Yeni not',
+                    leadingIcon: ElyanotesIcons.libraryPlus,
+                    onPressed: onCreateNew,
+                  ),
                 ),
               ],
             ],

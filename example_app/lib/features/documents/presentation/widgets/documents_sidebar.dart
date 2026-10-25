@@ -9,6 +9,7 @@ import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/sidebar_item.dart';
+import 'package:example_app/features/documents/presentation/widgets/folder_tile_art.dart';
 
 /// Sidebar bölüm tipleri
 enum SidebarSection { documents, favorites, shared, store, trash, folder }
@@ -238,7 +239,7 @@ class DocumentsSidebar extends ConsumerWidget {
       label: folder.name,
       isSelected: isSel,
       isSubfolder: isSub,
-      iconColor: Color(folder.colorValue),
+      iconColor: FolderTileArt.tame(Color(folder.colorValue)),
       trailing: Text(
         '${folder.documentCount}',
         style: AppTypography.caption.copyWith(

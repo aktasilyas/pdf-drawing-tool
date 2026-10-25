@@ -197,7 +197,7 @@ class DocumentsHeader extends ConsumerWidget {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(
-              AppSpacing.xs, AppSpacing.sm, AppSpacing.xs, 0),
+              AppSpacing.xs, AppSpacing.sm, AppSpacing.lg, 0),
           child: Row(
             children: [
               if (onMenuTap != null)

@@ -30,6 +30,12 @@ void main() {
       );
     });
 
+    testWidgets('Yeni not button has a 48dp hit height', (tester) async {
+      await pump(tester, onCreateNew: () {});
+      final size = tester.getSize(find.byType(AppButton));
+      expect(size.height, greaterThanOrEqualTo(48));
+    });
+
     testWidgets('Yeni not button calls onCreateNew', (tester) async {
       var called = false;
       await pump(tester, onCreateNew: () => called = true);

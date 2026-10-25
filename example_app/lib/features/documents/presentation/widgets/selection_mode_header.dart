@@ -49,14 +49,13 @@ class SelectionModeHeader extends ConsumerWidget {
             onPressed: () => _exitSelectionMode(ref),
           ),
           const SizedBox(width: AppSpacing.xs),
-          Flexible(
+          Expanded(
             child: Text(
               '$totalSelected seçildi',
               style: AppTypography.titleMedium.copyWith(color: palette.accent),
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          const Spacer(),
           _SelectAllButton(
             allDocumentIds: allDocumentIds,
             allFolderIds: allFolderIds,

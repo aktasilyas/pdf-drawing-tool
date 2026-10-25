@@ -52,6 +52,19 @@ void main() {
     expect(find.text('2 seçildi'), findsOneWidget);
   });
 
+  testWidgets('count label expands so actions end at the right edge',
+      (tester) async {
+    await pump(tester, selected: {'a'});
+    final label = tester.getRect(find.text('1 seçildi'));
+    final all = tester.getRect(find.text('Tümü'));
+    expect(label.right, lessThan(all.left));
+    final row = tester.getRect(find.byType(SelectionModeHeader));
+    expect(
+        row.right -
+            tester.getRect(find.byIcon(ElyanotesIcons.libraryTrash)).right,
+        lessThan(24));
+  });
+
   testWidgets('delete icon is danger when something is selected',
       (tester) async {
     await pump(tester, selected: {'a'});

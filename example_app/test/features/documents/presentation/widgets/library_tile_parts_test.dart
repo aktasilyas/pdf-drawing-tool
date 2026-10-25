@@ -24,6 +24,7 @@ BoxDecoration _checkboxDecoration(WidgetTester tester) {
 }
 
 void main() {
+  checkboxOffsetTests();
   group('LibrarySelectionCheckbox', () {
     for (final entry in {
       'light': (AppTheme.light, AppPalette.light),
@@ -219,5 +220,15 @@ void main() {
       expect(box.right, closeTo(marker.right - AppSpacing.sm, 0.01));
       expect(box.top, closeTo(marker.top + AppSpacing.sm, 0.01));
     });
+  });
+}
+
+void checkboxOffsetTests() {
+  test('libraryCheckboxOffset uses the cover box, not art', () {
+    const box = Size(100, 133);
+    final o = libraryCheckboxOffset(box);
+    expect(o.dy, AppSpacing.sm);
+    expect(
+        o.dx + LibrarySelectionCheckbox.size, box.width * 0.94 - AppSpacing.sm);
   });
 }
