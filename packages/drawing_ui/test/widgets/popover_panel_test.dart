@@ -64,7 +64,7 @@ class _HarnessState extends State<_Harness> {
   }
 }
 
-Future<_HarnessState> _pumpHarness(
+Future<_HarnessState> _pump(
   WidgetTester tester, {
   required PopoverController controller,
   double anchorTop = 20,
@@ -75,13 +75,14 @@ Future<_HarnessState> _pumpHarness(
   tester.view.physicalSize = const Size(800, 800);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
-  await tester.pumpWidget(_Harness(
+  final harness = _Harness(
     controller: controller,
     anchorTop: anchorTop,
     brightness: brightness,
     onDismiss: onDismiss ?? () {},
     onCanvasDown: onCanvasDown ?? () {},
-  ));
+  );
+  await tester.pumpWidget(harness);
   final state = tester.state<_HarnessState>(find.byType(_Harness));
   state.open();
   await tester.pump();
@@ -89,9 +90,11 @@ Future<_HarnessState> _pumpHarness(
 }
 
 BoxDecoration _panelDecoration(WidgetTester tester) {
-  final container = tester.widget<Container>(find
-      .ancestor(of: find.byKey(_panelKey), matching: find.byType(Container))
-      .first);
+  final containers = find.ancestor(
+    of: find.byKey(_panelKey),
+    matching: find.byType(Container),
+  );
+  final container = tester.widget<Container>(containers.first);
   return container.decoration! as BoxDecoration;
 }
 
@@ -102,13 +105,11 @@ void main() {
   tearDown(() => controller.dispose());
 
   for (final brightness in Brightness.values) {
-    final palette =
-        brightness == Brightness.dark ? ChromePalette.dark : ChromePalette.light;
+    final dark = brightness == Brightness.dark;
+    final palette = dark ? ChromePalette.dark : ChromePalette.light;
 
-    testWidgets('panel uses chrome palette (${brightness.name})',
-        (tester) async {
-      await _pumpHarness(tester,
-          controller: controller, brightness: brightness);
+    testWidgets('chrome palette ${brightness.name}', (tester) async {
+      await _pump(tester, controller: controller, brightness: brightness);
       await tester.pumpAndSettle();
 
       final decoration = _panelDecoration(tester);
@@ -116,14 +117,13 @@ void main() {
       final border = decoration.border! as Border;
       expect(border.top.color, palette.border);
       expect(border.top.width, 1);
-      expect(decoration.borderRadius,
-          BorderRadius.circular(ChromeRadius.xl));
+      expect(decoration.borderRadius, BorderRadius.circular(ChromeRadius.xl));
       expect(decoration.boxShadow, DrawingShadows.panel(brightness));
     });
   }
 
   testWidgets('opens below the anchor with an sm gap', (tester) async {
-    await _pumpHarness(tester, controller: controller, anchorTop: 20);
+    await _pump(tester, controller: controller, anchorTop: 20);
     await tester.pumpAndSettle();
 
     final panelTop = tester.getTopLeft(find.byKey(_panelKey)).dy;
@@ -133,7 +133,7 @@ void main() {
 
   testWidgets('flips above when less than 360 is free below', (tester) async {
     // Anchor bottom at 448: 800 - 448 - 8 - 12 = 332 below, 412 above.
-    await _pumpHarness(tester, controller: controller, anchorTop: 400);
+    await _pump(tester, controller: controller, anchorTop: 400);
     await tester.pumpAndSettle();
 
     final panelBottom = tester.getBottomLeft(find.byKey(_panelKey)).dy;
@@ -141,21 +141,21 @@ void main() {
   });
 
   testWidgets('enter animation takes 200ms', (tester) async {
-    await _pumpHarness(tester, controller: controller);
+    await _pump(tester, controller: controller);
     await tester.pump(const Duration(milliseconds: 100));
-    final fade = tester.widget<FadeTransition>(find
-        .ancestor(
-            of: find.byKey(_panelKey), matching: find.byType(FadeTransition))
-        .first);
+    final fades = find.ancestor(
+      of: find.byKey(_panelKey),
+      matching: find.byType(FadeTransition),
+    );
+    final fade = tester.widget<FadeTransition>(fades.first);
     expect(fade.opacity.value, inInclusiveRange(0.05, 0.95));
 
     await tester.pump(const Duration(milliseconds: 100));
     expect(fade.opacity.value, 1);
   });
 
-  testWidgets('hide plays a 100ms exit before removing the panel',
-      (tester) async {
-    await _pumpHarness(tester, controller: controller);
+  testWidgets('hide plays a 100ms exit first', (tester) async {
+    await _pump(tester, controller: controller);
     await tester.pumpAndSettle();
 
     controller.hide();
@@ -171,11 +171,10 @@ void main() {
     expect(find.byKey(_panelKey), findsNothing);
   });
 
-  testWidgets('outside pen-down closes without reaching the canvas',
-      (tester) async {
+  testWidgets('outside pen-down closes without drawing', (tester) async {
     var dismissed = 0;
     var canvasDowns = 0;
-    await _pumpHarness(
+    await _pump(
       tester,
       controller: controller,
       onDismiss: () => dismissed++,
@@ -204,8 +203,7 @@ void main() {
 
   testWidgets('tap inside the panel does not dismiss', (tester) async {
     var dismissed = 0;
-    await _pumpHarness(tester,
-        controller: controller, onDismiss: () => dismissed++);
+    await _pump(tester, controller: controller, onDismiss: () => dismissed++);
     await tester.pumpAndSettle();
 
     await tester.tap(find.byKey(_panelKey));
@@ -216,8 +214,7 @@ void main() {
 
   testWidgets('Escape closes the popover', (tester) async {
     var dismissed = 0;
-    await _pumpHarness(tester,
-        controller: controller, onDismiss: () => dismissed++);
+    await _pump(tester, controller: controller, onDismiss: () => dismissed++);
     await tester.pumpAndSettle();
 
     await tester.sendKeyEvent(LogicalKeyboardKey.escape);
@@ -227,7 +224,7 @@ void main() {
   });
 
   testWidgets('show while open replaces the panel at once', (tester) async {
-    final state = await _pumpHarness(tester, controller: controller);
+    final state = await _pump(tester, controller: controller);
     await tester.pumpAndSettle();
 
     state.open();
@@ -239,7 +236,7 @@ void main() {
   });
 
   testWidgets('dispose removes the panel immediately', (tester) async {
-    await _pumpHarness(tester, controller: controller);
+    await _pump(tester, controller: controller);
     await tester.pumpAndSettle();
 
     controller.dispose();
