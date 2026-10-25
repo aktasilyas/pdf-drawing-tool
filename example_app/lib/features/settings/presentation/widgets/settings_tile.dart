@@ -33,7 +33,7 @@ class SettingsTile extends StatelessWidget {
     final subtitleColor = enabled ? palette.textMuted : palette.textDisabled;
     final iconColor = enabled ? palette.accent : palette.textDisabled;
     final iconBgColor =
-        enabled ? palette.surfaceElevated : palette.accentContainer;
+        enabled ? palette.accentContainer : palette.background;
 
     return InkWell(
       onTap: enabled ? onTap : null,
