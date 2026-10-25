@@ -27,7 +27,8 @@ fail() {
 }
 
 manifest_for() { # $1=variant (release|debug)
-  find "$BUILD_DIR" -path "*/intermediates/merged_manifest/$1/*" -name AndroidManifest.xml 2>/dev/null | head -n 1
+  # Only the :app module; plugin subprojects have their own merged manifests.
+  find "$BUILD_DIR/app/intermediates/merged_manifest/$1" -name AndroidManifest.xml 2>/dev/null | head -n 1
 }
 
 permissions_of() { # $1=manifest file: one permission name per line
