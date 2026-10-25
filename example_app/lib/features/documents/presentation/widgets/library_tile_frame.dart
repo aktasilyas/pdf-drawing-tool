@@ -1,0 +1,155 @@
+import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
+import 'package:drawing_ui/drawing_ui.dart' show CoverGeometry;
+
+import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/features/documents/presentation/widgets/library_tile_parts.dart';
+
+List<Widget> _noOverlays(Rect board) => const <Widget>[];
+
+/// Shared frame of document and folder tiles: a 3:4 cover box bottom-aligned
+/// above an info block, a selection backdrop, a press scale and the
+/// selection checkbox. Overlays are positioned in the cover box's
+/// coordinates; [overlays] receives the cover board rect inside that box.
+class LibraryTileFrame extends StatefulWidget {
+  const LibraryTileFrame({
+    super.key,
+    required this.cover,
+    required this.info,
+    required this.onTap,
+    required this.onLongPress,
+    this.isSelected = false,
+    this.isSelectionMode = false,
+    this.overlays = _noOverlays,
+  });
+
+  final Widget cover;
+  final Widget info;
+  final VoidCallback onTap;
+  final VoidCallback onLongPress;
+  final bool isSelected;
+  final bool isSelectionMode;
+  final List<Widget> Function(Rect board) overlays;
+
+  @override
+  State<LibraryTileFrame> createState() => _LibraryTileFrameState();
+}
+
+class _LibraryTileFrameState extends State<LibraryTileFrame> {
+  // Local state is fine here: a tile, not the ink path.
+  bool _pressed = false;
+  bool _focused = false;
+
+  void _setPressed(bool value) {
+    if (_pressed != value) setState(() => _pressed = value);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FocusableActionDetector(
+      onShowFocusHighlight: (value) => setState(() => _focused = value),
+      actions: <Type, Action<Intent>>{
+        ActivateIntent: CallbackAction<ActivateIntent>(
+          onInvoke: (_) {
+            widget.onTap();
+            return null;
+          },
+        ),
+      },
+      child: Stack(
+        fit: StackFit.expand,
+        clipBehavior: Clip.none,
+        children: [
+          _buildBackdrop(context),
+          AnimatedScale(
+            scale: _pressed ? 0.97 : 1,
+            duration: AppDurations.instant,
+            curve: AppCurves.enter,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: _buildCover()),
+                widget.info,
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBackdrop(BuildContext context) {
+    final palette = context.palette;
+    final ring = widget.isSelected || _focused;
+    return Positioned(
+      left: -AppSpacing.sm,
+      top: -AppSpacing.sm,
+      right: -AppSpacing.sm,
+      bottom: -AppSpacing.sm,
+      child: IgnorePointer(
+        child: AnimatedContainer(
+          duration: AppDurations.fast,
+          curve: AppCurves.enter,
+          decoration: BoxDecoration(
+            color: widget.isSelected ? palette.accentContainer : null,
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            border: Border.all(
+              color: ring ? palette.accent : Colors.transparent,
+              width: 1.5,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCover() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = math.min(
+          constraints.maxWidth,
+          constraints.maxHeight * 3 / 4,
+        );
+        final box = Size(width, width * 4 / 3);
+        final board = CoverGeometry.of(box).cover;
+        return Align(
+          alignment: Alignment.bottomCenter,
+          child: SizedBox(
+            width: box.width,
+            height: box.height,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Positioned.fill(
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: widget.onTap,
+                    onLongPress: widget.onLongPress,
+                    onTapDown: (_) => _setPressed(true),
+                    onTapUp: (_) => _setPressed(false),
+                    onTapCancel: () => _setPressed(false),
+                    child: widget.cover,
+                  ),
+                ),
+                ...widget.overlays(board),
+                if (widget.isSelectionMode)
+                  Positioned(
+                    left: board.right -
+                        AppSpacing.sm -
+                        LibrarySelectionCheckbox.size,
+                    top: board.top + AppSpacing.sm,
+                    child: IgnorePointer(
+                      child: LibrarySelectionCheckbox(
+                        isSelected: widget.isSelected,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}

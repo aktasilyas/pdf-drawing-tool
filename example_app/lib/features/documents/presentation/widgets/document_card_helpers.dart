@@ -1,127 +1,38 @@
 /// ElyaNotes Document Card Helper Widgets
 ///
-/// Doküman kartı için yardımcı widget'lar.
+/// Doküman kartı için yardımcı widget'lar (gün rozeti, kağıt rengi, tarih).
 library;
 
 import 'package:flutter/material.dart';
 
 import 'package:example_app/core/theme/index.dart';
 
-/// Selection checkbox for document card
-class DocumentSelectionCheckbox extends StatelessWidget {
-  final bool isSelected;
-  const DocumentSelectionCheckbox({super.key, required this.isSelected});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 24,
-      height: 24,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: isSelected ? AppColors.primary : context.palette.surface,
-        border: Border.all(
-          color: isSelected ? AppColors.primary : context.palette.border,
-          width: 2,
-        ),
-      ),
-      child: isSelected
-          ? const Icon(Icons.check, size: 16, color: AppColors.onPrimary)
-          : null,
-    );
-  }
-}
-
-/// Favorite button for document card
-class DocumentFavoriteButton extends StatelessWidget {
-  final bool isFavorite;
-  final VoidCallback? onTap;
-
-  const DocumentFavoriteButton({
-    super.key,
-    required this.isFavorite,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 48,
-      height: 48,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.all(AppSpacing.xs),
-            decoration: BoxDecoration(
-              color: context.palette.surface.withValues(alpha: 0.9),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              isFavorite ? Icons.star : Icons.star_outline,
-              size: AppIconSize.sm,
-              color:
-                  isFavorite ? AppColors.accent : context.palette.textDisabled,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Page count badge for document card
-class DocumentPageCountBadge extends StatelessWidget {
-  final int count;
-  const DocumentPageCountBadge({super.key, required this.count});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.xxs,
-      ),
-      decoration: BoxDecoration(
-        color: context.palette.textPrimary.withValues(alpha: 0.7),
-        borderRadius: BorderRadius.circular(AppRadius.xs),
-      ),
-      child: Text(
-        '$count sayfa',
-        style: AppTypography.caption.copyWith(
-          color: context.palette.surface,
-          fontSize: 9,
-        ),
-      ),
-    );
-  }
-}
-
-/// Days left badge for trashed documents
+/// Days left badge for trashed documents and pages.
+///
+/// 7 days or fewer: `danger`; otherwise a quiet elevated chip.
 class DocumentDaysLeftBadge extends StatelessWidget {
   final DateTime deletedAt;
   const DocumentDaysLeftBadge({super.key, required this.deletedAt});
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     final daysLeft = 30 - DateTime.now().difference(deletedAt).inDays;
     final clampedDays = daysLeft.clamp(0, 30);
+    final urgent = clampedDays <= 7;
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
         vertical: AppSpacing.xxs,
       ),
       decoration: BoxDecoration(
-        color: clampedDays <= 7 ? AppColors.error : AppColors.warning,
+        color: urgent ? palette.danger : palette.surfaceElevated,
         borderRadius: BorderRadius.circular(AppRadius.xs),
       ),
       child: Text(
         '$clampedDays gün',
-        style: AppTypography.caption.copyWith(
-          color: clampedDays <= 7 ? AppColors.onError : AppColors.onWarning,
-          fontSize: 9,
-          fontWeight: FontWeight.w600,
+        style: AppTypography.labelMedium.copyWith(
+          color: urgent ? palette.onDanger : palette.textMuted,
         ),
       ),
     );

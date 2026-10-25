@@ -1,9 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:drawing_ui/drawing_ui.dart' show ElyanotesIcons;
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/documents/domain/entities/folder.dart';
 import 'package:example_app/features/documents/presentation/widgets/folder_card.dart';
+import 'package:example_app/features/documents/presentation/widgets/folder_tile_art.dart';
+import 'package:example_app/features/documents/presentation/widgets/library_tile_parts.dart';
+
+Color? _artColor(WidgetTester tester) {
+  final paints = tester
+      .widgetList<CustomPaint>(find.byType(CustomPaint))
+      .where((p) => p.painter is FolderTileArt);
+  expect(paints, hasLength(1));
+  return (paints.single.painter! as FolderTileArt).color;
+}
+
+BoxDecoration _checkboxDecoration(WidgetTester tester) {
+  final container = tester.widget<AnimatedContainer>(
+    find.descendant(
+      of: find.byType(LibrarySelectionCheckbox),
+      matching: find.byType(AnimatedContainer),
+    ),
+  );
+  return container.decoration! as BoxDecoration;
+}
 
 void main() {
   group('FolderCard', () {
@@ -70,7 +91,7 @@ void main() {
         expect(text.style?.color, equals(AppPalette.light.textMuted));
       });
 
-      testWidgets('should_display_folder_icon_with_custom_color',
+      testWidgets('should_draw_folder_art_with_folder_color',
           (tester) async {
         // Arrange & Act
         await tester.pumpWidget(
@@ -81,8 +102,7 @@ void main() {
         );
 
         // Assert
-        final icon = tester.widget<Icon>(find.byIcon(Icons.folder_rounded));
-        expect(icon.color, equals(Color(testFolder.colorValue)));
+        expect(_artColor(tester), equals(Color(testFolder.colorValue)));
       });
     });
 
@@ -116,7 +136,7 @@ void main() {
         expect(text.style?.color, equals(AppPalette.dark.textMuted));
       });
 
-      testWidgets('should_display_folder_icon_with_custom_color',
+      testWidgets('should_draw_folder_art_with_folder_color',
           (tester) async {
         // Arrange & Act
         await tester.pumpWidget(
@@ -127,15 +147,13 @@ void main() {
         );
 
         // Assert
-        final icon = tester.widget<Icon>(find.byIcon(Icons.folder_rounded));
-        expect(icon.color, equals(Color(testFolder.colorValue)));
+        expect(_artColor(tester), equals(Color(testFolder.colorValue)));
       });
     });
 
     group('Selection Checkbox - Light Theme', () {
       testWidgets('should_not_show_checkbox_when_not_in_selection_mode',
           (tester) async {
-        // Arrange & Act
         await tester.pumpWidget(
           buildTestWidget(
             folder: testFolder,
@@ -144,24 +162,11 @@ void main() {
           ),
         );
 
-        // Assert
-        // The checkbox is in a Positioned widget, check that it doesn't render
-        expect(
-          find.byWidgetPredicate(
-            (widget) =>
-                widget is Container &&
-                widget.decoration is BoxDecoration &&
-                (widget.decoration as BoxDecoration).shape == BoxShape.circle &&
-                widget.constraints ==
-                    const BoxConstraints.tightFor(width: 24, height: 24),
-          ),
-          findsNothing,
-        );
+        expect(find.byType(LibrarySelectionCheckbox), findsNothing);
       });
 
-      testWidgets('should_show_unselected_checkbox_with_surfaceLight_color',
+      testWidgets('should_show_unselected_checkbox_with_elevated_fill',
           (tester) async {
-        // Arrange & Act
         await tester.pumpWidget(
           buildTestWidget(
             folder: testFolder,
@@ -171,25 +176,20 @@ void main() {
           ),
         );
 
-        // Assert
-        final container = tester.widget<Container>(
-          find.byWidgetPredicate(
-            (widget) =>
-                widget is Container &&
-                widget.decoration is BoxDecoration &&
-                (widget.decoration as BoxDecoration).shape == BoxShape.circle &&
-                widget.constraints ==
-                    const BoxConstraints.tightFor(width: 24, height: 24),
-          ),
+        final decoration = _checkboxDecoration(tester);
+        expect(
+          decoration.color,
+          equals(AppPalette.light.surfaceElevated.withValues(alpha: 0.92)),
         );
-        final decoration = container.decoration as BoxDecoration;
-        expect(decoration.color, equals(AppPalette.light.surface));
-        expect(decoration.border?.top.color, equals(AppPalette.light.border));
+        expect(
+          decoration.border?.top.color,
+          equals(AppPalette.light.textMuted),
+        );
+        expect(find.byIcon(ElyanotesIcons.libraryCheck), findsNothing);
       });
 
-      testWidgets('should_show_selected_checkbox_with_primary_color',
+      testWidgets('should_show_selected_checkbox_with_accent_color',
           (tester) async {
-        // Arrange & Act
         await tester.pumpWidget(
           buildTestWidget(
             folder: testFolder,
@@ -199,30 +199,15 @@ void main() {
           ),
         );
 
-        // Assert
-        final container = tester.widget<Container>(
-          find.byWidgetPredicate(
-            (widget) =>
-                widget is Container &&
-                widget.decoration is BoxDecoration &&
-                (widget.decoration as BoxDecoration).shape == BoxShape.circle &&
-                widget.constraints ==
-                    const BoxConstraints.tightFor(width: 24, height: 24),
-          ),
-        );
-        final decoration = container.decoration as BoxDecoration;
+        final decoration = _checkboxDecoration(tester);
         expect(decoration.color, equals(AppPalette.light.accent));
-        expect(decoration.border?.top.color, equals(AppPalette.light.accent));
-
-        // Should show check icon
-        expect(find.byIcon(Icons.check), findsOneWidget);
+        expect(find.byIcon(ElyanotesIcons.libraryCheck), findsOneWidget);
       });
     });
 
     group('Selection Checkbox - Dark Theme', () {
       testWidgets('should_not_show_checkbox_when_not_in_selection_mode',
           (tester) async {
-        // Arrange & Act
         await tester.pumpWidget(
           buildTestWidget(
             folder: testFolder,
@@ -231,23 +216,11 @@ void main() {
           ),
         );
 
-        // Assert
-        expect(
-          find.byWidgetPredicate(
-            (widget) =>
-                widget is Container &&
-                widget.decoration is BoxDecoration &&
-                (widget.decoration as BoxDecoration).shape == BoxShape.circle &&
-                widget.constraints ==
-                    const BoxConstraints.tightFor(width: 24, height: 24),
-          ),
-          findsNothing,
-        );
+        expect(find.byType(LibrarySelectionCheckbox), findsNothing);
       });
 
-      testWidgets('should_show_unselected_checkbox_with_surfaceDark_color',
+      testWidgets('should_show_unselected_checkbox_with_elevated_fill',
           (tester) async {
-        // Arrange & Act
         await tester.pumpWidget(
           buildTestWidget(
             folder: testFolder,
@@ -257,25 +230,20 @@ void main() {
           ),
         );
 
-        // Assert
-        final container = tester.widget<Container>(
-          find.byWidgetPredicate(
-            (widget) =>
-                widget is Container &&
-                widget.decoration is BoxDecoration &&
-                (widget.decoration as BoxDecoration).shape == BoxShape.circle &&
-                widget.constraints ==
-                    const BoxConstraints.tightFor(width: 24, height: 24),
-          ),
+        final decoration = _checkboxDecoration(tester);
+        expect(
+          decoration.color,
+          equals(AppPalette.dark.surfaceElevated.withValues(alpha: 0.92)),
         );
-        final decoration = container.decoration as BoxDecoration;
-        expect(decoration.color, equals(AppPalette.dark.surface));
-        expect(decoration.border?.top.color, equals(AppPalette.dark.border));
+        expect(
+          decoration.border?.top.color,
+          equals(AppPalette.dark.textMuted),
+        );
+        expect(find.byIcon(ElyanotesIcons.libraryCheck), findsNothing);
       });
 
-      testWidgets('should_show_selected_checkbox_with_primary_color',
+      testWidgets('should_show_selected_checkbox_with_accent_color',
           (tester) async {
-        // Arrange & Act
         await tester.pumpWidget(
           buildTestWidget(
             folder: testFolder,
@@ -285,23 +253,9 @@ void main() {
           ),
         );
 
-        // Assert
-        final container = tester.widget<Container>(
-          find.byWidgetPredicate(
-            (widget) =>
-                widget is Container &&
-                widget.decoration is BoxDecoration &&
-                (widget.decoration as BoxDecoration).shape == BoxShape.circle &&
-                widget.constraints ==
-                    const BoxConstraints.tightFor(width: 24, height: 24),
-          ),
-        );
-        final decoration = container.decoration as BoxDecoration;
+        final decoration = _checkboxDecoration(tester);
         expect(decoration.color, equals(AppPalette.dark.accent));
-        expect(decoration.border?.top.color, equals(AppPalette.dark.accent));
-
-        // Should show check icon
-        expect(find.byIcon(Icons.check), findsOneWidget);
+        expect(find.byIcon(ElyanotesIcons.libraryCheck), findsOneWidget);
       });
     });
 
@@ -375,21 +329,6 @@ void main() {
         final text = tester.widget<Text>(find.text(longNameFolder.name));
         expect(text.maxLines, equals(1));
         expect(text.overflow, equals(TextOverflow.ellipsis));
-      });
-    });
-
-    group('Card Variant', () {
-      testWidgets('should_use_filled_card_variant', (tester) async {
-        // Arrange & Act
-        await tester.pumpWidget(
-          buildTestWidget(folder: testFolder),
-        );
-
-        // Assert
-        // The FolderCard uses AppCard with filled variant
-        // We can verify by checking that the outermost Container has surfaceVariant color
-        final containers = find.byType(Container);
-        expect(containers, findsWidgets);
       });
     });
   });

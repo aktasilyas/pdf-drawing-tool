@@ -24,13 +24,11 @@ class LibraryGridMetrics {
   }) {
     final double crossGap = isPhone ? AppSpacing.lg : AppSpacing.xl;
     const double rowGap = AppSpacing.xl;
-    final int columns = isPhone
-        ? 2
-        : ((availableWidth + crossGap) / (minTileWidth + crossGap))
-            .floor()
-            .clamp(minColumns, maxColumns);
-    final double tileWidth =
-        (availableWidth - (columns - 1) * crossGap) / columns;
+    final double fit = (availableWidth + crossGap) / (minTileWidth + crossGap);
+    final int fitted = fit.floor().clamp(minColumns, maxColumns);
+    final int columns = isPhone ? 2 : fitted;
+    final double gaps = (columns - 1) * crossGap;
+    final double tileWidth = (availableWidth - gaps) / columns;
     return LibraryGridMetrics._(
       columns: columns,
       crossGap: crossGap,
@@ -67,18 +65,19 @@ class LibraryGridMetrics {
       );
 
   /// Horizontal padding of the library pane.
-  static double paneHorizontalPadding(bool isPhone) => isPhone
-      ? AppSpacing.screenPaddingMobile
-      : AppSpacing.screenPaddingTablet;
+  static double paneHorizontalPadding(bool isPhone) {
+    if (isPhone) return AppSpacing.screenPaddingMobile;
+    return AppSpacing.screenPaddingTablet;
+  }
 
   /// `sm` gap + title line (16 x 1.5) + `xxs` + meta line (12 x 1.33),
   /// both font sizes passed through [s].
-  static double infoBlockHeight(TextScaler s) =>
-      (AppSpacing.sm +
-              s.scale(16) * 1.5 +
-              AppSpacing.xxs +
-              s.scale(12) * 1.33)
-          .ceilToDouble();
+  static double infoBlockHeight(TextScaler s) {
+    final double title = s.scale(16) * 1.5;
+    final double meta = s.scale(12) * 1.33;
+    final double total = AppSpacing.sm + title + AppSpacing.xxs + meta;
+    return total.ceilToDouble();
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -90,6 +89,7 @@ class LibraryGridMetrics {
       other.infoHeight == infoHeight;
 
   @override
-  int get hashCode =>
-      Object.hash(columns, crossGap, rowGap, tileWidth, infoHeight);
+  int get hashCode {
+    return Object.hash(columns, crossGap, rowGap, tileWidth, infoHeight);
+  }
 }
