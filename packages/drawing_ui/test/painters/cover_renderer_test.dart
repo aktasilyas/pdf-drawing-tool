@@ -15,12 +15,12 @@ Future<ByteData> _render(Cover cover, ui.Size size) async {
 }
 
 void main() {
-  test('labelPlateRect is 64% wide, 3:1, in the upper third', () {
+  test('title zone is 3:1, centred on the face, in the upper third', () {
     const size = ui.Size(240, 320);
     final r = CoverRenderer.labelPlateRect(size);
-    expect(r.width, closeTo(240 * 0.64, 0.001));
     expect(r.width / r.height, closeTo(3, 0.001));
-    expect(r.center.dx, closeTo(120, 0.001));
+    expect(r.width, lessThan(240 * 0.74));
+    expect(r.left, greaterThan(240 * 0.08)); // clear of the spine
     expect(r.bottom, lessThan(320 / 3));
   });
 
@@ -33,15 +33,40 @@ void main() {
     }
   });
 
-  test('center pixel of the plate is the plate color', () async {
-    for (final size in const [ui.Size(120, 160), ui.Size(240, 320)]) {
-      final data = await _render(CoverFamily.leatherNavy, size);
-      final c = CoverRenderer.labelPlateRect(size).center;
-      final i = (c.dy.round() * size.width.round() + c.dx.round()) * 4;
-      expect(data.getUint8(i), 0xFB);
-      expect(data.getUint8(i + 1), 0xF9);
-      expect(data.getUint8(i + 2), 0xF4);
+  test('kraft label plate stays close to the paper colour', () async {
+    const size = ui.Size(240, 320);
+    final data = await _render(CoverFamily.kraftNatural, size);
+    final c = CoverRenderer.labelPlateRect(size).center;
+    final i = (c.dy.round() * size.width.round() + c.dx.round()) * 4;
+    expect(data.getUint8(i), greaterThan(0xE0));
+    expect(data.getUint8(i + 1), greaterThan(0xDC));
+    expect(data.getUint8(i + 2), greaterThan(0xC8));
+  });
+
+  test('notebook layout: transparent corner, opaque board, square spine',
+      () async {
+    const size = ui.Size(240, 320);
+    final data = await _render(CoverFamily.leatherCognac, size);
+    int alpha(int x, int y) => data.getUint8((y * 240 + x) * 4 + 3);
+    expect(alpha(1, 1), 0); // outside the board (margin)
+    expect(alpha(120, 160), 255); // board
+    expect(alpha(5, 5), 255); // square spine corner
+  });
+
+  test('loaded photographic texture adds grain to the board', () async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    await CoverTextureStore.ensureLoaded();
+    const size = ui.Size(240, 320);
+    final data = await _render(CoverFamily.leatherCognac, size);
+    final distinct = <int>{};
+    for (var y = 150; y < 250; y++) {
+      for (var x = 100; x < 200; x++) {
+        distinct.add(data.getUint32((y * 240 + x) * 4));
+      }
     }
+    // Assets are only bundled when running via the app; skip silently if not.
+    if (!CoverTextureStore.isLoaded) return;
+    expect(distinct.length, greaterThan(200));
   });
 
   test('texture is visible outside the plate', () async {

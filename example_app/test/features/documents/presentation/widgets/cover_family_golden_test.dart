@@ -41,7 +41,39 @@ Widget _sheet(ThemeData theme, double width) {
 }
 
 void main() {
-  setUpAll(loadAppTestFonts);
+  setUpAll(() async {
+    TestWidgetsFlutterBinding.ensureInitialized();
+    await loadAppTestFonts();
+    await CoverTextureStore.ensureLoaded();
+  });
+
+  for (final cover in [CoverFamily.leatherOxblood, CoverFamily.linenSage]) {
+    testWidgets('cover close-up 480dp ${cover.id}', (tester) async {
+      tester.view.physicalSize = const Size(512, 704);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      await tester.pumpWidget(MaterialApp(
+        theme: AppTheme.light,
+        debugShowCheckedModeBanner: false,
+        home: Builder(
+          builder: (context) => Scaffold(
+            backgroundColor: context.palette.background,
+            body: Center(
+              child: SizedBox(
+                width: 480,
+                height: 640,
+                child: CoverPreviewWidget(
+                    cover: cover, title: 'Biology', showBorder: false),
+              ),
+            ),
+          ),
+        ),
+      ));
+      await tester.pumpAndSettle();
+      await expectLater(find.byType(MaterialApp),
+          matchesGoldenFile('goldens/cover_closeup_480_${cover.id}.png'));
+    });
+  }
 
   for (final width in [120, 240]) {
     for (final mode in ['light', 'dark']) {

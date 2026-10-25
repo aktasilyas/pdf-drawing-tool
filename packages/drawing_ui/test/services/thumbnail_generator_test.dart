@@ -236,8 +236,8 @@ void main() {
         final codec = await ui.instantiateImageCodec(bytes!);
         final image = (await codec.getNextFrame()).image;
         final data = (await image.toByteData())!;
-        // Pixel near bottom-right, away from hinge and plate.
-        final i = (190 * image.width + 140) * 4;
+        // Pixel inside the board, away from hinge, title zone and details.
+        final i = (130 * image.width + 110) * 4;
         final base = CoverFamily.leatherNavy.primaryColor;
         expect((data.getUint8(i) - ((base >> 16) & 0xFF)).abs(), lessThan(48));
         expect(

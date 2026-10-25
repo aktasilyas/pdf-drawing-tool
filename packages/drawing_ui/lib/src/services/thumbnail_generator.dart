@@ -6,6 +6,7 @@ import 'package:flutter/material.dart' hide Page;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/painters/cover/cover_renderer.dart';
+import 'package:drawing_ui/src/painters/cover/cover_texture_store.dart';
 import 'package:pdfx/pdfx.dart' as pdfx;
 
 /// Generates thumbnail images for pages.
@@ -164,6 +165,7 @@ class ThumbnailGenerator {
     final cover = CoverRegistry.byId(coverId);
     if (cover == null) return;
     if (cover.style == CoverStyle.material) {
+      await CoverTextureStore.ensureLoaded();
       CoverRenderer.paint(canvas, size, cover);
       return;
     }

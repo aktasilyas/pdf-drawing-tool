@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/painters/cover/cover_renderer.dart';
 import 'package:drawing_ui/src/painters/cover/legacy_cover_pattern_painter.dart';
+import 'package:drawing_ui/src/painters/cover/cover_texture_store.dart';
+import 'package:drawing_ui/src/widgets/cover_title_overlay.dart';
 
 /// Kapak önizleme widget'ı - başlık gösterimli
 class CoverPreviewWidget extends StatelessWidget {
@@ -27,6 +29,7 @@ class CoverPreviewWidget extends StatelessWidget {
     final theme = Theme.of(context);
     final radius = borderRadius ?? BorderRadius.circular(8);
     final isMaterial = cover.style == CoverStyle.material;
+    if (isMaterial) return _buildMaterial();
 
     return Container(
       width: width,
@@ -57,13 +60,11 @@ class CoverPreviewWidget extends StatelessWidget {
 
             // Title
             // Material covers always show it (the plate exists for the title).
-            if ((isMaterial || cover.showTitle) &&
-                title != null &&
-                title!.isNotEmpty)
-              isMaterial ? _buildPlateTitle(theme) : _buildTitle(theme),
+            if (cover.showTitle && title != null && title!.isNotEmpty)
+              _buildTitle(theme),
 
             // Ring-dot spine decoration (legacy styles only)
-            if (!isMaterial) _buildDecoration(theme),
+            _buildDecoration(theme),
           ],
         ),
       ),
@@ -99,7 +100,7 @@ class CoverPreviewWidget extends StatelessWidget {
         return _buildImageBackground();
 
       case CoverStyle.material:
-        return CustomPaint(painter: _MaterialCoverPainter(cover));
+        return const SizedBox.shrink(); // handled by _buildMaterial
     }
   }
 
@@ -164,45 +165,32 @@ class CoverPreviewWidget extends StatelessWidget {
     return Container(color: Color(cover.primaryColor));
   }
 
-  /// Typed serif title centered on the label plate.
-  Widget _buildPlateTitle(ThemeData theme) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final plate = CoverRenderer.labelPlateRect(constraints.biggest);
-        final padding = plate.height * 0.12;
-        return Stack(
-          children: [
-            Positioned.fromRect(
-              rect: plate,
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: padding * 2,
-                  vertical: padding,
+  /// Notebook object: the renderer draws the shadow/pages/board, so there is
+  /// no container, border or clip. The title is debossed/foiled on the board.
+  Widget _buildMaterial() {
+    return SizedBox(
+      width: width,
+      height: height,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          CustomPaint(
+            painter: _MaterialCoverPainter(cover),
+            isComplex: true,
+            willChange: false,
+          ),
+          if (title != null && title!.isNotEmpty)
+            LayoutBuilder(
+              builder: (context, c) => Stack(children: [
+                CoverTitleOverlay(
+                  cover: cover,
+                  title: title!,
+                  zone: CoverRenderer.labelPlateRect(c.biggest),
                 ),
-                child: LayoutBuilder(
-                  builder: (context, inner) => FittedBox(
-                    fit: BoxFit.scaleDown,
-                    // Width is fixed to the plate so maxLines/ellipsis apply;
-                    // FittedBox only scales down for vertical fit.
-                    child: SizedBox(
-                      width: inner.maxWidth,
-                      child: Text(
-                        title!,
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          color: const Color(CoverFamily.labelInkColor),
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+              ]),
             ),
-          ],
-        );
-      },
+        ],
+      ),
     );
   }
 
@@ -292,7 +280,8 @@ class CoverPreviewWidget extends StatelessWidget {
 class _MaterialCoverPainter extends CustomPainter {
   final Cover cover;
 
-  const _MaterialCoverPainter(this.cover);
+  _MaterialCoverPainter(this.cover)
+      : super(repaint: CoverTextureStore.revision);
 
   @override
   void paint(Canvas canvas, Size size) =>
