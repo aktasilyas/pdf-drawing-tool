@@ -16,14 +16,10 @@ mixin _PixelEraserGestures<T extends ConsumerStatefulWidget>
     // Apply eraser filters first
     final filteredStrokes = applyEraserFilters(strokes, settings);
 
-    // Convert eraser size from screen space to canvas space
+    // Pressure-scaled size (same helper the cursor uses), converted from
+    // screen space to canvas space.
     final zoom = ref.read(canvasTransformProvider).zoom;
-    final baseSize = settings.size / zoom;
-
-    // Scale eraser size based on pressure when pressure sensitivity is on
-    final effectiveSize = settings.pressureSensitive
-        ? baseSize * (0.3 + 0.7 * pressure)
-        : baseSize;
+    final effectiveSize = settings.effectiveSize(pressure) / zoom;
 
     // Join this sample to the previous one so fast moves leave no gaps.
     final capsule = pixelEraseSweep.add(

@@ -18,7 +18,9 @@ enum EraserMode { pixel, stroke, lasso }
 const _defaultEraserSettings = EraserSettings(
   mode: EraserMode.pixel,
   size: 20.0,
-  pressureSensitive: true,
+  // Off by default (#132): GoodNotes, Flexcil and StarNote erasers ignore
+  // pen pressure, so the cursor is the eraser.
+  pressureSensitive: false,
   eraseOnlyHighlighter: false,
   autoLift: false,
 );
@@ -38,6 +40,18 @@ class EraserSettings {
   final bool pressureSensitive;
   final bool eraseOnlyHighlighter;
   final bool autoLift;
+
+  /// Smallest share of [size] the eraser shrinks to at zero pressure.
+  static const double minPressureScale = 0.3;
+
+  /// Eraser diameter (screen px) at [pressure]: the single source for both
+  /// the erase footprint and the cursor. Scales 30-100 % of [size] with
+  /// pressure when [pressureSensitive] is on, otherwise always [size].
+  double effectiveSize(double pressure) {
+    if (!pressureSensitive) return size;
+    final p = pressure.clamp(0.0, 1.0);
+    return size * (minPressureScale + (1 - minPressureScale) * p);
+  }
 
   EraserSettings copyWith({
     EraserMode? mode,

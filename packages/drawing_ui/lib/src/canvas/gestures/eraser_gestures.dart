@@ -17,8 +17,10 @@ mixin _EraserGestures<T extends ConsumerStatefulWidget>
     final transform = ref.read(canvasTransformProvider);
     final canvasPoint = transform.screenToCanvas(event.localPosition);
 
-    // Update cursor position
+    // Update cursor position and pressure
     ref.read(eraserCursorPositionProvider.notifier).state = event.localPosition;
+    ref.read(eraserCursorPressureProvider.notifier).state =
+        event.pressure.clamp(0.0, 1.0);
 
     switch (settings.mode) {
       case EraserMode.pixel:
@@ -69,8 +71,10 @@ mixin _EraserGestures<T extends ConsumerStatefulWidget>
     final transform = ref.read(canvasTransformProvider);
     final canvasPoint = transform.screenToCanvas(event.localPosition);
 
-    // Update cursor position
+    // Update cursor position and pressure
     ref.read(eraserCursorPositionProvider.notifier).state = event.localPosition;
+    ref.read(eraserCursorPressureProvider.notifier).state =
+        event.pressure.clamp(0.0, 1.0);
 
     switch (settings.mode) {
       case EraserMode.pixel:
@@ -102,8 +106,9 @@ mixin _EraserGestures<T extends ConsumerStatefulWidget>
     final document = ref.read(documentProvider);
     final layerIndex = document.activeLayerIndex;
 
-    // Clear cursor position
+    // Clear cursor position and pressure
     ref.read(eraserCursorPositionProvider.notifier).state = null;
+    ref.read(eraserCursorPressureProvider.notifier).state = 1.0;
 
     switch (settings.mode) {
       case EraserMode.pixel:
