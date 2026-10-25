@@ -37,6 +37,7 @@ class _ToolPanelSheet extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colorScheme = Theme.of(context).colorScheme;
+    final activePanel = ref.watch(activePanelProvider);
 
     // When panel's X button sets activePanelProvider to null, pop the sheet.
     // Only pop if this modal route is still the current route — prevents
@@ -85,7 +86,9 @@ class _ToolPanelSheet extends ConsumerWidget {
                 child: SingleChildScrollView(
                   controller: scrollController,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: buildActivePanel(panel: tool),
+                  // Follows the active panel: the pen picker can switch to the
+                  // highlighter while the sheet is open.
+                  child: buildActivePanel(panel: activePanel ?? tool),
                 ),
               ),
             ],

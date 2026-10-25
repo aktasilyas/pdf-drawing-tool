@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -733,6 +734,89 @@ void main() {
         );
 
         recorder.endRecording();
+      });
+    });
+
+    group('routing (texture -> outline -> stroked)', () {
+      List<DrawingPoint> line() => [
+            for (var i = 0; i <= 80; i++)
+              DrawingPoint(x: 20 + i * 2.0, y: 50, pressure: 0.5),
+          ];
+
+      Future<ByteData> raster(Stroke stroke) async {
+        final recorder = PictureRecorder();
+        renderer.renderStroke(Canvas(recorder), stroke);
+        final image = await recorder.endRecording().toImage(200, 100);
+        final data = await image.toByteData();
+        image.dispose();
+        return data!;
+      }
+
+      int columnHeight(ByteData d, int x) {
+        var n = 0;
+        for (var y = 0; y < 100; y++) {
+          if (d.getUint8((y * 200 + x) * 4 + 3) > 127) n++;
+        }
+        return n;
+      }
+
+      final taperedStyle = StrokeStyle(
+        thickness: 10,
+        color: 0xFF000000,
+        dynamics: const StrokeDynamics(taperStart: 40, taperEnd: 40),
+      );
+
+      testWidgets('tapered stroke is thin near its end', (tester) async {
+        await tester.runAsync(() async {
+          final d = await raster(Stroke.create(
+            points: line(),
+            style: taperedStyle,
+          ));
+          final mid = columnHeight(d, 100);
+          final end = columnHeight(d, 178);
+          expect(mid, greaterThan(4));
+          expect(end, lessThan(mid * 0.3));
+        });
+      });
+
+      testWidgets('ballpoint-like stroke keeps round ends', (tester) async {
+        await tester.runAsync(() async {
+          final d = await raster(Stroke.create(
+            points: line(),
+            style: StrokeStyle(
+              thickness: 10,
+              color: 0xFF000000,
+              dynamics: const StrokeDynamics(velocityThinning: 0.1),
+            ),
+          ));
+          final mid = columnHeight(d, 100);
+          final end = columnHeight(d, 178);
+          expect(end, greaterThan(mid * 0.6));
+        });
+      });
+
+      testWidgets('pencil texture wins over pressure and taper',
+          (tester) async {
+        await tester.runAsync(() async {
+          final pencil = StrokeStyle(
+            thickness: 10,
+            color: 0xFF000000,
+            texture: StrokeTexture.pencil,
+            pressureSensitive: true,
+            dynamics: const StrokeDynamics(taperEnd: 40),
+          );
+          final plain = taperedStyle.copyWith(
+            dynamics: const StrokeDynamics(taperStart: 40, taperEnd: 40),
+          );
+          final a = await raster(Stroke.create(points: line(), style: pencil));
+          final b = await raster(Stroke.create(points: line(), style: plain));
+          // Texture output differs from the plain outline fill.
+          var differs = false;
+          for (var i = 0; i < a.lengthInBytes && !differs; i++) {
+            differs = a.getUint8(i) != b.getUint8(i);
+          }
+          expect(differs, isTrue);
+        });
       });
     });
   });

@@ -13,6 +13,7 @@ export 'toolbar_settings_panel.dart';
 export 'lasso_selection_panel.dart';
 export 'laser_pointer_panel.dart';
 export 'pen_type_picker.dart';
+export 'pen_preset_preview.dart';
 export 'text_settings_panel.dart';
 export 'sticky_note_panel.dart';
 export 'page_options_panel.dart';

@@ -11,13 +11,28 @@ class VariableWidthStrokeRenderer {
     ..style = PaintingStyle.fill
     ..isAntiAlias = true;
 
+  /// Whether [style] is drawn as a filled [StrokeOutline] polygon.
+  ///
+  /// Single routing predicate shared by committed, live and PDF rendering.
+  /// Pencil texture always wins; otherwise pressure or any outline tuning
+  /// (tapers, custom streamline/velocity) selects the outline.
+  static bool usesOutline(StrokeStyle style) =>
+      style.texture != StrokeTexture.pencil &&
+      (style.pressureSensitive || !style.dynamics.isNone);
+
   /// Outline options shared by the committed and the live render so the two
   /// cannot drift apart.
-  static StrokeOutlineOptions optionsFor(StrokeStyle style) =>
-      StrokeOutlineOptions(
-        size: style.thickness,
-        thinning: style.pressureSensitivity,
-      );
+  static StrokeOutlineOptions optionsFor(StrokeStyle style) {
+    final d = style.dynamics;
+    return StrokeOutlineOptions(
+      size: style.thickness,
+      thinning: style.pressureSensitive ? style.pressureSensitivity : 0,
+      velocityThinning: d.velocityThinning,
+      streamline: d.streamline,
+      taperStart: d.taperStart,
+      taperEnd: d.taperEnd,
+    );
+  }
 
   /// Creates the fill paint used for [style].
   static Paint fillPaintFor(StrokeStyle style) {

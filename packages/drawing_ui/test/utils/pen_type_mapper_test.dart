@@ -97,11 +97,18 @@ void main() {
           PenTypeMapper.fromToolbarPenType(toolbar.PenType.marker),
           PenType.ballpointPen,
         );
-        expect(
-          PenTypeMapper.fromToolbarPenType(toolbar.PenType.fountainPen),
-          PenType.ballpointPen,
-        );
       });
+    });
+
+    test('maps fountainPen both ways', () {
+      expect(
+        PenTypeMapper.toToolbarPenType(PenType.fountainPen),
+        toolbar.PenType.fountainPen,
+      );
+      expect(
+        PenTypeMapper.fromToolbarPenType(toolbar.PenType.fountainPen),
+        PenType.fountainPen,
+      );
     });
 
     group('isSupported', () {
@@ -112,9 +119,12 @@ void main() {
         expect(PenTypeMapper.isSupported(toolbar.PenType.rulerPen), isTrue);
       });
 
+      test('returns true for fountainPen', () {
+        expect(PenTypeMapper.isSupported(toolbar.PenType.fountainPen), isTrue);
+      });
+
       test('returns false for unsupported types', () {
         expect(PenTypeMapper.isSupported(toolbar.PenType.marker), isFalse);
-        expect(PenTypeMapper.isSupported(toolbar.PenType.fountainPen), isFalse);
         expect(PenTypeMapper.isSupported(toolbar.PenType.fineliner), isFalse);
         expect(PenTypeMapper.isSupported(toolbar.PenType.crayon), isFalse);
       });

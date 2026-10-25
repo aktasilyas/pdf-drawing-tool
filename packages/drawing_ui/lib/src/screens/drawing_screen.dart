@@ -252,7 +252,6 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
   Widget build(BuildContext context) {
     // Listen to activePanel changes
     ref.listen<ToolType?>(activePanelProvider, (previous, next) {
-      final isPenPickerMode = ref.read(penPickerModeProvider);
       handlePanelChange(
         context: context,
         panel: next,
@@ -262,8 +261,6 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
         highlighterGroupButtonKey: _highlighterGroupButtonKey,
         settingsButtonKey: _settingsButtonKey,
         onClosePanel: _closePanel,
-        isPenPickerMode: isPenPickerMode,
-        onPenSelected: _onPenSelected,
       );
     });
 
@@ -533,7 +530,6 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
 
   void _closePanel() {
     ref.read(activePanelProvider.notifier).state = null;
-    ref.read(penPickerModeProvider.notifier).state = false;
   }
 
   /// Builds a preview widget shown when swiping past the last page.
@@ -618,17 +614,5 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
       return Color(pages[currentIndex].background.color);
     }
     return null;
-  }
-
-  void _onPenSelected(ToolType selectedPen) {
-    // Close picker
-    ref.read(penPickerModeProvider.notifier).state = false;
-    ref.read(activePanelProvider.notifier).state = null;
-    // Open settings panel after brief delay
-    Future.microtask(() {
-      if (mounted) {
-        ref.read(activePanelProvider.notifier).state = selectedPen;
-      }
-    });
   }
 }

@@ -209,6 +209,7 @@ abstract final class ElyanotesIcons {
   /// Returns the appropriate icon for a given ToolType.
   static PhosphorIconData iconForTool(ToolType tool, {bool active = false}) {
     return switch (tool) {
+      ToolType.fountainPen => active ? penNibActive : penNib,
       ToolType.pencil => active ? pencilActive : pencil,
       ToolType.hardPencil => active ? pencilActive : pencil,
       ToolType.ballpointPen => active ? penActive : pen,
