@@ -126,8 +126,11 @@ Starting tuning (final values set in the golden step, by eye + ui-designer revie
 9. Picker spec: `ui-designer` writes `docs/specs/45-pen-picker.md` (tile anatomy, preview size, labels,
    selected state, tokens). No code.
 10. Preview widget. Files: `pen_preset_preview.dart` (new), `panels.dart` barrel. Verify: `flutter test test/panels/pen_preset_preview_test.dart`.
-11. Picker rewrite + goldens. Files: `pen_type_picker.dart`, `pubspec.yaml` (alchemist). Verify:
+11a. Picker rewrite + goldens. Files: `pen_type_picker.dart`, `pubspec.yaml` (alchemist). Verify:
     `flutter test test/panels/pen_type_picker_test.dart test/golden/pen_type_picker_golden_test.dart`, design-loop review.
+11b. Picker integration (spec `docs/specs/45-pen-picker.md` section 12): picker becomes the type row of
+    `PenSettingsPanel` (replaces `PenTypeSelector`), popover `maxWidth` 380, remove unused
+    `penPickerModeProvider` path. Verify: `flutter test test/panels/ test/screens/`.
 12. Benchmark + full check. Files: `ink_benchmark_test.dart`. Verify: `./scripts/check.sh analyze && ./scripts/check.sh test`, `scripts/ink_benchmark.sh`.
 
 ## 6. Risks and left out
