@@ -54,7 +54,7 @@ for pkg in "${PACKAGES[@]}"; do
       # Wall-clock benchmarks run alone so parallel test processes do not
       # compete with them for the CPU (see dart_test.yaml).
       run "test $pkg" "$pkg" flutter test --timeout=90s --concurrency=4 --exclude-tags benchmark
-      run "benchmark $pkg" "$pkg" flutter test --timeout=90s --concurrency=1 test/benchmark
+      run "benchmark $pkg" "$pkg" flutter test --timeout=90s --concurrency=1 --tags benchmark
     else run "test $pkg" "$pkg" flutter test --timeout=90s --concurrency=4; fi
   fi
 done
