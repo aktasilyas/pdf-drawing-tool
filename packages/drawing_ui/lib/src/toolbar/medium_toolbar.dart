@@ -130,7 +130,7 @@ class _MediumToolbarState extends ConsumerState<MediumToolbar> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        const toolSlotWidth = 42.0;
+        const toolSlotWidth = 50.0;
         const overflowWidth = 48.0;
         const dividerWidth = 17.0;
         const aiButtonWidth = 40.0;

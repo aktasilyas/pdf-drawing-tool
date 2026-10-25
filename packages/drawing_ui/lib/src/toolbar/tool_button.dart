@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
+import 'package:drawing_ui/src/toolbar/chrome_icon_button.dart';
 
-/// A tool button with GoodNotes-style selection indicator.
+/// A toolbar tool button; renders a [ChromeIconButton].
 ///
-/// Selected state: [colorScheme.primary] pill background + white icon.
-/// Deselected state: transparent background + [colorScheme.onSurfaceVariant] icon.
+/// Idle: `textMuted` icon. Selected: `accentContainer` fill, `accent` icon
+/// and the active icon variant. 48dp hit area.
 ///
 /// If the tool is already selected and has a panel, tapping opens the panel.
 /// Otherwise, tapping selects the tool.
@@ -39,7 +39,7 @@ class ToolButton extends StatelessWidget {
   /// Whether the button is enabled.
   final bool enabled;
 
-  /// Optional key for the button (for anchored panel positioning).
+  /// Optional key on the 40dp visual (for anchored panel positioning).
   final GlobalKey? buttonKey;
 
   /// Whether this tool has a settings panel.
@@ -48,64 +48,32 @@ class ToolButton extends StatelessWidget {
   /// Custom icon to override the default tool icon.
   final IconData? customIcon;
 
-  /// Whether to use compact sizing (phone layout).
+  /// Phone layout. Kept for API compatibility: phone slots use the same
+  /// 48dp hit area and 40dp visual as tablet (spec section 3).
   final bool compact;
+
+  void _handleTap() {
+    if (isSelected && hasPanel && onPanelTap != null) {
+      onPanelTap!();
+    } else {
+      onPressed();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final theme = DrawingTheme.of(context);
+    final icon = customIcon ?? ElyanotesIcons.iconForTool(toolType);
+    final selectedIcon =
+        customIcon ?? ElyanotesIcons.iconForTool(toolType, active: true);
 
-    final buttonSize = compact ? 36.0 : 40.0;
-    final iconSize = compact ? 20.0 : ElyanotesIcons.toolSize;
-
-    final Color bgColor;
-    final Color iconColor;
-
-    if (!enabled) {
-      bgColor = Colors.transparent;
-      iconColor = theme.toolbarIconDisabledColor;
-    } else if (isSelected) {
-      bgColor = theme.toolbarIconSelectedColor.withValues(alpha: 0.15);
-      iconColor = theme.toolbarIconSelectedColor;
-    } else {
-      bgColor = Colors.transparent;
-      iconColor = theme.toolbarIconColor;
-    }
-
-    final iconData =
-        customIcon ?? ElyanotesIcons.iconForTool(toolType, active: isSelected);
-
-    return Semantics(
-      label: toolType.displayName,
-      button: true,
+    return ChromeIconButton(
+      icon: icon,
+      selectedIcon: selectedIcon,
+      tooltip: toolType.displayName,
+      onPressed: _handleTap,
+      selected: isSelected,
       enabled: enabled,
-      child: Tooltip(
-        message: toolType.displayName,
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: enabled
-              ? () {
-                  if (isSelected && hasPanel && onPanelTap != null) {
-                    onPanelTap!();
-                  } else {
-                    onPressed();
-                  }
-                }
-              : null,
-          child: Container(
-            key: buttonKey,
-            width: buttonSize,
-            height: buttonSize,
-            decoration: BoxDecoration(
-              color: bgColor,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Center(
-              child: PhosphorIcon(iconData, size: iconSize, color: iconColor),
-            ),
-          ),
-        ),
-      ),
+      visualKey: buttonKey,
     );
   }
 

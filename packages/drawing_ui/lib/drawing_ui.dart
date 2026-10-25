@@ -53,6 +53,7 @@ export 'src/widgets/widgets.dart';
 export 'src/widgets/template_picker/template_picker_widgets.dart';
 
 // Toolbar (Two-row layout)
+export 'src/toolbar/chrome_icon_button.dart';
 export 'src/toolbar/elyanotes_nav_button.dart';
 export 'src/toolbar/top_navigation_bar.dart';
 export 'src/toolbar/top_nav_menus.dart';

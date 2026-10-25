@@ -92,7 +92,7 @@ class _CompactToolRowState extends ConsumerState<CompactToolRow> {
           Expanded(
             child: LayoutBuilder(
               builder: (context, constraints) {
-                const toolSlotWidth = 40.0;
+                const toolSlotWidth = 48.0;
                 const overflowWidth = 48.0;
                 final totalTools = allTools.length;
 

@@ -354,10 +354,11 @@ void main() {
         ),
       );
 
-      // Disabled state uses the dedicated disabled token, not the normal one.
+      // Disabled state uses the dedicated disabled role, not the idle one.
+      final palette = ChromePalette.of(tester.element(find.byType(ToolButton)));
       final icon = tester.widget<PhosphorIcon>(find.byType(PhosphorIcon));
-      expect(icon.color, DrawingTheme.defaultTheme.toolbarIconDisabledColor);
-      expect(icon.color, isNot(DrawingTheme.defaultTheme.toolbarIconColor));
+      expect(icon.color, palette.textDisabled);
+      expect(icon.color, isNot(palette.textMuted));
     });
 
     testWidgets('should_show_primary_background_when_selected', (tester) async {
