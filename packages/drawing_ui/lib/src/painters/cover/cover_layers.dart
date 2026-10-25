@@ -59,11 +59,24 @@ class CoverLayers {
       ui.Color(0xFFD9D2C2),
       ui.Color(0xFFC4BDAC),
     ];
+    // The block's left edge lines up with the board's anti-aliased edge;
+    // drawing both there leaves a 1px seam, so hide it wherever the board
+    // covers it and keep it only below the board, where it meets the corner.
+    final r0 = g.cover;
+    final seam = ui.Rect.fromLTRB(
+      r0.left - g.dp,
+      r0.top - g.dp,
+      r0.left + g.dp,
+      r0.bottom - g.dp * 0.5,
+    );
+    c.save();
+    c.clipRect(seam, clipOp: ui.ClipOp.difference);
     for (var k = g.pageLayers; k >= 1; k--) {
       final r = g.pageLayer(k);
       c.drawRRect(r, ui.Paint()..color = tones[(k - 1) % 3]);
       if (g.pageLayers > 1) c.drawRRect(r, line);
     }
+    c.restore();
   }
 
   /// Cover body: base colour, material grain, light, hue-keeping vignette,
