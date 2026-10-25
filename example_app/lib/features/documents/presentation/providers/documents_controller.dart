@@ -7,7 +7,6 @@ import 'package:example_app/features/documents/presentation/providers/documents_
 import 'package:example_app/features/documents/presentation/providers/documents_invalidation.dart';
 import 'package:example_app/features/documents/presentation/providers/imported_document_content.dart';
 import 'package:example_app/features/documents/presentation/providers/library_error.dart';
-import 'package:example_app/core/core.dart';
 
 /// Mutations on notebooks: create, rename, move, favourite, trash, restore,
 /// duplicate and delete. Bulk and page-trash operations live in mixins.
@@ -117,8 +116,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
       );
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
-      reportLibraryFailure(
-          ref, UnknownFailure(e.toString()), 'Belge içe aktarılamadı');
+      reportLibraryError(ref, e, 'Belge içe aktarılamadı');
       return null;
     }
   }
@@ -218,7 +216,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
       );
     } catch (e) {
       state = AsyncError(e, StackTrace.current);
-      reportLibraryFailure(ref, UnknownFailure(e.toString()), 'Belge geri yüklenemedi');
+      reportLibraryError(ref, e, 'Belge geri yüklenemedi');
       return false;
     }
   }
@@ -240,7 +238,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
       );
     } catch (e) {
       state = AsyncError(e, StackTrace.current);
-      reportLibraryFailure(ref, UnknownFailure(e.toString()), 'Belge çoğaltılamadı');
+      reportLibraryError(ref, e, 'Belge çoğaltılamadı');
       return false;
     }
   }
@@ -252,7 +250,8 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
       return await result.fold(
         (failure) {
           state = AsyncError(failure, StackTrace.current);
-          reportLibraryFailure(ref, failure, 'Belge kalıcı olarak silinemedi');
+          reportLibraryFailure(
+              ref, failure, 'Belge kalıcı olarak silinemedi');
           return false;
         },
         (_) {
@@ -262,7 +261,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
       );
     } catch (e) {
       state = AsyncError(e, StackTrace.current);
-      reportLibraryFailure(ref, UnknownFailure(e.toString()), 'Belge kalıcı olarak silinemedi');
+      reportLibraryError(ref, e, 'Belge kalıcı olarak silinemedi');
       return false;
     }
   }

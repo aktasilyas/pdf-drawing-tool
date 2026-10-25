@@ -25,27 +25,33 @@ void main() {
     createdAt: now,
     updatedAt: now,
   );
+  final root = FolderModel(id: 'root', name: 'Okul', createdAt: now);
+  final sub = FolderModel(
+    id: 'sub',
+    name: 'Ders',
+    parentId: 'root',
+    createdAt: now,
+  );
 
   setUp(() {
     prefs = _RejectingPrefs();
+    final documentsJson = json.encode([document.toJson()]);
+    final foldersJson = json.encode([root.toJson(), sub.toJson()]);
     when(() => prefs.getString(any())).thenReturn(null);
-    when(() => prefs.getString('documents'))
-        .thenReturn(json.encode([document.toJson()]));
-    when(() => prefs.getString('folders')).thenReturn(json.encode([
-      FolderModel(id: 'root', name: 'Okul', createdAt: now).toJson(),
-      FolderModel(id: 'sub', name: 'Ders', parentId: 'root', createdAt: now)
-          .toJson(),
-    ]));
+    when(() => prefs.getString('documents')).thenReturn(documentsJson);
+    when(() => prefs.getString('folders')).thenReturn(foldersJson);
     when(() => prefs.setString(any(), any())).thenAnswer((_) async => false);
 
     final documents = DocumentLocalDatasourceImpl(prefs);
     final folders = FolderLocalDatasourceImpl(prefs);
-    container = ProviderContainer(overrides: [
-      documentRepositoryProvider
-          .overrideWithValue(DocumentRepositoryImpl(documents, folders)),
-      folderRepositoryProvider
-          .overrideWithValue(FolderRepositoryImpl(folders, documents)),
-    ]);
+    final documentRepo = DocumentRepositoryImpl(documents, folders);
+    final folderRepo = FolderRepositoryImpl(folders, documents);
+    container = ProviderContainer(
+      overrides: [
+        documentRepositoryProvider.overrideWithValue(documentRepo),
+        folderRepositoryProvider.overrideWithValue(folderRepo),
+      ],
+    );
   });
 
   tearDown(() => container.dispose());
@@ -70,20 +76,20 @@ void main() {
 
   testWidgets('move to trash failure shows a snackbar', (tester) async {
     await pumpApp(tester);
-    expect(await documents().moveToTrash('doc-1'), isFalse);
+    final moved = await documents().moveToTrash('doc-1');
+    expect(moved, isFalse);
     await tester.pump();
     expect(find.text('Belge çöpe taşınamadı'), findsOneWidget);
   });
 
-  testWidgets('rename failure from the rename dialog shows a snackbar',
-      (tester) async {
+  testWidgets('rename dialog failure shows a snackbar', (tester) async {
+    final info = document.toEntity();
     await pumpApp(
       tester,
       home: Consumer(
         builder: (context, ref, _) => Scaffold(
           body: TextButton(
-            onPressed: () =>
-                showRenameDocumentDialog(context, ref, document.toEntity()),
+            onPressed: () => showRenameDocumentDialog(context, ref, info),
             child: const Text('open'),
           ),
         ),
@@ -99,18 +105,19 @@ void main() {
 
   testWidgets('folder create failure shows a snackbar', (tester) async {
     await pumpApp(tester);
-    expect(await folders().createFolder(name: 'Yeni'), isNull);
+    final id = await folders().createFolder(name: 'Yeni');
+    expect(id, isNull);
     await tester.pump();
     expect(find.text('Klasör oluşturulamadı'), findsOneWidget);
   });
 
   testWidgets('validation messages are shown verbatim', (tester) async {
     await pumpApp(tester);
-    expect(await folders().createFolder(name: 'Derin', parentId: 'sub'),
-        isNull);
+    final id = await folders().createFolder(name: 'Derin', parentId: 'sub');
+    expect(id, isNull);
     await tester.pump();
-    expect(find.text('Alt klasörlerin altına klasör oluşturulamaz'),
-        findsOneWidget);
+    const message = 'Alt klasörlerin altına klasör oluşturulamaz';
+    expect(find.text(message), findsOneWidget);
   });
 
   testWidgets('every failure is shown, even when identical', (tester) async {

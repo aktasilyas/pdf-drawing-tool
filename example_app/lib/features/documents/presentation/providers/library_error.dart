@@ -30,3 +30,8 @@ void reportLibraryFailure(Ref ref, Failure failure, String fallbackMessage) {
   ref.read(libraryErrorProvider.notifier).state =
       LibraryError(failure, fallbackMessage);
 }
+
+/// [reportLibraryFailure] for an unexpected exception.
+void reportLibraryError(Ref ref, Object error, String fallbackMessage) {
+  reportLibraryFailure(ref, UnknownFailure(error.toString()), fallbackMessage);
+}

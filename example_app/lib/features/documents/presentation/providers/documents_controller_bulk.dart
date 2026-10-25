@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/domain/repositories/document_repository.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_invalidation.dart';
 import 'package:example_app/features/documents/presentation/providers/library_error.dart';
@@ -29,6 +28,9 @@ mixin DocumentsBulkOperations on StateNotifier<AsyncValue<void>> {
       state = const AsyncData(null);
     } catch (e) {
       state = AsyncError(e, StackTrace.current);
+      // Earlier items may have succeeded: refresh the lists either way.
+      invalidateTrashMove(ref);
+      reportLibraryError(ref, e, 'Belgeler çöpe taşınamadı');
       rethrow;
     }
   }
@@ -48,6 +50,9 @@ mixin DocumentsBulkOperations on StateNotifier<AsyncValue<void>> {
       state = const AsyncData(null);
     } catch (e) {
       state = AsyncError(e, StackTrace.current);
+      // Earlier items may have succeeded: refresh the lists either way.
+      invalidateDocumentLists(ref, trash: true, documentCount: true);
+      reportLibraryError(ref, e, 'Belgeler kalıcı olarak silinemedi');
       rethrow;
     }
   }
@@ -73,6 +78,9 @@ mixin DocumentsBulkOperations on StateNotifier<AsyncValue<void>> {
       state = const AsyncData(null);
     } catch (e) {
       state = AsyncError(e, StackTrace.current);
+      // Earlier items may have succeeded: refresh the lists either way.
+      invalidateAllDocumentLists(ref);
+      reportLibraryError(ref, e, 'Belgeler çoğaltılamadı');
       rethrow;
     }
   }
@@ -100,8 +108,7 @@ mixin DocumentsBulkOperations on StateNotifier<AsyncValue<void>> {
       return true;
     } catch (e) {
       state = AsyncError(e, StackTrace.current);
-      reportLibraryFailure(
-          ref, UnknownFailure(e.toString()), 'Belgeler taşınamadı');
+      reportLibraryError(ref, e, 'Belgeler taşınamadı');
       return false;
     }
   }

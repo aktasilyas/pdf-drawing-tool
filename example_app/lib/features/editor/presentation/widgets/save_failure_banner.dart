@@ -15,7 +15,9 @@ class SaveFailureBanner extends ConsumerWidget {
     if (failure == null) return const SizedBox.shrink();
 
     final palette = context.palette;
-    final textStyle = AppTypography.bodyMedium.copyWith(color: palette.onDanger);
+    final textStyle = AppTypography.bodyMedium.copyWith(
+      color: palette.onDanger,
+    );
 
     return Semantics(
       liveRegion: true,
@@ -30,8 +32,11 @@ class SaveFailureBanner extends ConsumerWidget {
           ),
           child: Row(
             children: [
-              Icon(Icons.error_outline,
-                  color: palette.onDanger, size: AppIconSize.md),
+              Icon(
+                Icons.error_outline,
+                color: palette.onDanger,
+                size: AppIconSize.md,
+              ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Text(

@@ -137,29 +137,19 @@ class _ManageFoldersScreenState extends ConsumerState<ManageFoldersScreen> {
 
   Future<void> _saveOrder() async {
     final controller = ref.read(foldersControllerProvider.notifier);
-    int rootOrder = 0;
-    final subOrders = <String, int>{};
-
+    final nextOrder = <String, int>{}; // per parent id; '' is the root
     var saved = true;
     for (final folder in _orderedFolders) {
-      final int order;
-      if (folder.parentId == null) {
-        order = rootOrder++;
-      } else {
-        final parentKey = folder.parentId!;
-        order = subOrders[parentKey] ?? 0;
-        subOrders[parentKey] = order + 1;
-      }
+      final key = folder.parentId ?? '';
+      final order = nextOrder[key] ?? 0;
+      nextOrder[key] = order + 1;
       // Stop at the first failure; LibraryErrorListener shows it once.
-      if (!await controller.updateSortOrder(folder.id, order)) {
-        saved = false;
-        break;
-      }
+      saved = await controller.updateSortOrder(folder.id, order);
+      if (!saved) break;
     }
-
     ref.invalidate(foldersProvider);
-    if (!mounted) return;
-    if (!saved) return; // keep _hasChanges so the user can retry
+    // On failure keep _hasChanges so the user can retry.
+    if (!saved || !mounted) return;
     setState(() => _hasChanges = false);
     AppToast.success(context, 'Sıralama kaydedildi');
   }

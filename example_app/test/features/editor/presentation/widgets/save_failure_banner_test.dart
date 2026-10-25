@@ -20,6 +20,9 @@ void main() {
 
   setUp(() => save = _MockSave());
 
+  const failed = Left<Failure, void>(CacheFailure('disk full'));
+  const saved = Right<Failure, void>(null);
+
   Future<ProviderContainer> pumpBanner(
     WidgetTester tester, {
     double width = 380,
@@ -59,11 +62,9 @@ void main() {
     expect(find.text('Tekrar dene'), findsNothing);
   });
 
-  testWidgets('a failed save shows a persistent banner; Retry re-saves',
-      (tester) async {
+  testWidgets('a failed save shows a banner; Retry re-saves', (tester) async {
     final doc = DrawingDocument.emptyMultiPage('A').copyWith(id: 'doc_a');
-    when(() => save(any()))
-        .thenAnswer((_) async => const Left(CacheFailure('disk full')));
+    when(() => save(any())).thenAnswer((_) async => failed);
     final container = await pumpBanner(tester);
 
     await container.read(autoSaveProvider.notifier).saveNow(doc);
@@ -74,7 +75,7 @@ void main() {
     expect(tester.getSize(retry).height, greaterThanOrEqualTo(48));
     expect(tester.getSize(retry).width, greaterThanOrEqualTo(48));
 
-    when(() => save(any())).thenAnswer((_) async => const Right(null));
+    when(() => save(any())).thenAnswer((_) async => saved);
     await tester.tap(retry);
     await tester.pumpAndSettle();
 
@@ -83,11 +84,10 @@ void main() {
   });
 
   testWidgets('no overflow at 380dp width and textScaler 1.3', (tester) async {
-    when(() => save(any()))
-        .thenAnswer((_) async => const Left(CacheFailure('disk full')));
+    final doc = DrawingDocument.emptyMultiPage('A').copyWith(id: 'doc_a');
+    when(() => save(any())).thenAnswer((_) async => failed);
     final container = await pumpBanner(tester, textScale: 1.3);
-    await container.read(autoSaveProvider.notifier).saveNow(
-        DrawingDocument.emptyMultiPage('A').copyWith(id: 'doc_a'));
+    await container.read(autoSaveProvider.notifier).saveNow(doc);
     await tester.pump();
     expect(find.textContaining('Kaydedilemedi'), findsOneWidget);
     expect(tester.takeException(), isNull);
