@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/drawing_ui.dart';
+import 'package:drawing_ui/src/painters/cover/cover_geometry.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Future<ByteData> _render(Cover cover, ui.Size size) async {
@@ -51,6 +52,16 @@ void main() {
     expect(alpha(1, 1), 0); // outside the board (margin)
     expect(alpha(120, 160), 255); // board
     expect(alpha(5, 5), 255); // square spine corner
+  });
+
+  test('page block runs under the spine at the bottom-left corner', () async {
+    const size = ui.Size(240, 320);
+    final data = await _render(CoverFamily.linenSage, size);
+    int alpha(int x, int y) => data.getUint8((y * 240 + x) * 4 + 3);
+    final g = CoverGeometry.of(size);
+    final x = (g.cover.left + g.spineWidth / 2).round();
+    final y = (g.cover.bottom + g.pageEdge).floor();
+    expect(alpha(x, y), 255); // opaque page edge below the spine
   });
 
   test('loaded photographic texture adds grain to the board', () async {
