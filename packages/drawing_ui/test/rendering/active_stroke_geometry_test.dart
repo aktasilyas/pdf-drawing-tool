@@ -134,22 +134,26 @@ void main() {
       g.dispose();
     });
 
+    final cases = <String, List<DrawingPoint>>{
+      'sine': _sine(400),
+      'zigzag': _wave(400),
+    };
     for (final entry in {
       'pen': StrokeStyle.pen(thickness: 3),
       'pen (thick)': StrokeStyle.pen(thickness: 12),
     }.entries) {
-      for (final input in {'sine': _sine(400), 'zigzag': _wave(400)}.entries) {
-        test('chunked live render matches committed render: '
-            '${entry.key}, ${input.key}', () async {
+      for (final input in cases.entries) {
+        final style = entry.value;
+        final name = '${entry.key}, ${input.key}';
+        test('chunked live render matches committed render: $name', () async {
           final points = input.value;
-          final g = ActiveStrokeGeometry()..begin(entry.value);
+          final g = ActiveStrokeGeometry()..begin(style);
           for (var n = 1; n <= points.length; n++) {
             g.sync(points.sublist(0, n));
           }
           expect(g.frozenChunks, greaterThan(5));
           final live = await _raster(g.paint);
-          final committed = await _raster((c) => FlutterStrokeRenderer()
-              .renderActiveStroke(c, points, entry.value));
+          final committed = await _committed(points, style);
           expect(_diffRatio(live, committed), lessThan(0.005));
           g.dispose();
         });
@@ -166,6 +170,11 @@ List<DrawingPoint> _sine(int n) => [
           pressure: 0.5,
         ),
     ];
+
+Future<Uint8List> _committed(List<DrawingPoint> points, StrokeStyle style) {
+  final renderer = FlutterStrokeRenderer();
+  return _raster((c) => renderer.renderActiveStroke(c, points, style));
+}
 
 Future<Uint8List> _raster(void Function(ui.Canvas) draw) async {
   final recorder = ui.PictureRecorder();
