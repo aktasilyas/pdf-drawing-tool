@@ -65,11 +65,13 @@ class AutoSaveNotifier extends StateNotifier<bool> {
   }
 
   /// Saves a pending change right away (app paused, back pressed).
-  /// Does nothing when there is no pending change.
+  /// After a failed save it retries the newest document instead.
+  /// Does nothing when there is nothing left to save.
   Future<void> flush() {
     final pending = _pending;
-    if (pending == null) return Future<void>.value();
-    return saveNow(pending);
+    if (pending != null) return saveNow(pending);
+    if (_ref.read(saveFailureProvider) != null) return retry();
+    return Future<void>.value();
   }
 
   Future<void> _save(DrawingDocument document) async {
