@@ -356,7 +356,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                         if (!isCompactMode &&
                             widget.externalLeftSidebar != null)
                           AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
+                            duration: ChromeDurations.normal,
                             curve: Curves.easeInOut,
                             width: widget.isExternalLeftSidebarOpen
                                 ? widget.externalLeftSidebarWidth
@@ -373,7 +373,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                         // Page sidebar — tablet only
                         if (isCompactMode == false)
                           AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
+                            duration: ChromeDurations.normal,
                             curve: Curves.easeInOut,
                             width: showSidebar ? kPageSidebarWidth : 0.0,
                             clipBehavior: Clip.hardEdge,
@@ -445,7 +445,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
               // Phone external left sidebar drawer
               if (isCompactMode && widget.externalLeftSidebar != null)
                 AnimatedPositioned(
-                  duration: const Duration(milliseconds: 300),
+                  duration: ChromeDurations.normal,
                   curve: Curves.easeInOut,
                   left: widget.isExternalLeftSidebarOpen
                       ? 0
@@ -473,7 +473,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
               // Phone page sidebar drawer
               if (isCompactMode)
                 AnimatedPositioned(
-                  duration: const Duration(milliseconds: 300),
+                  duration: ChromeDurations.normal,
                   curve: Curves.easeInOut,
                   left: showSidebar ? 0 : -drawerWidth,
                   top: 0,

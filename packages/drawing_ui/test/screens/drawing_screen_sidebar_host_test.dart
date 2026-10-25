@@ -18,8 +18,15 @@ void main() {
       (tester) async {
     await _pump(tester, const Size(1180, 820));
     expect(find.byType(PageSidebar), findsOneWidget);
-    final box = tester.getSize(find.byType(AnimatedContainer).first);
-    expect(box.width, lessThanOrEqualTo(kPageSidebarWidth));
+    final host = find.ancestor(
+      of: find.byType(PageSidebar),
+      matching: find.byType(AnimatedContainer),
+    ).first;
+    expect(tester.getSize(host).width, 0);
+    expect(
+      tester.widget<AnimatedContainer>(host).duration,
+      ChromeDurations.normal,
+    );
   });
 
   testWidgets('phone: sidebar is an off-screen drawer when closed',
@@ -28,5 +35,13 @@ void main() {
     final drawer = find.byType(PageSidebar);
     expect(drawer, findsOneWidget);
     expect(tester.getTopLeft(drawer).dx, lessThan(0));
+    final positioned = find.ancestor(
+      of: drawer,
+      matching: find.byType(AnimatedPositioned),
+    ).first;
+    expect(
+      tester.widget<AnimatedPositioned>(positioned).duration,
+      ChromeDurations.normal,
+    );
   });
 }
