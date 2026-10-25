@@ -139,8 +139,7 @@ void main() {
       expect(capsule.right, lessThanOrEqualTo(390 - ChromeSpacing.sm));
     });
 
-    testWidgets('every chrome button keeps a 48x48 hit area',
-        (tester) async {
+    testWidgets('every chrome button keeps a 48x48 hit area', (tester) async {
       final container = await pumpPhone(tester);
       container.read(pageManagerProvider.notifier).addPage();
       await tester.pump();
@@ -154,8 +153,7 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('tapping the selected pen requests its panel',
-        (tester) async {
+    testWidgets('tapping the selected pen requests its panel', (tester) async {
       ToolType? requested;
       await pumpPhone(tester, onPanelRequested: (t) => requested = t);
 
@@ -186,8 +184,10 @@ void main() {
   });
 
   testWidgets('no overflow on a 320 wide phone', (tester) async {
-    final container = await pumpPhone(tester, width: 320, title: 'Uzun bir '
-        'defter basligi ki tek satira sigmasin diye yazildi');
+    final container = await pumpPhone(tester,
+        width: 320,
+        title: 'Uzun bir '
+            'defter basligi ki tek satira sigmasin diye yazildi');
     container.read(pageManagerProvider.notifier).addPage();
     await tester.pump();
 
