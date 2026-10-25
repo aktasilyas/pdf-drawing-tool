@@ -108,7 +108,6 @@ class _PanelHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       padding: const EdgeInsets.only(left: 16, right: 8, top: 12, bottom: 12),
@@ -135,9 +134,7 @@ class _PanelHeader extends StatelessWidget {
                   width: 32,
                   height: 32,
                   decoration: BoxDecoration(
-                    color: isDark
-                        ? colorScheme.surfaceContainerHigh
-                        : colorScheme.surfaceContainerHighest,
+                    color: colorScheme.controlSurface,
                     shape: BoxShape.circle,
                   ),
                   child: PhosphorIcon(
@@ -409,7 +406,6 @@ class PanelCloseButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -419,8 +415,7 @@ class PanelCloseButton extends StatelessWidget {
           width: 32,
           height: 32,
           decoration: BoxDecoration(
-            color:
-                isDark ? cs.surfaceContainerHigh : cs.surfaceContainerHighest,
+            color: cs.controlSurface,
             shape: BoxShape.circle,
           ),
           child: PhosphorIcon(

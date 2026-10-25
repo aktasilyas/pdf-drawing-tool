@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart' hide Page;
 import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/theme/chrome_roles.dart';
 import 'package:drawing_ui/src/theme/drawing_shadows.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'package:drawing_ui/src/services/thumbnail_cache.dart';
@@ -189,9 +190,8 @@ class _PageNavigatorState extends State<PageNavigator> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final isDark = theme.brightness == Brightness.dark;
-    final backgroundColor = widget.backgroundColor ??
-        (isDark ? colorScheme.surfaceContainerLow : colorScheme.surface);
+    final backgroundColor =
+        widget.backgroundColor ?? (colorScheme.panelSurface);
 
     return Container(
       height: widget.height,

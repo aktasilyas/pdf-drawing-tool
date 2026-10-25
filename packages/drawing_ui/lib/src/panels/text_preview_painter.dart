@@ -27,7 +27,6 @@ class TextPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     // Clamp preview font size so it fits the 100px box
     final previewSize = fontSize.clamp(10.0, 42.0);
@@ -38,7 +37,6 @@ class TextPreview extends StatelessWidget {
       child: CustomPaint(
         painter: _NotebookLinesPainter(
           lineColor: cs.outlineVariant.withValues(alpha: 0.3),
-          isDark: isDark,
         ),
         child: Center(
           child: Text(
@@ -65,11 +63,9 @@ class TextPreview extends StatelessWidget {
 class _NotebookLinesPainter extends CustomPainter {
   _NotebookLinesPainter({
     required this.lineColor,
-    required this.isDark,
   });
 
   final Color lineColor;
-  final bool isDark;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -100,6 +96,5 @@ class _NotebookLinesPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(_NotebookLinesPainter o) =>
-      lineColor != o.lineColor || isDark != o.isDark;
+  bool shouldRepaint(_NotebookLinesPainter o) => lineColor != o.lineColor;
 }

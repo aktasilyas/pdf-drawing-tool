@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:drawing_ui/src/theme/chrome_roles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
@@ -173,17 +174,12 @@ class _CompactToolItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       height: 34,
       margin: const EdgeInsets.symmetric(vertical: 1, horizontal: 6),
       decoration: BoxDecoration(
-        color: isVisible
-            ? cs.surface
-            : (isDark
-                ? cs.surfaceContainerHigh.withValues(alpha: 0.5)
-                : cs.surfaceContainerHighest),
+        color: isVisible ? cs.surface : cs.mutedControlSurface,
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
           color: isVisible
