@@ -19,8 +19,8 @@ class SceneEntry {
       element is Stroke &&
       (element as Stroke).style.blendMode != DrawingBlendMode.normal;
 
-  /// Whether [element] blends non-affinely (overlay, darken, lighten), so a
-  /// tile holding it cannot be cached as an `A*B + K` image pair.
+  /// Whether [element] uses overlay, darken or lighten. Tiles holding one stay
+  /// vectors (no v1.0 tool emits them; blend semantics are #115).
   bool get isVectorOnly =>
       usesBlend &&
       (element as Stroke).style.blendMode != DrawingBlendMode.multiply &&
@@ -82,10 +82,6 @@ class ElementScene {
 
   /// Visible elements in paint order. Computed once, O(n).
   late final List<SceneEntry> entries = _buildEntries();
-
-  /// Whether a non-normal blend element touches [rect].
-  bool hasBlendIn(Rect rect) =>
-      entries.any((e) => e.usesBlend && e.bounds.overlaps(rect));
 
   /// Whether an overlay/darken/lighten element touches [rect] (vector tile).
   bool hasVectorOnlyIn(Rect rect) =>

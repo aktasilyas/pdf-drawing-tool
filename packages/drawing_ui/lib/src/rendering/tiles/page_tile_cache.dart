@@ -20,8 +20,9 @@ import 'package:drawing_ui/src/rendering/tiles/tile_store.dart';
 ///
 /// On a scale change the old tiles stay as [legacyTiles] and the new visible
 /// tiles become pending; a `TileRasterScheduler` fills them via
-/// [rasterizeNextPending]. Multiply/screen content is cached as an image pair
-/// (see `TileBuilder`); tiles with overlay/darken/lighten content are never
+/// [rasterizeNextPending]. Multiply/screen content is rasterized like normal
+/// content: the layer is transparent, so multiply over empty pixels is normal
+/// alpha (see #115). Tiles with overlay/darken/lighten content are never
 /// rasterized (see [vectorRects]).
 class PageTileCache extends ChangeNotifier {
   PageTileCache({
@@ -214,7 +215,6 @@ class PageTileCache extends ChangeNotifier {
         scale: grid.scale,
         renderer: sub,
         base: tile,
-        blend: hits.any((e) => e.usesBlend),
       );
       _put(built, hits.length);
     }
@@ -255,7 +255,6 @@ class PageTileCache extends ChangeNotifier {
       rect: rect,
       scale: grid.scale,
       renderer: buildSceneRenderer(scene, _strokeRenderer, _cacheManager),
-      blend: hits.any((e) => e.usesBlend),
     );
     _put(built, hits.length);
   }

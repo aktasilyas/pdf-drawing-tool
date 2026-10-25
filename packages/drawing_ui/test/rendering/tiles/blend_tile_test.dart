@@ -51,11 +51,16 @@ PageTileCache _cache() => PageTileCache(
       cacheManager: ImageCacheManager(),
     )..setViewport(_page, 1, interacting: false);
 
+/// The real composition: content goes into its own transparent layer (the
+/// `RepaintBoundary` of `ActiveLayerContent`), which is then composited over
+/// the paper (a different layer in the app).
 Future<Uint8List> _pixels(void Function(ui.Canvas) draw) async {
   final recorder = ui.PictureRecorder();
   final canvas = ui.Canvas(recorder);
   canvas.drawRect(_page, ui.Paint()..color = _paper);
+  canvas.saveLayer(_page, ui.Paint());
   draw(canvas);
+  canvas.restore();
   final image = recorder.endRecording().toImageSync(_size, _size);
   final data = await image.toByteData();
   image.dispose();
@@ -95,13 +100,16 @@ void main() {
         final pen = StrokeStyle.pen(thickness: 4);
         final strokes = [
           _stroke('ink', 90, pen),
+          // Highlighter over ink.
           _stroke('hl', 100, _blend(mode)),
           // Normal stroke above the highlighter (z-order matters).
           _stroke('top', 110, StrokeStyle.pen(color: 0xFFD32F2F, thickness: 6)),
           _stroke('hl2', 105, _blend(mode, color: 0xFF4CAF50), x: 120),
+          // Highlighter over empty pixels (normal alpha in the layer).
+          _stroke('hl3', 420, _blend(mode, color: 0xFFFF9800), x: 300),
         ];
         final cache = _cache();
-        // Pen-up by pen-up: exercises plain->pair and pair->pair composites.
+        // Pen-up by pen-up: exercises the incremental composite.
         for (var n = 1; n <= strokes.length; n++) {
           cache.update(_scene(strokes.sublist(0, n)));
           expect(cache.vectorRects, isEmpty, reason: 'after $n strokes');
@@ -148,12 +156,12 @@ void main() {
     }
   });
 
-  testWidgets('blend tile images are all disposed', (tester) async {
+  testWidgets('a removed highlighter tile image is disposed', (tester) async {
     final cache = _cache()
       ..update(_scene([_stroke('hl', 100, _blend(DrawingBlendMode.multiply))]));
-    final tile = cache.visibleTiles.first;
-    expect(tile.multiplyImage, isNotNull);
-    final images = [tile.image, tile.multiplyImage!];
+    expect(cache.vectorRects, isEmpty);
+    final images = [for (final t in cache.visibleTiles) t.image];
+    expect(images, isNotEmpty);
     cache.update(_scene(const []));
     expect(images.every((i) => i.debugDisposed), isTrue);
     cache.dispose();

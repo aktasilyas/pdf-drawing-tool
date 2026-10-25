@@ -226,8 +226,6 @@ void main() {
       ..setViewport(page, 1, interacting: false); // warm every tile
 
     final plain = ui.Paint();
-    final multiplyPaint = ui.Paint()..blendMode = ui.BlendMode.multiply;
-    final plusPaint = ui.Paint()..blendMode = ui.BlendMode.plus;
     final tiled = <double>[];
     final legacy = <double>[];
     for (var k = 1; k <= _penUps; k++) {
@@ -238,16 +236,8 @@ void main() {
       cache.update(sceneOf(list));
       final recorder = ui.PictureRecorder();
       final canvas = ui.Canvas(recorder);
-      // Blend tiles: A multiplied in, then K added (as TiledElementPainter).
       for (final t in cache.visibleTiles) {
-        final a = t.multiplyImage;
-        if (a == null) {
-          canvas.drawImageRect(t.image, t.src, t.rect, plain);
-        } else {
-          canvas
-            ..drawImageRect(a, t.src, t.rect, multiplyPaint)
-            ..drawImageRect(t.image, t.src, t.rect, plusPaint);
-        }
+        canvas.drawImageRect(t.image, t.src, t.rect, plain);
       }
       for (final r in cache.vectorRects) {
         canvas.save();

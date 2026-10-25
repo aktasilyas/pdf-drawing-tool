@@ -12,7 +12,7 @@ class TileStore {
   final Set<TileKey> empty = {};
 
   /// Visible tiles drawn as vectors because they hold overlay/darken/lighten
-  /// elements (not affine, so no image pair can represent them).
+  /// elements (no v1.0 tool emits them; blend semantics are #115).
   final Set<TileKey> vector = {};
 
   bool has(TileKey key) =>
