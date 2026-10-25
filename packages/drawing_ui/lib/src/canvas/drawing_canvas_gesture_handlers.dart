@@ -17,6 +17,8 @@ import 'package:drawing_ui/src/widgets/ruler_overlay.dart'
 
 part 'gestures/ruler_snapping.dart';
 part 'gestures/sticky_note_gestures.dart';
+part 'gestures/text_gestures.dart';
+part 'gestures/placement_gestures.dart';
 
 /// Shared state contract for the gesture mixins of [DrawingCanvasState].
 ///
@@ -93,6 +95,8 @@ abstract class DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
         _GestureState<T>,
         _RulerSnapping<T>,
         _StickyNoteGestures<T>,
+        _TextGestures<T>,
+        _PlacementGestures<T>,
         _PointerDownGestures<T> {
   /// Minimum distance between points to avoid excessive point creation.
   static const double minPointDistance = 1.0;
@@ -105,7 +109,9 @@ mixin _PointerDownGestures<T extends ConsumerStatefulWidget>
         DrawingCanvasHelpers<T>,
         _GestureState<T>,
         _RulerSnapping<T>,
-        _StickyNoteGestures<T> {
+        _StickyNoteGestures<T>,
+        _TextGestures<T>,
+        _PlacementGestures<T> {
   // ─────────────────────────────────────────────────────────────────────────
   // POINTER EVENT HANDLERS (Single Finger Drawing)
   // ─────────────────────────────────────────────────────────────────────────
@@ -332,41 +338,13 @@ mixin _PointerDownGestures<T extends ConsumerStatefulWidget>
     // Image tool selected (no placement) — tap on existing image selects it
     // via the main selection system (SelectionHandles + SelectionToolbar)
     if (toolType == ToolType.image) {
-      final transform = ref.read(canvasTransformProvider);
-      final canvasPoint =
-          (event.localPosition - transform.offset) / transform.zoom;
-
-      final images = ref.read(activeLayerImagesProvider);
-      for (final image in images.reversed) {
-        if (image.containsPoint(canvasPoint.dx, canvasPoint.dy, 10)) {
-          final selection = core.Selection.create(
-            type: core.SelectionType.rectangle,
-            selectedStrokeIds: const [],
-            selectedShapeIds: const [],
-            selectedImageIds: [image.id],
-            bounds: image.bounds,
-          );
-          ref.read(selectionProvider.notifier).setSelection(selection);
-          ref.read(selectionUiProvider.notifier).showContextMenu();
-          ref.read(currentToolProvider.notifier).selectTool(ToolType.selection);
-          return;
-        }
-      }
+      _handleImageToolDown(event);
       return;
     }
 
     // Sticker tool selected (no placement) — tap on existing text selects it
     if (toolType == ToolType.sticker) {
-      final transform = ref.read(canvasTransformProvider);
-      final canvasPoint =
-          (event.localPosition - transform.offset) / transform.zoom;
-      final texts = ref.read(activeLayerTextsProvider);
-      for (final text in texts.reversed) {
-        if (text.containsPoint(canvasPoint.dx, canvasPoint.dy, 10)) {
-          _selectText(text);
-          return;
-        }
-      }
+      _trySelectTextAt(event);
       return; // Sticker tool does nothing on empty area without placement
     }
 
@@ -411,18 +389,7 @@ mixin _PointerDownGestures<T extends ConsumerStatefulWidget>
     }
 
     // Check if tap is on an existing text/sticker — select it
-    {
-      final transform = ref.read(canvasTransformProvider);
-      final canvasPoint =
-          (event.localPosition - transform.offset) / transform.zoom;
-      final texts = ref.read(activeLayerTextsProvider);
-      for (final text in texts.reversed) {
-        if (text.containsPoint(canvasPoint.dx, canvasPoint.dy, 10)) {
-          _selectText(text);
-          return;
-        }
-      }
-    }
+    if (_trySelectTextAt(event)) return;
 
     // Block drawing when pointer is on the ruler body
     if (_isPointOnRuler(event.localPosition)) return;
@@ -1565,268 +1532,6 @@ mixin _PointerDownGestures<T extends ConsumerStatefulWidget>
     activeShapeTool = null;
     drawingInsideNote = null;
     setState(() {});
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // TEXT EVENT HANDLERS
-  // ─────────────────────────────────────────────────────────────────────────
-
-  void handleTextDown(PointerDownEvent event) {
-    final transform = ref.read(canvasTransformProvider);
-    final canvasPoint =
-        (event.localPosition - transform.offset) / transform.zoom;
-
-    // Check if there's already active text editing
-    final textToolState = ref.read(textToolProvider);
-
-    if (textToolState.isEditing) {
-      // Check if tapped on the same text element - if not, finish current and STOP
-      final activeText = textToolState.activeText;
-      if (activeText != null) {
-        // Check if tapped on current active text
-        if (activeText.containsPoint(canvasPoint.dx, canvasPoint.dy, 10)) {
-          // Same text clicked - do nothing, let TextField handle it
-          return;
-        }
-        // Tapped somewhere else - finish current editing and STOP
-        // User needs to tap again to create new text (this closes keyboard)
-        finishTextEditing();
-        return; // IMPORTANT: Don't create new text on same tap
-      }
-    }
-
-    // If menu is showing, close it first
-    if (textToolState.showMenu) {
-      ref.read(textToolProvider.notifier).hideContextMenu();
-      return;
-    }
-
-    // If style popup is showing, close it first
-    if (textToolState.showStylePopup) {
-      ref.read(textToolProvider.notifier).hideStylePopup();
-      return;
-    }
-
-    // Check if tapped on existing text - enter editing directly (text tool)
-    final texts = ref.read(activeLayerTextsProvider);
-
-    for (final text in texts.reversed) {
-      if (text.containsPoint(canvasPoint.dx, canvasPoint.dy, 10)) {
-        ref.read(textToolProvider.notifier).editExistingText(text);
-        return;
-      }
-    }
-
-    // Create new text at tap location using text settings
-    final textSettings = ref.read(textSettingsProvider);
-    ref.read(textToolProvider.notifier).startNewText(
-          canvasPoint.dx,
-          canvasPoint.dy,
-          fontSize: textSettings.fontSize,
-          color: textSettings.color,
-          isBold: textSettings.isBold,
-          isItalic: textSettings.isItalic,
-          isUnderline: textSettings.isUnderline,
-        );
-  }
-
-  void finishTextEditing() {
-    final textToolState = ref.read(textToolProvider);
-
-    // IMPORTANT: Get the current text state BEFORE calling finishEditing
-    // because finishEditing clears the state
-    final currentText = textToolState.activeText;
-
-    if (currentText == null || currentText.text.trim().isEmpty) {
-      ref.read(textToolProvider.notifier).cancelEditing();
-      return;
-    }
-
-    // Now finish editing (this clears the state)
-    ref.read(textToolProvider.notifier).finishEditing();
-
-    final document = ref.read(documentProvider);
-
-    if (textToolState.isNewText) {
-      // Add new text
-      final command = core.AddTextCommand(
-        layerIndex: document.activeLayerIndex,
-        textElement: currentText,
-      );
-      ref.read(historyManagerProvider.notifier).execute(command);
-
-      // Auto-select into selection system
-      _selectText(currentText);
-    } else {
-      // Update existing text
-      final command = core.UpdateTextCommand(
-        layerIndex: document.activeLayerIndex,
-        newText: currentText,
-      );
-      ref.read(historyManagerProvider.notifier).execute(command);
-    }
-  }
-
-  void cancelTextEditing() {
-    ref.read(textToolProvider.notifier).cancelEditing();
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // TEXT HELPERS
-  // ─────────────────────────────────────────────────────────────────────────
-
-  /// Selects a text element into the main selection system.
-  void _selectText(core.TextElement text) {
-    final selection = core.Selection.create(
-      type: core.SelectionType.rectangle,
-      selectedStrokeIds: const [],
-      selectedShapeIds: const [],
-      selectedImageIds: const [],
-      selectedTextIds: [text.id],
-      bounds: text.bounds,
-    );
-    ref.read(selectionProvider.notifier).setSelection(selection);
-    ref.read(selectionUiProvider.notifier).showContextMenu();
-    ref.read(currentToolProvider.notifier).selectTool(ToolType.selection);
-  }
-
-  void handleTextStyleChanged(core.TextElement updatedText) {
-    final document = ref.read(documentProvider);
-    final command = core.UpdateTextCommand(
-      layerIndex: document.activeLayerIndex,
-      newText: updatedText,
-    );
-    ref.read(historyManagerProvider.notifier).execute(command);
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // STICKER PLACEMENT
-  // ─────────────────────────────────────────────────────────────────────────
-
-  void _handleStickerPlacement(PointerDownEvent event) {
-    final stickerState = ref.read(stickerPlacementProvider);
-    final emoji = stickerState.selectedEmoji;
-    if (emoji == null) return;
-
-    final textToolState = ref.read(textToolProvider);
-
-    // If context menu is showing, close it
-    if (textToolState.showMenu) {
-      ref.read(textToolProvider.notifier).hideContextMenu();
-      return;
-    }
-
-    // If style popup is showing, close it
-    if (textToolState.showStylePopup) {
-      ref.read(textToolProvider.notifier).hideStylePopup();
-      return;
-    }
-
-    final transform = ref.read(canvasTransformProvider);
-    final canvasPoint =
-        (event.localPosition - transform.offset) / transform.zoom;
-
-    // Check if tap is on an existing text/sticker — select it
-    final texts = ref.read(activeLayerTextsProvider);
-    for (final text in texts.reversed) {
-      if (text.containsPoint(canvasPoint.dx, canvasPoint.dy, 10)) {
-        _selectText(text);
-        return;
-      }
-    }
-
-    // Empty area — place new sticker
-    // Measure actual emoji size for accurate selection bounds
-    const stickerFontSize = 48.0;
-    final paragraph = (ui.ParagraphBuilder(ui.ParagraphStyle())
-          ..pushStyle(ui.TextStyle(fontSize: stickerFontSize))
-          ..addText(emoji))
-        .build();
-    paragraph.layout(const ui.ParagraphConstraints(width: 1000.0));
-    final measuredW = paragraph.maxIntrinsicWidth;
-    final measuredH = paragraph.height;
-
-    final textElement = core.TextElement.create(
-      text: emoji,
-      x: canvasPoint.dx - measuredW / 2,
-      y: canvasPoint.dy - measuredH / 2,
-      fontSize: stickerFontSize,
-      width: measuredW,
-      height: measuredH,
-    );
-
-    final document = ref.read(documentProvider);
-    final command = core.AddTextCommand(
-      layerIndex: document.activeLayerIndex,
-      textElement: textElement,
-    );
-    ref.read(historyManagerProvider.notifier).execute(command);
-
-    // Exit sticker placement and auto-select into selection system
-    ref.read(stickerPlacementProvider.notifier).placed();
-    _selectText(textElement);
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // IMAGE PLACEMENT
-  // ─────────────────────────────────────────────────────────────────────────
-
-  void _handleImagePlacement(PointerDownEvent event) {
-    final imageState = ref.read(imagePlacementProvider);
-    final imagePath = imageState.selectedImagePath;
-    if (imagePath == null) return;
-
-    final transform = ref.read(canvasTransformProvider);
-    final canvasPoint = transform.screenToCanvas(event.localPosition);
-
-    // Default image size on canvas
-    const defaultWidth = 200.0;
-    const defaultHeight = 200.0;
-
-    double imgX = canvasPoint.dx - defaultWidth / 2;
-    double imgY = canvasPoint.dy - defaultHeight / 2;
-
-    // Clamp position to page bounds (skip in infinite mode)
-    if (!ref.read(isInfiniteCanvasProvider)) {
-      final page = ref.read(currentPageProvider);
-      final maxX = (page.size.width - defaultWidth).clamp(0.0, page.size.width);
-      final maxY =
-          (page.size.height - defaultHeight).clamp(0.0, page.size.height);
-      imgX = imgX.clamp(0.0, maxX);
-      imgY = imgY.clamp(0.0, maxY);
-    }
-
-    final imageElement = core.ImageElement.create(
-      filePath: imagePath,
-      x: imgX,
-      y: imgY,
-      width: defaultWidth,
-      height: defaultHeight,
-    );
-
-    final document = ref.read(documentProvider);
-    final command = core.AddImageCommand(
-      layerIndex: document.activeLayerIndex,
-      imageElement: imageElement,
-    );
-    ref.read(historyManagerProvider.notifier).execute(command);
-
-    // Exit placement mode
-    ref.read(imagePlacementProvider.notifier).placed();
-
-    // Auto-select image into the main selection system
-    final selection = core.Selection.create(
-      type: core.SelectionType.rectangle,
-      selectedStrokeIds: const [],
-      selectedShapeIds: const [],
-      selectedImageIds: [imageElement.id],
-      bounds: imageElement.bounds,
-    );
-    ref.read(selectionProvider.notifier).setSelection(selection);
-    ref.read(selectionUiProvider.notifier).showContextMenu();
-
-    // Switch to selection tool so handles are interactive
-    ref.read(currentToolProvider.notifier).selectTool(ToolType.selection);
   }
 
   // ─────────────────────────────────────────────────────────────────────────
