@@ -1,181 +1,13 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:drawing_core/drawing_core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:pdfx/pdfx.dart';
-import 'package:path_provider/path_provider.dart';
+import 'pdf_import_models.dart';
+import 'pdf_import_pages.dart';
 import 'pdf_loader.dart';
 import 'pdf_page_renderer.dart';
 import 'pdf_to_page_converter.dart';
 
-/// State of the PDF import process.
-enum PDFImportState {
-  /// Idle, ready to start import.
-  idle,
-
-  /// Loading PDF document.
-  loadingPDF,
-
-  /// Rendering PDF pages.
-  renderingPages,
-
-  /// Converting PDF pages to Drawing pages.
-  convertingPages,
-
-  /// Import completed successfully.
-  completed,
-
-  /// Import failed with error.
-  error,
-}
-
-/// Page selection mode for import.
-enum PDFPageSelection {
-  /// Import all pages.
-  all,
-
-  /// Import a page range.
-  range,
-
-  /// Import selected pages.
-  selected,
-}
-
-/// Configuration for PDF import.
-class PDFImportConfig {
-  /// Page selection mode.
-  final PDFPageSelection pageSelection;
-
-  /// Start page for range selection (1-based).
-  final int? startPage;
-
-  /// End page for range selection (1-based).
-  final int? endPage;
-
-  /// Selected page numbers (1-based).
-  final List<int>? selectedPages;
-
-  /// Whether to embed PDF images.
-  final bool embedImages;
-
-  /// Render options for PDF pages.
-  final PDFRenderOptions? renderOptions;
-
-  const PDFImportConfig({
-    this.pageSelection = PDFPageSelection.all,
-    this.startPage,
-    this.endPage,
-    this.selectedPages,
-    this.embedImages = true,
-    this.renderOptions,
-  });
-
-  /// Creates config for importing all pages.
-  factory PDFImportConfig.all({
-    bool embedImages = true,
-    PDFRenderOptions? renderOptions,
-  }) {
-    return PDFImportConfig(
-      pageSelection: PDFPageSelection.all,
-      embedImages: embedImages,
-      renderOptions: renderOptions,
-    );
-  }
-
-  /// Creates config for importing a page range.
-  factory PDFImportConfig.pageRange({
-    required int startPage,
-    required int endPage,
-    bool embedImages = true,
-    PDFRenderOptions? renderOptions,
-  }) {
-    return PDFImportConfig(
-      pageSelection: PDFPageSelection.range,
-      startPage: startPage,
-      endPage: endPage,
-      embedImages: embedImages,
-      renderOptions: renderOptions,
-    );
-  }
-
-  /// Creates config for importing selected pages.
-  factory PDFImportConfig.selectedPages({
-    required List<int> pages,
-    bool embedImages = true,
-    PDFRenderOptions? renderOptions,
-  }) {
-    return PDFImportConfig(
-      pageSelection: PDFPageSelection.selected,
-      selectedPages: pages,
-      embedImages: embedImages,
-      renderOptions: renderOptions,
-    );
-  }
-
-  /// Validates the configuration against total page count.
-  bool isValid({required int totalPages}) {
-    switch (pageSelection) {
-      case PDFPageSelection.all:
-        return true;
-
-      case PDFPageSelection.range:
-        if (startPage == null || endPage == null) return false;
-        if (startPage! < 1 || endPage! > totalPages) return false;
-        if (startPage! > endPage!) return false;
-        return true;
-
-      case PDFPageSelection.selected:
-        if (selectedPages == null || selectedPages!.isEmpty) return false;
-        for (final page in selectedPages!) {
-          if (page < 1 || page > totalPages) return false;
-        }
-        return true;
-    }
-  }
-}
-
-/// Result of PDF import operation.
-class PDFImportServiceResult {
-  /// Whether the import was successful.
-  final bool isSuccess;
-
-  /// Imported pages.
-  final List<Page> pages;
-
-  /// Error message if import failed.
-  final String? errorMessage;
-
-  const PDFImportServiceResult({
-    required this.isSuccess,
-    required this.pages,
-    this.errorMessage,
-  });
-
-  /// Creates a successful result.
-  factory PDFImportServiceResult.success(List<Page> pages) {
-    return PDFImportServiceResult(
-      isSuccess: true,
-      pages: pages,
-    );
-  }
-
-  /// Creates an error result.
-  factory PDFImportServiceResult.error(String message) {
-    return PDFImportServiceResult(
-      isSuccess: false,
-      pages: const [],
-      errorMessage: message,
-    );
-  }
-
-  /// Creates a cancelled result.
-  factory PDFImportServiceResult.cancelled() {
-    return PDFImportServiceResult(
-      isSuccess: false,
-      pages: const [],
-    );
-  }
-}
+export 'pdf_import_models.dart';
 
 /// Service for orchestrating PDF import workflow.
 class PDFImportService {
@@ -259,12 +91,9 @@ class PDFImportService {
 
     return true;
   }
-
   /// Generates a page range.
-  List<int> generatePageRange({required int start, required int end}) {
-    if (start > end) return [];
-    return List.generate(end - start + 1, (index) => start + index);
-  }
+  List<int> generatePageRange({required int start, required int end}) =>
+      generatePdfPageRange(start: start, end: end);
 
   /// Calculates progress.
   double calculateProgress({
@@ -276,44 +105,18 @@ class PDFImportService {
   }
 
   /// Checks if can transition to a new state.
-  bool canTransitionTo(PDFImportState newState) {
-    // Can always transition to error
-    if (newState == PDFImportState.error) return true;
-
-    // Valid transitions
-    switch (_state) {
-      case PDFImportState.idle:
-        return newState == PDFImportState.loadingPDF;
-
-      case PDFImportState.loadingPDF:
-        return newState == PDFImportState.renderingPages ||
-            newState == PDFImportState.convertingPages;
-
-      case PDFImportState.renderingPages:
-        return newState == PDFImportState.convertingPages;
-
-      case PDFImportState.convertingPages:
-        return newState == PDFImportState.completed;
-
-      case PDFImportState.completed:
-      case PDFImportState.error:
-        return newState == PDFImportState.idle ||
-            newState == PDFImportState.loadingPDF;
-    }
-  }
+  bool canTransitionTo(PDFImportState newState) =>
+      _state.canTransitionTo(newState);
 
   /// Calculates optimal batch size for processing.
   int calculateOptimalBatchSize({
     required int totalPages,
     required int availableMemory,
   }) {
-    const int maxBatchSize = 50;
-    const int avgPageMemory = 10 * 1024 * 1024; // 10MB per page estimate
-
-    final memoryBasedBatch = (availableMemory / avgPageMemory).floor();
-    final batchSize = memoryBasedBatch.clamp(1, maxBatchSize);
-
-    return batchSize > totalPages ? totalPages : batchSize;
+    return optimalPdfBatchSize(
+      totalPages: totalPages,
+      availableMemory: availableMemory,
+    );
   }
 
   /// Maximum number of pages allowed for import.
@@ -349,89 +152,12 @@ class PDFImportService {
     try {
       _updateState(PDFImportState.loadingPDF);
 
-      // 1. PDF'i app storage'a kopyala (orijinal dosya silinebilir)
-      final appDir = await getApplicationDocumentsDirectory();
-      final pdfDir = Directory('${appDir.path}/pdfs');
-      if (!await pdfDir.exists()) {
-        await pdfDir.create(recursive: true);
-      }
-
-      final pdfId = 'pdf_${DateTime.now().millisecondsSinceEpoch}';
-      final pdfFile = File('${pdfDir.path}/$pdfId.pdf');
+      // 1. Copy the PDF to app storage (the original may be deleted).
+      final pdfFile = await newImportedPdfFile();
       await File(filePath).copy(pdfFile.path);
 
-      // 2. Kopyalanan PDF'i aç (orijinal bytes RAM'de tutulmaz)
-      final document = await _loader.loadFromFile(pdfFile.path);
-
-      // Validate config
-      if (!config.isValid(totalPages: document.pagesCount)) {
-        await _loader.disposeDocument(document);
-        throw ArgumentError('Invalid import configuration');
-      }
-
-      // Page count limit
-      final pageNumbers = _getPageNumbers(config, document.pagesCount);
-      if (pageNumbers.length > maxPageCount) {
-        await _loader.disposeDocument(document);
-        return PDFImportServiceResult.error(
-          'PDF çok fazla sayfa içeriyor (${pageNumbers.length}). '
-          'Maksimum $maxPageCount sayfa destekleniyor.',
-        );
-      }
-
-      _totalPages = pageNumbers.length;
-      _processedPages = 0;
-      _updateProgress(0.0);
-
-      // 3. Sayfa boyutlarını oku (render yok - sadece metadata)
-      _updateState(PDFImportState.convertingPages);
-      final pages = <Page>[];
-
-      for (final pageNumber in pageNumbers) {
-        PdfPage? pdfPage;
-        try {
-          pdfPage = await document.getPage(pageNumber);
-
-          final page = Page(
-            id: 'page_${DateTime.now().millisecondsSinceEpoch}_$pageNumber',
-            index: pageNumber - 1,
-            size: PageSize(width: pdfPage.width, height: pdfPage.height),
-            background: PageBackground.pdfLazy(
-              pageIndex: pageNumber,
-              pdfFilePath: pdfFile.path,
-            ),
-            layers: [Layer.empty('Layer 1')],
-            createdAt: DateTime.now(),
-            updatedAt: DateTime.now(),
-          );
-
-          pages.add(page);
-        } catch (e) {
-          debugPrint('Warning: Could not load PDF page $pageNumber: $e');
-          // Bozuk sayfayı atla, devam et
-        } finally {
-          try {
-            await pdfPage?.close();
-          } catch (_) {}
-        }
-
-        _processedPages++;
-        _updateProgress(calculateProgress(
-          processedPages: _processedPages,
-          totalPages: _totalPages,
-        ));
-      }
-
-      await _loader.disposeDocument(document);
-
-      if (pages.isEmpty) {
-        return PDFImportServiceResult.error(
-          'PDF sayfaları okunamadı. Dosya bozuk olabilir.',
-        );
-      }
-
-      _updateState(PDFImportState.completed);
-      return PDFImportServiceResult.success(pages);
+      // 2. Open the copy lazily (original bytes are not kept in RAM).
+      return await _importLazily(pdfFile.path, config);
     } catch (e) {
       _setError(e.toString());
       return PDFImportServiceResult.error(e.toString());
@@ -452,103 +178,15 @@ class PDFImportService {
     _checkRangeOrder(config);
 
     try {
-      // ═══════════════════════════════════════════════════════════════════
-      // LAZY LOADING MODE: Save PDF to device, don't render pages
-      // ═══════════════════════════════════════════════════════════════════
+      // LAZY LOADING MODE: save the PDF to device, don't render pages.
       if (useLazyLoading) {
         _updateState(PDFImportState.loadingPDF);
-
-        // 1. PDF'i cihaza kaydet
-        final appDir = await getApplicationDocumentsDirectory();
-        final pdfDir = Directory('${appDir.path}/pdfs');
-        if (!await pdfDir.exists()) {
-          await pdfDir.create(recursive: true);
-        }
-
-        final pdfId = 'pdf_${DateTime.now().millisecondsSinceEpoch}';
-        final pdfFile = File('${pdfDir.path}/$pdfId.pdf');
+        final pdfFile = await newImportedPdfFile();
         await pdfFile.writeAsBytes(bytes);
-
-        // 2. Dosyadan aç (bytes'ı tekrar RAM'e yüklemeden)
-        final document = await _loader.loadFromFile(pdfFile.path);
-
-        // Validate config
-        if (!config.isValid(totalPages: document.pagesCount)) {
-          await _loader.disposeDocument(document);
-          throw ArgumentError('Invalid import configuration');
-        }
-
-        // Determine pages to import
-        final pageNumbers = _getPageNumbers(config, document.pagesCount);
-
-        // Page count limit
-        if (pageNumbers.length > maxPageCount) {
-          await _loader.disposeDocument(document);
-          return PDFImportServiceResult.error(
-            'PDF çok fazla sayfa içeriyor (${pageNumbers.length}). '
-            'Maksimum $maxPageCount sayfa destekleniyor.',
-          );
-        }
-
-        _totalPages = pageNumbers.length;
-        _processedPages = 0;
-        _updateProgress(0.0);
-
-        _updateState(PDFImportState.convertingPages);
-
-        final pages = <Page>[];
-
-        for (final pageNumber in pageNumbers) {
-          PdfPage? pdfPage;
-          try {
-            pdfPage = await document.getPage(pageNumber);
-
-            // Sadece boyut bilgisi + dosya yolu kaydet, RENDER YOK
-            final page = Page(
-              id: 'page_${DateTime.now().millisecondsSinceEpoch}_$pageNumber',
-              index: pageNumber - 1,
-              size: PageSize(width: pdfPage.width, height: pdfPage.height),
-              background: PageBackground.pdfLazy(
-                pageIndex: pageNumber,
-                pdfFilePath: pdfFile.path,
-              ),
-              layers: [Layer.empty('Layer 1')],
-              createdAt: DateTime.now(),
-              updatedAt: DateTime.now(),
-            );
-
-            pages.add(page);
-          } catch (e) {
-            debugPrint('Warning: Could not load PDF page $pageNumber: $e');
-            // Bozuk sayfayı atla, devam et
-          } finally {
-            try {
-              await pdfPage?.close();
-            } catch (_) {}
-          }
-
-          _processedPages++;
-          _updateProgress(calculateProgress(
-            processedPages: _processedPages,
-            totalPages: _totalPages,
-          ));
-        }
-
-        await _loader.disposeDocument(document);
-
-        if (pages.isEmpty) {
-          return PDFImportServiceResult.error(
-            'PDF sayfaları okunamadı. Dosya bozuk olabilir.',
-          );
-        }
-
-        _updateState(PDFImportState.completed);
-        return PDFImportServiceResult.success(pages);
+        return await _importLazily(pdfFile.path, config);
       }
 
-      // ═══════════════════════════════════════════════════════════════════
-      // IMMEDIATE MODE: Legacy approach - render all pages now
-      // ═══════════════════════════════════════════════════════════════════
+      // IMMEDIATE MODE: legacy approach - render all pages now.
       _updateState(PDFImportState.loadingPDF);
       final document = await _loader.loadFromBytes(bytes);
 
@@ -558,18 +196,20 @@ class PDFImportService {
       }
 
       // Determine pages to import
-      final pageNumbers = _getPageNumbers(config, document.pagesCount);
+      final pageNumbers = pdfImportPageNumbers(config, document.pagesCount);
       _totalPages = pageNumbers.length;
       _processedPages = 0;
       _updateProgress(0.0);
 
       // Convert pages (with immediate rendering)
       _updateState(PDFImportState.convertingPages);
-      final pages = await _convertPages(
+      final pages = await convertPdfPagesImmediately(
         document,
         pageNumbers,
-        config,
-        useLazyLoading: false,
+        converter: _converter,
+        renderOptions: config.renderOptions ?? defaultRenderOptions,
+        embedImages: config.embedImages,
+        onPageProcessed: _onPageProcessed,
       );
 
       // Cleanup
@@ -583,56 +223,63 @@ class PDFImportService {
     }
   }
 
-  /// Gets page numbers to import based on config.
-  List<int> _getPageNumbers(PDFImportConfig config, int totalPages) {
-    switch (config.pageSelection) {
-      case PDFPageSelection.all:
-        return generatePageRange(start: 1, end: totalPages);
+  /// Opens the stored PDF at [pdfFilePath] and builds lazy pages (sizes and
+  /// file path only, rendered on demand). Throws [ArgumentError] when
+  /// [config] does not fit the document.
+  Future<PDFImportServiceResult> _importLazily(
+    String pdfFilePath,
+    PDFImportConfig config,
+  ) async {
+    final document = await _loader.loadFromFile(pdfFilePath);
 
-      case PDFPageSelection.range:
-        return generatePageRange(
-          start: config.startPage!,
-          end: config.endPage!,
-        );
-
-      case PDFPageSelection.selected:
-        return List.from(config.selectedPages!);
+    // Validate config
+    if (!config.isValid(totalPages: document.pagesCount)) {
+      await _loader.disposeDocument(document);
+      throw ArgumentError('Invalid import configuration');
     }
+
+    // Page count limit
+    final pageNumbers = pdfImportPageNumbers(config, document.pagesCount);
+    if (pageNumbers.length > maxPageCount) {
+      await _loader.disposeDocument(document);
+      return PDFImportServiceResult.error(
+        'PDF çok fazla sayfa içeriyor (${pageNumbers.length}). '
+        'Maksimum $maxPageCount sayfa destekleniyor.',
+      );
+    }
+
+    _totalPages = pageNumbers.length;
+    _processedPages = 0;
+    _updateProgress(0.0);
+
+    // Read page sizes only (no rendering).
+    _updateState(PDFImportState.convertingPages);
+    final pages = await buildLazyPdfPages(
+      document,
+      pageNumbers,
+      pdfFilePath: pdfFilePath,
+      onPageProcessed: _onPageProcessed,
+    );
+
+    await _loader.disposeDocument(document);
+
+    if (pages.isEmpty) {
+      return PDFImportServiceResult.error(
+        'PDF sayfaları okunamadı. Dosya bozuk olabilir.',
+      );
+    }
+
+    _updateState(PDFImportState.completed);
+    return PDFImportServiceResult.success(pages);
   }
 
-  /// Converts PDF pages to Drawing pages.
-  Future<List<Page>> _convertPages(
-    PdfDocument document,
-    List<int> pageNumbers,
-    PDFImportConfig config, {
-    bool useLazyLoading = true,
-  }) async {
-    final pages = <Page>[];
-
-    // IMMEDIATE MODE ONLY: Render pages now
-    for (final pageNumber in pageNumbers) {
-      final page = await _converter.convertPage(
-        document,
-        pageNumber,
-        renderOptions: config.renderOptions ?? defaultRenderOptions,
-        conversionOptions: PDFConversionOptions(
-          embedImages: config.embedImages,
-        ),
-        useLazyLoading: false, // Force immediate rendering
-      );
-
-      if (page != null) {
-        pages.add(page);
-      }
-
-      _processedPages++;
-      _updateProgress(calculateProgress(
-        processedPages: _processedPages,
-        totalPages: _totalPages,
-      ));
-    }
-
-    return pages;
+  /// Counts one processed page and publishes the new progress.
+  void _onPageProcessed() {
+    _processedPages++;
+    _updateProgress(calculateProgress(
+      processedPages: _processedPages,
+      totalPages: _totalPages,
+    ));
   }
 
   /// Updates the current state.
