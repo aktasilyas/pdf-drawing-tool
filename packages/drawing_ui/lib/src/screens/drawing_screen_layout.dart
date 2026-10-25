@@ -15,7 +15,8 @@ import 'package:drawing_ui/src/toolbar/tool_groups.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_layout_mode.dart';
 
 export 'layers_list.dart' show LayersList;
-export 'page_sidebar.dart' show PageSidebar, kPageSidebarWidth;
+export 'page_sidebar.dart'
+    show PageSidebar, PageSidebarVariant, kPageSidebarWidth;
 
 /// Whether the floating undo/redo pill is shown over the canvas.
 ///

@@ -478,8 +478,10 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                   bottom: 0,
                   width: kPageSidebarWidth,
                   child: PageSidebar(
-                      thumbnailCache: _thumbnailCache,
-                      onPageTap: _navigateToPage),
+                    thumbnailCache: _thumbnailCache,
+                    onPageTap: _navigateToPage,
+                    variant: PageSidebarVariant.drawer,
+                  ),
                 ),
             ],
           ),

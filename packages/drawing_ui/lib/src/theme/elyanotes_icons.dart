@@ -24,6 +24,7 @@ abstract final class ElyanotesIcons {
   static const readerModeActive = PhosphorIconsFill.bookOpen;
   static const layers = PhosphorIconsRegular.stack;
   static const gridOn = PhosphorIconsRegular.gridFour;
+  static const gridOnActive = PhosphorIconsFill.gridFour;
   static const gridOff = PhosphorIconsRegular.squareSplitHorizontal;
   static const share = PhosphorIconsRegular.shareFat;
   static const exportIcon = PhosphorIconsRegular.export;
@@ -164,6 +165,7 @@ abstract final class ElyanotesIcons {
 
   static const microphone = PhosphorIconsRegular.microphone;
   static const waveform = PhosphorIconsRegular.waveform;
+  static const waveformActive = PhosphorIconsFill.waveform;
   static const play = PhosphorIconsRegular.play;
   static const pause = PhosphorIconsRegular.pause;
   static const recordCircle = PhosphorIconsRegular.record;

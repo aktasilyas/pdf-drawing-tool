@@ -1,28 +1,50 @@
-/// Page navigator sidebar with filter bar and 2-column grid layout.
+/// Page navigator sidebar: filter header and 2-column thumbnail grid
+/// (docs/specs/52-editor-chrome.md, section 3 and 4 "Page sidebar").
 import 'package:flutter/material.dart';
-import 'package:drawing_ui/src/theme/chrome_roles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:phosphor_icons/phosphor_icons.dart';
 
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/services/thumbnail_cache.dart';
+import 'package:drawing_ui/src/theme/chrome_palette.dart';
+import 'package:drawing_ui/src/theme/chrome_tokens.dart';
 import 'package:drawing_ui/src/theme/drawing_shadows.dart';
-import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 
 import 'audio_recordings_list.dart';
+import 'page_sidebar_cells.dart';
+import 'page_sidebar_filter_bar.dart';
 import 'page_sidebar_widgets.dart';
 
-/// Sidebar width for the page navigator panel.
-const double kPageSidebarWidth = 240;
+/// Width of the docked tablet sidebar card.
+const double kPageSidebarCardWidth = 256;
+
+/// Layout footprint of the docked tablet sidebar: the card plus its left
+/// margin. The canvas transform subtracts this so the page reflows.
+const double kPageSidebarWidth = kPageSidebarCardWidth + ChromeSpacing.sm;
+
+/// How the sidebar is presented.
+enum PageSidebarVariant {
+  /// Tablet: inset floating card that takes layout space next to the page.
+  docked,
+
+  /// Phone: full-height drawer over the page; width comes from the host.
+  drawer,
+}
 
 /// Page navigator sidebar with a 2-column grid layout.
 ///
 /// Automatically scrolls to the currently selected page when mounted
 /// and when the page changes via external navigation.
 class PageSidebar extends ConsumerStatefulWidget {
-  const PageSidebar({super.key, required this.thumbnailCache, this.onPageTap});
+  const PageSidebar({
+    super.key,
+    required this.thumbnailCache,
+    this.onPageTap,
+    this.variant = PageSidebarVariant.docked,
+  });
+
   final ThumbnailCache thumbnailCache;
   final ValueChanged<int>? onPageTap;
+  final PageSidebarVariant variant;
 
   @override
   ConsumerState<PageSidebar> createState() => _PageSidebarState();
@@ -30,19 +52,21 @@ class PageSidebar extends ConsumerStatefulWidget {
 
 class _PageSidebarState extends ConsumerState<PageSidebar> {
   static const int _crossAxisCount = 2;
-  static const double _crossAxisSpacing = 12;
-  static const double _mainAxisSpacing = 16;
-  static const double _childAspectRatio = 0.58;
-  static const double _gridPadding = 12;
+  static const double _gridPadding = ChromeSpacing.md;
+  static const double _crossAxisSpacing = ChromeSpacing.md;
+  static const double _mainAxisSpacing = ChromeSpacing.lg;
 
   late final ScrollController _scrollController;
 
+  /// Grid width from the last layout; the docked card width until then.
+  double _gridWidth = kPageSidebarCardWidth;
+
   double _offsetForIndex(int index) {
-    final availableWidth = kPageSidebarWidth - _gridPadding * 2;
+    final availableWidth = _gridWidth - _gridPadding * 2;
     final itemWidth =
         (availableWidth - _crossAxisSpacing * (_crossAxisCount - 1)) /
             _crossAxisCount;
-    final itemHeight = itemWidth / _childAspectRatio;
+    final itemHeight = itemWidth / kPageGridItemAspectRatio;
     final rowHeight = itemHeight + _mainAxisSpacing;
     final row = index ~/ _crossAxisCount;
     return (_gridPadding + row * rowHeight).clamp(0.0, double.infinity);
@@ -55,8 +79,11 @@ class _PageSidebarState extends ConsumerState<PageSidebar> {
     final target = _offsetForIndex(index)
         .clamp(0.0, _scrollController.position.maxScrollExtent);
     if (animate) {
-      _scrollController.animateTo(target,
-          duration: const Duration(milliseconds: 200), curve: Curves.easeInOut);
+      _scrollController.animateTo(
+        target,
+        duration: ChromeDurations.fast,
+        curve: Curves.easeInOut,
+      );
     } else {
       _scrollController.jumpTo(target);
     }
@@ -98,8 +125,7 @@ class _PageSidebarState extends ConsumerState<PageSidebar> {
 
   @override
   Widget build(BuildContext context) {
-    final pageManager = ref.watch(pageManagerProvider);
-    final cs = Theme.of(context).colorScheme;
+    final palette = ChromePalette.of(context);
     final audioEnabled = ref.watch(audioRecordingEnabledProvider);
     final rawFilter = ref.watch(sidebarFilterProvider);
     // Recordings filter is unavailable when audio is disabled.
@@ -111,209 +137,144 @@ class _PageSidebarState extends ConsumerState<PageSidebar> {
       if (prev != next) _scrollToPage(next);
     });
 
-    return Container(
-      width: kPageSidebarWidth,
-      decoration: BoxDecoration(
-        color: cs.sidebarSurface,
-        border: Border(right: BorderSide(color: cs.outlineVariant, width: 0.5)),
-      ),
-      child: Column(
-        children: [
-          _FilterBar(
-            filter: filter,
-            showRecordings: audioEnabled,
-            onFilterChanged: (f) =>
-                ref.read(sidebarFilterProvider.notifier).state = f,
-            cs: cs,
-          ),
-          Expanded(
-            child: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 250),
-              switchInCurve: Curves.easeOut,
-              switchOutCurve: Curves.easeIn,
-              transitionBuilder: (child, animation) {
-                return FadeTransition(
-                  opacity: animation,
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(0, 0.04),
-                      end: Offset.zero,
-                    ).animate(animation),
-                    child: child,
-                  ),
-                );
-              },
-              child: KeyedSubtree(
-                key: ValueKey(filter),
-                child: filter == SidebarFilter.recordings
-                    ? const AudioRecordingsList()
-                    : _buildPageGrid(pageManager, filter, cs),
+    final content = Column(
+      children: [
+        PageSidebarFilterBar(
+          filter: filter,
+          showRecordings: audioEnabled,
+          onFilterChanged: (f) =>
+              ref.read(sidebarFilterProvider.notifier).state = f,
+        ),
+        Expanded(
+          child: AnimatedSwitcher(
+            duration: ChromeDurations.normal,
+            switchInCurve: Curves.easeOut,
+            switchOutCurve: Curves.easeIn,
+            transitionBuilder: (child, animation) => FadeTransition(
+              opacity: animation,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(0, 0.04),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
               ),
             ),
+            child: KeyedSubtree(
+              key: ValueKey(filter),
+              child: filter == SidebarFilter.recordings
+                  ? const AudioRecordingsList()
+                  : _buildPageGrid(filter),
+            ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
+
+    return widget.variant == PageSidebarVariant.docked
+        ? _DockedCard(palette: palette, child: content)
+        : _Drawer(palette: palette, child: content);
   }
 
-  Widget _buildPageGrid(
-    dynamic pageManager,
-    SidebarFilter filter,
-    ColorScheme cs,
-  ) {
+  Widget _buildPageGrid(SidebarFilter filter) {
+    final pageManager = ref.watch(pageManagerProvider);
     final allPages = pageManager.pages;
     final isBookmarkFilter = filter == SidebarFilter.bookmarked;
-    final filteredEntries = <_PageEntry>[];
-    for (int i = 0; i < allPages.length; i++) {
-      if (!isBookmarkFilter || allPages[i].isBookmarked) {
-        filteredEntries.add(_PageEntry(page: allPages[i], originalIndex: i));
-      }
+    final entries = <int>[
+      for (int i = 0; i < allPages.length; i++)
+        if (!isBookmarkFilter || allPages[i].isBookmarked) i,
+    ];
+
+    if (isBookmarkFilter && entries.isEmpty) {
+      return const EmptyBookmarksState();
     }
 
     final showAddCell = !isBookmarkFilter;
-    final itemCount = filteredEntries.length + (showAddCell ? 1 : 0);
+    final itemCount = entries.length + (showAddCell ? 1 : 0);
 
-    return GridView.builder(
-      controller: _scrollController,
-      padding: const EdgeInsets.all(_gridPadding),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: _crossAxisCount,
-        crossAxisSpacing: _crossAxisSpacing,
-        mainAxisSpacing: _mainAxisSpacing,
-        childAspectRatio: _childAspectRatio,
+    return LayoutBuilder(builder: (context, constraints) {
+      _gridWidth = constraints.maxWidth;
+      return GridView.builder(
+        controller: _scrollController,
+        padding: const EdgeInsets.all(_gridPadding),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: _crossAxisCount,
+          crossAxisSpacing: _crossAxisSpacing,
+          mainAxisSpacing: _mainAxisSpacing,
+          childAspectRatio: kPageGridItemAspectRatio,
+        ),
+        itemCount: itemCount,
+        itemBuilder: (context, index) {
+          if (index < entries.length) {
+            final pageIndex = entries[index];
+            return PageGridItem(
+              page: allPages[pageIndex],
+              index: pageIndex,
+              isSelected: pageIndex == pageManager.currentIndex,
+              thumbnailCache: widget.thumbnailCache,
+              onPageTap: widget.onPageTap,
+            );
+          }
+          return const AddPageCell();
+        },
+      );
+    });
+  }
+}
+
+/// Tablet card: `surface` fill, hairline, radius xl, chrome shadow, inset by
+/// sm from the left and bottom edges of its [kPageSidebarWidth] footprint.
+class _DockedCard extends StatelessWidget {
+  const _DockedCard({required this.palette, required this.child});
+
+  final ChromePalette palette;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    const radius = BorderRadius.all(Radius.circular(ChromeRadius.xl));
+    return SizedBox(
+      width: kPageSidebarWidth,
+      child: Padding(
+        padding: const EdgeInsets.only(
+          left: ChromeSpacing.sm,
+          bottom: ChromeSpacing.sm,
+        ),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: palette.surface,
+            borderRadius: radius,
+            border: Border.all(color: palette.border, width: 0.5),
+            boxShadow: DrawingShadows.chrome(Theme.of(context).brightness),
+          ),
+          child: ClipRRect(borderRadius: radius, child: child),
+        ),
       ),
-      itemCount: itemCount,
-      itemBuilder: (context, index) {
-        if (index < filteredEntries.length) {
-          final entry = filteredEntries[index];
-          return PageGridItem(
-            page: entry.page,
-            index: entry.originalIndex,
-            isSelected: entry.originalIndex == pageManager.currentIndex,
-            thumbnailCache: widget.thumbnailCache,
-            onPageTap: widget.onPageTap,
-          );
-        }
-        return AddPageCell(cs: cs);
-      },
     );
   }
 }
 
-/// Internal model pairing a page with its original index in the document.
-class _PageEntry {
-  const _PageEntry({required this.page, required this.originalIndex});
-  final dynamic page;
-  final int originalIndex;
-}
+/// Phone drawer: `surface` fill with xl right corners and the panel shadow.
+class _Drawer extends StatelessWidget {
+  const _Drawer({required this.palette, required this.child});
 
-/// Centered segmented tab bar: all pages / bookmarked / recordings.
-class _FilterBar extends StatelessWidget {
-  const _FilterBar({
-    required this.filter,
-    required this.onFilterChanged,
-    required this.cs,
-    required this.showRecordings,
-  });
-
-  final bool showRecordings;
-  final SidebarFilter filter;
-  final ValueChanged<SidebarFilter> onFilterChanged;
-  final ColorScheme cs;
+  final ChromePalette palette;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    final groupBg = cs.sidebarGroupSurface;
-
-    return Container(
-      height: 44,
+    const radius = BorderRadius.horizontal(
+      right: Radius.circular(ChromeRadius.xl),
+    );
+    return DecoratedBox(
       decoration: BoxDecoration(
-        border:
-            Border(bottom: BorderSide(color: cs.outlineVariant, width: 0.5)),
+        color: palette.surface,
+        borderRadius: radius,
+        boxShadow: DrawingShadows.panel(Theme.of(context).brightness),
       ),
-      child: Center(
-        child: Container(
-          height: 32,
-          padding: const EdgeInsets.all(2),
-          decoration: BoxDecoration(
-            color: groupBg,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _FilterTab(
-                icon: ElyanotesIcons.gridOn,
-                isActive: filter == SidebarFilter.allPages,
-                cs: cs,
-                tooltip: 'Tum sayfalar',
-                onTap: () => onFilterChanged(SidebarFilter.allPages),
-              ),
-              _FilterTab(
-                icon: filter == SidebarFilter.bookmarked
-                    ? ElyanotesIcons.bookmarkFilled
-                    : ElyanotesIcons.bookmark,
-                isActive: filter == SidebarFilter.bookmarked,
-                cs: cs,
-                tooltip: 'Yer imleri',
-                onTap: () => onFilterChanged(SidebarFilter.bookmarked),
-              ),
-              if (showRecordings)
-                _FilterTab(
-                  icon: ElyanotesIcons.waveform,
-                  isActive: filter == SidebarFilter.recordings,
-                  cs: cs,
-                  tooltip: 'Ses kayitlari',
-                  onTap: () => onFilterChanged(SidebarFilter.recordings),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Single tab inside the segmented filter group.
-class _FilterTab extends StatelessWidget {
-  const _FilterTab({
-    required this.icon,
-    required this.isActive,
-    required this.cs,
-    required this.tooltip,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final bool isActive;
-  final ColorScheme cs;
-  final String tooltip;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final brightness = Theme.of(context).brightness;
-    return Tooltip(
-      message: tooltip,
-      child: GestureDetector(
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          width: 40,
-          height: 28,
-          decoration: BoxDecoration(
-            color: isActive ? cs.surface : Colors.transparent,
-            borderRadius: BorderRadius.circular(6),
-            boxShadow: isActive ? DrawingShadows.floating(brightness) : null,
-          ),
-          child: Center(
-            child: PhosphorIcon(
-              icon,
-              size: 18,
-              color: isActive ? cs.primary : cs.onSurfaceVariant,
-            ),
-          ),
-        ),
+      child: ClipRRect(
+        borderRadius: radius,
+        child: SafeArea(right: false, child: child),
       ),
     );
   }
