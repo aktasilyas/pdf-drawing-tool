@@ -61,9 +61,8 @@ class DocumentFavoriteButton extends StatelessWidget {
             child: Icon(
               isFavorite ? Icons.star : Icons.star_outline,
               size: AppIconSize.sm,
-              color: isFavorite
-                  ? AppColors.accent
-                  : context.palette.textDisabled,
+              color:
+                  isFavorite ? AppColors.accent : context.palette.textDisabled,
             ),
           ),
         ),

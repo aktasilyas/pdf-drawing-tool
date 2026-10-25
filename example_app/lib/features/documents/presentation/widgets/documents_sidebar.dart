@@ -245,8 +245,8 @@ class DocumentsSidebar extends ConsumerWidget {
       isSubfolder: isSub,
       iconColor: Color(folder.colorValue),
       trailing: Text('${folder.documentCount}',
-          style: AppTypography.caption.copyWith(
-              color: isSel ? context.palette.accent : tertiaryColor)),
+          style: AppTypography.caption
+              .copyWith(color: isSel ? context.palette.accent : tertiaryColor)),
       onTap: () => onFolderSelected?.call(folder.id),
     );
   }
