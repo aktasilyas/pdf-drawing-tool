@@ -7,6 +7,7 @@ import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/toolbar/elyanotes_nav_button.dart';
 import 'package:drawing_ui/src/toolbar/tool_groups.dart';
+import 'package:drawing_ui/src/toolbar/toolbar_widgets.dart';
 import 'package:drawing_ui/src/toolbar/top_nav_menus.dart';
 import 'package:drawing_ui/src/widgets/document_title_button.dart';
 
@@ -108,20 +109,17 @@ class TopNavigationBar extends ConsumerWidget {
     ColorScheme colorScheme,
     bool isReaderMode,
   ) {
-    const double sz = 32;
     final currentTool = ref.watch(currentToolProvider);
     final rulerVisible = ref.watch(rulerVisibleProvider);
 
     final pageCount = ref.watch(pageCountProvider);
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    return ToolbarSharedRow(
       children: [
         ElyanotesNavButton(
           icon: ElyanotesIcons.home,
           tooltip: 'Ana Sayfa',
           onPressed: onHomePressed ?? () {},
-          size: sz,
         ),
         if (pageCount > 1)
           ElyanotesNavButton(
@@ -131,7 +129,6 @@ class TopNavigationBar extends ConsumerWidget {
             tooltip: 'Sayfa Paneli',
             onPressed: onSidebarToggle ?? () {},
             isActive: isSidebarOpen,
-            size: sz,
           ),
         if (!isReaderMode) ...[
           if (onAIPressed != null)
@@ -139,13 +136,11 @@ class TopNavigationBar extends ConsumerWidget {
               icon: ElyanotesIcons.sparkle,
               tooltip: 'Yapay Zeka',
               onPressed: onAIPressed!,
-              size: sz,
             ),
           ...compactTopBarTools.map((tool) => _buildCompactToolButton(
                 ref: ref,
                 tool: tool,
                 currentTool: currentTool,
-                size: sz,
               )),
           if (!ref.watch(isInfiniteCanvasProvider) &&
               ref.watch(audioRecordingEnabledProvider))
@@ -154,7 +149,6 @@ class TopNavigationBar extends ConsumerWidget {
               tooltip: 'Ses Kaydi',
               onPressed: () =>
                   showAudioMenu(context, ref, onSidebarToggle, isSidebarOpen),
-              size: sz,
             ),
           ElyanotesNavButton(
             icon: rulerVisible
@@ -164,7 +158,6 @@ class TopNavigationBar extends ConsumerWidget {
             onPressed: () =>
                 ref.read(rulerVisibleProvider.notifier).state = !rulerVisible,
             isActive: rulerVisible,
-            size: sz,
           ),
         ],
         if (isReaderMode) _buildReaderBadge(colorScheme),
@@ -177,7 +170,6 @@ class TopNavigationBar extends ConsumerWidget {
             ref.read(readerModeProvider.notifier).state = !isReaderMode;
           },
           isActive: isReaderMode,
-          size: sz,
         ),
         ElyanotesNavButton(
           icon: ElyanotesIcons.more,
@@ -194,7 +186,6 @@ class TopNavigationBar extends ConsumerWidget {
                   showExport: true,
                   compact: true,
                 ),
-          size: sz,
         ),
       ],
     );
@@ -205,7 +196,6 @@ class TopNavigationBar extends ConsumerWidget {
     required WidgetRef ref,
     required ToolType tool,
     required ToolType currentTool,
-    required double size,
   }) {
     final isSelected = tool == currentTool;
     return ElyanotesNavButton(
@@ -220,7 +210,6 @@ class TopNavigationBar extends ConsumerWidget {
         }
       },
       isActive: isSelected,
-      size: size,
     );
   }
 

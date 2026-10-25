@@ -8,6 +8,7 @@ import 'package:drawing_ui/src/toolbar/toolbar.dart';
 import 'package:drawing_ui/src/canvas/page_slide_transition.dart';
 import 'package:drawing_ui/src/canvas/page_background_painter.dart';
 import 'package:drawing_ui/src/screens/drawing_screen_layout.dart';
+import 'package:drawing_ui/src/screens/drawing_screen_theme.dart';
 import 'package:drawing_ui/src/widgets/widgets.dart';
 import 'package:drawing_ui/src/services/thumbnail_cache.dart';
 
@@ -313,16 +314,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
         ? Color(currentPage.background.color)
         : Color(canvasMode.surroundingAreaColor);
 
-    final drawingTheme = DrawingTheme(
-      toolbarBackground: colorScheme.primary,
-      toolbarIconColor: colorScheme.onPrimary.withValues(alpha: 0.7),
-      toolbarIconSelectedColor: colorScheme.onPrimary,
-      toolbarIconDisabledColor: colorScheme.onPrimary.withValues(alpha: 0.3),
-      panelBackground: colorScheme.screenSurface,
-      panelBorderColor: colorScheme.outlineVariant,
-      penBoxBackground: colorScheme.surface,
-      penBoxSlotSelectedColor: colorScheme.primaryContainer,
-    );
+    final drawingTheme = drawingThemeFromChrome(ChromePalette.of(context));
 
     return DrawingThemeProvider(
       theme: drawingTheme,
