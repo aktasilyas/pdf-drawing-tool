@@ -2,6 +2,8 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/canvas/canvas_color_scheme.dart';
+import 'package:drawing_ui/src/painters/cover/cover_renderer.dart';
+import 'package:drawing_ui/src/painters/cover/cover_texture_store.dart';
 import 'package:drawing_ui/src/painters/template_pattern_painter.dart';
 
 /// Sayfa içi arka plan pattern çizici (LIMITED mod için).
@@ -13,6 +15,10 @@ class PageBackgroundPatternPainter extends CustomPainter {
   final PageBackground background;
   final CanvasColorScheme? colorScheme;
 
+  /// [CoverTextureStore.revision] at build time. A change forces a repaint so
+  /// material covers pick up their textures once loaded.
+  final int textureRevision;
+
   // Static cache for pattern pictures
   static final Map<String, ui.Picture> _pictureCache = {};
   static const int _maxCacheSize = 20;
@@ -20,6 +26,7 @@ class PageBackgroundPatternPainter extends CustomPainter {
   const PageBackgroundPatternPainter({
     required this.background,
     this.colorScheme,
+    this.textureRevision = 0,
   });
 
   /// Generate cache key from background properties
@@ -28,7 +35,7 @@ class PageBackgroundPatternPainter extends CustomPainter {
         '${background.gridSpacing}_${background.lineSpacing}_'
         '${background.templatePattern}_${background.templateSpacingMm}_'
         '${background.coverId}_${size.width}_${size.height}_'
-        '${colorScheme?.hashCode}';
+        '${colorScheme?.hashCode}_${CoverTextureStore.isLoaded}';
   }
 
   @override
@@ -167,6 +174,10 @@ class PageBackgroundPatternPainter extends CustomPainter {
       case CoverStyle.image:
         // Image covers are rendered in UI layer via Image.asset widget
         break;
+
+      case CoverStyle.material:
+        CoverRenderer.paint(canvas, size, cover);
+        break;
     }
   }
 
@@ -237,7 +248,8 @@ class PageBackgroundPatternPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant PageBackgroundPatternPainter oldDelegate) {
     return oldDelegate.background != background ||
-        oldDelegate.colorScheme != colorScheme;
+        oldDelegate.colorScheme != colorScheme ||
+        oldDelegate.textureRevision != textureRevision;
   }
 }
 
@@ -258,15 +270,24 @@ class PageBackgroundView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final imagePath = _coverImagePath;
-    final painter = CustomPaint(
-      painter: PageBackgroundPatternPainter(
-        background: background,
-        colorScheme: colorScheme,
-      ),
-      size: pageSize,
-      isComplex: true,
-      willChange: false,
-    );
+    final isMaterialCover = _isMaterialCover;
+    if (isMaterialCover) CoverTextureStore.ensureLoaded();
+    Widget buildPainter(int revision) => CustomPaint(
+          painter: PageBackgroundPatternPainter(
+            background: background,
+            colorScheme: colorScheme,
+            textureRevision: revision,
+          ),
+          size: pageSize,
+          isComplex: true,
+          willChange: false,
+        );
+    final painter = isMaterialCover
+        ? ValueListenableBuilder<int>(
+            valueListenable: CoverTextureStore.revision,
+            builder: (_, revision, __) => buildPainter(revision),
+          )
+        : buildPainter(0);
 
     if (imagePath == null) return painter;
 
@@ -282,6 +303,14 @@ class PageBackgroundView extends StatelessWidget {
         painter,
       ],
     );
+  }
+
+  bool get _isMaterialCover {
+    if (background.type != BackgroundType.cover || background.coverId == null) {
+      return false;
+    }
+    return CoverRegistry.byId(background.coverId!)?.style ==
+        CoverStyle.material;
   }
 
   String? get _coverImagePath {

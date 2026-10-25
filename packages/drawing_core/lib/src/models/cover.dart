@@ -5,7 +5,11 @@ enum CoverStyle {
   pattern, // Desenli (çizgili, noktalı vs)
   minimal, // Minimalist çerçeve
   image, // Görsel kapak (asset)
+  material, // Procedural material (linen, leather, kraft, felt)
 }
+
+/// Material of a procedural [CoverStyle.material] cover.
+enum CoverMaterial { linen, leather, kraft, felt }
 
 /// Kapak modeli
 class Cover {
@@ -18,6 +22,7 @@ class Cover {
       imagePath; // Asset path (örn: 'assets/covers/cover_01_kraft.webp')
   final bool isPremium;
   final bool showTitle; // Başlık gösterilsin mi
+  final CoverMaterial? material; // Only for CoverStyle.material
 
   const Cover({
     required this.id,
@@ -28,6 +33,7 @@ class Cover {
     this.imagePath,
     this.isPremium = false,
     this.showTitle = false,
+    this.material,
   });
 
   factory Cover.fromJson(Map<String, dynamic> json) {
@@ -43,6 +49,7 @@ class Cover {
       imagePath: json['imagePath'] as String?,
       isPremium: json['isPremium'] as bool? ?? false,
       showTitle: json['showTitle'] as bool? ?? false,
+      material: _materialFromName(json['material'] as String?),
     );
   }
 
@@ -55,7 +62,16 @@ class Cover {
         if (imagePath != null) 'imagePath': imagePath,
         'isPremium': isPremium,
         'showTitle': showTitle,
+        if (material != null) 'material': material!.name,
       };
+
+  static CoverMaterial? _materialFromName(String? name) {
+    if (name == null) return null;
+    for (final m in CoverMaterial.values) {
+      if (m.name == name) return m;
+    }
+    return null;
+  }
 
   @override
   bool operator ==(Object other) =>

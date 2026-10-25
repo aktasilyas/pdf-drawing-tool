@@ -37,5 +37,17 @@ jobs:
       - name: Analyze
         run: ./scripts/check.sh analyze ${{ matrix.package }}
 
+      - name: Coverage tool
+        if: matrix.package == 'packages/drawing_core'
+        # Same version as the transitive `coverage` in drawing_core/pubspec.lock.
+        run: dart pub global activate coverage 1.15.0
+
       - name: Test
+        env:
+          COVERAGE: '1'
         run: ./scripts/check.sh test ${{ matrix.package }}
+
+      - name: Coverage
+        # Summary in the job summary; fails below the floor in
+        # scripts/coverage-thresholds.txt.
+        run: ./scripts/coverage.sh ${{ matrix.package }}

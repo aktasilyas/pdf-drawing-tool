@@ -20,11 +20,19 @@ Frozen behind flags until after v1.0: AI chat, cloud sync, premium, audio record
 ./scripts/check.sh pub          # pub get in dependency order (once per clone / pubspec change)
 ./scripts/check.sh analyze      # dart analyze all packages (what CI runs)
 ./scripts/check.sh test         # dart test / flutter test per package (what CI runs)
+COVERAGE=1 ./scripts/check.sh test <pkg> && ./scripts/coverage.sh <pkg>  # lcov summary; floors in scripts/coverage-thresholds.txt
 cd example_app && flutter run   # v1.0 scope: all feature flags off, no config needed
 # frozen features on (FF_* flags); .env must hold SUPABASE_URL, SUPABASE_ANON_KEY, REVENUECAT_*_KEY
 cd example_app && flutter run --dart-define-from-file=config/flags_all_on.json --dart-define-from-file=.env
 flutter test path/to/file_test.dart                 # single test
 dart run build_runner build --delete-conflicting-outputs   # example_app codegen
+```
+No Flutter SDK in the session (engine download blocked)? Regenerate goldens in CI on a
+pushed `claude/*` branch, then `git fetch` + `git merge` the branch and Read the PNGs
+(details in the `design-loop` skill):
+```bash
+gh api -X POST repos/aktasilyas/pdf-drawing-tool/actions/workflows/update-goldens.yml/dispatches \
+  -f ref=main -f "inputs[branch]=claude/<n>-<slug>" -f "inputs[package]=packages/drawing_ui"
 ```
 
 ## Workflow (every task)
