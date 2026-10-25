@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/utils/responsive.dart';
-import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
 import 'package:example_app/features/documents/domain/entities/folder.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
@@ -27,16 +26,29 @@ class DocumentsScreen extends ConsumerStatefulWidget {
 class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
     with DocumentsScreenHelpers {
   final GlobalKey _addButtonKey = GlobalKey();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   SidebarSection _selectedSection = SidebarSection.documents;
   String? _selectedFolderId;
   bool _isSidebarCollapsed = false;
+  bool _sidebarInitialised = false;
   bool _nearLimitBannerDismissed = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_sidebarInitialised) {
+      _sidebarInitialised = true;
+      _isSidebarCollapsed =
+          MediaQuery.sizeOf(context).width < AppBreakpoints.expanded;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final isPhone = Responsive.isPhone(context);
 
     return Scaffold(
+      key: _scaffoldKey,
       backgroundColor: context.palette.background,
       drawer: isPhone
           ? Drawer(
@@ -53,53 +65,18 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
   }
 
   Widget _buildMobileLayout() {
-    final isInFolder =
-        _selectedSection == SidebarSection.folder && _selectedFolderId != null;
-
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _MobileTopBar(
-            center: isInFolder
-                ? buildBreadcrumb(
-                    _selectedFolderId,
-                    _navigateToRoot,
-                    _navigateToFolder,
-                    compact: true,
-                  )
-                : _buildMobileTitle(),
-            onSettingsTap: () => context.push('/settings'),
-          ),
-          _buildHeader(),
-          _buildSoftDivider(),
-          _buildNearLimitBanner(),
-          Expanded(child: _buildContentView()),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMobileTitle() {
-    final textPrimary = context.palette.textPrimary;
-
-    return Text(
-      getSectionTitle(ref, _selectedSection, _selectedFolderId),
-      style: AppTypography.headlineMedium.copyWith(color: textPrimary),
-      overflow: TextOverflow.ellipsis,
+      child: _buildPane(isPhone: true),
     );
   }
 
   Widget _buildDesktopLayout() {
-    final isInFolder =
-        _selectedSection == SidebarSection.folder && _selectedFolderId != null;
-
     return Row(
       children: [
         AnimatedContainer(
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeInOut,
+          duration: AppDurations.fast,
+          curve: _isSidebarCollapsed ? AppCurves.exit : AppCurves.enter,
           width: _isSidebarCollapsed ? 0 : AppSpacing.sidebarWidth,
           clipBehavior: Clip.hardEdge,
           decoration: const BoxDecoration(),
@@ -115,29 +92,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
             onTap: () => FocusScope.of(context).unfocus(),
             child: Container(
               color: context.palette.background,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _DesktopTopBar(
-                    center: isInFolder
-                        ? buildBreadcrumb(
-                            _selectedFolderId,
-                            _navigateToRoot,
-                            _navigateToFolder,
-                            compact: true,
-                          )
-                        : _buildDesktopTitle(),
-                    onSidebarToggle: () => setState(
-                        () => _isSidebarCollapsed = !_isSidebarCollapsed),
-                    isSidebarCollapsed: _isSidebarCollapsed,
-                    onSettingsTap: () => context.push('/settings'),
-                  ),
-                  _buildHeader(),
-                  _buildSoftDivider(),
-                  _buildNearLimitBanner(),
-                  Expanded(child: _buildContentView()),
-                ],
-              ),
+              child: _buildPane(isPhone: false),
             ),
           ),
         ),
@@ -145,17 +100,21 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
     );
   }
 
-  Widget _buildDesktopTitle() {
-    final textPrimary = context.palette.textPrimary;
-
-    return Text(
-      getSectionTitle(ref, _selectedSection, _selectedFolderId),
-      style: AppTypography.headlineLarge.copyWith(color: textPrimary),
-      overflow: TextOverflow.ellipsis,
+  Widget _buildPane({required bool isPhone}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildHeader(isPhone: isPhone),
+        _buildNearLimitBanner(),
+        Expanded(child: _buildContentView()),
+      ],
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader({required bool isPhone}) {
+    final isInFolder =
+        _selectedSection == SidebarSection.folder && _selectedFolderId != null;
+
     return DocumentsHeader(
       newButtonKey: _addButtonKey,
       onNewPressed: () => showNewDocumentDropdown(context, _addButtonKey),
@@ -168,17 +127,20 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
       allFolderIds:
           getCurrentFolderIds(ref, _selectedSection, _selectedFolderId),
       isTrashSection: _selectedSection == SidebarSection.trash,
-    );
-  }
-
-  Widget _buildSoftDivider() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.md),
-      child: Divider(
-        height: 1,
-        thickness: 0.5,
-        color: context.palette.border,
-      ),
+      title: getSectionTitle(ref, _selectedSection, _selectedFolderId),
+      breadcrumb: isInFolder
+          ? buildBreadcrumb(
+              _selectedFolderId,
+              _navigateToRoot,
+              _navigateToFolder,
+              compact: true,
+            )
+          : null,
+      onSettingsTap: () => context.push('/settings'),
+      onMenuTap: isPhone ? () => _scaffoldKey.currentState?.openDrawer() : null,
+      onSidebarToggle: !isPhone && _isSidebarCollapsed
+          ? () => setState(() => _isSidebarCollapsed = false)
+          : null,
     );
   }
 
@@ -307,92 +269,4 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
   void _handleFolderTap(Folder folder) =>
       handleFolderTap(folder, _navigateToFolder);
   void _handleDocumentTap(DocumentInfo doc) => handleDocumentTap(doc);
-}
-
-/// Mobile top bar: [Sidebar icon] [Title or Path] [Settings icon]
-class _MobileTopBar extends StatelessWidget {
-  const _MobileTopBar({
-    required this.center,
-    required this.onSettingsTap,
-  });
-  final Widget center;
-  final VoidCallback onSettingsTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.sm,
-      ),
-      child: Row(
-        children: [
-          Builder(
-            builder: (ctx) => AppIconButton(
-              icon: Icons.view_sidebar_outlined,
-              variant: AppIconButtonVariant.ghost,
-              tooltip: 'Menü',
-              onPressed: () => Scaffold.of(ctx).openDrawer(),
-            ),
-          ),
-          const SizedBox(width: AppSpacing.xs),
-          Expanded(child: center),
-          const SizedBox(width: AppSpacing.xs),
-          AppIconButton(
-            icon: Icons.settings_outlined,
-            variant: AppIconButtonVariant.ghost,
-            tooltip: 'Ayarlar',
-            onPressed: onSettingsTap,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Desktop top bar: [Sidebar toggle] [Title or Path] [Settings icon]
-class _DesktopTopBar extends StatelessWidget {
-  const _DesktopTopBar({
-    required this.center,
-    required this.onSidebarToggle,
-    required this.isSidebarCollapsed,
-    required this.onSettingsTap,
-  });
-  final Widget center;
-  final VoidCallback onSidebarToggle;
-  final bool isSidebarCollapsed;
-  final VoidCallback onSettingsTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
-      ),
-      child: Row(
-        children: [
-          AppIconButton(
-            icon: isSidebarCollapsed
-                ? Icons.view_sidebar_outlined
-                : Icons.view_sidebar,
-            variant: AppIconButtonVariant.ghost,
-            tooltip: isSidebarCollapsed
-                ? 'Kenar çubuğunu aç'
-                : 'Kenar çubuğunu kapat',
-            onPressed: onSidebarToggle,
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(child: center),
-          const SizedBox(width: AppSpacing.sm),
-          AppIconButton(
-            icon: Icons.settings_outlined,
-            variant: AppIconButtonVariant.ghost,
-            tooltip: 'Ayarlar',
-            onPressed: onSettingsTap,
-          ),
-        ],
-      ),
-    );
-  }
 }
