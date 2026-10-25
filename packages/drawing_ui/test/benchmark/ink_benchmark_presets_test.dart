@@ -1,6 +1,9 @@
 // Ink benchmark for the v2 presets: 1,000 strokes alternating fountain and
 // brush (tapered outlines) plus a scripted active fountain stroke.
 // Timings are informational; run via ./scripts/ink_benchmark.sh.
+@Tags(['benchmark'])
+library;
+
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
