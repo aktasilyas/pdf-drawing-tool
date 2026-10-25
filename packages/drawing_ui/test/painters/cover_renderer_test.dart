@@ -49,9 +49,7 @@ void main() {
     const size = ui.Size(240, 320);
     final data = await _render(CoverFamily.leatherCognac, size);
     int alpha(int x, int y) => data.getUint8((y * 240 + x) * 4 + 3);
-    // Outside the board: at most a trace of the soft ambient shadow, which
-    // now runs under the spine as well.
-    expect(alpha(1, 1), lessThan(8));
+    expect(alpha(1, 1), 0); // outside the board (margin)
     expect(alpha(120, 160), 255); // board
     expect(alpha(5, 5), 255); // square spine corner
   });
@@ -64,6 +62,9 @@ void main() {
     final x = (g.cover.left + g.spineWidth / 2).round();
     final y = (g.cover.bottom + g.pageEdge).floor();
     expect(alpha(x, y), 255); // opaque page edge below the spine
+    // Nothing is cast into the margin left of the book.
+    final left = (g.cover.left - 1).floor();
+    expect(alpha(left, g.cover.center.dy.round()), 0);
   });
 
   test('loaded photographic texture adds grain to the board', () async {
