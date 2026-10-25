@@ -1,5 +1,7 @@
 #!/bin/bash
 # Workspace checks without melos: ./scripts/check.sh [pub|analyze|test|all] [package-dir]
+# COVERAGE=1 ./scripts/check.sh test <pkg> also collects lcov (needs
+# `dart pub global activate coverage` for pure Dart packages).
 # Order matters: drawing_core → drawing_ui → example_app (path dependencies).
 # In GitHub Actions, failures are also emitted as annotations so they are
 # readable from the PR page and the API.
@@ -64,13 +66,19 @@ for pkg in "${PACKAGES[@]}"; do
     run "analyze $pkg" "$pkg" dart analyze .
   fi
   if [[ $STEP == test || $STEP == all ]] && [ -d "$pkg/test" ]; then
-    if ! is_flutter "$pkg"; then run "test $pkg" "$pkg" dart test --timeout=90s
+    # COVERAGE=1 writes <pkg>/coverage/lcov.info (summarized by scripts/coverage.sh).
+    cov=()
+    [ -n "${COVERAGE:-}" ] && cov=(--coverage)
+    if ! is_flutter "$pkg"; then
+      if [ -n "${COVERAGE:-}" ]; then
+        run "test $pkg" "$pkg" dart pub global run coverage:test_with_coverage -- --timeout=90s
+      else run "test $pkg" "$pkg" dart test --timeout=90s; fi
     elif [ -d "$pkg/test/benchmark" ]; then
       # Wall-clock benchmarks run alone so parallel test processes do not
-      # compete with them for the CPU (see dart_test.yaml).
-      run "test $pkg" "$pkg" flutter test --timeout=90s --concurrency=4 --exclude-tags benchmark
+      # compete with them for the CPU (see dart_test.yaml). No coverage for them.
+      run "test $pkg" "$pkg" flutter test --timeout=90s --concurrency=4 --exclude-tags benchmark ${cov[@]+"${cov[@]}"}
       run "benchmark $pkg" "$pkg" flutter test --timeout=90s --concurrency=1 --tags benchmark
-    else run "test $pkg" "$pkg" flutter test --timeout=90s --concurrency=4; fi
+    else run "test $pkg" "$pkg" flutter test --timeout=90s --concurrency=4 ${cov[@]+"${cov[@]}"}; fi
   fi
 done
 
