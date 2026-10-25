@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
+import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/ai/domain/entities/ai_entities.dart';
 
 /// A single chat message bubble (user or assistant).
@@ -20,7 +21,6 @@ class AIChatBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -31,7 +31,7 @@ class AIChatBubble extends StatelessWidget {
         children: [
           if (!_isUser) _buildAvatar(theme),
           if (!_isUser) const SizedBox(width: 8),
-          Flexible(child: _buildBubble(theme, isDark)),
+          Flexible(child: _buildBubble(context, theme)),
           if (_isUser) const SizedBox(width: 8),
           if (_isUser) _buildAvatar(theme),
         ],
@@ -54,12 +54,9 @@ class AIChatBubble extends StatelessWidget {
     );
   }
 
-  Widget _buildBubble(ThemeData theme, bool isDark) {
-    final bgColor = _isUser
-        ? theme.colorScheme.primary.withValues(alpha: isDark ? 0.3 : 0.1)
-        : isDark
-            ? theme.colorScheme.surface
-            : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5);
+  Widget _buildBubble(BuildContext context, ThemeData theme) {
+    final palette = context.palette;
+    final bgColor = _isUser ? palette.accentContainer : palette.surfaceElevated;
 
     return Container(
       constraints: const BoxConstraints(maxWidth: 600),
