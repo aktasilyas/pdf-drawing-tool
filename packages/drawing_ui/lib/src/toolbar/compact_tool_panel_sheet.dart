@@ -3,6 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/screens/drawing_screen_panels.dart';
+import 'package:drawing_ui/src/theme/chrome_palette.dart';
+import 'package:drawing_ui/src/theme/chrome_tokens.dart';
+
+/// Sheet height cap as a fraction of the screen; the sheet shrinks to content.
+const double _maxHeightFraction = 0.6;
 
 /// Shows a tool's settings panel as a modal bottom sheet.
 ///
@@ -22,6 +27,7 @@ Future<void> showToolPanelSheet({
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
+    barrierColor: ChromePalette.of(context).textPrimary.withValues(alpha: 0.12),
     builder: (sheetContext) => _ToolPanelSheet(tool: tool),
   ).whenComplete(() {
     // Reset when sheet closes (swipe dismiss or X button).
@@ -36,7 +42,7 @@ class _ToolPanelSheet extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final palette = ChromePalette.of(context);
     final activePanel = ref.watch(activePanelProvider);
 
     // When panel's X button sets activePanelProvider to null, pop the sheet.
@@ -53,48 +59,43 @@ class _ToolPanelSheet extends ConsumerWidget {
       }
     });
 
-    return DraggableScrollableSheet(
-      initialChildSize: 0.65,
-      minChildSize: 0.3,
-      maxChildSize: 0.85,
-      builder: (context, scrollController) {
-        return Container(
-          decoration: BoxDecoration(
-            color: colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(
-              top: Radius.circular(20),
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.sizeOf(context).height * _maxHeightFraction,
+      ),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: palette.surfaceElevated,
+          borderRadius: const BorderRadius.vertical(
+            top: Radius.circular(ChromeRadius.xxl),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: ChromeSpacing.md),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: palette.border,
+                  borderRadius: BorderRadius.circular(ChromeSpacing.xxs),
+                ),
+                child: const SizedBox(width: 32, height: 4),
+              ),
             ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Drag handle
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Container(
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
+            Flexible(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: ChromeSpacing.lg,
                 ),
+                // Follows the active panel: the pen picker can switch to the
+                // highlighter while the sheet is open.
+                child: buildActivePanel(panel: activePanel ?? tool),
               ),
-
-              // Panel content
-              Expanded(
-                child: SingleChildScrollView(
-                  controller: scrollController,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  // Follows the active panel: the pen picker can switch to the
-                  // highlighter while the sheet is open.
-                  child: buildActivePanel(panel: activePanel ?? tool),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
