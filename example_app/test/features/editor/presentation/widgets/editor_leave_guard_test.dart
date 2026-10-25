@@ -1,0 +1,107 @@
+import 'dart:async';
+
+import 'package:dartz/dartz.dart';
+import 'package:drawing_core/drawing_core.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+
+import 'package:example_app/features/editor/editor.dart';
+
+class _MockSave extends Mock implements SaveDocumentUseCase {}
+
+void main() {
+  late _MockSave save;
+  late DrawingDocument doc;
+  late int leaveCalls;
+
+  setUpAll(() {
+    registerFallbackValue(DrawingDocument.emptyMultiPage('fallback'));
+  });
+
+  setUp(() {
+    save = _MockSave();
+    when(() => save(any())).thenAnswer((_) async => const Right(null));
+    doc = DrawingDocument.emptyMultiPage('A').copyWith(id: 'doc_a');
+    leaveCalls = 0;
+  });
+
+  Future<ProviderContainer> pumpGuard(
+    WidgetTester tester, {
+    Future<void> Function()? onLeave,
+  }) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [saveDocumentUseCaseProvider.overrideWithValue(save)],
+        child: MaterialApp(
+          home: EditorLeaveGuard(
+            onLeave: onLeave ?? () async => leaveCalls++,
+            child: const SizedBox(),
+          ),
+        ),
+      ),
+    );
+    return ProviderScope.containerOf(tester.element(find.byType(SizedBox)));
+  }
+
+  void setLifecycle(WidgetTester tester, List<AppLifecycleState> states) {
+    for (final state in states) {
+      tester.binding.handleAppLifecycleStateChanged(state);
+    }
+  }
+
+  testWidgets('pausing the app within the debounce saves the stroke',
+      (tester) async {
+    final container = await pumpGuard(tester);
+    container.read(autoSaveProvider.notifier).documentChanged(doc);
+
+    await tester.pump(const Duration(milliseconds: 500));
+    setLifecycle(tester, const [
+      AppLifecycleState.inactive,
+      AppLifecycleState.hidden,
+      AppLifecycleState.paused,
+    ]);
+    await tester.pump();
+
+    verify(() => save(doc)).called(1);
+
+    await tester.pump(const Duration(seconds: 5));
+    verifyNoMoreInteractions(save);
+
+    setLifecycle(tester, const [
+      AppLifecycleState.hidden,
+      AppLifecycleState.inactive,
+      AppLifecycleState.resumed,
+    ]);
+  });
+
+  testWidgets('system back goes through onLeave', (tester) async {
+    await pumpGuard(tester);
+
+    await tester.binding.handlePopRoute();
+    await tester.pump();
+
+    expect(leaveCalls, 1);
+    expect(find.byType(SizedBox), findsOneWidget);
+  });
+
+  testWidgets('a second back while leaving is ignored', (tester) async {
+    final done = Completer<void>();
+    await pumpGuard(
+      tester,
+      onLeave: () {
+        leaveCalls++;
+        return done.future;
+      },
+    );
+
+    await tester.binding.handlePopRoute();
+    await tester.binding.handlePopRoute();
+    await tester.pump();
+    expect(leaveCalls, 1);
+
+    done.complete();
+    await tester.pump();
+  });
+}
