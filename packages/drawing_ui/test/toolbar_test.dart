@@ -44,8 +44,16 @@ void main() {
     );
   }
 
+  /// ToolBar is the expanded (>=840) layout; render it at tablet width so
+  /// the tool capsule shows its tools instead of the overflow menu.
+  Future<void> useTabletSurface(WidgetTester tester) async {
+    await tester.binding.setSurfaceSize(const Size(1180, 820));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+  }
+
   group('ToolBar', () {
     testWidgets('renders nav buttons and tool buttons', (tester) async {
+      await useTabletSurface(tester);
       await tester.pumpWidget(createToolBarWidget());
 
       // Nav buttons live inside the single-row toolbar.
@@ -61,9 +69,9 @@ void main() {
         findsOneWidget,
       );
 
-      // Undo/redo moved to FloatingUndoRedo; settings button was removed.
-      expect(find.byIcon(ElyanotesIcons.undo), findsNothing);
-      expect(find.byIcon(ElyanotesIcons.redo), findsNothing);
+      // Undo/redo live in the tools capsule; settings button was removed.
+      expect(find.byIcon(ElyanotesIcons.undo), findsOneWidget);
+      expect(find.byIcon(ElyanotesIcons.redo), findsOneWidget);
       expect(find.byIcon(ElyanotesIcons.settings), findsNothing);
     });
 
@@ -94,6 +102,7 @@ void main() {
     });
 
     testWidgets('tool selection updates current tool provider', (tester) async {
+      await useTabletSurface(tester);
       await tester.pumpWidget(createToolBarWidget());
 
       // Tap on eraser tool (not grouped, directly visible)
