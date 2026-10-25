@@ -13,7 +13,6 @@ import 'package:drawing_ui/src/canvas/sticky_note_handles_painter.dart';
 import 'package:drawing_ui/src/canvas/sticky_note_resize_handles.dart';
 import 'package:drawing_ui/src/canvas/selected_elements_painter.dart';
 import 'package:drawing_ui/src/canvas/page_background_painter.dart';
-import 'package:drawing_ui/src/canvas/drawing_canvas_helpers.dart';
 import 'package:drawing_ui/src/canvas/drawing_canvas_gesture_handlers.dart';
 import 'package:drawing_ui/src/canvas/laser_controller.dart';
 import 'package:drawing_ui/src/canvas/laser_overlay_widget.dart';
@@ -112,8 +111,7 @@ class DrawingCanvas extends ConsumerStatefulWidget {
 ///
 /// Exposed as public for testing purposes.
 /// Uses mixins for gesture handling and helpers to keep file size manageable.
-class DrawingCanvasState extends ConsumerState<DrawingCanvas>
-    with DrawingCanvasHelpers, DrawingCanvasGestureHandlers {
+class DrawingCanvasState extends DrawingCanvasGestureHandlers<DrawingCanvas> {
   /// Canvas mode configuration (for gesture handlers)
   @override
   core.CanvasMode? get canvasMode => widget.canvasMode;

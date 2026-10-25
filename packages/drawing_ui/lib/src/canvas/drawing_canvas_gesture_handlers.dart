@@ -15,9 +15,11 @@ import 'package:drawing_ui/src/models/tool_type.dart';
 import 'package:drawing_ui/src/widgets/ruler_overlay.dart'
     show rulerStripLength, rulerStripHeight;
 
-/// Gesture handling methods for DrawingCanvas.
-/// Extracted for better maintainability (file size reduction).
-mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
+/// Shared state contract for the gesture mixins of [DrawingCanvasState].
+///
+/// Abstract accessors are implemented by `DrawingCanvasState`; the private
+/// fields are shared between the gesture mixins in this library.
+mixin _GestureState<T extends ConsumerStatefulWidget>
     on ConsumerState<T>, DrawingCanvasHelpers<T> {
   // Required fields from DrawingCanvasState
   core.CanvasMode? get canvasMode; // Canvas mode configuration
@@ -74,13 +76,23 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
   set scaleGestureIsZoom(bool value);
   bool _swipeDragActive = false;
 
-  /// Minimum distance between points to avoid excessive point creation.
-  static const double minPointDistance = 1.0;
-
   // ── Long press paste menu ──
   Timer? _longPressTimer;
   Offset? _longPressScreenPos;
+}
 
+/// Gesture handling methods for DrawingCanvas.
+/// Composes the private gesture mixins of this library.
+abstract class DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
+    extends ConsumerState<T>
+    with DrawingCanvasHelpers<T>, _GestureState<T>, _PointerDownGestures<T> {
+  /// Minimum distance between points to avoid excessive point creation.
+  static const double minPointDistance = 1.0;
+}
+
+/// Temporary remainder holding the not yet extracted handlers.
+mixin _PointerDownGestures<T extends ConsumerStatefulWidget>
+    on ConsumerState<T>, DrawingCanvasHelpers<T>, _GestureState<T> {
   /// Detects if the pointer starts inside a (non-minimized) sticky note
   /// and stores it for point clamping during the stroke.
   void _detectDrawingInsideNote(PointerEvent event) {
@@ -684,7 +696,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     final lastPointValue = lastPoint;
     if (lastPointValue != null) {
       final distance = (event.localPosition - lastPointValue).distance;
-      if (distance < minPointDistance) return;
+      if (distance < DrawingCanvasGestureHandlers.minPointDistance) return;
     }
 
     var point = _clampToNote(createDrawingPoint(event));
@@ -1060,7 +1072,7 @@ mixin DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
     final lastPointValue = lastPoint;
     if (lastPointValue != null) {
       final distance = (event.localPosition - lastPointValue).distance;
-      if (distance < minPointDistance) return;
+      if (distance < DrawingCanvasGestureHandlers.minPointDistance) return;
     }
 
     final transform = ref.read(canvasTransformProvider);
