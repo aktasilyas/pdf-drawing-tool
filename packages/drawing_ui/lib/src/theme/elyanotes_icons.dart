@@ -1,7 +1,11 @@
 /// Centralized icon definitions for Elyanotes.
 ///
-/// All icons use Phosphor Light style for thin, elegant appearance.
+/// Editor icons use Phosphor Light style for thin, elegant appearance.
 /// Active/selected states use Phosphor Regular for slightly bolder look.
+///
+/// The library screen (`library*` members) follows docs/design/BRIEF.md:
+/// Regular for chrome, Fill for selected state. Whether the editor should
+/// move to Regular as well is an open question (spec 51, section 10).
 ///
 /// Never use PhosphorIcons directly in widgets — always use ElyanotesIcons.
 library;
@@ -185,6 +189,38 @@ abstract final class ElyanotesIcons {
   static const chevronLeft = PhosphorIconsLight.caretLeft;
   static const chevronRight = PhosphorIconsLight.caretRight;
   static const arrowLeft = PhosphorIconsLight.arrowLeft;
+
+  // ═══════════════════════════════════════════
+  // Library (BRIEF: Regular chrome, Fill selected)
+  // ═══════════════════════════════════════════
+
+  static const libraryNotebook = PhosphorIconsRegular.notebook;
+  static const libraryNotebookFill = PhosphorIconsFill.notebook;
+  static const libraryStar = PhosphorIconsRegular.star;
+  static const libraryStarFill = PhosphorIconsFill.star;
+  static const libraryTrash = PhosphorIconsRegular.trash;
+  static const libraryTrashFill = PhosphorIconsFill.trash;
+  static const libraryFolder = PhosphorIconsRegular.folder;
+  static const libraryFolderFill = PhosphorIconsFill.folder;
+  static const libraryPlus = PhosphorIconsRegular.plus;
+  static const libraryCaretDown = PhosphorIconsRegular.caretDown;
+  static const libraryCaretRight = PhosphorIconsRegular.caretRight;
+  static const librarySearch = PhosphorIconsRegular.magnifyingGlass;
+  static const librarySort = PhosphorIconsRegular.sortAscending;
+  static const libraryGrid = PhosphorIconsRegular.squaresFour;
+  static const libraryRows = PhosphorIconsRegular.rows;
+  static const librarySelect = PhosphorIconsRegular.checkCircle;
+  static const libraryCheck = PhosphorIconsRegular.check;
+  static const libraryClose = PhosphorIconsRegular.x;
+  static const libraryCopy = PhosphorIconsRegular.copy;
+  static const libraryMove = PhosphorIconsRegular.folderSimple;
+  static const libraryCheckSquare = PhosphorIconsRegular.checkSquare;
+  static const librarySquare = PhosphorIconsRegular.square;
+  static const librarySettings = PhosphorIconsRegular.gearSix;
+  static const librarySidebar = PhosphorIconsRegular.sidebar;
+  static const libraryMenu = PhosphorIconsRegular.list;
+  static const libraryInfo = PhosphorIconsRegular.info;
+  static const libraryLock = PhosphorIconsRegular.lock;
 
   // ═══════════════════════════════════════════
   // Size Constants
