@@ -10,7 +10,10 @@ import 'package:drawing_ui/src/toolbar/tool_groups.dart';
 
 /// A reorderable list of tools for the settings panel.
 class ReorderableToolList extends ConsumerWidget {
-  const ReorderableToolList({super.key});
+  const ReorderableToolList({super.key, this.shrinkWrap = false});
+
+  /// Sizes the list to its items, for parents with unbounded height.
+  final bool shrinkWrap;
 
   /// Collapse grouped tools (pen, highlighter, eraser) into single entries.
   static List<ToolConfig> _collapseGroups(List<ToolConfig> sorted) {
@@ -60,6 +63,7 @@ class ReorderableToolList extends ConsumerWidget {
     final displayTools = _collapseGroups(config.sortedTools);
 
     return ReorderableListView.builder(
+      shrinkWrap: shrinkWrap,
       padding: const EdgeInsets.symmetric(horizontal: 4),
       itemCount: displayTools.length,
       onReorder: (oldIndex, newIndex) async {

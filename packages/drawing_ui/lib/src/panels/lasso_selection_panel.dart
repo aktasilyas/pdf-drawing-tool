@@ -50,7 +50,7 @@ class LassoSelectionPanel extends ConsumerWidget {
           SelectionPreview(mode: settings.mode),
           const SizedBox(height: 16),
 
-          // -- Selection Type Selector (40x40 icon buttons) --
+          // -- Selection Type Selector (40dp icons, 48dp hit areas) --
           _SelectionTypeSelector(
             selectedMode: settings.mode,
             onModeSelected: (mode) {
@@ -120,20 +120,27 @@ class _SelectionTypeSelector extends StatelessWidget {
       children: LassoMode.values.map((mode) {
         final selected = mode == selectedMode;
         final icon = _iconFor(mode, selected);
+        // 40dp visual inside a 48dp (kMinInteractiveDimension) hit area.
         return GestureDetector(
+          key: ValueKey('lasso-mode-${mode.name}'),
           onTap: () => onModeSelected(mode),
           behavior: HitTestBehavior.opaque,
-          child: Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: selected ? cs.primary : Colors.transparent,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(
-              icon,
-              size: 20,
-              color: selected ? cs.onPrimary : cs.onSurfaceVariant,
+          child: SizedBox.square(
+            dimension: kMinInteractiveDimension,
+            child: Center(
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: selected ? cs.primary : Colors.transparent,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  icon,
+                  size: 20,
+                  color: selected ? cs.onPrimary : cs.onSurfaceVariant,
+                ),
+              ),
             ),
           ),
         );

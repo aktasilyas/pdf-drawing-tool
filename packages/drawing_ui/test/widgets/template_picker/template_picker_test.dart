@@ -351,4 +351,23 @@ void main() {
       expect(find.byType(TemplatePicker), findsOneWidget);
     });
   });
+
+  testWidgets('fits a 400 dp wide phone without overflow', (tester) async {
+    tester.view.physicalSize = const Size(400, 800);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: TemplatePicker(),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.byType(PaperSizePicker), findsOneWidget);
+    expect(find.text('Uygula'), findsOneWidget);
+  });
 }

@@ -4,11 +4,25 @@ import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/widgets/reorderable_tool_list.dart';
 
 /// Panel for customizing toolbar layout.
+///
+/// With a bounded height the tool list takes the remaining space and
+/// scrolls; with an unbounded height (e.g. inside a scroll view) it is
+/// shrink-wrapped to its items.
 class ToolbarEditorPanel extends ConsumerWidget {
   const ToolbarEditorPanel({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    return LayoutBuilder(
+      builder: (context, constraints) => _build(
+        context,
+        ref,
+        bounded: constraints.hasBoundedHeight,
+      ),
+    );
+  }
+
+  Widget _build(BuildContext context, WidgetRef ref, {required bool bounded}) {
     final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     return Padding(
@@ -38,7 +52,10 @@ class ToolbarEditorPanel extends ConsumerWidget {
               style: textTheme.bodySmall
                   ?.copyWith(fontSize: 13, color: cs.onSurfaceVariant)),
           const SizedBox(height: 16),
-          const ReorderableToolList(),
+          if (bounded)
+            const Flexible(child: ReorderableToolList())
+          else
+            const ReorderableToolList(shrinkWrap: true),
         ],
       ),
     );
