@@ -14,6 +14,22 @@ Claude can read PNG files as images, so golden tests double as screenshots.
      are for local review and are git-ignored.
    - Wrap the widget in the real `AppTheme` so tokens apply.
 3. **Render**: `flutter test --update-goldens <test file>` in the package.
+   - **No working SDK** (cloud session whose proxy blocks the engine download):
+     push the branch, then dispatch the `Update goldens` workflow:
+     `gh api -X POST repos/aktasilyas/pdf-drawing-tool/actions/workflows/update-goldens.yml/dispatches -f ref=main -f "inputs[branch]=claude/<n>-<slug>" -f "inputs[package]=packages/drawing_ui"`
+     (`package` is `packages/drawing_ui` or `example_app`; only `claude/*` branches
+     are accepted). Find the run with
+     `gh api "repos/aktasilyas/pdf-drawing-tool/actions/workflows/update-goldens.yml/runs?event=workflow_dispatch&branch=main&per_page=1"`,
+     wait until it completes, then `git fetch origin <branch> && git merge origin/<branch>`
+     and Read the committed CI goldens. It commits
+     `test(golden): regenerate goldens [workflow]` and dispatches CI on the branch
+     itself (a `GITHUB_TOKEN` push does not trigger CI).
+   - The workflow commits nothing when any test in the package fails (read the
+     run's job log to see which one). The rendered PNGs, including platform
+     goldens with real fonts, are always in the run's `goldens-<run_id>` artifact:
+     `gh api repos/aktasilyas/pdf-drawing-tool/actions/runs/<run_id>/artifacts`, then
+     `gh api .../actions/artifacts/<artifact_id>/zip > goldens.zip` (the download
+     may be blocked by the session proxy; the committed CI goldens are the reliable path).
 4. **Look**: Read the generated platform-golden PNGs. Then ask the
    `ui-designer` agent to review the same files against the spec.
 5. **Fix** the ranked findings, re-render, re-review. Stop when the reviewer

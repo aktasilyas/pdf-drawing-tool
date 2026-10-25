@@ -26,6 +26,13 @@ cd example_app && flutter run --dart-define-from-file=config/flags_all_on.json -
 flutter test path/to/file_test.dart                 # single test
 dart run build_runner build --delete-conflicting-outputs   # example_app codegen
 ```
+No Flutter SDK in the session (engine download blocked)? Regenerate goldens in CI on a
+pushed `claude/*` branch, then `git fetch` + `git merge` the branch and Read the PNGs
+(details in the `design-loop` skill):
+```bash
+gh api -X POST repos/aktasilyas/pdf-drawing-tool/actions/workflows/update-goldens.yml/dispatches \
+  -f ref=main -f "inputs[branch]=claude/<n>-<slug>" -f "inputs[package]=packages/drawing_ui"
+```
 
 ## Workflow (every task)
 1. Non-trivial work starts from a GitHub issue with acceptance criteria.
