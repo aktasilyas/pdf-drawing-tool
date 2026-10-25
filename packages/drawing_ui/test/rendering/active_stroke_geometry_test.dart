@@ -125,24 +125,35 @@ void main() {
       g.dispose();
     });
 
+    test('square-cap styles keep one body path', () {
+      final g = ActiveStrokeGeometry()
+        ..begin(StrokeStyle.highlighter())
+        ..sync(_wave(300));
+      expect(g.mode, ActiveStrokeMode.stroked);
+      expect(g.frozenChunks, 0);
+      g.dispose();
+    });
+
     for (final entry in {
       'pen': StrokeStyle.pen(thickness: 3),
-      'highlighter': StrokeStyle.highlighter(),
+      'pen (thick)': StrokeStyle.pen(thickness: 12),
     }.entries) {
-      test('chunked live render matches committed render: ${entry.key}',
-          () async {
-        final points = _sine(400);
-        final g = ActiveStrokeGeometry()..begin(entry.value);
-        for (var n = 1; n <= points.length; n++) {
-          g.sync(points.sublist(0, n));
-        }
-        expect(g.frozenChunks, greaterThan(5));
-        final live = await _raster(g.paint);
-        final committed = await _raster((c) =>
-            FlutterStrokeRenderer().renderActiveStroke(c, points, entry.value));
-        expect(_diffRatio(live, committed), lessThan(0.005));
-        g.dispose();
-      });
+      for (final input in {'sine': _sine(400), 'zigzag': _wave(400)}.entries) {
+        test('chunked live render matches committed render: '
+            '${entry.key}, ${input.key}', () async {
+          final points = input.value;
+          final g = ActiveStrokeGeometry()..begin(entry.value);
+          for (var n = 1; n <= points.length; n++) {
+            g.sync(points.sublist(0, n));
+          }
+          expect(g.frozenChunks, greaterThan(5));
+          final live = await _raster(g.paint);
+          final committed = await _raster((c) => FlutterStrokeRenderer()
+              .renderActiveStroke(c, points, entry.value));
+          expect(_diffRatio(live, committed), lessThan(0.005));
+          g.dispose();
+        });
+      }
     }
   });
 }

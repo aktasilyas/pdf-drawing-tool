@@ -53,6 +53,7 @@ class ActiveStrokeGeometry {
   DrawingPoint? _prev;
   double _bodyX = 0, _bodyY = 0; // stroked: current end point of [_body]
   int _bodySegments = 0; // stroked: segments in [_body] since last freeze
+  bool get _roundCaps => _paint?.strokeCap == StrokeCap.round;
   Picture? _frozen; // stroked: every frozen body chunk, nested
   final List<Picture> _pictures = <Picture>[]; // owned, for disposal
   double _minX = 0, _minY = 0, _maxX = 0, _maxY = 0;
@@ -247,9 +248,9 @@ class ActiveStrokeGeometry {
         _bodyX = (q.x + p.x) / 2;
         _bodyY = (q.y + p.y) / 2;
         _body.quadraticBezierTo(q.x, q.y, _bodyX, _bodyY);
-        // Chunk joints sit at segment end points, where consecutive
-        // quadratics share a tangent, so caps meet like the round join.
-        if (++_bodySegments >= strokedChunk) _freezeBody();
+        // Joints share a tangent, so round caps meet like the round join;
+        // square caps would poke out on tight turns (one body path instead).
+        if (++_bodySegments >= strokedChunk && _roundCaps) _freezeBody();
       }
       _prev = p;
       _consumed = i + 1;
