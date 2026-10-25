@@ -46,14 +46,15 @@ class DocumentCard extends ConsumerWidget {
       info: LibraryTileInfo(
         title: document.title,
         meta: LibraryMeta.document(document),
-        onTap: onMorePressed,
-        showCaret: onMorePressed != null,
+        onTap: isSelectionMode ? onTap : onMorePressed,
+        showCaret: onMorePressed != null && !isSelectionMode,
       ),
       onTap: onTap,
       onLongPress: () => _handleLongPress(ref),
       isSelected: isSelected,
       isSelectionMode: isSelectionMode,
       overlays: _buildOverlays,
+      artRect: _artRect(),
     );
   }
 
@@ -66,17 +67,25 @@ class DocumentCard extends ConsumerWidget {
     }
   }
 
-  Widget _buildCover() {
+  Rect Function(Size)? _artRect() {
+    if (_coverOrNull() != null) return null;
+    return (box) => LibraryPageThumbnail.pageRect(document, box);
+  }
+
+  core.Cover? _coverOrNull() {
     final coverId = document.coverId;
-    if (document.hasCover && coverId != null) {
-      final cover = core.CoverRegistry.byId(coverId);
-      if (cover != null) {
-        return CoverPreviewWidget(
-          cover: cover,
-          title: document.title,
-          showBorder: false,
-        );
-      }
+    if (!document.hasCover || coverId == null) return null;
+    return core.CoverRegistry.byId(coverId);
+  }
+
+  Widget _buildCover() {
+    final cover = _coverOrNull();
+    if (cover != null) {
+      return CoverPreviewWidget(
+        cover: cover,
+        title: document.title,
+        showBorder: false,
+      );
     }
     return LibraryPageThumbnail(document: document);
   }

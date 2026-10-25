@@ -43,7 +43,7 @@ class FolderCard extends ConsumerWidget {
       info: LibraryTileInfo(
         title: folder.name,
         meta: LibraryMeta.folder(folder),
-        onTap: onMorePressed,
+        onTap: isSelectionMode ? onTap : onMorePressed,
         showCaret: onMorePressed != null && !isSelectionMode,
         caretKey: const Key('folder_card_more_button'),
       ),
@@ -52,6 +52,7 @@ class FolderCard extends ConsumerWidget {
       isSelected: isSelected,
       isSelectionMode: isSelectionMode,
       overlays: (board) => _buildOverlays(ref, board),
+      artRect: FolderTileArt.bodyRect,
     );
   }
 

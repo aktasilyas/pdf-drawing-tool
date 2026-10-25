@@ -6,6 +6,8 @@ import 'package:drawing_ui/drawing_ui.dart' show CoverGeometry;
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/documents/presentation/widgets/library_tile_parts.dart';
 
+Rect _boardRect(Size box) => CoverGeometry.of(box).cover;
+
 List<Widget> _noOverlays(Rect board) => const <Widget>[];
 
 /// Shared frame of document and folder tiles: a 3:4 cover box bottom-aligned
@@ -22,6 +24,7 @@ class LibraryTileFrame extends StatefulWidget {
     this.isSelected = false,
     this.isSelectionMode = false,
     this.overlays = _noOverlays,
+    this.artRect,
   });
 
   final Widget cover;
@@ -31,6 +34,16 @@ class LibraryTileFrame extends StatefulWidget {
   final bool isSelected;
   final bool isSelectionMode;
   final List<Widget> Function(Rect board) overlays;
+
+  /// Rect of the visible art inside the cover box. Defaults to the cover
+  /// board; used for the checkbox and passed to [overlays].
+  final Rect Function(Size box)? artRect;
+
+  /// Scale while the tile is pressed.
+  static const double pressedScale = 0.97;
+
+  /// Width of the selection / focus ring.
+  static const double ringWidth = 1.5;
 
   @override
   State<LibraryTileFrame> createState() => _LibraryTileFrameState();
@@ -63,7 +76,7 @@ class _LibraryTileFrameState extends State<LibraryTileFrame> {
         children: [
           _buildBackdrop(context),
           AnimatedScale(
-            scale: _pressed ? 0.97 : 1,
+            scale: _pressed ? LibraryTileFrame.pressedScale : 1,
             duration: AppDurations.instant,
             curve: AppCurves.enter,
             child: Column(
@@ -96,7 +109,7 @@ class _LibraryTileFrameState extends State<LibraryTileFrame> {
             borderRadius: BorderRadius.circular(AppRadius.lg),
             border: Border.all(
               color: ring ? palette.accent : Colors.transparent,
-              width: 1.5,
+              width: LibraryTileFrame.ringWidth,
             ),
           ),
         ),
@@ -112,7 +125,7 @@ class _LibraryTileFrameState extends State<LibraryTileFrame> {
           constraints.maxHeight * 3 / 4,
         );
         final box = Size(width, width * 4 / 3);
-        final board = CoverGeometry.of(box).cover;
+        final art = (widget.artRect ?? _boardRect)(box);
         return Align(
           alignment: Alignment.bottomCenter,
           child: SizedBox(
@@ -132,13 +145,13 @@ class _LibraryTileFrameState extends State<LibraryTileFrame> {
                     child: widget.cover,
                   ),
                 ),
-                ...widget.overlays(board),
+                ...widget.overlays(art),
                 if (widget.isSelectionMode)
                   Positioned(
-                    left: board.right -
+                    left: art.right -
                         AppSpacing.sm -
                         LibrarySelectionCheckbox.size,
-                    top: board.top + AppSpacing.sm,
+                    top: art.top + AppSpacing.sm,
                     child: IgnorePointer(
                       child: LibrarySelectionCheckbox(
                         isSelected: widget.isSelected,

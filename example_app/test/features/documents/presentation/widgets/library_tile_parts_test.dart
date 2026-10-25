@@ -183,5 +183,40 @@ void main() {
       );
       expect(find.byType(LibrarySelectionCheckbox), findsOneWidget);
     });
+
+    testWidgets('checkbox sits on the top-right of a custom artRect',
+        (tester) async {
+      const key = Key('art_marker');
+      Rect art(Size box) => const Rect.fromLTWH(10, 20, 80, 90);
+      await tester.pumpWidget(
+        _host(
+          AppTheme.light,
+          SizedBox(
+            width: 151,
+            height: 252,
+            child: LibraryTileFrame(
+              cover: const ColoredBox(color: Colors.red),
+              info: const LibraryTileInfo(title: 'A', meta: 'B'),
+              onTap: () {},
+              onLongPress: () {},
+              isSelectionMode: true,
+              artRect: art,
+              overlays: (rect) => [
+                Positioned.fromRect(
+                  rect: rect,
+                  child: const SizedBox(key: key),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      final marker = tester.getRect(find.byKey(key));
+      final box = tester.getRect(find.byType(LibrarySelectionCheckbox));
+      expect(marker.size, const Size(80, 90));
+      expect(box.right, closeTo(marker.right - AppSpacing.sm, 0.01));
+      expect(box.top, closeTo(marker.top + AppSpacing.sm, 0.01));
+    });
   });
 }

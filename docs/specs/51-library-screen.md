@@ -80,7 +80,7 @@ PHONE 390x844 (compact header, sidebar in Drawer)
 - Without a cover (PDF, image, notebook without cover, whiteboard): the page thumbnail is contained in the cover-board rect
   (insets: left 1.2%·w, right 6%·w, bottom 6%·w, the same as `CoverGeometry.cover`), with its own aspect (`isPortrait`, paper mm), **bottom-centred**
   so baselines line up across the row. Page: paper fill (`DocumentPaperColors`, unchanged data colours), 1dp `border`, radius `AppRadius.xs`, no shadow.
-  Delete the spiral-binding decoration and the whiteboard frame. A whiteboard is a page with the dot grid in `textPrimary` @ 8% on `paper`.
+  Delete the spiral-binding decoration and the whiteboard frame. A whiteboard is a page with the dot grid in the light palette's `textPrimary` @ 24% on `paper` (pages stay light in dark mode, so the dots are theme-invariant).
 - Remove the page-count badge (it used a 9px inline font) because the count is now in the meta line. Remove the always-visible empty star.
 - Gestures (unchanged): tap cover = open (in selection mode: toggle). Long-press = enter selection. Tap on the info block (title, caret, meta;
   hit area includes the `sm` gap, at least 48 high) = document menu. Tap on the favorite badge = toggle favorite.
@@ -92,8 +92,9 @@ PHONE 390x844 (compact header, sidebar in Drawer)
 Same footprint and info block as a document tile, so rows stay aligned. The art is an original drawn folder, bottom-aligned in the cover box:
 - Body box `w x 0.78w` on the bottom edge. Back panel: full body, radius `0.06w`, colour = folder colour darkened (HSL lightness −0.08).
   Tab: top-left, `0.40w x 0.08w`, same colour, top corners rounded. Sheet: `paper`, inset `0.06w` on the sides, top `0.05w` below the back top.
-  Front panel: from `0.20w` below the back top to the bottom, full width, same radius. Colour = `Color.lerp(folderColor, palette.surface, 0.30)`
-  (this calms the saturated legacy folder palette in both themes). Top edge highlight: 1dp `paper` @ 25%. No icon, no number on the art.
+  Front panel: from `0.20w` below the back top to the bottom, full width, same radius. Colour = the folder colour tamed theme-independently
+  (HSL saturation capped at 0.45, lightness clamped to 0.42..0.62; this calms the saturated legacy folder palette). Back panel and tab use the
+  tamed colour darkened by 0.08 lightness; a 1dp line darkened by 0.16 runs along the body's bottom edge. The art is drawn inside the cover board rect. Top edge highlight: 1dp `paper` @ 25%. No icon, no number on the art.
 - Paints are built in the painter's constructor. `shouldRepaint` compares the colour and the palette. Reuse it at 36x48 in list rows.
 - Meta line: `"{n} belge"`. Favorite badge is the same as for documents. Remove the `Icons.folder_rounded` FittedBox and the white count text.
 - Keep `Key('folder_card_more_button')` on the caret.

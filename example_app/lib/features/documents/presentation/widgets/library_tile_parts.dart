@@ -14,6 +14,9 @@ class LibrarySelectionCheckbox extends StatelessWidget {
 
   static const double size = 24;
 
+  /// Ring width.
+  static const double borderWidth = 1.5;
+
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
@@ -29,7 +32,7 @@ class LibrarySelectionCheckbox extends StatelessWidget {
             : palette.surfaceElevated.withValues(alpha: 0.92),
         border: Border.all(
           color: isSelected ? palette.accent : palette.textMuted,
-          width: 1.5,
+          width: borderWidth,
         ),
       ),
       child: isSelected

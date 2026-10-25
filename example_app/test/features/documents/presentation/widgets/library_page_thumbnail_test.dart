@@ -56,4 +56,12 @@ void main() {
     expect(page.bottom, closeTo(root.top + board.bottom, 0.01));
     expect(page.right, lessThanOrEqualTo(root.left + board.right + 0.01));
   });
+
+  test('pageRect is bottom-centred in the board for the given box', () {
+    const box = Size(151, 201.6);
+    final page = LibraryPageThumbnail.pageRect(_doc(), box);
+    expect(page.bottom, closeTo(board.bottom, 0.01));
+    expect(page.center.dx, closeTo(board.center.dx, 0.01));
+    expect(page.height, greaterThan(page.width));
+  });
 }

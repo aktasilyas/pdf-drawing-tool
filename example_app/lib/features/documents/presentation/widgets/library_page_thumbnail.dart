@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
 import 'package:drawing_ui/drawing_ui.dart' show CoverGeometry;
@@ -28,8 +30,10 @@ class LibraryPageThumbnail extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final board = CoverGeometry.of(constraints.biggest).cover;
-        final pageRect = _pageRect(board);
+        final pageRect = LibraryPageThumbnail.pageRect(
+          document,
+          constraints.biggest,
+        );
         return Stack(
           clipBehavior: Clip.none,
           children: [
@@ -45,7 +49,7 @@ class LibraryPageThumbnail extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AppRadius.xs),
                   border: Border.all(color: palette.border),
                 ),
-                child: _content(palette),
+                child: _content(),
               ),
             ),
           ],
@@ -54,15 +58,13 @@ class LibraryPageThumbnail extends StatelessWidget {
     );
   }
 
-  /// Largest page of the document's aspect that fits [board], bottom-centred.
-  Rect _pageRect(Rect board) {
-    final short = document.paperWidthMm < document.paperHeightMm
-        ? document.paperWidthMm
-        : document.paperHeightMm;
-    final long = document.paperWidthMm < document.paperHeightMm
-        ? document.paperHeightMm
-        : document.paperWidthMm;
-    final aspect = document.isPortrait ? short / long : long / short;
+  /// Largest page of [d]'s aspect that fits the cover board of [box],
+  /// bottom-centred.
+  static Rect pageRect(DocumentInfo d, Size box) {
+    final board = CoverGeometry.of(box).cover;
+    final short = math.min(d.paperWidthMm, d.paperHeightMm);
+    final long = math.max(d.paperWidthMm, d.paperHeightMm);
+    final aspect = d.isPortrait ? short / long : long / short;
 
     var width = board.width;
     var height = width / aspect;
@@ -78,7 +80,11 @@ class LibraryPageThumbnail extends StatelessWidget {
     );
   }
 
-  Widget _content(AppPalette palette) {
+  // Pages stay light in dark mode, so the dots use the light palette.
+  static final Color _dotColor =
+      AppPalette.light.textPrimary.withValues(alpha: 0.24);
+
+  Widget _content() {
     switch (document.documentType) {
       case core.DocumentType.pdf:
       case core.DocumentType.image:
@@ -86,7 +92,8 @@ class LibraryPageThumbnail extends StatelessWidget {
       case core.DocumentType.whiteboard:
         return CustomPaint(
           painter: WhiteboardGridPainter(
-            dotColor: palette.textPrimary.withValues(alpha: 0.08),
+            dotColor: _dotColor,
+            spacing: AppSpacing.md,
           ),
           size: Size.infinite,
         );

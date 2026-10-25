@@ -66,6 +66,8 @@ class AppIconButton extends StatelessWidget {
   final AppIconButtonSize size;
 
   /// Seçili durumu (toggle butonlar için).
+  /// Affects the tonal, outline and ghost variants only; the filled variant
+  /// ignores it.
   final bool isSelected;
 
   /// Icon color for the ghost variant when enabled and not selected.

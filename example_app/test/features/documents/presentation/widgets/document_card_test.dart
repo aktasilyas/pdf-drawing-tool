@@ -123,6 +123,42 @@ void main() {
       expect(morePressed, true);
     });
 
+    testWidgets('long press outside selection mode enters selection',
+        (tester) async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      await tester.pumpWidget(
+        UncontrolledProviderScope(
+          container: container,
+          child: MaterialApp(
+            theme: AppTheme.light,
+            home: Scaffold(
+              body: DocumentCard(document: testDocument, onTap: () {}),
+            ),
+          ),
+        ),
+      );
+
+      await tester.longPress(find.byType(DocumentCard));
+      await tester.pump();
+
+      expect(container.read(selectionModeProvider), isTrue);
+      expect(container.read(selectedDocumentsProvider), {'doc-1'});
+    });
+
+    testWidgets('caret is hidden in selection mode', (tester) async {
+      await tester.pumpWidget(
+        host(DocumentCard(
+          document: testDocument,
+          onTap: () {},
+          onMorePressed: () {},
+          isSelectionMode: true,
+        )),
+      );
+
+      expect(find.byIcon(ElyanotesIcons.libraryCaretDown), findsNothing);
+    });
+
     testWidgets('should ellipsize a long title on one line', (tester) async {
       final longDoc = testDocument.copyWith(
         title: 'Çok uzun bir defter adı kısaltma testi için',
