@@ -15,11 +15,11 @@ import 'package:example_app/core/theme/index.dart';
 /// the initializer list; the front-panel gradient shader is rebuilt per paint from precomputed colours.
 class FolderTileArt extends CustomPainter {
   FolderTileArt({required this.color, required this.palette})
-      : _backPaint = Paint()..color = _darken(_tame(color)),
+      : _backPaint = Paint()..color = _darken(tame(color)),
         _sheetPaint = Paint()..color = palette.paper,
-        _frontPaint = Paint()..color = _tame(color),
+        _frontPaint = Paint()..color = tame(color),
         _edgePaint = Paint()
-          ..color = _darken(_tame(color), 0.16)
+          ..color = _darken(tame(color), 0.16)
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1,
         _shadowPaint = Paint()
@@ -30,9 +30,9 @@ class FolderTileArt extends CustomPainter {
           ..style = PaintingStyle.stroke
           ..strokeWidth = 0.75,
         _gradientColors = [
-          _lighten(_tame(color)),
-          _tame(color),
-          _darken(_tame(color), 0.05),
+          _lighten(tame(color)),
+          tame(color),
+          _darken(tame(color), 0.05),
         ],
         _highlightPaint = Paint()
           ..color = palette.paper.withValues(alpha: 0.25)
@@ -52,7 +52,7 @@ class FolderTileArt extends CustomPainter {
   final Paint _sheetEdgePaint;
 
   /// Calms saturated folder colours the same way in light and dark themes.
-  static Color _tame(Color c) {
+  static Color tame(Color c) {
     final hsl = HSLColor.fromColor(c);
     final saturation = math.min(hsl.saturation, 0.45);
     final lightness = hsl.lightness.clamp(0.42, 0.62).toDouble();

@@ -1,6 +1,7 @@
-/// ElyaNotes Documents Sidebar - Settings-style card layout
+/// ElyaNotes Documents Sidebar - flat nav rows and folder list
 library;
 
+import 'package:drawing_ui/drawing_ui.dart' show ElyanotesIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -8,7 +9,7 @@ import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/sidebar_item.dart';
-import 'package:example_app/features/documents/presentation/widgets/sidebar_tile.dart';
+import 'package:example_app/features/documents/presentation/widgets/folder_tile_art.dart';
 
 /// Sidebar bölüm tipleri
 enum SidebarSection { documents, favorites, shared, store, trash, folder }
@@ -37,18 +38,38 @@ class DocumentsSidebar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final foldersAsync = ref.watch(foldersProvider);
+    final palette = context.palette;
 
     return Container(
       width: AppSpacing.sidebarWidth,
-      color: context.palette.surface,
+      decoration: BoxDecoration(
+        color: palette.surface,
+        border: Border(right: BorderSide(color: palette.border)),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildHeader(context),
-          const SizedBox(height: AppSpacing.sm),
-          // Navigasyon kartı
-          _buildNavCard(context),
-          const SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.xl),
+          _navItem(
+            icon: ElyanotesIcons.libraryNotebook,
+            selectedIcon: ElyanotesIcons.libraryNotebookFill,
+            label: 'Tüm Notlar',
+            section: SidebarSection.documents,
+          ),
+          _navItem(
+            icon: ElyanotesIcons.libraryStar,
+            selectedIcon: ElyanotesIcons.libraryStarFill,
+            label: 'Favoriler',
+            section: SidebarSection.favorites,
+          ),
+          _navItem(
+            icon: ElyanotesIcons.libraryTrash,
+            selectedIcon: ElyanotesIcons.libraryTrashFill,
+            label: 'Son Silinenler',
+            section: SidebarSection.trash,
+          ),
+          const SizedBox(height: AppSpacing.lg),
           _buildFoldersHeader(context),
           Expanded(
             child: SingleChildScrollView(
@@ -61,57 +82,18 @@ class DocumentsSidebar extends ConsumerWidget {
     );
   }
 
-  Widget _buildNavCard(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-      child: AppCard(
-        variant: AppCardVariant.elevated,
-        padding: EdgeInsets.zero,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SidebarTile(
-              icon: Icons.description_outlined,
-              label: 'Tüm Notlar',
-              isSelected: selectedSection == SidebarSection.documents,
-              onTap: () => onSectionChanged(SidebarSection.documents),
-            ),
-            _divider(context),
-            SidebarTile(
-              icon: Icons.star_outline,
-              label: 'Favoriler',
-              isSelected: selectedSection == SidebarSection.favorites,
-              onTap: () => onSectionChanged(SidebarSection.favorites),
-            ),
-            _divider(context),
-            SidebarTile(
-              icon: Icons.delete_outline,
-              label: 'Son Silinenler',
-              isSelected: selectedSection == SidebarSection.trash,
-              onTap: () => onSectionChanged(SidebarSection.trash),
-            ),
-            _divider(context),
-            SidebarTile(
-              icon: Icons.label_outline,
-              label: 'Etiketler',
-              isSelected: false,
-              enabled: false,
-              trailing: Text('Yakında',
-                  style: AppTypography.caption
-                      .copyWith(color: context.palette.textDisabled)),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _divider(BuildContext context) {
-    return Divider(
-      height: 0.5,
-      thickness: 0.5,
-      color: context.palette.border,
-      indent: 52,
+  Widget _navItem({
+    required IconData icon,
+    required IconData selectedIcon,
+    required String label,
+    required SidebarSection section,
+  }) {
+    return SidebarItem(
+      icon: icon,
+      selectedIcon: selectedIcon,
+      label: label,
+      isSelected: selectedSection == section,
+      onTap: () => onSectionChanged(section),
     );
   }
 
@@ -120,7 +102,7 @@ class DocumentsSidebar extends ConsumerWidget {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-          AppSpacing.md, AppSpacing.lg, AppSpacing.sm, AppSpacing.sm),
+          AppSpacing.md, AppSpacing.lg, AppSpacing.sm, 0),
       child: Row(
         children: [
           Expanded(
@@ -131,10 +113,10 @@ class DocumentsSidebar extends ConsumerWidget {
                   height: 40,
                   width: 40,
                   fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => const Icon(
+                  errorBuilder: (_, __, ___) => Icon(
                     Icons.edit_note_rounded,
                     size: 40,
-                    color: AppColors.primary,
+                    color: context.palette.accent,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm),
@@ -152,7 +134,9 @@ class DocumentsSidebar extends ConsumerWidget {
           ),
           if (onCollapse != null)
             AppIconButton(
-              icon: isDrawer ? Icons.close : Icons.chevron_left,
+              icon: isDrawer
+                  ? ElyanotesIcons.libraryClose
+                  : ElyanotesIcons.librarySidebar,
               variant: AppIconButtonVariant.ghost,
               size: AppIconButtonSize.small,
               tooltip: isDrawer ? 'Kapat' : 'Daralt',
@@ -164,49 +148,62 @@ class DocumentsSidebar extends ConsumerWidget {
   }
 
   Widget _buildFoldersHeader(BuildContext context) {
-    return AppSectionHeader(
-      title: 'Klasörler',
-      padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md, vertical: AppSpacing.xs),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextButton(
-            onPressed: () => context.push('/manage-folders'),
-            style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    final palette = context.palette;
+
+    return SizedBox(
+      height: AppSpacing.minTouchTarget,
+      child: Padding(
+        padding:
+            const EdgeInsets.only(left: AppSpacing.lg, right: AppSpacing.sm),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Klasörler',
+                style: AppTypography.labelMedium
+                    .copyWith(color: palette.textMuted),
+              ),
             ),
-            child: Text('Yönet',
-                style: AppTypography.caption
-                    .copyWith(color: context.palette.accent)),
-          ),
-          AppIconButton(
-            icon: Icons.add,
-            variant: AppIconButtonVariant.ghost,
-            size: AppIconButtonSize.small,
-            tooltip: 'Yeni Klasör',
-            onPressed: onCreateFolder,
-          ),
-        ],
+            TextButton(
+              onPressed: () => context.push('/manage-folders'),
+              style: TextButton.styleFrom(
+                minimumSize: const Size(
+                  AppSpacing.minTouchTarget,
+                  AppSpacing.minTouchTarget,
+                ),
+                splashFactory: NoSplash.splashFactory,
+              ),
+              child: Text(
+                'Yönet',
+                style:
+                    AppTypography.labelMedium.copyWith(color: palette.accent),
+              ),
+            ),
+            AppIconButton(
+              icon: ElyanotesIcons.libraryPlus,
+              variant: AppIconButtonVariant.ghost,
+              size: AppIconButtonSize.small,
+              tooltip: 'Yeni Klasör',
+              onPressed: onCreateFolder,
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildFoldersList(
       BuildContext context, AsyncValue<List<dynamic>> foldersAsync) {
-    final tertiaryColor = context.palette.textDisabled;
-
     return foldersAsync.when(
       data: (folders) {
         final rootFolders = folders.where((f) => f.parentId == null).toList();
         if (rootFolders.isEmpty) {
           return Padding(
             padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.md, vertical: AppSpacing.xs),
+                horizontal: AppSpacing.lg, vertical: AppSpacing.xs),
             child: Text('Klasör yok',
-                style: AppTypography.caption.copyWith(color: tertiaryColor)),
+                style: AppTypography.caption
+                    .copyWith(color: context.palette.textMuted)),
           );
         }
         final widgets = <Widget>[];
@@ -235,18 +232,21 @@ class DocumentsSidebar extends ConsumerWidget {
   Widget _buildFolderItem(BuildContext context, dynamic folder, bool isSub) {
     final isSel = selectedSection == SidebarSection.folder &&
         selectedFolderId == folder.id;
-    final tertiaryColor = context.palette.textDisabled;
 
     return SidebarItem(
-      icon: Icons.folder_outlined,
-      selectedIcon: Icons.folder,
+      icon: ElyanotesIcons.libraryFolderFill,
+      selectedIcon: ElyanotesIcons.libraryFolderFill,
       label: folder.name,
       isSelected: isSel,
       isSubfolder: isSub,
-      iconColor: Color(folder.colorValue),
-      trailing: Text('${folder.documentCount}',
-          style: AppTypography.caption
-              .copyWith(color: isSel ? context.palette.accent : tertiaryColor)),
+      iconColor: FolderTileArt.tame(Color(folder.colorValue)),
+      trailing: Text(
+        '${folder.documentCount}',
+        style: AppTypography.caption.copyWith(
+          color: context.palette.textMuted,
+          fontFeatures: const [FontFeature.tabularFigures()],
+        ),
+      ),
       onTap: () => onFolderSelected?.call(folder.id),
     );
   }

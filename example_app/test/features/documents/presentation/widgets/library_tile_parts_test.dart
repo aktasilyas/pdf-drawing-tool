@@ -24,6 +24,7 @@ BoxDecoration _checkboxDecoration(WidgetTester tester) {
 }
 
 void main() {
+  checkboxOffsetTests();
   group('LibrarySelectionCheckbox', () {
     for (final entry in {
       'light': (AppTheme.light, AppPalette.light),
@@ -184,7 +185,7 @@ void main() {
       expect(find.byType(LibrarySelectionCheckbox), findsOneWidget);
     });
 
-    testWidgets('checkbox sits on the top-right of a custom artRect',
+    testWidgets('checkbox is anchored to the cover box, not a custom artRect',
         (tester) async {
       const key = Key('art_marker');
       Rect art(Size box) => const Rect.fromLTWH(10, 20, 80, 90);
@@ -216,8 +217,30 @@ void main() {
       final box = tester.getRect(find.byType(LibrarySelectionCheckbox));
       expect(marker.width, closeTo(80, 0.01));
       expect(marker.height, closeTo(90, 0.01));
-      expect(box.right, closeTo(marker.right - AppSpacing.sm, 0.01));
-      expect(box.top, closeTo(marker.top + AppSpacing.sm, 0.01));
+      final coverBox = tester.getRect(
+        find
+            .ancestor(
+              of: find.byType(LibrarySelectionCheckbox),
+              matching: find.byType(Stack),
+            )
+            .first,
+      );
+      final offset = libraryCheckboxOffset(coverBox.size);
+      expect(box.left, closeTo(coverBox.left + offset.dx, 0.01));
+      expect(box.top, closeTo(coverBox.top + offset.dy, 0.01));
+      // Independent of the custom art rect (10, 20, 80, 90).
+      expect(box.top, isNot(closeTo(marker.top + AppSpacing.sm, 0.01)));
+      expect(box.right, isNot(closeTo(marker.right - AppSpacing.sm, 0.01)));
     });
+  });
+}
+
+void checkboxOffsetTests() {
+  test('libraryCheckboxOffset uses the cover box, not art', () {
+    const box = Size(100, 133);
+    final o = libraryCheckboxOffset(box);
+    expect(o.dy, AppSpacing.sm);
+    expect(
+        o.dx + LibrarySelectionCheckbox.size, box.width * 0.94 - AppSpacing.sm);
   });
 }

@@ -10,7 +10,7 @@ import 'package:example_app/core/theme/index.dart';
 
 /// Bottom sheet menu tile with circular icon background.
 ///
-/// Consistent with [SettingsTile] and [SidebarTile] icon styling.
+/// Consistent with [SettingsTile] icon styling.
 class MenuTile extends StatelessWidget {
   final IconData icon;
   final String label;

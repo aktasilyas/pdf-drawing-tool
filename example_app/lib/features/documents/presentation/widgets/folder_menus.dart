@@ -74,6 +74,18 @@ void showFolderMenu(
             },
           ),
           _softDivider(context),
+          MenuTile(
+            icon: folder.isFavorite ? Icons.star : Icons.star_outline,
+            label:
+                folder.isFavorite ? 'Favorilerden Kaldır' : 'Favorilere Ekle',
+            onTap: () {
+              Navigator.pop(ctx);
+              ref
+                  .read(foldersControllerProvider.notifier)
+                  .toggleFavorite(folder.id);
+            },
+          ),
+          _softDivider(context),
           _buildDeleteFolderTile(context, ref, folder, onDeleted),
           const SizedBox(height: AppSpacing.sm),
         ],

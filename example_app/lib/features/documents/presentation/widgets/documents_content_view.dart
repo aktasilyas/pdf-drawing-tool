@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
 import 'package:example_app/features/documents/domain/entities/folder.dart';
 import 'package:example_app/features/documents/domain/entities/sort_option.dart';
@@ -25,6 +26,7 @@ class DocumentsContentView extends ConsumerWidget {
     required this.onFolderMore,
     required this.onDocumentMore,
     this.onTrashedPageTap,
+    this.onCreateNew,
   });
 
   final SidebarSection section;
@@ -35,12 +37,16 @@ class DocumentsContentView extends ConsumerWidget {
   final ValueChanged<DocumentInfo> onDocumentMore;
   final ValueChanged<TrashedPage>? onTrashedPageTap;
 
+  /// Call to action of the root empty state.
+  final VoidCallback? onCreateNew;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     switch (section) {
       case SidebarSection.documents:
         return _DocumentsWithFolders(
           parentFolderId: null,
+          onCreateNew: onCreateNew,
           onFolderTap: onFolderTap,
           onDocumentTap: onDocumentTap,
           onFolderMore: onFolderMore,
@@ -82,8 +88,10 @@ class _DocumentsWithFolders extends ConsumerWidget {
     required this.onDocumentTap,
     required this.onFolderMore,
     required this.onDocumentMore,
+    this.onCreateNew,
   });
 
+  final VoidCallback? onCreateNew;
   final String? parentFolderId;
   final ValueChanged<Folder> onFolderTap;
   final ValueChanged<DocumentInfo> onDocumentTap;
@@ -128,7 +136,7 @@ class _DocumentsWithFolders extends ConsumerWidget {
               if (parentFolderId != null) {
                 return const DocumentsEmptyFolderView();
               }
-              return const DocumentsEmptyState();
+              return DocumentsEmptyState(onCreateNew: onCreateNew);
             }
             // Sort documents
             final sortedDocs = _sortDocuments(ref, filteredDocs);
@@ -148,18 +156,7 @@ class _DocumentsWithFolders extends ConsumerWidget {
     List<Folder> folders,
     List<DocumentInfo> documents,
   ) {
-    final viewMode = ref.watch(viewModeProvider);
-    if (viewMode == ViewMode.grid) {
-      return DocumentsCombinedGridView(
-        folders: folders,
-        documents: documents,
-        onFolderTap: onFolderTap,
-        onDocumentTap: onDocumentTap,
-        onFolderMore: onFolderMore,
-        onDocumentMore: onDocumentMore,
-      );
-    }
-    return DocumentsCombinedListView(
+    return _ViewModeSwitcher(
       folders: folders,
       documents: documents,
       onFolderTap: onFolderTap,
@@ -201,18 +198,7 @@ class _FavoritesView extends ConsumerWidget {
               return const DocumentsEmptyState();
             }
             final sorted = _sortDocuments(ref, documents);
-            final viewMode = ref.watch(viewModeProvider);
-            if (viewMode == ViewMode.grid) {
-              return DocumentsCombinedGridView(
-                folders: folders,
-                documents: sorted,
-                onFolderTap: onFolderTap,
-                onDocumentTap: onDocumentTap,
-                onFolderMore: onFolderMore,
-                onDocumentMore: onDocumentMore,
-              );
-            }
-            return DocumentsCombinedListView(
+            return _ViewModeSwitcher(
               folders: folders,
               documents: sorted,
               onFolderTap: onFolderTap,
@@ -223,6 +209,55 @@ class _FavoritesView extends ConsumerWidget {
           },
         );
       },
+    );
+  }
+}
+
+/// Grid or list for the current [ViewMode], cross-faded on change.
+class _ViewModeSwitcher extends ConsumerWidget {
+  const _ViewModeSwitcher({
+    required this.folders,
+    required this.documents,
+    required this.onFolderTap,
+    required this.onDocumentTap,
+    required this.onFolderMore,
+    required this.onDocumentMore,
+  });
+
+  final List<Folder> folders;
+  final List<DocumentInfo> documents;
+  final ValueChanged<Folder> onFolderTap;
+  final ValueChanged<DocumentInfo> onDocumentTap;
+  final ValueChanged<Folder> onFolderMore;
+  final ValueChanged<DocumentInfo> onDocumentMore;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final viewMode = ref.watch(viewModeProvider);
+    return AnimatedSwitcher(
+      duration: AppDurations.fast,
+      switchInCurve: AppCurves.fade,
+      switchOutCurve: AppCurves.fade,
+      child: KeyedSubtree(
+        key: ValueKey(viewMode),
+        child: viewMode == ViewMode.grid
+            ? DocumentsCombinedGridView(
+                folders: folders,
+                documents: documents,
+                onFolderTap: onFolderTap,
+                onDocumentTap: onDocumentTap,
+                onFolderMore: onFolderMore,
+                onDocumentMore: onDocumentMore,
+              )
+            : DocumentsCombinedListView(
+                folders: folders,
+                documents: documents,
+                onFolderTap: onFolderTap,
+                onDocumentTap: onDocumentTap,
+                onFolderMore: onFolderMore,
+                onDocumentMore: onDocumentMore,
+              ),
+      ),
     );
   }
 }

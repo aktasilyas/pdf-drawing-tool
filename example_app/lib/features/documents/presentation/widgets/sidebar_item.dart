@@ -4,11 +4,8 @@ library;
 import 'package:flutter/material.dart';
 import 'package:example_app/core/theme/index.dart';
 
-/// Sidebar item widget
-///
-/// Modern tasarım:
-/// - Selected: sol kenar 3px primary bar + hafif tint arka plan
-/// - Dark theme tam uyumlu
+/// Sidebar row: 48 high, flat. Selected = accentContainer fill with accent
+/// icon and label; pressed = textPrimary at 6%. No ripple, no side bar.
 class SidebarItem extends StatelessWidget {
   final IconData icon, selectedIcon;
   final String label;
@@ -31,91 +28,54 @@ class SidebarItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Dark modda accent (#4A8AF7) kullan — primary (#38434F) koyu bg'de görünmez
-    final selectedColor = context.palette.accent;
-
-    // Theme-aware colors
-    final textPrimary = context.palette.textPrimary;
-    final textSecondary = context.palette.textMuted;
-
-    // Selected background: hafif tint
-    final selectedBg = selectedColor.withValues(alpha: 0.12);
-
-    // Icon color: custom veya seçime göre
+    final palette = context.palette;
     final effectiveIconColor =
-        iconColor ?? (isSelected ? selectedColor : textSecondary);
-
-    final iconSz = isSubfolder ? AppIconSize.sm : AppIconSize.sm;
+        iconColor ?? (isSelected ? palette.accent : palette.textMuted);
+    final radius = BorderRadius.circular(AppRadius.md);
 
     return Padding(
-      padding: EdgeInsets.only(
-        left: isSubfolder ? AppSpacing.xl : AppSpacing.sm,
-        right: AppSpacing.sm,
-        top: 1,
-        bottom: 1,
-      ),
-      child: Stack(
-        children: [
-          // Main content
-          Material(
-            color: isSelected ? selectedBg : Colors.transparent,
-            borderRadius: BorderRadius.circular(AppRadius.sm),
-            child: InkWell(
-              onTap: onTap,
-              borderRadius: BorderRadius.circular(AppRadius.sm),
-              hoverColor:
-                  context.palette.surfaceElevated.withValues(alpha: 0.5),
-              child: Container(
-                constraints: const BoxConstraints(minHeight: 40),
-                padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
-                child: Row(
-                  children: [
-                    Icon(
-                      isSelected ? selectedIcon : icon,
-                      size: iconSz,
-                      color: effectiveIconColor,
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Expanded(
-                      child: Text(
-                        label,
-                        style: (isSubfolder
-                                ? AppTypography.caption
-                                : AppTypography.bodyMedium)
-                            .copyWith(
-                          color: isSelected ? selectedColor : textPrimary,
-                          fontWeight:
-                              isSelected ? FontWeight.w700 : FontWeight.w600,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    if (trailing != null) ...[
-                      const SizedBox(width: AppSpacing.xs),
-                      trailing!,
-                    ],
-                  ],
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+      child: Material(
+        color: isSelected ? palette.accentContainer : Colors.transparent,
+        borderRadius: radius,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: radius,
+          splashFactory: NoSplash.splashFactory,
+          highlightColor: palette.textPrimary.withValues(alpha: 0.06),
+          child: Container(
+            height: AppSpacing.minTouchTarget,
+            padding: EdgeInsets.only(
+              left: AppSpacing.md + (isSubfolder ? AppSpacing.lg : 0),
+              right: AppSpacing.md,
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  isSelected ? selectedIcon : icon,
+                  size: AppIconSize.md,
+                  color: effectiveIconColor,
                 ),
-              ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: AppTypography.labelLarge.copyWith(
+                      color: isSelected ? palette.accent : palette.textPrimary,
+                      fontWeight: isSelected ? FontWeight.w600 : null,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (trailing != null) ...[
+                  const SizedBox(width: AppSpacing.xs),
+                  trailing!,
+                ],
+              ],
             ),
           ),
-          // Selected indicator: sol kenar 3px primary bar
-          if (isSelected)
-            Positioned(
-              left: 0,
-              top: 6,
-              bottom: 6,
-              child: Container(
-                width: 3,
-                decoration: BoxDecoration(
-                  color: selectedColor,
-                  borderRadius: BorderRadius.circular(1.5),
-                ),
-              ),
-            ),
-        ],
+        ),
       ),
     );
   }

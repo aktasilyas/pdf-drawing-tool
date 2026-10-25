@@ -8,6 +8,14 @@ import 'package:example_app/features/documents/presentation/widgets/library_tile
 
 Rect _boardRect(Size box) => CoverGeometry.of(box).cover;
 
+/// Top-left of the selection checkbox in the cover box [box]: `sm` below the
+/// box top and `sm` inside the cover board's right edge (6% of the width in
+/// from the box edge), so every checkbox in a row shares one y.
+Offset libraryCheckboxOffset(Size box) => Offset(
+      box.width * 0.94 - AppSpacing.sm - LibrarySelectionCheckbox.size,
+      AppSpacing.sm,
+    );
+
 List<Widget> _noOverlays(Rect board) => const <Widget>[];
 
 /// Shared frame of document and folder tiles: a 3:4 cover box bottom-aligned
@@ -148,10 +156,8 @@ class _LibraryTileFrameState extends State<LibraryTileFrame> {
                 ...widget.overlays(art),
                 if (widget.isSelectionMode)
                   Positioned(
-                    left: art.right -
-                        AppSpacing.sm -
-                        LibrarySelectionCheckbox.size,
-                    top: art.top + AppSpacing.sm,
+                    left: libraryCheckboxOffset(box).dx,
+                    top: libraryCheckboxOffset(box).dy,
                     child: IgnorePointer(
                       child: LibrarySelectionCheckbox(
                         isSelected: widget.isSelected,

@@ -77,6 +77,11 @@ void main() {
           ),
         ),
       );
+      await tester.runAsync(() async {
+        for (final e in find.byType(Image).evaluate()) {
+          await precacheImage((e.widget as Image).image, e);
+        }
+      });
       await tester.pumpAndSettle();
 
       await expectLater(
