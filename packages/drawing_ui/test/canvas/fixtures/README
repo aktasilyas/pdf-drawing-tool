@@ -1,0 +1,1 @@
+Element-tree fixtures for drawing_canvas_tree_test.dart; regenerate on known-good code with UPDATE_CANVAS_TREE=1 flutter test test/canvas/drawing_canvas_tree_test.dart (see docs/plans/55-split-drawing-canvas.md).
