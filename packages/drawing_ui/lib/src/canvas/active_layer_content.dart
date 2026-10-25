@@ -57,6 +57,9 @@ class ActiveLayerContentState extends State<ActiveLayerContent> {
   bool _hasRaster = false;
   ElementScene? _applied;
 
+  /// File paths of applied scene images that have not loaded yet.
+  Set<String> _unloaded = const {};
+
   @visibleForTesting
   PageTileCache get cache => _cache;
 
@@ -82,15 +85,29 @@ class ActiveLayerContentState extends State<ActiveLayerContent> {
     _cache.dispose();
   }
 
-  /// Late-loading images change the pixels of tiles that were cached with a
-  /// placeholder: start over with a fresh cache.
+  /// Late-loading images change the pixels of the tiles cached with their
+  /// placeholder: re-raster only the tiles under the images that loaded.
   void _onImagesChanged() {
-    if (widget.scene.images.isEmpty || !mounted) return;
-    setState(() {
-      _disposeCache();
-      _createCache();
-      _apply();
-    });
+    if (!mounted || _unloaded.isEmpty) return;
+    final manager = widget.cacheManager;
+    final loaded = {
+      for (final path in _unloaded)
+        if (manager.get(path) != null) path,
+    };
+    if (loaded.isEmpty) return;
+    _unloaded = _unloaded.difference(loaded);
+    _cache.invalidate([
+      for (final image in _applied?.images ?? const <ImageElement>[])
+        if (loaded.contains(image.filePath)) imageBounds(image),
+    ]);
+  }
+
+  /// Records which images of the applied scene are still placeholders.
+  void _trackUnloaded(ElementScene scene) {
+    _unloaded = {
+      for (final image in scene.images)
+        if (widget.cacheManager.get(image.filePath) == null) image.filePath,
+    };
   }
 
   @override
@@ -140,6 +157,7 @@ class ActiveLayerContentState extends State<ActiveLayerContent> {
     if (!(_applied?.isSameAs(widget.scene) ?? false)) {
       _cache.update(widget.scene);
       _applied = widget.scene;
+      _trackUnloaded(widget.scene);
     }
     _cache.setViewport(
       visible,

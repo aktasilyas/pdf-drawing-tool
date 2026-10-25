@@ -2,6 +2,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 
+import 'package:drawing_ui/src/rendering/tiles/cached_tile.dart';
 import 'package:drawing_ui/src/rendering/tiles/page_tile_cache.dart';
 
 /// Draws the committed content of a page from a [PageTileCache].
@@ -22,7 +23,7 @@ class TiledElementPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     for (final tile in cache.visibleTiles) {
-      _drawImage(canvas, tile.image, tile.rect);
+      _drawTile(canvas, tile);
     }
     for (final rect in cache.vectorRects) {
       canvas
@@ -38,7 +39,7 @@ class TiledElementPainter extends CustomPainter {
       var drewLegacy = false;
       for (final old in cache.legacyTiles) {
         if (!old.rect.overlaps(rect)) continue;
-        _drawImage(canvas, old.image, old.rect);
+        _drawTile(canvas, old);
         drewLegacy = true;
       }
       if (!drewLegacy) cache.paintVectorRegion(canvas, rect);
@@ -46,13 +47,9 @@ class TiledElementPainter extends CustomPainter {
     }
   }
 
-  void _drawImage(Canvas canvas, ui.Image image, Rect dst) {
-    canvas.drawImageRect(
-      image,
-      Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
-      dst,
-      _paint,
-    );
+  /// Uses the tile's precomputed source rect: no allocation per frame.
+  void _drawTile(Canvas canvas, CachedTile tile) {
+    canvas.drawImageRect(tile.image, tile.src, tile.rect, _paint);
   }
 
   @override
