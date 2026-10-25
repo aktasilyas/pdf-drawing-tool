@@ -38,6 +38,8 @@ app data if you have enabled it in your system settings; that backup is governed
   older this needs the storage permission; newer versions use scoped storage.
 - **Clipboard:** only when you copy or paste content in the editor.
 
+This release does not use the microphone, location, contacts or the network.
+
 ### Sharing and export
 When you export or share a notebook, page or image, you choose the destination (for example another
 app or a folder). What happens to the data there is governed by that destination.
@@ -84,12 +86,14 @@ açtıysanız, yedek uygulama verilerini içerebilir; bu yedek Google'ın politi
   ve öncesinde depolama izni gerekir; yeni sürümler kapsamlı depolama kullanır.
 - **Pano:** yalnızca düzenleyicide kopyalama veya yapıştırma yaptığınızda.
 
+Bu sürüm mikrofonu, konumu, kişileri veya ağı kullanmaz.
+
 ### Paylaşma ve dışa aktarma
 Bir defteri, sayfayı veya görseli dışa aktardığınızda ya da paylaştığınızda hedefi siz seçersiniz
 (örneğin başka bir uygulama veya klasör). Verinin orada işlenmesi o hedefin koşullarına tabidir.
 
 ### Çocuklar
-Uygulama hiçbir veri toplamadığı için çocuklar dahil kimseden bilerek veri toplamaz.
+Uygulama veri toplamadığı için çocuklardan da veri toplamaz.
 
 ### Değişiklikler
 İleride veriyi cihaz dışına gönderen bir özellik eklenirse, o sürüm yayınlanmadan önce bu politikayı ve

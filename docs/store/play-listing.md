@@ -6,6 +6,11 @@ limits (app name 30, short description 80, full description 4000 characters; cou
 notebooks and covers, PDF import/annotate/export, local storage); frozen features are not mentioned.
 
 ## Reference check
+Sources: [Goodnotes for Android](https://www.goodnotes.com/android),
+[Goodnotes Play listing summary](https://apptopia.com/google-play/app/com.goodnotes.android.app/about),
+[Flexcil App Store page](https://apps.apple.com/app/id1531466462),
+[Flexcil Android listing mirror](https://cafebazaar.ir/app/com.flexcil.flexcilnote?l=en). StarNote:
+Play listing reviewed from memory of earlier reference checks (#45 plan), no new source this run.
 - GoodNotes (Android): name pairs brand with category keywords ("Notes, Docs, PDF"); short text leads
   with handwriting on tablets; full text is grouped feature bullets (write, annotate PDFs, organise).
 - Flexcil: listing leads with PDF reading + note-taking in one app; bullets for pen tools, PDF
@@ -27,18 +32,18 @@ Elyanotes, kağıt defter hissini tabletinize ve telefonunuza getiren bir el yaz
 
 KALEMLER VE MÜREKKEP
 • Dolma kalem, tükenmez kalem, fırça kalem, kurşun kalem ve fosforlu kalem
-• Basınca duyarlı, akıcı ve gecikmesi düşük mürekkep
+• Basınca duyarlı, akıcı mürekkep
 • Silgi, seçim aracı, şekiller ve metin
 • Geri al / yinele
 
 DEFTERLER
 • Kapaklı defterler ve klasörlerle düzenli bir kitaplık
 • Çizgili, kareli, noktalı, Cornell ve planlayıcı sayfa şablonları
-• Sayfa ekleme, silme ve yeniden sıralama
+• Sayfa ekleme ve silme
 
 PDF
 • PDF içe aktarın; ders notlarını, makaleleri ve formları işaretleyin
-• Vurgulayın, altını çizin, kenar notu yazın
+• Fosforlu kalemle vurgulayın, sayfanın üzerine el yazısıyla not alın
 • Notlarınızı PDF olarak dışa aktarıp istediğiniz yere kaydedin
 
 GİZLİLİK
@@ -61,18 +66,18 @@ Elyanotes is a handwriting notes app that brings the feel of a paper notebook to
 
 PENS AND INK
 • Fountain pen, ballpoint, brush pen, pencil and highlighter
-• Pressure-sensitive, smooth, low-latency ink
+• Pressure-sensitive, smooth ink
 • Eraser, lasso selection, shapes and text
 • Undo / redo
 
 NOTEBOOKS
 • A tidy library of notebooks with covers, and folders
 • Lined, grid, dotted, Cornell and planner page templates
-• Add, delete and reorder pages
+• Add and delete pages
 
 PDF
 • Import PDFs and mark up lecture notes, papers and forms
-• Highlight, underline and write in the margins
+• Highlight and handwrite right on the page
 • Export your notes as PDF and save them anywhere
 
 PRIVACY
@@ -93,7 +98,7 @@ Designed for Android tablets with a stylus; works on phones too.
 ## Category, tags, rating
 - Category: Productivity. Tags: note taking, PDF, handwriting.
 - Content rating questionnaire: no user-generated content shared with others, no ads → expected
-  rating "Everyone" / PEGI 3.
+  rating "Everyone" / PEGI 3 (expected only; the owner confirms in the questionnaire).
 - Ads: "No". Target audience: 13+ (owner may choose otherwise; under-13 triggers Families policy).
 
 ## Screenshot plan
@@ -113,9 +118,16 @@ Feature graphic (1024x500): cover family on the warm paper background with the w
 treatment is an open BRIEF question, so this waits for the owner.
 
 ## Release-blocking notes for the owner
-- `example_app/android/app/src/main/AndroidManifest.xml` declares `com.android.vending.BILLING` (for the
-  frozen premium feature). Play shows it and may ask about in-app purchases; remove it from the v1.0
-  release build (or move it to a flavor) so the listing and Data safety answers stay consistent.
-  Follow-up issue recommended.
+- **Depends on #45:** the fountain pen ("Dolma Kalem") and the five-pen picker (screenshots 2 and 4)
+  exist only on PR #96 until #45 is merged. Publish this listing only after #45 lands.
+- **Permissions in the merged release manifest:** the app manifest declares `com.android.vending.BILLING`
+  (frozen premium), and plugins compiled in for frozen features very likely merge in more:
+  `INTERNET` and `BILLING` (`purchases_flutter`, `supabase_flutter`), `ACCESS_NETWORK_STATE`
+  (`connectivity_plus`), `RECORD_AUDIO` (`record`, used by the frozen audio feature in drawing_ui).
+  Not verified here (no Android build in this run): check the merged manifest of a release AAB
+  (`./gradlew :app:processReleaseMainManifest` or `aapt dump permissions`). Play shows these on the
+  listing, which contradicts "offline, no microphone". Recommended follow-up issue: strip them from the
+  v1.0 release with `tools:node="remove"` entries (or a flavor), then re-check this listing and the
+  Data safety answers.
 - The privacy policy needs a public URL and contact email (see `privacy-policy.md`).
 - Turkish strings use Title Case pen names as decided on #45 (Dolma Kalem, Fosforlu Kalem).
