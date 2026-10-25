@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/documents/domain/entities/sort_option.dart';
 import 'package:example_app/features/documents/presentation/widgets/documents_header.dart';
 
@@ -13,6 +14,7 @@ void main() {
     }) {
       return ProviderScope(
         child: MaterialApp(
+          theme: AppTheme.light,
           home: Scaffold(
             body: DocumentsHeader(
               onNewPressed: onNewPressed ?? () {},

@@ -16,6 +16,7 @@ class DocumentThumbnailPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
+      // Template lines are drawn on fixed paper, so they stay theme-independent.
       ..color = AppColors.outlineLight
       ..strokeWidth = 0.5;
 

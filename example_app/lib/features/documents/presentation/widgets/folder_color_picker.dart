@@ -18,15 +18,12 @@ class FolderColorPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return AlertDialog(
-      backgroundColor: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+      backgroundColor: context.palette.surface,
       title: Text(
         'Renk Seç',
         style: AppTypography.titleLarge.copyWith(
-          color:
-              isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+          color: context.palette.textPrimary,
         ),
       ),
       content: SizedBox(
@@ -70,8 +67,6 @@ class _ColorItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -82,11 +77,8 @@ class _ColorItem extends StatelessWidget {
           color: color,
           shape: BoxShape.circle,
           border: Border.all(
-            color: isSelected
-                ? (isDark
-                    ? AppColors.textPrimaryDark
-                    : AppColors.textPrimaryLight)
-                : Colors.transparent,
+            color:
+                isSelected ? (context.palette.textPrimary) : Colors.transparent,
             width: 3,
           ),
           boxShadow: isSelected

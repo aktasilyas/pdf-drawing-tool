@@ -29,12 +29,11 @@ class FolderCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final brightness = isDark ? Brightness.dark : Brightness.light;
+    final brightness = Theme.of(context).brightness;
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+        color: context.palette.surface,
         borderRadius: BorderRadius.circular(AppRadius.card),
         boxShadow: AppShadows.cardResting(brightness),
       ),
@@ -56,7 +55,6 @@ class FolderCard extends ConsumerWidget {
   }
 
   Widget _buildThumbnailCard(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final folderColor = Color(folder.colorValue);
 
     return Stack(
@@ -108,7 +106,6 @@ class FolderCard extends ConsumerWidget {
             left: 0,
             child: _SelectionCheckbox(
               isSelected: isSelected,
-              isDark: isDark,
             ),
           ),
       ],
@@ -123,13 +120,9 @@ class FolderCard extends ConsumerWidget {
   }
 
   Widget _buildInfoSection(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textPrimary =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
-    final textSecondary =
-        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
-    final textTertiary =
-        isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight;
+    final textPrimary = context.palette.textPrimary;
+    final textSecondary = context.palette.textMuted;
+    final textTertiary = context.palette.textDisabled;
 
     return GestureDetector(
       onTap: onMorePressed,
@@ -175,8 +168,6 @@ class _FavoriteButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return SizedBox(
       width: 48,
       height: 48,
@@ -187,8 +178,7 @@ class _FavoriteButton extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(AppSpacing.xs),
             decoration: BoxDecoration(
-              color: (isDark ? AppColors.surfaceDark : AppColors.surfaceLight)
-                  .withValues(alpha: 0.9),
+              color: (context.palette.surface).withValues(alpha: 0.9),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -196,9 +186,7 @@ class _FavoriteButton extends StatelessWidget {
               size: AppIconSize.sm,
               color: isFavorite
                   ? AppColors.accent
-                  : (isDark
-                      ? AppColors.textTertiaryDark
-                      : AppColors.textTertiaryLight),
+                  : (context.palette.textDisabled),
             ),
           ),
         ),
@@ -210,28 +198,22 @@ class _FavoriteButton extends StatelessWidget {
 /// Selection checkbox widget
 class _SelectionCheckbox extends StatelessWidget {
   final bool isSelected;
-  final bool isDark;
 
   const _SelectionCheckbox({
     required this.isSelected,
-    required this.isDark,
   });
 
   @override
   Widget build(BuildContext context) {
-    final accentColor = isDark ? AppColors.accent : AppColors.primary;
+    final accentColor = context.palette.accent;
     return Container(
       width: 24,
       height: 24,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: isSelected
-            ? accentColor
-            : (isDark ? AppColors.surfaceDark : AppColors.surfaceLight),
+        color: isSelected ? accentColor : (context.palette.surface),
         border: Border.all(
-          color: isSelected
-              ? accentColor
-              : (isDark ? AppColors.outlineDark : AppColors.outlineLight),
+          color: isSelected ? accentColor : (context.palette.border),
           width: 2,
         ),
       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/documents/documents.dart';
 
 void main() {
@@ -16,6 +17,7 @@ void main() {
 
     Widget createTestWidget(DocumentInfo document) {
       return MaterialApp(
+        theme: AppTheme.light,
         home: Scaffold(
           body: DocumentCard(
             document: document,
@@ -64,6 +66,7 @@ void main() {
       bool tapped = false;
       await tester.pumpWidget(
         MaterialApp(
+          theme: AppTheme.light,
           home: Scaffold(
             body: DocumentCard(
               document: testDocument,
@@ -87,6 +90,7 @@ void main() {
       bool favoriteToggled = false;
       await tester.pumpWidget(
         MaterialApp(
+          theme: AppTheme.light,
           home: Scaffold(
             body: DocumentCard(
               document: testDocument,
@@ -111,6 +115,7 @@ void main() {
       bool morePressed = false;
       await tester.pumpWidget(
         MaterialApp(
+          theme: AppTheme.light,
           home: Scaffold(
             body: DocumentCard(
               document: testDocument,

@@ -112,11 +112,8 @@ class TemplateGridItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final outlineColor =
-        isDark ? AppColors.outlineDark : AppColors.outlineLight;
-    final textSecondary =
-        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+    final outlineColor = context.palette.border;
+    final textSecondary = context.palette.textMuted;
 
     return GestureDetector(
       onTap: onTap,

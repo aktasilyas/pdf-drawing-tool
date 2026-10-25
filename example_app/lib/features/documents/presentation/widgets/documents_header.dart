@@ -130,9 +130,7 @@ class DocumentsHeader extends ConsumerWidget {
   }
 
   Widget _buildTrashInfo(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textSecondary =
-        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+    final textSecondary = context.palette.textMuted;
 
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -180,13 +178,9 @@ class _NewDocumentButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final iconColor = isDark ? AppColors.primaryDarkMode : AppColors.primary;
-    final bgColor = isDark
-        ? AppColors.surfaceContainerHighDark
-        : AppColors.surfaceContainerHighLight;
-    final textColor =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final iconColor = context.palette.accent;
+    final bgColor = context.palette.surfaceElevated;
+    final textColor = context.palette.textPrimary;
 
     return Tooltip(
       message: isLocked ? 'Belge limiti doldu' : 'Yeni Belge',
@@ -245,11 +239,8 @@ class _CircleIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final iconColor = isDark ? AppColors.primaryDarkMode : AppColors.primary;
-    final bgColor = isDark
-        ? AppColors.surfaceContainerHighDark
-        : AppColors.surfaceContainerHighLight;
+    final iconColor = context.palette.accent;
+    final bgColor = context.palette.surfaceElevated;
 
     return Tooltip(
       message: tooltip,

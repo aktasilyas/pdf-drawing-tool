@@ -25,26 +25,20 @@ class DocumentListTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isSelectionMode = ref.watch(selectionModeProvider);
     final selectedDocs = ref.watch(selectedDocumentsProvider);
     final isSelected = selectedDocs.contains(document.id);
 
-    final textPrimary =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
-    final textTertiary =
-        isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight;
-    final surfaceColor =
-        isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
-    final hoverColor =
-        isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariantLight;
+    final textPrimary = context.palette.textPrimary;
+    final textTertiary = context.palette.textDisabled;
+    final surfaceColor = context.palette.surface;
+    final hoverColor = context.palette.surfaceElevated;
 
     return Container(
       decoration: BoxDecoration(
         color: surfaceColor,
         borderRadius: BorderRadius.circular(AppRadius.card),
-        boxShadow:
-            AppShadows.cardResting(isDark ? Brightness.dark : Brightness.light),
+        boxShadow: AppShadows.cardResting(Theme.of(context).brightness),
       ),
       child: Material(
         color: Colors.transparent,
@@ -126,9 +120,7 @@ class SelectionCheckbox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final outlineColor =
-        isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight;
+    final outlineColor = context.palette.textDisabled;
 
     return Container(
       width: 36,
@@ -165,10 +157,8 @@ class CompactDocumentThumbnail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final paperColor = DocumentPaperColors.fromName(document.paperColor);
-    final outlineColor =
-        isDark ? AppColors.outlineDark : AppColors.outlineLight;
+    final outlineColor = context.palette.border;
 
     return Container(
       width: 40,
@@ -177,13 +167,7 @@ class CompactDocumentThumbnail extends StatelessWidget {
         color: paperColor,
         borderRadius: BorderRadius.circular(6),
         border: Border.all(color: outlineColor, width: 0.5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.12),
-            blurRadius: 3,
-            offset: const Offset(0, 1),
-          ),
-        ],
+        boxShadow: AppShadows.cardResting(Theme.of(context).brightness),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(5.5),
@@ -261,21 +245,14 @@ class _CompactSpiralBinding extends StatelessWidget {
 class _CompactWhiteboardThumbnail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final frameColor = isDark
-        ? AppColors.outlineDark.withValues(alpha: 0.8)
-        : AppColors.outlineLight;
-    final dotColor = isDark
-        ? Colors.white.withValues(alpha: 0.08)
-        : Colors.black.withValues(alpha: 0.08);
+    final frameColor = context.palette.border;
+    final dotColor = context.palette.textPrimary.withValues(alpha: 0.08);
 
     return Container(
       padding: const EdgeInsets.all(2),
       color: frameColor,
       child: Container(
-        color: isDark
-            ? AppColors.surfaceContainerHighDark
-            : AppColors.surfaceLight,
+        color: context.palette.surfaceElevated,
         child: CustomPaint(
           painter: WhiteboardGridPainter(dotColor: dotColor, spacing: 10),
           size: const Size(36, 44),

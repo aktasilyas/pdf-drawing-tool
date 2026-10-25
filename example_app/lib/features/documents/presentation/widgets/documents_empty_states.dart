@@ -17,8 +17,6 @@ class DocumentsEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xxl),
@@ -35,17 +33,13 @@ class DocumentsEmptyState extends StatelessWidget {
             Icon(
               Icons.description_outlined,
               size: AppIconSize.emptyState,
-              color: isDark
-                  ? AppColors.textSecondaryDark
-                  : AppColors.textSecondaryLight,
+              color: context.palette.textMuted,
             ),
             const SizedBox(height: AppSpacing.xl),
             Text(
               'Henüz not yok',
               style: AppTypography.headlineSmall.copyWith(
-                color: isDark
-                    ? AppColors.textPrimaryDark
-                    : AppColors.textPrimaryLight,
+                color: context.palette.textPrimary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -53,9 +47,7 @@ class DocumentsEmptyState extends StatelessWidget {
             Text(
               'Yeni bir not oluşturmak için "+" butonuna tıklayın',
               style: AppTypography.bodyMedium.copyWith(
-                color: isDark
-                    ? AppColors.textSecondaryDark
-                    : AppColors.textSecondaryLight,
+                color: context.palette.textMuted,
               ),
               textAlign: TextAlign.center,
             ),
@@ -120,8 +112,6 @@ class DocumentsEmptySearchResult extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.xxl),
@@ -131,17 +121,13 @@ class DocumentsEmptySearchResult extends ConsumerWidget {
             Icon(
               Icons.search_off,
               size: AppIconSize.emptyState,
-              color: isDark
-                  ? AppColors.textSecondaryDark
-                  : AppColors.textSecondaryLight,
+              color: context.palette.textMuted,
             ),
             const SizedBox(height: AppSpacing.xl),
             Text(
               'Sonuç bulunamadı',
               style: AppTypography.headlineSmall.copyWith(
-                color: isDark
-                    ? AppColors.textPrimaryDark
-                    : AppColors.textPrimaryLight,
+                color: context.palette.textPrimary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -149,9 +135,7 @@ class DocumentsEmptySearchResult extends ConsumerWidget {
             Text(
               '"$query" için eşleşen not bulunamadı',
               style: AppTypography.bodyMedium.copyWith(
-                color: isDark
-                    ? AppColors.textSecondaryDark
-                    : AppColors.textSecondaryLight,
+                color: context.palette.textMuted,
               ),
               textAlign: TextAlign.center,
             ),

@@ -37,20 +37,17 @@ class DocumentsSidebar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final foldersAsync = ref.watch(foldersProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       width: AppSpacing.sidebarWidth,
-      color: isDark
-          ? AppColors.surfaceContainerLowDark
-          : AppColors.surfaceContainerLowLight,
+      color: context.palette.surface,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildHeader(context),
           const SizedBox(height: AppSpacing.sm),
           // Navigasyon kartı
-          _buildNavCard(context, isDark),
+          _buildNavCard(context),
           const SizedBox(height: AppSpacing.md),
           _buildFoldersHeader(context),
           Expanded(
@@ -64,7 +61,7 @@ class DocumentsSidebar extends ConsumerWidget {
     );
   }
 
-  Widget _buildNavCard(BuildContext context, bool isDark) {
+  Widget _buildNavCard(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
       child: AppCard(
@@ -79,31 +76,29 @@ class DocumentsSidebar extends ConsumerWidget {
               isSelected: selectedSection == SidebarSection.documents,
               onTap: () => onSectionChanged(SidebarSection.documents),
             ),
-            _divider(isDark),
+            _divider(context),
             SidebarTile(
               icon: Icons.star_outline,
               label: 'Favoriler',
               isSelected: selectedSection == SidebarSection.favorites,
               onTap: () => onSectionChanged(SidebarSection.favorites),
             ),
-            _divider(isDark),
+            _divider(context),
             SidebarTile(
               icon: Icons.delete_outline,
               label: 'Son Silinenler',
               isSelected: selectedSection == SidebarSection.trash,
               onTap: () => onSectionChanged(SidebarSection.trash),
             ),
-            _divider(isDark),
+            _divider(context),
             SidebarTile(
               icon: Icons.label_outline,
               label: 'Etiketler',
               isSelected: false,
               enabled: false,
               trailing: Text('Yakında',
-                  style: AppTypography.caption.copyWith(
-                      color: isDark
-                          ? AppColors.textTertiaryDark
-                          : AppColors.textTertiaryLight)),
+                  style: AppTypography.caption
+                      .copyWith(color: context.palette.textDisabled)),
             ),
           ],
         ),
@@ -111,20 +106,17 @@ class DocumentsSidebar extends ConsumerWidget {
     );
   }
 
-  Widget _divider(bool isDark) {
+  Widget _divider(BuildContext context) {
     return Divider(
       height: 0.5,
       thickness: 0.5,
-      color:
-          isDark ? AppColors.outlineVariantDark : AppColors.outlineVariantLight,
+      color: context.palette.border,
       indent: 52,
     );
   }
 
   Widget _buildHeader(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textPrimary =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final textPrimary = context.palette.textPrimary;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -172,7 +164,6 @@ class DocumentsSidebar extends ConsumerWidget {
   }
 
   Widget _buildFoldersHeader(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return AppSectionHeader(
       title: 'Klasörler',
       padding: const EdgeInsets.symmetric(
@@ -188,8 +179,8 @@ class DocumentsSidebar extends ConsumerWidget {
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
             child: Text('Yönet',
-                style: AppTypography.caption.copyWith(
-                    color: isDark ? AppColors.accent : AppColors.primary)),
+                style: AppTypography.caption
+                    .copyWith(color: context.palette.accent)),
           ),
           AppIconButton(
             icon: Icons.add,
@@ -205,9 +196,7 @@ class DocumentsSidebar extends ConsumerWidget {
 
   Widget _buildFoldersList(
       BuildContext context, AsyncValue<List<dynamic>> foldersAsync) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final tertiaryColor =
-        isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight;
+    final tertiaryColor = context.palette.textDisabled;
 
     return foldersAsync.when(
       data: (folders) {
@@ -244,11 +233,9 @@ class DocumentsSidebar extends ConsumerWidget {
   }
 
   Widget _buildFolderItem(BuildContext context, dynamic folder, bool isSub) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isSel = selectedSection == SidebarSection.folder &&
         selectedFolderId == folder.id;
-    final tertiaryColor =
-        isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight;
+    final tertiaryColor = context.palette.textDisabled;
 
     return SidebarItem(
       icon: Icons.folder_outlined,
@@ -259,9 +246,7 @@ class DocumentsSidebar extends ConsumerWidget {
       iconColor: Color(folder.colorValue),
       trailing: Text('${folder.documentCount}',
           style: AppTypography.caption.copyWith(
-              color: isSel
-                  ? (isDark ? AppColors.accent : AppColors.primary)
-                  : tertiaryColor)),
+              color: isSel ? (context.palette.accent) : tertiaryColor)),
       onTap: () => onFolderSelected?.call(folder.id),
     );
   }
