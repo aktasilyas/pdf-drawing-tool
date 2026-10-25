@@ -226,7 +226,7 @@ extension PenTypeExtension on PenType {
           defaultThickness: 2.0,
           maxThickness: 10.0,
           pressureSensitive: true,
-          pressureSensitivity: 0.55,
+          pressureSensitivity: 0.7,
           taperStartFactor: 1.5,
           taperEndFactor: 3.0,
           streamline: 0.45,
