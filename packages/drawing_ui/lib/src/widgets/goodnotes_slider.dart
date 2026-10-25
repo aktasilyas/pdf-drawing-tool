@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
-/// GoodNotes-style stepped slider with dot tick marks.
+import 'package:drawing_ui/src/theme/theme.dart';
+
+/// Chrome slider: label and tabular value header above a continuous track.
 ///
-/// Features:
-/// - Uppercase label + percentage value header
-/// - Track with visible dot markers at each step
-/// - Active dots colored [activeColor], inactive grey
-/// - Larger thumb circle
+/// Track 4dp, thumb 20dp, 48dp hit height, no step ticks (docs/specs/
+/// 52-editor-chrome.md, section 4). Colours come from [ChromePalette];
+/// [activeColor] tints the filled track and thumb. Pass [divisions] only for
+/// values that must snap (for example font sizes).
 class GoodNotesSlider extends StatelessWidget {
   const GoodNotesSlider({
     super.key,
@@ -17,8 +18,14 @@ class GoodNotesSlider extends StatelessWidget {
     required this.displayValue,
     required this.activeColor,
     required this.onChanged,
-    this.divisions = 8,
+    this.divisions,
   });
+
+  /// Track thickness.
+  static const double trackHeight = 4;
+
+  /// Thumb diameter.
+  static const double thumbSize = 20;
 
   final String label;
   final double value;
@@ -27,49 +34,65 @@ class GoodNotesSlider extends StatelessWidget {
   final String displayValue;
   final Color activeColor;
   final ValueChanged<double> onChanged;
-  final int divisions;
+
+  /// Optional snapping; null means continuous. Never draws tick marks.
+  final int? divisions;
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    return Column(mainAxisSize: MainAxisSize.min, children: [
-      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-        Text(label,
-            style: textTheme.labelSmall?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: cs.onSurfaceVariant,
-              letterSpacing: 0.5,
-            )),
-        Text(displayValue,
-            style: textTheme.labelMedium?.copyWith(
-              color: cs.onSurface,
-            )),
-      ]),
-      const SizedBox(height: 2),
-      SizedBox(
-        height: 32,
-        child: SliderTheme(
-          data: SliderThemeData(
-            trackHeight: 3,
-            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 9),
-            overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
-            activeTrackColor: activeColor,
-            inactiveTrackColor: cs.outlineVariant.withValues(alpha: 0.4),
-            thumbColor: activeColor,
-            activeTickMarkColor: activeColor,
-            inactiveTickMarkColor: cs.outlineVariant,
-            tickMarkShape: const RoundSliderTickMarkShape(tickMarkRadius: 4),
-          ),
-          child: Slider(
-            value: value.clamp(min, max),
-            min: min,
-            max: max,
-            divisions: divisions,
-            onChanged: onChanged,
+    final palette = ChromePalette.of(context);
+    final labelStyle = Theme.of(context).textTheme.labelMedium;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                label,
+                style: labelStyle?.copyWith(color: palette.textMuted),
+              ),
+            ),
+            const SizedBox(width: ChromeSpacing.sm),
+            Text(
+              displayValue,
+              style: labelStyle?.copyWith(
+                color: palette.textPrimary,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
+            ),
+          ],
+        ),
+        SizedBox(
+          height: ChromeSizes.minTouchTarget,
+          child: SliderTheme(
+            data: SliderThemeData(
+              trackHeight: trackHeight,
+              thumbShape: const RoundSliderThumbShape(
+                enabledThumbRadius: thumbSize / 2,
+                elevation: 0,
+                pressedElevation: 0,
+              ),
+              overlayShape: const RoundSliderOverlayShape(
+                overlayRadius: ChromeSizes.minTouchTarget / 2,
+              ),
+              overlayColor: activeColor.withValues(alpha: 0.12),
+              activeTrackColor: activeColor,
+              inactiveTrackColor: palette.border,
+              thumbColor: activeColor,
+              tickMarkShape: SliderTickMarkShape.noTickMark,
+              trackShape: const RoundedRectSliderTrackShape(),
+            ),
+            child: Slider(
+              value: value.clamp(min, max),
+              min: min,
+              max: max,
+              divisions: divisions,
+              onChanged: onChanged,
+            ),
           ),
         ),
-      ),
-    ]);
+      ],
+    );
   }
 }
