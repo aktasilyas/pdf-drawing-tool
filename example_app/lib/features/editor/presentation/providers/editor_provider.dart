@@ -74,6 +74,8 @@ class AutoSaveNotifier extends StateNotifier<bool> {
       (_) => logger.i('Document saved successfully: ${document.id}'),
     );
 
+    // A lifecycle flush can outlive the editor (provider invalidated on leave).
+    if (!mounted) return;
     state = false; // Saved
     // Only clear unsaved flag if no new changes arrived during save
     if (_debounceTimer == null || !_debounceTimer!.isActive) {
