@@ -27,6 +27,8 @@ class PenTypeMapper {
         return toolbar.PenType.neonHighlighter;
       case PenType.rulerPen:
         return toolbar.PenType.rulerPen;
+      case PenType.fountainPen:
+        return toolbar.PenType.fountainPen;
     }
   }
 
@@ -51,10 +53,11 @@ class PenTypeMapper {
         return PenType.neonHighlighter;
       case toolbar.PenType.rulerPen:
         return PenType.rulerPen;
+      case toolbar.PenType.fountainPen:
+        return PenType.fountainPen;
       // Fallback for toolbar types not in drawing_core
       case toolbar.PenType.pen:
       case toolbar.PenType.marker:
-      case toolbar.PenType.fountainPen:
       case toolbar.PenType.fineliner:
       case toolbar.PenType.crayon:
         return PenType.ballpointPen;
@@ -73,6 +76,7 @@ class PenTypeMapper {
       toolbar.PenType.brushPen,
       toolbar.PenType.neonHighlighter,
       toolbar.PenType.rulerPen,
+      toolbar.PenType.fountainPen,
     ].contains(toolbarType);
   }
 }

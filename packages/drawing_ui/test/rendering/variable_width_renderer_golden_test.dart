@@ -12,7 +12,8 @@ class _StrokePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     canvas.drawRect(
         Offset.zero & size, Paint()..color = const Color(0xFFFFFFFF));
-    final style = StrokeStyle.pen(thickness: 10, color: 0xFF000000);
+    final style = StrokeStyle.pen(thickness: 10, color: 0xFF000000)
+        .copyWith(pressureSensitive: true);
     final pressures = [0.15, 0.55, 1.0];
     for (var row = 0; row < pressures.length; row++) {
       final pts = [

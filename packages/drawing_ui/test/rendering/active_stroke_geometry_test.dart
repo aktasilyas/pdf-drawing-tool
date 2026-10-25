@@ -22,6 +22,25 @@ void main() {
       expect(g.mode, ActiveStrokeMode.outline);
     });
 
+    test('tapered non-pressure style uses the outline mode', () {
+      final g = ActiveStrokeGeometry()
+        ..begin(StrokeStyle(
+            color: 0xFF000000,
+            thickness: 4,
+            dynamics: const StrokeDynamics(taperEnd: 8)));
+      expect(g.mode, ActiveStrokeMode.outline);
+    });
+
+    test('pencil texture wins over pressure (fallback)', () {
+      final g = ActiveStrokeGeometry()
+        ..begin(StrokeStyle(
+            color: 0xFF000000,
+            thickness: 4,
+            texture: StrokeTexture.pencil,
+            pressureSensitive: true));
+      expect(g.mode, ActiveStrokeMode.fallback);
+    });
+
     test('solid pens use the stroked mode', () {
       final g = ActiveStrokeGeometry()..begin(StrokeStyle.pen());
       expect(g.mode, ActiveStrokeMode.stroked);
@@ -76,6 +95,42 @@ void main() {
         ..sync(_wave(10))
         ..clear();
       expect(g.consumed, 0);
+    });
+  });
+
+  group('ActiveStrokeGeometry parity with committed render', () {
+    testWidgets('tapered style: live and committed pixels match',
+        (tester) async {
+      await tester.runAsync(() async {
+        final style = StrokeStyle(
+          thickness: 8,
+          color: 0xFF000000,
+          dynamics: const StrokeDynamics(taperStart: 30, taperEnd: 30),
+        );
+        final points = _wave(120);
+
+        Future<ByteData> raster(void Function(ui.Canvas) draw) async {
+          final recorder = ui.PictureRecorder();
+          draw(ui.Canvas(recorder));
+          final image = await recorder.endRecording().toImage(300, 200);
+          final data = await image.toByteData();
+          image.dispose();
+          return data!;
+        }
+
+        final committed = await raster((c) => FlutterStrokeRenderer()
+            .renderStroke(c, Stroke.create(points: points, style: style)));
+        final geometry = ActiveStrokeGeometry()
+          ..begin(style)
+          ..sync(points);
+        final live = await raster(geometry.paint);
+
+        var diff = 0;
+        for (var i = 0; i < committed.lengthInBytes; i++) {
+          if ((committed.getUint8(i) - live.getUint8(i)).abs() > 8) diff++;
+        }
+        expect(diff / committed.lengthInBytes, lessThan(0.005));
+      });
     });
   });
 

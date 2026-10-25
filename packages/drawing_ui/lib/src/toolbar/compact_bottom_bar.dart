@@ -210,13 +210,11 @@ class _CompactToolRowState extends ConsumerState<CompactToolRow> {
       // First click — just select
       ref.read(currentToolProvider.notifier).selectTool(tool);
       ref.read(activePanelProvider.notifier).state = null;
-      ref.read(penPickerModeProvider.notifier).state = false;
     }
   }
 
   /// Handle panel chevron tap.
   void _onPanelTap(ToolType tool) {
-    ref.read(penPickerModeProvider.notifier).state = false;
     widget.onPanelRequested?.call(tool);
   }
 }

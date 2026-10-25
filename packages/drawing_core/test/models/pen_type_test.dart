@@ -3,8 +3,8 @@ import 'package:drawing_core/drawing_core.dart';
 
 void main() {
   group('PenType enum', () {
-    test('has 9 pen types', () {
-      expect(PenType.values.length, 9);
+    test('has 10 pen types', () {
+      expect(PenType.values.length, 10);
     });
 
     test('contains all expected values', () {
@@ -16,6 +16,64 @@ void main() {
       expect(PenType.values, contains(PenType.highlighter));
       expect(PenType.values, contains(PenType.brushPen));
       expect(PenType.values, contains(PenType.neonHighlighter));
+    });
+  });
+
+  group('PenType presets v2', () {
+    test('fountainPen is appended last', () {
+      expect(PenType.values.last, PenType.fountainPen);
+      expect(PenType.rulerPen.index, 8);
+    });
+
+    test('fountain and brush taper scales with thickness', () {
+      for (final t in [PenType.fountainPen, PenType.brushPen]) {
+        final a = t.toStrokeStyle(color: 0xFF000000, thickness: 2).dynamics;
+        final b = t.toStrokeStyle(color: 0xFF000000, thickness: 4).dynamics;
+        expect(a.taperStart, greaterThan(0));
+        expect(a.taperEnd, greaterThan(0));
+        expect(b.taperStart, closeTo(a.taperStart * 2, 1e-9));
+        expect(b.taperEnd, closeTo(a.taperEnd * 2, 1e-9));
+      }
+    });
+
+    test('fountain tuning matches plan', () {
+      final s = PenType.fountainPen.toStrokeStyle(
+        color: 0xFF000000,
+        thickness: 2,
+      );
+      expect(s.pressureSensitive, isTrue);
+      expect(s.dynamics.taperStart, closeTo(3, 1e-9));
+      expect(s.dynamics.taperEnd, closeTo(6, 1e-9));
+      expect(s.dynamics.streamline, 0.45);
+      expect(s.dynamics.velocityThinning, 0.25);
+    });
+
+    test('ballpoint keeps round ends with slight speed thinning', () {
+      final s = PenType.ballpointPen.toStrokeStyle(color: 0xFF000000);
+      expect(s.dynamics.taperStart, 0);
+      expect(s.dynamics.taperEnd, 0);
+      expect(s.dynamics.velocityThinning, 0.1);
+      expect(s.pressureSensitive, isFalse);
+    });
+
+    test('highlighter uses multiply at 0.4 opacity', () {
+      final s = PenType.highlighter.toStrokeStyle(color: 0xFFFFEB3B);
+      expect(s.blendMode, DrawingBlendMode.multiply);
+      expect(s.opacity, 0.4);
+    });
+
+    test('pencil and legacy presets have no dynamics', () {
+      for (final t in [PenType.pencil, PenType.gelPen, PenType.dashedPen]) {
+        expect(t.toStrokeStyle(color: 0xFF000000).dynamics.isNone, isTrue);
+      }
+    });
+
+    test('config exposes usesOutline', () {
+      expect(PenType.fountainPen.config.usesOutline, isTrue);
+      expect(PenType.brushPen.config.usesOutline, isTrue);
+      expect(PenType.ballpointPen.config.usesOutline, isTrue);
+      expect(PenType.highlighter.config.usesOutline, isFalse);
+      expect(PenType.pencil.config.usesOutline, isFalse);
     });
   });
 

@@ -28,6 +28,11 @@ enum PenType {
 
   /// Ruler pen for drawing straight lines.
   rulerPen,
+
+  /// Pressure-sensitive fountain pen with tapered ends.
+  ///
+  /// Appended last so persisted enum indices of older types stay stable.
+  fountainPen,
 }
 
 /// Configuration for each pen type.
@@ -74,6 +79,27 @@ class PenTypeConfig {
   /// Whether this pen type supports pressure-sensitive variable width.
   final bool pressureSensitive;
 
+  /// Default pressure sensitivity (0.0 to 1.0) when pressure is on.
+  final double pressureSensitivity;
+
+  /// Taper length at stroke start as a multiple of thickness (0 = round).
+  final double taperStartFactor;
+
+  /// Taper length at stroke end as a multiple of thickness (0 = round).
+  final double taperEndFactor;
+
+  /// Input smoothing amount for the outline.
+  final double streamline;
+
+  /// How much speed thins the stroke.
+  final double velocityThinning;
+
+  /// Blend mode of strokes created from this pen type.
+  final DrawingBlendMode blendMode;
+
+  /// Whether strokes render through the variable-width outline.
+  final bool usesOutline;
+
   const PenTypeConfig({
     required this.displayName,
     required this.displayNameTr,
@@ -89,6 +115,13 @@ class PenTypeConfig {
     this.dashPattern,
     this.nibAngle = 0.0,
     this.pressureSensitive = false,
+    this.pressureSensitivity = 0.75,
+    this.taperStartFactor = 0.0,
+    this.taperEndFactor = 0.0,
+    this.streamline = 0.5,
+    this.velocityThinning = 0.2,
+    this.blendMode = DrawingBlendMode.normal,
+    this.usesOutline = false,
   });
 }
 
@@ -120,6 +153,8 @@ extension PenTypeExtension on PenType {
           displayNameTr: 'Tükenmez Kalem',
           defaultThickness: 1.5,
           maxThickness: 5.0,
+          velocityThinning: 0.1,
+          usesOutline: true,
         );
       case PenType.gelPen:
         return const PenTypeConfig(
@@ -146,6 +181,7 @@ extension PenTypeExtension on PenType {
           maxThickness: 40.0,
           defaultOpacity: 0.4,
           nibShape: NibShape.rectangle,
+          blendMode: DrawingBlendMode.multiply,
         );
       case PenType.brushPen:
         return const PenTypeConfig(
@@ -155,6 +191,12 @@ extension PenTypeExtension on PenType {
           maxThickness: 30.0,
           nibShape: NibShape.ellipse,
           pressureSensitive: true,
+          pressureSensitivity: 0.9,
+          taperStartFactor: 2.5,
+          taperEndFactor: 4.0,
+          streamline: 0.55,
+          velocityThinning: 0.35,
+          usesOutline: true,
         );
       case PenType.neonHighlighter:
         return const PenTypeConfig(
@@ -177,6 +219,20 @@ extension PenTypeExtension on PenType {
           maxThickness: 10.0,
           nibShape: NibShape.circle,
         );
+      case PenType.fountainPen:
+        return const PenTypeConfig(
+          displayName: 'Fountain Pen',
+          displayNameTr: 'Dolma Kalem',
+          defaultThickness: 2.0,
+          maxThickness: 10.0,
+          pressureSensitive: true,
+          pressureSensitivity: 0.7,
+          taperStartFactor: 1.5,
+          taperEndFactor: 3.0,
+          streamline: 0.45,
+          velocityThinning: 0.25,
+          usesOutline: true,
+        );
     }
   }
 
@@ -191,10 +247,12 @@ extension PenTypeExtension on PenType {
     double? pressureSensitivity,
   }) {
     final c = config;
+    final t = thickness ?? c.defaultThickness;
     return StrokeStyle(
       color: color,
-      thickness: thickness ?? c.defaultThickness,
+      thickness: t,
       opacity: c.defaultOpacity,
+      blendMode: c.blendMode,
       nibShape: c.nibShape,
       pattern: c.pattern,
       texture: c.texture,
@@ -203,7 +261,15 @@ extension PenTypeExtension on PenType {
       dashPattern: c.dashPattern,
       nibAngle: c.nibAngle,
       pressureSensitive: pressureSensitive ?? c.pressureSensitive,
-      pressureSensitivity: pressureSensitivity ?? 0.75,
+      pressureSensitivity: pressureSensitivity ?? c.pressureSensitivity,
+      dynamics: c.usesOutline
+          ? StrokeDynamics(
+              taperStart: c.taperStartFactor * t,
+              taperEnd: c.taperEndFactor * t,
+              streamline: c.streamline,
+              velocityThinning: c.velocityThinning,
+            )
+          : StrokeDynamics.none,
     );
   }
 }

@@ -1,129 +1,102 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_ui/src/models/models.dart';
+import 'package:drawing_ui/src/panels/pen_type_tile.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
+import 'package:drawing_ui/src/toolbar/toolbar_layout_mode.dart';
 
-/// GoodNotes-style horizontal pen type picker for popover.
+// Mirrors AppSpacing (drawing_ui cannot import example_app).
+const double _kSm = 8;
+const double _kMd = 12;
+const double _kLg = 16;
+const double _kTabletTileWidth = 64;
+const double _kMinTileWidth = 60;
+
+/// Horizontal row of the five pen presets, each with a live stroke preview.
+///
+/// Order is fixed: fountain, ballpoint, brush, highlighter, pencil. Selected
+/// means the current tool equals the tile's tool (legacy tools select none).
 class PenTypePicker extends ConsumerWidget {
-  const PenTypePicker({super.key, this.onPenSelected});
+  const PenTypePicker({super.key, this.onPenSelected, this.padding});
 
   final ValueChanged<ToolType>? onPenSelected;
 
-  /// Gösterilecek 5 kalem tipi (sıralı)
-  static const _pickerPens = [
-    ToolType.pencil, // Kurşun Kalem
-    ToolType.ballpointPen, // Tükenmez Kalem
-    ToolType.dashedPen, // Kesik Çizgi
-    ToolType.brushPen, // Fırça Kalem
-    ToolType.rulerPen, // Cetvelli Kalem
+  /// Overrides the default padding (use [EdgeInsets.zero] when embedded).
+  final EdgeInsets? padding;
+
+  static const _pens = [
+    (ToolType.fountainPen, 'Dolma Kalem'),
+    (ToolType.ballpointPen, 'Tükenmez Kalem'),
+    (ToolType.brushPen, 'Fırça Kalem'),
+    (ToolType.highlighter, 'Fosforlu Kalem'),
+    (ToolType.pencil, 'Kurşun Kalem'),
   ];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentTool = ref.watch(currentToolProvider);
-    final colorScheme = Theme.of(context).colorScheme;
+    final current = ref.watch(currentToolProvider);
+    final tablet =
+        MediaQuery.sizeOf(context).width >= ToolbarLayoutMode.compactBreakpoint;
+    final insets = padding ??
+        EdgeInsets.symmetric(horizontal: tablet ? _kMd : _kLg, vertical: _kMd);
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: _pickerPens.map((pen) {
-          final isSelected = pen == currentTool ||
-              (!_pickerPens.contains(currentTool) &&
-                  pen == ToolType.ballpointPen);
-          final label = _getLabel(pen);
+    Widget tile(ToolType tool, String label) => PenTypeTile(
+          tool: tool,
+          label: label,
+          selected: tool == current,
+          onTap: () {
+            ref.read(currentToolProvider.notifier).selectTool(tool);
+            onPenSelected?.call(tool);
+          },
+        );
 
-          return Expanded(
-            child: GestureDetector(
-              onTap: () {
-                ref.read(currentToolProvider.notifier).selectTool(pen);
-                onPenSelected?.call(pen);
-              },
-              behavior: HitTestBehavior.opaque,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+    const tiles = _pens;
+
+    return Semantics(
+      container: true,
+      label: 'Kalem türü',
+      child: Padding(
+        padding: insets,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final gaps = _kSm * (tiles.length - 1);
+            final perTile = (constraints.maxWidth - gaps) / tiles.length;
+            Widget gap() => const SizedBox(width: _kSm);
+            if (tablet && perTile >= _kTabletTileWidth ||
+                !tablet && perTile >= _kMinTileWidth) {
+              return Row(
+                mainAxisSize: tablet ? MainAxisSize.min : MainAxisSize.max,
                 children: [
-                  // İkon container
-                  Container(
-                    width: 44,
-                    height: 44,
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? colorScheme.primaryContainer
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.circular(12),
-                      border: isSelected
-                          ? Border.all(color: colorScheme.primary, width: 1.5)
-                          : null,
+                  for (var i = 0; i < tiles.length; i++) ...[
+                    if (i > 0) gap(),
+                    tablet
+                        ? SizedBox(
+                            width: _kTabletTileWidth,
+                            child: tile(tiles[i].$1, tiles[i].$2),
+                          )
+                        : Expanded(child: tile(tiles[i].$1, tiles[i].$2)),
+                  ],
+                ],
+              );
+            }
+            // Too narrow: scroll instead of shrinking the tiles.
+            return SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  for (var i = 0; i < tiles.length; i++) ...[
+                    if (i > 0) gap(),
+                    SizedBox(
+                      width: _kMinTileWidth,
+                      child: tile(tiles[i].$1, tiles[i].$2),
                     ),
-                    child: Center(
-                      child: PhosphorIcon(
-                        _getIcon(pen),
-                        size: 22,
-                        color: isSelected
-                            ? colorScheme.primary
-                            : colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  // Label
-                  Text(
-                    label,
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          fontSize: 10,
-                          fontWeight:
-                              isSelected ? FontWeight.w600 : FontWeight.w400,
-                          color: isSelected
-                              ? colorScheme.primary
-                              : colorScheme.onSurfaceVariant,
-                        ),
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  ],
                 ],
               ),
-            ),
-          );
-        }).toList(),
+            );
+          },
+        ),
       ),
     );
-  }
-
-  static String _getLabel(ToolType type) {
-    switch (type) {
-      case ToolType.pencil:
-        return 'Kurşun\nKalem';
-      case ToolType.ballpointPen:
-        return 'Tükenmez\nKalem';
-      case ToolType.dashedPen:
-        return 'Kesik\nÇizgi';
-      case ToolType.brushPen:
-        return 'Fırça\nKalem';
-      case ToolType.rulerPen:
-        return 'Cetvelli\nKalem';
-      default:
-        return type.displayName;
-    }
-  }
-
-  static PhosphorIconData _getIcon(ToolType type) {
-    switch (type) {
-      case ToolType.pencil:
-        return PhosphorIconsLight.pencilSimple;
-      case ToolType.ballpointPen:
-        return PhosphorIconsLight.pen;
-      case ToolType.dashedPen:
-        return PhosphorIconsLight.penNibStraight;
-      case ToolType.brushPen:
-        return PhosphorIconsLight.paintBrush;
-      case ToolType.rulerPen:
-        return PhosphorIconsLight.ruler;
-      default:
-        return PhosphorIconsLight.pen;
-    }
   }
 }
