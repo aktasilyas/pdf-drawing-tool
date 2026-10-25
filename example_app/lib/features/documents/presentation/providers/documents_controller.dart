@@ -6,6 +6,8 @@ import 'package:example_app/features/documents/presentation/providers/documents_
 import 'package:example_app/features/documents/presentation/providers/documents_controller_page_trash.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_invalidation.dart';
 import 'package:example_app/features/documents/presentation/providers/imported_document_content.dart';
+import 'package:example_app/features/documents/presentation/providers/library_error.dart';
+import 'package:example_app/core/core.dart';
 
 /// Mutations on notebooks: create, rename, move, favourite, trash, restore,
 /// duplicate and delete. Bulk and page-trash operations live in mixins.
@@ -47,6 +49,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
     return result.fold(
       (failure) {
         state = AsyncValue.error(failure, StackTrace.current);
+        reportLibraryFailure(ref, failure, 'Belge oluşturulamadı');
         return null;
       },
       (document) {
@@ -81,6 +84,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
       return await result.fold(
         (failure) {
           state = AsyncValue.error(failure, StackTrace.current);
+          reportLibraryFailure(ref, failure, 'Belge içe aktarılamadı');
           return null;
         },
         (document) async {
@@ -100,6 +104,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
           return saveResult.fold(
             (failure) {
               state = AsyncValue.error(failure, StackTrace.current);
+              reportLibraryFailure(ref, failure, 'Belge içe aktarılamadı');
               return null;
             },
             (_) {
@@ -112,6 +117,8 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
       );
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
+      reportLibraryFailure(
+          ref, UnknownFailure(e.toString()), 'Belge içe aktarılamadı');
       return null;
     }
   }
@@ -122,6 +129,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
     return result.fold(
       (failure) {
         state = AsyncValue.error(failure, StackTrace.current);
+        reportLibraryFailure(ref, failure, 'Belge taşınamadı');
         return false;
       },
       (_) {
@@ -135,7 +143,10 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
   Future<bool> toggleFavorite(String documentId) async {
     final result = await repository.toggleFavorite(documentId);
     return result.fold(
-      (failure) => false,
+      (failure) {
+        reportLibraryFailure(ref, failure, 'Favori durumu değiştirilemedi');
+        return false;
+      },
       (_) {
         // Only invalidate favorites and the documents list
         invalidateDocumentLists(ref, documents: true, favorites: true);
@@ -147,7 +158,10 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
   Future<bool> moveToTrash(String documentId) async {
     final result = await repository.moveToTrash(documentId);
     return result.fold(
-      (failure) => false,
+      (failure) {
+        reportLibraryFailure(ref, failure, 'Belge çöpe taşınamadı');
+        return false;
+      },
       (_) {
         // Invalidate documents, trash, and folders (for counts)
         invalidateTrashMove(ref);
@@ -159,7 +173,10 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
   Future<bool> deleteDocument(String documentId) async {
     final result = await repository.deleteDocument(documentId);
     return result.fold(
-      (failure) => false,
+      (failure) {
+        reportLibraryFailure(ref, failure, 'Belge silinemedi');
+        return false;
+      },
       (_) {
         invalidateAllDocumentLists(ref);
         return true;
@@ -171,7 +188,10 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
     final result =
         await repository.updateDocument(id: documentId, title: newTitle);
     return result.fold(
-      (failure) => false,
+      (failure) {
+        reportLibraryFailure(ref, failure, 'Belge adı değiştirilemedi');
+        return false;
+      },
       (_) {
         // Only invalidate documents list (rename doesn't affect favorites/trash)
         invalidateDocumentLists(ref, documents: true);
@@ -187,6 +207,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
       return await result.fold(
         (failure) {
           state = AsyncError(failure, StackTrace.current);
+          reportLibraryFailure(ref, failure, 'Belge geri yüklenemedi');
           return false;
         },
         (_) {
@@ -197,6 +218,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
       );
     } catch (e) {
       state = AsyncError(e, StackTrace.current);
+      reportLibraryFailure(ref, UnknownFailure(e.toString()), 'Belge geri yüklenemedi');
       return false;
     }
   }
@@ -208,6 +230,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
       return await result.fold(
         (failure) {
           state = AsyncError(failure, StackTrace.current);
+          reportLibraryFailure(ref, failure, 'Belge çoğaltılamadı');
           return false;
         },
         (_) {
@@ -217,6 +240,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
       );
     } catch (e) {
       state = AsyncError(e, StackTrace.current);
+      reportLibraryFailure(ref, UnknownFailure(e.toString()), 'Belge çoğaltılamadı');
       return false;
     }
   }
@@ -228,6 +252,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
       return await result.fold(
         (failure) {
           state = AsyncError(failure, StackTrace.current);
+          reportLibraryFailure(ref, failure, 'Belge kalıcı olarak silinemedi');
           return false;
         },
         (_) {
@@ -237,6 +262,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
       );
     } catch (e) {
       state = AsyncError(e, StackTrace.current);
+      reportLibraryFailure(ref, UnknownFailure(e.toString()), 'Belge kalıcı olarak silinemedi');
       return false;
     }
   }

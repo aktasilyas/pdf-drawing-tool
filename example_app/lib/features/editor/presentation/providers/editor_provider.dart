@@ -34,13 +34,21 @@ final autoSaveProvider = StateNotifierProvider<AutoSaveNotifier, bool>((ref) {
   return AutoSaveNotifier(ref);
 });
 
+// Latest failed save; null when the last save succeeded. The editor shows a
+// persistent "Kaydedilemedi" banner with Retry while this is set.
+final saveFailureProvider = StateProvider<Failure?>((ref) => null);
+
 class AutoSaveNotifier extends StateNotifier<bool> {
   final Ref _ref;
   Timer? _debounceTimer;
 
+  /// Newest document handed to this notifier; what [retry] saves.
+  DrawingDocument? _latest;
+
   AutoSaveNotifier(this._ref) : super(false);
 
   void documentChanged(DrawingDocument document) {
+    _latest = document;
     _debounceTimer?.cancel();
     _debounceTimer = Timer(const Duration(seconds: 3), () {
       _save(document);
@@ -52,19 +60,33 @@ class AutoSaveNotifier extends StateNotifier<bool> {
     final useCase = _ref.read(saveDocumentUseCaseProvider);
     final result = await useCase(document);
 
-    result.fold(
-      (failure) => logger.e('Save failed', error: failure.message),
-      (_) => logger.i('Document saved successfully: ${document.id}'),
-    );
+    final failure = result.fold((f) => f, (_) => null);
+    if (failure != null) {
+      logger.e('Save failed', error: failure.message);
+    } else {
+      logger.i('Document saved successfully: ${document.id}');
+    }
 
+    if (!mounted) return;
+    _ref.read(saveFailureProvider.notifier).state = failure;
     state = false; // Saved
+    // A failed save keeps the unsaved flag so nothing is reported as saved.
+    if (failure != null) return;
     // Only clear unsaved flag if no new changes arrived during save
     if (_debounceTimer == null || !_debounceTimer!.isActive) {
       _ref.read(hasUnsavedChangesProvider.notifier).state = false;
     }
   }
 
+  /// Saves the newest document again after a failed save.
+  Future<void> retry() {
+    final latest = _latest;
+    if (latest == null) return Future<void>.value();
+    return saveNow(latest);
+  }
+
   Future<void> saveNow(DrawingDocument document) {
+    _latest = document;
     _debounceTimer?.cancel();
     return _save(document);
   }

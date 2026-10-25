@@ -140,20 +140,28 @@ class _ManageFoldersScreenState extends ConsumerState<ManageFoldersScreen> {
     int rootOrder = 0;
     final subOrders = <String, int>{};
 
+    var saved = true;
     for (final folder in _orderedFolders) {
+      final int order;
       if (folder.parentId == null) {
-        await controller.updateSortOrder(folder.id, rootOrder++);
+        order = rootOrder++;
       } else {
         final parentKey = folder.parentId!;
-        subOrders[parentKey] = (subOrders[parentKey] ?? 0);
-        await controller.updateSortOrder(folder.id, subOrders[parentKey]!);
-        subOrders[parentKey] = subOrders[parentKey]! + 1;
+        order = subOrders[parentKey] ?? 0;
+        subOrders[parentKey] = order + 1;
+      }
+      // Stop at the first failure; LibraryErrorListener shows it once.
+      if (!await controller.updateSortOrder(folder.id, order)) {
+        saved = false;
+        break;
       }
     }
 
     ref.invalidate(foldersProvider);
+    if (!mounted) return;
+    if (!saved) return; // keep _hasChanges so the user can retry
     setState(() => _hasChanges = false);
-    if (mounted) AppToast.success(context, 'Sıralama kaydedildi');
+    AppToast.success(context, 'Sıralama kaydedildi');
   }
 
   Future<void> _showRenameDialog(Folder folder) async {
@@ -243,11 +251,12 @@ class _ManageFoldersScreenState extends ConsumerState<ManageFoldersScreen> {
       isDestructive: true,
     );
     if (confirmed == true) {
-      await ref
+      final deleted = await ref
           .read(foldersControllerProvider.notifier)
           .deleteFolder(folder.id);
       ref.invalidate(foldersProvider);
-      if (mounted) AppToast.success(context, 'Klasör silindi');
+      // Failures are shown by LibraryErrorListener.
+      if (deleted && mounted) AppToast.success(context, 'Klasör silindi');
     }
   }
 

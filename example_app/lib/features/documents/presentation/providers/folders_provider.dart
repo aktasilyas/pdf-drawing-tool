@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:example_app/features/documents/domain/entities/folder.dart';
 import 'package:example_app/features/documents/domain/repositories/folder_repository.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
+import 'package:example_app/features/documents/presentation/providers/library_error.dart';
 
 // Repository provider using GetIt
 final folderRepositoryProvider = Provider<FolderRepository>((ref) {
@@ -105,6 +106,7 @@ class FoldersController extends StateNotifier<AsyncValue<void>> {
     return result.fold(
       (failure) {
         state = AsyncValue.error(failure, StackTrace.current);
+        reportLibraryFailure(_ref, failure, 'Klasör oluşturulamadı');
         return null;
       },
       (folder) {
@@ -118,7 +120,10 @@ class FoldersController extends StateNotifier<AsyncValue<void>> {
   Future<bool> renameFolder(String folderId, String newName) async {
     final result = await _repository.updateFolder(id: folderId, name: newName);
     return result.fold(
-      (failure) => false,
+      (failure) {
+        reportLibraryFailure(_ref, failure, 'Klasör adı değiştirilemedi');
+        return false;
+      },
       (_) {
         _invalidateFolders();
         return true;
@@ -130,7 +135,10 @@ class FoldersController extends StateNotifier<AsyncValue<void>> {
     final result =
         await _repository.updateFolder(id: folderId, colorValue: colorValue);
     return result.fold(
-      (failure) => false,
+      (failure) {
+        reportLibraryFailure(_ref, failure, 'Klasör rengi değiştirilemedi');
+        return false;
+      },
       (_) {
         _invalidateFolders();
         return true;
@@ -142,7 +150,10 @@ class FoldersController extends StateNotifier<AsyncValue<void>> {
     final result =
         await _repository.updateFolder(id: folderId, sortOrder: sortOrder);
     return result.fold(
-      (failure) => false,
+      (failure) {
+        reportLibraryFailure(_ref, failure, 'Sıralama kaydedilemedi');
+        return false;
+      },
       (_) => true,
     );
   }
@@ -153,7 +164,10 @@ class FoldersController extends StateNotifier<AsyncValue<void>> {
   }) async {
     final result = await _repository.moveFolder(folderId, newParentId);
     return result.fold(
-      (failure) => false,
+      (failure) {
+        reportLibraryFailure(_ref, failure, 'Klasör taşınamadı');
+        return false;
+      },
       (_) {
         _invalidateFolders();
         _invalidateDocuments();
@@ -165,7 +179,10 @@ class FoldersController extends StateNotifier<AsyncValue<void>> {
   Future<bool> toggleFavorite(String folderId) async {
     final result = await _repository.toggleFavorite(folderId);
     return result.fold(
-      (failure) => false,
+      (failure) {
+        reportLibraryFailure(_ref, failure, 'Favori durumu değiştirilemedi');
+        return false;
+      },
       (_) {
         _invalidateFolders();
         return true;
@@ -176,7 +193,10 @@ class FoldersController extends StateNotifier<AsyncValue<void>> {
   Future<bool> deleteFolder(String folderId) async {
     final result = await _repository.deleteFolder(folderId);
     return result.fold(
-      (failure) => false,
+      (failure) {
+        reportLibraryFailure(_ref, failure, 'Klasör silinemedi');
+        return false;
+      },
       (_) {
         _invalidateFolders();
         _invalidateDocuments();

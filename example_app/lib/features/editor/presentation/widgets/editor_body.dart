@@ -4,9 +4,11 @@ import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/drawing_ui.dart';
 
 import 'package:example_app/core/config/feature_flags.dart';
+import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/ai/presentation/providers/ai_sidebar_provider.dart';
 import 'package:example_app/features/ai/presentation/widgets/ai_chat_floating.dart';
 import 'package:example_app/features/ai/presentation/widgets/ai_chat_sidebar.dart';
+import 'package:example_app/features/editor/presentation/widgets/save_failure_banner.dart';
 
 /// Editor body that passes the AI sidebar into [DrawingScreen]'s layout.
 ///
@@ -60,15 +62,19 @@ class EditorBody extends ConsumerWidget {
       onExternalLeftSidebarClose: () => _closeAI(ref),
     );
 
-    if (aiEnabled && !isSidebar && isAIOpen) {
-      return Stack(
-        children: [
-          drawingScreen,
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        drawingScreen,
+        if (aiEnabled && !isSidebar && isAIOpen)
           AIFloatingChat(onClose: () => _closeAI(ref)),
-        ],
-      );
-    }
-
-    return drawingScreen;
+        const Positioned(
+          left: AppSpacing.lg,
+          right: AppSpacing.lg,
+          bottom: AppSpacing.lg,
+          child: SafeArea(child: SaveFailureBanner()),
+        ),
+      ],
+    );
   }
 }
