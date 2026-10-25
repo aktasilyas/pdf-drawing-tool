@@ -121,4 +121,49 @@ mixin _StickyNoteGestures<T extends ConsumerStatefulWidget>
     }
     ref.read(stickyNotePlacementProvider.notifier).deselectNote();
   }
+
+  /// Handles pointer down while the sticky note tool is active.
+  void _handleStickyNoteToolDown(PointerDownEvent event) {
+    final transform = ref.read(canvasTransformProvider);
+    final canvasPoint =
+        (event.localPosition - transform.offset) / transform.zoom;
+    final currentNoteState = ref.read(stickyNotePlacementProvider);
+
+    // If a selected (non-minimized) note is showing resize handles,
+    // check if tap is inside the note → let handles handle it.
+    // If outside → minimize and deselect, then check other notes.
+    if (currentNoteState.selectedNote != null &&
+        !currentNoteState.showMenu &&
+        !currentNoteState.selectedNote!.minimized) {
+      if (currentNoteState.selectedNote!
+          .containsPoint(canvasPoint.dx, canvasPoint.dy, 0)) {
+        return; // Inside note → resize handles handle it
+      }
+      // Outside note → minimize and deselect
+      _minimizeAndDeselectNote(currentNoteState.selectedNote!);
+    }
+
+    final notes = ref.read(activeLayerStickyNotesProvider);
+    for (final note in notes.reversed) {
+      if (note.containsPoint(canvasPoint.dx, canvasPoint.dy, 10)) {
+        if (note.minimized) {
+          // Maximize the note
+          final maximized = note.copyWith(minimized: false);
+          final document = ref.read(documentProvider);
+          final command = core.UpdateStickyNoteCommand(
+            layerIndex: document.activeLayerIndex,
+            newNote: maximized,
+          );
+          ref.read(historyManagerProvider.notifier).execute(command);
+          ref.read(stickyNotePlacementProvider.notifier).selectNote(maximized);
+          return;
+        }
+        ref.read(stickyNotePlacementProvider.notifier).selectNote(note);
+        return;
+      }
+    }
+    // Tap on empty area → deselect
+    ref.read(stickyNotePlacementProvider.notifier).deselectNote();
+    return;
+  }
 }
