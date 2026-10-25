@@ -19,6 +19,13 @@ class SceneEntry {
       element is Stroke &&
       (element as Stroke).style.blendMode != DrawingBlendMode.normal;
 
+  /// Whether [element] blends non-affinely (overlay, darken, lighten), so a
+  /// tile holding it cannot be cached as an `A*B + K` image pair.
+  bool get isVectorOnly =>
+      usesBlend &&
+      (element as Stroke).style.blendMode != DrawingBlendMode.multiply &&
+      (element as Stroke).style.blendMode != DrawingBlendMode.screen;
+
   /// Inflated page-space bounds of [element].
   Rect get bounds => switch (element) {
         final Stroke s => strokeBounds(s),
@@ -79,6 +86,10 @@ class ElementScene {
   /// Whether a non-normal blend element touches [rect].
   bool hasBlendIn(Rect rect) =>
       entries.any((e) => e.usesBlend && e.bounds.overlaps(rect));
+
+  /// Whether an overlay/darken/lighten element touches [rect] (vector tile).
+  bool hasVectorOnlyIn(Rect rect) =>
+      entries.any((e) => e.isVectorOnly && e.bounds.overlaps(rect));
 
   /// Visible elements by id.
   late final Map<String, SceneEntry> byId = {

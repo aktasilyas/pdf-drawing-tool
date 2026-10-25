@@ -10,8 +10,9 @@ import 'package:drawing_ui/src/rendering/tiles/page_tile_cache.dart';
 /// Paints in page space (the parent transform scales it). Ready tiles are
 /// drawn as images. A tile that is not ready yet shows the old-scale images
 /// clipped to its rect (never stacked), or vectors when there are none.
-/// Tiles with non-normal blend content (multiply highlighter) are always
-/// vectors so the blend sees the page below.
+/// Multiply/screen tiles are image pairs drawn as `A` (multiply) then `K`
+/// (plus) plus an optional normal overlay, so they blend with the page below. Overlay/darken/lighten tiles are
+/// always vectors.
 class TiledElementPainter extends CustomPainter {
   TiledElementPainter({required this.cache}) : super(repaint: cache);
 
@@ -47,9 +48,28 @@ class TiledElementPainter extends CustomPainter {
     }
   }
 
+  /// Multiplies the page by a blend tile's `A` image, then adds its `K`.
+  static final ui.Paint _multiplyPaint = ui.Paint()
+    ..filterQuality = FilterQuality.medium
+    ..blendMode = BlendMode.multiply;
+  static final ui.Paint _plusPaint = ui.Paint()
+    ..filterQuality = FilterQuality.medium
+    ..blendMode = BlendMode.plus;
+
   /// Uses the tile's precomputed source rect: no allocation per frame.
   void _drawTile(Canvas canvas, CachedTile tile) {
-    canvas.drawImageRect(tile.image, tile.src, tile.rect, _paint);
+    final multiply = tile.multiplyImage;
+    if (multiply == null) {
+      canvas.drawImageRect(tile.image, tile.src, tile.rect, _paint);
+      return;
+    }
+    canvas
+      ..drawImageRect(multiply, tile.src, tile.rect, _multiplyPaint)
+      ..drawImageRect(tile.image, tile.src, tile.rect, _plusPaint);
+    final overlay = tile.overlayImage;
+    if (overlay != null) {
+      canvas.drawImageRect(overlay, tile.src, tile.rect, _paint);
+    }
   }
 
   @override

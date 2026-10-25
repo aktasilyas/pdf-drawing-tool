@@ -9,5 +9,6 @@ export 'scene_diff.dart';
 export 'scene_renderer_factory.dart';
 export 'tile_grid.dart';
 export 'tile_raster_scheduler.dart';
+export 'tile_builder.dart';
 export 'tile_rasterizer.dart';
 export 'tile_store.dart';
