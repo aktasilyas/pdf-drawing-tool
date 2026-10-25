@@ -66,7 +66,13 @@ class AppIconButton extends StatelessWidget {
   final AppIconButtonSize size;
 
   /// Seçili durumu (toggle butonlar için).
+  /// Affects the tonal, outline and ghost variants only; the filled variant
+  /// ignores it.
   final bool isSelected;
+
+  /// Icon color for the ghost variant when enabled and not selected.
+  /// Defaults to `palette.textMuted`. Ignored by the other variants.
+  final Color? iconColor;
 
   const AppIconButton({
     required this.icon,
@@ -75,6 +81,7 @@ class AppIconButton extends StatelessWidget {
     this.variant = AppIconButtonVariant.filled,
     this.size = AppIconButtonSize.medium,
     this.isSelected = false,
+    this.iconColor,
     super.key,
   });
 
@@ -83,16 +90,18 @@ class AppIconButton extends StatelessWidget {
     final isDisabled = onPressed == null;
     final specs = _getSpecs();
 
-    Widget button = Opacity(
-      opacity: isDisabled ? 0.5 : 1.0,
-      child: SizedBox(
-        width: specs.touchTarget,
-        height: specs.touchTarget,
-        child: Center(
-          child: _buildButton(specs, isDisabled),
-        ),
+    Widget button = SizedBox(
+      width: specs.touchTarget,
+      height: specs.touchTarget,
+      child: Center(
+        child: _buildButton(specs, isDisabled),
       ),
     );
+
+    // Ghost signals disabled with textDisabled instead of fading.
+    if (isDisabled && variant != AppIconButtonVariant.ghost) {
+      button = Opacity(opacity: 0.5, child: button);
+    }
 
     if (tooltip != null) {
       button = Tooltip(
@@ -137,6 +146,7 @@ class AppIconButton extends StatelessWidget {
           onPressed: isDisabled ? null : onPressed,
           size: specs.buttonSize,
           isSelected: isSelected,
+          iconColor: iconColor,
           child: iconWidget,
         );
     }
@@ -198,8 +208,9 @@ class _FilledIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Material(
-      color: isSelected ? AppColors.primaryDark : AppColors.primary,
+      color: palette.accent,
       borderRadius: BorderRadius.circular(AppRadius.button),
       child: InkWell(
         onTap: onPressed,
@@ -208,7 +219,7 @@ class _FilledIconButton extends StatelessWidget {
           width: size,
           height: size,
           child: IconTheme(
-            data: const IconThemeData(color: AppColors.onPrimary),
+            data: IconThemeData(color: palette.onAccent),
             child: Center(child: child),
           ),
         ),
@@ -301,31 +312,39 @@ class _GhostIconButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final double size;
   final bool isSelected;
+  final Color? iconColor;
   final Widget child;
 
   const _GhostIconButton({
     required this.onPressed,
     required this.size,
     required this.isSelected,
+    required this.iconColor,
     required this.child,
   });
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
+    final color = isSelected
+        ? palette.accent
+        : (onPressed == null
+            ? palette.textDisabled
+            : iconColor ?? palette.textMuted);
+
     return Material(
-      color: isSelected ? AppColors.surfaceVariantLight : Colors.transparent,
+      color: isSelected ? palette.accentContainer : Colors.transparent,
       borderRadius: BorderRadius.circular(AppRadius.button),
       child: InkWell(
         onTap: onPressed,
         borderRadius: BorderRadius.circular(AppRadius.button),
+        splashFactory: NoSplash.splashFactory,
+        highlightColor: palette.textPrimary.withValues(alpha: 0.06),
         child: SizedBox(
           width: size,
           height: size,
           child: IconTheme(
-            data: IconThemeData(
-              color:
-                  isSelected ? AppColors.primary : AppColors.textSecondaryLight,
-            ),
+            data: IconThemeData(color: color),
             child: Center(child: child),
           ),
         ),
