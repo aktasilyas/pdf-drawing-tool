@@ -7,6 +7,7 @@ import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/toolbar/elyanotes_nav_button.dart';
 import 'package:drawing_ui/src/toolbar/tool_groups.dart';
+import 'package:drawing_ui/src/toolbar/toolbar_widgets.dart';
 import 'package:drawing_ui/src/toolbar/top_nav_menus.dart';
 import 'package:drawing_ui/src/widgets/document_title_button.dart';
 
@@ -113,87 +114,79 @@ class TopNavigationBar extends ConsumerWidget {
 
     final pageCount = ref.watch(pageCountProvider);
 
-    final buttons = <Widget>[
-      ElyanotesNavButton(
-        icon: ElyanotesIcons.home,
-        tooltip: 'Ana Sayfa',
-        onPressed: onHomePressed ?? () {},
-      ),
-      if (pageCount > 1)
-        ElyanotesNavButton(
-          icon: isSidebarOpen
-              ? ElyanotesIcons.sidebarActive
-              : ElyanotesIcons.sidebar,
-          tooltip: 'Sayfa Paneli',
-          onPressed: onSidebarToggle ?? () {},
-          isActive: isSidebarOpen,
-        ),
-      if (!isReaderMode) ...[
-        if (onAIPressed != null)
-          ElyanotesNavButton(
-            icon: ElyanotesIcons.sparkle,
-            tooltip: 'Yapay Zeka',
-            onPressed: onAIPressed!,
-          ),
-        for (final tool in compactTopBarTools)
-          _buildCompactToolButton(
-            ref: ref,
-            tool: tool,
-            currentTool: currentTool,
-          ),
-        if (!ref.watch(isInfiniteCanvasProvider) &&
-            ref.watch(audioRecordingEnabledProvider))
-          ElyanotesNavButton(
-            icon: ElyanotesIcons.microphone,
-            tooltip: 'Ses Kaydi',
-            onPressed: () =>
-                showAudioMenu(context, ref, onSidebarToggle, isSidebarOpen),
-          ),
-        ElyanotesNavButton(
-          icon: rulerVisible
-              ? ElyanotesIcons.rulerActive
-              : ElyanotesIcons.ruler,
-          tooltip: 'Cetvel',
-          onPressed: () =>
-              ref.read(rulerVisibleProvider.notifier).state = !rulerVisible,
-          isActive: rulerVisible,
-        ),
-      ],
-      if (isReaderMode) _buildReaderBadge(colorScheme),
-      ElyanotesNavButton(
-        icon: isReaderMode
-            ? ElyanotesIcons.readerModeActive
-            : ElyanotesIcons.readerMode,
-        tooltip: isReaderMode ? 'Duzenleme Modu' : 'Okuyucu Modu',
-        onPressed: () {
-          ref.read(readerModeProvider.notifier).state = !isReaderMode;
-        },
-        isActive: isReaderMode,
-      ),
-      ElyanotesNavButton(
-        icon: ElyanotesIcons.more,
-        tooltip: 'Daha Fazla',
-        onPressed: () => ref.read(isInfiniteCanvasProvider)
-            ? showInfiniteBackgroundMenu(context)
-            : showMoreMenu(
-                context,
-                ref,
-                documentTitle: documentTitle,
-                onRenameDocument: onRenameDocument,
-                onDeleteDocument: onDeleteDocument,
-                showAddPage: !isReaderMode,
-                showExport: true,
-                compact: true,
-              ),
-      ),
-    ];
-
-    // 48dp hit areas; Flexible lets them share the row on the narrowest
-    // phones instead of overflowing (phone layout is reworked in slice 8).
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    return ToolbarSharedRow(
       children: [
-        for (final b in buttons) Flexible(child: b),
+        ElyanotesNavButton(
+          icon: ElyanotesIcons.home,
+          tooltip: 'Ana Sayfa',
+          onPressed: onHomePressed ?? () {},
+        ),
+        if (pageCount > 1)
+          ElyanotesNavButton(
+            icon: isSidebarOpen
+                ? ElyanotesIcons.sidebarActive
+                : ElyanotesIcons.sidebar,
+            tooltip: 'Sayfa Paneli',
+            onPressed: onSidebarToggle ?? () {},
+            isActive: isSidebarOpen,
+          ),
+        if (!isReaderMode) ...[
+          if (onAIPressed != null)
+            ElyanotesNavButton(
+              icon: ElyanotesIcons.sparkle,
+              tooltip: 'Yapay Zeka',
+              onPressed: onAIPressed!,
+            ),
+          ...compactTopBarTools.map((tool) => _buildCompactToolButton(
+                ref: ref,
+                tool: tool,
+                currentTool: currentTool,
+              )),
+          if (!ref.watch(isInfiniteCanvasProvider) &&
+              ref.watch(audioRecordingEnabledProvider))
+            ElyanotesNavButton(
+              icon: ElyanotesIcons.microphone,
+              tooltip: 'Ses Kaydi',
+              onPressed: () =>
+                  showAudioMenu(context, ref, onSidebarToggle, isSidebarOpen),
+            ),
+          ElyanotesNavButton(
+            icon: rulerVisible
+                ? ElyanotesIcons.rulerActive
+                : ElyanotesIcons.ruler,
+            tooltip: 'Cetvel',
+            onPressed: () =>
+                ref.read(rulerVisibleProvider.notifier).state = !rulerVisible,
+            isActive: rulerVisible,
+          ),
+        ],
+        if (isReaderMode) _buildReaderBadge(colorScheme),
+        ElyanotesNavButton(
+          icon: isReaderMode
+              ? ElyanotesIcons.readerModeActive
+              : ElyanotesIcons.readerMode,
+          tooltip: isReaderMode ? 'Duzenleme Modu' : 'Okuyucu Modu',
+          onPressed: () {
+            ref.read(readerModeProvider.notifier).state = !isReaderMode;
+          },
+          isActive: isReaderMode,
+        ),
+        ElyanotesNavButton(
+          icon: ElyanotesIcons.more,
+          tooltip: 'Daha Fazla',
+          onPressed: () => ref.read(isInfiniteCanvasProvider)
+              ? showInfiniteBackgroundMenu(context)
+              : showMoreMenu(
+                  context,
+                  ref,
+                  documentTitle: documentTitle,
+                  onRenameDocument: onRenameDocument,
+                  onDeleteDocument: onDeleteDocument,
+                  showAddPage: !isReaderMode,
+                  showExport: true,
+                  compact: true,
+                ),
+        ),
       ],
     );
   }

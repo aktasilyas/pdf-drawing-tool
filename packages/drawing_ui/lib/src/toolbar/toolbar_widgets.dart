@@ -88,3 +88,24 @@ class ToolbarIconButton extends StatelessWidget {
 
   static void _noop() {}
 }
+
+/// Row that spreads [children] evenly and, when it is too narrow for their
+/// natural width, gives each an equal share instead of overflowing.
+///
+/// Used by the phone top bar so 48dp chrome buttons fit narrow screens until
+/// the phone toolbar is reworked (docs/specs/52-editor-chrome.md, slice 8).
+class ToolbarSharedRow extends StatelessWidget {
+  const ToolbarSharedRow({super.key, required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        for (final child in children) Flexible(child: child),
+      ],
+    );
+  }
+}
