@@ -48,12 +48,16 @@ Sidebar: docked floating card, width 256, footprint `kPageSidebarWidth` = 264
 Canvas transform uses the footprint so the page reflows.
 
 ### Tablet portrait / medium (600-839)
-Same band. Nav: Home + Sidebar (title moves to More). Actions: Add page + More (Export
-in More). Tool capsule fits Undo, Redo, divider, 8 tools + overflow at 820.
+Same band. Nav: Home + Sidebar (title moves to More). Actions: Reader + Add page + More
+(Export in More; Reader as in landscape). Tool capsule fits Undo, Redo, divider, 8 tools
++ overflow at 820.
 
 ### Phone (< 600)
-Row 1 (48, no fill): Back, serif title, Pages, More. Row 2: tool capsule 48 tall,
-margin h sm, 48dp slots, last slot overflow. Chrome height = inset + 104.
+Row 1 (48, no capsule, on the band): Back, serif title, Pages, [Ruler], Reader, More
+(Ruler/Mic follow the landscape actions rules; Reader stays so reader mode can be left).
+Row 2: the standard 52dp tool capsule (a 48dp hit plus 1dp borders does not fit in 48),
+margin h sm, xs below, 48dp slots, last slot overflow. Chrome height = inset + 48 + 56
+= inset + 104; reader mode hides row 2.
 Sidebar: left drawer over page with scrim, width min(280, 85%), right corners xl.
 
 ## 4. Components

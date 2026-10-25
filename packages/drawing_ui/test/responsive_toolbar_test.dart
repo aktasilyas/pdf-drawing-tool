@@ -193,7 +193,7 @@ void main() {
       expect(find.byIcon(ElyanotesIcons.pageAdd), findsNothing);
     });
 
-    testWidgets('shows_document_title_only_in_full_mode', (tester) async {
+    testWidgets('shows_document_title_in_both_modes', (tester) async {
       const title = 'Test Document';
 
       await tester.pumpWidget(
@@ -202,8 +202,8 @@ void main() {
           width: 400,
         ),
       );
-      // Compact bar has no title; it lives in the "More" popup instead.
-      expect(find.text(title), findsNothing);
+      // Phone row 1 shows the serif title (spec #52 section 3).
+      expect(find.text(title), findsOneWidget);
 
       await tester.pumpWidget(
         buildTestWidget(
