@@ -24,6 +24,7 @@ class ToolbarOverflowMenu extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = DrawingTheme.of(context);
+    final palette = ChromePalette.of(context);
     final currentTool = ref.watch(currentToolProvider);
 
     // Check if any hidden tool is currently selected
@@ -44,6 +45,14 @@ class ToolbarOverflowMenu extends ConsumerWidget {
         minHeight: 48,
       ),
       position: PopupMenuPosition.under,
+      color: palette.surfaceElevated,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      shadowColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(ChromeRadius.xl),
+        side: BorderSide(color: palette.border),
+      ),
       onSelected: (tool) {
         final wasSelected = isToolSelected(tool, currentTool);
         handleToolPressed(ref, tool);
@@ -63,15 +72,13 @@ class ToolbarOverflowMenu extends ConsumerWidget {
               PhosphorIcon(
                 ElyanotesIcons.iconForTool(tool, active: isSelected),
                 size: ElyanotesIcons.actionSize,
-                color: isSelected
-                    ? theme.toolbarIconSelectedColor
-                    : theme.toolbarIconColor,
+                color: isSelected ? palette.accent : palette.textMuted,
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: ChromeSpacing.md),
               Text(
                 tool.displayName,
                 style: TextStyle(
-                  color: isSelected ? theme.toolbarIconSelectedColor : null,
+                  color: isSelected ? palette.accent : palette.textPrimary,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 ),
               ),
