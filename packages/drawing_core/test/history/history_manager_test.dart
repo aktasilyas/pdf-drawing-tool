@@ -1,6 +1,7 @@
 import 'package:test/test.dart';
 import 'package:drawing_core/src/models/document.dart';
 import 'package:drawing_core/src/models/drawing_point.dart';
+import 'package:drawing_core/src/models/page.dart';
 import 'package:drawing_core/src/models/stroke.dart';
 import 'package:drawing_core/src/models/stroke_style.dart';
 import 'package:drawing_core/src/history/add_stroke_command.dart';
@@ -536,6 +537,71 @@ void main() {
         // Redo remove
         current = manager.redo(current)!;
         expect(current.strokeCount, 0);
+      });
+    });
+
+    group('Multi-page', () {
+      late DrawingDocument twoPages;
+
+      setUp(() {
+        twoPages = DrawingDocument.emptyMultiPage('Test Document')
+            .addPage(Page.create(index: 1));
+      });
+
+      int strokes(DrawingDocument d, int page) => d.pages[page].strokeCount;
+
+      test('undo applies to the page of the action and navigates there', () {
+        var doc = manager.execute(
+            AddStrokeCommand(layerIndex: 0, stroke: createTestStroke('a')),
+            twoPages);
+        doc = doc.setCurrentPage(1);
+
+        doc = manager.undo(doc)!;
+
+        expect(strokes(doc, 0), 0);
+        expect(strokes(doc, 1), 0);
+        expect(doc.currentPageIndex, 0);
+      });
+
+      test('redo restores the stroke on the original page', () {
+        var doc = manager.execute(
+            AddStrokeCommand(layerIndex: 0, stroke: createTestStroke('a')),
+            twoPages);
+        doc = manager.undo(doc.setCurrentPage(1))!;
+        doc = manager.redo(doc.setCurrentPage(1))!;
+
+        expect(strokes(doc, 0), 1);
+        expect(strokes(doc, 1), 0);
+      });
+
+      test('undo leaves other pages untouched', () {
+        var doc = manager.execute(
+            AddStrokeCommand(layerIndex: 0, stroke: createTestStroke('a')),
+            twoPages);
+        doc = manager.execute(
+            AddStrokeCommand(layerIndex: 0, stroke: createTestStroke('b')),
+            doc.setCurrentPage(1));
+
+        doc = manager.undo(doc)!;
+        expect(strokes(doc, 0), 1);
+        expect(strokes(doc, 1), 0);
+
+        doc = manager.undo(doc)!;
+        expect(strokes(doc, 0), 0);
+        expect(doc.currentPageIndex, 0);
+      });
+
+      test('undo of an action on a deleted page does not touch other pages',
+          () {
+        var doc = manager.execute(
+            AddStrokeCommand(layerIndex: 0, stroke: createTestStroke('a')),
+            twoPages);
+        doc = doc.removePage(0);
+
+        final undone = manager.undo(doc)!;
+
+        expect(undone.pages.length, 1);
+        expect(strokes(undone, 0), 0);
       });
     });
   });
