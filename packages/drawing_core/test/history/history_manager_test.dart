@@ -5,6 +5,7 @@ import 'package:drawing_core/src/models/page.dart';
 import 'package:drawing_core/src/models/stroke.dart';
 import 'package:drawing_core/src/models/stroke_style.dart';
 import 'package:drawing_core/src/history/add_stroke_command.dart';
+import 'package:drawing_core/src/history/clear_layer_command.dart';
 import 'package:drawing_core/src/history/history_manager.dart';
 import 'package:drawing_core/src/history/remove_stroke_command.dart';
 
@@ -591,17 +592,35 @@ void main() {
         expect(doc.currentPageIndex, 0);
       });
 
-      test('undo of an action on a deleted page does not touch other pages',
-          () {
+      test('undo/redo of an action on a deleted page is a no-op', () {
         var doc = manager.execute(
             AddStrokeCommand(layerIndex: 0, stroke: createTestStroke('a')),
             twoPages);
+        doc = manager.execute(
+            AddStrokeCommand(layerIndex: 0, stroke: createTestStroke('b')),
+            doc.setCurrentPage(1));
+        doc = doc.removePage(1);
+        doc = manager.undo(doc)!;
+        expect(doc.pages.length, 1);
+        expect(strokes(doc, 0), 1);
+        expect(manager.canRedo, true);
+
+        doc = manager.redo(doc)!;
+        expect(strokes(doc, 0), 1);
+      });
+
+      test('undo of a restoring command does not leak onto another page', () {
+        var doc = manager.execute(
+            AddStrokeCommand(layerIndex: 0, stroke: createTestStroke('a')),
+            twoPages);
+        doc = manager.execute(ClearLayerCommand(layerIndex: 0), doc);
         doc = doc.removePage(0);
+        final before = doc;
 
-        final undone = manager.undo(doc)!;
+        doc = manager.undo(doc)!;
 
-        expect(undone.pages.length, 1);
-        expect(strokes(undone, 0), 0);
+        expect(doc, before);
+        expect(strokes(doc, 0), 0);
       });
     });
   });

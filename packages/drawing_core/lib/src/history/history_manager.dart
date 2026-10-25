@@ -81,8 +81,8 @@ class HistoryManager {
     final entry = _undoStack.removeLast();
 
     // Undo the command on the page it was recorded on
-    final newDocument =
-        entry.command.undo(_onPage(document, entry.pageId) ?? document);
+    final target = _onPage(document, entry.pageId);
+    final newDocument = target == null ? document : entry.command.undo(target);
 
     // Push to redo stack
     _redoStack.add(entry);
@@ -105,8 +105,9 @@ class HistoryManager {
     final entry = _redoStack.removeLast();
 
     // Re-execute the command on the page it was recorded on
+    final target = _onPage(document, entry.pageId);
     final newDocument =
-        entry.command.execute(_onPage(document, entry.pageId) ?? document);
+        target == null ? document : entry.command.execute(target);
 
     // Push to undo stack
     _undoStack.add(entry);
@@ -147,7 +148,7 @@ class HistoryManager {
       document.isMultiPage ? document.currentPage?.id : null;
 
   /// Returns [document] with the page [pageId] made current, or null when the
-  /// page no longer exists (the command then runs against the document as is).
+  /// page no longer exists (the step is then consumed without any change).
   static DrawingDocument? _onPage(DrawingDocument document, String? pageId) {
     if (pageId == null || !document.isMultiPage) return document;
     final index = document.pages.indexWhere((p) => p.id == pageId);
