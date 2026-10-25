@@ -33,6 +33,7 @@ class PenPresetPreview extends StatelessWidget {
     super.key,
     required this.penType,
     required this.style,
+    this.background,
   });
 
   /// Preset the preview belongs to (selects curve and thickness range).
@@ -40,6 +41,13 @@ class PenPresetPreview extends StatelessWidget {
 
   /// Current style of the tool (colour, thickness, dynamics).
   final StrokeStyle style;
+
+  /// Paper colour painted under the stroke, in the same layer.
+  ///
+  /// Blend-mode strokes (the multiply highlighter) need an opaque
+  /// destination: over the transparent layer of the [RepaintBoundary] some
+  /// backends draw nothing (#126).
+  final Color? background;
 
   @override
   Widget build(BuildContext context) {
@@ -51,6 +59,7 @@ class PenPresetPreview extends StatelessWidget {
             penType: penType,
             style: style,
             size: constraints.biggest,
+            background: background,
           ),
         ),
       ),
@@ -64,12 +73,19 @@ class PenPresetPreviewPainter extends CustomPainter {
     required this.penType,
     required this.style,
     required this.size,
-  }) : _stroke = _buildStroke(penType, style, size);
+    this.background,
+  })  : _stroke = _buildStroke(penType, style, size),
+        _backgroundPaint =
+            background == null ? null : (Paint()..color = background);
 
   final PenType penType;
   final StrokeStyle style;
   final Size size;
+
+  /// See [PenPresetPreview.background].
+  final Color? background;
   final Stroke _stroke;
+  final Paint? _backgroundPaint;
   static final FlutterStrokeRenderer _renderer = FlutterStrokeRenderer();
 
   /// The stroke that is drawn (exposed for tests).
@@ -80,13 +96,18 @@ class PenPresetPreviewPainter extends CustomPainter {
     if (_stroke.isEmpty) return;
     canvas.save();
     canvas.clipRect(Offset.zero & size);
+    final bg = _backgroundPaint;
+    if (bg != null) canvas.drawRect(Offset.zero & size, bg);
     _renderer.renderStroke(canvas, _stroke);
     canvas.restore();
   }
 
   @override
   bool shouldRepaint(PenPresetPreviewPainter old) =>
-      old.style != style || old.size != size || old.penType != penType;
+      old.style != style ||
+      old.size != size ||
+      old.penType != penType ||
+      old.background != background;
 
   static Stroke _buildStroke(PenType type, StrokeStyle style, Size size) {
     final w = math.max(0.0, size.width - 2 * _kInsetH);

@@ -1,3 +1,5 @@
+import 'dart:ui' as ui;
+
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/panels/pen_preset_preview.dart';
 import 'package:flutter/material.dart';
@@ -78,5 +80,46 @@ void main() {
     );
     expect(tester.takeException(), isNull);
     expect(find.byType(PenPresetPreview), findsOneWidget);
+  });
+
+  testWidgets('highlighter is visible over the paper background (#126)',
+      (tester) async {
+    const paper = Color(0xFFFFFFFF);
+    final painter = PenPresetPreviewPainter(
+      penType: PenType.highlighter,
+      style: PenType.highlighter.toStrokeStyle(color: 0xFFFFEB3B),
+      size: const Size(56, 40),
+      background: paper,
+    );
+    expect(painter.shouldRepaint(_painter(PenType.highlighter)), isTrue);
+
+    final recorder = ui.PictureRecorder();
+    painter.paint(Canvas(recorder), const Size(56, 40));
+    final picture = recorder.endRecording();
+    final bytes = await tester.runAsync(() async {
+      final image = await picture.toImage(56, 40);
+      final data = await image.toByteData();
+      image.dispose();
+      return data!;
+    });
+    picture.dispose();
+    final data = bytes!;
+
+    Color pixel(int x, int y) {
+      final i = (y * 56 + x) * 4;
+      return Color.fromARGB(
+        data.getUint8(i + 3),
+        data.getUint8(i),
+        data.getUint8(i + 1),
+        data.getUint8(i + 2),
+      );
+    }
+
+    // Corner: opaque paper. Centre: the multiply highlighter on paper.
+    expect(pixel(1, 1), paper);
+    final centre = pixel(28, 20);
+    expect(centre.a, 1.0);
+    expect(centre, isNot(paper));
+    expect(centre.b, lessThan(centre.r), reason: 'tinted yellow');
   });
 }

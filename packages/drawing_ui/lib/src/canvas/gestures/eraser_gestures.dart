@@ -31,6 +31,7 @@ mixin _EraserGestures<T extends ConsumerStatefulWidget>
         );
         pixelEraseHits.clear();
         pixelEraseOriginalStrokes.clear();
+        pixelEraseSweep.clear();
         erasedNoteStrokeIds.clear();
         erasedNoteShapeIds.clear();
         pixelEraseNoteHits.clear();

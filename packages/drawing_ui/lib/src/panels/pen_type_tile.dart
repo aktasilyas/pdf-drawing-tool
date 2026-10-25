@@ -133,7 +133,11 @@ class _PreviewWell extends ConsumerWidget {
           borderRadius: BorderRadius.circular(_kWellRadius),
           border: Border.all(color: scheme.outlineVariant, width: _kHairline),
         ),
-        child: PenPresetPreview(penType: tool.penType!, style: style),
+        child: PenPresetPreview(
+          penType: tool.penType!,
+          style: style,
+          background: page,
+        ),
       ),
     );
   }

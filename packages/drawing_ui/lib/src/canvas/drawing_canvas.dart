@@ -203,6 +203,9 @@ class DrawingCanvasState extends DrawingCanvasGestureHandlers<DrawingCanvas> {
   /// Original strokes affected by pixel eraser (for undo).
   final List<core.Stroke> _pixelEraseOriginalStrokes = [];
 
+  /// Path swept by the pixel eraser during a gesture (canvas units).
+  final core.EraserSweep _pixelEraseSweep = core.EraserSweep();
+
   /// Note ID -> set of internal stroke IDs erased in current gesture.
   final Map<String, Set<String>> _erasedNoteStrokeIds = {};
 
@@ -606,6 +609,9 @@ class DrawingCanvasState extends DrawingCanvasGestureHandlers<DrawingCanvas> {
 
   @override
   List<core.Stroke> get pixelEraseOriginalStrokes => _pixelEraseOriginalStrokes;
+
+  @override
+  core.EraserSweep get pixelEraseSweep => _pixelEraseSweep;
 
   @override
   Map<String, Set<String>> get erasedNoteStrokeIds => _erasedNoteStrokeIds;
