@@ -15,10 +15,11 @@ typedef ProviderReader = T Function<T>(ProviderListenable<T> provider);
 void startEditorSession(ProviderReader read, DrawingDocument document) {
   read(documentProvider.notifier).updateDocument(document);
   read(currentDocumentProvider.notifier).state = document;
-  read(pageManagerProvider.notifier).initializeFromDocument(
-        document.pages,
-        currentIndex: document.currentPageIndex,
-      );
+  final pageManager = read(pageManagerProvider.notifier);
+  pageManager.initializeFromDocument(
+    document.pages,
+    currentIndex: document.currentPageIndex,
+  );
   read(historyManagerProvider.notifier).clearHistory();
 }
 

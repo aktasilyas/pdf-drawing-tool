@@ -37,8 +37,7 @@ void main() {
     expect(container.read(currentDocumentProvider)?.id, 'doc_b');
   });
 
-  test('undo after switching documents leaves the new document unchanged',
-      () {
+  test('undo after switching documents leaves the new document unchanged', () {
     startEditorSession(container.read, docA);
     container.read(historyManagerProvider.notifier).addStroke(_stroke());
     startEditorSession(container.read, docB);
