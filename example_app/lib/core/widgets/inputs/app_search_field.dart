@@ -1,7 +1,7 @@
 /// ElyaNotes Design System - AppSearchField Component
 ///
 /// Modern, debounce destekli arama input'u.
-/// Default: border yok, sadece fill color.
+/// Default: 1dp hairline border + fill color.
 /// Focus: 1.5px primary border.
 ///
 /// Kullanım:
@@ -16,6 +16,7 @@ library;
 
 import 'dart:async';
 
+import 'package:drawing_ui/drawing_ui.dart' show ElyanotesIcons;
 import 'package:flutter/material.dart';
 
 import 'package:example_app/core/theme/index.dart';
@@ -23,7 +24,7 @@ import 'package:example_app/core/theme/index.dart';
 /// ElyaNotes modern arama field komponenti.
 ///
 /// Modern minimal tasarım:
-/// - Default: filled, border yok
+/// - Default: filled, 1dp border
 /// - Focus: 1.5px primary border
 /// - Min height: 48dp
 class AppSearchField extends StatefulWidget {
@@ -76,7 +77,11 @@ class _AppSearchFieldState extends State<AppSearchField> {
   void didUpdateWidget(covariant AppSearchField oldWidget) {
     super.didUpdateWidget(oldWidget);
     // Sync controller with external text without triggering onChanged loop
-    if (widget.text != null && widget.text != _controller.text) {
+    // Only on an external change: syncing on every rebuild would overwrite
+    // what the user is typing during the debounce window.
+    if (widget.text != null &&
+        widget.text != oldWidget.text &&
+        widget.text != _controller.text) {
       _controller.removeListener(_onTextChanged);
       _controller.text = widget.text!;
       _hasText = _controller.text.isNotEmpty;
@@ -137,7 +142,7 @@ class _AppSearchFieldState extends State<AppSearchField> {
           hintText: widget.hint,
           hintStyle: AppTypography.bodyMedium.copyWith(color: hintColor),
           prefixIcon: Icon(
-            Icons.search,
+            ElyanotesIcons.librarySearch,
             size: AppIconSize.md,
             color: iconColor,
           ),
@@ -145,7 +150,7 @@ class _AppSearchFieldState extends State<AppSearchField> {
               ? IconButton(
                   onPressed: _onClear,
                   icon: Icon(
-                    Icons.close,
+                    ElyanotesIcons.libraryClose,
                     size: AppIconSize.md,
                     color: palette.textMuted,
                   ),
@@ -158,15 +163,15 @@ class _AppSearchFieldState extends State<AppSearchField> {
             horizontal: AppSpacing.lg,
             vertical: 14, // 14dp vertical padding
           ),
-          // Default: border yok
+          // Default and enabled: 1dp hairline (surface alone is invisible
+          // on background).
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppRadius.textField),
-            borderSide: BorderSide.none,
+            borderSide: BorderSide(color: palette.border),
           ),
-          // Enabled: border yok (modern minimal)
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(AppRadius.textField),
-            borderSide: BorderSide.none,
+            borderSide: BorderSide(color: palette.border),
           ),
           // Focus: 1.5px primary border
           focusedBorder: OutlineInputBorder(

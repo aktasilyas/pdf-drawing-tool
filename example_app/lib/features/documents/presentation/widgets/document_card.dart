@@ -1,19 +1,21 @@
 /// ElyaNotes Document Card
 ///
-/// Doküman kartı widget'ı. Thumbnail, başlık, tarih gösterir.
+/// Library tile for a document: the cover (or page thumbnail) sits on the
+/// background with the title and meta line underneath.
 library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
-import 'package:drawing_ui/drawing_ui.dart';
+import 'package:drawing_ui/drawing_ui.dart' show CoverPreviewWidget;
 
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/document_card_helpers.dart';
-import 'package:example_app/features/documents/presentation/widgets/document_preview.dart';
-import 'package:example_app/features/documents/presentation/widgets/document_thumbnail_painter.dart';
+import 'package:example_app/features/documents/presentation/widgets/library_page_thumbnail.dart';
+import 'package:example_app/features/documents/presentation/widgets/library_tile_frame.dart';
+import 'package:example_app/features/documents/presentation/widgets/library_tile_parts.dart';
 
 class DocumentCard extends ConsumerWidget {
   final DocumentInfo document;
@@ -39,28 +41,20 @@ class DocumentCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final brightness = Theme.of(context).brightness;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: context.palette.surface,
-        borderRadius: BorderRadius.circular(AppRadius.card),
-        boxShadow: AppShadows.cardResting(brightness),
+    return LibraryTileFrame(
+      cover: _buildCover(),
+      info: LibraryTileInfo(
+        title: document.title,
+        meta: LibraryMeta.document(document),
+        onTap: isSelectionMode ? onTap : onMorePressed,
+        showCaret: onMorePressed != null && !isSelectionMode,
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(child: _buildThumbnailCard(context, ref)),
-          Padding(
-            padding: const EdgeInsets.only(
-                top: AppSpacing.xs,
-                bottom: AppSpacing.sm,
-                left: AppSpacing.sm,
-                right: AppSpacing.sm),
-            child: _buildInfoSection(context),
-          ),
-        ],
-      ),
+      onTap: onTap,
+      onLongPress: () => _handleLongPress(ref),
+      isSelected: isSelected,
+      isSelectionMode: isSelectionMode,
+      overlays: _buildOverlays,
+      artRect: _artRect(),
     );
   }
 
@@ -73,205 +67,49 @@ class DocumentCard extends ConsumerWidget {
     }
   }
 
-  Widget _buildThumbnailCard(BuildContext context, WidgetRef ref) {
-    return Container(
-      decoration: BoxDecoration(
-        color: DocumentPaperColors.fromName(document.paperColor),
-        borderRadius:
-            const BorderRadius.vertical(top: Radius.circular(AppRadius.card)),
-        border:
-            isSelected ? Border.all(color: AppColors.primary, width: 2) : null,
-      ),
-      child: Stack(
-        children: [
-          // Thumbnail with card tap gesture (below favorite button)
-          Positioned.fill(
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: onTap,
-              onLongPress: () => _handleLongPress(ref),
-              child: ClipRRect(
-                borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(AppRadius.card)),
-                child: _buildThumbnail(context),
-              ),
-            ),
-          ),
-          if (isSelectionMode && isSelected) _buildSelectionOverlay(),
-          if (isSelectionMode)
-            Positioned(
-              top: AppSpacing.sm,
-              left: AppSpacing.sm,
-              child: DocumentSelectionCheckbox(isSelected: isSelected),
-            ),
-          // Favorite button on top (hit-test priority over card tap)
-          if (!isSelectionMode)
-            Positioned(
-              top: AppSpacing.sm,
-              right: AppSpacing.sm,
-              child: DocumentFavoriteButton(
-                isFavorite: document.isFavorite,
-                onTap: onFavoriteToggle,
-              ),
-            ),
-          if (document.pageCount > 1)
-            Positioned(
-              bottom: AppSpacing.sm,
-              right: AppSpacing.sm,
-              child: DocumentPageCountBadge(count: document.pageCount),
-            ),
-          if (isInTrash && document.deletedAt != null)
-            Positioned(
-              bottom: AppSpacing.sm,
-              left: AppSpacing.sm,
-              child: DocumentDaysLeftBadge(deletedAt: document.deletedAt!),
-            ),
-        ],
-      ),
-    );
+  Rect Function(Size)? _artRect() {
+    if (_coverOrNull() != null) return null;
+    return (box) => LibraryPageThumbnail.pageRect(document, box);
   }
 
-  Widget _buildSelectionOverlay() {
-    return Positioned.fill(
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.primary.withValues(alpha: 0.1),
-          borderRadius:
-              const BorderRadius.vertical(top: Radius.circular(AppRadius.card)),
-        ),
-      ),
-    );
+  core.Cover? _coverOrNull() {
+    final coverId = document.coverId;
+    if (!document.hasCover || coverId == null) return null;
+    return core.CoverRegistry.byId(coverId);
   }
 
-  Widget _buildInfoSection(BuildContext context) {
-    final textPrimary = context.palette.textPrimary;
-    final textSecondary = context.palette.textMuted;
-    final textTertiary = context.palette.textDisabled;
-
-    return GestureDetector(
-      onTap: onMorePressed,
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  document.title,
-                  style: AppTypography.titleMedium.copyWith(color: textPrimary),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: AppSpacing.xxs),
-                Text(
-                  DocumentDateFormatter.format(document.updatedAt),
-                  style: AppTypography.caption.copyWith(color: textSecondary),
-                ),
-              ],
-            ),
-          ),
-          if (onMorePressed != null)
-            Icon(
-              Icons.keyboard_arrow_down,
-              size: AppIconSize.md,
-              color: textTertiary,
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildThumbnail(BuildContext context) {
-    if (document.hasCover && document.coverId != null) {
-      final cover = core.CoverRegistry.byId(document.coverId!);
-      if (cover != null) {
-        return CoverPreviewWidget(
-          cover: cover,
-          title: document.title,
-          width: double.infinity,
-          height: double.infinity,
-        );
-      }
-    }
-    if (document.documentType == core.DocumentType.pdf ||
-        document.documentType == core.DocumentType.image) {
-      return DocumentPreview(document: document);
-    }
-    return _buildTemplatePlaceholder(context);
-  }
-
-  Widget _buildTemplatePlaceholder(BuildContext context) {
-    if (document.documentType == core.DocumentType.whiteboard) {
-      return _buildWhiteboardPlaceholder(context);
-    }
-    if (document.documentType == core.DocumentType.notebook) {
-      return Stack(
-        children: [
-          CustomPaint(
-            painter: DocumentThumbnailPainter(document.templateId),
-            size: Size.infinite,
-          ),
-          _buildSpiralBinding(context),
-        ],
+  Widget _buildCover() {
+    final cover = _coverOrNull();
+    if (cover != null) {
+      return CoverPreviewWidget(
+        cover: cover,
+        title: document.title,
+        showBorder: false,
       );
     }
-    return CustomPaint(
-      painter: DocumentThumbnailPainter(document.templateId),
-      size: Size.infinite,
-    );
+    return LibraryPageThumbnail(document: document);
   }
 
-  Widget _buildWhiteboardPlaceholder(BuildContext context) {
-    final frameColor = context.palette.border;
-    final dotColor = context.palette.textPrimary.withValues(alpha: 0.08);
-
-    return Container(
-      padding: const EdgeInsets.all(4),
-      color: frameColor,
-      child: Container(
-        color: context.palette.surfaceElevated,
-        child: CustomPaint(
-          painter: WhiteboardGridPainter(dotColor: dotColor),
-          size: Size.infinite,
+  List<Widget> _buildOverlays(Rect board) {
+    const hit = LibraryFavoriteBadge.hitSize;
+    const disc = LibraryFavoriteBadge.discSize;
+    const inset = AppSpacing.sm;
+    final deletedAt = document.deletedAt;
+    return [
+      if (document.isFavorite && !isSelectionMode)
+        Positioned(
+          left: board.right - inset - disc - (hit - disc) / 2,
+          top: board.bottom - inset - disc - (hit - disc) / 2,
+          child: LibraryFavoriteBadge(onTap: onFavoriteToggle),
         ),
-      ),
-    );
-  }
-
-  Widget _buildSpiralBinding(BuildContext context) {
-    final textPrimary = context.palette.textPrimary;
-    final textTertiary = context.palette.textDisabled;
-
-    return Positioned(
-      left: 0,
-      top: 0,
-      bottom: 0,
-      child: Container(
-        width: 16,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              textPrimary.withValues(alpha: 0.08),
-              Colors.transparent,
-            ],
+      if (isInTrash && deletedAt != null)
+        Positioned.fromRect(
+          rect: board.deflate(inset),
+          child: Align(
+            alignment: Alignment.bottomLeft,
+            child: DocumentDaysLeftBadge(deletedAt: deletedAt),
           ),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: List.generate(
-            6,
-            (_) => Container(
-              width: 5,
-              height: 5,
-              margin: const EdgeInsets.only(left: 3),
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: textTertiary,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
+    ];
   }
 }
