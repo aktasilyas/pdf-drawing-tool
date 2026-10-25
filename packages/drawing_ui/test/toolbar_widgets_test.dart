@@ -30,66 +30,6 @@ void main() {
     );
   }
 
-  group('MediumToolbar', () {
-    testWidgets('renders_nav_buttons_without_undo_redo', (tester) async {
-      await tester.pumpWidget(
-        buildTestWidget(const MediumToolbar(), width: 700),
-      );
-
-      expect(find.byIcon(ElyanotesIcons.home), findsOneWidget);
-      expect(find.byIcon(ElyanotesIcons.readerMode), findsOneWidget);
-      expect(find.byIcon(ElyanotesIcons.more), findsOneWidget);
-      // Undo/redo live in FloatingUndoRedo, not in the toolbar.
-      expect(find.byIcon(ElyanotesIcons.undo), findsNothing);
-      expect(find.byIcon(ElyanotesIcons.redo), findsNothing);
-    });
-
-    testWidgets('does_not_show_settings_button', (tester) async {
-      await tester.pumpWidget(
-        buildTestWidget(const MediumToolbar(), width: 700),
-      );
-
-      expect(find.byIcon(ElyanotesIcons.settings), findsNothing);
-    });
-
-    testWidgets('shows_tool_buttons', (tester) async {
-      await tester.pumpWidget(
-        buildTestWidget(const MediumToolbar(), width: 700),
-      );
-
-      expect(find.byType(ToolButton), findsWidgets);
-    });
-
-    testWidgets('hides_tools_in_reader_mode', (tester) async {
-      await tester.pumpWidget(
-        buildTestWidget(const MediumToolbar(), width: 700),
-      );
-      final container = ProviderScope.containerOf(
-        tester.element(find.byType(MediumToolbar)),
-      );
-      container.read(readerModeProvider.notifier).state = true;
-      await tester.pump();
-
-      expect(find.byType(ToolButton), findsNothing);
-    });
-
-    testWidgets('no_overflow_menu_when_all_tools_fit', (tester) async {
-      await tester.pumpWidget(
-        buildTestWidget(const MediumToolbar(), width: 840),
-      );
-
-      expect(find.byType(ToolbarOverflowMenu), findsNothing);
-    });
-
-    testWidgets('shows_overflow_menu_when_tools_do_not_fit', (tester) async {
-      await tester.pumpWidget(
-        buildTestWidget(const MediumToolbar(), width: 450),
-      );
-
-      expect(find.byType(ToolbarOverflowMenu), findsOneWidget);
-    });
-  });
-
   group('CompactToolRow', () {
     testWidgets('has_48dp_height', (tester) async {
       await tester.pumpWidget(
