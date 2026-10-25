@@ -9,8 +9,10 @@ import 'package:example_app/core/theme/index.dart';
 /// board rect of its box.
 ///
 /// Body is `w x 0.78w` on the board's bottom edge: a darkened back panel
-/// with a tab, a paper sheet peeking out, and a front panel in the tamed
-/// folder colour. All paints are built once in the initializer list.
+/// with a tab, two paper sheets peeking out, and a front panel with a soft
+/// top-lit gradient in the tamed folder colour, over a soft contact shadow
+/// (same depth language as the notebook covers). Paints are built once in
+/// the initializer list; the gradient shader is created per size.
 class FolderTileArt extends CustomPainter {
   FolderTileArt({required this.color, required this.palette})
       : _backPaint = Paint()..color = _darken(_tame(color)),
@@ -20,6 +22,13 @@ class FolderTileArt extends CustomPainter {
           ..color = _darken(_tame(color), 0.16)
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1,
+        _shadowPaint = Paint()
+          ..color = const Color(0x2E000000)
+          ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6),
+        _sheetEdgePaint = Paint()
+          ..color = palette.border
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 0.75,
         _highlightPaint = Paint()
           ..color = palette.paper.withValues(alpha: 0.25)
           ..style = PaintingStyle.stroke
@@ -33,6 +42,8 @@ class FolderTileArt extends CustomPainter {
   final Paint _frontPaint;
   final Paint _edgePaint;
   final Paint _highlightPaint;
+  final Paint _shadowPaint;
+  final Paint _sheetEdgePaint;
 
   /// Calms saturated folder colours the same way in light and dark themes.
   static Color _tame(Color c) {
@@ -45,6 +56,11 @@ class FolderTileArt extends CustomPainter {
   static Color _darken(Color c, [double amount = 0.08]) {
     final hsl = HSLColor.fromColor(c);
     return hsl.withLightness(math.max(0.0, hsl.lightness - amount)).toColor();
+  }
+
+  static Color _lighten(Color c, [double amount = 0.05]) {
+    final hsl = HSLColor.fromColor(c);
+    return hsl.withLightness(math.min(1.0, hsl.lightness + amount)).toColor();
   }
 
   /// The folder body (without the tab) when painted in a box of [box].
@@ -63,6 +79,7 @@ class FolderTileArt extends CustomPainter {
     final bodyTop = bottom - w * 0.78;
 
     final body = RRect.fromLTRBR(r.left, bodyTop, r.right, bottom, radius);
+    canvas.drawRRect(body.shift(Offset(0, w * 0.015)), _shadowPaint);
     canvas.drawRRect(body, _backPaint);
 
     final tabRadius = Radius.circular(w * 0.04);
@@ -78,22 +95,31 @@ class FolderTileArt extends CustomPainter {
       _backPaint,
     );
 
-    canvas.drawRRect(
-      RRect.fromLTRBR(
-        r.left + w * 0.06,
-        bodyTop + w * 0.05,
-        r.left + w * 0.94,
+    for (final inset in const [0.09, 0.06]) {
+      final sheet = RRect.fromLTRBR(
+        r.left + w * inset,
+        bodyTop + w * (inset - 0.01),
+        r.left + w * (1 - inset),
         bottom,
         Radius.circular(w * 0.02),
-      ),
-      _sheetPaint,
-    );
+      );
+      canvas.drawRRect(sheet, _sheetPaint);
+      canvas.drawRRect(sheet, _sheetEdgePaint);
+    }
 
     final frontTop = bodyTop + w * 0.20;
-    canvas.drawRRect(
-      RRect.fromLTRBR(r.left, frontTop, r.right, bottom, radius),
-      _frontPaint,
-    );
+    final front = Rect.fromLTRB(r.left, frontTop, r.right, bottom);
+    _frontPaint.shader = LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        _lighten(_tame(color)),
+        _tame(color),
+        _darken(_tame(color), 0.05)
+      ],
+      stops: const [0, 0.35, 1],
+    ).createShader(front);
+    canvas.drawRRect(RRect.fromRectAndRadius(front, radius), _frontPaint);
     canvas.drawLine(
       Offset(r.left + radius.x, frontTop + 0.5),
       Offset(r.right - radius.x, frontTop + 0.5),
