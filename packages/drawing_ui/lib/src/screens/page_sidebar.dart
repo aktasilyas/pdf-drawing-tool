@@ -134,7 +134,10 @@ class _PageSidebarState extends ConsumerState<PageSidebar> {
         : rawFilter;
 
     ref.listen<int>(currentPageIndexProvider, (prev, next) {
-      if (prev != next) _scrollToPage(next);
+      // Grid rows follow page indexes only when every page is listed.
+      if (prev != next && filter == SidebarFilter.allPages) {
+        _scrollToPage(next);
+      }
     });
 
     final content = Column(

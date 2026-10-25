@@ -168,7 +168,7 @@ void main() {
     expect(tester.getSize(more), const Size.square(48));
   });
 
-  testWidgets('add-page cell closes the grid', (tester) async {
+  testWidgets('add-page cell follows the pages', (tester) async {
     await pumpSidebar(tester, pages: sidebarPages(2));
     expect(find.byType(AddPageCell), findsOneWidget);
     expect(find.text('Sayfa ekle'), findsOneWidget);
