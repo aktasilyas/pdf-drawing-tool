@@ -17,10 +17,8 @@ class GoogleSignInButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final outline = isDark ? AppColors.outlineDark : AppColors.outlineLight;
-    final textColor =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final outline = context.palette.border;
+    final textColor = context.palette.textPrimary;
 
     return OutlinedButton(
       onPressed: onPressed,

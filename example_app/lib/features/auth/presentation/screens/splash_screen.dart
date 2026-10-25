@@ -85,8 +85,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+    final bgColor = context.palette.surface;
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -94,9 +93,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _LogoWidget(animation: _logoAnimation, isDark: isDark),
+            _LogoWidget(animation: _logoAnimation),
             const SizedBox(height: AppSpacing.xl),
-            _SubtitleWidget(animation: _subtitleAnimation, isDark: isDark),
+            _SubtitleWidget(animation: _subtitleAnimation),
             const SizedBox(height: AppSpacing.xxxl),
             _LoadingWidget(animation: _loadingAnimation),
           ],
@@ -107,11 +106,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 }
 
 class _LogoWidget extends AnimatedWidget {
-  final bool isDark;
-
   const _LogoWidget({
     required Animation<double> animation,
-    required this.isDark,
   }) : super(listenable: animation);
 
   Animation<double> get _progress => listenable as Animation<double>;
@@ -119,10 +115,8 @@ class _LogoWidget extends AnimatedWidget {
   @override
   Widget build(BuildContext context) {
     final scale = 0.85 + (_progress.value * 0.15);
-    final surfaceColor =
-        isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
-    final textColor =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final surfaceColor = context.palette.surface;
+    final textColor = context.palette.textPrimary;
 
     return Opacity(
       opacity: _progress.value,
@@ -142,7 +136,7 @@ class _LogoWidget extends AnimatedWidget {
                   color: surfaceColor,
                   borderRadius: BorderRadius.circular(AppRadius.bottomSheet),
                   boxShadow: AppShadows.cardElevated(
-                    isDark ? Brightness.dark : Brightness.light,
+                    Theme.of(context).brightness,
                   ),
                 ),
                 child: const Icon(
@@ -168,19 +162,15 @@ class _LogoWidget extends AnimatedWidget {
 }
 
 class _SubtitleWidget extends AnimatedWidget {
-  final bool isDark;
-
   const _SubtitleWidget({
     required Animation<double> animation,
-    required this.isDark,
   }) : super(listenable: animation);
 
   Animation<double> get _progress => listenable as Animation<double>;
 
   @override
   Widget build(BuildContext context) {
-    final textColor =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final textColor = context.palette.textPrimary;
 
     return Opacity(
       opacity: _progress.value,
