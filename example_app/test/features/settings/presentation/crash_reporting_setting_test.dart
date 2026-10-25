@@ -64,7 +64,7 @@ void main() {
     final prefs = await pump(tester);
 
     await tester.tap(find.byType(Switch));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(switchValue(tester), isFalse);
     expect(prefs.getBool(StorageKeys.crashReportingEnabled), isFalse);

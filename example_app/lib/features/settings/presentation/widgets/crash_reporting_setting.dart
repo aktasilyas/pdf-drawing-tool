@@ -19,7 +19,7 @@ class CrashReportingSetting extends ConsumerWidget {
       showArrow: false,
       trailing: Switch(
         value: enabled,
-        activeTrackColor: AppColors.primary,
+        activeTrackColor: context.palette.accent,
         onChanged: (v) =>
             ref.read(crashReportingEnabledProvider.notifier).set(v),
       ),

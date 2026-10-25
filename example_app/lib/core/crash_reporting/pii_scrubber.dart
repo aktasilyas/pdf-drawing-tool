@@ -4,12 +4,18 @@ library;
 /// Maximum length of a scrubbed message.
 const int kMaxScrubbedLength = 1024;
 
-final RegExp _uriPattern = RegExp(r'''(?:file|content)://[^\s'"]*''');
+final RegExp _uriPattern = RegExp(r'''(?:file|content|https?)://[^\s'"]*''');
 final RegExp _singleQuoted = RegExp(r"'[^'\n]*'");
 final RegExp _doubleQuoted = RegExp(r'"[^"\n]*"');
 final RegExp _windowsPath = RegExp(r'''(?<!\w)[A-Za-z]:[\\/][^\s'"]*''');
 final RegExp _posixPath = RegExp(r'''(?<![\w.:])(?:/[^\s/'"()<>,;]+){2,}''');
 final RegExp _email = RegExp(r'[\w.+-]+@[\w-]+(?:\.[\w-]+)+');
+final RegExp _fileName = RegExp(
+  r'(?<![\w.:/<])[\w-]+(?:\.[\w-]+)*'
+  r'\.(?:pdf|png|jpe?g|gif|webp|heic|json|db|sqlite|txt|elya)\b',
+  caseSensitive: false,
+);
+final RegExp _sqlParameters = RegExp(r'parameters:[^\n]*');
 
 String _scrubPaths(String input) {
   return input
@@ -19,7 +25,8 @@ String _scrubPaths(String input) {
 }
 
 /// Removes URIs, quoted strings (often note or file titles), absolute file
-/// paths and email addresses from [input], then truncates it.
+/// paths, bare file names, email addresses and SQL parameter lists from
+/// [input], then truncates it.
 ///
 /// Idempotent. `package:` and `dart:` frames are left intact.
 String scrubPii(String input) {
@@ -27,7 +34,10 @@ String scrubPii(String input) {
   out = out
       .replaceAll(_singleQuoted, "'<redacted>'")
       .replaceAll(_doubleQuoted, '"<redacted>"');
-  out = out.replaceAll(_email, '<email>');
+  out = out
+      .replaceAll(_email, '<email>')
+      .replaceAll(_fileName, '<file>')
+      .replaceAll(_sqlParameters, 'parameters: <redacted>');
   if (out.length > kMaxScrubbedLength) {
     out = out.substring(0, kMaxScrubbedLength);
   }

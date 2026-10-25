@@ -125,6 +125,31 @@ void main() {
     verifyNever(() => crashlytics.deleteUnsentReports());
   });
 
+  test('drops errors recorded while opted out', () async {
+    await reporter.setCollectionEnabled(false);
+    await reporter.recordError(StateError('x'), StackTrace.current);
+    await reporter.recordFlutterError(
+      FlutterErrorDetails(exception: StateError('y')),
+    );
+
+    verifyNever(
+      () => crashlytics.recordError(
+        any<dynamic>(),
+        any(),
+        printDetails: any(named: 'printDetails'),
+        fatal: any(named: 'fatal'),
+      ),
+    );
+    verifyNever(
+      () => crashlytics.recordError(
+        any<dynamic>(),
+        any(),
+        reason: any<dynamic>(named: 'reason'),
+        printDetails: any(named: 'printDetails'),
+      ),
+    );
+  });
+
   test('never sets user identifier, log lines or custom keys', () async {
     await reporter.recordError(StateError('x'), StackTrace.current);
     await reporter.setCollectionEnabled(true);

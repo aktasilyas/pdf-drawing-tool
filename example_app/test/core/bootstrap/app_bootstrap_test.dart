@@ -78,8 +78,7 @@ void main() {
     setUp(() {
       reporter = _MockReporter();
       when(() => reporter.isActive).thenReturn(false);
-      when(() => reporter.setCollectionEnabled(any()))
-          .thenAnswer((_) async {});
+      when(() => reporter.setCollectionEnabled(any())).thenAnswer((_) async {});
     });
 
     AppBootstrap buildRelease({bool isRelease = true, AppEnv? env}) {

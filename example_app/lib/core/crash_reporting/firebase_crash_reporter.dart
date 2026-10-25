@@ -22,11 +22,16 @@ class FirebaseCrashReporter implements CrashReporter {
 
   final FirebaseCrashlytics _crashlytics;
 
+  /// Mirrors the user's choice. Errors recorded while opted out are dropped
+  /// so they cannot be uploaded after a later opt-in.
+  bool _enabled = true;
+
   @override
   bool get isActive => true;
 
   @override
   Future<void> setCollectionEnabled(bool enabled) async {
+    _enabled = enabled;
     await _crashlytics.setCrashlyticsCollectionEnabled(enabled);
     if (!enabled) {
       await _crashlytics.deleteUnsentReports();
@@ -39,6 +44,7 @@ class FirebaseCrashReporter implements CrashReporter {
     StackTrace? stack, {
     bool fatal = false,
   }) {
+    if (!_enabled) return Future<void>.value();
     return _crashlytics.recordError(
       ScrubbedError(
         type: error.runtimeType.toString(),
@@ -52,6 +58,7 @@ class FirebaseCrashReporter implements CrashReporter {
 
   @override
   Future<void> recordFlutterError(FlutterErrorDetails details) {
+    if (!_enabled) return Future<void>.value();
     final stack = details.stack;
     final context = details.context?.toDescription();
     return _crashlytics.recordError(

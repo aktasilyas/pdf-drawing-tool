@@ -35,13 +35,8 @@ void main() {
     when(() => reporter.isActive).thenReturn(true);
     when(() => reporter.setCollectionEnabled(any())).thenAnswer((_) async {});
     when(() => reporter.recordFlutterError(any())).thenAnswer((_) async {});
-    when(
-      () => reporter.recordError(
-        any(),
-        any(),
-        fatal: any(named: 'fatal'),
-      ),
-    ).thenAnswer((_) async {});
+    when(() => reporter.recordError(any(), any(), fatal: any(named: 'fatal')))
+        .thenAnswer((_) async {});
   });
 
   Future<CrashReporter> select({
@@ -50,26 +45,24 @@ void main() {
     bool userEnabled = true,
     CrashReporterInitializer? init,
   }) {
+    Future<CrashReporter> defaultInit(AppEnv _) async {
+      initCalls++;
+      return reporter;
+    }
+
     return selectCrashReporter(
       isRelease: isRelease,
       env: env,
       userEnabled: userEnabled,
-      initFirebase: init ??
-          (_) async {
-            initCalls++;
-            return reporter;
-          },
+      initFirebase: init ?? defaultInit,
     );
   }
 
   group('AppEnv.hasFirebaseConfig', () {
     test('false by default and when any value is missing', () {
       expect(const AppEnv().hasFirebaseConfig, isFalse);
-      expect(
-        const AppEnv(firebaseApiKey: 'k', firebaseAppId: 'a')
-            .hasFirebaseConfig,
-        isFalse,
-      );
+      const partial = AppEnv(firebaseApiKey: 'k', firebaseAppId: 'a');
+      expect(partial.hasFirebaseConfig, isFalse);
     });
 
     test('true when all four values are set', () {
@@ -149,9 +142,7 @@ void main() {
         stack,
       );
       expect(handled, isTrue);
-      verify(
-        () => reporter.recordError(any(), stack, fatal: true),
-      ).called(1);
+      verify(() => reporter.recordError(any(), stack, fatal: true)).called(1);
     });
   });
 }

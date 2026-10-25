@@ -41,6 +41,26 @@ void main() {
       expect(out, "No file '<redacted>'");
     });
 
+    test('removes web URLs', () {
+      expect(scrubPii('GET https://x.io/u/42?q=a failed'), 'GET <uri> failed');
+    });
+
+    test('removes bare file names left after a path with spaces', () {
+      final out = scrubPii('Cannot open /storage/emulated/0/My Note.pdf now');
+      expect(out, isNot(contains('Note.pdf')));
+      expect(out, contains('<file>'));
+    });
+
+    test('redacts SQL parameter lists', () {
+      final out = scrubPii(
+        'SqliteException(19): UNIQUE failed\n'
+        '  Causing statement: INSERT INTO notes VALUES (?, ?), '
+        'parameters: 7, Diary',
+      );
+      expect(out, isNot(contains('Diary')));
+      expect(out, contains('parameters: <redacted>'));
+    });
+
     test('removes emails', () {
       expect(scrubPii('user ada.l@example.com failed'), 'user <email> failed');
     });
