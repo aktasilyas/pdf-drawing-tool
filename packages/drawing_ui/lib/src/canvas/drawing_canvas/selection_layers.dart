@@ -3,7 +3,7 @@ part of 'package:drawing_ui/src/canvas/drawing_canvas.dart';
 /// Selection overlay, live-transformed elements and sticky note handles.
 mixin _CanvasSelectionLayers
     on DrawingCanvasGestureHandlers<DrawingCanvas>, _CanvasFields {
-  /// [context] is the LayoutBuilder context, as in the original `build`.
+  /// [context] is the State context; only the theme color scheme is read from it.
   List<Widget> _buildSelectionLayers(
     BuildContext context,
     _CanvasFrame f,
