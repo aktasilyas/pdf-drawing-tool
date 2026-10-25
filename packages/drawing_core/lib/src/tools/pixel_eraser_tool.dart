@@ -100,6 +100,53 @@ class PixelEraserTool {
     return hits;
   }
 
+  /// Find stroke segments touched by the swept [capsule] (eraser moved from
+  /// one sample to the next). Unlike [findSegmentsAt], fast eraser moves
+  /// leave no gaps between samples.
+  List<SegmentHit> findSegmentsAlong(
+    List<Stroke> strokes,
+    EraserCapsule capsule,
+  ) {
+    final hits = <SegmentHit>[];
+
+    for (final stroke in strokes) {
+      final bounds = stroke.bounds;
+      if (bounds == null) continue;
+      final pad = stroke.style.thickness / 2;
+      // Bounding box pre-filter
+      if (!capsule.overlapsBounds(bounds, pad)) continue;
+      final reach = capsule.radius + pad;
+      final points = stroke.points;
+
+      if (points.length == 1) {
+        final d = capsule.distanceToPoint(points.first.x, points.first.y);
+        if (d <= reach) {
+          hits.add(SegmentHit(
+            strokeId: stroke.id,
+            segmentIndex: 0,
+            distance: d,
+          ));
+        }
+        continue;
+      }
+
+      for (int i = 0; i < points.length - 1; i++) {
+        final p1 = points[i];
+        final p2 = points[i + 1];
+        final d = capsule.distanceToSegment(p1.x, p1.y, p2.x, p2.y);
+        if (d <= reach) {
+          hits.add(SegmentHit(
+            strokeId: stroke.id,
+            segmentIndex: i,
+            distance: d,
+          ));
+        }
+      }
+    }
+
+    return hits;
+  }
+
   bool _boundsCheck(BoundingBox? bounds, double x, double y, double tolerance) {
     if (bounds == null) return false;
     return x >= bounds.left - tolerance &&

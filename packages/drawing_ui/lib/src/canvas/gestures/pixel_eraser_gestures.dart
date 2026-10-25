@@ -25,12 +25,13 @@ mixin _PixelEraserGestures<T extends ConsumerStatefulWidget>
         ? baseSize * (0.3 + 0.7 * pressure)
         : baseSize;
 
-    final hits = pixelTool.findSegmentsAt(
-      filteredStrokes,
+    // Join this sample to the previous one so fast moves leave no gaps.
+    final capsule = pixelEraseSweep.add(
       canvasPoint.dx,
       canvasPoint.dy,
-      effectiveSize,
+      effectiveSize / 2,
     );
+    final hits = pixelTool.findSegmentsAlong(filteredStrokes, capsule);
 
     for (final hit in hits) {
       // Track original stroke if not already tracked
@@ -68,30 +69,35 @@ mixin _PixelEraserGestures<T extends ConsumerStatefulWidget>
     _eraseInsideStickyNotes(canvasPoint, tolerance, isPixelMode: true);
 
     // Update preview provider for visual feedback
-    ref.read(pixelEraserPreviewProvider.notifier).state =
-        Map<String, List<int>>.from(pixelEraseHits);
+    // Copy the lists too: the tile cache diffs previews by value, and a
+    // shared mutable list would look unchanged.
+    ref.read(pixelEraserPreviewProvider.notifier).state = {
+      for (final e in pixelEraseHits.entries) e.key: List<int>.of(e.value),
+    };
   }
 
   void commitPixelErase(int layerIndex) {
     // Commit strokes
     if (pixelEraseHits.isNotEmpty && pixelEraseOriginalStrokes.isNotEmpty) {
-      // Split strokes and create resulting strokes
-      final splitResult = core.StrokeSplitter.splitStrokes(
-        pixelEraseOriginalStrokes,
-        pixelEraseHits,
-      );
-
+      // Cut exactly the swept area out of every touched stroke.
+      final capsules = pixelEraseSweep.capsules;
+      final originals = <core.Stroke>[];
       final resultingStrokes = <core.Stroke>[];
-      for (final pieces in splitResult.values) {
+      for (final stroke in pixelEraseOriginalStrokes) {
+        final pieces = core.SweepStrokeEraser.erase(stroke, capsules);
+        if (pieces == null) continue;
+        originals.add(stroke);
         resultingStrokes.addAll(pieces);
       }
 
-      final command = core.ErasePointsCommand(
-        layerIndex: layerIndex,
-        originalStrokes: pixelEraseOriginalStrokes.toList(),
-        resultingStrokes: resultingStrokes,
-      );
-      ref.read(historyManagerProvider.notifier).execute(command);
+      if (originals.isNotEmpty) {
+        final command = core.ErasePointsCommand(
+          layerIndex: layerIndex,
+          originalStrokes: originals,
+          resultingStrokes: resultingStrokes,
+        );
+        ref.read(historyManagerProvider.notifier).execute(command);
+      }
     }
 
     // Commit shapes
@@ -109,6 +115,7 @@ mixin _PixelEraserGestures<T extends ConsumerStatefulWidget>
     // Clear tracking
     pixelEraseHits.clear();
     pixelEraseOriginalStrokes.clear();
+    pixelEraseSweep.clear();
     erasedShapeIds.clear();
     ref.read(pixelEraserPreviewProvider.notifier).state = {};
   }
