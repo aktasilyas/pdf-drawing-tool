@@ -59,7 +59,8 @@ class ExportPanel extends ConsumerWidget {
     final document = ref.read(documentProvider);
     final notifier = ref.read(exportProgressProvider.notifier);
     final watermark = ref.read(exportWatermarkProvider);
-    performPDFExport(notifier, document, addWatermark: watermark);
+    final runner = ref.read(pdfExportRunnerProvider);
+    runner.run(notifier, document, addWatermark: watermark);
   }
 
   /// Captures canvas screenshot and saves as PNG.
@@ -71,6 +72,24 @@ class ExportPanel extends ConsumerWidget {
     performPNGExport(notifier, boundaryKey, title: document.title);
   }
 }
+
+/// Runs the full-document PDF export behind [ExportPanel] (tablet popover and
+/// phone sheet). Replaced in tests to observe the export without file pickers.
+class PDFExportRunner {
+  const PDFExportRunner();
+
+  Future<void> run(
+    ExportProgressNotifier progress,
+    DrawingDocument document, {
+    bool addWatermark = false,
+  }) {
+    return performPDFExport(progress, document, addWatermark: addWatermark);
+  }
+}
+
+/// The [PDFExportRunner] used by [ExportPanel].
+final pdfExportRunnerProvider =
+    Provider<PDFExportRunner>((ref) => const PDFExportRunner());
 
 /// Exports all pages of [document] to PDF using the floating progress overlay.
 ///
