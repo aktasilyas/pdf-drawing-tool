@@ -1,0 +1,2 @@
+# Line coverage floors checked by scripts/coverage.sh in CI: <package-dir> <min %>
+# Raise a floor when coverage goes up; never lower it to make CI pass.
