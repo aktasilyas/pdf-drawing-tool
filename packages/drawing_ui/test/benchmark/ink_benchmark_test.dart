@@ -125,6 +125,7 @@ void main() {
     final styles = {
       'pen': StrokeStyle.pen(thickness: 2),
       'brush': StrokeStyle.brush(),
+      'highlighter': StrokeStyle.highlighter(),
     };
     for (final entry in styles.entries) {
       List<double> run(bool incremental) {

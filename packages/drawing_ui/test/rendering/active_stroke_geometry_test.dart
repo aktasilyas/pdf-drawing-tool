@@ -180,12 +180,39 @@ void main() {
       g.dispose();
     });
 
-    test('square-cap styles keep one body path', () {
-      final g = ActiveStrokeGeometry()
-        ..begin(StrokeStyle.highlighter())
-        ..sync(_wave(300));
+    test('square-cap styles chunk too, repeating one segment per chunk', () {
+      final points = _wave(1000);
+      final g = ActiveStrokeGeometry()..begin(StrokeStyle.highlighter());
+      for (var n = 1; n <= points.length; n++) {
+        g.sync(points.sublist(0, n));
+        expect(g.liveSegments, lessThan(chunk));
+      }
       expect(g.mode, ActiveStrokeMode.stroked);
-      expect(g.frozenChunks, 0);
+      // The first chunk holds `chunk` segments; every later live body starts
+      // with a copy of the previous chunk's last segment.
+      const segments = 1000 - 2;
+      const freezes = 1 + (segments - chunk) ~/ (chunk - 1);
+      expect(g.frozenChunks, freezes);
+      const live = segments - chunk - (freezes - 1) * (chunk - 1) + 1;
+      expect(g.liveSegments, live);
+      g.dispose();
+    });
+
+    test('square-cap start cap waits for a point that sets its direction',
+        () async {
+      final style = StrokeStyle.highlighter(thickness: 20);
+      final points = [
+        DrawingPoint(x: 100, y: 120),
+        DrawingPoint(x: 100, y: 120),
+        for (var i = 1; i <= 80; i++) DrawingPoint(x: 100 + i * 3.0, y: 120),
+      ];
+      final g = ActiveStrokeGeometry()..begin(style);
+      for (var n = 1; n <= points.length; n++) {
+        g.sync(points.sublist(0, n));
+      }
+      final live = await _raster(g.paint);
+      final committed = await _committed(points, style);
+      expect(_diffRatio(live, committed), lessThan(0.005));
       g.dispose();
     });
 
@@ -196,6 +223,14 @@ void main() {
     for (final entry in {
       'pen': StrokeStyle.pen(thickness: 3),
       'pen (thick)': StrokeStyle.pen(thickness: 12),
+      'highlighter': StrokeStyle.highlighter(),
+      'highlighter (multiply)': StrokeStyle(
+        color: 0xFF2196F3,
+        thickness: 24,
+        opacity: 0.5,
+        nibShape: NibShape.rectangle,
+        blendMode: DrawingBlendMode.multiply,
+      ),
     }.entries) {
       for (final input in cases.entries) {
         final style = entry.value;
