@@ -19,6 +19,10 @@ part 'gestures/ruler_snapping.dart';
 part 'gestures/sticky_note_gestures.dart';
 part 'gestures/text_gestures.dart';
 part 'gestures/placement_gestures.dart';
+part 'gestures/selection_gestures.dart';
+part 'gestures/shape_gestures.dart';
+part 'gestures/straight_line_gestures.dart';
+part 'gestures/laser_gestures.dart';
 
 /// Shared state contract for the gesture mixins of [DrawingCanvasState].
 ///
@@ -97,6 +101,10 @@ abstract class DrawingCanvasGestureHandlers<T extends ConsumerStatefulWidget>
         _StickyNoteGestures<T>,
         _TextGestures<T>,
         _PlacementGestures<T>,
+        _SelectionGestures<T>,
+        _ShapeGestures<T>,
+        _StraightLineGestures<T>,
+        _LaserGestures<T>,
         _PointerDownGestures<T> {
   /// Minimum distance between points to avoid excessive point creation.
   static const double minPointDistance = 1.0;
@@ -111,7 +119,11 @@ mixin _PointerDownGestures<T extends ConsumerStatefulWidget>
         _RulerSnapping<T>,
         _StickyNoteGestures<T>,
         _TextGestures<T>,
-        _PlacementGestures<T> {
+        _PlacementGestures<T>,
+        _SelectionGestures<T>,
+        _ShapeGestures<T>,
+        _StraightLineGestures<T>,
+        _LaserGestures<T> {
   // ─────────────────────────────────────────────────────────────────────────
   // POINTER EVENT HANDLERS (Single Finger Drawing)
   // ─────────────────────────────────────────────────────────────────────────
@@ -223,41 +235,7 @@ mixin _PointerDownGestures<T extends ConsumerStatefulWidget>
 
     // Check if selection tool is active
     if (isSelectionTool) {
-      // Check if there's an existing selection
-      final selection = ref.read(selectionProvider);
-      if (selection != null) {
-        final transform = ref.read(canvasTransformProvider);
-        final canvasPoint =
-            (event.localPosition - transform.offset) / transform.zoom;
-
-        // If tap is inside selection, let SelectionHandles handle the drag
-        if (isPointInSelection(canvasPoint, selection)) {
-          // Don't start new selection - SelectionHandles will handle this
-          return;
-        }
-      }
-
-      // Start long press timer for paste menu (only if clipboard has data)
-      final clipboard = ref.read(selectionClipboardProvider);
-      if (clipboard != null) {
-        _longPressScreenPos = event.localPosition;
-        _longPressTimer?.cancel();
-        _longPressTimer = Timer(const Duration(milliseconds: 500), () {
-          _longPressTimer = null;
-          isSelecting = false;
-          ref.read(activeSelectionToolProvider).cancelSelection();
-          final transform = ref.read(canvasTransformProvider);
-          final canvasPos = transform.screenToCanvas(_longPressScreenPos!);
-          ref.read(pasteMenuProvider.notifier).state = PasteMenuState(
-            screenPos: _longPressScreenPos!,
-            canvasPos: canvasPos,
-          );
-          setState(() {});
-        });
-      }
-
-      // Start new selection (outside existing or no selection)
-      handleSelectionDown(event);
+      _handleSelectionToolDown(event);
       return;
     }
 
@@ -609,280 +587,6 @@ mixin _PointerDownGestures<T extends ConsumerStatefulWidget>
       drawingController.cancelStroke();
     }
     drawingInsideNote = null;
-    lastPoint = null;
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // SELECTION EVENT HANDLERS
-  // ─────────────────────────────────────────────────────────────────────────
-
-  void handleSelectionDown(PointerDownEvent event) {
-    // Clear any existing selection first
-    ref.read(selectionProvider.notifier).clearSelection();
-    ref.read(selectionUiProvider.notifier).reset();
-
-    final transform = ref.read(canvasTransformProvider);
-    final canvasPoint =
-        (event.localPosition - transform.offset) / transform.zoom;
-
-    final tool = ref.read(activeSelectionToolProvider);
-    tool.startSelection(core.DrawingPoint(
-      x: canvasPoint.dx,
-      y: canvasPoint.dy,
-      pressure: 1.0,
-    ));
-
-    isSelecting = true;
-    setState(() {});
-  }
-
-  void handleSelectionMove(PointerMoveEvent event) {
-    final transform = ref.read(canvasTransformProvider);
-    final canvasPoint =
-        (event.localPosition - transform.offset) / transform.zoom;
-
-    final tool = ref.read(activeSelectionToolProvider);
-    tool.updateSelection(core.DrawingPoint(
-      x: canvasPoint.dx,
-      y: canvasPoint.dy,
-      pressure: 1.0,
-    ));
-
-    // Trigger rebuild for preview
-    setState(() {});
-  }
-
-  void handleSelectionUp(PointerUpEvent event) {
-    isSelecting = false;
-
-    final tool = ref.read(activeSelectionToolProvider);
-    final allStrokes = ref.read(activeLayerStrokesProvider);
-    final allShapes = ref.read(activeLayerShapesProvider);
-    final allImages = ref.read(activeLayerImagesProvider);
-    final allTexts = ref.read(activeLayerTextsProvider);
-    final lassoSettings = ref.read(lassoSettingsProvider);
-
-    // Filter by selectable type settings
-    final strokes = filterStrokesBySelectableType(
-      allStrokes,
-      lassoSettings.selectableTypes,
-    );
-    final allowShapes =
-        lassoSettings.selectableTypes[SelectableType.shape] ?? true;
-    final shapes = allowShapes ? allShapes : <core.Shape>[];
-    final allowImages =
-        lassoSettings.selectableTypes[SelectableType.imageSticker] ?? true;
-    final images = allowImages ? allImages : <core.ImageElement>[];
-    // Text/stickers use the same filter as imageSticker
-    final texts = allowImages ? allTexts : <core.TextElement>[];
-
-    var selection = tool.endSelection(strokes, shapes, images, texts);
-
-    // Tap-to-select: when the rectangle is too small (tap), hit test the
-    // tap point against individual element bounds (topmost first).
-    if (selection == null) {
-      final transform = ref.read(canvasTransformProvider);
-      final canvasPoint =
-          (event.localPosition - transform.offset) / transform.zoom;
-      selection = _hitTestElementsAtPoint(
-        canvasPoint,
-        strokes,
-        shapes,
-        images,
-        texts,
-      );
-    }
-
-    if (selection != null) {
-      ref.read(selectionProvider.notifier).setSelection(selection);
-      ref.read(selectionUiProvider.notifier).showContextMenu();
-    }
-
-    setState(() {});
-  }
-
-  /// Hit-tests a single point against elements and returns a selection
-  /// containing the topmost hit element, or null if nothing was hit.
-  core.Selection? _hitTestElementsAtPoint(
-    Offset point,
-    List<core.Stroke> strokes,
-    List<core.Shape> shapes,
-    List<core.ImageElement> images,
-    List<core.TextElement> texts,
-  ) {
-    const tolerance = 10.0;
-    final px = point.dx, py = point.dy;
-
-    // Check elements in reverse (topmost first) using element order
-    final doc = ref.read(documentProvider);
-    final layer = doc.layers[doc.activeLayerIndex];
-    final order = layer.elementOrder;
-
-    for (int i = order.length - 1; i >= 0; i--) {
-      final id = order[i];
-
-      // Check texts
-      final text = texts.where((t) => t.id == id).firstOrNull;
-      if (text != null && text.containsPoint(px, py, tolerance)) {
-        return core.Selection.create(
-          type: core.SelectionType.rectangle,
-          selectedStrokeIds: const [],
-          selectedTextIds: [id],
-          bounds: text.bounds,
-        );
-      }
-
-      // Check images
-      final image = images.where((img) => img.id == id).firstOrNull;
-      if (image != null && image.containsPoint(px, py, tolerance)) {
-        return core.Selection.create(
-          type: core.SelectionType.rectangle,
-          selectedStrokeIds: const [],
-          selectedImageIds: [id],
-          bounds: image.bounds,
-        );
-      }
-
-      // Check shapes
-      final shape = shapes.where((s) => s.id == id).firstOrNull;
-      if (shape != null) {
-        final b = shape.bounds;
-        if (px >= b.left - tolerance &&
-            px <= b.right + tolerance &&
-            py >= b.top - tolerance &&
-            py <= b.bottom + tolerance) {
-          return core.Selection.create(
-            type: core.SelectionType.rectangle,
-            selectedStrokeIds: const [],
-            selectedShapeIds: [id],
-            bounds: b,
-          );
-        }
-      }
-
-      // Check strokes
-      final stroke = strokes.where((s) => s.id == id).firstOrNull;
-      if (stroke != null) {
-        final b = stroke.bounds;
-        if (b != null &&
-            px >= b.left - tolerance &&
-            px <= b.right + tolerance &&
-            py >= b.top - tolerance &&
-            py <= b.bottom + tolerance) {
-          return core.Selection.create(
-            type: core.SelectionType.rectangle,
-            selectedStrokeIds: [id],
-            bounds: b,
-          );
-        }
-      }
-    }
-
-    return null;
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // STRAIGHT LINE EVENT HANDLERS (for highlighter)
-  // ─────────────────────────────────────────────────────────────────────────
-
-  void handleStraightLineDown(PointerDownEvent event) {
-    if (_isPointOnRuler(event.localPosition)) return;
-
-    _detectDrawingInsideNote(event);
-    var point = _clampToNote(createDrawingPoint(event));
-    point = _snapToRuler(point);
-    final style = getCurrentStyle();
-
-    straightLineStart = point;
-    straightLineEnd = point;
-    straightLineStyle = style;
-    isStraightLineDrawing = true;
-
-    setState(() {});
-  }
-
-  void handleStraightLineMove(PointerMoveEvent event) {
-    if (!isStraightLineDrawing || straightLineStart == null) return;
-
-    var point = _clampToNote(createDrawingPoint(event));
-    point = _snapToRuler(point);
-    straightLineEnd = point;
-
-    setState(() {}); // Triggers rebuild for real-time preview
-  }
-
-  void handleStraightLineUp(PointerUpEvent event) {
-    if (!isStraightLineDrawing) return;
-
-    final start = straightLineStart;
-    final end = straightLineEnd;
-    final style = straightLineStyle;
-
-    if (start != null && end != null && style != null) {
-      // Create stroke with just two points (start and end)
-      final stroke = core.Stroke.create(
-        points: [start, end],
-        style: style,
-      );
-
-      if (drawingInsideNote != null) {
-        _addStrokeToStickyNote(stroke, drawingInsideNote!);
-      } else {
-        ref.read(historyManagerProvider.notifier).addStroke(stroke);
-      }
-    }
-
-    // Reset state
-    straightLineStart = null;
-    straightLineEnd = null;
-    straightLineStyle = null;
-    isStraightLineDrawing = false;
-    drawingInsideNote = null;
-
-    setState(() {});
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // LASER POINTER EVENT HANDLERS
-  // ─────────────────────────────────────────────────────────────────────────
-
-  void handleLaserDown(PointerDownEvent event) {
-    final transform = ref.read(canvasTransformProvider);
-    final canvasPoint = transform.screenToCanvas(event.localPosition);
-    final settings = ref.read(laserSettingsProvider);
-
-    laserController.startStroke(
-      canvasPoint,
-      color: settings.color,
-      thickness: settings.thickness,
-      mode: settings.mode,
-      lineStyle: settings.lineStyle,
-    );
-    isLaserDrawing = true;
-    lastPoint = event.localPosition;
-  }
-
-  void handleLaserMove(PointerMoveEvent event) {
-    // Distance filter to avoid excessive points
-    final lastPointValue = lastPoint;
-    if (lastPointValue != null) {
-      final distance = (event.localPosition - lastPointValue).distance;
-      if (distance < DrawingCanvasGestureHandlers.minPointDistance) return;
-    }
-
-    final transform = ref.read(canvasTransformProvider);
-    final canvasPoint = transform.screenToCanvas(event.localPosition);
-    laserController.addPoint(canvasPoint);
-    lastPoint = event.localPosition;
-  }
-
-  void handleLaserUp(PointerUpEvent event) {
-    final settings = ref.read(laserSettingsProvider);
-    final fadeDuration = Duration(
-      milliseconds: (settings.duration * 1000).round(),
-    );
-    laserController.endStroke(fadeDuration);
-    isLaserDrawing = false;
     lastPoint = null;
   }
 
@@ -1424,114 +1128,6 @@ mixin _PointerDownGestures<T extends ConsumerStatefulWidget>
     final dx = x1 - x2;
     final dy = y1 - y2;
     return math.sqrt(dx * dx + dy * dy);
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // SHAPE EVENT HANDLERS
-  // ─────────────────────────────────────────────────────────────────────────
-
-  void handleShapeDown(PointerDownEvent event) {
-    _detectDrawingInsideNote(event);
-
-    final transform = ref.read(canvasTransformProvider);
-    final canvasPoint = transform.screenToCanvas(event.localPosition);
-
-    final coreShapeType = ref.read(activeCoreShapeTypeProvider);
-    final isFilled = ref.read(shapeFilledProvider);
-    final fillColor = ref.read(shapeFillColorProvider);
-    final style = ref.read(shapeStrokeStyleProvider);
-
-    // Create shape tool based on type
-    switch (coreShapeType) {
-      case core.ShapeType.line:
-        activeShapeTool = core.LineTool(style: style);
-        break;
-      case core.ShapeType.arrow:
-        activeShapeTool = core.ArrowTool(style: style);
-        break;
-      case core.ShapeType.rectangle:
-        activeShapeTool = core.RectangleTool(
-          style: style,
-          filled: isFilled,
-          fillColor: fillColor,
-        );
-        break;
-      case core.ShapeType.ellipse:
-        activeShapeTool = core.EllipseTool(
-          style: style,
-          filled: isFilled,
-          fillColor: fillColor,
-        );
-        break;
-      case core.ShapeType.triangle:
-      case core.ShapeType.diamond:
-      case core.ShapeType.star:
-      case core.ShapeType.pentagon:
-      case core.ShapeType.hexagon:
-      case core.ShapeType.plus:
-        activeShapeTool = core.GenericShapeTool(
-          style: style,
-          shapeType: coreShapeType,
-          filled: isFilled,
-          fillColor: fillColor,
-        );
-        break;
-    }
-
-    final clampedPoint = _clampToNote(core.DrawingPoint(
-      x: canvasPoint.dx,
-      y: canvasPoint.dy,
-      pressure: 1.0,
-    ));
-
-    activeShapeTool!.startShape(clampedPoint);
-
-    isDrawingShape = true;
-    setState(() {});
-  }
-
-  void handleShapeMove(PointerMoveEvent event) {
-    final tool = activeShapeTool;
-    if (tool == null) return;
-
-    final transform = ref.read(canvasTransformProvider);
-    final canvasPoint = transform.screenToCanvas(event.localPosition);
-
-    final clampedPoint = _clampToNote(core.DrawingPoint(
-      x: canvasPoint.dx,
-      y: canvasPoint.dy,
-      pressure: 1.0,
-    ));
-
-    tool.updateShape(clampedPoint);
-
-    setState(() {});
-  }
-
-  void handleShapeUp(PointerUpEvent event) {
-    final tool = activeShapeTool;
-    if (tool == null) return;
-
-    isDrawingShape = false;
-
-    final shape = tool.endShape();
-
-    if (shape != null) {
-      if (drawingInsideNote != null) {
-        _addShapeToStickyNote(shape, drawingInsideNote!);
-      } else {
-        final document = ref.read(documentProvider);
-        final command = core.AddShapeCommand(
-          layerIndex: document.activeLayerIndex,
-          shape: shape,
-        );
-        ref.read(historyManagerProvider.notifier).execute(command);
-      }
-    }
-
-    activeShapeTool = null;
-    drawingInsideNote = null;
-    setState(() {});
   }
 
   // ─────────────────────────────────────────────────────────────────────────
