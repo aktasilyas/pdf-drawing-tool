@@ -1,0 +1,63 @@
+name: Android manifest
+
+# Release builds must not request frozen-feature permissions (issue #102).
+# Merges the release and debug manifests and checks them with
+# scripts/check-android-manifest.sh. Runs only when the Android project,
+# dependencies or the check itself change.
+on:
+  pull_request:
+    paths:
+      - example_app/android/**
+      - '**/pubspec.yaml'
+      - '**/pubspec.lock'
+      - scripts/check-android-manifest.sh
+      - .github/workflows/android-manifest.yml
+  push:
+    branches: [main]
+    paths:
+      - example_app/android/**
+      - '**/pubspec.yaml'
+      - '**/pubspec.lock'
+      - scripts/check-android-manifest.sh
+      - .github/workflows/android-manifest.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-manifest-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  merged-manifest:
+    name: merged manifest permissions
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: .flutter-version
+          channel: stable
+          cache: true
+
+      - name: Dependencies
+        run: ./scripts/check.sh pub
+
+      - name: Generate Gradle files
+        working-directory: example_app
+        run: flutter build apk --config-only
+
+      - name: Merge manifests
+        working-directory: example_app/android
+        run: ./gradlew --no-daemon :app:processReleaseMainManifest :app:processDebugMainManifest
+
+      - name: Check permissions
+        run: ./scripts/check-android-manifest.sh

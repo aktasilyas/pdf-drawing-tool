@@ -28,10 +28,24 @@ const _pageSize = ui.Size(1200, 1600);
 
 List<Stroke> _syntheticStrokes() {
   final rnd = math.Random(42);
+  // 30% multiply highlighters (the real highlighter blend), the rest inks.
+  final highlighter = StrokeStyle(
+    color: 0xFFFFEB3B,
+    thickness: 20,
+    opacity: 0.5,
+    nibShape: NibShape.rectangle,
+    blendMode: DrawingBlendMode.multiply,
+  );
   final styles = <StrokeStyle>[
+    highlighter,
+    highlighter,
+    highlighter,
+    StrokeStyle.pen(thickness: 2),
+    StrokeStyle.pen(thickness: 2),
     StrokeStyle.pen(thickness: 2),
     StrokeStyle.pen(color: 0xFF1565C0, thickness: 3),
-    StrokeStyle.highlighter(),
+    StrokeStyle.pen(color: 0xFF1565C0, thickness: 3),
+    StrokeStyle.brush(),
     StrokeStyle.brush(),
   ];
   return List.generate(_strokeCount, (i) {
@@ -211,6 +225,7 @@ void main() {
       ..update(sceneOf(committed(0)))
       ..setViewport(page, 1, interacting: false); // warm every tile
 
+    final plain = ui.Paint();
     final tiled = <double>[];
     final legacy = <double>[];
     for (var k = 1; k <= _penUps; k++) {
@@ -222,7 +237,7 @@ void main() {
       final recorder = ui.PictureRecorder();
       final canvas = ui.Canvas(recorder);
       for (final t in cache.visibleTiles) {
-        canvas.drawImage(t.image, t.rect.topLeft, ui.Paint());
+        canvas.drawImageRect(t.image, t.src, t.rect, plain);
       }
       for (final r in cache.vectorRects) {
         canvas.save();

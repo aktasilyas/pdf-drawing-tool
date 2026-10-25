@@ -50,14 +50,16 @@ Future<ByteData> _bytes(ui.Image image) async {
   return data!;
 }
 
+/// Content is drawn into its own transparent layer, then composited over the
+/// tint, as in the app (the ink layer and the page are separate layers).
 ui.Image _render(void Function(ui.Canvas) draw) {
   final recorder = ui.PictureRecorder();
   final canvas = ui.Canvas(recorder);
-  canvas.drawRect(
-    ui.Rect.fromLTWH(0, 0, _w.toDouble(), _h.toDouble()),
-    ui.Paint()..color = _tint,
-  );
+  final bounds = ui.Rect.fromLTWH(0, 0, _w.toDouble(), _h.toDouble());
+  canvas.drawRect(bounds, ui.Paint()..color = _tint);
+  canvas.saveLayer(bounds, ui.Paint());
   draw(canvas);
+  canvas.restore();
   return recorder.endRecording().toImageSync(_w, _h);
 }
 

@@ -1,0 +1,17 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <!-- v1.0 release is offline with every frozen feature (AI, sync, premium,
+         audio) flagged off, but their plugins still merge these permissions
+         (supabase_flutter / purchases_flutter: INTERNET, BILLING;
+         connectivity_plus: ACCESS_NETWORK_STATE; record: RECORD_AUDIO).
+         They would show on the Play listing and contradict the Data safety
+         answers, so the release manifest strips them. Debug and profile
+         builds keep them for FF_* flag testing.
+         REVISIT: when a frozen feature ships after v1.0, delete its line here
+         in the same PR. CI (.github/workflows/android-manifest.yml) checks
+         this list against the merged manifests. -->
+    <uses-permission android:name="android.permission.INTERNET" tools:node="remove" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" tools:node="remove" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" tools:node="remove" />
+    <uses-permission android:name="com.android.vending.BILLING" tools:node="remove" />
+</manifest>
