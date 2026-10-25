@@ -2,6 +2,8 @@
 library;
 
 export 'adaptive_toolbar.dart';
+export 'chrome_capsule.dart';
+export 'chrome_icon_button.dart';
 export 'tool_groups.dart';
 export 'compact_bottom_bar.dart';
 export 'compact_tool_panel_sheet.dart';

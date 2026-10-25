@@ -6,6 +6,11 @@ on:
   pull_request:
     types: [labeled]
 
+# Merge one PR at a time; concurrent merges fail with "Base branch was modified".
+concurrency:
+  group: architect-merge
+  cancel-in-progress: false
+
 permissions:
   contents: write
   pull-requests: write
@@ -25,8 +30,13 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR: ${{ github.event.pull_request.number }}
         run: |
-          gh api -X PUT "repos/${{ github.repository }}/pulls/$PR/merge" \
-            -f merge_method=squash
+          for attempt in 1 2 3 4 5; do
+            if gh api -X PUT "repos/${{ github.repository }}/pulls/$PR/merge" -f merge_method=squash; then
+              break
+            fi
+            [ "$attempt" = 5 ] && exit 1
+            sleep $((attempt * 20))
+          done
           gh api -X DELETE "repos/${{ github.repository }}/git/refs/heads/${{ github.event.pull_request.head.ref }}" || true
 
       # A merge made with GITHUB_TOKEN neither auto-closes linked issues nor

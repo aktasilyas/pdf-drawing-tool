@@ -55,11 +55,23 @@ void _registerRepositories() {
     () => FolderLocalDatasourceImpl(getIt()),
   );
 
+  getIt.registerLazySingleton<TrashedPageLocalDatasource>(
+    () => TrashedPageLocalDatasourceImpl(getIt()),
+  );
+
   // Documents
   getIt.registerLazySingleton<DocumentRepository>(
     () => DocumentRepositoryImpl(
       getIt<DocumentLocalDatasource>(),
       getIt<FolderLocalDatasource>(),
+    ),
+  );
+
+  // Page trash
+  getIt.registerLazySingleton<PageTrashRepository>(
+    () => PageTrashRepositoryImpl(
+      getIt<TrashedPageLocalDatasource>(),
+      getIt<SharedPreferences>(),
     ),
   );
 

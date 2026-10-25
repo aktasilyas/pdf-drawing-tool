@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:phosphor_icons/phosphor_icons.dart';
 
 import 'package:drawing_ui/src/panels/add_page_panel.dart';
 import 'package:drawing_ui/src/panels/audio_recording_dropdown.dart';
@@ -11,12 +10,11 @@ import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/screens/layers_list.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/toolbar/elyanotes_nav_button.dart';
+import 'package:drawing_ui/src/toolbar/toolbar_reader_badge.dart';
 import 'package:drawing_ui/src/widgets/document_title_button.dart';
 import 'package:drawing_ui/src/widgets/popover_panel.dart';
 
 /// Left navigation section: Home, Sidebar toggle, document title, reader badge.
-///
-/// Pure widget — all state is passed in via parameters.
 class ToolbarNavLeft extends StatelessWidget {
   const ToolbarNavLeft({
     super.key,
@@ -29,6 +27,8 @@ class ToolbarNavLeft extends StatelessWidget {
     this.isReaderMode = false,
     this.pageCount = 1,
     this.showTitle = true,
+    this.titleMaxWidth = 160,
+    this.showReaderBadge = true,
   });
 
   final String? documentTitle;
@@ -40,9 +40,14 @@ class ToolbarNavLeft extends StatelessWidget {
   final bool isReaderMode;
   final int pageCount;
 
-  /// When false, hides the document title button (used in MediumToolbar
-  /// where title moves to the "more" popup to save horizontal space).
+  /// When false, hides the title (MediumToolbar moves it to "more").
   final bool showTitle;
+
+  /// Maximum width of the document title pill.
+  final double titleMaxWidth;
+
+  /// Whether reader mode shows the "Salt okunur" badge.
+  final bool showReaderBadge;
 
   @override
   Widget build(BuildContext context) {
@@ -64,23 +69,23 @@ class ToolbarNavLeft extends StatelessWidget {
             isActive: isSidebarOpen,
           ),
         if (showTitle) ...[
-          const SizedBox(width: 4),
+          const SizedBox(width: ChromeSpacing.xs),
           DocumentTitleButton(
             title: documentTitle,
             onRename: onRenameDocument ?? () {},
             onDelete: onDeleteDocument ?? () {},
+            maxWidth: titleMaxWidth,
           ),
         ],
-        if (isReaderMode) ...[
-          const SizedBox(width: 8),
-          _ReaderBadge(colorScheme: Theme.of(context).colorScheme),
+        if (isReaderMode && showReaderBadge) ...[
+          const SizedBox(width: ChromeSpacing.sm),
+          const ToolbarReaderBadge(),
         ],
       ],
     );
   }
 }
 
-/// Which nav popover is currently open.
 enum _NavPanel { addPage, audioRecording, layers, export, more }
 
 /// Right navigation section: Reader toggle, Add Page, Export, More.
@@ -162,7 +167,6 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
         );
       case _NavPanel.layers:
         anchorKey = _layersKey;
-        // Cap height to 60% of screen, min 280, max 420
         final screenH = MediaQuery.of(context).size.height;
         final layersH = (screenH * 0.6).clamp(280.0, 420.0);
         child =
@@ -291,35 +295,6 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
           isActive: _activePanel == _NavPanel.more,
         ),
       ],
-    );
-  }
-}
-
-/// "Salt okunur" badge shown in reader mode.
-class _ReaderBadge extends StatelessWidget {
-  const _ReaderBadge({required this.colorScheme});
-  final ColorScheme colorScheme;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    return Semantics(
-      label: 'Salt okunur mod aktif',
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-        decoration: BoxDecoration(
-            color: cs.secondaryContainer,
-            borderRadius: BorderRadius.circular(10)),
-        child: Row(mainAxisSize: MainAxisSize.min, children: [
-          PhosphorIcon(ElyanotesIcons.readerMode,
-              size: 12, color: cs.onSecondaryContainer),
-          const SizedBox(width: 3),
-          Text('Salt okunur',
-              style: textTheme.labelSmall
-                  ?.copyWith(color: cs.onSecondaryContainer)),
-        ]),
-      ),
     );
   }
 }

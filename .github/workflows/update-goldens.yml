@@ -66,7 +66,17 @@ jobs:
 
       - name: Regenerate goldens
         working-directory: ${{ inputs.package }}
-        run: flutter test --update-goldens
+        # Failing test names go into an annotation: job logs are not readable
+        # from cloud agent sessions, annotations are (check-runs API).
+        run: |
+          if ! flutter test --update-goldens > "$RUNNER_TEMP/test.log" 2>&1; then
+            cat "$RUNNER_TEMP/test.log"
+            msg=$( { grep -E '❌|\[E\]|EXCEPTION CAUGHT|Expected:|Actual:' "$RUNNER_TEMP/test.log" | head -n 30; echo '...'; tail -n 30 "$RUNNER_TEMP/test.log"; } \
+              | sed -e 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+            echo "::error title=update-goldens $PACKAGE::$msg"
+            exit 1
+          fi
+          tail -n 3 "$RUNNER_TEMP/test.log"
 
       - name: Upload rendered PNGs
         if: always()

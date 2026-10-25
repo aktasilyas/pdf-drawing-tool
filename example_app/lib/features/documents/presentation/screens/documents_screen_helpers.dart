@@ -153,15 +153,15 @@ String getSectionTitle(
 ) {
   switch (section) {
     case SidebarSection.documents:
-      return 'Belgeler';
+      return 'Tüm Notlar';
     case SidebarSection.favorites:
-      return 'Sık Kullanılanlar';
+      return 'Favoriler';
     case SidebarSection.shared:
       return 'Paylaşılan';
     case SidebarSection.store:
       return 'Mağaza';
     case SidebarSection.trash:
-      return 'Çöp';
+      return 'Son Silinenler';
     case SidebarSection.folder:
       if (folderId != null) {
         final folderAsync = ref.watch(folderByIdProvider(folderId));

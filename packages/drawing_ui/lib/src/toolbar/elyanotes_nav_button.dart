@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_icons/phosphor_icons.dart';
 
 import 'package:drawing_ui/src/theme/theme.dart';
+import 'package:drawing_ui/src/toolbar/chrome_icon_button.dart';
 
-/// Professional navigation button with consistent sizing and feedback.
+/// Navigation button for the editor toolbars; renders a [ChromeIconButton].
 ///
-/// Used in [TopNavigationBar] and reusable in other toolbars.
-/// Visual size is [size] (default 36dp) with 48dp touch target via padding.
+/// Used in [TopNavigationBar] and the toolbar nav sections. 40dp visual in a
+/// 48dp hit area (docs/specs/52-editor-chrome.md, section 4). Active state
+/// uses `accentContainer` + `accent`; colours come from [ChromePalette].
 class ElyanotesNavButton extends StatelessWidget {
   const ElyanotesNavButton({
     super.key,
@@ -35,71 +36,42 @@ class ElyanotesNavButton extends StatelessWidget {
   /// Whether this button is disabled (greyed out, not tappable).
   final bool isDisabled;
 
-  /// Visual size of the button container (default 36dp).
+  /// Legacy visual size. No longer affects layout: every chrome button has
+  /// a [ChromeIconButton.visualSize] visual in a 48dp hit area. Kept so
+  /// existing callers compile.
   final double size;
 
-  /// Override icon size (defaults to [ElyanotesIcons.navSize]).
+  /// Override icon size (defaults to [ChromeIconSizes.lg]).
   final double? iconSize;
 
-  /// Optional badge widget (e.g. notification dot).
+  /// Optional badge widget (e.g. notification dot), top-right of the visual.
   final Widget? badge;
+
+  /// Inset of [badge] from the top-right corner of the 48dp hit area.
+  static const double badgeInset = ChromeSpacing.sm;
 
   @override
   Widget build(BuildContext context) {
-    final theme = DrawingTheme.of(context);
-    final effectiveIconSize = iconSize ?? ElyanotesIcons.navSize;
-
-    final iconColor = isDisabled
-        ? theme.toolbarIconDisabledColor
-        : isActive
-            ? theme.toolbarIconSelectedColor
-            : theme.toolbarIconColor;
-
-    final bgColor = isActive
-        ? theme.toolbarIconSelectedColor.withValues(alpha: 0.15)
-        : Colors.transparent;
-
-    return Tooltip(
-      message: tooltip,
-      child: Semantics(
-        label: tooltip,
-        button: true,
-        enabled: !isDisabled,
-        selected: isActive,
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: isDisabled ? null : onPressed,
-            borderRadius: BorderRadius.circular(8),
-            child: Container(
-              width: size,
-              height: size,
-              margin: const EdgeInsets.symmetric(horizontal: 1),
-              decoration: BoxDecoration(
-                color: bgColor,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: badge != null
-                  ? Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        PhosphorIcon(
-                          icon,
-                          size: effectiveIconSize,
-                          color: iconColor,
-                        ),
-                        Positioned(top: 4, right: 4, child: badge!),
-                      ],
-                    )
-                  : PhosphorIcon(
-                      icon,
-                      size: effectiveIconSize,
-                      color: iconColor,
-                    ),
-            ),
-          ),
+    final button = ChromeIconButton(
+      icon: icon,
+      tooltip: tooltip,
+      onPressed: onPressed,
+      selected: isActive,
+      enabled: !isDisabled,
+      iconSize: iconSize ?? ChromeIconSizes.lg,
+    );
+    final badgeWidget = badge;
+    if (badgeWidget == null) return button;
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        button,
+        Positioned(
+          top: badgeInset,
+          right: badgeInset,
+          child: IgnorePointer(child: badgeWidget),
         ),
-      ),
+      ],
     );
   }
 }

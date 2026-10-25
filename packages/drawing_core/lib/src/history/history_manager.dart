@@ -5,12 +5,16 @@ import 'package:drawing_core/src/internal.dart';
 /// The [HistoryManager] maintains two stacks: one for undo operations
 /// and one for redo operations. It enforces a maximum history size
 /// to prevent unbounded memory growth.
+///
+/// Every entry remembers the id of the page that was current when the command
+/// ran. Undo and redo apply the command to that page and navigate to it, so a
+/// step is never applied to (or consumed on) a different page.
 class HistoryManager {
   /// The stack of commands that can be undone.
-  final List<DrawingCommand> _undoStack = [];
+  final List<_Entry> _undoStack = [];
 
   /// The stack of commands that can be redone.
-  final List<DrawingCommand> _redoStack = [];
+  final List<_Entry> _redoStack = [];
 
   /// The maximum number of commands to keep in history.
   final int maxHistorySize;
@@ -43,11 +47,13 @@ class HistoryManager {
   /// If the undo stack exceeds [maxHistorySize], the oldest command
   /// is removed.
   DrawingDocument execute(DrawingCommand command, DrawingDocument document) {
+    final pageId = _currentPageId(document);
+
     // Execute the command
     final newDocument = command.execute(document);
 
     // Add to undo stack
-    _undoStack.add(command);
+    _undoStack.add(_Entry(command, pageId));
 
     // Clear redo stack (new action invalidates redo history)
     _redoStack.clear();
@@ -72,13 +78,14 @@ class HistoryManager {
     }
 
     // Pop from undo stack
-    final command = _undoStack.removeLast();
+    final entry = _undoStack.removeLast();
 
-    // Undo the command
-    final newDocument = command.undo(document);
+    // Undo the command on the page it was recorded on
+    final target = _onPage(document, entry.pageId);
+    final newDocument = target == null ? document : entry.command.undo(target);
 
     // Push to redo stack
-    _redoStack.add(command);
+    _redoStack.add(entry);
 
     return newDocument;
   }
@@ -95,13 +102,15 @@ class HistoryManager {
     }
 
     // Pop from redo stack
-    final command = _redoStack.removeLast();
+    final entry = _redoStack.removeLast();
 
-    // Re-execute the command
-    final newDocument = command.execute(document);
+    // Re-execute the command on the page it was recorded on
+    final target = _onPage(document, entry.pageId);
+    final newDocument =
+        target == null ? document : entry.command.execute(target);
 
     // Push to undo stack
-    _undoStack.add(command);
+    _undoStack.add(entry);
 
     return newDocument;
   }
@@ -121,7 +130,7 @@ class HistoryManager {
   ///
   /// Useful for displaying undo history in the UI.
   List<String> getUndoDescriptions() {
-    return _undoStack.map((cmd) => cmd.description).toList();
+    return _undoStack.map((e) => e.command.description).toList();
   }
 
   /// Returns the descriptions of commands in the redo stack.
@@ -131,6 +140,27 @@ class HistoryManager {
   ///
   /// Useful for displaying redo history in the UI.
   List<String> getRedoDescriptions() {
-    return _redoStack.map((cmd) => cmd.description).toList();
+    return _redoStack.map((e) => e.command.description).toList();
   }
+
+  /// The id of the current page, or null for single-page (V1) documents.
+  static String? _currentPageId(DrawingDocument document) =>
+      document.isMultiPage ? document.currentPage?.id : null;
+
+  /// Returns [document] with the page [pageId] made current, or null when the
+  /// page no longer exists (the step is then consumed without any change).
+  static DrawingDocument? _onPage(DrawingDocument document, String? pageId) {
+    if (pageId == null || !document.isMultiPage) return document;
+    final index = document.pages.indexWhere((p) => p.id == pageId);
+    if (index < 0) return null;
+    if (index == document.currentPageIndex) return document;
+    return document.setCurrentPage(index);
+  }
+}
+
+class _Entry {
+  final DrawingCommand command;
+  final String? pageId;
+
+  const _Entry(this.command, this.pageId);
 }

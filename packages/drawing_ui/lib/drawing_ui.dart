@@ -11,6 +11,8 @@ library drawing_ui;
 export 'src/models/tool_type.dart';
 
 // Theme
+export 'src/theme/chrome_palette.dart';
+export 'src/theme/chrome_tokens.dart';
 export 'src/theme/drawing_theme.dart';
 export 'src/theme/drawing_colors.dart';
 export 'src/theme/elyanotes_icons.dart';
@@ -32,6 +34,7 @@ export 'src/canvas/canvas_color_scheme.dart';
 
 // Painters
 export 'src/painters/template_pattern_painter.dart';
+export 'src/painters/cover/cover_geometry.dart';
 export 'src/painters/cover/cover_renderer.dart';
 export 'src/painters/cover/cover_texture_store.dart';
 
@@ -51,6 +54,8 @@ export 'src/widgets/widgets.dart';
 export 'src/widgets/template_picker/template_picker_widgets.dart';
 
 // Toolbar (Two-row layout)
+export 'src/toolbar/chrome_capsule.dart';
+export 'src/toolbar/chrome_icon_button.dart';
 export 'src/toolbar/elyanotes_nav_button.dart';
 export 'src/toolbar/top_navigation_bar.dart';
 export 'src/toolbar/top_nav_menus.dart';

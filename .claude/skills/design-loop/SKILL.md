@@ -39,3 +39,14 @@ Claude can read PNG files as images, so golden tests double as screenshots.
 
 Never update goldens just to make a failing test pass without looking at the
 diff image; an unexpected golden change is a bug until proven otherwise.
+
+## Golden tolerance
+`example_app` and `drawing_ui` install a `TolerantGoldenFileComparator` via
+`test/flutter_test_config.dart` (`test/helpers/tolerant_golden_comparator.dart`,
+one copy per package; keep them in sync). A golden passes when at most
+**0.05 % of its pixels** differ (`kGoldenDiffTolerance = 0.0005`); size
+changes always fail. This absorbs CI anti-aliasing noise (tens of pixels) but
+not real changes: a 1 dp hairline across a tablet golden is ~0.12 %. Do not
+raise the threshold to make a failing golden pass; look at the diff instead.
+The count ignores colour distance, so a small recoloured icon or badge
+(a few hundred pixels) can slip through: still look at changed PNGs in review.

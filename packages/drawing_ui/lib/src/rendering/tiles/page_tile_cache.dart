@@ -8,6 +8,7 @@ import 'package:drawing_ui/src/rendering/tiles/cached_tile.dart';
 import 'package:drawing_ui/src/rendering/tiles/element_scene.dart';
 import 'package:drawing_ui/src/rendering/tiles/scene_diff.dart';
 import 'package:drawing_ui/src/rendering/tiles/scene_renderer_factory.dart';
+import 'package:drawing_ui/src/rendering/tiles/tile_builder.dart';
 import 'package:drawing_ui/src/rendering/tiles/tile_grid.dart';
 import 'package:drawing_ui/src/rendering/tiles/tile_rasterizer.dart';
 import 'package:drawing_ui/src/rendering/tiles/tile_store.dart';
@@ -19,7 +20,9 @@ import 'package:drawing_ui/src/rendering/tiles/tile_store.dart';
 ///
 /// On a scale change the old tiles stay as [legacyTiles] and the new visible
 /// tiles become pending; a `TileRasterScheduler` fills them via
-/// [rasterizeNextPending]. Tiles with non-normal blend content are never
+/// [rasterizeNextPending]. Multiply/screen content is rasterized like normal
+/// content: the layer is transparent, so multiply over empty pixels is normal
+/// alpha (see #115). Tiles with overlay/darken/lighten content are never
 /// rasterized (see [vectorRects]).
 class PageTileCache extends ChangeNotifier {
   PageTileCache({
@@ -29,11 +32,13 @@ class PageTileCache extends ChangeNotifier {
     TileRasterizer rasterizer = const TileRasterizer(),
   })  : _strokeRenderer = strokeRenderer,
         _cacheManager = cacheManager,
-        _rasterizer = rasterizer;
+        _rasterizer = rasterizer,
+        _builder = TileBuilder(rasterizer);
 
   final FlutterStrokeRenderer _strokeRenderer;
   final ImageCacheManager _cacheManager;
   final TileRasterizer _rasterizer;
+  final TileBuilder _builder;
   final int budgetBytes;
 
   final TileStore _store = TileStore();
@@ -64,7 +69,7 @@ class PageTileCache extends ChangeNotifier {
   /// Page rects of visible tiles not rasterized yet.
   List<ui.Rect> get pendingRects => _pendingRects;
 
-  /// Page rects of visible tiles drawn as vectors (non-normal blend content).
+  /// Page rects of visible tiles drawn as vectors (overlay/darken/lighten).
   List<ui.Rect> get vectorRects => _vectorRects;
 
   /// Whether visible tiles at the current scale still wait to be rasterized.
@@ -197,21 +202,21 @@ class PageTileCache extends ChangeNotifier {
       final tile = _store.tiles[key];
       if (tile == null && !_store.has(key)) continue; // built later
       final rect = grid.rectOf(key);
-      if (appended.any((e) => e.usesBlend && e.bounds.overlaps(rect))) {
+      final hits = appended.where((e) => e.bounds.overlaps(rect)).toList();
+      if (hits.isEmpty) continue;
+      if (hits.any((e) => e.isVectorOnly)) {
         _store.drop(key);
         _store.vector.add(key);
         continue;
       }
-      final count = appended.where((e) => e.bounds.overlaps(rect)).length;
-      if (count == 0) continue;
-      final image = _rasterizer.rasterize(
-        pageRect: rect,
+      final built = _builder.build(
+        key: key,
+        rect: rect,
         scale: grid.scale,
-        base: tile?.image,
-        paint: (canvas) => sub.paintRegion(canvas, rect),
+        renderer: sub,
+        base: tile,
       );
-      _store.drop(key);
-      _put(key, rect, image, count);
+      _put(built, hits.length);
     }
   }
 
@@ -228,7 +233,7 @@ class PageTileCache extends ChangeNotifier {
       final rect = grid.rectOf(key);
       if (!scene.entries.any((e) => e.bounds.overlaps(rect))) {
         _store.empty.add(key);
-      } else if (scene.hasBlendIn(rect)) {
+      } else if (scene.hasVectorOnlyIn(rect)) {
         _store.vector.add(key);
       } else if (defer) {
         _pending.add(key);
@@ -240,24 +245,24 @@ class PageTileCache extends ChangeNotifier {
 
   void _rasterizeTile(TileGrid grid, ElementScene scene, TileKey key) {
     final rect = grid.rectOf(key);
-    final count = scene.entries.where((e) => e.bounds.overlaps(rect)).length;
-    if (count == 0) {
+    final hits = scene.entries.where((e) => e.bounds.overlaps(rect)).toList();
+    if (hits.isEmpty) {
       _store.empty.add(key);
       return;
     }
-    final full = buildSceneRenderer(scene, _strokeRenderer, _cacheManager);
-    final image = _rasterizer.rasterize(
-      pageRect: rect,
+    final built = _builder.build(
+      key: key,
+      rect: rect,
       scale: grid.scale,
-      paint: (canvas) => full.paintRegion(canvas, rect),
+      renderer: buildSceneRenderer(scene, _strokeRenderer, _cacheManager),
     );
-    _put(key, rect, image, count);
+    _put(built, hits.length);
   }
 
-  void _put(TileKey key, ui.Rect rect, ui.Image image, int recorded) {
-    _store.tiles[key] = CachedTile(key, rect, image);
+  void _put(CachedTile tile, int recorded) {
+    _store.replace(tile);
     _rasterCount++;
-    _lastKeys = [..._lastKeys, key];
+    _lastKeys = [..._lastKeys, tile.key];
     _lastRecorded = recorded > _lastRecorded ? recorded : _lastRecorded;
   }
 
@@ -272,7 +277,7 @@ class PageTileCache extends ChangeNotifier {
   }
 
   void _releaseLegacy() {
-    _legacy.forEach((t) => t.image.dispose());
+    _legacy.forEach((t) => t.dispose());
     _legacy = const [];
   }
 

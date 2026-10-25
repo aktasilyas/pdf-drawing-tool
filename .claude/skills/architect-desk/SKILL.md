@@ -10,9 +10,21 @@ below, then log and stop. Reply to the owner in Turkish; write code-facing
 comments in English.
 
 GitHub: REST only via `gh api`. `R=repos/aktasilyas/pdf-drawing-tool`.
-Same limits as the `autopilot` skill: no merging, no force-push, no pushes to
-`main`, a denied action is logged and never retried another way.
+Hard limits: no `gh pr merge` / merge API calls (merging is the label
+workflow's job), no force-push, no pushes to `main`, no rebase/amend of pushed
+branches; a denied action is logged and never retried another way.
 Read `CLAUDE.md`, `docs/ROADMAP.md` and `docs/design/BRIEF.md` first.
+
+The owner's standing instruction: **the pipeline must never stall.** You have
+the owner's authority for everything not on the escalation list below. When
+something blocks work, fix it yourself in this run (sections 3 and 5) instead
+of only logging it.
+
+Reading CI failures: job logs are not downloadable from cloud sessions (403).
+Read the failure annotations instead — every job's check-run id equals its job
+id: `gh api $R/actions/runs/<run>/jobs --jq '.jobs[]|"\(.id) \(.name) \(.conclusion)"'`,
+then `gh api $R/check-runs/<job_id>/annotations`. `scripts/check.sh` and the
+`Update goldens` workflow put failing test names into those annotations.
 
 ## What only the owner decides (escalate)
 - Money, accounts, signing keys, store submissions, legal or privacy text.
@@ -57,9 +69,45 @@ If autopilot logged the queue as empty or blocked, look at why (dependencies,
 missing criteria) and fix the issues so work can continue; you may edit issue
 bodies, labels and dependencies, and open new issues for gaps you find.
 
-Also: an open issue with `in-review` and no open PR is stalled. If its work is
-complete, comment why and leave it for the owner to close (you cannot close);
+Also: an open issue with `in-review` and no open PR is stalled. If its
+acceptance criteria are verifiably met on `main`, comment which commits/PRs
+met each criterion and close it
+(`gh api -X PATCH $R/issues/<n> -f state=closed -f state_reason=completed`);
 otherwise remove `in-review` and make sure it has `agent-ready`.
+
+Stuck PRs:
+- `architect-approved` but still open (the merge workflow failed, e.g. checks
+  were red or pending): once its checks are green, remove and re-add the
+  `architect-approved` label to re-run the merge workflow.
+- Behind `main` or conflicting: `gh api -X PUT $R/pulls/<n>/update-branch`
+  (a merge commit, allowed). On a conflict, fetch the branch,
+  `git merge origin/main`, resolve, verify, push to the same `claude/*` branch.
+- `needs-architect` or `needs-decision` items that are technical rather than
+  on the owner list: decide them (section 1) and relabel `agent-ready`.
+
+## 3a. Keep the queue full
+Count open issues labeled `agent-ready` without `in-progress`/`in-review`.
+If fewer than 3, groom the backlog before you stop:
+- Compare `docs/ROADMAP.md` v1.0 scope (ink engine, notebooks + covers,
+  PDF import/annotate/export, local storage, Android release) against what
+  `main` actually does. Read the code; do not trust issue titles.
+- Open new issues for real gaps, bugs and release-readiness work (PDF flows,
+  notebook/page management, storage robustness, error states, empty states,
+  accessibility, performance on large documents, tests for untested paths,
+  unlabeled leftover issues). Each issue: user-facing goal, acceptance
+  criteria, `Depends on:` if any, the right milestone, a Reference check line
+  for UX work, and `agent-ready`. Prefer slices one PR can finish.
+- Never add frozen features (AI, sync, premium, audio) or change v1.0 scope;
+  those stay owner decisions.
+
+## 5. Fix blockers yourself
+When `main` is red, a flaky test blocks merges, or a PR is stuck on something
+small (conflict, golden refresh, a failing check that is unrelated to the PR):
+fix it in this run on a `claude/<issue>-<slug>` branch (open an issue first if
+none fits), follow TDD and verification from CLAUDE.md, have the `reviewer`
+subagent check the diff, open the PR, and label it `architect-approved` only
+when the reviewer finds nothing blocking and the required checks are green.
+Keep such fixes small and scoped to unblocking; larger work goes to the queue.
 
 ## 3b. Owner tasks that became unblocked
 For open issues labeled `needs-owner`: when every `Depends on:` issue is closed
@@ -67,7 +115,7 @@ and you have not announced it yet, comment on that issue in Turkish with exact
 step-by-step instructions for the owner (commands, what to look for), and
 escalate it in the log.
 
-## 4. Log
+## 4. Log (always last)
 Comment on the "Autopilot status" issue, in Turkish, at most 6 lines, starting
 with `Mimar:` — decisions made, PRs approved, anything escalated. If an item
 was escalated, start the comment with `⚠️ Sahibin kararı gerekiyor:` so the

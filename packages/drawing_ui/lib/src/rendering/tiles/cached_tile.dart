@@ -24,4 +24,12 @@ class CachedTile {
 
   /// Cache clock value of the last frame this tile was visible (LRU).
   int lastUsed = 0;
+
+  void dispose() => image.dispose();
+
+  /// Disposes [image] unless [next] reuses it.
+  void disposeExcept(CachedTile? next) {
+    if (next != null && identical(image, next.image)) return;
+    image.dispose();
+  }
 }

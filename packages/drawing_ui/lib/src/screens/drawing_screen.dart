@@ -8,6 +8,7 @@ import 'package:drawing_ui/src/toolbar/toolbar.dart';
 import 'package:drawing_ui/src/canvas/page_slide_transition.dart';
 import 'package:drawing_ui/src/canvas/page_background_painter.dart';
 import 'package:drawing_ui/src/screens/drawing_screen_layout.dart';
+import 'package:drawing_ui/src/screens/drawing_screen_theme.dart';
 import 'package:drawing_ui/src/widgets/widgets.dart';
 import 'package:drawing_ui/src/services/thumbnail_cache.dart';
 
@@ -308,21 +309,14 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
     final isCompactMode = screenWidth < ToolbarLayoutMode.compactBreakpoint;
     final isSidebarOpen = ref.watch(sidebarOpenProvider);
     final showSidebar = isSidebarOpen && ref.watch(pageCountProvider) > 1;
+    // Phone drawer: min(280, 85% of the screen).
+    final drawerWidth = (screenWidth * 0.85).clamp(0.0, 280.0);
 
     final scaffoldBgColor = canvasMode.isInfinite
         ? Color(currentPage.background.color)
         : Color(canvasMode.surroundingAreaColor);
 
-    final drawingTheme = DrawingTheme(
-      toolbarBackground: colorScheme.primary,
-      toolbarIconColor: colorScheme.onPrimary.withValues(alpha: 0.7),
-      toolbarIconSelectedColor: colorScheme.onPrimary,
-      toolbarIconDisabledColor: colorScheme.onPrimary.withValues(alpha: 0.3),
-      panelBackground: colorScheme.screenSurface,
-      panelBorderColor: colorScheme.outlineVariant,
-      penBoxBackground: colorScheme.surface,
-      penBoxSlotSelectedColor: colorScheme.primaryContainer,
-    );
+    final drawingTheme = drawingThemeFromChrome(ChromePalette.of(context));
 
     return DrawingThemeProvider(
       theme: drawingTheme,
@@ -481,13 +475,15 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                 AnimatedPositioned(
                   duration: const Duration(milliseconds: 300),
                   curve: Curves.easeInOut,
-                  left: showSidebar ? 0 : -kPageSidebarWidth,
+                  left: showSidebar ? 0 : -drawerWidth,
                   top: 0,
                   bottom: 0,
-                  width: kPageSidebarWidth,
+                  width: drawerWidth,
                   child: PageSidebar(
-                      thumbnailCache: _thumbnailCache,
-                      onPageTap: _navigateToPage),
+                    thumbnailCache: _thumbnailCache,
+                    onPageTap: _navigateToPage,
+                    variant: PageSidebarVariant.drawer,
+                  ),
                 ),
             ],
           ),

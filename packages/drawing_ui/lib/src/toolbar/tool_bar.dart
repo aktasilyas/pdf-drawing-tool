@@ -3,25 +3,26 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
+import 'package:drawing_ui/src/toolbar/chrome_capsule.dart';
 import 'package:drawing_ui/src/toolbar/tool_button.dart';
 import 'package:drawing_ui/src/toolbar/tool_groups.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_logic.dart';
 import 'package:drawing_ui/src/toolbar/elyanotes_nav_button.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_nav_sections.dart';
+import 'package:drawing_ui/src/toolbar/toolbar_overflow_menu.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_widgets.dart';
 
 /// Expanded toolbar (>=840px) — single-row layout combining navigation and
 /// drawing tools.
 ///
-/// Layout (edit mode):
+/// Three floating [ChromeCapsule]s on a `background` band
+/// (docs/specs/52-editor-chrome.md, section 3):
 /// ```
-/// [Nav Left] | [Tools...scroll...Settings] | [Nav Right]
+/// [Nav]      [Undo Redo | tools... overflow]      [Actions]
 /// ```
-///
-/// Layout (reader mode):
-/// ```
-/// [Nav Left]  ···spacer···  [Nav Right]
-/// ```
+/// Tools that do not fit collapse into a trailing overflow menu; the tools
+/// capsule never scrolls. In reader mode the tools capsule fades out while
+/// the other capsules stay in place.
 class ToolBar extends ConsumerStatefulWidget {
   const ToolBar({
     super.key,
@@ -59,6 +60,15 @@ class ToolBar extends ConsumerStatefulWidget {
 }
 
 class _ToolBarState extends ConsumerState<ToolBar> {
+  /// Height of the band: capsule plus top and bottom padding.
+  static const double _bandHeight =
+      ChromeCapsule.height + ChromeSpacing.sm + ChromeSpacing.xs;
+
+  /// Toolbar width from which the title pill may grow to [_wideTitleWidth].
+  static const double _wideTitleBreakpoint = 1000;
+  static const double _wideTitleWidth = 240;
+  static const double _narrowTitleWidth = 160;
+
   final Map<ToolType, GlobalKey> _toolButtonKeys = {};
 
   @override
@@ -71,82 +81,124 @@ class _ToolBarState extends ConsumerState<ToolBar> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = DrawingTheme.of(context);
+    final palette = ChromePalette.of(context);
     final isReaderMode = ref.watch(readerModeProvider);
     final pageCount = ref.watch(pageCountProvider);
 
-    return Container(
-      height: 48,
-      decoration: BoxDecoration(
-        color: theme.toolbarBackground,
-        border: Border(
-          bottom: BorderSide(
-            color: theme.toolbarIconColor.withValues(alpha: 0.15),
-            width: 0.5,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final titleMaxWidth = constraints.maxWidth >= _wideTitleBreakpoint
+            ? _wideTitleWidth
+            : _narrowTitleWidth;
+        return Container(
+          height: _bandHeight,
+          color: palette.background,
+          padding: const EdgeInsets.fromLTRB(
+            ChromeSpacing.lg,
+            ChromeSpacing.sm,
+            ChromeSpacing.lg,
+            ChromeSpacing.xs,
           ),
-        ),
-      ),
-      child: Row(
-        children: [
-          const SizedBox(width: 4),
-          // Nav left section
-          ToolbarNavLeft(
-            documentTitle: widget.documentTitle,
-            onHomePressed: widget.onHomePressed,
-            onRenameDocument: widget.onRenameDocument,
-            onDeleteDocument: widget.onDeleteDocument,
-            onSidebarToggle: widget.onSidebarToggle,
-            isSidebarOpen: widget.isSidebarOpen,
-            isReaderMode: isReaderMode,
-            pageCount: pageCount,
+          child: Row(
+            children: [
+              ChromeCapsule(
+                children: [
+                  ToolbarNavLeft(
+                    documentTitle: widget.documentTitle,
+                    onHomePressed: widget.onHomePressed,
+                    onRenameDocument: widget.onRenameDocument,
+                    onDeleteDocument: widget.onDeleteDocument,
+                    onSidebarToggle: widget.onSidebarToggle,
+                    isSidebarOpen: widget.isSidebarOpen,
+                    isReaderMode: isReaderMode,
+                    pageCount: pageCount,
+                    titleMaxWidth: titleMaxWidth,
+                    showReaderBadge: false,
+                  ),
+                ],
+              ),
+              Expanded(child: _buildToolsArea(isReaderMode)),
+              ChromeCapsule(
+                children: [
+                  ToolbarNavRight(
+                    isReaderMode: isReaderMode,
+                    onReaderToggle: () => _setReaderMode(!isReaderMode),
+                    onShowRecordings: () => _openRecordingsTab(ref),
+                  ),
+                ],
+              ),
+            ],
           ),
-          // Tools section (hidden in reader mode)
-          if (!isReaderMode) ..._buildToolsSection(theme),
-          // Spacer pushes nav right to the end in reader mode
-          if (isReaderMode) const Expanded(child: SizedBox()),
-          // Nav right section
-          ToolbarNavRight(
-            isReaderMode: isReaderMode,
-            onReaderToggle: () =>
-                ref.read(readerModeProvider.notifier).state = !isReaderMode,
-            onShowRecordings: () => _openRecordingsTab(ref),
-          ),
-          const SizedBox(width: 4),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  /// Build scrollable tools + settings button.
-  List<Widget> _buildToolsSection(DrawingTheme theme) {
+  /// Centred tools capsule with a [ChromeSpacing.md] gap to its neighbours.
+  Widget _buildToolsArea(bool isReaderMode) {
     final currentTool = ref.watch(currentToolProvider);
     final toolbarConfig = ref.watch(toolbarConfigProvider);
-    final visibleTools = getGroupedVisibleTools(toolbarConfig, currentTool);
+    final tools = getGroupedVisibleTools(toolbarConfig, currentTool);
+    final canUndo = ref.watch(canUndoProvider);
+    final canRedo = ref.watch(canRedoProvider);
+    final hasAI = widget.onAIPressed != null;
 
-    return [
-      const ToolbarVerticalDivider(),
-      if (widget.onAIPressed != null)
-        ElyanotesNavButton(
-          icon: ElyanotesIcons.sparkle,
-          tooltip: 'Yapay Zeka',
-          onPressed: widget.onAIPressed!,
-        ),
-      if (widget.onAIPressed != null) const ToolbarVerticalDivider(),
-      Expanded(
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              ...visibleTools
-                  .map((tool) => _buildToolButton(tool, currentTool)),
-            ],
-          ),
-        ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: ChromeSpacing.md),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Fixed part: capsule inset, undo + redo, divider, optional AI.
+          final fixed = ChromeCapsule.horizontalInset +
+              (hasAI ? 3 : 2) * ChromeSizes.minTouchTarget +
+              ChromeDivider.extent;
+          final available = constraints.maxWidth - fixed;
+          final slots = (available / ChromeSizes.minTouchTarget).floor();
+          final fits = tools.length <= slots;
+          final shown = fits ? tools.length : (slots > 1 ? slots - 1 : 0);
+          final hidden = tools.sublist(shown);
+
+          return Center(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: ExcludeFocus(
+                excluding: isReaderMode,
+                child: ExcludeSemantics(
+                  excluding: isReaderMode,
+                  child: IgnorePointer(
+                    ignoring: isReaderMode,
+                    child: AnimatedOpacity(
+                      opacity: isReaderMode ? 0 : 1,
+                      duration: ChromeDurations.instant,
+                      child: ChromeCapsule(
+                        children: [
+                          if (hasAI)
+                            ElyanotesNavButton(
+                              icon: ElyanotesIcons.sparkle,
+                              tooltip: 'Yapay Zeka',
+                              onPressed: widget.onAIPressed!,
+                            ),
+                          ToolbarUndoRedoButtons(
+                            canUndo: canUndo,
+                            canRedo: canRedo,
+                            onUndo: _undo,
+                            onRedo: _redo,
+                          ),
+                          const ChromeDivider(),
+                          for (final tool in tools.take(shown))
+                            _buildToolButton(tool, currentTool),
+                          if (hidden.isNotEmpty)
+                            ToolbarOverflowMenu(hiddenTools: hidden),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
       ),
-      const ToolbarVerticalDivider(),
-    ];
+    );
   }
 
   Widget _buildToolButton(ToolType tool, ToolType currentTool) {
@@ -172,20 +224,24 @@ class _ToolBarState extends ConsumerState<ToolBar> {
       customIcon = ToolButton.getIconForTool(currentTool);
     }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 2),
-      child: ToolButton(
-        key: buttonKey,
-        toolType: tool,
-        isSelected: selected,
-        buttonKey: _toolButtonKeys[tool],
-        onPressed: () => _onToolPressed(tool),
-        onPanelTap: hasPanel ? () => _onPanelTap(tool) : null,
-        hasPanel: hasPanel,
-        customIcon: customIcon,
-      ),
+    return ToolButton(
+      key: buttonKey,
+      toolType: tool,
+      isSelected: selected,
+      buttonKey: _toolButtonKeys[tool],
+      onPressed: () => _onToolPressed(tool),
+      onPanelTap: hasPanel ? () => _onPanelTap(tool) : null,
+      hasPanel: hasPanel,
+      customIcon: customIcon,
     );
   }
+
+  void _setReaderMode(bool value) =>
+      ref.read(readerModeProvider.notifier).state = value;
+
+  void _undo() => ref.read(historyManagerProvider.notifier).undo();
+
+  void _redo() => ref.read(historyManagerProvider.notifier).redo();
 
   void _onToolPressed(ToolType tool) => handleToolPressed(ref, tool);
 

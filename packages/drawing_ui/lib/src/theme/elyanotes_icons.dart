@@ -1,7 +1,8 @@
 /// Centralized icon definitions for Elyanotes.
 ///
-/// All icons use Phosphor Light style for thin, elegant appearance.
-/// Active/selected states use Phosphor Regular for slightly bolder look.
+/// Follows docs/design/BRIEF.md and docs/specs/52-editor-chrome.md
+/// (section 6): Phosphor Regular for idle chrome, Phosphor Fill for the
+/// active/selected variant (`*Active`, `*Filled`, `library*Fill`).
 ///
 /// Never use PhosphorIcons directly in widgets — always use ElyanotesIcons.
 library;
@@ -15,82 +16,83 @@ abstract final class ElyanotesIcons {
   // Navigation Bar Icons (Row 1)
   // ═══════════════════════════════════════════
 
-  static const home = PhosphorIconsLight.house;
-  static const sidebar = PhosphorIconsLight.sidebar;
-  static const sidebarActive = PhosphorIconsRegular.sidebar;
-  static const search = PhosphorIconsLight.magnifyingGlass;
-  static const readerMode = PhosphorIconsLight.bookOpen;
-  static const readerModeActive = PhosphorIconsRegular.bookOpen;
-  static const layers = PhosphorIconsLight.stack;
-  static const gridOn = PhosphorIconsLight.gridFour;
-  static const gridOff = PhosphorIconsLight.squareSplitHorizontal;
-  static const share = PhosphorIconsLight.shareFat;
-  static const exportIcon = PhosphorIconsLight.export;
-  static const more = PhosphorIconsLight.dotsThree;
-  static const moreVert = PhosphorIconsLight.dotsThreeVertical;
-  static const caretDown = PhosphorIconsLight.caretDown;
-  static const caretUp = PhosphorIconsLight.caretUp;
-  static const settings = PhosphorIconsLight.gearSix;
+  static const home = PhosphorIconsRegular.house;
+  static const sidebar = PhosphorIconsRegular.sidebar;
+  static const sidebarActive = PhosphorIconsFill.sidebar;
+  static const search = PhosphorIconsRegular.magnifyingGlass;
+  static const readerMode = PhosphorIconsRegular.bookOpen;
+  static const readerModeActive = PhosphorIconsFill.bookOpen;
+  static const layers = PhosphorIconsRegular.stack;
+  static const gridOn = PhosphorIconsRegular.gridFour;
+  static const gridOnActive = PhosphorIconsFill.gridFour;
+  static const gridOff = PhosphorIconsRegular.squareSplitHorizontal;
+  static const share = PhosphorIconsRegular.shareFat;
+  static const exportIcon = PhosphorIconsRegular.export;
+  static const more = PhosphorIconsRegular.dotsThree;
+  static const moreVert = PhosphorIconsRegular.dotsThreeVertical;
+  static const caretDown = PhosphorIconsRegular.caretDown;
+  static const caretUp = PhosphorIconsRegular.caretUp;
+  static const settings = PhosphorIconsRegular.gearSix;
 
   // ═══════════════════════════════════════════
   // Tool Bar Icons (Row 2) — Drawing Tools
   // ═══════════════════════════════════════════
 
   // Pen tools
-  static const penNib = PhosphorIconsLight.penNib;
-  static const penNibActive = PhosphorIconsRegular.penNib;
-  static const pencil = PhosphorIconsLight.pencilSimple;
-  static const pencilActive = PhosphorIconsRegular.pencilSimple;
-  static const pen = PhosphorIconsLight.pen;
-  static const penActive = PhosphorIconsRegular.pen;
-  static const markerCircle = PhosphorIconsLight.markerCircle;
-  static const markerCircleActive = PhosphorIconsRegular.markerCircle;
-  static const dashedPen = PhosphorIconsLight.penNibStraight;
-  static const dashedPenActive = PhosphorIconsRegular.penNibStraight;
-  static const paintBrush = PhosphorIconsLight.paintBrush;
-  static const paintBrushActive = PhosphorIconsRegular.paintBrush;
-  static const ruler = PhosphorIconsLight.ruler;
-  static const rulerActive = PhosphorIconsRegular.ruler;
+  static const penNib = PhosphorIconsRegular.penNib;
+  static const penNibActive = PhosphorIconsFill.penNib;
+  static const pencil = PhosphorIconsRegular.pencilSimple;
+  static const pencilActive = PhosphorIconsFill.pencilSimple;
+  static const pen = PhosphorIconsRegular.pen;
+  static const penActive = PhosphorIconsFill.pen;
+  static const markerCircle = PhosphorIconsRegular.markerCircle;
+  static const markerCircleActive = PhosphorIconsFill.markerCircle;
+  static const dashedPen = PhosphorIconsRegular.penNibStraight;
+  static const dashedPenActive = PhosphorIconsFill.penNibStraight;
+  static const paintBrush = PhosphorIconsRegular.paintBrush;
+  static const paintBrushActive = PhosphorIconsFill.paintBrush;
+  static const ruler = PhosphorIconsRegular.ruler;
+  static const rulerActive = PhosphorIconsFill.ruler;
 
   // Highlighter
-  static const highlighter = PhosphorIconsLight.highlighterCircle;
-  static const highlighterActive = PhosphorIconsRegular.highlighterCircle;
+  static const highlighter = PhosphorIconsRegular.highlighterCircle;
+  static const highlighterActive = PhosphorIconsFill.highlighterCircle;
 
   // Eraser
-  static const eraser = PhosphorIconsLight.eraser;
-  static const eraserActive = PhosphorIconsRegular.eraser;
+  static const eraser = PhosphorIconsRegular.eraser;
+  static const eraserActive = PhosphorIconsFill.eraser;
 
   // Shape tools
-  static const shapes = PhosphorIconsLight.shapes;
-  static const shapesActive = PhosphorIconsRegular.shapes;
+  static const shapes = PhosphorIconsRegular.shapes;
+  static const shapesActive = PhosphorIconsFill.shapes;
 
   // Text
-  static const textT = PhosphorIconsLight.textT;
-  static const textTActive = PhosphorIconsRegular.textT;
+  static const textT = PhosphorIconsRegular.textT;
+  static const textTActive = PhosphorIconsFill.textT;
 
   // Image
-  static const image = PhosphorIconsLight.imageSquare;
-  static const imageActive = PhosphorIconsRegular.imageSquare;
+  static const image = PhosphorIconsRegular.imageSquare;
+  static const imageActive = PhosphorIconsFill.imageSquare;
 
   // Sticker
-  static const sticker = PhosphorIconsLight.smiley;
-  static const stickerActive = PhosphorIconsRegular.smiley;
+  static const sticker = PhosphorIconsRegular.smiley;
+  static const stickerActive = PhosphorIconsFill.smiley;
 
   // Sticky note
-  static const stickyNote = PhosphorIconsLight.noteBlank;
-  static const stickyNoteActive = PhosphorIconsRegular.noteBlank;
+  static const stickyNote = PhosphorIconsRegular.noteBlank;
+  static const stickyNoteActive = PhosphorIconsFill.noteBlank;
 
   // Laser pointer
-  static const laser = PhosphorIconsLight.cursorClick;
-  static const laserActive = PhosphorIconsRegular.cursorClick;
+  static const laser = PhosphorIconsRegular.cursorClick;
+  static const laserActive = PhosphorIconsFill.cursorClick;
 
   // Selection / Lasso
-  static const selection = PhosphorIconsLight.selection;
-  static const selectionActive = PhosphorIconsRegular.selection;
+  static const selection = PhosphorIconsRegular.selection;
+  static const selectionActive = PhosphorIconsFill.selection;
 
   // Pan/Zoom
-  static const hand = PhosphorIconsLight.hand;
-  static const handActive = PhosphorIconsRegular.hand;
+  static const hand = PhosphorIconsRegular.hand;
+  static const handActive = PhosphorIconsFill.hand;
 
   // ═══════════════════════════════════════════
   // Action Icons
@@ -98,93 +100,126 @@ abstract final class ElyanotesIcons {
 
   static const undo = PhosphorIconsRegular.arrowBendUpLeft;
   static const redo = PhosphorIconsRegular.arrowBendUpRight;
-  static const close = PhosphorIconsLight.x;
-  static const check = PhosphorIconsLight.check;
-  static const plus = PhosphorIconsLight.plus;
-  static const minus = PhosphorIconsLight.minus;
-  static const trash = PhosphorIconsLight.trash;
-  static const copy = PhosphorIconsLight.copy;
-  static const duplicate = PhosphorIconsLight.copySimple;
-  static const paste = PhosphorIconsLight.clipboardText;
-  static const scissors = PhosphorIconsLight.scissors;
-  static const bookmark = PhosphorIconsLight.bookmarkSimple;
+  static const close = PhosphorIconsRegular.x;
+  static const check = PhosphorIconsRegular.check;
+  static const plus = PhosphorIconsRegular.plus;
+  static const minus = PhosphorIconsRegular.minus;
+  static const trash = PhosphorIconsRegular.trash;
+  static const copy = PhosphorIconsRegular.copy;
+  static const duplicate = PhosphorIconsRegular.copySimple;
+  static const paste = PhosphorIconsRegular.clipboardText;
+  static const scissors = PhosphorIconsRegular.scissors;
+  static const bookmark = PhosphorIconsRegular.bookmarkSimple;
   static const bookmarkFilled = PhosphorIconsFill.bookmarkSimple;
-  static const rotate = PhosphorIconsLight.arrowsClockwise;
-  static const rotateCW = PhosphorIconsLight.arrowClockwise;
-  static const rotateCCW = PhosphorIconsLight.arrowCounterClockwise;
-  static const rotateHalf = PhosphorIconsLight.arrowUDownLeft;
-  static const template = PhosphorIconsLight.layout;
-  static const goToPage = PhosphorIconsLight.arrowSquareRight;
-  static const sliders = PhosphorIconsLight.slidersHorizontal;
-  static const palette = PhosphorIconsLight.palette;
-  static const eyedropper = PhosphorIconsLight.eyedropper;
-  static const list = PhosphorIconsLight.list;
-  static const lock = PhosphorIconsLight.lock;
-  static const lockOpen = PhosphorIconsLight.lockOpen;
+  static const rotate = PhosphorIconsRegular.arrowsClockwise;
+  static const rotateCW = PhosphorIconsRegular.arrowClockwise;
+  static const rotateCCW = PhosphorIconsRegular.arrowCounterClockwise;
+  static const rotateHalf = PhosphorIconsRegular.arrowUDownLeft;
+  static const template = PhosphorIconsRegular.layout;
+  static const goToPage = PhosphorIconsRegular.arrowSquareRight;
+  static const sliders = PhosphorIconsRegular.slidersHorizontal;
+  static const palette = PhosphorIconsRegular.palette;
+  static const eyedropper = PhosphorIconsRegular.eyedropper;
+  static const list = PhosphorIconsRegular.list;
+  static const lock = PhosphorIconsRegular.lock;
+  static const lockOpen = PhosphorIconsRegular.lockOpen;
   static const lockFilled = PhosphorIconsFill.lock;
-  static const star = PhosphorIconsLight.star;
+  static const star = PhosphorIconsRegular.star;
   static const starFilled = PhosphorIconsFill.star;
-  static const link = PhosphorIconsLight.link;
-  static const tag = PhosphorIconsLight.tag;
-  static const camera = PhosphorIconsLight.camera;
-  static const images = PhosphorIconsLight.images;
-  static const cloud = PhosphorIconsLight.cloudArrowUp;
-  static const chartLine = PhosphorIconsLight.chartLine;
-  static const circle = PhosphorIconsLight.circle;
-  static const broom = PhosphorIconsLight.broom;
-  static const sparkle = PhosphorIconsLight.sparkle;
-  static const info = PhosphorIconsLight.info;
-  static const checkCircle = PhosphorIconsLight.checkCircle;
-  static const hourglass = PhosphorIconsLight.hourglassSimple;
-  static const send = PhosphorIconsLight.paperPlaneRight;
-  static const refresh = PhosphorIconsLight.arrowCounterClockwise;
-  static const warningCircle = PhosphorIconsLight.warningCircle;
-  static const touchApp = PhosphorIconsLight.handTap;
-  static const addCircle = PhosphorIconsLight.plusCircle;
-  static const crown = PhosphorIconsLight.crown;
-  static const brokenImage = PhosphorIconsLight.imageBroken;
-  static const uploadFile = PhosphorIconsLight.uploadSimple;
-  static const colorize = PhosphorIconsLight.eyedropperSample;
-  static const move = PhosphorIconsLight.arrowsOutCardinal;
-  static const dragHandle = PhosphorIconsLight.dotsSixVertical;
-  static const editPencil = PhosphorIconsLight.pencilSimpleLine;
-  static const orientationPortrait = PhosphorIconsLight.deviceMobile;
-  static const orientationLandscape = PhosphorIconsLight.deviceTabletSpeaker;
-  static const comment = PhosphorIconsLight.chatCircleDots;
-  static const scrollDirection = PhosphorIconsLight.arrowsHorizontal;
-  static const scrollDirectionVertical = PhosphorIconsLight.arrowsDownUp;
-  static const splitView = PhosphorIconsLight.squareSplitHorizontal;
-  static const bringToFront = PhosphorIconsLight.arrowLineUp;
-  static const sendToBack = PhosphorIconsLight.arrowLineDown;
+  static const link = PhosphorIconsRegular.link;
+  static const tag = PhosphorIconsRegular.tag;
+  static const camera = PhosphorIconsRegular.camera;
+  static const images = PhosphorIconsRegular.images;
+  static const cloud = PhosphorIconsRegular.cloudArrowUp;
+  static const chartLine = PhosphorIconsRegular.chartLine;
+  static const circle = PhosphorIconsRegular.circle;
+  static const broom = PhosphorIconsRegular.broom;
+  static const sparkle = PhosphorIconsRegular.sparkle;
+  static const info = PhosphorIconsRegular.info;
+  static const checkCircle = PhosphorIconsRegular.checkCircle;
+  static const hourglass = PhosphorIconsRegular.hourglassSimple;
+  static const send = PhosphorIconsRegular.paperPlaneRight;
+  static const refresh = PhosphorIconsRegular.arrowCounterClockwise;
+  static const warningCircle = PhosphorIconsRegular.warningCircle;
+  static const touchApp = PhosphorIconsRegular.handTap;
+  static const addCircle = PhosphorIconsRegular.plusCircle;
+  static const crown = PhosphorIconsRegular.crown;
+  static const brokenImage = PhosphorIconsRegular.imageBroken;
+  static const uploadFile = PhosphorIconsRegular.uploadSimple;
+  static const colorize = PhosphorIconsRegular.eyedropperSample;
+  static const move = PhosphorIconsRegular.arrowsOutCardinal;
+  static const dragHandle = PhosphorIconsRegular.dotsSixVertical;
+  static const editPencil = PhosphorIconsRegular.pencilSimpleLine;
+  static const orientationPortrait = PhosphorIconsRegular.deviceMobile;
+  static const orientationLandscape = PhosphorIconsRegular.deviceTabletSpeaker;
+  static const comment = PhosphorIconsRegular.chatCircleDots;
+  static const scrollDirection = PhosphorIconsRegular.arrowsHorizontal;
+  static const scrollDirectionVertical = PhosphorIconsRegular.arrowsDownUp;
+  static const splitView = PhosphorIconsRegular.squareSplitHorizontal;
+  static const bringToFront = PhosphorIconsRegular.arrowLineUp;
+  static const sendToBack = PhosphorIconsRegular.arrowLineDown;
 
   // ═══════════════════════════════════════════
   // Audio Icons
   // ═══════════════════════════════════════════
 
-  static const microphone = PhosphorIconsLight.microphone;
-  static const waveform = PhosphorIconsLight.waveform;
-  static const play = PhosphorIconsLight.play;
-  static const pause = PhosphorIconsLight.pause;
-  static const recordCircle = PhosphorIconsLight.record;
+  static const microphone = PhosphorIconsRegular.microphone;
+  static const waveform = PhosphorIconsRegular.waveform;
+  static const waveformActive = PhosphorIconsFill.waveform;
+  static const play = PhosphorIconsRegular.play;
+  static const pause = PhosphorIconsRegular.pause;
+  static const recordCircle = PhosphorIconsRegular.record;
 
   // ═══════════════════════════════════════════
   // Page & Document Icons
   // ═══════════════════════════════════════════
 
-  static const page = PhosphorIconsLight.file;
-  static const pageAdd = PhosphorIconsLight.filePlus;
-  static const pageClear = PhosphorIconsLight.fileX;
-  static const pdfFile = PhosphorIconsLight.filePdf;
-  static const folder = PhosphorIconsLight.folder;
-  static const folderOpen = PhosphorIconsLight.folderOpen;
+  static const page = PhosphorIconsRegular.file;
+  static const pageAdd = PhosphorIconsRegular.filePlus;
+  static const pageClear = PhosphorIconsRegular.fileX;
+  static const pdfFile = PhosphorIconsRegular.filePdf;
+  static const folder = PhosphorIconsRegular.folder;
+  static const folderOpen = PhosphorIconsRegular.folderOpen;
 
   // ═══════════════════════════════════════════
   // Navigation Icons
   // ═══════════════════════════════════════════
 
-  static const chevronLeft = PhosphorIconsLight.caretLeft;
-  static const chevronRight = PhosphorIconsLight.caretRight;
-  static const arrowLeft = PhosphorIconsLight.arrowLeft;
+  static const chevronLeft = PhosphorIconsRegular.caretLeft;
+  static const chevronRight = PhosphorIconsRegular.caretRight;
+  static const arrowLeft = PhosphorIconsRegular.arrowLeft;
+
+  // ═══════════════════════════════════════════
+  // Library
+  // ═══════════════════════════════════════════
+
+  static const libraryNotebook = PhosphorIconsRegular.notebook;
+  static const libraryNotebookFill = PhosphorIconsFill.notebook;
+  static const libraryStar = PhosphorIconsRegular.star;
+  static const libraryStarFill = PhosphorIconsFill.star;
+  static const libraryTrash = PhosphorIconsRegular.trash;
+  static const libraryTrashFill = PhosphorIconsFill.trash;
+  static const libraryFolder = PhosphorIconsRegular.folder;
+  static const libraryFolderFill = PhosphorIconsFill.folder;
+  static const libraryPlus = PhosphorIconsRegular.plus;
+  static const libraryCaretDown = PhosphorIconsRegular.caretDown;
+  static const libraryCaretRight = PhosphorIconsRegular.caretRight;
+  static const librarySearch = PhosphorIconsRegular.magnifyingGlass;
+  static const librarySort = PhosphorIconsRegular.sortAscending;
+  static const libraryGrid = PhosphorIconsRegular.squaresFour;
+  static const libraryRows = PhosphorIconsRegular.rows;
+  static const librarySelect = PhosphorIconsRegular.checkCircle;
+  static const libraryCheck = PhosphorIconsRegular.check;
+  static const libraryClose = PhosphorIconsRegular.x;
+  static const libraryCopy = PhosphorIconsRegular.copy;
+  static const libraryMove = PhosphorIconsRegular.folderSimple;
+  static const libraryCheckSquare = PhosphorIconsRegular.checkSquare;
+  static const librarySquare = PhosphorIconsRegular.square;
+  static const librarySettings = PhosphorIconsRegular.gearSix;
+  static const librarySidebar = PhosphorIconsRegular.sidebar;
+  static const libraryMenu = PhosphorIconsRegular.list;
+  static const libraryInfo = PhosphorIconsRegular.info;
+  static const libraryLock = PhosphorIconsRegular.lock;
 
   // ═══════════════════════════════════════════
   // Size Constants

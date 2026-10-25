@@ -10,8 +10,9 @@ import 'package:drawing_ui/src/rendering/tiles/page_tile_cache.dart';
 /// Paints in page space (the parent transform scales it). Ready tiles are
 /// drawn as images. A tile that is not ready yet shows the old-scale images
 /// clipped to its rect (never stacked), or vectors when there are none.
-/// Tiles with non-normal blend content (multiply highlighter) are always
-/// vectors so the blend sees the page below.
+/// The layer is transparent, so multiply over empty pixels is normal alpha
+/// (see #115); multiply/screen tiles are plain images. Overlay/darken/lighten
+/// tiles are vectors.
 class TiledElementPainter extends CustomPainter {
   TiledElementPainter({required this.cache}) : super(repaint: cache);
 

@@ -73,11 +73,19 @@ class CoverGeometry {
   }
 
   /// Rect of page-block layer [k] (1 = innermost), peeking out right/bottom.
+  ///
+  /// The block runs under the spine too, so the book's bottom edge is one
+  /// straight line and the spine never overhangs the bottom-left corner.
   ui.RRect pageLayer(int k) {
     final e = pageEdge * k;
+    final rect = ui.Rect.fromLTRB(
+      cover.left,
+      cover.top + e,
+      cover.right + e,
+      cover.bottom + e,
+    );
     return ui.RRect.fromRectAndCorners(
-      ui.Rect.fromLTRB(cover.left + spineWidth, cover.top + e, cover.right + e,
-          cover.bottom + e),
+      rect,
       topRight: ui.Radius.circular(radius * 0.8),
       bottomRight: ui.Radius.circular(radius * 0.8),
     );

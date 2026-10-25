@@ -1,21 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:drawing_ui/src/theme/drawing_theme.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
+import 'package:drawing_ui/src/theme/theme.dart';
+import 'package:drawing_ui/src/toolbar/chrome_capsule.dart';
+import 'package:drawing_ui/src/toolbar/elyanotes_nav_button.dart';
 import 'package:drawing_ui/src/toolbar/tool_button.dart';
 import 'package:drawing_ui/src/toolbar/tool_groups.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_logic.dart';
-import 'package:drawing_ui/src/toolbar/toolbar_widgets.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_overflow_menu.dart';
-import 'package:drawing_ui/src/toolbar/top_navigation_bar.dart';
+import 'package:drawing_ui/src/toolbar/toolbar_widgets.dart';
 
-/// Compact tool row for phone screens (<600px).
-///
-/// Sits as the second row in the top toolbar area.
-/// Shows undo/redo + dynamically sized tool buttons + overflow menu.
-/// Tool panels open as bottom sheets instead of anchored panels.
+/// Phone tool row (Row 2 of the phone chrome, < 600dp), see
+/// docs/specs/52-editor-chrome.md, section 3:
+/// ```
+/// ( Undo Redo | tool tool tool ... overflow )
+/// ```
+/// One [ChromeCapsule] on the desk band with [ChromeSpacing.sm] side margins,
+/// 48dp slots, and the last slot as overflow menu when tools do not fit
+/// (never a scroll view). Tool panels open as bottom sheets via
+/// [onPanelRequested]. Hidden in reader mode.
 class CompactToolRow extends ConsumerStatefulWidget {
   const CompactToolRow({
     super.key,
@@ -24,6 +29,10 @@ class CompactToolRow extends ConsumerStatefulWidget {
     this.onRedoPressed,
     this.onPanelRequested,
   });
+
+  /// Row height: capsule plus [ChromeSpacing.xs] below it. Together with the
+  /// 48dp nav row the phone chrome is inset + 104 (spec section 3).
+  static const double height = ChromeCapsule.height + ChromeSpacing.xs;
 
   final VoidCallback? onAIPressed;
   final VoidCallback? onUndoPressed;
@@ -42,89 +51,61 @@ class _CompactToolRowState extends ConsumerState<CompactToolRow> {
     final isReaderMode = ref.watch(readerModeProvider);
     if (isReaderMode) return const SizedBox.shrink();
 
-    final theme = DrawingTheme.of(context);
     final canUndo = ref.watch(canUndoProvider);
     final canRedo = ref.watch(canRedoProvider);
     final currentTool = ref.watch(currentToolProvider);
     final toolbarConfig = ref.watch(toolbarConfigProvider);
-
-    // Get grouped visible tools, excluding tools shown in the nav row.
-    final topTools = TopNavigationBar.compactTopBarTools.toSet();
-    final allTools = _getGroupedVisibleTools(toolbarConfig, currentTool)
-        .where((t) => !topTools.contains(t))
-        .toList();
+    final tools = getGroupedVisibleTools(toolbarConfig, currentTool);
+    final hasAI = widget.onAIPressed != null;
 
     return Container(
-      height: 48,
-      decoration: BoxDecoration(
-        color: theme.toolbarBackground,
-        border: Border(
-          bottom: BorderSide(
-            color: theme.toolbarIconColor.withValues(alpha: 0.15),
-            width: 0.5,
-          ),
-        ),
+      height: CompactToolRow.height,
+      color: ChromePalette.of(context).background,
+      padding: const EdgeInsets.fromLTRB(
+        ChromeSpacing.sm,
+        0,
+        ChromeSpacing.sm,
+        ChromeSpacing.xs,
       ),
-      child: Row(
-        children: [
-          const SizedBox(width: 4),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final fixed = ChromeCapsule.horizontalInset +
+              (hasAI ? 3 : 2) * ChromeSizes.minTouchTarget +
+              ChromeDivider.extent;
+          final slots =
+              ((constraints.maxWidth - fixed) / ChromeSizes.minTouchTarget)
+                  .floor();
+          final fits = tools.length <= slots;
+          final shown = fits ? tools.length : (slots > 1 ? slots - 1 : 0);
+          final hidden = tools.sublist(shown);
 
-          // Undo/Redo
-          ToolbarUndoRedoButtons(
-            canUndo: canUndo,
-            canRedo: canRedo,
-            onUndo: widget.onUndoPressed,
-            onRedo: widget.onRedoPressed,
-          ),
-
-          const SizedBox(width: 2),
-
-          // Divider
-          Container(
-            width: 0.5,
-            height: 24,
-            color: theme.toolbarIconColor.withValues(alpha: 0.3),
-          ),
-
-          const SizedBox(width: 2),
-
-          // Tool buttons (dynamically sized)
-          Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                const toolSlotWidth = 40.0;
-                const overflowWidth = 48.0;
-                final totalTools = allTools.length;
-
-                var max = (constraints.maxWidth / toolSlotWidth)
-                    .floor()
-                    .clamp(0, totalTools);
-                var shownTools = allTools.take(max).toList();
-                var hiddenTools = allTools.skip(max).toList();
-
-                if (hiddenTools.isNotEmpty && max > 0) {
-                  max = ((constraints.maxWidth - overflowWidth) / toolSlotWidth)
-                      .floor()
-                      .clamp(1, totalTools);
-                  shownTools = allTools.take(max).toList();
-                  hiddenTools = allTools.skip(max).toList();
-                }
-
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    ...shownTools
-                        .map((tool) => _buildToolButton(tool, currentTool)),
-                    if (hiddenTools.isNotEmpty)
-                      ToolbarOverflowMenu(hiddenTools: hiddenTools),
-                  ],
-                );
-              },
+          return Center(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: ChromeCapsule(
+                children: [
+                  if (hasAI)
+                    ElyanotesNavButton(
+                      icon: ElyanotesIcons.sparkle,
+                      tooltip: 'Yapay Zeka',
+                      onPressed: widget.onAIPressed!,
+                    ),
+                  ToolbarUndoRedoButtons(
+                    canUndo: canUndo,
+                    canRedo: canRedo,
+                    onUndo: widget.onUndoPressed,
+                    onRedo: widget.onRedoPressed,
+                  ),
+                  const ChromeDivider(),
+                  for (final tool in tools.take(shown))
+                    _buildToolButton(tool, currentTool),
+                  if (hidden.isNotEmpty)
+                    ToolbarOverflowMenu(hiddenTools: hidden),
+                ],
+              ),
             ),
-          ),
-
-          const SizedBox(width: 4),
-        ],
+          );
+        },
       ),
     );
   }
@@ -133,7 +114,6 @@ class _CompactToolRowState extends ConsumerState<CompactToolRow> {
     final isPenGroup = penTools.contains(tool);
     final isHighlighterGroup = highlighterTools.contains(tool);
     final isEraserGroup = eraserTools.contains(tool);
-    final isSelected = isToolSelected(tool, currentTool);
     final hasPanel = toolsWithPanel.contains(tool);
 
     IconData? customIcon;
@@ -147,74 +127,30 @@ class _CompactToolRowState extends ConsumerState<CompactToolRow> {
 
     return ToolButton(
       toolType: tool,
-      isSelected: isSelected,
+      isSelected: isToolSelected(tool, currentTool),
       onPressed: () => _onToolPressed(tool),
-      onPanelTap: hasPanel ? () => _onPanelTap(tool) : null,
+      onPanelTap: hasPanel ? () => widget.onPanelRequested?.call(tool) : null,
       hasPanel: hasPanel,
       customIcon: customIcon,
-      compact: true,
     );
   }
 
-  /// Get grouped visible tools (pen/highlighter groups collapsed).
-  List<ToolType> _getGroupedVisibleTools(
-      ToolbarConfig config, ToolType currentTool) {
-    final visibleTools = config.visibleTools.map((tc) => tc.toolType).toList();
-    final result = <ToolType>[];
-    bool penAdded = false;
-    bool highlighterAdded = false;
-    bool eraserAdded = false;
-
-    for (final tool in visibleTools) {
-      if (penTools.contains(tool)) {
-        if (!penAdded) {
-          result.add(penTools.contains(currentTool)
-              ? currentTool
-              : ToolType.ballpointPen);
-          penAdded = true;
-        }
-      } else if (highlighterTools.contains(tool)) {
-        if (!highlighterAdded) {
-          result.add(highlighterTools.contains(currentTool)
-              ? currentTool
-              : ToolType.highlighter);
-          highlighterAdded = true;
-        }
-      } else if (eraserTools.contains(tool)) {
-        if (!eraserAdded) {
-          result.add(eraserTools.contains(currentTool)
-              ? currentTool
-              : ToolType.pixelEraser);
-          eraserAdded = true;
-        }
-      } else {
-        result.add(tool);
-      }
-    }
-    return result;
-  }
-
-  /// Handle tool button press.
+  /// First tap selects; tapping the selected tool opens its bottom sheet.
   void _onToolPressed(ToolType tool) {
-    // Cancel sticker/image placement if active
     ref.read(stickerPlacementProvider.notifier).cancel();
     ref.read(imagePlacementProvider.notifier).cancel();
 
     final currentTool = ref.read(currentToolProvider);
     if (isToolSelected(tool, currentTool)) {
-      // Already selected — open panel (bottom sheet) if it has one
       if (toolsWithPanel.contains(currentTool)) {
         widget.onPanelRequested?.call(currentTool);
       }
     } else {
-      // First click — just select
+      if (eraserTools.contains(tool) && !eraserTools.contains(currentTool)) {
+        ref.read(previousToolProvider.notifier).state = currentTool;
+      }
       ref.read(currentToolProvider.notifier).selectTool(tool);
       ref.read(activePanelProvider.notifier).state = null;
     }
-  }
-
-  /// Handle panel chevron tap.
-  void _onPanelTap(ToolType tool) {
-    widget.onPanelRequested?.call(tool);
   }
 }

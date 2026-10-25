@@ -5,8 +5,10 @@ import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/utils/responsive.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
 import 'package:example_app/features/documents/domain/entities/folder.dart';
-import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/document_list_tile.dart';
+import 'package:example_app/features/documents/presentation/widgets/folder_list_tile.dart';
+import 'package:example_app/features/documents/presentation/widgets/library_grid_metrics.dart';
+import 'package:example_app/features/documents/presentation/widgets/library_list_row.dart';
 
 /// Combined list view showing folders then documents.
 class DocumentsCombinedListView extends ConsumerWidget {
@@ -29,215 +31,86 @@ class DocumentsCombinedListView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isPhone = Responsive.isPhone(context);
-    final padding = isPhone ? AppSpacing.md : AppSpacing.lg;
-    final textTertiary = context.palette.textDisabled;
+    final pad = LibraryGridMetrics.paneHorizontalPadding(
+      Responsive.isPhone(context),
+    );
 
-    final hasFolders = folders.isNotEmpty;
-    final hasDocs = documents.isNotEmpty;
-    int totalItems = folders.length + documents.length;
-    if (hasFolders) totalItems++;
-    if (hasDocs) totalItems++;
-
-    return ListView.builder(
-      padding: EdgeInsets.symmetric(
-        horizontal: padding,
-        vertical: AppSpacing.sm,
-      ),
-      itemCount: totalItems,
-      itemBuilder: (context, index) {
-        int currentIndex = index;
-
-        // Folders section header
-        if (hasFolders && currentIndex == 0) {
-          return _SectionHeader(label: 'Klasörler', color: textTertiary);
-        }
-        if (hasFolders) currentIndex--;
-
-        // Folder items
-        if (currentIndex < folders.length) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 2),
+    final children = <Widget>[
+      if (folders.isNotEmpty) ...[
+        const _SectionHeader(label: 'Klasörler', isFirst: true),
+        for (var i = 0; i < folders.length; i++)
+          _Row(
+            showDivider: i < folders.length - 1,
             child: FolderListTile(
-              folder: folders[currentIndex],
-              onTap: () => onFolderTap(folders[currentIndex]),
-              onLongPress: () => onFolderMore(folders[currentIndex]),
+              folder: folders[i],
+              onTap: () => onFolderTap(folders[i]),
+              onLongPress: () => onFolderMore(folders[i]),
             ),
-          );
-        }
-        currentIndex -= folders.length;
-
-        // Documents section header
-        if (hasDocs && currentIndex == 0) {
-          return _SectionHeader(
-            label: 'Belgeler',
-            color: textTertiary,
-            topPadding: hasFolders ? AppSpacing.lg : AppSpacing.sm,
-          );
-        }
-        if (hasDocs) currentIndex--;
-
-        // Document items
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 2),
-          child: DocumentListTile(
-            document: documents[currentIndex],
-            onTap: () => onDocumentTap(documents[currentIndex]),
-            onLongPress: () => onDocumentMore(documents[currentIndex]),
           ),
-        );
-      },
+      ],
+      if (documents.isNotEmpty) ...[
+        _SectionHeader(label: 'Belgeler', isFirst: folders.isEmpty),
+        for (var i = 0; i < documents.length; i++)
+          _Row(
+            showDivider: i < documents.length - 1,
+            child: DocumentListTile(
+              document: documents[i],
+              onTap: () => onDocumentTap(documents[i]),
+              onLongPress: () => onDocumentMore(documents[i]),
+            ),
+          ),
+      ],
+    ];
+
+    return ListView(
+      padding: EdgeInsets.fromLTRB(pad, AppSpacing.sm, pad, AppSpacing.xxl),
+      children: children,
+    );
+  }
+}
+
+/// A row followed by an optional hairline starting at the text column.
+class _Row extends StatelessWidget {
+  const _Row({required this.child, required this.showDivider});
+
+  final Widget child;
+  final bool showDivider;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        child,
+        if (showDivider)
+          Divider(
+            height: 1,
+            thickness: 1,
+            indent: LibraryListRow.dividerIndent,
+            color: context.palette.border,
+          ),
+      ],
     );
   }
 }
 
 class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({
-    required this.label,
-    required this.color,
-    this.topPadding = AppSpacing.sm,
-  });
+  const _SectionHeader({required this.label, this.isFirst = false});
 
   final String label;
-  final Color color;
-  final double topPadding;
+  final bool isFirst;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(
-        left: AppSpacing.sm,
-        top: topPadding,
+        left: AppSpacing.md,
+        top: isFirst ? 0 : AppSpacing.lg,
         bottom: AppSpacing.xs,
       ),
       child: Text(
         label,
-        style: AppTypography.caption.copyWith(
-          color: color,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.5,
-        ),
-      ),
-    );
-  }
-}
-
-/// List tile for a folder row.
-class FolderListTile extends ConsumerWidget {
-  const FolderListTile({
-    super.key,
-    required this.folder,
-    required this.onTap,
-    required this.onLongPress,
-  });
-
-  final Folder folder;
-  final VoidCallback onTap;
-  final VoidCallback onLongPress;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isSelectionMode = ref.watch(selectionModeProvider);
-    final selectedFolders = ref.watch(selectedFoldersProvider);
-    final isSelected = selectedFolders.contains(folder.id);
-
-    final textPrimary = context.palette.textPrimary;
-    final textTertiary = context.palette.textDisabled;
-    final surfaceColor = context.palette.surface;
-    final hoverColor = context.palette.surfaceElevated;
-
-    return Material(
-      color: surfaceColor,
-      child: InkWell(
-        onTap: onTap,
-        onLongPress: onLongPress,
-        hoverColor: hoverColor,
-        splashColor: hoverColor,
-        borderRadius: BorderRadius.circular(AppRadius.sm),
-        child: Container(
-          height: 52,
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-          child: Row(
-            children: [
-              if (isSelectionMode)
-                SelectionCheckbox(isSelected: isSelected)
-              else
-                _FolderIcon(folder: folder),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Text(
-                  folder.name,
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: textPrimary,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              _FolderCountBadge(
-                count: folder.documentCount,
-              ),
-              if (!isSelectionMode) ...[
-                const SizedBox(width: AppSpacing.xs),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  size: 20,
-                  color: textTertiary,
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _FolderIcon extends StatelessWidget {
-  const _FolderIcon({required this.folder});
-  final Folder folder;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 36,
-      height: 36,
-      decoration: BoxDecoration(
-        color: Color(folder.colorValue).withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(AppRadius.sm),
-      ),
-      child: Icon(
-        Icons.folder_rounded,
-        size: 20,
-        color: Color(folder.colorValue),
-      ),
-    );
-  }
-}
-
-class _FolderCountBadge extends StatelessWidget {
-  const _FolderCountBadge({required this.count});
-  final int count;
-
-  @override
-  Widget build(BuildContext context) {
-    final textTertiary = context.palette.textDisabled;
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: 2,
-      ),
-      decoration: BoxDecoration(
-        color: context.palette.surfaceElevated,
-        borderRadius: BorderRadius.circular(AppRadius.full),
-      ),
-      child: Text(
-        '$count',
-        style: AppTypography.caption.copyWith(
-          color: textTertiary,
-          fontWeight: FontWeight.w500,
-        ),
+        style: AppTypography.labelMedium
+            .copyWith(color: context.palette.textMuted),
       ),
     );
   }

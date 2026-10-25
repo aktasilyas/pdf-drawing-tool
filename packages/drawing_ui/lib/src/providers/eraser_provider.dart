@@ -51,6 +51,10 @@ final lassoEraserToolProvider = Provider<LassoEraserTool>((ref) {
 /// Current eraser cursor position
 final eraserCursorPositionProvider = StateProvider<Offset?>((ref) => null);
 
+/// Pen pressure (0-1) of the latest eraser sample, so the cursor can draw at
+/// the same pressure-scaled size the eraser erases with. 1.0 when idle.
+final eraserCursorPressureProvider = StateProvider<double>((ref) => 1.0);
+
 /// Lasso eraser path points
 final lassoEraserPointsProvider = StateProvider<List<Offset>>((ref) => []);
 

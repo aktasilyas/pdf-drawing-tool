@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_icons/phosphor_icons.dart';
-import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
-import 'package:drawing_ui/src/widgets/compact_color_picker.dart';
-import 'package:drawing_ui/src/widgets/color_presets.dart';
 
-/// Horizontal scrollable color strip with a palette button.
+import 'package:drawing_ui/src/theme/theme.dart';
+import 'package:drawing_ui/src/toolbar/chrome_icon_button.dart';
+import 'package:drawing_ui/src/widgets/color_presets.dart';
+import 'package:drawing_ui/src/widgets/compact_color_picker.dart';
+
+const double _pickerMaxWidth = 320;
+
+/// Horizontal scrollable colour strip with a "+" button that opens
+/// [CompactColorPicker].
 ///
-/// Shows a row of square color chips that scroll horizontally,
-/// plus a fixed palette icon on the right that opens [CompactColorPicker].
+/// Swatches are [chipSize] (32dp) inside 48dp cells. The selected swatch gets
+/// a 2dp `accent` ring separated by a 2dp gap (docs/specs/52-editor-chrome.md,
+/// section 4). Colours come from [ChromePalette].
 class ColorPickerStrip extends StatelessWidget {
   const ColorPickerStrip({
     super.key,
     required this.selectedColor,
     required this.onColorSelected,
     this.colors,
-    this.chipSize = 20.0,
+    this.chipSize = 32.0,
     this.isHighlighter = false,
   });
 
@@ -24,7 +29,7 @@ class ColorPickerStrip extends StatelessWidget {
   /// Colors to display. Defaults to [ColorPresets.popular20].
   final List<Color>? colors;
 
-  /// Size of each color square chip.
+  /// Diameter of each colour swatch.
   final double chipSize;
 
   /// When true, CompactColorPicker shows opacity slider.
@@ -42,22 +47,21 @@ class ColorPickerStrip extends StatelessWidget {
             child: Row(
               children: [
                 for (final color in palette)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 4),
-                    child: _ColorSquare(
-                      color: color,
-                      size: chipSize,
-                      isSelected: _colorsMatch(color, selectedColor),
-                      onTap: () => onColorSelected(color),
-                    ),
+                  _ColorSwatch(
+                    color: color,
+                    size: chipSize,
+                    isSelected: _colorsMatch(color, selectedColor),
+                    onTap: () => onColorSelected(color),
                   ),
               ],
             ),
           ),
         ),
-        const SizedBox(width: 4),
-        _PaletteIconButton(
-          onTap: () => _showColorPalette(context),
+        ChromeIconButton(
+          icon: ElyanotesIcons.plus,
+          iconSize: ChromeIconSizes.md,
+          tooltip: 'Renk ekle',
+          onPressed: () => _showColorPalette(context),
         ),
       ],
     );
@@ -65,12 +69,13 @@ class ColorPickerStrip extends StatelessWidget {
 
   void _showColorPalette(BuildContext context) {
     final overlay = Overlay.of(context);
+    final scrim = ChromePalette.of(context).textPrimary.withValues(alpha: 0.12);
     late OverlayEntry overlayEntry;
 
     overlayEntry = OverlayEntry(
       builder: (overlayContext) {
         return Material(
-          color: Colors.black.withValues(alpha: 137.0 / 255.0),
+          color: scrim,
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () => overlayEntry.remove(),
@@ -80,7 +85,7 @@ class ColorPickerStrip extends StatelessWidget {
                 onTap: () {},
                 child: ConstrainedBox(
                   constraints: BoxConstraints(
-                    maxWidth: 320,
+                    maxWidth: _pickerMaxWidth,
                     maxHeight: MediaQuery.of(overlayContext).size.height * 0.85,
                   ),
                   child: CompactColorPicker(
@@ -113,14 +118,17 @@ class ColorPickerStrip extends StatelessWidget {
   }
 }
 
-/// Small square color chip.
-class _ColorSquare extends StatelessWidget {
-  const _ColorSquare({
+/// Round swatch in a 48dp cell; selected = accent ring + gap.
+class _ColorSwatch extends StatelessWidget {
+  const _ColorSwatch({
     required this.color,
     required this.size,
     required this.isSelected,
     required this.onTap,
   });
+
+  static const double _ring = 2;
+  static const double _gap = 2;
 
   final Color color;
   final double size;
@@ -129,77 +137,38 @@ class _ColorSquare extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(4),
-          border: Border.all(
-            color: isSelected
-                ? colorScheme.primary
-                : (color.computeLuminance() > 0.8
-                    ? colorScheme.outline.withValues(alpha: 0.5)
-                    : Colors.transparent),
-            width: isSelected ? 2 : 1,
-          ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: colorScheme.primary.withValues(alpha: 0.3),
-                    blurRadius: 4,
-                    spreadRadius: 1,
-                  ),
-                ]
-              : null,
-        ),
-        child: isSelected
-            ? Center(
-                child: PhosphorIcon(
-                  ElyanotesIcons.check,
-                  size: size * 0.6,
-                  color: color.computeLuminance() > 0.5
-                      ? Colors.black
-                      : Colors.white,
+    final palette = ChromePalette.of(context);
+    const inset = _ring + _gap;
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: 'Renk',
+      excludeSemantics: true,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: SizedBox.square(
+          dimension: ChromeSizes.minTouchTarget,
+          child: Center(
+            child: Container(
+              width: size + 2 * inset,
+              height: size + 2 * inset,
+              padding: const EdgeInsets.all(_gap),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected ? palette.accent : Colors.transparent,
+                  width: _ring,
                 ),
-              )
-            : null,
-      ),
-    );
-  }
-}
-
-/// Fixed palette icon button on the right side of the strip.
-class _PaletteIconButton extends StatelessWidget {
-  const _PaletteIconButton({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 28,
-        height: 28,
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(
-            color: colorScheme.outline.withValues(alpha: 0.3),
-          ),
-        ),
-        child: Center(
-          child: PhosphorIcon(
-            ElyanotesIcons.palette,
-            size: 16,
-            color: colorScheme.primary,
+              ),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: color,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: palette.border),
+                ),
+              ),
+            ),
           ),
         ),
       ),

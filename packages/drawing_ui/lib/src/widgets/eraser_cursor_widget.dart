@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/src/canvas/eraser_cursor_painter.dart';
 import 'package:drawing_ui/src/providers/drawing_providers.dart';
+import 'package:drawing_ui/src/providers/eraser_provider.dart';
 
 /// Widget that displays eraser cursor overlay.
 /// Positioned absolutely over the canvas.
@@ -22,6 +23,7 @@ class EraserCursorWidget extends ConsumerWidget {
     if (!isVisible) return const SizedBox.shrink();
 
     final eraserSettings = ref.watch(eraserSettingsProvider);
+    final pressure = ref.watch(eraserCursorPressureProvider);
 
     final mode = switch (eraserSettings.mode) {
       EraserMode.pixel => EraserCursorMode.pixel,
@@ -33,7 +35,9 @@ class EraserCursorWidget extends ConsumerWidget {
       child: CustomPaint(
         painter: EraserCursorPainter(
           position: cursorPosition,
-          size: eraserSettings.size,
+          size: eraserSettings.mode == EraserMode.pixel
+              ? eraserSettings.effectiveSize(pressure)
+              : eraserSettings.size,
           mode: mode,
           lassoPoints: lassoPoints,
           isActive: lassoPoints.isNotEmpty,

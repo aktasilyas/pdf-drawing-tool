@@ -99,7 +99,7 @@ void main() {
     });
   });
 
-  testWidgets('multiply content stays vector so it blends with the page', (
+  testWidgets('overlay content stays vector so it blends with the page', (
     tester,
   ) async {
     final stroke = Stroke(
@@ -108,7 +108,7 @@ void main() {
       style: StrokeStyle(
         color: 0xFF2196F3,
         thickness: 20,
-        blendMode: DrawingBlendMode.multiply,
+        blendMode: DrawingBlendMode.overlay,
       ),
       createdAt: DateTime(2024),
     );

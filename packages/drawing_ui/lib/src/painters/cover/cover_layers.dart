@@ -17,19 +17,34 @@ class CoverLayers {
 
   /// Two-layer drop shadow: tight contact shadow + soft ambient shadow.
   /// Strong enough to separate the book from a dark background.
+  ///
+  /// The page block runs under the spine, but the shadows start further in
+  /// so neither spills into the margin left of the book (light is top-left).
   static void shadow(ui.Canvas c, CoverGeometry g) {
-    final outer = g.pageLayer(g.pageLayers);
     final dp = g.dp;
+    final ambient = _shadowSource(g, g.cover.left + g.spineWidth);
     c.drawRRect(
-        outer.shift(ui.Offset(dp * 2, dp * 6)),
+        ambient.shift(ui.Offset(dp * 2, dp * 6)),
         ui.Paint()
           ..color = const ui.Color(0x8C000000)
           ..maskFilter = ui.MaskFilter.blur(ui.BlurStyle.normal, dp * 6));
+    final contact = _shadowSource(g, g.cover.left + dp * 3);
     c.drawRRect(
-        outer.shift(ui.Offset(dp * 0.5, dp * 1.5)),
+        contact.shift(ui.Offset(dp * 0.5, dp * 1.5)),
         ui.Paint()
           ..color = const ui.Color(0xB3000000)
           ..maskFilter = ui.MaskFilter.blur(ui.BlurStyle.normal, dp * 0.8));
+  }
+
+  /// The outer page-block shape with its left edge moved to [left].
+  static ui.RRect _shadowSource(CoverGeometry g, double left) {
+    final outer = g.pageLayer(g.pageLayers);
+    final rect = ui.Rect.fromLTRB(left, outer.top, outer.right, outer.bottom);
+    return ui.RRect.fromRectAndCorners(
+      rect,
+      topRight: outer.trRadius,
+      bottomRight: outer.brRadius,
+    );
   }
 
   /// Page-edge layers on the fore-edge and bottom (about 80% of paper tone,
@@ -44,11 +59,24 @@ class CoverLayers {
       ui.Color(0xFFD9D2C2),
       ui.Color(0xFFC4BDAC),
     ];
+    // The block's left edge lines up with the board's anti-aliased edge;
+    // drawing both there leaves a 1px seam, so hide it wherever the board
+    // covers it and keep it only below the board, where it meets the corner.
+    final r0 = g.cover;
+    final seam = ui.Rect.fromLTRB(
+      r0.left - g.dp,
+      r0.top - g.dp,
+      r0.left + g.dp,
+      r0.bottom - g.dp * 0.5,
+    );
+    c.save();
+    c.clipRect(seam, clipOp: ui.ClipOp.difference);
     for (var k = g.pageLayers; k >= 1; k--) {
       final r = g.pageLayer(k);
       c.drawRRect(r, ui.Paint()..color = tones[(k - 1) % 3]);
       if (g.pageLayers > 1) c.drawRRect(r, line);
     }
+    c.restore();
   }
 
   /// Cover body: base colour, material grain, light, hue-keeping vignette,

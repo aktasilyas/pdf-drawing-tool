@@ -170,8 +170,8 @@ void main() {
           ],
         ));
         await tester.pump();
-        expect(find.byIcon(ElyanotesIcons.waveform),
-            enabled ? findsWidgets : findsNothing);
+        expect(find.byTooltip('Ses kayıtları'),
+            enabled ? findsOneWidget : findsNothing);
         expect(find.byType(AudioRecordingsList),
             enabled ? findsOneWidget : findsNothing);
       });

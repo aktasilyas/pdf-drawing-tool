@@ -4,6 +4,9 @@
 /// Tüm empty state'ler AppEmptyState widget'ını kullanır.
 library;
 
+import 'package:drawing_core/drawing_core.dart' show CoverFamily;
+import 'package:drawing_ui/drawing_ui.dart'
+    show CoverPreviewWidget, ElyanotesIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -13,45 +16,57 @@ import 'package:example_app/features/documents/presentation/providers/documents_
 
 /// Tüm Notlar bölümü boş durumu
 class DocumentsEmptyState extends StatelessWidget {
-  const DocumentsEmptyState({super.key});
+  const DocumentsEmptyState({super.key, this.onCreateNew});
+
+  /// Shows the "Yeni not" call to action when non-null.
+  final VoidCallback? onCreateNew;
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.palette;
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xxl),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.asset(
-              'assets/images/elyanotes_logo_transparent.png',
-              height: 64,
-              fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            Icon(
-              Icons.description_outlined,
-              size: AppIconSize.emptyState,
-              color: context.palette.textMuted,
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            Text(
-              'Henüz not yok',
-              style: AppTypography.headlineSmall.copyWith(
-                color: context.palette.textPrimary,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 320),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CoverPreviewWidget(
+                cover: CoverFamily.linenSand,
+                width: 120,
+                height: 160,
+                showBorder: false,
               ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              'Yeni bir not oluşturmak için "+" butonuna tıklayın',
-              style: AppTypography.bodyMedium.copyWith(
-                color: context.palette.textMuted,
+              const SizedBox(height: AppSpacing.xl),
+              Text(
+                'Henüz not yok',
+                style: AppTypography.headlineMedium
+                    .copyWith(color: palette.textPrimary),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                'Yeni bir defter oluşturun ya da bir PDF içe aktarın.',
+                style:
+                    AppTypography.bodyMedium.copyWith(color: palette.textMuted),
+                textAlign: TextAlign.center,
+              ),
+              if (onCreateNew != null) ...[
+                const SizedBox(height: AppSpacing.xl),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    minHeight: AppSpacing.minTouchTarget,
+                  ),
+                  child: AppButton(
+                    label: 'Yeni not',
+                    leadingIcon: ElyanotesIcons.libraryPlus,
+                    onPressed: onCreateNew,
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );
@@ -119,7 +134,7 @@ class DocumentsEmptySearchResult extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              Icons.search_off,
+              ElyanotesIcons.librarySearch,
               size: AppIconSize.emptyState,
               color: context.palette.textMuted,
             ),
@@ -144,7 +159,7 @@ class DocumentsEmptySearchResult extends ConsumerWidget {
               label: 'Aramayı temizle',
               variant: AppButtonVariant.outline,
               size: AppButtonSize.medium,
-              leadingIcon: Icons.clear,
+              leadingIcon: ElyanotesIcons.libraryClose,
               onPressed: () {
                 ref.read(searchQueryProvider.notifier).state = '';
               },

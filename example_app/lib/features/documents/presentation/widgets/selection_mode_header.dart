@@ -4,6 +4,7 @@
 /// Tümünü seç, çoğalt, taşı, sil işlemleri içerir.
 library;
 
+import 'package:drawing_ui/drawing_ui.dart' show ElyanotesIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -12,7 +13,6 @@ import 'package:go_router/go_router.dart';
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/core/routing/route_names.dart';
-import 'package:example_app/core/utils/responsive.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/move_to_folder_dialog.dart';
@@ -32,55 +32,46 @@ class SelectionModeHeader extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isPhone = Responsive.isPhone(context);
     final selectedDocs = ref.watch(selectedDocumentsProvider);
     final selectedFolders = ref.watch(selectedFoldersProvider);
     final hasSelection = selectedDocs.isNotEmpty || selectedFolders.isNotEmpty;
     final totalSelected = selectedDocs.length + selectedFolders.length;
+    final palette = context.palette;
 
-    return Padding(
-      padding: EdgeInsets.symmetric(
-        horizontal: isPhone ? AppSpacing.lg : AppSpacing.xxl,
-        vertical: AppSpacing.md,
-      ),
+    return SizedBox(
+      height: AppSpacing.minTouchTarget,
       child: Row(
         children: [
-          // Close button
           AppIconButton(
-            icon: Icons.close,
+            icon: ElyanotesIcons.libraryClose,
             variant: AppIconButtonVariant.ghost,
             tooltip: 'Kapat',
             onPressed: () => _exitSelectionMode(ref),
           ),
           const SizedBox(width: AppSpacing.xs),
-          // Selection count
-          Flexible(
+          Expanded(
             child: Text(
               '$totalSelected seçildi',
-              style: AppTypography.titleMedium.copyWith(
-                color: context.palette.textPrimary,
-              ),
+              style: AppTypography.titleMedium.copyWith(color: palette.accent),
               overflow: TextOverflow.ellipsis,
             ),
           ),
-          const Spacer(),
-          // Actions
+          _SelectAllButton(
+            allDocumentIds: allDocumentIds,
+            allFolderIds: allFolderIds,
+          ),
           if (!isTrashSection) ...[
             AppIconButton(
-              icon: Icons.content_copy,
+              icon: ElyanotesIcons.libraryCopy,
               variant: AppIconButtonVariant.ghost,
-              size:
-                  isPhone ? AppIconButtonSize.small : AppIconButtonSize.medium,
               tooltip: 'Çoğalt',
               onPressed: hasSelection
                   ? () => _duplicateSelected(context, ref, selectedDocs)
                   : null,
             ),
             AppIconButton(
-              icon: Icons.drive_file_move_outline,
+              icon: ElyanotesIcons.libraryMove,
               variant: AppIconButtonVariant.ghost,
-              size:
-                  isPhone ? AppIconButtonSize.small : AppIconButtonSize.medium,
               tooltip: 'Taşı',
               onPressed: hasSelection
                   ? () =>
@@ -89,18 +80,13 @@ class SelectionModeHeader extends ConsumerWidget {
             ),
           ],
           AppIconButton(
-            icon: Icons.delete_outline,
+            icon: ElyanotesIcons.libraryTrash,
             variant: AppIconButtonVariant.ghost,
-            size: isPhone ? AppIconButtonSize.small : AppIconButtonSize.medium,
+            iconColor: hasSelection ? palette.danger : null,
             tooltip: isTrashSection ? 'Kalıcı Sil' : 'Sil',
             onPressed: hasSelection
                 ? () => _deleteSelected(context, ref, selectedDocs)
                 : null,
-          ),
-          // Select all button
-          _SelectAllButton(
-            allDocumentIds: allDocumentIds,
-            allFolderIds: allFolderIds,
           ),
         ],
       ),
@@ -233,7 +219,16 @@ class _SelectAllButton extends ConsumerWidget {
         allFoldersSelected &&
         (allDocumentIds.isNotEmpty || allFolderIds.isNotEmpty);
 
+    final muted = context.palette.textMuted;
     return TextButton.icon(
+      style: TextButton.styleFrom(
+        minimumSize: const Size(
+          AppSpacing.minTouchTarget,
+          AppSpacing.minTouchTarget,
+        ),
+        splashFactory: NoSplash.splashFactory,
+        foregroundColor: muted,
+      ),
       onPressed: () {
         if (allSelected) {
           ref.read(selectedDocumentsProvider.notifier).state = {};
@@ -246,15 +241,15 @@ class _SelectAllButton extends ConsumerWidget {
         }
       },
       icon: Icon(
-        allSelected ? Icons.check_box : Icons.check_box_outline_blank,
+        allSelected
+            ? ElyanotesIcons.libraryCheckSquare
+            : ElyanotesIcons.librarySquare,
         size: AppIconSize.md,
-        color: context.palette.textMuted,
+        color: muted,
       ),
       label: Text(
         'Tümü',
-        style: AppTypography.labelMedium.copyWith(
-          color: context.palette.textMuted,
-        ),
+        style: AppTypography.labelLarge.copyWith(color: muted),
       ),
     );
   }

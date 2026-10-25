@@ -9,6 +9,7 @@ export 'domain/entities/view_mode.dart';
 // Domain - Repositories
 export 'domain/repositories/document_repository.dart';
 export 'domain/repositories/folder_repository.dart';
+export 'domain/repositories/page_trash_repository.dart';
 
 // Domain - Use Cases
 export 'domain/usecases/create_document_usecase.dart';
@@ -28,10 +29,12 @@ export 'data/models/folder_model.dart';
 // Data - Datasources
 export 'data/datasources/document_local_datasource.dart';
 export 'data/datasources/folder_local_datasource.dart';
+export 'data/datasources/trashed_page_local_datasource.dart';
 
 // Data - Repositories
 export 'data/repositories/document_repository_impl.dart';
 export 'data/repositories/folder_repository_impl.dart';
+export 'data/repositories/page_trash_repository_impl.dart';
 
 // Presentation - Providers
 export 'presentation/providers/documents_provider.dart';
@@ -64,8 +67,16 @@ export 'presentation/widgets/documents_sidebar.dart';
 export 'presentation/widgets/empty_state.dart';
 export 'presentation/widgets/folder_card.dart';
 export 'presentation/widgets/folder_color_picker.dart';
+export 'presentation/widgets/folder_list_tile.dart';
 export 'presentation/widgets/folder_menus.dart';
+export 'presentation/widgets/folder_tile_art.dart';
 export 'presentation/widgets/format_picker_sheet.dart';
+export 'presentation/widgets/library_grid_metrics.dart';
+export 'presentation/widgets/library_header_parts.dart';
+export 'presentation/widgets/library_list_row.dart';
+export 'presentation/widgets/library_page_thumbnail.dart';
+export 'presentation/widgets/library_tile_frame.dart';
+export 'presentation/widgets/library_tile_parts.dart';
 export 'presentation/widgets/manage_folder_list_item.dart';
 export 'presentation/widgets/move_to_folder_dialog.dart';
 export 'presentation/widgets/new_document_dialog.dart';

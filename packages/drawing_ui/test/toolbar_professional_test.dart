@@ -6,19 +6,18 @@ import 'package:drawing_ui/drawing_ui.dart';
 void main() {
   group('ElyanotesIcons', () {
     test('should_have_home_icon', () {
-      expect(ElyanotesIcons.home, equals(PhosphorIconsLight.house));
+      expect(ElyanotesIcons.home, equals(PhosphorIconsRegular.house));
     });
 
     test('should_have_sidebar_icons_with_active_variant', () {
-      expect(ElyanotesIcons.sidebar, equals(PhosphorIconsLight.sidebar));
-      expect(
-          ElyanotesIcons.sidebarActive, equals(PhosphorIconsRegular.sidebar));
+      expect(ElyanotesIcons.sidebar, equals(PhosphorIconsRegular.sidebar));
+      expect(ElyanotesIcons.sidebarActive, equals(PhosphorIconsFill.sidebar));
     });
 
     test('should_have_reader_mode_icons_with_active_variant', () {
-      expect(ElyanotesIcons.readerMode, equals(PhosphorIconsLight.bookOpen));
-      expect(ElyanotesIcons.readerModeActive,
-          equals(PhosphorIconsRegular.bookOpen));
+      expect(ElyanotesIcons.readerMode, equals(PhosphorIconsRegular.bookOpen));
+      expect(
+          ElyanotesIcons.readerModeActive, equals(PhosphorIconsFill.bookOpen));
     });
 
     test('should_have_correct_icon_sizes', () {
@@ -31,26 +30,27 @@ void main() {
     test('should_map_tool_types_to_icons', () {
       expect(
         ElyanotesIcons.iconForTool(ToolType.pencil),
-        equals(PhosphorIconsLight.pencilSimple),
-      );
-      expect(
-        ElyanotesIcons.iconForTool(ToolType.pencil, active: true),
         equals(PhosphorIconsRegular.pencilSimple),
       );
       expect(
+        ElyanotesIcons.iconForTool(ToolType.pencil, active: true),
+        equals(PhosphorIconsFill.pencilSimple),
+      );
+      expect(
         ElyanotesIcons.iconForTool(ToolType.highlighter),
-        equals(PhosphorIconsLight.highlighterCircle),
+        equals(PhosphorIconsRegular.highlighterCircle),
       );
       expect(
         ElyanotesIcons.iconForTool(ToolType.highlighter, active: true),
-        equals(PhosphorIconsRegular.highlighterCircle),
+        equals(PhosphorIconsFill.highlighterCircle),
       );
     });
 
     test('should_have_navigation_arrow_icons', () {
-      expect(ElyanotesIcons.chevronLeft, equals(PhosphorIconsLight.caretLeft));
       expect(
-          ElyanotesIcons.chevronRight, equals(PhosphorIconsLight.caretRight));
+          ElyanotesIcons.chevronLeft, equals(PhosphorIconsRegular.caretLeft));
+      expect(
+          ElyanotesIcons.chevronRight, equals(PhosphorIconsRegular.caretRight));
     });
   });
 
@@ -354,10 +354,11 @@ void main() {
         ),
       );
 
-      // Disabled state uses the dedicated disabled token, not the normal one.
+      // Disabled state uses the dedicated disabled role, not the idle one.
+      final palette = ChromePalette.of(tester.element(find.byType(ToolButton)));
       final icon = tester.widget<PhosphorIcon>(find.byType(PhosphorIcon));
-      expect(icon.color, DrawingTheme.defaultTheme.toolbarIconDisabledColor);
-      expect(icon.color, isNot(DrawingTheme.defaultTheme.toolbarIconColor));
+      expect(icon.color, palette.textDisabled);
+      expect(icon.color, isNot(palette.textMuted));
     });
 
     testWidgets('should_show_primary_background_when_selected', (tester) async {
@@ -399,7 +400,7 @@ void main() {
       );
 
       final icon = tester.widget<PhosphorIcon>(find.byType(PhosphorIcon));
-      expect(icon.icon, equals(PhosphorIconsRegular.pencilSimple));
+      expect(icon.icon, equals(PhosphorIconsFill.pencilSimple));
     });
   });
 
@@ -498,13 +499,13 @@ void main() {
       );
 
       expect(find.byType(TopNavigationBar), findsOneWidget);
-      // Title is consolidated into the "More" menu in compact mode.
-      expect(find.text('Test Document'), findsNothing);
+      // Phone row 1 shows the serif title; rename lives in the More sheet.
+      expect(find.text('Test Document'), findsOneWidget);
       expect(find.byIcon(ElyanotesIcons.home), findsOneWidget);
       expect(find.byIcon(ElyanotesIcons.more), findsOneWidget);
     });
 
-    testWidgets('should_render_reader_mode_badge_in_compact_mode_when_active',
+    testWidgets('should_show_active_reader_toggle_in_compact_mode',
         (tester) async {
       await tester.pumpWidget(
         ProviderScope(
@@ -523,7 +524,8 @@ void main() {
         ),
       );
 
-      expect(find.text('Salt okunur'), findsOneWidget);
+      // Phone shows the active Reader toggle instead of a badge.
+      expect(find.byIcon(ElyanotesIcons.readerModeActive), findsOneWidget);
     });
 
     testWidgets('should_hide_grid_button_in_reader_mode', (tester) async {
@@ -606,8 +608,8 @@ void main() {
       final sidebarIcon = find.byWidgetPredicate(
         (widget) =>
             widget is PhosphorIcon &&
-            (widget.icon == PhosphorIconsLight.sidebar ||
-                widget.icon == PhosphorIconsRegular.sidebar),
+            (widget.icon == PhosphorIconsRegular.sidebar ||
+                widget.icon == PhosphorIconsFill.sidebar),
       );
       expect(sidebarIcon, findsOneWidget);
     });
