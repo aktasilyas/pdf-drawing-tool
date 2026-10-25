@@ -71,12 +71,28 @@ void main() {
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
 
-    final sheet = find.ancestor(
-      of: find.byType(PenSettingsPanel),
-      matching: find.byType(ConstrainedBox),
+    final context = tester.element(find.byType(PenSettingsPanel));
+    final palette = ChromePalette.of(context);
+    final sheet = find.byWidgetPredicate((w) =>
+        w is DecoratedBox &&
+        w.decoration is BoxDecoration &&
+        (w.decoration as BoxDecoration).color == palette.surfaceElevated);
+    expect(sheet, findsOneWidget);
+    final decoration =
+        tester.widget<DecoratedBox>(sheet).decoration as BoxDecoration;
+    expect(
+      decoration.borderRadius,
+      const BorderRadius.vertical(top: Radius.circular(ChromeRadius.xxl)),
     );
-    final height = tester.getSize(sheet.first).height;
-    expect(height, lessThanOrEqualTo(700 * 0.6 + 0.01));
+    // The pen panel is taller than the cap on a 700dp screen.
+    expect(tester.getSize(sheet).height, closeTo(700 * 0.6, 0.01));
+    expect(
+      find.byWidgetPredicate(
+          (w) => w is SizedBox && w.width == 32 && w.height == 4),
+      findsOneWidget,
+    );
+    final barrier = tester.widget<ModalBarrier>(find.byType(ModalBarrier).last);
+    expect(barrier.color, palette.textPrimary.withValues(alpha: 0.12));
     expect(find.byType(DraggableScrollableSheet), findsNothing);
   });
 }
