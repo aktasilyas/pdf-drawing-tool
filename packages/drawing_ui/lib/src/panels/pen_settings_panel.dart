@@ -99,6 +99,7 @@ class PenSettingsPanel extends ConsumerWidget {
             max: _maxTh(active),
             displayValue:
                 '${_pct(s.thickness, _minTh(active), _maxTh(active))}%',
+            divisions: null,
             activeColor: palette.accent,
             onChanged: notifier.setThickness,
           ),
@@ -108,6 +109,7 @@ class PenSettingsPanel extends ConsumerWidget {
             min: 0,
             max: 1,
             displayValue: '${(s.pressureSensitivity * 100).round()}%',
+            divisions: null,
             activeColor: palette.accent,
             onChanged: notifier.setPressureSensitivity,
           ),
@@ -117,6 +119,7 @@ class PenSettingsPanel extends ConsumerWidget {
             min: 0,
             max: 1,
             displayValue: '${(s.stabilization * 100).round()}%',
+            divisions: null,
             activeColor: palette.accent,
             onChanged: notifier.setStabilization,
           ),

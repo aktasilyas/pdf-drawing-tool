@@ -7,7 +7,8 @@ import 'package:drawing_ui/src/theme/theme.dart';
 /// Track 4dp, thumb 20dp, 48dp hit height, no step ticks (docs/specs/
 /// 52-editor-chrome.md, section 4). Colours come from [ChromePalette];
 /// [activeColor] tints the filled track and thumb. Pass [divisions] only for
-/// values that must snap (for example font sizes).
+/// values that must snap; defaults to 8 steps (no tick marks), pass null for
+/// a continuous value.
 class GoodNotesSlider extends StatelessWidget {
   const GoodNotesSlider({
     super.key,
@@ -18,7 +19,7 @@ class GoodNotesSlider extends StatelessWidget {
     required this.displayValue,
     required this.activeColor,
     required this.onChanged,
-    this.divisions,
+    this.divisions = 8,
   });
 
   /// Track thickness.
