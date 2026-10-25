@@ -20,7 +20,11 @@ Future<void> main() async {
 
   runApp(
     ProviderScope(
-      overrides: buildAppOverrides(flags: flags, prefs: result.prefs),
+      overrides: buildAppOverrides(
+        flags: flags,
+        prefs: result.prefs,
+        crashReporter: result.crashReporter,
+      ),
       child: const ElyaNotesApp(),
     ),
   );

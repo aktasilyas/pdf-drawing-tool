@@ -98,3 +98,8 @@ coverage/
 **/goldens/windows/
 **/goldens/linux/
 **/test/**/failures/
+
+# Firebase config (crash reporting, #60): provided locally / by CI, never committed
+example_app/android/app/google-services.json
+example_app/config/firebase.json
+GoogleService-Info.plist

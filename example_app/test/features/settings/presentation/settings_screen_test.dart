@@ -53,6 +53,8 @@ void main() {
     expect(find.text('Çıkış Yap'), findsNothing);
     expect(find.text('GÖRÜNÜM'), findsOneWidget);
     expect(find.text('VERİ'), findsOneWidget);
+    expect(find.text('GİZLİLİK'), findsOneWidget);
+    expect(find.text('Çökme raporlarını gönder'), findsOneWidget);
   });
 
   testWidgets('cloud on: shows account section, logout and user name',

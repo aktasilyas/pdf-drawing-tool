@@ -17,6 +17,9 @@ export 'errors/exceptions.dart';
 export 'config/app_env.dart';
 export 'config/feature_flags.dart';
 
+// Crash reporting
+export 'crash_reporting/crash_reporting.dart';
+
 // Constants
 export 'constants/app_constants.dart';
 export 'constants/storage_keys.dart';
