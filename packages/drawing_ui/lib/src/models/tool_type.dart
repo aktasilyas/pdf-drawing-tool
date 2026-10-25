@@ -5,7 +5,10 @@ import 'package:drawing_core/drawing_core.dart';
 /// This enum is used by the UI layer to identify which tool is currently
 /// selected and to determine which settings panel to show.
 enum ToolType {
-  // PEN TOOLS (10 types)
+  // PEN TOOLS
+  /// Fountain pen - pressure-sensitive with tapered ends.
+  fountainPen,
+
   /// Pencil - matte with slight texture.
   pencil,
 
@@ -74,6 +77,8 @@ enum ToolType {
   /// Human-readable display name for the tool.
   String get displayName {
     switch (this) {
+      case ToolType.fountainPen:
+        return 'Dolma Kalem';
       case ToolType.pencil:
         return 'Kurşun Kalem';
       case ToolType.hardPencil:
@@ -123,6 +128,8 @@ enum ToolType {
   /// Returns null for non-pen tools.
   PenType? get penType {
     switch (this) {
+      case ToolType.fountainPen:
+        return PenType.fountainPen;
       case ToolType.pencil:
         return PenType.pencil;
       case ToolType.hardPencil:

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/models/models.dart';
-import 'package:drawing_ui/src/panels/pen_settings_widgets.dart';
+import 'package:drawing_ui/src/panels/pen_type_picker.dart';
 import 'package:drawing_ui/src/panels/tool_panel.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/widgets/color_picker_strip.dart';
@@ -15,9 +15,14 @@ class PenSettingsPanel extends ConsumerWidget {
   const PenSettingsPanel({super.key, required this.toolType});
   final ToolType toolType;
 
+  /// Tools this panel edits (the picker row shows the five v2 presets;
+  /// legacy pens keep their settings here when they are current).
   static const _penTools = [
+    ToolType.fountainPen,
     ToolType.pencil,
+    ToolType.hardPencil,
     ToolType.ballpointPen,
+    ToolType.gelPen,
     ToolType.dashedPen,
     ToolType.brushPen,
     ToolType.rulerPen,
@@ -73,11 +78,14 @@ class PenSettingsPanel extends ConsumerWidget {
           const SizedBox(height: 16),
 
           // ── Kalem Tipleri (yatay kartlar) ──
-          PenTypeSelector(
-            selectedType: currentTool,
-            selectedColor: s.color,
-            onTypeSelected: (t) =>
-                ref.read(currentToolProvider.notifier).selectTool(t),
+          PenTypePicker(
+            padding: EdgeInsets.zero,
+            onPenSelected: (t) {
+              // The highlighter has its own settings panel.
+              if (t == ToolType.highlighter) {
+                ref.read(activePanelProvider.notifier).state = t;
+              }
+            },
           ),
           const SizedBox(height: 20),
 

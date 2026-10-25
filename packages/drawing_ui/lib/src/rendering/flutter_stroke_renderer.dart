@@ -19,21 +19,13 @@ class FlutterStrokeRenderer {
   /// Renders a single stroke to the canvas.
   ///
   /// Does nothing if the stroke is empty.
-  /// Delegates to [VariableWidthStrokeRenderer] when pressure-sensitive.
+  /// Routing: pencil texture, then outline, then stroked path.
   void renderStroke(Canvas canvas, Stroke stroke) {
     if (stroke.isEmpty) return;
 
     final style = stroke.style;
 
-    if (style.pressureSensitive) {
-      _variableWidthRenderer.render(canvas, stroke.points, style);
-      return;
-    }
-
-    if (style.texture == StrokeTexture.pencil) {
-      _pencilRenderer.render(canvas, stroke.points, style);
-      return;
-    }
+    if (_renderSpecial(canvas, stroke.points, style)) return;
 
     var paint = _createPaint(style);
     var path = _createPath(stroke.points, style);
@@ -92,11 +84,7 @@ class FlutterStrokeRenderer {
 
       final subPoints = points.sublist(rangeStart, i + 1);
 
-      if (style.pressureSensitive) {
-        _variableWidthRenderer.render(canvas, subPoints, style);
-      } else if (style.texture == StrokeTexture.pencil) {
-        _pencilRenderer.render(canvas, subPoints, style);
-      } else {
+      if (!_renderSpecial(canvas, subPoints, style)) {
         var paint = _createPaint(style);
         paint = _buildPaintWithGlow(style, paint);
         var path = _createPath(subPoints, style);
@@ -111,7 +99,7 @@ class FlutterStrokeRenderer {
   /// Renders an active (incomplete) stroke being drawn.
   ///
   /// This is used for live preview while the user is drawing.
-  /// Delegates to [VariableWidthStrokeRenderer] when pressure-sensitive.
+  /// Routing: pencil texture, then outline, then stroked path.
   void renderActiveStroke(
     Canvas canvas,
     List<DrawingPoint> points,
@@ -119,15 +107,7 @@ class FlutterStrokeRenderer {
   ) {
     if (points.isEmpty) return;
 
-    if (style.pressureSensitive) {
-      _variableWidthRenderer.render(canvas, points, style);
-      return;
-    }
-
-    if (style.texture == StrokeTexture.pencil) {
-      _pencilRenderer.render(canvas, points, style);
-      return;
-    }
+    if (_renderSpecial(canvas, points, style)) return;
 
     var paint = _createPaint(style);
     var path = _createPath(points, style);
@@ -141,6 +121,26 @@ class FlutterStrokeRenderer {
     }
 
     canvas.drawPath(path, paint);
+  }
+
+  /// The single routing order: texture -> outline -> stroked.
+  ///
+  /// Draws [points] and returns true for textured (pencil) and outline
+  /// styles; returns false when the caller should draw a stroked path.
+  bool _renderSpecial(
+    Canvas canvas,
+    List<DrawingPoint> points,
+    StrokeStyle style,
+  ) {
+    if (style.texture == StrokeTexture.pencil) {
+      _pencilRenderer.render(canvas, points, style);
+      return true;
+    }
+    if (VariableWidthStrokeRenderer.usesOutline(style)) {
+      _variableWidthRenderer.render(canvas, points, style);
+      return true;
+    }
+    return false;
   }
 
   /// Paint used for solid stroked pens, including glow. Shared with the live

@@ -1,6 +1,9 @@
 import 'package:equatable/equatable.dart';
 
+import 'stroke_dynamics.dart';
+import 'stroke_json_parsing.dart';
 import 'stroke_style_enums.dart';
+export 'stroke_dynamics.dart';
 export 'stroke_style_enums.dart';
 
 /// Defines the visual style of a stroke.
@@ -54,6 +57,9 @@ class StrokeStyle extends Equatable {
   /// Clamped to [0.0, 1.0].
   final double pressureSensitivity;
 
+  /// Outline tuning (tapers, streamline). [StrokeDynamics.none] = legacy.
+  final StrokeDynamics dynamics;
+
   /// Creates a new [StrokeStyle].
   ///
   /// [color] is in ARGB format (0xAARRGGBB).
@@ -78,6 +84,7 @@ class StrokeStyle extends Equatable {
     this.nibAngle = 0.0,
     this.pressureSensitive = false,
     double pressureSensitivity = 0.75,
+    this.dynamics = StrokeDynamics.none,
   })  : thickness = thickness.clamp(0.1, 50.0),
         opacity = opacity.clamp(0.0, 1.0),
         glowRadius = glowRadius.clamp(0.0, 20.0),
@@ -172,6 +179,7 @@ class StrokeStyle extends Equatable {
     double? nibAngle,
     bool? pressureSensitive,
     double? pressureSensitivity,
+    StrokeDynamics? dynamics,
   }) {
     return StrokeStyle(
       color: color ?? this.color,
@@ -188,6 +196,7 @@ class StrokeStyle extends Equatable {
       nibAngle: nibAngle ?? this.nibAngle,
       pressureSensitive: pressureSensitive ?? this.pressureSensitive,
       pressureSensitivity: pressureSensitivity ?? this.pressureSensitivity,
+      dynamics: dynamics ?? this.dynamics,
     );
   }
 
@@ -208,15 +217,16 @@ class StrokeStyle extends Equatable {
       'nibAngle': nibAngle,
       'pressureSensitive': pressureSensitive,
       'pressureSensitivity': pressureSensitivity,
+      if (!dynamics.isNone) 'dynamics': dynamics.toJson(),
     };
   }
 
   /// Creates a [StrokeStyle] from a JSON map.
   factory StrokeStyle.fromJson(Map<String, dynamic> json) {
     return StrokeStyle(
-      color: _parseInt(json['color'], 0xFF000000),
-      thickness: _parseDouble(json['thickness'], 1.0),
-      opacity: _parseDouble(json['opacity'], 1.0),
+      color: parseJsonInt(json['color'], 0xFF000000),
+      thickness: parseJsonDouble(json['thickness'], 1.0),
+      opacity: parseJsonDouble(json['opacity'], 1.0),
       nibShape: NibShape.values.firstWhere(
         (e) => e.name == json['nibShape'],
         orElse: () => NibShape.circle,
@@ -234,33 +244,18 @@ class StrokeStyle extends Equatable {
         (e) => e.name == json['texture'],
         orElse: () => StrokeTexture.none,
       ),
-      glowRadius: _parseDouble(json['glowRadius'], 0.0),
-      glowIntensity: _parseDouble(json['glowIntensity'], 0.0),
+      glowRadius: parseJsonDouble(json['glowRadius'], 0.0),
+      glowIntensity: parseJsonDouble(json['glowIntensity'], 0.0),
       dashPattern: (json['dashPattern'] as List<dynamic>?)
-          ?.map((e) => _parseDouble(e, 0.0))
+          ?.map((e) => parseJsonDouble(e, 0.0))
           .toList(),
-      nibAngle: _parseDouble(json['nibAngle'], 0.0),
+      nibAngle: parseJsonDouble(json['nibAngle'], 0.0),
       pressureSensitive: json['pressureSensitive'] as bool? ?? false,
-      pressureSensitivity: _parseDouble(json['pressureSensitivity'], 0.75),
+      pressureSensitivity: parseJsonDouble(json['pressureSensitivity'], 0.75),
+      dynamics: StrokeDynamics.fromJson(
+        json['dynamics'] as Map<String, dynamic>?,
+      ),
     );
-  }
-
-  static double _parseDouble(dynamic value, double defaultValue) {
-    if (value == null) return defaultValue;
-    if (value is double) return value;
-    if (value is int) return value.toDouble();
-    if (value is String) return double.tryParse(value) ?? defaultValue;
-    if (value is num) return value.toDouble();
-    return defaultValue;
-  }
-
-  static int _parseInt(dynamic value, int defaultValue) {
-    if (value == null) return defaultValue;
-    if (value is int) return value;
-    if (value is double) return value.toInt();
-    if (value is String) return int.tryParse(value) ?? defaultValue;
-    if (value is num) return value.toInt();
-    return defaultValue;
   }
 
   @override
@@ -279,6 +274,7 @@ class StrokeStyle extends Equatable {
         nibAngle,
         pressureSensitive,
         pressureSensitivity,
+        dynamics,
       ];
 
   @override
@@ -287,6 +283,7 @@ class StrokeStyle extends Equatable {
         'thickness: $thickness, opacity: $opacity, nibShape: $nibShape, '
         'blendMode: $blendMode, isEraser: $isEraser, pattern: $pattern, '
         'texture: $texture, glowRadius: $glowRadius, glowIntensity: $glowIntensity, '
-        'pressureSensitive: $pressureSensitive, pressureSensitivity: $pressureSensitivity)';
+        'pressureSensitive: $pressureSensitive, '
+        'pressureSensitivity: $pressureSensitivity, dynamics: $dynamics)';
   }
 }

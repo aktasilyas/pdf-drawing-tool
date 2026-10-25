@@ -2,20 +2,13 @@
 import 'package:flutter/material.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/panels/panels.dart';
-import 'package:drawing_ui/src/toolbar/tool_groups.dart';
 
 /// Build the active tool panel widget.
 Widget buildActivePanel({
   required ToolType panel,
-  bool isPenPickerMode = false,
-  ValueChanged<ToolType>? onPenSelected,
 }) {
-  // Pen picker mode — compact pen list
-  if (isPenPickerMode && penToolsSet.contains(panel)) {
-    return PenTypePicker(onPenSelected: onPenSelected);
-  }
-
   switch (panel) {
+    case ToolType.fountainPen:
     case ToolType.pencil:
     case ToolType.hardPencil:
     case ToolType.ballpointPen:

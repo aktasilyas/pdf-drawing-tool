@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
-import 'package:phosphor_icons/phosphor_icons.dart';
 
 /// Darkens a color by the given amount (0.0 to 1.0).
 Color darkenColor(Color c, double amt) {
@@ -76,85 +75,4 @@ class StrokePainter extends CustomPainter {
   @override
   bool shouldRepaint(StrokePainter o) =>
       color != o.color || thickness != o.thickness || toolType != o.toolType;
-}
-
-/// GoodNotes-style horizontal pen type selector.
-class PenTypeSelector extends StatelessWidget {
-  const PenTypeSelector({
-    super.key,
-    required this.selectedType,
-    required this.selectedColor,
-    required this.onTypeSelected,
-  });
-
-  final ToolType selectedType;
-  final Color selectedColor;
-  final ValueChanged<ToolType> onTypeSelected;
-
-  static const _types = [
-    ToolType.pencil,
-    ToolType.ballpointPen,
-    ToolType.dashedPen,
-    ToolType.brushPen,
-    ToolType.rulerPen,
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        for (final t in _types)
-          PenCard(
-            type: t,
-            isSelected: t == selectedType,
-            selectedColor: selectedColor,
-            onTap: () => onTypeSelected(t),
-          ),
-      ],
-    );
-  }
-}
-
-/// Pen card matching toolbar selection style:
-/// Selected → primary pill bg + white icon (Regular weight)
-/// Deselected → transparent + grey icon (Light weight)
-class PenCard extends StatelessWidget {
-  const PenCard({
-    super.key,
-    required this.type,
-    required this.isSelected,
-    required this.selectedColor,
-    required this.onTap,
-  });
-
-  final ToolType type;
-  final bool isSelected;
-  final Color selectedColor;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: isSelected ? cs.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Center(
-          child: PhosphorIcon(
-            ElyanotesIcons.iconForTool(type, active: isSelected),
-            size: ElyanotesIcons.toolSize,
-            color: isSelected ? cs.onPrimary : cs.onSurfaceVariant,
-          ),
-        ),
-      ),
-    );
-  }
 }

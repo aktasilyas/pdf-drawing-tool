@@ -3,7 +3,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/../packages/drawing_ui"
 out=$(mktemp)
-if ! flutter test test/benchmark/ink_benchmark_test.dart >"$out" 2>&1; then
+if ! flutter test test/benchmark >"$out" 2>&1; then
   cat "$out"
   exit 1
 fi
