@@ -36,7 +36,7 @@ void main() {
       final folder = Folder(
         id: 'folder-1',
         name: 'Test Folder',
-        colorValue: Colors.blue.value,
+        colorValue: Colors.blue.toARGB32(),
         createdAt: DateTime(2025, 1, 1),
         documentCount: 5,
       );
@@ -101,7 +101,7 @@ void main() {
       final folder = Folder(
         id: 'folder-1',
         name: 'My Folder',
-        colorValue: Colors.green.value,
+        colorValue: Colors.green.toARGB32(),
         createdAt: DateTime(2025, 1, 1),
         documentCount: 3,
       );

@@ -30,9 +30,9 @@ class FolderTileArt extends CustomPainter {
           ..style = PaintingStyle.stroke
           ..strokeWidth = 0.75,
         _gradientColors = [
-          _lighten(_tame(color)),
-          _tame(color),
-          _darken(_tame(color), 0.05),
+          _lighten(tame(color)),
+          tame(color),
+          _darken(tame(color), 0.05),
         ],
         _highlightPaint = Paint()
           ..color = palette.paper.withValues(alpha: 0.25)
