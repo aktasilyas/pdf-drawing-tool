@@ -91,8 +91,7 @@ void main() {
         expect(text.style?.color, equals(AppPalette.light.textMuted));
       });
 
-      testWidgets('should_draw_folder_art_with_folder_color',
-          (tester) async {
+      testWidgets('should_draw_folder_art_with_folder_color', (tester) async {
         // Arrange & Act
         await tester.pumpWidget(
           buildTestWidget(
@@ -136,8 +135,7 @@ void main() {
         expect(text.style?.color, equals(AppPalette.dark.textMuted));
       });
 
-      testWidgets('should_draw_folder_art_with_folder_color',
-          (tester) async {
+      testWidgets('should_draw_folder_art_with_folder_color', (tester) async {
         // Arrange & Act
         await tester.pumpWidget(
           buildTestWidget(
