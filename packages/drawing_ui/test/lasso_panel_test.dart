@@ -312,5 +312,24 @@ void main() {
         expect(settingsOn.selectableTypes[type], true);
       }
     });
+
+    testWidgets('mode buttons have at least 48x48 dp hit areas',
+        (tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: Scaffold(
+              body: LassoSelectionPanel(),
+            ),
+          ),
+        ),
+      );
+
+      for (final key in ['lasso-mode-freeform', 'lasso-mode-rectangle']) {
+        final size = tester.getSize(find.byKey(ValueKey(key)));
+        expect(size.width, greaterThanOrEqualTo(48), reason: key);
+        expect(size.height, greaterThanOrEqualTo(48), reason: key);
+      }
+    });
   });
 }

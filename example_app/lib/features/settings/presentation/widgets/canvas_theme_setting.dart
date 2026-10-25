@@ -14,13 +14,10 @@ class CanvasThemeSetting extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final mode = ref.watch(canvasDarkModeProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
-    final iconColor = isDark ? AppColors.primaryDarkMode : AppColors.primary;
-    final iconBgColor = isDark
-        ? AppColors.surfaceContainerHighDark
-        : AppColors.surfaceContainerHighLight;
+    final palette = context.palette;
+    final textColor = palette.textPrimary;
+    final iconColor = palette.accent;
+    final iconBgColor = palette.surfaceElevated;
 
     return Padding(
       padding: const EdgeInsets.symmetric(

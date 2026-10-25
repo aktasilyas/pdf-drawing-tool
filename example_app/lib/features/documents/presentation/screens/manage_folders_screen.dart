@@ -29,14 +29,11 @@ class _ManageFoldersScreenState extends ConsumerState<ManageFoldersScreen> {
   @override
   Widget build(BuildContext context) {
     final foldersAsync = ref.watch(foldersProvider);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor:
-          isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+      backgroundColor: context.palette.background,
       appBar: AppBar(
-        backgroundColor:
-            isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+        backgroundColor: context.palette.surface,
         leading: AppIconButton(
           icon: Icons.arrow_back,
           variant: AppIconButtonVariant.ghost,
@@ -45,8 +42,7 @@ class _ManageFoldersScreenState extends ConsumerState<ManageFoldersScreen> {
         title: Text(
           'Klasörleri Yönet',
           style: AppTypography.titleLarge.copyWith(
-            color:
-                isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+            color: context.palette.textPrimary,
           ),
         ),
         actions: [

@@ -123,8 +123,6 @@ class _BackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -137,9 +135,7 @@ class _BackButton extends StatelessWidget {
           child: Icon(
             Icons.arrow_back,
             size: AppIconSize.md,
-            color: isDark
-                ? AppColors.textSecondaryDark
-                : AppColors.textSecondaryLight,
+            color: context.palette.textMuted,
           ),
         ),
       ),
@@ -153,15 +149,12 @@ class _Separator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
       child: Icon(
         Icons.chevron_right,
         size: 16,
-        color:
-            isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight,
+        color: context.palette.textDisabled,
       ),
     );
   }
@@ -181,8 +174,6 @@ class _BreadcrumbItemWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -197,12 +188,8 @@ class _BreadcrumbItemWidget extends StatelessWidget {
             item.label,
             style: AppTypography.bodyMedium.copyWith(
               color: isActive
-                  ? (isDark
-                      ? AppColors.textPrimaryDark
-                      : AppColors.textPrimaryLight)
-                  : (isDark
-                      ? AppColors.textSecondaryDark
-                      : AppColors.textSecondaryLight),
+                  ? context.palette.textPrimary
+                  : context.palette.textMuted,
               fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
             ),
           ),

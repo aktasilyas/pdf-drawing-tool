@@ -31,16 +31,12 @@ class SidebarItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     // Dark modda accent (#4A8AF7) kullan — primary (#38434F) koyu bg'de görünmez
-    final selectedColor = isDark ? AppColors.accent : AppColors.primary;
+    final selectedColor = context.palette.accent;
 
     // Theme-aware colors
-    final textPrimary =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
-    final textSecondary =
-        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+    final textPrimary = context.palette.textPrimary;
+    final textSecondary = context.palette.textMuted;
 
     // Selected background: hafif tint
     final selectedBg = selectedColor.withValues(alpha: 0.12);
@@ -67,9 +63,8 @@ class SidebarItem extends StatelessWidget {
             child: InkWell(
               onTap: onTap,
               borderRadius: BorderRadius.circular(AppRadius.sm),
-              hoverColor: isDark
-                  ? AppColors.surfaceVariantDark.withValues(alpha: 0.5)
-                  : AppColors.surfaceVariantLight.withValues(alpha: 0.5),
+              hoverColor:
+                  context.palette.surfaceElevated.withValues(alpha: 0.5),
               child: Container(
                 constraints: const BoxConstraints(minHeight: 40),
                 padding: const EdgeInsets.symmetric(

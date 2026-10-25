@@ -98,14 +98,9 @@ PopupMenuItem<NewDocumentOption> _buildMenuItem(
     height: 52,
     child: Builder(
       builder: (context) {
-        final isDark = Theme.of(context).brightness == Brightness.dark;
-        final iconColor =
-            isDark ? AppColors.primaryDarkMode : AppColors.primary;
-        final iconBg = isDark
-            ? AppColors.surfaceContainerHighDark
-            : AppColors.surfaceContainerHighLight;
-        final textPrimary =
-            isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+        final iconColor = context.palette.accent;
+        final iconBg = context.palette.surfaceElevated;
+        final textPrimary = context.palette.textPrimary;
 
         return Row(
           children: [

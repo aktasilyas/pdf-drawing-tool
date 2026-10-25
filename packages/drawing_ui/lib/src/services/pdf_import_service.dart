@@ -319,6 +319,17 @@ class PDFImportService {
   /// Maximum number of pages allowed for import.
   static const int maxPageCount = 500;
 
+  /// Fails fast on a range that can never be valid, whatever the page count,
+  /// before any file is written or loaded.
+  void _checkRangeOrder(PDFImportConfig config) {
+    if (config.pageSelection == PDFPageSelection.range &&
+        config.startPage != null &&
+        config.endPage != null &&
+        config.startPage! > config.endPage!) {
+      throw ArgumentError('Invalid import configuration');
+    }
+  }
+
   /// Imports PDF from file path with lazy loading.
   ///
   /// Copies the source PDF to app storage, then extracts page dimensions
@@ -333,13 +344,7 @@ class PDFImportService {
       throw ArgumentError('File path cannot be empty');
     }
 
-    // Fail fast on configs that can never be valid, whatever the page count.
-    if (config.pageSelection == PDFPageSelection.range &&
-        config.startPage != null &&
-        config.endPage != null &&
-        config.startPage! > config.endPage!) {
-      throw ArgumentError('Invalid import configuration');
-    }
+    _checkRangeOrder(config);
 
     try {
       _updateState(PDFImportState.loadingPDF);
@@ -444,6 +449,7 @@ class PDFImportService {
     bool useLazyLoading = true,
   }) async {
     _checkNotDisposed();
+    _checkRangeOrder(config);
 
     try {
       // ═══════════════════════════════════════════════════════════════════

@@ -27,13 +27,9 @@ abstract class SettingsDialogs {
 
   static void showThemeDialog(
       BuildContext context, WidgetRef ref, AppSettings settings) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final surfaceColor =
-        isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
-    final textPrimary =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
-    final textSecondary =
-        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+    final surfaceColor = context.palette.surface;
+    final textPrimary = context.palette.textPrimary;
+    final textSecondary = context.palette.textMuted;
 
     showDialog(
       context: context,
@@ -54,9 +50,7 @@ abstract class SettingsDialogs {
                 isSelected
                     ? Icons.radio_button_checked
                     : Icons.radio_button_off,
-                color: isSelected
-                    ? (isDark ? AppColors.accent : AppColors.primary)
-                    : textSecondary,
+                color: isSelected ? context.palette.accent : textSecondary,
               ),
               onTap: () {
                 ref.read(settingsProvider.notifier).setTheme(mode);
@@ -70,11 +64,8 @@ abstract class SettingsDialogs {
   }
 
   static void showEditNameDialog(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final surfaceColor =
-        isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
-    final textPrimary =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final surfaceColor = context.palette.surface;
+    final textPrimary = context.palette.textPrimary;
 
     final controller = TextEditingController();
     showDialog(
@@ -107,13 +98,9 @@ abstract class SettingsDialogs {
   }
 
   static void showAccountInfo(BuildContext context, User? user) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final surfaceColor =
-        isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
-    final textPrimary =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
-    final textSecondary =
-        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+    final surfaceColor = context.palette.surface;
+    final textPrimary = context.palette.textPrimary;
+    final textSecondary = context.palette.textMuted;
 
     showDialog(
       context: context,

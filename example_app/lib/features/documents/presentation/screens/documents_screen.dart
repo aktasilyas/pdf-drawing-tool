@@ -35,15 +35,12 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
   @override
   Widget build(BuildContext context) {
     final isPhone = Responsive.isPhone(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor:
-          isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+      backgroundColor: context.palette.background,
       drawer: isPhone
           ? Drawer(
-              backgroundColor:
-                  isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+              backgroundColor: context.palette.surface,
               child: SafeArea(
                 child: _buildSidebarContent(isDrawer: true),
               ),
@@ -85,9 +82,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
   }
 
   Widget _buildMobileTitle() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textPrimary =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final textPrimary = context.palette.textPrimary;
 
     return Text(
       getSectionTitle(ref, _selectedSection, _selectedFolderId),
@@ -97,7 +92,6 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
   }
 
   Widget _buildDesktopLayout() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isInFolder =
         _selectedSection == SidebarSection.folder && _selectedFolderId != null;
 
@@ -120,7 +114,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
           child: GestureDetector(
             onTap: () => FocusScope.of(context).unfocus(),
             child: Container(
-              color: isDark ? AppColors.backgroundDark : AppColors.surfaceLight,
+              color: context.palette.background,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -152,9 +146,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
   }
 
   Widget _buildDesktopTitle() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textPrimary =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final textPrimary = context.palette.textPrimary;
 
     return Text(
       getSectionTitle(ref, _selectedSection, _selectedFolderId),
@@ -180,15 +172,12 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
   }
 
   Widget _buildSoftDivider() {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: Divider(
         height: 1,
         thickness: 0.5,
-        color: isDark
-            ? AppColors.outlineVariantDark
-            : AppColors.outlineVariantLight,
+        color: context.palette.border,
       ),
     );
   }

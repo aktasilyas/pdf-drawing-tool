@@ -38,9 +38,7 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final surfaceColor =
-        isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
+    final surfaceColor = context.palette.surface;
     final foldersAsync = ref.watch(foldersProvider);
 
     return GestureDetector(
@@ -76,9 +74,7 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
   }
 
   Widget _buildHeader(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textPrimary =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final textPrimary = context.palette.textPrimary;
 
     final title = _isFolderMode
         ? 'Klasör Yönetimi'
@@ -102,16 +98,11 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
   }
 
   Widget _buildNewFolderSection(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final surfaceVariant =
-        isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariantLight;
-    final textPrimary =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
-    final textSecondary =
-        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
-    final outlineColor =
-        isDark ? AppColors.outlineDark : AppColors.outlineLight;
-    final accentColor = isDark ? AppColors.accent : AppColors.primary;
+    final surfaceVariant = context.palette.surfaceElevated;
+    final textPrimary = context.palette.textPrimary;
+    final textSecondary = context.palette.textMuted;
+    final outlineColor = context.palette.border;
+    final accentColor = context.palette.accent;
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -252,12 +243,9 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
   }
 
   Widget _buildRootOption(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textPrimary =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
-    final textSecondary =
-        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
-    final accentColor = isDark ? AppColors.accent : AppColors.primary;
+    final textPrimary = context.palette.textPrimary;
+    final textSecondary = context.palette.textMuted;
+    final accentColor = context.palette.accent;
 
     final sel = _selectedFolderId == null;
     return ListTile(
@@ -273,12 +261,9 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
   }
 
   Widget _buildFolderOption(BuildContext context, Folder folder) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textPrimary =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
-    final textSecondary =
-        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
-    final accentColor = isDark ? AppColors.accent : AppColors.primary;
+    final textPrimary = context.palette.textPrimary;
+    final textSecondary = context.palette.textMuted;
+    final accentColor = context.palette.accent;
 
     final sel = _selectedFolderId == folder.id;
     return ListTile(
@@ -295,9 +280,7 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
   }
 
   Widget _buildError(Object error) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textSecondary =
-        isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight;
+    final textSecondary = context.palette.textMuted;
     return Center(
       child: Padding(
           padding: const EdgeInsets.all(AppSpacing.lg),

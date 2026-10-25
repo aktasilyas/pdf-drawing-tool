@@ -14,20 +14,14 @@ class DocumentSelectionCheckbox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Container(
       width: 24,
       height: 24,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: isSelected
-            ? AppColors.primary
-            : (isDark ? AppColors.surfaceDark : AppColors.surfaceLight),
+        color: isSelected ? AppColors.primary : context.palette.surface,
         border: Border.all(
-          color: isSelected
-              ? AppColors.primary
-              : (isDark ? AppColors.outlineDark : AppColors.outlineLight),
+          color: isSelected ? AppColors.primary : context.palette.border,
           width: 2,
         ),
       ),
@@ -51,8 +45,6 @@ class DocumentFavoriteButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return SizedBox(
       width: 48,
       height: 48,
@@ -63,18 +55,14 @@ class DocumentFavoriteButton extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(AppSpacing.xs),
             decoration: BoxDecoration(
-              color: (isDark ? AppColors.surfaceDark : AppColors.surfaceLight)
-                  .withValues(alpha: 0.9),
+              color: context.palette.surface.withValues(alpha: 0.9),
               shape: BoxShape.circle,
             ),
             child: Icon(
               isFavorite ? Icons.star : Icons.star_outline,
               size: AppIconSize.sm,
-              color: isFavorite
-                  ? AppColors.accent
-                  : (isDark
-                      ? AppColors.textTertiaryDark
-                      : AppColors.textTertiaryLight),
+              color:
+                  isFavorite ? AppColors.accent : context.palette.textDisabled,
             ),
           ),
         ),
@@ -90,22 +78,19 @@ class DocumentPageCountBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
         vertical: AppSpacing.xxs,
       ),
       decoration: BoxDecoration(
-        color: (isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight)
-            .withValues(alpha: 0.7),
+        color: context.palette.textPrimary.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(AppRadius.xs),
       ),
       child: Text(
         '$count sayfa',
         style: AppTypography.caption.copyWith(
-          color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+          color: context.palette.surface,
           fontSize: 9,
         ),
       ),
@@ -143,7 +128,9 @@ class DocumentDaysLeftBadge extends StatelessWidget {
   }
 }
 
-/// Paper color utility for document card
+/// Paper color utility for document card.
+/// Paper colors are document data, not theme roles: they stay fixed in both
+/// light and dark mode (intentional, not migrated to AppPalette).
 class DocumentPaperColors {
   DocumentPaperColors._();
 

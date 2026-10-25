@@ -205,26 +205,32 @@ class _TemplatePickerState extends State<TemplatePicker>
       child: SafeArea(
         top: false,
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          // Options strip (paper color, size, orientation)
+          // Options strip (paper color, size, orientation); wraps onto a
+          // second line at phone widths instead of overflowing.
           if (!_isCoverTab)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-              child: Row(children: [
-                PaperColorDropdown(
-                  selectedColor: _paperColor,
-                  onColorChanged: (c) => setState(() => _paperColor = c),
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    PaperColorDropdown(
+                      selectedColor: _paperColor,
+                      onColorChanged: (c) => setState(() => _paperColor = c),
+                    ),
+                    PaperSizePicker(
+                      selectedSize: _selectedPaperSize,
+                      onSizeSelected: (s) =>
+                          setState(() => _selectedPaperSize = s),
+                      showLandscapeToggle: true,
+                      dense: true,
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: PaperSizePicker(
-                    selectedSize: _selectedPaperSize,
-                    onSizeSelected: (s) =>
-                        setState(() => _selectedPaperSize = s),
-                    showLandscapeToggle: true,
-                    dense: true,
-                  ),
-                ),
-              ]),
+              ),
             ),
           // Action buttons
           Padding(

@@ -30,7 +30,6 @@ class ManageFolderListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isSub = folder.isSubfolder;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       margin: EdgeInsets.only(
@@ -39,10 +38,9 @@ class ManageFolderListItem extends StatelessWidget {
         bottom: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : AppColors.surfaceLight,
+        color: context.palette.surface,
         borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(
-            color: isDark ? AppColors.outlineDark : AppColors.outlineLight),
+        border: Border.all(color: context.palette.border),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(
@@ -60,8 +58,7 @@ class ManageFolderListItem extends StatelessWidget {
         title: Text(
           folder.name,
           style: AppTypography.titleMedium.copyWith(
-            color:
-                isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight,
+            color: context.palette.textPrimary,
           ),
         ),
         trailing: Row(
@@ -72,16 +69,11 @@ class ManageFolderListItem extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.sm),
                 child: Icon(Icons.drag_handle,
-                    color: isDark
-                        ? AppColors.textTertiaryDark
-                        : AppColors.textTertiaryLight),
+                    color: context.palette.textDisabled),
               ),
             ),
             PopupMenuButton<String>(
-              icon: Icon(Icons.more_vert,
-                  color: isDark
-                      ? AppColors.textSecondaryDark
-                      : AppColors.textSecondaryLight),
+              icon: Icon(Icons.more_vert, color: context.palette.textMuted),
               onSelected: (value) {
                 switch (value) {
                   case 'rename':

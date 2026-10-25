@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -132,4 +133,164 @@ void main() {
       });
     });
   });
+
+  group('ActiveStrokeGeometry stroked chunks', () {
+    const chunk = ActiveStrokeGeometry.strokedChunk;
+
+    test('live body stays bounded while chunks freeze', () {
+      final points = _wave(1000);
+      final g = ActiveStrokeGeometry()..begin(StrokeStyle.pen());
+      for (var n = 1; n <= points.length; n++) {
+        g.sync(points.sublist(0, n));
+        expect(g.liveSegments, lessThan(chunk));
+      }
+      // n points give n - 2 quadratic segments.
+      expect(g.frozenChunks, (points.length - 2) ~/ chunk);
+      expect(g.liveSegments, (points.length - 2) % chunk);
+      g.dispose();
+    });
+
+    test('begin, clear and dispose drop frozen chunks', () {
+      final g = ActiveStrokeGeometry()
+        ..begin(StrokeStyle.pen())
+        ..sync(_wave(200));
+      expect(g.frozenChunks, greaterThan(0));
+      g.begin(StrokeStyle.pen());
+      expect(g.frozenChunks, 0);
+      g.sync(_wave(200));
+      g.clear();
+      expect(g.frozenChunks, 0);
+      g
+        ..begin(StrokeStyle.pen())
+        ..sync(_wave(200))
+        ..dispose();
+      expect(g.frozenChunks, 0);
+    });
+
+    test('a shrinking point list after freezes rebuilds from scratch', () {
+      final points = _wave(300);
+      final g = ActiveStrokeGeometry()
+        ..begin(StrokeStyle.pen())
+        ..sync(points);
+      expect(g.frozenChunks, (300 - 2) ~/ chunk);
+      g.sync(points.sublist(0, 50));
+      expect(g.consumed, 50);
+      expect(g.frozenChunks, (50 - 2) ~/ chunk);
+      expect(g.liveSegments, (50 - 2) % chunk);
+      g.dispose();
+    });
+
+    test('square-cap styles chunk too, repeating one segment per chunk', () {
+      final points = _wave(1000);
+      final g = ActiveStrokeGeometry()..begin(StrokeStyle.highlighter());
+      for (var n = 1; n <= points.length; n++) {
+        g.sync(points.sublist(0, n));
+        expect(g.liveSegments, lessThan(chunk));
+      }
+      expect(g.mode, ActiveStrokeMode.stroked);
+      // The first chunk holds `chunk` segments; every later live body starts
+      // with a copy of the previous chunk's last segment.
+      const segments = 1000 - 2;
+      const freezes = 1 + (segments - chunk) ~/ (chunk - 1);
+      expect(g.frozenChunks, freezes);
+      const live = segments - chunk - (freezes - 1) * (chunk - 1) + 1;
+      expect(g.liveSegments, live);
+      g.dispose();
+    });
+
+    test('square-cap start cap waits for a point that sets its direction',
+        () async {
+      final style = StrokeStyle.highlighter(thickness: 20);
+      final points = [
+        DrawingPoint(x: 100, y: 120),
+        DrawingPoint(x: 100, y: 120),
+        for (var i = 1; i <= 80; i++) DrawingPoint(x: 100 + i * 3.0, y: 120),
+      ];
+      final g = ActiveStrokeGeometry()..begin(style);
+      for (var n = 1; n <= points.length; n++) {
+        g.sync(points.sublist(0, n));
+      }
+      final live = await _raster(g.paint);
+      final committed = await _committed(points, style);
+      expect(_diffRatio(live, committed), lessThan(0.005));
+      g.dispose();
+    });
+
+    final cases = <String, List<DrawingPoint>>{
+      'sine': _sine(400),
+      'zigzag': _wave(400),
+    };
+    for (final entry in {
+      'pen': StrokeStyle.pen(thickness: 3),
+      'pen (thick)': StrokeStyle.pen(thickness: 12),
+      'highlighter': StrokeStyle.highlighter(),
+      'highlighter (multiply)': StrokeStyle(
+        color: 0xFF2196F3,
+        thickness: 24,
+        opacity: 0.5,
+        nibShape: NibShape.rectangle,
+        blendMode: DrawingBlendMode.multiply,
+      ),
+    }.entries) {
+      for (final input in cases.entries) {
+        final style = entry.value;
+        final name = '${entry.key}, ${input.key}';
+        test('chunked live render matches committed render: $name', () async {
+          final points = input.value;
+          final g = ActiveStrokeGeometry()..begin(style);
+          for (var n = 1; n <= points.length; n++) {
+            g.sync(points.sublist(0, n));
+          }
+          expect(g.frozenChunks, greaterThan(5));
+          final live = await _raster(g.paint);
+          final committed = await _committed(points, style);
+          expect(_diffRatio(live, committed), lessThan(0.005));
+          g.dispose();
+        });
+      }
+    }
+  });
+}
+
+List<DrawingPoint> _sine(int n) => [
+      for (var i = 0; i < n; i++)
+        DrawingPoint(
+          x: 20 + i * 0.9,
+          y: 120 + 70 * math.sin(i / 25),
+          pressure: 0.5,
+        ),
+    ];
+
+Future<Uint8List> _committed(List<DrawingPoint> points, StrokeStyle style) {
+  final renderer = FlutterStrokeRenderer();
+  return _raster((c) => renderer.renderActiveStroke(c, points, style));
+}
+
+Future<Uint8List> _raster(void Function(ui.Canvas) draw) async {
+  final recorder = ui.PictureRecorder();
+  final canvas = ui.Canvas(recorder);
+  canvas.drawRect(
+    const ui.Rect.fromLTWH(0, 0, 400, 240),
+    ui.Paint()..color = const ui.Color(0xFFFFFFFF),
+  );
+  draw(canvas);
+  final picture = recorder.endRecording();
+  final image = await picture.toImage(400, 240);
+  final data = await image.toByteData();
+  image.dispose();
+  picture.dispose();
+  return data!.buffer.asUint8List();
+}
+
+double _diffRatio(Uint8List a, Uint8List b) {
+  var bad = 0;
+  for (var i = 0; i < a.length; i += 4) {
+    var d = 0;
+    for (var c = 0; c < 4; c++) {
+      final delta = (a[i + c] - b[i + c]).abs();
+      if (delta > d) d = delta;
+    }
+    if (d > 8) bad++;
+  }
+  return bad / (a.length / 4);
 }

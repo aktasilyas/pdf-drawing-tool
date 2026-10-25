@@ -43,14 +43,9 @@ class _TemplateSelectionScreenState
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    final backgroundColor =
-        isDark ? AppColors.backgroundDark : AppColors.backgroundLight;
-    final surfaceColor =
-        isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
-    final textPrimary =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final backgroundColor = context.palette.background;
+    final surfaceColor = context.palette.surface;
+    final textPrimary = context.palette.textPrimary;
 
     return Scaffold(
       backgroundColor: backgroundColor,

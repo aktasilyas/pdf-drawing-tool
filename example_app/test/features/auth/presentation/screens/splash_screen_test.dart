@@ -34,7 +34,7 @@ void main() {
           featureFlagsProvider.overrideWithValue(flags),
           sessionProvider.overrideWith((ref) => session()),
         ],
-        child: MaterialApp.router(routerConfig: router),
+        child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
       ),
     );
     await tester.pump(AppDurations.splash + const Duration(seconds: 2));

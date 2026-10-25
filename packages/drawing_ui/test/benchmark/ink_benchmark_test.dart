@@ -2,6 +2,9 @@
 // stroke. Prints worst / p95 frame times. Timings are informational (CI smoke).
 //
 // Run: ./scripts/ink_benchmark.sh   (or `flutter test test/benchmark`)
+@Tags(['benchmark'])
+library;
+
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
@@ -122,6 +125,7 @@ void main() {
     final styles = {
       'pen': StrokeStyle.pen(thickness: 2),
       'brush': StrokeStyle.brush(),
+      'highlighter': StrokeStyle.highlighter(),
     };
     for (final entry in styles.entries) {
       List<double> run(bool incremental) {

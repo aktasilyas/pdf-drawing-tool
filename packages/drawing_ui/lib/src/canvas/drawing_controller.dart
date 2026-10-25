@@ -242,6 +242,7 @@ class DrawingController extends ChangeNotifier {
   @override
   void dispose() {
     _activePoints.clear();
+    geometry.dispose();
     super.dispose();
   }
 }

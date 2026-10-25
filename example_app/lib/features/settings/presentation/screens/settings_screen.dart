@@ -28,13 +28,9 @@ class SettingsScreen extends ConsumerWidget {
     final user = cloud ? ref.watch(currentUserProvider) : null;
     final pinFavorites = ref.watch(pinFavoritesProvider);
     final isTablet = Responsive.isTablet(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final backgroundColor = isDark
-        ? AppColors.surfaceContainerLowDark
-        : AppColors.surfaceContainerLowLight;
-    final textPrimary =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final backgroundColor = context.palette.background;
+    final textPrimary = context.palette.textPrimary;
 
     final userName = !cloud
         ? 'ElyaNotes'
@@ -53,8 +49,7 @@ class SettingsScreen extends ConsumerWidget {
             child: ListView(
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
               children: [
-                _buildHeader(
-                    context, initials, userName, textPrimary, isDark, ref),
+                _buildHeader(context, initials, userName, textPrimary, ref),
                 const SizedBox(height: AppSpacing.sectionSpacing),
                 _buildAppearanceSection(context, ref, settings, pinFavorites),
                 const SizedBox(height: AppSpacing.sectionSpacing),
@@ -64,7 +59,7 @@ class SettingsScreen extends ConsumerWidget {
                 ],
                 _buildDataSection(context, ref),
                 const SizedBox(height: AppSpacing.sectionSpacing),
-                _buildAboutSection(context, isDark),
+                _buildAboutSection(context),
                 const SizedBox(height: AppSpacing.xxl),
                 if (cloud) ...[
                   _buildLogoutButton(context, ref),
@@ -79,7 +74,7 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Widget _buildHeader(BuildContext context, String initials, String userName,
-      Color textPrimary, bool isDark, WidgetRef ref) {
+      Color textPrimary, WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Column(
@@ -178,7 +173,7 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildAboutSection(BuildContext context, bool isDark) {
+  Widget _buildAboutSection(BuildContext context) {
     return SettingsSection(
       title: 'HAKKINDA',
       children: [
@@ -199,10 +194,7 @@ class SettingsScreen extends ConsumerWidget {
           title: 'Versiyon',
           showArrow: false,
           trailing: Text('1.0.0 (1)',
-              style: TextStyle(
-                  color: isDark
-                      ? AppColors.textSecondaryDark
-                      : AppColors.textSecondaryLight)),
+              style: TextStyle(color: context.palette.textMuted)),
         ),
         SettingsTile(
           icon: Icons.privacy_tip_outlined,

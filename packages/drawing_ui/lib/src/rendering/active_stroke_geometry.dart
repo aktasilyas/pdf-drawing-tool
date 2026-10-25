@@ -2,8 +2,10 @@ import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:drawing_core/drawing_core.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 
 import 'flutter_stroke_renderer.dart';
+import 'stroked_stroke_body.dart';
 import 'variable_width_renderer.dart';
 
 /// How [ActiveStrokeGeometry] renders the live stroke.
@@ -11,7 +13,9 @@ enum ActiveStrokeMode {
   /// Outline pens (pressure or tapered): frozen outline chunks plus a recomputed tail.
   outline,
 
-  /// Solid stroked pens: quadratic segments appended one by one.
+  /// Solid stroked pens: quadratic segments appended one by one; the body
+  /// is frozen every [ActiveStrokeGeometry.strokedChunk] segments so the
+  /// live (mutated) path stays short (see [StrokedStrokeBody]).
   stroked,
 
   /// Dashed, pencil, straight line: rebuilt from all points (O(n)).
@@ -30,12 +34,18 @@ class ActiveStrokeGeometry {
   /// Frozen outline chunks are at least this many samples long.
   static const int _chunk = 8;
 
+  /// Stroked mode freezes the live body path every this many
+  /// quadratic segments, so per-event work does not grow with the stroke.
+  static const int strokedChunk = StrokedStrokeBody.chunk;
+
   final FlutterStrokeRenderer _renderer;
-  final Path _body = Path();
-  final Path _tail = Path();
+  final Path _body = Path(); // outline: frozen polygons
+  final Path _tail = Path(); // outline: recomputed tail
+  final StrokedStrokeBody _stroked = StrokedStrokeBody();
   final List<double> _scratch = <double>[];
   IncrementalStrokeOutline? _outline;
   Paint? _paint;
+  Paint? _chunkPaint; // stroked: butt-capped copy of [_paint] for chunks
   Paint? _layerPaint;
   StrokeStyle? _style;
   List<DrawingPoint> _points = const [];
@@ -43,7 +53,6 @@ class ActiveStrokeGeometry {
   ActiveStrokeMode _mode = ActiveStrokeMode.fallback;
   int _consumed = 0;
   int _bodyEnd = -1; // outline: last sample covered by [_body]
-  DrawingPoint? _prev;
   double _minX = 0, _minY = 0, _maxX = 0, _maxY = 0;
 
   /// Bumped on every change; painters compare it in `shouldRepaint`.
@@ -54,6 +63,14 @@ class ActiveStrokeGeometry {
   /// Number of input points folded into the geometry so far.
   int get consumed => _consumed;
 
+  /// Stroked mode: segments in the live (not yet frozen) body path.
+  @visibleForTesting
+  int get liveSegments => _stroked.liveSegments;
+
+  /// Stroked mode: number of body chunks frozen so far.
+  @visibleForTesting
+  int get frozenChunks => _stroked.frozenChunks;
+
   /// Starts a new stroke. [incremental] is false for straight-line previews
   /// and for strokes whose points are rewritten rather than appended.
   void begin(StrokeStyle style, {bool incremental = true}) {
@@ -62,7 +79,6 @@ class ActiveStrokeGeometry {
     _tail.reset();
     _consumed = 0;
     _bodyEnd = -1;
-    _prev = null;
     _points = const [];
     final dashed =
         style.pattern != StrokePattern.solid && style.dashPattern != null;
@@ -79,6 +95,7 @@ class ActiveStrokeGeometry {
       _mode = ActiveStrokeMode.stroked;
     }
     _configurePaints(style);
+    _stroked.reset(cap: _paint!.strokeCap, thickness: style.thickness);
     version++;
   }
 
@@ -89,32 +106,46 @@ class ActiveStrokeGeometry {
     _tail.reset();
     _points = const [];
     _consumed = 0;
-    _prev = null;
+    _stroked.dropFrozen();
     version++;
   }
 
+  /// Drops the frozen chunks. The geometry stays usable.
+  void dispose() => _stroked.dropFrozen();
+
   void _configurePaints(StrokeStyle style) {
-    final Paint paint;
-    if (_mode == ActiveStrokeMode.outline) {
-      paint = VariableWidthStrokeRenderer.fillPaintFor(style);
-    } else {
-      paint = _renderer.strokePaintFor(style);
-    }
     final translucent =
         style.opacity < 1 || style.blendMode != DrawingBlendMode.normal;
-    if (translucent && _mode != ActiveStrokeMode.fallback) {
-      // Draw opaque into a layer, then composite once, so the overlap of
-      // body and tail does not darken (same as a committed stroke).
+    final layered = translucent && _mode != ActiveStrokeMode.fallback;
+    final paint = _buildPaint(style, layered);
+    if (layered) {
+      // Draw opaque into a layer, then composite once, so overlapping
+      // chunks, body and tail do not darken (same as a committed stroke).
       _layerPaint = Paint()
         ..blendMode = paint.blendMode
         ..color = Color(0xFF000000).withValues(alpha: style.opacity);
-      paint
-        ..color = paint.color.withValues(alpha: 1)
-        ..blendMode = BlendMode.srcOver;
+      paint.blendMode = BlendMode.srcOver;
     } else {
       _layerPaint = null;
     }
     _paint = paint;
+    final squareish = paint.strokeCap != StrokeCap.round;
+    if (_mode == ActiveStrokeMode.stroked && squareish) {
+      _chunkPaint = _buildPaint(style, layered)
+        ..blendMode = paint.blendMode
+        ..strokeCap = StrokeCap.butt;
+    } else {
+      _chunkPaint = paint;
+    }
+  }
+
+  /// The style's paint; opaque colour when it is drawn into a layer.
+  Paint _buildPaint(StrokeStyle style, bool layered) {
+    final paint = _mode == ActiveStrokeMode.outline
+        ? VariableWidthStrokeRenderer.fillPaintFor(style)
+        : _renderer.strokePaintFor(style);
+    if (layered) paint.color = paint.color.withValues(alpha: 1);
+    return paint;
   }
 
   /// Brings the geometry up to date with [points], the controller's list.
@@ -189,32 +220,10 @@ class ActiveStrokeGeometry {
     for (var i = _consumed; i < points.length; i++) {
       final p = points[i];
       _grow(p);
-      if (i == 0) {
-        _body.moveTo(p.x, p.y);
-      } else if (i >= 2) {
-        final q = _prev!;
-        _body.quadraticBezierTo(q.x, q.y, (q.x + p.x) / 2, (q.y + p.y) / 2);
-      }
-      _prev = p;
+      _stroked.add(i, p);
       _consumed = i + 1;
     }
-    _tail.reset();
-    final n = points.length;
-    if (n == 0) return;
-    final last = points[n - 1];
-    if (n == 1) {
-      _tail.addOval(Rect.fromCircle(
-        center: Offset(last.x, last.y),
-        radius: style.thickness / 2,
-      ));
-    } else if (n == 2) {
-      _tail.moveTo(points[0].x, points[0].y);
-      _tail.lineTo(last.x, last.y);
-    } else {
-      final q = points[n - 2];
-      _tail.moveTo((q.x + last.x) / 2, (q.y + last.y) / 2);
-      _tail.lineTo(last.x, last.y);
-    }
+    _stroked.updateTail(points, style.thickness);
   }
 
   /// Draws the live stroke. Allocates nothing in outline and stroked modes
@@ -234,8 +243,12 @@ class ActiveStrokeGeometry {
         layer,
       );
     }
-    canvas.drawPath(_body, _paint!);
-    canvas.drawPath(_tail, _paint!);
+    if (_mode == ActiveStrokeMode.stroked) {
+      _stroked.paint(canvas, _paint!, _chunkPaint!);
+    } else {
+      canvas.drawPath(_body, _paint!);
+      canvas.drawPath(_tail, _paint!);
+    }
     if (layer != null) canvas.restore();
   }
 }

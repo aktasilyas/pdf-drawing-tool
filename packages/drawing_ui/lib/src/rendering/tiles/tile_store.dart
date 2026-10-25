@@ -27,6 +27,13 @@ class TileStore {
     vector.remove(key);
   }
 
+  /// Drops every tile of [grid] that intersects one of [rects].
+  void dropIn(TileGrid grid, Iterable<ui.Rect> rects) {
+    for (final rect in rects) {
+      grid.keysIn(rect).forEach(drop);
+    }
+  }
+
   void clear() {
     for (final t in tiles.values) {
       t.image.dispose();

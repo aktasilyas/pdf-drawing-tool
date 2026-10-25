@@ -25,21 +25,18 @@ class SidebarTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final selectedColor = isDark ? AppColors.accent : AppColors.primary;
+    final selectedColor = context.palette.accent;
     final textColor = !enabled
-        ? (isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight)
+        ? context.palette.textDisabled
         : isSelected
             ? selectedColor
-            : (isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight);
+            : context.palette.textPrimary;
     final iconColor = !enabled
-        ? (isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight)
+        ? context.palette.textDisabled
         : isSelected
             ? selectedColor
-            : (isDark ? AppColors.primaryDarkMode : AppColors.primary);
-    final iconBg = isDark
-        ? AppColors.surfaceContainerHighDark
-        : AppColors.surfaceContainerHighLight;
+            : context.palette.accent;
+    final iconBg = context.palette.surfaceElevated;
 
     return InkWell(
       onTap: enabled ? onTap : null,

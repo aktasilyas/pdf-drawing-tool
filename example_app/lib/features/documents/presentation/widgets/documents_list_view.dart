@@ -29,11 +29,9 @@ class DocumentsCombinedListView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isPhone = Responsive.isPhone(context);
     final padding = isPhone ? AppSpacing.md : AppSpacing.lg;
-    final textTertiary =
-        isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight;
+    final textTertiary = context.palette.textDisabled;
 
     final hasFolders = folders.isNotEmpty;
     final hasDocs = documents.isNotEmpty;
@@ -139,19 +137,14 @@ class FolderListTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final isSelectionMode = ref.watch(selectionModeProvider);
     final selectedFolders = ref.watch(selectedFoldersProvider);
     final isSelected = selectedFolders.contains(folder.id);
 
-    final textPrimary =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
-    final textTertiary =
-        isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight;
-    final surfaceColor =
-        isDark ? AppColors.surfaceDark : AppColors.surfaceLight;
-    final hoverColor =
-        isDark ? AppColors.surfaceVariantDark : AppColors.surfaceVariantLight;
+    final textPrimary = context.palette.textPrimary;
+    final textTertiary = context.palette.textDisabled;
+    final surfaceColor = context.palette.surface;
+    final hoverColor = context.palette.surfaceElevated;
 
     return Material(
       color: surfaceColor,
@@ -184,7 +177,6 @@ class FolderListTile extends ConsumerWidget {
               ),
               _FolderCountBadge(
                 count: folder.documentCount,
-                isDark: isDark,
               ),
               if (!isSelectionMode) ...[
                 const SizedBox(width: AppSpacing.xs),
@@ -225,23 +217,19 @@ class _FolderIcon extends StatelessWidget {
 }
 
 class _FolderCountBadge extends StatelessWidget {
-  const _FolderCountBadge({required this.count, required this.isDark});
+  const _FolderCountBadge({required this.count});
   final int count;
-  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
-    final textTertiary =
-        isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight;
+    final textTertiary = context.palette.textDisabled;
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
         vertical: 2,
       ),
       decoration: BoxDecoration(
-        color: isDark
-            ? AppColors.surfaceVariantDark
-            : AppColors.surfaceVariantLight,
+        color: context.palette.surfaceElevated,
         borderRadius: BorderRadius.circular(AppRadius.full),
       ),
       child: Text(

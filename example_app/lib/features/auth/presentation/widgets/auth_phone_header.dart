@@ -11,9 +11,7 @@ class AuthPhoneHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textPrimary =
-        isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight;
+    final textPrimary = context.palette.textPrimary;
 
     return Column(
       children: [
@@ -31,7 +29,7 @@ class AuthPhoneHeader extends StatelessWidget {
                 color: AppColors.primary,
                 borderRadius: BorderRadius.circular(AppRadius.lg),
                 boxShadow: AppShadows.cardResting(
-                  isDark ? Brightness.dark : Brightness.light,
+                  Theme.of(context).brightness,
                 ),
               ),
               child: const Icon(

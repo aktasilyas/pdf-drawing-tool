@@ -8,8 +8,9 @@ void main() {
   group('DocumentsEmptyState', () {
     testWidgets('should_render_without_error', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: const Scaffold(
             body: DocumentsEmptyState(),
           ),
         ),
@@ -27,8 +28,9 @@ void main() {
   group('FavoritesEmptyState', () {
     testWidgets('should_render_without_error', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: const Scaffold(
             body: FavoritesEmptyState(),
           ),
         ),
@@ -42,8 +44,9 @@ void main() {
   group('FolderEmptyState', () {
     testWidgets('should_render_without_error', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: const Scaffold(
             body: FolderEmptyState(),
           ),
         ),
@@ -57,8 +60,9 @@ void main() {
   group('TrashEmptyState', () {
     testWidgets('should_render_without_error', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: const Scaffold(
             body: TrashEmptyState(),
           ),
         ),
@@ -75,7 +79,7 @@ void main() {
         ProviderScope(
           child: MaterialApp(
             theme: AppTheme.light,
-            home: Scaffold(
+            home: const Scaffold(
               body: DocumentsEmptySearchResult(query: 'test'),
             ),
           ),
@@ -90,8 +94,9 @@ void main() {
   group('DocumentsComingSoon', () {
     testWidgets('should_render_without_error', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
+        MaterialApp(
+          theme: AppTheme.light,
+          home: const Scaffold(
             body: DocumentsComingSoon(),
           ),
         ),

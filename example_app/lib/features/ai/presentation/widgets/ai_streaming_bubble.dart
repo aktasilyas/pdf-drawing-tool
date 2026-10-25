@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
+import 'package:example_app/core/theme/index.dart';
+
 /// Displays the currently streaming AI response with a typing cursor.
 class AIStreamingBubble extends StatelessWidget {
   const AIStreamingBubble({
@@ -13,7 +15,6 @@ class AIStreamingBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -35,10 +36,7 @@ class AIStreamingBubble extends StatelessWidget {
               constraints: const BoxConstraints(maxWidth: 600),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: isDark
-                    ? theme.colorScheme.surface
-                    : theme.colorScheme.surfaceContainerHighest
-                        .withValues(alpha: 0.5),
+                color: context.palette.surfaceElevated,
                 borderRadius: const BorderRadius.only(
                   topLeft: Radius.circular(16),
                   topRight: Radius.circular(16),

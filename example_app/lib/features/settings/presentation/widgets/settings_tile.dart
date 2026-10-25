@@ -28,23 +28,11 @@ class SettingsTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor = enabled
-        ? (isDark ? AppColors.textPrimaryDark : AppColors.textPrimaryLight)
-        : (isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight);
-    final subtitleColor = enabled
-        ? (isDark ? AppColors.textSecondaryDark : AppColors.textSecondaryLight)
-        : (isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight);
-    final iconColor = enabled
-        ? (isDark ? AppColors.primaryDarkMode : AppColors.primary)
-        : (isDark ? AppColors.textTertiaryDark : AppColors.textTertiaryLight);
-    final iconBgColor = enabled
-        ? (isDark
-            ? AppColors.surfaceContainerHighDark
-            : AppColors.surfaceContainerHighLight)
-        : (isDark
-            ? AppColors.surfaceVariantDark
-            : AppColors.surfaceVariantLight);
+    final palette = context.palette;
+    final textColor = enabled ? palette.textPrimary : palette.textDisabled;
+    final subtitleColor = enabled ? palette.textMuted : palette.textDisabled;
+    final iconColor = enabled ? palette.accent : palette.textDisabled;
+    final iconBgColor = enabled ? palette.accentContainer : palette.background;
 
     return InkWell(
       onTap: enabled ? onTap : null,
@@ -89,10 +77,7 @@ class SettingsTile extends StatelessWidget {
             if (trailing != null)
               trailing!
             else if (showArrow && onTap != null)
-              Icon(Icons.chevron_right,
-                  color: isDark
-                      ? AppColors.textTertiaryDark
-                      : AppColors.textTertiaryLight),
+              Icon(Icons.chevron_right, color: palette.textDisabled),
           ],
         ),
       ),

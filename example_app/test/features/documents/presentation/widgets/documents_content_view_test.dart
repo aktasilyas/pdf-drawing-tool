@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/documents/presentation/widgets/documents_content_view.dart';
 import 'package:example_app/features/documents/presentation/widgets/documents_sidebar.dart';
 
@@ -10,6 +11,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
+            theme: AppTheme.light,
             home: Scaffold(
               body: DocumentsContentView(
                 section: SidebarSection.shared,
@@ -31,6 +33,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
+            theme: AppTheme.light,
             home: Scaffold(
               body: DocumentsContentView(
                 section: SidebarSection.store,
@@ -54,6 +57,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
+            theme: AppTheme.light,
             home: Scaffold(
               body: DocumentsContentView(
                 section: SidebarSection.folder,
@@ -78,6 +82,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
+            theme: AppTheme.light,
             home: Scaffold(
               body: DocumentsContentView(
                 section: SidebarSection.shared,

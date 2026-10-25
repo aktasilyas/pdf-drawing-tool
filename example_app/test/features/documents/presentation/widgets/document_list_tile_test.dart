@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
 import 'package:example_app/features/documents/presentation/widgets/document_list_tile.dart';
 
@@ -25,6 +26,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
+            theme: AppTheme.light,
             home: Scaffold(
               body: DocumentListTile(
                 document: testDocument,
@@ -44,6 +46,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
+            theme: AppTheme.light,
             home: Scaffold(
               body: DocumentListTile(
                 document: testDocument,
@@ -64,6 +67,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
+            theme: AppTheme.light,
             home: Scaffold(
               body: DocumentListTile(
                 document: testDocument,
@@ -87,6 +91,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           child: MaterialApp(
+            theme: AppTheme.light,
             home: Scaffold(
               body: DocumentListTile(
                 document: testDocument,
