@@ -149,25 +149,7 @@ class LoadDocumentUseCase {
     );
   }
 
-  /// Convert paper color string to hex color
-  int _getPaperColor(String paperColor) {
-    switch (paperColor) {
-      case 'Beyaz kağıt':
-        return 0xFFFFFFFF; // Pure white
-      case 'Siyah kağıt':
-        return 0xFF1A1A1A; // Black (dark mode)
-      case 'Krem kağıt':
-        return 0xFFFFF8E7; // Cream
-      case 'Gri kağıt':
-        return 0xFFF5F5F5; // Light gray
-      case 'Yeşil kağıt':
-        return 0xFFE8F5E9; // Light green
-      case 'Mavi kağıt':
-        return 0xFFE3F2FD; // Light blue
-      case 'Sarı kağıt':
-        return 0xFFFFFDE7; // Cream/yellow tint (legacy)
-      default:
-        return 0xFFFFFFFF; // Default to white
-    }
-  }
+  /// Paper colour for a stored value in either spelling; white if unknown.
+  int _getPaperColor(String paperColor) =>
+      (PaperColor.tryParse(paperColor) ?? PaperColor.white).argb;
 }
