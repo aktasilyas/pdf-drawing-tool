@@ -115,8 +115,12 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
                   label: '$pageLabel, Sayfaya gitmek için dokunun',
                   button: true,
                   child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
                     onTap: () => _showGoToPageDialog(context, ref, pageCount),
-                    child: Padding(
+                    // Full-height hit area: 48dp like the arrows beside it.
+                    child: Container(
+                      height: 48,
+                      alignment: Alignment.center,
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Text(pageLabel,
                           style: Theme.of(context)
