@@ -54,6 +54,24 @@ extension AppPump on WidgetTester {
     }
   }
 
+  /// Pumps until [condition] holds, or fails with [reason] after [timeout].
+  /// For app state (providers) that changes a few frames after a gesture.
+  Future<void> pumpUntilTrue(
+    bool Function() condition, {
+    required String reason,
+    Duration timeout = const Duration(seconds: 10),
+  }) async {
+    const step = Duration(milliseconds: 100);
+    var elapsed = Duration.zero;
+    while (!condition()) {
+      if (elapsed >= timeout) {
+        throw TestFailure('Timed out after ${timeout.inSeconds}s: $reason');
+      }
+      await pump(step);
+      elapsed += step;
+    }
+  }
+
   /// Waits for [finder], taps it, then lets transitions run.
   Future<void> tapAndWait(Finder finder) async {
     await pumpUntilFound(finder);
