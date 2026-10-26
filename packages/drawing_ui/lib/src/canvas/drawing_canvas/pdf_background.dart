@@ -110,42 +110,12 @@ mixin _PdfBackground on DrawingCanvasGestureHandlers<DrawingCanvas> {
     );
   }
 
-  /// PDF placeholder widget'ı
+  /// PDF placeholder; shows a distinct state when the source PDF is missing.
   Widget _buildPdfPlaceholder(core.Page page) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Container(
+    return PdfPagePlaceholder(
       width: page.size.width,
       height: page.size.height,
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerLowest,
-        // Gölge ekle
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.15),
-            blurRadius: 20,
-            spreadRadius: 2,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            PhosphorIcon(ElyanotesIcons.pdfFile,
-                size: 40, color: colorScheme.outlineVariant),
-            const SizedBox(height: 8),
-            Text(
-              'PDF Sayfası',
-              style: Theme.of(context)
-                  .textTheme
-                  .bodySmall
-                  ?.copyWith(color: colorScheme.onSurfaceVariant),
-            ),
-          ],
-        ),
-      ),
+      pdfFilePath: page.background.pdfFilePath,
     );
   }
 

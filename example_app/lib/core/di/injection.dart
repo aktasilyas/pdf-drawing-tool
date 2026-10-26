@@ -12,7 +12,9 @@ library;
 
 import 'dart:async';
 
+import 'package:drawing_core/drawing_core.dart' show PdfPathResolver;
 import 'package:get_it/get_it.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:example_app/core/database/app_database.dart';
 import 'package:example_app/core/database/local_transaction_runner.dart';
@@ -40,6 +42,10 @@ Future<void> configureDependencies() async {
 
   // Import the legacy prefs library before any datasource reads from Drift.
   await PrefsToDriftMigration(database, prefs).run();
+
+  // Imported PDFs are stored relative to the app documents directory.
+  final docsDir = await getApplicationDocumentsDirectory();
+  getIt.registerSingleton<PdfPathResolver>(PdfPathResolver(docsDir.path));
 
   // Manual registrations
   _registerRepositories();
@@ -85,7 +91,10 @@ void _registerCoreServices() {
 void _registerRepositories() {
   // Datasources
   getIt.registerLazySingleton<DocumentLocalDatasource>(
-    () => DocumentLocalDatasourceImpl(getIt()),
+    () => DocumentLocalDatasourceImpl(
+      getIt(),
+      pdfPaths: getIt<PdfPathResolver>(),
+    ),
   );
 
   getIt.registerLazySingleton<FolderLocalDatasource>(

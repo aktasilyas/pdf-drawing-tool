@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:drawing_core/drawing_core.dart' show PdfPathResolver;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -81,6 +82,7 @@ Future<void> _bootApp(WidgetTester tester) async {
         flags: flags,
         prefs: result.prefs,
         crashReporter: result.crashReporter,
+        pdfPaths: getIt<PdfPathResolver>(),
       ),
       child: const ElyaNotesApp(),
     ),

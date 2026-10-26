@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:drawing_ui/src/providers/pdf_page_cache.dart';
+import 'package:drawing_ui/src/providers/pdf_path_provider.dart';
 
 export 'package:drawing_ui/src/providers/pdf_page_cache.dart';
 export 'package:drawing_ui/src/providers/pdf_zoom_render_provider.dart';
@@ -46,7 +47,7 @@ Future<Uint8List?> renderThumbnail(
     final parts = cacheKey.split('|');
     if (parts.length != 2) return null;
 
-    final filePath = parts[0];
+    final filePath = container.read(pdfPathResolverProvider).resolve(parts[0]);
     final pageNumber = int.tryParse(parts[1]);
     if (pageNumber == null) return null;
 

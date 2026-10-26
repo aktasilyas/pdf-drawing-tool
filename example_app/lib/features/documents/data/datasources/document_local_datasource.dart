@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:drawing_core/drawing_core.dart' show PdfPathResolver;
 import 'package:drift/drift.dart';
 import 'package:injectable/injectable.dart';
 import 'package:example_app/core/core.dart';
@@ -28,6 +29,7 @@ abstract class DocumentLocalDatasource {
 class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
   final AppDatabase _db;
   final DocumentContentCodec _codec;
+  final PdfPathResolver _pdfPaths;
 
   /// Newest content write per document. Large encodes yield mid-way, so
   /// writes are chained to land in call order (a stale autosave never
@@ -37,7 +39,9 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
   DocumentLocalDatasourceImpl(
     this._db, {
     DocumentContentCodec codec = const DocumentContentCodec(),
-  }) : _codec = codec;
+    PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
+  })  : _codec = codec,
+        _pdfPaths = pdfPaths;
 
   /// Root level (folderId null) or a single folder.
   SimpleSelectStatement<$DocumentsTable, DocumentRow> _folderQuery(
@@ -164,7 +168,7 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
 
   Future<void> _deleteFile(String path) async {
     try {
-      final file = File(path);
+      final file = File(_pdfPaths.resolve(path));
       if (await file.exists()) await file.delete();
     } catch (e) {
       logger.w('Could not delete PDF copy $path: $e');

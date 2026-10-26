@@ -123,7 +123,8 @@ class PDFExportService {
   PDFExportService({
     PDFExporter? exporter,
     RasterPDFRenderer? rasterRenderer,
-  })  : _exporter = exporter ?? PDFExporter(),
+    PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
+  })  : _exporter = exporter ?? PDFExporter(pdfPaths: pdfPaths),
         _rasterRenderer = rasterRenderer ?? RasterPDFRenderer();
 
   /// Current export state.

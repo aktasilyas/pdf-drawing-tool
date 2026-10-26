@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:drawing_core/drawing_core.dart' show PdfPathResolver;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:example_app/features/documents/documents.dart';
 import '../../../../helpers/library_fixture.dart';
@@ -167,6 +168,23 @@ void main() {
 
       await fx.documents.permanentlyDelete(b.id);
       expect(shared.existsSync(), isFalse);
+    });
+
+    test('resolves a relative stored PDF path against the documents root',
+        () async {
+      final rooted = LibraryFixture(null, PdfPathResolver(dir.path));
+      addTearDown(rooted.close);
+      Directory('${dir.path}/pdfs').createSync();
+      final pdf = File('${dir.path}/pdfs/a.pdf')..writeAsStringSync('x');
+      final a = (await rooted.documents
+              .createDocument(title: 'A', templateId: 'blank'))
+          .getOrElse(() => throw StateError('create failed'));
+      await rooted.documents
+          .saveDocumentContent(id: a.id, content: pdfContent('pdfs/a.pdf'));
+
+      await rooted.documents.permanentlyDelete(a.id);
+
+      expect(pdf.existsSync(), isFalse);
     });
 
     test('keeps the PDF while another document\'s trashed page uses it',
