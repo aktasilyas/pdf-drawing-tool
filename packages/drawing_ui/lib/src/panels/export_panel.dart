@@ -104,8 +104,7 @@ class PDFExportRunner {
 }
 
 /// The [PDFExportRunner] used by [ExportPanel].
-final pdfExportRunnerProvider =
-    Provider<PDFExportRunner>(
+final pdfExportRunnerProvider = Provider<PDFExportRunner>(
   (ref) => PDFExportRunner(shareService: ref.watch(pdfShareServiceProvider)),
 );
 

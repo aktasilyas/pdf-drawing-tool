@@ -109,7 +109,8 @@ void main() {
   });
 
   for (final embedded in [true, false]) {
-    testWidgets('ExportPanel PDF Paylaş reaches the share service '
+    testWidgets(
+        'ExportPanel PDF Paylaş reaches the share service '
         '(embedded: $embedded)', (tester) async {
       final share = _CountingShare();
       await tester.pumpWidget(
@@ -128,8 +129,8 @@ void main() {
         ),
       );
       await tester.tap(find.text('PDF Paylaş'));
-      await tester.runAsync(() => Future<void>.delayed(
-          const Duration(milliseconds: 500)));
+      await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 500)));
       await tester.pump();
 
       expect(share.calls, 1);
