@@ -1,0 +1,5 @@
+# Wall-clock benchmarks (test/benchmark). scripts/check.sh excludes them from
+# the parallel suite and runs them afterwards with --concurrency=1, so other
+# test processes do not compete with them for the CPU.
+tags:
+  benchmark:

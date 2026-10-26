@@ -300,7 +300,12 @@ class AppDatabase extends _$AppDatabase {
       }
       final dbFolder = await getApplicationDocumentsDirectory();
       final file = File(p.join(dbFolder.path, 'elyanotes.db'));
-      return NativeDatabase.createInBackground(file);
+      return NativeDatabase.createInBackground(
+        file,
+        // Android has no writable /tmp for sqlite's temp files (large sorts,
+        // migrations); keep them in memory instead.
+        setup: (db) => db.execute('PRAGMA temp_store = MEMORY'),
+      );
     });
   }
 }

@@ -1,3 +1,10 @@
+// Document content benchmark: longest UI-isolate stall per save/load of a
+// 300-page notebook, before vs after #208. Timings are informational.
+//
+// Run: flutter test test/benchmark (scripts/check.sh runs it alone).
+@Tags(['benchmark'])
+library;
+
 import 'dart:async';
 import 'dart:io';
 
@@ -9,7 +16,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/documents.dart';
 
-import '../../../../helpers/large_document.dart';
+import '../helpers/large_document.dart';
 
 /// Longest time the calling isolate's event loop was blocked while [work]
 /// ran, sampled with a 1 ms ticker. This is what a UI frame would wait for.
