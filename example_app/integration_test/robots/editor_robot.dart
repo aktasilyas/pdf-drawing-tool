@@ -116,7 +116,11 @@ class EditorRobot {
       reason: 'eraser $type not selected (still $currentTool)',
     );
     await tester.tapAndWait(find.byTooltip('Kapat').hitTestable());
-    await tester.pumpUntilGone(option);
+    // The toolbar button now carries the same tooltip, so wait for the
+    // panel's own button (keyed by type) to leave the tree.
+    await tester.pumpUntilGone(
+      find.byKey(ValueKey('eraser-type-${type.name}')),
+    );
   }
 
   bool _sameGroup(ToolType a, ToolType b) {
