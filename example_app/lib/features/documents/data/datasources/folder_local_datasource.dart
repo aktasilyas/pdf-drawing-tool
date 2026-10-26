@@ -38,8 +38,7 @@ class FolderLocalDatasourceImpl implements FolderLocalDatasource {
   @override
   Future<FolderModel> getFolder(String id) async {
     try {
-      final row = await (_db.select(_db.folders)
-            ..where((t) => t.id.equals(id)))
+      final row = await (_db.select(_db.folders)..where((t) => t.id.equals(id)))
           .getSingleOrNull();
       if (row == null) throw const CacheException('Folder not found');
       return _toModel(row);
