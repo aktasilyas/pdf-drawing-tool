@@ -1,7 +1,5 @@
-import 'dart:async';
-import 'dart:convert';
+import 'package:drift/drift.dart';
 import 'package:injectable/injectable.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/data/models/folder_model.dart';
 
@@ -14,33 +12,24 @@ abstract class FolderLocalDatasource {
   Stream<List<FolderModel>> watchFolders({String? parentId});
 }
 
+/// Drift-backed folder storage.
 @Injectable(as: FolderLocalDatasource)
 class FolderLocalDatasourceImpl implements FolderLocalDatasource {
-  static const String _foldersKey = 'folders';
-  final SharedPreferences _prefs;
-  final StreamController<List<FolderModel>> _controller =
-      StreamController<List<FolderModel>>.broadcast();
+  final AppDatabase _db;
 
-  FolderLocalDatasourceImpl(this._prefs);
+  FolderLocalDatasourceImpl(this._db);
+
+  SimpleSelectStatement<$FoldersTable, FolderRow> _query(String? parentId) {
+    final q = _db.select(_db.folders);
+    if (parentId != null) q.where((t) => t.parentId.equals(parentId));
+    return q;
+  }
 
   @override
   Future<List<FolderModel>> getFolders({String? parentId}) async {
     try {
-      final jsonString = _prefs.getString(_foldersKey);
-      if (jsonString == null) {
-        return [];
-      }
-
-      final List<dynamic> jsonList = json.decode(jsonString) as List;
-      final folders = jsonList
-          .map((json) => FolderModel.fromJson(json as Map<String, dynamic>))
-          .toList();
-
-      if (parentId == null) {
-        return folders;
-      }
-
-      return folders.where((folder) => folder.parentId == parentId).toList();
+      final rows = await _query(parentId).get();
+      return rows.map(_toModel).toList();
     } catch (e) {
       throw CacheException('Failed to get folders: $e');
     }
@@ -49,11 +38,11 @@ class FolderLocalDatasourceImpl implements FolderLocalDatasource {
   @override
   Future<FolderModel> getFolder(String id) async {
     try {
-      final folders = await getFolders();
-      return folders.firstWhere(
-        (folder) => folder.id == id,
-        orElse: () => throw const CacheException('Folder not found'),
-      );
+      final row = await (_db.select(_db.folders)
+            ..where((t) => t.id.equals(id)))
+          .getSingleOrNull();
+      if (row == null) throw const CacheException('Folder not found');
+      return _toModel(row);
     } catch (e) {
       throw CacheException('Failed to get folder: $e');
     }
@@ -62,10 +51,7 @@ class FolderLocalDatasourceImpl implements FolderLocalDatasource {
   @override
   Future<FolderModel> createFolder(FolderModel folder) async {
     try {
-      final folders = await getFolders();
-      folders.add(folder);
-      await _saveFolders(folders);
-      _controller.add(folders);
+      await _db.into(_db.folders).insert(_toCompanion(folder));
       return folder;
     } catch (e) {
       throw CacheException('Failed to create folder: $e');
@@ -75,16 +61,10 @@ class FolderLocalDatasourceImpl implements FolderLocalDatasource {
   @override
   Future<FolderModel> updateFolder(FolderModel folder) async {
     try {
-      final folders = await getFolders();
-      final index = folders.indexWhere((f) => f.id == folder.id);
-
-      if (index == -1) {
-        throw const CacheException('Folder not found');
-      }
-
-      folders[index] = folder;
-      await _saveFolders(folders);
-      _controller.add(folders);
+      final count = await (_db.update(_db.folders)
+            ..where((t) => t.id.equals(folder.id)))
+          .write(_toCompanion(folder));
+      if (count == 0) throw const CacheException('Folder not found');
       return folder;
     } catch (e) {
       throw CacheException('Failed to update folder: $e');
@@ -94,10 +74,7 @@ class FolderLocalDatasourceImpl implements FolderLocalDatasource {
   @override
   Future<void> deleteFolder(String id) async {
     try {
-      final folders = await getFolders();
-      folders.removeWhere((folder) => folder.id == id);
-      await _saveFolders(folders);
-      _controller.add(folders);
+      await (_db.delete(_db.folders)..where((t) => t.id.equals(id))).go();
     } catch (e) {
       throw CacheException('Failed to delete folder: $e');
     }
@@ -105,35 +82,26 @@ class FolderLocalDatasourceImpl implements FolderLocalDatasource {
 
   @override
   Stream<List<FolderModel>> watchFolders({String? parentId}) {
-    // Emit initial data
-    getFolders(parentId: parentId).then((folders) {
-      if (!_controller.isClosed) {
-        _controller.add(folders);
-      }
-    });
-
-    if (parentId == null) {
-      return _controller.stream;
-    }
-
-    return _controller.stream.map(
-      (folders) => folders.where((f) => f.parentId == parentId).toList(),
-    );
+    return _query(parentId).watch().map((rows) => rows.map(_toModel).toList());
   }
 
-  Future<void> _saveFolders(List<FolderModel> folders) async {
-    try {
-      final jsonList = folders.map((folder) => folder.toJson()).toList();
-      final jsonString = json.encode(jsonList);
-      if (!await _prefs.setString(_foldersKey, jsonString)) {
-        throw const CacheException('Folders write was rejected');
-      }
-    } catch (e) {
-      throw CacheException('Failed to save folders: $e');
-    }
-  }
+  FolderModel _toModel(FolderRow r) => FolderModel(
+        id: r.id,
+        name: r.name,
+        parentId: r.parentId,
+        colorValue: r.colorValue,
+        sortOrder: r.sortOrder,
+        createdAt: r.createdAt,
+        isFavorite: r.isFavorite,
+      );
 
-  void dispose() {
-    _controller.close();
-  }
+  FoldersCompanion _toCompanion(FolderModel f) => FoldersCompanion(
+        id: Value(f.id),
+        name: Value(f.name),
+        parentId: Value(f.parentId),
+        colorValue: Value(f.colorValue),
+        sortOrder: Value(f.sortOrder),
+        isFavorite: Value(f.isFavorite),
+        createdAt: Value(f.createdAt),
+      );
 }

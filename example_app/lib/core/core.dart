@@ -44,4 +44,5 @@ export 'network/network_info.dart';
 export 'di/injection.dart' show getIt, configureDependencies;
 
 // Database - export only public interfaces
-// export 'database/app_database.dart';
+export 'database/app_database.dart';
+export 'database/local_transaction_runner.dart';
