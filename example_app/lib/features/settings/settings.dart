@@ -1,6 +1,10 @@
 export 'domain/entities/app_settings.dart';
 export 'presentation/providers/settings_provider.dart';
+export 'domain/entities/app_about_info.dart';
+export 'presentation/screens/privacy_policy_screen.dart';
 export 'presentation/screens/settings_screen.dart';
+export 'presentation/widgets/about_section.dart';
+export 'presentation/widgets/settings_header.dart';
 export 'presentation/widgets/settings_section.dart';
 export 'presentation/widgets/settings_tile.dart';
 export 'presentation/widgets/profile_header.dart';

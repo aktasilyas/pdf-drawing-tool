@@ -1,47 +1,47 @@
-/// ElyaNotes Settings Screen - Multinet style design
+/// ElyaNotes Settings screen.
+///
+/// With every feature flag off (v1.0) it shows: Görünüm (app theme, canvas
+/// theme, pin favourites), Gizlilik (crash reports) and Hakkında (version,
+/// privacy policy, licences, feedback). Account entries and logout appear
+/// only when cloud sync is on.
 library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:example_app/core/config/feature_flags.dart';
 import 'package:example_app/core/theme/index.dart';
-import 'package:example_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:example_app/core/utils/responsive.dart';
 import 'package:example_app/core/widgets/index.dart';
+import 'package:example_app/features/auth/presentation/providers/auth_provider.dart';
+import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
+import 'package:example_app/features/settings/domain/entities/app_settings.dart';
 import 'package:example_app/features/settings/presentation/providers/settings_provider.dart';
-import 'package:example_app/features/settings/presentation/widgets/settings_section.dart';
-import 'package:example_app/features/settings/presentation/widgets/settings_tile.dart';
+import 'package:example_app/features/settings/presentation/widgets/about_section.dart';
 import 'package:example_app/features/settings/presentation/widgets/canvas_theme_setting.dart';
 import 'package:example_app/features/settings/presentation/widgets/crash_reporting_setting.dart';
 import 'package:example_app/features/settings/presentation/widgets/settings_dialogs.dart';
-import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
+import 'package:example_app/features/settings/presentation/widgets/settings_header.dart';
+import 'package:example_app/features/settings/presentation/widgets/settings_section.dart';
+import 'package:example_app/features/settings/presentation/widgets/settings_tile.dart';
 
 class SettingsScreen extends ConsumerWidget {
-  const SettingsScreen({super.key});
+  const SettingsScreen({super.key, this.aboutSection = const AboutSection()});
+
+  /// Injectable so tests and goldens can pin the build version.
+  final Widget aboutSection;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settings = ref.watch(settingsProvider);
     final cloud = ref.watch(featureFlagsProvider).cloudSync;
     final user = cloud ? ref.watch(currentUserProvider) : null;
-    final pinFavorites = ref.watch(pinFavoritesProvider);
     final isTablet = Responsive.isTablet(context);
-
-    final backgroundColor = context.palette.background;
-    final textPrimary = context.palette.textPrimary;
-
-    final userName = !cloud
-        ? 'ElyaNotes'
-        : user?.userMetadata?['name'] as String? ??
-            user?.email?.split('@').first ??
-            'Kullanıcı';
-    final initials = userName.isNotEmpty ? userName[0].toUpperCase() : 'U';
+    const gap = SizedBox(height: AppSpacing.sectionSpacing);
+    void editName() => SettingsDialogs.showEditNameDialog(context, ref);
 
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: context.palette.background,
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
@@ -50,22 +50,26 @@ class SettingsScreen extends ConsumerWidget {
             child: ListView(
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
               children: [
-                _buildHeader(context, initials, userName, textPrimary, ref),
-                const SizedBox(height: AppSpacing.sectionSpacing),
-                _buildAppearanceSection(context, ref, settings, pinFavorites),
-                const SizedBox(height: AppSpacing.sectionSpacing),
+                SettingsHeader(
+                  userName: cloud ? _userName(user) : null,
+                  onNameTap: editName,
+                ),
+                gap,
+                const _AppearanceSection(),
+                gap,
                 if (cloud) ...[
-                  _buildAccountSection(context, ref, user),
-                  const SizedBox(height: AppSpacing.sectionSpacing),
+                  _AccountSection(user: user),
+                  gap,
                 ],
-                _buildDataSection(context, ref),
-                const SizedBox(height: AppSpacing.sectionSpacing),
-                _buildPrivacySection(),
-                const SizedBox(height: AppSpacing.sectionSpacing),
-                _buildAboutSection(context),
+                const SettingsSection(
+                  title: 'GİZLİLİK',
+                  children: [CrashReportingSetting()],
+                ),
+                gap,
+                aboutSection,
                 const SizedBox(height: AppSpacing.xxl),
                 if (cloud) ...[
-                  _buildLogoutButton(context, ref),
+                  const _LogoutButton(),
                   const SizedBox(height: AppSpacing.xxl),
                 ],
               ],
@@ -76,46 +80,39 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context, String initials, String userName,
-      Color textPrimary, WidgetRef ref) {
+  static String _userName(User? user) {
+    final metadataName = user?.userMetadata?['name'];
+    if (metadataName is String) return metadataName;
+    final email = user?.email;
+    if (email != null) return email.split('@').first;
+    return 'Kullanıcı';
+  }
+}
+
+class _LogoutButton extends ConsumerWidget {
+  const _LogoutButton();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              AppAvatar(
-                initials: initials,
-                size: AppAvatarSize.medium,
-                backgroundColor: AppColors.primary,
-              ),
-              AppIconButton(
-                icon: Icons.close,
-                variant: AppIconButtonVariant.ghost,
-                onPressed: () => context.pop(),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-          GestureDetector(
-            onTap: () => SettingsDialogs.showEditNameDialog(context, ref),
-            child: Text(
-              userName,
-              style: AppTypography.headlineMedium.copyWith(
-                color: textPrimary,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
+      child: AppButton(
+        label: 'Çıkış Yap',
+        variant: AppButtonVariant.destructive,
+        isExpanded: true,
+        onPressed: () => SettingsDialogs.handleLogout(context, ref),
       ),
     );
   }
+}
 
-  Widget _buildAppearanceSection(BuildContext context, WidgetRef ref,
-      dynamic settings, bool pinFavorites) {
+class _AppearanceSection extends ConsumerWidget {
+  const _AppearanceSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final AppSettings settings = ref.watch(settingsProvider);
+    final pinFavorites = ref.watch(pinFavoritesProvider);
     return SettingsSection(
       title: 'GÖRÜNÜM',
       children: [
@@ -130,17 +127,25 @@ class SettingsScreen extends ConsumerWidget {
           icon: Icons.star_outline,
           title: 'Favorileri üste sabitle',
           showArrow: false,
+          onTap: () => ref.read(pinFavoritesProvider.notifier).toggle(),
           trailing: Switch(
             value: pinFavorites,
-            activeTrackColor: AppColors.primary,
-            onChanged: (v) => ref.read(pinFavoritesProvider.notifier).toggle(),
+            activeTrackColor: context.palette.accent,
+            onChanged: (v) => ref.read(pinFavoritesProvider.notifier).set(v),
           ),
         ),
       ],
     );
   }
+}
 
-  Widget _buildAccountSection(BuildContext context, WidgetRef ref, User? user) {
+class _AccountSection extends StatelessWidget {
+  const _AccountSection({required this.user});
+
+  final User? user;
+
+  @override
+  Widget build(BuildContext context) {
     return SettingsSection(
       title: 'HESAP',
       children: [
@@ -155,80 +160,6 @@ class SettingsScreen extends ConsumerWidget {
           onTap: () => SettingsDialogs.showAccountInfo(context, user),
         ),
       ],
-    );
-  }
-
-  Widget _buildDataSection(BuildContext context, WidgetRef ref) {
-    return SettingsSection(
-      title: 'VERİ',
-      children: [
-        SettingsTile(
-          icon: Icons.upload_outlined,
-          title: 'Dışa aktar',
-          onTap: () => SettingsDialogs.showExportDialog(context),
-        ),
-        SettingsTile(
-          icon: Icons.cleaning_services_outlined,
-          title: 'Önbelleği temizle',
-          onTap: () => SettingsDialogs.clearCache(context, ref),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPrivacySection() {
-    return const SettingsSection(
-      title: 'GİZLİLİK',
-      children: [CrashReportingSetting()],
-    );
-  }
-
-  Widget _buildAboutSection(BuildContext context) {
-    return SettingsSection(
-      title: 'HAKKINDA',
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(
-              vertical: AppSpacing.lg, horizontal: AppSpacing.lg),
-          child: Center(
-            child: Image.asset(
-              'assets/images/elyanotes_logo.png',
-              width: 200,
-              fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-            ),
-          ),
-        ),
-        SettingsTile(
-          icon: Icons.info_outline,
-          title: 'Versiyon',
-          showArrow: false,
-          trailing: Text('1.0.0 (1)',
-              style: TextStyle(color: context.palette.textMuted)),
-        ),
-        SettingsTile(
-          icon: Icons.privacy_tip_outlined,
-          title: 'Gizlilik politikası',
-          onTap: () => SettingsDialogs.openLegalPage(context, 'privacy'),
-        ),
-        SettingsTile(
-          icon: Icons.description_outlined,
-          title: 'Kullanım koşulları',
-          onTap: () => SettingsDialogs.openLegalPage(context, 'terms'),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLogoutButton(BuildContext context, WidgetRef ref) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-      child: AppButton(
-        label: 'Çıkış Yap',
-        variant: AppButtonVariant.destructive,
-        isExpanded: true,
-        onPressed: () => SettingsDialogs.handleLogout(context, ref),
-      ),
     );
   }
 }
