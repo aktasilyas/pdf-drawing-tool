@@ -132,4 +132,95 @@ void main() {
     await b.run();
     expect(calls, ['deps']);
   });
+
+  group('startup failure', () {
+    late _MockReporter rep;
+    late int resets;
+    late int crashInits;
+
+    setUpAll(() {
+      registerFallbackValue(Object());
+      registerFallbackValue(StackTrace.empty);
+    });
+
+    setUp(() {
+      resets = 0;
+      crashInits = 0;
+      rep = _MockReporter();
+      when(() => rep.isActive).thenReturn(true);
+      when(() => rep.setCollectionEnabled(any())).thenAnswer((_) async {});
+      when(() => rep.recordError(any(), any(), fatal: any(named: 'fatal')))
+          .thenAnswer((_) async {});
+    });
+
+    AppBootstrap buildFailing({
+      required Future<void> Function() configureDeps,
+      bool isRelease = true,
+    }) {
+      return AppBootstrap(
+        flags: FeatureFlags.allOff,
+        env: _firebaseEnv,
+        isRelease: isRelease,
+        initCrashReporting: (_) async {
+          crashInits++;
+          return rep;
+        },
+        configureDeps: configureDeps,
+        resetDeps: () async => resets++,
+      );
+    }
+
+    test('reports the error, resets dependencies and rethrows', () async {
+      final error = StateError('database is locked');
+      final b = buildFailing(configureDeps: () async => throw error);
+
+      await expectLater(b.run(), throwsA(same(error)));
+
+      verify(() => rep.recordError(error, any(), fatal: false)).called(1);
+      expect(resets, 1);
+    });
+
+    test('inactive rep is not called', () async {
+      when(() => rep.isActive).thenReturn(false);
+      final b = buildFailing(configureDeps: () async => throw Exception('x'));
+
+      await expectLater(b.run(), throwsA(isA<Exception>()));
+
+      verifyNever(
+        () => rep.recordError(any(), any(), fatal: any(named: 'fatal')),
+      );
+      expect(resets, 1);
+    });
+
+    test('success does not reset dependencies', () async {
+      await buildFailing(configureDeps: () async {}).run();
+      expect(resets, 0);
+    });
+
+    test('retry reuses the crash rep and can succeed', () async {
+      var attempts = 0;
+      final b = buildFailing(configureDeps: () async {
+        attempts++;
+        if (attempts == 1) throw Exception('migration failed');
+      });
+
+      await expectLater(b.run(), throwsA(isA<Exception>()));
+      final result = await b.run();
+
+      expect(result.crashReporter, same(rep));
+      expect(crashInits, 1);
+      expect(attempts, 2);
+    });
+
+    test('a failing reset does not hide the original error', () async {
+      final error = StateError('boom');
+      final b = AppBootstrap(
+        flags: FeatureFlags.allOff,
+        configureDeps: () async => throw error,
+        resetDeps: () async => throw Exception('reset failed'),
+      );
+
+      await expectLater(b.run(), throwsA(same(error)));
+    });
+  });
 }

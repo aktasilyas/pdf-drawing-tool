@@ -30,6 +30,7 @@ class AppBootstrap {
     this.configureDeps = configureDependencies,
     this.initCrashReporting = initFirebaseCrashReporter,
     this.isRelease = kReleaseMode,
+    this.resetDeps = resetDependencies,
   });
 
   final FeatureFlags flags;
@@ -40,31 +41,77 @@ class AppBootstrap {
   final CrashReporterInitializer initCrashReporting;
   final bool isRelease;
 
+  /// Undoes a partial [configureDeps] so [run] can be called again (Retry).
+  final Future<void> Function() resetDeps;
+
+  /// Selected once and reused by later runs, so a Retry never initializes
+  /// Firebase twice.
+  CrashReporter? _crashReporter;
+
+  /// Runs the startup sequence. Safe to call again after it threw: failed
+  /// registrations are reset first. Errors after the crash reporter exists
+  /// are reported to it (not logged; the caller logs) and rethrown.
   Future<AppBootstrapResult> run() async {
     env.validateFor(flags);
 
     final prefs = await SharedPreferences.getInstance();
-    final crashReporter = await selectCrashReporter(
+    final crashReporter = _crashReporter ?? await _selectReporter(prefs);
+    _crashReporter = crashReporter;
+
+    try {
+      if (flags.needsSupabase) {
+        // Out of v1.0 scope: a Retry after a failed Supabase init would call
+        // Supabase.initialize twice (frozen cloud-sync flag only).
+        await initSupabase(env);
+      }
+      if (flags.premium) {
+        try {
+          await initRevenueCat(env);
+        } catch (e) {
+          // Graceful degradation: the app works without RevenueCat.
+          logger.e('RevenueCat init failed: $e');
+        }
+      }
+      await configureDeps();
+    } catch (error, stack) {
+      await _report(crashReporter, error, stack);
+      await _resetQuietly();
+      rethrow;
+    }
+    return AppBootstrapResult(prefs: prefs, crashReporter: crashReporter);
+  }
+
+  Future<CrashReporter> _selectReporter(SharedPreferences prefs) async {
+    final reporter = await selectCrashReporter(
       isRelease: isRelease,
       env: env,
       userEnabled: prefs.getBool(StorageKeys.crashReportingEnabled) ?? true,
       initFirebase: initCrashReporting,
     );
-    installCrashHandlers(crashReporter);
+    installCrashHandlers(reporter);
+    return reporter;
+  }
 
-    if (flags.needsSupabase) {
-      await initSupabase(env);
+  Future<void> _report(
+    CrashReporter reporter,
+    Object error,
+    StackTrace stack,
+  ) async {
+    if (!reporter.isActive) return;
+    try {
+      // Not fatal: the user can recover with Retry.
+      await reporter.recordError(error, stack);
+    } catch (e) {
+      logger.w('Could not report startup error: $e');
     }
-    if (flags.premium) {
-      try {
-        await initRevenueCat(env);
-      } catch (e) {
-        // Graceful degradation: the app works without RevenueCat.
-        logger.e('RevenueCat init failed: $e');
-      }
+  }
+
+  Future<void> _resetQuietly() async {
+    try {
+      await resetDeps();
+    } catch (e) {
+      logger.w('Dependency reset after failed startup failed: $e');
     }
-    await configureDeps();
-    return AppBootstrapResult(prefs: prefs, crashReporter: crashReporter);
   }
 }
 
