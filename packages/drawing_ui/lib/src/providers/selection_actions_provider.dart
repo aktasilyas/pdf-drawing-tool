@@ -13,6 +13,7 @@ import 'package:drawing_ui/src/providers/pdf_render_provider.dart';
 import 'package:drawing_ui/src/providers/selection_provider.dart';
 import 'package:drawing_ui/src/providers/pending_selection_image_provider.dart';
 import 'package:drawing_ui/src/providers/selection_clipboard_provider.dart';
+import 'package:drawing_ui/src/providers/selection_paste.dart';
 import 'package:drawing_ui/src/services/selection_capture_service.dart';
 import 'package:drawing_ui/src/screens/drawing_screen_layout.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
@@ -90,85 +91,6 @@ void _copyToClipboard(WidgetRef ref, Selection selection) {
 void _cutToClipboard(WidgetRef ref, Selection selection) {
   _copyToClipboard(ref, selection);
   _deleteSelection(ref, selection);
-}
-
-void _pasteFromClipboard(WidgetRef ref) {
-  final clipboard = ref.read(selectionClipboardProvider);
-  if (clipboard == null) return;
-
-  final document = ref.read(documentProvider);
-  final layerIndex = document.activeLayerIndex;
-
-  // Add strokes with new IDs and slight offset
-  for (final stroke in clipboard.strokes) {
-    final movedPoints = stroke.points
-        .map((p) => DrawingPoint(
-              x: p.x + 40,
-              y: p.y + 40,
-              pressure: p.pressure,
-              tilt: p.tilt,
-              timestamp: p.timestamp,
-            ))
-        .toList();
-    final newStroke = Stroke.create(style: stroke.style, points: movedPoints);
-    final cmd = AddStrokeCommand(layerIndex: layerIndex, stroke: newStroke);
-    ref.read(historyManagerProvider.notifier).execute(cmd);
-  }
-
-  for (final shape in clipboard.shapes) {
-    final newShape = Shape(
-      id: DateTime.now().microsecondsSinceEpoch.toString(),
-      type: shape.type,
-      startPoint: DrawingPoint(
-        x: shape.startPoint.x + 40,
-        y: shape.startPoint.y + 40,
-        pressure: shape.startPoint.pressure,
-      ),
-      endPoint: DrawingPoint(
-        x: shape.endPoint.x + 40,
-        y: shape.endPoint.y + 40,
-        pressure: shape.endPoint.pressure,
-      ),
-      style: shape.style,
-      isFilled: shape.isFilled,
-      fillColor: shape.fillColor,
-    );
-    final cmd = AddShapeCommand(layerIndex: layerIndex, shape: newShape);
-    ref.read(historyManagerProvider.notifier).execute(cmd);
-  }
-
-  for (final image in clipboard.images) {
-    final newImage = ImageElement.create(
-      filePath: image.filePath,
-      x: image.x + 40,
-      y: image.y + 40,
-      width: image.width,
-      height: image.height,
-      rotation: image.rotation,
-    );
-    final cmd = AddImageCommand(layerIndex: layerIndex, imageElement: newImage);
-    ref.read(historyManagerProvider.notifier).execute(cmd);
-  }
-
-  for (final text in clipboard.texts) {
-    final newText = TextElement.create(
-      text: text.text,
-      x: text.x + 40,
-      y: text.y + 40,
-      fontSize: text.fontSize,
-      color: text.color,
-      fontFamily: text.fontFamily,
-      isBold: text.isBold,
-      isItalic: text.isItalic,
-      isUnderline: text.isUnderline,
-      alignment: text.alignment,
-    );
-    final cmd = AddTextCommand(layerIndex: layerIndex, textElement: newText);
-    ref.read(historyManagerProvider.notifier).execute(cmd);
-  }
-
-  ref.read(selectionUiProvider.notifier).reset();
-  ref.read(selectionProvider.notifier).clearSelection();
 }
 
 void _bringToFront(WidgetRef ref, Selection selection) {
@@ -519,7 +441,7 @@ SelectionActionConfig buildSelectionActionConfig(
       icon: ElyanotesIcons.paste,
       label: 'Yapıştır',
       isEnabled: hasClipboard,
-      onExecute: hasClipboard ? () => _pasteFromClipboard(ref) : null,
+      onExecute: hasClipboard ? () => pasteFromClipboard(ref) : null,
     ),
     SelectionAction(
       id: 'overflow_ai',
@@ -554,95 +476,6 @@ SelectionActionConfig buildSelectionActionConfig(
     topRowActions: topRowActions,
     overflowActions: overflowActions,
   );
-}
-
-/// Paste clipboard content centered at a specific canvas point.
-///
-/// Used by the long-press paste context menu to paste at the press location.
-void pasteFromClipboardAt(WidgetRef ref, Offset canvasPoint) {
-  final clipboard = ref.read(selectionClipboardProvider);
-  if (clipboard == null) return;
-
-  final document = ref.read(documentProvider);
-  final layerIndex = document.activeLayerIndex;
-
-  // Compute delta from clipboard's original center to target point
-  final centerX =
-      (clipboard.originalBounds.left + clipboard.originalBounds.right) / 2;
-  final centerY =
-      (clipboard.originalBounds.top + clipboard.originalBounds.bottom) / 2;
-  final dx = canvasPoint.dx - centerX;
-  final dy = canvasPoint.dy - centerY;
-
-  for (final stroke in clipboard.strokes) {
-    final movedPoints = stroke.points
-        .map((p) => DrawingPoint(
-              x: p.x + dx,
-              y: p.y + dy,
-              pressure: p.pressure,
-              tilt: p.tilt,
-              timestamp: p.timestamp,
-            ))
-        .toList();
-    final newStroke = Stroke.create(style: stroke.style, points: movedPoints);
-    final cmd = AddStrokeCommand(layerIndex: layerIndex, stroke: newStroke);
-    ref.read(historyManagerProvider.notifier).execute(cmd);
-  }
-
-  for (final shape in clipboard.shapes) {
-    final newShape = Shape(
-      id: DateTime.now().microsecondsSinceEpoch.toString(),
-      type: shape.type,
-      startPoint: DrawingPoint(
-        x: shape.startPoint.x + dx,
-        y: shape.startPoint.y + dy,
-        pressure: shape.startPoint.pressure,
-      ),
-      endPoint: DrawingPoint(
-        x: shape.endPoint.x + dx,
-        y: shape.endPoint.y + dy,
-        pressure: shape.endPoint.pressure,
-      ),
-      style: shape.style,
-      isFilled: shape.isFilled,
-      fillColor: shape.fillColor,
-    );
-    final cmd = AddShapeCommand(layerIndex: layerIndex, shape: newShape);
-    ref.read(historyManagerProvider.notifier).execute(cmd);
-  }
-
-  for (final image in clipboard.images) {
-    final newImage = ImageElement.create(
-      filePath: image.filePath,
-      x: image.x + dx,
-      y: image.y + dy,
-      width: image.width,
-      height: image.height,
-      rotation: image.rotation,
-    );
-    final cmd = AddImageCommand(layerIndex: layerIndex, imageElement: newImage);
-    ref.read(historyManagerProvider.notifier).execute(cmd);
-  }
-
-  for (final text in clipboard.texts) {
-    final newText = TextElement.create(
-      text: text.text,
-      x: text.x + dx,
-      y: text.y + dy,
-      fontSize: text.fontSize,
-      color: text.color,
-      fontFamily: text.fontFamily,
-      isBold: text.isBold,
-      isItalic: text.isItalic,
-      isUnderline: text.isUnderline,
-      alignment: text.alignment,
-    );
-    final cmd = AddTextCommand(layerIndex: layerIndex, textElement: newText);
-    ref.read(historyManagerProvider.notifier).execute(cmd);
-  }
-
-  ref.read(selectionUiProvider.notifier).reset();
-  ref.read(selectionProvider.notifier).clearSelection();
 }
 
 /// Convenience: change the color of strokes in a selection.

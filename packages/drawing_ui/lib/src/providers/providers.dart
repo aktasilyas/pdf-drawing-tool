@@ -57,5 +57,6 @@ export 'export_progress_provider.dart';
 export 'copied_page_provider.dart';
 export 'selection_clipboard_provider.dart';
 export 'selection_actions_provider.dart';
+export 'selection_paste.dart';
 export 'pending_selection_image_provider.dart';
 export 'infinite_canvas_provider.dart';

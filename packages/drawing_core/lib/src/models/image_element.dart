@@ -48,7 +48,7 @@ class ImageElement {
     double rotation = 0.0,
   }) {
     return ImageElement(
-      id: DateTime.now().microsecondsSinceEpoch.toString(),
+      id: ElementIds.next(),
       filePath: filePath,
       x: x,
       y: y,

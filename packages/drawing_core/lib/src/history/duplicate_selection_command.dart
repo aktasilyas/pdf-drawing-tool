@@ -83,7 +83,7 @@ class DuplicateSelectionCommand implements DrawingCommand {
       final shape = layer.getShapeById(id);
       if (shape == null) continue;
 
-      final newId = DateTime.now().microsecondsSinceEpoch.toString();
+      final newId = ElementIds.next();
       final newShape = Shape(
         id: newId,
         type: shape.type,

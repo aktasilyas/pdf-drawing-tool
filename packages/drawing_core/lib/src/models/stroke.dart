@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import 'package:drawing_core/src/models/bounding_box.dart';
 import 'package:drawing_core/src/models/drawing_point.dart';
+import 'package:drawing_core/src/models/element_ids.dart';
 import 'package:drawing_core/src/models/stroke_style.dart';
 
 /// Represents a single stroke in a drawing.
@@ -52,7 +53,7 @@ class Stroke extends Equatable {
 
   /// Generates a unique ID based on the current timestamp.
   static String _generateId() {
-    return DateTime.now().microsecondsSinceEpoch.toString();
+    return ElementIds.next();
   }
 
   /// Whether this stroke has no points.

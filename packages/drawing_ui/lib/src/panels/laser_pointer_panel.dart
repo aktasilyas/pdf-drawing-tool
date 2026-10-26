@@ -1,11 +1,11 @@
-import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
-import 'package:drawing_ui/src/panels/tool_panel.dart';
+import 'package:drawing_ui/src/panels/chrome_panel_parts.dart';
+import 'package:drawing_ui/src/panels/laser_preview_painter.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
+import 'package:drawing_ui/src/toolbar/chrome_icon_button.dart';
 import 'package:drawing_ui/src/widgets/color_picker_strip.dart';
 import 'package:drawing_ui/src/widgets/goodnotes_slider.dart';
 
@@ -26,291 +26,66 @@ class LaserPointerPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(laserSettingsProvider);
-    final cs = Theme.of(context).colorScheme;
-
-    final title = _titleFor(settings.mode, settings.lineStyle);
+    final notifier = ref.read(laserSettingsProvider.notifier);
+    final palette = ChromePalette.of(context);
 
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(ChromeSpacing.lg),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: cs.onSurface,
-                  ),
-                ),
-              ),
-              PanelCloseButton(
-                onTap: () =>
-                    ref.read(activePanelProvider.notifier).state = null,
-              ),
-            ],
+          ChromePanelHeader(
+            title: _titleFor(settings.mode, settings.lineStyle),
+            onClose: () => ref.read(activePanelProvider.notifier).state = null,
           ),
-          const SizedBox(height: 16),
-
-          // Preview
-          _LaserPreview(
+          LaserPreview(
             color: settings.color,
             thickness: settings.thickness,
             mode: settings.mode,
             lineStyle: settings.lineStyle,
           ),
-          const SizedBox(height: 16),
-
+          const SizedBox(height: ChromeSpacing.sm),
           // Combined mode + line style selector (4 options)
           _LaserTypeSelector(
             mode: settings.mode,
             lineStyle: settings.lineStyle,
             onSelected: (mode, style) {
-              ref.read(laserSettingsProvider.notifier).setMode(mode);
-              ref.read(laserSettingsProvider.notifier).setLineStyle(style);
+              notifier.setMode(mode);
+              notifier.setLineStyle(style);
             },
           ),
-          const SizedBox(height: 20),
-
-          // Thickness slider
+          const ChromeHairline(),
           GoodNotesSlider(
             label: 'Kalınlık',
             value: settings.thickness.clamp(0.5, 5.0),
             min: 0.5,
             max: 5.0,
             displayValue: '${settings.thickness.toStringAsFixed(1)}mm',
-            activeColor: cs.primary,
-            onChanged: (v) =>
-                ref.read(laserSettingsProvider.notifier).setThickness(v),
+            activeColor: palette.accent,
+            onChanged: notifier.setThickness,
           ),
-          const SizedBox(height: 8),
-
-          // Duration slider
           GoodNotesSlider(
             label: 'Süre',
             value: settings.duration.clamp(0.5, 5.0),
             min: 0.5,
             max: 5.0,
             displayValue: '${settings.duration.toStringAsFixed(1)}s',
-            activeColor: cs.primary,
-            onChanged: (v) =>
-                ref.read(laserSettingsProvider.notifier).setDuration(v),
+            activeColor: palette.accent,
+            onChanged: notifier.setDuration,
           ),
           // Color strip (hidden for rainbow)
           if (settings.lineStyle != LaserLineStyle.rainbow) ...[
-            const SizedBox(height: 16),
+            const ChromeHairline(),
             ColorPickerStrip(
               selectedColor: settings.color,
-              onColorSelected: (c) =>
-                  ref.read(laserSettingsProvider.notifier).setColor(c),
+              onColorSelected: notifier.setColor,
             ),
           ],
         ],
       ),
     );
   }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Preview
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _LaserPreview extends StatelessWidget {
-  const _LaserPreview({
-    required this.color,
-    required this.thickness,
-    required this.mode,
-    required this.lineStyle,
-  });
-
-  final Color color;
-  final double thickness;
-  final LaserMode mode;
-  final LaserLineStyle lineStyle;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      height: 100,
-      child: CustomPaint(
-        size: const Size(double.infinity, 100),
-        painter: _LaserPreviewPainter(color, thickness, mode, lineStyle),
-      ),
-    );
-  }
-}
-
-class _LaserPreviewPainter extends CustomPainter {
-  _LaserPreviewPainter(this.color, this.thickness, this.mode, this.lineStyle);
-
-  final Color color;
-  final double thickness;
-  final LaserMode mode;
-  final LaserLineStyle lineStyle;
-
-  static const _rainbowColors = [
-    Color(0xFFFF0000),
-    Color(0xFFFF8800),
-    Color(0xFFFFFF00),
-    Color(0xFF00FF00),
-    Color(0xFF0088FF),
-    Color(0xFF8800FF),
-    Color(0xFFFF00FF),
-  ];
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final w = size.width;
-    final h = size.height;
-    final t = thickness.clamp(0.5, 5.0);
-
-    if (mode == LaserMode.dot) {
-      _drawDot(canvas, Offset(w / 2, h / 2), t);
-      return;
-    }
-
-    final path = Path()
-      ..moveTo(w * 0.10, h * 0.75)
-      ..cubicTo(w * 0.20, h * 0.10, w * 0.35, h * 0.05, w * 0.50, h * 0.30)
-      ..cubicTo(w * 0.65, h * 0.55, w * 0.75, h * 0.85, w * 0.90, h * 0.25);
-
-    switch (lineStyle) {
-      case LaserLineStyle.solid:
-        _drawSolid(canvas, path, t);
-      case LaserLineStyle.hollow:
-        _drawHollow(canvas, path, t);
-      case LaserLineStyle.rainbow:
-        _drawRainbow(canvas, path, t);
-    }
-  }
-
-  void _drawSolid(Canvas canvas, Path path, double t) {
-    final p = _strokePaint();
-    // Layer 1: Wide outer glow
-    canvas.drawPath(
-        path,
-        p
-          ..color = color.withValues(alpha: 0.5)
-          ..strokeWidth = t * 10
-          ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, t * 6));
-    // Layer 2: Middle glow
-    canvas.drawPath(
-        path,
-        p
-          ..color = color.withValues(alpha: 0.85)
-          ..strokeWidth = t * 5
-          ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, t * 2));
-    // Layer 3: Tight bright glow
-    canvas.drawPath(
-        path,
-        p
-          ..color = color.withValues(alpha: 0.95)
-          ..strokeWidth = t * 2.5
-          ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, t * 0.5));
-    // Layer 4: White core
-    final coreColor = Color.lerp(color, Colors.white, 0.7)!;
-    canvas.drawPath(
-        path,
-        p
-          ..color = coreColor
-          ..strokeWidth = t * 1.2
-          ..maskFilter = null);
-  }
-
-  void _drawHollow(Canvas canvas, Path path, double t) {
-    final p = _strokePaint();
-    // Layer 1: Subtle outer glow (narrow)
-    canvas.drawPath(
-        path,
-        p
-          ..color = color.withValues(alpha: 0.3)
-          ..strokeWidth = t * 6
-          ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, t * 3));
-    // Layer 2: Tight inner glow
-    canvas.drawPath(
-        path,
-        p
-          ..color = color.withValues(alpha: 0.6)
-          ..strokeWidth = t * 3
-          ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, t * 0.8));
-    // Layer 3: Sharp solid color core (dominant)
-    canvas.drawPath(
-        path,
-        p
-          ..color = color
-          ..strokeWidth = t * 1.8
-          ..maskFilter = null);
-  }
-
-  void _drawRainbow(Canvas canvas, Path path, double t) {
-    final bounds = path.getBounds();
-    final gradient = ui.Gradient.linear(
-      bounds.topLeft,
-      bounds.bottomRight,
-      _rainbowColors,
-      List.generate(
-        _rainbowColors.length,
-        (i) => i / (_rainbowColors.length - 1),
-      ),
-    );
-    final p = _strokePaint();
-    // Outer glow
-    canvas.drawPath(
-        path,
-        p
-          ..shader = gradient
-          ..strokeWidth = t * 10
-          ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, t * 6));
-    // Middle glow
-    canvas.drawPath(
-        path,
-        p
-          ..strokeWidth = t * 5
-          ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, t * 2));
-    p.shader = null;
-    // White core
-    canvas.drawPath(
-        path,
-        p
-          ..color = Colors.white.withValues(alpha: 0.9)
-          ..strokeWidth = t * 1.2
-          ..maskFilter = null);
-  }
-
-  void _drawDot(Canvas canvas, Offset center, double t) {
-    final r = t * 1.5;
-    canvas.drawCircle(
-        center,
-        r * 5,
-        Paint()
-          ..color = color.withValues(alpha: 0.5)
-          ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, r * 5));
-    canvas.drawCircle(
-        center,
-        r * 2.5,
-        Paint()
-          ..color = color.withValues(alpha: 0.85)
-          ..maskFilter = ui.MaskFilter.blur(BlurStyle.normal, r * 2));
-    final coreColor = Color.lerp(color, Colors.white, 0.7)!;
-    canvas.drawCircle(center, r, Paint()..color = coreColor);
-  }
-
-  Paint _strokePaint() => Paint()
-    ..style = PaintingStyle.stroke
-    ..strokeCap = StrokeCap.round
-    ..strokeJoin = StrokeJoin.round;
-
-  @override
-  bool shouldRepaint(_LaserPreviewPainter o) =>
-      color != o.color ||
-      thickness != o.thickness ||
-      mode != o.mode ||
-      lineStyle != o.lineStyle;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -328,79 +103,58 @@ class _LaserTypeSelector extends StatelessWidget {
   final LaserLineStyle lineStyle;
   final void Function(LaserMode mode, LaserLineStyle style) onSelected;
 
+  Widget _button({
+    required String keyName,
+    required IconData icon,
+    required bool selected,
+    required LaserMode targetMode,
+    required LaserLineStyle targetStyle,
+  }) {
+    return ChromeIconButton(
+      key: ValueKey('laser-type-$keyName'),
+      icon: icon,
+      iconSize: ChromeIconSizes.md,
+      tooltip: _titleFor(targetMode, targetStyle),
+      selected: selected,
+      onPressed: () => onSelected(targetMode, targetStyle),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
+    final isLine = mode == LaserMode.line;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _PillCard(
+        _button(
+          keyName: 'solid',
           icon: PhosphorIconsLight.lineSegment,
-          isSelected:
-              mode == LaserMode.line && lineStyle == LaserLineStyle.solid,
-          cs: cs,
-          onTap: () => onSelected(LaserMode.line, LaserLineStyle.solid),
+          selected: isLine && lineStyle == LaserLineStyle.solid,
+          targetMode: LaserMode.line,
+          targetStyle: LaserLineStyle.solid,
         ),
-        _PillCard(
+        _button(
+          keyName: 'hollow',
           icon: PhosphorIconsLight.lineSegments,
-          isSelected:
-              mode == LaserMode.line && lineStyle == LaserLineStyle.hollow,
-          cs: cs,
-          onTap: () => onSelected(LaserMode.line, LaserLineStyle.hollow),
+          selected: isLine && lineStyle == LaserLineStyle.hollow,
+          targetMode: LaserMode.line,
+          targetStyle: LaserLineStyle.hollow,
         ),
-        _PillCard(
+        _button(
+          keyName: 'rainbow',
           icon: PhosphorIconsLight.rainbow,
-          isSelected:
-              mode == LaserMode.line && lineStyle == LaserLineStyle.rainbow,
-          cs: cs,
-          onTap: () => onSelected(LaserMode.line, LaserLineStyle.rainbow),
+          selected: isLine && lineStyle == LaserLineStyle.rainbow,
+          targetMode: LaserMode.line,
+          targetStyle: LaserLineStyle.rainbow,
         ),
-        _PillCard(
+        _button(
+          keyName: 'dot',
           icon: ElyanotesIcons.circle,
-          isSelected: mode == LaserMode.dot,
-          cs: cs,
-          onTap: () => onSelected(LaserMode.dot, lineStyle),
+          selected: mode == LaserMode.dot,
+          targetMode: LaserMode.dot,
+          targetStyle: lineStyle,
         ),
       ],
-    );
-  }
-}
-
-/// Reusable 40x40 pill card (same as PenCard).
-class _PillCard extends StatelessWidget {
-  const _PillCard({
-    required this.icon,
-    required this.isSelected,
-    required this.cs,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final bool isSelected;
-  final ColorScheme cs;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: isSelected ? cs.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Center(
-          child: PhosphorIcon(
-            icon,
-            size: ElyanotesIcons.toolSize,
-            color: isSelected ? cs.onPrimary : cs.onSurfaceVariant,
-          ),
-        ),
-      ),
     );
   }
 }

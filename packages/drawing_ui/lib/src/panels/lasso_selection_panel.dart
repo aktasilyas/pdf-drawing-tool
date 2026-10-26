@@ -2,10 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/panels/chrome_panel_parts.dart';
 import 'package:drawing_ui/src/panels/selection_preview_painter.dart';
-import 'package:drawing_ui/src/panels/tool_panel.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
+import 'package:drawing_ui/src/toolbar/chrome_icon_button.dart';
+
+String _titleForMode(LassoMode mode) {
+  return switch (mode) {
+    LassoMode.freeform => 'Serbest Seçim',
+    LassoMode.rectangle => 'Dikdörtgen Seçim',
+  };
+}
 
 /// Settings panel for the lasso (kement) selection tool.
 ///
@@ -17,40 +25,19 @@ class LassoSelectionPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(lassoSettingsProvider);
-    final cs = Theme.of(context).colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(ChromeSpacing.lg),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // -- Title + Close --
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  _titleForMode(settings.mode),
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: cs.onSurface,
-                  ),
-                ),
-              ),
-              PanelCloseButton(
-                onTap: () =>
-                    ref.read(activePanelProvider.notifier).state = null,
-              ),
-            ],
+          ChromePanelHeader(
+            title: _titleForMode(settings.mode),
+            onClose: () => ref.read(activePanelProvider.notifier).state = null,
           ),
-          const SizedBox(height: 16),
-
-          // -- Selection Preview --
           SelectionPreview(mode: settings.mode),
-          const SizedBox(height: 16),
-
-          // -- Selection Type Selector (40dp icons, 48dp hit areas) --
+          const SizedBox(height: ChromeSpacing.sm),
           _SelectionTypeSelector(
             selectedMode: settings.mode,
             onModeSelected: (mode) {
@@ -62,21 +49,8 @@ class LassoSelectionPanel extends ConsumerWidget {
                   selectionType;
             },
           ),
-          const SizedBox(height: 20),
-
-          // -- Section label --
-          Text(
-            'Seçilebilir',
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: cs.onSurfaceVariant,
-              letterSpacing: 0.5,
-            ),
-          ),
-          const SizedBox(height: 8),
-
-          // -- Selectable types grid --
+          const ChromeHairline(),
+          const ChromeSectionLabel('Seçilebilir'),
           _SelectableTypesGrid(
             selectableTypes: settings.selectableTypes,
             onTypeChanged: (type, value) {
@@ -89,17 +63,10 @@ class LassoSelectionPanel extends ConsumerWidget {
       ),
     );
   }
-
-  String _titleForMode(LassoMode mode) {
-    return switch (mode) {
-      LassoMode.freeform => 'Serbest Seçim',
-      LassoMode.rectangle => 'Dikdörtgen Seçim',
-    };
-  }
 }
 
 // ---------------------------------------------------------------------------
-// Selection Type Selector (matches _EraserTypeSelector style)
+// Selection Type Selector
 // ---------------------------------------------------------------------------
 
 class _SelectionTypeSelector extends StatelessWidget {
@@ -113,36 +80,17 @@ class _SelectionTypeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: LassoMode.values.map((mode) {
-        final selected = mode == selectedMode;
-        final icon = _iconFor(mode, selected);
-        // 40dp visual inside a 48dp (kMinInteractiveDimension) hit area.
-        return GestureDetector(
+        return ChromeIconButton(
           key: ValueKey('lasso-mode-${mode.name}'),
-          onTap: () => onModeSelected(mode),
-          behavior: HitTestBehavior.opaque,
-          child: SizedBox.square(
-            dimension: kMinInteractiveDimension,
-            child: Center(
-              child: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: selected ? cs.primary : Colors.transparent,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(
-                  icon,
-                  size: 20,
-                  color: selected ? cs.onPrimary : cs.onSurfaceVariant,
-                ),
-              ),
-            ),
-          ),
+          icon: _iconFor(mode, false),
+          selectedIcon: _iconFor(mode, true),
+          iconSize: ChromeIconSizes.md,
+          tooltip: _titleForMode(mode),
+          selected: mode == selectedMode,
+          onPressed: () => onModeSelected(mode),
         );
       }).toList(),
     );
@@ -186,11 +134,12 @@ class _SelectableTypesGrid extends StatelessWidget {
     ];
 
     return Wrap(
-      spacing: 6,
-      runSpacing: 6,
+      spacing: ChromeSpacing.sm,
+      runSpacing: 0,
       children: types.map((t) {
         final isSelected = selectableTypes[t.$1] ?? true;
         return _TypeChip(
+          key: ValueKey('lasso-type-${t.$1.name}'),
           label: t.$2,
           icon: t.$3,
           isSelected: isSelected,
@@ -203,6 +152,7 @@ class _SelectableTypesGrid extends StatelessWidget {
 
 class _TypeChip extends StatelessWidget {
   const _TypeChip({
+    super.key,
     required this.label,
     required this.icon,
     required this.isSelected,
@@ -214,43 +164,58 @@ class _TypeChip extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
 
+  static const double _visualHeight = 40;
+
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final palette = ChromePalette.of(context);
+    final color = isSelected ? palette.accent : palette.textMuted;
 
-    return GestureDetector(
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      excludeSemantics: true,
+      label: label,
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-        decoration: BoxDecoration(
-          color: isSelected ? cs.primaryContainer : (cs.controlSurface),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: isSelected
-                ? cs.primary.withValues(alpha: 0.5)
-                : cs.outline.withValues(alpha: 0.3),
-            width: 1,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        // 4 + 40 + 4 = the 48dp hit row.
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: ChromeSpacing.xs),
+          child: _chip(context, color),
+        ),
+      ),
+    );
+  }
+
+  /// The pill is a 40dp visual inside the 48dp hit row, like
+  /// `ChromeIconButton`.
+  Widget _chip(BuildContext context, Color color) {
+    final palette = ChromePalette.of(context);
+    return Container(
+      height: _visualHeight,
+      padding: const EdgeInsets.symmetric(horizontal: ChromeSpacing.md),
+      decoration: BoxDecoration(
+        color: isSelected ? palette.accentContainer : Colors.transparent,
+        borderRadius: BorderRadius.circular(ChromeRadius.full),
+        border: Border.all(
+          color: isSelected ? palette.accent : palette.border,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: ChromeIconSizes.sm, color: color),
+          const SizedBox(width: ChromeSpacing.xs),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                  color: color,
+                ),
           ),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 14,
-              color: isSelected ? cs.primary : cs.onSurfaceVariant,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
-                color: isSelected ? cs.onPrimaryContainer : cs.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }

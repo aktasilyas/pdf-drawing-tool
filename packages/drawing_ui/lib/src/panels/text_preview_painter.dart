@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:drawing_ui/src/theme/theme.dart';
 
 // ---------------------------------------------------------------------------
 // Text Preview
@@ -26,7 +27,7 @@ class TextPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final palette = ChromePalette.of(context);
 
     // Clamp preview font size so it fits the 100px box
     final previewSize = fontSize.clamp(10.0, 42.0);
@@ -35,9 +36,7 @@ class TextPreview extends StatelessWidget {
       width: double.infinity,
       height: 100,
       child: CustomPaint(
-        painter: _NotebookLinesPainter(
-          lineColor: cs.outlineVariant.withValues(alpha: 0.3),
-        ),
+        painter: _NotebookLinesPainter(lineColor: palette.border),
         child: Center(
           child: Text(
             'Merhaba',

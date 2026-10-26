@@ -49,7 +49,7 @@ class StickyNote {
     bool minimized = false,
   }) {
     return StickyNote(
-      id: DateTime.now().microsecondsSinceEpoch.toString(),
+      id: ElementIds.next(),
       x: x,
       y: y,
       width: width,

@@ -105,6 +105,20 @@ class HistoryNotifier extends StateNotifier<HistoryState> {
     _updateState();
   }
 
+  /// Runs [body] and records every command it executes as one undo step.
+  ///
+  /// Commands still apply immediately, so [body] can read the updated
+  /// document between them (see [HistoryManager.beginGroup]).
+  void runBatch(void Function() body, {String? description}) {
+    _historyManager.beginGroup();
+    try {
+      body();
+    } finally {
+      _historyManager.endGroup(description: description);
+      _updateState();
+    }
+  }
+
   /// Add stroke to active layer (convenience method).
   ///
   /// Creates an [AddStrokeCommand] and executes it.

@@ -110,46 +110,49 @@ mixin _EraserGestures<T extends ConsumerStatefulWidget>
     ref.read(eraserCursorPositionProvider.notifier).state = null;
     ref.read(eraserCursorPressureProvider.notifier).state = 1.0;
 
-    switch (settings.mode) {
-      case EraserMode.pixel:
-        commitPixelErase(layerIndex);
-        break;
+    // One gesture = one undo step, however many commands it commits.
+    ref.read(historyManagerProvider.notifier).runBatch(() {
+      switch (settings.mode) {
+        case EraserMode.pixel:
+          commitPixelErase(layerIndex);
+          break;
 
-      case EraserMode.stroke:
-        final eraserTool = ref.read(eraserToolProvider);
-        final erasedStrokeIds = eraserTool.endErasing();
+        case EraserMode.stroke:
+          final eraserTool = ref.read(eraserToolProvider);
+          final erasedStrokeIds = eraserTool.endErasing();
 
-        // Commit erased strokes
-        if (erasedStrokeIds.isNotEmpty) {
-          final command = core.EraseStrokesCommand(
-            layerIndex: layerIndex,
-            strokeIds: erasedStrokeIds.toList(),
-          );
-          ref.read(historyManagerProvider.notifier).execute(command);
-        }
+          // Commit erased strokes
+          if (erasedStrokeIds.isNotEmpty) {
+            final command = core.EraseStrokesCommand(
+              layerIndex: layerIndex,
+              strokeIds: erasedStrokeIds.toList(),
+            );
+            ref.read(historyManagerProvider.notifier).execute(command);
+          }
 
-        // Commit erased shapes
-        for (final shapeId in erasedShapeIds) {
-          final command = core.RemoveShapeCommand(
-            layerIndex: layerIndex,
-            shapeId: shapeId,
-          );
-          ref.read(historyManagerProvider.notifier).execute(command);
-        }
-        erasedShapeIds.clear();
+          // Commit erased shapes
+          for (final shapeId in erasedShapeIds) {
+            final command = core.RemoveShapeCommand(
+              layerIndex: layerIndex,
+              shapeId: shapeId,
+            );
+            ref.read(historyManagerProvider.notifier).execute(command);
+          }
+          erasedShapeIds.clear();
 
-        // Commit erased note internal strokes/shapes
-        _commitNoteErasures(layerIndex);
+          // Commit erased note internal strokes/shapes
+          _commitNoteErasures(layerIndex);
 
-        // Clear stroke eraser preview
-        ref.read(strokeEraserPreviewProvider.notifier).state = {};
-        break;
+          // Clear stroke eraser preview
+          ref.read(strokeEraserPreviewProvider.notifier).state = {};
+          break;
 
-      case EraserMode.lasso:
-        commitLassoErase(layerIndex);
-        ref.read(lassoEraserPointsProvider.notifier).state = [];
-        break;
-    }
+        case EraserMode.lasso:
+          commitLassoErase(layerIndex);
+          ref.read(lassoEraserPointsProvider.notifier).state = [];
+          break;
+      }
+    }, description: 'Erase');
 
     // AutoLift: switch back to previous tool after erasing
     if (settings.autoLift) {

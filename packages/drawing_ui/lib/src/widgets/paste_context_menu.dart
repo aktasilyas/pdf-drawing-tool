@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_ui/src/providers/selection_clipboard_provider.dart';
-import 'package:drawing_ui/src/providers/selection_actions_provider.dart';
+import 'package:drawing_ui/src/providers/selection_paste.dart';
 import 'package:drawing_ui/src/theme/drawing_shadows.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 

@@ -187,4 +187,60 @@ class DocumentModel {
       paperHeightMm: paperHeightMm ?? this.paperHeightMm,
     );
   }
+
+  /// Copy with an explicit (possibly null) folder; [copyWith] cannot clear it.
+  DocumentModel withFolderId(String? folderId) => _rebuild(
+        folderId: folderId,
+        coverId: coverId,
+        hasCover: hasCover,
+        deletedAt: deletedAt,
+      );
+
+  /// Copy with an explicit (possibly null) cover; [copyWith] cannot clear it.
+  DocumentModel withCover(String? coverId) => _rebuild(
+        folderId: folderId,
+        coverId: coverId,
+        hasCover: coverId != null,
+        deletedAt: deletedAt,
+      );
+
+  /// Copy that is out of the trash, with [folderId] and no deletion time.
+  DocumentModel restored(String? folderId, DateTime now) => _rebuild(
+        folderId: folderId,
+        coverId: coverId,
+        hasCover: hasCover,
+        deletedAt: null,
+        updatedAt: now,
+        isInTrash: false,
+      );
+
+  DocumentModel _rebuild({
+    required String? folderId,
+    required String? coverId,
+    required bool hasCover,
+    required DateTime? deletedAt,
+    DateTime? updatedAt,
+    bool? isInTrash,
+  }) =>
+      DocumentModel(
+        id: id,
+        title: title,
+        folderId: folderId,
+        templateId: templateId,
+        createdAt: createdAt,
+        updatedAt: updatedAt ?? this.updatedAt,
+        thumbnailPath: thumbnailPath,
+        pageCount: pageCount,
+        isFavorite: isFavorite,
+        isInTrash: isInTrash ?? this.isInTrash,
+        deletedAt: deletedAt,
+        syncState: syncState,
+        paperColor: paperColor,
+        isPortrait: isPortrait,
+        documentType: documentType,
+        coverId: coverId,
+        hasCover: hasCover,
+        paperWidthMm: paperWidthMm,
+        paperHeightMm: paperHeightMm,
+      );
 }

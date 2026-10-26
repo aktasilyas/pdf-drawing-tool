@@ -1,5 +1,4 @@
 import 'package:dartz/dartz.dart';
-import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:uuid/uuid.dart';
 import 'package:drawing_core/drawing_core.dart';
@@ -9,73 +8,26 @@ import 'package:example_app/features/documents/domain/repositories/document_repo
 import 'package:example_app/features/documents/data/datasources/document_local_datasource.dart';
 import 'package:example_app/features/documents/data/datasources/folder_local_datasource.dart';
 import 'package:example_app/features/documents/data/models/document_model.dart';
+import 'package:example_app/features/documents/data/repositories/document_queries.dart';
 
 @Injectable(as: DocumentRepository)
-class DocumentRepositoryImpl implements DocumentRepository {
+class DocumentRepositoryImpl
+    with DocumentQueries
+    implements DocumentRepository {
   final DocumentLocalDatasource _localDatasource;
   final FolderLocalDatasource _folderDatasource;
+  final LocalTransactionRunner _runner;
   final Uuid _uuid;
 
   DocumentRepositoryImpl(
     this._localDatasource,
-    this._folderDatasource, [
+    this._folderDatasource,
+    this._runner, [
     Uuid? uuid,
   ]) : _uuid = uuid ?? const Uuid();
 
   @override
-  Future<Either<Failure, List<DocumentInfo>>> getDocuments({
-    String? folderId,
-  }) async {
-    try {
-      final documents = await _localDatasource.getDocuments(folderId: folderId);
-      final nonTrashDocs = documents
-          .where((doc) => !doc.isInTrash)
-          .map((model) => model.toEntity())
-          .toList();
-
-      // Return unsorted list - UI will handle sorting based on user preference
-      return Right(nonTrashDocs);
-    } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
-    } catch (e) {
-      return Left(CacheFailure('Failed to get documents: $e'));
-    }
-  }
-
-  @override
-  Future<Either<Failure, int>> getDocumentCount({
-    DocumentType? documentType,
-    bool includeTrash = false,
-  }) async {
-    try {
-      final documents = await _localDatasource.getAllDocuments();
-      Iterable<DocumentModel> filtered = documents;
-      if (!includeTrash) {
-        filtered = filtered.where((doc) => !doc.isInTrash);
-      }
-      if (documentType != null) {
-        filtered =
-            filtered.where((doc) => doc.documentType == documentType.name);
-      }
-      return Right(filtered.length);
-    } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
-    } catch (e) {
-      return Left(CacheFailure('Failed to get document count: $e'));
-    }
-  }
-
-  @override
-  Future<Either<Failure, DocumentInfo>> getDocument(String id) async {
-    try {
-      final document = await _localDatasource.getDocument(id);
-      return Right(document.toEntity());
-    } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
-    } catch (e) {
-      return Left(CacheFailure('Failed to get document: $e'));
-    }
-  }
+  DocumentLocalDatasource get localDatasource => _localDatasource;
 
   @override
   Future<Either<Failure, DocumentInfo>> createDocument({
@@ -121,6 +73,32 @@ class DocumentRepositoryImpl implements DocumentRepository {
     }
   }
 
+  /// Runs [action] in one transaction and maps errors to a [Failure].
+  Future<Either<Failure, T>> _guard<T>(
+    String what,
+    Future<T> Function() action,
+  ) async {
+    try {
+      return Right(await _runner.run(action));
+    } on CacheException catch (e) {
+      return Left(CacheFailure(e.message));
+    } catch (e) {
+      return Left(CacheFailure('Failed to $what: $e'));
+    }
+  }
+
+  /// Loads a document, applies [change] and stores the result.
+  Future<Either<Failure, DocumentModel>> _modify(
+    String id,
+    String what,
+    DocumentModel Function(DocumentModel doc) change,
+  ) {
+    return _guard(what, () async {
+      final document = await _localDatasource.getDocument(id);
+      return _localDatasource.updateDocument(change(document));
+    });
+  }
+
   @override
   Future<Either<Failure, DocumentInfo>> updateDocument({
     required String id,
@@ -129,59 +107,35 @@ class DocumentRepositoryImpl implements DocumentRepository {
     String? thumbnailPath,
     int? pageCount,
   }) async {
-    try {
-      final document = await _localDatasource.getDocument(id);
-
-      // Manually create updated document to handle null folderId correctly
-      final updated = DocumentModel(
-        id: document.id,
-        title: title ?? document.title,
-        folderId: folderId, // Explicitly use the passed folderId (can be null)
-        templateId: document.templateId,
-        createdAt: document.createdAt,
-        updatedAt: DateTime.now(),
-        thumbnailPath: thumbnailPath ?? document.thumbnailPath,
-        pageCount: pageCount ?? document.pageCount,
-        isFavorite: document.isFavorite,
-        isInTrash: document.isInTrash,
-        syncState: document.syncState,
-        paperColor: document.paperColor,
-        isPortrait: document.isPortrait,
-        documentType: document.documentType,
-        coverId: document.coverId,
-        hasCover: document.hasCover,
-        paperWidthMm: document.paperWidthMm,
-        paperHeightMm: document.paperHeightMm,
-      );
-
-      final result = await _localDatasource.updateDocument(updated);
-      return Right(result.toEntity());
-    } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
-    } catch (e) {
-      return Left(CacheFailure('Failed to update document: $e'));
-    }
+    // The passed folderId is used as is, so null moves to the root.
+    final result = await _modify(
+      id,
+      'update document',
+      (doc) => doc
+          .copyWith(
+            title: title,
+            thumbnailPath: thumbnailPath,
+            pageCount: pageCount,
+            updatedAt: DateTime.now(),
+          )
+          .withFolderId(folderId),
+    );
+    return result.map((m) => m.toEntity());
   }
 
   @override
-  Future<Either<Failure, void>> deleteDocument(String id) async {
-    try {
-      await _localDatasource.deleteDocument(id);
-      return const Right(null);
-    } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
-    } catch (e) {
-      return Left(CacheFailure('Failed to delete document: $e'));
-    }
-  }
+  Future<Either<Failure, void>> deleteDocument(String id) =>
+      _guard('delete document', () => _localDatasource.deleteDocument(id));
+
+  @override
+  Future<Either<Failure, void>> permanentlyDelete(String id) =>
+      _guard('permanently delete', () => _localDatasource.deleteDocument(id));
 
   @override
   Future<Either<Failure, DocumentInfo>> duplicateDocument(String id) async {
-    try {
-      // Get the original document
+    // Document row and content are copied in one transaction.
+    final result = await _guard('duplicate document', () async {
       final original = await _localDatasource.getDocument(id);
-
-      // Create a copy with new ID and updated timestamps
       final now = DateTime.now();
       final duplicate = original.copyWith(
         id: _uuid.v4(),
@@ -190,189 +144,94 @@ class DocumentRepositoryImpl implements DocumentRepository {
         updatedAt: now,
         isFavorite: false, // Don't copy favorite status
       );
-
-      // Save the duplicate
       final created = await _localDatasource.createDocument(duplicate);
-
-      // Copy document content if exists
-      try {
-        final content = await _localDatasource.getDocumentContent(id);
-        if (content != null) {
-          await _localDatasource.saveDocumentContent(created.id, content);
-        }
-      } catch (e) {
-        // Content copy failed, but document is created
-        debugPrint('Failed to copy document content: $e');
+      final content = await _localDatasource.getDocumentContent(id);
+      if (content != null) {
+        await _localDatasource.saveDocumentContent(created.id, content);
       }
-
-      return Right(created.toEntity());
-    } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
-    } catch (e) {
-      return Left(CacheFailure('Failed to duplicate document: $e'));
-    }
+      return created;
+    });
+    return result.map((m) => m.toEntity());
   }
 
   @override
   Future<Either<Failure, void>> moveDocument(
       String id, String? folderId) async {
-    try {
-      final document = await _localDatasource.getDocument(id);
-      final updated = document.copyWith(
-        folderId: folderId,
-        updatedAt: DateTime.now(),
-      );
-      await _localDatasource.updateDocument(updated);
-      return const Right(null);
-    } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
-    } catch (e) {
-      return Left(CacheFailure('Failed to move document: $e'));
-    }
+    final result = await _modify(
+      id,
+      'move document',
+      (doc) => doc.copyWith(updatedAt: DateTime.now()).withFolderId(folderId),
+    );
+    return result.map((_) {});
   }
 
   @override
   Future<Either<Failure, void>> toggleFavorite(String id) async {
-    try {
-      final document = await _localDatasource.getDocument(id);
-      final updated = document.copyWith(
-        isFavorite: !document.isFavorite,
+    final result = await _modify(
+      id,
+      'toggle favorite',
+      (doc) => doc.copyWith(
+        isFavorite: !doc.isFavorite,
         updatedAt: DateTime.now(),
-      );
-      await _localDatasource.updateDocument(updated);
-      return const Right(null);
-    } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
-    } catch (e) {
-      return Left(CacheFailure('Failed to toggle favorite: $e'));
-    }
-  }
-
-  @override
-  Future<Either<Failure, List<DocumentInfo>>> getFavorites() async {
-    try {
-      final documents = await _localDatasource.getAllDocuments();
-      final favorites = documents
-          .where((doc) => doc.isFavorite && !doc.isInTrash)
-          .map((model) => model.toEntity())
-          .toList();
-
-      // Sort by updated date (most recent first)
-      favorites.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
-
-      return Right(favorites);
-    } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
-    } catch (e) {
-      return Left(CacheFailure('Failed to get favorites: $e'));
-    }
-  }
-
-  @override
-  Future<Either<Failure, List<DocumentInfo>>> getRecent(
-      {int limit = 10}) async {
-    try {
-      final documents = await _localDatasource.getAllDocuments();
-      final recent = documents
-          .where((doc) => !doc.isInTrash)
-          .map((model) => model.toEntity())
-          .toList();
-
-      // Sort by updated date (most recent first)
-      recent.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
-
-      return Right(recent.take(limit).toList());
-    } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
-    } catch (e) {
-      return Left(CacheFailure('Failed to get recent documents: $e'));
-    }
-  }
-
-  @override
-  Future<Either<Failure, List<DocumentInfo>>> search(String query) async {
-    try {
-      final documents = await _localDatasource.getAllDocuments();
-      final lowerQuery = query.toLowerCase();
-      final results = documents
-          .where((doc) =>
-              !doc.isInTrash && doc.title.toLowerCase().contains(lowerQuery))
-          .map((model) => model.toEntity())
-          .toList();
-
-      // Sort by relevance (exact match first, then by updated date)
-      results.sort((a, b) {
-        final aExact = a.title.toLowerCase() == lowerQuery;
-        final bExact = b.title.toLowerCase() == lowerQuery;
-        if (aExact && !bExact) return -1;
-        if (!aExact && bExact) return 1;
-        return b.updatedAt.compareTo(a.updatedAt);
-      });
-
-      return Right(results);
-    } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
-    } catch (e) {
-      return Left(CacheFailure('Failed to search documents: $e'));
-    }
-  }
-
-  @override
-  Stream<List<DocumentInfo>> watchDocuments({String? folderId}) {
-    return _localDatasource.watchDocuments(folderId: folderId).map((documents) {
-      final nonTrashDocs = documents
-          .where((doc) => !doc.isInTrash)
-          .map((model) => model.toEntity())
-          .toList();
-
-      // Sort by updated date (most recent first)
-      nonTrashDocs.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
-
-      return nonTrashDocs;
-    });
-  }
-
-  @override
-  Future<Either<Failure, List<DocumentInfo>>> getTrash() async {
-    try {
-      // Get ALL documents (not filtered by folderId)
-      final documents = await _localDatasource.getAllDocuments();
-      final trash = documents
-          .where((doc) => doc.isInTrash)
-          .map((model) => model.toEntity())
-          .toList();
-
-      // Sort by updated date (most recent first)
-      trash.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
-
-      return Right(trash);
-    } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
-    } catch (e) {
-      return Left(CacheFailure('Failed to get trash: $e'));
-    }
+      ),
+    );
+    return result.map((_) {});
   }
 
   @override
   Future<Either<Failure, void>> moveToTrash(String id) async {
-    try {
-      final document = await _localDatasource.getDocument(id);
-      final updated = document.copyWith(
-        isInTrash: true,
-        updatedAt: DateTime.now(),
-      );
-      await _localDatasource.updateDocument(updated);
-      return const Right(null);
-    } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
-    } catch (e) {
-      return Left(CacheFailure('Failed to move to trash: $e'));
-    }
+    final result = await _modify(
+      id,
+      'move to trash',
+      (doc) => _trashed(doc, DateTime.now()),
+    );
+    return result.map((_) {});
+  }
+
+  DocumentModel _trashed(DocumentModel doc, DateTime now) =>
+      doc.copyWith(isInTrash: true, deletedAt: now, updatedAt: now);
+
+  @override
+  Future<Either<Failure, int>> emptyTrash() {
+    return _guard('empty trash', () async {
+      final trashed =
+          (await _localDatasource.getAllDocuments()).where((d) => d.isInTrash);
+      var count = 0;
+      for (final doc in trashed) {
+        await _localDatasource.deleteDocument(doc.id);
+        count++;
+      }
+      return count;
+    });
   }
 
   @override
-  Future<Either<Failure, void>> restoreFromTrash(String id) async {
-    try {
+  Future<Either<Failure, int>> purgeExpiredTrash({
+    required DateTime now,
+    Duration retention = trashRetention,
+  }) {
+    final cutoff = now.subtract(retention);
+    return _guard('purge expired trash', () async {
+      var purged = 0;
+      final trashed =
+          (await _localDatasource.getAllDocuments()).where((d) => d.isInTrash);
+      for (final doc in trashed) {
+        final deletedAt = doc.deletedAt;
+        if (deletedAt == null) {
+          // Legacy row: start its retention period now, never purge at once.
+          await _localDatasource.updateDocument(doc.copyWith(deletedAt: now));
+        } else if (deletedAt.isBefore(cutoff)) {
+          await _localDatasource.deleteDocument(doc.id);
+          purged++;
+        }
+      }
+      return purged;
+    });
+  }
+
+  @override
+  Future<Either<Failure, void>> restoreFromTrash(String id) {
+    return _guard('restore from trash', () async {
       final document = await _localDatasource.getDocument(id);
 
       // Check if the original folder still exists
@@ -381,58 +240,23 @@ class DocumentRepositoryImpl implements DocumentRepository {
         try {
           await _folderDatasource.getFolder(restoredFolderId);
         } on CacheException {
-          // Folder no longer exists — move document to root
+          // Folder no longer exists - move document to root
           restoredFolderId = null;
         }
       }
 
-      final updated = DocumentModel(
-        id: document.id,
-        title: document.title,
-        folderId: restoredFolderId,
-        templateId: document.templateId,
-        createdAt: document.createdAt,
-        updatedAt: DateTime.now(),
-        thumbnailPath: document.thumbnailPath,
-        pageCount: document.pageCount,
-        isFavorite: document.isFavorite,
-        isInTrash: false,
-        syncState: document.syncState,
-        paperColor: document.paperColor,
-        isPortrait: document.isPortrait,
-        documentType: document.documentType,
-        coverId: document.coverId,
-        hasCover: document.hasCover,
-        paperWidthMm: document.paperWidthMm,
-        paperHeightMm: document.paperHeightMm,
+      await _localDatasource.updateDocument(
+        document.restored(restoredFolderId, DateTime.now()),
       );
-      await _localDatasource.updateDocument(updated);
-      return const Right(null);
-    } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
-    } catch (e) {
-      return Left(CacheFailure('Failed to restore from trash: $e'));
-    }
-  }
-
-  @override
-  Future<Either<Failure, void>> permanentlyDelete(String id) async {
-    try {
-      await _localDatasource.deleteDocument(id);
-      return const Right(null);
-    } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
-    } catch (e) {
-      return Left(CacheFailure('Failed to permanently delete: $e'));
-    }
+    });
   }
 
   @override
   Future<Either<Failure, Map<String, dynamic>?>> getDocumentContent(
-      String id) async {
+    String id,
+  ) async {
     try {
-      final content = await _localDatasource.getDocumentContent(id);
-      return Right(content);
+      return Right(await _localDatasource.getDocumentContent(id));
     } on CacheException catch (e) {
       return Left(CacheFailure(e.message));
     } catch (e) {
@@ -449,46 +273,24 @@ class DocumentRepositoryImpl implements DocumentRepository {
     String? coverId,
     bool updateCover = false,
     String? title,
-  }) async {
-    try {
-      // Save content
+  }) {
+    // Content and metadata are written atomically.
+    return _guard('save document content', () async {
       await _localDatasource.saveDocumentContent(id, content);
-
-      // Update metadata if provided
-      if (pageCount != null ||
-          updatedAt != null ||
-          updateCover ||
-          title != null) {
-        final document = await _localDatasource.getDocument(id);
-        // Build updated model manually to allow setting coverId to null
-        final updated = DocumentModel(
-          id: document.id,
-          title: title ?? document.title,
-          folderId: document.folderId,
-          templateId: document.templateId,
-          createdAt: document.createdAt,
-          updatedAt: updatedAt ?? DateTime.now(),
-          thumbnailPath: document.thumbnailPath,
-          pageCount: pageCount ?? document.pageCount,
-          isFavorite: document.isFavorite,
-          isInTrash: document.isInTrash,
-          syncState: document.syncState,
-          paperColor: document.paperColor,
-          isPortrait: document.isPortrait,
-          documentType: document.documentType,
-          coverId: updateCover ? coverId : document.coverId,
-          hasCover: updateCover ? (coverId != null) : document.hasCover,
-          paperWidthMm: document.paperWidthMm,
-          paperHeightMm: document.paperHeightMm,
-        );
-        await _localDatasource.updateDocument(updated);
+      if (pageCount == null &&
+          updatedAt == null &&
+          !updateCover &&
+          title == null) {
+        return;
       }
-
-      return const Right(null);
-    } on CacheException catch (e) {
-      return Left(CacheFailure(e.message));
-    } catch (e) {
-      return Left(CacheFailure('Failed to save document content: $e'));
-    }
+      final document = await _localDatasource.getDocument(id);
+      var updated = document.copyWith(
+        title: title,
+        pageCount: pageCount,
+        updatedAt: updatedAt ?? DateTime.now(),
+      );
+      if (updateCover) updated = updated.withCover(coverId);
+      await _localDatasource.updateDocument(updated);
+    });
   }
 }

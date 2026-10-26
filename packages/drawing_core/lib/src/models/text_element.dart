@@ -109,7 +109,7 @@ class TextElement {
     double rotation = 0.0,
   }) {
     return TextElement(
-      id: DateTime.now().microsecondsSinceEpoch.toString(),
+      id: ElementIds.next(),
       text: text,
       x: x,
       y: y,

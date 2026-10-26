@@ -10,8 +10,13 @@
 /// ```
 library;
 
+import 'dart:async';
+
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:example_app/core/database/app_database.dart';
+import 'package:example_app/core/database/local_transaction_runner.dart';
+import 'package:example_app/core/utils/logger.dart';
 import 'package:example_app/features/documents/documents.dart';
 import 'package:example_app/features/editor/editor.dart';
 
@@ -26,18 +31,50 @@ Future<void> configureDependencies() async {
   final prefs = await SharedPreferences.getInstance();
   getIt.registerSingleton<SharedPreferences>(prefs);
 
+  // Single local database for the whole app (providers read it from here).
+  final database = AppDatabase();
+  getIt.registerSingleton<AppDatabase>(database);
+  getIt.registerLazySingleton<LocalTransactionRunner>(
+    () => DriftTransactionRunner(database),
+  );
+
+  // Import the legacy prefs library before any datasource reads from Drift.
+  await PrefsToDriftMigration(database, prefs).run();
+
   // Manual registrations
   _registerRepositories();
   _registerUseCases();
+
+  unawaited(purgeExpiredTrashOnStartup(
+    PurgeExpiredTrashUseCase(
+      getIt<DocumentRepository>(),
+      getIt<PageTrashRepository>(),
+    ),
+  ));
+}
+
+/// Deletes trash older than 30 days. Never blocks or fails app startup.
+Future<void> purgeExpiredTrashOnStartup(
+  PurgeExpiredTrashUseCase purge, {
+  DateTime Function() clock = DateTime.now,
+}) async {
+  try {
+    final result = await purge(clock());
+    result.fold(
+      (failure) => logger.w('Trash purge failed: ${failure.message}'),
+      (count) {
+        if (count > 0) logger.i('Purged $count expired trash items');
+      },
+    );
+  } catch (e) {
+    logger.w('Trash purge failed: $e');
+  }
 }
 
 // ignore: unused_element
 void _registerCoreServices() {
   // Network info
   // getIt.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl());
-
-  // Database
-  // getIt.registerLazySingleton<AppDatabase>(() => AppDatabase());
 
   // Supabase client
   // getIt.registerLazySingleton<SupabaseClient>(() => Supabase.instance.client);
@@ -64,6 +101,7 @@ void _registerRepositories() {
     () => DocumentRepositoryImpl(
       getIt<DocumentLocalDatasource>(),
       getIt<FolderLocalDatasource>(),
+      getIt<LocalTransactionRunner>(),
     ),
   );
 
@@ -71,7 +109,8 @@ void _registerRepositories() {
   getIt.registerLazySingleton<PageTrashRepository>(
     () => PageTrashRepositoryImpl(
       getIt<TrashedPageLocalDatasource>(),
-      getIt<SharedPreferences>(),
+      getIt<DocumentLocalDatasource>(),
+      getIt<LocalTransactionRunner>(),
     ),
   );
 
@@ -80,6 +119,7 @@ void _registerRepositories() {
     () => FolderRepositoryImpl(
       getIt<FolderLocalDatasource>(),
       getIt<DocumentLocalDatasource>(),
+      getIt<LocalTransactionRunner>(),
     ),
   );
 }

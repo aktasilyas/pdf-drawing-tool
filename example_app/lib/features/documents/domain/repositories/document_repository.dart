@@ -3,6 +3,9 @@ import 'package:drawing_core/drawing_core.dart';
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
 
+/// How long trashed items are kept before they are purged.
+const Duration trashRetention = Duration(days: 30);
+
 abstract class DocumentRepository {
   /// Get all documents, optionally filtered by folder
   Future<Either<Failure, List<DocumentInfo>>> getDocuments({String? folderId});
@@ -76,6 +79,17 @@ abstract class DocumentRepository {
 
   /// Permanently delete document
   Future<Either<Failure, void>> permanentlyDelete(String id);
+
+  /// Permanently deletes every document in the trash; returns how many.
+  Future<Either<Failure, int>> emptyTrash();
+
+  /// Permanently deletes documents trashed before `now - retention`.
+  /// Legacy trashed documents without a deletion time get `now` stamped
+  /// instead (they start their retention period). Returns the purge count.
+  Future<Either<Failure, int>> purgeExpiredTrash({
+    required DateTime now,
+    Duration retention = trashRetention,
+  });
 
   /// Get document content (drawing data as JSON)
   Future<Either<Failure, Map<String, dynamic>?>> getDocumentContent(String id);

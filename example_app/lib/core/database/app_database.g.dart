@@ -4,7 +4,7 @@ part of 'app_database.dart';
 
 // ignore_for_file: type=lint
 class $DocumentsTable extends Documents
-    with TableInfo<$DocumentsTable, Document> {
+    with TableInfo<$DocumentsTable, DocumentRow> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -85,6 +85,12 @@ class $DocumentsTable extends Documents
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: const Constant(0));
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+      'deleted_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
   static const VerificationMeta _contentMeta =
       const VerificationMeta('content');
   @override
@@ -162,6 +168,7 @@ class $DocumentsTable extends Documents
         isFavorite,
         isInTrash,
         syncState,
+        deletedAt,
         content,
         paperColor,
         isPortrait,
@@ -177,7 +184,7 @@ class $DocumentsTable extends Documents
   String get actualTableName => $name;
   static const String $name = 'documents';
   @override
-  VerificationContext validateIntegrity(Insertable<Document> instance,
+  VerificationContext validateIntegrity(Insertable<DocumentRow> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -242,6 +249,10 @@ class $DocumentsTable extends Documents
       context.handle(_syncStateMeta,
           syncState.isAcceptableOrUnknown(data['sync_state']!, _syncStateMeta));
     }
+    if (data.containsKey('deleted_at')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
+    }
     if (data.containsKey('content')) {
       context.handle(_contentMeta,
           content.isAcceptableOrUnknown(data['content']!, _contentMeta));
@@ -290,9 +301,9 @@ class $DocumentsTable extends Documents
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Document map(Map<String, dynamic> data, {String? tablePrefix}) {
+  DocumentRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Document(
+    return DocumentRow(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       title: attachedDatabase.typeMapping
@@ -315,6 +326,8 @@ class $DocumentsTable extends Documents
           .read(DriftSqlType.bool, data['${effectivePrefix}is_in_trash'])!,
       syncState: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}sync_state'])!,
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at']),
       content: attachedDatabase.typeMapping
           .read(DriftSqlType.blob, data['${effectivePrefix}content']),
       paperColor: attachedDatabase.typeMapping
@@ -340,7 +353,7 @@ class $DocumentsTable extends Documents
   }
 }
 
-class Document extends DataClass implements Insertable<Document> {
+class DocumentRow extends DataClass implements Insertable<DocumentRow> {
   /// Unique document ID
   final String id;
 
@@ -374,7 +387,10 @@ class Document extends DataClass implements Insertable<Document> {
   /// Sync state: 0=local, 1=syncing, 2=synced, 3=error
   final int syncState;
 
-  /// Document content (serialized drawing data)
+  /// When the document was moved to trash (null if not trashed)
+  final DateTime? deletedAt;
+
+  /// Legacy content blob, unused since v6 (see [DocumentContents]).
   final Uint8List? content;
 
   /// Paper color: 'Beyaz kağıt', 'Sarı kağıt', 'Gri kağıt'
@@ -397,7 +413,7 @@ class Document extends DataClass implements Insertable<Document> {
 
   /// Paper height in millimeters (default A4: 297mm)
   final double paperHeightMm;
-  const Document(
+  const DocumentRow(
       {required this.id,
       required this.title,
       this.folderId,
@@ -409,6 +425,7 @@ class Document extends DataClass implements Insertable<Document> {
       required this.isFavorite,
       required this.isInTrash,
       required this.syncState,
+      this.deletedAt,
       this.content,
       required this.paperColor,
       required this.isPortrait,
@@ -435,6 +452,9 @@ class Document extends DataClass implements Insertable<Document> {
     map['is_favorite'] = Variable<bool>(isFavorite);
     map['is_in_trash'] = Variable<bool>(isInTrash);
     map['sync_state'] = Variable<int>(syncState);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
     if (!nullToAbsent || content != null) {
       map['content'] = Variable<Uint8List>(content);
     }
@@ -467,6 +487,9 @@ class Document extends DataClass implements Insertable<Document> {
       isFavorite: Value(isFavorite),
       isInTrash: Value(isInTrash),
       syncState: Value(syncState),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
       content: content == null && nullToAbsent
           ? const Value.absent()
           : Value(content),
@@ -482,10 +505,10 @@ class Document extends DataClass implements Insertable<Document> {
     );
   }
 
-  factory Document.fromJson(Map<String, dynamic> json,
+  factory DocumentRow.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Document(
+    return DocumentRow(
       id: serializer.fromJson<String>(json['id']),
       title: serializer.fromJson<String>(json['title']),
       folderId: serializer.fromJson<String?>(json['folderId']),
@@ -497,6 +520,7 @@ class Document extends DataClass implements Insertable<Document> {
       isFavorite: serializer.fromJson<bool>(json['isFavorite']),
       isInTrash: serializer.fromJson<bool>(json['isInTrash']),
       syncState: serializer.fromJson<int>(json['syncState']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
       content: serializer.fromJson<Uint8List?>(json['content']),
       paperColor: serializer.fromJson<String>(json['paperColor']),
       isPortrait: serializer.fromJson<bool>(json['isPortrait']),
@@ -522,6 +546,7 @@ class Document extends DataClass implements Insertable<Document> {
       'isFavorite': serializer.toJson<bool>(isFavorite),
       'isInTrash': serializer.toJson<bool>(isInTrash),
       'syncState': serializer.toJson<int>(syncState),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
       'content': serializer.toJson<Uint8List?>(content),
       'paperColor': serializer.toJson<String>(paperColor),
       'isPortrait': serializer.toJson<bool>(isPortrait),
@@ -533,7 +558,7 @@ class Document extends DataClass implements Insertable<Document> {
     };
   }
 
-  Document copyWith(
+  DocumentRow copyWith(
           {String? id,
           String? title,
           Value<String?> folderId = const Value.absent(),
@@ -545,6 +570,7 @@ class Document extends DataClass implements Insertable<Document> {
           bool? isFavorite,
           bool? isInTrash,
           int? syncState,
+          Value<DateTime?> deletedAt = const Value.absent(),
           Value<Uint8List?> content = const Value.absent(),
           String? paperColor,
           bool? isPortrait,
@@ -553,7 +579,7 @@ class Document extends DataClass implements Insertable<Document> {
           bool? hasCover,
           double? paperWidthMm,
           double? paperHeightMm}) =>
-      Document(
+      DocumentRow(
         id: id ?? this.id,
         title: title ?? this.title,
         folderId: folderId.present ? folderId.value : this.folderId,
@@ -566,6 +592,7 @@ class Document extends DataClass implements Insertable<Document> {
         isFavorite: isFavorite ?? this.isFavorite,
         isInTrash: isInTrash ?? this.isInTrash,
         syncState: syncState ?? this.syncState,
+        deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
         content: content.present ? content.value : this.content,
         paperColor: paperColor ?? this.paperColor,
         isPortrait: isPortrait ?? this.isPortrait,
@@ -575,8 +602,8 @@ class Document extends DataClass implements Insertable<Document> {
         paperWidthMm: paperWidthMm ?? this.paperWidthMm,
         paperHeightMm: paperHeightMm ?? this.paperHeightMm,
       );
-  Document copyWithCompanion(DocumentsCompanion data) {
-    return Document(
+  DocumentRow copyWithCompanion(DocumentsCompanion data) {
+    return DocumentRow(
       id: data.id.present ? data.id.value : this.id,
       title: data.title.present ? data.title.value : this.title,
       folderId: data.folderId.present ? data.folderId.value : this.folderId,
@@ -592,6 +619,7 @@ class Document extends DataClass implements Insertable<Document> {
           data.isFavorite.present ? data.isFavorite.value : this.isFavorite,
       isInTrash: data.isInTrash.present ? data.isInTrash.value : this.isInTrash,
       syncState: data.syncState.present ? data.syncState.value : this.syncState,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
       content: data.content.present ? data.content.value : this.content,
       paperColor:
           data.paperColor.present ? data.paperColor.value : this.paperColor,
@@ -613,7 +641,7 @@ class Document extends DataClass implements Insertable<Document> {
 
   @override
   String toString() {
-    return (StringBuffer('Document(')
+    return (StringBuffer('DocumentRow(')
           ..write('id: $id, ')
           ..write('title: $title, ')
           ..write('folderId: $folderId, ')
@@ -625,6 +653,7 @@ class Document extends DataClass implements Insertable<Document> {
           ..write('isFavorite: $isFavorite, ')
           ..write('isInTrash: $isInTrash, ')
           ..write('syncState: $syncState, ')
+          ..write('deletedAt: $deletedAt, ')
           ..write('content: $content, ')
           ..write('paperColor: $paperColor, ')
           ..write('isPortrait: $isPortrait, ')
@@ -650,6 +679,7 @@ class Document extends DataClass implements Insertable<Document> {
       isFavorite,
       isInTrash,
       syncState,
+      deletedAt,
       $driftBlobEquality.hash(content),
       paperColor,
       isPortrait,
@@ -661,7 +691,7 @@ class Document extends DataClass implements Insertable<Document> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Document &&
+      (other is DocumentRow &&
           other.id == this.id &&
           other.title == this.title &&
           other.folderId == this.folderId &&
@@ -673,6 +703,7 @@ class Document extends DataClass implements Insertable<Document> {
           other.isFavorite == this.isFavorite &&
           other.isInTrash == this.isInTrash &&
           other.syncState == this.syncState &&
+          other.deletedAt == this.deletedAt &&
           $driftBlobEquality.equals(other.content, this.content) &&
           other.paperColor == this.paperColor &&
           other.isPortrait == this.isPortrait &&
@@ -683,7 +714,7 @@ class Document extends DataClass implements Insertable<Document> {
           other.paperHeightMm == this.paperHeightMm);
 }
 
-class DocumentsCompanion extends UpdateCompanion<Document> {
+class DocumentsCompanion extends UpdateCompanion<DocumentRow> {
   final Value<String> id;
   final Value<String> title;
   final Value<String?> folderId;
@@ -695,6 +726,7 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
   final Value<bool> isFavorite;
   final Value<bool> isInTrash;
   final Value<int> syncState;
+  final Value<DateTime?> deletedAt;
   final Value<Uint8List?> content;
   final Value<String> paperColor;
   final Value<bool> isPortrait;
@@ -716,6 +748,7 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
     this.isFavorite = const Value.absent(),
     this.isInTrash = const Value.absent(),
     this.syncState = const Value.absent(),
+    this.deletedAt = const Value.absent(),
     this.content = const Value.absent(),
     this.paperColor = const Value.absent(),
     this.isPortrait = const Value.absent(),
@@ -738,6 +771,7 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
     this.isFavorite = const Value.absent(),
     this.isInTrash = const Value.absent(),
     this.syncState = const Value.absent(),
+    this.deletedAt = const Value.absent(),
     this.content = const Value.absent(),
     this.paperColor = const Value.absent(),
     this.isPortrait = const Value.absent(),
@@ -752,7 +786,7 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
         templateId = Value(templateId),
         createdAt = Value(createdAt),
         updatedAt = Value(updatedAt);
-  static Insertable<Document> custom({
+  static Insertable<DocumentRow> custom({
     Expression<String>? id,
     Expression<String>? title,
     Expression<String>? folderId,
@@ -764,6 +798,7 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
     Expression<bool>? isFavorite,
     Expression<bool>? isInTrash,
     Expression<int>? syncState,
+    Expression<DateTime>? deletedAt,
     Expression<Uint8List>? content,
     Expression<String>? paperColor,
     Expression<bool>? isPortrait,
@@ -786,6 +821,7 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
       if (isFavorite != null) 'is_favorite': isFavorite,
       if (isInTrash != null) 'is_in_trash': isInTrash,
       if (syncState != null) 'sync_state': syncState,
+      if (deletedAt != null) 'deleted_at': deletedAt,
       if (content != null) 'content': content,
       if (paperColor != null) 'paper_color': paperColor,
       if (isPortrait != null) 'is_portrait': isPortrait,
@@ -810,6 +846,7 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
       Value<bool>? isFavorite,
       Value<bool>? isInTrash,
       Value<int>? syncState,
+      Value<DateTime?>? deletedAt,
       Value<Uint8List?>? content,
       Value<String>? paperColor,
       Value<bool>? isPortrait,
@@ -831,6 +868,7 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
       isFavorite: isFavorite ?? this.isFavorite,
       isInTrash: isInTrash ?? this.isInTrash,
       syncState: syncState ?? this.syncState,
+      deletedAt: deletedAt ?? this.deletedAt,
       content: content ?? this.content,
       paperColor: paperColor ?? this.paperColor,
       isPortrait: isPortrait ?? this.isPortrait,
@@ -879,6 +917,9 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
     if (syncState.present) {
       map['sync_state'] = Variable<int>(syncState.value);
     }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
     if (content.present) {
       map['content'] = Variable<Uint8List>(content.value);
     }
@@ -923,6 +964,7 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
           ..write('isFavorite: $isFavorite, ')
           ..write('isInTrash: $isInTrash, ')
           ..write('syncState: $syncState, ')
+          ..write('deletedAt: $deletedAt, ')
           ..write('content: $content, ')
           ..write('paperColor: $paperColor, ')
           ..write('isPortrait: $isPortrait, ')
@@ -937,7 +979,7 @@ class DocumentsCompanion extends UpdateCompanion<Document> {
   }
 }
 
-class $FoldersTable extends Folders with TableInfo<$FoldersTable, Folder> {
+class $FoldersTable extends Folders with TableInfo<$FoldersTable, FolderRow> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
@@ -966,6 +1008,24 @@ class $FoldersTable extends Folders with TableInfo<$FoldersTable, Folder> {
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: const Constant(0xFF2196F3));
+  static const VerificationMeta _sortOrderMeta =
+      const VerificationMeta('sortOrder');
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+      'sort_order', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _isFavoriteMeta =
+      const VerificationMeta('isFavorite');
+  @override
+  late final GeneratedColumn<bool> isFavorite = GeneratedColumn<bool>(
+      'is_favorite', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("is_favorite" IN (0, 1))'),
+      defaultValue: const Constant(false));
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
@@ -974,14 +1034,14 @@ class $FoldersTable extends Folders with TableInfo<$FoldersTable, Folder> {
       type: DriftSqlType.dateTime, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, name, parentId, colorValue, createdAt];
+      [id, name, parentId, colorValue, sortOrder, isFavorite, createdAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'folders';
   @override
-  VerificationContext validateIntegrity(Insertable<Folder> instance,
+  VerificationContext validateIntegrity(Insertable<FolderRow> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
@@ -1006,6 +1066,16 @@ class $FoldersTable extends Folders with TableInfo<$FoldersTable, Folder> {
           colorValue.isAcceptableOrUnknown(
               data['color_value']!, _colorValueMeta));
     }
+    if (data.containsKey('sort_order')) {
+      context.handle(_sortOrderMeta,
+          sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta));
+    }
+    if (data.containsKey('is_favorite')) {
+      context.handle(
+          _isFavoriteMeta,
+          isFavorite.isAcceptableOrUnknown(
+              data['is_favorite']!, _isFavoriteMeta));
+    }
     if (data.containsKey('created_at')) {
       context.handle(_createdAtMeta,
           createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
@@ -1018,9 +1088,9 @@ class $FoldersTable extends Folders with TableInfo<$FoldersTable, Folder> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Folder map(Map<String, dynamic> data, {String? tablePrefix}) {
+  FolderRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Folder(
+    return FolderRow(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       name: attachedDatabase.typeMapping
@@ -1029,6 +1099,10 @@ class $FoldersTable extends Folders with TableInfo<$FoldersTable, Folder> {
           .read(DriftSqlType.string, data['${effectivePrefix}parent_id']),
       colorValue: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}color_value'])!,
+      sortOrder: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}sort_order'])!,
+      isFavorite: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_favorite'])!,
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
     );
@@ -1040,7 +1114,7 @@ class $FoldersTable extends Folders with TableInfo<$FoldersTable, Folder> {
   }
 }
 
-class Folder extends DataClass implements Insertable<Folder> {
+class FolderRow extends DataClass implements Insertable<FolderRow> {
   /// Unique folder ID
   final String id;
 
@@ -1053,13 +1127,21 @@ class Folder extends DataClass implements Insertable<Folder> {
   /// Folder color as integer value
   final int colorValue;
 
+  /// Manual sort position
+  final int sortOrder;
+
+  /// Whether the folder is marked as favorite
+  final bool isFavorite;
+
   /// When the folder was created
   final DateTime createdAt;
-  const Folder(
+  const FolderRow(
       {required this.id,
       required this.name,
       this.parentId,
       required this.colorValue,
+      required this.sortOrder,
+      required this.isFavorite,
       required this.createdAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1070,6 +1152,8 @@ class Folder extends DataClass implements Insertable<Folder> {
       map['parent_id'] = Variable<String>(parentId);
     }
     map['color_value'] = Variable<int>(colorValue);
+    map['sort_order'] = Variable<int>(sortOrder);
+    map['is_favorite'] = Variable<bool>(isFavorite);
     map['created_at'] = Variable<DateTime>(createdAt);
     return map;
   }
@@ -1082,18 +1166,22 @@ class Folder extends DataClass implements Insertable<Folder> {
           ? const Value.absent()
           : Value(parentId),
       colorValue: Value(colorValue),
+      sortOrder: Value(sortOrder),
+      isFavorite: Value(isFavorite),
       createdAt: Value(createdAt),
     );
   }
 
-  factory Folder.fromJson(Map<String, dynamic> json,
+  factory FolderRow.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Folder(
+    return FolderRow(
       id: serializer.fromJson<String>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       parentId: serializer.fromJson<String?>(json['parentId']),
       colorValue: serializer.fromJson<int>(json['colorValue']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+      isFavorite: serializer.fromJson<bool>(json['isFavorite']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
@@ -1105,64 +1193,80 @@ class Folder extends DataClass implements Insertable<Folder> {
       'name': serializer.toJson<String>(name),
       'parentId': serializer.toJson<String?>(parentId),
       'colorValue': serializer.toJson<int>(colorValue),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+      'isFavorite': serializer.toJson<bool>(isFavorite),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
 
-  Folder copyWith(
+  FolderRow copyWith(
           {String? id,
           String? name,
           Value<String?> parentId = const Value.absent(),
           int? colorValue,
+          int? sortOrder,
+          bool? isFavorite,
           DateTime? createdAt}) =>
-      Folder(
+      FolderRow(
         id: id ?? this.id,
         name: name ?? this.name,
         parentId: parentId.present ? parentId.value : this.parentId,
         colorValue: colorValue ?? this.colorValue,
+        sortOrder: sortOrder ?? this.sortOrder,
+        isFavorite: isFavorite ?? this.isFavorite,
         createdAt: createdAt ?? this.createdAt,
       );
-  Folder copyWithCompanion(FoldersCompanion data) {
-    return Folder(
+  FolderRow copyWithCompanion(FoldersCompanion data) {
+    return FolderRow(
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
       parentId: data.parentId.present ? data.parentId.value : this.parentId,
       colorValue:
           data.colorValue.present ? data.colorValue.value : this.colorValue,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+      isFavorite:
+          data.isFavorite.present ? data.isFavorite.value : this.isFavorite,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
     );
   }
 
   @override
   String toString() {
-    return (StringBuffer('Folder(')
+    return (StringBuffer('FolderRow(')
           ..write('id: $id, ')
           ..write('name: $name, ')
           ..write('parentId: $parentId, ')
           ..write('colorValue: $colorValue, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('isFavorite: $isFavorite, ')
           ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, parentId, colorValue, createdAt);
+  int get hashCode => Object.hash(
+      id, name, parentId, colorValue, sortOrder, isFavorite, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Folder &&
+      (other is FolderRow &&
           other.id == this.id &&
           other.name == this.name &&
           other.parentId == this.parentId &&
           other.colorValue == this.colorValue &&
+          other.sortOrder == this.sortOrder &&
+          other.isFavorite == this.isFavorite &&
           other.createdAt == this.createdAt);
 }
 
-class FoldersCompanion extends UpdateCompanion<Folder> {
+class FoldersCompanion extends UpdateCompanion<FolderRow> {
   final Value<String> id;
   final Value<String> name;
   final Value<String?> parentId;
   final Value<int> colorValue;
+  final Value<int> sortOrder;
+  final Value<bool> isFavorite;
   final Value<DateTime> createdAt;
   final Value<int> rowid;
   const FoldersCompanion({
@@ -1170,6 +1274,8 @@ class FoldersCompanion extends UpdateCompanion<Folder> {
     this.name = const Value.absent(),
     this.parentId = const Value.absent(),
     this.colorValue = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.isFavorite = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
@@ -1178,16 +1284,20 @@ class FoldersCompanion extends UpdateCompanion<Folder> {
     required String name,
     this.parentId = const Value.absent(),
     this.colorValue = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.isFavorite = const Value.absent(),
     required DateTime createdAt,
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         name = Value(name),
         createdAt = Value(createdAt);
-  static Insertable<Folder> custom({
+  static Insertable<FolderRow> custom({
     Expression<String>? id,
     Expression<String>? name,
     Expression<String>? parentId,
     Expression<int>? colorValue,
+    Expression<int>? sortOrder,
+    Expression<bool>? isFavorite,
     Expression<DateTime>? createdAt,
     Expression<int>? rowid,
   }) {
@@ -1196,6 +1306,8 @@ class FoldersCompanion extends UpdateCompanion<Folder> {
       if (name != null) 'name': name,
       if (parentId != null) 'parent_id': parentId,
       if (colorValue != null) 'color_value': colorValue,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (isFavorite != null) 'is_favorite': isFavorite,
       if (createdAt != null) 'created_at': createdAt,
       if (rowid != null) 'rowid': rowid,
     });
@@ -1206,6 +1318,8 @@ class FoldersCompanion extends UpdateCompanion<Folder> {
       Value<String>? name,
       Value<String?>? parentId,
       Value<int>? colorValue,
+      Value<int>? sortOrder,
+      Value<bool>? isFavorite,
       Value<DateTime>? createdAt,
       Value<int>? rowid}) {
     return FoldersCompanion(
@@ -1213,6 +1327,8 @@ class FoldersCompanion extends UpdateCompanion<Folder> {
       name: name ?? this.name,
       parentId: parentId ?? this.parentId,
       colorValue: colorValue ?? this.colorValue,
+      sortOrder: sortOrder ?? this.sortOrder,
+      isFavorite: isFavorite ?? this.isFavorite,
       createdAt: createdAt ?? this.createdAt,
       rowid: rowid ?? this.rowid,
     );
@@ -1233,6 +1349,12 @@ class FoldersCompanion extends UpdateCompanion<Folder> {
     if (colorValue.present) {
       map['color_value'] = Variable<int>(colorValue.value);
     }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    if (isFavorite.present) {
+      map['is_favorite'] = Variable<bool>(isFavorite.value);
+    }
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
@@ -1249,7 +1371,656 @@ class FoldersCompanion extends UpdateCompanion<Folder> {
           ..write('name: $name, ')
           ..write('parentId: $parentId, ')
           ..write('colorValue: $colorValue, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('isFavorite: $isFavorite, ')
           ..write('createdAt: $createdAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $DocumentContentsTable extends DocumentContents
+    with TableInfo<$DocumentContentsTable, DocumentContent> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DocumentContentsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _documentIdMeta =
+      const VerificationMeta('documentId');
+  @override
+  late final GeneratedColumn<String> documentId = GeneratedColumn<String>(
+      'document_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _dataMeta = const VerificationMeta('data');
+  @override
+  late final GeneratedColumn<String> data = GeneratedColumn<String>(
+      'data', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _updatedAtMeta =
+      const VerificationMeta('updatedAt');
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+      'updated_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [documentId, data, updatedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'document_contents';
+  @override
+  VerificationContext validateIntegrity(Insertable<DocumentContent> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('document_id')) {
+      context.handle(
+          _documentIdMeta,
+          documentId.isAcceptableOrUnknown(
+              data['document_id']!, _documentIdMeta));
+    } else if (isInserting) {
+      context.missing(_documentIdMeta);
+    }
+    if (data.containsKey('data')) {
+      context.handle(
+          _dataMeta, this.data.isAcceptableOrUnknown(data['data']!, _dataMeta));
+    } else if (isInserting) {
+      context.missing(_dataMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(_updatedAtMeta,
+          updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta));
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {documentId};
+  @override
+  DocumentContent map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DocumentContent(
+      documentId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}document_id'])!,
+      data: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}data'])!,
+      updatedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+    );
+  }
+
+  @override
+  $DocumentContentsTable createAlias(String alias) {
+    return $DocumentContentsTable(attachedDatabase, alias);
+  }
+}
+
+class DocumentContent extends DataClass implements Insertable<DocumentContent> {
+  /// Owning document ID
+  final String documentId;
+
+  /// Content as JSON text
+  final String data;
+
+  /// When the content was last written
+  final DateTime updatedAt;
+  const DocumentContent(
+      {required this.documentId, required this.data, required this.updatedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['document_id'] = Variable<String>(documentId);
+    map['data'] = Variable<String>(data);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  DocumentContentsCompanion toCompanion(bool nullToAbsent) {
+    return DocumentContentsCompanion(
+      documentId: Value(documentId),
+      data: Value(data),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory DocumentContent.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DocumentContent(
+      documentId: serializer.fromJson<String>(json['documentId']),
+      data: serializer.fromJson<String>(json['data']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'documentId': serializer.toJson<String>(documentId),
+      'data': serializer.toJson<String>(data),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  DocumentContent copyWith(
+          {String? documentId, String? data, DateTime? updatedAt}) =>
+      DocumentContent(
+        documentId: documentId ?? this.documentId,
+        data: data ?? this.data,
+        updatedAt: updatedAt ?? this.updatedAt,
+      );
+  DocumentContent copyWithCompanion(DocumentContentsCompanion data) {
+    return DocumentContent(
+      documentId:
+          data.documentId.present ? data.documentId.value : this.documentId,
+      data: data.data.present ? data.data.value : this.data,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DocumentContent(')
+          ..write('documentId: $documentId, ')
+          ..write('data: $data, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(documentId, data, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DocumentContent &&
+          other.documentId == this.documentId &&
+          other.data == this.data &&
+          other.updatedAt == this.updatedAt);
+}
+
+class DocumentContentsCompanion extends UpdateCompanion<DocumentContent> {
+  final Value<String> documentId;
+  final Value<String> data;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const DocumentContentsCompanion({
+    this.documentId = const Value.absent(),
+    this.data = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DocumentContentsCompanion.insert({
+    required String documentId,
+    required String data,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  })  : documentId = Value(documentId),
+        data = Value(data),
+        updatedAt = Value(updatedAt);
+  static Insertable<DocumentContent> custom({
+    Expression<String>? documentId,
+    Expression<String>? data,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (documentId != null) 'document_id': documentId,
+      if (data != null) 'data': data,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DocumentContentsCompanion copyWith(
+      {Value<String>? documentId,
+      Value<String>? data,
+      Value<DateTime>? updatedAt,
+      Value<int>? rowid}) {
+    return DocumentContentsCompanion(
+      documentId: documentId ?? this.documentId,
+      data: data ?? this.data,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (documentId.present) {
+      map['document_id'] = Variable<String>(documentId.value);
+    }
+    if (data.present) {
+      map['data'] = Variable<String>(data.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DocumentContentsCompanion(')
+          ..write('documentId: $documentId, ')
+          ..write('data: $data, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $TrashedPagesTable extends TrashedPages
+    with TableInfo<$TrashedPagesTable, TrashedPage> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $TrashedPagesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _pageIdMeta = const VerificationMeta('pageId');
+  @override
+  late final GeneratedColumn<String> pageId = GeneratedColumn<String>(
+      'page_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _sourceDocumentIdMeta =
+      const VerificationMeta('sourceDocumentId');
+  @override
+  late final GeneratedColumn<String> sourceDocumentId = GeneratedColumn<String>(
+      'source_document_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _sourceDocumentTitleMeta =
+      const VerificationMeta('sourceDocumentTitle');
+  @override
+  late final GeneratedColumn<String> sourceDocumentTitle =
+      GeneratedColumn<String>('source_document_title', aliasedName, false,
+          type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _originalPageIndexMeta =
+      const VerificationMeta('originalPageIndex');
+  @override
+  late final GeneratedColumn<int> originalPageIndex = GeneratedColumn<int>(
+      'original_page_index', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _deletedAtMeta =
+      const VerificationMeta('deletedAt');
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+      'deleted_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _pageDataMeta =
+      const VerificationMeta('pageData');
+  @override
+  late final GeneratedColumn<String> pageData = GeneratedColumn<String>(
+      'page_data', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        pageId,
+        sourceDocumentId,
+        sourceDocumentTitle,
+        originalPageIndex,
+        deletedAt,
+        pageData
+      ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'trashed_pages';
+  @override
+  VerificationContext validateIntegrity(Insertable<TrashedPage> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('page_id')) {
+      context.handle(_pageIdMeta,
+          pageId.isAcceptableOrUnknown(data['page_id']!, _pageIdMeta));
+    } else if (isInserting) {
+      context.missing(_pageIdMeta);
+    }
+    if (data.containsKey('source_document_id')) {
+      context.handle(
+          _sourceDocumentIdMeta,
+          sourceDocumentId.isAcceptableOrUnknown(
+              data['source_document_id']!, _sourceDocumentIdMeta));
+    } else if (isInserting) {
+      context.missing(_sourceDocumentIdMeta);
+    }
+    if (data.containsKey('source_document_title')) {
+      context.handle(
+          _sourceDocumentTitleMeta,
+          sourceDocumentTitle.isAcceptableOrUnknown(
+              data['source_document_title']!, _sourceDocumentTitleMeta));
+    } else if (isInserting) {
+      context.missing(_sourceDocumentTitleMeta);
+    }
+    if (data.containsKey('original_page_index')) {
+      context.handle(
+          _originalPageIndexMeta,
+          originalPageIndex.isAcceptableOrUnknown(
+              data['original_page_index']!, _originalPageIndexMeta));
+    } else if (isInserting) {
+      context.missing(_originalPageIndexMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(_deletedAtMeta,
+          deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta));
+    } else if (isInserting) {
+      context.missing(_deletedAtMeta);
+    }
+    if (data.containsKey('page_data')) {
+      context.handle(_pageDataMeta,
+          pageData.isAcceptableOrUnknown(data['page_data']!, _pageDataMeta));
+    } else if (isInserting) {
+      context.missing(_pageDataMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  TrashedPage map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return TrashedPage(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      pageId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}page_id'])!,
+      sourceDocumentId: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}source_document_id'])!,
+      sourceDocumentTitle: attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}source_document_title'])!,
+      originalPageIndex: attachedDatabase.typeMapping.read(
+          DriftSqlType.int, data['${effectivePrefix}original_page_index'])!,
+      deletedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}deleted_at'])!,
+      pageData: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}page_data'])!,
+    );
+  }
+
+  @override
+  $TrashedPagesTable createAlias(String alias) {
+    return $TrashedPagesTable(attachedDatabase, alias);
+  }
+}
+
+class TrashedPage extends DataClass implements Insertable<TrashedPage> {
+  final String id;
+  final String pageId;
+  final String sourceDocumentId;
+  final String sourceDocumentTitle;
+  final int originalPageIndex;
+  final DateTime deletedAt;
+
+  /// Page JSON
+  final String pageData;
+  const TrashedPage(
+      {required this.id,
+      required this.pageId,
+      required this.sourceDocumentId,
+      required this.sourceDocumentTitle,
+      required this.originalPageIndex,
+      required this.deletedAt,
+      required this.pageData});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['page_id'] = Variable<String>(pageId);
+    map['source_document_id'] = Variable<String>(sourceDocumentId);
+    map['source_document_title'] = Variable<String>(sourceDocumentTitle);
+    map['original_page_index'] = Variable<int>(originalPageIndex);
+    map['deleted_at'] = Variable<DateTime>(deletedAt);
+    map['page_data'] = Variable<String>(pageData);
+    return map;
+  }
+
+  TrashedPagesCompanion toCompanion(bool nullToAbsent) {
+    return TrashedPagesCompanion(
+      id: Value(id),
+      pageId: Value(pageId),
+      sourceDocumentId: Value(sourceDocumentId),
+      sourceDocumentTitle: Value(sourceDocumentTitle),
+      originalPageIndex: Value(originalPageIndex),
+      deletedAt: Value(deletedAt),
+      pageData: Value(pageData),
+    );
+  }
+
+  factory TrashedPage.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TrashedPage(
+      id: serializer.fromJson<String>(json['id']),
+      pageId: serializer.fromJson<String>(json['pageId']),
+      sourceDocumentId: serializer.fromJson<String>(json['sourceDocumentId']),
+      sourceDocumentTitle:
+          serializer.fromJson<String>(json['sourceDocumentTitle']),
+      originalPageIndex: serializer.fromJson<int>(json['originalPageIndex']),
+      deletedAt: serializer.fromJson<DateTime>(json['deletedAt']),
+      pageData: serializer.fromJson<String>(json['pageData']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'pageId': serializer.toJson<String>(pageId),
+      'sourceDocumentId': serializer.toJson<String>(sourceDocumentId),
+      'sourceDocumentTitle': serializer.toJson<String>(sourceDocumentTitle),
+      'originalPageIndex': serializer.toJson<int>(originalPageIndex),
+      'deletedAt': serializer.toJson<DateTime>(deletedAt),
+      'pageData': serializer.toJson<String>(pageData),
+    };
+  }
+
+  TrashedPage copyWith(
+          {String? id,
+          String? pageId,
+          String? sourceDocumentId,
+          String? sourceDocumentTitle,
+          int? originalPageIndex,
+          DateTime? deletedAt,
+          String? pageData}) =>
+      TrashedPage(
+        id: id ?? this.id,
+        pageId: pageId ?? this.pageId,
+        sourceDocumentId: sourceDocumentId ?? this.sourceDocumentId,
+        sourceDocumentTitle: sourceDocumentTitle ?? this.sourceDocumentTitle,
+        originalPageIndex: originalPageIndex ?? this.originalPageIndex,
+        deletedAt: deletedAt ?? this.deletedAt,
+        pageData: pageData ?? this.pageData,
+      );
+  TrashedPage copyWithCompanion(TrashedPagesCompanion data) {
+    return TrashedPage(
+      id: data.id.present ? data.id.value : this.id,
+      pageId: data.pageId.present ? data.pageId.value : this.pageId,
+      sourceDocumentId: data.sourceDocumentId.present
+          ? data.sourceDocumentId.value
+          : this.sourceDocumentId,
+      sourceDocumentTitle: data.sourceDocumentTitle.present
+          ? data.sourceDocumentTitle.value
+          : this.sourceDocumentTitle,
+      originalPageIndex: data.originalPageIndex.present
+          ? data.originalPageIndex.value
+          : this.originalPageIndex,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      pageData: data.pageData.present ? data.pageData.value : this.pageData,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TrashedPage(')
+          ..write('id: $id, ')
+          ..write('pageId: $pageId, ')
+          ..write('sourceDocumentId: $sourceDocumentId, ')
+          ..write('sourceDocumentTitle: $sourceDocumentTitle, ')
+          ..write('originalPageIndex: $originalPageIndex, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('pageData: $pageData')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, pageId, sourceDocumentId,
+      sourceDocumentTitle, originalPageIndex, deletedAt, pageData);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TrashedPage &&
+          other.id == this.id &&
+          other.pageId == this.pageId &&
+          other.sourceDocumentId == this.sourceDocumentId &&
+          other.sourceDocumentTitle == this.sourceDocumentTitle &&
+          other.originalPageIndex == this.originalPageIndex &&
+          other.deletedAt == this.deletedAt &&
+          other.pageData == this.pageData);
+}
+
+class TrashedPagesCompanion extends UpdateCompanion<TrashedPage> {
+  final Value<String> id;
+  final Value<String> pageId;
+  final Value<String> sourceDocumentId;
+  final Value<String> sourceDocumentTitle;
+  final Value<int> originalPageIndex;
+  final Value<DateTime> deletedAt;
+  final Value<String> pageData;
+  final Value<int> rowid;
+  const TrashedPagesCompanion({
+    this.id = const Value.absent(),
+    this.pageId = const Value.absent(),
+    this.sourceDocumentId = const Value.absent(),
+    this.sourceDocumentTitle = const Value.absent(),
+    this.originalPageIndex = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.pageData = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  TrashedPagesCompanion.insert({
+    required String id,
+    required String pageId,
+    required String sourceDocumentId,
+    required String sourceDocumentTitle,
+    required int originalPageIndex,
+    required DateTime deletedAt,
+    required String pageData,
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        pageId = Value(pageId),
+        sourceDocumentId = Value(sourceDocumentId),
+        sourceDocumentTitle = Value(sourceDocumentTitle),
+        originalPageIndex = Value(originalPageIndex),
+        deletedAt = Value(deletedAt),
+        pageData = Value(pageData);
+  static Insertable<TrashedPage> custom({
+    Expression<String>? id,
+    Expression<String>? pageId,
+    Expression<String>? sourceDocumentId,
+    Expression<String>? sourceDocumentTitle,
+    Expression<int>? originalPageIndex,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? pageData,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (pageId != null) 'page_id': pageId,
+      if (sourceDocumentId != null) 'source_document_id': sourceDocumentId,
+      if (sourceDocumentTitle != null)
+        'source_document_title': sourceDocumentTitle,
+      if (originalPageIndex != null) 'original_page_index': originalPageIndex,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (pageData != null) 'page_data': pageData,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  TrashedPagesCompanion copyWith(
+      {Value<String>? id,
+      Value<String>? pageId,
+      Value<String>? sourceDocumentId,
+      Value<String>? sourceDocumentTitle,
+      Value<int>? originalPageIndex,
+      Value<DateTime>? deletedAt,
+      Value<String>? pageData,
+      Value<int>? rowid}) {
+    return TrashedPagesCompanion(
+      id: id ?? this.id,
+      pageId: pageId ?? this.pageId,
+      sourceDocumentId: sourceDocumentId ?? this.sourceDocumentId,
+      sourceDocumentTitle: sourceDocumentTitle ?? this.sourceDocumentTitle,
+      originalPageIndex: originalPageIndex ?? this.originalPageIndex,
+      deletedAt: deletedAt ?? this.deletedAt,
+      pageData: pageData ?? this.pageData,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (pageId.present) {
+      map['page_id'] = Variable<String>(pageId.value);
+    }
+    if (sourceDocumentId.present) {
+      map['source_document_id'] = Variable<String>(sourceDocumentId.value);
+    }
+    if (sourceDocumentTitle.present) {
+      map['source_document_title'] =
+          Variable<String>(sourceDocumentTitle.value);
+    }
+    if (originalPageIndex.present) {
+      map['original_page_index'] = Variable<int>(originalPageIndex.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (pageData.present) {
+      map['page_data'] = Variable<String>(pageData.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TrashedPagesCompanion(')
+          ..write('id: $id, ')
+          ..write('pageId: $pageId, ')
+          ..write('sourceDocumentId: $sourceDocumentId, ')
+          ..write('sourceDocumentTitle: $sourceDocumentTitle, ')
+          ..write('originalPageIndex: $originalPageIndex, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('pageData: $pageData, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3078,12 +3849,18 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $DocumentsTable documents = $DocumentsTable(this);
   late final $FoldersTable folders = $FoldersTable(this);
+  late final $DocumentContentsTable documentContents =
+      $DocumentContentsTable(this);
+  late final $TrashedPagesTable trashedPages = $TrashedPagesTable(this);
   late final $SyncQueueTable syncQueue = $SyncQueueTable(this);
   late final $SyncMetadataTable syncMetadata = $SyncMetadataTable(this);
   late final $AiConversationsLocalTable aiConversationsLocal =
       $AiConversationsLocalTable(this);
   late final $AiMessagesLocalTable aiMessagesLocal =
       $AiMessagesLocalTable(this);
+  late final Index trashedPagesSourceDocumentIdx = Index(
+      'trashed_pages_source_document_idx',
+      'CREATE INDEX trashed_pages_source_document_idx ON trashed_pages (source_document_id)');
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3091,10 +3868,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
         documents,
         folders,
+        documentContents,
+        trashedPages,
         syncQueue,
         syncMetadata,
         aiConversationsLocal,
-        aiMessagesLocal
+        aiMessagesLocal,
+        trashedPagesSourceDocumentIdx
       ];
 }
 
@@ -3110,6 +3890,7 @@ typedef $$DocumentsTableCreateCompanionBuilder = DocumentsCompanion Function({
   Value<bool> isFavorite,
   Value<bool> isInTrash,
   Value<int> syncState,
+  Value<DateTime?> deletedAt,
   Value<Uint8List?> content,
   Value<String> paperColor,
   Value<bool> isPortrait,
@@ -3132,6 +3913,7 @@ typedef $$DocumentsTableUpdateCompanionBuilder = DocumentsCompanion Function({
   Value<bool> isFavorite,
   Value<bool> isInTrash,
   Value<int> syncState,
+  Value<DateTime?> deletedAt,
   Value<Uint8List?> content,
   Value<String> paperColor,
   Value<bool> isPortrait,
@@ -3184,6 +3966,9 @@ class $$DocumentsTableFilterComposer
 
   ColumnFilters<int> get syncState => $composableBuilder(
       column: $table.syncState, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<Uint8List> get content => $composableBuilder(
       column: $table.content, builder: (column) => ColumnFilters(column));
@@ -3252,6 +4037,9 @@ class $$DocumentsTableOrderingComposer
 
   ColumnOrderings<int> get syncState => $composableBuilder(
       column: $table.syncState, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<Uint8List> get content => $composableBuilder(
       column: $table.content, builder: (column) => ColumnOrderings(column));
@@ -3323,6 +4111,9 @@ class $$DocumentsTableAnnotationComposer
   GeneratedColumn<int> get syncState =>
       $composableBuilder(column: $table.syncState, builder: (column) => column);
 
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
   GeneratedColumn<Uint8List> get content =>
       $composableBuilder(column: $table.content, builder: (column) => column);
 
@@ -3351,14 +4142,14 @@ class $$DocumentsTableAnnotationComposer
 class $$DocumentsTableTableManager extends RootTableManager<
     _$AppDatabase,
     $DocumentsTable,
-    Document,
+    DocumentRow,
     $$DocumentsTableFilterComposer,
     $$DocumentsTableOrderingComposer,
     $$DocumentsTableAnnotationComposer,
     $$DocumentsTableCreateCompanionBuilder,
     $$DocumentsTableUpdateCompanionBuilder,
-    (Document, BaseReferences<_$AppDatabase, $DocumentsTable, Document>),
-    Document,
+    (DocumentRow, BaseReferences<_$AppDatabase, $DocumentsTable, DocumentRow>),
+    DocumentRow,
     PrefetchHooks Function()> {
   $$DocumentsTableTableManager(_$AppDatabase db, $DocumentsTable table)
       : super(TableManagerState(
@@ -3382,6 +4173,7 @@ class $$DocumentsTableTableManager extends RootTableManager<
             Value<bool> isFavorite = const Value.absent(),
             Value<bool> isInTrash = const Value.absent(),
             Value<int> syncState = const Value.absent(),
+            Value<DateTime?> deletedAt = const Value.absent(),
             Value<Uint8List?> content = const Value.absent(),
             Value<String> paperColor = const Value.absent(),
             Value<bool> isPortrait = const Value.absent(),
@@ -3404,6 +4196,7 @@ class $$DocumentsTableTableManager extends RootTableManager<
             isFavorite: isFavorite,
             isInTrash: isInTrash,
             syncState: syncState,
+            deletedAt: deletedAt,
             content: content,
             paperColor: paperColor,
             isPortrait: isPortrait,
@@ -3426,6 +4219,7 @@ class $$DocumentsTableTableManager extends RootTableManager<
             Value<bool> isFavorite = const Value.absent(),
             Value<bool> isInTrash = const Value.absent(),
             Value<int> syncState = const Value.absent(),
+            Value<DateTime?> deletedAt = const Value.absent(),
             Value<Uint8List?> content = const Value.absent(),
             Value<String> paperColor = const Value.absent(),
             Value<bool> isPortrait = const Value.absent(),
@@ -3448,6 +4242,7 @@ class $$DocumentsTableTableManager extends RootTableManager<
             isFavorite: isFavorite,
             isInTrash: isInTrash,
             syncState: syncState,
+            deletedAt: deletedAt,
             content: content,
             paperColor: paperColor,
             isPortrait: isPortrait,
@@ -3460,8 +4255,8 @@ class $$DocumentsTableTableManager extends RootTableManager<
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (
-                    e.readTable<$DocumentsTable, Document>(table),
-                    BaseReferences<_$AppDatabase, $DocumentsTable, Document>(
+                    e.readTable<$DocumentsTable, DocumentRow>(table),
+                    BaseReferences<_$AppDatabase, $DocumentsTable, DocumentRow>(
                         db, table, e)
                   ))
               .toList(),
@@ -3472,20 +4267,22 @@ class $$DocumentsTableTableManager extends RootTableManager<
 typedef $$DocumentsTableProcessedTableManager = ProcessedTableManager<
     _$AppDatabase,
     $DocumentsTable,
-    Document,
+    DocumentRow,
     $$DocumentsTableFilterComposer,
     $$DocumentsTableOrderingComposer,
     $$DocumentsTableAnnotationComposer,
     $$DocumentsTableCreateCompanionBuilder,
     $$DocumentsTableUpdateCompanionBuilder,
-    (Document, BaseReferences<_$AppDatabase, $DocumentsTable, Document>),
-    Document,
+    (DocumentRow, BaseReferences<_$AppDatabase, $DocumentsTable, DocumentRow>),
+    DocumentRow,
     PrefetchHooks Function()>;
 typedef $$FoldersTableCreateCompanionBuilder = FoldersCompanion Function({
   required String id,
   required String name,
   Value<String?> parentId,
   Value<int> colorValue,
+  Value<int> sortOrder,
+  Value<bool> isFavorite,
   required DateTime createdAt,
   Value<int> rowid,
 });
@@ -3494,6 +4291,8 @@ typedef $$FoldersTableUpdateCompanionBuilder = FoldersCompanion Function({
   Value<String> name,
   Value<String?> parentId,
   Value<int> colorValue,
+  Value<int> sortOrder,
+  Value<bool> isFavorite,
   Value<DateTime> createdAt,
   Value<int> rowid,
 });
@@ -3518,6 +4317,12 @@ class $$FoldersTableFilterComposer
 
   ColumnFilters<int> get colorValue => $composableBuilder(
       column: $table.colorValue, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+      column: $table.sortOrder, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<bool> get isFavorite => $composableBuilder(
+      column: $table.isFavorite, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
@@ -3544,6 +4349,12 @@ class $$FoldersTableOrderingComposer
   ColumnOrderings<int> get colorValue => $composableBuilder(
       column: $table.colorValue, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+      column: $table.sortOrder, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isFavorite => $composableBuilder(
+      column: $table.isFavorite, builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
 }
@@ -3569,6 +4380,12 @@ class $$FoldersTableAnnotationComposer
   GeneratedColumn<int> get colorValue => $composableBuilder(
       column: $table.colorValue, builder: (column) => column);
 
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+
+  GeneratedColumn<bool> get isFavorite => $composableBuilder(
+      column: $table.isFavorite, builder: (column) => column);
+
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 }
@@ -3576,14 +4393,14 @@ class $$FoldersTableAnnotationComposer
 class $$FoldersTableTableManager extends RootTableManager<
     _$AppDatabase,
     $FoldersTable,
-    Folder,
+    FolderRow,
     $$FoldersTableFilterComposer,
     $$FoldersTableOrderingComposer,
     $$FoldersTableAnnotationComposer,
     $$FoldersTableCreateCompanionBuilder,
     $$FoldersTableUpdateCompanionBuilder,
-    (Folder, BaseReferences<_$AppDatabase, $FoldersTable, Folder>),
-    Folder,
+    (FolderRow, BaseReferences<_$AppDatabase, $FoldersTable, FolderRow>),
+    FolderRow,
     PrefetchHooks Function()> {
   $$FoldersTableTableManager(_$AppDatabase db, $FoldersTable table)
       : super(TableManagerState(
@@ -3600,6 +4417,8 @@ class $$FoldersTableTableManager extends RootTableManager<
             Value<String> name = const Value.absent(),
             Value<String?> parentId = const Value.absent(),
             Value<int> colorValue = const Value.absent(),
+            Value<int> sortOrder = const Value.absent(),
+            Value<bool> isFavorite = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -3608,6 +4427,8 @@ class $$FoldersTableTableManager extends RootTableManager<
             name: name,
             parentId: parentId,
             colorValue: colorValue,
+            sortOrder: sortOrder,
+            isFavorite: isFavorite,
             createdAt: createdAt,
             rowid: rowid,
           ),
@@ -3616,6 +4437,8 @@ class $$FoldersTableTableManager extends RootTableManager<
             required String name,
             Value<String?> parentId = const Value.absent(),
             Value<int> colorValue = const Value.absent(),
+            Value<int> sortOrder = const Value.absent(),
+            Value<bool> isFavorite = const Value.absent(),
             required DateTime createdAt,
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -3624,13 +4447,15 @@ class $$FoldersTableTableManager extends RootTableManager<
             name: name,
             parentId: parentId,
             colorValue: colorValue,
+            sortOrder: sortOrder,
+            isFavorite: isFavorite,
             createdAt: createdAt,
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (
-                    e.readTable<$FoldersTable, Folder>(table),
-                    BaseReferences<_$AppDatabase, $FoldersTable, Folder>(
+                    e.readTable<$FoldersTable, FolderRow>(table),
+                    BaseReferences<_$AppDatabase, $FoldersTable, FolderRow>(
                         db, table, e)
                   ))
               .toList(),
@@ -3641,14 +4466,375 @@ class $$FoldersTableTableManager extends RootTableManager<
 typedef $$FoldersTableProcessedTableManager = ProcessedTableManager<
     _$AppDatabase,
     $FoldersTable,
-    Folder,
+    FolderRow,
     $$FoldersTableFilterComposer,
     $$FoldersTableOrderingComposer,
     $$FoldersTableAnnotationComposer,
     $$FoldersTableCreateCompanionBuilder,
     $$FoldersTableUpdateCompanionBuilder,
-    (Folder, BaseReferences<_$AppDatabase, $FoldersTable, Folder>),
-    Folder,
+    (FolderRow, BaseReferences<_$AppDatabase, $FoldersTable, FolderRow>),
+    FolderRow,
+    PrefetchHooks Function()>;
+typedef $$DocumentContentsTableCreateCompanionBuilder
+    = DocumentContentsCompanion Function({
+  required String documentId,
+  required String data,
+  required DateTime updatedAt,
+  Value<int> rowid,
+});
+typedef $$DocumentContentsTableUpdateCompanionBuilder
+    = DocumentContentsCompanion Function({
+  Value<String> documentId,
+  Value<String> data,
+  Value<DateTime> updatedAt,
+  Value<int> rowid,
+});
+
+class $$DocumentContentsTableFilterComposer
+    extends Composer<_$AppDatabase, $DocumentContentsTable> {
+  $$DocumentContentsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get documentId => $composableBuilder(
+      column: $table.documentId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get data => $composableBuilder(
+      column: $table.data, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$DocumentContentsTableOrderingComposer
+    extends Composer<_$AppDatabase, $DocumentContentsTable> {
+  $$DocumentContentsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get documentId => $composableBuilder(
+      column: $table.documentId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get data => $composableBuilder(
+      column: $table.data, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+      column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$DocumentContentsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DocumentContentsTable> {
+  $$DocumentContentsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get documentId => $composableBuilder(
+      column: $table.documentId, builder: (column) => column);
+
+  GeneratedColumn<String> get data =>
+      $composableBuilder(column: $table.data, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$DocumentContentsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $DocumentContentsTable,
+    DocumentContent,
+    $$DocumentContentsTableFilterComposer,
+    $$DocumentContentsTableOrderingComposer,
+    $$DocumentContentsTableAnnotationComposer,
+    $$DocumentContentsTableCreateCompanionBuilder,
+    $$DocumentContentsTableUpdateCompanionBuilder,
+    (
+      DocumentContent,
+      BaseReferences<_$AppDatabase, $DocumentContentsTable, DocumentContent>
+    ),
+    DocumentContent,
+    PrefetchHooks Function()> {
+  $$DocumentContentsTableTableManager(
+      _$AppDatabase db, $DocumentContentsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DocumentContentsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DocumentContentsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DocumentContentsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> documentId = const Value.absent(),
+            Value<String> data = const Value.absent(),
+            Value<DateTime> updatedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              DocumentContentsCompanion(
+            documentId: documentId,
+            data: data,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String documentId,
+            required String data,
+            required DateTime updatedAt,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              DocumentContentsCompanion.insert(
+            documentId: documentId,
+            data: data,
+            updatedAt: updatedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable<$DocumentContentsTable, DocumentContent>(table),
+                    BaseReferences<_$AppDatabase, $DocumentContentsTable,
+                        DocumentContent>(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$DocumentContentsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $DocumentContentsTable,
+    DocumentContent,
+    $$DocumentContentsTableFilterComposer,
+    $$DocumentContentsTableOrderingComposer,
+    $$DocumentContentsTableAnnotationComposer,
+    $$DocumentContentsTableCreateCompanionBuilder,
+    $$DocumentContentsTableUpdateCompanionBuilder,
+    (
+      DocumentContent,
+      BaseReferences<_$AppDatabase, $DocumentContentsTable, DocumentContent>
+    ),
+    DocumentContent,
+    PrefetchHooks Function()>;
+typedef $$TrashedPagesTableCreateCompanionBuilder = TrashedPagesCompanion
+    Function({
+  required String id,
+  required String pageId,
+  required String sourceDocumentId,
+  required String sourceDocumentTitle,
+  required int originalPageIndex,
+  required DateTime deletedAt,
+  required String pageData,
+  Value<int> rowid,
+});
+typedef $$TrashedPagesTableUpdateCompanionBuilder = TrashedPagesCompanion
+    Function({
+  Value<String> id,
+  Value<String> pageId,
+  Value<String> sourceDocumentId,
+  Value<String> sourceDocumentTitle,
+  Value<int> originalPageIndex,
+  Value<DateTime> deletedAt,
+  Value<String> pageData,
+  Value<int> rowid,
+});
+
+class $$TrashedPagesTableFilterComposer
+    extends Composer<_$AppDatabase, $TrashedPagesTable> {
+  $$TrashedPagesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get pageId => $composableBuilder(
+      column: $table.pageId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get sourceDocumentId => $composableBuilder(
+      column: $table.sourceDocumentId,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get sourceDocumentTitle => $composableBuilder(
+      column: $table.sourceDocumentTitle,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get originalPageIndex => $composableBuilder(
+      column: $table.originalPageIndex,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get pageData => $composableBuilder(
+      column: $table.pageData, builder: (column) => ColumnFilters(column));
+}
+
+class $$TrashedPagesTableOrderingComposer
+    extends Composer<_$AppDatabase, $TrashedPagesTable> {
+  $$TrashedPagesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get pageId => $composableBuilder(
+      column: $table.pageId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get sourceDocumentId => $composableBuilder(
+      column: $table.sourceDocumentId,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get sourceDocumentTitle => $composableBuilder(
+      column: $table.sourceDocumentTitle,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get originalPageIndex => $composableBuilder(
+      column: $table.originalPageIndex,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+      column: $table.deletedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get pageData => $composableBuilder(
+      column: $table.pageData, builder: (column) => ColumnOrderings(column));
+}
+
+class $$TrashedPagesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $TrashedPagesTable> {
+  $$TrashedPagesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get pageId =>
+      $composableBuilder(column: $table.pageId, builder: (column) => column);
+
+  GeneratedColumn<String> get sourceDocumentId => $composableBuilder(
+      column: $table.sourceDocumentId, builder: (column) => column);
+
+  GeneratedColumn<String> get sourceDocumentTitle => $composableBuilder(
+      column: $table.sourceDocumentTitle, builder: (column) => column);
+
+  GeneratedColumn<int> get originalPageIndex => $composableBuilder(
+      column: $table.originalPageIndex, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get pageData =>
+      $composableBuilder(column: $table.pageData, builder: (column) => column);
+}
+
+class $$TrashedPagesTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $TrashedPagesTable,
+    TrashedPage,
+    $$TrashedPagesTableFilterComposer,
+    $$TrashedPagesTableOrderingComposer,
+    $$TrashedPagesTableAnnotationComposer,
+    $$TrashedPagesTableCreateCompanionBuilder,
+    $$TrashedPagesTableUpdateCompanionBuilder,
+    (
+      TrashedPage,
+      BaseReferences<_$AppDatabase, $TrashedPagesTable, TrashedPage>
+    ),
+    TrashedPage,
+    PrefetchHooks Function()> {
+  $$TrashedPagesTableTableManager(_$AppDatabase db, $TrashedPagesTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$TrashedPagesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$TrashedPagesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$TrashedPagesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> id = const Value.absent(),
+            Value<String> pageId = const Value.absent(),
+            Value<String> sourceDocumentId = const Value.absent(),
+            Value<String> sourceDocumentTitle = const Value.absent(),
+            Value<int> originalPageIndex = const Value.absent(),
+            Value<DateTime> deletedAt = const Value.absent(),
+            Value<String> pageData = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              TrashedPagesCompanion(
+            id: id,
+            pageId: pageId,
+            sourceDocumentId: sourceDocumentId,
+            sourceDocumentTitle: sourceDocumentTitle,
+            originalPageIndex: originalPageIndex,
+            deletedAt: deletedAt,
+            pageData: pageData,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String id,
+            required String pageId,
+            required String sourceDocumentId,
+            required String sourceDocumentTitle,
+            required int originalPageIndex,
+            required DateTime deletedAt,
+            required String pageData,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              TrashedPagesCompanion.insert(
+            id: id,
+            pageId: pageId,
+            sourceDocumentId: sourceDocumentId,
+            sourceDocumentTitle: sourceDocumentTitle,
+            originalPageIndex: originalPageIndex,
+            deletedAt: deletedAt,
+            pageData: pageData,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable<$TrashedPagesTable, TrashedPage>(table),
+                    BaseReferences<_$AppDatabase, $TrashedPagesTable,
+                        TrashedPage>(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$TrashedPagesTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $TrashedPagesTable,
+    TrashedPage,
+    $$TrashedPagesTableFilterComposer,
+    $$TrashedPagesTableOrderingComposer,
+    $$TrashedPagesTableAnnotationComposer,
+    $$TrashedPagesTableCreateCompanionBuilder,
+    $$TrashedPagesTableUpdateCompanionBuilder,
+    (
+      TrashedPage,
+      BaseReferences<_$AppDatabase, $TrashedPagesTable, TrashedPage>
+    ),
+    TrashedPage,
     PrefetchHooks Function()>;
 typedef $$SyncQueueTableCreateCompanionBuilder = SyncQueueCompanion Function({
   required String id,
@@ -4762,6 +5948,10 @@ class $AppDatabaseManager {
       $$DocumentsTableTableManager(_db, _db.documents);
   $$FoldersTableTableManager get folders =>
       $$FoldersTableTableManager(_db, _db.folders);
+  $$DocumentContentsTableTableManager get documentContents =>
+      $$DocumentContentsTableTableManager(_db, _db.documentContents);
+  $$TrashedPagesTableTableManager get trashedPages =>
+      $$TrashedPagesTableTableManager(_db, _db.trashedPages);
   $$SyncQueueTableTableManager get syncQueue =>
       $$SyncQueueTableTableManager(_db, _db.syncQueue);
   $$SyncMetadataTableTableManager get syncMetadata =>

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:drawing_ui/src/panels/chrome_panel_parts.dart';
 import 'package:drawing_ui/src/panels/text_preview_painter.dart';
-import 'package:drawing_ui/src/panels/tool_panel.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
+import 'package:drawing_ui/src/theme/theme.dart';
+import 'package:drawing_ui/src/toolbar/chrome_icon_button.dart';
 import 'package:drawing_ui/src/widgets/color_picker_strip.dart';
 import 'package:drawing_ui/src/widgets/goodnotes_slider.dart';
 
@@ -16,43 +18,25 @@ class TextSettingsPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(textSettingsProvider);
-    final cs = Theme.of(context).colorScheme;
+    final palette = ChromePalette.of(context);
 
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(ChromeSpacing.lg),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // -- Title + Close --
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  'Metin Aracı',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: cs.onSurface,
-                      ),
-                ),
-              ),
-              PanelCloseButton(
-                onTap: () =>
-                    ref.read(activePanelProvider.notifier).state = null,
-              ),
-            ],
+          ChromePanelHeader(
+            title: 'Metin Aracı',
+            onClose: () => ref.read(activePanelProvider.notifier).state = null,
           ),
-          const SizedBox(height: 8),
           Text(
             'Tuvale dokunarak metin kutusu ekleyin.',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: cs.onSurfaceVariant,
+                  color: palette.textMuted,
                 ),
           ),
-          const SizedBox(height: 16),
-
-          // -- Text Preview --
+          const SizedBox(height: ChromeSpacing.sm),
           TextPreview(
             fontSize: settings.fontSize,
             color: Color(settings.color),
@@ -60,9 +44,7 @@ class TextSettingsPanel extends ConsumerWidget {
             isItalic: settings.isItalic,
             isUnderline: settings.isUnderline,
           ),
-          const SizedBox(height: 16),
-
-          // -- Font Size Slider --
+          const ChromeHairline(),
           GoodNotesSlider(
             label: 'Boyut',
             value: settings.fontSize.clamp(8.0, 72.0),
@@ -70,40 +52,20 @@ class TextSettingsPanel extends ConsumerWidget {
             max: 72.0,
             divisions: 16,
             displayValue: '${settings.fontSize.round()}pt',
-            activeColor: cs.primary,
+            activeColor: palette.accent,
             onChanged: (v) =>
                 ref.read(textSettingsProvider.notifier).setFontSize(v),
           ),
-          const SizedBox(height: 20),
-
-          // -- Color Section --
-          Text(
-            'Renk',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: cs.onSurfaceVariant,
-                  letterSpacing: 0.5,
-                ),
-          ),
-          const SizedBox(height: 8),
+          const ChromeHairline(),
+          const ChromeSectionLabel('Renk'),
           ColorPickerStrip(
             selectedColor: Color(settings.color),
             onColorSelected: (color) => ref
                 .read(textSettingsProvider.notifier)
                 .setColor(color.toARGB32()),
           ),
-          const SizedBox(height: 20),
-
-          // -- Style Section --
-          Text(
-            'Stil',
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: cs.onSurfaceVariant,
-                  letterSpacing: 0.5,
-                ),
-          ),
-          const SizedBox(height: 8),
+          const ChromeHairline(),
+          const ChromeSectionLabel('Stil'),
           _StyleButtonRow(
             isBold: settings.isBold,
             isItalic: settings.isItalic,
@@ -147,20 +109,23 @@ class _StyleButtonRow extends StatelessWidget {
     return Row(
       children: [
         _StyleToggle(
+          key: const ValueKey('text-style-bold'),
           label: 'B',
           isSelected: isBold,
           fontWeight: FontWeight.bold,
           onTap: onBoldToggled,
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: ChromeSpacing.xs),
         _StyleToggle(
+          key: const ValueKey('text-style-italic'),
           label: 'I',
           isSelected: isItalic,
           fontStyle: FontStyle.italic,
           onTap: onItalicToggled,
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: ChromeSpacing.xs),
         _StyleToggle(
+          key: const ValueKey('text-style-underline'),
           label: 'U',
           isSelected: isUnderline,
           decoration: TextDecoration.underline,
@@ -173,6 +138,7 @@ class _StyleButtonRow extends StatelessWidget {
 
 class _StyleToggle extends StatelessWidget {
   const _StyleToggle({
+    super.key,
     required this.label,
     required this.isSelected,
     required this.onTap,
@@ -190,32 +156,35 @@ class _StyleToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final palette = ChromePalette.of(context);
 
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: isSelected ? cs.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(10),
-          border: isSelected
-              ? null
-              : Border.all(
-                  color: cs.outline.withValues(alpha: 0.3),
-                ),
-        ),
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox.square(
+        dimension: ChromeSizes.minTouchTarget,
         child: Center(
-          child: Text(
-            label,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontSize: 18,
-                  fontWeight: fontWeight ?? FontWeight.normal,
-                  fontStyle: fontStyle,
-                  decoration: decoration,
-                  color: isSelected ? cs.onPrimary : cs.onSurfaceVariant,
-                ),
+          child: Container(
+            width: ChromeIconButton.visualSize,
+            height: ChromeIconButton.visualSize,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: isSelected ? palette.accentContainer : Colors.transparent,
+              borderRadius: BorderRadius.circular(ChromeRadius.md),
+              border: Border.all(
+                color: isSelected ? palette.accent : palette.border,
+              ),
+            ),
+            child: Text(
+              label,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontSize: 18,
+                    fontWeight: fontWeight ?? FontWeight.normal,
+                    fontStyle: fontStyle,
+                    decoration: decoration,
+                    color: isSelected ? palette.accent : palette.textMuted,
+                  ),
+            ),
           ),
         ),
       ),

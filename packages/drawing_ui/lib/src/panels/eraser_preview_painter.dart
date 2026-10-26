@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:drawing_ui/src/providers/drawing_providers.dart';
+import 'package:drawing_ui/src/theme/theme.dart';
 
 // ---------------------------------------------------------------------------
 // Eraser Preview
@@ -18,24 +19,38 @@ class EraserPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final selectionColor = Theme.of(context).colorScheme.primary;
+    final palette = ChromePalette.of(context);
     return SizedBox(
       width: double.infinity,
       height: 100,
       child: CustomPaint(
         size: const Size(double.infinity, 100),
-        painter: _EraserPreviewPainter(mode, size, selectionColor),
+        painter: _EraserPreviewPainter(
+          mode,
+          size,
+          palette.accent,
+          palette.textMuted,
+          palette.danger,
+        ),
       ),
     );
   }
 }
 
 class _EraserPreviewPainter extends CustomPainter {
-  _EraserPreviewPainter(this.mode, this.eraserSize, this.selectionColor);
+  _EraserPreviewPainter(
+    this.mode,
+    this.eraserSize,
+    this.selectionColor,
+    this.strokeColor,
+    this.dangerColor,
+  );
 
   final EraserMode mode;
   final double eraserSize;
   final Color selectionColor;
+  final Color strokeColor;
+  final Color dangerColor;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -55,7 +70,7 @@ class _EraserPreviewPainter extends CustomPainter {
   /// Pixel eraser: a swoosh stroke with a gap where eraser passed.
   void _drawPixelEraser(Canvas canvas, double w, double h) {
     final strokePaint = Paint()
-      ..color = const Color(0xFF888888)
+      ..color = strokeColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3.0
       ..strokeCap = StrokeCap.round;
@@ -81,14 +96,14 @@ class _EraserPreviewPainter extends CustomPainter {
         tangent.position,
         eraserR,
         Paint()
-          ..color = const Color(0x30FF5252)
+          ..color = dangerColor.withValues(alpha: 0.19)
           ..style = PaintingStyle.fill,
       );
       canvas.drawCircle(
         tangent.position,
         eraserR,
         Paint()
-          ..color = const Color(0xFFFF5252)
+          ..color = dangerColor
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1.5,
       );
@@ -98,7 +113,7 @@ class _EraserPreviewPainter extends CustomPainter {
   /// Stroke eraser: full stroke with a cross-out mark.
   void _drawStrokeEraser(Canvas canvas, double w, double h) {
     final strokePaint = Paint()
-      ..color = const Color(0x60888888)
+      ..color = strokeColor.withValues(alpha: 0.38)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 3.0
       ..strokeCap = StrokeCap.round;
@@ -112,7 +127,7 @@ class _EraserPreviewPainter extends CustomPainter {
 
     // Cross-out X over the stroke center
     final crossPaint = Paint()
-      ..color = const Color(0xFFFF5252)
+      ..color = dangerColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0
       ..strokeCap = StrokeCap.round;
@@ -169,5 +184,7 @@ class _EraserPreviewPainter extends CustomPainter {
   bool shouldRepaint(_EraserPreviewPainter o) =>
       mode != o.mode ||
       eraserSize != o.eraserSize ||
-      selectionColor != o.selectionColor;
+      selectionColor != o.selectionColor ||
+      strokeColor != o.strokeColor ||
+      dangerColor != o.dangerColor;
 }

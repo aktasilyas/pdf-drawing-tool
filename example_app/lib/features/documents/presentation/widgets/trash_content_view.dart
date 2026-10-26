@@ -27,7 +27,10 @@ class TrashContentView extends ConsumerWidget {
 
     return itemsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => DocumentsErrorView(error: error),
+      error: (error, _) => DocumentsErrorView(
+        error: error,
+        onRetry: () => ref.invalidate(trashItemsProvider),
+      ),
       data: (items) {
         if (items.isEmpty) return const DocumentsEmptyState();
         return _buildGrid(ref, items);
