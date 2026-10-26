@@ -16,7 +16,18 @@ class SaveDocumentUseCase {
     DocumentJsonSlicer slicer = const DocumentJsonSlicer(),
   }) : _slicer = slicer;
 
-  Future<Either<Failure, void>> call(DrawingDocument document) async {
+  /// Saves run strictly one after another: slicing yields to the event loop,
+  /// so a slow save of an older large document must not reach the datasource
+  /// after a newer one (keeps the #214 ordering guard).
+  static Future<void> _tail = Future<void>.value();
+
+  Future<Either<Failure, void>> call(DrawingDocument document) {
+    final run = _tail.then((_) => _save(document));
+    _tail = run.then((_) {}, onError: (_) {});
+    return run;
+  }
+
+  Future<Either<Failure, void>> _save(DrawingDocument document) async {
     try {
       // 1. Clean cover pages (remove drawings from cover pages)
       final cleanedPages = document.pages.map((page) {

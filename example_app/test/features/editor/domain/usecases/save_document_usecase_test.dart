@@ -34,6 +34,40 @@ void main() {
       );
     });
 
+    test('saves reach the repository in call order', () async {
+      final order = <String>[];
+      when(() => mockRepository.saveDocumentContent(
+            id: any(named: 'id'),
+            content: any(named: 'content'),
+            pageCount: any(named: 'pageCount'),
+            updatedAt: any(named: 'updatedAt'),
+            coverId: any(named: 'coverId'),
+            updateCover: any(named: 'updateCover'),
+            title: any(named: 'title'),
+          )).thenAnswer((inv) async {
+        order.add(inv.namedArguments[#title] as String);
+        return const Right(null);
+      });
+      // Zero budget: the large document yields after every page.
+      final slowUseCase = SaveDocumentUseCase(
+        mockRepository,
+        slicer: const DocumentJsonSlicer(sliceBudget: Duration.zero),
+      );
+      final large = DrawingDocument.multiPage(
+        id: 'd',
+        title: 'large',
+        pages: List.generate(40, (i) => Page.create(index: i)),
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      final first = slowUseCase(large);
+      final second = slowUseCase(testDocument.copyWith(title: 'small'));
+      await Future.wait([first, second]);
+
+      expect(order, ['large', 'small']);
+    });
+
     test('should save document content successfully', () async {
       // Arrange
       when(() => mockRepository.saveDocumentContent(
