@@ -198,7 +198,7 @@ class LibraryRobot {
   Future<void> deleteFolder(String name) async {
     await _folderMenuAction(name, 'Sil');
     await tester.tapAndWait(
-      find.descendant(of: find.byType(Dialog), matching: find.text('Sil')),
+      find.widgetWithText(AppButton, 'Sil'),
     );
   }
 
@@ -216,7 +216,7 @@ class LibraryRobot {
   Future<void> emptyTrash() async {
     await tester.tapAndWait(find.text('Çöpü Boşalt'));
     await tester.tapAndWait(
-      find.descendant(of: find.byType(Dialog), matching: find.text('Boşalt')),
+      find.widgetWithText(AppButton, 'Boşalt'),
     );
   }
 
