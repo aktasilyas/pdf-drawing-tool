@@ -9,11 +9,15 @@ import 'page_trash_callback_provider.dart';
 /// needed to put it back.
 class DeletedPage {
   const DeletedPage({
+    required this.documentId,
     required this.page,
     required this.index,
     required this.wasCurrent,
     this.trashId,
   });
+
+  /// Id of the document the page was removed from.
+  final String documentId;
 
   /// The removed page (same id and layers).
   final Page page;
@@ -64,9 +68,15 @@ class PageStructureActions {
     // Re-read: the document may have changed while the trash call was running.
     final fresh = _ref.read(documentProvider);
     final freshIndex = fresh.pages.indexWhere((p) => p.id == page.id);
-    if (freshIndex < 0) return null;
+    if (freshIndex < 0) {
+      // Page is already gone: drop the trash entry we just wrote.
+      final discard = _ref.read(pageTrashDiscardCallbackProvider);
+      if (trashId != null && discard != null) await discard(trashId);
+      return null;
+    }
     _apply(fresh.removePage(freshIndex));
     return DeletedPage(
+      documentId: fresh.id,
       page: page,
       index: index,
       wasCurrent: wasCurrent,
@@ -77,6 +87,7 @@ class PageStructureActions {
   /// Puts a deleted page back at its old index and drops its trash entry.
   Future<void> restorePage(DeletedPage deleted) async {
     final doc = _ref.read(documentProvider);
+    if (doc.id != deleted.documentId) return;
     if (doc.pages.any((p) => p.id == deleted.page.id)) return;
     var restored = doc.insertPageAt(deleted.index, deleted.page);
     if (deleted.wasCurrent) {

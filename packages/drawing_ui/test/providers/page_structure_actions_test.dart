@@ -119,7 +119,69 @@ void main() {
     });
   });
 
+  group('deletePage edge cases', () {
+    test('discards the trash entry when the page vanished during trashing',
+        () async {
+      load(3, current: 1);
+      final discarded = <String>[];
+      container.read(pageTrashCallbackProvider.notifier).state =
+          (index, page) async {
+        final doc = container.read(documentProvider);
+        container
+            .read(documentProvider.notifier)
+            .updateDocument(doc.removePage(index));
+        return 'trash-1';
+      };
+      container.read(pageTrashDiscardCallbackProvider.notifier).state =
+          (id) async => discarded.add(id);
+
+      expect(await actions().deletePage(1), isNull);
+      expect(discarded, ['trash-1']);
+    });
+
+    test('null trash id still removes the page and undo works', () async {
+      load(3, current: 1);
+      final discarded = <String>[];
+      container.read(pageTrashCallbackProvider.notifier).state =
+          (_, __) async => null;
+      container.read(pageTrashDiscardCallbackProvider.notifier).state =
+          (id) async => discarded.add(id);
+
+      final deleted = await actions().deletePage(1);
+      expect(docIds(), ['p0', 'p2']);
+      expect(deleted!.trashId, isNull);
+
+      await actions().restorePage(deleted);
+      expect(docIds(), ['p0', 'p1', 'p2']);
+      expect(discarded, isEmpty);
+    });
+  });
+
   group('restorePage', () {
+    test('no-op when a different document is loaded', () async {
+      load(3, current: 1);
+      final discarded = <String>[];
+      container.read(pageTrashCallbackProvider.notifier).state =
+          (_, __) async => 'trash-1';
+      container.read(pageTrashDiscardCallbackProvider.notifier).state =
+          (id) async => discarded.add(id);
+      final deleted = await actions().deletePage(1);
+
+      container.read(documentProvider.notifier).updateDocument(
+            DrawingDocument.multiPage(
+              id: 'other',
+              title: 't',
+              pages: [page('x0', 0), page('x1', 1)],
+              createdAt: DateTime(2024),
+              updatedAt: DateTime(2024),
+            ),
+          );
+      await actions().restorePage(deleted!);
+
+      expect(docIds(), ['x0', 'x1']);
+      expect(discarded, isEmpty);
+    });
+
     test('puts the same page back, selects it, discards the trash entry',
         () async {
       load(3, current: 1);

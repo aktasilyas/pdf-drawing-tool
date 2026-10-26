@@ -12,6 +12,9 @@ const double kReorderSourceOpacity = 0.4;
 /// Half-size of the pointer rect used to trigger edge auto-scroll.
 const double _autoScrollProbe = ChromeSpacing.sm;
 
+/// Scroll speed (logical px/s scale) of the edge auto-scroller during a drag.
+const double _autoScrollVelocityScalar = 48;
+
 /// Wraps a page cell so it can be long-press dragged onto another cell.
 ///
 /// Dropping on a cell takes that cell's slot: [onMove] gets
@@ -45,7 +48,7 @@ class _ReorderablePageCellState extends State<ReorderablePageCell> {
     if (scrollable == null) return;
     _autoScroller = EdgeDraggingAutoScroller(
       scrollable,
-      velocityScalar: ChromeSizes.minTouchTarget,
+      velocityScalar: _autoScrollVelocityScalar,
     );
   }
 
