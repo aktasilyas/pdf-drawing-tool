@@ -24,8 +24,8 @@ attempt() {
     return 1
   fi
   # Only this app's crashes count; other emulator processes may log their own.
-  if echo "$log" | grep -A2 'FATAL EXCEPTION' | grep -q "Process: $package" ||
-    echo "$log" | grep -E 'flutter.*Unhandled Exception'; then
+  if grep -A2 'FATAL EXCEPTION' <<<"$log" | grep "Process: $package" ||
+    grep -E 'flutter.*Unhandled Exception' <<<"$log"; then
     echo "::error title=Release smoke::crash or Flutter error in logcat"
     echo "$log" | tail -n 200
     return 1
