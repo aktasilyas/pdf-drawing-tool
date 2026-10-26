@@ -25,6 +25,7 @@ cd example_app && flutter run   # v1.0 scope: all feature flags off, no config n
 # frozen features on (FF_* flags); .env must hold SUPABASE_URL, SUPABASE_ANON_KEY, REVENUECAT_*_KEY
 cd example_app && flutter run --dart-define-from-file=config/flags_all_on.json --dart-define-from-file=.env
 flutter test path/to/file_test.dart                 # single test
+cd example_app && flutter test integration_test   # needs a device/emulator; CI: .github/workflows/e2e.yml
 dart run build_runner build --delete-conflicting-outputs   # example_app codegen
 ```
 No Flutter SDK in the session (engine download blocked)? Regenerate goldens in CI on a
