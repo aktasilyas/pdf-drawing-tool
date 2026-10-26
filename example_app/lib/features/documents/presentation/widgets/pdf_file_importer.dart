@@ -7,6 +7,7 @@ import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/routing/route_names.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
+import 'package:example_app/features/documents/presentation/widgets/pdf_import_commit.dart';
 import 'package:example_app/features/premium/premium.dart';
 
 /// Title for a document created from a PDF file name: only a trailing `.pdf`
@@ -76,7 +77,9 @@ Future<void> importPdfFile(
   PDFImportService? importService;
   try {
     // PDF Import Service kullan (dosya yolu ile - RAM tasarrufu)
-    importService = PDFImportService();
+    final pdfPaths = ProviderScope.containerOf(context)
+        .read(pdfPathResolverProvider);
+    importService = PDFImportService(pdfPaths: pdfPaths);
     final importResult = await importService.importFromFile(
       filePath: path,
       config: PDFImportConfig.all(),
@@ -95,7 +98,11 @@ Future<void> importPdfFile(
       return;
     }
     // Doküman oluştur
-    if (!context.mounted) return;
+    if (!context.mounted) {
+      // Nobody can create the document anymore: drop the stored copy.
+      await commitPdfImport(importResult.pages, () async => null, pdfPaths);
+      return;
+    }
     final container = ProviderScope.containerOf(context);
     final controller = container.read(documentsControllerProvider.notifier);
     final folderId = container.read(currentFolderIdProvider);
@@ -103,12 +110,16 @@ Future<void> importPdfFile(
     final title = pdfTitleFromFileName(name);
     final pagesJson = importResult.pages.map((page) => page.toJson()).toList();
 
-    final documentId = await controller.createDocumentWithPages(
-      title: title,
-      folderId: folderId,
-      documentType: drawing_core.DocumentType.pdf,
-      pages: pagesJson,
-      pageCount: importResult.pages.length,
+    final documentId = await commitPdfImport(
+      importResult.pages,
+      () => controller.createDocumentWithPages(
+        title: title,
+        folderId: folderId,
+        documentType: drawing_core.DocumentType.pdf,
+        pages: pagesJson,
+        pageCount: importResult.pages.length,
+      ),
+      pdfPaths,
     );
 
     // Refresh providers to update folder counts and document lists

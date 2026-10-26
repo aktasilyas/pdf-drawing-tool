@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:drawing_core/drawing_core.dart' show PdfPathResolver;
 import 'package:drift/drift.dart';
 import 'package:injectable/injectable.dart';
 import 'package:example_app/core/core.dart';
@@ -25,8 +26,12 @@ abstract class DocumentLocalDatasource {
 @Injectable(as: DocumentLocalDatasource)
 class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
   final AppDatabase _db;
+  final PdfPathResolver _pdfPaths;
 
-  DocumentLocalDatasourceImpl(this._db);
+  DocumentLocalDatasourceImpl(
+    this._db, [
+    this._pdfPaths = PdfPathResolver.passthrough,
+  ]);
 
   /// Root level (folderId null) or a single folder.
   SimpleSelectStatement<$DocumentsTable, DocumentRow> _folderQuery(
@@ -154,7 +159,7 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
 
   Future<void> _deleteFile(String path) async {
     try {
-      final file = File(path);
+      final file = File(_pdfPaths.resolve(path));
       if (await file.exists()) await file.delete();
     } catch (e) {
       logger.w('Could not delete PDF copy $path: $e');

@@ -8,6 +8,7 @@ import 'package:drawing_ui/src/theme/drawing_shadows.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'package:drawing_ui/src/services/thumbnail_cache.dart';
 import 'package:drawing_ui/src/services/thumbnail_generator.dart';
+import 'package:drawing_ui/src/providers/pdf_path_provider.dart';
 import 'package:drawing_ui/src/providers/pdf_render_provider.dart'
     show renderThumbnail, pdfThumbnailCacheProvider;
 
@@ -108,6 +109,7 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
         width: widget.width,
         height: widget.height,
         backgroundColor: widget.backgroundColor,
+        pdfPaths: ref.read(pdfPathResolverProvider),
       );
 
       if (data != null) {

@@ -1,3 +1,4 @@
+import 'package:drawing_core/drawing_core.dart' show PdfPathResolver;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,6 +26,7 @@ Future<void> main() async {
         flags: flags,
         prefs: result.prefs,
         crashReporter: result.crashReporter,
+        pdfPaths: getIt<PdfPathResolver>(),
       ),
       child: const ElyaNotesApp(),
     ),

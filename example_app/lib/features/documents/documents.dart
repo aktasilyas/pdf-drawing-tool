@@ -97,6 +97,7 @@ export 'presentation/widgets/new_document_dialog.dart';
 export 'presentation/widgets/new_document_importers.dart';
 export 'presentation/widgets/paper_color_palette.dart';
 export 'presentation/widgets/pdf_file_importer.dart';
+export 'presentation/widgets/pdf_import_commit.dart';
 export 'presentation/widgets/selection_mode_header.dart';
 export 'presentation/widgets/sidebar_item.dart';
 export 'presentation/widgets/template_category_tabs.dart';

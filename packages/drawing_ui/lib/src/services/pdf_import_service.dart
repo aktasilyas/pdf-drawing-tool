@@ -1,32 +1,17 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:drawing_core/drawing_core.dart' show PdfPathResolver;
 import 'package:flutter/foundation.dart';
+import 'pdf_import_errors.dart';
 import 'pdf_import_models.dart';
 import 'pdf_import_pages.dart';
+import 'pdf_import_storage.dart';
 import 'pdf_loader.dart';
 import 'pdf_page_renderer.dart';
 import 'pdf_to_page_converter.dart';
 
+export 'pdf_import_errors.dart';
 export 'pdf_import_models.dart';
-
-/// Maps an import failure to a message that is safe to show to the user.
-String friendlyPdfImportError(Object error) {
-  if (error is ArgumentError || error is StateError) {
-    return error.toString();
-  }
-  final text = error is PDFLoaderException
-      ? '${error.message} ${error.cause}'.toLowerCase()
-      : error.toString().toLowerCase();
-  if (text.contains('password') ||
-      text.contains('encrypt') ||
-      text.contains('parola')) {
-    return 'Bu PDF parola korumalı. Parolayı kaldırıp tekrar deneyin.';
-  }
-  if (error is FileSystemException) {
-    return 'PDF dosyasına erişilemedi.';
-  }
-  return 'PDF açılamadı. Dosya bozuk olabilir.';
-}
 
 /// Service for orchestrating PDF import workflow.
 class PDFImportService {
@@ -35,6 +20,7 @@ class PDFImportService {
   final PDFPageRenderer _renderer;
   final PDFToPageConverter _converter;
   final PDFRenderOptions defaultRenderOptions;
+  final PdfPathResolver _pdfPaths;
 
   PDFImportState _state = PDFImportState.idle;
   String? _errorMessage;
@@ -54,7 +40,9 @@ class PDFImportService {
     PDFPageRenderer? renderer,
     PDFToPageConverter? converter,
     PDFRenderOptions? defaultRenderOptions,
-  })  : _loader = loader ?? PDFLoader(),
+    PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
+  })  : _pdfPaths = pdfPaths,
+        _loader = loader ?? PDFLoader(),
         _renderer = renderer ?? PDFPageRenderer(),
         _converter = converter ?? PDFToPageConverter(),
         defaultRenderOptions = defaultRenderOptions ?? const PDFRenderOptions();
@@ -163,12 +151,14 @@ class PDFImportService {
     try {
       _updateState(PDFImportState.loadingPDF);
 
-      // 1. Copy the PDF to app storage (the original may be deleted).
-      final pdfFile = await newImportedPdfFile();
-      await File(filePath).copy(pdfFile.path);
-
-      // 2. Open the copy lazily (original bytes are not kept in RAM).
-      return await _importStoredCopy(pdfFile, config);
+      // Copy the PDF to app storage (the original may be deleted), then
+      // open the copy lazily. The copy is removed again on any failure.
+      return await storePdfAndImport(
+        file: await newImportedPdfFile(_pdfPaths),
+        write: (file) => File(filePath).copy(file.path),
+        import: (file) => _importLazily(file.path, config),
+        isFailure: (result) => !result.isSuccess,
+      );
     } catch (e) {
       final message = friendlyPdfImportError(e);
       _setError(message);
@@ -193,9 +183,12 @@ class PDFImportService {
       // LAZY LOADING MODE: save the PDF to device, don't render pages.
       if (useLazyLoading) {
         _updateState(PDFImportState.loadingPDF);
-        final pdfFile = await newImportedPdfFile();
-        await pdfFile.writeAsBytes(bytes);
-        return await _importStoredCopy(pdfFile, config);
+        return await storePdfAndImport(
+          file: await newImportedPdfFile(_pdfPaths),
+          write: (file) => file.writeAsBytes(bytes),
+          import: (file) => _importLazily(file.path, config),
+          isFailure: (result) => !result.isSuccess,
+        );
       }
 
       // IMMEDIATE MODE: legacy approach - render all pages now.
@@ -236,36 +229,14 @@ class PDFImportService {
     }
   }
 
-  /// Runs [_importLazily] on the stored copy and deletes the copy again when
-  /// the import fails, so no orphan file stays in app storage.
-  Future<PDFImportServiceResult> _importStoredCopy(
-    File pdfFile,
-    PDFImportConfig config,
-  ) async {
-    try {
-      final result = await _importLazily(pdfFile.path, config);
-      if (!result.isSuccess) await _deleteQuietly(pdfFile);
-      return result;
-    } catch (_) {
-      await _deleteQuietly(pdfFile);
-      rethrow;
-    }
-  }
-
-  Future<void> _deleteQuietly(File file) async {
-    try {
-      if (await file.exists()) await file.delete();
-    } catch (_) {}
-  }
-
-  /// Opens the stored PDF at [pdfFilePath] and builds lazy pages (sizes and
-  /// file path only, rendered on demand). Throws [ArgumentError] when
-  /// [config] does not fit the document.
+  /// Opens the stored PDF at [absolutePath] and builds lazy pages (sizes and
+  /// the container-relative file path only, rendered on demand). Throws
+  /// [ArgumentError] when [config] does not fit the document.
   Future<PDFImportServiceResult> _importLazily(
-    String pdfFilePath,
+    String absolutePath,
     PDFImportConfig config,
   ) async {
-    final document = await _loader.loadFromFile(pdfFilePath);
+    final document = await _loader.loadFromFile(absolutePath);
 
     // Validate config
     if (!config.isValid(totalPages: document.pagesCount)) {
@@ -292,7 +263,7 @@ class PDFImportService {
     final pages = await buildLazyPdfPages(
       document,
       pageNumbers,
-      pdfFilePath: pdfFilePath,
+      pdfFilePath: _pdfPaths.toStored(absolutePath),
       onPageProcessed: _onPageProcessed,
     );
 

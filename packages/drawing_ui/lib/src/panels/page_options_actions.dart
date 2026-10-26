@@ -97,6 +97,7 @@ mixin PageOptionsActions<T extends ConsumerStatefulWidget> on ConsumerState<T> {
       notifier,
       pages: [doc.pages[pageIndex]],
       title: '${doc.title}_sayfa${pageIndex + 1}',
+      pdfPaths: ref.read(pdfPathResolverProvider),
     );
   }
 

@@ -12,6 +12,7 @@ export 'eraser_settings_provider.dart';
 export 'highlighter_settings_provider.dart';
 export 'history_provider.dart';
 export 'page_provider.dart';
+export 'pdf_path_provider.dart';
 export 'pdf_provider.dart';
 export 'pen_settings_provider.dart';
 export 'recent_colors_provider.dart';

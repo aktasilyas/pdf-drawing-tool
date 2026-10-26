@@ -2,7 +2,7 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 
-import 'package:drawing_core/drawing_core.dart' show DrawingDocument, Page;
+import 'package:drawing_core/drawing_core.dart' show DrawingDocument, Page, PdfPathResolver;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Page;
@@ -83,9 +83,13 @@ class ExportPanel extends ConsumerWidget {
 /// Runs the full-document PDF export behind [ExportPanel] (tablet popover and
 /// phone sheet). Replaced in tests to observe the export without file pickers.
 class PDFExportRunner {
-  const PDFExportRunner({this.shareService = const PdfShareService()});
+  const PDFExportRunner({
+    this.shareService = const PdfShareService(),
+    this.pdfPaths = PdfPathResolver.passthrough,
+  });
 
   final PdfShareService shareService;
+  final PdfPathResolver pdfPaths;
 
   Future<void> run(
     ExportProgressNotifier progress,
@@ -99,13 +103,17 @@ class PDFExportRunner {
       addWatermark: addWatermark,
       share: share,
       shareService: shareService,
+      pdfPaths: pdfPaths,
     );
   }
 }
 
 /// The [PDFExportRunner] used by [ExportPanel].
 final pdfExportRunnerProvider = Provider<PDFExportRunner>(
-  (ref) => PDFExportRunner(shareService: ref.watch(pdfShareServiceProvider)),
+  (ref) => PDFExportRunner(
+    shareService: ref.watch(pdfShareServiceProvider),
+    pdfPaths: ref.watch(pdfPathResolverProvider),
+  ),
 );
 
 /// Exports all pages of [document] to PDF using the floating progress overlay.
@@ -118,6 +126,7 @@ Future<void> performPDFExport(
   bool addWatermark = false,
   bool share = false,
   PdfShareService shareService = const PdfShareService(),
+  PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
 }) {
   return performPagesPDFExport(
     progress,
@@ -127,6 +136,7 @@ Future<void> performPDFExport(
     addWatermark: addWatermark,
     share: share,
     shareService: shareService,
+    pdfPaths: pdfPaths,
   );
 }
 
@@ -142,11 +152,12 @@ Future<void> performPagesPDFExport(
   bool addWatermark = false,
   bool share = false,
   PdfShareService shareService = const PdfShareService(),
+  PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
 }) async {
   progress.start(pages.length);
 
   try {
-    final exporter = PDFExporter();
+    final exporter = PDFExporter(pdfPaths: pdfPaths);
     final result = await exporter.exportPages(
       pages: pages,
       metadata: PDFDocumentMetadata(title: title),

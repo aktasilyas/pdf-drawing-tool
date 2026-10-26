@@ -1,3 +1,4 @@
+import 'package:drawing_core/drawing_core.dart' show PdfPathResolver;
 import 'package:drift/drift.dart' show QueryExecutor;
 import 'package:drift/native.dart';
 import 'package:example_app/core/core.dart';
@@ -13,10 +14,12 @@ class LibraryFixture {
   late final FolderRepositoryImpl folders;
   late final PageTrashRepositoryImpl pageTrash;
 
-  LibraryFixture([QueryExecutor? executor])
-      : db = AppDatabase(executor ?? NativeDatabase.memory()) {
+  LibraryFixture([
+    QueryExecutor? executor,
+    PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
+  ]) : db = AppDatabase(executor ?? NativeDatabase.memory()) {
     final runner = DriftTransactionRunner(db);
-    documentDs = DocumentLocalDatasourceImpl(db);
+    documentDs = DocumentLocalDatasourceImpl(db, pdfPaths);
     folderDs = FolderLocalDatasourceImpl(db);
     trashDs = TrashedPageLocalDatasourceImpl(db);
     documents = DocumentRepositoryImpl(documentDs, folderDs, runner);

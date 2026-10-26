@@ -160,6 +160,7 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
     final imported = await pickAndImportFile(
       insertIndex: insertIdx,
       defaultPageSize: doc.settings.defaultPageSize,
+      pdfPaths: ref.read(pdfPathResolverProvider),
       onError: (message) =>
           messenger?.showSnackBar(SnackBar(content: Text(message))),
     );
