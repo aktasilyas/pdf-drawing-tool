@@ -97,6 +97,23 @@ mixin DocumentsScreenHelpers on ConsumerState<DocumentsScreen> {
     });
   }
 
+  /// Confirms, then permanently deletes everything in the trash.
+  Future<void> confirmAndEmptyTrash() async {
+    final confirmed = await AppConfirmDialog.show(
+      context: context,
+      title: DocumentsStrings.emptyTrashTitle,
+      message: DocumentsStrings.emptyTrashMessage,
+      confirmLabel: DocumentsStrings.emptyTrashConfirm,
+      isDestructive: true,
+    );
+    if (confirmed != true || !mounted) return;
+    final done =
+        await ref.read(documentsControllerProvider.notifier).emptyTrash();
+    if (done && mounted) {
+      AppToast.success(context, DocumentsStrings.trashEmptied);
+    }
+  }
+
   /// Builds the breadcrumb navigation widget for folder paths.
   Widget buildBreadcrumb(
     String? selectedFolderId,

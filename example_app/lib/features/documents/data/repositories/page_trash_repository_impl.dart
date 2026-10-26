@@ -5,6 +5,8 @@ import 'package:example_app/features/documents/data/datasources/document_local_d
 import 'package:example_app/features/documents/data/datasources/trashed_page_local_datasource.dart';
 import 'package:example_app/features/documents/data/models/trashed_page_model.dart';
 import 'package:example_app/features/documents/domain/entities/trashed_page.dart';
+import 'package:example_app/features/documents/domain/repositories/document_repository.dart'
+    show trashRetention;
 import 'package:example_app/features/documents/domain/repositories/page_trash_repository.dart';
 
 class PageTrashRepositoryImpl implements PageTrashRepository {
@@ -89,6 +91,30 @@ class PageTrashRepositoryImpl implements PageTrashRepository {
   @override
   Future<void> permanentlyDeletePage(String trashedPageId) async {
     await _trashDatasource.removeTrashedPage(trashedPageId);
+  }
+
+  @override
+  Future<int> emptyTrash() async {
+    final pages = await _trashDatasource.getTrashedPages();
+    for (final page in pages) {
+      await _trashDatasource.removeTrashedPage(page.id);
+    }
+    return pages.length;
+  }
+
+  @override
+  Future<int> purgeExpired({
+    required DateTime now,
+    Duration retention = trashRetention,
+  }) async {
+    final cutoff = now.subtract(retention);
+    final expired = (await _trashDatasource.getTrashedPages())
+        .where((p) => p.deletedAt.isBefore(cutoff))
+        .toList();
+    for (final page in expired) {
+      await _trashDatasource.removeTrashedPage(page.id);
+    }
+    return expired.length;
   }
 
   @override

@@ -127,6 +127,10 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
       allFolderIds:
           getCurrentFolderIds(ref, _selectedSection, _selectedFolderId),
       isTrashSection: _selectedSection == SidebarSection.trash,
+      onEmptyTrash: _selectedSection == SidebarSection.trash &&
+              (ref.watch(trashItemsProvider).valueOrNull ?? const []).isNotEmpty
+          ? confirmAndEmptyTrash
+          : null,
       title: getSectionTitle(ref, _selectedSection, _selectedFolderId),
       breadcrumb: isInFolder
           ? buildBreadcrumb(

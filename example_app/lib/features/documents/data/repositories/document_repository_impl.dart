@@ -183,9 +183,50 @@ class DocumentRepositoryImpl
     final result = await _modify(
       id,
       'move to trash',
-      (doc) => doc.copyWith(isInTrash: true, updatedAt: DateTime.now()),
+      (doc) => _trashed(doc, DateTime.now()),
     );
     return result.map((_) {});
+  }
+
+  DocumentModel _trashed(DocumentModel doc, DateTime now) =>
+      doc.copyWith(isInTrash: true, deletedAt: now, updatedAt: now);
+
+  @override
+  Future<Either<Failure, int>> emptyTrash() {
+    return _guard('empty trash', () async {
+      final trashed =
+          (await _localDatasource.getAllDocuments()).where((d) => d.isInTrash);
+      var count = 0;
+      for (final doc in trashed) {
+        await _localDatasource.deleteDocument(doc.id);
+        count++;
+      }
+      return count;
+    });
+  }
+
+  @override
+  Future<Either<Failure, int>> purgeExpiredTrash({
+    required DateTime now,
+    Duration retention = trashRetention,
+  }) {
+    final cutoff = now.subtract(retention);
+    return _guard('purge expired trash', () async {
+      var purged = 0;
+      final trashed =
+          (await _localDatasource.getAllDocuments()).where((d) => d.isInTrash);
+      for (final doc in trashed) {
+        final deletedAt = doc.deletedAt;
+        if (deletedAt == null) {
+          // Legacy row: start its retention period now, never purge at once.
+          await _localDatasource.updateDocument(doc.copyWith(deletedAt: now));
+        } else if (deletedAt.isBefore(cutoff)) {
+          await _localDatasource.deleteDocument(doc.id);
+          purged++;
+        }
+      }
+      return purged;
+    });
   }
 
   @override
