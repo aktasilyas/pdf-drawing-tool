@@ -83,7 +83,8 @@ void main() {
     await editor.waitStrokes(split, 'pixel erase redone');
 
     // Stroke eraser across the top stroke: the whole stroke goes.
-    await editor.selectTool(ToolType.strokeEraser);
+    // Switched in the eraser panel, like a user does.
+    await editor.selectEraserType(ToolType.strokeEraser);
     await editor.eraseAcross(0.3);
     final remaining = [...split]..remove(top);
     await editor.waitStrokes(remaining, 'stroke erase');

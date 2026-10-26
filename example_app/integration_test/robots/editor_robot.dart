@@ -21,6 +21,13 @@ const _erasers = {
   ToolType.lassoEraser,
 };
 
+/// Eraser type buttons in the eraser panel (`EraserTypeSelector`).
+const _eraserPanelLabels = {
+  ToolType.pixelEraser: 'Piksel Silgi',
+  ToolType.strokeEraser: 'Çizgi Silgisi',
+  ToolType.lassoEraser: 'Kement Silgisi',
+};
+
 /// Page object for the editor screen (drawing_ui toolbar chrome).
 ///
 /// Gestures go through the real canvas; assertions read the editor's
@@ -68,9 +75,14 @@ class EditorRobot {
   /// the toolbar by its tooltip; a variant inside the already selected group
   /// is picked through the tool provider, because the pen-type picker sheet
   /// is covered by widget tests and its live previews make it slow here.
+  /// Eraser types are switched with [selectEraserType].
   Future<void> selectTool(ToolType tool) async {
     final current = currentTool;
     if (current == tool) return;
+    assert(
+      !(_erasers.contains(current) && _erasers.contains(tool)),
+      'use selectEraserType to switch between eraser types',
+    );
     final button = find.byTooltip(tool.displayName).hitTestable();
     if (button.evaluate().isNotEmpty && !_sameGroup(current, tool)) {
       await tester.tap(button.first);
@@ -82,6 +94,29 @@ class EditorRobot {
       reason: 'tool $tool not selected (still $currentTool)',
     );
     await tester.pumpFor(const Duration(milliseconds: 300));
+  }
+
+  /// Switches the eraser type the way a user does: tap the selected eraser
+  /// button to open its panel, pick the type, close the sheet. The panel
+  /// also sets the eraser mode the canvas erases with, which the tool
+  /// provider alone does not.
+  Future<void> selectEraserType(ToolType type) async {
+    assert(_erasers.contains(type), '$type is not an eraser');
+    if (!_erasers.contains(currentTool)) {
+      await selectTool(ToolType.pixelEraser);
+    }
+    if (currentTool == type) return;
+    await tester.tapAndWait(
+      find.byTooltip(currentTool.displayName).hitTestable(),
+    );
+    final option = find.byTooltip(_eraserPanelLabels[type]!).hitTestable();
+    await tester.tapAndWait(option);
+    await tester.pumpUntilTrue(
+      () => currentTool == type,
+      reason: 'eraser $type not selected (still $currentTool)',
+    );
+    await tester.tapAndWait(find.byTooltip('Kapat').hitTestable());
+    await tester.pumpUntilGone(option);
   }
 
   bool _sameGroup(ToolType a, ToolType b) {
