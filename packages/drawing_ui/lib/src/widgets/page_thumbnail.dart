@@ -109,7 +109,10 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
         width: widget.width,
         height: widget.height,
         backgroundColor: widget.backgroundColor,
-        pdfPaths: ref.read(pdfPathResolverProvider),
+        // Only PDF pages need the resolver (and a ProviderScope).
+        pdfPaths: widget.page.background.type == BackgroundType.pdf
+            ? ref.read(pdfPathResolverProvider)
+            : PdfPathResolver.passthrough,
       );
 
       if (data != null) {

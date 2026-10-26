@@ -15,21 +15,23 @@ DrawingCanvas
                         Stack
                           Positioned
                             IgnorePointer
-                              Container
-                                ConstrainedBox
-                                  DecoratedBox
-                                    Padding
-                                      Center
-                                        Column
-                                          PhosphorIcon
-                                            Semantics
-                                              ExcludeSemantics
-                                                SizedBox
-                                                  Center
-                                                    RichText
-                                          SizedBox
-                                          Text
-                                            RichText
+                              PdfPagePlaceholder
+                                Container
+                                  ConstrainedBox
+                                    DecoratedBox
+                                      Padding
+                                        Center
+                                          Padding
+                                            Column
+                                              PhosphorIcon
+                                                Semantics
+                                                  ExcludeSemantics
+                                                    SizedBox
+                                                      Center
+                                                        RichText
+                                              SizedBox
+                                              Text
+                                                RichText
                           Stack
                             Consumer
                               ActiveLayerContent
