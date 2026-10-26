@@ -59,6 +59,22 @@ void main() {
     expect(container.read(hasUnsavedChangesProvider), isFalse);
   });
 
+  test('flush after a failed autosave retries the newest document', () async {
+    when(() => save(any())).thenAnswer((_) async => const Left(failure));
+    await notifier().saveNow(doc);
+    when(() => save(any())).thenAnswer((_) async => const Right(null));
+
+    await notifier().flush();
+
+    verify(() => save(doc)).called(2);
+    expect(container.read(saveFailureProvider), isNull);
+  });
+
+  test('flush with nothing pending and no failure does nothing', () async {
+    await notifier().flush();
+    verifyNever(() => save(any()));
+  });
+
   test('retry without any document does nothing', () async {
     await notifier().retry();
     verifyNever(() => save(any()));
