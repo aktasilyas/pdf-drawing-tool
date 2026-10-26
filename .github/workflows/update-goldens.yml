@@ -1,12 +1,14 @@
 name: Update goldens
 
-# Regenerates golden PNGs, pubspec.lock files and gen-l10n output on a claude/*
-# branch for agent sessions that cannot download the Flutter engine. Dispatch:
+# Regenerates golden PNGs, pubspec.lock files and gen-l10n output and runs
+# dart format on a claude/* branch, for agent sessions that cannot download the
+# Flutter engine. Dispatch:
 #   gh api -X POST repos/<owner>/<repo>/actions/workflows/update-goldens.yml/dispatches \
 #     -f ref=main -f "inputs[branch]=claude/<n>-<slug>" -f "inputs[package]=packages/drawing_ui"
 # (use ref=<the branch> instead of main when the branch changes this workflow).
-# The job commits changed goldens, lockfiles and example_app/lib/l10n/*.dart
-# back to that branch (normal push; generated files even if tests fail)
+# The job commits changed goldens, lockfiles, example_app/lib/l10n and formatted
+# Dart sources back to that branch (normal push; everything but goldens even if
+# tests fail)
 # and uploads every rendered PNG (including git-ignored platform goldens) as an
 # artifact. A push made with GITHUB_TOKEN does not trigger CI, so the job
 # dispatches ci.yml on the branch afterwards.
@@ -67,6 +69,10 @@ jobs:
         id: deps
         run: ./scripts/check.sh pub
 
+      - name: Format Dart sources
+        # Same paths as the CI format check; agent sessions cannot run it.
+        run: dart format packages example_app/lib example_app/test
+
       - name: Generate localizations
         if: hashFiles('example_app/l10n.yaml') != ''
         working-directory: example_app
@@ -110,6 +116,7 @@ jobs:
           git ls-files -z --cached --others --exclude-standard -- '*pubspec.lock' \
             | xargs -0 -r git add --
           if [ -d example_app/lib/l10n ]; then git add -A -- example_app/lib/l10n; fi
+          git add -u -- packages example_app/lib example_app/test
           if [ "$GOLDENS" = success ]; then git add -A -- "$PACKAGE/*.png"; fi
           if git diff --cached --quiet; then
             echo "Nothing changed."
@@ -117,7 +124,7 @@ jobs:
             exit 0
           fi
           git diff --cached --stat
-          git commit -m 'chore(build): regenerate goldens, lockfiles and l10n [workflow]'
+          git commit -m 'chore(build): regenerate goldens, lockfiles, l10n, format [workflow]'
           git push origin "HEAD:refs/heads/$BRANCH"
           echo "pushed=true" >> "$GITHUB_OUTPUT"
 
