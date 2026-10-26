@@ -10,7 +10,7 @@ void main() {
 
   testWidgets(
     'notebook: create, survive an editor round trip, rename, favourite, '
-    'trash and restore',
+    'trash, restore and app relaunch',
     (tester) async {
       const title = 'E2E Defter';
       const renamed = 'E2E Defter 2';
@@ -55,6 +55,11 @@ void main() {
       await library.restore(renamed);
       await library.waitNotListed(renamed);
       await library.openSection(LibrarySection.all);
+      await library.waitListed(renamed);
+
+      // Kill and reopen: the notebook is read back from the database.
+      await relaunchApp(tester);
+      await library.waitForLibrary();
       await library.waitListed(renamed);
     },
   );

@@ -46,20 +46,6 @@ jobs:
       - name: Dependencies
         run: ./scripts/check.sh pub
 
-      - name: Report pubspec.lock diff
-        # The integration_test dependency was added without regenerating the
-        # lockfile (no Flutter SDK in the authoring session). The next session
-        # applies this diff.
-        run: |
-          if git diff --quiet -- example_app/pubspec.lock; then
-            echo "example_app/pubspec.lock is up to date."
-          else
-            git diff -- example_app/pubspec.lock
-            msg=$(git diff -- example_app/pubspec.lock | head -n 200 \
-              | sed -e 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
-            echo "::notice title=pubspec.lock diff::$msg"
-          fi
-
       - name: Run integration tests
         uses: reactivecircus/android-emulator-runner@v2
         with:

@@ -35,8 +35,11 @@ class LibraryRobot {
       );
 
   /// Waits through the splash screen until the library is shown.
+  /// Also lets startup work (the unawaited trash purge) settle, so a later
+  /// reset or relaunch does not close the database under it.
   Future<void> waitForLibrary() async {
     await tester.pumpUntilFound(_newButton);
+    await tester.pumpFor(const Duration(milliseconds: 500));
   }
 
   void expectEmptyState() {
