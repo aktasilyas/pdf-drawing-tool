@@ -12,7 +12,7 @@ class _FakeSource implements PdfSource {
   @override
   Future<Uint8List?> renderJpeg(int index, double scale) async {
     renders++;
-    return null; // falls back to nothing; only open/close counts matter
+    return null; // null skips the background; only open/close matter
   }
 
   @override
@@ -62,6 +62,20 @@ void main() {
     expect(opens, 2);
     expect(opened['/a.pdf']!.renders, 5);
     expect(opened.values.every((s) => s.closed), isTrue);
+  });
+
+  test('the source is closed when the export is cancelled', () async {
+    final source = _FakeSource();
+    final exporter = PDFExporter(sourceOpener: (_) async => source);
+    var calls = 0;
+
+    final result = await exporter.exportPages(
+      pages: [for (var i = 0; i < 3; i++) _pdfPage(i, '/a.pdf')],
+      isCancelled: () => ++calls > 1,
+    );
+
+    expect(result.wasCancelled, isTrue);
+    expect(source.closed, isTrue);
   });
 
   test('raster layers are embedded as Flate-compressed streams', () async {

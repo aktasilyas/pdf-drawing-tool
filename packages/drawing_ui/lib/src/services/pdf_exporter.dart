@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -6,15 +5,16 @@ import 'dart:ui' as ui;
 import 'package:drawing_core/drawing_core.dart';
 import 'package:flutter/material.dart' hide Page;
 import 'package:pdf/pdf.dart';
-import 'package:pdfx/pdfx.dart' as pdfx;
 
 import 'pdf_compressed_image.dart';
 import 'pdf_content_painter.dart';
 import 'pdf_export_models.dart';
 import 'pdf_raster_layer_renderer.dart';
+import 'pdf_source.dart';
 
 // Re-export models so existing imports continue to work.
 export 'pdf_export_models.dart';
+export 'pdf_source.dart';
 
 /// Hybrid vector+raster PDF exporter.
 ///
@@ -23,7 +23,7 @@ export 'pdf_export_models.dart';
 /// (textured/glow/eraser strokes, text) falls back to lossless PNG overlay.
 class PDFExporter {
   PDFExporter({PdfSourceOpener? sourceOpener})
-      : _openSource = sourceOpener ?? _openPdfxSource;
+      : _openSource = sourceOpener ?? openPdfxSource;
 
   final PdfSourceOpener _openSource;
   final _contentPainter = PdfContentPainter();
@@ -42,7 +42,7 @@ class PDFExporter {
 
     try {
       final doc = PdfDocument();
-      final sources = _PdfSourcePool(_openSource);
+      final sources = PdfSourcePool(_openSource);
       try {
         for (int i = 0; i < pages.length; i++) {
           if (isCancelled?.call() == true) return PDFExportResult.cancelled();
@@ -65,7 +65,7 @@ class PDFExporter {
     PdfDocument doc,
     Page page,
     PDFExportOptions options,
-    _PdfSourcePool sources,
+    PdfSourcePool sources,
   ) async {
     double pdfW, pdfH;
     if (options.isInfiniteCanvas) {
@@ -163,7 +163,7 @@ class PDFExporter {
     double w,
     double h,
     PDFExportOptions options,
-    _PdfSourcePool sources,
+    PdfSourcePool sources,
   ) async {
     if (page.background.pdfPageIndex == null) return;
 
@@ -192,7 +192,7 @@ class PDFExporter {
   }
 
   Future<Uint8List?> _renderPdfPageAsJpeg(
-    _PdfSourcePool sources,
+    PdfSourcePool sources,
     String path,
     int index,
     double renderScale,
@@ -278,70 +278,4 @@ class PDFExporter {
       image.dispose();
     }
   }
-}
-
-/// A source PDF opened once and kept for all of its pages in an export.
-abstract class PdfSource {
-  /// Renders page [index] as a JPEG, or null when it cannot be rendered.
-  Future<Uint8List?> renderJpeg(int index, double scale);
-
-  Future<void> close();
-}
-
-/// Opens the source PDF at a path; null when the file is missing/unreadable.
-typedef PdfSourceOpener = Future<PdfSource?> Function(String path);
-
-/// One [PdfSource] per path, opened lazily and closed after the export.
-class _PdfSourcePool {
-  _PdfSourcePool(this._open);
-
-  final PdfSourceOpener _open;
-  final _sources = <String, PdfSource?>{};
-
-  Future<PdfSource?> get(String path) async {
-    if (_sources.containsKey(path)) return _sources[path];
-    return _sources[path] = await _open(path);
-  }
-
-  Future<void> closeAll() async {
-    for (final s in _sources.values) {
-      try {
-        await s?.close();
-      } catch (_) {}
-    }
-    _sources.clear();
-  }
-}
-
-Future<PdfSource?> _openPdfxSource(String path) async {
-  if (!await File(path).exists()) return null;
-  return _PdfxSource(await pdfx.PdfDocument.openFile(path));
-}
-
-class _PdfxSource implements PdfSource {
-  _PdfxSource(this._doc);
-
-  final pdfx.PdfDocument _doc;
-
-  @override
-  Future<Uint8List?> renderJpeg(int index, double scale) async {
-    pdfx.PdfPage? pg;
-    try {
-      pg = await _doc.getPage(index);
-      final img = await pg.render(
-        width: pg.width * scale,
-        height: pg.height * scale,
-        format: pdfx.PdfPageImageFormat.jpeg,
-        quality: 90,
-      );
-      return img?.bytes;
-    } finally {
-      try {
-        await pg?.close();
-      } catch (_) {}
-    }
-  }
-
-  @override
-  Future<void> close() => _doc.close();
 }
