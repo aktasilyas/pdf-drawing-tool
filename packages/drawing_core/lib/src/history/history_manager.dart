@@ -19,6 +19,12 @@ class HistoryManager {
   /// The maximum number of commands to keep in history.
   final int maxHistorySize;
 
+  /// Commands executed since [beginGroup], recorded as one step at
+  /// [endGroup]. Null when no group is open.
+  List<DrawingCommand>? _group;
+  String? _groupPageId;
+  int _groupDepth = 0;
+
   /// Creates a new [HistoryManager].
   ///
   /// [maxHistorySize] defaults to 100. When exceeded, the oldest
@@ -71,18 +77,59 @@ class HistoryManager {
       entryPageId = _currentPageId(document);
     }
 
-    // Add to undo stack
-    _undoStack.add(_Entry(command, entryPageId));
-
     // Clear redo stack (new action invalidates redo history)
     _redoStack.clear();
 
+    final group = _group;
+    if (group != null) {
+      if (group.isEmpty) _groupPageId = entryPageId;
+      group.add(command);
+    } else {
+      _push(_Entry(command, entryPageId));
+    }
+
+    return newDocument;
+  }
+
+  /// Whether a group opened by [beginGroup] is collecting commands.
+  bool get isGrouping => _group != null;
+
+  /// Starts collecting executed commands into one undo step.
+  ///
+  /// Commands still run immediately in [execute], so callers can read the
+  /// updated document between them. [endGroup] records them as a single
+  /// [CompositeCommand]. Groups may nest; only the outermost [endGroup]
+  /// records the step.
+  void beginGroup() {
+    _groupDepth++;
+    _group ??= [];
+  }
+
+  /// Ends the group started by [beginGroup].
+  ///
+  /// Records the collected commands as one undo step on the page of the
+  /// first command. An empty group records nothing, and a group of one
+  /// command records that command as is.
+  void endGroup({String? description}) {
+    if (_groupDepth == 0) return;
+    _groupDepth--;
+    if (_groupDepth > 0) return;
+    final group = _group!;
+    _group = null;
+    if (group.isEmpty) return;
+    final command = group.length == 1
+        ? group.single
+        : CompositeCommand(group, description: description);
+    _push(_Entry(command, _groupPageId));
+    _groupPageId = null;
+  }
+
+  void _push(_Entry entry) {
+    _undoStack.add(entry);
     // Enforce max history size
     while (_undoStack.length > maxHistorySize) {
       _undoStack.removeAt(0); // Remove oldest
     }
-
-    return newDocument;
   }
 
   /// Undoes the most recent command.

@@ -120,4 +120,38 @@ void main() {
     expect(strokes(), [line]);
     expect(container.read(pixelEraserPreviewProvider), isEmpty);
   });
+
+  testWidgets('erasing a stroke and a shape in one gesture is one undo step',
+      (tester) async {
+    await pump(tester);
+    final line = drawLine();
+    final history = container.read(historyManagerProvider.notifier);
+    final layerIndex = container.read(documentProvider).activeLayerIndex;
+    final a = toCanvas(const Offset(250, 250));
+    final b = toCanvas(const Offset(350, 250));
+    final shape = core.Shape(
+      id: 'shape-1',
+      type: core.ShapeType.line,
+      startPoint: core.DrawingPoint(x: a.dx, y: a.dy),
+      endPoint: core.DrawingPoint(x: b.dx, y: b.dy),
+      style: core.StrokeStyle.pen(),
+    );
+    history.execute(
+      core.AddShapeCommand(layerIndex: layerIndex, shape: shape),
+    );
+    List<core.Shape> shapes() => container.read(activeLayerShapesProvider);
+    expect(shapes(), hasLength(1));
+    selectPixelEraser();
+    final before = container.read(historyManagerProvider).undoCount;
+
+    // Crosses the stroke at y=200 and ends on the shape at y=250.
+    gesture(const [Offset(300, 150), Offset(300, 250)]);
+    expect(strokes(), hasLength(2));
+    expect(shapes(), isEmpty);
+    expect(container.read(historyManagerProvider).undoCount, before + 1);
+
+    history.undo();
+    expect(strokes(), [line]);
+    expect(shapes().map((s) => s.id), ['shape-1']);
+  });
 }
