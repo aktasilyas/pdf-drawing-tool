@@ -6,8 +6,8 @@ part of 'ai_conversation.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$AIConversationImpl _$$AIConversationImplFromJson(Map<String, dynamic> json) =>
-    _$AIConversationImpl(
+_AIConversation _$AIConversationFromJson(Map<String, dynamic> json) =>
+    _AIConversation(
       id: json['id'] as String,
       userId: json['userId'] as String,
       title: json['title'] as String? ?? 'Yeni Sohbet',
@@ -21,8 +21,7 @@ _$AIConversationImpl _$$AIConversationImplFromJson(Map<String, dynamic> json) =>
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
 
-Map<String, dynamic> _$$AIConversationImplToJson(
-        _$AIConversationImpl instance) =>
+Map<String, dynamic> _$AIConversationToJson(_AIConversation instance) =>
     <String, dynamic>{
       'id': instance.id,
       'userId': instance.userId,

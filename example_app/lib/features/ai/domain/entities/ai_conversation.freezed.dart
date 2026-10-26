@@ -1,6 +1,6 @@
-// coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// ignore_for_file: type=lint
+// coverage:ignore-file
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'ai_conversation.dart';
@@ -9,142 +9,95 @@ part of 'ai_conversation.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// dart format off
 T _$identity<T>(T value) => value;
-
-final _privateConstructorUsedError = UnsupportedError(
-    'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models');
-
-AIConversation _$AIConversationFromJson(Map<String, dynamic> json) {
-  return _AIConversation.fromJson(json);
-}
 
 /// @nodoc
 mixin _$AIConversation {
-  String get id => throw _privateConstructorUsedError;
-  String get userId => throw _privateConstructorUsedError;
-  String get title => throw _privateConstructorUsedError;
-  String? get documentId => throw _privateConstructorUsedError;
-  String get taskType => throw _privateConstructorUsedError;
-  int get totalInputTokens => throw _privateConstructorUsedError;
-  int get totalOutputTokens => throw _privateConstructorUsedError;
-  int get messageCount => throw _privateConstructorUsedError;
-  bool get isPinned => throw _privateConstructorUsedError;
-  DateTime get createdAt => throw _privateConstructorUsedError;
-  DateTime get updatedAt => throw _privateConstructorUsedError;
-
-  /// Serializes this AIConversation to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  String get id;
+  String get userId;
+  String get title;
+  String? get documentId;
+  String get taskType;
+  int get totalInputTokens;
+  int get totalOutputTokens;
+  int get messageCount;
+  bool get isPinned;
+  DateTime get createdAt;
+  DateTime get updatedAt;
 
   /// Create a copy of AIConversation
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
-  $AIConversationCopyWith<AIConversation> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-abstract class $AIConversationCopyWith<$Res> {
-  factory $AIConversationCopyWith(
-          AIConversation value, $Res Function(AIConversation) then) =
-      _$AIConversationCopyWithImpl<$Res, AIConversation>;
-  @useResult
-  $Res call(
-      {String id,
-      String userId,
-      String title,
-      String? documentId,
-      String taskType,
-      int totalInputTokens,
-      int totalOutputTokens,
-      int messageCount,
-      bool isPinned,
-      DateTime createdAt,
-      DateTime updatedAt});
-}
-
-/// @nodoc
-class _$AIConversationCopyWithImpl<$Res, $Val extends AIConversation>
-    implements $AIConversationCopyWith<$Res> {
-  _$AIConversationCopyWithImpl(this._value, this._then);
-
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
-
-  /// Create a copy of AIConversation
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
+  $AIConversationCopyWith<AIConversation> get copyWith =>
+      _$AIConversationCopyWithImpl<AIConversation>(
+          this as AIConversation, _$identity);
+
+  /// Serializes this AIConversation to a JSON map.
+  Map<String, dynamic> toJson();
+
   @override
-  $Res call({
-    Object? id = null,
-    Object? userId = null,
-    Object? title = null,
-    Object? documentId = freezed,
-    Object? taskType = null,
-    Object? totalInputTokens = null,
-    Object? totalOutputTokens = null,
-    Object? messageCount = null,
-    Object? isPinned = null,
-    Object? createdAt = null,
-    Object? updatedAt = null,
-  }) {
-    return _then(_value.copyWith(
-      id: null == id
-          ? _value.id
-          : id // ignore: cast_nullable_to_non_nullable
-              as String,
-      userId: null == userId
-          ? _value.userId
-          : userId // ignore: cast_nullable_to_non_nullable
-              as String,
-      title: null == title
-          ? _value.title
-          : title // ignore: cast_nullable_to_non_nullable
-              as String,
-      documentId: freezed == documentId
-          ? _value.documentId
-          : documentId // ignore: cast_nullable_to_non_nullable
-              as String?,
-      taskType: null == taskType
-          ? _value.taskType
-          : taskType // ignore: cast_nullable_to_non_nullable
-              as String,
-      totalInputTokens: null == totalInputTokens
-          ? _value.totalInputTokens
-          : totalInputTokens // ignore: cast_nullable_to_non_nullable
-              as int,
-      totalOutputTokens: null == totalOutputTokens
-          ? _value.totalOutputTokens
-          : totalOutputTokens // ignore: cast_nullable_to_non_nullable
-              as int,
-      messageCount: null == messageCount
-          ? _value.messageCount
-          : messageCount // ignore: cast_nullable_to_non_nullable
-              as int,
-      isPinned: null == isPinned
-          ? _value.isPinned
-          : isPinned // ignore: cast_nullable_to_non_nullable
-              as bool,
-      createdAt: null == createdAt
-          ? _value.createdAt
-          : createdAt // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-      updatedAt: null == updatedAt
-          ? _value.updatedAt
-          : updatedAt // ignore: cast_nullable_to_non_nullable
-              as DateTime,
-    ) as $Val);
+  bool operator ==(Object other) {
+    final _this = this as AIConversation;
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is AIConversation &&
+            (identical(other.id, _this.id) || other.id == _this.id) &&
+            (identical(other.userId, _this.userId) ||
+                other.userId == _this.userId) &&
+            (identical(other.title, _this.title) ||
+                other.title == _this.title) &&
+            (identical(other.documentId, _this.documentId) ||
+                other.documentId == _this.documentId) &&
+            (identical(other.taskType, _this.taskType) ||
+                other.taskType == _this.taskType) &&
+            (identical(other.totalInputTokens, _this.totalInputTokens) ||
+                other.totalInputTokens == _this.totalInputTokens) &&
+            (identical(other.totalOutputTokens, _this.totalOutputTokens) ||
+                other.totalOutputTokens == _this.totalOutputTokens) &&
+            (identical(other.messageCount, _this.messageCount) ||
+                other.messageCount == _this.messageCount) &&
+            (identical(other.isPinned, _this.isPinned) ||
+                other.isPinned == _this.isPinned) &&
+            (identical(other.createdAt, _this.createdAt) ||
+                other.createdAt == _this.createdAt) &&
+            (identical(other.updatedAt, _this.updatedAt) ||
+                other.updatedAt == _this.updatedAt));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode {
+    final _this = this as AIConversation;
+    return Object.hash(
+        runtimeType,
+        _this.id,
+        _this.userId,
+        _this.title,
+        _this.documentId,
+        _this.taskType,
+        _this.totalInputTokens,
+        _this.totalOutputTokens,
+        _this.messageCount,
+        _this.isPinned,
+        _this.createdAt,
+        _this.updatedAt);
+  }
+
+  @override
+  String toString() {
+    final _this = this as AIConversation;
+    return 'AIConversation(id: ${_this.id}, userId: ${_this.userId}, title: ${_this.title}, documentId: ${_this.documentId}, taskType: ${_this.taskType}, totalInputTokens: ${_this.totalInputTokens}, totalOutputTokens: ${_this.totalOutputTokens}, messageCount: ${_this.messageCount}, isPinned: ${_this.isPinned}, createdAt: ${_this.createdAt}, updatedAt: ${_this.updatedAt})';
   }
 }
 
 /// @nodoc
-abstract class _$$AIConversationImplCopyWith<$Res>
-    implements $AIConversationCopyWith<$Res> {
-  factory _$$AIConversationImplCopyWith(_$AIConversationImpl value,
-          $Res Function(_$AIConversationImpl) then) =
-      __$$AIConversationImplCopyWithImpl<$Res>;
-  @override
+abstract mixin class $AIConversationCopyWith<$Res> {
+  factory $AIConversationCopyWith(
+          AIConversation value, $Res Function(AIConversation) _then) =
+      _$AIConversationCopyWithImpl;
   @useResult
   $Res call(
       {String id,
@@ -161,12 +114,12 @@ abstract class _$$AIConversationImplCopyWith<$Res>
 }
 
 /// @nodoc
-class __$$AIConversationImplCopyWithImpl<$Res>
-    extends _$AIConversationCopyWithImpl<$Res, _$AIConversationImpl>
-    implements _$$AIConversationImplCopyWith<$Res> {
-  __$$AIConversationImplCopyWithImpl(
-      _$AIConversationImpl _value, $Res Function(_$AIConversationImpl) _then)
-      : super(_value, _then);
+class _$AIConversationCopyWithImpl<$Res>
+    implements $AIConversationCopyWith<$Res> {
+  _$AIConversationCopyWithImpl(this._self, this._then);
+
+  final AIConversation _self;
+  final $Res Function(AIConversation) _then;
 
   /// Create a copy of AIConversation
   /// with the given fields replaced by the non-null parameter values.
@@ -185,59 +138,285 @@ class __$$AIConversationImplCopyWithImpl<$Res>
     Object? createdAt = null,
     Object? updatedAt = null,
   }) {
-    return _then(_$AIConversationImpl(
+    return _then(AIConversation(
       id: null == id
-          ? _value.id
+          ? _self.id
           : id // ignore: cast_nullable_to_non_nullable
               as String,
       userId: null == userId
-          ? _value.userId
+          ? _self.userId
           : userId // ignore: cast_nullable_to_non_nullable
               as String,
       title: null == title
-          ? _value.title
+          ? _self.title
           : title // ignore: cast_nullable_to_non_nullable
               as String,
       documentId: freezed == documentId
-          ? _value.documentId
+          ? _self.documentId
           : documentId // ignore: cast_nullable_to_non_nullable
               as String?,
       taskType: null == taskType
-          ? _value.taskType
+          ? _self.taskType
           : taskType // ignore: cast_nullable_to_non_nullable
               as String,
       totalInputTokens: null == totalInputTokens
-          ? _value.totalInputTokens
+          ? _self.totalInputTokens
           : totalInputTokens // ignore: cast_nullable_to_non_nullable
               as int,
       totalOutputTokens: null == totalOutputTokens
-          ? _value.totalOutputTokens
+          ? _self.totalOutputTokens
           : totalOutputTokens // ignore: cast_nullable_to_non_nullable
               as int,
       messageCount: null == messageCount
-          ? _value.messageCount
+          ? _self.messageCount
           : messageCount // ignore: cast_nullable_to_non_nullable
               as int,
       isPinned: null == isPinned
-          ? _value.isPinned
+          ? _self.isPinned
           : isPinned // ignore: cast_nullable_to_non_nullable
               as bool,
       createdAt: null == createdAt
-          ? _value.createdAt
+          ? _self.createdAt
           : createdAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
       updatedAt: null == updatedAt
-          ? _value.updatedAt
+          ? _self.updatedAt
           : updatedAt // ignore: cast_nullable_to_non_nullable
               as DateTime,
     ));
   }
 }
 
+/// Adds pattern-matching-related methods to [AIConversation].
+extension AIConversationPatterns on AIConversation {
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_AIConversation value)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _AIConversation() when $default != null:
+        return $default(_that);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// Callbacks receives the raw object, upcasted.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case final Subclass2 value:
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>(
+    TResult Function(_AIConversation value) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _AIConversation():
+        return $default(_that);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `map` that fallback to returning `null`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_AIConversation value)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _AIConversation() when $default != null:
+        return $default(_that);
+      case _:
+        return null;
+    }
+  }
+
+  /// A variant of `when` that fallback to an `orElse` callback.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(
+            String id,
+            String userId,
+            String title,
+            String? documentId,
+            String taskType,
+            int totalInputTokens,
+            int totalOutputTokens,
+            int messageCount,
+            bool isPinned,
+            DateTime createdAt,
+            DateTime updatedAt)?
+        $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _AIConversation() when $default != null:
+        return $default(
+            _that.id,
+            _that.userId,
+            _that.title,
+            _that.documentId,
+            _that.taskType,
+            _that.totalInputTokens,
+            _that.totalOutputTokens,
+            _that.messageCount,
+            _that.isPinned,
+            _that.createdAt,
+            _that.updatedAt);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// As opposed to `map`, this offers destructuring.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case Subclass2(:final field2):
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>(
+    TResult Function(
+            String id,
+            String userId,
+            String title,
+            String? documentId,
+            String taskType,
+            int totalInputTokens,
+            int totalOutputTokens,
+            int messageCount,
+            bool isPinned,
+            DateTime createdAt,
+            DateTime updatedAt)
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _AIConversation():
+        return $default(
+            _that.id,
+            _that.userId,
+            _that.title,
+            _that.documentId,
+            _that.taskType,
+            _that.totalInputTokens,
+            _that.totalOutputTokens,
+            _that.messageCount,
+            _that.isPinned,
+            _that.createdAt,
+            _that.updatedAt);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `when` that fallback to returning `null`
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(
+            String id,
+            String userId,
+            String title,
+            String? documentId,
+            String taskType,
+            int totalInputTokens,
+            int totalOutputTokens,
+            int messageCount,
+            bool isPinned,
+            DateTime createdAt,
+            DateTime updatedAt)?
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _AIConversation() when $default != null:
+        return $default(
+            _that.id,
+            _that.userId,
+            _that.title,
+            _that.documentId,
+            _that.taskType,
+            _that.totalInputTokens,
+            _that.totalOutputTokens,
+            _that.messageCount,
+            _that.isPinned,
+            _that.createdAt,
+            _that.updatedAt);
+      case _:
+        return null;
+    }
+  }
+}
+
 /// @nodoc
 @JsonSerializable()
-class _$AIConversationImpl implements _AIConversation {
-  const _$AIConversationImpl(
+class _AIConversation implements AIConversation {
+  const _AIConversation(
       {required this.id,
       required this.userId,
       this.title = 'Yeni Sohbet',
@@ -249,9 +428,8 @@ class _$AIConversationImpl implements _AIConversation {
       this.isPinned = false,
       required this.createdAt,
       required this.updatedAt});
-
-  factory _$AIConversationImpl.fromJson(Map<String, dynamic> json) =>
-      _$$AIConversationImplFromJson(json);
+  factory _AIConversation.fromJson(Map<String, dynamic> json) =>
+      _$AIConversationFromJson(json);
 
   @override
   final String id;
@@ -282,16 +460,26 @@ class _$AIConversationImpl implements _AIConversation {
   @override
   final DateTime updatedAt;
 
+  /// Create a copy of AIConversation
+  /// with the given fields replaced by the non-null parameter values.
   @override
-  String toString() {
-    return 'AIConversation(id: $id, userId: $userId, title: $title, documentId: $documentId, taskType: $taskType, totalInputTokens: $totalInputTokens, totalOutputTokens: $totalOutputTokens, messageCount: $messageCount, isPinned: $isPinned, createdAt: $createdAt, updatedAt: $updatedAt)';
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$AIConversationCopyWith<_AIConversation> get copyWith =>
+      __$AIConversationCopyWithImpl<_AIConversation>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$AIConversationToJson(
+      this,
+    );
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$AIConversationImpl &&
+            other is _AIConversation &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.userId, userId) || other.userId == userId) &&
             (identical(other.title, title) || other.title == title) &&
@@ -315,81 +503,122 @@ class _$AIConversationImpl implements _AIConversation {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-      runtimeType,
-      id,
-      userId,
-      title,
-      documentId,
-      taskType,
-      totalInputTokens,
-      totalOutputTokens,
-      messageCount,
-      isPinned,
-      createdAt,
-      updatedAt);
-
-  /// Create a copy of AIConversation
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$AIConversationImplCopyWith<_$AIConversationImpl> get copyWith =>
-      __$$AIConversationImplCopyWithImpl<_$AIConversationImpl>(
-          this, _$identity);
+  int get hashCode {
+    return Object.hash(
+        runtimeType,
+        id,
+        userId,
+        title,
+        documentId,
+        taskType,
+        totalInputTokens,
+        totalOutputTokens,
+        messageCount,
+        isPinned,
+        createdAt,
+        updatedAt);
+  }
 
   @override
-  Map<String, dynamic> toJson() {
-    return _$$AIConversationImplToJson(
-      this,
-    );
+  String toString() {
+    return 'AIConversation(id: $id, userId: $userId, title: $title, documentId: $documentId, taskType: $taskType, totalInputTokens: $totalInputTokens, totalOutputTokens: $totalOutputTokens, messageCount: $messageCount, isPinned: $isPinned, createdAt: $createdAt, updatedAt: $updatedAt)';
   }
 }
 
-abstract class _AIConversation implements AIConversation {
-  const factory _AIConversation(
-      {required final String id,
-      required final String userId,
-      final String title,
-      final String? documentId,
-      final String taskType,
-      final int totalInputTokens,
-      final int totalOutputTokens,
-      final int messageCount,
-      final bool isPinned,
-      required final DateTime createdAt,
-      required final DateTime updatedAt}) = _$AIConversationImpl;
+/// @nodoc
+abstract mixin class _$AIConversationCopyWith<$Res>
+    implements $AIConversationCopyWith<$Res> {
+  factory _$AIConversationCopyWith(
+          _AIConversation value, $Res Function(_AIConversation) _then) =
+      __$AIConversationCopyWithImpl;
+  @override
+  @useResult
+  $Res call(
+      {String id,
+      String userId,
+      String title,
+      String? documentId,
+      String taskType,
+      int totalInputTokens,
+      int totalOutputTokens,
+      int messageCount,
+      bool isPinned,
+      DateTime createdAt,
+      DateTime updatedAt});
+}
 
-  factory _AIConversation.fromJson(Map<String, dynamic> json) =
-      _$AIConversationImpl.fromJson;
+/// @nodoc
+class __$AIConversationCopyWithImpl<$Res>
+    implements _$AIConversationCopyWith<$Res> {
+  __$AIConversationCopyWithImpl(this._self, this._then);
 
-  @override
-  String get id;
-  @override
-  String get userId;
-  @override
-  String get title;
-  @override
-  String? get documentId;
-  @override
-  String get taskType;
-  @override
-  int get totalInputTokens;
-  @override
-  int get totalOutputTokens;
-  @override
-  int get messageCount;
-  @override
-  bool get isPinned;
-  @override
-  DateTime get createdAt;
-  @override
-  DateTime get updatedAt;
+  final _AIConversation _self;
+  final $Res Function(_AIConversation) _then;
 
   /// Create a copy of AIConversation
   /// with the given fields replaced by the non-null parameter values.
   @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$AIConversationImplCopyWith<_$AIConversationImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? id = null,
+    Object? userId = null,
+    Object? title = null,
+    Object? documentId = freezed,
+    Object? taskType = null,
+    Object? totalInputTokens = null,
+    Object? totalOutputTokens = null,
+    Object? messageCount = null,
+    Object? isPinned = null,
+    Object? createdAt = null,
+    Object? updatedAt = null,
+  }) {
+    return _then(_AIConversation(
+      id: null == id
+          ? _self.id
+          : id // ignore: cast_nullable_to_non_nullable
+              as String,
+      userId: null == userId
+          ? _self.userId
+          : userId // ignore: cast_nullable_to_non_nullable
+              as String,
+      title: null == title
+          ? _self.title
+          : title // ignore: cast_nullable_to_non_nullable
+              as String,
+      documentId: freezed == documentId
+          ? _self.documentId
+          : documentId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      taskType: null == taskType
+          ? _self.taskType
+          : taskType // ignore: cast_nullable_to_non_nullable
+              as String,
+      totalInputTokens: null == totalInputTokens
+          ? _self.totalInputTokens
+          : totalInputTokens // ignore: cast_nullable_to_non_nullable
+              as int,
+      totalOutputTokens: null == totalOutputTokens
+          ? _self.totalOutputTokens
+          : totalOutputTokens // ignore: cast_nullable_to_non_nullable
+              as int,
+      messageCount: null == messageCount
+          ? _self.messageCount
+          : messageCount // ignore: cast_nullable_to_non_nullable
+              as int,
+      isPinned: null == isPinned
+          ? _self.isPinned
+          : isPinned // ignore: cast_nullable_to_non_nullable
+              as bool,
+      createdAt: null == createdAt
+          ? _self.createdAt
+          : createdAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      updatedAt: null == updatedAt
+          ? _self.updatedAt
+          : updatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+    ));
+  }
 }
+
+// dart format on

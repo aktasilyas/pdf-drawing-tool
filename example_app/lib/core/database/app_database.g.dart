@@ -3459,7 +3459,11 @@ class $$DocumentsTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map((e) => (
+                    e.readTable<$DocumentsTable, Document>(table),
+                    BaseReferences<_$AppDatabase, $DocumentsTable, Document>(
+                        db, table, e)
+                  ))
               .toList(),
           prefetchHooksCallback: null,
         ));
@@ -3624,7 +3628,11 @@ class $$FoldersTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map((e) => (
+                    e.readTable<$FoldersTable, Folder>(table),
+                    BaseReferences<_$AppDatabase, $FoldersTable, Folder>(
+                        db, table, e)
+                  ))
               .toList(),
           prefetchHooksCallback: null,
         ));
@@ -3823,7 +3831,11 @@ class $$SyncQueueTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map((e) => (
+                    e.readTable<$SyncQueueTable, SyncQueueData>(table),
+                    BaseReferences<_$AppDatabase, $SyncQueueTable,
+                        SyncQueueData>(db, table, e)
+                  ))
               .toList(),
           prefetchHooksCallback: null,
         ));
@@ -3951,7 +3963,11 @@ class $$SyncMetadataTableTableManager extends RootTableManager<
             rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map((e) => (
+                    e.readTable<$SyncMetadataTable, SyncMetadataData>(table),
+                    BaseReferences<_$AppDatabase, $SyncMetadataTable,
+                        SyncMetadataData>(db, table, e)
+                  ))
               .toList(),
           prefetchHooksCallback: null,
         ));
@@ -4010,11 +4026,12 @@ final class $$AiConversationsLocalTableReferences extends BaseReferences<
   $$AiConversationsLocalTableReferences(
       super.$_db, super.$_table, super.$_typedResult);
 
-  static MultiTypedResultKey<$AiMessagesLocalTable, List<AiMessagesLocalData>>
-      _aiMessagesLocalRefsTable(_$AppDatabase db) =>
-          MultiTypedResultKey.fromTable(db.aiMessagesLocal,
-              aliasName: $_aliasNameGenerator(db.aiConversationsLocal.id,
-                  db.aiMessagesLocal.conversationId));
+  static MultiTypedResultKey<$AiMessagesLocalTable,
+      List<AiMessagesLocalData>> _aiMessagesLocalRefsTable(
+          _$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(db.aiMessagesLocal,
+          aliasName:
+              'ai_conversations_local__id__ai_messages_local__conversation_id');
 
   $$AiMessagesLocalTableProcessedTableManager get aiMessagesLocalRefs {
     final manager =
@@ -4300,7 +4317,8 @@ class $$AiConversationsLocalTableTableManager extends RootTableManager<
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (
-                    e.readTable(table),
+                    e.readTable<$AiConversationsLocalTable,
+                        AiConversationsLocalData>(table),
                     $$AiConversationsLocalTableReferences(db, table, e)
                   ))
               .toList(),
@@ -4314,17 +4332,19 @@ class $$AiConversationsLocalTableTableManager extends RootTableManager<
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (aiMessagesLocalRefs)
-                    await $_getPrefetchedData<AiConversationsLocalData,
-                            $AiConversationsLocalTable, AiMessagesLocalData>(
+                    await $_getPrefetchedDataByColumns<
+                            AiConversationsLocalData,
+                            $AiConversationsLocalTable,
+                            AiMessagesLocalData,
+                            $AiMessagesLocalTable>(
                         currentTable: table,
                         referencedTable: $$AiConversationsLocalTableReferences
                             ._aiMessagesLocalRefsTable(db),
                         managerFromTypedResult: (p0) =>
                             $$AiConversationsLocalTableReferences(db, table, p0)
                                 .aiMessagesLocalRefs,
-                        referencedItemsForCurrentItem:
-                            (item, referencedItems) => referencedItems
-                                .where((e) => e.conversationId == item.id),
+                        currentColumn: 'id',
+                        referencedColumn: 'conversation_id',
                         typedResults: items)
                 ];
               },
@@ -4385,8 +4405,8 @@ final class $$AiMessagesLocalTableReferences extends BaseReferences<
       super.$_db, super.$_table, super.$_typedResult);
 
   static $AiConversationsLocalTable _conversationIdTable(_$AppDatabase db) =>
-      db.aiConversationsLocal.createAlias($_aliasNameGenerator(
-          db.aiMessagesLocal.conversationId, db.aiConversationsLocal.id));
+      db.aiConversationsLocal.createAlias(
+          'ai_messages_local__conversation_id__ai_conversations_local__id');
 
   $$AiConversationsLocalTableProcessedTableManager get conversationId {
     final $_column = $_itemColumn<String>('conversation_id')!;
@@ -4678,7 +4698,8 @@ class $$AiMessagesLocalTableTableManager extends RootTableManager<
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (
-                    e.readTable(table),
+                    e.readTable<$AiMessagesLocalTable, AiMessagesLocalData>(
+                        table),
                     $$AiMessagesLocalTableReferences(db, table, e)
                   ))
               .toList(),
