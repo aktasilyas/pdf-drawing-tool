@@ -51,6 +51,7 @@ class DocumentCard extends ConsumerWidget {
       ),
       onTap: onTap,
       onLongPress: () => _handleLongPress(ref),
+      semanticLabel: document.title,
       isSelected: isSelected,
       isSelectionMode: isSelectionMode,
       overlays: _buildOverlays,

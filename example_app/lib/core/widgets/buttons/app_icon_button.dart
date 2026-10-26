@@ -17,6 +17,8 @@ import 'package:flutter/material.dart';
 
 import 'package:example_app/core/theme/index.dart';
 
+part 'app_icon_button_variants.dart';
+
 /// Icon buton varyantları.
 enum AppIconButtonVariant {
   /// Dolu arka plan - Primary renk
@@ -56,8 +58,13 @@ class AppIconButton extends StatelessWidget {
   /// Null ise buton disabled görünür.
   final VoidCallback? onPressed;
 
-  /// Accessibility için tooltip metni.
+  /// Accessibility için tooltip metni. Aynı zamanda semantics etiketi
+  /// olarak kullanılır ([semanticLabel] verilmediyse).
   final String? tooltip;
+
+  /// Screen-reader label when it must differ from [tooltip] (or when the
+  /// button shows no tooltip). Falls back to [tooltip].
+  final String? semanticLabel;
 
   /// Buton varyantı.
   final AppIconButtonVariant variant;
@@ -78,12 +85,16 @@ class AppIconButton extends StatelessWidget {
     required this.icon,
     this.onPressed,
     this.tooltip,
+    this.semanticLabel,
     this.variant = AppIconButtonVariant.filled,
     this.size = AppIconButtonSize.medium,
     this.isSelected = false,
     this.iconColor,
     super.key,
-  });
+  }) : assert(
+          tooltip != null || semanticLabel != null,
+          'An icon-only button needs a tooltip or a semanticLabel',
+        );
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +121,18 @@ class AppIconButton extends StatelessWidget {
       );
     }
 
-    return button;
+    // One node for the whole button: the inner InkWell would otherwise be a
+    // second, unlabelled button node next to the tooltip's label node, and
+    // without `container` the label would be absorbed into a neighbour's node.
+    return Semantics(
+      container: true,
+      button: true,
+      enabled: !isDisabled,
+      label: semanticLabel ?? tooltip,
+      onTap: onPressed,
+      excludeSemantics: true,
+      child: button,
+    );
   }
 
   Widget _buildButton(_IconButtonSpecs specs, bool isDisabled) {
@@ -187,168 +209,4 @@ class _IconButtonSpecs {
     required this.touchTarget,
     required this.iconSize,
   });
-}
-
-// ══════════════════════════════════════════════════════════════════════════
-// VARIANT WIDGETS
-// ══════════════════════════════════════════════════════════════════════════
-
-class _FilledIconButton extends StatelessWidget {
-  final VoidCallback? onPressed;
-  final double size;
-  final bool isSelected;
-  final Widget child;
-
-  const _FilledIconButton({
-    required this.onPressed,
-    required this.size,
-    required this.isSelected,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.palette;
-    return Material(
-      color: palette.accent,
-      borderRadius: BorderRadius.circular(AppRadius.button),
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(AppRadius.button),
-        child: SizedBox(
-          width: size,
-          height: size,
-          child: IconTheme(
-            data: IconThemeData(color: palette.onAccent),
-            child: Center(child: child),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _TonalIconButton extends StatelessWidget {
-  final VoidCallback? onPressed;
-  final double size;
-  final bool isSelected;
-  final Widget child;
-
-  const _TonalIconButton({
-    required this.onPressed,
-    required this.size,
-    required this.isSelected,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color:
-          isSelected ? AppColors.primaryLight : AppColors.surfaceVariantLight,
-      borderRadius: BorderRadius.circular(AppRadius.button),
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(AppRadius.button),
-        child: SizedBox(
-          width: size,
-          height: size,
-          child: IconTheme(
-            data: IconThemeData(
-              color: isSelected ? AppColors.onPrimary : AppColors.primary,
-            ),
-            child: Center(child: child),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _OutlineIconButton extends StatelessWidget {
-  final VoidCallback? onPressed;
-  final double size;
-  final bool isSelected;
-  final Widget child;
-
-  const _OutlineIconButton({
-    required this.onPressed,
-    required this.size,
-    required this.isSelected,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: isSelected ? AppColors.primary : Colors.transparent,
-      borderRadius: BorderRadius.circular(AppRadius.button),
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(AppRadius.button),
-        child: Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(AppRadius.button),
-            border: Border.all(
-              color: AppColors.primary,
-              width: isSelected ? 0 : 1,
-            ),
-          ),
-          child: IconTheme(
-            data: IconThemeData(
-              color: isSelected ? AppColors.onPrimary : AppColors.primary,
-            ),
-            child: Center(child: child),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _GhostIconButton extends StatelessWidget {
-  final VoidCallback? onPressed;
-  final double size;
-  final bool isSelected;
-  final Color? iconColor;
-  final Widget child;
-
-  const _GhostIconButton({
-    required this.onPressed,
-    required this.size,
-    required this.isSelected,
-    required this.iconColor,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.palette;
-    final color = isSelected
-        ? palette.accent
-        : (onPressed == null
-            ? palette.textDisabled
-            : iconColor ?? palette.textMuted);
-
-    return Material(
-      color: isSelected ? palette.accentContainer : Colors.transparent,
-      borderRadius: BorderRadius.circular(AppRadius.button),
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(AppRadius.button),
-        splashFactory: NoSplash.splashFactory,
-        highlightColor: palette.textPrimary.withValues(alpha: 0.06),
-        child: SizedBox(
-          width: size,
-          height: size,
-          child: IconTheme(
-            data: IconThemeData(color: color),
-            child: Center(child: child),
-          ),
-        ),
-      ),
-    );
-  }
 }

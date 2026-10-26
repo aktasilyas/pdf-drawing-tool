@@ -48,9 +48,17 @@ class LibrarySelectionCheckbox extends StatelessWidget {
 
 /// Filled star disc shown on favorite tiles (48dp hit area).
 class LibraryFavoriteBadge extends StatelessWidget {
-  const LibraryFavoriteBadge({super.key, required this.onTap});
+  const LibraryFavoriteBadge({
+    super.key,
+    required this.onTap,
+    this.semanticLabel = 'Favorilerden çıkar',
+  });
 
   final VoidCallback? onTap;
+
+  /// Screen-reader label; the badge only shows on favourites, so tapping it
+  /// removes the favourite.
+  final String semanticLabel;
 
   /// Hit area edge.
   static const double hitSize = AppSpacing.minTouchTarget;
@@ -61,24 +69,31 @@ class LibraryFavoriteBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
-    return SizedBox(
-      width: hitSize,
-      height: hitSize,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: Center(
-          child: Container(
-            width: discSize,
-            height: discSize,
-            decoration: BoxDecoration(
-              color: palette.surfaceElevated,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              ElyanotesIcons.libraryStarFill,
-              size: AppIconSize.sm,
-              color: palette.textPrimary,
+    return Semantics(
+      container: true,
+      button: true,
+      label: semanticLabel,
+      onTap: onTap,
+      excludeSemantics: true,
+      child: SizedBox(
+        width: hitSize,
+        height: hitSize,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onTap,
+          child: Center(
+            child: Container(
+              width: discSize,
+              height: discSize,
+              decoration: BoxDecoration(
+                color: palette.surfaceElevated,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                ElyanotesIcons.libraryStarFill,
+                size: AppIconSize.sm,
+                color: palette.textPrimary,
+              ),
             ),
           ),
         ),

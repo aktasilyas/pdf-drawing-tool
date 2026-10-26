@@ -49,6 +49,7 @@ class FolderCard extends ConsumerWidget {
       ),
       onTap: onTap,
       onLongPress: () => _handleLongPress(ref),
+      semanticLabel: folder.name,
       isSelected: isSelected,
       isSelectionMode: isSelectionMode,
       overlays: (board) => _buildOverlays(ref, board),

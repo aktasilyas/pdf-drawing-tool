@@ -34,6 +34,7 @@ void main() {
         tester,
         AppIconButton(
           icon: Icons.add,
+          tooltip: 'Ekle',
           variant: AppIconButtonVariant.ghost,
           onPressed: () {},
         ),
@@ -46,6 +47,7 @@ void main() {
         tester,
         AppIconButton(
           icon: Icons.add,
+          tooltip: 'Ekle',
           variant: AppIconButtonVariant.ghost,
           onPressed: () {},
         ),
@@ -60,6 +62,7 @@ void main() {
         tester,
         AppIconButton(
           icon: Icons.add,
+          tooltip: 'Ekle',
           variant: AppIconButtonVariant.ghost,
           isSelected: true,
           onPressed: () {},
@@ -74,6 +77,7 @@ void main() {
         tester,
         const AppIconButton(
           icon: Icons.add,
+          tooltip: 'Ekle',
           variant: AppIconButtonVariant.ghost,
         ),
       );
@@ -92,6 +96,7 @@ void main() {
         tester,
         AppIconButton(
           icon: Icons.add,
+          tooltip: 'Ekle',
           variant: AppIconButtonVariant.ghost,
           iconColor: AppPalette.light.danger,
           onPressed: () {},
@@ -105,7 +110,7 @@ void main() {
     testWidgets('uses accent fill and onAccent icon', (tester) async {
       await _pump(
         tester,
-        AppIconButton(icon: Icons.add, onPressed: () {}),
+        AppIconButton(icon: Icons.add, tooltip: 'Ekle', onPressed: () {}),
       );
       expect(_fill(tester), AppPalette.light.accent);
       expect(_iconColor(tester), AppPalette.light.onAccent);
