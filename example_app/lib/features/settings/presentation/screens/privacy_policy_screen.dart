@@ -21,8 +21,11 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    // Not cached: opened rarely, and a cached Future would outlive the
+    // zone it completed in (breaks repeated loads in widget tests).
+    const asset = AppAboutInfo.privacyPolicyAsset;
     final bundle = DefaultAssetBundle.of(context);
-    _policy ??= bundle.loadString(AppAboutInfo.privacyPolicyAsset);
+    _policy ??= bundle.loadString(asset, cache: false);
   }
 
   @override
