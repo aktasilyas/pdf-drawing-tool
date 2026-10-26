@@ -44,13 +44,14 @@ menu, no horizontal scroll), actions (Add page, Export, More). Tool capsule is c
 with >= md gap. Reader mode fades the tool capsule (100ms); other capsules stay.
 `FloatingUndoRedo` is removed on tablet.
 Sidebar: docked floating card, width 256, footprint `kPageSidebarWidth` = 264
-(margin left sm, bottom sm), fill `surface`, hairline, radius xl, shadow `chrome`.
+(margin left, top and bottom sm), fill `surface`, hairline, radius xl, shadow `chrome`.
 Canvas transform uses the footprint so the page reflows.
 
 ### Tablet portrait / medium (600-839)
 Same band. Nav: Home + Sidebar (title moves to More). Actions: Reader + Add page + More
 (Export in More; Reader as in landscape). Tool capsule fits Undo, Redo, divider, 8 tools
-+ overflow at 820.
++ overflow at 820. `FloatingUndoRedo` is removed here too (undo/redo are in the
+tool capsule; slice 16 review).
 
 ### Phone (< 600)
 Row 1 (48, no capsule, on the band): Back, serif title, Pages, [Ruler], Reader, More

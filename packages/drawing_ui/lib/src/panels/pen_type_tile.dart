@@ -43,10 +43,10 @@ class _PenTypeTileState extends ConsumerState<PenTypeTile> {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final palette = ChromePalette.of(context);
     final duration = DrawingTheme.of(context).animationDuration;
     final selected = widget.selected;
-    final labelColor = selected ? scheme.primary : scheme.onSurfaceVariant;
+    final labelColor = selected ? palette.accent : palette.textMuted;
     final labelStyle = Theme.of(context).textTheme.labelSmall?.copyWith(
           height: _kLabelLine / _kLabelFont,
           color: labelColor,
@@ -54,7 +54,7 @@ class _PenTypeTileState extends ConsumerState<PenTypeTile> {
         );
     final scaler = MediaQuery.textScalerOf(context);
     final radius = BorderRadius.circular(_kTileRadius);
-    final borderColor = scheme.primary;
+    final borderColor = palette.accent;
     final border = _focused
         ? Border.all(color: borderColor, width: _kFocusBorder)
         : selected
@@ -75,8 +75,8 @@ class _PenTypeTileState extends ConsumerState<PenTypeTile> {
           borderRadius: radius,
           splashFactory: NoSplash.splashFactory,
           highlightColor: selected
-              ? scheme.primary.withValues(alpha: 0.12)
-              : scheme.onSurface.withValues(alpha: 0.08),
+              ? palette.accent.withValues(alpha: 0.12)
+              : palette.textPrimary.withValues(alpha: 0.08),
           splashColor: Colors.transparent,
           hoverColor: Colors.transparent,
           child: AnimatedContainer(
@@ -84,7 +84,7 @@ class _PenTypeTileState extends ConsumerState<PenTypeTile> {
             curve: Curves.easeOut,
             padding: const EdgeInsets.symmetric(vertical: _kSm),
             decoration: BoxDecoration(
-              color: selected ? scheme.primaryContainer : Colors.transparent,
+              color: selected ? palette.accentContainer : Colors.transparent,
               borderRadius: radius,
               border: border,
             ),
@@ -120,7 +120,7 @@ class _PreviewWell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final scheme = Theme.of(context).colorScheme;
+    final palette = ChromePalette.of(context);
     final style = ref.watch(strokeStyleForToolProvider(tool));
     final page = ref.watch(canvasColorSchemeProvider).background;
     return ExcludeSemantics(
@@ -131,7 +131,7 @@ class _PreviewWell extends ConsumerWidget {
         decoration: BoxDecoration(
           color: page,
           borderRadius: BorderRadius.circular(_kWellRadius),
-          border: Border.all(color: scheme.outlineVariant, width: _kHairline),
+          border: Border.all(color: palette.border, width: _kHairline),
         ),
         child: PenPresetPreview(
           penType: tool.penType!,
