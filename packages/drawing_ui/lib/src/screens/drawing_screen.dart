@@ -27,6 +27,7 @@ class DrawingScreen extends ConsumerStatefulWidget {
     this.isExternalLeftSidebarOpen = false,
     this.externalLeftSidebarWidth = 0.0,
     this.onExternalLeftSidebarClose,
+    this.thumbnailCache,
   });
 
   final String? documentTitle;
@@ -50,6 +51,10 @@ class DrawingScreen extends ConsumerStatefulWidget {
   /// Called when the phone overlay is tapped to dismiss the sidebar.
   final VoidCallback? onExternalLeftSidebarClose;
 
+  /// Thumbnail cache for the page sidebar; tests pass a pre-filled one so
+  /// goldens show pages instead of loading spinners.
+  final ThumbnailCache? thumbnailCache;
+
   @override
   ConsumerState<DrawingScreen> createState() => _DrawingScreenState();
 }
@@ -64,7 +69,8 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
   final GlobalKey<PageSlideTransitionState> _pageTransitionKey =
       GlobalKey<PageSlideTransitionState>();
   final PopoverController _panelController = PopoverController();
-  final ThumbnailCache _thumbnailCache = ThumbnailCache(maxSize: 20);
+  late final ThumbnailCache _thumbnailCache =
+      widget.thumbnailCache ?? ThumbnailCache(maxSize: 20);
   Offset _penBoxPosition = const Offset(12, 12);
   bool _isPageTransitioning = false;
   int? _preSwitchPageIndex; // Original page index before interactive pre-switch
