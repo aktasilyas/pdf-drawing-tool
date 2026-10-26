@@ -37,6 +37,7 @@ class _ManageFoldersScreenState extends ConsumerState<ManageFoldersScreen> {
         leading: AppIconButton(
           icon: Icons.arrow_back,
           variant: AppIconButtonVariant.ghost,
+          tooltip: 'Geri',
           onPressed: () => context.pop(),
         ),
         title: Text(

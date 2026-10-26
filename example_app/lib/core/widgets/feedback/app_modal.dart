@@ -24,6 +24,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/core/widgets/buttons/index.dart';
 
 /// ElyaNotes responsive modal komponenti.
 ///
@@ -150,7 +151,6 @@ class _BottomSheetContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.palette;
     final textPrimary = palette.textPrimary;
-    final textSecondary = palette.textMuted;
     final handleColor = palette.border;
 
     return SafeArea(
@@ -189,15 +189,7 @@ class _BottomSheetContent extends StatelessWidget {
                       ),
                     ),
                   ),
-                  if (showCloseButton)
-                    IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: Icon(
-                        Icons.close,
-                        size: AppIconSize.lg,
-                        color: textSecondary,
-                      ),
-                    ),
+                  if (showCloseButton) const _ModalCloseButton(),
                 ],
               ),
             ),
@@ -258,7 +250,6 @@ class _DialogContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.palette;
     final textPrimary = palette.textPrimary;
-    final textSecondary = palette.textMuted;
 
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.xl),
@@ -277,15 +268,7 @@ class _DialogContent extends StatelessWidget {
                   ),
                 ),
               ),
-              if (showCloseButton)
-                IconButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  icon: Icon(
-                    Icons.close,
-                    size: AppIconSize.lg,
-                    color: textSecondary,
-                  ),
-                ),
+              if (showCloseButton) const _ModalCloseButton(),
             ],
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -315,5 +298,21 @@ class _DialogContent extends StatelessWidget {
       children.add(actions[i]);
     }
     return children;
+  }
+}
+
+/// Close button shared by the sheet and the dialog layout. `AppIconButton`
+/// carries the 48dp hit area and the screen-reader label.
+class _ModalCloseButton extends StatelessWidget {
+  const _ModalCloseButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return AppIconButton(
+      icon: Icons.close,
+      variant: AppIconButtonVariant.ghost,
+      tooltip: 'Kapat',
+      onPressed: () => Navigator.of(context).pop(),
+    );
   }
 }

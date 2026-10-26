@@ -92,15 +92,21 @@ class LibraryListRow extends StatelessWidget {
                   LibrarySelectionCheckbox(isSelected: isSelected)
                 else ...[
                   if (isFavorite)
-                    GestureDetector(
-                      behavior: HitTestBehavior.opaque,
+                    Semantics(
+                      button: true,
+                      label: 'Favorilerden çıkar',
                       onTap: onFavoriteTap,
-                      child: SizedBox.square(
-                        dimension: AppSpacing.minTouchTarget,
-                        child: Icon(
-                          ElyanotesIcons.libraryStarFill,
-                          size: AppIconSize.sm,
-                          color: palette.textMuted,
+                      excludeSemantics: true,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: onFavoriteTap,
+                        child: SizedBox.square(
+                          dimension: AppSpacing.minTouchTarget,
+                          child: Icon(
+                            ElyanotesIcons.libraryStarFill,
+                            size: AppIconSize.sm,
+                            color: palette.textMuted,
+                          ),
                         ),
                       ),
                     ),

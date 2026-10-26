@@ -29,6 +29,7 @@ class LibraryTileFrame extends StatefulWidget {
     required this.info,
     required this.onTap,
     required this.onLongPress,
+    this.semanticLabel,
     this.isSelected = false,
     this.isSelectionMode = false,
     this.overlays = _noOverlays,
@@ -39,6 +40,10 @@ class LibraryTileFrame extends StatefulWidget {
   final Widget info;
   final VoidCallback onTap;
   final VoidCallback onLongPress;
+
+  /// Screen-reader label of the cover tap target (the item's title).
+  final String? semanticLabel;
+
   final bool isSelected;
   final bool isSelectionMode;
   final List<Widget> Function(Rect board) overlays;
@@ -143,14 +148,21 @@ class _LibraryTileFrameState extends State<LibraryTileFrame> {
               clipBehavior: Clip.none,
               children: [
                 Positioned.fill(
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
+                  child: Semantics(
+                    button: true,
+                    label: widget.semanticLabel,
                     onTap: widget.onTap,
                     onLongPress: widget.onLongPress,
-                    onTapDown: (_) => _setPressed(true),
-                    onTapUp: (_) => _setPressed(false),
-                    onTapCancel: () => _setPressed(false),
-                    child: widget.cover,
+                    excludeSemantics: true,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: widget.onTap,
+                      onLongPress: widget.onLongPress,
+                      onTapDown: (_) => _setPressed(true),
+                      onTapUp: (_) => _setPressed(false),
+                      onTapCancel: () => _setPressed(false),
+                      child: widget.cover,
+                    ),
                   ),
                 ),
                 ...widget.overlays(art),

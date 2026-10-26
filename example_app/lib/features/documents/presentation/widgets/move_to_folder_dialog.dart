@@ -101,6 +101,7 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
             icon: Icons.close,
             variant: AppIconButtonVariant.ghost,
             size: AppIconButtonSize.small,
+            tooltip: 'Kapat',
             onPressed: () => Navigator.pop(context)),
       ]),
     );

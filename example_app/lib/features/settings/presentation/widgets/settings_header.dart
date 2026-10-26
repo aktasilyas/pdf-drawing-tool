@@ -54,9 +54,25 @@ class SettingsHeader extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          GestureDetector(
+          Semantics(
+            button: true,
+            label: name,
+            hint: 'Adı düzenle',
             onTap: onNameTap,
-            child: Text(name, style: titleStyle),
+            excludeSemantics: true,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: onNameTap,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(
+                  minHeight: AppSpacing.minTouchTarget,
+                ),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(name, style: titleStyle),
+                ),
+              ),
+            ),
           ),
         ],
       );

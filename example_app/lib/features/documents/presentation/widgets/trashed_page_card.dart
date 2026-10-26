@@ -68,33 +68,39 @@ class _TrashedPageCardState extends State<TrashedPageCard> {
   Widget _buildThumbnailCard(BuildContext context) {
     final outlineColor = context.palette.border;
 
-    return GestureDetector(
+    return Semantics(
+      button: true,
+      label: widget.trashedPage.sourceDocumentTitle,
       onTap: widget.onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: context.palette.surface,
-          borderRadius: BorderRadius.circular(AppRadius.sm),
-          border: Border.all(color: outlineColor),
-          boxShadow: AppShadows.cardResting(
-            Theme.of(context).brightness,
-          ),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: Stack(
-          children: [
-            // Page thumbnail
-            Positioned.fill(child: _buildThumbnailContent()),
-            // Page number badge
-            _buildPageBadge(),
-            // Days left badge
-            Positioned(
-              bottom: AppSpacing.sm,
-              left: AppSpacing.sm,
-              child: DocumentDaysLeftBadge(
-                deletedAt: widget.trashedPage.deletedAt,
-              ),
+      excludeSemantics: true,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            color: context.palette.surface,
+            borderRadius: BorderRadius.circular(AppRadius.sm),
+            border: Border.all(color: outlineColor),
+            boxShadow: AppShadows.cardResting(
+              Theme.of(context).brightness,
             ),
-          ],
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: Stack(
+            children: [
+              // Page thumbnail
+              Positioned.fill(child: _buildThumbnailContent()),
+              // Page number badge
+              _buildPageBadge(),
+              // Days left badge
+              Positioned(
+                bottom: AppSpacing.sm,
+                left: AppSpacing.sm,
+                child: DocumentDaysLeftBadge(
+                  deletedAt: widget.trashedPage.deletedAt,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
