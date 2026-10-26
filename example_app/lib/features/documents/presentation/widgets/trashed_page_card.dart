@@ -71,8 +71,9 @@ class _TrashedPageCardState extends State<TrashedPageCard> {
     return Semantics(
       container: true,
       button: true,
-      label: '${widget.trashedPage.sourceDocumentTitle}, '
-          'Sayfa ${widget.trashedPage.originalPageIndex + 1}',
+      // Title only: the info row below already announces the page number
+      // and the deletion date for the same tap target.
+      label: widget.trashedPage.sourceDocumentTitle,
       onTap: widget.onTap,
       excludeSemantics: true,
       child: GestureDetector(
