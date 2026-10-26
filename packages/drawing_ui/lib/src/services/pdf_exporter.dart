@@ -8,7 +8,6 @@ import 'package:flutter/material.dart' hide Page;
 import 'package:pdf/pdf.dart';
 import 'package:pdfx/pdfx.dart' as pdfx;
 
-import 'package:drawing_ui/src/rendering/flutter_stroke_renderer.dart';
 import 'pdf_content_painter.dart';
 import 'pdf_export_models.dart';
 import 'pdf_raster_layer_renderer.dart';
@@ -23,7 +22,6 @@ export 'pdf_export_models.dart';
 /// (textured/glow/eraser strokes, text) falls back to lossless PNG overlay.
 class PDFExporter {
   final _contentPainter = PdfContentPainter();
-  final _strokeRenderer = FlutterStrokeRenderer();
   final _rasterRenderer = PdfRasterLayerRenderer();
 
   static double _scaleFromDpi(int dpi) => dpi / 72.0;
@@ -120,77 +118,33 @@ class PDFExporter {
       g.saveContext();
       g.setGraphicState(PdfGraphicState(opacity: layer.opacity));
     }
+    final scale = _scaleFromDpi(options.quality.dpi);
     if (_contentPainter.isLayerVectorizable(layer)) {
       await _contentPainter.paintLayerContent(g, doc, layer, w, h);
+      // Sticky notes sit above the layer's elements, as on the canvas.
+      if (layer.stickyNotes.isNotEmpty) {
+        final notes = await _rasterRenderer.renderStickyNotes(
+            layer.stickyNotes, w, h, scale);
+        _drawRaw(g, doc, notes, w, h);
+      }
     } else {
-      await _renderRasterOverlay(g, doc, layer, w, h, options);
+      final raw = await _rasterRenderer.renderLayer(layer, w, h, scale);
+      _drawRaw(g, doc, raw, w, h);
     }
     if (hasOpacity) g.restoreContext();
   }
 
-  Future<void> _renderRasterOverlay(
+  void _drawRaw(
     PdfGraphics g,
     PdfDocument doc,
-    Layer layer,
+    PdfRawImage? raw,
     double w,
     double h,
-    PDFExportOptions options,
-  ) async {
-    final raw = await _renderLayerToRaw(layer, w, h, options);
+  ) {
     if (raw == null) return;
     final img =
         PdfImage(doc, image: raw.bytes, width: raw.width, height: raw.height);
     g.drawImage(img, 0, 0, w, h);
-  }
-
-  /// Max pixel count for raster overlays to prevent OOM.
-  /// ~3M pixels ≈ 1457×2060 (A4 at ~175 DPI). RGBA = ~12MB per layer.
-  static const _maxRasterPixels = 3000000;
-
-  /// Renders layer content to raw RGBA pixels via Flutter Canvas.
-  Future<_RawImageData?> _renderLayerToRaw(
-    Layer layer,
-    double w,
-    double h,
-    PDFExportOptions options,
-  ) async {
-    final scale = _scaleFromDpi(options.quality.dpi);
-    var renderW = (w * scale).toInt();
-    var renderH = (h * scale).toInt();
-    // Cap resolution to prevent OOM on large/high-DPI pages.
-    final pixels = renderW * renderH;
-    if (pixels > _maxRasterPixels) {
-      final ratio = sqrt(_maxRasterPixels / pixels);
-      renderW = (renderW * ratio).toInt();
-      renderH = (renderH * ratio).toInt();
-    }
-    if (renderW <= 0 || renderH <= 0) return null;
-
-    final recorder = ui.PictureRecorder();
-    final canvas = Canvas(recorder);
-    // Use actual scale based on (possibly capped) render dimensions.
-    canvas.scale(renderW / w, renderH / h);
-
-    _strokeRenderer.renderStrokes(canvas, layer.strokes);
-    _rasterRenderer.renderShapes(canvas, layer.shapes);
-    await _rasterRenderer.renderImages(canvas, layer.images);
-    _rasterRenderer.renderTexts(canvas, layer.texts);
-
-    final picture = recorder.endRecording();
-    final image = await picture.toImage(renderW, renderH);
-    picture.dispose();
-    try {
-      final byteData =
-          await image.toByteData(format: ui.ImageByteFormat.rawRgba);
-      if (byteData == null) return null;
-      return (
-        bytes: byteData.buffer.asUint8List(),
-        width: renderW,
-        height: renderH,
-      );
-    } finally {
-      image.dispose();
-    }
   }
 
   Future<void> _embedPdfBackground(
@@ -315,7 +269,7 @@ class PDFExporter {
   }
 
   /// Decodes PNG bytes to raw RGBA using Flutter's native image codec.
-  Future<_RawImageData?> _decodeToRawRgba(Uint8List pngBytes) async {
+  Future<PdfRawImage?> _decodeToRawRgba(Uint8List pngBytes) async {
     final codec = await ui.instantiateImageCodec(pngBytes);
     final frame = await codec.getNextFrame();
     final image = frame.image;
@@ -333,6 +287,3 @@ class PDFExporter {
     }
   }
 }
-
-/// Raw RGBA image data with dimensions.
-typedef _RawImageData = ({Uint8List bytes, int width, int height});
