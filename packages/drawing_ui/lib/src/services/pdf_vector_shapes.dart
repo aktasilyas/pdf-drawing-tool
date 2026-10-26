@@ -7,9 +7,10 @@ import 'vector_pdf_renderer.dart';
 
 /// Renders [Shape] elements as PDF vector primitives.
 ///
-/// Handles rectangle, ellipse, line, arrow, triangle, diamond shapes
-/// with fill and stroke support. Coordinates are flipped from Flutter's
-/// top-left origin to PDF's bottom-left origin.
+/// Line, arrow, rectangle and ellipse use PDF primitives; every other
+/// [ShapeType] is built from [ShapeGeometry], the same vertices the screen
+/// painter draws. Coordinates are flipped from Flutter's top-left origin to
+/// PDF's bottom-left origin.
 class PdfVectorShapeRenderer {
   final VectorPDFRenderer _vectorHelper;
 
@@ -26,31 +27,27 @@ class PdfVectorShapeRenderer {
     final ey = shape.endPoint.y;
 
     g.saveContext();
+    g.setLineCap(PdfLineCap.round);
+    g.setLineJoin(PdfLineJoin.round);
 
-    if (shape.isFilled) {
+    // Open paths (line, arrow, plus bars) have nothing to fill. Colours and
+    // graphic state must be set before a path is started.
+    if (shape.isFilled && _hasClosedPath(shape.type)) {
       final fillColor = _argbToPdfColor(shape.fillColor ?? style.color);
       g.setFillColor(fillColor);
       if (alpha < 1.0) {
         g.setGraphicState(PdfGraphicState(opacity: alpha));
       }
-      _buildPath(g, shape.type, sx, sy, ex, ey, h);
+      _buildPath(g, shape, h, closedOnly: true);
       g.fillPath();
-
-      g.setStrokeColor(pdfColor);
-      g.setLineWidth(style.thickness);
-      _buildPath(g, shape.type, sx, sy, ex, ey, h);
-      g.strokePath();
-    } else {
-      if (alpha < 1.0) {
-        g.setGraphicState(PdfGraphicState(strokeOpacity: alpha));
-      }
-      g.setStrokeColor(pdfColor);
-      g.setLineWidth(style.thickness);
-      g.setLineCap(PdfLineCap.round);
-      g.setLineJoin(PdfLineJoin.round);
-      _buildPath(g, shape.type, sx, sy, ex, ey, h);
-      g.strokePath();
+    } else if (alpha < 1.0) {
+      g.setGraphicState(PdfGraphicState(strokeOpacity: alpha));
     }
+
+    g.setStrokeColor(pdfColor);
+    g.setLineWidth(style.thickness);
+    _buildPath(g, shape, h);
+    g.strokePath();
 
     if (shape.type == ShapeType.arrow) {
       _paintArrowHead(g, sx, sy, ex, ey, style.thickness, pdfColor, alpha, h);
@@ -59,59 +56,56 @@ class PdfVectorShapeRenderer {
     g.restoreContext();
   }
 
+  static bool _hasClosedPath(ShapeType type) =>
+      type != ShapeType.line &&
+      type != ShapeType.arrow &&
+      type != ShapeType.plus;
+
+  /// Adds [shape]'s outline to the current path. With [closedOnly], open
+  /// sub-paths are skipped.
   void _buildPath(
     PdfGraphics g,
-    ShapeType type,
-    double sx,
-    double sy,
-    double ex,
-    double ey,
-    double h,
-  ) {
-    switch (type) {
+    Shape shape,
+    double h, {
+    bool closedOnly = false,
+  }) {
+    final sx = shape.startPoint.x;
+    final sy = shape.startPoint.y;
+    final ex = shape.endPoint.x;
+    final ey = shape.endPoint.y;
+    switch (shape.type) {
       case ShapeType.line:
       case ShapeType.arrow:
+        if (closedOnly) return;
         g.drawLine(sx, _flipY(sy, h), ex, _flipY(ey, h));
       case ShapeType.rectangle:
-        final l = math.min(sx, ex);
-        final t = math.min(sy, ey);
-        final rw = (ex - sx).abs();
-        final rh = (ey - sy).abs();
-        g.drawRect(l, _flipY(t + rh, h), rw, rh);
+        g.drawRect(
+          shape.left,
+          _flipY(shape.bottom, h),
+          shape.width,
+          shape.height,
+        );
       case ShapeType.ellipse:
-        final cx = (sx + ex) / 2;
-        final cy = (sy + ey) / 2;
-        final rx = (ex - sx).abs() / 2;
-        final ry = (ey - sy).abs() / 2;
-        g.drawEllipse(cx, _flipY(cy, h), rx, ry);
+        g.drawEllipse(
+          shape.centerX,
+          _flipY(shape.centerY, h),
+          shape.width / 2,
+          shape.height / 2,
+        );
       case ShapeType.triangle:
-        final l = math.min(sx, ex);
-        final r = math.max(sx, ex);
-        final t = math.min(sy, ey);
-        final b = math.max(sy, ey);
-        g.moveTo((l + r) / 2, _flipY(t, h));
-        g.lineTo(l, _flipY(b, h));
-        g.lineTo(r, _flipY(b, h));
-        g.closePath();
       case ShapeType.diamond:
-        final cx = (sx + ex) / 2;
-        final cy = (sy + ey) / 2;
-        final hw = (ex - sx).abs() / 2;
-        final hh = (ey - sy).abs() / 2;
-        g.moveTo(cx, _flipY(cy - hh, h));
-        g.lineTo(cx + hw, _flipY(cy, h));
-        g.lineTo(cx, _flipY(cy + hh, h));
-        g.lineTo(cx - hw, _flipY(cy, h));
-        g.closePath();
       case ShapeType.star:
       case ShapeType.pentagon:
       case ShapeType.hexagon:
       case ShapeType.plus:
-        final l = math.min(sx, ex);
-        final t = math.min(sy, ey);
-        final rw = (ex - sx).abs();
-        final rh = (ey - sy).abs();
-        g.drawRect(l, _flipY(t + rh, h), rw, rh);
+        for (final p in ShapeGeometry.polygonPaths(shape)!) {
+          if (p.points.length < 2 || (closedOnly && !p.closed)) continue;
+          g.moveTo(p.points.first.x, _flipY(p.points.first.y, h));
+          for (var i = 1; i < p.points.length; i++) {
+            g.lineTo(p.points[i].x, _flipY(p.points[i].y, h));
+          }
+          if (p.closed) g.closePath();
+        }
     }
   }
 

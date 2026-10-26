@@ -1,198 +1,127 @@
-import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:drawing_core/drawing_core.dart';
-import 'package:flutter/material.dart' hide Page;
+import 'package:flutter/painting.dart';
 
-/// Renders drawing layer content to a Flutter [Canvas] for raster fallback.
+import 'package:drawing_ui/src/canvas/image_painter.dart';
+import 'package:drawing_ui/src/canvas/sticky_note_painter.dart';
+import 'package:drawing_ui/src/rendering/element_scene_renderer.dart';
+import 'package:drawing_ui/src/rendering/flutter_stroke_renderer.dart';
+
+/// Raw RGBA pixels with their dimensions.
+typedef PdfRawImage = ({Uint8List bytes, int width, int height});
+
+/// Renders layer content to raw pixels for the PDF raster fallback.
 ///
-/// Used by [PDFExporter] when a layer cannot be vectorized (contains
-/// textured strokes, glow effects, erasers, or text elements).
-/// The result is captured as a PNG image and embedded in the PDF.
+/// Used by `PDFExporter` when a layer cannot be vectorized (textured, glow or
+/// eraser strokes, text), and for sticky notes. It paints with the same
+/// renderers as the canvas ([ElementSceneRenderer], [StickyNotePainter]), so
+/// shapes, text, z-order ([Layer.elementOrder]) and sticky notes match the
+/// screen.
 class PdfRasterLayerRenderer {
-  void renderShapes(Canvas canvas, List<Shape> shapes) {
-    final paint = Paint()
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round
-      ..isAntiAlias = true;
+  PdfRasterLayerRenderer({FlutterStrokeRenderer? strokeRenderer})
+      : _strokeRenderer = strokeRenderer ?? FlutterStrokeRenderer();
 
-    for (final shape in shapes) {
-      if (shape.isFilled) {
-        paint.color = Color(shape.fillColor ?? shape.style.color);
-        paint.style = PaintingStyle.fill;
-        _drawShapeByType(canvas, shape, paint);
+  final FlutterStrokeRenderer _strokeRenderer;
 
-        paint.color = Color(shape.style.color).withValues(
-          alpha: shape.style.opacity,
-        );
-        paint.strokeWidth = shape.style.thickness;
-        paint.style = PaintingStyle.stroke;
-        _drawShapeByType(canvas, shape, paint);
-      } else {
-        paint.color = Color(shape.style.color).withValues(
-          alpha: shape.style.opacity,
-        );
-        paint.strokeWidth = shape.style.thickness;
-        paint.style = PaintingStyle.stroke;
-        _drawShapeByType(canvas, shape, paint);
-      }
-    }
-  }
+  /// Max pixel count for raster overlays to prevent OOM.
+  /// ~3M pixels ≈ 1457×2060 (A4 at ~175 DPI). RGBA = ~12MB per layer.
+  static const maxRasterPixels = 3000000;
 
-  void _drawShapeByType(Canvas canvas, Shape shape, Paint paint) {
-    final s = Offset(shape.startPoint.x, shape.startPoint.y);
-    final e = Offset(shape.endPoint.x, shape.endPoint.y);
-    final rect = Rect.fromPoints(s, e);
-
-    switch (shape.type) {
-      case ShapeType.line:
-        canvas.drawLine(s, e, paint);
-      case ShapeType.arrow:
-        canvas.drawLine(s, e, paint);
-        _drawArrowHead(canvas, s, e, paint);
-      case ShapeType.rectangle:
-        canvas.drawRect(rect, paint);
-      case ShapeType.ellipse:
-        canvas.drawOval(rect, paint);
-      case ShapeType.triangle:
-        final l = min(s.dx, e.dx);
-        final r = max(s.dx, e.dx);
-        final t = min(s.dy, e.dy);
-        final b = max(s.dy, e.dy);
-        canvas.drawPath(
-          Path()
-            ..moveTo((l + r) / 2, t)
-            ..lineTo(l, b)
-            ..lineTo(r, b)
-            ..close(),
-          paint,
-        );
-      case ShapeType.diamond:
-        final cx = (s.dx + e.dx) / 2;
-        final cy = (s.dy + e.dy) / 2;
-        final hw = (e.dx - s.dx).abs() / 2;
-        final hh = (e.dy - s.dy).abs() / 2;
-        canvas.drawPath(
-          Path()
-            ..moveTo(cx, cy - hh)
-            ..lineTo(cx + hw, cy)
-            ..lineTo(cx, cy + hh)
-            ..lineTo(cx - hw, cy)
-            ..close(),
-          paint,
-        );
-      case ShapeType.star:
-      case ShapeType.pentagon:
-      case ShapeType.hexagon:
-      case ShapeType.plus:
-        canvas.drawRect(rect, paint);
-    }
-  }
-
-  void _drawArrowHead(Canvas canvas, Offset start, Offset end, Paint paint) {
-    final dx = end.dx - start.dx;
-    final dy = end.dy - start.dy;
-    final len = sqrt(dx * dx + dy * dy);
-    if (len < 10) return;
-
-    final ux = dx / len;
-    final uy = dy / len;
-    final sz = paint.strokeWidth * 4;
-    final bx = end.dx - ux * sz;
-    final by = end.dy - uy * sz;
-    final px = -uy * sz * 0.5;
-    final py = ux * sz * 0.5;
-
-    canvas.drawPath(
-      Path()
-        ..moveTo(end.dx, end.dy)
-        ..lineTo(bx + px, by + py)
-        ..lineTo(bx - px, by - py)
-        ..close(),
-      Paint()
-        ..color = paint.color
-        ..style = PaintingStyle.fill
-        ..isAntiAlias = true,
-    );
-  }
-
-  void renderTexts(Canvas canvas, List<TextElement> texts) {
-    for (final t in texts) {
-      if (t.text.isEmpty) continue;
-      final style = ui.TextStyle(
-        color: Color(t.color),
-        fontSize: t.fontSize,
-        fontFamily: t.fontFamily,
-        fontWeight: t.isBold ? FontWeight.bold : FontWeight.normal,
-        fontStyle: t.isItalic ? FontStyle.italic : FontStyle.normal,
-        decoration:
-            t.isUnderline ? TextDecoration.underline : TextDecoration.none,
-      );
-      final builder = ui.ParagraphBuilder(ui.ParagraphStyle(
-        textAlign: t.alignment == TextAlignment.center
-            ? TextAlign.center
-            : t.alignment == TextAlignment.right
-                ? TextAlign.right
-                : TextAlign.left,
-      ))
-        ..pushStyle(style)
-        ..addText(t.text);
-      final paragraph = builder.build();
-      paragraph.layout(ui.ParagraphConstraints(width: t.width ?? 1000.0));
-      canvas.save();
-      if (t.rotation != 0.0) {
-        final cx = t.x + paragraph.maxIntrinsicWidth / 2;
-        final cy = t.y + paragraph.height / 2;
-        canvas.translate(cx, cy);
-        canvas.rotate(t.rotation);
-        canvas.translate(-cx, -cy);
-      }
-      canvas.drawParagraph(paragraph, Offset(t.x, t.y));
-      canvas.restore();
-    }
-  }
-
-  Future<void> renderImages(
-    Canvas canvas,
-    List<ImageElement> images,
+  /// Rasterizes all of [layer]: elements in z-order, sticky notes on top.
+  Future<PdfRawImage?> renderLayer(
+    Layer layer,
+    double w,
+    double h,
+    double scale,
   ) async {
-    for (final img in images) {
-      try {
-        final file = File(img.filePath);
-        if (!await file.exists()) continue;
+    final cache = ImageCacheManager();
+    try {
+      await Future.wait([
+        for (final img in layer.images) cache.loadImage(img.filePath),
+      ]);
+      return await _rasterize(w, h, scale, (canvas) {
+        paintElements(canvas, layer, cache);
+        paintStickyNotes(canvas, layer.stickyNotes);
+      });
+    } finally {
+      cache.dispose();
+    }
+  }
 
-        final bytes = await file.readAsBytes();
-        final codec = await ui.instantiateImageCodec(bytes);
-        final frame = await codec.getNextFrame();
-        final uiImage = frame.image;
+  /// Rasterizes only [notes] (for layers whose elements export as vectors).
+  Future<PdfRawImage?> renderStickyNotes(
+    List<StickyNote> notes,
+    double w,
+    double h,
+    double scale,
+  ) {
+    return _rasterize(w, h, scale, (c) => paintStickyNotes(c, notes));
+  }
 
-        canvas.save();
-        if (img.rotation != 0.0) {
-          final cx = img.x + img.width / 2;
-          final cy = img.y + img.height / 2;
-          canvas.translate(cx, cy);
-          canvas.rotate(img.rotation);
-          canvas.translate(-cx, -cy);
-        }
+  /// Paints [layer]'s strokes, shapes, images and texts in screen z-order.
+  /// Images missing from [cache] (unreadable files) are skipped.
+  void paintElements(Canvas canvas, Layer layer, ImageCacheManager cache) {
+    ElementSceneRenderer(
+      strokes: layer.strokes,
+      shapes: layer.shapes,
+      images: [
+        for (final img in layer.images)
+          if (cache.get(img.filePath) != null) img,
+      ],
+      texts: layer.texts,
+      elementOrder: layer.elementOrder,
+      renderer: _strokeRenderer,
+      cacheManager: cache,
+    ).paint(canvas);
+  }
 
-        final src = Rect.fromLTWH(
-          0,
-          0,
-          uiImage.width.toDouble(),
-          uiImage.height.toDouble(),
-        );
-        final dst = Rect.fromLTWH(img.x, img.y, img.width, img.height);
-        canvas.drawImageRect(
-          uiImage,
-          src,
-          dst,
-          Paint()..filterQuality = FilterQuality.high,
-        );
-        canvas.restore();
-      } catch (_) {
-        // Skip images that fail to load
-      }
+  /// Paints [notes] exactly as the canvas does.
+  void paintStickyNotes(Canvas canvas, List<StickyNote> notes) {
+    if (notes.isEmpty) return;
+    StickyNotePainter(stickyNotes: notes, renderer: _strokeRenderer)
+        .paint(canvas, Size.zero);
+  }
+
+  Future<PdfRawImage?> _rasterize(
+    double w,
+    double h,
+    double scale,
+    void Function(Canvas canvas) draw,
+  ) async {
+    var renderW = (w * scale).toInt();
+    var renderH = (h * scale).toInt();
+    // Cap resolution to prevent OOM on large/high-DPI pages.
+    final pixels = renderW * renderH;
+    if (pixels > maxRasterPixels) {
+      final ratio = sqrt(maxRasterPixels / pixels);
+      renderW = (renderW * ratio).toInt();
+      renderH = (renderH * ratio).toInt();
+    }
+    if (renderW <= 0 || renderH <= 0) return null;
+
+    final recorder = ui.PictureRecorder();
+    final canvas = Canvas(recorder);
+    // Use actual scale based on (possibly capped) render dimensions.
+    canvas.scale(renderW / w, renderH / h);
+    draw(canvas);
+
+    final picture = recorder.endRecording();
+    final image = await picture.toImage(renderW, renderH);
+    picture.dispose();
+    try {
+      final byteData =
+          await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+      if (byteData == null) return null;
+      return (
+        bytes: byteData.buffer.asUint8List(),
+        width: renderW,
+        height: renderH,
+      );
+    } finally {
+      image.dispose();
     }
   }
 }
