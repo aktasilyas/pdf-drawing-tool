@@ -99,6 +99,11 @@ coverage/
 **/goldens/linux/
 **/test/**/failures/
 
+# Signing keys (#215): never commit a keystore or its passwords
+*.jks
+*.keystore
+key.properties
+
 # Firebase config (crash reporting, #60): provided locally / by CI, never committed
 example_app/android/app/google-services.json
 example_app/config/firebase.json

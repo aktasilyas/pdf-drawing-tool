@@ -46,8 +46,8 @@ void installCrashHandlers(CrashReporter reporter) {
   };
 }
 
-/// Default initializer: Firebase from `--dart-define` values, no
-/// `google-services.json`.
+/// Default initializer: Firebase from `--dart-define` values. Release CI also
+/// writes a matching native `google-services.json` from the same secrets (#215).
 Future<CrashReporter> initFirebaseCrashReporter(AppEnv env) async {
   await Firebase.initializeApp(
     options: FirebaseOptions(
