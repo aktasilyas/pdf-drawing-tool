@@ -125,7 +125,6 @@ void main() {
     testWidgets('${entry.key}: meets tap-target and contrast guidelines',
         (tester) async {
       final handle = tester.ensureSemantics();
-      addTearDown(handle.dispose);
       await pumpEditor(
         tester,
         size: entry.value,
@@ -133,6 +132,7 @@ void main() {
         sidebarOpen: true,
       );
       await expectGuidelines(tester);
+      handle.dispose();
     });
   }
 
@@ -156,8 +156,8 @@ void main() {
   testWidgets('phone 390x844: meets tap-target and contrast guidelines',
       (tester) async {
     final handle = tester.ensureSemantics();
-    addTearDown(handle.dispose);
     await pumpEditor(tester, size: kEditorPhone, prefs: prefs);
     await expectGuidelines(tester);
+    handle.dispose();
   });
 }
