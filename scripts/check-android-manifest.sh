@@ -71,6 +71,12 @@ for variant in release debug; do
     grep -F "android:name=\"$action\"" <<<"$filters" | grep -Fq 'android:mimeType="application/pdf"' \
       || fail "$variant manifest lacks the $action application/pdf intent filter"
   done
+  # Backup / device transfer rules (#211): both attributes, in every variant.
+  app_tag=$(tr '\n' ' ' <"$manifest" | grep -oE '<application[^>]*>' | head -n 1)
+  for attr in dataExtractionRules=@xml/data_extraction_rules fullBackupContent=@xml/backup_rules; do
+    grep -Fq "android:${attr%%=*}=\"${attr#*=}\"" <<<"$app_tag" \
+      || fail "$variant manifest lacks android:${attr%%=*}=\"${attr#*=}\""
+  done
 done
 
 [ "$status" -eq 0 ] && echo "OK: release strips ${#STRIPPED[@]} frozen-feature permissions, debug keeps them, both request ${#REQUIRED[@]} network permissions"
