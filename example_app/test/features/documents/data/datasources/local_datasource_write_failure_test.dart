@@ -1,3 +1,4 @@
+import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:example_app/core/core.dart';
@@ -8,6 +9,8 @@ import '../../../../helpers/rejecting_database.dart';
 
 void main() {
   late AppDatabase db;
+
+  setUpAll(() => driftRuntimeOptions.dontWarnAboutMultipleDatabases = true);
 
   setUp(() async {
     db = AppDatabase(NativeDatabase.memory());
