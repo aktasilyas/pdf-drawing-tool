@@ -64,8 +64,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('a label with no tooltip still reaches the tree',
-      (tester) async {
+  testWidgets('a label with no tooltip still reaches the tree', (tester) async {
     final handle = tester.ensureSemantics();
     await _pump(
       tester,

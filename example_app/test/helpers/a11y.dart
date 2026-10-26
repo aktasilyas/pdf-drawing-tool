@@ -59,4 +59,3 @@ void expectNoOverflow(WidgetTester tester, String what) {
   final error = tester.takeException();
   expect(error, isNull, reason: '$what overflowed: $error');
 }
-
