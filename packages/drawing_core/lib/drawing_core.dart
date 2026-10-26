@@ -40,6 +40,7 @@ export 'src/models/bounding_box.dart';
 export 'src/models/canvas_mode.dart';
 export 'src/models/cover.dart';
 export 'src/models/document.dart';
+export 'src/models/document_page_ops.dart';
 export 'src/models/document_settings.dart';
 export 'src/models/document_type.dart';
 export 'src/models/drawing_point.dart';

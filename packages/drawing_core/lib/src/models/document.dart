@@ -555,6 +555,9 @@ class DrawingDocument extends Equatable {
     }
 
     final newPages = List<Page>.from(pages)..removeAt(pageIndex);
+    for (var i = 0; i < newPages.length; i++) {
+      if (newPages[i].index != i) newPages[i] = newPages[i].copyWith(index: i);
+    }
 
     // Adjust currentPageIndex if needed
     int newCurrentIndex = currentPageIndex;

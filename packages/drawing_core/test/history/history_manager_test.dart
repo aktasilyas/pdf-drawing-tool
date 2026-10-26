@@ -1,5 +1,6 @@
 import 'package:test/test.dart';
 import 'package:drawing_core/src/models/document.dart';
+import 'package:drawing_core/src/models/document_page_ops.dart';
 import 'package:drawing_core/src/models/drawing_point.dart';
 import 'package:drawing_core/src/models/page.dart';
 import 'package:drawing_core/src/models/stroke.dart';
@@ -621,6 +622,33 @@ void main() {
 
         expect(doc, before);
         expect(strokes(doc, 0), 0);
+      });
+
+      test('undo after movePage applies to the moved page', () {
+        var doc = manager.execute(
+            AddStrokeCommand(layerIndex: 0, stroke: createTestStroke('a')),
+            twoPages.addPage(Page.create(index: 2)).setCurrentPage(2));
+        final id = doc.pages[2].id;
+        doc = doc.movePage(2, 0);
+        doc = manager.undo(doc)!;
+        expect(doc.pages[0].id, id);
+        expect(strokes(doc, 0), 0);
+      });
+
+      test('delete then restore with insertPageAt re-enables history', () {
+        var doc = manager.execute(
+            AddStrokeCommand(layerIndex: 0, stroke: createTestStroke('b')),
+            twoPages.setCurrentPage(1));
+        final removed = doc.pages[1];
+        doc = doc.removePage(1);
+        doc = doc.insertPageAt(1, removed);
+        expect(strokes(doc, 1), 1);
+
+        doc = manager.undo(doc)!;
+        expect(doc.pages[1].id, removed.id);
+        expect(strokes(doc, 1), 0);
+        doc = manager.redo(doc)!;
+        expect(strokes(doc, 1), 1);
       });
 
       group('execute with pageId', () {
