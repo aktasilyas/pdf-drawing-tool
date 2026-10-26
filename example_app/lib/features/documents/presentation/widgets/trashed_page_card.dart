@@ -71,7 +71,8 @@ class _TrashedPageCardState extends State<TrashedPageCard> {
     return Semantics(
       container: true,
       button: true,
-      label: widget.trashedPage.sourceDocumentTitle,
+      label: '${widget.trashedPage.sourceDocumentTitle}, '
+          'Sayfa ${widget.trashedPage.originalPageIndex + 1}',
       onTap: widget.onTap,
       excludeSemantics: true,
       child: GestureDetector(

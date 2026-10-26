@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:example_app/core/theme/index.dart';
-import 'package:example_app/core/widgets/buttons/app_icon_button.dart';
+import 'package:example_app/core/widgets/buttons/index.dart';
 import 'package:example_app/features/documents/presentation/screens/documents_screen.dart';
 
 import '../../../../helpers/a11y.dart';
@@ -51,9 +51,9 @@ void main() {
     testWidgets('${entry.key}: meets the 48dp tap-target guideline',
         (tester) async {
       final handle = tester.ensureSemantics();
+      addTearDown(handle.dispose);
       await pump(tester, entry.value);
       await expectTapTargets(tester);
-      handle.dispose();
     });
 
     testWidgets('${entry.key}: lays out at 1.3x text scale', (tester) async {
@@ -66,9 +66,9 @@ void main() {
   testWidgets('selection mode meets the 48dp tap-target guideline',
       (tester) async {
     final handle = tester.ensureSemantics();
+    addTearDown(handle.dispose);
     await pump(tester, const Size(1180, 820), selection: true);
     await expectTapTargets(tester);
-    handle.dispose();
   });
 
   testWidgets('selection mode lays out at 1.3x text scale', (tester) async {
@@ -80,6 +80,7 @@ void main() {
   testWidgets('every icon-only button carries its label into semantics',
       (tester) async {
     final handle = tester.ensureSemantics();
+    addTearDown(handle.dispose);
     await pump(tester, const Size(1180, 820));
 
     final buttons = tester.widgetList<AppIconButton>(
@@ -89,27 +90,29 @@ void main() {
     for (final button in buttons) {
       final label = button.semanticLabel ?? button.tooltip;
       expect(label, isNotNull, reason: 'icon button without a label');
+      final nodes = find.semantics.byLabel(label!).evaluate().toList();
       expect(
-        find.semantics.byLabel(label!),
-        findsAny,
+        nodes,
+        isNotEmpty,
         reason: 'no semantics node labelled "$label": '
             '${semanticsLabels(tester)}',
       );
+      // The label must sit on the button's own node, not on a neighbour's.
+      expect(nodes.first, isSemantics(label: label, isButton: true));
     }
-    handle.dispose();
   });
 
   testWidgets('tiles and favourite badges reach the semantics tree',
       (tester) async {
     final handle = tester.ensureSemantics();
+    addTearDown(handle.dispose);
     await pump(tester, const Size(1180, 820));
 
-    // Tile covers are labelled with the item title (see
-    // library_tile_semantics_test.dart for the button flag itself).
-    expect(find.semantics.byLabel('Biyoloji'), findsAny);
-    expect(find.semantics.byLabel('Ders Notları'), findsAny);
-    // Fixtures hold favourites, so the badge is on screen.
-    expect(find.semantics.byLabel('Favorilerden çıkar'), findsAny);
-    handle.dispose();
+    // Fixtures hold favourites, so a badge is on screen; the tile covers
+    // themselves are asserted in library_tile_semantics_test.dart.
+    expect(
+      find.semantics.byLabel('Favorilerden çıkar').evaluate().first,
+      isSemantics(isButton: true, hasTapAction: true),
+    );
   });
 }

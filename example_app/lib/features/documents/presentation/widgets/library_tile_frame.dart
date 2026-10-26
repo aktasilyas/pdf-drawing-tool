@@ -29,7 +29,7 @@ class LibraryTileFrame extends StatefulWidget {
     required this.info,
     required this.onTap,
     required this.onLongPress,
-    this.semanticLabel,
+    required this.semanticLabel,
     this.isSelected = false,
     this.isSelectionMode = false,
     this.overlays = _noOverlays,
@@ -42,7 +42,7 @@ class LibraryTileFrame extends StatefulWidget {
   final VoidCallback onLongPress;
 
   /// Screen-reader label of the cover tap target (the item's title).
-  final String? semanticLabel;
+  final String semanticLabel;
 
   final bool isSelected;
   final bool isSelectionMode;

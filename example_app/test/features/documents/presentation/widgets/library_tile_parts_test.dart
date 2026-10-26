@@ -148,6 +148,7 @@ void main() {
             info: const LibraryTileInfo(title: 'Biyoloji', meta: '12 Eki 2026'),
             onTap: onTap,
             onLongPress: onLongPress,
+            semanticLabel: 'Biyoloji',
             isSelectionMode: isSelectionMode,
             isSelected: isSelected,
           ),
@@ -200,6 +201,7 @@ void main() {
               info: const LibraryTileInfo(title: 'A', meta: 'B'),
               onTap: () {},
               onLongPress: () {},
+              semanticLabel: 'A',
               isSelectionMode: true,
               artRect: art,
               overlays: (rect) => [
