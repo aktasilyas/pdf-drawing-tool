@@ -18,10 +18,15 @@ void main() {
   List<Rect> canvasRects(WidgetTester tester) {
     final canvases = find.byType(DrawingCanvas);
     expect(canvases, findsWidgets);
-    return [
+    final rects = [
       for (final element in canvases.evaluate())
         tester.getRect(find.byElementPredicate((e) => e == element)),
     ];
+    for (final rect in rects) {
+      expect(rect.width, greaterThan(0));
+      expect(rect.height, greaterThan(0));
+    }
+    return rects;
   }
 
   Rect sidebarHostRect(WidgetTester tester) => tester.getRect(
@@ -100,6 +105,9 @@ void main() {
         sidebarOpen: true,
       );
 
+      // Undo and redo live in the tools capsule; no pill over the page.
+      expect(find.byType(FloatingUndoRedo), findsNothing);
+
       final band = tester.getRect(find.byType(AdaptiveToolbar));
       final sidebar = sidebarHostRect(tester);
       expect(sidebar.width, kPageSidebarWidth);
@@ -117,6 +125,7 @@ void main() {
     testWidgets('${entry.key}: meets tap-target and contrast guidelines',
         (tester) async {
       final handle = tester.ensureSemantics();
+      addTearDown(handle.dispose);
       await pumpEditor(
         tester,
         size: entry.value,
@@ -124,7 +133,6 @@ void main() {
         sidebarOpen: true,
       );
       await expectGuidelines(tester);
-      handle.dispose();
     });
   }
 
@@ -148,8 +156,8 @@ void main() {
   testWidgets('phone 390x844: meets tap-target and contrast guidelines',
       (tester) async {
     final handle = tester.ensureSemantics();
+    addTearDown(handle.dispose);
     await pumpEditor(tester, size: kEditorPhone, prefs: prefs);
     await expectGuidelines(tester);
-    handle.dispose();
   });
 }

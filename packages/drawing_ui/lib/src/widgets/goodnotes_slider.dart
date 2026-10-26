@@ -69,6 +69,9 @@ class GoodNotesSlider extends StatelessWidget {
           child: SliderTheme(
             data: SliderThemeData(
               trackHeight: trackHeight,
+              // Track ends align with the label and value edges instead of
+              // Material's 24dp overlay inset; the thumb stays fully visible.
+              padding: const EdgeInsets.symmetric(horizontal: thumbSize / 2),
               thumbShape: const RoundSliderThumbShape(
                 enabledThumbRadius: thumbSize / 2,
                 elevation: 0,

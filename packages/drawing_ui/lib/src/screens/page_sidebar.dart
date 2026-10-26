@@ -241,6 +241,7 @@ class _DockedCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.only(
           left: ChromeSpacing.sm,
+          top: ChromeSpacing.sm,
           bottom: ChromeSpacing.sm,
         ),
         child: DecoratedBox(
