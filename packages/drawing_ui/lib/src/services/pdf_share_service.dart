@@ -22,16 +22,21 @@ class PdfShareService {
     final dir = await getTemporaryDirectory();
     final file = File('${dir.path}/$fileName');
     await file.writeAsBytes(bytes, flush: true);
-    final result = await SharePlus.instance.share(
-      ShareParams(
-        files: [XFile(file.path, mimeType: 'application/pdf')],
-        subject: fileName,
-      ),
-    );
-    // Cancelling the sheet is a normal outcome, not an error.
-    return result.status == ShareResultStatus.dismissed
-        ? PdfShareOutcome.dismissed
-        : PdfShareOutcome.shared;
+    try {
+      final result = await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path, mimeType: 'application/pdf')],
+          subject: fileName,
+        ),
+      );
+      // Cancelling the sheet is a normal outcome, not an error. Platforms
+      // that cannot report the result (`unavailable`) count as shared.
+      return result.status == ShareResultStatus.dismissed
+          ? PdfShareOutcome.dismissed
+          : PdfShareOutcome.shared;
+    } finally {
+      if (await file.exists()) await file.delete();
+    }
   }
 }
 

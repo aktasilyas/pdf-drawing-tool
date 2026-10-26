@@ -49,6 +49,6 @@ void main() {
   test('dismissing the share sheet is not an error', () async {
     final progress = await run(_FakeShare(PdfShareOutcome.dismissed));
 
-    expect(progress.state.status, isNot(ExportProgressStatus.error));
+    expect(progress.state.status, ExportProgressStatus.idle);
   });
 }
