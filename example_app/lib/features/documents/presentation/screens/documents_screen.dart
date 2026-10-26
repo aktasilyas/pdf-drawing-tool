@@ -47,6 +47,10 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
   Widget build(BuildContext context) {
     final isPhone = Responsive.isPhone(context);
 
+    return _buildScaffold(isPhone);
+  }
+
+  Widget _buildScaffold(bool isPhone) {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: context.palette.background,

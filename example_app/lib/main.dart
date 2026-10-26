@@ -45,12 +45,25 @@ class ElyaNotesApp extends ConsumerWidget {
       AppThemeMode.system => ThemeMode.system,
     };
 
+    final router = ref.watch(appRouterProvider);
+
     return MaterialApp.router(
       title: 'ElyaNotes',
       debugShowCheckedModeBanner: false,
       builder: (context, child) {
         // Failed library mutations surface as a snackbar on any screen.
-        final content = LibraryErrorListener(child: child!);
+        final content = LibraryErrorListener(
+          // Above the routes: PDFs opened from other apps are handled on
+          // every screen, including while an editor is open.
+          child: IncomingPdfListener(
+            navigatorKey: ref.watch(appNavigatorKeyProvider),
+            routeChanges: router.routerDelegate,
+            isRouterReady: () => RouteNames.isLibraryRoute(
+              router.routerDelegate.currentConfiguration.uri.path,
+            ),
+            child: child!,
+          ),
+        );
         // In landscape, remove all system padding so content fills
         // the entire screen including the notch/cutout area.
         if (MediaQuery.of(context).orientation == Orientation.landscape) {
@@ -68,7 +81,7 @@ class ElyaNotesApp extends ConsumerWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: themeMode,
-      routerConfig: ref.watch(appRouterProvider),
+      routerConfig: router,
     );
   }
 }

@@ -6,6 +6,7 @@ import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/routing/route_names.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
+import 'package:example_app/features/documents/presentation/widgets/document_quota.dart';
 import 'package:example_app/features/documents/presentation/widgets/new_document_importers.dart';
 import 'package:example_app/features/premium/premium.dart';
 
@@ -21,32 +22,9 @@ enum NewDocumentOption {
 /// Yeni doküman dropdown menüsünü gösterir.
 /// Eğer toplam belge limiti aşıldıysa dropdown yerine upgrade sheet gösterir.
 void showNewDocumentDropdown(BuildContext context, GlobalKey buttonKey) async {
-  // Unified total document limit check
-  final container = ProviderScope.containerOf(context);
-  final totalCount = await container.read(totalDocumentCountProvider.future);
-  final access = container.read(featureAccessProvider(
-    FeatureAccessParams(
-      feature: GatedFeature.createDocument,
-      currentUsage: totalCount,
-    ),
-  ));
-
+  // Unified total document limit check; shows the upgrade sheet when reached.
+  if (!await ensureDocumentQuota(context)) return;
   if (!context.mounted) return;
-
-  // If limit reached, show general upgrade sheet instead of dropdown
-  if (!access.isAllowed) {
-    await UpgradePromptSheet.show(
-      context,
-      access: access,
-      featureIcon: Icons.note_add_outlined,
-      featureTitle: 'Belge Limitine Ulaştınız',
-      onUpgrade: () {
-        Navigator.pop(context);
-        GoRouter.of(context).push(RouteNames.paywall);
-      },
-    );
-    return;
-  }
 
   final RenderBox button =
       buttonKey.currentContext!.findRenderObject() as RenderBox;

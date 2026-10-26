@@ -2,7 +2,8 @@
 # Checks the merged Android manifests of example_app (issue #102):
 # the release manifest must not request the permissions of frozen features,
 # the debug manifest must still have them (FF_* flag testing). Both must
-# request REQUIRED (crash reporting uploads, #60).
+# request REQUIRED (crash reporting uploads, #60) and keep the PDF
+# Open with / Share intent filters (#200).
 #
 #   ./scripts/check-android-manifest.sh [build-dir]
 #
@@ -20,6 +21,10 @@ STRIPPED=(
 REQUIRED=(
   android.permission.INTERNET
   android.permission.ACCESS_NETWORK_STATE
+)
+PDF_ACTIONS=(
+  android.intent.action.VIEW
+  android.intent.action.SEND
 )
 status=0
 
@@ -59,6 +64,12 @@ for variant in release debug; do
   done
   for p in "${REQUIRED[@]}"; do
     grep -Fxq "$p" <<<"$perms" || fail "$variant manifest lacks $p"
+  done
+  # Open with / Share a PDF (#200): one intent filter per action with the PDF type.
+  filters=$(tr '\n' ' ' <"$manifest" | sed 's#</intent-filter>#</intent-filter>\n#g')
+  for action in "${PDF_ACTIONS[@]}"; do
+    grep -F "android:name=\"$action\"" <<<"$filters" | grep -Fq 'android:mimeType="application/pdf"' \
+      || fail "$variant manifest lacks the $action application/pdf intent filter"
   done
 done
 
