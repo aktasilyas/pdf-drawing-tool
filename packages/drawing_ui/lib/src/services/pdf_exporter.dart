@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -6,14 +5,16 @@ import 'dart:ui' as ui;
 import 'package:drawing_core/drawing_core.dart';
 import 'package:flutter/material.dart' hide Page;
 import 'package:pdf/pdf.dart';
-import 'package:pdfx/pdfx.dart' as pdfx;
 
+import 'pdf_compressed_image.dart';
 import 'pdf_content_painter.dart';
 import 'pdf_export_models.dart';
 import 'pdf_raster_layer_renderer.dart';
+import 'pdf_source.dart';
 
 // Re-export models so existing imports continue to work.
 export 'pdf_export_models.dart';
+export 'pdf_source.dart';
 
 /// Hybrid vector+raster PDF exporter.
 ///
@@ -21,10 +22,14 @@ export 'pdf_export_models.dart';
 /// vector operations for infinite-zoom sharpness. Non-vectorizable content
 /// (textured/glow/eraser strokes, text) falls back to lossless PNG overlay.
 class PDFExporter {
-  PDFExporter({this.pdfPaths = PdfPathResolver.passthrough});
+  PDFExporter({
+    this.pdfPaths = PdfPathResolver.passthrough,
+    PdfSourceOpener? sourceOpener,
+  }) : _openSource = sourceOpener ?? openPdfxSource;
 
   /// Resolves stored PDF paths of lazy PDF backgrounds to files on disk.
   final PdfPathResolver pdfPaths;
+  final PdfSourceOpener _openSource;
 
   final _contentPainter = PdfContentPainter();
   final _rasterRenderer = PdfRasterLayerRenderer();
@@ -42,12 +47,17 @@ class PDFExporter {
 
     try {
       final doc = PdfDocument();
-      for (int i = 0; i < pages.length; i++) {
-        if (isCancelled?.call() == true) return PDFExportResult.cancelled();
-        final page = pages[i];
-        if (page.size.width <= 0 || page.size.height <= 0) continue;
-        await _exportPage(doc, page, options);
-        onProgress?.call(i + 1, pages.length);
+      final sources = PdfSourcePool(_openSource);
+      try {
+        for (int i = 0; i < pages.length; i++) {
+          if (isCancelled?.call() == true) return PDFExportResult.cancelled();
+          final page = pages[i];
+          if (page.size.width <= 0 || page.size.height <= 0) continue;
+          await _exportPage(doc, page, options, sources);
+          onProgress?.call(i + 1, pages.length);
+        }
+      } finally {
+        await sources.closeAll();
       }
       final bytes = await doc.save();
       return PDFExportResult.success(bytes);
@@ -60,6 +70,7 @@ class PDFExporter {
     PdfDocument doc,
     Page page,
     PDFExportOptions options,
+    PdfSourcePool sources,
   ) async {
     double pdfW, pdfH;
     if (options.isInfiniteCanvas) {
@@ -78,7 +89,7 @@ class PDFExporter {
       _contentPainter.paintBackground(g, page.background, pdfW, pdfH);
     }
     if (page.background.type == BackgroundType.pdf) {
-      await _embedPdfBackground(g, doc, page, pdfW, pdfH, options);
+      await _embedPdfBackground(g, doc, page, pdfW, pdfH, options, sources);
     }
     for (final layer in page.layers) {
       if (!layer.isVisible) continue;
@@ -147,9 +158,7 @@ class PDFExporter {
     double h,
   ) {
     if (raw == null) return;
-    final img =
-        PdfImage(doc, image: raw.bytes, width: raw.width, height: raw.height);
-    g.drawImage(img, 0, 0, w, h);
+    g.drawImage(addCompressedRgbaImage(doc, raw), 0, 0, w, h);
   }
 
   Future<void> _embedPdfBackground(
@@ -159,6 +168,7 @@ class PDFExporter {
     double w,
     double h,
     PDFExportOptions options,
+    PdfSourcePool sources,
   ) async {
     if (page.background.pdfPageIndex == null) return;
 
@@ -166,6 +176,7 @@ class PDFExporter {
     // of uncompressed RGB+alpha (~8.7MB), preventing OOM on multi-page docs.
     if (page.background.pdfFilePath != null) {
       final jpegBytes = await _renderPdfPageAsJpeg(
+        sources,
         pdfPaths.resolve(page.background.pdfFilePath!),
         page.background.pdfPageIndex!,
         _scaleFromDpi(options.quality.dpi),
@@ -182,37 +193,18 @@ class PDFExporter {
     if (pngData == null) return;
     final raw = await _decodeToRawRgba(pngData);
     if (raw == null) return;
-    final img =
-        PdfImage(doc, image: raw.bytes, width: raw.width, height: raw.height);
-    g.drawImage(img, 0, 0, w, h);
+    g.drawImage(addCompressedRgbaImage(doc, raw), 0, 0, w, h);
   }
 
   Future<Uint8List?> _renderPdfPageAsJpeg(
+    PdfSourcePool sources,
     String path,
     int index,
     double renderScale,
   ) async {
-    if (!await File(path).exists()) return null;
-    pdfx.PdfDocument? pdfDoc;
-    pdfx.PdfPage? pg;
-    try {
-      pdfDoc = await pdfx.PdfDocument.openFile(path);
-      pg = await pdfDoc.getPage(index);
-      final img = await pg.render(
-        width: pg.width * renderScale,
-        height: pg.height * renderScale,
-        format: pdfx.PdfPageImageFormat.jpeg,
-        quality: 90,
-      );
-      return img?.bytes;
-    } finally {
-      try {
-        await pg?.close();
-      } catch (_) {}
-      try {
-        await pdfDoc?.close();
-      } catch (_) {}
-    }
+    final source = await sources.get(path);
+    if (source == null) return null;
+    return source.renderJpeg(index, renderScale);
   }
 
   Rect? _calculateContentBounds(Page page) {
