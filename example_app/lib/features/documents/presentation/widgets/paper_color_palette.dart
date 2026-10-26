@@ -4,6 +4,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/features/documents/domain/entities/paper_color.dart';
 
 /// Paper color palette widget
 class PaperColorPalette extends StatelessWidget {
@@ -16,14 +17,9 @@ class PaperColorPalette extends StatelessWidget {
     required this.onColorSelected,
   });
 
-  /// Available paper colors
-  static const paperColors = [
-    0xFFFFFFFF, // Beyaz
-    0xFF1A1A1A, // Siyah (dark mode için)
-    0xFFFFF8E7, // Krem
-    0xFFF5F5F5, // Açık gri
-    0xFFE8F5E9, // Açık yeşil
-    0xFFE3F2FD, // Açık mavi
+  /// Available paper colors (ARGB), in palette order.
+  static final paperColors = [
+    for (final color in PaperColor.palette) color.argb,
   ];
 
   @override

@@ -49,6 +49,24 @@ void main() {
       verify(() => mockRepository.getDocumentContent(testDocId)).called(1);
     });
 
+    for (final color in PaperColor.values) {
+      for (final stored in {color.storageKey, color.asciiKey}) {
+        test('new document with paper "$stored" opens with that colour',
+            () async {
+          when(() => mockRepository.getDocument(testDocId)).thenAnswer(
+            (_) async => Right(testDocInfo.copyWith(paperColor: stored)),
+          );
+          when(() => mockRepository.getDocumentContent(testDocId))
+              .thenAnswer((_) async => const Right(null));
+
+          final result = await useCase(testDocId);
+
+          final document = result.getOrElse(() => throw Exception());
+          expect(document.pages.last.background.color, color.argb);
+        });
+      }
+    }
+
     test('should return deserialized document when content exists', () async {
       // Arrange
       final testContent = DrawingDocument.multiPage(

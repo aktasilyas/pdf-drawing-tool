@@ -9,6 +9,7 @@ import 'package:drawing_core/drawing_core.dart';
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/core/routing/route_names.dart';
+import 'package:example_app/features/documents/domain/entities/paper_color.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/paper_color_palette.dart';
 import 'package:example_app/features/documents/presentation/widgets/template_category_tabs.dart';
@@ -147,25 +148,6 @@ class _TemplateSelectionScreenState
     );
   }
 
-  String _mapColorToName(int color) {
-    switch (color) {
-      case 0xFFFFFFFF:
-        return 'Beyaz kagit';
-      case 0xFF1A1A1A:
-        return 'Siyah kagit';
-      case 0xFFFFF8E7:
-        return 'Krem kagit';
-      case 0xFFF5F5F5:
-        return 'Gri kagit';
-      case 0xFFE8F5E9:
-        return 'Yesil kagit';
-      case 0xFFE3F2FD:
-        return 'Mavi kagit';
-      default:
-        return 'Beyaz kagit';
-    }
-  }
-
   Future<void> _createDocument() async {
     if (_template == null) return;
 
@@ -177,7 +159,7 @@ class _TemplateSelectionScreenState
       title: docTitle,
       templateId: _template!.id,
       folderId: folderId,
-      paperColor: _mapColorToName(_paperColor),
+      paperColor: PaperColor.fromArgb(_paperColor).storageKey,
       isPortrait: !_paperSize.isLandscape,
       documentType: DocumentType.notebook,
       coverId: _hasCover ? _cover.id : null,

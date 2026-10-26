@@ -6,6 +6,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/features/documents/domain/entities/paper_color.dart';
 
 /// Days left badge for trashed documents and pages.
 ///
@@ -46,18 +47,21 @@ class DocumentPaperColors {
   DocumentPaperColors._();
 
   static Color fromName(String paperColor) {
-    switch (paperColor) {
-      case 'Beyaz kağıt':
+    final color = PaperColor.tryParse(paperColor);
+    if (color == null) return AppColors.paperCream;
+    switch (color) {
+      case PaperColor.white:
         return AppColors.surfaceLight;
-      case 'Sarı kağıt':
-      case 'Krem kağıt':
-        return AppColors.paperCream;
-      case 'Gri kağıt':
-      case 'Açık Gri':
+      case PaperColor.gray:
         return AppColors.surfaceVariantLight;
-      case 'Siyah kağıt':
+      case PaperColor.black:
         return AppColors.surfaceDark;
-      default:
+      case PaperColor.green:
+      case PaperColor.blue:
+        // Document data, not a theme role (see class doc).
+        return Color(color.argb);
+      case PaperColor.cream:
+      case PaperColor.yellow:
         return AppColors.paperCream;
     }
   }
