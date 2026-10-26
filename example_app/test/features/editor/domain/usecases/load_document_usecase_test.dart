@@ -95,6 +95,27 @@ void main() {
       verify(() => mockRepository.getDocumentContent(testDocId)).called(1);
     });
 
+    test('uses the library title when the stored content title is stale',
+        () async {
+      final staleContent = DrawingDocument.multiPage(
+        id: testDocId,
+        title: 'Old Title',
+        pages: [Page.create(index: 0)],
+        createdAt: DateTime(2024, 1, 1),
+        updatedAt: DateTime(2024, 1, 1),
+      ).toJson();
+
+      when(() => mockRepository.getDocument(testDocId))
+          .thenAnswer((_) async => Right(testDocInfo));
+      when(() => mockRepository.getDocumentContent(testDocId))
+          .thenAnswer((_) async => Right(staleContent));
+
+      final result = await useCase(testDocId);
+
+      final document = result.getOrElse(() => throw Exception());
+      expect(document.title, 'Test Document');
+    });
+
     test('should return failure when document not found', () async {
       // Arrange
       when(() => mockRepository.getDocument(testDocId)).thenAnswer(

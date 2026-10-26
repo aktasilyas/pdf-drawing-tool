@@ -43,6 +43,7 @@ void main() {
             updatedAt: any(named: 'updatedAt'),
             coverId: any(named: 'coverId'),
             updateCover: any(named: 'updateCover'),
+            title: any(named: 'title'),
           )).thenAnswer((_) async => const Right(null));
 
       // Act
@@ -58,6 +59,7 @@ void main() {
             updatedAt: any(named: 'updatedAt'),
             coverId: any(named: 'coverId'),
             updateCover: any(named: 'updateCover'),
+            title: any(named: 'title'),
           )).called(1);
     });
 
@@ -70,6 +72,7 @@ void main() {
             updatedAt: any(named: 'updatedAt'),
             coverId: any(named: 'coverId'),
             updateCover: any(named: 'updateCover'),
+            title: any(named: 'title'),
           )).thenAnswer((_) async => const Left(CacheFailure('Save failed')));
 
       // Act
@@ -85,6 +88,7 @@ void main() {
             updatedAt: any(named: 'updatedAt'),
             coverId: any(named: 'coverId'),
             updateCover: any(named: 'updateCover'),
+            title: any(named: 'title'),
           )).called(1);
     });
 
@@ -98,6 +102,7 @@ void main() {
             updatedAt: any(named: 'updatedAt'),
             coverId: any(named: 'coverId'),
             updateCover: any(named: 'updateCover'),
+            title: any(named: 'title'),
           )).thenAnswer((invocation) async {
         capturedContent =
             invocation.namedArguments[#content] as Map<String, dynamic>;
@@ -112,6 +117,30 @@ void main() {
       expect(capturedContent!['id'], testDocument.id);
       expect(capturedContent!['title'], testDocument.title);
       expect(capturedContent!['pages'], isA<List>());
+    });
+
+    test('syncs the editor title to library metadata', () async {
+      when(() => mockRepository.saveDocumentContent(
+            id: any(named: 'id'),
+            content: any(named: 'content'),
+            pageCount: any(named: 'pageCount'),
+            updatedAt: any(named: 'updatedAt'),
+            coverId: any(named: 'coverId'),
+            updateCover: any(named: 'updateCover'),
+            title: any(named: 'title'),
+          )).thenAnswer((_) async => const Right(null));
+
+      await useCase(testDocument);
+
+      verify(() => mockRepository.saveDocumentContent(
+            id: testDocument.id,
+            content: any(named: 'content'),
+            pageCount: any(named: 'pageCount'),
+            updatedAt: any(named: 'updatedAt'),
+            coverId: any(named: 'coverId'),
+            updateCover: true,
+            title: testDocument.title,
+          )).called(1);
     });
   });
 }
