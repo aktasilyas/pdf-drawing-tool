@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:example_app/core/utils/logger.dart';
 import 'package:example_app/features/documents/domain/entities/incoming_pdf.dart';
+import 'package:example_app/core/session/active_editor_leave_provider.dart';
 import 'package:example_app/features/documents/presentation/providers/incoming_pdf_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/document_quota.dart';
 import 'package:example_app/features/documents/presentation/widgets/pdf_file_importer.dart';
@@ -22,17 +23,21 @@ typedef DocumentQuotaCheck = Future<bool> Function(BuildContext context);
 
 /// Imports PDFs opened from other apps (Open with / Share), one at a time.
 ///
-/// Mount it below the Navigator (inside a screen): dialogs and routing need a
-/// context that has one.
+/// Mount it above the routes (`MaterialApp.router` builder) so it is alive on
+/// every screen. Dialogs and routing use the context of [navigatorKey]. When an
+/// editor is open it is left first through [activeEditorLeaveProvider], so its
+/// save-and-reset path runs before the new document opens.
 class IncomingPdfListener extends ConsumerStatefulWidget {
   const IncomingPdfListener({
     super.key,
     required this.child,
+    required this.navigatorKey,
     this.importFile = importPdfFile,
     this.ensureQuota = ensureDocumentQuota,
   });
 
   final Widget child;
+  final GlobalKey<NavigatorState> navigatorKey;
   final IncomingPdfImporter importFile;
   final DocumentQuotaCheck ensureQuota;
 
@@ -67,6 +72,13 @@ class _IncomingPdfListenerState extends ConsumerState<IncomingPdfListener> {
         final queue = ref.read(incomingPdfQueueProvider);
         if (queue.isEmpty) break;
         final pdf = queue.first;
+        if (!await _leaveEditor()) {
+          // Save failed: the editor stays open and the PDF stays queued
+          // (its copy is kept) until the next incoming PDF or app start.
+          break;
+        }
+        // Another drain may have taken it while the editor was closing.
+        if (!ref.read(incomingPdfQueueProvider).contains(pdf)) continue;
         ref.read(incomingPdfQueueProvider.notifier).remove(pdf);
         await _process(pdf);
       }
@@ -77,9 +89,10 @@ class _IncomingPdfListenerState extends ConsumerState<IncomingPdfListener> {
 
   Future<void> _process(IncomingPdf pdf) async {
     try {
-      _showLibrary();
+      final context = widget.navigatorKey.currentContext;
+      if (context == null || !context.mounted) return;
       if (!await widget.ensureQuota(context)) return;
-      if (!mounted) return;
+      if (!mounted || !context.mounted) return;
       await widget.importFile(
         context,
         path: pdf.path,
@@ -93,13 +106,11 @@ class _IncomingPdfListenerState extends ConsumerState<IncomingPdfListener> {
     }
   }
 
-  /// The library stays mounted below the editor. Close routes above it so the
-  /// new document does not open on top of another editor (they share the
-  /// global PDF state providers).
-  void _showLibrary() {
-    final route = ModalRoute.of(context);
-    if (route == null || route.isCurrent) return;
-    Navigator.of(context).popUntil((r) => r == route);
+  /// Closes the open editor, if any. False when it could not be left.
+  Future<bool> _leaveEditor() async {
+    final leave = ref.read(activeEditorLeaveProvider);
+    if (leave == null) return true;
+    return leave();
   }
 
   void _deleteCopy(String path) {

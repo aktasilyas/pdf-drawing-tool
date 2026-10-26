@@ -33,9 +33,17 @@ const _authPaths = {
 /// Premium routes that only exist when premium is on.
 const _premiumPaths = {RouteNames.paywall, RouteNames.subscription};
 
+/// Key of the root Navigator. Lets app-level widgets (mounted above the
+/// routes) reach the Navigator for dialogs and routing.
+final appNavigatorKeyProvider =
+    Provider<GlobalKey<NavigatorState>>((ref) => GlobalKey<NavigatorState>());
+
 /// Router for the app, reading the router from the flags-aware provider.
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final router = buildAppRouter(ref.watch(featureFlagsProvider));
+  final router = buildAppRouter(
+    ref.watch(featureFlagsProvider),
+    navigatorKey: ref.watch(appNavigatorKeyProvider),
+  );
   ref.onDispose(router.dispose);
   return router;
 });
@@ -48,8 +56,10 @@ GoRouter buildAppRouter(
   FeatureFlags flags, {
   String initialLocation = RouteNames.splash,
   bool debugLog = false,
+  GlobalKey<NavigatorState>? navigatorKey,
 }) {
   return GoRouter(
+    navigatorKey: navigatorKey,
     initialLocation: initialLocation,
     debugLogDiagnostics: debugLog,
     routes: [

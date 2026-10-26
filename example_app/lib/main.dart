@@ -50,7 +50,14 @@ class ElyaNotesApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       builder: (context, child) {
         // Failed library mutations surface as a snackbar on any screen.
-        final content = LibraryErrorListener(child: child!);
+        final content = LibraryErrorListener(
+          // Above the routes: PDFs opened from other apps are handled on
+          // every screen, including while an editor is open.
+          child: IncomingPdfListener(
+            navigatorKey: ref.watch(appNavigatorKeyProvider),
+            child: child!,
+          ),
+        );
         // In landscape, remove all system padding so content fills
         // the entire screen including the notch/cutout area.
         if (MediaQuery.of(context).orientation == Orientation.landscape) {

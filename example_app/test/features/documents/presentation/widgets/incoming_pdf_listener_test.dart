@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/documents.dart';
 import '../../../../helpers/fake_incoming_pdf_source.dart';
 
@@ -45,16 +46,23 @@ void main() {
 
   Future<bool> fakeQuota(BuildContext context) async => quotaAllowed;
 
-  Future<void> pumpListener(WidgetTester tester) async {
+  Future<void> pumpListener(WidgetTester tester, {EditorLeave? leave}) async {
+    final navigatorKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [incomingPdfSourceProvider.overrideWithValue(source)],
+        overrides: [
+          incomingPdfSourceProvider.overrideWithValue(source),
+          activeEditorLeaveProvider.overrideWith((ref) => leave),
+        ],
         child: MaterialApp(
-          home: IncomingPdfListener(
+          navigatorKey: navigatorKey,
+          builder: (context, child) => IncomingPdfListener(
+            navigatorKey: navigatorKey,
             importFile: fakeImporter,
             ensureQuota: fakeQuota,
-            child: const Scaffold(body: SizedBox.expand()),
+            child: child!,
           ),
+          home: const Scaffold(body: SizedBox.expand()),
         ),
       ),
     );
@@ -109,6 +117,42 @@ void main() {
     await settle(tester);
     expect(imported, ['ok.pdf']);
     expect(File(pdf.path).existsSync(), isFalse);
+  });
+
+  testWidgets('active editor is left exactly once before the import',
+      (tester) async {
+    final events = <String>[];
+    await pumpListener(tester, leave: () async {
+      events.add('leave');
+      return true;
+    });
+    final pdf = makePdf('editor.pdf');
+    source.emit(pdf);
+    await settle(tester);
+    expect(imported, ['editor.pdf']);
+    expect(events, ['leave']);
+  });
+
+  testWidgets('leave failed: no import, copy is kept while queued',
+      (tester) async {
+    var leaveCalls = 0;
+    await pumpListener(tester, leave: () async {
+      leaveCalls++;
+      return false;
+    });
+    final pdf = makePdf('kept.pdf');
+    source.emit(pdf);
+    await settle(tester);
+    expect(leaveCalls, 1);
+    expect(imported, isEmpty);
+    expect(File(pdf.path).existsSync(), isTrue);
+  });
+
+  testWidgets('no active editor: imports directly', (tester) async {
+    await pumpListener(tester);
+    source.emit(makePdf('direct.pdf'));
+    await settle(tester);
+    expect(imported, ['direct.pdf']);
   });
 
   testWidgets('copy is deleted and the queue continues after a failure',
