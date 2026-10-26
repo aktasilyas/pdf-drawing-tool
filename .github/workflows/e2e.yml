@@ -1,0 +1,104 @@
+name: E2E
+
+# Integration tests (example_app/integration_test) on an Android emulator,
+# all feature flags off (v1.0 scope). Failures are emitted as annotations
+# because job logs are not readable from cloud agent sessions.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 3 * * *'
+  pull_request:
+    paths:
+      - 'example_app/lib/**'
+      - 'example_app/integration_test/**'
+      - '.github/workflows/e2e.yml'
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: android-emulator
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: .flutter-version
+          channel: stable
+          cache: true
+
+      - name: Dependencies
+        run: ./scripts/check.sh pub
+
+      - name: Report pubspec.lock diff
+        # The integration_test dependency was added without regenerating the
+        # lockfile (no Flutter SDK in the authoring session). The next session
+        # applies this diff.
+        run: |
+          if git diff --quiet -- example_app/pubspec.lock; then
+            echo "example_app/pubspec.lock is up to date."
+          else
+            git diff -- example_app/pubspec.lock
+            msg=$(git diff -- example_app/pubspec.lock | head -n 200 \
+              | sed -e 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+            echo "::notice title=pubspec.lock diff::$msg"
+          fi
+
+      - name: Run integration tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          profile: pixel_6
+          force-avd-creation: false
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          working-directory: example_app
+          script: |
+            mkdir -p "$RUNNER_TEMP/e2e"
+            flutter test integration_test --no-pub > "$RUNNER_TEMP/e2e/test.log" 2>&1 || touch "$RUNNER_TEMP/e2e/failed"
+            adb exec-out screencap -p > "$RUNNER_TEMP/e2e/final-screen.png" || true
+            adb logcat -d -v time > "$RUNNER_TEMP/e2e/logcat.txt" || true
+
+      - name: Report result
+        if: always()
+        run: |
+          log="$RUNNER_TEMP/e2e/test.log"
+          if [ ! -f "$log" ]; then
+            echo "::error title=e2e::Emulator step produced no test log (emulator failed to start?)."
+            exit 1
+          fi
+          tail -n 15 "$log"
+          if [ -f "$RUNNER_TEMP/e2e/failed" ]; then
+            msg=$( { grep -E '\[E\]|EXCEPTION CAUGHT|Some tests failed|Expected:|Actual:|Timed out' "$log" | head -n 30; echo '...'; tail -n 40 "$log"; } \
+              | sed -e 's/%/%25/g' | awk '{printf "%s%%0A", $0}')
+            echo "::error title=e2e integration tests::$msg"
+            exit 1
+          fi
+
+      - name: Upload logs and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/e2e/
+            example_app/screenshots/
+          if-no-files-found: warn
