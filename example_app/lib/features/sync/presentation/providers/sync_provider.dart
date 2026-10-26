@@ -20,9 +20,6 @@ import 'package:example_app/features/sync/data/repositories/sync_repository_impl
 // ==================== Infrastructure Providers ====================
 
 /// App database provider
-///
-/// TODO(#147): reuse `getIt<AppDatabase>()` once DI registers the singleton
-/// (step 9) so the app has a single database instance.
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
   return AppDatabase();
 });

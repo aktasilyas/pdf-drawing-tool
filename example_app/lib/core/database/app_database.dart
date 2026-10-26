@@ -13,7 +13,6 @@ import 'package:path/path.dart' as p;
 part 'app_database.g.dart';
 
 /// Documents table schema
-@DataClassName('DocumentRow')
 class Documents extends Table {
   /// Unique document ID
   TextColumn get id => text()();
@@ -48,10 +47,7 @@ class Documents extends Table {
   /// Sync state: 0=local, 1=syncing, 2=synced, 3=error
   IntColumn get syncState => integer().withDefault(const Constant(0))();
 
-  /// When the document was moved to trash (null if not trashed)
-  DateTimeColumn get deletedAt => dateTime().nullable()();
-
-  /// Legacy content blob, unused since v6 (see [DocumentContents]).
+  /// Document content (serialized drawing data)
   BlobColumn get content => blob().nullable()();
 
   /// Paper color: 'Beyaz kağıt', 'Sarı kağıt', 'Gri kağıt'
@@ -82,7 +78,6 @@ class Documents extends Table {
 }
 
 /// Folders table schema
-@DataClassName('FolderRow')
 class Folders extends Table {
   /// Unique folder ID
   TextColumn get id => text()();
@@ -97,50 +92,11 @@ class Folders extends Table {
   IntColumn get colorValue =>
       integer().withDefault(const Constant(0xFF2196F3))();
 
-  /// Manual sort position
-  IntColumn get sortOrder => integer().withDefault(const Constant(0))();
-
-  /// Whether the folder is marked as favorite
-  BoolColumn get isFavorite => boolean().withDefault(const Constant(false))();
-
   /// When the folder was created
   DateTimeColumn get createdAt => dateTime()();
 
   @override
   Set<Column> get primaryKey => {id};
-}
-
-/// Serialized drawing content of a document (one row per document).
-class DocumentContents extends Table {
-  /// Owning document ID
-  TextColumn get documentId => text()();
-
-  /// Content as JSON text
-  TextColumn get data => text()();
-
-  /// When the content was last written
-  DateTimeColumn get updatedAt => dateTime()();
-
-  @override
-  Set<Column> get primaryKey => {documentId};
-}
-
-/// Pages removed from a document, kept until restored or purged.
-@TableIndex(name: 'trashed_pages_source_document_idx', columns: {#sourceDocumentId})
-class TrashedPages extends Table {
-  TextColumn get id => text()();
-  TextColumn get pageId => text()();
-  TextColumn get sourceDocumentId => text()();
-  TextColumn get sourceDocumentTitle => text()();
-  IntColumn get originalPageIndex => integer()();
-  DateTimeColumn get deletedAt => dateTime()();
-
-  /// Page JSON
-  TextColumn get pageData => text()();
-
-  @override
-  Set<Column> get primaryKey => {id};
-
 }
 
 /// Sync queue table schema
@@ -225,19 +181,17 @@ class AiMessagesLocal extends Table {
 @DriftDatabase(tables: [
   Documents,
   Folders,
-  DocumentContents,
-  TrashedPages,
   SyncQueue,
   SyncMetadata,
   AiConversationsLocal,
   AiMessagesLocal,
 ])
 class AppDatabase extends _$AppDatabase {
-  /// Creates the database; pass [e] to use a custom executor (tests).
-  AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
+  /// Creates the database with platform-specific connection
+  AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration {
@@ -276,14 +230,6 @@ class AppDatabase extends _$AppDatabase {
         if (from < 5) {
           await m.createTable(aiConversationsLocal);
           await m.createTable(aiMessagesLocal);
-        }
-        if (from < 6) {
-          await m.addColumn(documents, documents.deletedAt);
-          await m.addColumn(folders, folders.sortOrder);
-          await m.addColumn(folders, folders.isFavorite);
-          await m.createTable(documentContents);
-          await m.createTable(trashedPages);
-          await m.createIndex(trashedPagesSourceDocumentIdx);
         }
       },
     );

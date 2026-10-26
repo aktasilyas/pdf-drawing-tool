@@ -1,6 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
-import 'package:drift/drift.dart';
 import 'package:injectable/injectable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/data/models/document_model.dart';
 
@@ -15,35 +16,36 @@ abstract class DocumentLocalDatasource {
   Stream<List<DocumentModel>> watchDocuments({String? folderId});
   Future<Map<String, dynamic>?> getDocumentContent(String id);
   Future<void> saveDocumentContent(String id, Map<String, dynamic> content);
-
-  /// Whether a content row exists for [id] (without decoding it).
-  Future<bool> hasDocumentContent(String id);
 }
 
-/// Drift-backed document metadata and content storage.
 @Injectable(as: DocumentLocalDatasource)
 class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
-  final AppDatabase _db;
+  static const String _documentsKey = 'documents';
+  final SharedPreferences _prefs;
+  final StreamController<List<DocumentModel>> _controller =
+      StreamController<List<DocumentModel>>.broadcast();
 
-  DocumentLocalDatasourceImpl(this._db);
-
-  /// Root level (folderId null) or a single folder.
-  SimpleSelectStatement<$DocumentsTable, DocumentRow> _folderQuery(
-    String? folderId,
-  ) {
-    return _db.select(_db.documents)
-      ..where(
-        (t) => folderId == null
-            ? t.folderId.isNull()
-            : t.folderId.equals(folderId),
-      );
-  }
+  DocumentLocalDatasourceImpl(this._prefs);
 
   @override
   Future<List<DocumentModel>> getDocuments({String? folderId}) async {
     try {
-      final rows = await _folderQuery(folderId).get();
-      return rows.map(_toModel).toList();
+      final jsonString = _prefs.getString(_documentsKey);
+      if (jsonString == null) {
+        return [];
+      }
+
+      final List<dynamic> jsonList = json.decode(jsonString) as List;
+      final documents = jsonList
+          .map((json) => DocumentModel.fromJson(json as Map<String, dynamic>))
+          .toList();
+
+      if (folderId == null) {
+        // Return only documents without a folder (root level)
+        return documents.where((doc) => doc.folderId == null).toList();
+      }
+
+      return documents.where((doc) => doc.folderId == folderId).toList();
     } catch (e) {
       throw CacheException('Failed to get documents: $e');
     }
@@ -52,8 +54,15 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
   @override
   Future<List<DocumentModel>> getAllDocuments() async {
     try {
-      final rows = await _db.select(_db.documents).get();
-      return rows.map(_toModel).toList();
+      final jsonString = _prefs.getString(_documentsKey);
+      if (jsonString == null) {
+        return [];
+      }
+
+      final List<dynamic> jsonList = json.decode(jsonString) as List;
+      return jsonList
+          .map((json) => DocumentModel.fromJson(json as Map<String, dynamic>))
+          .toList();
     } catch (e) {
       throw CacheException('Failed to get all documents: $e');
     }
@@ -62,11 +71,12 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
   @override
   Future<DocumentModel> getDocument(String id) async {
     try {
-      final row = await (_db.select(_db.documents)
-            ..where((t) => t.id.equals(id)))
-          .getSingleOrNull();
-      if (row == null) throw const CacheException('Document not found');
-      return _toModel(row);
+      // Get ALL documents (not filtered by folderId)
+      final documents = await getAllDocuments();
+      return documents.firstWhere(
+        (doc) => doc.id == id,
+        orElse: () => throw const CacheException('Document not found'),
+      );
     } catch (e) {
       throw CacheException('Failed to get document: $e');
     }
@@ -75,7 +85,11 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
   @override
   Future<DocumentModel> createDocument(DocumentModel document) async {
     try {
-      await _db.into(_db.documents).insert(_toCompanion(document));
+      // Get ALL documents (not filtered by folderId)
+      final documents = await getAllDocuments();
+      documents.add(document);
+      await _saveDocuments(documents);
+      _controller.add(documents);
       return document;
     } catch (e) {
       throw CacheException('Failed to create document: $e');
@@ -85,10 +99,17 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
   @override
   Future<DocumentModel> updateDocument(DocumentModel document) async {
     try {
-      final count = await (_db.update(_db.documents)
-            ..where((t) => t.id.equals(document.id)))
-          .write(_toCompanion(document));
-      if (count == 0) throw const CacheException('Document not found');
+      // Get ALL documents (not filtered by folderId)
+      final documents = await getAllDocuments();
+      final index = documents.indexWhere((doc) => doc.id == document.id);
+
+      if (index == -1) {
+        throw const CacheException('Document not found');
+      }
+
+      documents[index] = document;
+      await _saveDocuments(documents);
+      _controller.add(documents);
       return document;
     } catch (e) {
       throw CacheException('Failed to update document: $e');
@@ -98,12 +119,11 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
   @override
   Future<void> deleteDocument(String id) async {
     try {
-      await _db.transaction(() async {
-        await (_db.delete(_db.documentContents)
-              ..where((t) => t.documentId.equals(id)))
-            .go();
-        await (_db.delete(_db.documents)..where((t) => t.id.equals(id))).go();
-      });
+      // Get ALL documents (not filtered by folderId)
+      final documents = await getAllDocuments();
+      documents.removeWhere((doc) => doc.id == id);
+      await _saveDocuments(documents);
+      _controller.add(documents);
     } catch (e) {
       throw CacheException('Failed to delete document: $e');
     }
@@ -111,19 +131,35 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
 
   @override
   Stream<List<DocumentModel>> watchDocuments({String? folderId}) {
-    return _folderQuery(folderId)
-        .watch()
-        .map((rows) => rows.map(_toModel).toList());
+    // Emit initial data
+    getDocuments(folderId: folderId).then((docs) {
+      if (!_controller.isClosed) {
+        _controller.add(docs);
+      }
+    });
+
+    if (folderId == null) {
+      // Return only documents without a folder (root level)
+      return _controller.stream.map(
+        (documents) => documents.where((doc) => doc.folderId == null).toList(),
+      );
+    }
+
+    return _controller.stream.map(
+      (documents) =>
+          documents.where((doc) => doc.folderId == folderId).toList(),
+    );
   }
 
   @override
   Future<Map<String, dynamic>?> getDocumentContent(String id) async {
     try {
-      final row = await (_db.select(_db.documentContents)
-            ..where((t) => t.documentId.equals(id)))
-          .getSingleOrNull();
-      if (row == null) return null;
-      return json.decode(row.data) as Map<String, dynamic>;
+      final key = 'document_content_$id';
+      final jsonString = _prefs.getString(key);
+      if (jsonString == null) {
+        return null;
+      }
+      return json.decode(jsonString) as Map<String, dynamic>;
     } catch (e) {
       throw CacheException('Failed to get document content: $e');
     }
@@ -131,76 +167,31 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
 
   @override
   Future<void> saveDocumentContent(
-    String id,
-    Map<String, dynamic> content,
-  ) async {
+      String id, Map<String, dynamic> content) async {
     try {
-      await _db.into(_db.documentContents).insertOnConflictUpdate(
-            DocumentContentsCompanion(
-              documentId: Value(id),
-              data: Value(json.encode(content)),
-              updatedAt: Value(DateTime.now()),
-            ),
-          );
+      final key = 'document_content_$id';
+      final jsonString = json.encode(content);
+      if (!await _prefs.setString(key, jsonString)) {
+        throw const CacheException('Document content write was rejected');
+      }
     } catch (e) {
       throw CacheException('Failed to save document content: $e');
     }
   }
 
-  @override
-  Future<bool> hasDocumentContent(String id) async {
+  Future<void> _saveDocuments(List<DocumentModel> documents) async {
     try {
-      final row = await (_db.selectOnly(_db.documentContents)
-            ..addColumns([_db.documentContents.documentId])
-            ..where(_db.documentContents.documentId.equals(id)))
-          .getSingleOrNull();
-      return row != null;
+      final jsonList = documents.map((doc) => doc.toJson()).toList();
+      final jsonString = json.encode(jsonList);
+      if (!await _prefs.setString(_documentsKey, jsonString)) {
+        throw const CacheException('Documents write was rejected');
+      }
     } catch (e) {
-      throw CacheException('Failed to check document content: $e');
+      throw CacheException('Failed to save documents: $e');
     }
   }
 
-  DocumentModel _toModel(DocumentRow r) => DocumentModel(
-        id: r.id,
-        title: r.title,
-        folderId: r.folderId,
-        templateId: r.templateId,
-        createdAt: r.createdAt,
-        updatedAt: r.updatedAt,
-        thumbnailPath: r.thumbnailPath,
-        pageCount: r.pageCount,
-        isFavorite: r.isFavorite,
-        isInTrash: r.isInTrash,
-        deletedAt: r.deletedAt,
-        syncState: r.syncState,
-        paperColor: r.paperColor,
-        isPortrait: r.isPortrait,
-        documentType: r.documentType,
-        coverId: r.coverId,
-        hasCover: r.hasCover,
-        paperWidthMm: r.paperWidthMm,
-        paperHeightMm: r.paperHeightMm,
-      );
-
-  DocumentsCompanion _toCompanion(DocumentModel d) => DocumentsCompanion(
-        id: Value(d.id),
-        title: Value(d.title),
-        folderId: Value(d.folderId),
-        templateId: Value(d.templateId),
-        createdAt: Value(d.createdAt),
-        updatedAt: Value(d.updatedAt),
-        thumbnailPath: Value(d.thumbnailPath),
-        pageCount: Value(d.pageCount),
-        isFavorite: Value(d.isFavorite),
-        isInTrash: Value(d.isInTrash),
-        deletedAt: Value(d.deletedAt),
-        syncState: Value(d.syncState),
-        paperColor: Value(d.paperColor),
-        isPortrait: Value(d.isPortrait),
-        documentType: Value(d.documentType),
-        coverId: Value(d.coverId),
-        hasCover: Value(d.hasCover),
-        paperWidthMm: Value(d.paperWidthMm),
-        paperHeightMm: Value(d.paperHeightMm),
-      );
+  void dispose() {
+    _controller.close();
+  }
 }
