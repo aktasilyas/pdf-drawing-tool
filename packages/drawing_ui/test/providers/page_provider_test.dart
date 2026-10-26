@@ -89,6 +89,7 @@ void main() {
       notifier.addPage();
 
       final page0IdBefore = container.read(pageManagerProvider).pages[0].id;
+      // ignore: deprecated_member_use_from_same_package
       notifier.reorderPage(0, 2);
 
       final manager = container.read(pageManagerProvider);
