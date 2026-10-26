@@ -11,14 +11,17 @@ import '../golden/helpers/chrome_theme.dart';
 /// Records export requests instead of rendering a PDF and opening a picker.
 class _RecordingRunner extends PDFExportRunner {
   final exported = <DrawingDocument>[];
+  final shared = <bool>[];
 
   @override
   Future<void> run(
     ExportProgressNotifier progress,
     DrawingDocument document, {
     bool addWatermark = false,
+    bool share = false,
   }) async {
     exported.add(document);
+    shared.add(share);
   }
 }
 
@@ -84,6 +87,21 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(runner.exported, [container.read(documentProvider)]);
+    expect(find.byType(ExportPanel), findsNothing);
+  });
+
+  testWidgets('More > Dışa Aktar > PDF Paylaş runs the export as a share',
+      (tester) async {
+    await pumpPhone(tester);
+
+    await tester.tap(find.byTooltip('Daha Fazla'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Dışa Aktar'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('PDF Paylaş'));
+    await tester.pumpAndSettle();
+
+    expect(runner.shared, [true]);
     expect(find.byType(ExportPanel), findsNothing);
   });
 }
