@@ -46,6 +46,7 @@ export 'reader_mode_provider.dart';
 export 'sticker_provider.dart';
 export 'image_provider.dart';
 export 'sticky_note_provider.dart';
+export 'page_structure_actions.dart';
 export 'page_trash_callback_provider.dart';
 export 'scroll_direction_provider.dart';
 export 'sidebar_filter_provider.dart';
