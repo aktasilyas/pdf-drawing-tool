@@ -43,7 +43,8 @@ void main() {
     );
   }
 
-  test('password-protected PDF gives a friendly message and no leftover', () async {
+  test('password-protected PDF gives a friendly message and no leftover',
+      () async {
     final r = await importWith(
       PlatformException(code: 'pdf', message: 'Password required'),
     );
