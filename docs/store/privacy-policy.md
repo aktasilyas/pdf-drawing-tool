@@ -1,8 +1,8 @@
 # Elyanotes privacy policy (draft for v1.0)
 
 Status: approved by the owner on 2026-10-25 (#59). Scope: the v1.0 Android release, built with all
-feature flags off (`example_app/lib/core/config/feature_flags.dart`). Still to do before publishing:
-host this page at a public URL (Play Console requires one).
+feature flags off (`example_app/lib/core/config/feature_flags.dart`). Published at
+https://aktasilyas.github.io/pdf-drawing-tool/privacy/ (`.github/workflows/pages.yml`).
 
 The Turkish section is bundled in the app as `example_app/assets/legal/privacy_policy_tr.md`
 (Settings → Gizlilik politikası); keep both in sync (a test in `example_app` checks it).
