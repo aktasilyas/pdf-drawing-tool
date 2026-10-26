@@ -2,7 +2,8 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 
-import 'package:drawing_core/drawing_core.dart' show DrawingDocument, Page, PdfPathResolver;
+import 'package:drawing_core/drawing_core.dart'
+    show DrawingDocument, Page, PdfPathResolver;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Page;

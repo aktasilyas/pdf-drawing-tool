@@ -77,8 +77,8 @@ Future<void> importPdfFile(
   PDFImportService? importService;
   try {
     // PDF Import Service kullan (dosya yolu ile - RAM tasarrufu)
-    final pdfPaths = ProviderScope.containerOf(context)
-        .read(pdfPathResolverProvider);
+    final pdfPaths =
+        ProviderScope.containerOf(context).read(pdfPathResolverProvider);
     importService = PDFImportService(pdfPaths: pdfPaths);
     final importResult = await importService.importFromFile(
       filePath: path,

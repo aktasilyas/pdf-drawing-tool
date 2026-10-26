@@ -61,8 +61,8 @@ List<int> pdfImportPageNumbers(PDFImportConfig config, int totalPages) {
 Future<File> newImportedPdfFile([
   PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
 ]) async {
-  final root = pdfPaths.documentsRoot ??
-      (await getApplicationDocumentsDirectory()).path;
+  final root =
+      pdfPaths.documentsRoot ?? (await getApplicationDocumentsDirectory()).path;
   final pdfDir = Directory('$root/${PdfPathResolver.pdfDir}');
   if (!await pdfDir.exists()) {
     await pdfDir.create(recursive: true);
