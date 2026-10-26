@@ -9,6 +9,10 @@ Page _page(Layer layer) => Page.create(
       size: const PageSize(width: 200, height: 120),
     ).copyWith(layers: [layer]);
 
+/// Image XObject dictionaries visible in [pdf].
+int _imageXObjects(List<int> pdf) =>
+    RegExp(r'/Subtype\s*/Image').allMatches(latin1.decode(pdf)).length;
+
 /// Exports a single page holding [layer] and returns the PDF bytes.
 Future<List<int>> _export(Layer layer) async {
   final result = await PDFExporter().exportPages(
@@ -38,7 +42,7 @@ void main() {
     final withNote =
         await _export(Layer.empty('l').addShape(shape).addStickyNote(note));
 
-    expect(latin1.decode(plain), isNot(contains('/Image')));
+    expect(_imageXObjects(plain), 0);
     expect(withNote.length, greaterThan(plain.length + 200),
         reason: 'the note overlay image must be embedded');
   });
