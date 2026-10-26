@@ -4,9 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_ui/src/models/models.dart';
-import 'package:drawing_ui/src/panels/tool_panel.dart';
+import 'package:drawing_ui/src/panels/chrome_panel_parts.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
-import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
+import 'package:drawing_ui/src/theme/theme.dart';
+import 'package:drawing_ui/src/toolbar/chrome_icon_button.dart';
 import 'package:drawing_ui/src/widgets/color_picker_strip.dart';
 import 'package:drawing_ui/src/widgets/compact_toggle.dart';
 import 'package:drawing_ui/src/widgets/goodnotes_slider.dart';
@@ -20,98 +21,63 @@ class HighlighterSettingsPanel extends ConsumerWidget {
     final settings = ref.watch(highlighterSettingsProvider);
     final currentTool = ref.watch(currentToolProvider);
     final isNeon = currentTool == ToolType.neonHighlighter;
-    final cs = Theme.of(context).colorScheme;
+    final palette = ChromePalette.of(context);
+    final notifier = ref.read(highlighterSettingsProvider.notifier);
+    final minTh = isNeon ? 8.0 : 10.0;
+    final maxTh = isNeon ? 30.0 : 40.0;
+    final thickness = settings.thickness.clamp(minTh, maxTh);
 
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(ChromeSpacing.lg),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // ── Title + Close ──
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  isNeon ? 'Neon Fosforlu' : 'Fosforlu Kalem',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: cs.onSurface,
-                  ),
-                ),
-              ),
-              PanelCloseButton(
-                onTap: () =>
-                    ref.read(activePanelProvider.notifier).state = null,
-              ),
-            ],
+          ChromePanelHeader(
+            title: isNeon ? 'Neon Fosforlu' : 'Fosforlu Kalem',
+            onClose: () => ref.read(activePanelProvider.notifier).state = null,
           ),
-          const SizedBox(height: 16),
-
-          // ── Stroke Preview ──
           _HighlighterStrokePreview(
             color: settings.color,
             thickness: settings.thickness,
             isNeon: isNeon,
           ),
-          const SizedBox(height: 16),
-
-          // ── Highlighter Type Selector ──
+          const SizedBox(height: ChromeSpacing.sm),
           _HighlighterTypeSelector(
             selectedType: currentTool,
             onTypeSelected: (t) =>
                 ref.read(currentToolProvider.notifier).selectTool(t),
           ),
-          const SizedBox(height: 20),
-
-          // ── KALINLIK (thickness) ──
+          const ChromeHairline(),
           GoodNotesSlider(
             label: 'Kalınlık',
-            value: settings.thickness
-                .clamp(isNeon ? 8.0 : 10.0, isNeon ? 30.0 : 40.0),
-            min: isNeon ? 8.0 : 10.0,
-            max: isNeon ? 30.0 : 40.0,
-            displayValue:
-                '${settings.thickness.clamp(isNeon ? 8.0 : 10.0, isNeon ? 30.0 : 40.0).toStringAsFixed(0)}mm',
-            activeColor: cs.primary,
-            onChanged: (v) =>
-                ref.read(highlighterSettingsProvider.notifier).setThickness(v),
+            value: thickness,
+            min: minTh,
+            max: maxTh,
+            displayValue: '${thickness.toStringAsFixed(0)}mm',
+            activeColor: palette.accent,
+            onChanged: notifier.setThickness,
           ),
-          const SizedBox(height: 8),
-
-          // ── PARLAKLIK (glow — neon only) ──
-          if (isNeon) ...[
+          if (isNeon)
             GoodNotesSlider(
               label: 'Parlaklık',
               value: settings.glowIntensity,
               min: 0.1,
               max: 1.0,
               displayValue: '${(settings.glowIntensity * 100).round()}%',
-              activeColor: cs.primary,
-              onChanged: (v) => ref
-                  .read(highlighterSettingsProvider.notifier)
-                  .setGlowIntensity(v),
+              activeColor: palette.accent,
+              onChanged: notifier.setGlowIntensity,
             ),
-            const SizedBox(height: 8),
-          ],
-
-          // ── Straight-line toggle ──
           CompactToggle(
             label: 'Düz çizgi',
             value: settings.straightLineMode,
-            onChanged: (v) => ref
-                .read(highlighterSettingsProvider.notifier)
-                .setStraightLineMode(v),
+            onChanged: notifier.setStraightLineMode,
           ),
-          const SizedBox(height: 16),
-
-          // ── RENK SEÇİCİ ──
+          const ChromeHairline(),
           ColorPickerStrip(
             selectedColor: settings.color,
             isHighlighter: true,
-            onColorSelected: (c) =>
-                ref.read(highlighterSettingsProvider.notifier).setColor(c),
+            onColorSelected: notifier.setColor,
           ),
         ],
       ),
@@ -227,31 +193,19 @@ class _HighlighterTypeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: _types.map((t) {
-        final selected = t == selectedType;
-        final icon = t == ToolType.neonHighlighter
-            ? PhosphorIconsLight.lightning
-            : ElyanotesIcons.highlighter;
-        return GestureDetector(
-          onTap: () => onTypeSelected(t),
-          behavior: HitTestBehavior.opaque,
-          child: Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: selected ? cs.primary : Colors.transparent,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(
-              icon,
-              size: 20,
-              color: selected ? cs.onPrimary : cs.onSurfaceVariant,
-            ),
-          ),
+        final isNeon = t == ToolType.neonHighlighter;
+        return ChromeIconButton(
+          key: ValueKey('highlighter-type-${t.name}'),
+          icon: isNeon
+              ? PhosphorIconsLight.lightning
+              : ElyanotesIcons.highlighter,
+          iconSize: ChromeIconSizes.md,
+          tooltip: isNeon ? 'Neon Fosforlu' : 'Fosforlu Kalem',
+          selected: t == selectedType,
+          onPressed: () => onTypeSelected(t),
         );
       }).toList(),
     );

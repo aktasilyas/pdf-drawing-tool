@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/models/models.dart';
+import 'package:drawing_ui/src/panels/chrome_panel_parts.dart';
 import 'package:drawing_ui/src/panels/pen_type_picker.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
-import 'package:drawing_ui/src/toolbar/chrome_icon_button.dart';
 import 'package:drawing_ui/src/widgets/color_picker_strip.dart';
 import 'package:drawing_ui/src/widgets/goodnotes_slider.dart';
 
@@ -21,7 +21,7 @@ class PenSettingsPanel extends ConsumerWidget {
   static const double width = 380;
 
   /// Header height.
-  static const double headerHeight = 48;
+  static const double headerHeight = ChromePanelHeader.height;
 
   /// Tools this panel edits (the picker row shows the five v2 presets;
   /// legacy pens keep their settings here when they are current).
@@ -57,30 +57,9 @@ class PenSettingsPanel extends ConsumerWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SizedBox(
-            height: headerHeight,
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    active.penType?.config.displayNameTr ?? 'Kalem',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: palette.textPrimary,
-                        ),
-                  ),
-                ),
-                ChromeIconButton(
-                  icon: ElyanotesIcons.close,
-                  iconSize: ChromeIconSizes.md,
-                  tooltip: 'Kapat',
-                  onPressed: () =>
-                      ref.read(activePanelProvider.notifier).state = null,
-                ),
-              ],
-            ),
+          ChromePanelHeader(
+            title: active.penType?.config.displayNameTr ?? 'Kalem',
+            onClose: () => ref.read(activePanelProvider.notifier).state = null,
           ),
           PenTypePicker(
             padding: EdgeInsets.zero,
@@ -91,7 +70,7 @@ class PenSettingsPanel extends ConsumerWidget {
               }
             },
           ),
-          const _Hairline(),
+          const ChromeHairline(),
           GoodNotesSlider(
             label: 'Kalınlık',
             value: s.thickness.clamp(_minTh(active), _maxTh(active)),
@@ -123,28 +102,12 @@ class PenSettingsPanel extends ConsumerWidget {
             activeColor: palette.accent,
             onChanged: notifier.setStabilization,
           ),
-          const _Hairline(),
+          const ChromeHairline(),
           ColorPickerStrip(
             selectedColor: s.color,
             onColorSelected: notifier.setColor,
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// 1dp `border` divider with `md` vertical breathing room.
-class _Hairline extends StatelessWidget {
-  const _Hairline();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: ChromeSpacing.md),
-      child: SizedBox(
-        height: 1,
-        child: ColoredBox(color: ChromePalette.of(context).border),
       ),
     );
   }

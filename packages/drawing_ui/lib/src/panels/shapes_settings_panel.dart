@@ -1,10 +1,10 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:drawing_ui/src/theme/chrome_roles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:drawing_ui/src/panels/tool_panel.dart';
+import 'package:drawing_ui/src/panels/chrome_panel_parts.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
+import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/widgets/color_picker_strip.dart';
 import 'package:drawing_ui/src/widgets/compact_toggle.dart';
 import 'package:drawing_ui/src/widgets/goodnotes_slider.dart';
@@ -16,39 +16,27 @@ class ShapesSettingsPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(shapesSettingsProvider);
-    final cs = Theme.of(context).colorScheme;
+    final palette = ChromePalette.of(context);
 
     return Padding(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(ChromeSpacing.lg),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text('Şekil',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: cs.onSurface)),
-              ),
-              PanelCloseButton(
-                onTap: () =>
-                    ref.read(activePanelProvider.notifier).state = null,
-              ),
-            ],
+          ChromePanelHeader(
+            title: 'Şekil',
+            onClose: () => ref.read(activePanelProvider.notifier).state = null,
           ),
-          const SizedBox(height: 10),
           _ShapeGrid(
             selectedShape: settings.selectedShape,
             onShapeSelected: (s) =>
                 ref.read(shapesSettingsProvider.notifier).setSelectedShape(s),
           ),
-          const SizedBox(height: 12),
+          const ChromeHairline(),
           GoodNotesSlider(
             label: 'Kontur Kalınlığı',
-            activeColor: cs.primary,
+            activeColor: palette.accent,
             value: settings.strokeThickness,
             min: 0.1,
             max: 10.0,
@@ -56,15 +44,14 @@ class ShapesSettingsPanel extends ConsumerWidget {
             onChanged: (v) =>
                 ref.read(shapesSettingsProvider.notifier).setStrokeThickness(v),
           ),
-          const SizedBox(height: 10),
-          _StripLabel(label: 'Kontur Rengi'),
-          const SizedBox(height: 6),
+          const SizedBox(height: ChromeSpacing.sm),
+          const ChromeSectionLabel('Kontur Rengi'),
           ColorPickerStrip(
             selectedColor: settings.strokeColor,
             onColorSelected: (c) =>
                 ref.read(shapesSettingsProvider.notifier).setStrokeColor(c),
           ),
-          const SizedBox(height: 8),
+          const ChromeHairline(),
           CompactToggle(
             label: 'Şekil dolgusu',
             value: settings.fillEnabled,
@@ -72,9 +59,8 @@ class ShapesSettingsPanel extends ConsumerWidget {
                 ref.read(shapesSettingsProvider.notifier).setFillEnabled(v),
           ),
           if (settings.fillEnabled) ...[
-            const SizedBox(height: 8),
-            _StripLabel(label: 'Dolgu Rengi'),
-            const SizedBox(height: 6),
+            const SizedBox(height: ChromeSpacing.sm),
+            const ChromeSectionLabel('Dolgu Rengi'),
             ColorPickerStrip(
               selectedColor: settings.fillColor,
               onColorSelected: (c) =>
@@ -84,22 +70,6 @@ class ShapesSettingsPanel extends ConsumerWidget {
         ],
       ),
     );
-  }
-}
-
-/// Section label for color strip.
-class _StripLabel extends StatelessWidget {
-  const _StripLabel({required this.label});
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Text(label,
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: cs.onSurfaceVariant,
-            letterSpacing: 0.5));
   }
 }
 
@@ -118,8 +88,8 @@ class _ShapeGrid extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       crossAxisCount: 5,
-      mainAxisSpacing: 6,
-      crossAxisSpacing: 6,
+      mainAxisSpacing: ChromeSpacing.sm,
+      crossAxisSpacing: ChromeSpacing.sm,
       children: ShapeType.values
           .map((shape) => _ShapeOption(
                 shape: shape,
@@ -144,25 +114,36 @@ class _ShapeOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return GestureDetector(
+    final palette = ChromePalette.of(context);
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: shape.name,
+      excludeSemantics: true,
       onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: isSelected ? cs.primaryContainer : cs.controlSurface,
-          borderRadius: BorderRadius.circular(4),
-          border: Border.all(
-            color: isSelected ? cs.primary : cs.outline.withValues(alpha: 0.3),
-            width: isSelected ? 1.5 : 1,
+      child: GestureDetector(
+        key: ValueKey('shape-${shape.name}'),
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          decoration: BoxDecoration(
+            color: isSelected ? palette.accentContainer : Colors.transparent,
+            borderRadius: BorderRadius.circular(ChromeRadius.sm),
+            border: Border.all(
+              color: isSelected ? palette.accent : palette.border,
+              width: isSelected ? 1.5 : 1,
+            ),
+          ),
+          child: Center(
+            child: CustomPaint(
+              size: const Size(18, 18),
+              painter: _ShapeIconPainter(
+                shape: shape,
+                color: isSelected ? palette.accent : palette.textMuted,
+              ),
+            ),
           ),
         ),
-        child: Center(
-            child: CustomPaint(
-          size: const Size(18, 18),
-          painter: _ShapeIconPainter(
-              shape: shape,
-              color: isSelected ? cs.primary : cs.onSurfaceVariant),
-        )),
       ),
     );
   }

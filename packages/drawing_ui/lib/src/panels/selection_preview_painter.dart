@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:drawing_ui/src/providers/drawing_providers.dart';
+import 'package:drawing_ui/src/theme/theme.dart';
 
 // ---------------------------------------------------------------------------
 // Selection Preview
@@ -16,23 +17,28 @@ class SelectionPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final selectionColor = Theme.of(context).colorScheme.primary;
+    final palette = ChromePalette.of(context);
     return SizedBox(
       width: double.infinity,
       height: 100,
       child: CustomPaint(
         size: const Size(double.infinity, 100),
-        painter: _SelectionPreviewPainter(mode, selectionColor),
+        painter: _SelectionPreviewPainter(
+          mode,
+          palette.accent,
+          palette.textMuted,
+        ),
       ),
     );
   }
 }
 
 class _SelectionPreviewPainter extends CustomPainter {
-  _SelectionPreviewPainter(this.mode, this.selectionColor);
+  _SelectionPreviewPainter(this.mode, this.selectionColor, this.objectColor);
 
   final LassoMode mode;
   final Color selectionColor;
+  final Color objectColor;
 
   late final Color _selectionFill = selectionColor.withValues(alpha: 0.06);
 
@@ -56,7 +62,7 @@ class _SelectionPreviewPainter extends CustomPainter {
   /// Draws small sample objects (lines/shapes) that appear "selected".
   void _drawSampleObjects(Canvas canvas, double w, double h) {
     final objectPaint = Paint()
-      ..color = const Color(0xFF888888)
+      ..color = objectColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.5
       ..strokeCap = StrokeCap.round;
@@ -148,5 +154,7 @@ class _SelectionPreviewPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_SelectionPreviewPainter o) =>
-      mode != o.mode || selectionColor != o.selectionColor;
+      mode != o.mode ||
+      selectionColor != o.selectionColor ||
+      objectColor != o.objectColor;
 }

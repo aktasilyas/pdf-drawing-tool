@@ -1,6 +1,8 @@
 /// Compact toggle widget for panel settings.
 import 'package:flutter/material.dart';
 
+import 'package:drawing_ui/src/theme/theme.dart';
+
 /// Compact toggle (switch) with label.
 ///
 /// Commonly used in tool settings panels for boolean options
@@ -41,31 +43,39 @@ class CompactToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final palette = ChromePalette.of(context);
     final textTheme = Theme.of(context).textTheme;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              label,
-              style: textTheme.labelSmall?.copyWith(
-                color: colorScheme.onSurface,
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: ChromeSizes.minTouchTarget),
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => onChanged(!value),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                label,
+                style: textTheme.labelMedium?.copyWith(
+                  color: palette.textPrimary,
+                ),
               ),
             ),
-          ),
-          Transform.scale(
-            scale: scale,
-            child: Switch(
-              value: value,
-              onChanged: onChanged,
-              activeThumbColor: activeColor ?? colorScheme.primary,
-              materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            Transform.scale(
+              scale: scale,
+              child: Switch(
+                value: value,
+                onChanged: onChanged,
+                activeTrackColor: activeColor ?? palette.accent,
+                activeThumbColor: palette.onAccent,
+                inactiveThumbColor: palette.textMuted,
+                inactiveTrackColor: palette.surfaceElevated,
+                trackOutlineColor: WidgetStatePropertyAll(palette.border),
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
