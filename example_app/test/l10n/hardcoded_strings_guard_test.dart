@@ -21,10 +21,8 @@ Map<String, String> _readArb(String name) {
   };
 }
 
-Set<String> _placeholders(String message) => RegExp(r'\{(\w+)\}')
-    .allMatches(message)
-    .map((m) => m.group(1)!)
-    .toSet();
+Set<String> _placeholders(String message) =>
+    RegExp(r'\{(\w+)\}').allMatches(message).map((m) => m.group(1)!).toSet();
 
 void main() {
   group('findHardcodedStrings', () {
