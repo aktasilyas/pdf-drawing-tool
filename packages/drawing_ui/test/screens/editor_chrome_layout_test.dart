@@ -1,5 +1,6 @@
 import 'package:drawing_ui/drawing_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -42,18 +43,45 @@ void main() {
     }
   }
 
-  // Evaluates each guideline directly so a failure names the offending
-  // nodes on one line instead of only the guideline's description.
-  Future<void> expectGuidelines(WidgetTester tester) async {
-    final guidelines = [androidTapTargetGuideline, textContrastGuideline];
-    for (final guideline in guidelines) {
-      final evaluation = await guideline.evaluate(tester);
-      expect(
-        (evaluation.reason ?? '').replaceAll('\n', ' | '),
-        isEmpty,
-        reason: guideline.description,
-      );
+  // Tappable semantics nodes smaller than 48x48, as short "label/size"
+  // strings, so a guideline failure names the widget on one log line.
+  List<String> smallTapTargets(WidgetTester tester) {
+    final found = <String>[];
+    void visit(SemanticsNode node) {
+      final data = node.getSemanticsData();
+      final tappable = data.hasAction(SemanticsAction.tap) ||
+          data.hasAction(SemanticsAction.longPress);
+      final size = node.rect.size;
+      if (tappable &&
+          !node.isMergedIntoParent &&
+          (size.width < 47.9 || size.height < 47.9)) {
+        final name = [data.label, data.tooltip, data.value]
+            .where((s) => s.isNotEmpty)
+            .join('/');
+        found.add('"$name" ${size.width.round()}x${size.height.round()}');
+      }
+      node.visitChildren((child) {
+        visit(child);
+        return true;
+      });
     }
+
+    for (final view in tester.binding.renderViews) {
+      final root = view.owner?.semanticsOwner?.rootSemanticsNode;
+      if (root != null) visit(root);
+    }
+    return found;
+  }
+
+  Future<void> expectGuidelines(WidgetTester tester) async {
+    final tapTargets = await androidTapTargetGuideline.evaluate(tester);
+    expect(
+      tapTargets.passed ? '' : smallTapTargets(tester).join(', '),
+      isEmpty,
+      reason: androidTapTargetGuideline.description,
+    );
+    final contrast = await textContrastGuideline.evaluate(tester);
+    expect(contrast.passed, isTrue, reason: contrast.reason);
   }
 
   const tabletSizes = <String, Size>{
