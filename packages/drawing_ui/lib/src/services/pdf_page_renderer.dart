@@ -114,6 +114,40 @@ class PDFPageRenderer {
     );
   }
 
+  /// Longest side, in pixels, a page bitmap may have.
+  ///
+  /// 4096 px keeps one RGBA render under ~64 MB (A4: 4096 x 2895 ≈ 47 MB),
+  /// which mid-range Android devices handle; uncapped 2.5x renders reached
+  /// ~200 MB.
+  static const double maxRenderSide = 4096;
+
+  /// Scales [size] down, keeping its aspect ratio, so that its longest side
+  /// is at most [maxSide]. Sizes already within the limit are returned as is.
+  Size capRenderSize(Size size, {double maxSide = maxRenderSide}) {
+    final longest = size.longestSide;
+    if (longest <= maxSide || longest <= 0) return size;
+    final scale = maxSide / longest;
+    return Size(size.width * scale, size.height * scale);
+  }
+
+  /// Bitmap size for a page shown at display [quality] (1.5, 2.0 or 2.5;
+  /// see `getQualityForZoom`), capped by [maxRenderSide].
+  Size renderSizeForDisplayQuality({
+    required double pageWidth,
+    required double pageHeight,
+    required double quality,
+  }) {
+    final level = quality >= 2.5 ? RenderQuality.high : RenderQuality.medium;
+    final dpi = getRecommendedDPI(level, quality);
+    return capRenderSize(
+      calculateRenderSize(
+        pageWidth: pageWidth,
+        pageHeight: pageHeight,
+        dpi: dpi,
+      ),
+    );
+  }
+
   /// Determines the quality level based on zoom.
   RenderQuality getQualityLevel(double zoom) {
     if (zoom < 0.75) return RenderQuality.low;
@@ -168,20 +202,18 @@ class PDFPageRenderer {
       // Use quality-based DPI instead of zoom-based
       final dpi = getRecommendedDPI(options.quality, options.devicePixelRatio);
 
-      final width = calculateRenderWidth(
-        pageWidth: page.width,
-        dpi: dpi,
-      );
-
-      final height = calculateRenderHeight(
-        pageHeight: page.height,
-        dpi: dpi,
+      final size = capRenderSize(
+        calculateRenderSize(
+          pageWidth: page.width,
+          pageHeight: page.height,
+          dpi: dpi,
+        ),
       );
 
       // Render the page
       final pageImage = await page.render(
-        width: width,
-        height: height,
+        width: size.width,
+        height: size.height,
         format: PdfPageImageFormat.png,
       );
 
