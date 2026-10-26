@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'helpers/app_harness.dart';
+import 'helpers/pump_helpers.dart';
 import 'robots/editor_robot.dart';
 import 'robots/library_robot.dart';
 
