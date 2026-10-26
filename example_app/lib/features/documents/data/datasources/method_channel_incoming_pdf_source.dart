@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 
+import 'package:example_app/core/utils/logger.dart';
 import 'package:example_app/features/documents/domain/entities/incoming_pdf.dart';
 import 'package:example_app/features/documents/domain/repositories/incoming_pdf_source.dart';
 
@@ -37,9 +38,11 @@ class MethodChannelIncomingPdfSource implements IncomingPdfSource {
         }
       } on MissingPluginException {
         // No native side (tests, other platforms): nothing will ever arrive.
+        _channel.setMethodCallHandler(null);
         await controller.close();
-      } on PlatformException {
+      } catch (e, st) {
         // Native failed to answer; PDFs pushed later are still delivered.
+        logger.w('Incoming PDF channel not ready', error: e, stackTrace: st);
       }
     }
 

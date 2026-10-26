@@ -52,6 +52,15 @@ class MainActivity : FlutterFragmentActivity() {
         // already delivered by the original launch.
         val fromHistory = (intent.flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) != 0
         if (savedInstanceState == null && !fromHistory) handleIntent(intent)
+        executor.execute(::deleteStaleCopies)
+    }
+
+    /** Copies left behind when the process died before Dart imported them. */
+    private fun deleteStaleCopies() {
+        val cutoff = System.currentTimeMillis() - STALE_AFTER_MS
+        File(cacheDir, INCOMING_DIR).listFiles()?.forEach {
+            if (it.lastModified() < cutoff) it.delete()
+        }
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -112,10 +121,16 @@ class MainActivity : FlutterFragmentActivity() {
         // is sanitized.
         val name = displayName(uri)?.takeIf { it.isNotBlank() } ?: "document.pdf"
         val safe = name.replace(Regex("[^A-Za-z0-9 ._-]"), "_").take(MAX_FILE_NAME)
-        val dir = File(cacheDir, "incoming").apply { mkdirs() }
-        val target = File(dir, "${System.currentTimeMillis()}_$safe.pdf")
-        val input = contentResolver.openInputStream(uri) ?: error("No stream for $uri")
-        input.use { source -> target.outputStream().use { source.copyTo(it) } }
+        val fileName = if (safe.endsWith(".pdf", true)) safe else "$safe.pdf"
+        val dir = File(cacheDir, INCOMING_DIR).apply { mkdirs() }
+        val target = File(dir, "${System.currentTimeMillis()}_$fileName")
+        try {
+            val input = contentResolver.openInputStream(uri) ?: error("No stream for $uri")
+            input.use { source -> target.outputStream().use { source.copyTo(it) } }
+        } catch (e: Exception) {
+            target.delete()
+            throw e
+        }
         return mapOf("path" to target.absolutePath, "name" to name, "size" to target.length())
     }
 
@@ -129,5 +144,7 @@ class MainActivity : FlutterFragmentActivity() {
         const val PDF_MIME = "application/pdf"
         const val TAG = "IncomingPdf"
         const val MAX_FILE_NAME = 100
+        const val INCOMING_DIR = "incoming"
+        const val STALE_AFTER_MS = 24L * 60 * 60 * 1000
     }
 }

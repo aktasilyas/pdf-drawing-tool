@@ -77,6 +77,7 @@ class _IncomingPdfListenerState extends ConsumerState<IncomingPdfListener> {
 
   Future<void> _process(IncomingPdf pdf) async {
     try {
+      _showLibrary();
       if (!await widget.ensureQuota(context)) return;
       if (!mounted) return;
       await widget.importFile(
@@ -90,6 +91,15 @@ class _IncomingPdfListenerState extends ConsumerState<IncomingPdfListener> {
     } finally {
       _deleteCopy(pdf.path);
     }
+  }
+
+  /// The library stays mounted below the editor. Close routes above it so the
+  /// new document does not open on top of another editor (they share the
+  /// global PDF state providers).
+  void _showLibrary() {
+    final route = ModalRoute.of(context);
+    if (route == null || route.isCurrent) return;
+    Navigator.of(context).popUntil((r) => r == route);
   }
 
   void _deleteCopy(String path) {
