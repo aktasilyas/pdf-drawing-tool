@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/panels/chrome_panel_parts.dart';
 import 'package:drawing_ui/src/providers/drawing_providers.dart';
 import 'package:drawing_ui/src/providers/document_provider.dart';
 import 'package:drawing_ui/src/providers/history_provider.dart';
 import 'package:drawing_ui/src/providers/page_provider.dart';
 import 'package:drawing_ui/src/providers/canvas_transform_provider.dart';
-import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
+import 'package:drawing_ui/src/theme/theme.dart';
+
+// content: mirrors the StickyNote default colour (document ink, not chrome).
+const Color _kDefaultNoteColor = Color(0xFFFFF3CD);
 
 /// Settings panel for the sticky note tool.
 ///
@@ -17,44 +20,53 @@ class StickyNotePanel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final cs = Theme.of(context).colorScheme;
+    final palette = ChromePalette.of(context);
     return Padding(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(ChromeSpacing.lg),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Yapışkan Not',
-              style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: cs.onSurface)),
-          const SizedBox(height: 10),
-          SizedBox(
-            width: double.infinity,
+          ChromePanelHeader(
+            title: 'Yapışkan Not',
+            onClose: () => ref.read(activePanelProvider.notifier).state = null,
+          ),
+          Semantics(
+            button: true,
+            label: 'Not Ekle',
+            excludeSemantics: true,
+            onTap: () => _addStickyNote(context, ref),
             child: GestureDetector(
+              key: const ValueKey('sticky-note-add'),
               onTap: () => _addStickyNote(context, ref),
+              behavior: HitTestBehavior.opaque,
               child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFF3CD).withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                      color: const Color(0xFFFFF3CD).withValues(alpha: 0.8)),
+                constraints: const BoxConstraints(minHeight: 56),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: ChromeSpacing.md,
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(ChromeRadius.lg),
+                  border: Border.all(color: palette.border),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    PhosphorIcon(ElyanotesIcons.stickyNote,
-                        size: 22, color: const Color(0xFFD4A017)),
-                    const SizedBox(height: 4),
-                    const Text(
-                      'Not Ekle',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFFD4A017),
+                    Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        color: _kDefaultNoteColor,
+                        borderRadius: BorderRadius.circular(ChromeRadius.sm),
+                        border: Border.all(color: palette.border),
                       ),
+                    ),
+                    const SizedBox(width: ChromeSpacing.sm),
+                    Text(
+                      'Not Ekle',
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            color: palette.textPrimary,
+                          ),
                     ),
                   ],
                 ),

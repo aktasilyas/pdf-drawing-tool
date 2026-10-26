@@ -67,5 +67,62 @@ void main() {
       final switchWidget = tester.widget<Switch>(find.byType(Switch));
       expect(switchWidget.value, true);
     });
+
+    testWidgets('is at least 48dp tall', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CompactToggle(
+              label: 'Test',
+              value: false,
+              onChanged: (_) {},
+            ),
+          ),
+        ),
+      );
+
+      final size = tester.getSize(find.byType(CompactToggle));
+      expect(size.height, greaterThanOrEqualTo(48));
+    });
+
+    testWidgets('tapping the label flips the value once', (tester) async {
+      final calls = <bool>[];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CompactToggle(
+              label: 'Test Toggle',
+              value: false,
+              onChanged: calls.add,
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Test Toggle'));
+      await tester.pump();
+      expect(calls, [true]);
+    });
+
+    testWidgets('tapping the switch calls onChanged once', (tester) async {
+      final calls = <bool>[];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: CompactToggle(
+              label: 'Test Toggle',
+              value: true,
+              onChanged: calls.add,
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(Switch));
+      await tester.pump();
+      expect(calls, [false]);
+    });
   });
 }

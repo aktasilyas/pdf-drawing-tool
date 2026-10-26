@@ -1,5 +1,6 @@
 // Panel exports for drawing_ui
 export 'tool_panel.dart';
+export 'chrome_panel_parts.dart';
 export 'pen_settings_panel.dart';
 export 'pen_settings_widgets.dart';
 export 'highlighter_settings_panel.dart';
