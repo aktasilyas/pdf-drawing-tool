@@ -1,0 +1,214 @@
+name: Release
+
+# Signed Android App Bundle (#192). Steps for the owner: docs/store/release-checklist.md.
+# - Tag `vX.Y.Z` (or run manually): needs the ANDROID_* repository secrets and
+#   fails with one clear error naming any that are missing. FIREBASE_* secrets
+#   are optional (crash reporting, #60).
+# - Pull requests touching the release setup: same pipeline with a throwaway
+#   keystore, plus a check that missing secrets fail clearly. Nothing from a
+#   PR run is meant for upload.
+# versionCode = run_number + 100: never rename this file (the counter resets
+# and Play rejects lower version codes).
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - .github/workflows/release.yml
+      - scripts/release-*.sh
+      - example_app/android/app/build.gradle.kts
+      - example_app/android/app/proguard-rules.pro
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  BUNDLETOOL_VERSION: '1.17.2'
+  PACKAGE: com.aktasilyas.elyanotes
+
+jobs:
+  bundle:
+    name: signed app bundle
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: .flutter-version
+          channel: stable
+          cache: true
+
+      - name: Dependencies
+        run: ./scripts/check.sh pub
+
+      - name: Missing secrets fail clearly (PR check)
+        if: github.event_name == 'pull_request'
+        run: |
+          set +e
+          out=$(env -u ANDROID_KEYSTORE_BASE64 -u ANDROID_KEYSTORE_PASSWORD -u ANDROID_KEY_ALIAS \
+            -u ANDROID_KEY_PASSWORD GITHUB_ENV=/dev/null ./scripts/release-secrets.sh 2>&1)
+          code=$?
+          set -e
+          echo "$out" | sed 's/^::error/(expected) error/'
+          [ "$code" -ne 0 ] || { echo "::error::release-secrets.sh succeeded without secrets"; exit 1; }
+          echo "$out" | grep -q 'Missing repository secrets: ANDROID_KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD' \
+            || { echo "::error::missing-secrets message not found"; exit 1; }
+
+      - name: Signing with a throwaway keystore (PR check)
+        if: github.event_name == 'pull_request'
+        run: |
+          pass=$(openssl rand -hex 16)
+          echo "::add-mask::$pass"
+          keytool -genkeypair -keystore "$RUNNER_TEMP/ephemeral.jks" -storetype PKCS12 \
+            -storepass "$pass" -keypass "$pass" -alias upload -keyalg RSA -keysize 2048 \
+            -validity 2 -dname "CN=Elyanotes PR check"
+          ANDROID_KEYSTORE_BASE64=$(base64 -w0 "$RUNNER_TEMP/ephemeral.jks") \
+          ANDROID_KEYSTORE_PASSWORD=$pass ANDROID_KEY_ALIAS=upload ANDROID_KEY_PASSWORD=$pass \
+            ./scripts/release-secrets.sh
+
+      - name: Signing with repository secrets
+        if: github.event_name != 'pull_request'
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
+        run: ./scripts/release-secrets.sh
+
+      # ci.yml already runs these on every PR.
+      - name: Analyze
+        if: github.event_name != 'pull_request'
+        run: ./scripts/check.sh analyze
+
+      - name: Test
+        if: github.event_name != 'pull_request'
+        run: ./scripts/check.sh test
+
+      - name: Version
+        id: version
+        run: |
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            if ! [[ "$GITHUB_REF_NAME" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "::error title=Version::tag '$GITHUB_REF_NAME' is not vMAJOR.MINOR.PATCH"
+              exit 1
+            fi
+            name=${GITHUB_REF_NAME#v}
+          else
+            name=$(sed -n 's/^version:[[:space:]]*\([^+[:space:]]*\).*/\1/p' example_app/pubspec.yaml)
+          fi
+          code=$((GITHUB_RUN_NUMBER + 100))
+          echo "name=$name" >>"$GITHUB_OUTPUT"
+          echo "code=$code" >>"$GITHUB_OUTPUT"
+          echo "versionName $name, versionCode $code"
+
+      - name: Build app bundle
+        working-directory: example_app
+        run: |
+          defines=()
+          [ -f config/firebase.json ] && defines=(--dart-define-from-file=config/firebase.json)
+          # All FF_* feature flags stay off (v1.0 scope).
+          flutter build appbundle --release --obfuscate --split-debug-info=build/symbols \
+            --build-name=${{ steps.version.outputs.name }} \
+            --build-number=${{ steps.version.outputs.code }} \
+            "${defines[@]}"
+
+      - name: Verify release signature
+        run: |
+          aab=example_app/build/app/outputs/bundle/release/app-release.aab
+          # -strict exit code 4 only means "chain not validated": every upload key is
+          # self-signed. Anything else (tampered, unsigned entries) fails. An unsigned
+          # bundle exits 0, so the output and the signer fingerprint are checked too.
+          set +e
+          verify=$(jarsigner -verify -strict "$aab" 2>&1)
+          code=$?
+          set -e
+          echo "$verify"
+          if { [ "$code" -ne 0 ] && [ "$code" -ne 4 ]; } || ! echo "$verify" | grep -q 'jar verified'; then
+            echo "::error title=Signing::jarsigner -verify failed (exit $code)"; exit 1
+          fi
+          signer=$(keytool -printcert -jarfile "$aab" 2>/dev/null)
+          bundle_sha=$(echo "$signer" | sed -n 's/^[[:space:]]*SHA256: //p' | head -n 1)
+          key_sha=$(keytool -list -v -keystore "$ANDROID_KEYSTORE_PATH" -storepass "$ANDROID_KEYSTORE_PASSWORD" \
+            -alias "$ANDROID_KEY_ALIAS" 2>/dev/null | sed -n 's/^[[:space:]]*SHA256: //p' | head -n 1)
+          if echo "$signer" | grep -q 'CN=Android Debug'; then
+            echo "::error title=Signing::bundle is debug-signed"; exit 1
+          fi
+          if [ -z "$bundle_sha" ] || [ "$bundle_sha" != "$key_sha" ]; then
+            echo "::error title=Signing::bundle signer ($bundle_sha) does not match the upload key ($key_sha)"; exit 1
+          fi
+          echo "Signed with the upload key: SHA256 $bundle_sha"
+
+      - name: Universal APK for the smoke test
+        run: |
+          curl -sSfL -o "$RUNNER_TEMP/bundletool.jar" \
+            "https://github.com/google/bundletool/releases/download/$BUNDLETOOL_VERSION/bundletool-all-$BUNDLETOOL_VERSION.jar"
+          java -jar "$RUNNER_TEMP/bundletool.jar" build-apks --mode=universal \
+            --bundle=example_app/build/app/outputs/bundle/release/app-release.aab \
+            --output=example_app/build/app-release.apks \
+            --ks="$ANDROID_KEYSTORE_PATH" --ks-pass="pass:$ANDROID_KEYSTORE_PASSWORD" \
+            --ks-key-alias="$ANDROID_KEY_ALIAS" --key-pass="pass:$ANDROID_KEY_PASSWORD"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: elyanotes-${{ steps.version.outputs.name }}-${{ steps.version.outputs.code }}-aab
+          path: example_app/build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: elyanotes-${{ steps.version.outputs.name }}-${{ steps.version.outputs.code }}-symbols
+          path: |
+            example_app/build/app/outputs/mapping/release/mapping.txt
+            example_app/build/symbols
+          if-no-files-found: error
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: smoke-apks
+          path: example_app/build/app-release.apks
+          retention-days: 3
+          if-no-files-found: error
+
+  smoke:
+    name: release build starts on emulator
+    needs: bundle
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: smoke-apks
+          path: build
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' \
+            | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          disable-animations: true
+          script: ./scripts/release-smoke.sh build/app-release.apks ${{ env.PACKAGE }}
