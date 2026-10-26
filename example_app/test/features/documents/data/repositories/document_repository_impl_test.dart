@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:uuid/uuid.dart';
 import 'package:example_app/features/documents/documents.dart';
+import '../../../../helpers/pass_through_runner.dart';
 
 class MockDocumentLocalDatasource extends Mock
     implements DocumentLocalDatasource {}
@@ -33,6 +34,7 @@ void main() {
     repository = DocumentRepositoryImpl(
       mockDatasource,
       mockFolderDatasource,
+      PassThroughRunner(),
       mockUuid,
     );
   });

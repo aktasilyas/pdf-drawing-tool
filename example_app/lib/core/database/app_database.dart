@@ -126,7 +126,8 @@ class DocumentContents extends Table {
 }
 
 /// Pages removed from a document, kept until restored or purged.
-@TableIndex(name: 'trashed_pages_source_document_idx', columns: {#sourceDocumentId})
+@TableIndex(
+    name: 'trashed_pages_source_document_idx', columns: {#sourceDocumentId})
 class TrashedPages extends Table {
   TextColumn get id => text()();
   TextColumn get pageId => text()();
@@ -140,7 +141,6 @@ class TrashedPages extends Table {
 
   @override
   Set<Column> get primaryKey => {id};
-
 }
 
 /// Sync queue table schema

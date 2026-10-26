@@ -1,20 +1,15 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:drift/native.dart';
 
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/documents.dart';
-
-/// Prefs that hold one document and one sub folder but reject every write,
-/// as SharedPreferences does when the platform write fails.
-class _RejectingPrefs extends Mock implements SharedPreferences {}
+import '../../../../helpers/pass_through_runner.dart';
+import '../../../../helpers/rejecting_database.dart';
 
 void main() {
-  late _RejectingPrefs prefs;
+  late AppDatabase db;
   late ProviderContainer container;
 
   final now = DateTime(2026, 1, 1);
@@ -33,19 +28,20 @@ void main() {
     createdAt: now,
   );
 
-  setUp(() {
-    prefs = _RejectingPrefs();
-    final documentsJson = json.encode([document.toJson()]);
-    final foldersJson = json.encode([root.toJson(), sub.toJson()]);
-    when(() => prefs.getString(any())).thenReturn(null);
-    when(() => prefs.getString('documents')).thenReturn(documentsJson);
-    when(() => prefs.getString('folders')).thenReturn(foldersJson);
-    when(() => prefs.setString(any(), any())).thenAnswer((_) async => false);
+  /// Holds one document and one sub folder but rejects every write.
+  setUp(() async {
+    db = AppDatabase(NativeDatabase.memory());
+    final documents = DocumentLocalDatasourceImpl(db);
+    final folders = FolderLocalDatasourceImpl(db);
+    await documents.createDocument(document);
+    await folders.createFolder(root);
+    await folders.createFolder(sub);
+    await rejectLibraryWrites(db);
 
-    final documents = DocumentLocalDatasourceImpl(prefs);
-    final folders = FolderLocalDatasourceImpl(prefs);
-    final documentRepo = DocumentRepositoryImpl(documents, folders);
-    final folderRepo = FolderRepositoryImpl(folders, documents);
+    final documentRepo =
+        DocumentRepositoryImpl(documents, folders, PassThroughRunner());
+    final folderRepo =
+        FolderRepositoryImpl(folders, documents, PassThroughRunner());
     container = ProviderContainer(
       overrides: [
         documentRepositoryProvider.overrideWithValue(documentRepo),
@@ -54,7 +50,10 @@ void main() {
     );
   });
 
-  tearDown(() => container.dispose());
+  tearDown(() async {
+    container.dispose();
+    await db.close();
+  });
 
   Future<void> pumpApp(WidgetTester tester, {Widget? home}) async {
     await tester.pumpWidget(

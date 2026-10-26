@@ -6,6 +6,7 @@ library;
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:example_app/core/core.dart' show getIt;
 import 'package:example_app/core/database/app_database.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -21,10 +22,9 @@ import 'package:example_app/features/sync/data/repositories/sync_repository_impl
 
 /// App database provider
 ///
-/// TODO(#147): reuse `getIt<AppDatabase>()` once DI registers the singleton
-/// (step 9) so the app has a single database instance.
+/// Returns the single [AppDatabase] registered in GetIt.
 final appDatabaseProvider = Provider<AppDatabase>((ref) {
-  return AppDatabase();
+  return getIt<AppDatabase>();
 });
 
 /// Shared preferences provider
