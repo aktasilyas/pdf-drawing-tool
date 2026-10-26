@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:drawing_core/src/models/bounding_box.dart';
 import 'package:drawing_core/src/models/drawing_point.dart';
+import 'package:drawing_core/src/models/element_ids.dart';
 import 'package:drawing_core/src/models/shape_type.dart';
 import 'package:drawing_core/src/models/stroke_style.dart';
 
@@ -69,7 +70,7 @@ class Shape {
     int? fillColor,
   }) {
     return Shape(
-      id: DateTime.now().microsecondsSinceEpoch.toString(),
+      id: ElementIds.next(),
       type: type,
       startPoint: startPoint,
       endPoint: endPoint,

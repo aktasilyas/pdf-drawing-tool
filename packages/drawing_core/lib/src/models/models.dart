@@ -5,6 +5,7 @@ export 'bounding_box.dart';
 export 'document.dart';
 export 'document_page_ops.dart';
 export 'drawing_point.dart';
+export 'element_ids.dart';
 export 'layer.dart';
 export 'pen_type.dart';
 export 'selection.dart';
