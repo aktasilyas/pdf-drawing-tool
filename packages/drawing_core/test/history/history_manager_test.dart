@@ -622,6 +622,61 @@ void main() {
         expect(doc, before);
         expect(strokes(doc, 0), 0);
       });
+
+      group('execute with pageId', () {
+        DrawingDocument withStrokes() {
+          var doc = manager.execute(
+            AddStrokeCommand(layerIndex: 0, stroke: createTestStroke('a')),
+            twoPages,
+          );
+          doc = manager.execute(
+            AddStrokeCommand(layerIndex: 0, stroke: createTestStroke('b')),
+            doc.setCurrentPage(1),
+          );
+          return doc.setCurrentPage(0);
+        }
+
+        test('runs on that page and keeps the current page', () {
+          final doc = withStrokes();
+          final result = manager.execute(
+            ClearLayerCommand(layerIndex: 0),
+            doc,
+            pageId: doc.pages[1].id,
+          );
+
+          expect(strokes(result, 0), 1);
+          expect(strokes(result, 1), 0);
+          expect(result.currentPageIndex, 0);
+        });
+
+        test('undo restores that page only', () {
+          final doc = withStrokes();
+          var result = manager.execute(
+            ClearLayerCommand(layerIndex: 0),
+            doc,
+            pageId: doc.pages[1].id,
+          );
+
+          result = manager.undo(result)!;
+
+          expect(strokes(result, 0), 1);
+          expect(strokes(result, 1), 1);
+        });
+
+        test('unknown pageId changes nothing and records nothing', () {
+          final doc = withStrokes();
+          final countBefore = manager.undoCount;
+
+          final result = manager.execute(
+            ClearLayerCommand(layerIndex: 0),
+            doc,
+            pageId: 'missing',
+          );
+
+          expect(result, doc);
+          expect(manager.undoCount, countBefore);
+        });
+      });
     });
   });
 }

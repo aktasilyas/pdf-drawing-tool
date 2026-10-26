@@ -358,8 +358,10 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel> {
           TextButton(
             onPressed: () {
               Navigator.pop(ctx);
-              historyManager
-                  .execute(ClearLayerCommand(layerIndex: doc.activeLayerIndex));
+              historyManager.execute(
+                ClearLayerCommand(layerIndex: doc.activeLayerIndex),
+                pageId: doc.pages[pageIndex].id,
+              );
             },
             style: TextButton.styleFrom(
                 foregroundColor: Theme.of(ctx).colorScheme.error),
