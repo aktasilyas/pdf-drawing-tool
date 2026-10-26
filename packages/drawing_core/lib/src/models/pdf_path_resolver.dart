@@ -61,7 +61,9 @@ class PdfPathResolver {
     if (root == null) return stored;
     final normalized = _normalize(stored);
     if (!_isAbsolute(stored)) {
-      return normalized.contains('..') ? stored : '$root/$normalized';
+      return normalized.split('/').contains('..')
+          ? stored
+          : '$root/$normalized';
     }
     final segments = normalized.split('/');
     if (segments.length >= 2 &&

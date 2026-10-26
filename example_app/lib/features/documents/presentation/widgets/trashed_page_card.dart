@@ -37,8 +37,10 @@ class _TrashedPageCardState extends State<TrashedPageCard> {
   Future<void> _generateThumbnail() async {
     try {
       final page = Page.fromJson(widget.trashedPage.pageData);
-      final pdfPaths =
-          ProviderScope.containerOf(context).read(pdfPathResolverProvider);
+      final pdfPaths = ProviderScope.containerOf(
+        context,
+        listen: false,
+      ).read(pdfPathResolverProvider);
       final data = await ThumbnailGenerator.generate(
         page,
         width: 150,

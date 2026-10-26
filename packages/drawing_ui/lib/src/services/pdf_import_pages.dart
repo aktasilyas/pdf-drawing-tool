@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' show Random;
 
 import 'package:drawing_core/drawing_core.dart';
 import 'package:flutter/foundation.dart';
@@ -68,7 +69,9 @@ Future<File> newImportedPdfFile([
     await pdfDir.create(recursive: true);
   }
 
-  final pdfId = 'pdf_${DateTime.now().millisecondsSinceEpoch}';
+  // Random suffix: two imports in the same millisecond must not share a file.
+  final suffix = Random().nextInt(1 << 30).toRadixString(36);
+  final pdfId = 'pdf_${DateTime.now().millisecondsSinceEpoch}_$suffix';
   return File('${pdfDir.path}/$pdfId.pdf');
 }
 
