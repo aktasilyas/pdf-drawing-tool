@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:drift/drift.dart';
@@ -27,6 +28,11 @@ abstract class DocumentLocalDatasource {
 class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
   final AppDatabase _db;
   final DocumentContentCodec _codec;
+
+  /// Newest content write per document. Large encodes yield mid-way, so
+  /// writes are chained to land in call order (a stale autosave never
+  /// overwrites a newer save).
+  final Map<String, Future<void>> _contentWrites = {};
 
   DocumentLocalDatasourceImpl(
     this._db, {
@@ -189,7 +195,29 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
   Future<void> saveDocumentContent(
     String id,
     Map<String, dynamic> content,
+  ) {
+    final write = _writeContentAfter(_contentWrites[id], id, content);
+    _contentWrites[id] = write;
+    unawaited(
+      write.then<void>((_) {}, onError: (Object _) {}).whenComplete(() {
+        if (identical(_contentWrites[id], write)) _contentWrites.remove(id);
+      }),
+    );
+    return write;
+  }
+
+  Future<void> _writeContentAfter(
+    Future<void>? previous,
+    String id,
+    Map<String, dynamic> content,
   ) async {
+    if (previous != null) {
+      try {
+        await previous;
+      } catch (_) {
+        // Already reported to the caller of that save.
+      }
+    }
     try {
       final data = await _codec.encode(content);
       await _db.into(_db.documentContents).insertOnConflictUpdate(

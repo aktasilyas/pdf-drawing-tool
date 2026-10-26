@@ -111,6 +111,34 @@ void main() {
       expect(restored.toJson(), equals(original));
     });
 
+    test('overlapping saves land in call order', () async {
+      final sliced = DocumentLocalDatasourceImpl(
+        db,
+        codec: const DocumentContentCodec(sliceBudget: Duration.zero),
+      );
+      final older = buildLargeDocument(pages: 30).toJson();
+      final newer = buildLargeDocument(pages: 1).toJson();
+
+      // The older, large save yields mid-encode; the newer one is quick.
+      await Future.wait([
+        sliced.saveDocumentContent('doc', older),
+        sliced.saveDocumentContent('doc', newer),
+      ]);
+
+      expect(await sliced.getDocumentContent('doc'), equals(newer));
+    });
+
+    test('a failed save does not block the next one', () async {
+      final cyclic = <String, dynamic>{};
+      cyclic['self'] = cyclic;
+      await expectLater(
+        ds.saveDocumentContent('doc', cyclic),
+        throwsA(isA<CacheException>()),
+      );
+      await ds.saveDocumentContent('doc', {'ok': true});
+      expect(await ds.getDocumentContent('doc'), {'ok': true});
+    });
+
     test('corrupt content still maps to CacheException', () async {
       await db.into(db.documentContents).insert(
             DocumentContentsCompanion.insert(
