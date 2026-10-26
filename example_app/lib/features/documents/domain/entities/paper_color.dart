@@ -68,11 +68,8 @@ enum PaperColor {
 
   /// Lower-case (Turkish-aware for I/İ), trimmed, diacritics folded.
   static String _fold(String value) {
-    final lower = value
-        .trim()
-        .replaceAll('I', 'ı')
-        .replaceAll('İ', 'i')
-        .toLowerCase();
+    final lower =
+        value.trim().replaceAll('I', 'ı').replaceAll('İ', 'i').toLowerCase();
     final buffer = StringBuffer();
     for (final rune in lower.runes) {
       final char = String.fromCharCode(rune);
