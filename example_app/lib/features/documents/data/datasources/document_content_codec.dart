@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:isolate';
 
+import 'package:drawing_core/drawing_core.dart';
+
 /// JSON codec for document content rows, built so large notebooks do not
 /// block UI frames. Small payloads are handled in one go.
 ///
@@ -92,6 +94,22 @@ class DocumentContentCodec {
     return Isolate.run(
       () => jsonDecode(data) as Map<String, dynamic>,
       debugName: 'document-content-decode',
+    );
+  }
+
+  /// Decodes [data] into a document. A large payload is decoded and turned
+  /// into a [DrawingDocument] on one background isolate, and the finished
+  /// model comes back via `Isolate.exit` without a copy.
+  Future<DrawingDocument> decodeDocument(String data) async {
+    final limit = decodeOffloadLength;
+    if (limit == null || data.length < limit) {
+      return DrawingDocument.fromJson(
+        jsonDecode(data) as Map<String, dynamic>,
+      );
+    }
+    return Isolate.run(
+      () => DrawingDocument.fromJson(jsonDecode(data) as Map<String, dynamic>),
+      debugName: 'document-model-decode',
     );
   }
 

@@ -32,7 +32,7 @@ void main() {
       // Arrange
       when(() => mockRepository.getDocument(testDocId))
           .thenAnswer((_) async => Right(testDocInfo));
-      when(() => mockRepository.getDocumentContent(testDocId))
+      when(() => mockRepository.getDrawingDocument(testDocId))
           .thenAnswer((_) async => const Right(null));
 
       // Act
@@ -46,7 +46,7 @@ void main() {
       expect(document.pageCount, 1);
 
       verify(() => mockRepository.getDocument(testDocId)).called(1);
-      verify(() => mockRepository.getDocumentContent(testDocId)).called(1);
+      verify(() => mockRepository.getDrawingDocument(testDocId)).called(1);
     });
 
     for (final color in PaperColor.values) {
@@ -56,7 +56,7 @@ void main() {
           when(() => mockRepository.getDocument(testDocId)).thenAnswer(
             (_) async => Right(testDocInfo.copyWith(paperColor: stored)),
           );
-          when(() => mockRepository.getDocumentContent(testDocId))
+          when(() => mockRepository.getDrawingDocument(testDocId))
               .thenAnswer((_) async => const Right(null));
 
           final result = await useCase(testDocId);
@@ -75,11 +75,11 @@ void main() {
         pages: [Page.create(index: 0)],
         createdAt: DateTime(2024, 1, 1),
         updatedAt: DateTime(2024, 1, 1),
-      ).toJson();
+      );
 
       when(() => mockRepository.getDocument(testDocId))
           .thenAnswer((_) async => Right(testDocInfo));
-      when(() => mockRepository.getDocumentContent(testDocId))
+      when(() => mockRepository.getDrawingDocument(testDocId))
           .thenAnswer((_) async => Right(testContent));
 
       // Act
@@ -92,7 +92,7 @@ void main() {
       expect(document.title, 'Test Document');
 
       verify(() => mockRepository.getDocument(testDocId)).called(1);
-      verify(() => mockRepository.getDocumentContent(testDocId)).called(1);
+      verify(() => mockRepository.getDrawingDocument(testDocId)).called(1);
     });
 
     test('uses the library title when the stored content title is stale',
@@ -103,11 +103,11 @@ void main() {
         pages: [Page.create(index: 0)],
         createdAt: DateTime(2024, 1, 1),
         updatedAt: DateTime(2024, 1, 1),
-      ).toJson();
+      );
 
       when(() => mockRepository.getDocument(testDocId))
           .thenAnswer((_) async => Right(testDocInfo));
-      when(() => mockRepository.getDocumentContent(testDocId))
+      when(() => mockRepository.getDrawingDocument(testDocId))
           .thenAnswer((_) async => Right(staleContent));
 
       final result = await useCase(testDocId);
@@ -128,17 +128,16 @@ void main() {
       expect(result.isLeft(), true);
 
       verify(() => mockRepository.getDocument(testDocId)).called(1);
-      verifyNever(() => mockRepository.getDocumentContent(any()));
+      verifyNever(() => mockRepository.getDrawingDocument(any()));
     });
 
     test('should return failure when content is corrupted', () async {
       // Arrange
-      const invalidContent = {'invalid': 'data'};
 
       when(() => mockRepository.getDocument(testDocId))
           .thenAnswer((_) async => Right(testDocInfo));
-      when(() => mockRepository.getDocumentContent(testDocId))
-          .thenAnswer((_) async => const Right(invalidContent));
+      when(() => mockRepository.getDrawingDocument(testDocId)).thenAnswer(
+          (_) async => const Left(CacheFailure('Document corrupted')));
 
       // Act
       final result = await useCase(testDocId);
@@ -147,7 +146,7 @@ void main() {
       expect(result.isLeft(), true);
 
       verify(() => mockRepository.getDocument(testDocId)).called(1);
-      verify(() => mockRepository.getDocumentContent(testDocId)).called(1);
+      verify(() => mockRepository.getDrawingDocument(testDocId)).called(1);
     });
   });
 }

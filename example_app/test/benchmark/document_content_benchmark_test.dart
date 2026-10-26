@@ -8,6 +8,8 @@ library;
 import 'dart:async';
 import 'dart:io';
 
+import 'package:dartz/dartz.dart' show Either;
+import 'package:drawing_core/drawing_core.dart';
 import 'package:drift/drift.dart' show QueryExecutor;
 import 'package:drift/native.dart';
 import 'package:flutter/foundation.dart' show debugPrint;
@@ -15,8 +17,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/documents.dart';
+import 'package:example_app/features/editor/editor.dart';
 
 import '../helpers/large_document.dart';
+import '../helpers/library_fixture.dart';
 
 /// Longest time the calling isolate's event loop was blocked while [work]
 /// ran, sampled with a 1 ms ticker. This is what a UI frame would wait for.
@@ -100,5 +104,52 @@ void main() {
       (file) => NativeDatabase.createInBackground(file),
       const DocumentContentCodec(),
     );
+  }, timeout: const Timeout(Duration(minutes: 3)));
+
+  test('300-page use cases (model <-> JSON <-> DB): stall stays small',
+      () async {
+    final fx = LibraryFixture(
+      NativeDatabase.createInBackground(File('${dir.path}/use_case.db')),
+    );
+    try {
+      final created = (await fx.documents.createDocument(
+        title: 'Büyük defter',
+        templateId: 'blank',
+      ))
+          .getOrElse(() => throw StateError('create failed'));
+      final document = buildLargeDocument().copyWith(id: created.id);
+      final save = SaveDocumentUseCase(fx.documents);
+      final load = LoadDocumentUseCase(fx.documents);
+
+      // Warm up the database and isolate spawn paths.
+      // A medium document also warms the JIT for the slicing code paths.
+      final warm = buildLargeDocument(pages: 30).copyWith(id: created.id);
+      await save(warm);
+      await load(created.id);
+
+      late final Either<Failure, void> saved;
+      final saveStall = await _longestStall(() async {
+        saved = await save(document);
+      });
+      expect(saved.isRight(), isTrue);
+
+      late final Either<Failure, DrawingDocument> loaded;
+      final loadStall = await _longestStall(() async {
+        loaded = await load(created.id);
+      });
+      final restored = loaded.getOrElse(() => throw StateError('load failed'));
+      expect(restored.pageCount, document.pageCount);
+
+      debugPrint('[content-bench] use case: longest UI-isolate stall '
+          'save ${_ms(saveStall)} ms, load ${_ms(loadStall)} ms '
+          '(budget 50 ms)');
+      // Timing varies a lot between machines (JIT, shared runners), so the
+      // test only guards against a return to the single-shot path (seconds
+      // on a slow machine); the 50 ms goal is tracked via the notice.
+      expect(saveStall, lessThan(const Duration(milliseconds: 250)));
+      expect(loadStall, lessThan(const Duration(milliseconds: 250)));
+    } finally {
+      await fx.close();
+    }
   }, timeout: const Timeout(Duration(minutes: 3)));
 }

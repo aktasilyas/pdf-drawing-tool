@@ -111,6 +111,30 @@ void main() {
       expect(restored.toJson(), equals(original));
     });
 
+    test('getDrawingDocument equals fromJson of the stored map', () async {
+      for (final document in [
+        buildLargeDocument(),
+        buildLargeDocument(pages: 2, strokesPerPage: 2),
+      ]) {
+        final original = document.toJson();
+        await ds.saveDocumentContent(document.id, original);
+
+        final model = await ds.getDrawingDocument(document.id);
+
+        expect(model!.toJson(), equals(original));
+        expect(model.pageCount, document.pageCount);
+      }
+      expect(await ds.getDrawingDocument('missing'), isNull);
+    });
+
+    test('getDrawingDocument reports corrupt content', () async {
+      await ds.saveDocumentContent('bad', {'invalid': 'data'});
+      await expectLater(
+        ds.getDrawingDocument('bad'),
+        throwsA(isA<CacheException>()),
+      );
+    });
+
     test('overlapping saves land in call order', () async {
       final sliced = DocumentLocalDatasourceImpl(
         db,

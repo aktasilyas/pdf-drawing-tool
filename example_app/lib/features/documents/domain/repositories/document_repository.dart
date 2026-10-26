@@ -94,6 +94,10 @@ abstract class DocumentRepository {
   /// Get document content (drawing data as JSON)
   Future<Either<Failure, Map<String, dynamic>?>> getDocumentContent(String id);
 
+  /// Document content as a model; null when nothing is stored yet. Large
+  /// documents are parsed off the UI isolate.
+  Future<Either<Failure, DrawingDocument?>> getDrawingDocument(String id);
+
   /// Save document content (drawing data as JSON)
   Future<Either<Failure, void>> saveDocumentContent({
     required String id,
