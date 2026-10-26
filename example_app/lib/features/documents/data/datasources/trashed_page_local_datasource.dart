@@ -66,7 +66,7 @@ class TrashedPageLocalDatasourceImpl implements TrashedPageLocalDatasource {
     }
   }
 
-  TrashedPageModel _toModel(TrashedPagesData r) => TrashedPageModel(
+  TrashedPageModel _toModel(TrashedPage r) => TrashedPageModel(
         id: r.id,
         pageId: r.pageId,
         sourceDocumentId: r.sourceDocumentId,
