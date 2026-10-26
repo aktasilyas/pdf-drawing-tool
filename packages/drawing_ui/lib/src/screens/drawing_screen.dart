@@ -7,6 +7,7 @@ import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/toolbar/toolbar.dart';
 import 'package:drawing_ui/src/canvas/page_slide_transition.dart';
 import 'package:drawing_ui/src/canvas/page_background_painter.dart';
+import 'package:drawing_ui/src/screens/canvas_brightness_sync.dart';
 import 'package:drawing_ui/src/screens/drawing_screen_layout.dart';
 import 'package:drawing_ui/src/screens/drawing_screen_theme.dart';
 import 'package:drawing_ui/src/widgets/widgets.dart';
@@ -74,17 +75,6 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
   Offset _penBoxPosition = const Offset(12, 12);
   bool _isPageTransitioning = false;
   int? _preSwitchPageIndex; // Original page index before interactive pre-switch
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final brightness = MediaQuery.platformBrightnessOf(context);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        ref.read(platformBrightnessProvider.notifier).state = brightness;
-      }
-    });
-  }
 
   @override
   void didUpdateWidget(DrawingScreen oldWidget) {
@@ -324,7 +314,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
 
     final drawingTheme = drawingThemeFromChrome(ChromePalette.of(context));
 
-    return DrawingThemeProvider(
+    final screen = DrawingThemeProvider(
       theme: drawingTheme,
       child: Scaffold(
         resizeToAvoidBottomInset: false,
@@ -496,6 +486,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
         ),
       ),
     );
+    return CanvasBrightnessSync(child: screen);
   }
 
   void _handleDocumentPageChange(core.DrawingDocument current) {

@@ -104,11 +104,17 @@ class _DocumentsWithFolders extends ConsumerWidget {
     final documentsAsync = ref.watch(documentsProvider(parentFolderId));
     return foldersAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => DocumentsErrorView(error: error),
+      error: (error, _) => DocumentsErrorView(
+        error: error,
+        onRetry: () => ref.invalidate(foldersProvider),
+      ),
       data: (folders) {
         return documentsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => DocumentsErrorView(error: error),
+          error: (error, _) => DocumentsErrorView(
+            error: error,
+            onRetry: () => ref.invalidate(documentsProvider(parentFolderId)),
+          ),
           data: (documents) {
             final searchQuery = ref.watch(searchQueryProvider);
             // Filter documents
@@ -188,14 +194,20 @@ class _FavoritesView extends ConsumerWidget {
 
     return favFoldersAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => DocumentsErrorView(error: error),
+      error: (error, _) => DocumentsErrorView(
+        error: error,
+        onRetry: () => ref.invalidate(favoriteFoldersProvider),
+      ),
       data: (folders) {
         return favDocsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => DocumentsErrorView(error: error),
+          error: (error, _) => DocumentsErrorView(
+            error: error,
+            onRetry: () => ref.invalidate(favoriteDocumentsProvider),
+          ),
           data: (documents) {
             if (folders.isEmpty && documents.isEmpty) {
-              return const DocumentsEmptyState();
+              return const FavoritesEmptyState();
             }
             final sorted = _sortDocuments(ref, documents);
             return _ViewModeSwitcher(

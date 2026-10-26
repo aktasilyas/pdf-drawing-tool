@@ -81,4 +81,6 @@ class DocumentsStrings {
   static const String errorDeletingDocument = 'Belge silinirken hata oluştu';
   static const String errorLoadingFolders = 'Klasörler yüklenirken hata oluştu';
   static const String errorCreatingFolder = 'Klasör oluşturulurken hata oluştu';
+  static const String folderDepthError =
+      'Alt klasörlerin altına klasör oluşturulamaz';
 }
