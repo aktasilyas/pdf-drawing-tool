@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 11 and older (API <= 30), full-backup rules. See
+     data_extraction_rules.xml for the rationale. -->
+<full-backup-content>
+    <include domain="root" path="app_flutter" />
+    <!-- Prefs hold tool presets and settings. Sync session is stored here too; sync is off in v1.0 builds, revisit when unfrozen. -->
+    <include domain="sharedpref" path="." />
+    <exclude domain="root" path="app_flutter/pdfs" />
+</full-backup-content>

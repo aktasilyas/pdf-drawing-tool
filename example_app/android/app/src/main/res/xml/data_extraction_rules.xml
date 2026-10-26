@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 12+ (API 31+). Flutter's getApplicationDocumentsDirectory() is
+     <data>/app_flutter: it holds elyanotes.db (+ -wal/-shm), imported pdfs/
+     and inserted images. Keep in sync with backup_rules.xml. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <include domain="root" path="app_flutter" />
+        <!-- Prefs hold tool presets and settings. Sync session is stored here too; sync is off in v1.0 builds, revisit when unfrozen. -->
+        <include domain="sharedpref" path="." />
+        <!-- Imported PDFs can exceed the 25 MB cloud quota and make Auto Backup
+             skip the whole backup. Page content survives; the PDF background
+             is re-imported by the user. -->
+        <exclude domain="root" path="app_flutter/pdfs" />
+    </cloud-backup>
+    <device-transfer>
+        <include domain="root" path="app_flutter" />
+        <include domain="sharedpref" path="." />
+    </device-transfer>
+</data-extraction-rules>
