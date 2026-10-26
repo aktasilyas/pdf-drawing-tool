@@ -30,18 +30,7 @@ class AboutSection extends StatelessWidget {
     return SettingsSection(
       title: 'HAKKINDA',
       children: [
-        Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Center(
-            child: Image.asset(
-              'assets/images/elyanotes_logo.png',
-              width: 200,
-              fit: BoxFit.contain,
-              excludeFromSemantics: true,
-              errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-            ),
-          ),
-        ),
+        const _AppIdentity(),
         SettingsTile(
           icon: Icons.info_outline,
           title: 'Sürüm',
@@ -94,5 +83,40 @@ class AboutSection extends StatelessWidget {
     if (context.mounted) {
       AppToast.success(context, 'E-posta adresi kopyalandı');
     }
+  }
+}
+
+/// App icon and name at the top of the About card. The launcher icon has
+/// its own light tile, so it reads on both themes (the wide wordmark PNG has
+/// an opaque white background and showed as a white box in dark mode).
+class _AppIdentity extends StatelessWidget {
+  const _AppIdentity();
+
+  static const double _iconSize = 64;
+
+  @override
+  Widget build(BuildContext context) {
+    final nameStyle = AppTypography.titleMedium.copyWith(
+      color: context.palette.textPrimary,
+    );
+    return Padding(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: Column(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(AppRadius.xl),
+            child: Image.asset(
+              'assets/images/elyanotes_app_icon.png',
+              width: _iconSize,
+              height: _iconSize,
+              excludeFromSemantics: true,
+              errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(AppAboutInfo.appName, style: nameStyle),
+        ],
+      ),
+    );
   }
 }
