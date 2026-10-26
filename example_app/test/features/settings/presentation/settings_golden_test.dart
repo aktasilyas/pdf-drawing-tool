@@ -16,6 +16,10 @@ import '../../../helpers/font_loader.dart';
 const _tablet = Size(1180, 820);
 const _phone = Size(390, 844);
 
+Future<void> _shortDelay() {
+  return Future<void>.delayed(const Duration(milliseconds: 20));
+}
+
 void main() {
   setUpAll(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
@@ -53,9 +57,13 @@ void main() {
       for (final e in find.byType(Image).evaluate()) {
         await precacheImage((e.widget as Image).image, e);
       }
-      // Lets the bundled policy Markdown finish loading.
-      await Future<void>.delayed(const Duration(milliseconds: 50));
     });
+    // The privacy policy loads its Markdown asset asynchronously.
+    final loading = find.byType(CircularProgressIndicator);
+    for (var i = 0; i < 50 && loading.evaluate().isNotEmpty; i++) {
+      await tester.runAsync(_shortDelay);
+      await tester.pump();
+    }
     await tester.pumpAndSettle();
   }
 

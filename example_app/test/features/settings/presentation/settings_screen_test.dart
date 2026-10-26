@@ -167,8 +167,13 @@ void main() {
     testWidgets('privacy policy opens the bundled policy', (tester) async {
       await pumpSettings(tester);
       await tester.tap(find.text('Gizlilik politikası'));
-      await tester.pumpAndSettle();
-      await tester.runAsync(_shortDelay);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      final loading = find.byType(CircularProgressIndicator);
+      for (var i = 0; i < 50 && loading.evaluate().isNotEmpty; i++) {
+        await tester.runAsync(_shortDelay);
+        await tester.pump();
+      }
       await tester.pumpAndSettle();
 
       expect(find.byType(PrivacyPolicyScreen), findsOneWidget);
