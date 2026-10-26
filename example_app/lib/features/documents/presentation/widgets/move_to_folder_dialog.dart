@@ -175,8 +175,9 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
                 style: AppTypography.caption.copyWith(color: textSecondary)),
             const SizedBox(height: AppSpacing.xs),
             InlineFolderColorRow(
-                selectedColorValue: _selectedColorValue,
-                onChanged: (v) => setState(() => _selectedColorValue = v)),
+              selectedColorValue: _selectedColorValue,
+              onChanged: (v) => setState(() => _selectedColorValue = v),
+            ),
             const SizedBox(height: AppSpacing.md),
             // Oluştur butonu
             AppButton(
@@ -297,12 +298,12 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
       AppToast.error(context, 'Klasör adı boş olamaz');
       return;
     }
-    final id = await ref
-        .read(foldersControllerProvider.notifier)
-        .createFolder(
-            name: name,
-            parentId: widget.parentFolderId,
-            colorValue: _selectedColorValue);
+    final controller = ref.read(foldersControllerProvider.notifier);
+    final id = await controller.createFolder(
+      name: name,
+      parentId: widget.parentFolderId,
+      colorValue: _selectedColorValue,
+    );
     if (id != null && mounted) {
       ref.invalidate(foldersProvider);
       setState(() {
