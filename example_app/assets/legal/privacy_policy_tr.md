@@ -1,5 +1,3 @@
-# Gizlilik politikası
-
 **Yürürlük tarihi:** 25 Ekim 2026
 
 Elyanotes ("uygulama"), İlyas Aktaş tarafından yayınlanan bir not alma uygulamasıdır. Bu

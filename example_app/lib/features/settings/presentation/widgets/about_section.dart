@@ -54,7 +54,8 @@ class AboutSection extends StatelessWidget {
           trailing: Icon(
             Icons.copy_outlined,
             size: AppIconSize.sm,
-            color: palette.textDisabled,
+            color: palette.textMuted,
+            semanticLabel: 'Kopyala',
           ),
           onTap: () => _copyContactEmail(context),
         ),
@@ -96,7 +97,7 @@ class _AppIdentity extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final nameStyle = AppTypography.titleMedium.copyWith(
+    final nameStyle = AppTypography.titleLarge.copyWith(
       color: context.palette.textPrimary,
     );
     return Padding(

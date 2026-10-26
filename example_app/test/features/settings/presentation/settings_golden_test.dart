@@ -98,12 +98,16 @@ void main() {
     );
   });
 
-  for (final dark in [false, true]) {
-    final name = 'privacy_policy_phone_${dark ? 'dark' : 'light'}';
+  const privacyCases = [
+    ('privacy_policy_phone_light', _phone, false),
+    ('privacy_policy_phone_dark', _phone, true),
+    ('privacy_policy_tablet_light', _tablet, false),
+  ];
+  for (final (name, size, dark) in privacyCases) {
     testWidgets(name, (tester) async {
       await pumpGolden(
         tester,
-        size: _phone,
+        size: size,
         dark: dark,
         home: const PrivacyPolicyScreen(),
       );

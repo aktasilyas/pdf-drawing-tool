@@ -86,8 +86,11 @@ class _PolicyBody extends StatelessWidget {
             p: body,
             listBullet: body,
             h1: AppTypography.headlineMedium.copyWith(color: primary),
-            h3: AppTypography.titleMedium.copyWith(color: primary),
-            h3Padding: const EdgeInsets.only(top: AppSpacing.md),
+            h3: AppTypography.titleMedium.copyWith(
+              color: primary,
+              fontWeight: FontWeight.w600,
+            ),
+            h3Padding: const EdgeInsets.only(top: AppSpacing.xl),
           ),
         ),
       ),

@@ -26,9 +26,9 @@ void main() {
     final bundled = File(AppAboutInfo.privacyPolicyAsset).readAsStringSync();
     final docs = File('../docs/store/privacy-policy.md').readAsStringSync();
 
-    const heading = '# Gizlilik politikası\n\n';
-    expect(bundled, startsWith(heading));
-    final body = bundled.substring(heading.length).trim();
+    // The app bar carries the title, so the asset starts at the date.
+    expect(bundled, startsWith('**Yürürlük tarihi:**'));
+    final body = bundled.trim();
     final turkish = docs.substring(docs.indexOf('## Türkçe')).trim();
     expect(turkish, endsWith(body));
     expect(body, contains(AppAboutInfo.contactEmail));
