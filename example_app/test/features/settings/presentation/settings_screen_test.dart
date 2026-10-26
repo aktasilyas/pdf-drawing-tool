@@ -18,6 +18,8 @@ import 'package:example_app/features/settings/presentation/screens/settings_scre
 import 'package:example_app/features/settings/presentation/widgets/about_section.dart';
 import 'package:example_app/features/sync/presentation/providers/sync_provider.dart';
 
+import '../../../helpers/l10n.dart';
+
 class _MockUser extends Mock implements User {}
 
 User? _noSupabase() => throw StateError('Supabase must not be touched');
@@ -59,7 +61,7 @@ void main() {
           drawing_ui.sharedPreferencesProvider.overrideWithValue(prefs),
           currentUserProvider.overrideWith((ref) => userFn()),
         ],
-        child: MaterialApp(
+        child: localizedApp(
           theme: AppTheme.light,
           home: const SettingsScreen(aboutSection: _about),
         ),
@@ -207,7 +209,7 @@ void main() {
 
     testWidgets('version falls back to a dash without build info',
         (tester) async {
-      final app = MaterialApp(
+      final app = localizedApp(
         theme: AppTheme.light,
         home: const Scaffold(body: AboutSection(buildName: null)),
       );

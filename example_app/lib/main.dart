@@ -6,6 +6,7 @@ import 'package:example_app/core/bootstrap/app_overrides.dart';
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/documents.dart';
 import 'package:example_app/features/settings/settings.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,7 +49,9 @@ class ElyaNotesApp extends ConsumerWidget {
     final router = ref.watch(appRouterProvider);
 
     return MaterialApp.router(
-      title: 'ElyaNotes',
+      title: 'ElyaNotes', // l10n-ignore
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       debugShowCheckedModeBanner: false,
       builder: (context, child) {
         // Failed library mutations surface as a snackbar on any screen.

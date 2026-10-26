@@ -10,6 +10,8 @@ import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/settings/presentation/widgets/crash_reporting_setting.dart';
 import 'package:example_app/features/sync/presentation/providers/sync_provider.dart';
 
+import '../../../helpers/l10n.dart';
+
 class _MockReporter extends Mock implements CrashReporter {}
 
 void main() {
@@ -32,7 +34,7 @@ void main() {
           sharedPreferencesProvider.overrideWithValue(prefs),
           crashReporterProvider.overrideWithValue(reporter),
         ],
-        child: MaterialApp(
+        child: localizedApp(
           theme: AppTheme.light,
           home: const Scaffold(body: CrashReportingSetting()),
         ),

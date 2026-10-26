@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/index.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 class SettingsHeader extends StatelessWidget {
   const SettingsHeader({super.key, this.userName, this.onNameTap});
@@ -17,6 +18,7 @@ class SettingsHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final name = userName;
     final titleStyle = AppTypography.headlineMedium.copyWith(
       color: context.palette.textPrimary,
@@ -25,7 +27,7 @@ class SettingsHeader extends StatelessWidget {
     final close = AppIconButton(
       icon: Icons.close,
       variant: AppIconButtonVariant.ghost,
-      tooltip: 'Kapat',
+      tooltip: l10n.commonClose,
       onPressed: () => Navigator.of(context).maybePop(),
     );
 
@@ -33,7 +35,7 @@ class SettingsHeader extends StatelessWidget {
     if (name == null) {
       content = Row(
         children: [
-          Expanded(child: Text('Ayarlar', style: titleStyle)),
+          Expanded(child: Text(l10n.settingsTitle, style: titleStyle)),
           close,
         ],
       );
@@ -58,7 +60,7 @@ class SettingsHeader extends StatelessWidget {
             container: true,
             button: true,
             label: name,
-            hint: 'Adı düzenle',
+            hint: l10n.settingsEditNameHint,
             onTap: onNameTap,
             excludeSemantics: true,
             child: GestureDetector(

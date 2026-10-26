@@ -1,10 +1,12 @@
 name: Update goldens
 
-# Regenerates golden PNGs on a claude/* branch for agent sessions that cannot
-# download the Flutter engine. Dispatch:
+# Regenerates golden PNGs, pubspec.lock files and gen-l10n output on a claude/*
+# branch for agent sessions that cannot download the Flutter engine. Dispatch:
 #   gh api -X POST repos/<owner>/<repo>/actions/workflows/update-goldens.yml/dispatches \
 #     -f ref=main -f "inputs[branch]=claude/<n>-<slug>" -f "inputs[package]=packages/drawing_ui"
-# The job commits changed committed goldens back to that branch (normal push)
+# (use ref=<the branch> instead of main when the branch changes this workflow).
+# The job commits changed goldens, lockfiles and example_app/lib/l10n/*.dart
+# back to that branch (normal push; generated files even if tests fail)
 # and uploads every rendered PNG (including git-ignored platform goldens) as an
 # artifact. A push made with GITHUB_TOKEN does not trigger CI, so the job
 # dispatches ci.yml on the branch afterwards.
@@ -62,7 +64,13 @@ jobs:
           cache: true
 
       - name: Dependencies
+        id: deps
         run: ./scripts/check.sh pub
+
+      - name: Generate localizations
+        if: hashFiles('example_app/l10n.yaml') != ''
+        working-directory: example_app
+        run: flutter gen-l10n
 
       - name: Regenerate goldens
         working-directory: ${{ inputs.package }}
@@ -86,25 +94,28 @@ jobs:
           path: ${{ inputs.package }}/test/**/*.png
           if-no-files-found: warn
 
-      - name: Commit changed goldens
+      - name: Commit changed goldens and generated files
         id: commit
+        if: always() && steps.deps.outcome == 'success'
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898299+github-actions[bot]@users.noreply.github.com'
-          # Only PNGs; .gitignore keeps platform goldens and failure diffs out.
-          git add -- "$PACKAGE/*.png"   # pathspec * also matches /
+          # PNGs (.gitignore keeps platform goldens and failure diffs out),
+          # lockfiles and gen-l10n output. Pathspec * also matches /.
+          git add -- "$PACKAGE/*.png" '*pubspec.lock'
+          if [ -d example_app/lib/l10n ]; then git add -- 'example_app/lib/l10n/*.dart'; fi
           if git diff --cached --quiet; then
-            echo "No golden changed."
+            echo "Nothing changed."
             echo "pushed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           git diff --cached --stat
-          git commit -m 'test(golden): regenerate goldens [workflow]'
+          git commit -m 'chore(build): regenerate goldens, lockfiles and l10n [workflow]'
           git push origin "HEAD:refs/heads/$BRANCH"
           echo "pushed=true" >> "$GITHUB_OUTPUT"
 
       - name: Run CI on the branch
-        if: steps.commit.outputs.pushed == 'true'
+        if: always() && steps.commit.outputs.pushed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}

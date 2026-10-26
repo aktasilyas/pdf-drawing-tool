@@ -12,6 +12,7 @@ import 'package:example_app/features/sync/presentation/providers/sync_provider.d
 
 import '../../../helpers/a11y.dart';
 import '../../../helpers/font_loader.dart';
+import '../../../helpers/l10n.dart';
 
 const _sizes = <String, Size>{
   'tablet': Size(1180, 820),
@@ -42,7 +43,7 @@ void main() {
           sharedPreferencesProvider.overrideWithValue(prefs),
           drawing_ui.sharedPreferencesProvider.overrideWithValue(prefs),
         ],
-        child: MaterialApp(
+        child: localizedApp(
           theme: AppTheme.light,
           home: _settings,
         ),
