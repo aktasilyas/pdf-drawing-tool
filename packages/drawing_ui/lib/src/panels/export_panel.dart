@@ -168,7 +168,9 @@ Future<void> performPagesPDFExport(
       return;
     }
 
-    final bytes = Uint8List.fromList(result.pdfBytes);
+    // doc.save() already returns a Uint8List; only copy a foreign List<int>.
+    final raw = result.pdfBytes;
+    final bytes = raw is Uint8List ? raw : Uint8List.fromList(raw);
     final filename = _buildExportFilename(title);
 
     if (share) {

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart' hide Page;
 import 'package:pdf/pdf.dart';
 import 'package:pdfx/pdfx.dart' as pdfx;
 
+import 'pdf_compressed_image.dart';
 import 'pdf_content_painter.dart';
 import 'pdf_export_models.dart';
 import 'pdf_raster_layer_renderer.dart';
@@ -21,6 +22,10 @@ export 'pdf_export_models.dart';
 /// vector operations for infinite-zoom sharpness. Non-vectorizable content
 /// (textured/glow/eraser strokes, text) falls back to lossless PNG overlay.
 class PDFExporter {
+  PDFExporter({PdfSourceOpener? sourceOpener})
+      : _openSource = sourceOpener ?? _openPdfxSource;
+
+  final PdfSourceOpener _openSource;
   final _contentPainter = PdfContentPainter();
   final _rasterRenderer = PdfRasterLayerRenderer();
 
@@ -37,12 +42,17 @@ class PDFExporter {
 
     try {
       final doc = PdfDocument();
-      for (int i = 0; i < pages.length; i++) {
-        if (isCancelled?.call() == true) return PDFExportResult.cancelled();
-        final page = pages[i];
-        if (page.size.width <= 0 || page.size.height <= 0) continue;
-        await _exportPage(doc, page, options);
-        onProgress?.call(i + 1, pages.length);
+      final sources = _PdfSourcePool(_openSource);
+      try {
+        for (int i = 0; i < pages.length; i++) {
+          if (isCancelled?.call() == true) return PDFExportResult.cancelled();
+          final page = pages[i];
+          if (page.size.width <= 0 || page.size.height <= 0) continue;
+          await _exportPage(doc, page, options, sources);
+          onProgress?.call(i + 1, pages.length);
+        }
+      } finally {
+        await sources.closeAll();
       }
       final bytes = await doc.save();
       return PDFExportResult.success(bytes);
@@ -55,6 +65,7 @@ class PDFExporter {
     PdfDocument doc,
     Page page,
     PDFExportOptions options,
+    _PdfSourcePool sources,
   ) async {
     double pdfW, pdfH;
     if (options.isInfiniteCanvas) {
@@ -73,7 +84,7 @@ class PDFExporter {
       _contentPainter.paintBackground(g, page.background, pdfW, pdfH);
     }
     if (page.background.type == BackgroundType.pdf) {
-      await _embedPdfBackground(g, doc, page, pdfW, pdfH, options);
+      await _embedPdfBackground(g, doc, page, pdfW, pdfH, options, sources);
     }
     for (final layer in page.layers) {
       if (!layer.isVisible) continue;
@@ -142,9 +153,7 @@ class PDFExporter {
     double h,
   ) {
     if (raw == null) return;
-    final img =
-        PdfImage(doc, image: raw.bytes, width: raw.width, height: raw.height);
-    g.drawImage(img, 0, 0, w, h);
+    g.drawImage(addCompressedRgbaImage(doc, raw), 0, 0, w, h);
   }
 
   Future<void> _embedPdfBackground(
@@ -154,6 +163,7 @@ class PDFExporter {
     double w,
     double h,
     PDFExportOptions options,
+    _PdfSourcePool sources,
   ) async {
     if (page.background.pdfPageIndex == null) return;
 
@@ -161,6 +171,7 @@ class PDFExporter {
     // of uncompressed RGB+alpha (~8.7MB), preventing OOM on multi-page docs.
     if (page.background.pdfFilePath != null) {
       final jpegBytes = await _renderPdfPageAsJpeg(
+        sources,
         page.background.pdfFilePath!,
         page.background.pdfPageIndex!,
         _scaleFromDpi(options.quality.dpi),
@@ -177,37 +188,18 @@ class PDFExporter {
     if (pngData == null) return;
     final raw = await _decodeToRawRgba(pngData);
     if (raw == null) return;
-    final img =
-        PdfImage(doc, image: raw.bytes, width: raw.width, height: raw.height);
-    g.drawImage(img, 0, 0, w, h);
+    g.drawImage(addCompressedRgbaImage(doc, raw), 0, 0, w, h);
   }
 
   Future<Uint8List?> _renderPdfPageAsJpeg(
+    _PdfSourcePool sources,
     String path,
     int index,
     double renderScale,
   ) async {
-    if (!await File(path).exists()) return null;
-    pdfx.PdfDocument? pdfDoc;
-    pdfx.PdfPage? pg;
-    try {
-      pdfDoc = await pdfx.PdfDocument.openFile(path);
-      pg = await pdfDoc.getPage(index);
-      final img = await pg.render(
-        width: pg.width * renderScale,
-        height: pg.height * renderScale,
-        format: pdfx.PdfPageImageFormat.jpeg,
-        quality: 90,
-      );
-      return img?.bytes;
-    } finally {
-      try {
-        await pg?.close();
-      } catch (_) {}
-      try {
-        await pdfDoc?.close();
-      } catch (_) {}
-    }
+    final source = await sources.get(path);
+    if (source == null) return null;
+    return source.renderJpeg(index, renderScale);
   }
 
   Rect? _calculateContentBounds(Page page) {
@@ -286,4 +278,70 @@ class PDFExporter {
       image.dispose();
     }
   }
+}
+
+/// A source PDF opened once and kept for all of its pages in an export.
+abstract class PdfSource {
+  /// Renders page [index] as a JPEG, or null when it cannot be rendered.
+  Future<Uint8List?> renderJpeg(int index, double scale);
+
+  Future<void> close();
+}
+
+/// Opens the source PDF at a path; null when the file is missing/unreadable.
+typedef PdfSourceOpener = Future<PdfSource?> Function(String path);
+
+/// One [PdfSource] per path, opened lazily and closed after the export.
+class _PdfSourcePool {
+  _PdfSourcePool(this._open);
+
+  final PdfSourceOpener _open;
+  final _sources = <String, PdfSource?>{};
+
+  Future<PdfSource?> get(String path) async {
+    if (_sources.containsKey(path)) return _sources[path];
+    return _sources[path] = await _open(path);
+  }
+
+  Future<void> closeAll() async {
+    for (final s in _sources.values) {
+      try {
+        await s?.close();
+      } catch (_) {}
+    }
+    _sources.clear();
+  }
+}
+
+Future<PdfSource?> _openPdfxSource(String path) async {
+  if (!await File(path).exists()) return null;
+  return _PdfxSource(await pdfx.PdfDocument.openFile(path));
+}
+
+class _PdfxSource implements PdfSource {
+  _PdfxSource(this._doc);
+
+  final pdfx.PdfDocument _doc;
+
+  @override
+  Future<Uint8List?> renderJpeg(int index, double scale) async {
+    pdfx.PdfPage? pg;
+    try {
+      pg = await _doc.getPage(index);
+      final img = await pg.render(
+        width: pg.width * scale,
+        height: pg.height * scale,
+        format: pdfx.PdfPageImageFormat.jpeg,
+        quality: 90,
+      );
+      return img?.bytes;
+    } finally {
+      try {
+        await pg?.close();
+      } catch (_) {}
+    }
+  }
+
+  @override
+  Future<void> close() => _doc.close();
 }
