@@ -72,7 +72,9 @@ class CanvasThemeSetting extends ConsumerWidget {
                     .setMode(selection.first);
               },
               style: const ButtonStyle(
-                visualDensity: VisualDensity.compact,
+                minimumSize: WidgetStatePropertyAll(
+                  Size(0, AppSpacing.minTouchTarget),
+                ),
               ),
             ),
           ),
