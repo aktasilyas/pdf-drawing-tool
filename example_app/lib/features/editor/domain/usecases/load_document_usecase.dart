@@ -82,7 +82,9 @@ class LoadDocumentUseCase {
               }
               // Deserialize from JSON
               try {
-                final doc = DrawingDocument.fromJson(content);
+                // Library metadata owns the title; content may be stale.
+                final doc = DrawingDocument.fromJson(content)
+                    .copyWith(title: docInfo.title);
                 logger.i('Document loaded: ${doc.id}');
                 return Right(doc);
               } catch (e, stackTrace) {

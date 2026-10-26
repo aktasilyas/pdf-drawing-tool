@@ -41,6 +41,7 @@ class SaveDocumentUseCase {
         updatedAt: DateTime.now(),
         coverId: coverId,
         updateCover: true,
+        title: document.title,
       );
 
       result.fold(

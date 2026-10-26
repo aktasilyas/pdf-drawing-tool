@@ -448,18 +448,22 @@ class DocumentRepositoryImpl implements DocumentRepository {
     DateTime? updatedAt,
     String? coverId,
     bool updateCover = false,
+    String? title,
   }) async {
     try {
       // Save content
       await _localDatasource.saveDocumentContent(id, content);
 
       // Update metadata if provided
-      if (pageCount != null || updatedAt != null || updateCover) {
+      if (pageCount != null ||
+          updatedAt != null ||
+          updateCover ||
+          title != null) {
         final document = await _localDatasource.getDocument(id);
         // Build updated model manually to allow setting coverId to null
         final updated = DocumentModel(
           id: document.id,
-          title: document.title,
+          title: title ?? document.title,
           folderId: document.folderId,
           templateId: document.templateId,
           createdAt: document.createdAt,
