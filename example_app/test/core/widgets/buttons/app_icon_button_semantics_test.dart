@@ -16,7 +16,6 @@ Future<void> _pump(WidgetTester tester, AppIconButton button) {
 void main() {
   testWidgets('tooltip doubles as the semantics label', (tester) async {
     final handle = tester.ensureSemantics();
-    addTearDown(handle.dispose);
     var taps = 0;
     await _pump(
       tester,
@@ -45,11 +44,11 @@ void main() {
 
     await tester.tap(find.byType(AppIconButton));
     expect(taps, 1);
+    handle.dispose();
   });
 
   testWidgets('semanticLabel wins over the tooltip', (tester) async {
     final handle = tester.ensureSemantics();
-    addTearDown(handle.dispose);
     await _pump(
       tester,
       AppIconButton(
@@ -62,11 +61,11 @@ void main() {
 
     expect(find.semantics.byLabel('Favorilerden çıkar'), findsOne);
     expect(find.semantics.byLabel('Favori'), findsNothing);
+    handle.dispose();
   });
 
   testWidgets('a label with no tooltip still reaches the tree', (tester) async {
     final handle = tester.ensureSemantics();
-    addTearDown(handle.dispose);
     await _pump(
       tester,
       AppIconButton(
@@ -78,11 +77,11 @@ void main() {
 
     expect(find.semantics.byLabel('Kapat'), findsOne);
     expect(find.byType(Tooltip), findsNothing);
+    handle.dispose();
   });
 
   testWidgets('disabled exposes no tap action', (tester) async {
     final handle = tester.ensureSemantics();
-    addTearDown(handle.dispose);
     await _pump(
       tester,
       const AppIconButton(icon: Icons.add, tooltip: 'Ekle'),
@@ -98,6 +97,7 @@ void main() {
         hasTapAction: false,
       ),
     );
+    handle.dispose();
   });
 
   test('an unlabelled icon button is a programming error', () {
@@ -110,7 +110,6 @@ void main() {
   for (final size in AppIconButtonSize.values) {
     testWidgets('$size meets the 48dp tap-target guideline', (tester) async {
       final handle = tester.ensureSemantics();
-      addTearDown(handle.dispose);
       await _pump(
         tester,
         AppIconButton(
@@ -121,6 +120,7 @@ void main() {
         ),
       );
       await expectTapTargets(tester);
+      handle.dispose();
     });
   }
 }

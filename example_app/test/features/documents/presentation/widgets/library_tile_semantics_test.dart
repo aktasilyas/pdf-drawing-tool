@@ -16,7 +16,6 @@ void main() {
   testWidgets('a tile cover is one button labelled with the title',
       (tester) async {
     final handle = tester.ensureSemantics();
-    addTearDown(handle.dispose);
     var taps = 0;
     await tester.pumpWidget(
       _host(
@@ -54,11 +53,11 @@ void main() {
     final origin = tester.getTopLeft(find.byType(LibraryTileFrame));
     await tester.tapAt(origin + const Offset(75, 100));
     expect(taps, 1);
+    handle.dispose();
   });
 
   testWidgets('the favourite badge is a labelled 48dp button', (tester) async {
     final handle = tester.ensureSemantics();
-    addTearDown(handle.dispose);
     var taps = 0;
     await tester.pumpWidget(
       _host(LibraryFavoriteBadge(onTap: () => taps++)),
@@ -74,5 +73,6 @@ void main() {
 
     await tester.tap(find.byType(LibraryFavoriteBadge));
     expect(taps, 1);
+    handle.dispose();
   });
 }
