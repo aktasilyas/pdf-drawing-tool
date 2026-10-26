@@ -6,8 +6,7 @@ part of 'ai_message.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$AIMessageImpl _$$AIMessageImplFromJson(Map<String, dynamic> json) =>
-    _$AIMessageImpl(
+_AIMessage _$AIMessageFromJson(Map<String, dynamic> json) => _AIMessage(
       id: json['id'] as String,
       conversationId: json['conversationId'] as String,
       role: $enumDecode(_$MessageRoleEnumMap, json['role']),
@@ -22,7 +21,7 @@ _$AIMessageImpl _$$AIMessageImplFromJson(Map<String, dynamic> json) =>
       createdAt: DateTime.parse(json['createdAt'] as String),
     );
 
-Map<String, dynamic> _$$AIMessageImplToJson(_$AIMessageImpl instance) =>
+Map<String, dynamic> _$AIMessageToJson(_AIMessage instance) =>
     <String, dynamic>{
       'id': instance.id,
       'conversationId': instance.conversationId,

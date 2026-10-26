@@ -5,7 +5,7 @@ part 'ai_conversation.g.dart';
 
 /// Domain entity for an AI conversation (chat session).
 @freezed
-class AIConversation with _$AIConversation {
+abstract class AIConversation with _$AIConversation {
   const factory AIConversation({
     required String id,
     required String userId,

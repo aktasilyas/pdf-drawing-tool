@@ -12,7 +12,7 @@ enum MessageRole {
 
 /// Domain entity for a single AI chat message.
 @freezed
-class AIMessage with _$AIMessage {
+abstract class AIMessage with _$AIMessage {
   const factory AIMessage({
     required String id,
     required String conversationId,
