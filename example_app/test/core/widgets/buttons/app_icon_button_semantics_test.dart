@@ -26,14 +26,14 @@ void main() {
       ),
     );
 
-    expect(find.bySemanticsLabel('Ekle'), findsOneWidget);
     // The tooltip itself stays in the tree for pointer users and finders.
     expect(find.byTooltip('Ekle'), findsOneWidget);
 
-    final node = tester.getSemantics(find.bySemanticsLabel('Ekle'));
+    final nodes = find.semantics.byLabel('Ekle');
+    expect(nodes, findsOne);
     expect(
-      node,
-      containsSemantics(
+      nodes.evaluate().single,
+      isSemantics(
         label: 'Ekle',
         isButton: true,
         isEnabled: true,
@@ -59,8 +59,8 @@ void main() {
       ),
     );
 
-    expect(find.bySemanticsLabel('Favorilerden çıkar'), findsOneWidget);
-    expect(find.bySemanticsLabel('Favori'), findsNothing);
+    expect(find.semantics.byLabel('Favorilerden çıkar'), findsOne);
+    expect(find.semantics.byLabel('Favori'), findsNothing);
     handle.dispose();
   });
 
@@ -75,7 +75,7 @@ void main() {
       ),
     );
 
-    expect(find.bySemanticsLabel('Kapat'), findsOneWidget);
+    expect(find.semantics.byLabel('Kapat'), findsOne);
     expect(find.byType(Tooltip), findsNothing);
     handle.dispose();
   });
@@ -87,10 +87,9 @@ void main() {
       const AppIconButton(icon: Icons.add, tooltip: 'Ekle'),
     );
 
-    final node = tester.getSemantics(find.bySemanticsLabel('Ekle'));
     expect(
-      node,
-      containsSemantics(
+      find.semantics.byLabel('Ekle').evaluate().single,
+      isSemantics(
         label: 'Ekle',
         isButton: true,
         isEnabled: false,

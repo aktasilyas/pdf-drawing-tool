@@ -44,7 +44,11 @@ and the Play pre-launch report flags small tap targets.
    `semanticLabel`, fed with the document title / folder name), favourite
    badges (`'Favorilerden çıkar'`) and the trashed-page thumbnail.
 4. Settings: the account name row becomes a labelled button with a 48dp
-   minimum height (it only renders with cloud sync on).
+   minimum height (it only renders with cloud sync on). The tap-target
+   guideline is **not** asserted on settings yet: the canvas-theme segments
+   are 40dp tall and the licence row 32dp, and raising them moves the rest of
+   the screen, so it needs a golden regen plus a design review — filed as
+   #205 with the measured offenders.
 5. Tests: `test/helpers/a11y.dart` (guideline reporter ported from
    `drawing_ui`, text-scale and overflow helpers), component semantics tests,
    library and settings guideline + 1.3x tests, tile semantics tests.
@@ -81,3 +85,5 @@ before navigation, so the platform default is the correct behaviour.
 - Canvas / stroke semantics (see the reference check).
 - `textContrastGuideline` on the library: decorative covers would fail it;
   contrast is a `ui-designer` review matter.
+- Settings tap targets below 48dp: #205 (needs a golden regen and a design
+  review, see step 4).

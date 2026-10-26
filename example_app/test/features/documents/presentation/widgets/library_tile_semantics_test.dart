@@ -35,11 +35,13 @@ void main() {
 
     // Only the cover carries the title label; the info block's own text is
     // a separate node ('Kapak' here) so this finder stays unambiguous.
-    final cover = find.bySemanticsLabel('Biyoloji');
-    expect(cover, findsOneWidget);
+    // The semantics finder walks the tree itself, which is what we care
+    // about: the node may be owned by an ancestor render object.
+    final cover = find.semantics.byLabel('Biyoloji');
+    expect(cover, findsOne);
     expect(
-      tester.getSemantics(cover),
-      containsSemantics(
+      cover.evaluate().single,
+      isSemantics(
         label: 'Biyoloji',
         isButton: true,
         hasTapAction: true,
@@ -47,7 +49,9 @@ void main() {
       ),
     );
 
-    await tester.tap(cover);
+    // Tap the middle of the cover box (as the frame's own tests do).
+    final origin = tester.getTopLeft(find.byType(LibraryTileFrame));
+    await tester.tapAt(origin + const Offset(75, 100));
     expect(taps, 1);
     handle.dispose();
   });
@@ -59,15 +63,15 @@ void main() {
       _host(LibraryFavoriteBadge(onTap: () => taps++)),
     );
 
-    final badge = find.bySemanticsLabel('Favorilerden çıkar');
-    expect(badge, findsOneWidget);
+    final badge = find.semantics.byLabel('Favorilerden çıkar');
+    expect(badge, findsOne);
     expect(
-      tester.getSemantics(badge),
-      containsSemantics(isButton: true, hasTapAction: true),
+      badge.evaluate().single,
+      isSemantics(isButton: true, hasTapAction: true),
     );
     await expectTapTargets(tester);
 
-    await tester.tap(badge);
+    await tester.tap(find.byType(LibraryFavoriteBadge));
     expect(taps, 1);
     handle.dispose();
   });
