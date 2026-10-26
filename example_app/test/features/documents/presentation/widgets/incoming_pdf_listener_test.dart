@@ -46,7 +46,12 @@ void main() {
 
   Future<bool> fakeQuota(BuildContext context) async => quotaAllowed;
 
-  Future<void> pumpListener(WidgetTester tester, {EditorLeave? leave}) async {
+  Future<void> pumpListener(
+    WidgetTester tester, {
+    EditorLeave? leave,
+    bool Function()? ready,
+    Listenable? routeChanges,
+  }) async {
     final navigatorKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
       ProviderScope(
@@ -58,6 +63,8 @@ void main() {
           navigatorKey: navigatorKey,
           builder: (context, child) => IncomingPdfListener(
             navigatorKey: navigatorKey,
+            routeChanges: routeChanges,
+            isRouterReady: ready ?? () => true,
             importFile: fakeImporter,
             ensureQuota: fakeQuota,
             child: child!,
@@ -144,6 +151,32 @@ void main() {
     source.emit(pdf);
     await settle(tester);
     expect(leaveCalls, 1);
+    expect(imported, isEmpty);
+    expect(File(pdf.path).existsSync(), isTrue);
+  });
+
+  testWidgets('router not ready (splash): waits, imports once ready',
+      (tester) async {
+    var isReady = false;
+    final routes = ChangeNotifier();
+    await pumpListener(tester, ready: () => isReady, routeChanges: routes);
+    final pdf = makePdf('splash.pdf');
+    source.emit(pdf);
+    await settle(tester);
+    expect(imported, isEmpty);
+    expect(File(pdf.path).existsSync(), isTrue);
+    isReady = true;
+    // ignore: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
+    routes.notifyListeners();
+    await settle(tester);
+    expect(imported, ['splash.pdf']);
+  });
+
+  testWidgets('leave throws: no import, copy kept', (tester) async {
+    await pumpListener(tester, leave: () async => throw StateError('boom'));
+    final pdf = makePdf('boom.pdf');
+    source.emit(pdf);
+    await settle(tester);
     expect(imported, isEmpty);
     expect(File(pdf.path).existsSync(), isTrue);
   });

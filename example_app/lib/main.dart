@@ -45,6 +45,8 @@ class ElyaNotesApp extends ConsumerWidget {
       AppThemeMode.system => ThemeMode.system,
     };
 
+    final router = ref.watch(appRouterProvider);
+
     return MaterialApp.router(
       title: 'ElyaNotes',
       debugShowCheckedModeBanner: false,
@@ -55,6 +57,10 @@ class ElyaNotesApp extends ConsumerWidget {
           // every screen, including while an editor is open.
           child: IncomingPdfListener(
             navigatorKey: ref.watch(appNavigatorKeyProvider),
+            routeChanges: router.routerDelegate,
+            isRouterReady: () => RouteNames.isLibraryRoute(
+              router.routerDelegate.currentConfiguration.uri.path,
+            ),
             child: child!,
           ),
         );
@@ -75,7 +81,7 @@ class ElyaNotesApp extends ConsumerWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: themeMode,
-      routerConfig: ref.watch(appRouterProvider),
+      routerConfig: router,
     );
   }
 }

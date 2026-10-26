@@ -40,8 +40,12 @@ class _ActiveEditorLeaveScopeState
   @override
   void dispose() {
     Future.microtask(() {
-      final notifier = _container.read(activeEditorLeaveProvider.notifier);
-      if (notifier.state == _leave) notifier.state = null;
+      try {
+        final notifier = _container.read(activeEditorLeaveProvider.notifier);
+        if (notifier.state == _leave) notifier.state = null;
+      } on StateError {
+        // The ProviderScope was torn down first; nothing left to clear.
+      }
     });
     super.dispose();
   }

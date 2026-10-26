@@ -29,6 +29,15 @@ abstract class RouteNames {
   static const String subscription = '/subscription';
 
   // Helper methods for parameterized routes
+  /// True for routes behind splash / auth, where a document may be opened.
+  static bool isLibraryRoute(String path) =>
+      path.startsWith(documents) ||
+      path.startsWith('/editor/') ||
+      path.startsWith('/folder/') ||
+      path == favorites ||
+      path == recent ||
+      path == trash;
+
   static String folderPath(String folderId) => '/folder/$folderId';
   static String editorPath(String documentId) => '/editor/$documentId';
 }

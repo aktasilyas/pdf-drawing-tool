@@ -32,12 +32,21 @@ class IncomingPdfListener extends ConsumerStatefulWidget {
     super.key,
     required this.child,
     required this.navigatorKey,
+    this.routeChanges,
+    this.isRouterReady = _alwaysReady,
     this.importFile = importPdfFile,
     this.ensureQuota = ensureDocumentQuota,
   });
 
   final Widget child;
   final GlobalKey<NavigatorState> navigatorKey;
+
+  /// Notifies when the current route changes; the queue is re-checked then.
+  final Listenable? routeChanges;
+
+  /// False while the router is still on splash / auth screens: importing then
+  /// would be overridden by their redirects.
+  final bool Function() isRouterReady;
   final IncomingPdfImporter importFile;
   final DocumentQuotaCheck ensureQuota;
 
@@ -46,13 +55,22 @@ class IncomingPdfListener extends ConsumerStatefulWidget {
       _IncomingPdfListenerState();
 }
 
+bool _alwaysReady() => true;
+
 class _IncomingPdfListenerState extends ConsumerState<IncomingPdfListener> {
   bool _draining = false;
 
   @override
   void initState() {
     super.initState();
+    widget.routeChanges?.addListener(_drain);
     WidgetsBinding.instance.addPostFrameCallback((_) => _drain());
+  }
+
+  @override
+  void dispose() {
+    widget.routeChanges?.removeListener(_drain);
+    super.dispose();
   }
 
   @override
@@ -60,6 +78,13 @@ class _IncomingPdfListenerState extends ConsumerState<IncomingPdfListener> {
     ref.listen<List<IncomingPdf>>(
       incomingPdfQueueProvider,
       (_, __) => _drain(),
+    );
+    // A failed editor leave kept the PDF queued: retry once the editor is gone.
+    ref.listen<EditorLeave?>(
+      activeEditorLeaveProvider,
+      (prev, next) {
+        if (next == null) _drain();
+      },
     );
     return widget.child;
   }
@@ -70,7 +95,9 @@ class _IncomingPdfListenerState extends ConsumerState<IncomingPdfListener> {
     try {
       while (mounted) {
         final queue = ref.read(incomingPdfQueueProvider);
-        if (queue.isEmpty) break;
+        if (queue.isEmpty || !widget.isRouterReady()) break;
+        final context = widget.navigatorKey.currentContext;
+        if (context == null || !context.mounted) break;
         final pdf = queue.first;
         if (!await _leaveEditor()) {
           // Save failed: the editor stays open and the PDF stays queued
@@ -110,7 +137,12 @@ class _IncomingPdfListenerState extends ConsumerState<IncomingPdfListener> {
   Future<bool> _leaveEditor() async {
     final leave = ref.read(activeEditorLeaveProvider);
     if (leave == null) return true;
-    return leave();
+    try {
+      return await leave();
+    } catch (e, st) {
+      logger.e('Leaving the editor failed', error: e, stackTrace: st);
+      return false;
+    }
   }
 
   void _deleteCopy(String path) {
