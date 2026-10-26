@@ -154,11 +154,14 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
     final doc = ref.read(documentProvider);
     final curIdx = ref.read(currentPageIndexProvider);
     final insertIdx = _resolveInsertionIndex(curIdx, doc.pages.length);
+    final messenger = ScaffoldMessenger.maybeOf(context);
     widget.onClose();
 
     final imported = await pickAndImportFile(
       insertIndex: insertIdx,
       defaultPageSize: doc.settings.defaultPageSize,
+      onError: (message) =>
+          messenger?.showSnackBar(SnackBar(content: Text(message))),
     );
     if (imported.isEmpty) return;
 
