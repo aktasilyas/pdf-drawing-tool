@@ -135,7 +135,7 @@ class _SelectableTypesGrid extends StatelessWidget {
 
     return Wrap(
       spacing: ChromeSpacing.sm,
-      runSpacing: ChromeSpacing.sm,
+      runSpacing: 0,
       children: types.map((t) {
         final isSelected = selectableTypes[t.$1] ?? true;
         return _TypeChip(
@@ -164,6 +164,8 @@ class _TypeChip extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
 
+  static const double _visualHeight = 40;
+
   @override
   Widget build(BuildContext context) {
     final palette = ChromePalette.of(context);
@@ -178,34 +180,42 @@ class _TypeChip extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
-        child: Container(
-          constraints: const BoxConstraints(
-            minHeight: ChromeSizes.minTouchTarget,
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: ChromeSpacing.md),
-          decoration: BoxDecoration(
-            color: isSelected ? palette.accentContainer : Colors.transparent,
-            borderRadius: BorderRadius.circular(ChromeRadius.full),
-            border: Border.all(
-              color: isSelected ? palette.accent : palette.border,
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: ChromeIconSizes.sm, color: color),
-              const SizedBox(width: ChromeSpacing.xs),
-              Text(
-                label,
-                style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      fontWeight:
-                          isSelected ? FontWeight.w600 : FontWeight.normal,
-                      color: color,
-                    ),
-              ),
-            ],
-          ),
+        // 4 + 40 + 4 = the 48dp hit row.
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: ChromeSpacing.xs),
+          child: _chip(context, color),
         ),
+      ),
+    );
+  }
+
+  /// The pill is a 40dp visual inside the 48dp hit row, like
+  /// `ChromeIconButton`.
+  Widget _chip(BuildContext context, Color color) {
+    final palette = ChromePalette.of(context);
+    return Container(
+      height: _visualHeight,
+      padding: const EdgeInsets.symmetric(horizontal: ChromeSpacing.md),
+      decoration: BoxDecoration(
+        color: isSelected ? palette.accentContainer : Colors.transparent,
+        borderRadius: BorderRadius.circular(ChromeRadius.full),
+        border: Border.all(
+          color: isSelected ? palette.accent : palette.border,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: ChromeIconSizes.sm, color: color),
+          const SizedBox(width: ChromeSpacing.xs),
+          Text(
+            label,
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                  color: color,
+                ),
+          ),
+        ],
       ),
     );
   }

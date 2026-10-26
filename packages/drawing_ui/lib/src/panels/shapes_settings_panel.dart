@@ -44,7 +44,7 @@ class ShapesSettingsPanel extends ConsumerWidget {
             onChanged: (v) =>
                 ref.read(shapesSettingsProvider.notifier).setStrokeThickness(v),
           ),
-          const SizedBox(height: ChromeSpacing.sm),
+          const ChromeHairline(),
           const ChromeSectionLabel('Kontur Rengi'),
           ColorPickerStrip(
             selectedColor: settings.strokeColor,

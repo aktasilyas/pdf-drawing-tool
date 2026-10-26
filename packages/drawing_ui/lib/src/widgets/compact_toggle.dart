@@ -23,7 +23,7 @@ class CompactToggle extends StatelessWidget {
     required this.value,
     required this.onChanged,
     this.activeColor,
-    this.scale = 0.65,
+    this.scale = 0.8,
   });
 
   /// Label text displayed next to the switch
@@ -38,7 +38,7 @@ class CompactToggle extends StatelessWidget {
   /// Active switch color (defaults to accent blue)
   final Color? activeColor;
 
-  /// Scale factor for the switch (defaults to 0.65 for compact look)
+  /// Scale factor for the switch (defaults to 0.8 for compact look)
   final double scale;
 
   @override
@@ -63,6 +63,7 @@ class CompactToggle extends StatelessWidget {
             ),
             Transform.scale(
               scale: scale,
+              alignment: Alignment.centerRight,
               child: Switch(
                 value: value,
                 onChanged: onChanged,
@@ -70,7 +71,11 @@ class CompactToggle extends StatelessWidget {
                 activeThumbColor: palette.onAccent,
                 inactiveThumbColor: palette.textMuted,
                 inactiveTrackColor: palette.surfaceElevated,
-                trackOutlineColor: WidgetStatePropertyAll(palette.border),
+                trackOutlineColor: WidgetStateProperty.resolveWith(
+                  (states) => states.contains(WidgetState.selected)
+                      ? Colors.transparent
+                      : palette.textMuted,
+                ),
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
             ),
