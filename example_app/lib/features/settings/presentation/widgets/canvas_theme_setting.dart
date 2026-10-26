@@ -17,7 +17,7 @@ class CanvasThemeSetting extends ConsumerWidget {
     final palette = context.palette;
     final textColor = palette.textPrimary;
     final iconColor = palette.accent;
-    final iconBgColor = palette.surfaceElevated;
+    final iconBgColor = palette.accentContainer;
 
     return Padding(
       padding: const EdgeInsets.symmetric(
