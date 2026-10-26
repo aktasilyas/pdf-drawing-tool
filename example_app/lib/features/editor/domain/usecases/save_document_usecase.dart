@@ -2,13 +2,19 @@ import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/documents.dart';
+import 'package:example_app/features/editor/domain/usecases/document_json_slicer.dart';
 import 'package:drawing_core/drawing_core.dart';
 
 @injectable
 class SaveDocumentUseCase {
   final DocumentRepository _repository;
 
-  SaveDocumentUseCase(this._repository);
+  final DocumentJsonSlicer _slicer;
+
+  SaveDocumentUseCase(
+    this._repository, {
+    DocumentJsonSlicer slicer = const DocumentJsonSlicer(),
+  }) : _slicer = slicer;
 
   Future<Either<Failure, void>> call(DrawingDocument document) async {
     try {
@@ -27,7 +33,8 @@ class SaveDocumentUseCase {
       );
 
       // 2. Serialize document to JSON
-      final content = cleanedDocument.toJson();
+      // Large documents are converted page by page, yielding to frames.
+      final content = await _slicer.toJson(cleanedDocument);
 
       // 3. Extract coverId from cover page for metadata sync
       final coverPage = document.pages.where((p) => p.isCover).firstOrNull;

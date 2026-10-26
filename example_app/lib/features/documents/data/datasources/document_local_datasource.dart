@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:drawing_core/drawing_core.dart' show PdfPathResolver;
+import 'package:drawing_core/drawing_core.dart'
+    show DrawingDocument, PdfPathResolver;
 import 'package:drift/drift.dart';
 import 'package:injectable/injectable.dart';
 import 'package:example_app/core/core.dart';
@@ -19,6 +20,10 @@ abstract class DocumentLocalDatasource {
   Stream<List<DocumentModel>> watchDocuments({String? folderId});
   Future<Map<String, dynamic>?> getDocumentContent(String id);
   Future<void> saveDocumentContent(String id, Map<String, dynamic> content);
+
+  /// Content of [id] as a model (decoded off the UI isolate when large), or
+  /// null when there is none yet.
+  Future<DrawingDocument?> getDrawingDocument(String id);
 
   /// Whether a content row exists for [id] (without decoding it).
   Future<bool> hasDocumentContent(String id);
@@ -192,6 +197,25 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
       return await _codec.decode(row.data);
     } catch (e) {
       throw CacheException('Failed to get document content: $e');
+    }
+  }
+
+  @override
+  Future<DrawingDocument?> getDrawingDocument(String id) async {
+    final String data;
+    try {
+      final row = await (_db.select(_db.documentContents)
+            ..where((t) => t.documentId.equals(id)))
+          .getSingleOrNull();
+      if (row == null) return null;
+      data = row.data;
+    } catch (e) {
+      throw CacheException('Failed to get document content: $e');
+    }
+    try {
+      return await _codec.decodeDocument(data);
+    } catch (e) {
+      throw CacheException('Document corrupted: $e');
     }
   }
 
