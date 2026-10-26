@@ -12,9 +12,8 @@ const _pageCount = 200;
 const _strokesPerPage = 6;
 
 /// Upper bound for the `ProcessInfo.maxRss` growth while exporting.
-/// Placeholder until the first green emulator run; the measured numbers are
-/// recorded in the PR and the bound is then tightened with headroom.
-const _maxRssGrowthBytes = 1024 * 1024 * 1024;
+/// First green emulator run measured 342 MB (17.1 MB PDF); ~75% headroom.
+const _maxRssGrowthBytes = 600 * 1024 * 1024;
 
 /// Log marker picked up by `.github/workflows/e2e.yml` (annotation).
 const _marker = 'E2E_EXPORT_MEMORY';
