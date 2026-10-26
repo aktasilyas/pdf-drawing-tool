@@ -35,6 +35,7 @@ export 'data/models/trashed_page_model.dart';
 export 'data/migration/prefs_to_drift_migration.dart';
 
 // Data - Datasources
+export 'data/datasources/document_content_codec.dart';
 export 'data/datasources/document_local_datasource.dart';
 export 'data/datasources/folder_local_datasource.dart';
 export 'data/datasources/method_channel_incoming_pdf_source.dart';

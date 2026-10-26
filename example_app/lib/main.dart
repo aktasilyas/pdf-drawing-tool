@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:example_app/core/bootstrap/app_bootstrap.dart';
 import 'package:example_app/core/bootstrap/app_overrides.dart';
+import 'package:example_app/core/bootstrap/startup_gate.dart';
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/documents.dart';
 import 'package:example_app/features/settings/settings.dart';
@@ -18,17 +19,24 @@ Future<void> main() async {
   );
 
   final flags = FeatureFlags.fromEnvironment();
-  final result = await AppBootstrap(flags: flags).run();
+  final bootstrap = AppBootstrap(flags: flags);
+  // First attempt before runApp: on success the native splash stays up until
+  // the library's first frame. On failure the gate shows a Retry screen.
+  final initial = await attemptStartup(bootstrap.run);
 
   runApp(
-    ProviderScope(
-      overrides: buildAppOverrides(
-        flags: flags,
-        prefs: result.prefs,
-        crashReporter: result.crashReporter,
-        pdfPaths: getIt<PdfPathResolver>(),
+    StartupGate(
+      initial: initial,
+      bootstrap: bootstrap.run,
+      appBuilder: (result) => ProviderScope(
+        overrides: buildAppOverrides(
+          flags: flags,
+          prefs: result.prefs,
+          crashReporter: result.crashReporter,
+          pdfPaths: getIt<PdfPathResolver>(),
+        ),
+        child: const ElyaNotesApp(),
       ),
-      child: const ElyaNotesApp(),
     ),
   );
 }

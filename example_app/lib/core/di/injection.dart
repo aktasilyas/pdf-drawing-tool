@@ -91,7 +91,10 @@ void _registerCoreServices() {
 void _registerRepositories() {
   // Datasources
   getIt.registerLazySingleton<DocumentLocalDatasource>(
-    () => DocumentLocalDatasourceImpl(getIt(), getIt<PdfPathResolver>()),
+    () => DocumentLocalDatasourceImpl(
+      getIt(),
+      pdfPaths: getIt<PdfPathResolver>(),
+    ),
   );
 
   getIt.registerLazySingleton<FolderLocalDatasource>(
@@ -136,7 +139,19 @@ void _registerUseCases() {
   getIt.registerFactory(() => SaveDocumentUseCase(getIt()));
 }
 
-/// Reset all registrations (useful for testing)
+/// Drops all registrations so [configureDependencies] can run again (startup
+/// Retry, tests). Closes an already registered database connection first so
+/// its file is not left locked.
+///
+/// Must never delete, move or rewrite any file: the database stays on disk
+/// exactly as it is.
 Future<void> resetDependencies() async {
+  if (getIt.isRegistered<AppDatabase>()) {
+    try {
+      await getIt<AppDatabase>().close();
+    } catch (e) {
+      logger.w('Closing the database during reset failed: $e');
+    }
+  }
   await getIt.reset();
 }

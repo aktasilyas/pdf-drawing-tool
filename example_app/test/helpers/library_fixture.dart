@@ -19,7 +19,7 @@ class LibraryFixture {
     PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
   ]) : db = AppDatabase(executor ?? NativeDatabase.memory()) {
     final runner = DriftTransactionRunner(db);
-    documentDs = DocumentLocalDatasourceImpl(db, pdfPaths);
+    documentDs = DocumentLocalDatasourceImpl(db, pdfPaths: pdfPaths);
     folderDs = FolderLocalDatasourceImpl(db);
     trashDs = TrashedPageLocalDatasourceImpl(db);
     documents = DocumentRepositoryImpl(documentDs, folderDs, runner);
