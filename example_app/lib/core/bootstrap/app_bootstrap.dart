@@ -5,6 +5,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:example_app/core/config/app_env.dart';
 import 'package:example_app/core/config/feature_flags.dart';
+import 'package:example_app/core/constants/storage_keys.dart';
+import 'package:example_app/core/crash_reporting/crash_reporter.dart';
+import 'package:example_app/core/crash_reporting/crash_reporting_setup.dart';
 import 'package:example_app/core/di/injection.dart';
 import 'package:example_app/core/utils/logger.dart';
 
@@ -12,8 +15,9 @@ typedef EnvInitializer = Future<void> Function(AppEnv env);
 
 /// Result of a successful [AppBootstrap.run].
 class AppBootstrapResult {
-  const AppBootstrapResult({required this.prefs});
+  const AppBootstrapResult({required this.prefs, required this.crashReporter});
   final SharedPreferences prefs;
+  final CrashReporter crashReporter;
 }
 
 /// Startup sequence. Services behind a disabled flag are never touched.
@@ -24,6 +28,8 @@ class AppBootstrap {
     this.initSupabase = _defaultInitSupabase,
     this.initRevenueCat = _defaultInitRevenueCat,
     this.configureDeps = configureDependencies,
+    this.initCrashReporting = initFirebaseCrashReporter,
+    this.isRelease = kReleaseMode,
   });
 
   final FeatureFlags flags;
@@ -31,11 +37,21 @@ class AppBootstrap {
   final EnvInitializer initSupabase;
   final EnvInitializer initRevenueCat;
   final Future<void> Function() configureDeps;
+  final CrashReporterInitializer initCrashReporting;
+  final bool isRelease;
 
   Future<AppBootstrapResult> run() async {
     env.validateFor(flags);
 
-    final prefsFuture = SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
+    final crashReporter = await selectCrashReporter(
+      isRelease: isRelease,
+      env: env,
+      userEnabled: prefs.getBool(StorageKeys.crashReportingEnabled) ?? true,
+      initFirebase: initCrashReporting,
+    );
+    installCrashHandlers(crashReporter);
+
     if (flags.needsSupabase) {
       await initSupabase(env);
     }
@@ -48,7 +64,7 @@ class AppBootstrap {
       }
     }
     await configureDeps();
-    return AppBootstrapResult(prefs: await prefsFuture);
+    return AppBootstrapResult(prefs: prefs, crashReporter: crashReporter);
   }
 }
 

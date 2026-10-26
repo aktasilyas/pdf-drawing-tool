@@ -18,7 +18,8 @@ Play listing reviewed from memory of earlier reference checks (#45 plan), no new
 - StarNote: short value line (handwriting notes), then feature list (pens, PDF, templates, offline).
 - What we do: the converged pattern (brand + keywords in the name, one-line value prop, grouped
   bullets). Our differentiator stated plainly: works offline, no account, no ads, data stays on device
-  (true for v1.0 because all networked features are flag-off). Own wording, no copied text.
+  (true for v1.0 because all networked features are flag-off; the only network use is optional,
+  anonymous crash reporting, #60). Own wording, no copied text.
 
 ## tr-TR
 
@@ -89,11 +90,22 @@ Designed for Android tablets with a stylus; works on phones too.
 ```
 
 ## Data safety form (answers for v1.0)
-- Does the app collect or share any of the required user data types? **No.** Files the user opens and
-  creates are processed only on the device and never sent off it, which Play does not count as
-  collection.
-- Data encrypted in transit / deletion request: not applicable (no data collected).
-- Revisit before any release with AI chat, cloud sync, premium (RevenueCat), audio or crash reporting.
+- Does the app collect or share any of the required user data types? **Yes, collected** (crash
+  reporting, #60). Notes, PDFs and images the user opens and creates are processed only on the device
+  and never sent off it, which Play does not count as collection.
+- Collected types (Firebase Crashlytics): **App info and performance → Crash logs** and
+  **Diagnostics**; **Device or other IDs** (Crashlytics installation ID). Purpose: App functionality
+  (stability). Not shared (Google acts as a service provider). Collection is optional: the user can
+  turn it off in Settings → Gizlilik. Check each answer against Firebase's "Data disclosure for
+  Google Play" page before submitting.
+- Data encrypted in transit: **Yes** (HTTPS). Deletion request: the user can turn reporting off;
+  reports expire after 90 days.
+- Revisit before any release with AI chat, cloud sync, premium (RevenueCat) or audio.
+- Build configuration: release builds report crashes only when built with the four `FIREBASE_*`
+  values (`--dart-define-from-file=config/firebase.json`, template in
+  `example_app/config/firebase.example.json`; the file and `google-services.json` are git-ignored).
+  CI writes that file from repository secrets of the same names. Without them the app builds and runs
+  with crash reporting off.
 
 ## Category, tags, rating
 - Category: Productivity. Tags: note taking, PDF, handwriting.
@@ -121,9 +133,10 @@ treatment is an open BRIEF question, so this waits for the owner.
 - **Depends on #45:** the fountain pen ("Dolma Kalem") and the five-pen picker (screenshots 2 and 4)
   exist only on PR #96 until #45 is merged. Publish this listing only after #45 lands.
 - **Permissions in the merged release manifest:** handled by #113. The release manifest
-  (`example_app/android/app/src/release/AndroidManifest.xml`) strips `INTERNET`,
-  `ACCESS_NETWORK_STATE`, `RECORD_AUDIO` and `com.android.vending.BILLING` with
-  `tools:node="remove"`, so the v1.0 listing matches "offline, no microphone". The debug build keeps
+  (`example_app/android/app/src/release/AndroidManifest.xml`) strips `RECORD_AUDIO` and
+  `com.android.vending.BILLING` with `tools:node="remove"`, so the v1.0 listing matches "no
+  microphone". `INTERNET` and `ACCESS_NETWORK_STATE` stay in release for crash reporting (#60); the
+  app still works fully offline. The debug build keeps
   them for FF_* flag testing. The `android-manifest.yml` workflow enforces this on every PR that
   changes the Android project or a pubspec. To re-check locally: run `flutter build apk --config-only` in
   `example_app` (generates the Gradle wrapper), then in `example_app/android` run

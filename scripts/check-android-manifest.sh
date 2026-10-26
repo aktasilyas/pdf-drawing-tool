@@ -1,7 +1,8 @@
 #!/bin/bash
 # Checks the merged Android manifests of example_app (issue #102):
 # the release manifest must not request the permissions of frozen features,
-# the debug manifest must still have them (FF_* flag testing).
+# the debug manifest must still have them (FF_* flag testing). Both must
+# request REQUIRED (crash reporting uploads, #60).
 #
 #   ./scripts/check-android-manifest.sh [build-dir]
 #
@@ -13,10 +14,12 @@ set -uo pipefail
 cd "$(dirname "$0")/.." || exit 1
 BUILD_DIR="${1:-example_app/build}"
 STRIPPED=(
-  android.permission.INTERNET
-  android.permission.ACCESS_NETWORK_STATE
   android.permission.RECORD_AUDIO
   com.android.vending.BILLING
+)
+REQUIRED=(
+  android.permission.INTERNET
+  android.permission.ACCESS_NETWORK_STATE
 )
 status=0
 
@@ -54,7 +57,10 @@ for variant in release debug; do
       fail "debug manifest lost $p"
     fi
   done
+  for p in "${REQUIRED[@]}"; do
+    grep -Fxq "$p" <<<"$perms" || fail "$variant manifest lacks $p"
+  done
 done
 
-[ "$status" -eq 0 ] && echo "OK: release strips ${#STRIPPED[@]} frozen-feature permissions, debug keeps them"
+[ "$status" -eq 0 ] && echo "OK: release strips ${#STRIPPED[@]} frozen-feature permissions, debug keeps them, both request ${#REQUIRED[@]} network permissions"
 exit "$status"

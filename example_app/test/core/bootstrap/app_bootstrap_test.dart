@@ -1,9 +1,13 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:example_app/core/bootstrap/app_bootstrap.dart';
 import 'package:example_app/core/config/app_env.dart';
 import 'package:example_app/core/config/feature_flags.dart';
+import 'package:example_app/core/constants/storage_keys.dart';
+import 'package:example_app/core/crash_reporting/crash_reporter.dart';
+import 'package:example_app/core/crash_reporting/noop_crash_reporter.dart';
 
 const _fullEnv = AppEnv(
   supabaseUrl: 'https://x.supabase.co',
@@ -11,6 +15,15 @@ const _fullEnv = AppEnv(
   revenueCatAppleKey: 'a',
   revenueCatGoogleKey: 'g',
 );
+
+const _firebaseEnv = AppEnv(
+  firebaseApiKey: 'key',
+  firebaseAppId: '1:2:android:3',
+  firebaseProjectId: 'proj',
+  firebaseMessagingSenderId: '2',
+);
+
+class _MockReporter extends Mock implements CrashReporter {}
 
 void main() {
   late List<String> calls;
@@ -57,6 +70,56 @@ void main() {
     expect(build(const FeatureFlags(aiChat: true)).run(),
         throwsA(isA<StateError>()));
     expect(calls, isEmpty);
+  });
+
+  group('crash reporting', () {
+    late _MockReporter reporter;
+
+    setUp(() {
+      reporter = _MockReporter();
+      when(() => reporter.isActive).thenReturn(false);
+      when(() => reporter.setCollectionEnabled(any())).thenAnswer((_) async {});
+    });
+
+    AppBootstrap buildRelease({bool isRelease = true, AppEnv? env}) {
+      return AppBootstrap(
+        flags: FeatureFlags.allOff,
+        env: env ?? _firebaseEnv,
+        isRelease: isRelease,
+        initCrashReporting: (_) async {
+          calls.add('crash');
+          return reporter;
+        },
+        configureDeps: () async => calls.add('deps'),
+      );
+    }
+
+    test('debug build uses a no-op reporter and skips Firebase', () async {
+      final result = await buildRelease(isRelease: false).run();
+      expect(result.crashReporter, isA<NoopCrashReporter>());
+      expect(calls, ['deps']);
+    });
+
+    test('release without Firebase config uses a no-op reporter', () async {
+      final result = await buildRelease(env: const AppEnv()).run();
+      expect(result.crashReporter, isA<NoopCrashReporter>());
+      expect(calls, ['deps']);
+    });
+
+    test('release with config is on by default', () async {
+      final result = await buildRelease().run();
+      expect(result.crashReporter, same(reporter));
+      expect(calls, ['crash', 'deps']);
+      verify(() => reporter.setCollectionEnabled(true)).called(1);
+    });
+
+    test('stored opt-out is applied at startup', () async {
+      SharedPreferences.setMockInitialValues({
+        StorageKeys.crashReportingEnabled: false,
+      });
+      await buildRelease().run();
+      verify(() => reporter.setCollectionEnabled(false)).called(1);
+    });
   });
 
   test('RevenueCat init failure does not abort startup', () async {
