@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:injectable/injectable.dart';
 import 'package:example_app/core/core.dart';
+import 'package:example_app/features/documents/data/datasources/document_content_codec.dart';
 import 'package:example_app/features/documents/data/models/document_model.dart';
 
 abstract class DocumentLocalDatasource {
@@ -25,8 +26,12 @@ abstract class DocumentLocalDatasource {
 @Injectable(as: DocumentLocalDatasource)
 class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
   final AppDatabase _db;
+  final DocumentContentCodec _codec;
 
-  DocumentLocalDatasourceImpl(this._db);
+  DocumentLocalDatasourceImpl(
+    this._db, {
+    DocumentContentCodec codec = const DocumentContentCodec(),
+  }) : _codec = codec;
 
   /// Root level (folderId null) or a single folder.
   SimpleSelectStatement<$DocumentsTable, DocumentRow> _folderQuery(
@@ -127,8 +132,7 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
           ..where((t) => t.documentId.equals(id)))
         .getSingleOrNull();
     if (row == null) return {};
-    final content = json.decode(row.data);
-    final pages = content is Map ? content['pages'] : null;
+    final pages = (await _codec.decode(row.data))['pages'];
     if (pages is! List) return {};
     return {
       for (final page in pages)
@@ -175,7 +179,7 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
             ..where((t) => t.documentId.equals(id)))
           .getSingleOrNull();
       if (row == null) return null;
-      return json.decode(row.data) as Map<String, dynamic>;
+      return await _codec.decode(row.data);
     } catch (e) {
       throw CacheException('Failed to get document content: $e');
     }
@@ -187,10 +191,11 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
     Map<String, dynamic> content,
   ) async {
     try {
+      final data = await _codec.encode(content);
       await _db.into(_db.documentContents).insertOnConflictUpdate(
             DocumentContentsCompanion(
               documentId: Value(id),
-              data: Value(json.encode(content)),
+              data: Value(data),
               updatedAt: Value(DateTime.now()),
             ),
           );
