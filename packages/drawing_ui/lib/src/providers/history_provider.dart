@@ -94,9 +94,12 @@ class HistoryNotifier extends StateNotifier<HistoryState> {
   ///
   /// This is the main method for executing drawing commands.
   /// It updates both the document and the history state.
-  void execute(DrawingCommand command) {
+  /// [pageId] targets a page other than the current one (see
+  /// [HistoryManager.execute]).
+  void execute(DrawingCommand command, {String? pageId}) {
     final document = _ref.read(documentProvider);
-    final newDocument = _historyManager.execute(command, document);
+    final newDocument =
+        _historyManager.execute(command, document, pageId: pageId);
     _ref.read(documentProvider.notifier).updateDocument(newDocument);
     _syncPageManager(newDocument);
     _updateState();

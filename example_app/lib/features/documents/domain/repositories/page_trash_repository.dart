@@ -5,8 +5,9 @@ abstract class PageTrashRepository {
   /// Trashed pages, newest first.
   Future<List<TrashedPage>> getTrashedPages();
 
-  /// Moves [pageData] (page [pageIndex] of [documentId]) to the trash.
-  Future<void> movePageToTrash({
+  /// Moves [pageData] (page [pageIndex] of [documentId]) to the trash and
+  /// returns the id of the new trash entry.
+  Future<String> movePageToTrash({
     required String documentId,
     required String documentTitle,
     required int pageIndex,

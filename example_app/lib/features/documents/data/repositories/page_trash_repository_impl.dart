@@ -21,7 +21,7 @@ class PageTrashRepositoryImpl implements PageTrashRepository {
   }
 
   @override
-  Future<void> movePageToTrash({
+  Future<String> movePageToTrash({
     required String documentId,
     required String documentTitle,
     required int pageIndex,
@@ -29,8 +29,9 @@ class PageTrashRepositoryImpl implements PageTrashRepository {
   }) async {
     final now = DateTime.now();
     final pageId = pageData['id'] as String? ?? 'unknown';
+    final trashId = 'trashed_page_${now.millisecondsSinceEpoch}';
     final model = TrashedPageModel(
-      id: 'trashed_page_${now.millisecondsSinceEpoch}',
+      id: trashId,
       pageId: pageId,
       sourceDocumentId: documentId,
       sourceDocumentTitle: documentTitle,
@@ -39,6 +40,7 @@ class PageTrashRepositoryImpl implements PageTrashRepository {
       pageData: pageData,
     );
     await _datasource.addTrashedPage(model);
+    return trashId;
   }
 
   @override
@@ -64,7 +66,7 @@ class PageTrashRepositoryImpl implements PageTrashRepository {
     }
 
     content['pages'] = pages;
-    await _prefs.setString(key, json.encode(content));
+    if (!await _prefs.setString(key, json.encode(content))) return false;
 
     // Update page count in document metadata
     await _updateDocumentPageCount(model.sourceDocumentId, pages.length);

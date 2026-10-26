@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:example_app/core/bootstrap/app_bootstrap.dart';
 import 'package:example_app/core/bootstrap/app_overrides.dart';
 import 'package:example_app/core/core.dart';
+import 'package:example_app/features/documents/documents.dart';
 import 'package:example_app/features/settings/settings.dart';
 
 Future<void> main() async {
@@ -20,7 +21,11 @@ Future<void> main() async {
 
   runApp(
     ProviderScope(
-      overrides: buildAppOverrides(flags: flags, prefs: result.prefs),
+      overrides: buildAppOverrides(
+        flags: flags,
+        prefs: result.prefs,
+        crashReporter: result.crashReporter,
+      ),
       child: const ElyaNotesApp(),
     ),
   );
@@ -44,6 +49,8 @@ class ElyaNotesApp extends ConsumerWidget {
       title: 'ElyaNotes',
       debugShowCheckedModeBanner: false,
       builder: (context, child) {
+        // Failed library mutations surface as a snackbar on any screen.
+        final content = LibraryErrorListener(child: child!);
         // In landscape, remove all system padding so content fills
         // the entire screen including the notch/cutout area.
         if (MediaQuery.of(context).orientation == Orientation.landscape) {
@@ -53,10 +60,10 @@ class ElyaNotesApp extends ConsumerWidget {
             removeRight: true,
             removeTop: true,
             removeBottom: true,
-            child: child!,
+            child: content,
           );
         }
-        return child!;
+        return content;
       },
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,

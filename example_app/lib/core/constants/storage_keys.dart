@@ -14,6 +14,7 @@ abstract class StorageKeys {
   static const String toolbarConfig = 'toolbar_config';
   static const String autoSaveEnabled = 'auto_save_enabled';
   static const String autoSyncEnabled = 'auto_sync_enabled';
+  static const String crashReportingEnabled = 'crash_reporting_enabled';
 
   // Sync
   static const String lastSyncTime = 'last_sync_time';

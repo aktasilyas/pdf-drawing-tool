@@ -12,6 +12,7 @@ import 'package:drawing_ui/src/theme/drawing_shadows.dart';
 import 'audio_recordings_list.dart';
 import 'page_sidebar_cells.dart';
 import 'page_sidebar_filter_bar.dart';
+import 'page_sidebar_reorder.dart';
 import 'page_sidebar_widgets.dart';
 
 /// Width of the docked tablet sidebar card.
@@ -210,12 +211,21 @@ class _PageSidebarState extends ConsumerState<PageSidebar> {
         itemBuilder: (context, index) {
           if (index < entries.length) {
             final pageIndex = entries[index];
-            return PageGridItem(
+            final item = PageGridItem(
+              key: ValueKey(allPages[pageIndex].id),
               page: allPages[pageIndex],
               index: pageIndex,
               isSelected: pageIndex == pageManager.currentIndex,
               thumbnailCache: widget.thumbnailCache,
               onPageTap: widget.onPageTap,
+            );
+            // Indexes are contiguous only when every page is listed.
+            if (isBookmarkFilter) return item;
+            return ReorderablePageCell(
+              index: pageIndex,
+              onMove: (from, to) =>
+                  ref.read(pageStructureActionsProvider).movePage(from, to),
+              child: item,
             );
           }
           return const AddPageCell();
@@ -241,6 +251,7 @@ class _DockedCard extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.only(
           left: ChromeSpacing.sm,
+          top: ChromeSpacing.sm,
           bottom: ChromeSpacing.sm,
         ),
         child: DecoratedBox(

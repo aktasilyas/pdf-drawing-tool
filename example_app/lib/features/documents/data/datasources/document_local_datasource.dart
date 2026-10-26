@@ -171,7 +171,9 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
     try {
       final key = 'document_content_$id';
       final jsonString = json.encode(content);
-      await _prefs.setString(key, jsonString);
+      if (!await _prefs.setString(key, jsonString)) {
+        throw const CacheException('Document content write was rejected');
+      }
     } catch (e) {
       throw CacheException('Failed to save document content: $e');
     }
@@ -181,7 +183,9 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
     try {
       final jsonList = documents.map((doc) => doc.toJson()).toList();
       final jsonString = json.encode(jsonList);
-      await _prefs.setString(_documentsKey, jsonString);
+      if (!await _prefs.setString(_documentsKey, jsonString)) {
+        throw const CacheException('Documents write was rejected');
+      }
     } catch (e) {
       throw CacheException('Failed to save documents: $e');
     }

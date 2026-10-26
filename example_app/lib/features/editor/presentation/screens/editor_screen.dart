@@ -10,6 +10,7 @@ import 'package:example_app/features/ai/presentation/providers/ai_providers.dart
 import 'package:example_app/features/editor/presentation/providers/editor_provider.dart';
 import 'package:example_app/features/editor/presentation/providers/editor_session.dart';
 import 'package:example_app/features/editor/presentation/widgets/editor_body.dart';
+import 'package:example_app/features/editor/presentation/widgets/editor_leave_guard.dart';
 
 class EditorScreen extends ConsumerWidget {
   final String documentId;
@@ -53,8 +54,8 @@ class EditorScreen extends ConsumerWidget {
 
           // Set page trash callback for soft-delete support
           ref.read(pageTrashCallbackProvider.notifier).state =
-              (pageIndex, page) async {
-            await ref
+              (pageIndex, page) {
+            return ref
                 .read(documentsControllerProvider.notifier)
                 .movePageToTrash(
                   documentId: document.id,
@@ -63,6 +64,12 @@ class EditorScreen extends ConsumerWidget {
                   pageData: page.toJson(),
                 );
           };
+
+          // Lets the editor drop a trash entry again (undo of a page delete).
+          ref.read(pageTrashDiscardCallbackProvider.notifier).state =
+              (trashId) => ref
+                  .read(documentsControllerProvider.notifier)
+                  .permanentlyDeletePage(trashId);
 
           // Initialize canvas transform for limited mode (notebook/notepad)
           final canvasMode = document.canvasMode;
@@ -94,22 +101,25 @@ class EditorScreen extends ConsumerWidget {
         // Get canvasMode from document (based on documentType)
         final canvasMode = document.canvasMode;
 
-        return Scaffold(
-          resizeToAvoidBottomInset: false,
-          // NO AppBar - DrawingScreen handles everything
-          body: EditorBody(
-            documentTitle: document.title,
-            canvasMode: canvasMode,
-            onHomePressed: () => _handleBack(context, ref),
-            onRenameDocument: () => _showRenameDialog(context, ref),
-            onDeleteDocument: () => _showDeleteConfirmation(context, ref),
-            onDocumentChanged: (doc) {
-              if (doc is DrawingDocument) {
-                ref.read(currentDocumentProvider.notifier).state = doc;
-                ref.read(autoSaveProvider.notifier).documentChanged(doc);
-                ref.read(hasUnsavedChangesProvider.notifier).state = true;
-              }
-            },
+        return EditorLeaveGuard(
+          onLeave: () => _handleBack(context, ref),
+          child: Scaffold(
+            resizeToAvoidBottomInset: false,
+            // NO AppBar - DrawingScreen handles everything
+            body: EditorBody(
+              documentTitle: document.title,
+              canvasMode: canvasMode,
+              onHomePressed: () => _handleBack(context, ref),
+              onRenameDocument: () => _showRenameDialog(context, ref),
+              onDeleteDocument: () => _showDeleteConfirmation(context, ref),
+              onDocumentChanged: (doc) {
+                if (doc is DrawingDocument) {
+                  ref.read(currentDocumentProvider.notifier).state = doc;
+                  ref.read(autoSaveProvider.notifier).documentChanged(doc);
+                  ref.read(hasUnsavedChangesProvider.notifier).state = true;
+                }
+              },
+            ),
           ),
         );
       },
@@ -121,6 +131,10 @@ class EditorScreen extends ConsumerWidget {
 
     // Always save current state before leaving (cancels any pending timer)
     await ref.read(autoSaveProvider.notifier).saveNow(currentDoc);
+
+    // Stay in the editor when the save failed: leaving would drop the
+    // unsaved changes. The save failure banner offers Retry.
+    if (ref.read(saveFailureProvider) != null) return;
 
     // Navigate FIRST - this destroys EditorScreen and auto-disposes
     // documentLoaderProvider (which is autoDispose). We must NOT invalidate
@@ -136,7 +150,9 @@ class EditorScreen extends ConsumerWidget {
     ref.invalidate(pageManagerProvider);
     ref.invalidate(autoSaveProvider);
     ref.invalidate(hasUnsavedChangesProvider);
+    ref.invalidate(saveFailureProvider);
     ref.invalidate(pageTrashCallbackProvider);
+    ref.invalidate(pageTrashDiscardCallbackProvider);
     endEditorSession(ref.read);
     if (ref.read(featureFlagsProvider).aiChat) {
       ref.invalidate(aiChatProvider);

@@ -162,7 +162,7 @@ Future<void> importPdf(BuildContext context) async {
     // Hata mesajı göster
     messenger.showSnackBar(
       SnackBar(
-        content: Text('PDF yüklenirken hata: ${e.toString()}'),
+        content: Text(friendlyPdfImportError(e)),
         backgroundColor: Theme.of(context).colorScheme.error,
         behavior: SnackBarBehavior.floating,
       ),

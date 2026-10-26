@@ -184,8 +184,8 @@ class PageOptionsToggleItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    return SizedBox(
-      height: compact ? 40 : 48,
+    return ConstrainedBox(
+      constraints: BoxConstraints(minHeight: compact ? 40 : 48),
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: compact ? 16 : 20),
         child: Row(
@@ -195,7 +195,7 @@ class PageOptionsToggleItem extends StatelessWidget {
             Expanded(
               child: subtitle != null
                   ? Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(label,

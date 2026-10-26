@@ -15,6 +15,7 @@ import 'package:example_app/features/settings/presentation/providers/settings_pr
 import 'package:example_app/features/settings/presentation/widgets/settings_section.dart';
 import 'package:example_app/features/settings/presentation/widgets/settings_tile.dart';
 import 'package:example_app/features/settings/presentation/widgets/canvas_theme_setting.dart';
+import 'package:example_app/features/settings/presentation/widgets/crash_reporting_setting.dart';
 import 'package:example_app/features/settings/presentation/widgets/settings_dialogs.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 
@@ -58,6 +59,8 @@ class SettingsScreen extends ConsumerWidget {
                   const SizedBox(height: AppSpacing.sectionSpacing),
                 ],
                 _buildDataSection(context, ref),
+                const SizedBox(height: AppSpacing.sectionSpacing),
+                _buildPrivacySection(),
                 const SizedBox(height: AppSpacing.sectionSpacing),
                 _buildAboutSection(context),
                 const SizedBox(height: AppSpacing.xxl),
@@ -170,6 +173,13 @@ class SettingsScreen extends ConsumerWidget {
           onTap: () => SettingsDialogs.clearCache(context, ref),
         ),
       ],
+    );
+  }
+
+  Widget _buildPrivacySection() {
+    return const SettingsSection(
+      title: 'GİZLİLİK',
+      children: [CrashReportingSetting()],
     );
   }
 

@@ -88,5 +88,6 @@ abstract class DocumentRepository {
     DateTime? updatedAt,
     String? coverId,
     bool updateCover = false,
+    String? title,
   });
 }

@@ -251,6 +251,30 @@ void main() {
       });
     });
 
+    group('saveDocumentContent', () {
+      test('updates the metadata title when a title is given', () async {
+        when(() => mockDatasource.saveDocumentContent(any(), any()))
+            .thenAnswer((_) async {});
+        when(() => mockDatasource.getDocument('doc-1'))
+            .thenAnswer((_) async => testModel);
+        DocumentModel? saved;
+        when(() => mockDatasource.updateDocument(any()))
+            .thenAnswer((invocation) async {
+          saved = invocation.positionalArguments[0] as DocumentModel;
+          return saved!;
+        });
+
+        final result = await repository.saveDocumentContent(
+          id: 'doc-1',
+          content: const {'title': 'Renamed'},
+          title: 'Renamed',
+        );
+
+        expect(result.isRight(), true);
+        expect(saved?.title, 'Renamed');
+      });
+    });
+
     group('getTrash', () {
       test('should return only documents in trash', () async {
         // Arrange

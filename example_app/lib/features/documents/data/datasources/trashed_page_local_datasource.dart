@@ -64,6 +64,8 @@ class TrashedPageLocalDatasourceImpl implements TrashedPageLocalDatasource {
 
   Future<void> _save(List<TrashedPageModel> pages) async {
     final jsonList = pages.map((p) => p.toJson()).toList();
-    await _prefs.setString(_key, json.encode(jsonList));
+    if (!await _prefs.setString(_key, json.encode(jsonList))) {
+      throw const CacheException('Trashed pages write was rejected');
+    }
   }
 }

@@ -46,14 +46,33 @@ class HistoryManager {
   ///
   /// If the undo stack exceeds [maxHistorySize], the oldest command
   /// is removed.
-  DrawingDocument execute(DrawingCommand command, DrawingDocument document) {
-    final pageId = _currentPageId(document);
-
-    // Execute the command
-    final newDocument = command.execute(document);
+  ///
+  /// [pageId] runs the command on that page of a multi-page document
+  /// instead of the current one; the current page stays the same. An unknown
+  /// [pageId] returns [document] unchanged and records nothing.
+  DrawingDocument execute(
+    DrawingCommand command,
+    DrawingDocument document, {
+    String? pageId,
+  }) {
+    final DrawingDocument newDocument;
+    final String? entryPageId;
+    if (pageId != null && document.isMultiPage) {
+      final index = document.pages.indexWhere((p) => p.id == pageId);
+      if (index < 0) return document;
+      final target = document.copyWith(currentPageIndex: index);
+      final changed = command.execute(target);
+      newDocument = changed.copyWith(
+        currentPageIndex: document.currentPageIndex,
+      );
+      entryPageId = pageId;
+    } else {
+      newDocument = command.execute(document);
+      entryPageId = _currentPageId(document);
+    }
 
     // Add to undo stack
-    _undoStack.add(_Entry(command, pageId));
+    _undoStack.add(_Entry(command, entryPageId));
 
     // Clear redo stack (new action invalidates redo history)
     _redoStack.clear();

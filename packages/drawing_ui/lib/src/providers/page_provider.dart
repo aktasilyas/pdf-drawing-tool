@@ -60,7 +60,10 @@ class PageManagerNotifier extends StateNotifier<PageManager> {
     );
   }
 
-  /// Reorders a page.
+  /// Reorders a page in the page manager only; the document is not updated.
+  @Deprecated(
+      'Use PageStructureActions.movePage (pageStructureActionsProvider), '
+      'which updates documentProvider so the order is saved.')
   void reorderPage(int oldIndex, int newIndex) {
     state.reorderPage(oldIndex, newIndex);
     state = PageManager(

@@ -34,17 +34,44 @@ final autoSaveProvider = StateNotifierProvider<AutoSaveNotifier, bool>((ref) {
   return AutoSaveNotifier(ref);
 });
 
+// Latest failed save; null when the last save succeeded. The editor shows a
+// persistent "Kaydedilemedi" banner with Retry while this is set.
+final saveFailureProvider = StateProvider<Failure?>((ref) => null);
+
 class AutoSaveNotifier extends StateNotifier<bool> {
   final Ref _ref;
   Timer? _debounceTimer;
+  DrawingDocument? _pending;
+
+  /// Delay between the last change and the automatic save.
+  static const debounce = Duration(seconds: 3);
+
+  /// Newest document handed to this notifier; what [retry] saves.
+  DrawingDocument? _latest;
 
   AutoSaveNotifier(this._ref) : super(false);
 
+  /// Whether a change is waiting for the debounce timer.
+  bool get hasPendingSave => _pending != null;
+
   void documentChanged(DrawingDocument document) {
+    _latest = document;
     _debounceTimer?.cancel();
-    _debounceTimer = Timer(const Duration(seconds: 3), () {
+    _pending = document;
+    _debounceTimer = Timer(debounce, () {
+      _pending = null;
       _save(document);
     });
+  }
+
+  /// Saves a pending change right away (app paused, back pressed).
+  /// After a failed save it retries the newest document instead.
+  /// Does nothing when there is nothing left to save.
+  Future<void> flush() {
+    final pending = _pending;
+    if (pending != null) return saveNow(pending);
+    if (_ref.read(saveFailureProvider) != null) return retry();
+    return Future<void>.value();
   }
 
   Future<void> _save(DrawingDocument document) async {
@@ -52,20 +79,36 @@ class AutoSaveNotifier extends StateNotifier<bool> {
     final useCase = _ref.read(saveDocumentUseCaseProvider);
     final result = await useCase(document);
 
-    result.fold(
-      (failure) => logger.e('Save failed', error: failure.message),
-      (_) => logger.i('Document saved successfully: ${document.id}'),
-    );
+    final failure = result.fold((f) => f, (_) => null);
+    if (failure != null) {
+      logger.e('Save failed', error: failure.message);
+    } else {
+      logger.i('Document saved successfully: ${document.id}');
+    }
 
+    // A lifecycle flush can outlive the editor (provider invalidated on leave).
+    if (!mounted) return;
+    _ref.read(saveFailureProvider.notifier).state = failure;
     state = false; // Saved
+    // A failed save keeps the unsaved flag so nothing is reported as saved.
+    if (failure != null) return;
     // Only clear unsaved flag if no new changes arrived during save
     if (_debounceTimer == null || !_debounceTimer!.isActive) {
       _ref.read(hasUnsavedChangesProvider.notifier).state = false;
     }
   }
 
+  /// Saves the newest document again after a failed save.
+  Future<void> retry() {
+    final latest = _latest;
+    if (latest == null) return Future<void>.value();
+    return saveNow(latest);
+  }
+
   Future<void> saveNow(DrawingDocument document) {
+    _latest = document;
     _debounceTimer?.cancel();
+    _pending = null;
     return _save(document);
   }
 

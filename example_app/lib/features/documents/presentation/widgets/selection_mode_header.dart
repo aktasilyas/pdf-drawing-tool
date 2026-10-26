@@ -133,10 +133,8 @@ class SelectionModeHeader extends ConsumerWidget {
       if (context.mounted) {
         AppToast.success(context, '${selectedDocs.length} belge kopyalandı');
       }
-    } catch (e) {
-      if (context.mounted) {
-        AppToast.error(context, 'Kopyalama başarısız: $e');
-      }
+    } catch (_) {
+      // Shown by LibraryErrorListener.
     }
   }
 
@@ -187,10 +185,8 @@ class SelectionModeHeader extends ConsumerWidget {
                 : '${selectedDocs.length} belge çöpe taşındı',
           );
         }
-      } catch (e) {
-        if (context.mounted) {
-          AppToast.error(context, 'Silme başarısız: $e');
-        }
+      } catch (_) {
+        // Shown by LibraryErrorListener.
       }
     }
   }

@@ -52,14 +52,11 @@ void _showTrashDocumentMenu(
               Navigator.pop(ctx);
               final controller = ref.read(documentsControllerProvider.notifier);
               final result = await controller.restoreFromTrash(document.id);
-              if (context.mounted) {
+              // Failures are shown by LibraryErrorListener.
+              if (result && context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      result ? 'Belge geri yüklendi' : 'Belge geri yüklenemedi',
-                    ),
-                    backgroundColor:
-                        result ? null : Theme.of(context).colorScheme.error,
+                  const SnackBar(
+                    content: Text('Belge geri yüklendi'),
                     behavior: SnackBarBehavior.floating,
                   ),
                 );
@@ -152,14 +149,11 @@ void _showNormalDocumentMenu(
               }
               final controller = ref.read(documentsControllerProvider.notifier);
               final result = await controller.duplicateDocument(document.id);
-              if (context.mounted) {
+              // Failures are shown by LibraryErrorListener.
+              if (result && context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      result ? 'Belge çoğaltıldı' : 'Belge çoğaltılamadı',
-                    ),
-                    backgroundColor:
-                        result ? null : Theme.of(context).colorScheme.error,
+                  const SnackBar(
+                    content: Text('Belge çoğaltıldı'),
                     behavior: SnackBarBehavior.floating,
                   ),
                 );

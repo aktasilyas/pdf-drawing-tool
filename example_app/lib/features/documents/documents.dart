@@ -4,6 +4,7 @@ library;
 // Domain - Entities
 export 'domain/entities/document_info.dart';
 export 'domain/entities/folder.dart';
+export 'domain/entities/paper_color.dart';
 export 'domain/entities/view_mode.dart';
 
 // Domain - Repositories
@@ -39,6 +40,7 @@ export 'data/repositories/page_trash_repository_impl.dart';
 // Presentation - Providers
 export 'presentation/providers/documents_provider.dart';
 export 'presentation/providers/folders_provider.dart';
+export 'presentation/providers/library_error.dart';
 
 // Presentation - Screens
 export 'presentation/screens/documents_screen.dart';
@@ -77,6 +79,7 @@ export 'presentation/widgets/library_list_row.dart';
 export 'presentation/widgets/library_page_thumbnail.dart';
 export 'presentation/widgets/library_tile_frame.dart';
 export 'presentation/widgets/library_tile_parts.dart';
+export 'presentation/widgets/library_error_listener.dart';
 export 'presentation/widgets/manage_folder_list_item.dart';
 export 'presentation/widgets/move_to_folder_dialog.dart';
 export 'presentation/widgets/new_document_dialog.dart';

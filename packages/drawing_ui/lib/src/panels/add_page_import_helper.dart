@@ -14,6 +14,7 @@ import 'package:drawing_ui/src/services/pdf_import_service.dart';
 Future<List<Page>> pickAndImportFile({
   required int insertIndex,
   required PageSize defaultPageSize,
+  void Function(String message)? onError,
 }) async {
   final result = await FilePicker.platform.pickFiles(
     type: FileType.custom,
@@ -26,12 +27,16 @@ Future<List<Page>> pickAndImportFile({
 
   final ext = filePath.split('.').last.toLowerCase();
   if (ext == 'pdf') {
-    return _importPdf(filePath, insertIndex);
+    return _importPdf(filePath, insertIndex, onError);
   }
   return _importImage(filePath, insertIndex);
 }
 
-Future<List<Page>> _importPdf(String path, int insertIndex) async {
+Future<List<Page>> _importPdf(
+  String path,
+  int insertIndex,
+  void Function(String message)? onError,
+) async {
   PDFImportService? svc;
   try {
     svc = PDFImportService();
@@ -39,12 +44,16 @@ Future<List<Page>> _importPdf(String path, int insertIndex) async {
       filePath: path,
       config: PDFImportConfig.all(),
     );
-    if (!r.isSuccess || r.pages.isEmpty) return [];
+    if (!r.isSuccess || r.pages.isEmpty) {
+      onError?.call(r.errorMessage ?? friendlyPdfImportError(''));
+      return [];
+    }
     return [
       for (int i = 0; i < r.pages.length; i++)
         r.pages[i].copyWith(index: insertIndex + i),
     ];
-  } catch (_) {
+  } catch (e) {
+    onError?.call(friendlyPdfImportError(e));
     return [];
   } finally {
     svc?.dispose();

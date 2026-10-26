@@ -2,7 +2,8 @@ name: Android manifest
 
 # Release builds must not request frozen-feature permissions (issue #102).
 # Merges the release and debug manifests and checks them with
-# scripts/check-android-manifest.sh. Runs only when the Android project,
+# scripts/check-android-manifest.sh, then builds a release APK without any
+# Firebase config (crash reporting must stay optional, #60). Runs only when the Android project,
 # dependencies or the check itself change.
 on:
   pull_request:
@@ -33,7 +34,7 @@ jobs:
   merged-manifest:
     name: merged manifest permissions
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
 
@@ -61,3 +62,7 @@ jobs:
 
       - name: Check permissions
         run: ./scripts/check-android-manifest.sh
+
+      - name: Release build without Firebase config
+        working-directory: example_app
+        run: flutter build apk --release

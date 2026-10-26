@@ -4,8 +4,9 @@ Status: approved by the owner on 2026-10-25 (#59). Scope: the v1.0 Android relea
 feature flags off (`example_app/lib/core/config/feature_flags.dart`). Still to do before publishing:
 host this page at a public URL (Play Console requires one).
 
-Must be revised before any release that turns on AI chat, cloud sync, premium, audio recording or
-adds crash reporting (ROADMAP M4), because each of those sends data off the device.
+Must be revised before any release that turns on AI chat, cloud sync, premium or audio recording,
+because each of those sends data off the device. Crash reporting (#60, Firebase Crashlytics) is
+covered below; the owner pre-approved that section on #60.
 
 ---
 
@@ -18,7 +19,9 @@ happens to your information when you use the app.
 
 ### Summary
 Elyanotes works fully offline. Your notebooks, drawings, imported PDFs and images stay on your device.
-We do not collect, sell or share personal data, and the app contains no ads, analytics or tracking.
+We do not sell or share personal data, and the app contains no ads, analytics or tracking. The only
+data that leaves your device is an optional, anonymous crash report (see "Crash reports"), which you
+can turn off in Settings.
 
 ### Data stored on your device
 - Notebooks, pages, handwriting, text, shapes and stickers you create.
@@ -37,14 +40,29 @@ app data if you have enabled it in your system settings; that backup is governed
   older this needs the storage permission; newer versions use scoped storage.
 - **Clipboard:** only when you copy or paste content in the editor.
 
-This release does not use the microphone, location, contacts or the network.
+This release does not use the microphone, location or contacts. It uses the network only to send
+crash reports (see below).
+
+### Crash reports
+If the app crashes, it can send a crash report to Google Firebase Crashlytics, a service provided by
+Google, so we can find and fix the problem.
+- **What is sent:** the technical error and stack trace, device model, Android version, app version,
+  the time of the crash and a random installation identifier created by Crashlytics.
+- **What is never sent:** your notes, drawings, PDFs, images, notebook titles, file names or paths,
+  and no account or other personal identifier. File paths and quoted text are removed from error
+  messages before a report is sent.
+- **Purpose:** app stability only. Reports are not used for advertising or tracking.
+- **Retention:** Crashlytics keeps crash reports for 90 days.
+- **Turning it off:** Settings → Privacy → "Send crash reports". When you turn it off, no further
+  reports are sent and reports not yet sent are deleted. It is on by default.
 
 ### Sharing and export
 When you export or share a notebook, page or image, you choose the destination (for example another
 app or a folder). What happens to the data there is governed by that destination.
 
 ### Children
-The app does not knowingly collect data from anyone, including children, because it collects no data.
+The app collects no personal data from anyone, including children. The only data sent off the
+device is the anonymous crash report described above.
 
 ### Changes
 If a future version adds features that send data off the device, we will update this policy and the
@@ -64,8 +82,9 @@ politika, uygulamayı kullanırken bilgilerinize ne olduğunu açıklar.
 
 ### Özet
 Elyanotes tamamen çevrimdışı çalışır. Defterleriniz, çizimleriniz, içe aktardığınız PDF'ler ve
-görseller cihazınızda kalır. Kişisel veri toplamayız, satmayız veya paylaşmayız; uygulamada reklam,
-analiz veya izleme yoktur.
+görseller cihazınızda kalır. Kişisel veri satmayız veya paylaşmayız; uygulamada reklam, analiz veya
+izleme yoktur. Cihazınızdan çıkan tek veri, Ayarlar'dan kapatabileceğiniz isteğe bağlı ve anonim çökme
+raporudur ("Çökme raporları" bölümüne bakın).
 
 ### Cihazınızda saklanan veriler
 - Oluşturduğunuz defterler, sayfalar, el yazısı, metin, şekiller ve çıkartmalar.
@@ -85,14 +104,29 @@ açtıysanız, yedek uygulama verilerini içerebilir; bu yedek Google'ın politi
   ve öncesinde depolama izni gerekir; yeni sürümler kapsamlı depolama kullanır.
 - **Pano:** yalnızca düzenleyicide kopyalama veya yapıştırma yaptığınızda.
 
-Bu sürüm mikrofonu, konumu, kişileri veya ağı kullanmaz.
+Bu sürüm mikrofonu, konumu veya kişileri kullanmaz. Ağı yalnızca çökme raporu göndermek için kullanır
+(aşağıya bakın).
+
+### Çökme raporları
+Uygulama çökerse, sorunu bulup düzeltebilmemiz için Google'ın sunduğu Google Firebase Crashlytics
+hizmetine bir çökme raporu gönderebilir.
+- **Gönderilenler:** teknik hata ve yığın izi (stack trace), cihaz modeli, Android sürümü, uygulama
+  sürümü, çökmenin zamanı ve Crashlytics'in oluşturduğu rastgele bir kurulum kimliği.
+- **Asla gönderilmeyenler:** notlarınız, çizimleriniz, PDF'leriniz, görselleriniz, defter adları, dosya
+  adları veya yolları; hesap ya da başka bir kişisel kimlik de gönderilmez. Rapor gönderilmeden önce
+  hata mesajlarındaki dosya yolları ve tırnak içindeki metinler silinir.
+- **Amaç:** yalnızca uygulamanın kararlılığı. Raporlar reklam veya izleme için kullanılmaz.
+- **Saklama süresi:** Crashlytics çökme raporlarını 90 gün saklar.
+- **Kapatma:** Ayarlar → Gizlilik → "Çökme raporlarını gönder". Kapattığınızda yeni rapor gönderilmez
+  ve henüz gönderilmemiş raporlar silinir. Varsayılan olarak açıktır.
 
 ### Paylaşma ve dışa aktarma
 Bir defteri, sayfayı veya görseli dışa aktardığınızda ya da paylaştığınızda hedefi siz seçersiniz
 (örneğin başka bir uygulama veya klasör). Verinin orada işlenmesi o hedefin koşullarına tabidir.
 
 ### Çocuklar
-Uygulama veri toplamadığı için çocuklardan da veri toplamaz.
+Uygulama çocuklar dahil kimseden kişisel veri toplamaz. Cihaz dışına gönderilen tek veri, yukarıda
+açıklanan anonim çökme raporudur.
 
 ### Değişiklikler
 İleride veriyi cihaz dışına gönderen bir özellik eklenirse, o sürüm yayınlanmadan önce bu politikayı ve

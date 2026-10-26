@@ -1,3 +1,5 @@
+import 'dart:ui' show Size;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:drawing_ui/src/services/pdf_page_renderer.dart';
 
@@ -302,6 +304,84 @@ void main() {
 
         expect(size.width, 10000.0);
         expect(size.height, 10000.0);
+      });
+    });
+
+    group('Render size cap', () {
+      // A4 in PDF points.
+      const a4Width = 595.0;
+      const a4Height = 842.0;
+
+      test('every display quality stays within maxRenderSide', () {
+        final expected = <double, Size>{
+          // 1.5x: medium (144) x 1.5 = 216 DPI -> 3x points, under the cap.
+          1.5: const Size(a4Width * 3, a4Height * 3),
+          // 2.0x: medium (144) x 2.0 = 288 DPI -> 4x points, under the cap.
+          2.0: const Size(a4Width * 4, a4Height * 4),
+          // 2.5x: high (288) x 2.5 = 720 DPI -> 8420 px tall, capped.
+          2.5: const Size(4096 * a4Width / a4Height, 4096),
+        };
+        for (final entry in expected.entries) {
+          final size = renderer.renderSizeForDisplayQuality(
+            pageWidth: a4Width,
+            pageHeight: a4Height,
+            quality: entry.key,
+          );
+          final reason = 'at ${entry.key}x';
+          expect(
+            size.width,
+            closeTo(entry.value.width, 0.01),
+            reason: reason,
+          );
+          expect(
+            size.height,
+            closeTo(entry.value.height, 0.01),
+            reason: reason,
+          );
+          expect(
+            size.longestSide,
+            lessThanOrEqualTo(PDFPageRenderer.maxRenderSide),
+          );
+        }
+      });
+
+      test('higher quality never yields a smaller bitmap', () {
+        double side(double quality) {
+          final size = renderer.renderSizeForDisplayQuality(
+            pageWidth: a4Width,
+            pageHeight: a4Height,
+            quality: quality,
+          );
+          return size.longestSide;
+        }
+
+        expect(side(2.0), greaterThan(side(1.5)));
+        expect(side(2.5), greaterThanOrEqualTo(side(2.0)));
+      });
+
+      test('landscape pages are capped on their width', () {
+        final size = renderer.renderSizeForDisplayQuality(
+          pageWidth: a4Height,
+          pageHeight: a4Width,
+          quality: 2.5,
+        );
+        expect(size.width, closeTo(4096, 0.01));
+        expect(size.width / size.height, closeTo(a4Height / a4Width, 1e-9));
+      });
+
+      test('capRenderSize keeps sizes within the limit unchanged', () {
+        const size = Size(1000, 2000);
+        expect(renderer.capRenderSize(size), size);
+      });
+
+      test('capRenderSize keeps the aspect ratio', () {
+        final size = renderer.capRenderSize(const Size(6000, 9000));
+        expect(size.height, closeTo(4096, 0.01));
+        expect(size.width / size.height, closeTo(6000 / 9000, 1e-9));
+      });
+
+      test('capRenderSize handles an empty size', () {
+        expect(renderer.capRenderSize(Size.zero), Size.zero);
       });
     });
   });

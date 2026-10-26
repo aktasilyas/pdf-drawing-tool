@@ -11,12 +11,29 @@ class AppEnv {
         const String.fromEnvironment('REVENUECAT_APPLE_KEY'),
     this.revenueCatGoogleKey =
         const String.fromEnvironment('REVENUECAT_GOOGLE_KEY'),
+    this.firebaseApiKey = const String.fromEnvironment('FIREBASE_API_KEY'),
+    this.firebaseAppId = const String.fromEnvironment('FIREBASE_APP_ID'),
+    this.firebaseProjectId =
+        const String.fromEnvironment('FIREBASE_PROJECT_ID'),
+    this.firebaseMessagingSenderId =
+        const String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID'),
   });
 
   final String supabaseUrl;
   final String supabaseAnonKey;
   final String revenueCatAppleKey;
   final String revenueCatGoogleKey;
+  final String firebaseApiKey;
+  final String firebaseAppId;
+  final String firebaseProjectId;
+  final String firebaseMessagingSenderId;
+
+  /// Whether all four Firebase values (crash reporting) are present.
+  bool get hasFirebaseConfig =>
+      firebaseApiKey.isNotEmpty &&
+      firebaseAppId.isNotEmpty &&
+      firebaseProjectId.isNotEmpty &&
+      firebaseMessagingSenderId.isNotEmpty;
 
   /// Platform-appropriate RevenueCat public API key (may be empty).
   String get revenueCatApiKey {

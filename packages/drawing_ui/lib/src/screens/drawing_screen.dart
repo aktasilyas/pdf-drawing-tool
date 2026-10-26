@@ -27,6 +27,7 @@ class DrawingScreen extends ConsumerStatefulWidget {
     this.isExternalLeftSidebarOpen = false,
     this.externalLeftSidebarWidth = 0.0,
     this.onExternalLeftSidebarClose,
+    this.thumbnailCache,
   });
 
   final String? documentTitle;
@@ -50,6 +51,10 @@ class DrawingScreen extends ConsumerStatefulWidget {
   /// Called when the phone overlay is tapped to dismiss the sidebar.
   final VoidCallback? onExternalLeftSidebarClose;
 
+  /// Thumbnail cache for the page sidebar; tests pass a pre-filled one so
+  /// goldens show pages instead of loading spinners.
+  final ThumbnailCache? thumbnailCache;
+
   @override
   ConsumerState<DrawingScreen> createState() => _DrawingScreenState();
 }
@@ -64,7 +69,8 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
   final GlobalKey<PageSlideTransitionState> _pageTransitionKey =
       GlobalKey<PageSlideTransitionState>();
   final PopoverController _panelController = PopoverController();
-  final ThumbnailCache _thumbnailCache = ThumbnailCache(maxSize: 20);
+  late final ThumbnailCache _thumbnailCache =
+      widget.thumbnailCache ?? ThumbnailCache(maxSize: 20);
   Offset _penBoxPosition = const Offset(12, 12);
   bool _isPageTransitioning = false;
   int? _preSwitchPageIndex; // Original page index before interactive pre-switch
@@ -356,7 +362,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                         if (!isCompactMode &&
                             widget.externalLeftSidebar != null)
                           AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
+                            duration: ChromeDurations.normal,
                             curve: Curves.easeInOut,
                             width: widget.isExternalLeftSidebarOpen
                                 ? widget.externalLeftSidebarWidth
@@ -373,7 +379,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
                         // Page sidebar — tablet only
                         if (isCompactMode == false)
                           AnimatedContainer(
-                            duration: const Duration(milliseconds: 250),
+                            duration: ChromeDurations.normal,
                             curve: Curves.easeInOut,
                             width: showSidebar ? kPageSidebarWidth : 0.0,
                             clipBehavior: Clip.hardEdge,
@@ -445,7 +451,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
               // Phone external left sidebar drawer
               if (isCompactMode && widget.externalLeftSidebar != null)
                 AnimatedPositioned(
-                  duration: const Duration(milliseconds: 300),
+                  duration: ChromeDurations.normal,
                   curve: Curves.easeInOut,
                   left: widget.isExternalLeftSidebarOpen
                       ? 0
@@ -473,7 +479,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen> {
               // Phone page sidebar drawer
               if (isCompactMode)
                 AnimatedPositioned(
-                  duration: const Duration(milliseconds: 300),
+                  duration: ChromeDurations.normal,
                   curve: Curves.easeInOut,
                   left: showSidebar ? 0 : -drawerWidth,
                   top: 0,

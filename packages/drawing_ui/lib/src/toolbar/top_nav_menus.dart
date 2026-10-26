@@ -3,68 +3,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 
 import 'package:drawing_ui/src/panels/add_page_panel.dart';
+import 'package:drawing_ui/src/panels/export_panel.dart';
 import 'package:drawing_ui/src/panels/infinite_background_panel.dart';
 import 'package:drawing_ui/src/panels/page_options_panel.dart';
-import 'package:drawing_ui/src/panels/page_options_widgets.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
-import 'package:drawing_ui/src/widgets/pdf_import_dialog.dart';
-import 'package:drawing_ui/src/widgets/pdf_export_dialog.dart';
 
-/// Shows export/share bottom sheet menu.
+/// Shows the export options as a bottom sheet (phone layout).
 ///
-/// Options: PDF export, image export (future), share (future).
+/// Same options and export path as the tablet [ExportPanel] popover:
+/// PDF for paged documents, PNG for the infinite canvas.
 void showExportMenu(BuildContext context, WidgetRef ref) {
-  final colorScheme = Theme.of(context).colorScheme;
-
   showModalBottomSheet<void>(
     context: context,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-    ),
+    showDragHandle: true,
     builder: (ctx) => SafeArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const SizedBox(height: 8),
-          Container(
-            width: 32,
-            height: 4,
-            decoration: BoxDecoration(
-              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-          const SizedBox(height: 12),
-          PageOptionsMenuItem(
-            icon: ElyanotesIcons.exportIcon,
-            label: 'PDF İçe Aktar',
-            onTap: () {
-              Navigator.pop(ctx);
-              _showPDFImportDialog(context, ref);
-            },
-          ),
-          pageOptionsDivider(colorScheme),
-          PageOptionsMenuItem(
-            icon: ElyanotesIcons.pdfFile,
-            label: 'PDF Olarak Dışa Aktar',
-            onTap: () {
-              Navigator.pop(ctx);
-              _showPDFExportDialog(context, ref);
-            },
-          ),
-          pageOptionsDivider(colorScheme),
-          PageOptionsMenuItem(
-            icon: ElyanotesIcons.image,
-            label: 'Resim Olarak Dışa Aktar',
-          ),
-          pageOptionsDivider(colorScheme),
-          PageOptionsMenuItem(
-            icon: ElyanotesIcons.share,
-            label: 'Paylaş',
-          ),
-          const SizedBox(height: 8),
-        ],
+      child: ExportPanel(
+        embedded: true,
+        onClose: () => Navigator.pop(ctx),
       ),
     ),
   );
@@ -296,45 +252,6 @@ void showAudioMenu(
           const SizedBox(height: 8),
         ],
       ),
-    ),
-  );
-}
-
-// ── Private helpers ──
-
-void _showPDFImportDialog(BuildContext context, WidgetRef ref) {
-  showDialog<void>(
-    context: context,
-    builder: (context) => PDFImportDialog(
-      onImportComplete: (result) {
-        if (result.isSuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('${result.pageCount} sayfa içe aktarıldı'),
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
-      },
-    ),
-  );
-}
-
-void _showPDFExportDialog(BuildContext context, WidgetRef ref) {
-  final pageCount = ref.read(pageCountProvider);
-
-  showDialog<void>(
-    context: context,
-    builder: (context) => PDFExportDialog(
-      totalPages: pageCount,
-      onExport: (config) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('PDF dışa aktarılıyor...'),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      },
     ),
   );
 }

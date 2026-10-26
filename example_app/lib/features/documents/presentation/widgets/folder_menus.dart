@@ -107,11 +107,11 @@ Future<void> _showColorPicker(
     final success = await ref
         .read(foldersControllerProvider.notifier)
         .updateFolderColor(folder.id, newColor);
-    if (context.mounted) {
+    // Failures are shown by LibraryErrorListener.
+    if (success && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-              success ? 'Klasör rengi değiştirildi' : 'Renk değiştirilemedi'),
+        const SnackBar(
+          content: Text('Klasör rengi değiştirildi'),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -165,13 +165,12 @@ Widget _buildDeleteFolderTile(
       if (confirmed == true && context.mounted) {
         final controller = ref.read(foldersControllerProvider.notifier);
         final success = await controller.deleteFolder(folder.id);
-        if (context.mounted) {
-          if (success) {
-            onDeleted?.call();
-          }
+        // Failures are shown by LibraryErrorListener.
+        if (success && context.mounted) {
+          onDeleted?.call();
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(success ? 'Klasör silindi' : 'Klasör silinemedi'),
+            const SnackBar(
+              content: Text('Klasör silindi'),
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -243,12 +242,12 @@ void _showRenameFolderDialog(
                   ref.read(foldersControllerProvider.notifier);
               final success =
                   await folderController.renameFolder(folder.id, newName);
-              if (context.mounted) {
+              // Failures are shown by LibraryErrorListener.
+              if (success && context.mounted) {
+                final message = 'Klasör "$newName" olarak yeniden adlandırıldı';
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(success
-                        ? 'Klasör "$newName" olarak yeniden adlandırıldı'
-                        : 'Klasör adı değiştirilemedi'),
+                    content: Text(message),
                     behavior: SnackBarBehavior.floating,
                   ),
                 );

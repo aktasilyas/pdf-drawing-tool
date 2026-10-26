@@ -88,7 +88,8 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
           margin: const EdgeInsets.only(bottom: 8),
           child: Center(
               child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+            // No vertical padding: the 48dp pill keeps 48dp hit targets.
+            padding: const EdgeInsets.symmetric(horizontal: 4),
             decoration: BoxDecoration(
               color: cs.surfaceContainerHigh.withValues(alpha: 0.92),
               borderRadius: BorderRadius.circular(20),
@@ -115,8 +116,12 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
                   label: '$pageLabel, Sayfaya gitmek için dokunun',
                   button: true,
                   child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
                     onTap: () => _showGoToPageDialog(context, ref, pageCount),
-                    child: Padding(
+                    // Full-height hit area: 48dp like the arrows beside it.
+                    child: Container(
+                      height: 48,
+                      alignment: Alignment.center,
                       padding: const EdgeInsets.symmetric(horizontal: 12),
                       child: Text(pageLabel,
                           style: Theme.of(context)

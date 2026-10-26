@@ -16,7 +16,7 @@ editor/
 │   ├── screens/
 │   │   └── editor_screen.dart            # Main editor screen
 │   └── widgets/
-│       └── pdf_export_dialog.dart        # PDF export dialog
+│       └── editor_body.dart              # Canvas + AI panels
 └── editor.dart                           # Barrel export
 ```
 
