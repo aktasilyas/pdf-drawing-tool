@@ -71,8 +71,7 @@ class PdfPagePlaceholder extends ConsumerWidget {
               PhosphorIcon(
                 missing ? ElyanotesIcons.warningCircle : ElyanotesIcons.pdfFile,
                 size: 40,
-                color:
-                    missing ? colorScheme.error : colorScheme.outlineVariant,
+                color: missing ? colorScheme.error : colorScheme.outlineVariant,
               ),
               const SizedBox(height: ChromeSpacing.sm),
               Text(
