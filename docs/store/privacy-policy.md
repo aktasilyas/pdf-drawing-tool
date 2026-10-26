@@ -4,6 +4,9 @@ Status: approved by the owner on 2026-10-25 (#59). Scope: the v1.0 Android relea
 feature flags off (`example_app/lib/core/config/feature_flags.dart`). Still to do before publishing:
 host this page at a public URL (Play Console requires one).
 
+The Turkish section is bundled in the app as `example_app/assets/legal/privacy_policy_tr.md`
+(Settings → Gizlilik politikası); keep both in sync (a test in `example_app` checks it).
+
 Must be revised before any release that turns on AI chat, cloud sync, premium or audio recording,
 because each of those sends data off the device. Crash reporting (#60, Firebase Crashlytics) is
 covered below; the owner pre-approved that section on #60.

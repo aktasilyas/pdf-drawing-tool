@@ -131,27 +131,6 @@ abstract class SettingsDialogs {
     );
   }
 
-  static void showExportDialog(BuildContext context) {
-    AppToast.info(context, 'Dışa aktarma özelliği yakında');
-  }
-
-  static Future<void> clearCache(BuildContext context, WidgetRef ref) async {
-    final result = await AppConfirmDialog.show(
-      context: context,
-      title: 'Önbelleği Temizle',
-      message: 'Uygulama önbelleği temizlenecek. Devam etmek istiyor musunuz?',
-      confirmLabel: 'Temizle',
-    );
-    if (result == true && context.mounted) {
-      // TODO: Cache temizleme
-      AppToast.success(context, 'Önbellek temizlendi');
-    }
-  }
-
-  static void openLegalPage(BuildContext context, String type) {
-    AppToast.info(context, '$type sayfası yakında eklenecek');
-  }
-
   static Future<void> handleLogout(BuildContext context, WidgetRef ref) async {
     final result = await AppConfirmDialog.show(
       context: context,

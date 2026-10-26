@@ -1,0 +1,70 @@
+/// Settings screen header: title (or account avatar when cloud is on) and
+/// a close button.
+library;
+
+import 'package:flutter/material.dart';
+
+import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/core/widgets/index.dart';
+
+class SettingsHeader extends StatelessWidget {
+  const SettingsHeader({super.key, this.userName, this.onNameTap});
+
+  /// Signed-in user's display name; `null` when there is no account
+  /// (cloud sync off), in which case the header shows the screen title.
+  final String? userName;
+  final VoidCallback? onNameTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final name = userName;
+    final titleStyle = AppTypography.headlineMedium.copyWith(
+      color: context.palette.textPrimary,
+      fontWeight: FontWeight.w600,
+    );
+    final close = AppIconButton(
+      icon: Icons.close,
+      variant: AppIconButtonVariant.ghost,
+      tooltip: 'Kapat',
+      onPressed: () => Navigator.of(context).maybePop(),
+    );
+
+    final Widget content;
+    if (name == null) {
+      content = Row(
+        children: [
+          Expanded(child: Text('Ayarlar', style: titleStyle)),
+          close,
+        ],
+      );
+    } else {
+      final initials = name.isNotEmpty ? name[0].toUpperCase() : 'U';
+      content = Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              AppAvatar(
+                initials: initials,
+                size: AppAvatarSize.medium,
+                backgroundColor: AppColors.primary,
+              ),
+              close,
+            ],
+          ),
+          const SizedBox(height: AppSpacing.md),
+          GestureDetector(
+            onTap: onNameTap,
+            child: Text(name, style: titleStyle),
+          ),
+        ],
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      child: content,
+    );
+  }
+}

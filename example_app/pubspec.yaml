@@ -84,6 +84,7 @@ flutter:
     - assets/stickers/
     - assets/covers/
     - assets/images/
+    - assets/legal/
 
   fonts:
     - family: SourceSerif4
