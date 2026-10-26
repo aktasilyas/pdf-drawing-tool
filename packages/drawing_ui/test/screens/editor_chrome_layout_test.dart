@@ -42,6 +42,20 @@ void main() {
     }
   }
 
+  // Evaluates each guideline directly so a failure names the offending
+  // nodes on one line instead of only the guideline's description.
+  Future<void> expectGuidelines(WidgetTester tester) async {
+    final guidelines = [androidTapTargetGuideline, textContrastGuideline];
+    for (final guideline in guidelines) {
+      final evaluation = await guideline.evaluate(tester);
+      expect(
+        (evaluation.reason ?? '').replaceAll('\n', ' | '),
+        isEmpty,
+        reason: guideline.description,
+      );
+    }
+  }
+
   const tabletSizes = <String, Size>{
     'landscape 1180x820': kEditorLandscape,
     'portrait 820x1180': kEditorPortrait,
@@ -80,8 +94,7 @@ void main() {
         prefs: prefs,
         sidebarOpen: true,
       );
-      await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
-      await expectLater(tester, meetsGuideline(textContrastGuideline));
+      await expectGuidelines(tester);
       handle.dispose();
     });
   }
@@ -107,8 +120,7 @@ void main() {
       (tester) async {
     final handle = tester.ensureSemantics();
     await pumpEditor(tester, size: kEditorPhone, prefs: prefs);
-    await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
-    await expectLater(tester, meetsGuideline(textContrastGuideline));
+    await expectGuidelines(tester);
     handle.dispose();
   });
 }
