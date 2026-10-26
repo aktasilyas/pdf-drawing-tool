@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/documents/presentation/widgets/library_tile_parts.dart';
+import 'package:example_app/features/documents/presentation/widgets/manage_folder_list_item.dart';
 import 'package:example_app/features/documents/presentation/widgets/sidebar_item.dart';
 
 import '../helpers/pump_helpers.dart';
@@ -137,5 +138,93 @@ class LibraryRobot {
       await tester.tapAndWait(opener);
     }
     await tester.tapAndWait(item);
+  }
+
+  /// Opens the folder management screen from the sidebar ("Yönet").
+  Future<void> openManageFolders() async {
+    await _ensureSidebarVisible();
+    await tester.tapAndWait(find.text('Yönet'));
+    await tester.pumpUntilFound(find.text('Klasörleri Yönet'));
+  }
+
+  /// Leaves the folder management screen.
+  Future<void> closeManageFolders() async {
+    await tester.tapAndWait(find.byTooltip('Geri'));
+    await waitForLibrary();
+  }
+
+  Finder get _dialog => find.byType(AlertDialog);
+
+  Future<void> _fillDialogAndConfirm(String text, String confirm) async {
+    await tester.pumpUntilFound(_dialog);
+    final field =
+        find.descendant(of: _dialog, matching: find.byType(TextField));
+    await tester.enterText(field, text);
+    await tester.pumpFor(const Duration(milliseconds: 300));
+    await tester.tapAndWait(
+      find.descendant(of: _dialog, matching: find.text(confirm)),
+    );
+    await tester.pumpUntilGone(_dialog);
+  }
+
+  /// Manage-folders screen: bottom "Yeni Klasör" button.
+  Future<void> createFolder(String name) async {
+    await tester.tapAndWait(find.text('Yeni Klasör').last);
+    await _fillDialogAndConfirm(name, 'Oluştur');
+  }
+
+  Future<void> _folderMenuAction(String folder, String action) async {
+    final tile = find.ancestor(
+      of: find.text(folder),
+      matching: find.byType(ManageFolderListItem),
+    );
+    await tester.tapAndWait(
+      find.descendant(of: tile, matching: find.byType(PopupMenuButton<String>)),
+    );
+    await tester.tapAndWait(find.text(action));
+  }
+
+  Future<void> renameFolder(String from, String to) async {
+    await _folderMenuAction(from, 'Yeniden Adlandır');
+    await _fillDialogAndConfirm(to, 'Kaydet');
+  }
+
+  Future<void> addSubfolder(String parent, String name) async {
+    await _folderMenuAction(parent, 'Alt Klasör Ekle');
+    await _fillDialogAndConfirm(name, 'Oluştur');
+  }
+
+  /// Deletes a folder through its menu and the confirm dialog.
+  Future<void> deleteFolder(String name) async {
+    await _folderMenuAction(name, 'Sil');
+    await tester.tapAndWait(
+      find.descendant(of: find.byType(Dialog), matching: find.text('Sil')),
+    );
+  }
+
+  void expectFolderListed(String name, {required bool listed}) {
+    expect(
+      find.descendant(
+        of: find.byType(ManageFolderListItem),
+        matching: find.text(name),
+      ),
+      listed ? findsOneWidget : findsNothing,
+    );
+  }
+
+  /// Trash section: "Çöpü Boşalt" then confirm "Boşalt".
+  Future<void> emptyTrash() async {
+    await tester.tapAndWait(find.text('Çöpü Boşalt'));
+    await tester.tapAndWait(
+      find.descendant(of: find.byType(Dialog), matching: find.text('Boşalt')),
+    );
+  }
+
+  Future<void> _ensureSidebarVisible() async {
+    if (find.text('Yönet').hitTestable().evaluate().isNotEmpty) return;
+    final opener = find.byTooltip('Menü').evaluate().isNotEmpty
+        ? find.byTooltip('Menü')
+        : find.byTooltip('Kenar çubuğunu aç');
+    await tester.tapAndWait(opener);
   }
 }
