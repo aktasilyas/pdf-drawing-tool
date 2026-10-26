@@ -51,10 +51,15 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  // The tap-target guideline is not asserted here yet: the canvas-theme
-  // segments (40dp) and the licence row (32dp) are still below 48dp, and
-  // raising them moves the rest of the screen, so it needs a golden regen
-  // and a design review. Tracked in #205 with the measured offenders.
+  for (final entry in _sizes.entries) {
+    testWidgets('${entry.key}: tap targets are at least 48dp', (tester) async {
+      final handle = tester.ensureSemantics();
+      await pump(tester, entry.value);
+      await expectTapTargets(tester);
+      handle.dispose();
+    });
+  }
+
   for (final entry in _sizes.entries) {
     testWidgets('${entry.key}: lays out at 1.3x text scale', (tester) async {
       useTextScale(tester, 1.3);
