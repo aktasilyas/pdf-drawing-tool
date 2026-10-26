@@ -122,9 +122,12 @@ void main() {
       final raster = _FakeRasterizer()..results.add(null);
       final container = _container(raster);
 
-      final first =
-          await container.read(pdfPageRenderProvider('doc.pdf|3').future);
-      expect(first, isNull);
+      final sub = container.listen(
+        pdfPageRenderProvider('doc.pdf|3').future,
+        (_, __) {},
+      );
+      expect(await sub.read(), isNull);
+      sub.close();
       await _settle();
 
       final second =

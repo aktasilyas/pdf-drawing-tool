@@ -148,7 +148,9 @@ final pdfPageRenderProvider =
     FutureProvider.autoDispose.family<Uint8List?, String>((ref, key) async {
   final link = ref.keepAlive();
   final bytes = await _renderSinglePage(ref, key);
-  if (bytes == null) link.close();
+  // Close after the value is delivered (next event-loop turn), so the
+  // result still reaches the current listeners before disposal.
+  if (bytes == null) Future<void>(link.close);
   return bytes;
 });
 
