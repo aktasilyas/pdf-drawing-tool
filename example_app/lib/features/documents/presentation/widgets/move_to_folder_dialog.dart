@@ -9,13 +9,22 @@ import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/documents/domain/entities/folder.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
+import 'package:example_app/features/documents/presentation/widgets/inline_folder_color_row.dart';
 
 /// Dialog for moving documents and folders
 class MoveToFolderDialog extends ConsumerStatefulWidget {
   final List<String> documentIds;
   final List<String> folderIds;
-  const MoveToFolderDialog(
-      {super.key, this.documentIds = const [], this.folderIds = const []});
+
+  /// Parent for folders created from this dialog. Null creates root folders.
+  /// The move flows leave it null.
+  final String? parentFolderId;
+  const MoveToFolderDialog({
+    super.key,
+    this.documentIds = const [],
+    this.folderIds = const [],
+    this.parentFolderId,
+  });
   @override
   ConsumerState<MoveToFolderDialog> createState() => _MoveToFolderDialogState();
 }
@@ -165,7 +174,9 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
             Text('Renk',
                 style: AppTypography.caption.copyWith(color: textSecondary)),
             const SizedBox(height: AppSpacing.xs),
-            _buildInlineColorPicker(),
+            InlineFolderColorRow(
+                selectedColorValue: _selectedColorValue,
+                onChanged: (v) => setState(() => _selectedColorValue = v)),
             const SizedBox(height: AppSpacing.md),
             // Oluştur butonu
             AppButton(
@@ -174,49 +185,6 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
                 isExpanded: true,
                 onPressed: _handleCreateFolder),
           ]),
-    );
-  }
-
-  Widget _buildInlineColorPicker() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: AppColors.folderColors.map((color) {
-          final isSelected = color.toARGB32() == _selectedColorValue;
-          return Padding(
-            padding: const EdgeInsets.only(right: AppSpacing.sm),
-            child: GestureDetector(
-              onTap: () =>
-                  setState(() => _selectedColorValue = color.toARGB32()),
-              child: Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: color,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color:
-                        isSelected ? AppColors.onPrimary : Colors.transparent,
-                    width: 2.5,
-                  ),
-                  boxShadow: isSelected
-                      ? [
-                          BoxShadow(
-                              color: color.withValues(alpha: 0.5),
-                              blurRadius: 6,
-                              spreadRadius: 1)
-                        ]
-                      : null,
-                ),
-                child: isSelected
-                    ? const Icon(Icons.check,
-                        color: AppColors.onPrimary, size: AppIconSize.xs)
-                    : null,
-              ),
-            ),
-          );
-        }).toList(),
-      ),
     );
   }
 
@@ -331,7 +299,10 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
     }
     final id = await ref
         .read(foldersControllerProvider.notifier)
-        .createFolder(name: name, colorValue: _selectedColorValue);
+        .createFolder(
+            name: name,
+            parentId: widget.parentFolderId,
+            colorValue: _selectedColorValue);
     if (id != null && mounted) {
       ref.invalidate(foldersProvider);
       setState(() {

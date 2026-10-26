@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:example_app/core/config/feature_flags.dart';
 import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/core/utils/logger.dart';
 import 'package:go_router/go_router.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/drawing_ui.dart';
@@ -11,37 +12,32 @@ import 'package:example_app/features/editor/presentation/providers/editor_provid
 import 'package:example_app/features/editor/presentation/providers/editor_session.dart';
 import 'package:example_app/features/editor/presentation/widgets/editor_body.dart';
 import 'package:example_app/features/editor/presentation/widgets/editor_leave_guard.dart';
+import 'package:example_app/features/editor/presentation/widgets/editor_load_error_view.dart';
 
 class EditorScreen extends ConsumerWidget {
   final String documentId;
 
   const EditorScreen({super.key, required this.documentId});
 
+  static const _loadingScaffold = Scaffold(
+    body: Center(child: CircularProgressIndicator()),
+  );
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final documentAsync = ref.watch(documentLoaderProvider(documentId));
 
     return documentAsync.when(
-      loading: () => const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      ),
-      error: (error, stack) => Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 64, color: Colors.red),
-              const SizedBox(height: 16),
-              Text('Belge yüklenemedi: $error'),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => context.pop(),
-                child: const Text('Geri Dön'),
-              ),
-            ],
-          ),
-        ),
-      ),
+      loading: () => _loadingScaffold,
+      error: (error, stack) {
+        logger.w('Editor load failed: $error');
+        return EditorLoadErrorView(
+          onRetry: () => ref.invalidate(documentLoaderProvider(documentId)),
+          // No session was started yet, so there is nothing to clean up.
+          onBack: () =>
+              context.canPop() ? context.pop() : context.go('/documents'),
+        );
+      },
       data: (document) {
         // Initialize document ONLY on first load (not on every rebuild)
         // Rebuilds happen on keyboard show/hide, MediaQuery changes, etc.
@@ -97,6 +93,11 @@ class EditorScreen extends ConsumerWidget {
             ref.read(hasUnsavedChangesProvider.notifier).state = true;
           }
         });
+
+        // Do not build the canvas until the loaded document has been applied
+        // to documentProvider (the session starts in the post-frame callback).
+        final appliedId = ref.watch(documentProvider.select((d) => d.id));
+        if (appliedId != document.id) return _loadingScaffold;
 
         // Get canvasMode from document (based on documentType)
         final canvasMode = document.canvasMode;

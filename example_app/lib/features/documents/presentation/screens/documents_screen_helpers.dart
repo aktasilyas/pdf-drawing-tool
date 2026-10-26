@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
+import 'package:example_app/features/documents/presentation/constants/documents_strings.dart';
 import 'package:example_app/features/documents/domain/entities/folder.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
@@ -14,6 +16,25 @@ import 'package:drawing_core/drawing_core.dart' as core;
 import 'package:drawing_ui/drawing_ui.dart';
 
 import 'documents_screen.dart';
+
+/// Where a folder created from the library should live.
+typedef NewFolderTarget = ({String? parentId, bool depthExceeded});
+
+/// Resolves the parent for a new folder created while viewing
+/// [currentFolderId]. Unknown or null ids fall back to the root; a folder that
+/// cannot have subfolders (already a subfolder) reports [depthExceeded].
+NewFolderTarget resolveNewFolderParent(
+  String? currentFolderId,
+  List<Folder> folders,
+) {
+  if (currentFolderId == null) return (parentId: null, depthExceeded: false);
+  final matches = folders.where((f) => f.id == currentFolderId);
+  if (matches.isEmpty) return (parentId: null, depthExceeded: false);
+  if (matches.first.canHaveSubfolders) {
+    return (parentId: currentFolderId, depthExceeded: false);
+  }
+  return (parentId: null, depthExceeded: true);
+}
 
 /// Mixin providing helper methods and widget builders for DocumentsScreen state.
 mixin DocumentsScreenHelpers on ConsumerState<DocumentsScreen> {
@@ -53,10 +74,24 @@ mixin DocumentsScreenHelpers on ConsumerState<DocumentsScreen> {
   }
 
   /// Shows dialog to create a new folder.
+  ///
+  /// Inside a root folder the new folder becomes its subfolder; inside a
+  /// subfolder (max depth) an explanatory error is shown instead.
   void showCreateFolderDialog() {
+    final target = resolveNewFolderParent(
+      ref.read(currentFolderIdProvider),
+      ref.read(foldersProvider).valueOrNull ?? const <Folder>[],
+    );
+    if (target.depthExceeded) {
+      AppToast.error(context, DocumentsStrings.folderDepthError);
+      return;
+    }
     showDialog<bool>(
       context: context,
-      builder: (context) => const MoveToFolderDialog(documentIds: []),
+      builder: (context) => MoveToFolderDialog(
+        documentIds: const [],
+        parentFolderId: target.parentId,
+      ),
     ).then((result) {
       if (result == true) ref.invalidate(foldersProvider);
     });

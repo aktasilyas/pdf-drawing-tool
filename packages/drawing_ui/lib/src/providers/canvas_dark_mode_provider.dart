@@ -14,13 +14,13 @@ enum CanvasDarkMode {
   /// Always dark canvas.
   on,
 
-  /// Follow system theme.
+  /// Follow the app theme (name kept: it is persisted by name).
   followSystem,
 }
 
-/// System brightness provider — override from DrawingScreen with
-/// `MediaQuery.platformBrightnessOf(context)`.
-final platformBrightnessProvider = StateProvider<Brightness>((ref) {
+/// App theme brightness provider — written by `CanvasBrightnessSync` from
+/// `Theme.of(context).brightness`.
+final appBrightnessProvider = StateProvider<Brightness>((ref) {
   return Brightness.light;
 });
 
@@ -62,12 +62,12 @@ class CanvasDarkModeNotifier extends StateNotifier<CanvasDarkMode> {
   }
 }
 
-/// Resolved canvas color scheme based on dark mode setting + system brightness.
+/// Resolved canvas color scheme based on dark mode setting + app brightness.
 ///
 /// Consumers (painters, widgets) watch this to get the active color scheme.
 final canvasColorSchemeProvider = Provider<CanvasColorScheme>((ref) {
   final mode = ref.watch(canvasDarkModeProvider);
-  final brightness = ref.watch(platformBrightnessProvider);
+  final brightness = ref.watch(appBrightnessProvider);
 
   switch (mode) {
     case CanvasDarkMode.off:

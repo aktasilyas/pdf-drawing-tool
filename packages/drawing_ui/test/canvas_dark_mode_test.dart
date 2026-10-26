@@ -47,7 +47,7 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           sharedPreferencesProvider.overrideWithValue(null),
-          platformBrightnessProvider.overrideWith((ref) => Brightness.dark),
+          appBrightnessProvider.overrideWith((ref) => Brightness.dark),
         ],
       );
       addTearDown(container.dispose);
@@ -68,7 +68,7 @@ void main() {
       final container = ProviderContainer(
         overrides: [
           sharedPreferencesProvider.overrideWithValue(null),
-          platformBrightnessProvider.overrideWith((ref) => Brightness.light),
+          appBrightnessProvider.overrideWith((ref) => Brightness.light),
         ],
       );
       addTearDown(container.dispose);

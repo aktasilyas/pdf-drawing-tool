@@ -7,3 +7,4 @@ export 'presentation/providers/editor_provider.dart';
 export 'presentation/providers/editor_session.dart';
 export 'presentation/screens/editor_screen.dart';
 export 'presentation/widgets/editor_leave_guard.dart';
+export 'presentation/widgets/editor_load_error_view.dart';
