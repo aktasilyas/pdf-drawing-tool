@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:drift/drift.dart';
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/data/models/trashed_page_model.dart';
 
@@ -10,21 +10,17 @@ abstract class TrashedPageLocalDatasource {
   Future<void> removeTrashedPage(String id);
 }
 
+/// Drift-backed trashed page storage.
 class TrashedPageLocalDatasourceImpl implements TrashedPageLocalDatasource {
-  static const String _key = 'trashed_pages';
-  final SharedPreferences _prefs;
+  final AppDatabase _db;
 
-  TrashedPageLocalDatasourceImpl(this._prefs);
+  TrashedPageLocalDatasourceImpl(this._db);
 
   @override
   Future<List<TrashedPageModel>> getTrashedPages() async {
     try {
-      final jsonString = _prefs.getString(_key);
-      if (jsonString == null) return [];
-      final List<dynamic> jsonList = json.decode(jsonString) as List;
-      return jsonList
-          .map((j) => TrashedPageModel.fromJson(j as Map<String, dynamic>))
-          .toList();
+      final rows = await _db.select(_db.trashedPages).get();
+      return rows.map(_toModel).toList();
     } catch (e) {
       throw CacheException('Failed to get trashed pages: $e');
     }
@@ -32,20 +28,30 @@ class TrashedPageLocalDatasourceImpl implements TrashedPageLocalDatasource {
 
   @override
   Future<TrashedPageModel?> getTrashedPage(String id) async {
-    final pages = await getTrashedPages();
     try {
-      return pages.firstWhere((p) => p.id == id);
-    } catch (_) {
-      return null;
+      final row = await (_db.select(_db.trashedPages)
+            ..where((t) => t.id.equals(id)))
+          .getSingleOrNull();
+      return row == null ? null : _toModel(row);
+    } catch (e) {
+      throw CacheException('Failed to get trashed page: $e');
     }
   }
 
   @override
   Future<void> addTrashedPage(TrashedPageModel page) async {
     try {
-      final pages = await getTrashedPages();
-      pages.add(page);
-      await _save(pages);
+      await _db.into(_db.trashedPages).insertOnConflictUpdate(
+            TrashedPagesCompanion(
+              id: Value(page.id),
+              pageId: Value(page.pageId),
+              sourceDocumentId: Value(page.sourceDocumentId),
+              sourceDocumentTitle: Value(page.sourceDocumentTitle),
+              originalPageIndex: Value(page.originalPageIndex),
+              deletedAt: Value(page.deletedAt),
+              pageData: Value(json.encode(page.pageData)),
+            ),
+          );
     } catch (e) {
       throw CacheException('Failed to add trashed page: $e');
     }
@@ -54,18 +60,19 @@ class TrashedPageLocalDatasourceImpl implements TrashedPageLocalDatasource {
   @override
   Future<void> removeTrashedPage(String id) async {
     try {
-      final pages = await getTrashedPages();
-      pages.removeWhere((p) => p.id == id);
-      await _save(pages);
+      await (_db.delete(_db.trashedPages)..where((t) => t.id.equals(id))).go();
     } catch (e) {
       throw CacheException('Failed to remove trashed page: $e');
     }
   }
 
-  Future<void> _save(List<TrashedPageModel> pages) async {
-    final jsonList = pages.map((p) => p.toJson()).toList();
-    if (!await _prefs.setString(_key, json.encode(jsonList))) {
-      throw const CacheException('Trashed pages write was rejected');
-    }
-  }
+  TrashedPageModel _toModel(TrashedPage r) => TrashedPageModel(
+        id: r.id,
+        pageId: r.pageId,
+        sourceDocumentId: r.sourceDocumentId,
+        sourceDocumentTitle: r.sourceDocumentTitle,
+        originalPageIndex: r.originalPageIndex,
+        deletedAt: r.deletedAt,
+        pageData: json.decode(r.pageData) as Map<String, dynamic>,
+      );
 }

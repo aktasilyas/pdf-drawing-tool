@@ -12,6 +12,8 @@ library;
 
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:example_app/core/database/app_database.dart';
+import 'package:example_app/core/database/local_transaction_runner.dart';
 import 'package:example_app/features/documents/documents.dart';
 import 'package:example_app/features/editor/editor.dart';
 
@@ -26,6 +28,16 @@ Future<void> configureDependencies() async {
   final prefs = await SharedPreferences.getInstance();
   getIt.registerSingleton<SharedPreferences>(prefs);
 
+  // Single local database for the whole app (providers read it from here).
+  final database = AppDatabase();
+  getIt.registerSingleton<AppDatabase>(database);
+  getIt.registerLazySingleton<LocalTransactionRunner>(
+    () => DriftTransactionRunner(database),
+  );
+
+  // Import the legacy prefs library before any datasource reads from Drift.
+  await PrefsToDriftMigration(database, prefs).run();
+
   // Manual registrations
   _registerRepositories();
   _registerUseCases();
@@ -35,9 +47,6 @@ Future<void> configureDependencies() async {
 void _registerCoreServices() {
   // Network info
   // getIt.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl());
-
-  // Database
-  // getIt.registerLazySingleton<AppDatabase>(() => AppDatabase());
 
   // Supabase client
   // getIt.registerLazySingleton<SupabaseClient>(() => Supabase.instance.client);
@@ -64,6 +73,7 @@ void _registerRepositories() {
     () => DocumentRepositoryImpl(
       getIt<DocumentLocalDatasource>(),
       getIt<FolderLocalDatasource>(),
+      getIt<LocalTransactionRunner>(),
     ),
   );
 
@@ -71,7 +81,8 @@ void _registerRepositories() {
   getIt.registerLazySingleton<PageTrashRepository>(
     () => PageTrashRepositoryImpl(
       getIt<TrashedPageLocalDatasource>(),
-      getIt<SharedPreferences>(),
+      getIt<DocumentLocalDatasource>(),
+      getIt<LocalTransactionRunner>(),
     ),
   );
 
@@ -80,6 +91,7 @@ void _registerRepositories() {
     () => FolderRepositoryImpl(
       getIt<FolderLocalDatasource>(),
       getIt<DocumentLocalDatasource>(),
+      getIt<LocalTransactionRunner>(),
     ),
   );
 }

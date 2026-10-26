@@ -27,6 +27,9 @@ export 'domain/usecases/delete_folder_usecase.dart';
 export 'data/models/document_model.dart';
 export 'data/models/folder_model.dart';
 
+// Data - Migration
+export 'data/migration/prefs_to_drift_migration.dart';
+
 // Data - Datasources
 export 'data/datasources/document_local_datasource.dart';
 export 'data/datasources/folder_local_datasource.dart';

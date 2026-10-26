@@ -1,27 +1,28 @@
+import 'package:drift/drift.dart' show driftRuntimeOptions;
+import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/data/models/trashed_page_model.dart';
 import 'package:example_app/features/documents/documents.dart';
-
-class _RejectingPrefs extends Mock implements SharedPreferences {}
+import '../../../../helpers/pass_through_runner.dart';
+import '../../../../helpers/rejecting_database.dart';
 
 void main() {
-  late _RejectingPrefs prefs;
+  late AppDatabase db;
 
-  setUp(() {
-    prefs = _RejectingPrefs();
-    when(() => prefs.getString(any())).thenReturn(null);
-    // SharedPreferences reports a failed platform write with `false`.
-    when(() => prefs.setString(any(), any())).thenAnswer((_) async => false);
+  setUpAll(() => driftRuntimeOptions.dontWarnAboutMultipleDatabases = true);
+
+  setUp(() async {
+    db = AppDatabase(NativeDatabase.memory());
+    await rejectLibraryWrites(db);
   });
+  tearDown(() => db.close());
 
   final now = DateTime(2026, 1, 1);
 
-  group('a rejected SharedPreferences write throws CacheException', () {
+  group('a rejected Drift write throws CacheException', () {
     test('document content', () {
-      final ds = DocumentLocalDatasourceImpl(prefs);
+      final ds = DocumentLocalDatasourceImpl(db);
       expect(
         ds.saveDocumentContent('doc-1', {'pages': <dynamic>[]}),
         throwsA(isA<CacheException>()),
@@ -29,7 +30,7 @@ void main() {
     });
 
     test('document metadata', () {
-      final ds = DocumentLocalDatasourceImpl(prefs);
+      final ds = DocumentLocalDatasourceImpl(db);
       final doc = DocumentModel(
         id: 'doc-1',
         title: 'Notes',
@@ -41,13 +42,13 @@ void main() {
     });
 
     test('folders', () {
-      final ds = FolderLocalDatasourceImpl(prefs);
+      final ds = FolderLocalDatasourceImpl(db);
       final folder = FolderModel(id: 'f1', name: 'Ders', createdAt: now);
       expect(ds.createFolder(folder), throwsA(isA<CacheException>()));
     });
 
     test('trashed pages', () {
-      final ds = TrashedPageLocalDatasourceImpl(prefs);
+      final ds = TrashedPageLocalDatasourceImpl(db);
       final page = TrashedPageModel(
         id: 't1',
         pageId: 'p1',
@@ -62,17 +63,19 @@ void main() {
   });
 
   test('a successful write does not throw', () async {
-    when(() => prefs.setString(any(), any())).thenAnswer((_) async => true);
-    final ds = DocumentLocalDatasourceImpl(prefs);
+    final healthy = AppDatabase(NativeDatabase.memory());
+    addTearDown(healthy.close);
+    final ds = DocumentLocalDatasourceImpl(healthy);
     await ds.saveDocumentContent('doc-1', {'pages': <dynamic>[]});
-    verify(() => prefs.setString('document_content_doc-1', any())).called(1);
+    expect(await ds.getDocumentContent('doc-1'), {'pages': <dynamic>[]});
   });
 
   test('the repository turns a rejected content write into a Failure',
       () async {
     final repo = DocumentRepositoryImpl(
-      DocumentLocalDatasourceImpl(prefs),
-      FolderLocalDatasourceImpl(prefs),
+      DocumentLocalDatasourceImpl(db),
+      FolderLocalDatasourceImpl(db),
+      PassThroughRunner(),
     );
     final result = await repo.saveDocumentContent(
       id: 'doc-1',

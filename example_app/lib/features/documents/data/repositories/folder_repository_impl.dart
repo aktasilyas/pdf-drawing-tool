@@ -12,11 +12,13 @@ import 'package:example_app/features/documents/data/models/folder_model.dart';
 class FolderRepositoryImpl implements FolderRepository {
   final FolderLocalDatasource _localDatasource;
   final DocumentLocalDatasource _documentDatasource;
+  final LocalTransactionRunner _runner;
   final Uuid _uuid;
 
   FolderRepositoryImpl(
     this._localDatasource,
-    this._documentDatasource, [
+    this._documentDatasource,
+    this._runner, [
     Uuid? uuid,
   ]) : _uuid = uuid ?? const Uuid();
 
@@ -152,18 +154,20 @@ class FolderRepositoryImpl implements FolderRepository {
     bool deleteContents = false,
   }) async {
     try {
-      // Move all documents in this folder to trash
-      await _moveDocumentsToTrash(id);
+      // Documents go to trash and folders are removed in one transaction.
+      await _runner.run(() async {
+        await _moveDocumentsToTrash(id);
 
-      // Recursively handle subfolders
-      final subfolders = await _localDatasource.getFolders(parentId: id);
-      for (final subfolder in subfolders) {
-        await _moveDocumentsToTrash(subfolder.id);
-        await _localDatasource.deleteFolder(subfolder.id);
-      }
+        // Recursively handle subfolders
+        final subfolders = await _localDatasource.getFolders(parentId: id);
+        for (final subfolder in subfolders) {
+          await _moveDocumentsToTrash(subfolder.id);
+          await _localDatasource.deleteFolder(subfolder.id);
+        }
 
-      // Delete the folder itself
-      await _localDatasource.deleteFolder(id);
+        // Delete the folder itself
+        await _localDatasource.deleteFolder(id);
+      });
       return const Right(null);
     } on CacheException catch (e) {
       return Left(CacheFailure(e.message));
