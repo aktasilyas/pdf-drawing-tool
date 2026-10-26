@@ -13,8 +13,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('neon variant has no overflow at textScaler 1.3',
-      (tester) async {
+  testWidgets('neon variant has no overflow at textScaler 1.3', (tester) async {
     await pumpPanel(
       tester,
       panel,
@@ -52,8 +51,7 @@ void main() {
     expect(slider.divisions, 8);
   });
 
-  testWidgets('type selector switches to the neon highlighter',
-      (tester) async {
+  testWidgets('type selector switches to the neon highlighter', (tester) async {
     final c = await pumpPanel(tester, panel);
     await tester.tap(
       find.byKey(const ValueKey('highlighter-type-neonHighlighter')),
