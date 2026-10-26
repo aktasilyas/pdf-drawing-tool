@@ -73,6 +73,7 @@ jobs:
         run: flutter gen-l10n
 
       - name: Regenerate goldens
+        id: goldens
         working-directory: ${{ inputs.package }}
         # Failing test names go into an annotation: job logs are not readable
         # from cloud agent sessions, annotations are (check-runs API).
@@ -97,13 +98,19 @@ jobs:
       - name: Commit changed goldens and generated files
         id: commit
         if: always() && steps.deps.outcome == 'success'
+        env:
+          GOLDENS: ${{ steps.goldens.outcome }}
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898299+github-actions[bot]@users.noreply.github.com'
           # PNGs (.gitignore keeps platform goldens and failure diffs out),
           # lockfiles and gen-l10n output. Pathspec * also matches /.
-          git add -- "$PACKAGE/*.png" '*pubspec.lock'
-          if [ -d example_app/lib/l10n ]; then git add -- 'example_app/lib/l10n/*.dart'; fi
+          # Lockfiles via ls-files + xargs -r: no error when none matches.
+          # PNGs only from a passing run.
+          git ls-files -z --cached --others --exclude-standard -- '*pubspec.lock' \
+            | xargs -0 -r git add --
+          if [ -d example_app/lib/l10n ]; then git add -A -- example_app/lib/l10n; fi
+          if [ "$GOLDENS" = success ]; then git add -A -- "$PACKAGE/*.png"; fi
           if git diff --cached --quiet; then
             echo "Nothing changed."
             echo "pushed=false" >> "$GITHUB_OUTPUT"

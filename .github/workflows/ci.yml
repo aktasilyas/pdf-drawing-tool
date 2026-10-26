@@ -34,7 +34,9 @@ jobs:
       - name: Generated l10n up to date
         # `generate: true` regenerates example_app/lib/l10n on pub get; a diff
         # means the committed files are stale (dispatch update-goldens.yml).
-        run: git diff --exit-code -- example_app/lib/l10n
+        run: |
+          git status --porcelain -- example_app/lib/l10n
+          test -z "$(git status --porcelain -- example_app/lib/l10n)"
 
       - name: Format check
         run: dart format --output=none --set-exit-if-changed packages example_app/lib example_app/test

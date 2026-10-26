@@ -138,7 +138,7 @@ Text('x' 'y');
 
     test('have no empty values', () {
       for (final arb in [en, tr]) {
-        for (final e in arb.entries.where((e) => e.key != '@@locale')) {
+        for (final e in arb.entries) {
           expect(e.value.trim(), isNotEmpty, reason: e.key);
         }
       }
