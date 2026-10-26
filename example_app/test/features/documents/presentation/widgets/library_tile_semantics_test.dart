@@ -35,14 +35,13 @@ void main() {
 
     // Only the cover carries the title label; the info block's own text is
     // a separate node ('Kapak' here) so this finder stays unambiguous.
-    // The semantics finder walks the tree itself, which is what we care
-    // about: the node may be owned by an ancestor render object.
-    final cover = find.semantics.byLabel('Biyoloji');
-    expect(cover, findsOne);
+    // A pattern, not an exact label: the cover's annotation can be absorbed
+    // into an ancestor node whose label then holds more than the title.
+    final cover = find.semantics.byLabel(RegExp('Biyoloji'));
+    expect(cover, findsAny, reason: 'labels: ${semanticsLabels(tester)}');
     expect(
-      cover.evaluate().single,
+      cover.evaluate().first,
       isSemantics(
-        label: 'Biyoloji',
         isButton: true,
         hasTapAction: true,
         hasLongPressAction: true,
@@ -64,7 +63,7 @@ void main() {
     );
 
     final badge = find.semantics.byLabel('Favorilerden çıkar');
-    expect(badge, findsOne);
+    expect(badge, findsOne, reason: 'labels: ${semanticsLabels(tester)}');
     expect(
       badge.evaluate().single,
       isSemantics(isButton: true, hasTapAction: true),

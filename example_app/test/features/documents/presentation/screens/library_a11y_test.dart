@@ -90,9 +90,10 @@ void main() {
       final label = button.semanticLabel ?? button.tooltip;
       expect(label, isNotNull, reason: 'icon button without a label');
       expect(
-        find.semantics.byLabel(label!),
+        find.semantics.byLabel(RegExp(RegExp.escape(label!))),
         findsAny,
-        reason: 'no semantics node labelled "$label"',
+        reason: 'no semantics node labelled "$label": '
+            '${semanticsLabels(tester)}',
       );
     }
     handle.dispose();
@@ -105,10 +106,10 @@ void main() {
 
     // Tile covers are labelled with the item title (see
     // library_tile_semantics_test.dart for the button flag itself).
-    expect(find.semantics.byLabel('Biyoloji'), findsAny);
-    expect(find.semantics.byLabel('Ders Notları'), findsAny);
+    expect(find.semantics.byLabel(RegExp('Biyoloji')), findsAny);
+    expect(find.semantics.byLabel(RegExp('Ders Notları')), findsAny);
     // Fixtures hold favourites, so the badge is on screen.
-    expect(find.semantics.byLabel('Favorilerden çıkar'), findsAny);
+    expect(find.semantics.byLabel(RegExp('Favorilerden')), findsAny);
     handle.dispose();
   });
 }

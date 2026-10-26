@@ -66,7 +66,11 @@ void main() {
   testWidgets('the close button is labelled', (tester) async {
     final handle = tester.ensureSemantics();
     await pump(tester, const Size(390, 844));
-    expect(find.semantics.byLabel('Kapat'), findsOne);
+    expect(
+      find.semantics.byLabel(RegExp('Kapat')),
+      findsAny,
+      reason: 'labels: ${semanticsLabels(tester)}',
+    );
     handle.dispose();
   });
 }

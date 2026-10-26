@@ -59,3 +59,24 @@ void expectNoOverflow(WidgetTester tester, String what) {
   final error = tester.takeException();
   expect(error, isNull, reason: '$what overflowed: $error');
 }
+
+/// Every non-empty semantics label in the tree, as quoted strings. Used in
+/// failure messages: a label can end up merged into an ancestor node, so
+/// seeing the effective labels is what makes such a failure readable.
+List<String> semanticsLabels(WidgetTester tester) {
+  final labels = <String>[];
+  void visit(SemanticsNode node) {
+    final label = node.getSemanticsData().label;
+    if (label.isNotEmpty) labels.add('"${label.replaceAll('\n', ' ')}"');
+    node.visitChildren((child) {
+      visit(child);
+      return true;
+    });
+  }
+
+  for (final view in tester.binding.renderViews) {
+    final root = view.owner?.semanticsOwner?.rootSemanticsNode;
+    if (root != null) visit(root);
+  }
+  return labels;
+}
