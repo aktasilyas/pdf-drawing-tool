@@ -5,6 +5,8 @@
 <data-extraction-rules>
     <cloud-backup>
         <include domain="root" path="app_flutter" />
+        <!-- Prefs hold tool presets and settings. Sync session is stored here too; sync is off in v1.0 builds, revisit when unfrozen. -->
+        <include domain="sharedpref" path="." />
         <!-- Imported PDFs can exceed the 25 MB cloud quota and make Auto Backup
              skip the whole backup. Page content survives; the PDF background
              is re-imported by the user. -->
@@ -12,5 +14,6 @@
     </cloud-backup>
     <device-transfer>
         <include domain="root" path="app_flutter" />
+        <include domain="sharedpref" path="." />
     </device-transfer>
 </data-extraction-rules>
