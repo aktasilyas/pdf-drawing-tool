@@ -64,6 +64,27 @@ void main() {
     expect(opened.values.every((s) => s.closed), isTrue);
   });
 
+  test('relative stored paths are resolved before the pool lookup', () async {
+    const resolver = PdfPathResolver('/docs');
+    final resolved = resolver.resolve('book.pdf');
+    expect(resolved, isNot('book.pdf'));
+    final opened = <String>[];
+    final exporter = PDFExporter(
+      pdfPaths: resolver,
+      sourceOpener: (path) async {
+        opened.add(path);
+        return _FakeSource();
+      },
+    );
+
+    final result = await exporter.exportPages(
+      pages: [for (var i = 0; i < 3; i++) _pdfPage(i, 'book.pdf')],
+    );
+
+    expect(result.isSuccess, isTrue, reason: result.errorMessage);
+    expect(opened, [resolved]);
+  });
+
   test('the source is closed when the export is cancelled', () async {
     final source = _FakeSource();
     final exporter = PDFExporter(sourceOpener: (_) async => source);

@@ -39,6 +39,7 @@ class ThumbnailGenerator {
     double width = defaultWidth,
     double height = defaultHeight,
     Color backgroundColor = Colors.white,
+    PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
   }) async {
     try {
       final recorder = ui.PictureRecorder();
@@ -70,7 +71,7 @@ class ThumbnailGenerator {
 
       // CRITICAL: Render PDF background if exists
       if (page.background.type == BackgroundType.pdf) {
-        await _renderPdfBackground(canvas, page);
+        await _renderPdfBackground(canvas, page, pdfPaths);
       }
 
       // Render all layers
@@ -273,6 +274,7 @@ class ThumbnailGenerator {
   static Future<void> _renderPdfBackground(
     Canvas canvas,
     Page page,
+    PdfPathResolver pdfPaths,
   ) async {
     if (page.background.pdfPageIndex == null) return;
 
@@ -282,7 +284,7 @@ class ThumbnailGenerator {
       // Lazy-loaded PDF: render from file path
       if (bytes == null && page.background.pdfFilePath != null) {
         bytes = await _renderPdfPageFromFile(
-          page.background.pdfFilePath!,
+          pdfPaths.resolve(page.background.pdfFilePath!),
           page.background.pdfPageIndex!,
         );
       }

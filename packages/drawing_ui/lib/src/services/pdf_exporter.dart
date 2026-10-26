@@ -22,10 +22,15 @@ export 'pdf_source.dart';
 /// vector operations for infinite-zoom sharpness. Non-vectorizable content
 /// (textured/glow/eraser strokes, text) falls back to lossless PNG overlay.
 class PDFExporter {
-  PDFExporter({PdfSourceOpener? sourceOpener})
-      : _openSource = sourceOpener ?? openPdfxSource;
+  PDFExporter({
+    this.pdfPaths = PdfPathResolver.passthrough,
+    PdfSourceOpener? sourceOpener,
+  }) : _openSource = sourceOpener ?? openPdfxSource;
 
+  /// Resolves stored PDF paths of lazy PDF backgrounds to files on disk.
+  final PdfPathResolver pdfPaths;
   final PdfSourceOpener _openSource;
+
   final _contentPainter = PdfContentPainter();
   final _rasterRenderer = PdfRasterLayerRenderer();
 
@@ -172,7 +177,7 @@ class PDFExporter {
     if (page.background.pdfFilePath != null) {
       final jpegBytes = await _renderPdfPageAsJpeg(
         sources,
-        page.background.pdfFilePath!,
+        pdfPaths.resolve(page.background.pdfFilePath!),
         page.background.pdfPageIndex!,
         _scaleFromDpi(options.quality.dpi),
       );

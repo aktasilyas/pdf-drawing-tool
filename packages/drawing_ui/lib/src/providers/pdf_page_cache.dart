@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdfx/pdfx.dart';
 
+import 'package:drawing_ui/src/providers/pdf_path_provider.dart';
 import 'package:drawing_ui/src/services/pdf_page_renderer.dart';
 import 'package:drawing_ui/src/services/pdf_render_slots.dart';
 
@@ -41,9 +42,19 @@ typedef PdfPageRasterizer = Future<Uint8List?> Function(
   double quality,
 );
 
-/// The rasteriser used by page and zoom renders (overridable in tests).
-final pdfPageRasterizerProvider =
+/// The low-level rasteriser; receives an already resolved file path
+/// (overridable in tests).
+final pdfFileRasterizerProvider =
     Provider<PdfPageRasterizer>((ref) => rasterizePdfPage);
+
+/// The rasteriser used by page and zoom renders (overridable in tests).
+/// Resolves the stored path against the documents root before rasterising.
+final pdfPageRasterizerProvider = Provider<PdfPageRasterizer>((ref) {
+  final resolver = ref.watch(pdfPathResolverProvider);
+  final rasterize = ref.watch(pdfFileRasterizerProvider);
+  return (stored, pageNumber, quality) =>
+      rasterize(resolver.resolve(stored), pageNumber, quality);
+});
 
 /// Default [PdfPageRasterizer] backed by pdfx; the bitmap size is capped by
 /// [PDFPageRenderer.maxRenderSide].

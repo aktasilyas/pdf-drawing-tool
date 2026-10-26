@@ -28,6 +28,7 @@ export 'src/screens/drawing_screen_layout.dart';
 // Canvas
 export 'src/canvas/mock_canvas.dart';
 export 'src/canvas/drawing_canvas.dart';
+export 'src/canvas/pdf_page_placeholder.dart' show PdfBackgroundStrings;
 export 'src/canvas/stroke_painter.dart';
 export 'src/canvas/infinite_background_painter.dart';
 export 'src/canvas/canvas_color_scheme.dart';

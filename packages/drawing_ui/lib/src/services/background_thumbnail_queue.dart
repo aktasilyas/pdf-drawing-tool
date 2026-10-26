@@ -56,6 +56,9 @@ class BackgroundThumbnailQueue {
   /// Maximum number of concurrent thumbnail generation tasks.
   final int maxConcurrent;
 
+  /// Resolves stored PDF paths of PDF pages when rendering thumbnails.
+  final PdfPathResolver pdfPaths;
+
   /// Internal queue of pending tasks.
   final List<ThumbnailTask> _queue = [];
 
@@ -81,6 +84,7 @@ class BackgroundThumbnailQueue {
   BackgroundThumbnailQueue({
     required this.cache,
     this.maxConcurrent = 2,
+    this.pdfPaths = PdfPathResolver.passthrough,
   });
 
   /// Whether the queue is currently processing tasks.
@@ -206,6 +210,7 @@ class BackgroundThumbnailQueue {
         width: task.width,
         height: task.height,
         backgroundColor: task.backgroundColor,
+        pdfPaths: pdfPaths,
       );
 
       if (_isDisposed) return;

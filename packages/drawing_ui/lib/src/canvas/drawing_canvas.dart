@@ -13,6 +13,7 @@ import 'package:drawing_ui/src/canvas/sticky_note_handles_painter.dart';
 import 'package:drawing_ui/src/canvas/sticky_note_resize_handles.dart';
 import 'package:drawing_ui/src/canvas/selected_elements_painter.dart';
 import 'package:drawing_ui/src/canvas/page_background_painter.dart';
+import 'package:drawing_ui/src/canvas/pdf_page_placeholder.dart';
 import 'package:drawing_ui/src/canvas/canvas_color_scheme.dart';
 import 'package:drawing_ui/src/canvas/drawing_canvas_gesture_handlers.dart';
 import 'package:drawing_ui/src/canvas/laser_controller.dart';
