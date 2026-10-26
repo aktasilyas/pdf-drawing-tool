@@ -135,8 +135,7 @@ void main() {
     });
   }
 
-  testWidgets('phone 390x844: canvas clears both toolbar rows',
-      (tester) async {
+  testWidgets('phone 390x844: canvas clears both toolbar rows', (tester) async {
     await pumpEditor(tester, size: kEditorPhone, prefs: prefs);
 
     final band = tester.getRect(find.byType(AdaptiveToolbar));
