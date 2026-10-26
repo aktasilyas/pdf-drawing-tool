@@ -187,6 +187,9 @@ class HistoryManager {
   void clear() {
     _undoStack.clear();
     _redoStack.clear();
+    _group = null;
+    _groupPageId = null;
+    _groupDepth = 0;
   }
 
   /// Returns the descriptions of commands in the undo stack.
