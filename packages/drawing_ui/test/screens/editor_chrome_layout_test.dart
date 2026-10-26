@@ -29,14 +29,13 @@ void main() {
     return rects;
   }
 
-  Rect sidebarHostRect(WidgetTester tester) => tester.getRect(
-        find
-            .ancestor(
-              of: find.byType(PageSidebar),
-              matching: find.byType(AnimatedContainer),
-            )
-            .first,
-      );
+  Rect sidebarHostRect(WidgetTester tester) {
+    final host = find.ancestor(
+      of: find.byType(PageSidebar),
+      matching: find.byType(AnimatedContainer),
+    );
+    return tester.getRect(host.first);
+  }
 
   void expectNoOverlap(List<Rect> canvases, Rect chrome, String what) {
     for (final canvas in canvases) {
@@ -54,17 +53,17 @@ void main() {
     final found = <String>[];
     void visit(SemanticsNode node) {
       final data = node.getSemanticsData();
-      final tappable = data.hasAction(SemanticsAction.tap) ||
-          data.hasAction(SemanticsAction.longPress);
+      final tap = data.hasAction(SemanticsAction.tap);
+      final longPress = data.hasAction(SemanticsAction.longPress);
       final size = node.rect.size;
-      if (tappable &&
-          !node.isMergedIntoParent &&
-          (size.width < 47.9 || size.height < 47.9)) {
-        final name = [data.label, data.tooltip, data.value]
-            .where((s) => s.isNotEmpty)
-            .join('/')
-            .replaceAll('\n', ' ');
-        found.add('"$name" ${size.width.round()}x${size.height.round()}');
+      final small = size.width < 47.9 || size.height < 47.9;
+      if ((tap || longPress) && !node.isMergedIntoParent && small) {
+        final parts = [data.label, data.tooltip, data.value];
+        final name = parts.where((s) => s.isNotEmpty).join('/');
+        final flat = name.replaceAll('\n', ' ');
+        final w = size.width.round();
+        final h = size.height.round();
+        found.add('"$flat" ${w}x$h');
       }
       node.visitChildren((child) {
         visit(child);
