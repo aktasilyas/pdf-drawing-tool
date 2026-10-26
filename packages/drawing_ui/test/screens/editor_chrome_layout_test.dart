@@ -57,7 +57,8 @@ void main() {
           (size.width < 47.9 || size.height < 47.9)) {
         final name = [data.label, data.tooltip, data.value]
             .where((s) => s.isNotEmpty)
-            .join('/');
+            .join('/')
+            .replaceAll('\n', ' ');
         found.add('"$name" ${size.width.round()}x${size.height.round()}');
       }
       node.visitChildren((child) {

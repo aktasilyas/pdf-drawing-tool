@@ -88,7 +88,8 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
           margin: const EdgeInsets.only(bottom: 8),
           child: Center(
               child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+            // No vertical padding: the 48dp pill keeps 48dp hit targets.
+            padding: const EdgeInsets.symmetric(horizontal: 4),
             decoration: BoxDecoration(
               color: cs.surfaceContainerHigh.withValues(alpha: 0.92),
               borderRadius: BorderRadius.circular(20),
