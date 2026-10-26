@@ -18,11 +18,13 @@ Shape _filled(ShapeType type, {int color = _red, String? id}) => Shape(
       fillColor: color,
     );
 
-Matcher _rgba(int r, int g, int b) => pairwise(
-      [r, g, b, 255],
-      (int e, int a) => (a - e).abs() <= 2,
-      'within 2 of',
-    );
+/// Expects [px] to be opaque and within 2 of ([r], [g], [b]) per channel.
+void _expectRgba(List<int> px, int r, int g, int b) {
+  final expected = [r, g, b, 255];
+  for (var i = 0; i < 4; i++) {
+    expect(px[i], closeTo(expected[i], 2), reason: 'channel $i of $px');
+  }
+}
 
 /// RGBA of pixel ([x], [y]) at scale 1.
 List<int> _px(PdfRawImage img, int x, int y) {
@@ -101,7 +103,7 @@ void main() {
       final renderer = PdfRasterLayerRenderer();
       final img = (await renderer.renderStickyNotes([note], _w, _h, 1))!;
       final inside = _px(img, 110, 85);
-      expect(inside, _rgba(0xFF, 0xF3, 0xCD));
+      _expectRgba(inside, 0xFF, 0xF3, 0xCD);
       expect(_px(img, 190, 110)[3], 0, reason: 'outside the note is empty');
     });
 
@@ -109,7 +111,7 @@ void main() {
       final note = StickyNote(
           id: 'n', x: 40, y: 20, width: 100, height: 80, color: 0xFF00FF00);
       final img = await _render(Layer.empty('l').addStickyNote(note));
-      expect(_px(img, 110, 85), _rgba(0x00, 0xFF, 0x00));
+      _expectRgba(_px(img, 110, 85), 0x00, 0xFF, 0x00);
     });
   });
 }
