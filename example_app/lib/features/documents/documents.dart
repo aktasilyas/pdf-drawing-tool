@@ -35,6 +35,7 @@ export 'data/models/trashed_page_model.dart';
 export 'data/migration/prefs_to_drift_migration.dart';
 
 // Data - Datasources
+export 'data/datasources/document_content_codec.dart';
 export 'data/datasources/document_local_datasource.dart';
 export 'data/datasources/folder_local_datasource.dart';
 export 'data/datasources/method_channel_incoming_pdf_source.dart';
@@ -97,6 +98,7 @@ export 'presentation/widgets/new_document_dialog.dart';
 export 'presentation/widgets/new_document_importers.dart';
 export 'presentation/widgets/paper_color_palette.dart';
 export 'presentation/widgets/pdf_file_importer.dart';
+export 'presentation/widgets/pdf_import_commit.dart';
 export 'presentation/widgets/selection_mode_header.dart';
 export 'presentation/widgets/sidebar_item.dart';
 export 'presentation/widgets/template_category_tabs.dart';

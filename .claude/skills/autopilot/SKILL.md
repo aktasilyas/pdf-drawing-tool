@@ -64,8 +64,10 @@ architect desk count the same as the owner's):
   done by a workflow after the architect desk approves.
 
 ## 2. Throttle
-If 4 or more `claude/` PRs are open and labeled `ready-to-merge`, start no new
-work: log "waiting for architect review" with the PR list and stop.
+If 4 or more `claude/` PRs are open and labeled `ready-to-merge` without
+`needs-owner-review` (those wait only on the owner's manual merge and do not
+count), start no new work: log "waiting for architect review" with the PR
+list and stop.
 
 ## 3. Pick the next issue
 Open issues with label `agent-ready` and without `in-progress`:

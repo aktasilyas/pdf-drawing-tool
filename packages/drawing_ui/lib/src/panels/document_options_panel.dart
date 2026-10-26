@@ -57,7 +57,11 @@ class DocumentOptionsPanel extends ConsumerWidget {
               onClose();
               final document = ref.read(documentProvider);
               final notifier = ref.read(exportProgressProvider.notifier);
-              performPDFExport(notifier, document);
+              performPDFExport(
+                notifier,
+                document,
+                pdfPaths: ref.read(pdfPathResolverProvider),
+              );
             },
           ),
         pageOptionsDivider(cs),

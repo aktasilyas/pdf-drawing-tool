@@ -49,6 +49,7 @@ export 'src/models/layer.dart';
 export 'src/models/page.dart';
 export 'src/models/page_background.dart';
 export 'src/models/page_size.dart';
+export 'src/models/pdf_path_resolver.dart';
 export 'src/models/paper_size.dart';
 export 'src/models/pen_type.dart';
 export 'src/models/selection.dart';

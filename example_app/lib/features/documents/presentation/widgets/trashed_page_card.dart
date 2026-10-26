@@ -1,7 +1,9 @@
 import 'dart:typed_data';
 import 'package:drawing_core/drawing_core.dart' show Page;
-import 'package:drawing_ui/drawing_ui.dart' show ThumbnailGenerator;
+import 'package:drawing_ui/drawing_ui.dart'
+    show ThumbnailGenerator, pdfPathResolverProvider;
 import 'package:flutter/material.dart' hide Page;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/documents/domain/entities/trashed_page.dart';
 import 'package:example_app/features/documents/presentation/widgets/document_card_helpers.dart';
@@ -35,10 +37,15 @@ class _TrashedPageCardState extends State<TrashedPageCard> {
   Future<void> _generateThumbnail() async {
     try {
       final page = Page.fromJson(widget.trashedPage.pageData);
+      final pdfPaths = ProviderScope.containerOf(
+        context,
+        listen: false,
+      ).read(pdfPathResolverProvider);
       final data = await ThumbnailGenerator.generate(
         page,
         width: 150,
         height: 200,
+        pdfPaths: pdfPaths,
       );
       if (mounted) {
         setState(() {

@@ -20,12 +20,12 @@ class LoadDocumentUseCase {
         // 2. Load document content (blob) and deserialize
         try {
           final contentResult =
-              await _repository.getDocumentContent(documentId);
+              await _repository.getDrawingDocument(documentId);
 
           return await contentResult.fold(
             (failure) => Left(failure),
-            (content) {
-              if (content == null) {
+            (stored) {
+              if (stored == null) {
                 // New document - create with template background
                 // CRITICAL: Create page size that fills viewport at 1.0 zoom
                 // Use aspect ratio from paper dimensions, but scale to reasonable screen size
@@ -80,17 +80,10 @@ class LoadDocumentUseCase {
                   documentType: docInfo.documentType,
                 ));
               }
-              // Deserialize from JSON
-              try {
-                // Library metadata owns the title; content may be stale.
-                final doc = DrawingDocument.fromJson(content)
-                    .copyWith(title: docInfo.title);
-                logger.i('Document loaded: ${doc.id}');
-                return Right(doc);
-              } catch (e, stackTrace) {
-                logger.e('JSON parse error', error: e, stackTrace: stackTrace);
-                return Left(CacheFailure('Document corrupted: $e'));
-              }
+              // Library metadata owns the title; content may be stale.
+              final doc = stored.copyWith(title: docInfo.title);
+              logger.i('Document loaded: ${doc.id}');
+              return Right(doc);
             },
           );
         } catch (e) {

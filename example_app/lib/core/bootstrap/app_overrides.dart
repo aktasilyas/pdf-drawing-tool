@@ -1,3 +1,4 @@
+import 'package:drawing_core/drawing_core.dart' show PdfPathResolver;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:drawing_ui/drawing_ui.dart' as drawing_ui;
@@ -16,12 +17,14 @@ List<Override> buildAppOverrides({
   required FeatureFlags flags,
   required SharedPreferences prefs,
   CrashReporter crashReporter = const NoopCrashReporter(),
+  PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
 }) {
   return [
     featureFlagsProvider.overrideWithValue(flags),
     sharedPreferencesProvider.overrideWithValue(prefs),
     crashReporterProvider.overrideWithValue(crashReporter),
     drawing_ui.sharedPreferencesProvider.overrideWithValue(prefs),
+    drawing_ui.pdfPathResolverProvider.overrideWithValue(pdfPaths),
     drawing_ui.aiAssistantEnabledProvider.overrideWithValue(flags.aiChat),
     drawing_ui.audioRecordingEnabledProvider
         .overrideWithValue(flags.audioRecording),

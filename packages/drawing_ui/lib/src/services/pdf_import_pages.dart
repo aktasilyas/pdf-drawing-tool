@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math' show Random;
 
 import 'package:drawing_core/drawing_core.dart';
 import 'package:flutter/foundation.dart';
@@ -55,14 +56,22 @@ List<int> pdfImportPageNumbers(PDFImportConfig config, int totalPages) {
 }
 
 /// Returns a new, not yet written file under `<app documents>/pdfs/`.
-Future<File> newImportedPdfFile() async {
-  final appDir = await getApplicationDocumentsDirectory();
-  final pdfDir = Directory('${appDir.path}/pdfs');
+///
+/// The documents directory is [pdfPaths]'s root; only a passthrough resolver
+/// falls back to path_provider.
+Future<File> newImportedPdfFile([
+  PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
+]) async {
+  final root =
+      pdfPaths.documentsRoot ?? (await getApplicationDocumentsDirectory()).path;
+  final pdfDir = Directory('$root/${PdfPathResolver.pdfDir}');
   if (!await pdfDir.exists()) {
     await pdfDir.create(recursive: true);
   }
 
-  final pdfId = 'pdf_${DateTime.now().millisecondsSinceEpoch}';
+  // Random suffix: two imports in the same millisecond must not share a file.
+  final suffix = Random().nextInt(1 << 30).toRadixString(36);
+  final pdfId = 'pdf_${DateTime.now().millisecondsSinceEpoch}_$suffix';
   return File('${pdfDir.path}/$pdfId.pdf');
 }
 

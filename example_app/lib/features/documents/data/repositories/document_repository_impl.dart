@@ -265,6 +265,19 @@ class DocumentRepositoryImpl
   }
 
   @override
+  Future<Either<Failure, DrawingDocument?>> getDrawingDocument(
+    String id,
+  ) async {
+    try {
+      return Right(await _localDatasource.getDrawingDocument(id));
+    } on CacheException catch (e) {
+      return Left(CacheFailure(e.message));
+    } catch (e) {
+      return Left(CacheFailure('Failed to get document content: $e'));
+    }
+  }
+
+  @override
   Future<Either<Failure, void>> saveDocumentContent({
     required String id,
     required Map<String, dynamic> content,

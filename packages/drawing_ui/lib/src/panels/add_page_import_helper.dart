@@ -15,6 +15,7 @@ Future<List<Page>> pickAndImportFile({
   required int insertIndex,
   required PageSize defaultPageSize,
   void Function(String message)? onError,
+  PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
 }) async {
   final result = await FilePicker.platform.pickFiles(
     type: FileType.custom,
@@ -27,7 +28,7 @@ Future<List<Page>> pickAndImportFile({
 
   final ext = filePath.split('.').last.toLowerCase();
   if (ext == 'pdf') {
-    return _importPdf(filePath, insertIndex, onError);
+    return _importPdf(filePath, insertIndex, onError, pdfPaths);
   }
   return _importImage(filePath, insertIndex);
 }
@@ -36,10 +37,11 @@ Future<List<Page>> _importPdf(
   String path,
   int insertIndex,
   void Function(String message)? onError,
+  PdfPathResolver pdfPaths,
 ) async {
   PDFImportService? svc;
   try {
-    svc = PDFImportService();
+    svc = PDFImportService(pdfPaths: pdfPaths);
     final r = await svc.importFromFile(
       filePath: path,
       config: PDFImportConfig.all(),

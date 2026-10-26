@@ -1,8 +1,12 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:drawing_core/drawing_core.dart'
+    show DrawingDocument, PdfPathResolver;
 import 'package:drift/drift.dart';
 import 'package:injectable/injectable.dart';
 import 'package:example_app/core/core.dart';
+import 'package:example_app/features/documents/data/datasources/document_content_codec.dart';
 import 'package:example_app/features/documents/data/models/document_model.dart';
 
 abstract class DocumentLocalDatasource {
@@ -17,6 +21,10 @@ abstract class DocumentLocalDatasource {
   Future<Map<String, dynamic>?> getDocumentContent(String id);
   Future<void> saveDocumentContent(String id, Map<String, dynamic> content);
 
+  /// Content of [id] as a model (decoded off the UI isolate when large), or
+  /// null when there is none yet.
+  Future<DrawingDocument?> getDrawingDocument(String id);
+
   /// Whether a content row exists for [id] (without decoding it).
   Future<bool> hasDocumentContent(String id);
 }
@@ -25,8 +33,20 @@ abstract class DocumentLocalDatasource {
 @Injectable(as: DocumentLocalDatasource)
 class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
   final AppDatabase _db;
+  final DocumentContentCodec _codec;
+  final PdfPathResolver _pdfPaths;
 
-  DocumentLocalDatasourceImpl(this._db);
+  /// Newest content write per document. Large encodes yield mid-way, so
+  /// writes are chained to land in call order (a stale autosave never
+  /// overwrites a newer save).
+  final Map<String, Future<void>> _contentWrites = {};
+
+  DocumentLocalDatasourceImpl(
+    this._db, {
+    DocumentContentCodec codec = const DocumentContentCodec(),
+    PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
+  })  : _codec = codec,
+        _pdfPaths = pdfPaths;
 
   /// Root level (folderId null) or a single folder.
   SimpleSelectStatement<$DocumentsTable, DocumentRow> _folderQuery(
@@ -127,8 +147,7 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
           ..where((t) => t.documentId.equals(id)))
         .getSingleOrNull();
     if (row == null) return {};
-    final content = json.decode(row.data);
-    final pages = content is Map ? content['pages'] : null;
+    final pages = (await _codec.decode(row.data))['pages'];
     if (pages is! List) return {};
     return {
       for (final page in pages)
@@ -154,7 +173,7 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
 
   Future<void> _deleteFile(String path) async {
     try {
-      final file = File(path);
+      final file = File(_pdfPaths.resolve(path));
       if (await file.exists()) await file.delete();
     } catch (e) {
       logger.w('Could not delete PDF copy $path: $e');
@@ -175,9 +194,28 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
             ..where((t) => t.documentId.equals(id)))
           .getSingleOrNull();
       if (row == null) return null;
-      return json.decode(row.data) as Map<String, dynamic>;
+      return await _codec.decode(row.data);
     } catch (e) {
       throw CacheException('Failed to get document content: $e');
+    }
+  }
+
+  @override
+  Future<DrawingDocument?> getDrawingDocument(String id) async {
+    final String data;
+    try {
+      final row = await (_db.select(_db.documentContents)
+            ..where((t) => t.documentId.equals(id)))
+          .getSingleOrNull();
+      if (row == null) return null;
+      data = row.data;
+    } catch (e) {
+      throw CacheException('Failed to get document content: $e');
+    }
+    try {
+      return await _codec.decodeDocument(data);
+    } catch (e) {
+      throw CacheException('Document corrupted: $e');
     }
   }
 
@@ -185,12 +223,35 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
   Future<void> saveDocumentContent(
     String id,
     Map<String, dynamic> content,
+  ) {
+    final write = _writeContentAfter(_contentWrites[id], id, content);
+    _contentWrites[id] = write;
+    unawaited(
+      write.then<void>((_) {}, onError: (Object _) {}).whenComplete(() {
+        if (identical(_contentWrites[id], write)) _contentWrites.remove(id);
+      }),
+    );
+    return write;
+  }
+
+  Future<void> _writeContentAfter(
+    Future<void>? previous,
+    String id,
+    Map<String, dynamic> content,
   ) async {
+    if (previous != null) {
+      try {
+        await previous;
+      } catch (_) {
+        // Already reported to the caller of that save.
+      }
+    }
     try {
+      final data = await _codec.encode(content);
       await _db.into(_db.documentContents).insertOnConflictUpdate(
             DocumentContentsCompanion(
               documentId: Value(id),
-              data: Value(json.encode(content)),
+              data: Value(data),
               updatedAt: Value(DateTime.now()),
             ),
           );
