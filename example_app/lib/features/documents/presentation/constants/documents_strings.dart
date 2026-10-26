@@ -78,6 +78,13 @@ class DocumentsStrings {
       'Belgeler yüklenirken hata oluştu';
   static const String errorCreatingDocument =
       'Belge oluşturulurken hata oluştu';
+  static const String errorEmptyTrash = 'Çöp kutusu boşaltılamadı';
+  static const String emptyTrashTitle = 'Çöpü Boşalt';
+  static const String emptyTrashMessage =
+      'Çöp kutusundaki tüm belgeler ve sayfalar kalıcı olarak silinecek. '
+      'Bu işlem geri alınamaz!';
+  static const String emptyTrashConfirm = 'Boşalt';
+  static const String trashEmptied = 'Çöp kutusu boşaltıldı';
   static const String errorDeletingDocument = 'Belge silinirken hata oluştu';
   static const String errorLoadingFolders = 'Klasörler yüklenirken hata oluştu';
   static const String errorCreatingFolder = 'Klasör oluşturulurken hata oluştu';

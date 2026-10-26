@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:injectable/injectable.dart';
 import 'package:example_app/core/core.dart';
@@ -98,14 +99,65 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
   @override
   Future<void> deleteDocument(String id) async {
     try {
-      await _db.transaction(() async {
+      final orphans = await _db.transaction(() async {
+        final paths = await _pdfPathsOf(id);
+        await (_db.delete(_db.trashedPages)
+              ..where((t) => t.sourceDocumentId.equals(id)))
+            .go();
         await (_db.delete(_db.documentContents)
               ..where((t) => t.documentId.equals(id)))
             .go();
         await (_db.delete(_db.documents)..where((t) => t.id.equals(id))).go();
+        return [
+          for (final path in paths)
+            if (!await _isPdfReferenced(path)) path,
+        ];
       });
+      for (final path in orphans) {
+        await _deleteFile(path);
+      }
     } catch (e) {
       throw CacheException('Failed to delete document: $e');
+    }
+  }
+
+  /// Copied PDF files the stored pages of [id] point to.
+  Future<Set<String>> _pdfPathsOf(String id) async {
+    final row = await (_db.select(_db.documentContents)
+          ..where((t) => t.documentId.equals(id)))
+        .getSingleOrNull();
+    if (row == null) return {};
+    final content = json.decode(row.data);
+    final pages = content is Map ? content['pages'] : null;
+    if (pages is! List) return {};
+    return {
+      for (final page in pages)
+        if (page is Map && page['background'] is Map)
+          if ((page['background'] as Map)['pdfFilePath'] case final String p) p,
+    };
+  }
+
+  /// Whether any remaining document content or trashed page mentions [path].
+  Future<bool> _isPdfReferenced(String path) async {
+    final needle = json.encode(path);
+    final content = await (_db.select(_db.documentContents)
+          ..where((t) => t.data.contains(needle))
+          ..limit(1))
+        .get();
+    if (content.isNotEmpty) return true;
+    final pages = await (_db.select(_db.trashedPages)
+          ..where((t) => t.pageData.contains(needle))
+          ..limit(1))
+        .get();
+    return pages.isNotEmpty;
+  }
+
+  Future<void> _deleteFile(String path) async {
+    try {
+      final file = File(path);
+      if (await file.exists()) await file.delete();
+    } catch (e) {
+      logger.w('Could not delete PDF copy $path: $e');
     }
   }
 

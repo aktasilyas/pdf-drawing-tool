@@ -1,4 +1,6 @@
 import 'package:example_app/features/documents/domain/entities/trashed_page.dart';
+import 'package:example_app/features/documents/domain/repositories/document_repository.dart'
+    show trashRetention;
 
 /// Stores pages deleted from a document so they can be restored later.
 abstract class PageTrashRepository {
@@ -20,6 +22,15 @@ abstract class PageTrashRepository {
 
   /// Removes the page from the trash for good.
   Future<void> permanentlyDeletePage(String trashedPageId);
+
+  /// Removes every trashed page for good; returns how many.
+  Future<int> emptyTrash();
+
+  /// Removes trashed pages deleted before `now - retention`; returns how many.
+  Future<int> purgeExpired({
+    required DateTime now,
+    Duration retention = trashRetention,
+  });
 
   /// Whether the source document of a trashed page still exists.
   Future<bool> documentExists(String documentId);

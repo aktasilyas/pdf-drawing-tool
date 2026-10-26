@@ -145,7 +145,7 @@ class DocumentsHeader extends ConsumerWidget {
   Widget _trashInfo() => Padding(
         padding: const EdgeInsets.only(bottom: AppSpacing.sm),
         child: LibraryTrashInfo(
-          onEmptyTrash: allDocumentIds.isNotEmpty ? onEmptyTrash : null,
+          onEmptyTrash: onEmptyTrash,
         ),
       );
 

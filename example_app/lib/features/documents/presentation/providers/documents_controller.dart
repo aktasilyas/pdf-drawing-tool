@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:example_app/features/documents/domain/repositories/document_repository.dart';
 import 'package:example_app/features/documents/presentation/providers/document_list_providers.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_controller_bulk.dart';
+import 'package:example_app/features/documents/presentation/providers/documents_controller_empty_trash.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_controller_page_trash.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_invalidation.dart';
 import 'package:example_app/features/documents/presentation/providers/imported_document_content.dart';
@@ -11,7 +12,10 @@ import 'package:example_app/features/documents/presentation/providers/library_er
 /// Mutations on notebooks: create, rename, move, favourite, trash, restore,
 /// duplicate and delete. Bulk and page-trash operations live in mixins.
 class DocumentsController extends StateNotifier<AsyncValue<void>>
-    with DocumentsBulkOperations, DocumentsPageTrashOperations {
+    with
+        DocumentsBulkOperations,
+        DocumentsPageTrashOperations,
+        DocumentsEmptyTrashOperation {
   @override
   final DocumentRepository repository;
   @override
