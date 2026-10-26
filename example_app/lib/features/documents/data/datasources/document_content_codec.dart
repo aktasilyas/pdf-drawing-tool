@@ -1,45 +1,86 @@
 import 'dart:convert';
 import 'dart:isolate';
 
-/// JSON codec for document content rows.
+/// JSON codec for document content rows, built so large notebooks do not
+/// block UI frames. Small payloads are handled in one go.
 ///
-/// Large payloads are encoded and decoded on a short-lived background
-/// isolate (`Isolate.run`) so autosave and document load do not block UI
-/// frames. Small payloads stay inline: spawning an isolate costs about a
-/// millisecond, more than encoding a few pages.
+/// - [decode] of a large payload runs on a short-lived background isolate
+///   (`Isolate.run`): the string goes in cheaply and the decoded map comes
+///   back via `Isolate.exit` without a copy.
+/// - [encode] of a large payload runs on the calling isolate in time slices
+///   (page by page, yielding to the event loop every [sliceBudget]).
+///   `Isolate.run` would have to copy the whole map graph synchronously on
+///   the calling isolate first, which the benchmark measured as slower than
+///   encoding it (`test/benchmark/document_content_benchmark_test.dart`).
 class DocumentContentCodec {
   const DocumentContentCodec({
-    this.encodeOffloadWeight = defaultEncodeOffloadWeight,
+    this.encodeSliceWeight = defaultEncodeSliceWeight,
     this.decodeOffloadLength = defaultDecodeOffloadLength,
+    this.sliceBudget = defaultSliceBudget,
   });
 
-  /// Never leaves the calling isolate (benchmark baseline).
+  /// Single-shot encode and decode on the calling isolate (benchmark
+  /// baseline).
   const DocumentContentCodec.inline()
-      : encodeOffloadWeight = null,
-        decodeOffloadLength = null;
+      : encodeSliceWeight = null,
+        decodeOffloadLength = null,
+        sliceBudget = defaultSliceBudget;
 
-  /// [contentWeight] from which [encode] runs on a background isolate.
-  static const int defaultEncodeOffloadWeight = 5000;
+  /// [contentWeight] from which [encode] works in time slices.
+  static const int defaultEncodeSliceWeight = 5000;
 
   /// JSON length (characters) from which [decode] runs on a background
-  /// isolate; roughly the size [defaultEncodeOffloadWeight] produces.
+  /// isolate; roughly the size [defaultEncodeSliceWeight] produces.
   static const int defaultDecodeOffloadLength = 128 * 1024;
 
-  /// `null` = always inline.
-  final int? encodeOffloadWeight;
+  /// Longest stretch [encode] works before yielding to the event loop.
+  static const Duration defaultSliceBudget = Duration(milliseconds: 4);
+
+  /// `null` = always single-shot.
+  final int? encodeSliceWeight;
 
   /// `null` = always inline.
   final int? decodeOffloadLength;
 
+  final Duration sliceBudget;
+
+  /// Same output as `jsonEncode(content)`.
   Future<String> encode(Map<String, dynamic> content) async {
-    final limit = encodeOffloadWeight;
+    final limit = encodeSliceWeight;
     if (limit == null || contentWeight(content) < limit) {
       return jsonEncode(content);
     }
-    return Isolate.run(
-      () => jsonEncode(content),
-      debugName: 'document-content-encode',
-    );
+    return _encodeInSlices(content);
+  }
+
+  Future<String> _encodeInSlices(Map<String, dynamic> content) async {
+    final pages = content['pages'];
+    if (pages is! List) return jsonEncode(content);
+    final out = StringBuffer('{');
+    final slice = Stopwatch()..start();
+    var firstEntry = true;
+    for (final entry in content.entries) {
+      if (!firstEntry) out.write(',');
+      firstEntry = false;
+      out.write('${jsonEncode(entry.key)}:');
+      if (!identical(entry.value, pages)) {
+        out.write(jsonEncode(entry.value));
+        continue;
+      }
+      out.write('[');
+      for (var i = 0; i < pages.length; i++) {
+        if (i > 0) out.write(',');
+        out.write(jsonEncode(pages[i]));
+        if (slice.elapsed >= sliceBudget) {
+          // A timer, not a microtask, so frames can run in between.
+          await Future<void>.delayed(Duration.zero);
+          slice.reset();
+        }
+      }
+      out.write(']');
+    }
+    out.write('}');
+    return out.toString();
   }
 
   Future<Map<String, dynamic>> decode(String data) async {

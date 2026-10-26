@@ -40,10 +40,33 @@ void main() {
       const codec = DocumentContentCodec();
       expect(
         DocumentContentCodec.contentWeight(large),
-        greaterThanOrEqualTo(DocumentContentCodec.defaultEncodeOffloadWeight),
+        greaterThanOrEqualTo(DocumentContentCodec.defaultEncodeSliceWeight),
       );
       expect(await codec.encode(small), jsonEncode(small));
       expect(await codec.encode(large), jsonEncode(large));
+    });
+
+    test('sliced encode yields between pages and keeps the output', () async {
+      const codec = DocumentContentCodec(sliceBudget: Duration.zero);
+      var ticks = 0;
+      final ticker = Stream<void>.periodic(Duration.zero).listen((_) {
+        ticks++;
+      });
+      final encoded = await codec.encode(large);
+      await ticker.cancel();
+      expect(encoded, jsonEncode(large));
+      expect(ticks, greaterThan(0));
+    });
+
+    test('content without a page list encodes in one go', () async {
+      const codec = DocumentContentCodec(encodeSliceWeight: 0);
+      final legacy = {
+        'id': 'v1',
+        'layers': [
+          {'strokes': <Object>[]},
+        ],
+      };
+      expect(await codec.encode(legacy), jsonEncode(legacy));
     });
 
     test('offloaded decode matches inline decode', () async {
