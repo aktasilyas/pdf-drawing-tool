@@ -54,8 +54,8 @@ class EditorScreen extends ConsumerWidget {
 
           // Set page trash callback for soft-delete support
           ref.read(pageTrashCallbackProvider.notifier).state =
-              (pageIndex, page) async {
-            await ref
+              (pageIndex, page) {
+            return ref
                 .read(documentsControllerProvider.notifier)
                 .movePageToTrash(
                   documentId: document.id,
@@ -64,6 +64,12 @@ class EditorScreen extends ConsumerWidget {
                   pageData: page.toJson(),
                 );
           };
+
+          // Lets the editor drop a trash entry again (undo of a page delete).
+          ref.read(pageTrashDiscardCallbackProvider.notifier).state =
+              (trashId) => ref
+                  .read(documentsControllerProvider.notifier)
+                  .permanentlyDeletePage(trashId);
 
           // Initialize canvas transform for limited mode (notebook/notepad)
           final canvasMode = document.canvasMode;
@@ -146,6 +152,7 @@ class EditorScreen extends ConsumerWidget {
     ref.invalidate(hasUnsavedChangesProvider);
     ref.invalidate(saveFailureProvider);
     ref.invalidate(pageTrashCallbackProvider);
+    ref.invalidate(pageTrashDiscardCallbackProvider);
     endEditorSession(ref.read);
     if (ref.read(featureFlagsProvider).aiChat) {
       ref.invalidate(aiChatProvider);
