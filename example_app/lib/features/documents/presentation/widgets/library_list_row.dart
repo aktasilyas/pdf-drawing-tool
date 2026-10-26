@@ -93,6 +93,7 @@ class LibraryListRow extends StatelessWidget {
                 else ...[
                   if (isFavorite)
                     Semantics(
+                      container: true,
                       button: true,
                       label: 'Favorilerden çıkar',
                       onTap: onFavoriteTap,

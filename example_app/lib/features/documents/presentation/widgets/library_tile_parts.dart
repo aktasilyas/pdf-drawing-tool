@@ -70,6 +70,7 @@ class LibraryFavoriteBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.palette;
     return Semantics(
+      container: true,
       button: true,
       label: semanticLabel,
       onTap: onTap,

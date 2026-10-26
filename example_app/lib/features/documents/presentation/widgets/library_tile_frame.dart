@@ -149,6 +149,7 @@ class _LibraryTileFrameState extends State<LibraryTileFrame> {
               children: [
                 Positioned.fill(
                   child: Semantics(
+                    container: true,
                     button: true,
                     label: widget.semanticLabel,
                     onTap: widget.onTap,

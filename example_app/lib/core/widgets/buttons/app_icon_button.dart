@@ -122,8 +122,10 @@ class AppIconButton extends StatelessWidget {
     }
 
     // One node for the whole button: the inner InkWell would otherwise be a
-    // second, unlabelled button node next to the tooltip's label node.
+    // second, unlabelled button node next to the tooltip's label node, and
+    // without `container` the label would be absorbed into a neighbour's node.
     return Semantics(
+      container: true,
       button: true,
       enabled: !isDisabled,
       label: semanticLabel ?? tooltip,

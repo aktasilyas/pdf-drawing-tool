@@ -69,6 +69,7 @@ class _TrashedPageCardState extends State<TrashedPageCard> {
     final outlineColor = context.palette.border;
 
     return Semantics(
+      container: true,
       button: true,
       label: widget.trashedPage.sourceDocumentTitle,
       onTap: widget.onTap,

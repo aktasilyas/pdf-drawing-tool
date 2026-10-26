@@ -67,8 +67,8 @@ void main() {
     final handle = tester.ensureSemantics();
     await pump(tester, const Size(390, 844));
     expect(
-      find.semantics.byLabel(RegExp('Kapat')),
-      findsAny,
+      find.semantics.byLabel('Kapat'),
+      findsOne,
       reason: 'labels: ${semanticsLabels(tester)}',
     );
     handle.dispose();

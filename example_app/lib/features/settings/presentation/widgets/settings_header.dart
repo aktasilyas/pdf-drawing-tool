@@ -55,6 +55,7 @@ class SettingsHeader extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           Semantics(
+            container: true,
             button: true,
             label: name,
             hint: 'Adı düzenle',
