@@ -4,12 +4,14 @@ library;
 // Domain - Entities
 export 'domain/entities/document_info.dart';
 export 'domain/entities/folder.dart';
+export 'domain/entities/incoming_pdf.dart';
 export 'domain/entities/paper_color.dart';
 export 'domain/entities/view_mode.dart';
 
 // Domain - Repositories
 export 'domain/repositories/document_repository.dart';
 export 'domain/repositories/folder_repository.dart';
+export 'domain/repositories/incoming_pdf_source.dart';
 export 'domain/repositories/page_trash_repository.dart';
 
 // Domain - Use Cases
@@ -35,6 +37,7 @@ export 'data/migration/prefs_to_drift_migration.dart';
 // Data - Datasources
 export 'data/datasources/document_local_datasource.dart';
 export 'data/datasources/folder_local_datasource.dart';
+export 'data/datasources/method_channel_incoming_pdf_source.dart';
 export 'data/datasources/trashed_page_local_datasource.dart';
 
 // Data - Repositories
@@ -45,6 +48,7 @@ export 'data/repositories/page_trash_repository_impl.dart';
 // Presentation - Providers
 export 'presentation/providers/documents_provider.dart';
 export 'presentation/providers/folders_provider.dart';
+export 'presentation/providers/incoming_pdf_provider.dart';
 export 'presentation/providers/library_error.dart';
 
 // Presentation - Screens
@@ -76,8 +80,10 @@ export 'presentation/widgets/folder_card.dart';
 export 'presentation/widgets/folder_color_picker.dart';
 export 'presentation/widgets/folder_list_tile.dart';
 export 'presentation/widgets/folder_menus.dart';
+export 'presentation/widgets/document_quota.dart';
 export 'presentation/widgets/folder_tile_art.dart';
 export 'presentation/widgets/format_picker_sheet.dart';
+export 'presentation/widgets/incoming_pdf_listener.dart';
 export 'presentation/widgets/library_grid_metrics.dart';
 export 'presentation/widgets/library_header_parts.dart';
 export 'presentation/widgets/library_list_row.dart';
@@ -90,6 +96,7 @@ export 'presentation/widgets/move_to_folder_dialog.dart';
 export 'presentation/widgets/new_document_dialog.dart';
 export 'presentation/widgets/new_document_importers.dart';
 export 'presentation/widgets/paper_color_palette.dart';
+export 'presentation/widgets/pdf_file_importer.dart';
 export 'presentation/widgets/selection_mode_header.dart';
 export 'presentation/widgets/sidebar_item.dart';
 export 'presentation/widgets/template_category_tabs.dart';

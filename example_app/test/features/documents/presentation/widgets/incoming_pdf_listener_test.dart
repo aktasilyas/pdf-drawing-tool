@@ -1,0 +1,130 @@
+import 'dart:async';
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import 'package:example_app/features/documents/documents.dart';
+import '../../../../helpers/fake_incoming_pdf_source.dart';
+
+void main() {
+  late FakeIncomingPdfSource source;
+  late Directory tmp;
+  late List<String> imported;
+  Completer<void>? gate;
+  late bool quotaAllowed;
+  late bool importThrows;
+
+  setUp(() {
+    source = FakeIncomingPdfSource();
+    tmp = Directory.systemTemp.createTempSync('incoming_pdf_test');
+    imported = [];
+    gate = null;
+    quotaAllowed = true;
+    importThrows = false;
+  });
+
+  tearDown(() => tmp.deleteSync(recursive: true));
+
+  IncomingPdf makePdf(String name) {
+    final file = File('${tmp.path}/$name')..writeAsBytesSync([1, 2, 3]);
+    return IncomingPdf(path: file.path, name: name, size: 3);
+  }
+
+  Future<void> fakeImporter(
+    BuildContext context, {
+    required String path,
+    required String name,
+    required int size,
+  }) async {
+    imported.add(name);
+    await gate?.future;
+    if (importThrows) throw StateError('import failed');
+  }
+
+  Future<bool> fakeQuota(BuildContext context) async => quotaAllowed;
+
+  Future<void> pumpListener(WidgetTester tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [incomingPdfSourceProvider.overrideWithValue(source)],
+        child: MaterialApp(
+          home: IncomingPdfListener(
+            importFile: fakeImporter,
+            ensureQuota: fakeQuota,
+            child: const Scaffold(body: SizedBox.expand()),
+          ),
+        ),
+      ),
+    );
+    await settle(tester);
+  }
+
+  testWidgets('cold start: a PDF waiting before mount is imported',
+      (tester) async {
+    final pdf = makePdf('cold.pdf');
+    source.emit(pdf);
+    await pumpListener(tester);
+    expect(imported, ['cold.pdf']);
+    expect(File(pdf.path).existsSync(), isFalse);
+  });
+
+  testWidgets('warm start: a PDF arriving while mounted is imported',
+      (tester) async {
+    await pumpListener(tester);
+    expect(imported, isEmpty);
+    source.emit(makePdf('warm.pdf'));
+    await settle(tester);
+    expect(imported, ['warm.pdf']);
+  });
+
+  testWidgets('PDFs are imported one at a time, in order', (tester) async {
+    gate = Completer<void>();
+    await pumpListener(tester);
+    source.emit(makePdf('one.pdf'));
+    source.emit(makePdf('two.pdf'));
+    await settle(tester);
+    expect(imported, ['one.pdf']);
+    gate!.complete();
+    await settle(tester);
+    expect(imported, ['one.pdf', 'two.pdf']);
+  });
+
+  testWidgets('quota blocked: nothing is imported, copy is deleted',
+      (tester) async {
+    quotaAllowed = false;
+    final pdf = makePdf('blocked.pdf');
+    await pumpListener(tester);
+    source.emit(pdf);
+    await settle(tester);
+    expect(imported, isEmpty);
+    expect(File(pdf.path).existsSync(), isFalse);
+  });
+
+  testWidgets('copy is deleted after a successful import', (tester) async {
+    final pdf = makePdf('ok.pdf');
+    await pumpListener(tester);
+    source.emit(pdf);
+    await settle(tester);
+    expect(imported, ['ok.pdf']);
+    expect(File(pdf.path).existsSync(), isFalse);
+  });
+
+  testWidgets('copy is deleted and the queue continues after a failure',
+      (tester) async {
+    importThrows = true;
+    final first = makePdf('bad.pdf');
+    await pumpListener(tester);
+    source.emit(first);
+    source.emit(makePdf('next.pdf'));
+    await settle(tester);
+    expect(imported, ['bad.pdf', 'next.pdf']);
+    expect(File(first.path).existsSync(), isFalse);
+  });
+}
+
+Future<void> settle(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pump();
+}

@@ -11,6 +11,7 @@ import 'package:example_app/features/documents/presentation/widgets/documents_he
 import 'package:example_app/features/documents/presentation/widgets/documents_menus.dart';
 import 'package:example_app/features/documents/presentation/widgets/documents_sidebar.dart';
 import 'package:example_app/features/documents/presentation/widgets/folder_menus.dart';
+import 'package:example_app/features/documents/presentation/widgets/incoming_pdf_listener.dart';
 import 'package:example_app/features/documents/presentation/widgets/new_document_dialog.dart';
 import 'package:example_app/core/routing/route_names.dart';
 import 'package:example_app/features/premium/premium.dart';
@@ -47,6 +48,12 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
   Widget build(BuildContext context) {
     final isPhone = Responsive.isPhone(context);
 
+    return IncomingPdfListener(
+      child: _buildScaffold(isPhone),
+    );
+  }
+
+  Widget _buildScaffold(bool isPhone) {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: context.palette.background,
