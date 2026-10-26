@@ -11,15 +11,17 @@ mixin DocumentsPageTrashOperations on StateNotifier<AsyncValue<void>> {
   @protected
   Ref get ref;
 
-  Future<void> movePageToTrash({
+  /// Returns the trash entry id, or null when the move failed.
+  Future<String?> movePageToTrash({
     required String documentId,
     required String documentTitle,
     required int pageIndex,
     required Map<String, dynamic> pageData,
   }) async {
     final repo = ref.read(pageTrashRepositoryProvider);
+    String? trashId;
     try {
-      await repo.movePageToTrash(
+      trashId = await repo.movePageToTrash(
         documentId: documentId,
         documentTitle: documentTitle,
         pageIndex: pageIndex,
@@ -29,6 +31,7 @@ mixin DocumentsPageTrashOperations on StateNotifier<AsyncValue<void>> {
       reportLibraryError(ref, e, 'Sayfa çöpe taşınamadı');
     }
     invalidatePageTrash(ref);
+    return trashId;
   }
 
   Future<bool> restorePageFromTrash(String trashedPageId) async {

@@ -17,9 +17,10 @@ void main() {
           documentTitle: any(named: 'documentTitle'),
           pageIndex: any(named: 'pageIndex'),
           pageData: any(named: 'pageData'),
-        )).thenAnswer((_) async {});
+        )).thenAnswer((_) async => 'trashed-1');
+    String? trashId;
     final rebuilt = await h.rebuiltBy(() async {
-      await h.controller.movePageToTrash(
+      trashId = await h.controller.movePageToTrash(
         documentId: 'doc-1',
         documentTitle: 'Notes',
         pageIndex: 2,
@@ -32,7 +33,24 @@ void main() {
           pageIndex: 2,
           pageData: {'id': 'p1'},
         )).called(1);
+    expect(trashId, 'trashed-1');
     expect(rebuilt, pageTrashLists);
+  });
+
+  test('movePageToTrash returns null when the repository fails', () async {
+    when(() => h.pageTrash.movePageToTrash(
+          documentId: any(named: 'documentId'),
+          documentTitle: any(named: 'documentTitle'),
+          pageIndex: any(named: 'pageIndex'),
+          pageData: any(named: 'pageData'),
+        )).thenThrow(Exception('disk full'));
+    final trashId = await h.controller.movePageToTrash(
+      documentId: 'doc-1',
+      documentTitle: 'Notes',
+      pageIndex: 2,
+      pageData: {'id': 'p1'},
+    );
+    expect(trashId, isNull);
   });
 
   group('restorePageFromTrash', () {

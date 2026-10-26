@@ -250,6 +250,7 @@ void main() {
         expect(manager.pages[0].index, 0);
         expect(manager.pages[1].index, 1);
 
+        // ignore: deprecated_member_use_from_same_package
         manager.reorderPage(0, 2); // Move first page to last
 
         expect(manager.pages[0].index, 0);
