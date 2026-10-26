@@ -1,6 +1,9 @@
+import 'dart:typed_data';
+
 import 'package:drawing_core/drawing_core.dart' show DrawingDocument;
 import 'package:drawing_ui/drawing_ui.dart';
 import 'package:drawing_ui/src/panels/export_panel.dart';
+import 'package:drawing_ui/src/services/pdf_share_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,14 +14,17 @@ import '../golden/helpers/chrome_theme.dart';
 /// Records export requests instead of rendering a PDF and opening a picker.
 class _RecordingRunner extends PDFExportRunner {
   final exported = <DrawingDocument>[];
+  final shared = <bool>[];
 
   @override
   Future<void> run(
     ExportProgressNotifier progress,
     DrawingDocument document, {
     bool addWatermark = false,
+    bool share = false,
   }) async {
     exported.add(document);
+    shared.add(share);
   }
 }
 
@@ -86,4 +92,61 @@ void main() {
     expect(runner.exported, [container.read(documentProvider)]);
     expect(find.byType(ExportPanel), findsNothing);
   });
+
+  testWidgets('More > Dışa Aktar > PDF Paylaş runs the export as a share',
+      (tester) async {
+    await pumpPhone(tester);
+
+    await tester.tap(find.byTooltip('Daha Fazla'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Dışa Aktar'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('PDF Paylaş'));
+    await tester.pumpAndSettle();
+
+    expect(runner.shared, [true]);
+    expect(find.byType(ExportPanel), findsNothing);
+  });
+
+  for (final embedded in [true, false]) {
+    testWidgets(
+        'ExportPanel PDF Paylaş reaches the share service '
+        '(embedded: $embedded)', (tester) async {
+      final share = _CountingShare();
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            sharedPreferencesProvider.overrideWithValue(prefs),
+            pdfShareServiceProvider.overrideWithValue(share),
+            isInfiniteCanvasProvider.overrideWith((ref) => false),
+          ],
+          child: MaterialApp(
+            theme: chromeTheme(Brightness.light),
+            home: Scaffold(
+              body: ExportPanel(onClose: () {}, embedded: embedded),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('PDF Paylaş'));
+      await tester.runAsync(
+          () => Future<void>.delayed(const Duration(milliseconds: 500)));
+      await tester.pump();
+
+      expect(share.calls, 1);
+    });
+  }
+}
+
+class _CountingShare extends PdfShareService {
+  int calls = 0;
+
+  @override
+  Future<PdfShareOutcome> sharePdf(
+    Uint8List bytes, {
+    required String fileName,
+  }) async {
+    calls++;
+    return PdfShareOutcome.dismissed;
+  }
 }

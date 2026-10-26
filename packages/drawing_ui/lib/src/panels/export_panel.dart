@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/src/panels/page_options_widgets.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/services/pdf_exporter.dart';
+import 'package:drawing_ui/src/services/pdf_share_service.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 
 /// Export panel with PDF and PNG export options.
@@ -41,6 +42,12 @@ class ExportPanel extends ConsumerWidget {
             label: 'PDF Olarak Dışa Aktar',
             onTap: () => _exportPDF(context, ref),
           ),
+        if (!isInfinite)
+          PageOptionsMenuItem(
+            icon: ElyanotesIcons.share,
+            label: 'PDF Paylaş',
+            onTap: () => _exportPDF(context, ref, share: true),
+          ),
       ],
     );
 
@@ -54,13 +61,13 @@ class ExportPanel extends ConsumerWidget {
     return content;
   }
 
-  void _exportPDF(BuildContext context, WidgetRef ref) {
+  void _exportPDF(BuildContext context, WidgetRef ref, {bool share = false}) {
     onClose();
     final document = ref.read(documentProvider);
     final notifier = ref.read(exportProgressProvider.notifier);
     final watermark = ref.read(exportWatermarkProvider);
     final runner = ref.read(pdfExportRunnerProvider);
-    runner.run(notifier, document, addWatermark: watermark);
+    runner.run(notifier, document, addWatermark: watermark, share: share);
   }
 
   /// Captures canvas screenshot and saves as PNG.
@@ -76,20 +83,30 @@ class ExportPanel extends ConsumerWidget {
 /// Runs the full-document PDF export behind [ExportPanel] (tablet popover and
 /// phone sheet). Replaced in tests to observe the export without file pickers.
 class PDFExportRunner {
-  const PDFExportRunner();
+  const PDFExportRunner({this.shareService = const PdfShareService()});
+
+  final PdfShareService shareService;
 
   Future<void> run(
     ExportProgressNotifier progress,
     DrawingDocument document, {
     bool addWatermark = false,
+    bool share = false,
   }) {
-    return performPDFExport(progress, document, addWatermark: addWatermark);
+    return performPDFExport(
+      progress,
+      document,
+      addWatermark: addWatermark,
+      share: share,
+      shareService: shareService,
+    );
   }
 }
 
 /// The [PDFExportRunner] used by [ExportPanel].
-final pdfExportRunnerProvider =
-    Provider<PDFExportRunner>((ref) => const PDFExportRunner());
+final pdfExportRunnerProvider = Provider<PDFExportRunner>(
+  (ref) => PDFExportRunner(shareService: ref.watch(pdfShareServiceProvider)),
+);
 
 /// Exports all pages of [document] to PDF using the floating progress overlay.
 ///
@@ -99,6 +116,8 @@ Future<void> performPDFExport(
   DrawingDocument document, {
   bool isInfiniteCanvas = false,
   bool addWatermark = false,
+  bool share = false,
+  PdfShareService shareService = const PdfShareService(),
 }) {
   return performPagesPDFExport(
     progress,
@@ -106,6 +125,8 @@ Future<void> performPDFExport(
     title: document.title,
     isInfiniteCanvas: isInfiniteCanvas,
     addWatermark: addWatermark,
+    share: share,
+    shareService: shareService,
   );
 }
 
@@ -119,6 +140,8 @@ Future<void> performPagesPDFExport(
   required String title,
   bool isInfiniteCanvas = false,
   bool addWatermark = false,
+  bool share = false,
+  PdfShareService shareService = const PdfShareService(),
 }) async {
   progress.start(pages.length);
 
@@ -147,6 +170,17 @@ Future<void> performPagesPDFExport(
 
     final bytes = Uint8List.fromList(result.pdfBytes);
     final filename = _buildExportFilename(title);
+
+    if (share) {
+      final outcome =
+          await shareService.sharePdf(bytes, fileName: '$filename.pdf');
+      if (outcome == PdfShareOutcome.shared) {
+        progress.complete(result.fileSizeFormatted);
+      } else {
+        progress.dismiss();
+      }
+      return;
+    }
 
     // Let user pick save location
     final savedPath = await FilePicker.platform.saveFile(
