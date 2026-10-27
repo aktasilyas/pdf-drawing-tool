@@ -26,8 +26,7 @@ class ThumbnailGenerator {
   static const double defaultHeight = 200;
 
   /// Shared canvas element painter (stroke renderer, sticky notes).
-  static final PdfRasterLayerRenderer _layerRenderer =
-      PdfRasterLayerRenderer();
+  static final PdfRasterLayerRenderer _layerRenderer = PdfRasterLayerRenderer();
 
   /// Generates a cache key for a page.
   ///

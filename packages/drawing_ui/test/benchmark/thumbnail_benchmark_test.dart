@@ -79,8 +79,8 @@ Future<Uint8List?> _legacyGenerate(Page page) async {
   for (final layer in page.layers) {
     for (final stroke in layer.strokes) {
       if (stroke.points.length < 2) continue;
-      final path = ui.Path()
-        ..moveTo(stroke.points.first.x, stroke.points.first.y);
+      final first = stroke.points.first;
+      final path = ui.Path()..moveTo(first.x, first.y);
       for (final p in stroke.points.skip(1)) {
         path.lineTo(p.x, p.y);
       }
@@ -117,10 +117,11 @@ void main() {
   testWidgets('thumbnail of the 1,000-stroke page', (tester) async {
     await tester.runAsync(() async {
       final page = _benchmarkPage();
-      final legacy = await _time('legacy', () => _legacyGenerate(page));
-      final current =
-          await _time('painters', () => ThumbnailGenerator.generate(page));
-      debugPrint('thumbnail 1,000 strokes: $current | $legacy (n=$_runs)');
+      Future<Uint8List?> painters() => ThumbnailGenerator.generate(page);
+      Future<Uint8List?> legacy() => _legacyGenerate(page);
+      final a = await _time('painters', painters);
+      final b = await _time('legacy', legacy);
+      debugPrint('thumbnail 1,000 strokes: $a | $b (n=$_runs)');
     });
   });
 }
