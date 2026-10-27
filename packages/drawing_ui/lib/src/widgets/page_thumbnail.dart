@@ -9,8 +9,7 @@ import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'package:drawing_ui/src/services/thumbnail_cache.dart';
 import 'package:drawing_ui/src/services/thumbnail_generator.dart';
 import 'package:drawing_ui/src/providers/pdf_path_provider.dart';
-import 'package:drawing_ui/src/providers/pdf_render_provider.dart'
-    show renderThumbnail, pdfThumbnailCacheProvider;
+import 'package:drawing_ui/src/widgets/page_thumbnail_parts.dart';
 
 /// A widget that displays a thumbnail preview of a page.
 ///
@@ -224,7 +223,7 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
     if (widget.page.background.type == BackgroundType.pdf &&
         widget.page.background.pdfFilePath != null &&
         widget.page.background.pdfPageIndex != null) {
-      return _buildPdfThumbnail();
+      return PdfPageThumbnail(background: widget.page.background);
     }
 
     // Normal page thumbnail rendering
@@ -267,52 +266,6 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
             ElyanotesIcons.brokenImage,
             size: 32,
             color: colorScheme.error.withValues(alpha: 0.7),
-          ),
-        );
-      },
-    );
-  }
-
-  /// Build PDF thumbnail using renderThumbnail (low-res)
-  Widget _buildPdfThumbnail() {
-    final cacheKey =
-        '${widget.page.background.pdfFilePath}|${widget.page.background.pdfPageIndex}';
-
-    return Consumer(
-      builder: (context, ref, child) {
-        // 1. Önce thumbnail cache'e bak
-        final thumbCache = ref.watch(pdfThumbnailCacheProvider);
-        if (thumbCache.containsKey(cacheKey)) {
-          return Image.memory(
-            thumbCache[cacheKey]!,
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
-            gaplessPlayback: true,
-          );
-        }
-
-        // 2. Scroll sırasında loading yapma
-        final shouldDefer =
-            Scrollable.recommendDeferredLoadingForContext(context);
-        if (!shouldDefer) {
-          // ProviderContainer kullan (dispose-safe)
-          final container = ProviderScope.containerOf(context);
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            renderThumbnail(container, cacheKey);
-          });
-        }
-
-        // 3. Basit placeholder
-        final placeholderCs = Theme.of(context).colorScheme;
-        return Container(
-          color: placeholderCs.surfaceContainerHighest,
-          child: Center(
-            child: PhosphorIcon(
-              ElyanotesIcons.pdfFile,
-              size: 24,
-              color: placeholderCs.outlineVariant,
-            ),
           ),
         );
       },

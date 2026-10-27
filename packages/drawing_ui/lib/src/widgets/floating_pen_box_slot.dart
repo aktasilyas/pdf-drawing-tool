@@ -116,6 +116,7 @@ class FloatingPenBoxSlot extends StatelessWidget {
                 top: isColumn ? ChromeSpacing.xxs : null,
                 bottom: isColumn ? null : ChromeSpacing.xxs,
                 child: Semantics(
+                  container: true,
                   button: true,
                   label: 'Kalemi kaldır',
                   child: GestureDetector(
