@@ -13,7 +13,6 @@ mixin _EraserGestures<T extends ConsumerStatefulWidget>
   // ─────────────────────────────────────────────────────────────────────────
 
   void handleEraserDown(PointerDownEvent event) {
-    final settings = ref.read(eraserSettingsProvider);
     final transform = ref.read(canvasTransformProvider);
     final canvasPoint = transform.screenToCanvas(event.localPosition);
 
@@ -22,7 +21,7 @@ mixin _EraserGestures<T extends ConsumerStatefulWidget>
     ref.read(eraserCursorPressureProvider.notifier).state =
         event.pressure.clamp(0.0, 1.0);
 
-    switch (settings.mode) {
+    switch (ref.read(activeEraserModeProvider)) {
       case EraserMode.pixel:
         // Start pixel eraser session
         final pixelTool = ref.read(pixelEraserToolProvider);
@@ -67,7 +66,6 @@ mixin _EraserGestures<T extends ConsumerStatefulWidget>
   }
 
   void handleEraserMove(PointerMoveEvent event) {
-    final settings = ref.read(eraserSettingsProvider);
     final transform = ref.read(canvasTransformProvider);
     final canvasPoint = transform.screenToCanvas(event.localPosition);
 
@@ -76,7 +74,7 @@ mixin _EraserGestures<T extends ConsumerStatefulWidget>
     ref.read(eraserCursorPressureProvider.notifier).state =
         event.pressure.clamp(0.0, 1.0);
 
-    switch (settings.mode) {
+    switch (ref.read(activeEraserModeProvider)) {
       case EraserMode.pixel:
         final pixelTool = ref.read(pixelEraserToolProvider);
         pixelTool.onPointerMove(
@@ -112,7 +110,7 @@ mixin _EraserGestures<T extends ConsumerStatefulWidget>
 
     // One gesture = one undo step, however many commands it commits.
     ref.read(historyManagerProvider.notifier).runBatch(() {
-      switch (settings.mode) {
+      switch (ref.read(activeEraserModeProvider)) {
         case EraserMode.pixel:
           commitPixelErase(layerIndex);
           break;

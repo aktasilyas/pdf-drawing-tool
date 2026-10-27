@@ -23,9 +23,10 @@ class EraserCursorWidget extends ConsumerWidget {
     if (!isVisible) return const SizedBox.shrink();
 
     final eraserSettings = ref.watch(eraserSettingsProvider);
+    final eraserMode = ref.watch(activeEraserModeProvider);
     final pressure = ref.watch(eraserCursorPressureProvider);
 
-    final mode = switch (eraserSettings.mode) {
+    final mode = switch (eraserMode) {
       EraserMode.pixel => EraserCursorMode.pixel,
       EraserMode.stroke => EraserCursorMode.stroke,
       EraserMode.lasso => EraserCursorMode.lasso,
@@ -35,7 +36,7 @@ class EraserCursorWidget extends ConsumerWidget {
       child: CustomPaint(
         painter: EraserCursorPainter(
           position: cursorPosition,
-          size: eraserSettings.mode == EraserMode.pixel
+          size: eraserMode == EraserMode.pixel
               ? eraserSettings.effectiveSize(pressure)
               : eraserSettings.size,
           mode: mode,

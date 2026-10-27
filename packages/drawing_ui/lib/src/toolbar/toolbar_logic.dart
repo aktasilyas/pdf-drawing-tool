@@ -11,8 +11,13 @@ import 'package:drawing_ui/src/toolbar/tool_groups.dart';
 /// Returns the ordered list of [ToolType] entries to display, where all pen
 /// tools are represented by the currently active pen (or [ToolType.ballpointPen])
 /// and all highlighter tools by the active highlighter (or [ToolType.highlighter]).
+/// Erasers are represented by the active eraser, otherwise by [lastEraser]
+/// (the last used eraser type, so its button brings that type back, #237).
 List<ToolType> getGroupedVisibleTools(
-    ToolbarConfig config, ToolType currentTool) {
+  ToolbarConfig config,
+  ToolType currentTool, {
+  ToolType lastEraser = ToolType.pixelEraser,
+}) {
   final visibleTools = config.visibleTools.map((tc) => tc.toolType).toList();
   final result = <ToolType>[];
   bool penAdded = false, highlighterAdded = false, eraserAdded = false;
@@ -33,9 +38,9 @@ List<ToolType> getGroupedVisibleTools(
       }
     } else if (eraserTools.contains(tool)) {
       if (!eraserAdded) {
-        result.add(eraserTools.contains(currentTool)
-            ? currentTool
-            : ToolType.pixelEraser);
+        result.add(
+          eraserTools.contains(currentTool) ? currentTool : lastEraser,
+        );
         eraserAdded = true;
       }
     } else {

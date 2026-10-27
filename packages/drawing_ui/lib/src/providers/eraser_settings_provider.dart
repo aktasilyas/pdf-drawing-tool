@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:drawing_ui/src/models/models.dart';
+import 'package:drawing_ui/src/providers/tool_providers.dart';
 import 'package:drawing_ui/src/providers/toolbar_config_provider.dart';
 
 // =============================================================================
@@ -13,6 +15,35 @@ const _eraserSettingsKey = 'elyanotes_eraser';
 
 /// Eraser mode enum.
 enum EraserMode { pixel, stroke, lasso }
+
+/// Eraser mode of an eraser [tool]; `null` for any other tool.
+EraserMode? eraserModeForTool(ToolType tool) {
+  return switch (tool) {
+    ToolType.pixelEraser => EraserMode.pixel,
+    ToolType.strokeEraser => EraserMode.stroke,
+    ToolType.lassoEraser => EraserMode.lasso,
+    _ => null,
+  };
+}
+
+/// Eraser [ToolType] for [mode].
+ToolType eraserToolForMode(EraserMode mode) {
+  return switch (mode) {
+    EraserMode.pixel => ToolType.pixelEraser,
+    EraserMode.stroke => ToolType.strokeEraser,
+    EraserMode.lasso => ToolType.lassoEraser,
+  };
+}
+
+/// The eraser mode the canvas erases with: the current eraser tool decides,
+/// so the toolbar, the panel and the canvas never disagree (#237). With a
+/// non-eraser tool it is the last used eraser type ([EraserSettings.mode],
+/// kept in sync by `currentToolProvider`), which the toolbar's eraser
+/// button selects next.
+final activeEraserModeProvider = Provider<EraserMode>((ref) {
+  final tool = ref.watch(currentToolProvider);
+  return eraserModeForTool(tool) ?? ref.watch(eraserSettingsProvider).mode;
+});
 
 /// Default eraser settings.
 const _defaultEraserSettings = EraserSettings(
@@ -122,7 +153,15 @@ class EraserSettingsNotifier extends StateNotifier<EraserSettings> {
 
   final SharedPreferences? _prefs;
 
+  /// Stored settings; a saved eraser tool decides the mode, so prefs from
+  /// older versions with a mismatched tool and mode load consistently.
   static EraserSettings _load(SharedPreferences? prefs) {
+    final settings = _loadStored(prefs);
+    final toolMode = eraserModeForTool(CurrentToolNotifier.loadSaved(prefs));
+    return toolMode == null ? settings : settings.copyWith(mode: toolMode);
+  }
+
+  static EraserSettings _loadStored(SharedPreferences? prefs) {
     if (prefs == null) return _defaultEraserSettings;
     final source = prefs.getString(_eraserSettingsKey);
     if (source != null) {

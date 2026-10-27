@@ -55,7 +55,11 @@ class _CompactToolRowState extends ConsumerState<CompactToolRow> {
     final canRedo = ref.watch(canRedoProvider);
     final currentTool = ref.watch(currentToolProvider);
     final toolbarConfig = ref.watch(toolbarConfigProvider);
-    final tools = getGroupedVisibleTools(toolbarConfig, currentTool);
+    final tools = getGroupedVisibleTools(
+      toolbarConfig,
+      currentTool,
+      lastEraser: eraserToolForMode(ref.watch(eraserSettingsProvider).mode),
+    );
     final hasAI = widget.onAIPressed != null;
 
     return Container(

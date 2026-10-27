@@ -138,7 +138,11 @@ class _ToolBarState extends ConsumerState<ToolBar> {
   Widget _buildToolsArea(bool isReaderMode) {
     final currentTool = ref.watch(currentToolProvider);
     final toolbarConfig = ref.watch(toolbarConfigProvider);
-    final tools = getGroupedVisibleTools(toolbarConfig, currentTool);
+    final tools = getGroupedVisibleTools(
+      toolbarConfig,
+      currentTool,
+      lastEraser: eraserToolForMode(ref.watch(eraserSettingsProvider).mode),
+    );
     final canUndo = ref.watch(canUndoProvider);
     final canRedo = ref.watch(canRedoProvider);
     final hasAI = widget.onAIPressed != null;
