@@ -134,16 +134,18 @@ mixin _LayerStrokeOps {
     return null;
   }
 
-  /// Finds all strokes that intersect with the given [rect].
+  /// Finds all strokes whose bounds intersect with the given [rect].
   ///
-  /// This is a stub implementation for Phase 2.
-  /// Full implementation will be done in Phase 3.
-  ///
-  /// Returns an empty list (stub).
+  /// Uses a bounding-box (AABB) test; touching edges do not count.
   List<Stroke> findStrokesInRect(BoundingBox rect) {
-    // TODO: Implement in Phase 3
-    // Will check stroke bounds intersection with rect
-    return const [];
+    return strokes.where((stroke) {
+      final bounds = stroke.bounds;
+      if (bounds == null) return false;
+      return bounds.left < rect.right &&
+          bounds.right > rect.left &&
+          bounds.top < rect.bottom &&
+          bounds.bottom > rect.top;
+    }).toList();
   }
 
   // ============================================================

@@ -79,9 +79,6 @@ Future<void> purgeExpiredTrashOnStartup(
 
 // ignore: unused_element
 void _registerCoreServices() {
-  // Network info
-  // getIt.registerLazySingleton<NetworkInfo>(() => NetworkInfoImpl());
-
   // Supabase client
   // getIt.registerLazySingleton<SupabaseClient>(() => Supabase.instance.client);
 
