@@ -1,4 +1,5 @@
 import 'package:drawing_core/src/internal.dart';
+import 'package:drawing_core/src/history/ordered_restore.dart';
 
 /// Birden fazla stroke'u tek seferde silme komutu.
 ///
@@ -12,7 +13,7 @@ class EraseStrokesCommand implements DrawingCommand {
   final List<String> strokeIds;
 
   /// Undo için silinen stroke'ları cache'le
-  final List<Stroke> _erasedStrokes = [];
+  List<MapEntry<int, Stroke>> _erasedStrokes = const [];
 
   /// Cached elementOrder before execute (for undo z-order restore).
   List<String> _originalElementOrder = const [];
@@ -37,17 +38,8 @@ class EraseStrokesCommand implements DrawingCommand {
     // Cache elementOrder before removal (for undo z-order restore)
     _originalElementOrder = List<String>.from(layer.elementOrder);
 
-    // Silinecek stroke'ları cache'le (undo için)
-    _erasedStrokes.clear();
-    for (final id in strokeIds) {
-      final stroke = layer.strokes.cast<Stroke?>().firstWhere(
-            (s) => s?.id == id,
-            orElse: () => null,
-          );
-      if (stroke != null) {
-        _erasedStrokes.add(stroke);
-      }
-    }
+    // Silinecek stroke'ları orijinal index'leriyle cache'le (undo için)
+    _erasedStrokes = indexedRemoved(layer.strokes, strokeIds, (s) => s.id);
 
     // Stroke'ları sil
     var updatedLayer = layer;
@@ -66,15 +58,11 @@ class EraseStrokesCommand implements DrawingCommand {
 
     var layer = document.layers[layerIndex];
 
-    // Silinen stroke'ları geri ekle (ters sırada - orijinal pozisyonlara)
-    for (final stroke in _erasedStrokes.reversed) {
-      layer = layer.addStroke(stroke);
-    }
-
-    // Restore original elementOrder (addStroke appends to end, wrong z-order)
-    if (_originalElementOrder.isNotEmpty) {
-      layer = layer.copyWith(elementOrder: _originalElementOrder);
-    }
+    // Silinen stroke'ları orijinal pozisyonlarına geri ekle
+    layer = layer.copyWith(
+      strokes: reinsertAt(layer.strokes, _erasedStrokes),
+      elementOrder: _originalElementOrder,
+    );
 
     return document.updateLayer(layerIndex, layer);
   }

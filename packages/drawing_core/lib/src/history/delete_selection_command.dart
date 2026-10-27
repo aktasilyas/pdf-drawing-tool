@@ -1,4 +1,5 @@
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_core/src/history/ordered_restore.dart';
 
 /// Command to delete selected strokes and shapes.
 ///
@@ -21,16 +22,16 @@ class DeleteSelectionCommand implements DrawingCommand {
   final List<String> textIds;
 
   /// Cache of deleted strokes for undo.
-  final List<Stroke> _deletedStrokes = [];
+  List<MapEntry<int, Stroke>> _deletedStrokes = const [];
 
   /// Cache of deleted shapes for undo.
-  final List<Shape> _deletedShapes = [];
+  List<MapEntry<int, Shape>> _deletedShapes = const [];
 
   /// Cache of deleted images for undo.
-  final List<ImageElement> _deletedImages = [];
+  List<MapEntry<int, ImageElement>> _deletedImages = const [];
 
   /// Cache of deleted texts for undo.
-  final List<TextElement> _deletedTexts = [];
+  List<MapEntry<int, TextElement>> _deletedTexts = const [];
 
   /// Cached original elementOrder for undo.
   List<String> _originalElementOrder = const [];
@@ -51,44 +52,11 @@ class DeleteSelectionCommand implements DrawingCommand {
     // Cache elementOrder for undo
     _originalElementOrder = List<String>.from(layer.elementOrder);
 
-    // Cache strokes to be deleted (for undo)
-    _deletedStrokes.clear();
-    for (final id in strokeIds) {
-      final stroke = layer.strokes.cast<Stroke?>().firstWhere(
-            (s) => s?.id == id,
-            orElse: () => null,
-          );
-      if (stroke != null) {
-        _deletedStrokes.add(stroke);
-      }
-    }
-
-    // Cache shapes to be deleted (for undo)
-    _deletedShapes.clear();
-    for (final id in shapeIds) {
-      final shape = layer.getShapeById(id);
-      if (shape != null) {
-        _deletedShapes.add(shape);
-      }
-    }
-
-    // Cache images to be deleted (for undo)
-    _deletedImages.clear();
-    for (final id in imageIds) {
-      final image = layer.getImageById(id);
-      if (image != null) {
-        _deletedImages.add(image);
-      }
-    }
-
-    // Cache texts to be deleted (for undo)
-    _deletedTexts.clear();
-    for (final id in textIds) {
-      final text = layer.getTextById(id);
-      if (text != null) {
-        _deletedTexts.add(text);
-      }
-    }
+    // Cache deleted elements with their original indices (for undo)
+    _deletedStrokes = indexedRemoved(layer.strokes, strokeIds, (e) => e.id);
+    _deletedShapes = indexedRemoved(layer.shapes, shapeIds, (e) => e.id);
+    _deletedImages = indexedRemoved(layer.images, imageIds, (e) => e.id);
+    _deletedTexts = indexedRemoved(layer.texts, textIds, (e) => e.id);
 
     // Remove strokes
     for (final id in strokeIds) {
@@ -117,30 +85,13 @@ class DeleteSelectionCommand implements DrawingCommand {
   DrawingDocument undo(DrawingDocument document) {
     var layer = document.layers[layerIndex];
 
-    // Restore deleted strokes in reverse order
-    for (final stroke in _deletedStrokes.reversed) {
-      layer = layer.addStroke(stroke);
-    }
-
-    // Restore deleted shapes in reverse order
-    for (final shape in _deletedShapes.reversed) {
-      layer = layer.addShape(shape);
-    }
-
-    // Restore deleted images in reverse order
-    for (final image in _deletedImages.reversed) {
-      layer = layer.addImage(image);
-    }
-
-    // Restore deleted texts in reverse order
-    for (final text in _deletedTexts.reversed) {
-      layer = layer.addText(text);
-    }
-
-    // Restore original elementOrder (addImage/addText would append new IDs)
-    if (_originalElementOrder.isNotEmpty) {
-      layer = layer.copyWith(elementOrder: _originalElementOrder);
-    }
+    layer = layer.copyWith(
+      strokes: reinsertAt(layer.strokes, _deletedStrokes),
+      shapes: reinsertAt(layer.shapes, _deletedShapes),
+      images: reinsertAt(layer.images, _deletedImages),
+      texts: reinsertAt(layer.texts, _deletedTexts),
+      elementOrder: _originalElementOrder,
+    );
 
     return document.updateLayer(layerIndex, layer);
   }
