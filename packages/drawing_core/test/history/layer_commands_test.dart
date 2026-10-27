@@ -3,8 +3,6 @@ import 'package:test/test.dart';
 
 import '../helpers/document_helpers.dart';
 
-typedef DocBuilder = DrawingDocument Function(List<Layer>, {int active});
-
 Layer layer(String id, {List<Stroke> strokes = const []}) {
   return Layer.empty(id).copyWith(id: id, strokes: strokes);
 }
@@ -36,10 +34,7 @@ DrawingDocument v2(List<Layer> layers, {int active = 0}) {
 List<String> ids(DrawingDocument d) => d.layers.map((l) => l.id).toList();
 
 void main() {
-  final builders = <String, DocBuilder>{
-    'V1': v1,
-    'multi-page': v2,
-  };
+  final builders = {'V1': v1, 'multi-page': v2};
 
   for (final entry in builders.entries) {
     final build = entry.value;
