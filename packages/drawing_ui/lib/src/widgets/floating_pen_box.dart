@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:drawing_ui/src/theme/chrome_roles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_ui/src/models/models.dart';
-import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
-import 'package:drawing_ui/src/widgets/pen_icon_widget.dart';
+import 'package:drawing_ui/src/theme/chrome_roles.dart';
+import 'package:drawing_ui/src/theme/chrome_tokens.dart';
+import 'package:drawing_ui/src/widgets/floating_pen_box_controls.dart';
+import 'package:drawing_ui/src/widgets/floating_pen_box_slot.dart';
 
 /// Floating pen box that appears on the canvas.
 /// Draggable, collapsible, with edit mode for removing pens.
@@ -29,18 +29,17 @@ class _FloatingPenBoxState extends ConsumerState<FloatingPenBox> {
   bool _isExpanded = true;
   bool _isEditMode = false;
 
-  bool get _shouldOpenHorizontally {
-    final screenWidth = WidgetsBinding
-            .instance.platformDispatcher.views.first.physicalSize.width /
-        WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
-    final x = widget.position.dx;
-    final y = widget.position.dy;
+  static const double _shadowBlur = 10;
+  static const Offset _shadowOffset = Offset(0, 2);
 
-    final isNearLeftEdge = x < 80;
-    final isNearRightEdge = x > screenWidth - 150;
-    final isNearTop = y < 200;
-
-    return !isNearLeftEdge && !isNearRightEdge && isNearTop;
+  Axis get _boxAxis {
+    final view = WidgetsBinding.instance.platformDispatcher.views.first;
+    final screenWidth = view.physicalSize.width / view.devicePixelRatio;
+    final horizontal = penBoxOpensHorizontally(
+      position: widget.position,
+      screenWidth: screenWidth,
+    );
+    return horizontal ? Axis.horizontal : Axis.vertical;
   }
 
   @override
@@ -56,22 +55,23 @@ class _FloatingPenBoxState extends ConsumerState<FloatingPenBox> {
     final content = Container(
       decoration: BoxDecoration(
         color: colorScheme.floatingSurface,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(ChromeRadius.md),
         border: colorScheme.outlinedFloatingBorder,
         boxShadow: [
           BoxShadow(
             color: colorScheme.shadow
                 .withValues(alpha: colorScheme.penBoxShadowAlpha),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
+            blurRadius: _shadowBlur,
+            offset: _shadowOffset,
           ),
         ],
       ),
       child: _isExpanded
-          ? (_shouldOpenHorizontally
-              ? _buildHorizontalExpandedView(activePresets, presets)
-              : _buildVerticalExpandedView(activePresets, presets))
-          : _buildCollapsedView(activePresets.length),
+          ? _buildExpanded(activePresets, presets)
+          : FloatingPenBoxCollapsed(
+              count: activePresets.length,
+              onExpand: () => setState(() => _isExpanded = true),
+            ),
     );
 
     if (!_isExpanded) {
@@ -86,373 +86,56 @@ class _FloatingPenBoxState extends ConsumerState<FloatingPenBox> {
     return content;
   }
 
-  Widget _buildCollapsedView(int count) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return GestureDetector(
-      onTap: () => setState(() => _isExpanded = true),
-      child: SizedBox(
-        width: 40,
-        height: 40,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            PhosphorIcon(
-              ElyanotesIcons.paintBrush,
-              size: 18,
-              color: colorScheme.onSurfaceVariant,
-            ),
-            Positioned(
-              right: 2,
-              bottom: 2,
-              child: Container(
-                width: 14,
-                height: 14,
-                decoration: BoxDecoration(
-                  color: colorScheme.primary,
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Text(
-                    '$count',
-                    style: const TextStyle(
-                      fontSize: 8,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildVerticalExpandedView(
-      List<PenPreset> activePresets, List<PenPreset> allPresets) {
+  Widget _buildExpanded(
+    List<PenPreset> activePresets,
+    List<PenPreset> allPresets,
+  ) {
     final selectedIndex = ref.watch(selectedPresetIndexProvider);
+    final axis = _boxAxis;
 
-    return Column(
+    return Flex(
+      direction: axis,
       mainAxisSize: MainAxisSize.min,
       children: [
-        ...activePresets.asMap().entries.map((entry) {
-          final index = allPresets.indexOf(entry.value);
-          final isSelected = index == selectedIndex;
-          return _VerticalPenSlot(
-            preset: entry.value,
-            isSelected: isSelected,
-            isEditMode: _isEditMode,
-            onTap: () => _onPresetTap(index, entry.value),
-            onDoubleTap: () => _onPresetDoubleTap(entry.value),
-            onDelete: () => _deletePreset(index),
-          );
-        }),
-        _buildBottomBar(),
+        for (final preset in activePresets)
+          _buildSlot(
+            preset: preset,
+            index: allPresets.indexOf(preset),
+            selectedIndex: selectedIndex,
+            axis: axis,
+          ),
+        FloatingPenBoxControls(
+          boxAxis: axis,
+          isEditMode: _isEditMode,
+          onToggleEditMode: () => setState(() => _isEditMode = !_isEditMode),
+          onCollapse: () => setState(() {
+            _isExpanded = false;
+            _isEditMode = false;
+          }),
+        ),
       ],
     );
   }
 
-  Widget _buildHorizontalExpandedView(
-      List<PenPreset> activePresets, List<PenPreset> allPresets) {
-    final selectedIndex = ref.watch(selectedPresetIndexProvider);
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ...activePresets.asMap().entries.map((entry) {
-          final index = allPresets.indexOf(entry.value);
-          final isSelected = index == selectedIndex;
-          return _HorizontalPenSlot(
-            preset: entry.value,
-            isSelected: isSelected,
-            isEditMode: _isEditMode,
-            onTap: () => _onPresetTap(index, entry.value),
-            onDoubleTap: () => _onPresetDoubleTap(entry.value),
-            onDelete: () => _deletePreset(index),
-          );
-        }),
-        _buildRightBar(),
-      ],
-    );
-  }
-
-  Widget _buildBottomBar() {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          GestureDetector(
-            onTap: () => setState(() => _isEditMode = !_isEditMode),
-            child: PhosphorIcon(
-              _isEditMode ? ElyanotesIcons.check : ElyanotesIcons.editPencil,
-              size: 14,
-              color: _isEditMode
-                  ? colorScheme.primary
-                  : colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(width: 12),
-          GestureDetector(
-            onTap: () => setState(() {
-              _isExpanded = false;
-              _isEditMode = false;
-            }),
-            child: PhosphorIcon(
-              ElyanotesIcons.caretUp,
-              size: 16,
-              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildRightBar() {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          GestureDetector(
-            onTap: () => setState(() => _isEditMode = !_isEditMode),
-            child: PhosphorIcon(
-              _isEditMode ? ElyanotesIcons.check : ElyanotesIcons.editPencil,
-              size: 14,
-              color: _isEditMode
-                  ? colorScheme.primary
-                  : colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 8),
-          GestureDetector(
-            onTap: () => setState(() {
-              _isExpanded = false;
-              _isEditMode = false;
-            }),
-            child: PhosphorIcon(
-              ElyanotesIcons.chevronLeft,
-              size: 16,
-              color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _onPresetTap(int index, PenPreset preset) {
-    if (_isEditMode) return;
-    ref.read(selectedPresetIndexProvider.notifier).state = index;
-    ref.read(currentToolProvider.notifier).selectTool(preset.toolType);
-    ref.read(penSettingsProvider(preset.toolType).notifier)
-      ..setColor(preset.color)
-      ..setThickness(preset.thickness)
-      ..setNibShape(preset.nibShape);
-    ref.read(activePanelProvider.notifier).state = null;
-  }
-
-  void _onPresetDoubleTap(PenPreset preset) {
-    if (_isEditMode) return;
-
-    // Highlighter mı pen mi kontrol et ve uygun paneli aç
-    if (preset.toolType == ToolType.highlighter ||
-        preset.toolType == ToolType.neonHighlighter) {
-      ref.read(activePanelProvider.notifier).state = ToolType.highlighter;
-    } else {
-      ref.read(activePanelProvider.notifier).state = preset.toolType;
-    }
-  }
-
-  void _deletePreset(int index) {
-    ref.read(penBoxPresetsProvider.notifier).removePreset(index);
-  }
-}
-
-/// Vertical slot - kalem yatay, uç SAĞA bakıyor
-/// Başlangıçta sadece uç ve şerit görünür, seçilince daha fazla görünür
-class _VerticalPenSlot extends StatelessWidget {
-  const _VerticalPenSlot({
-    required this.preset,
-    required this.isSelected,
-    required this.isEditMode,
-    required this.onTap,
-    required this.onDelete,
-    this.onDoubleTap,
-  });
-
-  final PenPreset preset;
-  final bool isSelected;
-  final bool isEditMode;
-  final VoidCallback onTap;
-  final VoidCallback onDelete;
-  final VoidCallback? onDoubleTap;
-
-  // Görünür alan
-  static const double _slotWidth = 56;
-  static const double _slotHeight = 48;
-
-  // Kalem boyutu
-  static const double _penSize = 50;
-
-  @override
-  Widget build(BuildContext context) {
-    // Seçili: kalem sağa kayar (daha fazla görünür)
-    // Seçili değil: kalem solda (sadece uç ve şerit görünür)
-    final double leftOffset = isSelected ? 6 : -16;
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return GestureDetector(
-      onTap: onTap,
-      onDoubleTap: onDoubleTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        width: _slotWidth,
-        height: _slotHeight,
-        decoration: isSelected
-            ? BoxDecoration(
-                color: colorScheme.primaryContainer.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(8),
-              )
-            : null,
-        child: Stack(
-          clipBehavior: Clip.hardEdge,
-          children: [
-            AnimatedPositioned(
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeOutCubic,
-              left: leftOffset,
-              top: (_slotHeight - _penSize) / 2,
-              width: _penSize,
-              height: _penSize,
-              child: ToolPenIcon(
-                toolType: preset.toolType,
-                color: preset.color,
-                isSelected: false,
-                size: _penSize,
-                orientation: PenOrientation.horizontal,
-              ),
-            ),
-            if (isEditMode)
-              Positioned(
-                right: 2,
-                top: 2,
-                child: GestureDetector(
-                  onTap: onDelete,
-                  child: Container(
-                    width: 14,
-                    height: 14,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.error,
-                      shape: BoxShape.circle,
-                    ),
-                    child: PhosphorIcon(ElyanotesIcons.minus,
-                        size: 10, color: Colors.white),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// Horizontal slot - kalem dikey, uç AŞAĞI bakıyor
-/// Başlangıçta sadece uç ve şerit görünür, seçilince daha fazla görünür
-class _HorizontalPenSlot extends StatelessWidget {
-  const _HorizontalPenSlot({
-    required this.preset,
-    required this.isSelected,
-    required this.isEditMode,
-    required this.onTap,
-    required this.onDelete,
-    this.onDoubleTap,
-  });
-
-  final PenPreset preset;
-  final bool isSelected;
-  final bool isEditMode;
-  final VoidCallback onTap;
-  final VoidCallback onDelete;
-  final VoidCallback? onDoubleTap;
-
-  // Görünür alan
-  static const double _slotWidth = 48;
-  static const double _slotHeight = 56;
-
-  // Kalem boyutu
-  static const double _penSize = 50;
-
-  @override
-  Widget build(BuildContext context) {
-    // Seçili: kalem aşağı kayar (daha fazla görünür)
-    // Seçili değil: kalem yukarıda (sadece uç ve şerit görünür)
-    final double topOffset = isSelected ? 6 : -16;
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return GestureDetector(
-      onTap: onTap,
-      onDoubleTap: onDoubleTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        width: _slotWidth,
-        height: _slotHeight,
-        decoration: isSelected
-            ? BoxDecoration(
-                color: colorScheme.primaryContainer.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(8),
-              )
-            : null,
-        child: Stack(
-          clipBehavior: Clip.hardEdge,
-          children: [
-            AnimatedPositioned(
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeOutCubic,
-              top: topOffset,
-              left: (_slotWidth - _penSize) / 2,
-              width: _penSize,
-              height: _penSize,
-              child: Transform.rotate(
-                angle: 3.14159, // 180° - uç aşağı baksın
-                child: ToolPenIcon(
-                  toolType: preset.toolType,
-                  color: preset.color,
-                  isSelected: false,
-                  size: _penSize,
-                  orientation: PenOrientation.vertical,
-                ),
-              ),
-            ),
-            if (isEditMode)
-              Positioned(
-                right: 2,
-                bottom: 2,
-                child: GestureDetector(
-                  onTap: onDelete,
-                  child: Container(
-                    width: 14,
-                    height: 14,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.error,
-                      shape: BoxShape.circle,
-                    ),
-                    child: PhosphorIcon(ElyanotesIcons.minus,
-                        size: 10, color: Colors.white),
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
+  Widget _buildSlot({
+    required PenPreset preset,
+    required int index,
+    required int selectedIndex,
+    required Axis axis,
+  }) {
+    final actions = ref.read(penBoxActionsProvider);
+    return FloatingPenBoxSlot(
+      preset: preset,
+      boxAxis: axis,
+      isSelected: index == selectedIndex,
+      isEditMode: _isEditMode,
+      onTap: () {
+        if (!_isEditMode) actions.selectPreset(index);
+      },
+      onDoubleTap: () {
+        if (!_isEditMode) actions.openEditor(preset);
+      },
+      onDelete: () => actions.deletePreset(index),
     );
   }
 }

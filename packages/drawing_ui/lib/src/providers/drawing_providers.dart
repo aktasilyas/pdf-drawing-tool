@@ -7,4 +7,5 @@ export 'shapes_settings_provider.dart';
 export 'lasso_settings_provider.dart';
 export 'laser_settings_provider.dart';
 export 'quick_access_providers.dart';
+export 'pen_box_actions.dart';
 export 'pen_box_presets_provider.dart';
