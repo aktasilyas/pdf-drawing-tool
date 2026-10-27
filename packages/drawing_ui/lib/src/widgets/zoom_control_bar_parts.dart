@@ -39,9 +39,8 @@ class ZoomBarIconButton extends StatelessWidget {
             child: PhosphorIcon(
               icon,
               size: ElyanotesIcons.actionSize,
-              color: isActive
-                  ? Colors.white
-                  : Colors.white.withValues(alpha: 0.6),
+              color:
+                  isActive ? Colors.white : Colors.white.withValues(alpha: 0.6),
             ),
           ),
         ),

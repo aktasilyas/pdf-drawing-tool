@@ -33,44 +33,44 @@ class FloatingPenBoxCollapsed extends StatelessWidget {
       label: 'Kalem kutusu, $count kalem',
       excludeSemantics: true,
       child: GestureDetector(
-      onTap: onExpand,
-      child: SizedBox(
-        width: _size,
-        height: _size,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            PhosphorIcon(
-              ElyanotesIcons.paintBrush,
-              size: _iconSize,
-              color: colorScheme.onSurfaceVariant,
-            ),
-            Positioned(
-              right: ChromeSpacing.xxs,
-              bottom: ChromeSpacing.xxs,
-              child: Container(
-                width: _badgeSize,
-                height: _badgeSize,
-                decoration: BoxDecoration(
-                  color: colorScheme.primary,
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Text(
-                    '$count',
-                    // Moved as-is; token migration is tracked separately.
-                    style: const TextStyle(
-                      fontSize: _badgeFontSize,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
+        onTap: onExpand,
+        child: SizedBox(
+          width: _size,
+          height: _size,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              PhosphorIcon(
+                ElyanotesIcons.paintBrush,
+                size: _iconSize,
+                color: colorScheme.onSurfaceVariant,
+              ),
+              Positioned(
+                right: ChromeSpacing.xxs,
+                bottom: ChromeSpacing.xxs,
+                child: Container(
+                  width: _badgeSize,
+                  height: _badgeSize,
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Text(
+                      '$count',
+                      // Moved as-is; token migration is tracked separately.
+                      style: const TextStyle(
+                        fontSize: _badgeFontSize,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
       ),
     );
   }
