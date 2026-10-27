@@ -31,8 +31,11 @@ void main() {
     return dir.existsSync() ? dir.listSync() : [];
   }
 
-  Future<PDFImportServiceResult> importWith(Object error) async {
-    final file = File('${src.path}/a.pdf')..writeAsBytesSync([1, 2, 3]);
+  Future<PDFImportServiceResult> importWith(
+    Object error, {
+    List<int> bytes = const [1, 2, 3],
+  }) async {
+    final file = File('${src.path}/a.pdf')..writeAsBytesSync(bytes);
     final service = PDFImportService(
       loader: PDFLoader(openFile: (_) async => throw error),
     );
@@ -61,5 +64,34 @@ void main() {
     expect(r.errorMessage, contains('bozuk'));
     expect(r.errorMessage, isNot(contains('PlatformException')));
     expect(stored(), isEmpty);
+  });
+
+  test('encrypted PDF: password message despite a generic error', () async {
+    final encrypted = '%PDF-1.7\ntrailer << /Encrypt 5 0 R >>'.codeUnits;
+    final r = await importWith(
+      PlatformException(code: 'PDF_RENDER', message: "Can't open file"),
+      bytes: encrypted,
+    );
+    expect(r.isSuccess, isFalse);
+    expect(r.errorMessage, contains('parola korumalı'));
+    expect(stored(), isEmpty);
+  });
+
+  group('pdfFileLooksEncrypted', () {
+    Future<bool> sniff(List<int> bytes) {
+      final file = File('${src.path}/s.pdf')..writeAsBytesSync(bytes);
+      return pdfFileLooksEncrypted(file.path);
+    }
+
+    test('finds /Encrypt in the trailer', () async {
+      final hit = await sniff('%PDF-1.4 << /Encrypt 3 0 R >>'.codeUnits);
+      expect(hit, isTrue);
+    });
+
+    test('is false for a plain PDF and for a missing file', () async {
+      final miss = await sniff('%PDF-1.4 << /Root 1 0 R >>'.codeUnits);
+      expect(miss, isFalse);
+      expect(await pdfFileLooksEncrypted('${src.path}/missing.pdf'), isFalse);
+    });
   });
 }

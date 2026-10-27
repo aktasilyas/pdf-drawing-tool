@@ -16,6 +16,7 @@ export 'pdf_vector_shapes.dart';
 export 'pdf_loader.dart';
 export 'pdf_page_renderer.dart';
 export 'pdf_render_queue.dart';
+export 'pdf_share_service.dart';
 export 'pdf_to_page_converter.dart';
 export 'preloading_strategy.dart';
 export 'raster_pdf_renderer.dart';
