@@ -73,6 +73,26 @@ class TemplatePatternPainter extends CustomPainter
     );
   }
 
+  /// Builds a painter for a page background (transparent fill, the canvas
+  /// paints the page color). [lineWidthScale] multiplies the line width (zoom).
+  factory TemplatePatternPainter.fromBackground(
+    PageBackground bg, {
+    required Color lineColor,
+    required Size pageSize,
+    double lineWidthScale = 1,
+  }) {
+    assert(bg.templatePattern != null, 'templatePattern must not be null');
+    return TemplatePatternPainter(
+      pattern: bg.templatePattern!,
+      spacingMm: bg.templateSpacingMm ?? 8.0,
+      lineWidth: (bg.templateLineWidth ?? 0.5) * lineWidthScale,
+      lineColor: lineColor,
+      backgroundColor: Colors.transparent,
+      pageSize: pageSize,
+      extraData: bg.templateExtraData,
+    );
+  }
+
   @override
   void paint(Canvas canvas, Size size) {
     // Arka plan

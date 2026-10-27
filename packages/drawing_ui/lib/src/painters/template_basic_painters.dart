@@ -110,9 +110,14 @@ mixin TemplateBasicPainters {
   }
 
   void drawCornell(Canvas canvas, Size size) {
-    final marginLeft = extraData?['marginLeft'] as double? ?? size.width * 0.3;
-    final marginBottom =
-        extraData?['marginBottom'] as double? ?? size.height * 0.2;
+    final leftRatio = (extraData?['leftMarginRatio'] as num?)?.toDouble();
+    final bottomRatio = (extraData?['bottomSummaryRatio'] as num?)?.toDouble();
+    final marginLeft = leftRatio != null
+        ? size.width * leftRatio
+        : (extraData?['marginLeft'] as num?)?.toDouble() ?? size.width * 0.3;
+    final marginBottom = bottomRatio != null
+        ? size.height * bottomRatio
+        : (extraData?['marginBottom'] as num?)?.toDouble() ?? size.height * 0.2;
 
     // Cue column
     canvas.drawLine(
