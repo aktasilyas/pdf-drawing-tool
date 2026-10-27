@@ -26,7 +26,8 @@ class EraserSettingsPanel extends ConsumerWidget {
     final active =
         _eraserTools.contains(currentTool) ? currentTool : ToolType.pixelEraser;
     final settings = ref.watch(eraserSettingsProvider);
-    final showSizeSlider = settings.mode != EraserMode.lasso;
+    final mode = ref.watch(activeEraserModeProvider);
+    final showSizeSlider = mode != EraserMode.lasso;
     final palette = ChromePalette.of(context);
 
     return Padding(
@@ -39,15 +40,13 @@ class EraserSettingsPanel extends ConsumerWidget {
             title: _titleForMode(active),
             onClose: () => ref.read(activePanelProvider.notifier).state = null,
           ),
-          EraserPreview(mode: settings.mode, size: settings.size),
+          EraserPreview(mode: mode, size: settings.size),
           const SizedBox(height: ChromeSpacing.sm),
           EraserTypeSelector(
             selectedType: active,
-            onTypeSelected: (t) {
-              ref.read(currentToolProvider.notifier).selectTool(t);
-              final mode = _toolTypeToMode(t);
-              ref.read(eraserSettingsProvider.notifier).setMode(mode);
-            },
+            // Selecting the tool also syncs the eraser mode (#237).
+            onTypeSelected: (t) =>
+                ref.read(currentToolProvider.notifier).selectTool(t),
           ),
           const ChromeHairline(),
           if (showSizeSlider)
@@ -96,15 +95,6 @@ class EraserSettingsPanel extends ConsumerWidget {
       ToolType.strokeEraser => 'Çizgi Silgisi',
       ToolType.lassoEraser => 'Kement Silgisi',
       _ => 'Silgi',
-    };
-  }
-
-  static EraserMode _toolTypeToMode(ToolType t) {
-    return switch (t) {
-      ToolType.pixelEraser => EraserMode.pixel,
-      ToolType.strokeEraser => EraserMode.stroke,
-      ToolType.lassoEraser => EraserMode.lasso,
-      _ => EraserMode.pixel,
     };
   }
 

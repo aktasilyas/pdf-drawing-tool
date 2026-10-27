@@ -10,7 +10,7 @@ export 'package:drawing_ui/src/providers/drawing_providers.dart'
 
 /// Eraser mode state - stroke, pixel veya lasso (backward compatibility)
 final eraserModeProvider = StateProvider<dp.EraserMode>((ref) {
-  return ref.watch(dp.eraserSettingsProvider).mode;
+  return ref.watch(dp.activeEraserModeProvider);
 });
 
 /// Eraser size state (piksel cinsinden) (backward compatibility)
