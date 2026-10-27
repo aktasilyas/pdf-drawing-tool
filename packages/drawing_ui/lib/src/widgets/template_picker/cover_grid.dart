@@ -67,97 +67,105 @@ class _CoverCard extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isSelected ? cs.primary : cs.outline.withValues(alpha: 0.2),
-            width: isSelected ? 2 : 1,
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: cover.name,
+      excludeSemantics: true,
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color:
+                  isSelected ? cs.primary : cs.outline.withValues(alpha: 0.2),
+              width: isSelected ? 2 : 1,
+            ),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: cs.primary.withValues(alpha: 0.25),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : null,
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: cs.primary.withValues(alpha: 0.25),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
-        ),
-        child: Stack(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(7),
-              child: CoverPreviewWidget(
-                cover: cover,
-                showBorder: false,
+          child: Stack(
+            children: [
+              ClipRRect(
                 borderRadius: BorderRadius.circular(7),
+                child: CoverPreviewWidget(
+                  cover: cover,
+                  showBorder: false,
+                  borderRadius: BorderRadius.circular(7),
+                ),
               ),
-            ),
-            if (cover.isPremium)
+              if (cover.isPremium)
+                Positioned(
+                  top: 4,
+                  right: 4,
+                  child: Container(
+                    padding: const EdgeInsets.all(3),
+                    decoration: BoxDecoration(
+                      color: cs.surfaceContainerHighest.withValues(alpha: 0.9),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: PhosphorIcon(ElyanotesIcons.lock,
+                        size: 12, color: cs.onSurfaceVariant),
+                  ),
+                ),
               Positioned(
-                top: 4,
-                right: 4,
+                left: 0,
+                right: 0,
+                bottom: 0,
                 child: Container(
-                  padding: const EdgeInsets.all(3),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
                   decoration: BoxDecoration(
-                    color: cs.surfaceContainerHighest.withValues(alpha: 0.9),
-                    borderRadius: BorderRadius.circular(4),
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.transparent,
+                        cs.surface.withValues(alpha: 0.95),
+                      ],
+                    ),
+                    borderRadius:
+                        const BorderRadius.vertical(bottom: Radius.circular(7)),
                   ),
-                  child: PhosphorIcon(ElyanotesIcons.lock,
-                      size: 12, color: cs.onSurfaceVariant),
+                  child: Text(
+                    cover.name,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      fontSize: 10,
+                      color: cs.onSurface,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.normal,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
               ),
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      cs.surface.withValues(alpha: 0.95),
-                    ],
+              if (isSelected)
+                Positioned(
+                  top: 4,
+                  left: 4,
+                  child: Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: cs.primary,
+                      shape: BoxShape.circle,
+                    ),
+                    child: PhosphorIcon(ElyanotesIcons.check,
+                        size: 10, color: cs.onPrimary),
                   ),
-                  borderRadius:
-                      const BorderRadius.vertical(bottom: Radius.circular(7)),
                 ),
-                child: Text(
-                  cover.name,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    fontSize: 10,
-                    color: cs.onSurface,
-                    fontWeight:
-                        isSelected ? FontWeight.w600 : FontWeight.normal,
-                  ),
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ),
-            if (isSelected)
-              Positioned(
-                top: 4,
-                left: 4,
-                child: Container(
-                  padding: const EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    color: cs.primary,
-                    shape: BoxShape.circle,
-                  ),
-                  child: PhosphorIcon(ElyanotesIcons.check,
-                      size: 10, color: cs.onPrimary),
-                ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );

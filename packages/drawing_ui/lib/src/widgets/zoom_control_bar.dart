@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
+import 'package:drawing_ui/src/widgets/zoom_control_bar_parts.dart';
 
 /// Centered zoom overlay shown during and briefly after pinch zoom.
 ///
@@ -141,44 +142,52 @@ class _ZoomControlBarState extends ConsumerState<ZoomControlBar>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _BarIconButton(
+          ZoomBarIconButton(
             icon:
                 isLocked ? ElyanotesIcons.lockFilled : ElyanotesIcons.lockOpen,
+            label: 'Yakınlaştırma kilidi',
             isActive: isLocked,
             onTap: () => _onIconTap(
               () => ref.read(zoomLockedProvider.notifier).state = !isLocked,
             ),
           ),
-          GestureDetector(
-            onTap: _toggleDropdown,
-            behavior: HitTestBehavior.opaque,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    '$percentage%',
-                    style: textTheme.headlineMedium?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 1,
+          Semantics(
+            button: true,
+            expanded: _isDropdownOpen,
+            label: 'Yakınlaştırma $percentage%, favori düzeyler',
+            excludeSemantics: true,
+            child: GestureDetector(
+              onTap: _toggleDropdown,
+              behavior: HitTestBehavior.opaque,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '$percentage%',
+                      style: textTheme.headlineMedium?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 4),
-                  PhosphorIcon(
-                    _isDropdownOpen
-                        ? ElyanotesIcons.caretUp
-                        : ElyanotesIcons.caretDown,
-                    size: 14,
-                    color: Colors.white.withValues(alpha: 0.6),
-                  ),
-                ],
+                    const SizedBox(width: 4),
+                    PhosphorIcon(
+                      _isDropdownOpen
+                          ? ElyanotesIcons.caretUp
+                          : ElyanotesIcons.caretDown,
+                      size: 14,
+                      color: Colors.white.withValues(alpha: 0.6),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-          _BarIconButton(
+          ZoomBarIconButton(
             icon: isFavorite ? ElyanotesIcons.starFilled : ElyanotesIcons.star,
+            label: 'Favori yakınlaştırma',
             isActive: isFavorite,
             onTap: () => _onIconTap(
               () => ref
@@ -209,40 +218,44 @@ class _ZoomControlBarState extends ConsumerState<ZoomControlBar>
 
   Widget _buildDropdownItem(int zoomPercent, bool isActive) {
     final textTheme = Theme.of(context).textTheme;
-    return GestureDetector(
-      onTap: () => _goToFavorite(zoomPercent),
-      behavior: HitTestBehavior.opaque,
-      child: SizedBox(
-        height: 48,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(
-                width: 16,
-                child: isActive
-                    ? const PhosphorIcon(
-                        ElyanotesIcons.check,
-                        size: 14,
-                        color: Colors.white,
-                      )
-                    : null,
-              ),
-              const SizedBox(width: 12),
-              Text(
-                '$zoomPercent%',
-                style: isActive
-                    ? textTheme.titleMedium?.copyWith(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      )
-                    : textTheme.bodyLarge?.copyWith(
-                        color: Colors.white,
-                      ),
-              ),
-            ],
+    return Semantics(
+      button: true,
+      selected: isActive,
+      child: GestureDetector(
+        onTap: () => _goToFavorite(zoomPercent),
+        behavior: HitTestBehavior.opaque,
+        child: SizedBox(
+          height: 48,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  width: 16,
+                  child: isActive
+                      ? const PhosphorIcon(
+                          ElyanotesIcons.check,
+                          size: 14,
+                          color: Colors.white,
+                        )
+                      : null,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  '$zoomPercent%',
+                  style: isActive
+                      ? textTheme.titleMedium?.copyWith(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        )
+                      : textTheme.bodyLarge?.copyWith(
+                          color: Colors.white,
+                        ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -260,37 +273,4 @@ class _ZoomControlBarState extends ConsumerState<ZoomControlBar>
       ),
     ],
   );
-}
-
-/// Icon button used in the zoom overlay bar.
-class _BarIconButton extends StatelessWidget {
-  const _BarIconButton({
-    required this.icon,
-    required this.isActive,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final bool isActive;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: SizedBox(
-        width: 48,
-        height: 48,
-        child: Center(
-          child: PhosphorIcon(
-            icon,
-            size: ElyanotesIcons.actionSize,
-            color:
-                isActive ? Colors.white : Colors.white.withValues(alpha: 0.6),
-          ),
-        ),
-      ),
-    );
-  }
 }
