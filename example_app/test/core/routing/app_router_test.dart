@@ -115,4 +115,25 @@ void main() {
       expect(find.text('login-screen'), findsOneWidget);
     });
   });
+
+  group('unknown paths', () {
+    for (final path in ['/trash', '/does-not-exist']) {
+      testWidgets('$path lands on the library', (tester) async {
+        final router = GoRouter(
+          initialLocation: path,
+          routes: [
+            GoRoute(
+              path: RouteNames.documents,
+              builder: (_, __) => const Text('documents-screen'),
+            ),
+          ],
+          errorBuilder: libraryFallbackBuilder,
+        );
+        addTearDown(router.dispose);
+        await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+        await tester.pumpAndSettle();
+        expect(find.text('documents-screen'), findsOneWidget);
+      });
+    }
+  });
 }
