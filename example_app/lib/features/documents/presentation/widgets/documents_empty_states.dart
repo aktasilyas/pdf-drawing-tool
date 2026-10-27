@@ -1,7 +1,6 @@
 /// ElyaNotes Documents Empty States
 ///
-/// Çeşitli bölümler için boş durum widget'ları.
-/// Tüm empty state'ler AppEmptyState widget'ını kullanır.
+/// Empty-state widgets for the library sections.
 library;
 
 import 'package:drawing_core/drawing_core.dart' show CoverFamily;
@@ -13,17 +12,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
+import 'package:example_app/l10n/l10n.dart';
 
-/// Tüm Notlar bölümü boş durumu
+/// Empty state of the "All notes" section.
 class DocumentsEmptyState extends StatelessWidget {
   const DocumentsEmptyState({super.key, this.onCreateNew});
 
-  /// Shows the "Yeni not" call to action when non-null.
+  /// Shows the "New note" call to action when non-null.
   final VoidCallback? onCreateNew;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
+    final l10n = context.l10n;
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.xl),
@@ -40,14 +41,14 @@ class DocumentsEmptyState extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.xl),
               Text(
-                'Henüz not yok',
+                l10n.libraryEmptyTitle,
                 style: AppTypography.headlineMedium
                     .copyWith(color: palette.textPrimary),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                'Yeni bir defter oluşturun ya da bir PDF içe aktarın.',
+                l10n.libraryEmptyMessage,
                 style:
                     AppTypography.bodyMedium.copyWith(color: palette.textMuted),
                 textAlign: TextAlign.center,
@@ -59,7 +60,7 @@ class DocumentsEmptyState extends StatelessWidget {
                     minHeight: AppSpacing.minTouchTarget,
                   ),
                   child: AppButton(
-                    label: 'Yeni not',
+                    label: l10n.libraryEmptyAction,
                     leadingIcon: ElyanotesIcons.libraryPlus,
                     onPressed: onCreateNew,
                   ),
@@ -73,50 +74,52 @@ class DocumentsEmptyState extends StatelessWidget {
   }
 }
 
-/// Favoriler bölümü boş durumu
+/// Empty state of the favorites section.
 class FavoritesEmptyState extends StatelessWidget {
   const FavoritesEmptyState({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const AppEmptyState(
+    final l10n = context.l10n;
+    return AppEmptyState(
       icon: Icons.star_outline,
-      title: 'Favori not yok',
-      description:
-          'Notlarınızı favorilere eklemek için yıldız ikonuna tıklayın',
+      title: l10n.libraryEmptyFavoritesTitle,
+      description: l10n.libraryEmptyFavoritesMessage,
     );
   }
 }
 
-/// Klasör bölümü boş durumu
+/// Empty state of a folder.
 class FolderEmptyState extends StatelessWidget {
   const FolderEmptyState({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const AppEmptyState(
+    final l10n = context.l10n;
+    return AppEmptyState(
       icon: Icons.folder_open,
-      title: 'Bu klasör boş',
-      description: 'Notlarınızı buraya taşıyın veya yeni not oluşturun',
+      title: l10n.libraryEmptyFolderTitle,
+      description: l10n.libraryEmptyFolderMessage,
     );
   }
 }
 
-/// Çöp Kutusu bölümü boş durumu
+/// Empty state of the trash.
 class TrashEmptyState extends StatelessWidget {
   const TrashEmptyState({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const AppEmptyState(
+    final l10n = context.l10n;
+    return AppEmptyState(
       icon: Icons.delete_outline,
-      title: 'Çöp kutusu boş',
-      description: 'Silinen notlar burada görünecek',
+      title: l10n.libraryTrashEmptyTitle,
+      description: l10n.libraryTrashEmptyMessage,
     );
   }
 }
 
-/// Arama sonucu boş durumu
+/// Empty search result.
 class DocumentsEmptySearchResult extends ConsumerWidget {
   final String query;
 
@@ -127,6 +130,7 @@ class DocumentsEmptySearchResult extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.xxl),
@@ -140,7 +144,7 @@ class DocumentsEmptySearchResult extends ConsumerWidget {
             ),
             const SizedBox(height: AppSpacing.xl),
             Text(
-              'Sonuç bulunamadı',
+              l10n.libraryNoResultsTitle,
               style: AppTypography.headlineSmall.copyWith(
                 color: context.palette.textPrimary,
               ),
@@ -148,7 +152,7 @@ class DocumentsEmptySearchResult extends ConsumerWidget {
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
-              '"$query" için eşleşen not bulunamadı',
+              l10n.libraryNoResultsMessage(query),
               style: AppTypography.bodyMedium.copyWith(
                 color: context.palette.textMuted,
               ),
@@ -156,7 +160,7 @@ class DocumentsEmptySearchResult extends ConsumerWidget {
             ),
             const SizedBox(height: AppSpacing.xl),
             AppButton(
-              label: 'Aramayı temizle',
+              label: l10n.libraryClearSearch,
               variant: AppButtonVariant.outline,
               size: AppButtonSize.medium,
               leadingIcon: ElyanotesIcons.libraryClose,

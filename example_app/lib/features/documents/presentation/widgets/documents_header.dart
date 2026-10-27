@@ -1,4 +1,4 @@
-/// ElyaNotes Documents Header - title, search, sort/view/select and "Yeni".
+/// ElyaNotes Documents Header - title, search, sort/view/select and "New".
 ///
 /// Layout depends on the content pane width: `wide` (>= 720) is one row,
 /// `compact` is two rows (docs/specs/51-library-screen.md §3).
@@ -14,6 +14,7 @@ import 'package:example_app/features/documents/presentation/providers/documents_
 import 'package:example_app/features/documents/presentation/widgets/library_header_parts.dart';
 import 'package:example_app/features/documents/presentation/widgets/selection_mode_header.dart';
 import 'package:example_app/features/premium/premium.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 class DocumentsHeader extends ConsumerWidget {
   /// Pane width from which the one-row layout is used.
@@ -119,18 +120,18 @@ class DocumentsHeader extends ConsumerWidget {
         );
   }
 
-  Widget _sidebarToggle() => AppIconButton(
+  Widget _sidebarToggle(BuildContext context) => AppIconButton(
         icon: ElyanotesIcons.librarySidebar,
         variant: AppIconButtonVariant.ghost,
-        tooltip: 'Kenar çubuğunu aç',
+        tooltip: context.l10n.libraryOpenSidebar,
         onPressed: onSidebarToggle,
       );
 
-  Widget _settings() => AppIconButton(
+  Widget _settings(BuildContext context) => AppIconButton(
         icon: ElyanotesIcons.librarySettings,
         variant: AppIconButtonVariant.ghost,
         size: AppIconButtonSize.small,
-        tooltip: 'Ayarlar',
+        tooltip: context.l10n.settingsTitle,
         onPressed: onSettingsTap,
       );
 
@@ -163,7 +164,7 @@ class DocumentsHeader extends ConsumerWidget {
           if (isTrashSection) _trashInfo(),
           Row(
             children: [
-              if (onSidebarToggle != null) _sidebarToggle(),
+              if (onSidebarToggle != null) _sidebarToggle(context),
               Expanded(
                 child: _titleWidget(context, AppTypography.displayMedium),
               ),
@@ -179,7 +180,7 @@ class DocumentsHeader extends ConsumerWidget {
                 sortOption: sortOption,
                 onSortChanged: onSortChanged,
               ),
-              if (onSettingsTap != null) _settings(),
+              if (onSettingsTap != null) _settings(context),
               if (!isTrashSection) ...[
                 const SizedBox(width: AppSpacing.md),
                 _newButton(compact: false, isLocked: isLocked),
@@ -204,16 +205,16 @@ class DocumentsHeader extends ConsumerWidget {
                 AppIconButton(
                   icon: ElyanotesIcons.libraryMenu,
                   variant: AppIconButtonVariant.ghost,
-                  tooltip: 'Menü',
+                  tooltip: context.l10n.commonMenu,
                   onPressed: onMenuTap,
                 ),
-              if (onSidebarToggle != null) _sidebarToggle(),
+              if (onSidebarToggle != null) _sidebarToggle(context),
               if (onMenuTap == null && onSidebarToggle == null)
                 const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: _titleWidget(context, AppTypography.headlineLarge),
               ),
-              if (onSettingsTap != null) _settings(),
+              if (onSettingsTap != null) _settings(context),
               if (!isTrashSection)
                 _newButton(compact: true, isLocked: isLocked),
             ],

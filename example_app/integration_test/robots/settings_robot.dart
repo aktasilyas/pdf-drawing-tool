@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:example_app/features/settings/settings.dart';
 
+import '../helpers/l10n.dart';
 import '../helpers/pump_helpers.dart';
 
 /// Page object for the Settings screen (all feature flags off).
@@ -45,9 +46,9 @@ class SettingsRobot {
         matching: find.byType(SegmentedButton<CanvasDarkMode>),
       );
 
-  /// Library header gear button ("Ayarlar").
+  /// Library header gear button ("Settings").
   Future<void> open() async {
-    await tester.tapAndWait(find.byTooltip('Ayarlar'));
+    await tester.tapAndWait(find.byTooltip(tester.l10n.settingsTitle));
     await tester.pumpUntilFound(screen);
   }
 

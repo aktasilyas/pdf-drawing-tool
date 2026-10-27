@@ -9,6 +9,7 @@ import 'package:example_app/features/documents/presentation/widgets/document_lis
 import 'package:example_app/features/documents/presentation/widgets/folder_list_tile.dart';
 import 'package:example_app/features/documents/presentation/widgets/library_grid_metrics.dart';
 import 'package:example_app/features/documents/presentation/widgets/library_list_row.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// Combined list view showing folders then documents.
 class DocumentsCombinedListView extends ConsumerWidget {
@@ -31,13 +32,14 @@ class DocumentsCombinedListView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final pad = LibraryGridMetrics.paneHorizontalPadding(
       Responsive.isPhone(context),
     );
 
     final children = <Widget>[
       if (folders.isNotEmpty) ...[
-        const _SectionHeader(label: 'Klasörler', isFirst: true),
+        _SectionHeader(label: l10n.libraryFolders, isFirst: true),
         for (var i = 0; i < folders.length; i++)
           _Row(
             showDivider: i < folders.length - 1,
@@ -49,7 +51,10 @@ class DocumentsCombinedListView extends ConsumerWidget {
           ),
       ],
       if (documents.isNotEmpty) ...[
-        _SectionHeader(label: 'Belgeler', isFirst: folders.isEmpty),
+        _SectionHeader(
+          label: l10n.libraryDocuments,
+          isFirst: folders.isEmpty,
+        ),
         for (var i = 0; i < documents.length; i++)
           _Row(
             showDivider: i < documents.length - 1,

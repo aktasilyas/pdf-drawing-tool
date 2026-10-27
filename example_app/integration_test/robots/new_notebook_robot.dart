@@ -11,6 +11,7 @@ import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/screens/documents_screen.dart';
 import 'package:example_app/features/documents/presentation/widgets/cover_grid.dart';
+import 'package:example_app/features/documents/presentation/widgets/library_header_parts.dart';
 import 'package:example_app/features/documents/presentation/widgets/template_grid.dart';
 import 'package:example_app/features/documents/presentation/widgets/template_preview_card.dart';
 
@@ -36,7 +37,7 @@ class NewNotebookRobot {
     required Cover cover,
     required Template template,
   }) async {
-    await tester.tapAndWait(find.byTooltip('Yeni Belge'));
+    await tester.tapAndWait(find.byType(LibraryNewButton));
     await tester.tapAndWait(find.text('Not Defteri'));
 
     // Preview cards: cover first (the cover switch is on by default), paper

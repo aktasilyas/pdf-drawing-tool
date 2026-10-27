@@ -168,5 +168,110 @@
   "libraryFolderFallback": "Folder",
   "libraryPaperSquare": "Square",
   "libraryPaperWide": "Widescreen",
-  "libraryPaperCustom": "Custom"
+  "libraryPaperCustom": "Custom",
+  "libraryBreadcrumbRoot": "Library",
+  "libraryFolders": "Folders",
+  "libraryDocuments": "Documents",
+  "libraryManage": "Manage",
+  "libraryNewFolder": "New folder",
+  "libraryNoFolders": "No folders",
+  "librarySidebarCollapse": "Collapse",
+  "libraryOpenSidebar": "Open sidebar",
+  "librarySearchHint": "Search...",
+  "libraryListView": "List view",
+  "libraryGridView": "Grid view",
+  "librarySelectMode": "Select",
+  "libraryNewDocument": "New document",
+  "libraryNewDocumentLocked": "Document limit reached",
+  "libraryNew": "New",
+  "libraryTrashInfo": "Deleted notes are permanently removed after 30 days",
+  "libraryEmptyTrash": "Empty trash",
+  "libraryEmptyTrashConfirmMessage": "Everything in the trash will be deleted permanently. This can't be undone.",
+  "libraryEmptyTrashConfirm": "Empty",
+  "libraryTrashEmptied": "Trash emptied",
+  "libraryOpenFailed": "Couldn't open the notebook",
+  "libraryTrashCountsTowardsLimit": "Notes in the trash count towards the limit. Delete them permanently to free up space, or",
+  "libraryRemainingDocuments": "{count, plural, =1{1 document left} other{{count} documents left}}",
+  "@libraryRemainingDocuments": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "librarySortTitle": "Sort",
+  "librarySortNewestFirst": "Newest first",
+  "librarySortOldestFirst": "Oldest first",
+  "libraryEmptyTitle": "No notes yet",
+  "libraryEmptyMessage": "Create a notebook or import a PDF.",
+  "libraryEmptyAction": "New note",
+  "libraryEmptyFavoritesTitle": "No favorite notes",
+  "libraryEmptyFavoritesMessage": "Tap the star icon to add notes to your favorites",
+  "libraryEmptyFolderTitle": "This folder is empty",
+  "libraryEmptyFolderMessage": "Move notes here or create a new one",
+  "libraryTrashEmptyTitle": "Trash is empty",
+  "libraryTrashEmptyMessage": "Deleted notes will appear here",
+  "libraryNoResultsTitle": "No results",
+  "libraryNoResultsMessage": "No notes match \"{query}\"",
+  "@libraryNoResultsMessage": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryClearSearch": "Clear search",
+  "librarySelectedCount": "{count} selected",
+  "@librarySelectedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "librarySelectAll": "All",
+  "libraryDeleteForever": "Delete permanently",
+  "libraryDeleteForeverTitle": "Delete permanently?",
+  "libraryDeleteDocumentsTitle": "Delete notes",
+  "libraryDocumentLimitReached": "Document limit reached",
+  "libraryDocumentsCopied": "{count, plural, =1{1 document duplicated} other{{count} documents duplicated}}",
+  "@libraryDocumentsCopied": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "libraryDocumentsTrashed": "{count, plural, =1{1 document moved to the trash} other{{count} documents moved to the trash}}",
+  "@libraryDocumentsTrashed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "libraryDocumentsDeleted": "{count, plural, =1{1 document deleted} other{{count} documents deleted}}",
+  "@libraryDocumentsDeleted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "libraryDeleteDocumentsForeverMessage": "{count, plural, =1{1 document will be deleted permanently. This can't be undone.} other{{count} documents will be deleted permanently. This can't be undone.}}",
+  "@libraryDeleteDocumentsForeverMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "libraryTrashDocumentsMessage": "{count, plural, =1{1 document will be moved to the trash.} other{{count} documents will be moved to the trash.}}",
+  "@libraryTrashDocumentsMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }
