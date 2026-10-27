@@ -1,9 +1,11 @@
 import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension
+import com.google.gms.googleservices.GoogleServicesPlugin.MissingGoogleServicesStrategy
 import java.util.Properties
 
 plugins {
     id("com.android.application")
     id("kotlin-android")
+    id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
@@ -31,6 +33,15 @@ val hasReleaseSigning =
     listOf(releaseStoreFile, releaseStorePassword, releaseKeyAlias, releaseKeyPassword)
         .all { !it.isNullOrBlank() }
 val requireReleaseSigning = System.getenv("ELYANOTES_REQUIRE_RELEASE_SIGNING") == "true"
+
+// Firebase native config (#215): written by scripts/release-secrets.sh from the
+// FIREBASE_* secrets, git-ignored, absent in local and PR builds. Without it the
+// google-services plugin only warns and no Crashlytics upload is attempted.
+val hasGoogleServices = file("google-services.json").exists()
+
+googleServices {
+    missingGoogleServicesStrategy = MissingGoogleServicesStrategy.WARN
+}
 
 android {
     namespace = "com.aktasilyas.elyanotes"
@@ -88,12 +99,11 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            // No automatic mapping/symbol uploads: they need Firebase credentials in
-            // every build. Release builds are obfuscated (--obfuscate, #192), so the
-            // release workflow keeps mapping.txt and the Dart symbols as artifacts and
-            // they are uploaded to Crashlytics by hand (docs/store/release-checklist.md).
+            // R8 mapping.txt is uploaded to Crashlytics automatically when Firebase
+            // config is present (#215). Dart code is not obfuscated, so Dart stacks
+            // are readable without symbols; there is no native code of our own.
             configure<CrashlyticsExtension> {
-                mappingFileUploadEnabled = false
+                mappingFileUploadEnabled = hasGoogleServices
                 nativeSymbolUploadEnabled = false
             }
         }

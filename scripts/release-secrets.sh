@@ -48,7 +48,19 @@ if [ "$present" -eq ${#firebase[@]} ]; then
     --arg p "$FIREBASE_PROJECT_ID" --arg s "$FIREBASE_MESSAGING_SENDER_ID" \
     '{FIREBASE_API_KEY: $k, FIREBASE_APP_ID: $a, FIREBASE_PROJECT_ID: $p, FIREBASE_MESSAGING_SENDER_ID: $s}' \
     >example_app/config/firebase.json
-  echo "Firebase config written (crash reporting on)."
+  # Native config for the google-services plugin, which the Crashlytics Gradle
+  # plugin needs to upload mapping.txt (#215). No storage bucket / database URL:
+  # the Dart FirebaseOptions do not carry them (FlutterFire compares them).
+  jq -n \
+    --arg k "$FIREBASE_API_KEY" --arg a "$FIREBASE_APP_ID" \
+    --arg p "$FIREBASE_PROJECT_ID" --arg s "$FIREBASE_MESSAGING_SENDER_ID" \
+    --arg pkg com.aktasilyas.elyanotes \
+    '{project_info: {project_number: $s, project_id: $p},
+      client: [{client_info: {mobilesdk_app_id: $a, android_client_info: {package_name: $pkg}},
+                oauth_client: [], api_key: [{current_key: $k}], services: {}}],
+      configuration_version: "1"}' \
+    >example_app/android/app/google-services.json
+  echo "Firebase config written (crash reporting on, mapping upload on)."
 elif [ "$present" -gt 0 ]; then
   echo "::warning title=Firebase::Only $present of ${#firebase[@]} FIREBASE_* secrets set; building without crash reporting."
 else

@@ -17,6 +17,8 @@ on:
     paths:
       - .github/workflows/release.yml
       - scripts/release-*.sh
+      - example_app/android/build.gradle.kts
+      - example_app/android/settings.gradle.kts
       - example_app/android/app/build.gradle.kts
       - example_app/android/app/proguard-rules.pro
 
@@ -122,11 +124,17 @@ jobs:
         run: |
           defines=()
           [ -f config/firebase.json ] && defines=(--dart-define-from-file=config/firebase.json)
-          # All FF_* feature flags stay off (v1.0 scope).
-          flutter build appbundle --release --obfuscate --split-debug-info=build/symbols \
+          # All FF_* feature flags stay off (v1.0 scope). No Dart obfuscation (#215):
+          # readable Dart stacks in Crashlytics; R8 still shrinks and obfuscates Java.
+          flutter build appbundle --release \
             --build-name=${{ steps.version.outputs.name }} \
             --build-number=${{ steps.version.outputs.code }} \
             "${defines[@]}"
+          if [ -f android/app/google-services.json ]; then
+            echo "Firebase config present: Crashlytics mapping upload enabled (a failed upload fails this step)."
+          else
+            echo "No Firebase config: mapping.txt not uploaded (kept as an artifact)."
+          fi
 
       - name: Verify release signature
         run: |
@@ -172,10 +180,8 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: elyanotes-${{ steps.version.outputs.name }}-${{ steps.version.outputs.code }}-symbols
-          path: |
-            example_app/build/app/outputs/mapping/release/mapping.txt
-            example_app/build/symbols
+          name: elyanotes-${{ steps.version.outputs.name }}-${{ steps.version.outputs.code }}-mapping
+          path: example_app/build/app/outputs/mapping/release/mapping.txt
           if-no-files-found: error
 
       - uses: actions/upload-artifact@v4
