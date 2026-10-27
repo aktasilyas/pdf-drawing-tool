@@ -7,6 +7,9 @@
 /// - Tool settings panels for various tools
 library drawing_ui;
 
+// Localization
+export 'src/l10n/l10n.dart';
+
 // Models
 export 'src/models/tool_type.dart';
 

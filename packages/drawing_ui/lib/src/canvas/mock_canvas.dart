@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
@@ -45,7 +46,7 @@ class MockCanvas extends ConsumerWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Current tool: ${currentTool.displayName}',
+                  'Current tool: ${currentTool.label(context.drawingStrings)}',
                   style: TextStyle(
                     fontSize: 14,
                     color: Colors.grey.shade400,

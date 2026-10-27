@@ -3,6 +3,7 @@ import 'package:drawing_ui/drawing_ui.dart'
         DrawingCanvas,
         DrawingScreen,
         ToolType,
+        ToolTypeLabel,
         activeLayerStrokesProvider,
         canvasTransformProvider,
         currentPageProvider,
@@ -11,6 +12,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../helpers/l10n.dart';
 import '../helpers/pump_helpers.dart';
 
 /// Toolbar groups: one button per group, the variants live in its panel.
@@ -83,7 +85,8 @@ class EditorRobot {
       !(_erasers.contains(current) && _erasers.contains(tool)),
       'use selectEraserType to switch between eraser types',
     );
-    final button = find.byTooltip(tool.displayName).hitTestable();
+    final button =
+        find.byTooltip(tool.label(tester.drawingStrings)).hitTestable();
     if (button.evaluate().isNotEmpty && !_sameGroup(current, tool)) {
       await tester.tap(button.first);
     } else {
@@ -107,7 +110,7 @@ class EditorRobot {
     }
     if (currentTool == type) return;
     await tester.tapAndWait(
-      find.byTooltip(currentTool.displayName).hitTestable(),
+      find.byTooltip(currentTool.label(tester.drawingStrings)).hitTestable(),
     );
     final option = find.byTooltip(_eraserPanelLabels[type]!).hitTestable();
     await tester.tapAndWait(option);
