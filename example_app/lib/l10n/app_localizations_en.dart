@@ -629,4 +629,177 @@ class AppLocalizationsEn extends AppLocalizations {
   String libraryCopyTitle(String title) {
     return '$title (copy)';
   }
+
+  @override
+  String get editorToolFountainPen => 'Fountain pen';
+
+  @override
+  String get editorToolPencil => 'Pencil';
+
+  @override
+  String get editorToolHardPencil => 'Hard pencil';
+
+  @override
+  String get editorToolBallpointPen => 'Ballpoint pen';
+
+  @override
+  String get editorToolGelPen => 'Gel pen';
+
+  @override
+  String get editorToolDashedPen => 'Dashed pen';
+
+  @override
+  String get editorToolHighlighter => 'Highlighter';
+
+  @override
+  String get editorToolBrushPen => 'Brush pen';
+
+  @override
+  String get editorToolNeonHighlighter => 'Neon highlighter';
+
+  @override
+  String get editorToolRulerPen => 'Ruler pen';
+
+  @override
+  String get editorToolPixelEraser => 'Eraser';
+
+  @override
+  String get editorToolStrokeEraser => 'Stroke eraser';
+
+  @override
+  String get editorToolLassoEraser => 'Lasso eraser';
+
+  @override
+  String get editorToolShapes => 'Shapes';
+
+  @override
+  String get editorToolText => 'Text';
+
+  @override
+  String get editorToolSticker => 'Sticker';
+
+  @override
+  String get editorToolImage => 'Image';
+
+  @override
+  String get editorToolSelection => 'Select';
+
+  @override
+  String get editorToolPanZoom => 'Pan & zoom';
+
+  @override
+  String get editorToolLaserPointer => 'Laser pointer';
+
+  @override
+  String get editorToolStickyNote => 'Sticky note';
+
+  @override
+  String get editorToolToolbarSettings => 'Toolbar settings';
+
+  @override
+  String get editorToolPenGroup => 'Pen';
+
+  @override
+  String get editorToolbarHome => 'Home';
+
+  @override
+  String get editorToolbarPages => 'Pages';
+
+  @override
+  String get editorToolbarRuler => 'Ruler';
+
+  @override
+  String get editorToolbarAudio => 'Audio recording';
+
+  @override
+  String get editorToolbarReaderMode => 'Reader mode';
+
+  @override
+  String get editorToolbarEditMode => 'Edit mode';
+
+  @override
+  String get editorToolbarMore => 'More';
+
+  @override
+  String get editorToolbarLayers => 'Layers';
+
+  @override
+  String get editorToolbarAddPage => 'Add page';
+
+  @override
+  String get editorToolbarExport => 'Export';
+
+  @override
+  String get editorToolbarAi => 'AI assistant';
+
+  @override
+  String get editorToolbarUntitled => 'Untitled note';
+
+  @override
+  String get editorToolbarMoreColors => 'More colors';
+
+  @override
+  String get editorToolbarColorSetHighlighter => 'Highlighter';
+
+  @override
+  String get editorToolbarColorSetPastel => 'Pastel';
+
+  @override
+  String editorToolbarSelectedColor(String hex) {
+    return 'Selected color $hex';
+  }
+
+  @override
+  String editorToolbarColor(String hex) {
+    return 'Color $hex';
+  }
+
+  @override
+  String editorToolbarThickness(String value) {
+    return 'Thickness $value';
+  }
+
+  @override
+  String get editorToolbarMoreTools => 'More tools';
+
+  @override
+  String get editorToolbarReadOnlyActive => 'Read-only mode on';
+
+  @override
+  String get editorToolbarReadOnly => 'Read-only';
+
+  @override
+  String get editorToolbarUndo => 'Undo';
+
+  @override
+  String get editorToolbarRedo => 'Redo';
+
+  @override
+  String get editorToolbarRecordingInProgress => 'Recording…';
+
+  @override
+  String get editorToolbarRecord => 'Start recording';
+
+  @override
+  String get editorToolbarMicPermissionRequired =>
+      'Microphone access is required. Please allow it in Settings.';
+
+  @override
+  String get editorToolbarShowRecordings => 'Show recordings';
+
+  @override
+  String get editorToolbarSettingsTabTools => 'Tools';
+
+  @override
+  String get editorToolbarSettingsTabExtraTools => 'Extra tools';
+
+  @override
+  String get editorToolbarSettingsToolsHint => 'Reorder and hide tools';
+
+  @override
+  String get editorToolbarSettingsExtraToolsHint =>
+      'Reorder and hide extra tools';
+
+  @override
+  String get editorToolbarSettingsReset => 'Reset to default';
 }
