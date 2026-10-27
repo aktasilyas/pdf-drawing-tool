@@ -96,8 +96,8 @@ class QuickThicknessChip extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     // Map thickness to 1-6dp visual height
     final visualThickness = (thickness * 0.8).clamp(1.0, 6.0);
-    final label = context.drawingStrings.toolbar
-        .thickness(thickness.toStringAsFixed(1));
+    final label =
+        context.drawingStrings.toolbar.thickness(thickness.toStringAsFixed(1));
 
     return Tooltip(
       message: label,
