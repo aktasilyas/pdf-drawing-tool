@@ -20,10 +20,6 @@ const _documents = 'lib/features/documents/presentation';
 /// migrates; the set must be empty after step 6 and is then deleted.
 const pendingL10n = <String>{
   '$_documents/constants/documents_strings.dart',
-  '$_documents/providers/documents_controller.dart',
-  '$_documents/providers/documents_controller_bulk.dart',
-  '$_documents/providers/documents_controller_page_trash.dart',
-  '$_documents/providers/folders_provider.dart',
   '$_documents/screens/documents_screen.dart',
   '$_documents/screens/documents_screen_helpers.dart',
   '$_documents/screens/manage_folders_screen.dart',

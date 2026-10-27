@@ -133,8 +133,11 @@ void main() {
       expect(result.isLeft(), true);
       result.fold(
         (failure) {
-          expect(failure, isA<ValidationFailure>());
-          expect(failure.message, contains('Klasör sınırına ulaştınız'));
+          expect(
+            failure,
+            isA<LibraryRuleFailure>()
+                .having((f) => f.rule, 'rule', LibraryRule.folderLimit),
+          );
         },
         (_) => fail('Should return failure'),
       );

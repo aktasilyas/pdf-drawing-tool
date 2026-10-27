@@ -391,6 +391,241 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Email address copied'**
   String get settingsEmailCopied;
+
+  /// No description provided for @libraryErrorCreateDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn't create the notebook'**
+  String get libraryErrorCreateDocument;
+
+  /// No description provided for @libraryErrorImportDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn't import the document'**
+  String get libraryErrorImportDocument;
+
+  /// No description provided for @libraryErrorMoveDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn't move the notebook'**
+  String get libraryErrorMoveDocument;
+
+  /// No description provided for @libraryErrorToggleFavorite.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn't update favorites'**
+  String get libraryErrorToggleFavorite;
+
+  /// No description provided for @libraryErrorTrashDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn't move the notebook to the trash'**
+  String get libraryErrorTrashDocument;
+
+  /// No description provided for @libraryErrorDeleteDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn't delete the notebook'**
+  String get libraryErrorDeleteDocument;
+
+  /// No description provided for @libraryErrorRenameDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn't rename the notebook'**
+  String get libraryErrorRenameDocument;
+
+  /// No description provided for @libraryErrorRestoreDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn't restore the notebook'**
+  String get libraryErrorRestoreDocument;
+
+  /// No description provided for @libraryErrorDuplicateDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn't duplicate the notebook'**
+  String get libraryErrorDuplicateDocument;
+
+  /// No description provided for @libraryErrorDeleteDocumentForever.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn't delete the notebook permanently'**
+  String get libraryErrorDeleteDocumentForever;
+
+  /// No description provided for @libraryErrorTrashDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn't move the notebooks to the trash'**
+  String get libraryErrorTrashDocuments;
+
+  /// No description provided for @libraryErrorDeleteDocumentsForever.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn't delete the notebooks permanently'**
+  String get libraryErrorDeleteDocumentsForever;
+
+  /// No description provided for @libraryErrorDuplicateDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn't duplicate the notebooks'**
+  String get libraryErrorDuplicateDocuments;
+
+  /// No description provided for @libraryErrorMoveDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn't move the notebooks'**
+  String get libraryErrorMoveDocuments;
+
+  /// No description provided for @libraryErrorTrashPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn't move the page to the trash'**
+  String get libraryErrorTrashPage;
+
+  /// No description provided for @libraryErrorDeletePageForever.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn't delete the page permanently'**
+  String get libraryErrorDeletePageForever;
+
+  /// No description provided for @libraryErrorEmptyTrash.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn't empty the trash'**
+  String get libraryErrorEmptyTrash;
+
+  /// No description provided for @libraryErrorCreateFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn't create the folder'**
+  String get libraryErrorCreateFolder;
+
+  /// No description provided for @libraryErrorRenameFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn't rename the folder'**
+  String get libraryErrorRenameFolder;
+
+  /// No description provided for @libraryErrorRecolorFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn't change the folder color'**
+  String get libraryErrorRecolorFolder;
+
+  /// No description provided for @libraryErrorSaveFolderOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn't save the order'**
+  String get libraryErrorSaveFolderOrder;
+
+  /// No description provided for @libraryErrorMoveFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn't move the folder'**
+  String get libraryErrorMoveFolder;
+
+  /// No description provided for @libraryErrorDeleteFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn't delete the folder'**
+  String get libraryErrorDeleteFolder;
+
+  /// No description provided for @libraryRuleFolderDepth.
+  ///
+  /// In en, this message translates to:
+  /// **'Folders can only be one level deep'**
+  String get libraryRuleFolderDepth;
+
+  /// No description provided for @libraryRuleFolderIntoOwnSubfolder.
+  ///
+  /// In en, this message translates to:
+  /// **'A folder can't be moved into its own subfolder'**
+  String get libraryRuleFolderIntoOwnSubfolder;
+
+  /// No description provided for @libraryRuleFolderMoveDepth.
+  ///
+  /// In en, this message translates to:
+  /// **'A folder can't be moved into a subfolder'**
+  String get libraryRuleFolderMoveDepth;
+
+  /// No description provided for @libraryRuleFolderWithSubfoldersMove.
+  ///
+  /// In en, this message translates to:
+  /// **'A folder with subfolders can't be moved into another folder'**
+  String get libraryRuleFolderWithSubfoldersMove;
+
+  /// No description provided for @libraryRuleDocumentLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'You've reached the free limit. Upgrade to Premium.'**
+  String get libraryRuleDocumentLimit;
+
+  /// No description provided for @libraryRuleFolderLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'You've reached the folder limit. Upgrade to Premium.'**
+  String get libraryRuleFolderLimit;
+
+  /// No description provided for @librarySortByDate.
+  ///
+  /// In en, this message translates to:
+  /// **'By date'**
+  String get librarySortByDate;
+
+  /// No description provided for @librarySortByName.
+  ///
+  /// In en, this message translates to:
+  /// **'By name'**
+  String get librarySortByName;
+
+  /// No description provided for @librarySortBySize.
+  ///
+  /// In en, this message translates to:
+  /// **'By size'**
+  String get librarySortBySize;
+
+  /// No description provided for @librarySectionAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All notes'**
+  String get librarySectionAll;
+
+  /// No description provided for @librarySectionFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites'**
+  String get librarySectionFavorites;
+
+  /// No description provided for @librarySectionTrash.
+  ///
+  /// In en, this message translates to:
+  /// **'Recently deleted'**
+  String get librarySectionTrash;
+
+  /// No description provided for @libraryFolderFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder'**
+  String get libraryFolderFallback;
+
+  /// No description provided for @libraryPaperSquare.
+  ///
+  /// In en, this message translates to:
+  /// **'Square'**
+  String get libraryPaperSquare;
+
+  /// No description provided for @libraryPaperWide.
+  ///
+  /// In en, this message translates to:
+  /// **'Widescreen'**
+  String get libraryPaperWide;
+
+  /// No description provided for @libraryPaperCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get libraryPaperCustom;
+
 }
 
 class _AppLocalizationsDelegate

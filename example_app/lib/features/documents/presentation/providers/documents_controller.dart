@@ -1,5 +1,6 @@
 import 'package:drawing_core/drawing_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:example_app/features/documents/domain/entities/paper_color.dart';
 import 'package:example_app/features/documents/domain/repositories/document_repository.dart';
 import 'package:example_app/features/documents/presentation/providers/document_list_providers.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_controller_bulk.dart';
@@ -28,7 +29,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
     required String title,
     required String templateId,
     String? folderId,
-    String paperColor = 'Sarı kağıt',
+    String? paperColor,
     bool isPortrait = true,
     DocumentType documentType = DocumentType.notebook,
     String? coverId,
@@ -41,7 +42,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
       title: title,
       templateId: templateId,
       folderId: folderId,
-      paperColor: paperColor,
+      paperColor: paperColor ?? PaperColor.yellow.storageKey,
       isPortrait: isPortrait,
       documentType: documentType,
       coverId: coverId,
@@ -52,7 +53,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
     return result.fold(
       (failure) {
         state = AsyncValue.error(failure, StackTrace.current);
-        reportLibraryFailure(ref, failure, 'Belge oluşturulamadı');
+        reportLibraryFailure(ref, failure, LibraryAction.createDocument);
         return null;
       },
       (document) {
@@ -77,9 +78,9 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
       // 1. Create the document with a blank template.
       final result = await repository.createDocument(
         title: title,
-        templateId: 'blank', // PDF için template gereksiz
+        templateId: 'blank', // PDF needs no template
         folderId: folderId,
-        paperColor: 'Beyaz kağıt', // PDF için varsayılan
+        paperColor: PaperColor.white.storageKey, // PDF default
         isPortrait: true,
         documentType: documentType,
       );
@@ -87,7 +88,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
       return await result.fold(
         (failure) {
           state = AsyncValue.error(failure, StackTrace.current);
-          reportLibraryFailure(ref, failure, 'Belge içe aktarılamadı');
+          reportLibraryFailure(ref, failure, LibraryAction.importDocument);
           return null;
         },
         (document) async {
@@ -107,7 +108,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
           return saveResult.fold(
             (failure) {
               state = AsyncValue.error(failure, StackTrace.current);
-              reportLibraryFailure(ref, failure, 'Belge içe aktarılamadı');
+              reportLibraryFailure(ref, failure, LibraryAction.importDocument);
               return null;
             },
             (_) {
@@ -120,7 +121,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
       );
     } catch (e) {
       state = AsyncValue.error(e, StackTrace.current);
-      reportLibraryError(ref, e, 'Belge içe aktarılamadı');
+      reportLibraryError(ref, e, LibraryAction.importDocument);
       return null;
     }
   }
@@ -131,7 +132,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
     return result.fold(
       (failure) {
         state = AsyncValue.error(failure, StackTrace.current);
-        reportLibraryFailure(ref, failure, 'Belge taşınamadı');
+        reportLibraryFailure(ref, failure, LibraryAction.moveDocument);
         return false;
       },
       (_) {
@@ -146,7 +147,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
     final result = await repository.toggleFavorite(documentId);
     return result.fold(
       (failure) {
-        reportLibraryFailure(ref, failure, 'Favori durumu değiştirilemedi');
+        reportLibraryFailure(ref, failure, LibraryAction.toggleFavorite);
         return false;
       },
       (_) {
@@ -161,7 +162,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
     final result = await repository.moveToTrash(documentId);
     return result.fold(
       (failure) {
-        reportLibraryFailure(ref, failure, 'Belge çöpe taşınamadı');
+        reportLibraryFailure(ref, failure, LibraryAction.trashDocument);
         return false;
       },
       (_) {
@@ -176,7 +177,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
     final result = await repository.deleteDocument(documentId);
     return result.fold(
       (failure) {
-        reportLibraryFailure(ref, failure, 'Belge silinemedi');
+        reportLibraryFailure(ref, failure, LibraryAction.deleteDocument);
         return false;
       },
       (_) {
@@ -191,7 +192,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
         await repository.updateDocument(id: documentId, title: newTitle);
     return result.fold(
       (failure) {
-        reportLibraryFailure(ref, failure, 'Belge adı değiştirilemedi');
+        reportLibraryFailure(ref, failure, LibraryAction.renameDocument);
         return false;
       },
       (_) {
@@ -209,7 +210,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
       return await result.fold(
         (failure) {
           state = AsyncError(failure, StackTrace.current);
-          reportLibraryFailure(ref, failure, 'Belge geri yüklenemedi');
+          reportLibraryFailure(ref, failure, LibraryAction.restoreDocument);
           return false;
         },
         (_) {
@@ -220,7 +221,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
       );
     } catch (e) {
       state = AsyncError(e, StackTrace.current);
-      reportLibraryError(ref, e, 'Belge geri yüklenemedi');
+      reportLibraryError(ref, e, LibraryAction.restoreDocument);
       return false;
     }
   }
@@ -232,7 +233,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
       return await result.fold(
         (failure) {
           state = AsyncError(failure, StackTrace.current);
-          reportLibraryFailure(ref, failure, 'Belge çoğaltılamadı');
+          reportLibraryFailure(ref, failure, LibraryAction.duplicateDocument);
           return false;
         },
         (_) {
@@ -242,7 +243,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
       );
     } catch (e) {
       state = AsyncError(e, StackTrace.current);
-      reportLibraryError(ref, e, 'Belge çoğaltılamadı');
+      reportLibraryError(ref, e, LibraryAction.duplicateDocument);
       return false;
     }
   }
@@ -254,7 +255,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
       return await result.fold(
         (failure) {
           state = AsyncError(failure, StackTrace.current);
-          reportLibraryFailure(ref, failure, 'Belge kalıcı olarak silinemedi');
+          reportLibraryFailure(ref, failure, LibraryAction.deleteDocumentForever);
           return false;
         },
         (_) {
@@ -264,7 +265,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
       );
     } catch (e) {
       state = AsyncError(e, StackTrace.current);
-      reportLibraryError(ref, e, 'Belge kalıcı olarak silinemedi');
+      reportLibraryError(ref, e, LibraryAction.deleteDocumentForever);
       return false;
     }
   }

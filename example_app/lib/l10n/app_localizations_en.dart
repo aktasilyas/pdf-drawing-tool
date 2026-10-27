@@ -164,4 +164,160 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsEmailCopied => 'Email address copied';
+
+  @override
+  String get libraryErrorCreateDocument =>
+      'Couldn\'t create the notebook';
+
+  @override
+  String get libraryErrorImportDocument =>
+      'Couldn\'t import the document';
+
+  @override
+  String get libraryErrorMoveDocument =>
+      'Couldn\'t move the notebook';
+
+  @override
+  String get libraryErrorToggleFavorite =>
+      'Couldn\'t update favorites';
+
+  @override
+  String get libraryErrorTrashDocument =>
+      'Couldn\'t move the notebook to the trash';
+
+  @override
+  String get libraryErrorDeleteDocument =>
+      'Couldn\'t delete the notebook';
+
+  @override
+  String get libraryErrorRenameDocument =>
+      'Couldn\'t rename the notebook';
+
+  @override
+  String get libraryErrorRestoreDocument =>
+      'Couldn\'t restore the notebook';
+
+  @override
+  String get libraryErrorDuplicateDocument =>
+      'Couldn\'t duplicate the notebook';
+
+  @override
+  String get libraryErrorDeleteDocumentForever =>
+      'Couldn\'t delete the notebook permanently';
+
+  @override
+  String get libraryErrorTrashDocuments =>
+      'Couldn\'t move the notebooks to the trash';
+
+  @override
+  String get libraryErrorDeleteDocumentsForever =>
+      'Couldn\'t delete the notebooks permanently';
+
+  @override
+  String get libraryErrorDuplicateDocuments =>
+      'Couldn\'t duplicate the notebooks';
+
+  @override
+  String get libraryErrorMoveDocuments =>
+      'Couldn\'t move the notebooks';
+
+  @override
+  String get libraryErrorTrashPage =>
+      'Couldn\'t move the page to the trash';
+
+  @override
+  String get libraryErrorDeletePageForever =>
+      'Couldn\'t delete the page permanently';
+
+  @override
+  String get libraryErrorEmptyTrash =>
+      'Couldn\'t empty the trash';
+
+  @override
+  String get libraryErrorCreateFolder =>
+      'Couldn\'t create the folder';
+
+  @override
+  String get libraryErrorRenameFolder =>
+      'Couldn\'t rename the folder';
+
+  @override
+  String get libraryErrorRecolorFolder =>
+      'Couldn\'t change the folder color';
+
+  @override
+  String get libraryErrorSaveFolderOrder =>
+      'Couldn\'t save the order';
+
+  @override
+  String get libraryErrorMoveFolder =>
+      'Couldn\'t move the folder';
+
+  @override
+  String get libraryErrorDeleteFolder =>
+      'Couldn\'t delete the folder';
+
+  @override
+  String get libraryRuleFolderDepth =>
+      'Folders can only be one level deep';
+
+  @override
+  String get libraryRuleFolderIntoOwnSubfolder =>
+      'A folder can\'t be moved into its own subfolder';
+
+  @override
+  String get libraryRuleFolderMoveDepth =>
+      'A folder can\'t be moved into a subfolder';
+
+  @override
+  String get libraryRuleFolderWithSubfoldersMove =>
+      'A folder with subfolders can\'t be moved into another folder';
+
+  @override
+  String get libraryRuleDocumentLimit =>
+      'You\'ve reached the free limit. Upgrade to Premium.';
+
+  @override
+  String get libraryRuleFolderLimit =>
+      'You\'ve reached the folder limit. Upgrade to Premium.';
+
+  @override
+  String get librarySortByDate =>
+      'By date';
+
+  @override
+  String get librarySortByName =>
+      'By name';
+
+  @override
+  String get librarySortBySize =>
+      'By size';
+
+  @override
+  String get librarySectionAll =>
+      'All notes';
+
+  @override
+  String get librarySectionFavorites =>
+      'Favorites';
+
+  @override
+  String get librarySectionTrash =>
+      'Recently deleted';
+
+  @override
+  String get libraryFolderFallback =>
+      'Folder';
+
+  @override
+  String get libraryPaperSquare =>
+      'Square';
+
+  @override
+  String get libraryPaperWide =>
+      'Widescreen';
+
+  @override
+  String get libraryPaperCustom =>
+      'Custom';
 }

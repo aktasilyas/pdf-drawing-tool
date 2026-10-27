@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/premium/premium.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
+import 'package:example_app/features/documents/domain/entities/library_rule.dart';
 import 'package:example_app/features/documents/domain/repositories/document_repository.dart';
 
 @injectable
@@ -34,11 +35,7 @@ class CreateDocumentUseCase {
             (documents) async {
               final nonTrashDocs = documents.where((d) => !d.isInTrash).length;
               if (nonTrashDocs >= FreeTierLimits.maxDocuments) {
-                return const Left(
-                  ValidationFailure(
-                    'Ücretsiz sınıra ulaştınız. Premium\'a geçin.',
-                  ),
-                );
+                return Left(LibraryRuleFailure(LibraryRule.documentLimit));
               }
               return _documentRepository.createDocument(
                 title: title,

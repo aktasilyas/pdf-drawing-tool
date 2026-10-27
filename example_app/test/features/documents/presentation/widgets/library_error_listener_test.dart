@@ -111,7 +111,7 @@ void main() {
     expect(find.text('Klasör oluşturulamadı'), findsOneWidget);
   });
 
-  testWidgets('validation messages are shown verbatim', (tester) async {
+  testWidgets('rule failures show the localized rule message', (tester) async {
     await pumpApp(tester);
     final id = await folders().createFolder(name: 'Derin', parentId: 'sub');
     expect(id, isNull);
