@@ -13,8 +13,9 @@ import 'package:example_app/features/documents/presentation/widgets/folder_tile_
 
 /// Library sidebar sections.
 ///
-/// Only sections shipped in v1.0 exist: no Shared/Store placeholders (#249). Sharing
-/// (cloud sync) and a store (premium) get real sections when they unfreeze.
+/// Only sections shipped in v1.0 exist: no Shared/Store placeholders (#249).
+/// Sharing (cloud sync) and a store (premium) get real sections when they
+/// unfreeze.
 enum SidebarSection { documents, favorites, trash, folder }
 
 /// Documents sidebar widget

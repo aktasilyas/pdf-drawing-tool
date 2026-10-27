@@ -95,6 +95,5 @@ void main() {
         expect(find.text('Yakında'), findsNothing);
       });
     }
-
   });
 }
