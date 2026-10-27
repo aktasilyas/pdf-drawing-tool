@@ -52,6 +52,7 @@ export 'presentation/providers/documents_provider.dart';
 export 'presentation/providers/folders_provider.dart';
 export 'presentation/providers/incoming_pdf_provider.dart';
 export 'presentation/providers/library_error.dart';
+export 'presentation/providers/move_to_folder_actions.dart';
 
 // Presentation - Screens
 export 'presentation/screens/documents_screen.dart';
