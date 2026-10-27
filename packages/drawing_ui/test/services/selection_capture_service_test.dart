@@ -21,8 +21,7 @@ Selection _rectSelection(
       bounds: bounds,
     );
 
-Stroke _line(String id, double y, {double x0 = 20, double x1 = 100}) =>
-    Stroke(
+Stroke _line(String id, double y, {double x0 = 20, double x1 = 100}) => Stroke(
       id: id,
       points: [
         for (var x = x0; x <= x1; x += 10) DrawingPoint(x: x, y: y),
@@ -119,9 +118,8 @@ void main() {
       layer,
     );
     // Page (x, y) maps to ((x - 10 + 16) * 3, (y - 20 + 16) * 3).
-    ui.Rect around(double y) =>
-        ui.Rect.fromLTWH((40 - 10 + 16) * _scale, (y - 20 + 16 - 4) * _scale,
-            40 * _scale, 8 * _scale);
+    ui.Rect around(double y) => ui.Rect.fromLTWH((40 - 10 + 16) * _scale,
+        (y - 20 + 16 - 4) * _scale, 40 * _scale, 8 * _scale);
     expect(_inked(r, around(30)), greaterThan(0), reason: 'selected stroke');
     expect(_inked(r, around(60)), 0, reason: 'unselected stroke');
   });

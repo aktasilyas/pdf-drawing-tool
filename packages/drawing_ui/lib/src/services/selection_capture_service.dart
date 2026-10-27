@@ -87,9 +87,8 @@ class SelectionCaptureService {
     if (padded.width <= 0 || padded.height <= 0) return null;
 
     final isPdf = background?.type == BackgroundType.pdf;
-    final pdfImage = isPdf && pdfImageBytes != null
-        ? await _decode(pdfImageBytes)
-        : null;
+    final pdfImage =
+        isPdf && pdfImageBytes != null ? await _decode(pdfImageBytes) : null;
     final coverImage = background != null && !isPdf
         ? await PageBackgroundRaster.prepare(background)
         : null;
