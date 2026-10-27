@@ -1,3 +1,4 @@
+import 'dart:ui' show PictureRecorder;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:drawing_core/drawing_core.dart';
@@ -334,6 +335,47 @@ void main() {
         );
 
         expect(painter1.shouldRepaint(painter2), false);
+      });
+
+      test('returns true when extraData changes', () {
+        TemplatePatternPainter build(Map<String, dynamic>? extra) =>
+            TemplatePatternPainter(
+              pattern: TemplatePattern.cornell,
+              spacingMm: 8,
+              lineWidth: 0.5,
+              lineColor: lineColor,
+              backgroundColor: backgroundColor,
+              pageSize: testSize,
+              extraData: extra,
+            );
+
+        expect(
+            build({'marginLeft': 10.0})
+                .shouldRepaint(build({'marginLeft': 20.0})),
+            true);
+        expect(
+            build({'marginLeft': 10.0})
+                .shouldRepaint(build({'marginLeft': 10.0})),
+            false);
+      });
+    });
+
+    group('paint reuse', () {
+      test('paints are created once per painter instance', () {
+        final painter = TemplatePatternPainter(
+          pattern: TemplatePattern.handwriting,
+          spacingMm: 8,
+          lineWidth: 0.5,
+          lineColor: lineColor,
+          backgroundColor: backgroundColor,
+          pageSize: testSize,
+        );
+        final first = painter.paints;
+        painter.paint(Canvas(PictureRecorder()), testSize);
+        painter.paint(Canvas(PictureRecorder()), testSize);
+
+        expect(identical(painter.paints, first), true);
+        expect(first.line.color.toARGB32(), lineColor.toARGB32());
       });
     });
 

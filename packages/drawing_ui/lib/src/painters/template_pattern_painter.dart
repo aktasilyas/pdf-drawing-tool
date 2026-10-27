@@ -1,8 +1,11 @@
-import 'dart:math';
+import 'package:flutter/foundation.dart' show mapEquals;
 import 'package:flutter/material.dart';
 import 'package:drawing_core/drawing_core.dart';
 
+import 'template_basic_painters.dart';
+import 'template_paints.dart';
 import 'template_planner_painters.dart';
+import 'template_writing_painters.dart';
 import 'template_creative_painters.dart';
 import 'template_table_painters.dart';
 
@@ -10,6 +13,8 @@ import 'template_table_painters.dart';
 /// Tema renklerini dışarıdan alır, hardcoded renk kullanmaz.
 class TemplatePatternPainter extends CustomPainter
     with
+        TemplateBasicPainters,
+        TemplateWritingPainters,
         TemplatePlannerPainters,
         TemplateCreativePainters,
         TemplateTablePainters {
@@ -22,17 +27,25 @@ class TemplatePatternPainter extends CustomPainter
   final Map<String, dynamic>? extraData;
 
   // mm → px dönüşüm (72 DPI)
-  double get _spacingPx => spacingMm * 72 / 25.4;
+  @override
+  double get spacingPx => spacingMm * 72 / 25.4;
 
   /// Public getter for mixin access
   @override
-  double get spacingPx => _spacingPx;
+  Paint get linePaint => Paint()
+    ..color = lineColor
+    ..strokeWidth = lineWidth
+    ..isAntiAlias = true;
 
-  /// Public getter for mixin access
+  /// Paints built once per painter instance (never mutated).
   @override
-  Paint get linePaint => _linePaint;
+  late final TemplatePaints paints = TemplatePaints(
+    lineColor: lineColor,
+    lineWidth: lineWidth,
+    backgroundColor: backgroundColor,
+  );
 
-  const TemplatePatternPainter({
+  TemplatePatternPainter({
     required this.pattern,
     required this.spacingMm,
     required this.lineWidth,
@@ -63,10 +76,7 @@ class TemplatePatternPainter extends CustomPainter
   @override
   void paint(Canvas canvas, Size size) {
     // Arka plan
-    canvas.drawRect(
-      Offset.zero & size,
-      Paint()..color = backgroundColor,
-    );
+    canvas.drawRect(Offset.zero & size, paints.background);
 
     // Pattern çiz
     switch (pattern) {
@@ -75,35 +85,35 @@ class TemplatePatternPainter extends CustomPainter
       case TemplatePattern.thinLines:
       case TemplatePattern.mediumLines:
       case TemplatePattern.thickLines:
-        _drawLines(canvas, size);
+        drawLines(canvas, size);
         break;
       case TemplatePattern.smallGrid:
       case TemplatePattern.mediumGrid:
       case TemplatePattern.largeGrid:
-        _drawGrid(canvas, size);
+        drawGrid(canvas, size);
         break;
       case TemplatePattern.smallDots:
       case TemplatePattern.mediumDots:
       case TemplatePattern.largeDots:
-        _drawDots(canvas, size);
+        drawDots(canvas, size);
         break;
       case TemplatePattern.isometric:
-        _drawIsometric(canvas, size);
+        drawIsometric(canvas, size);
         break;
       case TemplatePattern.hexagonal:
-        _drawHexagonal(canvas, size);
+        drawHexagonal(canvas, size);
         break;
       case TemplatePattern.cornell:
-        _drawCornell(canvas, size);
+        drawCornell(canvas, size);
         break;
       case TemplatePattern.music:
-        _drawMusic(canvas, size);
+        drawMusic(canvas, size);
         break;
       case TemplatePattern.handwriting:
-        _drawHandwriting(canvas, size);
+        drawHandwriting(canvas, size);
         break;
       case TemplatePattern.calligraphy:
-        _drawCalligraphy(canvas, size);
+        drawCalligraphy(canvas, size);
         break;
 
       // === YAPISAL PATTERN'LAR ===
@@ -146,302 +156,13 @@ class TemplatePatternPainter extends CustomPainter
     }
   }
 
-  Paint get _linePaint => Paint()
-    ..color = lineColor
-    ..strokeWidth = lineWidth
-    ..isAntiAlias = true;
-
-  void _drawLines(Canvas canvas, Size size) {
-    final paint = _linePaint;
-    final topMargin = _spacingPx * 2;
-    for (double y = topMargin; y < size.height; y += _spacingPx) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-    }
-  }
-
-  void _drawGrid(Canvas canvas, Size size) {
-    final paint = _linePaint;
-    for (double x = _spacingPx; x < size.width; x += _spacingPx) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-    }
-    for (double y = _spacingPx; y < size.height; y += _spacingPx) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-    }
-
-    // Margin desteği (engineer_pad vb.)
-    final showMarginLeft = extraData?['showMarginLeft'] as bool? ?? false;
-    if (showMarginLeft) {
-      final marginMm = (extraData?['marginMm'] as num?)?.toDouble() ?? 25;
-      final marginPx = marginMm * 72 / 25.4;
-      final marginPaint = Paint()
-        ..color = lineColor
-        ..strokeWidth = lineWidth * 3
-        ..isAntiAlias = true;
-      canvas.drawLine(
-        Offset(marginPx, 0),
-        Offset(marginPx, size.height),
-        marginPaint,
-      );
-    }
-  }
-
-  void _drawDots(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = lineColor
-      ..style = PaintingStyle.fill;
-    final radius = lineWidth * 1.5;
-    for (double x = _spacingPx; x < size.width; x += _spacingPx) {
-      for (double y = _spacingPx; y < size.height; y += _spacingPx) {
-        canvas.drawCircle(Offset(x, y), radius, paint);
-      }
-    }
-  }
-
-  void _drawIsometric(Canvas canvas, Size size) {
-    final paint = _linePaint;
-    final spacing = _spacingPx;
-
-    // 30° açılı çizgiler (tan(30°) ≈ 0.577)
-    final angle = 0.577;
-
-    // Sol üstten sağ alta
-    for (double x = -size.height; x < size.width; x += spacing) {
-      canvas.drawLine(
-        Offset(x, 0),
-        Offset(x + size.height * angle, size.height),
-        paint,
-      );
-    }
-
-    // Sağ üstten sol alta
-    for (double x = 0; x < size.width + size.height; x += spacing) {
-      canvas.drawLine(
-        Offset(x, 0),
-        Offset(x - size.height * angle, size.height),
-        paint,
-      );
-    }
-
-    // Yatay çizgiler
-    for (double y = spacing; y < size.height; y += spacing) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-    }
-  }
-
-  void _drawHexagonal(Canvas canvas, Size size) {
-    final paint = _linePaint;
-    final radius = _spacingPx / 2;
-    final hexHeight = radius * 1.732; // sqrt(3)
-    final hexWidth = radius * 2;
-
-    for (double y = radius; y < size.height + radius; y += hexHeight * 0.75) {
-      final rowOffset = (y ~/ (hexHeight * 0.75)) % 2 == 0 ? 0.0 : radius * 1.5;
-      for (double x = rowOffset;
-          x < size.width + hexWidth;
-          x += hexWidth * 1.5) {
-        _drawHexagon(canvas, Offset(x, y), radius, paint);
-      }
-    }
-  }
-
-  void _drawHexagon(Canvas canvas, Offset center, double radius, Paint paint) {
-    final path = Path();
-    for (int i = 0; i < 6; i++) {
-      final angle = (i * 60 - 30) * pi / 180;
-      final point = Offset(
-        center.dx + radius * cos(angle),
-        center.dy + radius * sin(angle),
-      );
-      if (i == 0) {
-        path.moveTo(point.dx, point.dy);
-      } else {
-        path.lineTo(point.dx, point.dy);
-      }
-    }
-    path.close();
-    canvas.drawPath(path, paint..style = PaintingStyle.stroke);
-  }
-
-  void _drawCornell(Canvas canvas, Size size) {
-    final paint = _linePaint;
-    final marginLeft = extraData?['marginLeft'] as double? ?? size.width * 0.3;
-    final marginBottom =
-        extraData?['marginBottom'] as double? ?? size.height * 0.2;
-
-    // Sol dikey çizgi (cue column)
-    canvas.drawLine(
-      Offset(marginLeft, 0),
-      Offset(marginLeft, size.height - marginBottom),
-      paint..strokeWidth = lineWidth * 2,
-    );
-
-    // Alt yatay çizgi (summary)
-    canvas.drawLine(
-      Offset(0, size.height - marginBottom),
-      Offset(size.width, size.height - marginBottom),
-      paint..strokeWidth = lineWidth * 2,
-    );
-
-    // Not alma alanında yatay çizgiler
-    paint.strokeWidth = lineWidth;
-    for (double y = _spacingPx * 2;
-        y < size.height - marginBottom;
-        y += _spacingPx) {
-      canvas.drawLine(Offset(marginLeft + 10, y), Offset(size.width, y), paint);
-    }
-  }
-
-  void _drawMusic(Canvas canvas, Size size) {
-    final paint = _linePaint;
-
-    // Staff içi çizgi aralığı (her staff 5 çizgiden oluşur)
-    final staffLineSpacing = _spacingPx * 0.25; // 2mm arası (8mm / 4 = 2mm)
-    final staffHeight = staffLineSpacing * 4; // 5 çizgi = 4 aralık
-    final staffGroupSpacing = _spacingPx * 2; // Staff grupları arası 16mm
-
-    double y = _spacingPx; // Üstten başlangıç
-
-    while (y + staffHeight < size.height) {
-      // 5 çizgili staff çiz
-      for (int i = 0; i < 5; i++) {
-        final lineY = y + (i * staffLineSpacing);
-        canvas.drawLine(
-          Offset(0, lineY),
-          Offset(size.width, lineY),
-          paint,
-        );
-      }
-      // Bir sonraki staff grubuna geç
-      y += staffHeight + staffGroupSpacing;
-    }
-  }
-
-  void _drawHandwriting(Canvas canvas, Size size) {
-    final paint = _linePaint;
-    final topMargin = _spacingPx * 2;
-
-    for (double y = topMargin; y < size.height; y += _spacingPx) {
-      // Ana baseline
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-
-      // Orta çizgi (dashed effect için daha açık renk)
-      final midY = y - _spacingPx * 0.4;
-      if (midY > topMargin) {
-        canvas.drawLine(
-          Offset(0, midY),
-          Offset(size.width, midY),
-          paint..color = lineColor.withValues(alpha: 0.4),
-        );
-        paint.color = lineColor; // Reset
-      }
-    }
-  }
-
-  void _drawCalligraphy(Canvas canvas, Size size) {
-    final paint = _linePaint;
-    final style = extraData?['style'] as String?;
-
-    // Açı: extraData'dan oku veya default 55°
-    final angleDeg = (extraData?['angle'] as num?)?.toDouble() ?? 55;
-    final tanAngle = tan(angleDeg * pi / 180);
-
-    if (style == 'copperplate') {
-      _drawCopperplateCalligraphy(canvas, size, paint, tanAngle);
-    } else {
-      _drawStandardCalligraphy(canvas, size, paint, tanAngle);
-    }
-  }
-
-  void _drawStandardCalligraphy(
-    Canvas canvas,
-    Size size,
-    Paint paint,
-    double tanAngle,
-  ) {
-    // Yatay baseline'lar
-    for (double y = _spacingPx * 2; y < size.height; y += _spacingPx) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-    }
-
-    // Açılı rehber çizgiler
-    paint.color = lineColor.withValues(alpha: 0.3);
-    for (double x = 0; x < size.width + size.height; x += _spacingPx * 2) {
-      canvas.drawLine(
-        Offset(x, 0),
-        Offset(x - size.height * tanAngle, size.height),
-        paint,
-      );
-    }
-  }
-
-  void _drawCopperplateCalligraphy(
-    Canvas canvas,
-    Size size,
-    Paint paint,
-    double tanAngle,
-  ) {
-    // Ratio: ascender:x-height:descender (default 3:2:3)
-    final ratioStr = (extraData?['ratio'] as String?) ?? '3:2:3';
-    final parts = ratioStr.split(':');
-    final aR = double.tryParse(parts[0]) ?? 3;
-    final xR = double.tryParse(parts[1]) ?? 2;
-    final dR = double.tryParse(parts[2]) ?? 3;
-    final totalR = aR + xR + dR;
-
-    final zoneH = _spacingPx; // Toplam bir satır yüksekliği
-    final ascenderH = zoneH * (aR / totalR);
-    final xHeightH = zoneH * (xR / totalR);
-    final descenderH = zoneH * (dR / totalR);
-    final topMargin = _spacingPx * 2;
-
-    final basePaint = Paint()
-      ..color = lineColor
-      ..strokeWidth = lineWidth
-      ..isAntiAlias = true;
-    final zonePaint = Paint()
-      ..color = lineColor.withValues(alpha: 0.25)
-      ..strokeWidth = lineWidth * 0.5
-      ..isAntiAlias = true;
-
-    for (double y = topMargin; y + zoneH <= size.height; y += zoneH) {
-      final ascLine = y;
-      final xLine = y + ascenderH;
-      final baseLine = y + ascenderH + xHeightH;
-      final descLine = y + ascenderH + xHeightH + descenderH;
-
-      // Ascender line (kalın)
-      canvas.drawLine(
-          Offset(0, ascLine), Offset(size.width, ascLine), basePaint);
-      // x-height line (ince)
-      canvas.drawLine(Offset(0, xLine), Offset(size.width, xLine), zonePaint);
-      // Baseline (kalın)
-      canvas.drawLine(
-          Offset(0, baseLine), Offset(size.width, baseLine), basePaint);
-      // Descender line (ince)
-      canvas.drawLine(
-          Offset(0, descLine), Offset(size.width, descLine), zonePaint);
-    }
-
-    // Açılı rehber çizgiler
-    final anglePaint = Paint()
-      ..color = lineColor.withValues(alpha: 0.2)
-      ..strokeWidth = lineWidth * 0.5
-      ..isAntiAlias = true;
-    for (double x = 0; x < size.width + size.height; x += _spacingPx * 1.5) {
-      canvas.drawLine(
-        Offset(x, 0),
-        Offset(x - size.height * tanAngle, size.height),
-        anglePaint,
-      );
-    }
-  }
-
   @override
   bool shouldRepaint(covariant TemplatePatternPainter oldDelegate) {
     return pattern != oldDelegate.pattern ||
         spacingMm != oldDelegate.spacingMm ||
         lineWidth != oldDelegate.lineWidth ||
         lineColor != oldDelegate.lineColor ||
-        backgroundColor != oldDelegate.backgroundColor;
+        backgroundColor != oldDelegate.backgroundColor ||
+        !mapEquals(extraData, oldDelegate.extraData);
   }
 }
