@@ -75,7 +75,8 @@ void main() {
 
       expect(container.read(selectedPresetIndexProvider), 2);
       expect(container.read(currentToolProvider), ToolType.fountainPen);
-      final settings = container.read(penSettingsProvider(ToolType.fountainPen));
+      final settings =
+          container.read(penSettingsProvider(ToolType.fountainPen));
       expect(settings.color, _red);
       expect(settings.thickness, 4.5);
       expect(settings.nibShape, NibShapeType.ellipse);
@@ -86,10 +87,9 @@ void main() {
       final container = _container();
       final actions = container.read(penBoxActionsProvider);
 
-      actions
-        ..selectPreset(1)
-        ..selectPreset(-1)
-        ..selectPreset(3);
+      actions.selectPreset(1);
+      actions.selectPreset(-1);
+      actions.selectPreset(3);
 
       expect(container.read(selectedPresetIndexProvider), 0);
     });

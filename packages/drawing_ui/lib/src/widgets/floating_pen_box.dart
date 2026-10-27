@@ -35,12 +35,11 @@ class _FloatingPenBoxState extends ConsumerState<FloatingPenBox> {
   Axis get _boxAxis {
     final view = WidgetsBinding.instance.platformDispatcher.views.first;
     final screenWidth = view.physicalSize.width / view.devicePixelRatio;
-    return penBoxOpensHorizontally(
+    final horizontal = penBoxOpensHorizontally(
       position: widget.position,
       screenWidth: screenWidth,
-    )
-        ? Axis.horizontal
-        : Axis.vertical;
+    );
+    return horizontal ? Axis.horizontal : Axis.vertical;
   }
 
   @override

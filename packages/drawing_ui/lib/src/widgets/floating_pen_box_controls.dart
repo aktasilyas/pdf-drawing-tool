@@ -110,8 +110,7 @@ class FloatingPenBoxControls extends StatelessWidget {
       child: PhosphorIcon(
         isEditMode ? ElyanotesIcons.check : ElyanotesIcons.editPencil,
         size: _editIconSize,
-        color:
-            isEditMode ? colorScheme.primary : colorScheme.onSurfaceVariant,
+        color: isEditMode ? colorScheme.primary : colorScheme.onSurfaceVariant,
       ),
     );
     final collapseButton = GestureDetector(
