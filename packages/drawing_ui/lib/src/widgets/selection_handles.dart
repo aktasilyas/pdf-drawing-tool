@@ -74,7 +74,8 @@ class _SelectionHandlesState extends ConsumerState<SelectionHandles> {
   /// Page size for clamping, or `null` on an infinite canvas.
   Size? _pageSize() {
     if (ref.read(isInfiniteCanvasProvider)) return null;
-    return ref.read(currentPageProvider).size;
+    final page = ref.read(currentPageProvider).size;
+    return Size(page.width, page.height);
   }
 
   // ── Pointer events ──
