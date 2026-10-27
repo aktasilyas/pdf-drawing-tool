@@ -293,4 +293,208 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get libraryPaperCustom => 'Custom';
+
+  @override
+  String get libraryBreadcrumbRoot => 'Library';
+
+  @override
+  String get libraryFolders => 'Folders';
+
+  @override
+  String get libraryDocuments => 'Documents';
+
+  @override
+  String get libraryManage => 'Manage';
+
+  @override
+  String get libraryNewFolder => 'New folder';
+
+  @override
+  String get libraryNoFolders => 'No folders';
+
+  @override
+  String get librarySidebarCollapse => 'Collapse';
+
+  @override
+  String get libraryOpenSidebar => 'Open sidebar';
+
+  @override
+  String get librarySearchHint => 'Search...';
+
+  @override
+  String get libraryListView => 'List view';
+
+  @override
+  String get libraryGridView => 'Grid view';
+
+  @override
+  String get librarySelectMode => 'Select';
+
+  @override
+  String get libraryNewDocument => 'New document';
+
+  @override
+  String get libraryNewDocumentLocked => 'Document limit reached';
+
+  @override
+  String get libraryNew => 'New';
+
+  @override
+  String get libraryTrashInfo =>
+      'Deleted notes are permanently removed after 30 days';
+
+  @override
+  String get libraryEmptyTrash => 'Empty trash';
+
+  @override
+  String get libraryEmptyTrashConfirmMessage =>
+      'Everything in the trash will be deleted permanently. This can\'t be undone.';
+
+  @override
+  String get libraryEmptyTrashConfirm => 'Empty';
+
+  @override
+  String get libraryTrashEmptied => 'Trash emptied';
+
+  @override
+  String get libraryOpenFailed => 'Couldn\'t open the notebook';
+
+  @override
+  String get libraryTrashCountsTowardsLimit =>
+      'Notes in the trash count towards the limit. Delete them permanently to free up space, or';
+
+  @override
+  String libraryRemainingDocuments(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count documents left',
+      one: '1 document left',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get librarySortTitle => 'Sort';
+
+  @override
+  String get librarySortNewestFirst => 'Newest first';
+
+  @override
+  String get librarySortOldestFirst => 'Oldest first';
+
+  @override
+  String get libraryEmptyTitle => 'No notes yet';
+
+  @override
+  String get libraryEmptyMessage => 'Create a notebook or import a PDF.';
+
+  @override
+  String get libraryEmptyAction => 'New note';
+
+  @override
+  String get libraryEmptyFavoritesTitle => 'No favorite notes';
+
+  @override
+  String get libraryEmptyFavoritesMessage =>
+      'Tap the star icon to add notes to your favorites';
+
+  @override
+  String get libraryEmptyFolderTitle => 'This folder is empty';
+
+  @override
+  String get libraryEmptyFolderMessage => 'Move notes here or create a new one';
+
+  @override
+  String get libraryTrashEmptyTitle => 'Trash is empty';
+
+  @override
+  String get libraryTrashEmptyMessage => 'Deleted notes will appear here';
+
+  @override
+  String get libraryNoResultsTitle => 'No results';
+
+  @override
+  String libraryNoResultsMessage(String query) {
+    return 'No notes match \"$query\"';
+  }
+
+  @override
+  String get libraryClearSearch => 'Clear search';
+
+  @override
+  String librarySelectedCount(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get librarySelectAll => 'All';
+
+  @override
+  String get libraryDeleteForever => 'Delete permanently';
+
+  @override
+  String get libraryDeleteForeverTitle => 'Delete permanently?';
+
+  @override
+  String get libraryDeleteDocumentsTitle => 'Delete notes';
+
+  @override
+  String get libraryDocumentLimitReached => 'Document limit reached';
+
+  @override
+  String libraryDocumentsCopied(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count documents duplicated',
+      one: '1 document duplicated',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String libraryDocumentsTrashed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count documents moved to the trash',
+      one: '1 document moved to the trash',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String libraryDocumentsDeleted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count documents deleted',
+      one: '1 document deleted',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String libraryDeleteDocumentsForeverMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count documents will be deleted permanently. This can\'t be undone.',
+      one: '1 document will be deleted permanently. This can\'t be undone.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String libraryTrashDocumentsMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count documents will be moved to the trash.',
+      one: '1 document will be moved to the trash.',
+    );
+    return '$_temp0';
+  }
 }

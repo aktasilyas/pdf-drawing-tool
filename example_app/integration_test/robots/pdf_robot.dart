@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import 'package:example_app/features/documents/presentation/widgets/library_header_parts.dart';
 import 'package:example_app/features/documents/presentation/widgets/pdf_file_importer.dart';
 
 import '../fixtures/pdf_fixtures.dart';
@@ -47,7 +48,7 @@ class PdfRobot {
   /// outcome (callers wait for the editor or an error SnackBar).
   Future<void> importFixture(PdfFixture fixture) async {
     final file = await fixture.writeToTemp();
-    final context = tester.element(find.byTooltip('Yeni Belge').first);
+    final context = tester.element(find.byType(LibraryNewButton).first);
     // Not awaited: the import pumps its own dialog and route.
     importPdfFile(
       context,

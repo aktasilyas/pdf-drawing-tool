@@ -7,9 +7,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/index.dart';
+import 'package:example_app/features/documents/presentation/l10n/library_labels.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/sidebar_item.dart';
 import 'package:example_app/features/documents/presentation/widgets/folder_tile_art.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// Library sidebar sections.
 ///
@@ -43,6 +45,7 @@ class DocumentsSidebar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final foldersAsync = ref.watch(foldersProvider);
     final palette = context.palette;
+    final l10n = context.l10n;
 
     return Container(
       width: AppSpacing.sidebarWidth,
@@ -58,19 +61,19 @@ class DocumentsSidebar extends ConsumerWidget {
           _navItem(
             icon: ElyanotesIcons.libraryNotebook,
             selectedIcon: ElyanotesIcons.libraryNotebookFill,
-            label: 'Tüm Notlar',
+            l10n: l10n,
             section: SidebarSection.documents,
           ),
           _navItem(
             icon: ElyanotesIcons.libraryStar,
             selectedIcon: ElyanotesIcons.libraryStarFill,
-            label: 'Favoriler',
+            l10n: l10n,
             section: SidebarSection.favorites,
           ),
           _navItem(
             icon: ElyanotesIcons.libraryTrash,
             selectedIcon: ElyanotesIcons.libraryTrashFill,
-            label: 'Son Silinenler',
+            l10n: l10n,
             section: SidebarSection.trash,
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -89,13 +92,13 @@ class DocumentsSidebar extends ConsumerWidget {
   Widget _navItem({
     required IconData icon,
     required IconData selectedIcon,
-    required String label,
+    required AppLocalizations l10n,
     required SidebarSection section,
   }) {
     return SidebarItem(
       icon: icon,
       selectedIcon: selectedIcon,
-      label: label,
+      label: section.title(l10n),
       isSelected: selectedSection == section,
       onTap: () => onSectionChanged(section),
     );
@@ -125,7 +128,7 @@ class DocumentsSidebar extends ConsumerWidget {
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Text(
-                  'elyanotes',
+                  'elyanotes', // l10n-ignore
                   style: TextStyle(
                     fontFamily: 'ComicRelief',
                     fontSize: 22,
@@ -143,7 +146,9 @@ class DocumentsSidebar extends ConsumerWidget {
                   : ElyanotesIcons.librarySidebar,
               variant: AppIconButtonVariant.ghost,
               size: AppIconButtonSize.small,
-              tooltip: isDrawer ? 'Kapat' : 'Daralt',
+              tooltip: isDrawer
+                  ? context.l10n.commonClose
+                  : context.l10n.librarySidebarCollapse,
               onPressed: onCollapse,
             ),
         ],
@@ -153,6 +158,7 @@ class DocumentsSidebar extends ConsumerWidget {
 
   Widget _buildFoldersHeader(BuildContext context) {
     final palette = context.palette;
+    final l10n = context.l10n;
 
     return SizedBox(
       height: AppSpacing.minTouchTarget,
@@ -163,7 +169,7 @@ class DocumentsSidebar extends ConsumerWidget {
           children: [
             Expanded(
               child: Text(
-                'Klasörler',
+                l10n.libraryFolders,
                 style: AppTypography.labelMedium
                     .copyWith(color: palette.textMuted),
               ),
@@ -178,7 +184,7 @@ class DocumentsSidebar extends ConsumerWidget {
                 splashFactory: NoSplash.splashFactory,
               ),
               child: Text(
-                'Yönet',
+                l10n.libraryManage,
                 style:
                     AppTypography.labelMedium.copyWith(color: palette.accent),
               ),
@@ -187,7 +193,7 @@ class DocumentsSidebar extends ConsumerWidget {
               icon: ElyanotesIcons.libraryPlus,
               variant: AppIconButtonVariant.ghost,
               size: AppIconButtonSize.small,
-              tooltip: 'Yeni Klasör',
+              tooltip: l10n.libraryNewFolder,
               onPressed: onCreateFolder,
             ),
           ],
@@ -205,7 +211,7 @@ class DocumentsSidebar extends ConsumerWidget {
           return Padding(
             padding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.lg, vertical: AppSpacing.xs),
-            child: Text('Klasör yok',
+            child: Text(context.l10n.libraryNoFolders,
                 style: AppTypography.caption
                     .copyWith(color: context.palette.textMuted)),
           );
