@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:drawing_ui/src/panels/export_panel.dart';
 import 'package:drawing_ui/src/panels/page_options_widgets.dart';
+import 'package:drawing_ui/src/panels/png_export_action.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 
@@ -43,10 +44,7 @@ class DocumentOptionsPanel extends ConsumerWidget {
             label: 'PNG Olarak Dışa Aktar',
             onTap: () {
               onClose();
-              final document = ref.read(documentProvider);
-              final notifier = ref.read(exportProgressProvider.notifier);
-              final boundaryKey = ref.read(canvasBoundaryKeyProvider);
-              performPNGExport(notifier, boundaryKey, title: document.title);
+              exportCurrentPageAsPNG(ref);
             },
           )
         else
