@@ -64,6 +64,20 @@ void main() {
     expect(opened.values.every((s) => s.closed), isTrue);
   });
 
+  test('PDF page content is still rendered with includeBackground off',
+      () async {
+    final source = _FakeSource();
+    final exporter = PDFExporter(sourceOpener: (_) async => source);
+
+    final result = await exporter.exportPages(
+      pages: [_pdfPage(0, '/a.pdf')],
+      options: const PDFExportOptions(includeBackground: false),
+    );
+
+    expect(result.isSuccess, isTrue, reason: result.errorMessage);
+    expect(source.renders, 1);
+  });
+
   test('relative stored paths are resolved before the pool lookup', () async {
     const resolver = PdfPathResolver('/docs');
     final resolved = resolver.resolve('book.pdf');
