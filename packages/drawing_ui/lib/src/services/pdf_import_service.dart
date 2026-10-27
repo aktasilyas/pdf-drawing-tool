@@ -13,6 +13,9 @@ import 'pdf_to_page_converter.dart';
 export 'pdf_import_errors.dart';
 export 'pdf_import_models.dart';
 
+const _unreadablePagesMessage =
+    'PDF sayfaları okunamadı. Dosya bozuk olabilir.';
+
 /// Service for orchestrating PDF import workflow.
 class PDFImportService {
   final PDFLoader _loader;
@@ -153,14 +156,23 @@ class PDFImportService {
 
       // Copy the PDF to app storage (the original may be deleted), then
       // open the copy lazily. The copy is removed again on any failure.
-      return await storePdfAndImport(
+      final result = await storePdfAndImport(
         file: await newImportedPdfFile(_pdfPaths),
         write: (file) => File(filePath).copy(file.path),
         import: (file) => _importLazily(file.path, config),
         isFailure: (result) => !result.isSuccess,
       );
+      // Pages unreadable after open: a locked file on some platforms.
+      if (result.errorMessage != _unreadablePagesMessage ||
+          !await pdfFileLooksEncrypted(filePath)) {
+        return result;
+      }
+      _setError(pdfPasswordProtectedMessage);
+      return PDFImportServiceResult.error(pdfPasswordProtectedMessage);
     } catch (e) {
-      final message = friendlyPdfImportError(e);
+      final message = await pdfFileLooksEncrypted(filePath)
+          ? pdfPasswordProtectedMessage
+          : friendlyPdfImportError(e);
       _setError(message);
       return PDFImportServiceResult.error(message);
     }
@@ -270,9 +282,7 @@ class PDFImportService {
     await _loader.disposeDocument(document);
 
     if (pages.isEmpty) {
-      return PDFImportServiceResult.error(
-        'PDF sayfaları okunamadı. Dosya bozuk olabilir.',
-      );
+      return PDFImportServiceResult.error(_unreadablePagesMessage);
     }
 
     _updateState(PDFImportState.completed);
