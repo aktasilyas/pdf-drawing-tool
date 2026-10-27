@@ -179,4 +179,3 @@ class LassoSettingsNotifier extends StateNotifier<LassoSettings> {
     _save();
   }
 }
-
