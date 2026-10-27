@@ -176,4 +176,39 @@ void main() {
         matching: find.byType(TextField)));
     expect(to.controller!.text, '3');
   });
+
+  // CI goldens draw editable text as a plain block, so the range digits'
+  // colour is checked here instead.
+  testWidgets('range digits use the on-surface colour in dark mode',
+      (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+    final theme = chromeTheme(Brightness.dark);
+    await tester.pumpWidget(ProviderScope(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+        isInfiniteCanvasProvider.overrideWith((ref) => false),
+        pageCountProvider.overrideWithValue(5),
+      ],
+      child: MaterialApp(
+        theme: theme,
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: ExportPanel(
+              onClose: () {},
+              embedded: true,
+              initialOptions: const ExportOptions(
+                  scope: ExportPageScope.range, from: 2, to: 4),
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    for (final key in ['export-range-from', 'export-range-to']) {
+      final editable = tester.widget<EditableText>(find.descendant(
+          of: find.byKey(ValueKey(key)), matching: find.byType(EditableText)));
+      expect(editable.style.color, theme.colorScheme.onSurface);
+    }
+  });
 }
