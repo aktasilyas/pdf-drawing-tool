@@ -40,8 +40,8 @@ void main() {
     test('colour change keeps pattern and spacing', () {
       const bg = PageBackground(
           type: BackgroundType.grid, gridSpacing: 25, lineColor: 0xFFCCCCCC);
-      final next =
-          InfiniteBackgroundBuilder.withColor(bg, InfiniteBackgroundColors.black);
+      final next = InfiniteBackgroundBuilder.withColor(
+          bg, InfiniteBackgroundColors.black);
       expect(next.type, BackgroundType.grid);
       expect(next.gridSpacing, 25);
       expect(next.color, InfiniteBackgroundColors.black);

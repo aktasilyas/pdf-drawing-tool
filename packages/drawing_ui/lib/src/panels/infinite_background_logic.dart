@@ -68,8 +68,7 @@ abstract final class InfiniteBackgroundBuilder {
   ) {
     switch (pattern) {
       case InfiniteBackgroundPattern.plain:
-        return PageBackground(
-            type: BackgroundType.blank, color: current.color);
+        return PageBackground(type: BackgroundType.blank, color: current.color);
       case InfiniteBackgroundPattern.dotted:
         return PageBackground(
             type: BackgroundType.dotted,
