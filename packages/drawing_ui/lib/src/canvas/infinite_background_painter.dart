@@ -81,13 +81,11 @@ class InfiniteBackgroundPainter extends CustomPainter {
 
           // Only render if zoomed enough to see patterns
           if (effectiveSpacingMm > 1.0) {
-            final templatePainter = TemplatePatternPainter(
-              pattern: background.templatePattern!,
-              spacingMm: spacingMm,
-              lineWidth: (background.templateLineWidth ?? 0.5) * zoom,
+            final templatePainter = TemplatePatternPainter.fromBackground(
+              background,
               lineColor: lineColor,
-              backgroundColor: Colors.transparent,
               pageSize: size,
+              lineWidthScale: zoom,
             );
 
             // Apply zoom transformation

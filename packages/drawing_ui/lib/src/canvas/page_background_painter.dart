@@ -34,6 +34,7 @@ class PageBackgroundPatternPainter extends CustomPainter {
     return '${background.type}_${background.lineColor}_'
         '${background.gridSpacing}_${background.lineSpacing}_'
         '${background.templatePattern}_${background.templateSpacingMm}_'
+        '${background.templateLineWidth}_${background.templateExtraData}_'
         '${background.coverId}_${size.width}_${size.height}_'
         '${colorScheme?.hashCode}_${CoverTextureStore.isLoaded}';
   }
@@ -106,12 +107,9 @@ class PageBackgroundPatternPainter extends CustomPainter {
       case BackgroundType.template:
         // Use TemplatePatternPainter for accurate template rendering
         if (background.templatePattern != null) {
-          final templatePainter = TemplatePatternPainter(
-            pattern: background.templatePattern!,
-            spacingMm: background.templateSpacingMm ?? 8.0,
-            lineWidth: background.templateLineWidth ?? 0.5,
+          final templatePainter = TemplatePatternPainter.fromBackground(
+            background, // Fill is already painted by the canvas
             lineColor: lineColor,
-            backgroundColor: Colors.transparent, // Already painted by canvas
             pageSize: size,
           );
           templatePainter.paint(canvas, size);
