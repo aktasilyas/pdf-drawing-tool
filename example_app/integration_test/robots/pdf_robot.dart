@@ -76,7 +76,9 @@ class PdfRobot {
       await tester.tapAndWait(button);
     } else {
       await tester.tapAndWait(find.byTooltip(s.more).hitTestable());
-      final item = find.text(s.export);
+      // The "More" menu is the page options panel, still Turkish until
+      // editor slice 3c (#327).
+      final item = find.text('Dışa Aktar');
       await tester.pumpUntilFound(item);
       await tester.ensureVisible(item.first);
       await tester.pumpFor(const Duration(milliseconds: 300));
