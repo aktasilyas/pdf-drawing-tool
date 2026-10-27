@@ -1,4 +1,5 @@
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_core/src/history/ordered_restore.dart';
 
 /// Shape silme komutu
 class RemoveShapeCommand implements DrawingCommand {
@@ -10,6 +11,9 @@ class RemoveShapeCommand implements DrawingCommand {
 
   /// Undo için silinen shape'i cache'le
   Shape? _removedShape;
+
+  /// Original index of the removed shape in `Layer.shapes`.
+  int _removedIndex = 0;
 
   /// Cached elementOrder before execute (for undo z-order restore).
   List<String> _originalElementOrder = const [];
@@ -33,6 +37,7 @@ class RemoveShapeCommand implements DrawingCommand {
 
     // Silinecek shape'i cache'le
     _removedShape = layer.getShapeById(shapeId);
+    _removedIndex = layer.shapes.indexWhere((s) => s.id == shapeId);
 
     final updatedLayer = layer.removeShape(shapeId);
     return document.updateLayer(layerIndex, updatedLayer);
@@ -47,12 +52,11 @@ class RemoveShapeCommand implements DrawingCommand {
     }
 
     var layer = document.layers[layerIndex];
-    layer = layer.addShape(_removedShape!);
-
-    // Restore original elementOrder (addShape appends to end, wrong z-order)
-    if (_originalElementOrder.isNotEmpty) {
-      layer = layer.copyWith(elementOrder: _originalElementOrder);
-    }
+    layer = layer.copyWith(
+      shapes:
+          reinsertAt(layer.shapes, [MapEntry(_removedIndex, _removedShape!)]),
+      elementOrder: _originalElementOrder,
+    );
 
     return document.updateLayer(layerIndex, layer);
   }
