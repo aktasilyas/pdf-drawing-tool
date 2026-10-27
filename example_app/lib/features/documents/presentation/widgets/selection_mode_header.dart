@@ -130,7 +130,10 @@ class SelectionModeHeader extends ConsumerWidget {
 
     final controller = ref.read(documentsControllerProvider.notifier);
     try {
-      await controller.duplicateDocuments(selectedDocs.toList());
+      await controller.duplicateDocuments(
+        selectedDocs.toList(),
+        copyTitle: context.l10n.libraryCopyTitle,
+      );
       _exitSelectionMode(ref);
       if (context.mounted) {
         AppToast.success(

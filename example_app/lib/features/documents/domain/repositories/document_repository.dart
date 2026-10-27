@@ -47,8 +47,14 @@ abstract class DocumentRepository {
   /// Delete document
   Future<Either<Failure, void>> deleteDocument(String id);
 
-  /// Duplicate document (create a copy)
-  Future<Either<Failure, DocumentInfo>> duplicateDocument(String id);
+  /// Duplicate document (create a copy).
+  ///
+  /// [copyTitle] builds the title of the copy from the original title; the
+  /// presentation layer supplies the localized "(copy)" suffix.
+  Future<Either<Failure, DocumentInfo>> duplicateDocument(
+    String id, {
+    required String Function(String title) copyTitle,
+  });
 
   /// Move document to folder
   Future<Either<Failure, void>> moveDocument(String id, String? folderId);

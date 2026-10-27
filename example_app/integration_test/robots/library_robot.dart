@@ -132,7 +132,8 @@ class LibraryRobot {
 
   Future<void> rename(String from, String to) async {
     await openMenu(from);
-    await tester.tapAndWait(find.text('Yeniden Adlandır'));
+    final l10n = _l10n;
+    await tester.tapAndWait(find.text(l10n.commonRename));
     final dialog = find.byType(AlertDialog);
     await tester.pumpUntilFound(dialog);
     final field = find.descendant(
@@ -141,24 +142,24 @@ class LibraryRobot {
     );
     await tester.enterText(field, to);
     await tester.pumpFor(const Duration(milliseconds: 300));
-    await tester.tapAndWait(find.text('Kaydet'));
+    await tester.tapAndWait(find.text(l10n.commonSave));
     await tester.pumpUntilGone(dialog);
   }
 
   Future<void> addToFavorites(String title) async {
     await openMenu(title);
-    await tester.tapAndWait(find.text('Favorilere Ekle'));
+    await tester.tapAndWait(find.text(_l10n.libraryAddToFavorites));
   }
 
   Future<void> moveToTrash(String title) async {
     await openMenu(title);
-    await tester.tapAndWait(find.text('Çöpe Taşı'));
+    await tester.tapAndWait(find.text(_l10n.libraryMoveToTrash));
   }
 
-  /// Restores a trashed tile ("Kurtar" in the trash menu).
+  /// Restores a trashed tile ("Restore" in the trash menu).
   Future<void> restore(String title) async {
     await openMenu(title);
-    await tester.tapAndWait(find.text('Kurtar'));
+    await tester.tapAndWait(find.text(_l10n.commonRestore));
   }
 
   /// Switches the sidebar section, opening the drawer / collapsed sidebar

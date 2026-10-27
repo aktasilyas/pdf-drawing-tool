@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:drawing_ui/drawing_ui.dart' show ElyanotesIcons;
 
 import 'package:example_app/core/theme/index.dart';
@@ -7,6 +8,7 @@ import 'package:example_app/features/documents/domain/entities/document_info.dar
 import 'package:example_app/features/documents/domain/entities/folder.dart';
 import 'package:example_app/features/documents/presentation/widgets/library_tile_frame.dart';
 import 'package:example_app/features/documents/presentation/widgets/library_tile_parts.dart';
+import 'package:example_app/l10n/l10n.dart';
 import '../../../../helpers/l10n.dart';
 
 Widget _host(ThemeData theme, Widget child) => localizedApp(
@@ -67,6 +69,10 @@ void main() {
   });
 
   group('LibraryMeta', () {
+    final tr = lookupAppLocalizations(const Locale('tr'));
+    final en = lookupAppLocalizations(const Locale('en'));
+    setUpAll(initializeDateFormatting);
+
     final doc = DocumentInfo(
       id: 'd',
       title: 'T',
@@ -76,13 +82,21 @@ void main() {
     );
 
     test('document with one page has no page count', () {
-      expect(LibraryMeta.document(doc), '12 Eki 2026');
+      expect(LibraryMeta.document(doc, tr), '12 Eki 2026');
     });
 
     test('document with several pages adds the count', () {
       expect(
-        LibraryMeta.document(doc.copyWith(pageCount: 24)),
+        LibraryMeta.document(doc.copyWith(pageCount: 24), tr),
         '12 Eki 2026 · 24 sayfa',
+      );
+    });
+
+    test('english uses the locale date format and plurals', () {
+      expect(LibraryMeta.document(doc, en), 'Oct 12, 2026');
+      expect(
+        LibraryMeta.document(doc.copyWith(pageCount: 2), en),
+        'Oct 12, 2026 · 2 pages',
       );
     });
 
@@ -93,7 +107,9 @@ void main() {
         createdAt: DateTime(2026, 10, 1),
         documentCount: 4,
       );
-      expect(LibraryMeta.folder(folder), '4 belge');
+      expect(LibraryMeta.folder(folder, tr), '4 belge');
+      expect(LibraryMeta.folder(folder.copyWith(documentCount: 1), en),
+          '1 document');
     });
   });
 

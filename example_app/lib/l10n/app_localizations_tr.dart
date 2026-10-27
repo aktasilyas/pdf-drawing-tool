@@ -488,6 +488,133 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String libraryPageCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sayfa',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String libraryDocumentCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count belge',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String libraryDaysLeft(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days gün',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get libraryRemoveFavoriteBadge => 'Favorilerden çıkar';
+
+  @override
+  String get libraryRemoveFromFavorites => 'Favorilerden Kaldır';
+
+  @override
+  String get libraryAddToFavorites => 'Favorilere Ekle';
+
+  @override
+  String get libraryMoveToTrash => 'Çöpe Taşı';
+
+  @override
+  String get libraryDocumentDuplicated => 'Belge çoğaltıldı';
+
+  @override
+  String get libraryDocumentMoved => 'Belge taşındı';
+
+  @override
+  String get libraryDocumentRestored => 'Belge geri yüklendi';
+
+  @override
+  String get libraryDeleteDocumentForeverMessage =>
+      'Bu belge kalıcı olarak silinecek. Bu işlem geri alınamaz!';
+
+  @override
+  String get libraryDocumentNameLabel => 'Belge Adı';
+
+  @override
+  String get libraryChangeColor => 'Renk Değiştir';
+
+  @override
+  String get libraryFolderMoved => 'Klasör taşındı';
+
+  @override
+  String get libraryFolderColorChanged => 'Klasör rengi değiştirildi';
+
+  @override
+  String get libraryDeleteFolderTitle => 'Klasörü Sil';
+
+  @override
+  String libraryDeleteFolderNonEmptyMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Bu klasörde $count belge var. Klasörü silmek belgelerini de siler. Devam etmek istiyor musunuz?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get libraryDeleteFolderMessage =>
+      'Bu klasörü silmek istediğinize emin misiniz?';
+
+  @override
+  String get libraryFolderDeleted => 'Klasör silindi';
+
+  @override
+  String get libraryRenameFolderTitle => 'Klasörü Yeniden Adlandır';
+
+  @override
+  String get libraryFolderNameLabel => 'Klasör adı';
+
+  @override
+  String libraryFolderRenamed(String name) {
+    return 'Klasör \"$name\" olarak yeniden adlandırıldı';
+  }
+
+  @override
+  String libraryPageNumber(int page) {
+    return 'Sayfa $page';
+  }
+
+  @override
+  String libraryTrashedPageTitle(String document, int page) {
+    return '$document — Sayfa $page';
+  }
+
+  @override
+  String get librarySourceDocumentMissing => 'Kaynak belge bulunamadı';
+
+  @override
+  String get libraryPageRestored => 'Sayfa geri yüklendi';
+
+  @override
+  String get libraryPageRestoreFailed => 'Sayfa geri yüklenemedi';
+
+  @override
+  String get libraryDeletePageForeverMessage =>
+      'Bu sayfa kalıcı olarak silinecek. Bu işlem geri alınamaz!';
+
+  @override
+  String libraryCopyTitle(String title) {
+    return '$title (kopya)';
+  }
+
+  @override
   String get editorDocumentNameLabel => 'Belge Adı';
 
   @override
