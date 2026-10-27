@@ -40,7 +40,8 @@ class EditorRobot {
   final WidgetTester tester;
 
   /// Home button of the phone, medium and full toolbar layouts.
-  Finder get _homeButton => find.byTooltip('Ana Sayfa');
+  Finder get _homeButton =>
+      find.byTooltip(tester.drawingStrings.toolbar.home);
 
   Finder get _canvas => find.byType(DrawingCanvas).first;
 
@@ -178,11 +179,15 @@ class EditorRobot {
       swipe(Offset(0.5, fy - 0.05), Offset(0.5, fy + 0.05));
 
   Future<void> undo() async {
-    await tester.tapAndWait(find.byTooltip('Geri al').hitTestable());
+    await tester.tapAndWait(
+      find.byTooltip(tester.drawingStrings.toolbar.undo).hitTestable(),
+    );
   }
 
   Future<void> redo() async {
-    await tester.tapAndWait(find.byTooltip('İleri al').hitTestable());
+    await tester.tapAndWait(
+      find.byTooltip(tester.drawingStrings.toolbar.redo).hitTestable(),
+    );
   }
 
   /// Waits until the page holds exactly the stroke ids in [expected]
