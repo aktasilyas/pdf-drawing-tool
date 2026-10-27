@@ -41,6 +41,22 @@ PdfImage addCompressedRgbaImage(PdfDocument doc, PdfRawImage raw) {
   return img;
 }
 
+/// Adds [raw] to [doc] as an opaque, Flate-compressed RGB image XObject
+/// (alpha is dropped, no soft mask). For fully opaque rasters such as page
+/// backgrounds: one image object instead of two, and a smaller file.
+PdfImage addCompressedRgbImage(PdfDocument doc, PdfRawImage raw) {
+  final pixels = raw.width * raw.height;
+  final rgba = raw.bytes;
+  final rgb = Uint8List(pixels * 3);
+  for (var i = 0, p = 0; i < pixels; i++, p += 3) {
+    final s = i * 4;
+    rgb[p] = rgba[s];
+    rgb[p + 1] = rgba[s + 1];
+    rgb[p + 2] = rgba[s + 2];
+  }
+  return _emptyImage(doc, raw, '/DeviceRGB')..buf.putBytes(zlib.encode(rgb));
+}
+
 /// A data-less image object. A 0×0 raw image writes no stream bytes, so the
 /// caller can supply a pre-compressed stream instead.
 PdfImage _emptyImage(PdfDocument doc, PdfRawImage raw, String colorSpace) {

@@ -2,20 +2,18 @@ import 'dart:io';
 import 'dart:ui' as ui;
 import 'dart:typed_data';
 import 'package:flutter/material.dart' hide Page;
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/canvas/image_painter.dart';
-import 'package:drawing_ui/src/canvas/page_background_painter.dart';
-import 'package:drawing_ui/src/painters/cover/cover_texture_store.dart';
+import 'package:drawing_ui/src/canvas/page_background_raster.dart';
 import 'package:drawing_ui/src/services/pdf_raster_layer_renderer.dart';
 import 'package:pdfx/pdfx.dart' as pdfx;
 
 /// Generates thumbnail images for pages.
 ///
 /// A thumbnail is a scaled-down render of the page with the same painters as
-/// the canvas: [PageBackgroundPatternPainter] (and through it
-/// `TemplatePatternPainter` / `CoverRenderer`) for the background, and
-/// `ElementSceneRenderer` / `StickyNotePainter` (via
+/// the canvas: [PageBackgroundRaster] (`PageBackgroundPatternPainter`, and
+/// through it `TemplatePatternPainter` / `CoverRenderer`) for the background,
+/// and `ElementSceneRenderer` / `StickyNotePainter` (via
 /// [PdfRasterLayerRenderer]) for the layer content. There is no second,
 /// simplified renderer here.
 class ThumbnailGenerator {
@@ -57,10 +55,7 @@ class ThumbnailGenerator {
       if (page.background.type == BackgroundType.pdf) {
         pdfImage = await _loadPdfBackground(page, pdfPaths);
       }
-      coverImage = await _loadCoverImage(page.background);
-      if (_isMaterialCover(page.background)) {
-        await CoverTextureStore.ensureLoaded();
-      }
+      coverImage = await PageBackgroundRaster.prepare(page.background);
       final visibleLayers = [
         for (final layer in page.layers)
           if (layer.isVisible) layer,
@@ -90,7 +85,7 @@ class ThumbnailGenerator {
       canvas.scale(scale);
 
       final pageSize = Size(page.size.width, page.size.height);
-      _paintBackground(canvas, page.background, pageSize, coverImage);
+      PageBackgroundRaster.paint(canvas, page.background, pageSize, coverImage);
       if (pdfImage != null) {
         canvas.drawImageRect(
           pdfImage,
@@ -131,54 +126,6 @@ class ThumbnailGenerator {
       images.dispose();
       pdfImage?.dispose();
       coverImage?.dispose();
-    }
-  }
-
-  /// Base color, then the image cover (if any), then the canvas background
-  /// painter (grid / lines / dots / templates / material and other covers).
-  static void _paintBackground(
-    Canvas canvas,
-    PageBackground background,
-    Size size,
-    ui.Image? coverImage,
-  ) {
-    canvas.drawRect(
-      Offset.zero & size,
-      Paint()..color = Color(background.color),
-    );
-    if (coverImage != null) {
-      canvas.drawImageRect(
-        coverImage,
-        Rect.fromLTWH(
-            0, 0, coverImage.width.toDouble(), coverImage.height.toDouble()),
-        Offset.zero & size,
-        Paint()..filterQuality = FilterQuality.medium,
-      );
-    }
-    PageBackgroundPatternPainter(background: background).paint(canvas, size);
-  }
-
-  static bool _isMaterialCover(PageBackground background) {
-    if (background.type != BackgroundType.cover) return false;
-    final id = background.coverId;
-    return id != null && CoverRegistry.byId(id)?.style == CoverStyle.material;
-  }
-
-  /// Loads the asset of an image cover; null for every other background or
-  /// when the asset cannot be loaded (the base color stays visible).
-  static Future<ui.Image?> _loadCoverImage(PageBackground background) async {
-    if (background.type != BackgroundType.cover) return null;
-    final id = background.coverId;
-    final cover = id == null ? null : CoverRegistry.byId(id);
-    if (cover?.style != CoverStyle.image || cover?.imagePath == null) {
-      return null;
-    }
-    try {
-      final data = await rootBundle.load(cover!.imagePath!);
-      final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
-      return (await codec.getNextFrame()).image;
-    } catch (_) {
-      return null;
     }
   }
 

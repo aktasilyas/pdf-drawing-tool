@@ -1,13 +1,13 @@
-import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:drawing_core/drawing_core.dart';
-import 'package:flutter/material.dart' hide Page;
 import 'package:pdf/pdf.dart';
 
+import 'pdf_background_rasterizer.dart';
 import 'pdf_compressed_image.dart';
 import 'pdf_content_painter.dart';
+import 'pdf_export_bounds.dart';
 import 'pdf_export_models.dart';
 import 'pdf_raster_layer_renderer.dart';
 import 'pdf_source.dart';
@@ -33,6 +33,7 @@ class PDFExporter {
 
   final _contentPainter = PdfContentPainter();
   final _rasterRenderer = PdfRasterLayerRenderer();
+  final _backgrounds = PdfBackgroundRasterizer();
 
   static double _scaleFromDpi(int dpi) => dpi / 72.0;
 
@@ -48,6 +49,7 @@ class PDFExporter {
     try {
       final doc = PdfDocument();
       final sources = PdfSourcePool(_openSource);
+      _backgrounds.clear();
       try {
         for (int i = 0; i < pages.length; i++) {
           if (isCancelled?.call() == true) return PDFExportResult.cancelled();
@@ -57,6 +59,7 @@ class PDFExporter {
           onProgress?.call(i + 1, pages.length);
         }
       } finally {
+        _backgrounds.clear();
         await sources.closeAll();
       }
       final bytes = await doc.save();
@@ -74,7 +77,7 @@ class PDFExporter {
   ) async {
     double pdfW, pdfH;
     if (options.isInfiniteCanvas) {
-      final bounds = _calculateInfiniteCanvasBounds(page);
+      final bounds = infiniteCanvasExportBounds(page);
       pdfW = bounds.width;
       pdfH = bounds.height;
     } else {
@@ -86,7 +89,7 @@ class PDFExporter {
     final g = pdfPage.getGraphics();
 
     if (options.includeBackground) {
-      _contentPainter.paintBackground(g, page.background, pdfW, pdfH);
+      await _paintBackground(g, doc, page.background, pdfW, pdfH, options);
     }
     if (page.background.type == BackgroundType.pdf) {
       await _embedPdfBackground(g, doc, page, pdfW, pdfH, options, sources);
@@ -99,6 +102,27 @@ class PDFExporter {
     if (options.addWatermark) {
       _drawWatermark(g, doc, pdfW, pdfH);
     }
+  }
+
+  /// Templates and covers go through the canvas painters as one cached
+  /// full-page image; legacy patterns stay vector.
+  Future<void> _paintBackground(
+    PdfGraphics g,
+    PdfDocument doc,
+    PageBackground bg,
+    double w,
+    double h,
+    PDFExportOptions options,
+  ) async {
+    if (PdfBackgroundRasterizer.handles(bg)) {
+      final img =
+          await _backgrounds.imageFor(doc, bg, w, h, options.quality.dpi);
+      if (img != null) {
+        g.drawImage(img, 0, 0, w, h);
+        return;
+      }
+    }
+    _contentPainter.paintBackground(g, bg, w, h);
   }
 
   /// Draws a small, semi-transparent "ElyaNotes" watermark at the
@@ -205,64 +229,6 @@ class PDFExporter {
     final source = await sources.get(path);
     if (source == null) return null;
     return source.renderJpeg(index, renderScale);
-  }
-
-  Rect? _calculateContentBounds(Page page) {
-    double? minX, minY, maxX, maxY;
-    void expand(BoundingBox b) {
-      minX = minX == null ? b.left : min(minX!, b.left);
-      minY = minY == null ? b.top : min(minY!, b.top);
-      maxX = maxX == null ? b.right : max(maxX!, b.right);
-      maxY = maxY == null ? b.bottom : max(maxY!, b.bottom);
-    }
-
-    for (final layer in page.layers) {
-      if (!layer.isVisible) continue;
-      for (final stroke in layer.strokes) {
-        final b = stroke.bounds;
-        if (b != null) expand(b);
-      }
-      for (final shape in layer.shapes) {
-        expand(shape.bounds);
-      }
-      for (final img in layer.images) {
-        expand(img.bounds);
-      }
-      for (final text in layer.texts) {
-        expand(text.bounds);
-      }
-      for (final note in layer.stickyNotes) {
-        expand(note.bounds);
-      }
-    }
-    if (minX == null) return null;
-    return Rect.fromLTRB(minX!, minY!, maxX!, maxY!);
-  }
-
-  ({double width, double height, double offsetX, double offsetY})
-      _calculateInfiniteCanvasBounds(Page page) {
-    final pageW = page.size.width;
-    final pageH = page.size.height;
-    final contentRect = _calculateContentBounds(page);
-    const padding = 24.0;
-    final double left, top, right, bottom;
-    if (contentRect != null) {
-      left = min(0.0, contentRect.left - padding);
-      top = min(0.0, contentRect.top - padding);
-      right = max(pageW, contentRect.right + padding);
-      bottom = max(pageH, contentRect.bottom + padding);
-    } else {
-      left = 0;
-      top = 0;
-      right = pageW;
-      bottom = pageH;
-    }
-    return (
-      width: right - left,
-      height: bottom - top,
-      offsetX: -left,
-      offsetY: -top,
-    );
   }
 
   /// Decodes PNG bytes to raw RGBA using Flutter's native image codec.
