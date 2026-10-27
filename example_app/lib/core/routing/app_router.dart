@@ -2,7 +2,7 @@
 ///
 /// Routes are organized by feature:
 /// - Auth routes (login, register)
-/// - Document routes (list, folder, favorites)
+/// - Document routes (library; folders, favorites, recents, trash are in-screen sections)
 /// - Editor routes
 /// - Settings routes
 /// - Premium routes
@@ -93,31 +93,6 @@ GoRouter buildAppRouter(
         builder: (context, state) => const DocumentsScreen(),
       ),
       GoRoute(
-        path: RouteNames.folder,
-        name: 'folder',
-        builder: (context, state) {
-          // TODO: Pass folderId to DocumentsScreen when implemented
-          // final folderId = state.pathParameters['folderId']!;
-          return const DocumentsScreen();
-        },
-      ),
-      GoRoute(
-        path: RouteNames.favorites,
-        name: 'favorites',
-        builder: (context, state) =>
-            const _PlaceholderScreen(title: 'Favorites'),
-      ),
-      GoRoute(
-        path: RouteNames.recent,
-        name: 'recent',
-        builder: (context, state) => const _PlaceholderScreen(title: 'Recent'),
-      ),
-      GoRoute(
-        path: RouteNames.trash,
-        name: 'trash',
-        builder: (context, state) => const _PlaceholderScreen(title: 'Trash'),
-      ),
-      GoRoute(
         path: '/manage-folders',
         name: 'manageFolders',
         builder: (context, state) => const ManageFoldersScreen(),
@@ -176,11 +151,7 @@ GoRouter buildAppRouter(
     ],
 
     // Error handling
-    errorBuilder: (context, state) => Scaffold(
-      body: Center(
-        child: Text('Sayfa bulunamadı: ${state.uri}'),
-      ),
-    ),
+    errorBuilder: libraryFallbackBuilder,
 
     redirect: (context, state) {
       if (!flags.needsSupabase && _authPaths.contains(state.uri.path)) {
@@ -192,6 +163,30 @@ GoRouter buildAppRouter(
       return null;
     },
   );
+}
+
+/// Unknown paths (stale deep links) land on the library, not an error page.
+Widget libraryFallbackBuilder(BuildContext context, GoRouterState state) =>
+    const _RedirectToLibrary();
+
+class _RedirectToLibrary extends StatefulWidget {
+  const _RedirectToLibrary();
+
+  @override
+  State<_RedirectToLibrary> createState() => _RedirectToLibraryState();
+}
+
+class _RedirectToLibraryState extends State<_RedirectToLibrary> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) context.go(RouteNames.documents);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => const Scaffold();
 }
 
 /// Temporary placeholder screen for routes not yet implemented

@@ -10,10 +10,6 @@ abstract class RouteNames {
 
   // Main
   static const String documents = '/documents';
-  static const String folder = '/folder/:folderId';
-  static const String favorites = '/favorites';
-  static const String recent = '/recent';
-  static const String trash = '/trash';
 
   // Editor
   static const String editor = '/editor/:documentId';
@@ -31,13 +27,7 @@ abstract class RouteNames {
   // Helper methods for parameterized routes
   /// True for routes behind splash / auth, where a document may be opened.
   static bool isLibraryRoute(String path) =>
-      path.startsWith(documents) ||
-      path.startsWith('/editor/') ||
-      path.startsWith('/folder/') ||
-      path == favorites ||
-      path == recent ||
-      path == trash;
+      path.startsWith(documents) || path.startsWith('/editor/');
 
-  static String folderPath(String folderId) => '/folder/$folderId';
   static String editorPath(String documentId) => '/editor/$documentId';
 }

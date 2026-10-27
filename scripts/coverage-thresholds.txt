@@ -1,3 +1,5 @@
 # Line coverage floors checked by scripts/coverage.sh in CI: <package-dir> <min %>
 # Raise a floor when coverage goes up; never lower it to make CI pass.
 packages/drawing_core 67.85
+packages/drawing_ui 55.3
+example_app 46.2
