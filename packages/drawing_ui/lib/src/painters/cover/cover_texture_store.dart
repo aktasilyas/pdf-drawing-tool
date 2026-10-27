@@ -1,3 +1,4 @@
+import 'package:drawing_ui/src/utils/drawing_log.dart';
 import 'dart:async';
 import 'dart:ui' as ui;
 
@@ -46,7 +47,7 @@ class CoverTextureStore {
         _images[material] = frame.image;
         revision.value++;
       } catch (e) {
-        debugPrint('CoverTextureStore: decode failed for $material: $e');
+        DrawingLog.e('CoverTextureStore: decode failed for $material: $e');
       }
     }
   }
@@ -63,7 +64,7 @@ class CoverTextureStore {
         continue;
       }
     }
-    debugPrint('CoverTextureStore: texture $name not found');
+    DrawingLog.w('CoverTextureStore: texture $name not found');
     return null;
   }
 

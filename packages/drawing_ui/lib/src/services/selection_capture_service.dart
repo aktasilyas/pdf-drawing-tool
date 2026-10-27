@@ -6,6 +6,7 @@ import 'package:drawing_core/drawing_core.dart';
 import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
 import 'package:pasteboard/pasteboard.dart';
 
+import 'package:drawing_ui/src/utils/drawing_log.dart';
 import 'package:drawing_ui/src/canvas/image_painter.dart';
 
 /// Service for capturing selected elements as PNG images.
@@ -102,7 +103,7 @@ class SelectionCaptureService {
 
       return byteData?.buffer.asUint8List();
     } catch (e) {
-      debugPrint('SelectionCaptureService: captureSelection failed: $e');
+      DrawingLog.e('SelectionCaptureService: captureSelection failed: $e');
       return null;
     }
   }
@@ -148,7 +149,7 @@ class SelectionCaptureService {
       }
       return result != null;
     } catch (e) {
-      debugPrint('SelectionCaptureService: saveToGallery failed: $e');
+      DrawingLog.e('SelectionCaptureService: saveToGallery failed: $e');
       return false;
     }
   }
@@ -159,7 +160,7 @@ class SelectionCaptureService {
       await Pasteboard.writeImage(bytes);
       return true;
     } catch (e) {
-      debugPrint('SelectionCaptureService: copyToClipboard failed: $e');
+      DrawingLog.e('SelectionCaptureService: copyToClipboard failed: $e');
       return false;
     }
   }
@@ -290,7 +291,7 @@ class SelectionCaptureService {
       final frame = await codec.getNextFrame();
       return frame.image;
     } catch (e) {
-      debugPrint('SelectionCaptureService: decode PDF image failed: $e');
+      DrawingLog.e('SelectionCaptureService: decode PDF image failed: $e');
       return null;
     }
   }

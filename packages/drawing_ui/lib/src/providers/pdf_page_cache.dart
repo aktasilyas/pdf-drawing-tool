@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdfx/pdfx.dart';
 
+import 'package:drawing_ui/src/utils/drawing_log.dart';
 import 'package:drawing_ui/src/providers/pdf_path_provider.dart';
 import 'package:drawing_ui/src/services/pdf_page_renderer.dart';
 import 'package:drawing_ui/src/services/pdf_render_slots.dart';
@@ -64,7 +65,7 @@ Future<Uint8List?> rasterizePdfPage(
   double quality,
 ) async {
   if (!await File(filePath).exists()) {
-    debugPrint('PDF file not found: $filePath');
+    DrawingLog.w('PDF file not found: $filePath');
     return null;
   }
   PdfDocument? document;
@@ -84,7 +85,7 @@ Future<Uint8List?> rasterizePdfPage(
     );
     return image?.bytes;
   } catch (e) {
-    debugPrint('PDF render error: $e');
+    DrawingLog.e('PDF render error: $e');
     return null;
   } finally {
     try {

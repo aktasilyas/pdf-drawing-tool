@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:drawing_ui/src/utils/drawing_log.dart';
 import 'package:drawing_ui/src/canvas/image_painter.dart';
 import 'package:drawing_ui/src/providers/document_provider.dart';
 import 'package:drawing_ui/src/providers/pdf_render_provider.dart';
@@ -81,7 +82,7 @@ Future<void> screenshotSelection(
     }
     showSnackBar(context, msg);
   } catch (e) {
-    debugPrint('Screenshot selection failed: $e');
+    DrawingLog.e('Screenshot selection failed: $e');
     showSnackBar(context, 'Ekran resmi oluşturulamadı');
   }
 }
@@ -129,7 +130,7 @@ Future<void> captureAndOpenAI(
       pendingNotifier.state = bytes;
     }
   } catch (e) {
-    debugPrint('Capture for AI failed: $e');
+    DrawingLog.e('Capture for AI failed: $e');
   }
 
   aiCallback();

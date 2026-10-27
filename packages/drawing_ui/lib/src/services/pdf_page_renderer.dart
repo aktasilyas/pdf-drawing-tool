@@ -1,3 +1,4 @@
+import 'package:drawing_ui/src/utils/drawing_log.dart';
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:pdfx/pdfx.dart';
@@ -222,7 +223,7 @@ class PDFPageRenderer {
 
       return pageImage?.bytes;
     } catch (e) {
-      debugPrint('ERROR: PDF render error - $e');
+      DrawingLog.e('ERROR: PDF render error - $e');
       return null;
     }
   }

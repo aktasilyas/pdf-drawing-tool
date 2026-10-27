@@ -1,3 +1,4 @@
+import 'package:drawing_ui/src/utils/drawing_log.dart';
 import 'package:flutter/material.dart';
 
 /// Direction where the arrow should point
@@ -54,7 +55,7 @@ class AnchorPositionCalculator {
         anchorKey.currentContext?.findRenderObject() as RenderBox?;
 
     if (renderBox == null) {
-      debugPrint('WARNING: Anchor renderBox is null');
+      DrawingLog.w('WARNING: Anchor renderBox is null');
       return null;
     }
 

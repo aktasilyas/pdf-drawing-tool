@@ -1,7 +1,7 @@
+import 'package:drawing_ui/src/utils/drawing_log.dart';
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 
@@ -97,7 +97,7 @@ class AudioRecordingService {
       _stateController.add(AudioRecordingState.recording);
       return true;
     } catch (e) {
-      debugPrint('AudioRecordingService: start failed: $e');
+      DrawingLog.e('AudioRecordingService: start failed: $e');
       _stateController.add(AudioRecordingState.error);
       return false;
     }
@@ -111,7 +111,7 @@ class AudioRecordingService {
       _stopTimer();
       _stateController.add(AudioRecordingState.paused);
     } catch (e) {
-      debugPrint('AudioRecordingService: pause failed: $e');
+      DrawingLog.e('AudioRecordingService: pause failed: $e');
     }
   }
 
@@ -123,7 +123,7 @@ class AudioRecordingService {
       _startTimer();
       _stateController.add(AudioRecordingState.recording);
     } catch (e) {
-      debugPrint('AudioRecordingService: resume failed: $e');
+      DrawingLog.e('AudioRecordingService: resume failed: $e');
     }
   }
 
@@ -136,7 +136,7 @@ class AudioRecordingService {
       _stateController.add(AudioRecordingState.idle);
       return path;
     } catch (e) {
-      debugPrint('AudioRecordingService: stop failed: $e');
+      DrawingLog.e('AudioRecordingService: stop failed: $e');
       _stateController.add(AudioRecordingState.error);
       return null;
     }

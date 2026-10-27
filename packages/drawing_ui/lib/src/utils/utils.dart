@@ -2,3 +2,4 @@
 export 'anchor_position_calculator.dart';
 export 'color_utils.dart';
 export 'size_utils.dart';
+export 'drawing_log.dart';

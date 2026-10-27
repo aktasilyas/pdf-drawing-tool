@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdfx/pdfx.dart';
+import 'package:drawing_ui/src/utils/drawing_log.dart';
 import 'package:drawing_ui/src/providers/pdf_page_cache.dart';
 import 'package:drawing_ui/src/providers/pdf_path_provider.dart';
 
@@ -54,7 +55,7 @@ Future<Uint8List?> renderThumbnail(
     // Check file existence before opening
     final file = File(filePath);
     if (!await file.exists()) {
-      debugPrint('PDF file not found: $filePath');
+      DrawingLog.w('PDF file not found: $filePath');
       return null;
     }
 
@@ -85,7 +86,7 @@ Future<Uint8List?> renderThumbnail(
     }
     return null;
   } catch (e) {
-    debugPrint('PDF render error: $e');
+    DrawingLog.e('PDF render error: $e');
     return null;
   } finally {
     try {
@@ -128,7 +129,7 @@ Future<Uint8List?> _renderSinglePage(Ref ref, String cacheKey) async {
     if (bytes != null) addToPdfPageCache(ref, cacheKey, bytes);
     return bytes;
   } catch (e) {
-    debugPrint('PDF render error: $e');
+    DrawingLog.e('PDF render error: $e');
     return null;
   } finally {
     slots.release(cacheKey);

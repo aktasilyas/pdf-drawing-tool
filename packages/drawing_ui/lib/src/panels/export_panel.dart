@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Page;
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:drawing_ui/src/utils/drawing_log.dart';
 import 'package:drawing_ui/src/panels/page_options_widgets.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/services/pdf_exporter.dart';
@@ -217,7 +218,7 @@ Future<void> performPagesPDFExport(
       progress.dismiss();
     }
   } catch (e) {
-    debugPrint('PDF export error: $e');
+    DrawingLog.e('PDF export error: $e');
     progress.setError('PDF dışa aktarılamadı: $e');
   }
 }
@@ -269,7 +270,7 @@ Future<void> performPNGExport(
 
     progress.updateProgress(1, 1);
   } catch (e) {
-    debugPrint('PNG export error: $e');
+    DrawingLog.e('PNG export error: $e');
     progress.setError('PNG dışa aktarılamadı: $e');
   }
 }
