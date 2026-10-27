@@ -179,8 +179,6 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel>
           ),
           pageOptionsThickDivider(cs, compact: c),
           PageOptionsSectionHeader(title: 'Ayarlar', compact: c),
-          // TEMPORARILY DISABLED: Dual page mode
-          // DualPageModeItem(onClose: widget.onClose),
           ScrollDirectionItem(onClose: widget.onClose, compact: c),
           PageOptionsMenuItem(
             icon: ElyanotesIcons.sliders,
