@@ -245,6 +245,7 @@ class _ColorSection extends ConsumerWidget {
       templatePattern: bg.templatePattern,
       templateSpacingMm: bg.templateSpacingMm,
       templateLineWidth: bg.templateLineWidth,
+      templateExtraData: bg.templateExtraData,
     );
     ref.read(documentProvider.notifier).updatePageBackground(page.id, newBg);
     ref

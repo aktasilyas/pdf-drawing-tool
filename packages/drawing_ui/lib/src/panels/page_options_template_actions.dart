@@ -1,4 +1,5 @@
 import 'package:drawing_core/drawing_core.dart';
+import 'package:flutter/foundation.dart' show mapEquals;
 import 'package:flutter/material.dart' hide Page;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -62,7 +63,8 @@ mixin PageOptionsTemplateActions<T extends ConsumerStatefulWidget>
     final newLineColor = result.lineColor?.toARGB32() ?? t.defaultLineColor;
     final templateChanged = t.pattern != bg.templatePattern ||
         newBgColor != bg.color ||
-        newLineColor != bg.lineColor;
+        newLineColor != bg.lineColor ||
+        !mapEquals(t.extraData, bg.templateExtraData);
 
     // Apply paper size change (orientation / format)
     final newPageSize = result.paperSize.toPageSize();
@@ -71,12 +73,9 @@ mixin PageOptionsTemplateActions<T extends ConsumerStatefulWidget>
     if (templateChanged || sizeChanged) {
       var updated = page;
       if (templateChanged) {
-        final newBg = PageBackground(
-          type: BackgroundType.template,
+        final newBg = PageBackground.fromTemplate(
+          t,
           color: newBgColor,
-          templatePattern: t.pattern,
-          templateSpacingMm: t.spacingMm,
-          templateLineWidth: t.lineWidth,
           lineColor: newLineColor,
         );
         updated = updated.copyWith(background: newBg);
