@@ -134,7 +134,8 @@ mixin DocumentsScreenHelpers on ConsumerState<DocumentsScreen> {
       data: (folders) {
         if (folders.isEmpty) return const SizedBox.shrink();
         final items = <BreadcrumbItem>[
-          BreadcrumbItem(folderId: null, label: context.l10n.libraryBreadcrumbRoot),
+          BreadcrumbItem(
+              folderId: null, label: context.l10n.libraryBreadcrumbRoot),
           ...folders.map(
             (f) => BreadcrumbItem(folderId: f.id, label: f.name),
           ),
@@ -211,8 +212,7 @@ String getSectionTitle(
 ) {
   final fallback = section.title(l10n);
   if (section != SidebarSection.folder || folderId == null) return fallback;
-  return ref.watch(folderByIdProvider(folderId)).valueOrNull?.name ??
-      fallback;
+  return ref.watch(folderByIdProvider(folderId)).valueOrNull?.name ?? fallback;
 }
 
 /// Returns the list of document IDs for the current section/folder view.
