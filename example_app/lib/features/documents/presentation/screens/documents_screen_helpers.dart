@@ -234,7 +234,6 @@ List<String> getCurrentDocumentIds(
     SidebarSection.favorites => ref.watch(favoriteDocumentsProvider),
     SidebarSection.trash => ref.watch(trashDocumentsProvider),
     SidebarSection.folder => ref.watch(documentsProvider(folderId)),
-    _ => const AsyncValue<List<DocumentInfo>>.data([]),
   };
   final searchQuery = ref.watch(searchQueryProvider);
   return documentsAsync.when(
