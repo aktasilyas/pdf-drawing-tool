@@ -16,3 +16,4 @@ export 'remove_stroke_command.dart';
 export 'add_text_command.dart';
 export 'remove_text_command.dart';
 export 'update_text_command.dart';
+export 'ordered_restore.dart';

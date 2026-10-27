@@ -69,11 +69,10 @@ void main() {
     return container.read(undoCountProvider) - before;
   }
 
-  /// Undo brings every element back. Delete's undo re-appends the removed
-  /// strokes (z-order is not restored), so [ordered] is false for those.
-  void expectUndoRestores(List<String> expected, {bool ordered = true}) {
+  /// Undo brings every element back, in the original order.
+  void expectUndoRestores(List<String> expected) {
     container.read(historyManagerProvider.notifier).undo();
-    expect(strokeIds(), ordered ? expected : unorderedEquals(expected));
+    expect(strokeIds(), expected);
   }
 
   testWidgets('delete is one undo step and clears selection', (tester) async {
@@ -81,7 +80,7 @@ void main() {
     expect(run('delete', ['a', 'b']), 1);
     expect(strokeIds(), ['c']);
     expect(container.read(selectionProvider), isNull);
-    expectUndoRestores(['a', 'b', 'c'], ordered: false);
+    expectUndoRestores(['a', 'b', 'c']);
   });
 
   testWidgets('duplicate is one undo step and clears selection',
@@ -90,7 +89,7 @@ void main() {
     expect(run('duplicate', ['a', 'b']), 1);
     expect(strokeIds(), hasLength(5));
     expect(container.read(selectionProvider), isNull);
-    expectUndoRestores(['a', 'b', 'c'], ordered: false);
+    expectUndoRestores(['a', 'b', 'c']);
   });
 
   testWidgets('copy fills the clipboard without touching history',
@@ -107,7 +106,7 @@ void main() {
     expect(container.read(selectionClipboardProvider)!.strokes.single.id, 'a');
     expect(strokeIds(), ['b', 'c']);
     expect(container.read(selectionProvider), isNull);
-    expectUndoRestores(['a', 'b', 'c'], ordered: false);
+    expectUndoRestores(['a', 'b', 'c']);
   });
 
   testWidgets('bring to front is one undo step', (tester) async {

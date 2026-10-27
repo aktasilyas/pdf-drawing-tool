@@ -15,6 +15,9 @@ class RemoveStrokeCommand implements DrawingCommand {
   /// This is set during execute and used during undo.
   Stroke? _removedStroke;
 
+  /// Original index of the removed stroke in `Layer.strokes`.
+  int _removedIndex = 0;
+
   /// Cached elementOrder before execute (for undo z-order restore).
   List<String> _originalElementOrder = const [];
 
@@ -42,6 +45,7 @@ class RemoveStrokeCommand implements DrawingCommand {
 
     // Find and cache the stroke for undo
     _removedStroke = layer.getStrokeById(strokeId);
+    _removedIndex = layer.strokes.indexWhere((s) => s.id == strokeId);
 
     if (_removedStroke == null) {
       // Stroke not found, return unchanged
@@ -64,12 +68,11 @@ class RemoveStrokeCommand implements DrawingCommand {
     }
 
     var layer = document.layers[layerIndex];
-    layer = layer.addStroke(_removedStroke!);
-
-    // Restore original elementOrder (addStroke appends to end, wrong z-order)
-    if (_originalElementOrder.isNotEmpty) {
-      layer = layer.copyWith(elementOrder: _originalElementOrder);
-    }
+    layer = layer.copyWith(
+      strokes:
+          reinsertAt(layer.strokes, [MapEntry(_removedIndex, _removedStroke!)]),
+      elementOrder: _originalElementOrder,
+    );
 
     return document.updateLayer(layerIndex, layer);
   }
