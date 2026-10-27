@@ -21,6 +21,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonBack => 'Back';
 
   @override
+  String get commonConfirm => 'Confirm';
+
+  @override
+  String get commonCreate => 'Create';
+
+  @override
+  String get commonDelete => 'Delete';
+
+  @override
+  String get commonDone => 'Done';
+
+  @override
+  String get commonOk => 'OK';
+
+  @override
+  String get commonRetry => 'Try again';
+
+  @override
+  String get commonRename => 'Rename';
+
+  @override
+  String get commonMove => 'Move';
+
+  @override
+  String get commonDuplicate => 'Duplicate';
+
+  @override
+  String get commonRestore => 'Restore';
+
+  @override
+  String get commonMenu => 'Menu';
+
+  @override
+  String commonErrorDetail(String error) {
+    return 'Error: $error';
+  }
+
+  @override
   String get settingsTitle => 'Settings';
 
   @override

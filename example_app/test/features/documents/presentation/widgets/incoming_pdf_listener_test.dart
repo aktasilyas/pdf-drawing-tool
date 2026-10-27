@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/documents.dart';
 import '../../../../helpers/fake_incoming_pdf_source.dart';
+import '../../../../helpers/l10n.dart';
 
 void main() {
   late FakeIncomingPdfSource source;
@@ -59,7 +60,7 @@ void main() {
           incomingPdfSourceProvider.overrideWithValue(source),
           activeEditorLeaveProvider.overrideWith((ref) => leave),
         ],
-        child: MaterialApp(
+        child: localizedApp(
           navigatorKey: navigatorKey,
           builder: (context, child) => IncomingPdfListener(
             navigatorKey: navigatorKey,

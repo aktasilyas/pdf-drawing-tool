@@ -7,6 +7,25 @@
   "@commonBack": {
     "description": "Tooltip of the back arrow in app bars."
   },
+  "commonConfirm": "Confirm",
+  "commonCreate": "Create",
+  "commonDelete": "Delete",
+  "commonDone": "Done",
+  "commonOk": "OK",
+  "commonRetry": "Try again",
+  "commonRename": "Rename",
+  "commonMove": "Move",
+  "commonDuplicate": "Duplicate",
+  "commonRestore": "Restore",
+  "commonMenu": "Menu",
+  "commonErrorDetail": "Error: {error}",
+  "@commonErrorDetail": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "settingsTitle": "Settings",
   "@settingsTitle": {
     "description": "Settings screen title."

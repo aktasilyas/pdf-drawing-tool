@@ -21,6 +21,44 @@ class AppLocalizationsTr extends AppLocalizations {
   String get commonBack => 'Geri';
 
   @override
+  String get commonConfirm => 'Onayla';
+
+  @override
+  String get commonCreate => 'Oluştur';
+
+  @override
+  String get commonDelete => 'Sil';
+
+  @override
+  String get commonDone => 'Bitti';
+
+  @override
+  String get commonOk => 'Tamam';
+
+  @override
+  String get commonRetry => 'Tekrar dene';
+
+  @override
+  String get commonRename => 'Yeniden Adlandır';
+
+  @override
+  String get commonMove => 'Taşı';
+
+  @override
+  String get commonDuplicate => 'Çoğalt';
+
+  @override
+  String get commonRestore => 'Kurtar';
+
+  @override
+  String get commonMenu => 'Menü';
+
+  @override
+  String commonErrorDetail(String error) {
+    return 'Hata: $error';
+  }
+
+  @override
   String get settingsTitle => 'Ayarlar';
 
   @override

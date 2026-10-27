@@ -6,8 +6,9 @@ import 'package:example_app/features/documents/presentation/widgets/library_tile
 import 'package:example_app/features/documents/presentation/widgets/library_tile_parts.dart';
 
 import '../../../../helpers/a11y.dart';
+import '../../../../helpers/l10n.dart';
 
-Widget _host(Widget child) => MaterialApp(
+Widget _host(Widget child) => localizedApp(
       theme: AppTheme.light,
       home: Scaffold(body: Center(child: child)),
     );

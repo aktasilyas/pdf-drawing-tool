@@ -25,6 +25,7 @@ import 'package:flutter/material.dart';
 
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/buttons/index.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// ElyaNotes responsive modal komponenti.
 ///
@@ -311,7 +312,7 @@ class _ModalCloseButton extends StatelessWidget {
     return AppIconButton(
       icon: Icons.close,
       variant: AppIconButtonVariant.ghost,
-      tooltip: 'Kapat',
+      tooltip: context.l10n.commonClose,
       onPressed: () => Navigator.of(context).pop(),
     );
   }

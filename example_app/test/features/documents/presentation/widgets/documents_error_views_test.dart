@@ -3,12 +3,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/documents/presentation/widgets/documents_error_views.dart';
+import '../../../../helpers/l10n.dart';
 
 void main() {
   group('DocumentsErrorView', () {
     testWidgets('should_render_without_error', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        localizedApp(
           theme: AppTheme.light,
           home: const Scaffold(
             body: DocumentsErrorView(error: 'Test error'),
@@ -23,7 +24,7 @@ void main() {
 
     testWidgets('should_display_error_icon', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        localizedApp(
           theme: AppTheme.light,
           home: const Scaffold(
             body: DocumentsErrorView(error: 'Network error'),
@@ -37,7 +38,7 @@ void main() {
 
     testWidgets('should_hide_retry_button_without_onRetry', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        localizedApp(
           theme: AppTheme.light,
           home: const Scaffold(
             body: DocumentsErrorView(error: 'Test error'),
@@ -51,7 +52,7 @@ void main() {
     testWidgets('should_call_onRetry_when_retry_tapped', (tester) async {
       var retried = 0;
       await tester.pumpWidget(
-        MaterialApp(
+        localizedApp(
           theme: AppTheme.light,
           home: Scaffold(
             body: DocumentsErrorView(
@@ -70,7 +71,7 @@ void main() {
 
     testWidgets('should_keep_retry_button_at_least_48dp', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        localizedApp(
           theme: AppTheme.light,
           home: Scaffold(
             body: DocumentsErrorView(error: 'Test error', onRetry: () {}),
@@ -86,7 +87,7 @@ void main() {
   group('DocumentsEmptyFolderView', () {
     testWidgets('should_render_without_error', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        localizedApp(
           theme: AppTheme.light,
           home: const Scaffold(
             body: DocumentsEmptyFolderView(),
@@ -101,7 +102,7 @@ void main() {
 
     testWidgets('should_display_folder_icon', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        localizedApp(
           theme: AppTheme.light,
           home: const Scaffold(
             body: DocumentsEmptyFolderView(),

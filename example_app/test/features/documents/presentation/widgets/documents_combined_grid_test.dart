@@ -5,13 +5,14 @@ import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
 import 'package:example_app/features/documents/domain/entities/folder.dart';
 import 'package:example_app/features/documents/presentation/widgets/documents_combined_grid.dart';
+import '../../../../helpers/l10n.dart';
 
 void main() {
   group('DocumentsCombinedGridView', () {
     testWidgets('should_render_empty_grid', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
-          child: MaterialApp(
+          child: localizedApp(
             theme: AppTheme.light,
             home: Scaffold(
               body: DocumentsCombinedGridView(
@@ -41,7 +42,7 @@ void main() {
 
       await tester.pumpWidget(
         ProviderScope(
-          child: MaterialApp(
+          child: localizedApp(
             theme: AppTheme.light,
             home: Scaffold(
               body: DocumentsCombinedGridView(
@@ -74,7 +75,7 @@ void main() {
 
       await tester.pumpWidget(
         ProviderScope(
-          child: MaterialApp(
+          child: localizedApp(
             theme: AppTheme.light,
             home: Scaffold(
               body: DocumentsCombinedGridView(
@@ -116,7 +117,7 @@ void main() {
 
       await tester.pumpWidget(
         ProviderScope(
-          child: MaterialApp(
+          child: localizedApp(
             theme: AppTheme.light,
             home: Scaffold(
               body: DocumentsCombinedGridView(

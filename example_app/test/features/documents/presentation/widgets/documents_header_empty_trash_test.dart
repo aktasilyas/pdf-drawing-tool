@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/documents/domain/entities/sort_option.dart';
 import 'package:example_app/features/documents/presentation/widgets/documents_header.dart';
+import '../../../../helpers/l10n.dart';
 
 void main() {
   Future<void> pump(WidgetTester tester, {VoidCallback? onEmptyTrash}) async {
@@ -12,7 +13,7 @@ void main() {
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
       ProviderScope(
-        child: MaterialApp(
+        child: localizedApp(
           theme: AppTheme.light,
           home: Scaffold(
             body: DocumentsHeader(

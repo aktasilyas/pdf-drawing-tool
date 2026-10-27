@@ -9,6 +9,7 @@ import 'package:example_app/features/documents/presentation/widgets/document_car
 import 'package:example_app/features/documents/presentation/widgets/folder_card.dart';
 
 import '../../../../helpers/font_loader.dart';
+import '../../../../helpers/l10n.dart';
 
 DocumentInfo _doc(String title, {bool portrait = true}) => DocumentInfo(
       id: title,
@@ -39,7 +40,7 @@ Widget _row(ThemeData theme, double tileWidth) {
     DocumentCard(document: _doc('Beyaz Tahta'), onTap: noop),
   ];
   return ProviderScope(
-    child: MaterialApp(
+    child: localizedApp(
       theme: theme,
       debugShowCheckedModeBanner: false,
       home: Builder(

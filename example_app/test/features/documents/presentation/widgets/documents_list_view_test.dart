@@ -7,13 +7,14 @@ import 'package:example_app/features/documents/domain/entities/folder.dart';
 import 'package:example_app/features/documents/presentation/widgets/document_list_tile.dart';
 import 'package:example_app/features/documents/presentation/widgets/documents_list_view.dart';
 import 'package:example_app/features/documents/presentation/widgets/folder_list_tile.dart';
+import '../../../../helpers/l10n.dart';
 
 void main() {
   group('DocumentsCombinedListView', () {
     testWidgets('should_render_empty_list', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
-          child: MaterialApp(
+          child: localizedApp(
             theme: AppTheme.light,
             home: Scaffold(
               body: DocumentsCombinedListView(
@@ -43,7 +44,7 @@ void main() {
 
       await tester.pumpWidget(
         ProviderScope(
-          child: MaterialApp(
+          child: localizedApp(
             theme: AppTheme.light,
             home: Scaffold(
               body: DocumentsCombinedListView(
@@ -77,7 +78,7 @@ void main() {
 
       await tester.pumpWidget(
         ProviderScope(
-          child: MaterialApp(
+          child: localizedApp(
             theme: AppTheme.light,
             home: Scaffold(
               body: DocumentsCombinedListView(
@@ -108,7 +109,7 @@ void main() {
 
       await tester.pumpWidget(
         ProviderScope(
-          child: MaterialApp(
+          child: localizedApp(
             theme: AppTheme.light,
             home: Scaffold(
               body: DocumentsCombinedListView(
@@ -141,7 +142,7 @@ void main() {
 
       await tester.pumpWidget(
         ProviderScope(
-          child: MaterialApp(
+          child: localizedApp(
             theme: AppTheme.light,
             home: Scaffold(
               body: DocumentsCombinedListView(
@@ -180,7 +181,7 @@ void main() {
       );
       await tester.pumpWidget(
         ProviderScope(
-          child: MaterialApp(
+          child: localizedApp(
             theme: AppTheme.light,
             home: Scaffold(
               body: DocumentsCombinedListView(

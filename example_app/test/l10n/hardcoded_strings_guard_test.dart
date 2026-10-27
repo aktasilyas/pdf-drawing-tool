@@ -7,7 +7,59 @@ import '../helpers/hardcoded_strings.dart';
 
 /// Directories (relative to `example_app`) whose user-facing copy must come
 /// from `AppLocalizations`. Later l10n slices add their directories here.
-const migratedDirs = ['lib/features/settings/presentation'];
+const migratedDirs = [
+  'lib/features/settings/presentation',
+  'lib/features/documents/presentation',
+  'lib/core/widgets/feedback',
+];
+
+const _documents = 'lib/features/documents/presentation';
+
+/// Files of [migratedDirs] whose literals are not migrated yet (#201 library
+/// slice). Each step of `docs/plans/201-l10n-library.md` removes the files it
+/// migrates; the set must be empty after step 6 and is then deleted.
+const pendingL10n = <String>{
+  '$_documents/constants/documents_strings.dart',
+  '$_documents/providers/documents_controller.dart',
+  '$_documents/providers/documents_controller_bulk.dart',
+  '$_documents/providers/documents_controller_page_trash.dart',
+  '$_documents/providers/folders_provider.dart',
+  '$_documents/screens/documents_screen.dart',
+  '$_documents/screens/documents_screen_helpers.dart',
+  '$_documents/screens/manage_folders_screen.dart',
+  '$_documents/screens/template_selection_screen.dart',
+  '$_documents/widgets/document_card_helpers.dart',
+  '$_documents/widgets/document_normal_menu.dart',
+  '$_documents/widgets/document_quota.dart',
+  '$_documents/widgets/document_trash_menu.dart',
+  '$_documents/widgets/documents_empty_states.dart',
+  '$_documents/widgets/documents_error_views.dart',
+  '$_documents/widgets/documents_header.dart',
+  '$_documents/widgets/documents_list_view.dart',
+  '$_documents/widgets/documents_menu_common.dart',
+  '$_documents/widgets/documents_sidebar.dart',
+  '$_documents/widgets/folder_color_picker.dart',
+  '$_documents/widgets/folder_menus.dart',
+  '$_documents/widgets/format_picker_sheet.dart',
+  '$_documents/widgets/library_header_parts.dart',
+  '$_documents/widgets/library_list_row.dart',
+  '$_documents/widgets/library_tile_parts.dart',
+  '$_documents/widgets/manage_folder_list_item.dart',
+  '$_documents/widgets/move_to_folder_create_form.dart',
+  '$_documents/widgets/move_to_folder_dialog.dart',
+  '$_documents/widgets/move_to_folder_list.dart',
+  '$_documents/widgets/new_document_dialog.dart',
+  '$_documents/widgets/new_document_importers.dart',
+  '$_documents/widgets/pdf_file_importer.dart',
+  '$_documents/widgets/rename_document_dialog.dart',
+  '$_documents/widgets/selection_mode_header.dart',
+  '$_documents/widgets/sort_popup_button.dart',
+  '$_documents/widgets/template_category_tabs.dart',
+  '$_documents/widgets/template_grid.dart',
+  '$_documents/widgets/template_preview_section.dart',
+  '$_documents/widgets/trashed_page_card.dart',
+  '$_documents/widgets/trashed_page_menu.dart',
+};
 
 List<int> _lines(String source) =>
     findHardcodedStrings(source).map((f) => f.line).toList();
@@ -99,6 +151,7 @@ Text('x' 'y');
         expect(files, isNotEmpty);
         final offences = <String>[];
         for (final file in files) {
+          if (pendingL10n.contains(file.path.replaceAll(r'\', '/'))) continue;
           final source = file.readAsStringSync();
           for (final f in findHardcodedStrings(source)) {
             offences.add('${file.path}:${f.line} "${f.literal}"');
@@ -110,6 +163,12 @@ Text('x' 'y');
           reason: 'Move to lib/l10n/*.arb or add // l10n-ignore',
         );
       });
+    }
+  });
+
+  test('pendingL10n only lists files that still exist', () {
+    for (final path in pendingL10n) {
+      expect(File(path).existsSync(), isTrue, reason: path);
     }
   });
 

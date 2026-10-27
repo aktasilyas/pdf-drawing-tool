@@ -7,6 +7,7 @@ import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/documents.dart';
 import '../../../../helpers/pass_through_runner.dart';
 import '../../../../helpers/rejecting_database.dart';
+import '../../../../helpers/l10n.dart';
 
 void main() {
   late AppDatabase db;
@@ -59,7 +60,7 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: MaterialApp(
+        child: localizedApp(
           theme: AppTheme.light,
           builder: (context, child) => LibraryErrorListener(child: child!),
           home: home ?? const Scaffold(body: SizedBox.expand()),

@@ -122,6 +122,78 @@ abstract class AppLocalizations {
   /// **'Back'**
   String get commonBack;
 
+  /// No description provided for @commonConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get commonConfirm;
+
+  /// No description provided for @commonCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get commonCreate;
+
+  /// No description provided for @commonDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get commonDelete;
+
+  /// No description provided for @commonDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get commonDone;
+
+  /// No description provided for @commonOk.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get commonOk;
+
+  /// No description provided for @commonRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Try again'**
+  String get commonRetry;
+
+  /// No description provided for @commonRename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get commonRename;
+
+  /// No description provided for @commonMove.
+  ///
+  /// In en, this message translates to:
+  /// **'Move'**
+  String get commonMove;
+
+  /// No description provided for @commonDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate'**
+  String get commonDuplicate;
+
+  /// No description provided for @commonRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get commonRestore;
+
+  /// No description provided for @commonMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Menu'**
+  String get commonMenu;
+
+  /// No description provided for @commonErrorDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {error}'**
+  String commonErrorDetail(String error);
+
   /// Settings screen title.
   ///
   /// In en, this message translates to:
