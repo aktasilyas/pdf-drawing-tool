@@ -1,6 +1,8 @@
 import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
+import 'package:drawing_ui/src/canvas/page_slide_drag_math.dart';
+import 'package:drawing_ui/src/canvas/page_slide_overlay.dart';
 
 /// Slide transition between pages with auto-animation and interactive drag.
 class PageSlideTransition extends StatefulWidget {
@@ -37,7 +39,7 @@ class PageSlideTransition extends StatefulWidget {
 
 class PageSlideTransitionState extends State<PageSlideTransition>
     with SingleTickerProviderStateMixin {
-  final GlobalKey _boundaryKey = GlobalKey();
+  final _boundaryKey = GlobalKey();
   late final AnimationController _controller;
   ui.Image? _snapshot;
   bool _isForward = true;
@@ -52,7 +54,6 @@ class PageSlideTransitionState extends State<PageSlideTransition>
       _targetOffset = 0.0,
       _extent = 0.0;
   VoidCallback? _dragAnimListener;
-
   bool get _isHorizontal => widget.scrollDirection == Axis.horizontal;
 
   @override
@@ -66,8 +67,7 @@ class PageSlideTransitionState extends State<PageSlideTransition>
   @override
   void dispose() {
     _controller.removeStatusListener(_onAnimationStatus);
-    if (_dragAnimListener != null)
-      _controller.removeListener(_dragAnimListener!);
+    _removeDragListener();
     _controller.dispose();
     _snapshot?.dispose();
     _dragSnapshot?.dispose();
@@ -146,26 +146,19 @@ class PageSlideTransitionState extends State<PageSlideTransition>
   void updateDrag(double delta) {
     if (!_isDragging || _isAnimatingDrag) return;
     setState(() {
-      var n = _dragOffset + delta;
-      // Direction lock: once determined, can't reverse past zero
-      if (_directionDetermined) {
-        n = _determinedDirection == 1
-            ? n.clamp(double.negativeInfinity, 0.0)
-            : n.clamp(0.0, double.infinity);
-      }
-      // Resistance for disallowed directions
-      if (n < 0 && !widget.canSwipeForward || n > 0 && !widget.canSwipeBack) {
-        _dragOffset += delta * 0.15;
-      } else {
-        _dragOffset = n;
-      }
+      _dragOffset = PageSlideDragMath.applyDelta(
+        current: _dragOffset,
+        delta: delta,
+        lockedDirection: _determinedDirection,
+        canSwipeForward: widget.canSwipeForward,
+        canSwipeBack: widget.canSwipeBack,
+      );
       // Detect direction once threshold exceeded
-      if (!_directionDetermined && _dragOffset.abs() > 10) {
-        _determinedDirection = _dragOffset < 0 ? 1 : -1;
+      final dir = PageSlideDragMath.directionFor(_dragOffset);
+      if (!_directionDetermined && dir != 0) {
+        _determinedDirection = dir;
         _directionDetermined = true;
-        _pagePreSwitched =
-            widget.onDragDirectionDetermined?.call(_determinedDirection) ??
-                false;
+        _pagePreSwitched = widget.onDragDirectionDetermined?.call(dir) ?? false;
       }
     });
   }
@@ -176,27 +169,29 @@ class PageSlideTransitionState extends State<PageSlideTransition>
       _cancelDrag();
       return;
     }
-    final progress = _dragOffset.abs() / _extent;
     final isForward = _dragOffset < 0;
     _isForward = isForward;
-    final ok = isForward && widget.canSwipeForward
-        ? (progress > 0.25 || velocity < -500)
-        : !isForward && widget.canSwipeBack
-            ? (progress > 0.25 || velocity > 500)
-            : false;
-    _animateToTarget(ok ? (isForward ? -_extent : _extent) : 0, velocity.abs());
+    final ok = PageSlideDragMath.shouldCommit(
+      offset: _dragOffset,
+      extent: _extent,
+      velocity: velocity,
+      canSwipeForward: widget.canSwipeForward,
+      canSwipeBack: widget.canSwipeBack,
+    );
+    _animateToTarget(
+        PageSlideDragMath.targetOffset(
+            commit: ok, forward: isForward, extent: _extent),
+        velocity.abs());
   }
 
   void _animateToTarget(double target, double absVel) {
     _startOffset = _dragOffset;
     _targetOffset = target;
     _isAnimatingDrag = true;
-    final dist = (target - _dragOffset).abs();
-    final ms = _extent <= 0
-        ? 250
-        : absVel > 300
-            ? (dist / absVel * 1000).clamp(100, 350).toInt()
-            : (dist / _extent * 300).clamp(150, 350).toInt();
+    final ms = PageSlideDragMath.releaseMillis(
+        distance: (target - _dragOffset).abs(),
+        extent: _extent,
+        absVelocity: absVel);
     _controller.duration = Duration(milliseconds: ms);
     _dragAnimListener = () {
       if (!_isAnimatingDrag) return;
@@ -281,79 +276,26 @@ class PageSlideTransitionState extends State<PageSlideTransition>
   Widget _buildDragOverlay(Widget child) {
     return ClipRect(child: LayoutBuilder(builder: (_, c) {
       _extent = _isHorizontal ? c.maxWidth : c.maxHeight;
-      final off = _dragOffset.clamp(-_extent, _extent);
-      final fwd = off < 0;
-      final cur = _isHorizontal ? Offset(off, 0) : Offset(0, off);
-      final d = off + (fwd ? _extent : -_extent);
-      final adj = _isHorizontal ? Offset(d, 0) : Offset(0, d);
-
-      final Widget adjWidget;
-      // Keep child always in the tree to prevent DrawingCanvas disposal
-      // during active gestures. Use Offstage when child is not visible.
-      bool childUsedInAdj = false;
-      if (_pagePreSwitched) {
-        childUsedInAdj = true;
-        adjWidget = Transform.translate(
-            offset: adj,
-            child:
-                SizedBox(width: c.maxWidth, height: c.maxHeight, child: child));
-      } else if (fwd && widget.addPagePreview != null) {
-        adjWidget = Transform.translate(
-            offset: adj,
-            child: SizedBox(
-                width: c.maxWidth,
-                height: c.maxHeight,
-                child: widget.addPagePreview));
-      } else {
-        final color =
-            fwd ? widget.nextPagePreviewColor : widget.prevPagePreviewColor;
-        if (color != null) {
-          adjWidget = Transform.translate(
-              offset: adj,
-              child: SizedBox(
-                  width: c.maxWidth,
-                  height: c.maxHeight,
-                  child: ColoredBox(color: color)));
-        } else {
-          childUsedInAdj = true;
-          adjWidget =
-              SizedBox(width: c.maxWidth, height: c.maxHeight, child: child);
-        }
-      }
-      return Stack(children: [
-        adjWidget,
-        Transform.translate(
-            offset: cur,
-            child: SizedBox(
-                width: c.maxWidth,
-                height: c.maxHeight,
-                child: RawImage(image: _dragSnapshot, fit: BoxFit.none))),
-        if (!childUsedInAdj) Offstage(child: child),
-      ]);
+      return buildPageSlideDragOverlay(
+        constraints: c,
+        axis: widget.scrollDirection,
+        extent: _extent,
+        dragOffset: _dragOffset,
+        snapshot: _dragSnapshot,
+        child: child,
+        pagePreSwitched: _pagePreSwitched,
+        addPagePreview: widget.addPagePreview,
+        nextPagePreviewColor: widget.nextPagePreviewColor,
+        prevPagePreviewColor: widget.prevPagePreviewColor,
+      );
     }));
   }
 
-  Widget _buildAutoAnimation(Widget child) {
-    final dir = _isForward ? -1.0 : 1.0;
-    return AnimatedBuilder(
+  Widget _buildAutoAnimation(Widget child) => buildPageSlideAutoAnimation(
         animation: _controller,
-        builder: (_, __) {
-          final t = Curves.easeInOut.transform(_controller.value);
-          return ClipRect(child: LayoutBuilder(builder: (_, c) {
-            final ext = _isHorizontal ? c.maxWidth : c.maxHeight;
-            final old = _isHorizontal
-                ? Offset(dir * t * ext, 0)
-                : Offset(0, dir * t * ext);
-            final nw = _isHorizontal
-                ? Offset(-dir * (1 - t) * ext, 0)
-                : Offset(0, -dir * (1 - t) * ext);
-            return Stack(children: [
-              Transform.translate(
-                  offset: old,
-                  child: RawImage(image: _snapshot, fit: BoxFit.none)),
-              Transform.translate(offset: nw, child: child),
-            ]);
-          }));
-        });
-  }
+        axis: widget.scrollDirection,
+        forward: _isForward,
+        snapshot: _snapshot,
+        child: child,
+      );
 }
