@@ -224,4 +224,130 @@ void main() {
       expect(container.read(documentProvider).pages[2].strokeCount, 0);
     });
   });
+
+  group('insertPage', () {
+    test('inserts, selects the new page and syncs the page manager', () {
+      load(3, current: 0);
+      actions().insertPage(1, page('new', 0));
+
+      expect(docIds(), ['p0', 'new', 'p1', 'p2']);
+      expect(managerIds(), docIds());
+      expect(container.read(documentProvider).currentPageIndex, 1);
+      expect(container.read(pageManagerProvider).currentIndex, 1);
+    });
+
+    test('undo restores the page list and current page', () {
+      load(3, current: 2);
+      final change = actions().insertPage(3, page('new', 0));
+
+      expect(actions().undo(change), isTrue);
+      final doc = container.read(documentProvider);
+      expect(docIds(), ['p0', 'p1', 'p2']);
+      expect(managerIds(), docIds());
+      expect(doc.currentPageIndex, 2);
+      expect(doc.pages.map((p) => p.index), [0, 1, 2]);
+    });
+
+    test('undo keeps strokes drawn on other pages since the insert', () {
+      load(2, current: 0);
+      final change = actions().insertPage(1, page('new', 0));
+      container.read(historyManagerProvider.notifier).execute(
+            AddStrokeCommand(layerIndex: 0, stroke: stroke('s1')),
+            pageId: 'p0',
+          );
+
+      actions().undo(change);
+      expect(docIds(), ['p0', 'p1']);
+      expect(container.read(documentProvider).pages[0].strokeCount, 1);
+    });
+
+    test('history entry on the removed page is a no-op on undo', () {
+      load(2, current: 0);
+      final change = actions().insertPage(1, page('new', 0));
+      container.read(historyManagerProvider.notifier).execute(
+            AddStrokeCommand(layerIndex: 0, stroke: stroke('s1')),
+          );
+      actions().undo(change);
+      final before = container.read(documentProvider);
+
+      container.read(historyManagerProvider.notifier).undo();
+      expect(docIds(), ['p0', 'p1']);
+      expect(container.read(documentProvider).pages[0].strokeCount,
+          before.pages[0].strokeCount);
+    });
+
+    test('undo is a no-op after another page change', () async {
+      load(3);
+      final change = actions().insertPage(1, page('new', 0));
+      await actions().deletePage(2);
+
+      expect(actions().undo(change), isFalse);
+      expect(docIds(), ['p0', 'new', 'p2']);
+    });
+
+    test('undo is a no-op when another document is loaded', () {
+      load(2);
+      final change = actions().insertPage(1, page('new', 0));
+      container.read(documentProvider.notifier).updateDocument(
+            DrawingDocument.multiPage(
+              id: 'other',
+              title: 't',
+              pages: [page('x0', 0)],
+              createdAt: DateTime(2024),
+              updatedAt: DateTime(2024),
+            ),
+          );
+
+      expect(actions().undo(change), isFalse);
+      expect(docIds(), ['x0']);
+    });
+  });
+
+  group('insertCopy', () {
+    test('inserts a copy with fresh ids after the source and selects it', () {
+      load(3, current: 0);
+      final source = container.read(documentProvider).pages[1];
+      final withInk = source.addStroke(stroke('s1'));
+
+      actions().insertCopy(1, withInk);
+
+      final doc = container.read(documentProvider);
+      final copy = doc.pages[2];
+      expect(doc.pages, hasLength(4));
+      expect(doc.currentPageIndex, 2);
+      expect(copy.id, isNot(withInk.id));
+      expect(copy.layers.single.id, isNot(withInk.layers.single.id));
+      expect(copy.layers.single.strokes.single.id, isNot('s1'));
+      expect(copy.strokeCount, 1);
+      expect(managerIds(), docIds());
+    });
+
+    test('undo removes the copy', () {
+      load(2, current: 1);
+      final change =
+          actions().insertCopy(0, container.read(documentProvider).pages[0]);
+
+      actions().undo(change);
+      expect(docIds(), ['p0', 'p1']);
+      expect(container.read(documentProvider).currentPageIndex, 1);
+    });
+  });
+
+  group('movePage undo', () {
+    test('returns null when nothing moved', () {
+      load(3);
+      expect(actions().movePage(1, 1), isNull);
+    });
+
+    test('undo restores the previous order and current page', () {
+      load(4, current: 1);
+      final change = actions().movePage(3, 0)!;
+      expect(docIds(), ['p3', 'p0', 'p1', 'p2']);
+
+      expect(actions().undo(change), isTrue);
+      expect(docIds(), ['p0', 'p1', 'p2', 'p3']);
+      expect(managerIds(), docIds());
+      expect(container.read(documentProvider).currentPageIndex, 1);
+    });
+  });
 }

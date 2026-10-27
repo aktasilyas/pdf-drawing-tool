@@ -6,6 +6,7 @@ import 'package:drawing_ui/src/providers/providers.dart';
 
 import 'export_panel.dart' show performPagesPDFExport;
 import 'page_options_widgets.dart';
+import 'page_structure_undo.dart';
 
 /// Page level actions of the page options panel (bookmark, copy, delete...).
 mixin PageOptionsActions<T extends ConsumerStatefulWidget> on ConsumerState<T> {
@@ -55,37 +56,23 @@ mixin PageOptionsActions<T extends ConsumerStatefulWidget> on ConsumerState<T> {
   void pastePage(BuildContext context) {
     final copied = ref.read(copiedPageProvider);
     if (copied == null) return;
-    _insertDeepCopy(copied);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Sayfa yapıştırıldı')),
-    );
+    _insertCopy(context, copied, 'Sayfa yapıştırıldı');
   }
 
-  void duplicatePage() {
+  void duplicatePage(BuildContext context) {
     final doc = ref.read(documentProvider);
-    _insertDeepCopy(doc.pages[targetPageIndex]);
+    _insertCopy(context, doc.pages[targetPageIndex], 'Sayfa çoğaltıldı');
   }
 
-  /// Deep-copies [source] and inserts after current page index.
-  void _insertDeepCopy(Page source) {
-    final pageIndex = targetPageIndex;
-    final clone = Page(
-      id: 'page_${DateTime.now().microsecondsSinceEpoch}',
-      index: pageIndex + 1,
-      size: source.size,
-      background: source.background,
-      layers: source.layers.map((l) => l.copyWith()).toList(),
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
-    final doc = ref.read(documentProvider);
-    final newPages = List<Page>.from(doc.pages)..insert(pageIndex + 1, clone);
-    final newDoc =
-        doc.copyWith(pages: newPages, currentPageIndex: pageIndex + 1);
-    ref.read(documentProvider.notifier).updateDocument(newDoc);
-    ref.read(pageManagerProvider.notifier).initializeFromDocument(newDoc.pages,
-        currentIndex: newDoc.currentPageIndex);
+  /// Inserts a copy of [source] (fresh ids) after the target page and offers
+  /// an undo SnackBar.
+  void _insertCopy(BuildContext context, Page source, String message) {
+    // The popover context goes away on close, so grab these first.
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final actions = ref.read(pageStructureActionsProvider);
+    final change = actions.insertCopy(targetPageIndex, source);
     onPanelClose();
+    showPageUndoSnackBar(messenger, actions, change, message);
   }
 
   void exportPageAsPdf() {

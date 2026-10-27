@@ -291,6 +291,7 @@ class Shape {
 
   /// Immutable copy
   Shape copyWith({
+    String? id,
     DrawingPoint? startPoint,
     DrawingPoint? endPoint,
     StrokeStyle? style,
@@ -298,7 +299,7 @@ class Shape {
     int? fillColor,
   }) {
     return Shape(
-      id: id,
+      id: id ?? this.id,
       type: type,
       startPoint: startPoint ?? this.startPoint,
       endPoint: endPoint ?? this.endPoint,

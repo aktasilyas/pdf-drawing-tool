@@ -84,6 +84,7 @@ class StickyNote {
   }
 
   StickyNote copyWith({
+    String? id,
     double? x,
     double? y,
     double? width,
@@ -94,7 +95,7 @@ class StickyNote {
     List<Shape>? shapes,
   }) {
     return StickyNote(
-      id: id,
+      id: id ?? this.id,
       x: x ?? this.x,
       y: y ?? this.y,
       width: width ?? this.width,

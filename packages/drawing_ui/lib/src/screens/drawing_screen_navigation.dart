@@ -1,8 +1,9 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/canvas/page_slide_transition.dart';
+import 'package:drawing_ui/src/panels/page_structure_undo.dart';
 import 'package:drawing_ui/src/screens/drawing_screen.dart';
 
 /// Page navigation, swipe handling and "add page by swiping" for
@@ -95,24 +96,24 @@ mixin DrawingScreenNavigation on ConsumerState<DrawingScreen> {
     }
   }
 
-  /// Adds a new page after the last page.
+  /// Adds a new page after the last page and offers undo.
   void _addPageAfterLast() {
     final doc = ref.read(documentProvider);
-    final newPage = core.Page.create(
-      index: doc.pages.length,
-      size: doc.settings.defaultPageSize,
-      background: resolveNewPageBackground(),
+    final actions = ref.read(pageStructureActionsProvider);
+    final change = actions.insertPage(
+      doc.pages.length,
+      core.Page.create(
+        index: doc.pages.length,
+        size: doc.settings.defaultPageSize,
+        background: resolveNewPageBackground(),
+      ),
     );
-    final newPages = List<core.Page>.from(doc.pages)..add(newPage);
-    final newDoc = doc.copyWith(
-      pages: newPages,
-      currentPageIndex: newPages.length - 1,
+    showPageUndoSnackBar(
+      ScaffoldMessenger.maybeOf(context),
+      actions,
+      change,
+      'Sayfa eklendi',
     );
-    ref.read(documentProvider.notifier).updateDocument(newDoc);
-    ref.read(pageManagerProvider.notifier).initializeFromDocument(
-          newDoc.pages,
-          currentIndex: newDoc.currentPageIndex,
-        );
   }
 
   /// Returns the background color of the page at offset from current.
