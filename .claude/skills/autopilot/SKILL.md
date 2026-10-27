@@ -9,9 +9,30 @@ first tend every open agent PR that needs work (step 1), then ship up to TWO
 issues (steps 3-4, one after the other), then log once and stop. Stop early
 if you hit a usage limit or a decision you cannot make.
 
-Runs can overlap. Lock what you work on: add label `in-progress` to an issue
-or PR before touching it, remove it when done, and skip anything that already
-has it unless that label is older than 3 hours (a crashed run).
+Runs can overlap. Lock what you work on (issue or PR) with the race-free
+procedure below, and skip anything that already has `in-progress` unless its
+earliest lock comment (or, if there is none, the label) is older than 3 hours
+(a crashed run). The label alone cannot tell two runs apart, so the lock
+comment decides.
+
+Lock procedure (REST only, `N` = issue or PR number; PR comments live under
+`issues/N/comments` too):
+1. Add the label: `gh api -X POST $R/issues/N/labels -f "labels[]=in-progress"`.
+2. Post a lock comment with a unique run id (your session URL, else a random
+   token): `gh api -X POST $R/issues/N/comments -f body="autopilot-lock: <run-id>"`
+   and keep the returned comment `id`.
+3. `sleep 20`, then list comments:
+   `gh api "$R/issues/N/comments?per_page=100" --jq '[.[]|select(.body|startswith("autopilot-lock:"))|select(.created_at > (now-10800|todate))]|sort_by(.created_at,.id)'`.
+4. You hold the lock only if your comment is the first in that list (ties on
+   `created_at` are broken by the lower comment `id`). Otherwise another run
+   holds it: delete your own lock comment (`gh api -X DELETE $R/issues/comments/<id>`),
+   leave the label alone, and pick the next issue/PR.
+5. Release when done (success, `needs-architect`, or giving up): remove the
+   label (`gh api -X DELETE $R/issues/N/labels/in-progress`) and delete your lock
+   comment; if deletion is denied, edit it to `autopilot-lock-released: <run-id>`
+   (`gh api -X PATCH $R/issues/comments/<id> -f body=...`), which no longer counts as a lock.
+Taking an issue or PR by any other route (including `ship-issue`) without this
+procedure is not allowed.
 
 GitHub: REST only via `gh api` (no GraphQL). `R=repos/aktasilyas/pdf-drawing-tool`.
 
@@ -40,6 +61,8 @@ Find the status issue: `gh api "$R/issues?labels=autopilot-status&state=open"`.
 ## 1. Tend open agent PRs first
 List open PRs whose head branch starts with `claude/`:
 `gh api "$R/pulls?state=open&per_page=50"`.
+Before changing anything on a PR (push, comment, label), take its lock (lock
+procedure above) and release it afterwards; skip it if you lose the lock.
 For each, newest first (skip PRs already labeled `ready-to-merge` unless they
 got new commits, conflicts or review comments since; review comments from the
 architect desk count the same as the owner's):
@@ -54,7 +77,7 @@ architect desk count the same as the owner's):
   reply on each thread, then continue with the next PR.
 - **Partial slice** (PR body lists remaining steps of a still-open issue, or the
   reviewer/architect asked for missing parts): this is the main work of the run.
-  Lock the issue, implement the next remaining steps on the same branch
+  Lock the PR/issue (lock procedure above), implement the next remaining steps on the same branch
   (merge `origin/main` first), verify, push, update the PR body checklist.
   Never end a run with only a comment on such a PR.
 - **Ready**: if every check is green or pre-existing-failing and the `reviewer`
@@ -79,7 +102,7 @@ Order: milestone title (M0b < M1 < M2 < M3 < M4 < M5), then lowest number.
 If none is eligible, log "queue empty or blocked" with the reason and stop.
 
 ## 4. Ship it
-- Add label `in-progress` (`gh api -X POST $R/issues/<n>/labels -f "labels[]=in-progress"`).
+- Lock the issue with the lock procedure above. If you lose the lock, skip to the next issue.
 - Follow the `ship-issue` skill for issue <n>.
 - If you hit a decision you cannot make (see "Decide before asking"): label
   `needs-architect` as described there, log it, stop.
@@ -89,7 +112,7 @@ If none is eligible, log "queue empty or blocked" with the reason and stop.
   a partial slice uses `Refs #<n>`. Once a later slice completes the issue,
   that PR must say `Closes #<n>` (the merge workflow closes issues from it).
 - Always run the `reviewer` subagent before labeling a PR `ready-to-merge`.
-- On success: remove `in-progress`, add `in-review`. Then, if this run has
+- On success: release the lock (remove `in-progress`, delete the lock comment), add `in-review`. Then, if this run has
   shipped only one issue so far, go back to step 3 for one more.
 
 ## 5. Log the run
