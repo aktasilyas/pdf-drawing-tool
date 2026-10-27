@@ -1,26 +1,28 @@
+import 'package:drawing_core/src/history/indexed_removal.dart';
 import 'package:drawing_core/src/internal.dart';
 
-/// Birden fazla stroke'u tek seferde silme komutu.
+/// Removes several strokes in one command.
 ///
-/// Tek gesture = tek command (batching) prensibine uygun.
-/// Bu, undo/redo history'sini temiz tutar.
+/// One gesture = one command (batching), which keeps undo/redo history
+/// clean. Undo puts every stroke back at its original list position and
+/// restores elementOrder, so the layer equals the one before execute.
 class EraseStrokesCommand implements DrawingCommand {
-  /// Silme işleminin yapılacağı layer indexi
+  /// Index of the layer to erase from.
   final int layerIndex;
 
-  /// Silinecek stroke ID'leri
+  /// IDs of the strokes to erase.
   final List<String> strokeIds;
 
-  /// Undo için silinen stroke'ları cache'le
-  final List<Stroke> _erasedStrokes = [];
+  /// Erased strokes with their original indices, cached for undo.
+  List<IndexedRemoval<Stroke>> _erased = const [];
 
   /// Cached elementOrder before execute (for undo z-order restore).
   List<String> _originalElementOrder = const [];
 
-  /// Yeni bir [EraseStrokesCommand] oluşturur.
-  ///
-  /// [layerIndex] - Silme işleminin yapılacağı layer
-  /// [strokeIds] - Silinecek stroke ID'lerinin listesi
+  /// Whether execute has cached state for undo.
+  bool _executed = false;
+
+  /// Creates an [EraseStrokesCommand] for [strokeIds] on [layerIndex].
   EraseStrokesCommand({
     required this.layerIndex,
     required this.strokeIds,
@@ -34,22 +36,11 @@ class EraseStrokesCommand implements DrawingCommand {
 
     final layer = document.layers[layerIndex];
 
-    // Cache elementOrder before removal (for undo z-order restore)
+    // Cache elementOrder and erased strokes (with positions) for undo
     _originalElementOrder = List<String>.from(layer.elementOrder);
+    _erased = collectRemovals(layer.strokes, strokeIds, (s) => s.id);
+    _executed = true;
 
-    // Silinecek stroke'ları cache'le (undo için)
-    _erasedStrokes.clear();
-    for (final id in strokeIds) {
-      final stroke = layer.strokes.cast<Stroke?>().firstWhere(
-            (s) => s?.id == id,
-            orElse: () => null,
-          );
-      if (stroke != null) {
-        _erasedStrokes.add(stroke);
-      }
-    }
-
-    // Stroke'ları sil
     var updatedLayer = layer;
     for (final id in strokeIds) {
       updatedLayer = updatedLayer.removeStroke(id);
@@ -60,23 +51,17 @@ class EraseStrokesCommand implements DrawingCommand {
 
   @override
   DrawingDocument undo(DrawingDocument document) {
-    if (layerIndex < 0 || layerIndex >= document.layers.length) {
+    if (!_executed || layerIndex < 0 || layerIndex >= document.layers.length) {
       return document;
     }
 
-    var layer = document.layers[layerIndex];
+    final layer = document.layers[layerIndex];
+    final restored = layer.copyWith(
+      strokes: reinsertRemovals(layer.strokes, _erased),
+      elementOrder: _originalElementOrder,
+    );
 
-    // Silinen stroke'ları geri ekle (ters sırada - orijinal pozisyonlara)
-    for (final stroke in _erasedStrokes.reversed) {
-      layer = layer.addStroke(stroke);
-    }
-
-    // Restore original elementOrder (addStroke appends to end, wrong z-order)
-    if (_originalElementOrder.isNotEmpty) {
-      layer = layer.copyWith(elementOrder: _originalElementOrder);
-    }
-
-    return document.updateLayer(layerIndex, layer);
+    return document.updateLayer(layerIndex, restored);
   }
 
   @override

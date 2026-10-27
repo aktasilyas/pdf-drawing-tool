@@ -1,9 +1,11 @@
+import 'package:drawing_core/src/history/indexed_removal.dart';
 import 'package:drawing_core/src/internal.dart';
 
 /// Command to remove a stroke from a layer.
 ///
 /// This command removes a stroke by its ID from the specified layer.
-/// The removed stroke is cached internally for undo operations.
+/// The removed stroke and its list position are cached for undo, so undo
+/// restores the layer exactly (stroke order and elementOrder).
 class RemoveStrokeCommand implements DrawingCommand {
   /// The index of the layer to remove the stroke from.
   final int layerIndex;
@@ -11,9 +13,8 @@ class RemoveStrokeCommand implements DrawingCommand {
   /// The ID of the stroke to remove.
   final String strokeId;
 
-  /// Cached stroke for undo operation.
-  /// This is set during execute and used during undo.
-  Stroke? _removedStroke;
+  /// Cached stroke and its original index, set during execute.
+  IndexedRemoval<Stroke>? _removal;
 
   /// Cached elementOrder before execute (for undo z-order restore).
   List<String> _originalElementOrder = const [];
@@ -27,7 +28,7 @@ class RemoveStrokeCommand implements DrawingCommand {
   /// The stroke that was removed (available after execute).
   ///
   /// Returns null if execute hasn't been called or the stroke wasn't found.
-  Stroke? get removedStroke => _removedStroke;
+  Stroke? get removedStroke => _removal?.element;
 
   @override
   DrawingDocument execute(DrawingDocument document) {
@@ -40,10 +41,11 @@ class RemoveStrokeCommand implements DrawingCommand {
     // Cache elementOrder before removal (for undo z-order restore)
     _originalElementOrder = List<String>.from(layer.elementOrder);
 
-    // Find and cache the stroke for undo
-    _removedStroke = layer.getStrokeById(strokeId);
+    // Find and cache the stroke with its position for undo
+    final removals = collectRemovals(layer.strokes, [strokeId], (s) => s.id);
+    _removal = removals.isEmpty ? null : removals.first;
 
-    if (_removedStroke == null) {
+    if (_removal == null) {
       // Stroke not found, return unchanged
       return document;
     }
@@ -54,7 +56,8 @@ class RemoveStrokeCommand implements DrawingCommand {
 
   @override
   DrawingDocument undo(DrawingDocument document) {
-    if (_removedStroke == null) {
+    final removal = _removal;
+    if (removal == null) {
       // No stroke was removed, return unchanged
       return document;
     }
@@ -63,15 +66,13 @@ class RemoveStrokeCommand implements DrawingCommand {
       return document;
     }
 
-    var layer = document.layers[layerIndex];
-    layer = layer.addStroke(_removedStroke!);
+    final layer = document.layers[layerIndex];
+    final restored = layer.copyWith(
+      strokes: reinsertRemovals(layer.strokes, [removal]),
+      elementOrder: _originalElementOrder,
+    );
 
-    // Restore original elementOrder (addStroke appends to end, wrong z-order)
-    if (_originalElementOrder.isNotEmpty) {
-      layer = layer.copyWith(elementOrder: _originalElementOrder);
-    }
-
-    return document.updateLayer(layerIndex, layer);
+    return document.updateLayer(layerIndex, restored);
   }
 
   @override
