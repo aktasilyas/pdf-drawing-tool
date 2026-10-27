@@ -2,7 +2,7 @@ part of 'layer.dart';
 
 /// Stroke and shape operations for [Layer].
 ///
-/// Kept in an extension so `layer.dart` stays small; every method returns a
+/// Kept in a mixin so `layer.dart` stays small; every method returns a
 /// new [Layer].
 mixin _LayerStrokeOps {
   String get id;

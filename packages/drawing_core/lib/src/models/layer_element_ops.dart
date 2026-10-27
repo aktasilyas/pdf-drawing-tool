@@ -2,7 +2,7 @@ part of 'layer.dart';
 
 /// Text, image and sticky-note operations for [Layer].
 ///
-/// Kept in an extension so `layer.dart` stays small; every method returns a
+/// Kept in a mixin so `layer.dart` stays small; every method returns a
 /// new [Layer].
 mixin _LayerElementOps on _LayerStrokeOps {
   // ============================================================

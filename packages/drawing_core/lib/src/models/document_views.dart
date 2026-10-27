@@ -19,6 +19,7 @@ mixin _DocumentViews {
   DateTime get createdAt;
   DateTime get updatedAt;
 
+  /// Used where the original code returned `this`.
   DrawingDocument get _self => this as DrawingDocument;
 
   /// Implemented by [DrawingDocument]; declared here for the other mixins.
