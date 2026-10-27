@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
+import 'package:drawing_ui/src/panels/panel_controls.dart';
+
+export 'package:drawing_ui/src/panels/panel_controls.dart';
+export 'package:drawing_ui/src/panels/panel_section.dart';
 
 /// Base container for tool settings panels.
 ///
@@ -79,7 +82,7 @@ class ToolPanel extends StatelessWidget {
                 builder: (context, constraints) {
                   return SingleChildScrollView(
                     physics: const ClampingScrollPhysics(),
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(ChromeSpacing.md),
                     child: child,
                   );
                 },
@@ -109,320 +112,32 @@ class _PanelHeader extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    return Container(
-      padding: const EdgeInsets.only(left: 16, right: 8, top: 12, bottom: 12),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              title,
-              style: textTheme.titleMedium?.copyWith(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: colorScheme.onSurface,
-              ),
-            ),
-          ),
-          if (actions != null) ...actions!,
-          if (onClose != null)
-            Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: onClose,
-                borderRadius: BorderRadius.circular(20),
-                child: Container(
-                  width: 32,
-                  height: 32,
-                  decoration: BoxDecoration(
-                    color: colorScheme.controlSurface,
-                    shape: BoxShape.circle,
-                  ),
-                  child: PhosphorIcon(
-                    ElyanotesIcons.close,
-                    size: ElyanotesIcons.panelSize,
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Section within a tool panel.
-class PanelSection extends StatelessWidget {
-  const PanelSection({
-    super.key,
-    required this.title,
-    required this.child,
-    this.isLocked = false,
-    this.onLockedTap,
-  });
-
-  /// Title of the section.
-  final String title;
-
-  /// Content of the section.
-  final Widget child;
-
-  /// Whether this section is locked (premium feature).
-  final bool isLocked;
-
-  /// Callback when locked section is tapped.
-  final VoidCallback? onLockedTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Text(
-              title,
-              style: textTheme.labelMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: colorScheme.onSurfaceVariant,
-                letterSpacing: 0.5,
-              ),
-            ),
-            if (isLocked) ...[
-              const SizedBox(width: 6),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: colorScheme.tertiary.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    PhosphorIcon(ElyanotesIcons.lock,
-                        size: 10, color: colorScheme.tertiary),
-                    const SizedBox(width: 2),
-                    Text(
-                      'PRO',
-                      style: textTheme.labelSmall?.copyWith(
-                        fontSize: 9,
-                        fontWeight: FontWeight.w700,
-                        color: colorScheme.tertiary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ],
-        ),
-        const SizedBox(height: 10),
-        if (isLocked)
-          _LockedSectionOverlay(onTap: onLockedTap, child: child)
-        else
-          child,
-      ],
-    );
-  }
-}
-
-/// Overlay for locked (premium) sections.
-class _LockedSectionOverlay extends StatelessWidget {
-  const _LockedSectionOverlay({
-    required this.child,
-    this.onTap,
-  });
-
-  final Widget child;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Stack(
-        children: [
-          // Blurred content
-          Opacity(
-            opacity: 0.3,
-            child: IgnorePointer(child: child),
-          ),
-          // Lock overlay
-          Positioned.fill(
-            child: Container(
-              decoration: BoxDecoration(
-                color:
-                    colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    PhosphorIcon(ElyanotesIcons.lock,
-                        color: colorScheme.tertiary, size: 24),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Premium',
-                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                            color: colorScheme.tertiary,
-                          ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// A toggle option row for panels.
-class PanelToggleRow extends StatelessWidget {
-  const PanelToggleRow({
-    super.key,
-    required this.label,
-    required this.value,
-    required this.onChanged,
-    this.enabled = true,
-  });
-
-  final String label;
-  final bool value;
-  final ValueChanged<bool> onChanged;
-  final bool enabled;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: textTheme.bodyMedium?.copyWith(
-              color: enabled ? colorScheme.onSurface : colorScheme.outline,
-            ),
-          ),
-          Transform.scale(
-            scale: 0.85,
-            child: Switch(
-              value: value,
-              onChanged: enabled ? onChanged : null,
-              activeThumbColor: colorScheme.primary,
-              activeTrackColor: colorScheme.primary.withValues(alpha: 0.4),
-            ),
-          ),
-        ],
+      padding: EdgeInsets.only(
+        left: ChromeSpacing.lg,
+        right: onClose == null ? ChromeSpacing.sm : 0,
+        top: ChromeSpacing.xs,
+        bottom: ChromeSpacing.xs,
       ),
-    );
-  }
-}
-
-/// A button row for panel actions.
-class PanelActionButton extends StatelessWidget {
-  const PanelActionButton({
-    super.key,
-    required this.label,
-    required this.onPressed,
-    this.icon,
-    this.isPrimary = false,
-    this.isDestructive = false,
-  });
-
-  final String label;
-  final VoidCallback onPressed;
-  final IconData? icon;
-  final bool isPrimary;
-  final bool isDestructive;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    final bgColor = isPrimary
-        ? colorScheme.primary
-        : isDestructive
-            ? colorScheme.error.withValues(alpha: 0.1)
-            : colorScheme.surfaceContainerLowest;
-    final fgColor = isPrimary
-        ? colorScheme.onPrimary
-        : isDestructive
-            ? colorScheme.error
-            : colorScheme.onSurface;
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(10),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: BoxDecoration(
-            color: bgColor,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (icon != null) ...[
-                Icon(icon, size: 18, color: fgColor),
-                const SizedBox(width: 8),
-              ],
-              Text(
-                label,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: fgColor,
-                    ),
-              ),
-            ],
-          ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(
+          minHeight: ChromeSizes.minTouchTarget,
         ),
-      ),
-    );
-  }
-}
-
-/// Reusable panel close button — circular X icon.
-///
-/// Used in tool settings panels (pen, highlighter, eraser, etc.)
-/// to provide an explicit close action.
-class PanelCloseButton extends StatelessWidget {
-  const PanelCloseButton({super.key, required this.onTap});
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
-          width: 32,
-          height: 32,
-          decoration: BoxDecoration(
-            color: cs.controlSurface,
-            shape: BoxShape.circle,
-          ),
-          child: PhosphorIcon(
-            ElyanotesIcons.close,
-            size: ElyanotesIcons.panelSize,
-            color: cs.onSurfaceVariant,
-          ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                title,
+                style: textTheme.titleMedium?.copyWith(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: colorScheme.onSurface,
+                ),
+              ),
+            ),
+            if (actions != null) ...actions!,
+            if (onClose != null) PanelCloseButton(onTap: onClose!),
+          ],
         ),
       ),
     );
