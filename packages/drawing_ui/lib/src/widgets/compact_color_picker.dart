@@ -1,15 +1,23 @@
 /// Samsung Notes-style color picker with Kartelalar (swatch) and Spektrum tabs.
 import 'package:flutter/material.dart';
-import 'package:drawing_ui/src/theme/chrome_roles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:phosphor_icons/phosphor_icons.dart';
-import 'package:drawing_ui/src/theme/drawing_shadows.dart';
-import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
+
 import 'package:drawing_ui/src/providers/recent_colors_provider.dart';
+import 'package:drawing_ui/src/theme/chrome_roles.dart';
+import 'package:drawing_ui/src/theme/chrome_tokens.dart';
+import 'package:drawing_ui/src/theme/drawing_shadows.dart';
+import 'package:drawing_ui/src/widgets/color_picker_actions.dart';
+import 'package:drawing_ui/src/widgets/color_picker_info_bar.dart';
+import 'package:drawing_ui/src/widgets/color_picker_logic.dart';
+import 'package:drawing_ui/src/widgets/color_picker_recent_row.dart';
 import 'package:drawing_ui/src/widgets/color_swatch_grid.dart';
 import 'package:drawing_ui/src/widgets/spectrum_picker.dart';
 
 /// Compact color picker — Samsung Notes inspired.
+///
+/// Reports the picked colour through [onColorSelected] when the user taps
+/// "Bitti" (and records it as a recent colour); "İptal et" calls [onClose],
+/// or pops the route when [onClose] is null.
 class CompactColorPicker extends ConsumerStatefulWidget {
   const CompactColorPicker({
     super.key,
@@ -48,19 +56,27 @@ class _CompactColorPickerState extends ConsumerState<CompactColorPicker>
     super.dispose();
   }
 
-  Color get _currentColor => _hsvColor
-      .toColor()
-      .withValues(alpha: widget.showOpacity ? _opacity : 1.0);
+  Color get _currentColor => ColorPickerLogic.compose(
+        _hsvColor,
+        _opacity,
+        showOpacity: widget.showOpacity,
+      );
 
   void _selectColor(Color color) {
     setState(() {
       _hsvColor = HSVColor.fromColor(color);
-      _opacity = color.a.clamp(0.01, 1.0);
+      _opacity = ColorPickerLogic.opacityOf(color);
     });
   }
 
   void _close() {
     widget.onClose != null ? widget.onClose!() : Navigator.maybePop(context);
+  }
+
+  void _done() {
+    final color = _currentColor;
+    ref.read(recentColorsProvider.notifier).addColor(color);
+    widget.onColorSelected(color);
   }
 
   @override
@@ -74,11 +90,11 @@ class _CompactColorPickerState extends ConsumerState<CompactColorPicker>
       onTap: () {},
       child: Container(
         width: 300,
-        margin: const EdgeInsets.all(8),
+        margin: const EdgeInsets.all(ChromeSpacing.sm),
         constraints: BoxConstraints(maxHeight: maxH),
         decoration: BoxDecoration(
           color: cs.pickerSurface,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(ChromeRadius.xl),
           border: cs.outlinedFloatingBorder,
           boxShadow: DrawingShadows.panel(Theme.of(context).brightness),
         ),
@@ -91,14 +107,14 @@ class _CompactColorPickerState extends ConsumerState<CompactColorPicker>
                 controller: _tabController,
                 children: [
                   SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(ChromeSpacing.lg),
                     child: ColorSwatchGrid(
                       selectedColor: _currentColor,
                       onColorSelected: _selectColor,
                     ),
                   ),
                   SingleChildScrollView(
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(ChromeSpacing.lg),
                     child: SpectrumPicker(
                       hsvColor: _hsvColor,
                       onColorChanged: (hsv) => setState(() => _hsvColor = hsv),
@@ -110,19 +126,16 @@ class _CompactColorPickerState extends ConsumerState<CompactColorPicker>
                 ],
               ),
             ),
-            _ColorInfoBar(color: _currentColor),
-            _DottedDivider(color: cs.outlineVariant),
-            _RecentColorsRow(
+            ColorPickerInfoBar(color: _currentColor),
+            ColorPickerDottedDivider(color: cs.outlineVariant),
+            ColorPickerRecentRow(
               onColorSelected: _selectColor,
               outlineColor: cs.outlineVariant,
               iconColor: cs.onSurfaceVariant,
             ),
-            _ActionButtons(
+            ColorPickerActions(
               onCancel: _close,
-              onDone: () {
-                ref.read(recentColorsProvider.notifier).addColor(_currentColor);
-                widget.onColorSelected(_currentColor);
-              },
+              onDone: _done,
               textColor: cs.onSurface,
               primaryColor: cs.primary,
               dividerColor: cs.outlineVariant,
@@ -136,12 +149,17 @@ class _CompactColorPickerState extends ConsumerState<CompactColorPicker>
   Widget _buildTabBar(ColorScheme cs) {
     final textTheme = Theme.of(context).textTheme;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      padding: const EdgeInsets.fromLTRB(
+        ChromeSpacing.lg,
+        ChromeSpacing.lg,
+        ChromeSpacing.lg,
+        ChromeSpacing.sm,
+      ),
       child: Container(
-        height: 40,
+        height: ChromeSizes.minTouchTarget,
         decoration: BoxDecoration(
           color: cs.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(ChromeSizes.minTouchTarget / 2),
         ),
         child: TabBar(
           controller: _tabController,
@@ -149,7 +167,8 @@ class _CompactColorPickerState extends ConsumerState<CompactColorPicker>
           unselectedLabelColor: cs.onSurfaceVariant,
           indicator: BoxDecoration(
             color: cs.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(20),
+            borderRadius:
+                BorderRadius.circular(ChromeSizes.minTouchTarget / 2),
           ),
           indicatorSize: TabBarIndicatorSize.tab,
           dividerHeight: 0,
@@ -158,217 +177,6 @@ class _CompactColorPickerState extends ConsumerState<CompactColorPicker>
           tabs: const [Tab(text: 'Kartelalar'), Tab(text: 'Spektrum')],
         ),
       ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Shared bottom-section widgets
-// ---------------------------------------------------------------------------
-
-/// Color preview + hex + RGB info.
-class _ColorInfoBar extends StatelessWidget {
-  const _ColorInfoBar({required this.color});
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    final r = (color.r * 255).round();
-    final g = (color.g * 255).round();
-    final b = (color.b * 255).round();
-    final hex = r.toRadixString(16).padLeft(2, '0') +
-        g.toRadixString(16).padLeft(2, '0') +
-        b.toRadixString(16).padLeft(2, '0');
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      child: Row(children: [
-        // Preview rectangle
-        Container(
-          width: 48,
-          height: 32,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-        const SizedBox(width: 8),
-        _infoCol('Altıgen', '#${hex.toUpperCase()}', cs, textTheme),
-        _infoCol('Kırmızı', '$r', cs, textTheme),
-        _infoCol('Yeşil', '$g', cs, textTheme),
-        _infoCol('Mavi', '$b', cs, textTheme),
-      ]),
-    );
-  }
-
-  Widget _infoCol(
-      String label, String value, ColorScheme cs, TextTheme textTheme) {
-    return Expanded(
-      child: Column(children: [
-        Text(label,
-            style: textTheme.labelSmall
-                ?.copyWith(fontSize: 9, color: cs.onSurfaceVariant)),
-        const SizedBox(height: 2),
-        Text(value,
-            style: textTheme.labelSmall
-                ?.copyWith(fontWeight: FontWeight.w600, color: cs.onSurface)),
-      ]),
-    );
-  }
-}
-
-/// Dotted line separator (Samsung Notes style).
-class _DottedDivider extends StatelessWidget {
-  const _DottedDivider({required this.color});
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      child: LayoutBuilder(builder: (_, c) {
-        final count = (c.maxWidth / 5).floor();
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: List.generate(
-            count,
-            (_) => Container(
-              width: 2,
-              height: 2,
-              decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-            ),
-          ),
-        );
-      }),
-    );
-  }
-}
-
-/// 5 recent-color slots + eyedropper icon.
-class _RecentColorsRow extends StatelessWidget {
-  const _RecentColorsRow({
-    required this.onColorSelected,
-    required this.outlineColor,
-    required this.iconColor,
-  });
-
-  final ValueChanged<Color> onColorSelected;
-  final Color outlineColor;
-  final Color iconColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      child: Consumer(builder: (context, ref, _) {
-        final recent = ref.watch(recentColorsProvider);
-        return Row(children: [
-          ...List.generate(5, (i) {
-            if (i < recent.length) {
-              return _slot(
-                child: GestureDetector(
-                  onTap: () => onColorSelected(recent[i]),
-                  child: Container(
-                    width: 32,
-                    height: 32,
-                    decoration: BoxDecoration(
-                      color: recent[i],
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: outlineColor.withValues(alpha: 0.5),
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }
-            return _slot(
-              child: Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: outlineColor),
-                ),
-              ),
-            );
-          }),
-          const Spacer(),
-          Container(
-            width: 32,
-            height: 32,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: outlineColor),
-            ),
-            child: PhosphorIcon(ElyanotesIcons.colorize,
-                size: 16, color: iconColor),
-          ),
-        ]);
-      }),
-    );
-  }
-
-  Widget _slot({required Widget child}) =>
-      Padding(padding: const EdgeInsets.only(right: 8), child: child);
-}
-
-/// Cancel / Done action buttons.
-class _ActionButtons extends StatelessWidget {
-  const _ActionButtons({
-    required this.onCancel,
-    required this.onDone,
-    required this.textColor,
-    required this.primaryColor,
-    required this.dividerColor,
-  });
-
-  final VoidCallback onCancel;
-  final VoidCallback onDone;
-  final Color textColor;
-  final Color primaryColor;
-  final Color dividerColor;
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
-      child: Row(children: [
-        Expanded(
-          child: GestureDetector(
-            onTap: onCancel,
-            behavior: HitTestBehavior.opaque,
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: Text('İptal et',
-                    style: textTheme.bodyMedium
-                        ?.copyWith(fontSize: 15, color: textColor)),
-              ),
-            ),
-          ),
-        ),
-        Container(width: 1, height: 20, color: dividerColor),
-        Expanded(
-          child: GestureDetector(
-            onTap: onDone,
-            behavior: HitTestBehavior.opaque,
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                child: Text('Bitti',
-                    style: textTheme.bodyMedium?.copyWith(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color: primaryColor)),
-              ),
-            ),
-          ),
-        ),
-      ]),
     );
   }
 }
