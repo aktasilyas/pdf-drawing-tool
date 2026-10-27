@@ -11,6 +11,8 @@ import 'package:drawing_core/src/models/stroke_style.dart';
 /// The stroke is immutable - adding points returns a new [Stroke] instance.
 ///
 /// This class uses [Equatable] for value equality.
+// The lazily cached bounds are derived from immutable points.
+// ignore: must_be_immutable
 class Stroke extends Equatable {
   /// Unique identifier for the stroke.
   final String id;
@@ -71,10 +73,20 @@ class Stroke extends Equatable {
   /// The last point of this stroke, or null if empty.
   DrawingPoint? get lastPoint => isEmpty ? null : points.last;
 
-  /// Calculates and returns the bounding box of this stroke.
+  BoundingBox? _bounds;
+  bool _boundsComputed = false;
+
+  /// Returns the bounding box of this stroke, or null if it is empty.
   ///
-  /// Returns null if the stroke is empty.
+  /// Computed lazily once per instance (points are immutable) and cached;
+  /// the cache does not take part in equality, hashing, copying or JSON.
   BoundingBox? get bounds {
+    if (_boundsComputed) return _bounds;
+    _boundsComputed = true;
+    return _bounds = _computeBounds();
+  }
+
+  BoundingBox? _computeBounds() {
     if (isEmpty) return null;
 
     double minX = points.first.x;
