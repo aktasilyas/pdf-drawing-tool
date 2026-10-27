@@ -62,8 +62,7 @@ void main() {
   testWidgets('Done reports the picked swatch and records it as recent',
       (tester) async {
     Color? reported;
-    final container =
-        await _pump(tester, onSelected: (c) => reported = c);
+    final container = await _pump(tester, onSelected: (c) => reported = c);
 
     final cell = find.descendant(
       of: find.byType(ColorSwatchGrid),
@@ -131,10 +130,12 @@ void main() {
 
     expectTarget(find.byKey(const ValueKey('recentColorSlot0')));
     for (final label in ['İptal et', 'Bitti']) {
-      expectTarget(find.ancestor(
-        of: find.text(label),
-        matching: find.byType(GestureDetector),
-      ).first);
+      expectTarget(find
+          .ancestor(
+            of: find.text(label),
+            matching: find.byType(GestureDetector),
+          )
+          .first);
     }
     for (final label in ['Kartelalar', 'Spektrum']) {
       final tab = find.ancestor(

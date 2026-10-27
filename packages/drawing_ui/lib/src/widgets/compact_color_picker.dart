@@ -167,8 +167,7 @@ class _CompactColorPickerState extends ConsumerState<CompactColorPicker>
           unselectedLabelColor: cs.onSurfaceVariant,
           indicator: BoxDecoration(
             color: cs.surfaceContainerHighest,
-            borderRadius:
-                BorderRadius.circular(ChromeSizes.minTouchTarget / 2),
+            borderRadius: BorderRadius.circular(ChromeSizes.minTouchTarget / 2),
           ),
           indicatorSize: TabBarIndicatorSize.tab,
           dividerHeight: 0,

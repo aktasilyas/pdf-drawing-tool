@@ -16,8 +16,7 @@ void main() {
 
     test('compose keeps opacity only when the slider is shown', () {
       final hsv = HSVColor.fromColor(const Color(0xFFFF0000));
-      final withAlpha =
-          ColorPickerLogic.compose(hsv, 0.5, showOpacity: true);
+      final withAlpha = ColorPickerLogic.compose(hsv, 0.5, showOpacity: true);
       final opaque = ColorPickerLogic.compose(hsv, 0.5, showOpacity: false);
 
       expect(withAlpha.a, closeTo(0.5, 0.001));
@@ -38,8 +37,7 @@ void main() {
     });
 
     test('recentSlots truncates to the slot count', () {
-      final many = List.generate(
-          7, (i) => Color(0xFF000000 + i));
+      final many = List.generate(7, (i) => Color(0xFF000000 + i));
       expect(ColorPickerLogic.recentSlots(many), many.take(5).toList());
     });
   });
