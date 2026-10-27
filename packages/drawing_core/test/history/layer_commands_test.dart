@@ -168,8 +168,8 @@ void main() {
   group('via HistoryManager', () {
     test('undo/redo after a page change restore layers and active', () {
       final manager = HistoryManager();
-      final start = [layer('a'), layer('b', strokes: [stroke('s')])];
-      var doc = v2([...start, layer('c')], active: 1);
+      final inked = layer('b', strokes: [stroke('s')]);
+      var doc = v2([layer('a'), inked, layer('c')], active: 1);
       doc = doc.addPage(Page.create(index: 1));
       final pageId = doc.pages[0].id;
 
