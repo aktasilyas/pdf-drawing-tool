@@ -7,8 +7,8 @@ void main() {
 
   test('messages reach a custom sink with level and error', () {
     final seen = <(DrawingLogLevel, String, Object?)>[];
-    DrawingLog.sink = (level, message, error, stack) =>
-        seen.add((level, message, error));
+    DrawingLog.sink =
+        (level, message, error, stack) => seen.add((level, message, error));
 
     DrawingLog.w('careful');
     DrawingLog.e('boom', StateError('x'));
