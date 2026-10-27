@@ -7,6 +7,9 @@ Deliver GitHub issue #$ARGUMENTS for Elyanotes.
 GitHub access: use `gh api` (REST) only. GraphQL (`gh issue view`, `gh pr create`)
 is not available in cloud sessions. `R=repos/aktasilyas/pdf-drawing-tool`.
 
+0. Do not start unless you hold the issue lock (label `in-progress` plus your
+   own earliest `autopilot-lock:` comment, see the autopilot skill). If you were
+   invoked directly by a human, take the lock the same way first.
 1. Read the issue: `gh api $R/issues/<n>` and its comments `gh api $R/issues/<n>/comments`.
    If acceptance criteria are missing, write them as a comment and continue with them.
 2. Branch from fresh main: `git fetch origin main && git switch -c claude/<n>-<slug> origin/main`.
