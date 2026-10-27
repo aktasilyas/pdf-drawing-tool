@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/documents.dart';
+import 'package:example_app/features/documents/domain/entities/sort_option.dart';
 import 'package:example_app/features/documents/presentation/l10n/library_labels.dart';
 import 'package:example_app/l10n/l10n.dart';
 
