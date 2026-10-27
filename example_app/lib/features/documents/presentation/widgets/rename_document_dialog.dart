@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
 import 'package:example_app/features/documents/presentation/providers/document_menu_actions.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// Shows rename dialog for a document.
 void showRenameDocumentDialog(
@@ -16,7 +17,7 @@ void showRenameDocumentDialog(
   showDialog(
     context: context,
     builder: (ctx) => AlertDialog(
-      title: const Text('Yeniden Adlandır'),
+      title: Text(ctx.l10n.commonRename),
       insetPadding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.xl,
         vertical: AppSpacing.xl,
@@ -24,9 +25,9 @@ void showRenameDocumentDialog(
       content: SingleChildScrollView(
         child: TextField(
           controller: controller,
-          decoration: const InputDecoration(
-            labelText: 'Belge Adı',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: ctx.l10n.libraryDocumentNameLabel,
+            border: const OutlineInputBorder(),
           ),
           autofocus: true,
         ),
@@ -34,7 +35,7 @@ void showRenameDocumentDialog(
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(ctx),
-          child: const Text('İptal'),
+          child: Text(ctx.l10n.commonCancel),
         ),
         FilledButton(
           onPressed: () {
@@ -42,7 +43,7 @@ void showRenameDocumentDialog(
             actions.rename(document, controller.text);
             Navigator.pop(ctx);
           },
-          child: const Text('Kaydet'),
+          child: Text(ctx.l10n.commonSave),
         ),
       ],
     ),

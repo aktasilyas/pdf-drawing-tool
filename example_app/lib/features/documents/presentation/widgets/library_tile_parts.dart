@@ -5,6 +5,7 @@ import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
 import 'package:example_app/features/documents/domain/entities/folder.dart';
 import 'package:example_app/features/documents/presentation/widgets/document_card_helpers.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// Round selection marker on the top-right of a tile's cover board.
 class LibrarySelectionCheckbox extends StatelessWidget {
@@ -51,14 +52,14 @@ class LibraryFavoriteBadge extends StatelessWidget {
   const LibraryFavoriteBadge({
     super.key,
     required this.onTap,
-    this.semanticLabel = 'Favorilerden çıkar',
+    this.semanticLabel,
   });
 
   final VoidCallback? onTap;
 
-  /// Screen-reader label; the badge only shows on favourites, so tapping it
-  /// removes the favourite.
-  final String semanticLabel;
+  /// Screen-reader label; defaults to "Remove from favorites" because the
+  /// badge only shows on favourites, so tapping it removes the favourite.
+  final String? semanticLabel;
 
   /// Hit area edge.
   static const double hitSize = AppSpacing.minTouchTarget;
@@ -72,7 +73,7 @@ class LibraryFavoriteBadge extends StatelessWidget {
     return Semantics(
       container: true,
       button: true,
-      label: semanticLabel,
+      label: semanticLabel ?? context.l10n.libraryRemoveFavoriteBadge,
       onTap: onTap,
       excludeSemantics: true,
       child: SizedBox(
@@ -177,9 +178,10 @@ class LibraryTileInfo extends StatelessWidget {
 
 /// Meta line texts for library tiles.
 abstract final class LibraryMeta {
-  static String document(DocumentInfo d) =>
-      '${DocumentDateFormatter.format(d.updatedAt)}'
-      '${d.pageCount > 1 ? ' · ${d.pageCount} sayfa' : ''}';
+  static String document(DocumentInfo d, AppLocalizations l10n) =>
+      '${DocumentDateFormatter.format(d.updatedAt, l10n.localeName)}'
+      '${d.pageCount > 1 ? ' · ${l10n.libraryPageCount(d.pageCount)}' : ''}';
 
-  static String folder(Folder f) => '${f.documentCount} belge';
+  static String folder(Folder f, AppLocalizations l10n) =>
+      l10n.libraryDocumentCount(f.documentCount);
 }

@@ -64,11 +64,17 @@ mixin DocumentsBulkOperations on StateNotifier<AsyncValue<void>> {
   }
 
   // Bulk duplicate documents
-  Future<void> duplicateDocuments(List<String> ids) async {
+  Future<void> duplicateDocuments(
+    List<String> ids, {
+    required String Function(String title) copyTitle,
+  }) async {
     state = const AsyncLoading();
     try {
       for (final id in ids) {
-        final result = await repository.duplicateDocument(id);
+        final result = await repository.duplicateDocument(
+          id,
+          copyTitle: copyTitle,
+        );
         result.fold(
           (failure) => throw Exception(failure.message),
           (_) {},

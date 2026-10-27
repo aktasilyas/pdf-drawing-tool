@@ -91,10 +91,13 @@ void main() {
     await fx.documents.saveDocumentContent(id: d.id, content: content(3));
     await fx.documents.toggleFavorite(d.id);
 
-    final copy = (await fx.documents.duplicateDocument(d.id))
+    final copy = (await fx.documents.duplicateDocument(
+      d.id,
+      copyTitle: (t) => '$t (copy)',
+    ))
         .getOrElse(() => throw StateError('dup failed'));
     expect(copy.id, isNot(d.id));
-    expect(copy.title, 'Doc (kopya)');
+    expect(copy.title, 'Doc (copy)');
     expect(copy.pageCount, 3);
     expect(copy.isFavorite, isFalse);
     final copied = (await fx.documents.getDocumentContent(copy.id))
@@ -115,7 +118,10 @@ void main() {
       "BEGIN SELECT RAISE(ABORT, 'no space'); END",
     );
 
-    final r = await fx.documents.duplicateDocument(d.id);
+    final r = await fx.documents.duplicateDocument(
+      d.id,
+      copyTitle: (t) => '$t (copy)',
+    );
     expect(r.isLeft(), isTrue);
     expect(await fx.documentDs.getAllDocuments(), hasLength(1));
   });

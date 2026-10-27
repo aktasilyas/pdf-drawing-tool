@@ -66,7 +66,6 @@ export 'presentation/widgets/breadcrumb_navigation.dart';
 export 'presentation/widgets/cover_grid.dart';
 export 'presentation/widgets/document_card.dart';
 export 'presentation/widgets/document_card_helpers.dart';
-export 'presentation/widgets/document_context_menu.dart';
 export 'presentation/widgets/document_grid.dart';
 export 'presentation/widgets/document_list_tile.dart';
 export 'presentation/widgets/document_preview.dart';

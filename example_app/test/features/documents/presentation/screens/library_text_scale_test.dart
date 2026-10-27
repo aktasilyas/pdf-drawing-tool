@@ -1,4 +1,5 @@
-import 'package:drawing_ui/drawing_ui.dart' show CoverTextureStore;
+import 'package:drawing_ui/drawing_ui.dart'
+    show CoverTextureStore, ElyanotesIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -127,5 +128,44 @@ void main() {
       expect(find.text(l10n.libraryEmptyTrashConfirmMessage), findsOneWidget);
       expectNoOverflow(t, 'empty-trash dialog');
     });
+
+    testWidgets('$tag: item menu sheet', (t) async {
+      final l10n = await pump(t, locale);
+      await _openItemMenu(t);
+      expect(find.text(l10n.commonDuplicate), findsOneWidget);
+      expect(find.text(l10n.libraryMoveToTrash), findsOneWidget);
+      expectNoOverflow(t, 'item menu sheet');
+    });
+
+    testWidgets('$tag: rename dialog', (t) async {
+      final l10n = await pump(t, locale);
+      await _openItemMenu(t);
+      await t.tap(find.text(l10n.commonRename));
+      await t.pumpAndSettle();
+      expect(find.text(l10n.libraryDocumentNameLabel), findsOneWidget);
+      expectNoOverflow(t, 'rename dialog');
+    });
+
+    testWidgets('$tag: folder delete dialog', (t) async {
+      final l10n = await pump(t, locale);
+      await t.tap(find.byKey(const Key('folder_card_more_button')).first);
+      await t.pumpAndSettle();
+      await t.tap(find.text(l10n.commonDelete));
+      await t.pumpAndSettle();
+      expect(find.text(l10n.libraryDeleteFolderTitle), findsOneWidget);
+      expectNoOverflow(t, 'folder delete dialog');
+    });
   }
+}
+
+/// Opens the menu of the first document tile through its caret.
+Future<void> _openItemMenu(WidgetTester tester) async {
+  final caret = find.byWidgetPredicate(
+    (w) =>
+        w is Icon &&
+        w.icon == ElyanotesIcons.libraryCaretDown &&
+        w.key == null,
+  );
+  await tester.tap(caret.first);
+  await tester.pumpAndSettle();
 }

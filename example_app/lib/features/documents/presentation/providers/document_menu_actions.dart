@@ -48,7 +48,10 @@ class DocumentMenuActions {
   }
 
   /// Duplicates [document] unless the unified document limit is reached.
-  Future<DuplicateOutcome> duplicate(DocumentInfo document) async {
+  Future<DuplicateOutcome> duplicate(
+    DocumentInfo document, {
+    required String Function(String title) copyTitle,
+  }) async {
     final totalCount = await _ref.read(totalDocumentCountProvider.future);
     final access = _ref.read(featureAccessProvider(
       FeatureAccessParams(
@@ -57,7 +60,10 @@ class DocumentMenuActions {
       ),
     ));
     if (!access.isAllowed) return DuplicateOutcome.blocked(access);
-    final ok = await _controller.duplicateDocument(document.id);
+    final ok = await _controller.duplicateDocument(
+      document.id,
+      copyTitle: copyTitle,
+    );
     return ok ? const DuplicateOutcome.done() : const DuplicateOutcome.failed();
   }
 

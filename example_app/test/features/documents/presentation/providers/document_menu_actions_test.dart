@@ -9,6 +9,8 @@ import 'package:example_app/features/premium/premium.dart';
 import 'documents_controller_harness.dart';
 
 void main() {
+  setUpAll(registerDocumentsFallbacks);
+
   late MockDocumentRepository repo;
   late MockPageTrashRepository pageTrash;
 
@@ -41,7 +43,7 @@ void main() {
     when(() => repo.updateDocument(
             id: any(named: 'id'), title: any(named: 'title')))
         .thenAnswer((_) async => Right(testDocument));
-    when(() => repo.duplicateDocument(any()))
+    when(() => repo.duplicateDocument(any(), copyTitle: any(named: 'copyTitle')))
         .thenAnswer((_) async => Right(testDocument));
     when(() => repo.toggleFavorite(any()))
         .thenAnswer((_) async => const Right(null));
@@ -84,25 +86,28 @@ void main() {
   group('duplicate', () {
     test('duplicates when under the limit', () async {
       final actions = build().read(documentMenuActionsProvider);
-      final outcome = await actions.duplicate(testDocument);
+      final outcome = await actions.duplicate(testDocument, copyTitle: copyTitle);
       expect(outcome.duplicated, isTrue);
       expect(outcome.blockedBy, isNull);
-      verify(() => repo.duplicateDocument('doc-1')).called(1);
+      verify(() => repo.duplicateDocument(
+          'doc-1',
+          copyTitle: any(named: 'copyTitle'),
+        )).called(1);
     });
 
     test('is blocked at the limit and does not duplicate', () async {
       final actions = build(allowed: false).read(documentMenuActionsProvider);
-      final outcome = await actions.duplicate(testDocument);
+      final outcome = await actions.duplicate(testDocument, copyTitle: copyTitle);
       expect(outcome.duplicated, isFalse);
       expect(outcome.blockedBy, isNotNull);
-      verifyNever(() => repo.duplicateDocument(any()));
+      verifyNever(() => repo.duplicateDocument(any(), copyTitle: any(named: 'copyTitle')));
     });
 
     test('reports failure', () async {
-      when(() => repo.duplicateDocument(any()))
+      when(() => repo.duplicateDocument(any(), copyTitle: any(named: 'copyTitle')))
           .thenAnswer((_) async => const Left(failure));
       final actions = build().read(documentMenuActionsProvider);
-      final outcome = await actions.duplicate(testDocument);
+      final outcome = await actions.duplicate(testDocument, copyTitle: copyTitle);
       expect(outcome.duplicated, isFalse);
       expect(outcome.blockedBy, isNull);
     });

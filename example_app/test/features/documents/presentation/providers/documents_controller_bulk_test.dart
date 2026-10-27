@@ -73,20 +73,20 @@ void main() {
 
   group('duplicateDocuments', () {
     test('duplicates every id and refreshes every list', () async {
-      when(() => h.repo.duplicateDocument(any()))
+      when(() => h.repo.duplicateDocument(any(), copyTitle: any(named: 'copyTitle')))
           .thenAnswer((_) async => Right(testDocument));
       final rebuilt = await h.rebuiltBy(() async {
-        await h.controller.duplicateDocuments(ids);
+        await h.controller.duplicateDocuments(ids, copyTitle: copyTitle);
       });
-      verify(() => h.repo.duplicateDocument(any())).called(2);
+      verify(() => h.repo.duplicateDocument(any(), copyTitle: any(named: 'copyTitle'))).called(2);
       expect(rebuilt, allLists);
     });
 
     test('a failure sets the error and rethrows', () async {
-      when(() => h.repo.duplicateDocument(any()))
+      when(() => h.repo.duplicateDocument(any(), copyTitle: any(named: 'copyTitle')))
           .thenAnswer((_) async => const Left(failure));
       await expectLater(
-        h.controller.duplicateDocuments(ids),
+        h.controller.duplicateDocuments(ids, copyTitle: copyTitle),
         throwsA(isA<Exception>()),
       );
       expect(h.state.hasError, isTrue);

@@ -919,6 +919,180 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count, plural, =1{1 document will be moved to the trash.} other{{count} documents will be moved to the trash.}}'**
   String libraryTrashDocumentsMessage(int count);
+
+  /// No description provided for @libraryPageCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 page} other{{count} pages}}'**
+  String libraryPageCount(int count);
+
+  /// No description provided for @libraryDocumentCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 document} other{{count} documents}}'**
+  String libraryDocumentCount(int count);
+
+  /// No description provided for @libraryDaysLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'{days, plural, =1{1 day} other{{days} days}}'**
+  String libraryDaysLeft(int days);
+
+  /// No description provided for @libraryRemoveFavoriteBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from favorites'**
+  String get libraryRemoveFavoriteBadge;
+
+  /// No description provided for @libraryRemoveFromFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from favorites'**
+  String get libraryRemoveFromFavorites;
+
+  /// No description provided for @libraryAddToFavorites.
+  ///
+  /// In en, this message translates to:
+  /// **'Add to favorites'**
+  String get libraryAddToFavorites;
+
+  /// No description provided for @libraryMoveToTrash.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to trash'**
+  String get libraryMoveToTrash;
+
+  /// No description provided for @libraryDocumentDuplicated.
+  ///
+  /// In en, this message translates to:
+  /// **'Notebook duplicated'**
+  String get libraryDocumentDuplicated;
+
+  /// No description provided for @libraryDocumentMoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Notebook moved'**
+  String get libraryDocumentMoved;
+
+  /// No description provided for @libraryDocumentRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Notebook restored'**
+  String get libraryDocumentRestored;
+
+  /// No description provided for @libraryDeleteDocumentForeverMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This notebook will be deleted permanently. This can\'t be undone.'**
+  String get libraryDeleteDocumentForeverMessage;
+
+  /// No description provided for @libraryDocumentNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Notebook name'**
+  String get libraryDocumentNameLabel;
+
+  /// No description provided for @libraryChangeColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Change color'**
+  String get libraryChangeColor;
+
+  /// No description provided for @libraryFolderMoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder moved'**
+  String get libraryFolderMoved;
+
+  /// No description provided for @libraryFolderColorChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder color changed'**
+  String get libraryFolderColorChanged;
+
+  /// No description provided for @libraryDeleteFolderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete folder'**
+  String get libraryDeleteFolderTitle;
+
+  /// No description provided for @libraryDeleteFolderNonEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{This folder contains 1 document. Deleting the folder also deletes that document. Continue?} other{This folder contains {count} documents. Deleting it also deletes them. Continue?}}'**
+  String libraryDeleteFolderNonEmptyMessage(int count);
+
+  /// No description provided for @libraryDeleteFolderMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this folder?'**
+  String get libraryDeleteFolderMessage;
+
+  /// No description provided for @libraryFolderDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder deleted'**
+  String get libraryFolderDeleted;
+
+  /// No description provided for @libraryRenameFolderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename folder'**
+  String get libraryRenameFolderTitle;
+
+  /// No description provided for @libraryFolderNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder name'**
+  String get libraryFolderNameLabel;
+
+  /// No description provided for @libraryFolderRenamed.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder renamed to \"{name}\"'**
+  String libraryFolderRenamed(String name);
+
+  /// No description provided for @libraryPageNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {page}'**
+  String libraryPageNumber(int page);
+
+  /// No description provided for @libraryTrashedPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{document} — Page {page}'**
+  String libraryTrashedPageTitle(String document, int page);
+
+  /// No description provided for @librarySourceDocumentMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'The original notebook no longer exists'**
+  String get librarySourceDocumentMissing;
+
+  /// No description provided for @libraryPageRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Page restored'**
+  String get libraryPageRestored;
+
+  /// No description provided for @libraryPageRestoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t restore the page'**
+  String get libraryPageRestoreFailed;
+
+  /// No description provided for @libraryDeletePageForeverMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This page will be deleted permanently. This can\'t be undone.'**
+  String get libraryDeletePageForeverMessage;
+
+  /// No description provided for @libraryCopyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{title} (copy)'**
+  String libraryCopyTitle(String title);
 }
 
 class _AppLocalizationsDelegate

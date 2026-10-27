@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/documents/domain/entities/trashed_page.dart';
 import 'package:example_app/features/documents/presentation/widgets/document_card_helpers.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// Card widget for a trashed page, displayed in the trash view.
 /// Renders the actual page content (strokes, shapes, background) as thumbnail.
@@ -165,7 +166,9 @@ class _TrashedPageCardState extends State<TrashedPageCard> {
           borderRadius: BorderRadius.circular(AppRadius.xs),
         ),
         child: Text(
-          'Sayfa ${widget.trashedPage.originalPageIndex + 1}',
+          context.l10n.libraryPageNumber(
+            widget.trashedPage.originalPageIndex + 1,
+          ),
           style: AppTypography.caption.copyWith(
             fontSize: 9,
             fontWeight: FontWeight.w600,
@@ -180,6 +183,14 @@ class _TrashedPageCardState extends State<TrashedPageCard> {
     final textPrimary = context.palette.textPrimary;
     final textSecondary = context.palette.textMuted;
     final textTertiary = context.palette.textDisabled;
+    final l10n = context.l10n;
+    final page = l10n.libraryPageNumber(
+      widget.trashedPage.originalPageIndex + 1,
+    );
+    final deletedOn = DocumentDateFormatter.format(
+      widget.trashedPage.deletedAt,
+      l10n.localeName,
+    );
 
     return GestureDetector(
       onTap: widget.onTap,
@@ -197,7 +208,7 @@ class _TrashedPageCardState extends State<TrashedPageCard> {
                 ),
                 const SizedBox(height: AppSpacing.xxs),
                 Text(
-                  'Sayfa ${widget.trashedPage.originalPageIndex + 1}  •  ${DocumentDateFormatter.format(widget.trashedPage.deletedAt)}',
+                  '$page  •  $deletedOn',
                   style: AppTypography.caption.copyWith(color: textSecondary),
                 ),
               ],
