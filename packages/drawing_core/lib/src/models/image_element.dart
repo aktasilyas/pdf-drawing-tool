@@ -102,6 +102,7 @@ class ImageElement {
 
   /// Immutable copy.
   ImageElement copyWith({
+    String? id,
     String? filePath,
     double? x,
     double? y,
@@ -110,7 +111,7 @@ class ImageElement {
     double? rotation,
   }) {
     return ImageElement(
-      id: id,
+      id: id ?? this.id,
       filePath: filePath ?? this.filePath,
       x: x ?? this.x,
       y: y ?? this.y,

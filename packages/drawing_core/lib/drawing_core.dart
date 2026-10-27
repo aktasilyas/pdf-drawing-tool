@@ -47,6 +47,7 @@ export 'src/models/drawing_point.dart';
 export 'src/models/element_ids.dart';
 export 'src/models/layer.dart';
 export 'src/models/page.dart';
+export 'src/models/page_copy.dart';
 export 'src/models/page_background.dart';
 export 'src/models/page_size.dart';
 export 'src/models/pdf_path_resolver.dart';

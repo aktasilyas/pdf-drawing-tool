@@ -14,6 +14,7 @@ import 'package:example_app/features/documents/presentation/widgets/folder_menus
 import 'package:example_app/features/documents/presentation/widgets/new_document_dialog.dart';
 import 'package:example_app/core/routing/route_names.dart';
 import 'package:example_app/features/premium/premium.dart';
+import 'package:example_app/l10n/l10n.dart';
 import 'documents_screen_helpers.dart';
 
 class DocumentsScreen extends ConsumerStatefulWidget {
@@ -135,7 +136,12 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
               (ref.watch(trashItemsProvider).valueOrNull ?? const []).isNotEmpty
           ? confirmAndEmptyTrash
           : null,
-      title: getSectionTitle(ref, _selectedSection, _selectedFolderId),
+      title: getSectionTitle(
+        ref,
+        context.l10n,
+        _selectedSection,
+        _selectedFolderId,
+      ),
       breadcrumb: isInFolder
           ? buildBreadcrumb(
               _selectedFolderId,
@@ -174,8 +180,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
             vertical: AppSpacing.xs,
           ),
           child: NearLimitBanner(
-            message: 'Çöp kutusundaki belgeler limite dahildir. '
-                'Yer açmak için kalıcı olarak silin veya',
+            message: context.l10n.libraryTrashCountsTowardsLimit,
             onUpgrade: () => context.push(RouteNames.paywall),
           ),
         );
@@ -194,7 +199,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen>
         vertical: AppSpacing.xs,
       ),
       child: NearLimitBanner(
-        message: '$remaining belge hakkınız kaldı',
+        message: context.l10n.libraryRemainingDocuments(remaining),
         onUpgrade: () => context.push(RouteNames.paywall),
         onDismiss: () => setState(() => _nearLimitBannerDismissed = true),
       ),

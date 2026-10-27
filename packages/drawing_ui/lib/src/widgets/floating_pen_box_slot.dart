@@ -3,6 +3,8 @@ import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/chrome_tokens.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
+import 'package:drawing_ui/src/widgets/color_chip.dart'
+    show colorSemanticsLabel;
 import 'package:drawing_ui/src/widgets/pen_icon_widget.dart';
 
 /// One preset pen in the `FloatingPenBox`.
@@ -72,61 +74,73 @@ class FloatingPenBoxSlot extends StatelessWidget {
     final isColumn = boxAxis == Axis.vertical;
     final slide = isSelected ? _selectedOffset : _restingOffset;
     const centred = (_slotBreadth - _penSize) / 2;
+    final label =
+        '${preset.toolType.displayName}, ${colorSemanticsLabel(preset.color)}';
 
-    return GestureDetector(
-      onTap: onTap,
-      onDoubleTap: onDoubleTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        width: isColumn ? _slotLength : _slotBreadth,
-        height: isColumn ? _slotBreadth : _slotLength,
-        decoration: isSelected
-            ? BoxDecoration(
-                color: colorScheme.primaryContainer.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(ChromeRadius.sm),
-              )
-            : null,
-        child: Stack(
-          clipBehavior: Clip.hardEdge,
-          children: [
-            AnimatedPositioned(
-              duration: ChromeDurations.fast,
-              curve: Curves.easeOutCubic,
-              left: isColumn ? slide : centred,
-              top: isColumn ? centred : slide,
-              width: _penSize,
-              height: _penSize,
-              child: isColumn
-                  ? _pen(PenOrientation.horizontal)
-                  : Transform.rotate(
-                      angle: _flipAngle,
-                      child: _pen(PenOrientation.vertical),
-                    ),
-            ),
-            if (isEditMode)
-              Positioned(
-                right: ChromeSpacing.xxs,
-                top: isColumn ? ChromeSpacing.xxs : null,
-                bottom: isColumn ? null : ChromeSpacing.xxs,
-                child: GestureDetector(
-                  onTap: onDelete,
-                  child: Container(
-                    width: _badgeSize,
-                    height: _badgeSize,
-                    decoration: BoxDecoration(
-                      color: colorScheme.error,
-                      shape: BoxShape.circle,
-                    ),
-                    // Moved as-is; token migration is tracked separately.
-                    child: PhosphorIcon(
-                      ElyanotesIcons.minus,
-                      size: _badgeIconSize,
-                      color: Colors.white,
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: label,
+      child: GestureDetector(
+        onTap: onTap,
+        onDoubleTap: onDoubleTap,
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          width: isColumn ? _slotLength : _slotBreadth,
+          height: isColumn ? _slotBreadth : _slotLength,
+          decoration: isSelected
+              ? BoxDecoration(
+                  color: colorScheme.primaryContainer.withValues(alpha: 0.3),
+                  borderRadius: BorderRadius.circular(ChromeRadius.sm),
+                )
+              : null,
+          child: Stack(
+            clipBehavior: Clip.hardEdge,
+            children: [
+              AnimatedPositioned(
+                duration: ChromeDurations.fast,
+                curve: Curves.easeOutCubic,
+                left: isColumn ? slide : centred,
+                top: isColumn ? centred : slide,
+                width: _penSize,
+                height: _penSize,
+                child: isColumn
+                    ? _pen(PenOrientation.horizontal)
+                    : Transform.rotate(
+                        angle: _flipAngle,
+                        child: _pen(PenOrientation.vertical),
+                      ),
+              ),
+              if (isEditMode)
+                Positioned(
+                  right: ChromeSpacing.xxs,
+                  top: isColumn ? ChromeSpacing.xxs : null,
+                  bottom: isColumn ? null : ChromeSpacing.xxs,
+                  child: Semantics(
+                    container: true,
+                    button: true,
+                    label: 'Kalemi kaldır',
+                    child: GestureDetector(
+                      onTap: onDelete,
+                      child: Container(
+                        width: _badgeSize,
+                        height: _badgeSize,
+                        decoration: BoxDecoration(
+                          color: colorScheme.error,
+                          shape: BoxShape.circle,
+                        ),
+                        // Moved as-is; token migration is tracked separately.
+                        child: PhosphorIcon(
+                          ElyanotesIcons.minus,
+                          size: _badgeIconSize,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );

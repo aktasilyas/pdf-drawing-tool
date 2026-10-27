@@ -2,16 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:example_app/core/utils/logger.dart';
 import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
-import 'package:example_app/features/documents/presentation/constants/documents_strings.dart';
 import 'package:example_app/features/documents/domain/entities/folder.dart';
+import 'package:example_app/features/documents/domain/entities/library_rule.dart';
+import 'package:example_app/features/documents/presentation/l10n/library_labels.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/breadcrumb_navigation.dart';
 import 'package:example_app/features/documents/presentation/widgets/documents_sidebar.dart';
 import 'package:example_app/features/documents/presentation/widgets/move_to_folder_dialog.dart';
 import 'package:example_app/features/editor/presentation/providers/editor_provider.dart';
+import 'package:example_app/l10n/l10n.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
 import 'package:drawing_ui/drawing_ui.dart';
 
@@ -45,10 +48,11 @@ mixin DocumentsScreenHelpers on ConsumerState<DocumentsScreen> {
 
     result.fold(
       (failure) {
+        logger.w('openDocument $documentId: ${failure.message}');
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Belge açılamadı: ${failure.message}'),
+              content: Text(context.l10n.libraryOpenFailed),
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -83,7 +87,7 @@ mixin DocumentsScreenHelpers on ConsumerState<DocumentsScreen> {
       ref.read(foldersProvider).valueOrNull ?? const <Folder>[],
     );
     if (target.depthExceeded) {
-      AppToast.error(context, DocumentsStrings.folderDepthError);
+      AppToast.error(context, LibraryRule.folderDepth.message(context.l10n));
       return;
     }
     showDialog<bool>(
@@ -99,18 +103,19 @@ mixin DocumentsScreenHelpers on ConsumerState<DocumentsScreen> {
 
   /// Confirms, then permanently deletes everything in the trash.
   Future<void> confirmAndEmptyTrash() async {
+    final l10n = context.l10n;
     final confirmed = await AppConfirmDialog.show(
       context: context,
-      title: DocumentsStrings.emptyTrashTitle,
-      message: DocumentsStrings.emptyTrashMessage,
-      confirmLabel: DocumentsStrings.emptyTrashConfirm,
+      title: l10n.libraryEmptyTrash,
+      message: l10n.libraryEmptyTrashConfirmMessage,
+      confirmLabel: l10n.libraryEmptyTrashConfirm,
       isDestructive: true,
     );
     if (confirmed != true || !mounted) return;
     final done =
         await ref.read(documentsControllerProvider.notifier).emptyTrash();
     if (done && mounted) {
-      AppToast.success(context, DocumentsStrings.trashEmptied);
+      AppToast.success(context, context.l10n.libraryTrashEmptied);
     }
   }
 
@@ -129,7 +134,8 @@ mixin DocumentsScreenHelpers on ConsumerState<DocumentsScreen> {
       data: (folders) {
         if (folders.isEmpty) return const SizedBox.shrink();
         final items = <BreadcrumbItem>[
-          const BreadcrumbItem(folderId: null, label: 'Belgelerim'),
+          BreadcrumbItem(
+              folderId: null, label: context.l10n.libraryBreadcrumbRoot),
           ...folders.map(
             (f) => BreadcrumbItem(folderId: f.id, label: f.name),
           ),
@@ -200,27 +206,13 @@ mixin DocumentsScreenHelpers on ConsumerState<DocumentsScreen> {
 /// Returns the display title for the given section and optional folder.
 String getSectionTitle(
   WidgetRef ref,
+  AppLocalizations l10n,
   SidebarSection section,
   String? folderId,
 ) {
-  switch (section) {
-    case SidebarSection.documents:
-      return 'Tüm Notlar';
-    case SidebarSection.favorites:
-      return 'Favoriler';
-    case SidebarSection.trash:
-      return 'Son Silinenler';
-    case SidebarSection.folder:
-      if (folderId != null) {
-        final folderAsync = ref.watch(folderByIdProvider(folderId));
-        return folderAsync.when(
-          data: (folder) => folder?.name ?? 'Klasör',
-          loading: () => 'Klasör',
-          error: (_, __) => 'Klasör',
-        );
-      }
-      return 'Klasör';
-  }
+  final fallback = section.title(l10n);
+  if (section != SidebarSection.folder || folderId == null) return fallback;
+  return ref.watch(folderByIdProvider(folderId)).valueOrNull?.name ?? fallback;
 }
 
 /// Returns the list of document IDs for the current section/folder view.
