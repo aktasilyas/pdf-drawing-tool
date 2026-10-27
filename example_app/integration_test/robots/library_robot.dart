@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:example_app/core/widgets/index.dart';
+import 'package:example_app/features/documents/presentation/widgets/library_tile_frame.dart';
 import 'package:example_app/features/documents/presentation/widgets/library_tile_parts.dart';
 import 'package:example_app/features/documents/presentation/widgets/manage_folder_list_item.dart';
 import 'package:example_app/features/documents/presentation/widgets/sidebar_item.dart';
@@ -95,6 +96,19 @@ class LibraryRobot {
       await tester.tapAndWait(coverSwitch);
     }
     await tester.tapAndWait(find.text('Olustur'));
+  }
+
+  /// Cover of the grid tile titled [title]; tapping it opens the item.
+  Finder tileCover(String title) => find.descendant(
+        of: find.byWidgetPredicate(
+          (w) => w is LibraryTileFrame && w.semanticLabel == title,
+        ),
+        matching: find.byType(GestureDetector),
+      );
+
+  /// Opens the notebook titled [title] in the editor by tapping its cover.
+  Future<void> openNotebook(String title) async {
+    await tester.tapAndWait(tileCover(title));
   }
 
   /// Opens the bottom-sheet menu of the tile titled [title].
