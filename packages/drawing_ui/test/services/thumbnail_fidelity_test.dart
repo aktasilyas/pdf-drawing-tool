@@ -5,8 +5,8 @@ import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/services/thumbnail_generator.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Thumbnails must look like the canvas page (#256): every template renders
-/// its own pattern, and strokes go through the canvas stroke renderer.
+// Thumbnails must look like the canvas page (#256): every template renders
+// its own pattern, and strokes go through the canvas stroke renderer.
 
 Page _templatePage(TemplatePattern pattern) => Page.create(
       index: 0,
@@ -19,6 +19,9 @@ Page _templatePage(TemplatePattern pattern) => Page.create(
         lineColor: 0xFF9E9E9E,
       ),
     );
+
+Page _a4With(Stroke stroke) =>
+    Page.create(index: 0, size: PageSize.a4Portrait).addStroke(stroke);
 
 Future<ByteData> _pixels(Page page) async {
   final png = await ThumbnailGenerator.generate(page, width: 300, height: 424);
@@ -68,11 +71,11 @@ void main() {
     for (final pattern in TemplatePattern.values) {
       if (pattern == TemplatePattern.blank) continue;
       final pixels = await _pixels(_templatePage(pattern));
-      expect(_samePixels(pixels, blank), isFalse,
-          reason: '$pattern renders nothing');
+      final empty = _samePixels(pixels, blank);
+      expect(empty, isFalse, reason: '$pattern renders nothing');
       if (!pattern.hasGrid && !pattern.hasDots) {
-        expect(_samePixels(pixels, grid), isFalse,
-            reason: '$pattern falls back to the plain grid');
+        final fallback = _samePixels(pixels, grid);
+        expect(fallback, isFalse, reason: '$pattern draws the plain grid');
       }
       seen[pattern] = pixels;
     }
@@ -93,13 +96,11 @@ void main() {
   });
 
   testGenerate('a single-point (dot) stroke appears', () async {
-    final page = Page.create(index: 0, size: PageSize.a4Portrait).addStroke(
-      Stroke.create(
-        points: [DrawingPoint(x: 300, y: 400, pressure: 0.8)],
-        style: StrokeStyle.pen(color: 0xFF000000, thickness: 12),
-      ),
+    final dot = Stroke.create(
+      points: [DrawingPoint(x: 300, y: 400, pressure: 0.8)],
+      style: StrokeStyle.pen(color: 0xFF000000, thickness: 12),
     );
-    final data = await _pixels(page);
+    final data = await _pixels(_a4With(dot));
     // A4 at 300 px wide: scale ~0.504, the dot sits near (151, 202).
     expect(
       _inkedPixels(data, 300, const ui.Rect.fromLTWH(140, 190, 24, 24)),
@@ -108,21 +109,21 @@ void main() {
   });
 
   testGenerate('hidden layers are not drawn', () async {
-    final base = Page.create(index: 0, size: PageSize.a4Portrait).addStroke(
-      Stroke.create(
-        points: [
-          DrawingPoint(x: 100, y: 100),
-          DrawingPoint(x: 500, y: 700),
-        ],
-        style: StrokeStyle.pen(color: 0xFF000000, thickness: 8),
-      ),
+    final line = Stroke.create(
+      points: [
+        DrawingPoint(x: 100, y: 100),
+        DrawingPoint(x: 500, y: 700),
+      ],
+      style: StrokeStyle.pen(color: 0xFF000000, thickness: 8),
     );
+    final base = _a4With(line);
     final hidden = base.copyWith(
       layers: [base.layers.first.copyWith(isVisible: false)],
     );
     final blank = Page.create(index: 0, size: PageSize.a4Portrait);
-    expect(_samePixels(await _pixels(hidden), await _pixels(blank)), isTrue);
-    expect(_samePixels(await _pixels(base), await _pixels(blank)), isFalse);
+    final blankPixels = await _pixels(blank);
+    expect(_samePixels(await _pixels(hidden), blankPixels), isTrue);
+    expect(_samePixels(await _pixels(base), blankPixels), isFalse);
   });
 
   testGenerate('pressure strokes render with the canvas outline renderer',
@@ -133,21 +134,19 @@ void main() {
       color: 0xFF000000,
       thickness: 24,
     );
-    final page = Page.create(index: 0, size: PageSize.a4Portrait).addStroke(
-      Stroke.create(
-        points: [
-          for (var i = 0; i <= 40; i++)
-            DrawingPoint(
-              x: 60 + i * 12.0,
-              y: 400,
-              pressure: 0.05 + 0.95 * i / 40,
-              timestamp: i * 16,
-            ),
-        ],
-        style: style,
-      ),
+    final ramp = Stroke.create(
+      points: [
+        for (var i = 0; i <= 40; i++)
+          DrawingPoint(
+            x: 60 + i * 12.0,
+            y: 400,
+            pressure: 0.05 + 0.95 * i / 40,
+            timestamp: i * 16,
+          ),
+      ],
+      style: style,
     );
-    final data = await _pixels(page);
+    final data = await _pixels(_a4With(ramp));
     // Thumbnail scale ~0.504: the stroke spans x 30..272 at y ~202.
     const thinBox = ui.Rect.fromLTWH(36, 180, 30, 44);
     const thickBox = ui.Rect.fromLTWH(236, 180, 30, 44);

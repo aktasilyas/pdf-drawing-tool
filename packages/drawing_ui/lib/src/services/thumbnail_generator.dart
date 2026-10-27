@@ -125,7 +125,7 @@ class ThumbnailGenerator {
       } finally {
         image.dispose();
       }
-    } catch (e) {
+    } catch (_) {
       // Return null on any error (e.g., invalid dimensions, rendering issues)
       return null;
     } finally {

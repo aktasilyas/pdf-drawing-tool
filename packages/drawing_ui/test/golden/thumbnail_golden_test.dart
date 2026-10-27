@@ -6,9 +6,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'reference_strokes.dart';
 
-/// Page thumbnails rendered with the canvas painters (#256): structured
-/// templates and highlighter / pencil ink. Rendered at 300x424 so the detail
-/// is reviewable; the app renders the same pipeline at 150x200.
+// Page thumbnails rendered with the canvas painters (#256): structured
+// templates and highlighter / pencil ink. Rendered at 300x424 so the detail
+// is reviewable; the app renders the same pipeline at 150x200.
 
 Page _page(TemplatePattern pattern, {List<Stroke> strokes = const []}) {
   final page = Page.create(
