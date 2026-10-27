@@ -163,22 +163,34 @@ class SettingsRobot {
     await tester.pumpFor(const Duration(milliseconds: 300));
   }
 
-  /// "Geri bildirim gönder" copies the contact address; returns what the
-  /// clipboard holds afterwards.
+  /// "Geri bildirim gönder" copies the contact address; returns the text the
+  /// app sent to the clipboard.
   ///
-  /// The clipboard is read until it holds text (up to 5 s): on Android 13+
-  /// the system clipboard preview can briefly take focus right after a copy
-  /// (seen on the tablet emulator), and reads made without focus return null.
+  /// The copy is captured on the platform channel (and still forwarded to the
+  /// platform) instead of read back with `Clipboard.getData`: on Android 13+
+  /// the system clipboard preview can take focus after a copy, and reads made
+  /// without focus return null. That made this step fail on the phone and
+  /// tablet emulators even with a 5 s poll.
   Future<String?> copyFeedbackAddress() async {
-    await Clipboard.setData(const ClipboardData(text: ''));
-    await _reveal(_tile(_feedbackIcon));
-    await tester.tapAndWait(_tile(_feedbackIcon));
-    String? text;
-    for (var i = 0; i < 50; i++) {
-      text = (await Clipboard.getData(Clipboard.kTextPlain))?.text;
-      if (text != null && text.isNotEmpty) break;
-      await tester.pump(const Duration(milliseconds: 100));
+    final messenger = tester.binding.defaultBinaryMessenger;
+    const codec = JSONMethodCodec();
+    String? copied;
+    messenger.setMockMessageHandler(SystemChannels.platform.name, (message) {
+      final call = codec.decodeMethodCall(message);
+      if (call.method == 'Clipboard.setData') {
+        copied = (call.arguments as Map<Object?, Object?>)['text'] as String?;
+      }
+      return messenger.delegate.send(SystemChannels.platform.name, message);
+    });
+    try {
+      await _reveal(_tile(_feedbackIcon));
+      await tester.tapAndWait(_tile(_feedbackIcon));
+      for (var i = 0; i < 50 && copied == null; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+    } finally {
+      messenger.setMockMessageHandler(SystemChannels.platform.name, null);
     }
-    return text;
+    return copied;
   }
 }
