@@ -85,15 +85,6 @@ void main() {
     });
 
     group('Vector Rendering', () {
-      test('should support all pen types', () {
-        final renderer = VectorPDFRenderer();
-
-        expect(renderer.supportsPenStyle(core.PenType.ballpointPen), true);
-        expect(renderer.supportsPenStyle(core.PenType.gelPen), true);
-        expect(renderer.supportsPenStyle(core.PenType.brushPen), true);
-        expect(renderer.supportsPenStyle(core.PenType.highlighter), true);
-      });
-
       test('should calculate stroke complexity', () {
         final renderer = VectorPDFRenderer();
 

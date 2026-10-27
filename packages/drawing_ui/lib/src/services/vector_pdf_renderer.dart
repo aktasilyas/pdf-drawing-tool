@@ -7,9 +7,6 @@ class VectorRenderOptions {
   /// Whether to smooth strokes using bezier curves.
   final bool smoothStrokes;
 
-  /// Whether to enable antialiasing.
-  final bool antialiasing;
-
   /// Whether to optimize paths by simplifying.
   final bool optimizePaths;
 
@@ -18,48 +15,23 @@ class VectorRenderOptions {
 
   const VectorRenderOptions({
     this.smoothStrokes = true,
-    this.antialiasing = true,
     this.optimizePaths = true,
     this.simplificationTolerance = 1.0,
   });
 }
 
-/// Enhanced vector PDF renderer with advanced features.
+/// Helpers the vector PDF export uses: stroke preparation (simplify +
+/// smooth), ARGB to PDF colour and per-pen line cap/join.
 class VectorPDFRenderer {
-  /// Whether antialiasing is enabled.
-  final bool enableAntialiasing;
-
   /// Default rendering options.
   final VectorRenderOptions defaultOptions;
 
   VectorPDFRenderer({
-    this.enableAntialiasing = true,
     VectorRenderOptions? defaultOptions,
   }) : defaultOptions = defaultOptions ?? const VectorRenderOptions();
 
-  /// Checks if a stroke can be rendered.
-  bool canRenderStroke(Stroke stroke) {
-    return stroke.points.length >= 2;
-  }
-
-  /// Checks if a shape can be rendered.
-  bool canRenderShape(Shape shape) {
-    return shape.bounds.width > 0 && shape.bounds.height > 0;
-  }
-
-  /// Checks if text can be rendered.
-  bool canRenderText(TextElement text) {
-    return text.text.isNotEmpty;
-  }
-
-  /// Checks if a pen style is supported.
-  bool supportsPenStyle(PenType penType) {
-    // All pen types are supported in vector mode
-    return true;
-  }
-
   /// Calculates the length of a stroke path.
-  double calculateStrokeLength(Stroke stroke) {
+  double _strokeLength(Stroke stroke) {
     double length = 0.0;
 
     for (int i = 1; i < stroke.points.length; i++) {
@@ -73,52 +45,6 @@ class VectorPDFRenderer {
     }
 
     return length;
-  }
-
-  /// Calculates the area of a shape.
-  double calculateShapeArea(Shape shape) {
-    switch (shape.type) {
-      case ShapeType.rectangle:
-        return shape.bounds.width * shape.bounds.height;
-
-      case ShapeType.ellipse:
-        final a = shape.bounds.width / 2;
-        final b = shape.bounds.height / 2;
-        return math.pi * a * b;
-
-      case ShapeType.triangle:
-        return shape.bounds.width * shape.bounds.height / 2;
-
-      case ShapeType.diamond:
-        return shape.bounds.width * shape.bounds.height / 2;
-
-      case ShapeType.line:
-      case ShapeType.arrow:
-        return 0.0;
-
-      case ShapeType.star:
-      case ShapeType.pentagon:
-      case ShapeType.hexagon:
-      case ShapeType.plus:
-        // Approximate area for complex shapes
-        return shape.bounds.width * shape.bounds.height * 0.7;
-    }
-  }
-
-  /// Estimates text width based on content and font size.
-  double estimateTextWidth(TextElement text) {
-    // Rough estimate: ~0.6 * fontSize per character
-    return text.text.length * text.fontSize * 0.6;
-  }
-
-  /// Gets default PDF line cap (round).
-  int getDefaultLineCap() {
-    return 1; // Round cap
-  }
-
-  /// Gets default PDF line join (round).
-  int getDefaultLineJoin() {
-    return 1; // Round join
   }
 
   /// Converts ARGB color to PDF color.
@@ -137,51 +63,8 @@ class VectorPDFRenderer {
     return a / 255;
   }
 
-  /// Generates a smooth bezier curve from points.
-  List<DrawingPoint> generateBezierCurve(List<DrawingPoint> points) {
-    if (points.length <= 2) {
-      return points;
-    }
-
-    final smoothed = <DrawingPoint>[];
-    smoothed.add(points.first);
-
-    for (int i = 0; i < points.length - 1; i++) {
-      final p0 = i > 0 ? points[i - 1] : points[i];
-      final p1 = points[i];
-      final p2 = points[i + 1];
-      final p3 = i < points.length - 2 ? points[i + 2] : points[i + 1];
-
-      // Catmull-Rom spline control points
-      final cp1x = p1.x + (p2.x - p0.x) / 6;
-      final cp1y = p1.y + (p2.y - p0.y) / 6;
-      final cp2x = p2.x - (p3.x - p1.x) / 6;
-      final cp2y = p2.y - (p3.y - p1.y) / 6;
-
-      // Sample the curve
-      for (double t = 0; t <= 1; t += 0.1) {
-        final t2 = t * t;
-        final t3 = t2 * t;
-        final mt = 1 - t;
-        final mt2 = mt * mt;
-        final mt3 = mt2 * mt;
-
-        final x =
-            mt3 * p1.x + 3 * mt2 * t * cp1x + 3 * mt * t2 * cp2x + t3 * p2.x;
-
-        final y =
-            mt3 * p1.y + 3 * mt2 * t * cp1y + 3 * mt * t2 * cp2y + t3 * p2.y;
-
-        smoothed.add(DrawingPoint(x: x, y: y));
-      }
-    }
-
-    smoothed.add(points.last);
-    return smoothed;
-  }
-
   /// Smooths a stroke path using moving average.
-  List<DrawingPoint> smoothStroke(List<DrawingPoint> points) {
+  List<DrawingPoint> _smooth(List<DrawingPoint> points) {
     if (points.length <= 2) {
       return points;
     }
@@ -207,7 +90,7 @@ class VectorPDFRenderer {
   }
 
   /// Simplifies a path using Douglas-Peucker algorithm.
-  List<DrawingPoint> simplifyPath(
+  List<DrawingPoint> _simplify(
     List<DrawingPoint> points, {
     required double tolerance,
   }) {
@@ -284,7 +167,7 @@ class VectorPDFRenderer {
   /// Estimates rendering complexity (0-1, higher is more complex).
   double estimateComplexity(Stroke stroke) {
     final pointCount = stroke.points.length;
-    final length = calculateStrokeLength(stroke);
+    final length = _strokeLength(stroke);
 
     // Normalize to 0-1 range
     final pointComplexity = (pointCount / 10000).clamp(0.0, 1.0);
@@ -308,12 +191,12 @@ class VectorPDFRenderer {
 
     // Optimize path if needed
     if (opts.optimizePaths && shouldOptimize(stroke)) {
-      points = simplifyPath(points, tolerance: opts.simplificationTolerance);
+      points = _simplify(points, tolerance: opts.simplificationTolerance);
     }
 
     // Smooth stroke if enabled
     if (opts.smoothStrokes && points.length > 2) {
-      points = smoothStroke(points);
+      points = _smooth(points);
     }
 
     return points;
