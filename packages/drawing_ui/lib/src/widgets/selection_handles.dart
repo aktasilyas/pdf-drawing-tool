@@ -66,16 +66,16 @@ class _SelectionHandlesState extends ConsumerState<SelectionHandles> {
 
   // ── Helpers ──
 
-  SelectionHit? _hitTest(Offset pos) => SelectionGeometry.hitTest(
-        pos,
-        widget.selection.bounds,
-        zoom: ref.read(zoomLevelProvider),
-      );
+  SelectionHit? _hitTest(Offset pos) {
+    final zoom = ref.read(zoomLevelProvider);
+    return SelectionGeometry.hitTest(pos, widget.selection.bounds, zoom: zoom);
+  }
 
   /// Page size for clamping, or `null` on an infinite canvas.
-  Size? _pageSize() => ref.read(isInfiniteCanvasProvider)
-      ? null
-      : ref.read(currentPageProvider).size;
+  Size? _pageSize() {
+    if (ref.read(isInfiniteCanvasProvider)) return null;
+    return ref.read(currentPageProvider).size;
+  }
 
   // ── Pointer events ──
 
@@ -139,9 +139,8 @@ class _SelectionHandlesState extends ConsumerState<SelectionHandles> {
     final notifier = ref.read(selectionUiProvider.notifier);
     switch (mode) {
       case SelectionDragMode.move:
-        notifier.setMoveDelta(
-          SelectionGeometry.clampMove(pos - start, ob, _pageSize()),
-        );
+        final d = SelectionGeometry.clampMove(pos - start, ob, _pageSize());
+        notifier.setMoveDelta(d);
       case SelectionDragMode.rotate:
         final a = SelectionGeometry.angleAround(pos, ob);
         notifier.setRotation(a - (_initialAngle ?? a));
@@ -165,8 +164,8 @@ class _SelectionHandlesState extends ConsumerState<SelectionHandles> {
     final downPos = _pointerDownPos;
     final mode = _dragMode;
     final ob = _originalBounds;
-    final moved = downPos != null &&
-        (pos - downPos).distance > SelectionGeometry.tapSlop;
+    final travel = downPos == null ? 0.0 : (pos - downPos).distance;
+    final moved = travel > SelectionGeometry.tapSlop;
 
     if (mode != null && ob != null && moved) {
       _commit(mode, ob);
@@ -202,15 +201,18 @@ class _SelectionHandlesState extends ConsumerState<SelectionHandles> {
     if (command == null) return;
     ref.read(historyManagerProvider.notifier).execute(command);
 
-    final newBounds = mode == SelectionDragMode.move
-        ? SelectionGeometry.translate(ob, ui.moveDelta)
-        : selectedElementBounds(ref.read(documentProvider), selection);
+    final doc = ref.read(documentProvider);
+    var newBounds = selectedElementBounds(doc, selection);
+    if (mode == SelectionDragMode.move) {
+      newBounds = SelectionGeometry.translate(ob, ui.moveDelta);
+    }
     if (newBounds != null) {
-      ref.read(selectionProvider.notifier).setSelection(selection.copyWith(
+      final updated = selection.copyWith(
         bounds: newBounds,
         lassoPath: null,
         type: SelectionType.rectangle,
-      ));
+      );
+      ref.read(selectionProvider.notifier).setSelection(updated);
     }
     ref.read(selectionUiProvider.notifier).reset();
     widget.onSelectionChanged?.call();
