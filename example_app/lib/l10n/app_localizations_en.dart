@@ -553,7 +553,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get libraryDocumentRestored => 'Notebook restored';
 
   @override
-  String get libraryDeleteDocumentForeverMessage => 'This notebook will be deleted permanently. This can\'t be undone.';
+  String get libraryDeleteDocumentForeverMessage =>
+      'This notebook will be deleted permanently. This can\'t be undone.';
 
   @override
   String get libraryDocumentNameLabel => 'Notebook name';
@@ -575,8 +576,10 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'This folder contains $count documents. Deleting it also deletes them. Continue?',
-      one: 'This folder contains 1 document. Deleting the folder also deletes that document. Continue?',
+      other:
+          'This folder contains $count documents. Deleting it also deletes them. Continue?',
+      one:
+          'This folder contains 1 document. Deleting the folder also deletes that document. Continue?',
     );
     return '$_temp0';
   }
@@ -609,7 +612,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get librarySourceDocumentMissing => 'The original notebook no longer exists';
+  String get librarySourceDocumentMissing =>
+      'The original notebook no longer exists';
 
   @override
   String get libraryPageRestored => 'Page restored';
@@ -618,7 +622,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get libraryPageRestoreFailed => 'Couldn\'t restore the page';
 
   @override
-  String get libraryDeletePageForeverMessage => 'This page will be deleted permanently. This can\'t be undone.';
+  String get libraryDeletePageForeverMessage =>
+      'This page will be deleted permanently. This can\'t be undone.';
 
   @override
   String libraryCopyTitle(String title) {

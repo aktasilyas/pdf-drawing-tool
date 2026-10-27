@@ -539,7 +539,8 @@ class AppLocalizationsTr extends AppLocalizations {
   String get libraryDocumentRestored => 'Belge geri yüklendi';
 
   @override
-  String get libraryDeleteDocumentForeverMessage => 'Bu belge kalıcı olarak silinecek. Bu işlem geri alınamaz!';
+  String get libraryDeleteDocumentForeverMessage =>
+      'Bu belge kalıcı olarak silinecek. Bu işlem geri alınamaz!';
 
   @override
   String get libraryDocumentNameLabel => 'Belge Adı';
@@ -561,13 +562,15 @@ class AppLocalizationsTr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: 'Bu klasörde $count belge var. Klasörü silmek belgelerini de siler. Devam etmek istiyor musunuz?',
+      other:
+          'Bu klasörde $count belge var. Klasörü silmek belgelerini de siler. Devam etmek istiyor musunuz?',
     );
     return '$_temp0';
   }
 
   @override
-  String get libraryDeleteFolderMessage => 'Bu klasörü silmek istediğinize emin misiniz?';
+  String get libraryDeleteFolderMessage =>
+      'Bu klasörü silmek istediğinize emin misiniz?';
 
   @override
   String get libraryFolderDeleted => 'Klasör silindi';
@@ -603,7 +606,8 @@ class AppLocalizationsTr extends AppLocalizations {
   String get libraryPageRestoreFailed => 'Sayfa geri yüklenemedi';
 
   @override
-  String get libraryDeletePageForeverMessage => 'Bu sayfa kalıcı olarak silinecek. Bu işlem geri alınamaz!';
+  String get libraryDeletePageForeverMessage =>
+      'Bu sayfa kalıcı olarak silinecek. Bu işlem geri alınamaz!';
 
   @override
   String libraryCopyTitle(String title) {

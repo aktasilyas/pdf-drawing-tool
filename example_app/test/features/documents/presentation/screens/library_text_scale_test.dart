@@ -162,9 +162,7 @@ void main() {
 Future<void> _openItemMenu(WidgetTester tester) async {
   final caret = find.byWidgetPredicate(
     (w) =>
-        w is Icon &&
-        w.icon == ElyanotesIcons.libraryCaretDown &&
-        w.key == null,
+        w is Icon && w.icon == ElyanotesIcons.libraryCaretDown && w.key == null,
   );
   await tester.tap(caret.first);
   await tester.pumpAndSettle();

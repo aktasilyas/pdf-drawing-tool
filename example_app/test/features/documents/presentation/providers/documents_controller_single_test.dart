@@ -123,9 +123,9 @@ void main() {
       when(() => h.repo.duplicateDocument(
             'doc-1',
             copyTitle: any(named: 'copyTitle'),
-          ))
-          .thenAnswer((_) async => Right(testDocument));
-      final rebuilt = await run((c) => c.duplicateDocument('doc-1', copyTitle: copyTitle));
+          )).thenAnswer((_) async => Right(testDocument));
+      final rebuilt =
+          await run((c) => c.duplicateDocument('doc-1', copyTitle: copyTitle));
       expect(result, isTrue);
       expect(rebuilt, allLists);
     });
@@ -134,9 +134,9 @@ void main() {
       when(() => h.repo.duplicateDocument(
             'doc-1',
             copyTitle: any(named: 'copyTitle'),
-          ))
-          .thenAnswer((_) async => const Left(failure));
-      final rebuilt = await run((c) => c.duplicateDocument('doc-1', copyTitle: copyTitle));
+          )).thenAnswer((_) async => const Left(failure));
+      final rebuilt =
+          await run((c) => c.duplicateDocument('doc-1', copyTitle: copyTitle));
       expect(result, isFalse);
       expect(rebuilt, isEmpty);
       expect(h.state.error, failure);
@@ -147,7 +147,9 @@ void main() {
             'doc-1',
             copyTitle: any(named: 'copyTitle'),
           )).thenThrow(StateError('x'));
-      expect(await h.controller.duplicateDocument('doc-1', copyTitle: copyTitle), isFalse);
+      expect(
+          await h.controller.duplicateDocument('doc-1', copyTitle: copyTitle),
+          isFalse);
       expect(h.state.error, isA<StateError>());
     });
   });
