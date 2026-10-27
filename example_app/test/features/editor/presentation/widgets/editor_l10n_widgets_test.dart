@@ -8,6 +8,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/editor/editor.dart';
 import 'package:example_app/features/editor/presentation/widgets/editor_dialogs.dart';
+import 'package:example_app/features/editor/presentation/widgets/save_failure_banner.dart';
 
 import '../../../../helpers/l10n.dart';
 
