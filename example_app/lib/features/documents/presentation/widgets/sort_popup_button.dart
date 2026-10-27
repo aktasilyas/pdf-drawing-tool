@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/documents/domain/entities/sort_option.dart';
+import 'package:example_app/features/documents/presentation/l10n/library_labels.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// Sort button: a ghost icon button that opens the sort menu.
 class SortPopupButton extends StatelessWidget {
@@ -32,13 +34,14 @@ class SortPopupButton extends StatelessWidget {
       icon: ElyanotesIcons.librarySort,
       variant: AppIconButtonVariant.ghost,
       size: AppIconButtonSize.small,
-      tooltip: 'Sıralama',
+      tooltip: context.l10n.librarySortTitle,
       onPressed: () => _open(context),
     );
   }
 
   Future<void> _open(BuildContext context) async {
     final palette = context.palette;
+    final l10n = context.l10n;
     final button = context.findRenderObject()! as RenderBox;
     final overlay =
         Navigator.of(context).overlay!.context.findRenderObject()! as RenderBox;
@@ -63,18 +66,20 @@ class SortPopupButton extends StatelessWidget {
         side: BorderSide(color: palette.border),
       ),
       items: [
-        _sortItem(
-            context, 'date', 'Tarihe göre', sortOption == SortOption.date),
-        _sortItem(context, 'name', 'İsme göre', sortOption == SortOption.name),
-        _sortItem(
-            context, 'size', 'Boyuta göre', sortOption == SortOption.size),
+        for (final option in SortOption.values)
+          _sortItem(
+            context,
+            option.name,
+            option.label(l10n),
+            sortOption == option,
+          ),
         const PopupMenuDivider(),
         _toggleItem(
           context,
           'direction',
           sortDirection == SortDirection.descending
-              ? 'Yeniden eskiye'
-              : 'Eskiden yeniye',
+              ? l10n.librarySortNewestFirst
+              : l10n.librarySortOldestFirst,
           icon: sortDirection == SortDirection.descending
               ? Icons.arrow_downward
               : Icons.arrow_upward,
@@ -84,7 +89,7 @@ class SortPopupButton extends StatelessWidget {
         _toggleItem(
           context,
           'pin_favorites',
-          'Favorileri üste sabitle',
+          l10n.settingsPinFavorites,
           icon: pinFavorites ? Icons.push_pin : Icons.push_pin_outlined,
           iconColor: pinFavorites ? palette.accent : palette.textMuted,
           checked: pinFavorites,

@@ -1,7 +1,6 @@
 /// ElyaNotes Selection Mode Header
 ///
-/// Seçim modunda gösterilen header widget'ı.
-/// Tümünü seç, çoğalt, taşı, sil işlemleri içerir.
+/// Header shown in selection mode: select all, duplicate, move, delete.
 library;
 
 import 'package:drawing_ui/drawing_ui.dart' show ElyanotesIcons;
@@ -17,6 +16,7 @@ import 'package:example_app/features/documents/presentation/providers/documents_
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/move_to_folder_dialog.dart';
 import 'package:example_app/features/premium/premium.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 class SelectionModeHeader extends ConsumerWidget {
   final List<String> allDocumentIds;
@@ -37,6 +37,7 @@ class SelectionModeHeader extends ConsumerWidget {
     final hasSelection = selectedDocs.isNotEmpty || selectedFolders.isNotEmpty;
     final totalSelected = selectedDocs.length + selectedFolders.length;
     final palette = context.palette;
+    final l10n = context.l10n;
 
     return SizedBox(
       height: AppSpacing.minTouchTarget,
@@ -45,13 +46,13 @@ class SelectionModeHeader extends ConsumerWidget {
           AppIconButton(
             icon: ElyanotesIcons.libraryClose,
             variant: AppIconButtonVariant.ghost,
-            tooltip: 'Kapat',
+            tooltip: l10n.commonClose,
             onPressed: () => _exitSelectionMode(ref),
           ),
           const SizedBox(width: AppSpacing.xs),
           Expanded(
             child: Text(
-              '$totalSelected seçildi',
+              l10n.librarySelectedCount(totalSelected),
               style: AppTypography.titleMedium.copyWith(color: palette.accent),
               overflow: TextOverflow.ellipsis,
             ),
@@ -64,7 +65,7 @@ class SelectionModeHeader extends ConsumerWidget {
             AppIconButton(
               icon: ElyanotesIcons.libraryCopy,
               variant: AppIconButtonVariant.ghost,
-              tooltip: 'Çoğalt',
+              tooltip: l10n.commonDuplicate,
               onPressed: hasSelection
                   ? () => _duplicateSelected(context, ref, selectedDocs)
                   : null,
@@ -72,7 +73,7 @@ class SelectionModeHeader extends ConsumerWidget {
             AppIconButton(
               icon: ElyanotesIcons.libraryMove,
               variant: AppIconButtonVariant.ghost,
-              tooltip: 'Taşı',
+              tooltip: l10n.commonMove,
               onPressed: hasSelection
                   ? () =>
                       _moveSelected(context, ref, selectedDocs, selectedFolders)
@@ -83,7 +84,8 @@ class SelectionModeHeader extends ConsumerWidget {
             icon: ElyanotesIcons.libraryTrash,
             variant: AppIconButtonVariant.ghost,
             iconColor: hasSelection ? palette.danger : null,
-            tooltip: isTrashSection ? 'Kalıcı Sil' : 'Sil',
+            tooltip:
+                isTrashSection ? l10n.libraryDeleteForever : l10n.commonDelete,
             onPressed: hasSelection
                 ? () => _deleteSelected(context, ref, selectedDocs)
                 : null,
@@ -117,7 +119,7 @@ class SelectionModeHeader extends ConsumerWidget {
         context,
         access: access,
         featureIcon: Icons.note_add_outlined,
-        featureTitle: 'Belge Limitine Ulaştınız',
+        featureTitle: context.l10n.libraryDocumentLimitReached,
         onUpgrade: () {
           Navigator.pop(context);
           GoRouter.of(context).push(RouteNames.paywall);
@@ -131,7 +133,10 @@ class SelectionModeHeader extends ConsumerWidget {
       await controller.duplicateDocuments(selectedDocs.toList());
       _exitSelectionMode(ref);
       if (context.mounted) {
-        AppToast.success(context, '${selectedDocs.length} belge kopyalandı');
+        AppToast.success(
+          context,
+          context.l10n.libraryDocumentsCopied(selectedDocs.length),
+        );
       }
     } catch (_) {
       // Shown by LibraryErrorListener.
@@ -158,13 +163,17 @@ class SelectionModeHeader extends ConsumerWidget {
       BuildContext context, WidgetRef ref, Set<String> selectedDocs) async {
     if (selectedDocs.isEmpty) return;
 
+    final l10n = context.l10n;
+    final count = selectedDocs.length;
     final confirmed = await AppConfirmDialog.show(
       context: context,
-      title: isTrashSection ? 'Kalıcı Olarak Sil' : 'Belgeleri Sil',
+      title: isTrashSection
+          ? l10n.libraryDeleteForeverTitle
+          : l10n.libraryDeleteDocumentsTitle,
       message: isTrashSection
-          ? '${selectedDocs.length} belge kalıcı olarak silinecek. Bu işlem geri alınamaz!'
-          : '${selectedDocs.length} belge çöp kutusuna taşınacak.',
-      confirmLabel: 'Sil',
+          ? l10n.libraryDeleteDocumentsForeverMessage(count)
+          : l10n.libraryTrashDocumentsMessage(count),
+      confirmLabel: l10n.commonDelete,
       isDestructive: true,
     );
 
@@ -181,8 +190,8 @@ class SelectionModeHeader extends ConsumerWidget {
           AppToast.success(
             context,
             isTrashSection
-                ? '${selectedDocs.length} belge silindi'
-                : '${selectedDocs.length} belge çöpe taşındı',
+                ? context.l10n.libraryDocumentsDeleted(count)
+                : context.l10n.libraryDocumentsTrashed(count),
           );
         }
       } catch (_) {
@@ -244,7 +253,7 @@ class _SelectAllButton extends ConsumerWidget {
         color: muted,
       ),
       label: Text(
-        'Tümü',
+        context.l10n.librarySelectAll,
         style: AppTypography.labelLarge.copyWith(color: muted),
       ),
     );

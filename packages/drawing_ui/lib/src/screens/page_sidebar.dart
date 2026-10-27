@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:drawing_ui/src/panels/page_structure_undo.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/services/thumbnail_cache.dart';
 import 'package:drawing_ui/src/theme/chrome_palette.dart';
@@ -223,8 +224,7 @@ class _PageSidebarState extends ConsumerState<PageSidebar> {
             if (isBookmarkFilter) return item;
             return ReorderablePageCell(
               index: pageIndex,
-              onMove: (from, to) =>
-                  ref.read(pageStructureActionsProvider).movePage(from, to),
+              onMove: (from, to) => movePageWithUndo(ref, context, from, to),
               child: item,
             );
           }

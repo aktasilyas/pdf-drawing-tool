@@ -9,9 +9,9 @@ import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/documents/domain/entities/sort_option.dart';
 import 'package:example_app/features/documents/domain/entities/view_mode.dart';
-import 'package:example_app/features/documents/presentation/constants/documents_strings.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/sort_popup_button.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// Search field bound to [searchQueryProvider].
 class LibrarySearchField extends ConsumerWidget {
@@ -20,7 +20,7 @@ class LibrarySearchField extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return AppSearchField(
-      hint: DocumentsStrings.search,
+      hint: context.l10n.librarySearchHint,
       text: ref.watch(searchQueryProvider),
       onChanged: (value) =>
           ref.read(searchQueryProvider.notifier).state = value,
@@ -44,6 +44,7 @@ class LibraryViewActions extends ConsumerWidget {
     final viewMode = ref.watch(viewModeProvider);
     final sortDirection = ref.watch(sortDirectionProvider);
     final pinFavorites = ref.watch(pinFavoritesProvider);
+    final l10n = context.l10n;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -69,8 +70,9 @@ class LibraryViewActions extends ConsumerWidget {
               : ElyanotesIcons.libraryGrid,
           variant: AppIconButtonVariant.ghost,
           size: AppIconButtonSize.small,
-          tooltip:
-              viewMode == ViewMode.grid ? 'Liste görünümü' : 'Grid görünümü',
+          tooltip: viewMode == ViewMode.grid
+              ? l10n.libraryListView
+              : l10n.libraryGridView,
           onPressed: () {
             ref.read(viewModeProvider.notifier).set(
                   viewMode == ViewMode.grid ? ViewMode.list : ViewMode.grid,
@@ -81,7 +83,7 @@ class LibraryViewActions extends ConsumerWidget {
           icon: ElyanotesIcons.librarySelect,
           variant: AppIconButtonVariant.ghost,
           size: AppIconButtonSize.small,
-          tooltip: 'Seçim modu',
+          tooltip: l10n.librarySelectMode,
           onPressed: () =>
               ref.read(selectionModeProvider.notifier).state = true,
         ),
@@ -90,7 +92,7 @@ class LibraryViewActions extends ConsumerWidget {
   }
 }
 
-/// "Yeni" button; an icon-only filled button when [compact].
+/// "New" button; an icon-only filled button when [compact].
 class LibraryNewButton extends StatelessWidget {
   const LibraryNewButton({
     super.key,
@@ -105,7 +107,9 @@ class LibraryNewButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tooltip = isLocked ? 'Belge limiti doldu' : 'Yeni Belge';
+    final l10n = context.l10n;
+    final tooltip =
+        isLocked ? l10n.libraryNewDocumentLocked : l10n.libraryNewDocument;
     final icon =
         isLocked ? ElyanotesIcons.libraryLock : ElyanotesIcons.libraryPlus;
 
@@ -121,7 +125,7 @@ class LibraryNewButton extends StatelessWidget {
       child: ConstrainedBox(
         constraints: const BoxConstraints(minHeight: AppSpacing.minTouchTarget),
         child: AppButton(
-          label: 'Yeni',
+          label: l10n.libraryNew,
           leadingIcon: icon,
           trailingIcon: ElyanotesIcons.libraryCaretDown,
           onPressed: onPressed,
@@ -135,12 +139,13 @@ class LibraryNewButton extends StatelessWidget {
 class LibraryTrashInfo extends StatelessWidget {
   const LibraryTrashInfo({super.key, this.onEmptyTrash});
 
-  /// Null hides the "Çöpü Boşalt" action.
+  /// Null hides the "Empty trash" action.
   final VoidCallback? onEmptyTrash;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
+    final l10n = context.l10n;
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
@@ -158,13 +163,13 @@ class LibraryTrashInfo extends StatelessWidget {
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
-              'Silinen notlar 30 gün sonra kalıcı olarak silinir',
+              l10n.libraryTrashInfo,
               style: AppTypography.caption.copyWith(color: palette.textMuted),
             ),
           ),
           if (onEmptyTrash != null)
             AppButton(
-              label: 'Çöpü Boşalt',
+              label: l10n.libraryEmptyTrash,
               variant: AppButtonVariant.destructive,
               size: AppButtonSize.small,
               onPressed: onEmptyTrash,

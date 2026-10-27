@@ -249,18 +249,16 @@ class _PageNavigatorState extends State<PageNavigator> {
 
                       return Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: GestureDetector(
+                        child: PageThumbnail(
+                          page: page,
+                          cache: widget.cache,
+                          width: widget.thumbnailWidth,
+                          height: widget.thumbnailHeight,
+                          isSelected: isSelected,
+                          showPageNumber: true,
+                          backgroundColor: Color(page.background.color),
                           onTap: () => _handlePageTap(index),
                           onLongPress: () => _handlePageLongPress(index),
-                          child: PageThumbnail(
-                            page: page,
-                            cache: widget.cache,
-                            width: widget.thumbnailWidth,
-                            height: widget.thumbnailHeight,
-                            isSelected: isSelected,
-                            showPageNumber: true,
-                            backgroundColor: Color(page.background.color),
-                          ),
                         ),
                       );
                     },

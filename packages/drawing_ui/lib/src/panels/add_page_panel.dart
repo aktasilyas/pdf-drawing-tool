@@ -13,6 +13,7 @@ import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/panels/add_page_import_helper.dart';
 import 'package:drawing_ui/src/panels/add_page_panel_widgets.dart';
 import 'package:drawing_ui/src/panels/page_options_widgets.dart';
+import 'package:drawing_ui/src/panels/page_structure_undo.dart';
 import 'package:drawing_ui/src/widgets/template_picker/template_picker.dart';
 
 /// Quick-access template IDs shown in the horizontal thumbnail strip.
@@ -65,20 +66,27 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
   void _insertNewPage(PageBackground background, {PageSize? size}) {
     final doc = ref.read(documentProvider);
     final currentIndex = ref.read(currentPageIndexProvider);
-    final insertIndex = _resolveInsertionIndex(currentIndex, doc.pages.length);
-    final newPage = Page.create(
-      index: insertIndex,
+    _insertPage(
+      actions: ref.read(pageStructureActionsProvider),
+      messenger: ScaffoldMessenger.maybeOf(context),
+      index: _resolveInsertionIndex(currentIndex, doc.pages.length),
       size: size ?? doc.settings.defaultPageSize,
       background: background,
     );
-    final newPages = List<Page>.from(doc.pages)..insert(insertIndex, newPage);
-    for (int i = insertIndex; i < newPages.length; i++) {
-      newPages[i] = newPages[i].copyWith(index: i);
-    }
-    final newDoc = doc.copyWith(pages: newPages, currentPageIndex: insertIndex);
-    ref.read(documentProvider.notifier).updateDocument(newDoc);
-    ref.read(pageManagerProvider.notifier).initializeFromDocument(newDoc.pages,
-        currentIndex: newDoc.currentPageIndex);
+  }
+
+  /// Inserts the page through [actions] and offers undo. Uses no `ref` or
+  /// `context`, so it also works after the popover has closed.
+  static void _insertPage({
+    required PageStructureActions actions,
+    required ScaffoldMessengerState? messenger,
+    required int index,
+    required PageSize size,
+    required PageBackground background,
+  }) {
+    final page = Page.create(index: index, size: size, background: background);
+    final change = actions.insertPage(index, page);
+    showPageUndoSnackBar(messenger, actions, change, 'Sayfa eklendi');
   }
 
   void _addPageFromTemplate(String templateId) {
@@ -90,8 +98,8 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
 
   Future<void> _openTemplatePicker() async {
     // Capture refs before close — onClose unmounts the widget.
-    final docNotifier = ref.read(documentProvider.notifier);
-    final pageManager = ref.read(pageManagerProvider.notifier);
+    final actions = ref.read(pageStructureActionsProvider);
+    final messenger = ScaffoldMessenger.maybeOf(context);
     final doc = ref.read(documentProvider);
     final curIdx = ref.read(currentPageIndexProvider);
     final navCtx = Navigator.of(context, rootNavigator: true).context;
@@ -99,21 +107,17 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
     final result = await TemplatePicker.show(navCtx);
     if (result == null) return;
     final t = result.template;
-    final bg = PageBackground.fromTemplate(
-      t,
-      color: result.backgroundColor?.toARGB32(),
-      lineColor: result.lineColor?.toARGB32(),
+    _insertPage(
+      actions: actions,
+      messenger: messenger,
+      index: _resolveInsertionIndex(curIdx, doc.pages.length),
+      size: doc.settings.defaultPageSize,
+      background: PageBackground.fromTemplate(
+        t,
+        color: result.backgroundColor?.toARGB32(),
+        lineColor: result.lineColor?.toARGB32(),
+      ),
     );
-    final idx = _resolveInsertionIndex(curIdx, doc.pages.length);
-    final np = List<Page>.from(doc.pages)
-      ..insert(
-          idx,
-          Page.create(
-              index: idx, size: doc.settings.defaultPageSize, background: bg));
-    for (int i = idx; i < np.length; i++) np[i] = np[i].copyWith(index: i);
-    final nd = doc.copyWith(pages: np, currentPageIndex: idx);
-    docNotifier.updateDocument(nd);
-    pageManager.initializeFromDocument(nd.pages, currentIndex: idx);
   }
 
   Future<void> _addImagePage(ImageSource source) async {
@@ -129,6 +133,7 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
     final bytes = await File(dest).readAsBytes();
     final codec = await ui.instantiateImageCodec(bytes);
     final frame = await codec.getNextFrame();
+    if (!mounted) return;
     _insertNewPage(
       PageBackground(type: BackgroundType.pdf, pdfData: bytes, pdfPageIndex: 1),
       size: PageSize(

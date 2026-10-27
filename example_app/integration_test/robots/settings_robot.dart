@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:example_app/features/settings/settings.dart';
 
+import '../helpers/l10n.dart';
 import '../helpers/pump_helpers.dart';
 
 /// Page object for the Settings screen (all feature flags off).
@@ -45,9 +46,9 @@ class SettingsRobot {
         matching: find.byType(SegmentedButton<CanvasDarkMode>),
       );
 
-  /// Library header gear button ("Ayarlar").
+  /// Library header gear button ("Settings").
   Future<void> open() async {
-    await tester.tapAndWait(find.byTooltip('Ayarlar'));
+    await tester.tapAndWait(find.byTooltip(tester.l10n.settingsTitle));
     await tester.pumpUntilFound(screen);
   }
 
@@ -162,13 +163,34 @@ class SettingsRobot {
     await tester.pumpFor(const Duration(milliseconds: 300));
   }
 
-  /// "Geri bildirim gönder" copies the contact address; returns what the
-  /// clipboard holds afterwards.
+  /// "Geri bildirim gönder" copies the contact address; returns the text the
+  /// app sent to the clipboard.
+  ///
+  /// The copy is captured on the platform channel (and still forwarded to the
+  /// platform) instead of read back with `Clipboard.getData`: on Android 13+
+  /// the system clipboard preview can take focus after a copy, and reads made
+  /// without focus return null. That made this step fail on the phone and
+  /// tablet emulators even with a 5 s poll.
   Future<String?> copyFeedbackAddress() async {
-    await Clipboard.setData(const ClipboardData(text: ''));
-    await _reveal(_tile(_feedbackIcon));
-    await tester.tapAndWait(_tile(_feedbackIcon));
-    final data = await Clipboard.getData(Clipboard.kTextPlain);
-    return data?.text;
+    final messenger = tester.binding.defaultBinaryMessenger;
+    const codec = JSONMethodCodec();
+    String? copied;
+    messenger.setMockMessageHandler(SystemChannels.platform.name, (message) {
+      final call = codec.decodeMethodCall(message);
+      if (call.method == 'Clipboard.setData') {
+        copied = (call.arguments as Map<Object?, Object?>)['text'] as String?;
+      }
+      return messenger.delegate.send(SystemChannels.platform.name, message);
+    });
+    try {
+      await _reveal(_tile(_feedbackIcon));
+      await tester.tapAndWait(_tile(_feedbackIcon));
+      for (var i = 0; i < 50 && copied == null; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
+    } finally {
+      messenger.setMockMessageHandler(SystemChannels.platform.name, null);
+    }
+    return copied;
   }
 }

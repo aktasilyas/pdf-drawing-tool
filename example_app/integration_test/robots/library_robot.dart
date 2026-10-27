@@ -2,34 +2,47 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:example_app/core/widgets/index.dart';
+import 'package:example_app/features/documents/presentation/widgets/library_header_parts.dart';
 import 'package:example_app/features/documents/presentation/widgets/library_tile_frame.dart';
 import 'package:example_app/features/documents/presentation/widgets/library_tile_parts.dart';
 import 'package:example_app/features/documents/presentation/widgets/manage_folder_list_item.dart';
 import 'package:example_app/features/documents/presentation/widgets/sidebar_item.dart';
 import 'package:example_app/features/documents/presentation/widgets/template_preview_section.dart';
+import 'package:example_app/l10n/l10n.dart';
 
+import '../helpers/l10n.dart';
 import '../helpers/pump_helpers.dart';
 
-/// Sidebar sections of the library, by their visible label.
-class LibrarySection {
-  static const all = 'Tüm Notlar';
-  static const favorites = 'Favoriler';
-  static const trash = 'Son Silinenler';
+/// Sidebar sections of the library.
+enum LibrarySection {
+  all,
+  favorites,
+  trash;
+
+  /// The section's sidebar label in the running locale.
+  String label(AppLocalizations l10n) => switch (this) {
+        LibrarySection.all => l10n.librarySectionAll,
+        LibrarySection.favorites => l10n.librarySectionFavorites,
+        LibrarySection.trash => l10n.librarySectionTrash,
+      };
 }
 
 /// Page object for the library (documents) screen.
 ///
-/// Finds widgets by visible Turkish text or tooltip; works on the phone
-/// layout (drawer sidebar) and the tablet layout (inline sidebar).
+/// Finds widgets by type, or by the localized text or tooltip of the running
+/// locale (`tester.l10n`); screens not localized yet are still matched by
+/// their Turkish text. Works on the phone layout (drawer sidebar) and the
+/// tablet layout (inline sidebar).
 class LibraryRobot {
   LibraryRobot(this.tester);
 
   final WidgetTester tester;
 
-  static const _emptyTitle = 'Henüz not yok';
+  /// Only valid once the library is visible (see [waitForLibrary]).
+  AppLocalizations get _l10n => tester.l10n;
 
-  Finder get _emptyState => find.text(_emptyTitle);
-  Finder get _newButton => find.byTooltip('Yeni Belge');
+  Finder get _emptyState => find.text(_l10n.libraryEmptyTitle);
+  Finder get _newButton => find.byType(LibraryNewButton);
 
   /// Title text inside a tile's info block; tapping it opens the item menu.
   Finder tileTitle(String title) => find.descendant(
@@ -150,26 +163,29 @@ class LibraryRobot {
 
   /// Switches the sidebar section, opening the drawer / collapsed sidebar
   /// first when its entries are not tappable.
-  Future<void> openSection(String label) async {
+  Future<void> openSection(LibrarySection section) async {
     final item = find
         .descendant(
           of: find.byType(SidebarItem),
-          matching: find.text(label),
+          matching: find.text(section.label(_l10n)),
         )
         .hitTestable();
-    if (item.evaluate().isEmpty) {
-      final opener = find.byTooltip('Menü').evaluate().isNotEmpty
-          ? find.byTooltip('Menü')
-          : find.byTooltip('Kenar çubuğunu aç');
-      await tester.tapAndWait(opener);
-    }
+    if (item.evaluate().isEmpty) await tester.tapAndWait(_sidebarOpener);
     await tester.tapAndWait(item);
   }
 
-  /// Opens the folder management screen from the sidebar ("Yönet").
+  /// Phone drawer button, or the tablet's collapsed-sidebar toggle.
+  Finder get _sidebarOpener {
+    final menu = find.byTooltip(_l10n.commonMenu);
+    return menu.evaluate().isNotEmpty
+        ? menu
+        : find.byTooltip(_l10n.libraryOpenSidebar);
+  }
+
+  /// Opens the folder management screen from the sidebar ("Manage").
   Future<void> openManageFolders() async {
     await _ensureSidebarVisible();
-    await tester.tapAndWait(find.text('Yönet'));
+    await tester.tapAndWait(find.text(_l10n.libraryManage));
     await tester.pumpUntilFound(find.text('Klasörleri Yönet'));
   }
 
@@ -238,19 +254,20 @@ class LibraryRobot {
     );
   }
 
-  /// Trash section: "Çöpü Boşalt" then confirm "Boşalt".
+  /// Trash section: "Empty trash" then confirm "Empty".
   Future<void> emptyTrash() async {
-    await tester.tapAndWait(find.text('Çöpü Boşalt'));
+    final l10n = _l10n;
     await tester.tapAndWait(
-      find.widgetWithText(AppButton, 'Boşalt'),
+      find.widgetWithText(AppButton, l10n.libraryEmptyTrash),
+    );
+    await tester.tapAndWait(
+      find.widgetWithText(AppButton, l10n.libraryEmptyTrashConfirm),
     );
   }
 
   Future<void> _ensureSidebarVisible() async {
-    if (find.text('Yönet').hitTestable().evaluate().isNotEmpty) return;
-    final opener = find.byTooltip('Menü').evaluate().isNotEmpty
-        ? find.byTooltip('Menü')
-        : find.byTooltip('Kenar çubuğunu aç');
-    await tester.tapAndWait(opener);
+    final manage = find.text(_l10n.libraryManage).hitTestable();
+    if (manage.evaluate().isNotEmpty) return;
+    await tester.tapAndWait(_sidebarOpener);
   }
 }

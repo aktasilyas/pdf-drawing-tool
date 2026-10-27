@@ -87,6 +87,25 @@ void main() {
       });
     });
 
+    group('replacePages', () {
+      test('re-numbers and selects the page by id', () {
+        final before = fourPages();
+        final doc = before.replacePages(
+          [before.pages[3], before.pages[1], before.pages[0]],
+          currentPageId: 'p1',
+        );
+        expect(ids(doc), ['p3', 'p1', 'p0']);
+        expect(indexes(doc), [0, 1, 2]);
+        expect(doc.currentPageIndex, 1);
+      });
+
+      test('falls back to the first page for an unknown id', () {
+        final before = fourPages(current: 2);
+        final doc = before.replacePages(before.pages, currentPageId: 'nope');
+        expect(doc.currentPageIndex, 0);
+      });
+    });
+
     test('removePage re-numbers indexes', () {
       final doc = fourPages().removePage(1);
       expect(ids(doc), ['p0', 'p2', 'p3']);

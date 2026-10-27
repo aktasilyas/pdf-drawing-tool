@@ -32,7 +32,29 @@ class DeletedPage {
   final String? trashId;
 }
 
-/// Page structure changes (move, delete, restore).
+/// Undo token for an insert or a move made by [PageStructureActions].
+class PageStructureChange {
+  const PageStructureChange({
+    required this.documentId,
+    required this.previousOrder,
+    required this.previousCurrentId,
+    this.insertedPageId,
+  });
+
+  /// Id of the document the change was made in.
+  final String documentId;
+
+  /// Page ids in their order before the change.
+  final List<String> previousOrder;
+
+  /// Id of the current page before the change.
+  final String previousCurrentId;
+
+  /// Id of the page the change inserted, if any.
+  final String? insertedPageId;
+}
+
+/// Page structure changes (insert, move, delete, restore).
 ///
 /// `documentProvider` is the single source of truth; `pageManagerProvider` is
 /// synced afterwards so the sidebar and canvas follow.
@@ -41,12 +63,52 @@ class PageStructureActions {
 
   final Ref _ref;
 
-  /// Moves the page at [from] to position [to].
-  void movePage(int from, int to) {
+  /// Moves the page at [from] to position [to]. Returns null when nothing
+  /// moved.
+  PageStructureChange? movePage(int from, int to) {
     final doc = _ref.read(documentProvider);
     final moved = doc.movePage(from, to);
-    if (identical(moved, doc)) return;
+    if (identical(moved, doc)) return null;
+    final change = _changeFrom(doc);
     _apply(moved);
+    return change;
+  }
+
+  /// Inserts [page] at [index] (clamped) and makes it the current page.
+  PageStructureChange insertPage(int index, Page page) {
+    final doc = _ref.read(documentProvider);
+    final change = _changeFrom(doc, insertedPageId: page.id);
+    final inserted = doc.insertPageAt(index, page);
+    _apply(inserted.replacePages(inserted.pages, currentPageId: page.id));
+    return change;
+  }
+
+  /// Inserts a copy of [source] with fresh page, layer and element ids right
+  /// after [afterIndex] and makes it the current page.
+  PageStructureChange insertCopy(int afterIndex, Page source) =>
+      insertPage(afterIndex + 1, source.copyWithFreshIds());
+
+  /// Reverts an insert or a move: restores the previous page order and
+  /// current page, keeping the pages' current content.
+  ///
+  /// Returns false (and changes nothing) when another document is loaded or
+  /// the set of pages changed in some other way since.
+  bool undo(PageStructureChange change) {
+    final doc = _ref.read(documentProvider);
+    if (doc.id != change.documentId) return false;
+    final byId = {for (final p in doc.pages) p.id: p};
+    final expected = {
+      ...change.previousOrder,
+      if (change.insertedPageId != null) change.insertedPageId!,
+    };
+    if (byId.length != expected.length || !expected.every(byId.containsKey)) {
+      return false;
+    }
+    _apply(doc.replacePages(
+      [for (final id in change.previousOrder) byId[id]!],
+      currentPageId: change.previousCurrentId,
+    ));
+    return true;
   }
 
   /// Deletes the page at [index]. Returns null when it is the last page.
@@ -100,6 +162,17 @@ class PageStructureActions {
     final discard = _ref.read(pageTrashDiscardCallbackProvider);
     if (trashId != null && discard != null) await discard(trashId);
   }
+
+  PageStructureChange _changeFrom(
+    DrawingDocument doc, {
+    String? insertedPageId,
+  }) =>
+      PageStructureChange(
+        documentId: doc.id,
+        previousOrder: [for (final p in doc.pages) p.id],
+        previousCurrentId: doc.pages[doc.currentPageIndex].id,
+        insertedPageId: insertedPageId,
+      );
 
   void _apply(DrawingDocument doc) {
     _ref.read(documentProvider.notifier).updateDocument(doc);
