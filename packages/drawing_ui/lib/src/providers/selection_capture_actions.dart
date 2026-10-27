@@ -9,6 +9,7 @@ import 'package:drawing_ui/src/providers/pdf_render_provider.dart';
 import 'package:drawing_ui/src/providers/pending_selection_image_provider.dart';
 import 'package:drawing_ui/src/services/selection_capture_service.dart';
 import 'package:drawing_ui/src/widgets/screenshot_preview_dialog.dart';
+import 'package:drawing_ui/src/services/selection_image_sink.dart';
 
 // Selection capture actions: screenshot and "ask AI about this area".
 
@@ -32,6 +33,7 @@ Future<void> screenshotSelection(
 
   try {
     final document = ref.read(documentProvider);
+    final sink = ref.read(selectionImageSinkProvider);
     final layer = document.layers[document.activeLayerIndex];
 
     // Get current page background and size for screenshot rendering
@@ -65,21 +67,9 @@ Future<void> screenshotSelection(
     );
     if (confirmed != true) return;
 
-    final gallerySaved = await SelectionCaptureService.saveToGallery(bytes);
-    final clipboardCopied =
-        await SelectionCaptureService.copyToClipboard(bytes);
-
-    String msg;
-    if (gallerySaved && clipboardCopied) {
-      msg = 'Ekran resmi galeriye kaydedildi ve panoya kopyalandı';
-    } else if (gallerySaved) {
-      msg = 'Ekran resmi galeriye kaydedildi';
-    } else if (clipboardCopied) {
-      msg = 'Ekran resmi panoya kopyalandı';
-    } else {
-      msg = 'Ekran resmi kaydedilemedi';
-    }
-    showSnackBar(context, msg);
+    final result = await saveSelectionImage(sink, bytes);
+    if (!context.mounted) return;
+    showSnackBar(context, selectionImageSaveMessage(result));
   } catch (e) {
     debugPrint('Screenshot selection failed: $e');
     showSnackBar(context, 'Ekran resmi oluşturulamadı');
@@ -134,6 +124,16 @@ Future<void> captureAndOpenAI(
 
   aiCallback();
 }
+
+/// Snackbar text for a [SelectionImageSaveResult].
+String selectionImageSaveMessage(SelectionImageSaveResult result) =>
+    switch (result) {
+      SelectionImageSaveResult.savedAndCopied =>
+        'Ekran resmi galeriye kaydedildi ve panoya kopyalandı',
+      SelectionImageSaveResult.saved => 'Ekran resmi galeriye kaydedildi',
+      SelectionImageSaveResult.copied => 'Ekran resmi panoya kopyalandı',
+      SelectionImageSaveResult.failed => 'Ekran resmi kaydedilemedi',
+    };
 
 void showSnackBar(BuildContext? context, String message) {
   if (context == null || !context.mounted) return;
