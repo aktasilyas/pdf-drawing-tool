@@ -29,6 +29,11 @@ extension DocumentPageOps on DrawingDocument {
     return _withPages(list, currentId);
   }
 
+  /// Replaces the page list with [list] (re-numbered) and selects the page
+  /// with [currentPageId], or the first page when it is not in [list].
+  DrawingDocument replacePages(List<Page> list, {String? currentPageId}) =>
+      _withPages(list, currentPageId);
+
   DrawingDocument _withPages(List<Page> list, String? currentId) {
     final renumbered = [
       for (var i = 0; i < list.length; i++)

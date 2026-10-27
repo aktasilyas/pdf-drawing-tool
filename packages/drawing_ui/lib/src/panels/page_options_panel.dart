@@ -140,7 +140,7 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel>
             icon: ElyanotesIcons.duplicate,
             label: 'Sayfayı çoğalt',
             compact: c,
-            onTap: duplicatePage,
+            onTap: () => duplicatePage(context),
           ),
           PageOptionsMenuItem(
             icon: ElyanotesIcons.template,

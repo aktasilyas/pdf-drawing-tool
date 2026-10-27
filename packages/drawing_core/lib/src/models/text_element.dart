@@ -214,6 +214,7 @@ class TextElement {
 
   /// Immutable copy
   TextElement copyWith({
+    String? id,
     String? text,
     double? x,
     double? y,
@@ -229,7 +230,7 @@ class TextElement {
     double? rotation,
   }) {
     return TextElement(
-      id: id,
+      id: id ?? this.id,
       text: text ?? this.text,
       x: x ?? this.x,
       y: y ?? this.y,
