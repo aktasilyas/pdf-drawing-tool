@@ -6,11 +6,6 @@ on:
   pull_request:
     types: [labeled]
 
-# Merge one PR at a time; concurrent merges fail with "Base branch was modified".
-concurrency:
-  group: architect-merge
-  cancel-in-progress: false
-
 permissions:
   contents: write
   pull-requests: write
@@ -24,6 +19,12 @@ jobs:
       startsWith(github.event.pull_request.head.ref, 'claude/') &&
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
+    # Merge one PR at a time; concurrent merges fail with "Base branch was
+    # modified". Job-level, so runs for other labels (skipped by the `if`)
+    # never enter the group and cannot cancel a pending approval run.
+    concurrency:
+      group: architect-merge
+      cancel-in-progress: false
     steps:
       - name: Squash-merge
         env:
