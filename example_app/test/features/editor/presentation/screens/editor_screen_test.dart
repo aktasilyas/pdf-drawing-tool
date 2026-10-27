@@ -13,6 +13,10 @@ import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/editor/editor.dart';
 import 'package:example_app/features/editor/presentation/widgets/editor_body.dart';
 
+import 'package:example_app/l10n/l10n.dart';
+
+import '../../../../helpers/l10n.dart';
+
 class MockLoadDocumentUseCase extends Mock implements LoadDocumentUseCase {}
 
 class MockSaveDocumentUseCase extends Mock implements SaveDocumentUseCase {}
@@ -32,7 +36,7 @@ void main() {
         loadDocumentUseCaseProvider.overrideWithValue(mockLoadUseCase),
         saveDocumentUseCaseProvider.overrideWithValue(mockSaveUseCase),
       ],
-      child: MaterialApp(
+      child: localizedApp(
         theme: AppTheme.light,
         home: EditorScreen(documentId: documentId),
       ),
@@ -136,6 +140,9 @@ void main() {
             saveDocumentUseCaseProvider.overrideWithValue(mockSaveUseCase),
           ],
           child: MaterialApp.router(
+            locale: testLocale,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
             theme: AppTheme.light,
             routerConfig: router,
           ),

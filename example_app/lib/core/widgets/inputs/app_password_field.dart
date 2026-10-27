@@ -17,6 +17,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// ElyaNotes modern şifre field komponenti.
 ///
@@ -30,7 +31,7 @@ class AppPasswordField extends StatefulWidget {
   final TextEditingController? controller;
 
   /// Input üzerindeki label (üstte sabit).
-  final String label;
+  final String? label;
 
   /// Placeholder metni.
   final String? hint;
@@ -55,7 +56,7 @@ class AppPasswordField extends StatefulWidget {
 
   const AppPasswordField({
     this.controller,
-    this.label = 'Şifre',
+    this.label,
     this.hint,
     this.errorText,
     this.onChanged,
@@ -120,7 +121,7 @@ class _AppPasswordFieldState extends State<AppPasswordField> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            widget.label,
+            widget.label ?? context.l10n.commonPasswordLabel,
             style: AppTypography.caption.copyWith(
               color: hasError ? palette.danger : labelColor,
             ),

@@ -11,6 +11,10 @@ const migratedDirs = [
   'lib/features/settings/presentation',
   'lib/features/documents/presentation',
   'lib/core/widgets/feedback',
+  'lib/features/editor/presentation',
+  'lib/core/widgets',
+  'lib/core/bootstrap',
+  'lib/core/routing',
 ];
 
 const _documents = 'lib/features/documents/presentation';

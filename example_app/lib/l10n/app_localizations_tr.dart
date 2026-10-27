@@ -486,4 +486,56 @@ class AppLocalizationsTr extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get editorDocumentNameLabel => 'Belge Adı';
+
+  @override
+  String get editorMoveToTrashTitle => 'Çöpe Taşı';
+
+  @override
+  String get editorMoveToTrashMessage =>
+      'Bu belge çöpe taşınacak. Daha sonra geri yükleyebilirsiniz.';
+
+  @override
+  String get editorLoadErrorTitle => 'Belge açılamadı';
+
+  @override
+  String get editorLoadErrorMessage => 'Belge bulunamadı ya da okunamadı.';
+
+  @override
+  String get editorLoadErrorBack => 'Geri dön';
+
+  @override
+  String get editorSaveFailedMessage =>
+      'Kaydedilemedi. Değişiklikleriniz henüz kaydedilmedi.';
+
+  @override
+  String get startupErrorTitle => 'Uygulama başlatılamadı';
+
+  @override
+  String get startupErrorMessage =>
+      'Notlarınız güvende, hiçbir şey silinmedi. Veriler açılırken bir sorun oluştu. Tekrar deneyin; sorun sürerse uygulamayı kapatıp yeniden açın.';
+
+  @override
+  String get commonPasswordLabel => 'Şifre';
+
+  @override
+  String get commonSelectItemTitle => 'Bir öğe seçin';
+
+  @override
+  String get commonSelectItemDescription =>
+      'Detayları görmek için sol taraftan bir öğe seçin';
+
+  @override
+  String get commonUnderConstruction => 'Bu ekran henüz yapım aşamasında';
+
+  @override
+  String get routerForgotPasswordTitle => 'Şifremi unuttum';
+
+  @override
+  String get routerProfileTitle => 'Profil';
+
+  @override
+  String get routerSubscriptionTitle => 'Abonelik';
 }

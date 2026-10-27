@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:example_app/core/config/feature_flags.dart';
-import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/utils/logger.dart';
 import 'package:go_router/go_router.dart';
 import 'package:drawing_core/drawing_core.dart';
@@ -12,6 +11,7 @@ import 'package:example_app/features/editor/presentation/providers/editor_provid
 import 'package:example_app/features/editor/presentation/providers/editor_session.dart';
 import 'package:example_app/features/editor/presentation/widgets/active_editor_leave_scope.dart';
 import 'package:example_app/features/editor/presentation/widgets/editor_body.dart';
+import 'package:example_app/features/editor/presentation/widgets/editor_dialogs.dart';
 import 'package:example_app/features/editor/presentation/widgets/editor_leave_guard.dart';
 import 'package:example_app/features/editor/presentation/widgets/editor_load_error_view.dart';
 
@@ -173,101 +173,32 @@ class EditorScreen extends ConsumerWidget {
     return true;
   }
 
-  void _showRenameDialog(BuildContext context, WidgetRef ref) {
-    final document = ref.read(documentProvider);
-    final controller = TextEditingController(text: document.title);
-    final colorScheme = Theme.of(context).colorScheme;
-
-    showDialog(
+  Future<void> _showRenameDialog(BuildContext context, WidgetRef ref) async {
+    final title = await showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: context.palette.surfaceElevated,
-        title: Text('Yeniden Adlandır',
-            style: TextStyle(
-                fontFamily: AppTypography.headingFontFamily,
-                color: colorScheme.onSurface)),
-        content: TextField(
-          controller: controller,
-          style: TextStyle(
-              fontFamily: AppTypography.headingFontFamily,
-              color: colorScheme.onSurface),
-          decoration: InputDecoration(
-            labelText: 'Belge Adı',
-            border: const OutlineInputBorder(),
-            enabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: colorScheme.outline),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: colorScheme.primary, width: 2),
-            ),
-          ),
-          autofocus: true,
-          onSubmitted: (value) {
-            if (value.trim().isNotEmpty) {
-              ref.read(documentProvider.notifier).updateTitle(value.trim());
-              Navigator.pop(context);
-            }
-          },
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('İptal'),
-          ),
-          FilledButton(
-            onPressed: () {
-              final newTitle = controller.text.trim();
-              if (newTitle.isNotEmpty) {
-                ref.read(documentProvider.notifier).updateTitle(newTitle);
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('Kaydet'),
-          ),
-        ],
+      builder: (_) => RenameDocumentDialog(
+        initialTitle: ref.read(documentProvider).title,
       ),
     );
+    if (title != null) {
+      ref.read(documentProvider.notifier).updateTitle(title);
+    }
   }
 
-  void _showDeleteConfirmation(BuildContext context, WidgetRef ref) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    showDialog(
+  Future<void> _showDeleteConfirmation(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
+    final confirmed = await showDialog<bool>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: context.palette.surfaceElevated,
-        title: Text('Çöpe Taşı',
-            style: TextStyle(
-                fontFamily: AppTypography.headingFontFamily,
-                color: colorScheme.onSurface)),
-        content: Text(
-          'Bu belge çöpe taşınacak. Daha sonra geri yükleyebilirsiniz.',
-          style: TextStyle(
-              fontFamily: AppTypography.headingFontFamily,
-              color: colorScheme.onSurfaceVariant),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('İptal'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: colorScheme.error,
-            ),
-            onPressed: () async {
-              Navigator.pop(dialogContext);
-              final result = await ref
-                  .read(documentsControllerProvider.notifier)
-                  .moveToTrash(documentId);
-              if (result && context.mounted) {
-                context.go('/documents');
-              }
-            },
-            child: const Text('Çöpe Taşı'),
-          ),
-        ],
-      ),
+      builder: (_) => const MoveToTrashDialog(),
     );
+    if (confirmed != true) return;
+    final result = await ref
+        .read(documentsControllerProvider.notifier)
+        .moveToTrash(documentId);
+    if (result && context.mounted) {
+      context.go('/documents');
+    }
   }
 }
