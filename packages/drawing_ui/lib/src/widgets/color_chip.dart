@@ -48,65 +48,65 @@ class ColorChip extends StatelessWidget {
       selected: isSelected,
       label: colorSemanticsLabel(color),
       child: GestureDetector(
-      onTap: onTap,
-      child: Stack(
-        children: [
-          // Checkerboard pattern for transparent colors
-          if (showOpacity && (color.a * 255.0).round().clamp(0, 255) < 255)
-            Container(
+        onTap: onTap,
+        child: Stack(
+          children: [
+            // Checkerboard pattern for transparent colors
+            if (showOpacity && (color.a * 255.0).round().clamp(0, 255) < 255)
+              Container(
+                width: chipSize,
+                height: chipSize,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: colorScheme.surfaceContainerHighest,
+                ),
+                child: ClipOval(
+                  child: CustomPaint(
+                    size: Size(chipSize, chipSize),
+                    painter: _CheckerboardPainter(),
+                  ),
+                ),
+              ),
+            // Color chip
+            AnimatedContainer(
+              duration: theme.animationDuration,
+              curve: theme.animationCurve,
               width: chipSize,
               height: chipSize,
               decoration: BoxDecoration(
+                color: color,
                 shape: BoxShape.circle,
-                color: colorScheme.surfaceContainerHighest,
-              ),
-              child: ClipOval(
-                child: CustomPaint(
-                  size: Size(chipSize, chipSize),
-                  painter: _CheckerboardPainter(),
+                border: Border.all(
+                  color: isSelected
+                      ? theme.toolbarIconSelectedColor
+                      : color.computeLuminance() > 0.8
+                          ? colorScheme.outlineVariant
+                          : Colors.transparent,
+                  width: isSelected ? 3 : 1,
                 ),
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: theme.toolbarIconSelectedColor
+                              .withValues(alpha: 60.0 / 255.0),
+                          blurRadius: 8,
+                          spreadRadius: 2,
+                        )
+                      ]
+                    : null,
               ),
-            ),
-          // Color chip
-          AnimatedContainer(
-            duration: theme.animationDuration,
-            curve: theme.animationCurve,
-            width: chipSize,
-            height: chipSize,
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: isSelected
-                    ? theme.toolbarIconSelectedColor
-                    : color.computeLuminance() > 0.8
-                        ? colorScheme.outlineVariant
-                        : Colors.transparent,
-                width: isSelected ? 3 : 1,
-              ),
-              boxShadow: isSelected
-                  ? [
-                      BoxShadow(
-                        color: theme.toolbarIconSelectedColor
-                            .withValues(alpha: 60.0 / 255.0),
-                        blurRadius: 8,
-                        spreadRadius: 2,
-                      )
-                    ]
+              child: isSelected
+                  ? PhosphorIcon(
+                      ElyanotesIcons.check,
+                      size: chipSize * 0.5,
+                      color: color.computeLuminance() > 0.5
+                          ? Colors.black87
+                          : Colors.white,
+                    )
                   : null,
             ),
-            child: isSelected
-                ? PhosphorIcon(
-                    ElyanotesIcons.check,
-                    size: chipSize * 0.5,
-                    color: color.computeLuminance() > 0.5
-                        ? Colors.black87
-                        : Colors.white,
-                  )
-                : null,
-          ),
-        ],
-      ),
+          ],
+        ),
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:drawing_ui/src/widgets/color_chip.dart' show colorSemanticsLabel;
+import 'package:drawing_ui/src/widgets/color_chip.dart'
+    show colorSemanticsLabel;
 
 /// Samsung Notes-style color swatch grid.
 /// Columns: gray + 9 hue steps. Rows: light → dark.
@@ -70,30 +71,30 @@ class ColorSwatchGrid extends StatelessWidget {
                           selected: selected,
                           label: colorSemanticsLabel(color),
                           child: GestureDetector(
-                          onTap: () => onColorSelected(color),
-                          child: SizedBox(
-                            width: cellSize,
-                            height: cellSize,
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(color: color),
-                              child: selected
-                                  ? Center(
-                                      child: Container(
-                                        width: cellSize * 0.4,
-                                        height: cellSize * 0.4,
-                                        decoration: BoxDecoration(
-                                          border: Border.all(
-                                            color: Colors.white,
-                                            width: 1.5,
+                            onTap: () => onColorSelected(color),
+                            child: SizedBox(
+                              width: cellSize,
+                              height: cellSize,
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(color: color),
+                                child: selected
+                                    ? Center(
+                                        child: Container(
+                                          width: cellSize * 0.4,
+                                          height: cellSize * 0.4,
+                                          decoration: BoxDecoration(
+                                            border: Border.all(
+                                              color: Colors.white,
+                                              width: 1.5,
+                                            ),
+                                            borderRadius:
+                                                BorderRadius.circular(2),
                                           ),
-                                          borderRadius:
-                                              BorderRadius.circular(2),
                                         ),
-                                      ),
-                                    )
-                                  : null,
+                                      )
+                                    : null,
+                              ),
                             ),
-                          ),
                           ),
                         );
                       }).toList(),

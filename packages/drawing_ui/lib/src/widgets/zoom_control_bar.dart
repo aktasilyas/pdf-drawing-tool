@@ -162,27 +162,27 @@ class _ZoomControlBarState extends ConsumerState<ZoomControlBar>
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    '$percentage%',
-                    style: textTheme.headlineMedium?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 1,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '$percentage%',
+                      style: textTheme.headlineMedium?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 1,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 4),
-                  PhosphorIcon(
-                    _isDropdownOpen
-                        ? ElyanotesIcons.caretUp
-                        : ElyanotesIcons.caretDown,
-                    size: 14,
-                    color: Colors.white.withValues(alpha: 0.6),
-                  ),
-                ],
+                    const SizedBox(width: 4),
+                    PhosphorIcon(
+                      _isDropdownOpen
+                          ? ElyanotesIcons.caretUp
+                          : ElyanotesIcons.caretDown,
+                      size: 14,
+                      color: Colors.white.withValues(alpha: 0.6),
+                    ),
+                  ],
+                ),
               ),
-            ),
             ),
           ),
           ZoomBarIconButton(
@@ -225,39 +225,39 @@ class _ZoomControlBarState extends ConsumerState<ZoomControlBar>
         onTap: () => _goToFavorite(zoomPercent),
         behavior: HitTestBehavior.opaque,
         child: SizedBox(
-        height: 48,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(
-                width: 16,
-                child: isActive
-                    ? const PhosphorIcon(
-                        ElyanotesIcons.check,
-                        size: 14,
-                        color: Colors.white,
-                      )
-                    : null,
-              ),
-              const SizedBox(width: 12),
-              Text(
-                '$zoomPercent%',
-                style: isActive
-                    ? textTheme.titleMedium?.copyWith(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      )
-                    : textTheme.bodyLarge?.copyWith(
-                        color: Colors.white,
-                      ),
-              ),
-            ],
+          height: 48,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  width: 16,
+                  child: isActive
+                      ? const PhosphorIcon(
+                          ElyanotesIcons.check,
+                          size: 14,
+                          color: Colors.white,
+                        )
+                      : null,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  '$zoomPercent%',
+                  style: isActive
+                      ? textTheme.titleMedium?.copyWith(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        )
+                      : textTheme.bodyLarge?.copyWith(
+                          color: Colors.white,
+                        ),
+                ),
+              ],
+            ),
           ),
         ),
-      ),
       ),
     );
   }

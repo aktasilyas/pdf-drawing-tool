@@ -92,8 +92,8 @@ void main() {
 
     expect(find.bySemanticsLabel('Yakınlaştırma kilidi'), findsOneWidget);
     expect(find.bySemanticsLabel('Favori yakınlaştırma'), findsOneWidget);
-    expect(find.bySemanticsLabel(RegExp(r'^Yakınlaştırma \d+%')),
-        findsOneWidget);
+    expect(
+        find.bySemanticsLabel(RegExp(r'^Yakınlaştırma \d+%')), findsOneWidget);
     await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
 
     // The favourites dropdown items are labelled by their text.
