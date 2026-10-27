@@ -73,9 +73,6 @@ class DocumentsContentView extends ConsumerWidget {
           onFolderMore: onFolderMore,
           onDocumentMore: onDocumentMore,
         );
-      case SidebarSection.shared:
-      case SidebarSection.store:
-        return const DocumentsComingSoon();
     }
   }
 }

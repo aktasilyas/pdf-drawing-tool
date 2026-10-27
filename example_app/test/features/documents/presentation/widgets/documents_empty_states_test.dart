@@ -118,20 +118,4 @@ void main() {
       expect(find.byIcon(ElyanotesIcons.libraryClose), findsOneWidget);
     });
   });
-
-  group('DocumentsComingSoon', () {
-    testWidgets('should_render_without_error', (tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: AppTheme.light,
-          home: const Scaffold(
-            body: DocumentsComingSoon(),
-          ),
-        ),
-      );
-
-      expect(find.byType(DocumentsComingSoon), findsOneWidget);
-      expect(find.text('Yakında'), findsOneWidget);
-    });
-  });
 }

@@ -208,10 +208,6 @@ String getSectionTitle(
       return 'Tüm Notlar';
     case SidebarSection.favorites:
       return 'Favoriler';
-    case SidebarSection.shared:
-      return 'Paylaşılan';
-    case SidebarSection.store:
-      return 'Mağaza';
     case SidebarSection.trash:
       return 'Son Silinenler';
     case SidebarSection.folder:
@@ -238,7 +234,6 @@ List<String> getCurrentDocumentIds(
     SidebarSection.favorites => ref.watch(favoriteDocumentsProvider),
     SidebarSection.trash => ref.watch(trashDocumentsProvider),
     SidebarSection.folder => ref.watch(documentsProvider(folderId)),
-    _ => const AsyncValue<List<DocumentInfo>>.data([]),
   };
   final searchQuery = ref.watch(searchQueryProvider);
   return documentsAsync.when(

@@ -170,17 +170,3 @@ class DocumentsEmptySearchResult extends ConsumerWidget {
     );
   }
 }
-
-/// Yakında gelecek özellikler için placeholder
-class DocumentsComingSoon extends StatelessWidget {
-  const DocumentsComingSoon({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const AppEmptyState(
-      icon: Icons.construction_outlined,
-      title: 'Yakında',
-      description: 'Bu özellik üzerinde çalışıyoruz',
-    );
-  }
-}

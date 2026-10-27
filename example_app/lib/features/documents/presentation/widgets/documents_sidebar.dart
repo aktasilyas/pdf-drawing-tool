@@ -11,8 +11,12 @@ import 'package:example_app/features/documents/presentation/providers/folders_pr
 import 'package:example_app/features/documents/presentation/widgets/sidebar_item.dart';
 import 'package:example_app/features/documents/presentation/widgets/folder_tile_art.dart';
 
-/// Sidebar bölüm tipleri
-enum SidebarSection { documents, favorites, shared, store, trash, folder }
+/// Library sidebar sections.
+///
+/// Only sections shipped in v1.0 exist: no Shared/Store placeholders (#249).
+/// Sharing (cloud sync) and a store (premium) get real sections when they
+/// unfreeze.
+enum SidebarSection { documents, favorites, trash, folder }
 
 /// Documents sidebar widget
 class DocumentsSidebar extends ConsumerWidget {
