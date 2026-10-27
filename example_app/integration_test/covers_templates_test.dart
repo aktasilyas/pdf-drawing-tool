@@ -21,44 +21,49 @@ import 'robots/new_notebook_robot.dart';
 void main() {
   initE2E();
 
-  testWidgets(
-    'every cover and every paper template opens in the editor',
-    (tester) async {
-      await launchApp(tester);
-      final library = LibraryRobot(tester);
-      final editor = EditorRobot(tester);
-      final notebooks = NewNotebookRobot(tester);
+  testWidgets('every cover opens in the editor', (tester) async {
+    await launchApp(tester);
+    final library = LibraryRobot(tester);
+    final editor = EditorRobot(tester);
+    final notebooks = NewNotebookRobot(tester);
+    await library.waitForLibrary();
+
+    for (final cover in CoverRegistry.pickable) {
+      final id = await notebooks.createAndOpen(
+        'Kapak ${cover.id}',
+        template: TemplateRegistry.blank,
+        cover: cover,
+      );
+      await _waitLoaded(tester, editor, id);
+      expect(_firstPage(editor).type, BackgroundType.cover);
+      expect(_firstPage(editor).coverId, cover.id);
+      expectNoErrorWidgets('cover ${cover.id}');
+      await editor.goHome();
       await library.waitForLibrary();
+    }
+  });
 
-      for (final cover in CoverRegistry.pickable) {
-        final id = await notebooks.createAndOpen(
-          'Kapak ${cover.id}',
-          template: TemplateRegistry.blank,
-          cover: cover,
-        );
-        await _waitLoaded(tester, editor, id);
-        expect(_firstPage(editor).type, BackgroundType.cover);
-        expect(_firstPage(editor).coverId, cover.id);
-        expectNoErrorWidgets('cover ${cover.id}');
-        await editor.goHome();
-        await library.waitForLibrary();
-      }
+  testWidgets('every paper template opens in the editor', (tester) async {
+    await launchApp(tester);
+    final library = LibraryRobot(tester);
+    final editor = EditorRobot(tester);
+    final notebooks = NewNotebookRobot(tester);
+    await library.waitForLibrary();
 
-      for (final template in TemplateRegistry.all) {
-        final id = await notebooks.createAndOpen(
-          'Kağıt ${template.id}',
-          template: template,
-        );
-        await _waitLoaded(tester, editor, id);
-        final first = _firstPage(editor);
-        expect(first.type, BackgroundType.template, reason: template.id);
-        expect(first.templatePattern, template.pattern, reason: template.id);
-        expectNoErrorWidgets('template ${template.id}');
-        await editor.goHome();
-        await library.waitForLibrary();
-      }
-    },
-  );
+    for (final template in TemplateRegistry.all) {
+      final id = await notebooks.createAndOpen(
+        'Kağıt ${template.id}',
+        template: template,
+      );
+      await _waitLoaded(tester, editor, id);
+      final first = _firstPage(editor);
+      expect(first.type, BackgroundType.template, reason: template.id);
+      expect(first.templatePattern, template.pattern, reason: template.id);
+      expectNoErrorWidgets('template ${template.id}');
+      await editor.goHome();
+      await library.waitForLibrary();
+    }
+  });
 }
 
 /// Waits for the editor and for the notebook [id] to be its document

@@ -82,6 +82,7 @@ void main() {
       await relaunchApp(tester);
       await library.waitForLibrary();
       await library.waitListed('Beta');
+      await library.waitListed('Alfa');
       expect(_brightnessOf(tester, find.byType(DocumentsScreen)),
           Brightness.dark);
       await tester.pumpUntilTrue(
