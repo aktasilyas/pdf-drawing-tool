@@ -8,8 +8,8 @@ import 'package:drawing_ui/src/providers/document_provider.dart';
 import 'package:drawing_ui/src/providers/pdf_render_provider.dart';
 import 'package:drawing_ui/src/providers/pending_selection_image_provider.dart';
 import 'package:drawing_ui/src/services/selection_capture_service.dart';
-import 'package:drawing_ui/src/widgets/screenshot_preview_dialog.dart';
 import 'package:drawing_ui/src/services/selection_image_sink.dart';
+import 'package:drawing_ui/src/widgets/screenshot_preview_dialog.dart';
 
 // Selection capture actions: screenshot and "ask AI about this area".
 
@@ -68,7 +68,6 @@ Future<void> screenshotSelection(
     if (confirmed != true) return;
 
     final result = await saveSelectionImage(sink, bytes);
-    if (!context.mounted) return;
     showSnackBar(context, selectionImageSaveMessage(result));
   } catch (e) {
     debugPrint('Screenshot selection failed: $e');
