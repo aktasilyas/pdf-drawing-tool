@@ -8,8 +8,9 @@ import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/documents/domain/entities/folder.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
-import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
-import 'package:example_app/features/documents/presentation/widgets/inline_folder_color_row.dart';
+import 'package:example_app/features/documents/presentation/providers/move_to_folder_actions.dart';
+import 'package:example_app/features/documents/presentation/widgets/move_to_folder_create_form.dart';
+import 'package:example_app/features/documents/presentation/widgets/move_to_folder_list.dart';
 
 /// Dialog for moving documents and folders
 class MoveToFolderDialog extends ConsumerStatefulWidget {
@@ -32,14 +33,6 @@ class MoveToFolderDialog extends ConsumerStatefulWidget {
 class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
   String? _selectedFolderId;
   bool _isCreatingFolder = false;
-  final _newFolderController = TextEditingController();
-  int _selectedColorValue = AppColors.folderColors.first.toARGB32();
-
-  @override
-  void dispose() {
-    _newFolderController.dispose();
-    super.dispose();
-  }
 
   bool get _isFolderMode =>
       widget.documentIds.isEmpty && widget.folderIds.isEmpty;
@@ -62,12 +55,16 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
           child: SingleChildScrollView(
             child: Column(mainAxisSize: MainAxisSize.min, children: [
               _buildHeader(context),
-              if (_isCreatingFolder) _buildNewFolderSection(context),
+              if (_isCreatingFolder)
+                MoveToFolderCreateForm(
+                  onCreate: _handleCreateFolder,
+                  onCancel: () => setState(() => _isCreatingFolder = false),
+                ),
               const AppDivider(),
               ConstrainedBox(
                 constraints: const BoxConstraints(maxHeight: 400),
                 child: foldersAsync.when(
-                  data: (folders) => _buildFolderList(context, folders),
+                  data: (folders) => _buildFolderList(folders),
                   loading: () =>
                       const Center(child: CircularProgressIndicator()),
                   error: (e, _) => _buildError(e),
@@ -107,147 +104,12 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
     );
   }
 
-  Widget _buildNewFolderSection(BuildContext context) {
-    final surfaceVariant = context.palette.surfaceElevated;
-    final textPrimary = context.palette.textPrimary;
-    final textSecondary = context.palette.textMuted;
-    final outlineColor = context.palette.border;
-    final accentColor = context.palette.accent;
-
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      color: surfaceVariant,
-      child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(children: [
-              Icon(Icons.create_new_folder,
-                  size: AppIconSize.sm, color: textSecondary),
-              const SizedBox(width: AppSpacing.sm),
-              Text('Yeni Klasör',
-                  style: AppTypography.labelLarge.copyWith(
-                      fontWeight: FontWeight.bold, color: textPrimary)),
-              const Spacer(),
-              AppButton(
-                  label: 'İptal',
-                  variant: AppButtonVariant.text,
-                  size: AppButtonSize.small,
-                  onPressed: () => setState(() {
-                        _isCreatingFolder = false;
-                        _newFolderController.clear();
-                      })),
-            ]),
-            const SizedBox(height: AppSpacing.sm),
-            // Klasör adı + önizleme ikonu
-            Row(children: [
-              Icon(Icons.folder,
-                  color: Color(_selectedColorValue), size: AppIconSize.lg),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                  child: TextField(
-                controller: _newFolderController,
-                autofocus: true,
-                style: AppTypography.bodyMedium.copyWith(color: textPrimary),
-                cursorColor: accentColor,
-                decoration: InputDecoration(
-                  hintText: 'Klasör adı girin',
-                  hintStyle:
-                      AppTypography.bodyMedium.copyWith(color: textSecondary),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(AppRadius.sm),
-                      borderSide: BorderSide(color: outlineColor)),
-                  enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(AppRadius.sm),
-                      borderSide: BorderSide(color: outlineColor)),
-                  focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(AppRadius.sm),
-                      borderSide: BorderSide(color: accentColor, width: 2)),
-                  isDense: true,
-                  contentPadding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md, vertical: AppSpacing.sm),
-                ),
-                onSubmitted: (_) => _handleCreateFolder(),
-              )),
-            ]),
-            const SizedBox(height: AppSpacing.md),
-            // Renk seçici
-            Text('Renk',
-                style: AppTypography.caption.copyWith(color: textSecondary)),
-            const SizedBox(height: AppSpacing.xs),
-            InlineFolderColorRow(
-              selectedColorValue: _selectedColorValue,
-              onChanged: (v) => setState(() => _selectedColorValue = v),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            // Oluştur butonu
-            AppButton(
-                label: 'Oluştur',
-                size: AppButtonSize.small,
-                isExpanded: true,
-                onPressed: _handleCreateFolder),
-          ]),
-    );
-  }
-
-  Widget _buildFolderList(BuildContext context, List<Folder> folders) {
-    var available = folders;
-    if (_isMovingFolder && widget.folderIds.isNotEmpty) {
-      final id = widget.folderIds.first;
-      available = folders.where((f) => f.id != id && f.parentId != id).toList();
-    }
-    if (available.isEmpty && !_isMovingFolder) {
-      return const AppEmptyState(
-          icon: Icons.folder_outlined,
-          title: 'Henüz klasör yok',
-          description: 'Yeni klasör oluşturarak başlayın');
-    }
-    return ListView.builder(
-      shrinkWrap: true,
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-      itemCount: available.length + 1,
-      itemBuilder: (ctx, i) => i == 0
-          ? _buildRootOption(context)
-          : _buildFolderOption(context, available[i - 1]),
-    );
-  }
-
-  Widget _buildRootOption(BuildContext context) {
-    final textPrimary = context.palette.textPrimary;
-    final textSecondary = context.palette.textMuted;
-    final accentColor = context.palette.accent;
-
-    final sel = _selectedFolderId == null;
-    return ListTile(
-      leading:
-          Icon(Icons.home_outlined, color: sel ? accentColor : textSecondary),
-      title: Text(_isMovingFolder ? 'Ana Klasörler' : 'Belgeler (Klasörsüz)',
-          style: AppTypography.bodyLarge.copyWith(
-              fontWeight: sel ? FontWeight.w600 : FontWeight.normal,
-              color: sel ? accentColor : textPrimary)),
-      trailing: sel ? Icon(Icons.check, color: accentColor) : null,
-      onTap: () => setState(() => _selectedFolderId = null),
-    );
-  }
-
-  Widget _buildFolderOption(BuildContext context, Folder folder) {
-    final textPrimary = context.palette.textPrimary;
-    final textSecondary = context.palette.textMuted;
-    final accentColor = context.palette.accent;
-
-    final sel = _selectedFolderId == folder.id;
-    return ListTile(
-      leading: Icon(Icons.folder,
-          color: sel ? accentColor : Color(folder.colorValue)),
-      title: Text(folder.name,
-          style: AppTypography.bodyLarge
-              .copyWith(color: sel ? accentColor : textPrimary)),
-      subtitle: Text('${folder.documentCount} belge',
-          style: AppTypography.caption.copyWith(color: textSecondary)),
-      trailing: sel ? Icon(Icons.check, color: accentColor) : null,
-      onTap: () => setState(() => _selectedFolderId = folder.id),
-    );
-  }
+  Widget _buildFolderList(List<Folder> folders) => MoveToFolderList(
+        folders: MoveToFolderActions.targetsFor(folders, widget.folderIds),
+        selectedFolderId: _selectedFolderId,
+        isMovingFolder: _isMovingFolder,
+        onSelected: (id) => setState(() => _selectedFolderId = id),
+      );
 
   Widget _buildError(Object error) {
     final textSecondary = context.palette.textMuted;
@@ -293,46 +155,33 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
         ]),
       );
 
-  Future<void> _handleCreateFolder() async {
-    final name = _newFolderController.text.trim();
-    if (name.isEmpty) {
+  Future<void> _handleCreateFolder(String name, int colorValue) async {
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) {
       AppToast.error(context, 'Klasör adı boş olamaz');
       return;
     }
-    final controller = ref.read(foldersControllerProvider.notifier);
-    final id = await controller.createFolder(
-      name: name,
-      parentId: widget.parentFolderId,
-      colorValue: _selectedColorValue,
-    );
+    final id = await ref.read(moveToFolderActionsProvider).createFolder(
+          name: trimmed,
+          parentId: widget.parentFolderId,
+          colorValue: colorValue,
+        );
     if (id != null && mounted) {
-      ref.invalidate(foldersProvider);
       setState(() {
         _selectedFolderId = id;
         _isCreatingFolder = false;
-        _newFolderController.clear();
-        _selectedColorValue = AppColors.folderColors.first.toARGB32();
       });
-      AppToast.success(context, 'Klasör "$name" oluşturuldu');
+      AppToast.success(context, 'Klasör "$trimmed" oluşturuldu');
     }
     // Failures are shown by LibraryErrorListener.
   }
 
   Future<void> _handleMove() async {
-    bool success = true;
-    if (widget.documentIds.isNotEmpty) {
-      success = await ref
-          .read(documentsControllerProvider.notifier)
-          .moveDocumentsToFolder(widget.documentIds, _selectedFolderId);
-    }
-    if (widget.folderIds.isNotEmpty && success) {
-      final ctrl = ref.read(foldersControllerProvider.notifier);
-      for (final fid in widget.folderIds) {
-        success = await ctrl.moveFolder(
-            folderId: fid, newParentId: _selectedFolderId);
-        if (!success) break;
-      }
-    }
+    final success = await ref.read(moveToFolderActionsProvider).move(
+          documentIds: widget.documentIds,
+          folderIds: widget.folderIds,
+          targetFolderId: _selectedFolderId,
+        );
     // Failures are shown by LibraryErrorListener.
     if (success && mounted) Navigator.pop(context, true);
   }
