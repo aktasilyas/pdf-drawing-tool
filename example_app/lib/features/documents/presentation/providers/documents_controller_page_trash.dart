@@ -28,7 +28,7 @@ mixin DocumentsPageTrashOperations on StateNotifier<AsyncValue<void>> {
         pageData: pageData,
       );
     } catch (e) {
-      reportLibraryError(ref, e, 'Sayfa çöpe taşınamadı');
+      reportLibraryError(ref, e, LibraryAction.trashPage);
     }
     invalidatePageTrash(ref);
     return trashId;
@@ -52,7 +52,7 @@ mixin DocumentsPageTrashOperations on StateNotifier<AsyncValue<void>> {
     try {
       await repo.permanentlyDeletePage(trashedPageId);
     } catch (e) {
-      reportLibraryError(ref, e, 'Sayfa kalıcı olarak silinemedi');
+      reportLibraryError(ref, e, LibraryAction.deletePageForever);
     }
     invalidatePageTrash(ref);
   }

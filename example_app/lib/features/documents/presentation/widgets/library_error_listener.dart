@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/documents/presentation/providers/library_error.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// Shows an error snackbar for every failed library mutation reported through
 /// [reportLibraryFailure] (trash, rename, favourite, folder create, ...).
@@ -18,7 +19,7 @@ class LibraryErrorListener extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     ref.listen<LibraryError?>(libraryErrorProvider, (previous, next) {
       if (next == null) return;
-      AppToast.error(context, next.message);
+      AppToast.error(context, next.message(context.l10n));
     });
     return child;
   }

@@ -228,7 +228,11 @@ void main() {
         expect(result.isLeft(), true);
         result.fold(
           (failure) {
-            expect(failure.message, contains('kendi alt klasörüne taşınamaz'));
+            expect(failure, isA<LibraryRuleFailure>());
+            expect(
+              (failure as LibraryRuleFailure).rule,
+              LibraryRule.folderIntoOwnSubfolder,
+            );
           },
           (_) => fail('Should return failure'),
         );

@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/documents/domain/entities/folder.dart';
 import 'package:example_app/features/documents/presentation/widgets/folder_menus.dart';
+import '../../../../helpers/l10n.dart';
 
 void main() {
   Future<void> openMenu(WidgetTester tester, {required bool favorite}) async {
@@ -20,7 +21,7 @@ void main() {
     );
     await tester.pumpWidget(
       ProviderScope(
-        child: MaterialApp(
+        child: localizedApp(
           theme: AppTheme.light,
           home: Scaffold(
             body: Consumer(

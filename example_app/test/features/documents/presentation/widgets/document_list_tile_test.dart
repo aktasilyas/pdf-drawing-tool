@@ -7,6 +7,7 @@ import 'package:example_app/features/documents/domain/entities/document_info.dar
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/document_list_tile.dart';
 import 'package:example_app/features/documents/presentation/widgets/library_tile_parts.dart';
+import '../../../../helpers/l10n.dart';
 
 void main() {
   group('DocumentListTile', () {
@@ -28,7 +29,7 @@ void main() {
     testWidgets('should_render_without_error', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
-          child: MaterialApp(
+          child: localizedApp(
             theme: AppTheme.light,
             home: Scaffold(
               body: DocumentListTile(
@@ -48,7 +49,7 @@ void main() {
     testWidgets('should_display_document_name', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
-          child: MaterialApp(
+          child: localizedApp(
             theme: AppTheme.light,
             home: Scaffold(
               body: DocumentListTile(
@@ -69,7 +70,7 @@ void main() {
 
       await tester.pumpWidget(
         ProviderScope(
-          child: MaterialApp(
+          child: localizedApp(
             theme: AppTheme.light,
             home: Scaffold(
               body: DocumentListTile(
@@ -93,7 +94,7 @@ void main() {
 
       await tester.pumpWidget(
         ProviderScope(
-          child: MaterialApp(
+          child: localizedApp(
             theme: AppTheme.light,
             home: Scaffold(
               body: DocumentListTile(
@@ -122,7 +123,7 @@ void main() {
           overrides: [
             if (selection) selectionModeProvider.overrideWith((ref) => true),
           ],
-          child: MaterialApp(
+          child: localizedApp(
             theme: AppTheme.light,
             home: Scaffold(
               body: DocumentListTile(

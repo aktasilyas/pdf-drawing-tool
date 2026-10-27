@@ -11,6 +11,7 @@ import 'package:example_app/features/documents/presentation/screens/documents_sc
 import '../../../../helpers/a11y.dart';
 import '../../../../helpers/font_loader.dart';
 import 'library_fixtures.dart';
+import '../../../../helpers/l10n.dart';
 
 const _sizes = <String, Size>{
   'landscape tablet': Size(1180, 820),
@@ -38,7 +39,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: libraryOverrides(selection: selection),
-        child: MaterialApp(
+        child: localizedApp(
           theme: AppTheme.light,
           home: const DocumentsScreen(),
         ),

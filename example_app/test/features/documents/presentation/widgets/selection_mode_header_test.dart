@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/selection_mode_header.dart';
+import '../../../../helpers/l10n.dart';
 
 void main() {
   Future<ProviderContainer> pump(
@@ -21,7 +22,7 @@ void main() {
           selectionModeProvider.overrideWith((ref) => true),
           selectedDocumentsProvider.overrideWith((ref) => selected),
         ],
-        child: MaterialApp(
+        child: localizedApp(
           theme: AppTheme.light,
           home: const Scaffold(
             body: SelectionModeHeader(

@@ -5,6 +5,7 @@ library;
 export 'domain/entities/document_info.dart';
 export 'domain/entities/folder.dart';
 export 'domain/entities/incoming_pdf.dart';
+export 'domain/entities/library_rule.dart';
 export 'domain/entities/paper_color.dart';
 export 'domain/entities/view_mode.dart';
 

@@ -4,6 +4,7 @@ import 'package:drawing_ui/drawing_ui.dart' show CoverGeometry;
 
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/documents/presentation/widgets/folder_tile_art.dart';
+import '../../../../helpers/l10n.dart';
 
 void main() {
   group('FolderTileArt.shouldRepaint', () {
@@ -49,7 +50,7 @@ void main() {
 
   testWidgets('paints without error in a tile-sized box', (tester) async {
     await tester.pumpWidget(
-      MaterialApp(
+      localizedApp(
         theme: AppTheme.light,
         home: Center(
           child: SizedBox(

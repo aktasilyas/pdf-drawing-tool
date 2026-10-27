@@ -10,6 +10,7 @@ import 'package:example_app/features/documents/presentation/widgets/menu_tile.da
 import 'package:example_app/features/premium/premium.dart';
 
 import '../providers/documents_controller_harness.dart';
+import '../../../../helpers/l10n.dart';
 
 void main() {
   late MockDocumentRepository repo;
@@ -68,7 +69,7 @@ void main() {
           totalDocumentCountProvider.overrideWith((ref) async => 0),
           foldersProvider.overrideWith((ref) async => []),
         ],
-        child: MaterialApp(
+        child: localizedApp(
           theme: AppTheme.light,
           home: Scaffold(
             body: Consumer(

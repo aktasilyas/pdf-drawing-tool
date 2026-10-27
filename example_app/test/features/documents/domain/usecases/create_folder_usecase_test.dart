@@ -1,7 +1,6 @@
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/documents.dart';
 import 'package:example_app/features/premium/premium.dart';
 
@@ -133,8 +132,11 @@ void main() {
       expect(result.isLeft(), true);
       result.fold(
         (failure) {
-          expect(failure, isA<ValidationFailure>());
-          expect(failure.message, contains('Klasör sınırına ulaştınız'));
+          expect(
+            failure,
+            isA<LibraryRuleFailure>()
+                .having((f) => f.rule, 'rule', LibraryRule.folderLimit),
+          );
         },
         (_) => fail('Should return failure'),
       );

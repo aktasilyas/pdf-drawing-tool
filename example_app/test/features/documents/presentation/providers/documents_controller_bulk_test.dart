@@ -67,7 +67,7 @@ void main() {
       );
       expect(h.state.hasError, isTrue);
       final reported = h.container.read(libraryErrorProvider);
-      expect(reported?.message, 'Belgeler kalıcı olarak silinemedi');
+      expect(reported?.action, LibraryAction.deleteDocumentsForever);
     });
   });
 
@@ -119,7 +119,7 @@ void main() {
       expect(rebuilt, allLists);
       expect(h.state.hasError, isTrue);
       final reported = h.container.read(libraryErrorProvider);
-      expect(reported?.message, 'Belgeler taşınamadı');
+      expect(reported?.action, LibraryAction.moveDocuments);
     });
   });
 }

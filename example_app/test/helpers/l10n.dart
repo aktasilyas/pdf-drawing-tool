@@ -13,8 +13,10 @@ Widget localizedApp({
   Locale locale = testLocale,
   bool debugShowCheckedModeBanner = true,
   TransitionBuilder? builder,
+  GlobalKey<NavigatorState>? navigatorKey,
 }) {
   return MaterialApp(
+    navigatorKey: navigatorKey,
     locale: locale,
     localizationsDelegates: AppLocalizations.localizationsDelegates,
     supportedLocales: AppLocalizations.supportedLocales,

@@ -7,8 +7,9 @@ import 'package:example_app/features/documents/domain/entities/document_info.dar
 import 'package:example_app/features/documents/domain/entities/folder.dart';
 import 'package:example_app/features/documents/presentation/widgets/library_tile_frame.dart';
 import 'package:example_app/features/documents/presentation/widgets/library_tile_parts.dart';
+import '../../../../helpers/l10n.dart';
 
-Widget _host(ThemeData theme, Widget child) => MaterialApp(
+Widget _host(ThemeData theme, Widget child) => localizedApp(
       theme: theme,
       home: Scaffold(body: Center(child: child)),
     );

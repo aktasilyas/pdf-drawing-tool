@@ -7,6 +7,7 @@ import 'package:example_app/features/documents/domain/entities/folder.dart';
 import 'package:example_app/features/documents/presentation/widgets/folder_card.dart';
 import 'package:example_app/features/documents/presentation/widgets/folder_tile_art.dart';
 import 'package:example_app/features/documents/presentation/widgets/library_tile_parts.dart';
+import '../../../../helpers/l10n.dart';
 
 Color? _artColor(WidgetTester tester) {
   final paints = tester
@@ -45,7 +46,7 @@ void main() {
       VoidCallback? onMorePressed,
     }) {
       return ProviderScope(
-        child: MaterialApp(
+        child: localizedApp(
           theme: isDark ? AppTheme.dark : AppTheme.light,
           home: Scaffold(
             body: FolderCard(

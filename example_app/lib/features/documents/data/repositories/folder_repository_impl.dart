@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 import 'package:uuid/uuid.dart';
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/domain/entities/folder.dart';
+import 'package:example_app/features/documents/domain/entities/library_rule.dart';
 import 'package:example_app/features/documents/domain/repositories/folder_repository.dart';
 import 'package:example_app/features/documents/data/datasources/folder_local_datasource.dart';
 import 'package:example_app/features/documents/data/datasources/document_local_datasource.dart';
@@ -86,9 +87,7 @@ class FolderRepositoryImpl implements FolderRepository {
         final parentFolder = await _localDatasource.getFolder(parentId);
         if (parentFolder.parentId != null) {
           // Parent zaten bir alt klasör - 3. seviye yasak
-          return const Left(
-            ValidationFailure('Alt klasörlerin altına klasör oluşturulamaz'),
-          );
+          return Left(LibraryRuleFailure(LibraryRule.folderDepth));
         }
       }
 
@@ -203,17 +202,13 @@ class FolderRepositoryImpl implements FolderRepository {
         // Check for circular reference
         final isCircular = await _checkCircularReference(id, newParentId);
         if (isCircular) {
-          return const Left(
-            ValidationFailure('Klasör kendi alt klasörüne taşınamaz'),
-          );
+          return Left(LibraryRuleFailure(LibraryRule.folderIntoOwnSubfolder));
         }
 
         // 2 seviye max kuralı: Hedef klasör zaten alt klasörse engelle
         final targetFolder = await _localDatasource.getFolder(newParentId);
         if (targetFolder.parentId != null) {
-          return const Left(
-            ValidationFailure('Alt klasörlerin altına klasör taşınamaz'),
-          );
+          return Left(LibraryRuleFailure(LibraryRule.folderMoveDepth));
         }
 
         // Taşınan klasörün alt klasörleri varsa ve hedef root değilse engelle
@@ -221,10 +216,8 @@ class FolderRepositoryImpl implements FolderRepository {
           // Root klasör taşınıyor - alt klasörleri var mı kontrol et
           final subfolders = await _localDatasource.getFolders(parentId: id);
           if (subfolders.isNotEmpty) {
-            return const Left(
-              ValidationFailure(
-                'Alt klasörleri olan bir klasör başka klasörün altına taşınamaz',
-              ),
+            return Left(
+              LibraryRuleFailure(LibraryRule.folderWithSubfoldersMove),
             );
           }
         }

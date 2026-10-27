@@ -9,6 +9,7 @@ import 'package:example_app/features/documents/presentation/widgets/documents_si
 
 import '../../../../helpers/font_loader.dart';
 import '../screens/library_fixtures.dart';
+import '../../../../helpers/l10n.dart';
 
 void main() {
   setUpAll(() async {
@@ -32,7 +33,7 @@ void main() {
           foldersProvider.overrideWith((ref) => libraryFolders),
           featureFlagsProvider.overrideWithValue(flags),
         ],
-        child: MaterialApp(
+        child: localizedApp(
           theme: AppTheme.light,
           home: Scaffold(
             body: DocumentsSidebar(
