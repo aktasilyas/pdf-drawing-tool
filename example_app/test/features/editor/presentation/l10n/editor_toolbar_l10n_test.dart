@@ -100,10 +100,9 @@ void main() {
           (t) async {
         final s = await pump(t, locale, entry.value, readerMode: true);
         expect(find.byTooltip(s.toolbar.home), findsWidgets);
+        // The wide ToolBar hides the read-only badge (showReaderBadge:
+        // false), so only the mode toggle's tooltip changes here.
         expect(find.byTooltip(s.toolbar.editMode), findsWidgets);
-        if (wide) {
-          expect(find.text(s.toolbar.readOnly), findsWidgets);
-        }
         if (locale.languageCode == 'en') {
           expect(find.byTooltip('Ana Sayfa'), findsNothing);
         }
