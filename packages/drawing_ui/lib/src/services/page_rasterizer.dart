@@ -74,7 +74,6 @@ abstract final class PageRasterizer {
         (height - area.height * scale) / 2,
       );
       canvas.scale(scale);
-      canvas.clipRect(Offset.zero & area.size);
 
       // Paper fills the whole region (an infinite canvas grows past the page).
       // Its pattern starts at the region's corner, as in the PDF export of an
