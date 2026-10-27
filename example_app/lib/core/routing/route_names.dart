@@ -27,8 +27,7 @@ abstract class RouteNames {
   // Helper methods for parameterized routes
   /// True for routes behind splash / auth, where a document may be opened.
   static bool isLibraryRoute(String path) =>
-      path.startsWith(documents) ||
-      path.startsWith('/editor/');
+      path.startsWith(documents) || path.startsWith('/editor/');
 
   static String editorPath(String documentId) => '/editor/$documentId';
 }
