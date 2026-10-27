@@ -46,24 +46,23 @@ class ImageHandlesPainter extends CustomPainter {
 
     canvas.drawRect(rect, _stroke);
 
-    for (final corner in [
-      rect.topLeft,
-      rect.topRight,
-      rect.bottomLeft,
-      rect.bottomRight,
-    ]) {
-      canvas.drawCircle(corner, _r, _fill);
-      canvas.drawCircle(corner, _r, _stroke);
-    }
+    _drawHandle(canvas, rect.topLeft);
+    _drawHandle(canvas, rect.topRight);
+    _drawHandle(canvas, rect.bottomLeft);
+    _drawHandle(canvas, rect.bottomRight);
 
     final topCenter = Offset(c.dx, image.y);
     final rotHandle = ImageHandlesGeometry.rotHandleLocal(image);
     canvas.drawLine(topCenter, rotHandle, _stroke);
-    canvas.drawCircle(rotHandle, _r, _fill);
-    canvas.drawCircle(rotHandle, _r, _stroke);
+    _drawHandle(canvas, rotHandle);
     _drawRotationArrow(canvas, rotHandle);
 
     canvas.restore();
+  }
+
+  void _drawHandle(Canvas canvas, Offset center) {
+    canvas.drawCircle(center, _r, _fill);
+    canvas.drawCircle(center, _r, _stroke);
   }
 
   /// Draws a small circular arrow (↻) inside the rotation handle circle.
