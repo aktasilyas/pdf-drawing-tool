@@ -3,32 +3,40 @@ import 'package:test/test.dart';
 
 import '../helpers/document_helpers.dart';
 
-Layer layer(String id, {List<Stroke> strokes = const []}) =>
-    Layer.empty(id).copyWith(id: id, strokes: strokes);
+typedef DocBuilder = DrawingDocument Function(List<Layer>, {int active});
 
-Stroke stroke(String id) => Stroke(
-      id: id,
-      points: [DrawingPoint(x: 0, y: 0), DrawingPoint(x: 10, y: 10)],
-      style: StrokeStyle.pen(),
-      createdAt: DateTime(2024),
-    );
+Layer layer(String id, {List<Stroke> strokes = const []}) {
+  return Layer.empty(id).copyWith(id: id, strokes: strokes);
+}
 
-DrawingDocument v1(List<Layer> layers, {int active = 0}) => DrawingDocument(
-      id: 'd',
-      title: 't',
-      layers: layers,
-      activeLayerIndex: active,
-      createdAt: DateTime(2024),
-      updatedAt: DateTime(2024),
-    );
+Stroke stroke(String id) {
+  return Stroke(
+    id: id,
+    points: [DrawingPoint(x: 0, y: 0), DrawingPoint(x: 10, y: 10)],
+    style: StrokeStyle.pen(),
+    createdAt: DateTime(2024),
+  );
+}
 
-DrawingDocument v2(List<Layer> layers, {int active = 0}) =>
-    multiPageDocWithLayers('t', layers).setActiveLayer(active);
+DrawingDocument v1(List<Layer> layers, {int active = 0}) {
+  return DrawingDocument(
+    id: 'd',
+    title: 't',
+    layers: layers,
+    activeLayerIndex: active,
+    createdAt: DateTime(2024),
+    updatedAt: DateTime(2024),
+  );
+}
+
+DrawingDocument v2(List<Layer> layers, {int active = 0}) {
+  return multiPageDocWithLayers('t', layers).setActiveLayer(active);
+}
 
 List<String> ids(DrawingDocument d) => d.layers.map((l) => l.id).toList();
 
 void main() {
-  final builders = <String, DrawingDocument Function(List<Layer>, {int active})>{
+  final builders = <String, DocBuilder>{
     'V1': v1,
     'multi-page': v2,
   };
@@ -37,7 +45,7 @@ void main() {
     final build = entry.value;
     group('layer commands (${entry.key})', () {
       group('AddLayerCommand', () {
-        test('appends on top, activates it; undo/redo restore exactly', () {
+        test('appends on top and activates it; undo/redo restore', () {
           final doc = build([layer('a'), layer('b')], active: 0);
           final cmd = AddLayerCommand(layer: layer('n'));
 
@@ -57,7 +65,10 @@ void main() {
         test('inserts at index and activates it', () {
           final doc = build([layer('a'), layer('b')], active: 1);
           final cmd = AddLayerCommand(
-              layer: layer('n'), index: 1, description: 'Duplicate layer');
+            layer: layer('n'),
+            index: 1,
+            description: 'Duplicate layer',
+          );
 
           final added = cmd.execute(doc);
           expect(ids(added), ['a', 'n', 'b']);
@@ -72,11 +83,9 @@ void main() {
 
       group('RemoveLayerCommand', () {
         test('undo restores layer content, order and active index', () {
-          final doc = build([
-            layer('a'),
-            layer('b', strokes: [stroke('s1'), stroke('s2')]),
-            layer('c'),
-          ], active: 1);
+          final strokes = [stroke('s1'), stroke('s2')];
+          final start = [layer('a'), layer('b', strokes: strokes), layer('c')];
+          final doc = build(start, active: 1);
           final cmd = RemoveLayerCommand(layerIndex: 1);
 
           final removed = cmd.execute(doc);
@@ -86,7 +95,8 @@ void main() {
           final undone = cmd.undo(removed);
           expect(ids(undone), ['a', 'b', 'c']);
           expect(undone.activeLayerIndex, 1);
-          expect(undone.layers[1].strokes.map((s) => s.id), ['s1', 's2']);
+          final restored = undone.layers[1].strokes.map((s) => s.id);
+          expect(restored, ['s1', 's2']);
 
           final redone = cmd.execute(undone);
           expect(ids(redone), ['a', 'c']);
@@ -94,14 +104,15 @@ void main() {
         });
 
         test('active index adjusts like DrawingDocument.removeLayer', () {
+          final start = [layer('a'), layer('b'), layer('c')];
           for (var active = 0; active < 3; active++) {
             for (var index = 0; index < 3; index++) {
-              final doc = build([layer('a'), layer('b'), layer('c')],
-                  active: active);
-              final result = RemoveLayerCommand(layerIndex: index).execute(doc);
-              expect(result.activeLayerIndex,
-                  doc.removeLayer(index).activeLayerIndex,
-                  reason: 'active=$active index=$index');
+              final doc = build(start, active: active);
+              final cmd = RemoveLayerCommand(layerIndex: index);
+              final actual = cmd.execute(doc).activeLayerIndex;
+              final expected = doc.removeLayer(index).activeLayerIndex;
+              final reason = 'active=$active index=$index';
+              expect(actual, expected, reason: reason);
             }
           }
         });
@@ -115,10 +126,10 @@ void main() {
 
         test('bad index is a no-op', () {
           final doc = build([layer('a'), layer('b')]);
-          expect(ids(RemoveLayerCommand(layerIndex: 5).execute(doc)),
-              ['a', 'b']);
-          expect(ids(RemoveLayerCommand(layerIndex: -1).execute(doc)),
-              ['a', 'b']);
+          final above = RemoveLayerCommand(layerIndex: 5).execute(doc);
+          final below = RemoveLayerCommand(layerIndex: -1).execute(doc);
+          expect(ids(above), ['a', 'b']);
+          expect(ids(below), ['a', 'b']);
         });
       });
 
@@ -140,35 +151,30 @@ void main() {
           expect(redone.activeLayerIndex, 2);
         });
 
-        test('active layer other than the moved one keeps following its id',
-            () {
+        test('an unmoved active layer keeps following its id', () {
           final doc = build([layer('a'), layer('b'), layer('c')], active: 1);
-          final moved =
-              ReorderLayersCommand(oldIndex: 2, newIndex: 0).execute(doc);
+          final cmd = ReorderLayersCommand(oldIndex: 2, newIndex: 0);
+          final moved = cmd.execute(doc);
           expect(ids(moved), ['c', 'a', 'b']);
           expect(moved.activeLayerIndex, 2);
         });
 
         test('invalid or identical indexes are no-ops', () {
           final doc = build([layer('a'), layer('b')]);
-          expect(
-              ids(ReorderLayersCommand(oldIndex: 1, newIndex: 1)
-                  .execute(doc)),
-              ['a', 'b']);
-          expect(
-              ids(ReorderLayersCommand(oldIndex: 0, newIndex: 2)
-                  .execute(doc)),
-              ['a', 'b']);
+          final same = ReorderLayersCommand(oldIndex: 1, newIndex: 1);
+          final outOfRange = ReorderLayersCommand(oldIndex: 0, newIndex: 2);
+          expect(ids(same.execute(doc)), ['a', 'b']);
+          expect(ids(outOfRange.execute(doc)), ['a', 'b']);
         });
       });
     });
   }
 
   group('via HistoryManager', () {
-    test('undo/redo after a page change restore layers and active index', () {
+    test('undo/redo after a page change restore layers and active', () {
       final manager = HistoryManager();
-      var doc = v2([layer('a'), layer('b', strokes: [stroke('s')]), layer('c')],
-          active: 1);
+      final start = [layer('a'), layer('b', strokes: [stroke('s')])];
+      var doc = v2([...start, layer('c')], active: 1);
       doc = doc.addPage(Page.create(index: 1));
       final pageId = doc.pages[0].id;
 
@@ -188,13 +194,13 @@ void main() {
       expect(doc.activeLayerIndex, 1);
     });
 
-    test('reorder redo after page change keeps the active layer', () {
+    test('reorder redo after a page change keeps the active layer', () {
       final manager = HistoryManager();
       var doc = v2([layer('a'), layer('b'), layer('c')], active: 0);
       doc = doc.addPage(Page.create(index: 1));
 
-      doc = manager.execute(
-          ReorderLayersCommand(oldIndex: 0, newIndex: 2), doc);
+      final cmd = ReorderLayersCommand(oldIndex: 0, newIndex: 2);
+      doc = manager.execute(cmd, doc);
       doc = doc.setCurrentPage(1);
       doc = manager.undo(doc)!;
       expect(ids(doc), ['a', 'b', 'c']);

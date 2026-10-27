@@ -4,6 +4,9 @@ import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 
+/// Divider line width; row heights add it so targets stay 48dp.
+const double _line = 0.5;
+
 /// Footer of the layers panel: opacity slider and delete/duplicate buttons.
 class LayerFooter extends ConsumerWidget {
   const LayerFooter({
@@ -22,7 +25,7 @@ class LayerFooter extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final textTheme = Theme.of(context).textTheme;
     final canDelete = layerCount > 1;
-    final border = BorderSide(color: cs.outlineVariant, width: 0.5);
+    final border = BorderSide(color: cs.outlineVariant, width: _line);
     const touch = BoxConstraints(
       minWidth: ChromeSizes.minTouchTarget,
       minHeight: ChromeSizes.minTouchTarget,
@@ -30,7 +33,7 @@ class LayerFooter extends ConsumerWidget {
     return Column(mainAxisSize: MainAxisSize.min, children: [
       // Opacity slider
       Container(
-        height: ChromeSizes.minTouchTarget,
+        height: ChromeSizes.minTouchTarget + _line,
         padding: const EdgeInsets.symmetric(horizontal: ChromeSpacing.sm),
         decoration: BoxDecoration(border: Border(top: border)),
         child: Row(children: [
@@ -61,7 +64,7 @@ class LayerFooter extends ConsumerWidget {
       ),
       // Action buttons
       Container(
-        height: ChromeSizes.minTouchTarget,
+        height: ChromeSizes.minTouchTarget + _line,
         decoration: BoxDecoration(border: Border(top: border)),
         child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           IconButton(

@@ -122,16 +122,17 @@ class ReorderLayersCommand implements DrawingCommand {
       return document;
     }
     final active = _activeBefore ??= document.activeLayerIndex;
-    final activeId = active >= 0 && active < layers.length
-        ? layers[active].id
-        : null;
+    final inRange = active >= 0 && active < layers.length;
+    final activeId = inRange ? layers[active].id : null;
 
     final moved = layers.removeAt(oldIndex);
     layers.insert(newIndex, moved);
     _movedId = moved.id;
 
-    final newActive =
-        activeId == null ? active : layers.indexWhere((l) => l.id == activeId);
+    var newActive = active;
+    if (activeId != null) {
+      newActive = layers.indexWhere((l) => l.id == activeId);
+    }
     return document.withLayers(layers, activeLayerIndex: newActive);
   }
 

@@ -4,6 +4,9 @@ import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 
+/// Divider line width; row heights add it so targets stay 48dp.
+const double _line = 0.5;
+
 /// Header of the layers panel: title and the "add layer" button (48dp tall).
 class LayerListHeader extends ConsumerWidget {
   const LayerListHeader({super.key, required this.cs});
@@ -14,11 +17,11 @@ class LayerListHeader extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
     final layerCount = ref.watch(allLayersProvider).length;
     return Container(
-      height: ChromeSizes.minTouchTarget,
+      height: ChromeSizes.minTouchTarget + _line,
       padding: const EdgeInsets.symmetric(horizontal: ChromeSpacing.md),
       decoration: BoxDecoration(
         border:
-            Border(bottom: BorderSide(color: cs.outlineVariant, width: 0.5)),
+            Border(bottom: BorderSide(color: cs.outlineVariant, width: _line)),
       ),
       child: Row(children: [
         Expanded(

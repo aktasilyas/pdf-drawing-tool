@@ -5,6 +5,9 @@ import 'package:drawing_core/drawing_core.dart' show Layer;
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 
+/// Divider line width; row heights add it so targets stay 48dp.
+const double _line = 0.5;
+
 /// One row of the layers panel: drag handle, name (double tap to rename),
 /// visibility and lock toggles. Tapping the row activates the layer.
 class LayerRow extends ConsumerStatefulWidget {
@@ -71,13 +74,13 @@ class _LayerRowState extends ConsumerState<LayerRow> {
       onTap: () =>
           ref.read(documentProvider.notifier).setActiveLayer(widget.dataIndex),
       child: Container(
-        height: ChromeSizes.minTouchTarget,
+        height: ChromeSizes.minTouchTarget + _line,
         padding: const EdgeInsets.symmetric(horizontal: ChromeSpacing.xs),
         decoration: BoxDecoration(
           color: widget.isActive ? cs.primaryContainer : null,
           border: Border(
             bottom: BorderSide(
-                color: cs.outlineVariant.withValues(alpha: 0.3), width: 0.5),
+                color: cs.outlineVariant.withValues(alpha: 0.3), width: _line),
           ),
         ),
         child: Row(children: [
@@ -87,8 +90,11 @@ class _LayerRowState extends ConsumerState<LayerRow> {
               width: ChromeSizes.minTouchTarget,
               height: ChromeSizes.minTouchTarget,
               child: Center(
-                child: PhosphorIcon(ElyanotesIcons.dragHandle,
-                    size: ChromeIconSizes.md, color: cs.onSurfaceVariant),
+                child: PhosphorIcon(
+                  ElyanotesIcons.dragHandle,
+                  size: ChromeIconSizes.md,
+                  color: cs.onSurfaceVariant,
+                ),
               ),
             ),
           ),
@@ -139,6 +145,8 @@ class _LayerRowState extends ConsumerState<LayerRow> {
         onTapOutside: (_) => _submitRename(),
       );
     }
+    final base = widget.isActive ? textTheme.titleSmall : textTheme.bodySmall;
+    final nameStyle = base?.copyWith(fontSize: 13, color: cs.onSurface);
     return GestureDetector(
       key: ValueKey('layer-name-${layer.id}'),
       behavior: HitTestBehavior.opaque,
@@ -147,14 +155,12 @@ class _LayerRowState extends ConsumerState<LayerRow> {
         alignment: Alignment.centerLeft,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: ChromeSpacing.xs),
-          child: Text(layer.name,
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-              style: widget.isActive
-                  ? textTheme.titleSmall
-                      ?.copyWith(fontSize: 13, color: cs.onSurface)
-                  : textTheme.bodySmall
-                      ?.copyWith(fontSize: 13, color: cs.onSurface)),
+          child: Text(
+            layer.name,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+            style: nameStyle,
+          ),
         ),
       ),
     );
@@ -185,7 +191,12 @@ class _IconToggle extends StatelessWidget {
           width: ChromeSizes.minTouchTarget,
           height: ChromeSizes.minTouchTarget,
           child: Center(
-              child: PhosphorIcon(icon, size: ChromeIconSizes.md, color: color)),
+            child: PhosphorIcon(
+              icon,
+              size: ChromeIconSizes.md,
+              color: color,
+            ),
+          ),
         ),
       ),
     );
