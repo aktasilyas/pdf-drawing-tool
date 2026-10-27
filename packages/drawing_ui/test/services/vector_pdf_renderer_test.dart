@@ -1,5 +1,6 @@
 import 'package:drawing_core/drawing_core.dart';
-import 'package:drawing_ui/drawing_ui.dart';
+import 'package:drawing_ui/drawing_ui.dart'
+    show VectorPDFRenderer, VectorRenderOptions;
 import 'package:flutter_test/flutter_test.dart';
 
 Stroke _stroke(List<DrawingPoint> points) => Stroke(

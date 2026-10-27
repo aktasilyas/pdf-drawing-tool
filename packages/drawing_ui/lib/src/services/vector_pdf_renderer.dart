@@ -4,7 +4,7 @@ import 'package:pdf/pdf.dart';
 
 /// Options for vector rendering.
 class VectorRenderOptions {
-  /// Whether to smooth strokes using bezier curves.
+  /// Whether to smooth strokes (3-point moving average).
   final bool smoothStrokes;
 
   /// Whether to optimize paths by simplifying.
