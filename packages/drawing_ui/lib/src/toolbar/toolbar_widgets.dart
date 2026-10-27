@@ -1,5 +1,6 @@
 /// Shared widgets for the toolbar UI.
 import 'package:flutter/material.dart';
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/theme/drawing_theme.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'package:drawing_ui/src/toolbar/chrome_icon_button.dart';
@@ -21,18 +22,19 @@ class ToolbarUndoRedoButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = context.drawingStrings.toolbar;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         ToolbarIconButton(
           icon: ElyanotesIcons.undo,
-          tooltip: 'Geri al',
+          tooltip: s.undo,
           enabled: canUndo,
           onPressed: onUndo,
         ),
         ToolbarIconButton(
           icon: ElyanotesIcons.redo,
-          tooltip: 'İleri al',
+          tooltip: s.redo,
           enabled: canRedo,
           onPressed: onRedo,
         ),

@@ -39,7 +39,7 @@ class ToolbarOverflowMenu extends ConsumerWidget {
             ? theme.toolbarIconSelectedColor
             : theme.toolbarIconColor,
       ),
-      tooltip: 'Daha fazla arac',
+      tooltip: context.drawingStrings.toolbar.moreTools,
       padding: EdgeInsets.zero,
       constraints: const BoxConstraints(
         minWidth: 48,

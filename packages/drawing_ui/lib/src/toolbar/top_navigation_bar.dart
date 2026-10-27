@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/toolbar/elyanotes_nav_button.dart';
@@ -108,6 +109,7 @@ class TopNavigationBar extends ConsumerWidget {
     ColorScheme colorScheme,
     bool isReaderMode,
   ) {
+    final s = context.drawingStrings.toolbar;
     final pageCount = ref.watch(pageCountProvider);
 
     return Row(
@@ -115,7 +117,7 @@ class TopNavigationBar extends ConsumerWidget {
         // -- Left: Home + Sidebar + Title --
         ElyanotesNavButton(
           icon: ElyanotesIcons.home,
-          tooltip: 'Ana Sayfa',
+          tooltip: s.home,
           onPressed: onHomePressed ?? () {},
         ),
 
@@ -124,7 +126,7 @@ class TopNavigationBar extends ConsumerWidget {
             icon: isSidebarOpen
                 ? ElyanotesIcons.sidebarActive
                 : ElyanotesIcons.sidebar,
-            tooltip: 'Sayfa Paneli',
+            tooltip: s.pages,
             onPressed: onSidebarToggle ?? () {},
             isActive: isSidebarOpen,
           ),
@@ -141,7 +143,7 @@ class TopNavigationBar extends ConsumerWidget {
 
         if (isReaderMode) ...[
           const SizedBox(width: 8),
-          _buildReaderBadge(colorScheme),
+          _buildReaderBadge(context, colorScheme),
         ],
 
         // -- Center spacer --
@@ -152,7 +154,7 @@ class TopNavigationBar extends ConsumerWidget {
           icon: isReaderMode
               ? ElyanotesIcons.readerModeActive
               : ElyanotesIcons.readerMode,
-          tooltip: isReaderMode ? 'Duzenleme Modu' : 'Okuyucu Modu',
+          tooltip: isReaderMode ? s.editMode : s.readerMode,
           onPressed: () {
             ref.read(readerModeProvider.notifier).state = !isReaderMode;
           },
@@ -162,7 +164,7 @@ class TopNavigationBar extends ConsumerWidget {
         if (!isReaderMode && !ref.watch(isInfiniteCanvasProvider))
           ElyanotesNavButton(
             icon: ElyanotesIcons.pageAdd,
-            tooltip: 'Sayfa Ekle',
+            tooltip: s.addPage,
             onPressed: () => showAddPageMenu(context),
           ),
 
@@ -171,20 +173,20 @@ class TopNavigationBar extends ConsumerWidget {
             ref.watch(audioRecordingEnabledProvider))
           ElyanotesNavButton(
             icon: ElyanotesIcons.microphone,
-            tooltip: 'Ses Kaydi',
+            tooltip: s.audio,
             onPressed: () =>
                 showAudioMenu(context, ref, onSidebarToggle, isSidebarOpen),
           ),
 
         ElyanotesNavButton(
           icon: ElyanotesIcons.exportIcon,
-          tooltip: 'Dışa Aktar',
+          tooltip: s.export,
           onPressed: () => showExportMenu(context, ref),
         ),
 
         ElyanotesNavButton(
           icon: ElyanotesIcons.more,
-          tooltip: 'Daha Fazla',
+          tooltip: s.more,
           onPressed: () => ref.read(isInfiniteCanvasProvider)
               ? showInfiniteBackgroundMenu(context)
               : showMoreMenu(context, ref),
@@ -193,10 +195,11 @@ class TopNavigationBar extends ConsumerWidget {
     );
   }
 
-  /// "Salt okunur" badge shown in reader mode.
-  Widget _buildReaderBadge(ColorScheme colorScheme) {
+  /// Read-only badge shown in reader mode.
+  Widget _buildReaderBadge(BuildContext context, ColorScheme colorScheme) {
+    final s = context.drawingStrings.toolbar;
     return Semantics(
-      label: 'Salt okunur mod aktif',
+      label: s.readOnlyActive,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
@@ -213,7 +216,7 @@ class TopNavigationBar extends ConsumerWidget {
             ),
             const SizedBox(width: 4),
             Text(
-              'Salt okunur',
+              s.readOnly,
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,

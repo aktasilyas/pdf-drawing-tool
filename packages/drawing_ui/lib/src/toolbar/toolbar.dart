@@ -18,4 +18,5 @@ export 'elyanotes_nav_button.dart';
 export 'top_navigation_bar.dart';
 export 'top_nav_menus.dart';
 export 'toolbar_logic.dart';
+export 'toolbar_nav_left.dart';
 export 'toolbar_nav_sections.dart';

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 
@@ -95,7 +96,8 @@ class QuickThicknessChip extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     // Map thickness to 1-6dp visual height
     final visualThickness = (thickness * 0.8).clamp(1.0, 6.0);
-    final label = 'Kalınlık ${thickness.toStringAsFixed(1)}';
+    final label = context.drawingStrings.toolbar
+        .thickness(thickness.toStringAsFixed(1));
 
     return Tooltip(
       message: label,

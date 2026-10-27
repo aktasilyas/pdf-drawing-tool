@@ -119,13 +119,22 @@ class ReorderableToolList extends ConsumerWidget {
 class ReorderableExtraToolList extends ConsumerWidget {
   const ReorderableExtraToolList({super.key});
 
-  static const _extraToolMeta = <String, ({IconData icon, String label})>{
-    'ruler': (icon: ElyanotesIcons.ruler, label: 'Cetvel'),
-    'audio': (icon: ElyanotesIcons.microphone, label: 'Ses Kaydı'),
+  static const _extraToolIcons = <String, IconData>{
+    'ruler': ElyanotesIcons.ruler,
+    'audio': ElyanotesIcons.microphone,
   };
+
+  static String? _extraToolLabel(DrawingStrings strings, String key) {
+    return switch (key) {
+      'ruler' => strings.toolbar.ruler,
+      'audio' => strings.toolbar.audio,
+      _ => null,
+    };
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final strings = context.drawingStrings;
     final config = ref.watch(toolbarConfigProvider);
     final sorted = config.sortedExtraTools;
 
@@ -140,12 +149,11 @@ class ReorderableExtraToolList extends ConsumerWidget {
       },
       itemBuilder: (context, index) {
         final extra = sorted[index];
-        final meta = _extraToolMeta[extra.key];
         return _CompactToolItem(
           key: ValueKey(extra.key),
           index: index,
-          icon: meta?.icon ?? ElyanotesIcons.settings,
-          label: meta?.label ?? extra.key,
+          icon: _extraToolIcons[extra.key] ?? ElyanotesIcons.settings,
+          label: _extraToolLabel(strings, extra.key) ?? extra.key,
           isVisible: extra.isVisible,
           onVisibilityToggle: () async {
             await ref
