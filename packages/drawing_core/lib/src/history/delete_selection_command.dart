@@ -47,6 +47,10 @@ class DeleteSelectionCommand implements DrawingCommand {
 
   @override
   DrawingDocument execute(DrawingDocument document) {
+    if (layerIndex < 0 || layerIndex >= document.layers.length) {
+      return document;
+    }
+
     var layer = document.layers[layerIndex];
 
     // Cache elementOrder for undo
@@ -83,6 +87,17 @@ class DeleteSelectionCommand implements DrawingCommand {
 
   @override
   DrawingDocument undo(DrawingDocument document) {
+    if (_deletedStrokes.isEmpty &&
+        _deletedShapes.isEmpty &&
+        _deletedImages.isEmpty &&
+        _deletedTexts.isEmpty) {
+      return document;
+    }
+
+    if (layerIndex < 0 || layerIndex >= document.layers.length) {
+      return document;
+    }
+
     var layer = document.layers[layerIndex];
 
     layer = layer.copyWith(

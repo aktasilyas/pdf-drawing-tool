@@ -52,6 +52,8 @@ class EraseStrokesCommand implements DrawingCommand {
 
   @override
   DrawingDocument undo(DrawingDocument document) {
+    if (_erasedStrokes.isEmpty) return document;
+
     if (layerIndex < 0 || layerIndex >= document.layers.length) {
       return document;
     }
