@@ -2,7 +2,7 @@
 /// (#201) moves them into ARB files.
 abstract final class ExportStrings {
   static const scopeAll = 'Tümü';
-  static const scopeCurrent = 'Geçerli';
+  static const scopeCurrent = 'Bu sayfa';
   static const scopeRange = 'Aralık';
   static const from = 'Başlangıç';
   static const to = 'Bitiş';

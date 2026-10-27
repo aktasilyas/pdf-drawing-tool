@@ -20,17 +20,26 @@ import 'package:drawing_ui/src/theme/theme.dart';
 
 /// Export panel with PDF and PNG export options.
 class ExportPanel extends ConsumerStatefulWidget {
-  const ExportPanel({super.key, required this.onClose, this.embedded = false});
+  const ExportPanel({
+    super.key,
+    required this.onClose,
+    this.embedded = false,
+    this.initialOptions = const ExportOptions(),
+  });
 
   final VoidCallback onClose;
   final bool embedded;
+
+  /// Options the panel opens with (goldens render the range state).
+  @visibleForTesting
+  final ExportOptions initialOptions;
 
   @override
   ConsumerState<ExportPanel> createState() => _ExportPanelState();
 }
 
 class _ExportPanelState extends ConsumerState<ExportPanel> {
-  ExportOptions _options = const ExportOptions();
+  late ExportOptions _options = widget.initialOptions;
 
   VoidCallback get onClose => widget.onClose;
 

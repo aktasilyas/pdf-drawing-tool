@@ -18,7 +18,7 @@ class ExportOptionsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
     final valid = options.isValid(pageCount);
     return Padding(
       padding: const EdgeInsets.all(ChromeSpacing.md),
@@ -69,8 +69,11 @@ class ExportOptionsSection extends StatelessWidget {
             if (!valid)
               Padding(
                 padding: const EdgeInsets.only(top: ChromeSpacing.xs),
-                child: Text(ExportStrings.invalidRange(pageCount),
-                    style: TextStyle(color: cs.error, fontSize: 12)),
+                child: Text(
+                  ExportStrings.invalidRange(pageCount),
+                  style: theme.textTheme.bodySmall
+                      ?.copyWith(color: theme.colorScheme.error),
+                ),
               ),
           ],
           SwitchListTile(
@@ -102,7 +105,8 @@ class _NumberField extends StatelessWidget {
     return TextFormField(
       initialValue: '$value',
       keyboardType: TextInputType.number,
-      decoration: InputDecoration(labelText: label, isDense: true),
+      // Not dense: the field stays a >= 48dp touch target.
+      decoration: InputDecoration(labelText: label),
       // Unparseable input becomes 0, which the range validation rejects.
       onChanged: (t) => onChanged(int.tryParse(t) ?? 0),
     );
