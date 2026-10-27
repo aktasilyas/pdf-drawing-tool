@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
+import 'package:example_app/features/documents/domain/entities/document_sort.dart';
 import 'package:example_app/features/documents/domain/entities/folder.dart';
-import 'package:example_app/features/documents/domain/entities/sort_option.dart';
 import 'package:example_app/features/documents/domain/entities/trashed_page.dart';
 import 'package:example_app/features/documents/domain/entities/view_mode.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
@@ -274,27 +274,15 @@ class _ViewModeSwitcher extends ConsumerWidget {
   }
 }
 
-/// Sorts documents based on current sort provider state.
+/// Sorts documents by the sort menu state; "Favorileri üste sabitle" puts
+/// favourites first.
 List<DocumentInfo> _sortDocuments(
   WidgetRef ref,
   List<DocumentInfo> documents,
-) {
-  final sortOption = ref.watch(sortOptionProvider);
-  final sortDirection = ref.watch(sortDirectionProvider);
-  final sorted = List<DocumentInfo>.from(documents);
-  switch (sortOption) {
-    case SortOption.date:
-      sorted.sort((a, b) => sortDirection == SortDirection.descending
-          ? b.updatedAt.compareTo(a.updatedAt)
-          : a.updatedAt.compareTo(b.updatedAt));
-    case SortOption.name:
-      sorted.sort((a, b) => sortDirection == SortDirection.descending
-          ? b.title.compareTo(a.title)
-          : a.title.compareTo(b.title));
-    case SortOption.size:
-      sorted.sort((a, b) => sortDirection == SortDirection.descending
-          ? b.pageCount.compareTo(a.pageCount)
-          : a.pageCount.compareTo(b.pageCount));
-  }
-  return sorted;
-}
+) =>
+    sortDocuments(
+      documents,
+      option: ref.watch(sortOptionProvider),
+      direction: ref.watch(sortDirectionProvider),
+      pinFavorites: ref.watch(pinFavoritesProvider),
+    );
