@@ -1,16 +1,16 @@
 /// Export options panel shown as a popover below the export toolbar button.
+import 'dart:developer' as developer;
 import 'dart:io';
-import 'dart:ui' as ui;
 
 import 'package:drawing_core/drawing_core.dart'
     show DrawingDocument, Page, PdfPathResolver;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Page;
-import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:drawing_ui/src/utils/drawing_log.dart';
+import 'package:drawing_ui/src/panels/export_file_name.dart';
 import 'package:drawing_ui/src/panels/page_options_widgets.dart';
+import 'package:drawing_ui/src/panels/png_export_action.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/services/pdf_exporter.dart';
 import 'package:drawing_ui/src/services/pdf_share_service.dart';
@@ -72,13 +72,10 @@ class ExportPanel extends ConsumerWidget {
     runner.run(notifier, document, addWatermark: watermark, share: share);
   }
 
-  /// Captures canvas screenshot and saves as PNG.
+  /// Renders the current page off-screen and saves it as PNG.
   void _exportPNG(BuildContext context, WidgetRef ref) {
     onClose();
-    final document = ref.read(documentProvider);
-    final notifier = ref.read(exportProgressProvider.notifier);
-    final boundaryKey = ref.read(canvasBoundaryKeyProvider);
-    performPNGExport(notifier, boundaryKey, title: document.title);
+    exportCurrentPageAsPNG(ref);
   }
 }
 
@@ -184,7 +181,7 @@ Future<void> performPagesPDFExport(
     // doc.save() already returns a Uint8List; only copy a foreign List<int>.
     final raw = result.pdfBytes;
     final bytes = raw is Uint8List ? raw : Uint8List.fromList(raw);
-    final filename = _buildExportFilename(title);
+    final filename = buildExportFilename(title);
 
     if (share) {
       final outcome =
@@ -218,83 +215,12 @@ Future<void> performPagesPDFExport(
       progress.dismiss();
     }
   } catch (e) {
-    DrawingLog.e('PDF export error: $e');
+    developer.log('PDF export failed', name: _logName, error: e);
     progress.setError('PDF dışa aktarılamadı: $e');
   }
 }
 
-/// Captures the canvas via RepaintBoundary and saves as PNG.
-Future<void> performPNGExport(
-  ExportProgressNotifier progress,
-  GlobalKey boundaryKey, {
-  required String title,
-}) async {
-  progress.start(1);
-
-  try {
-    final boundary = boundaryKey.currentContext?.findRenderObject()
-        as RenderRepaintBoundary?;
-    if (boundary == null) {
-      progress.setError('Tuval yakalanamadı');
-      return;
-    }
-
-    final image = await boundary.toImage(pixelRatio: 3.0);
-    final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-    if (byteData == null) {
-      progress.setError('Görüntü oluşturulamadı');
-      return;
-    }
-
-    final bytes = byteData.buffer.asUint8List();
-    final filename = _buildExportFilename(title);
-
-    final savedPath = await FilePicker.platform.saveFile(
-      dialogTitle: 'PNG Kaydet',
-      fileName: '$filename.png',
-      type: FileType.custom,
-      allowedExtensions: ['png'],
-      bytes: bytes,
-    );
-
-    if (savedPath != null) {
-      final file = File(savedPath);
-      if (!await file.exists() || await file.length() == 0) {
-        await file.writeAsBytes(bytes);
-      }
-      final sizeMB = (bytes.length / (1024 * 1024)).toStringAsFixed(1);
-      progress.complete('$sizeMB MB');
-    } else {
-      progress.dismiss();
-    }
-
-    progress.updateProgress(1, 1);
-  } catch (e) {
-    DrawingLog.e('PNG export error: $e');
-    progress.setError('PNG dışa aktarılamadı: $e');
-  }
-}
-
-/// Builds an export filename with title + date/time stamp.
-String _buildExportFilename(String title) {
-  final base = sanitizeFilename(title);
-  final now = DateTime.now();
-  final stamp = '${now.year}'
-      '${now.month.toString().padLeft(2, '0')}'
-      '${now.day.toString().padLeft(2, '0')}'
-      '_'
-      '${now.hour.toString().padLeft(2, '0')}'
-      '${now.minute.toString().padLeft(2, '0')}';
-  return '${base}_$stamp';
-}
-
-/// Sanitizes a string for use as a filename.
-String sanitizeFilename(String title) {
-  var name = title.isEmpty ? 'doküman' : title;
-  name = name.replaceAll(RegExp(r'[<>:"/\\|?*]'), '');
-  if (name.length > 200) name = name.substring(0, 200);
-  return name;
-}
+const _logName = 'drawing_ui.export';
 
 class _PanelHeader extends StatelessWidget {
   const _PanelHeader({required this.cs});

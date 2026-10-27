@@ -1,20 +1,13 @@
-import 'dart:io';
-import 'dart:ui' as ui;
 import 'dart:typed_data';
-import 'package:flutter/material.dart' hide Page;
+
 import 'package:drawing_core/drawing_core.dart';
-import 'package:drawing_ui/src/canvas/image_painter.dart';
-import 'package:drawing_ui/src/canvas/page_background_raster.dart';
-import 'package:drawing_ui/src/services/pdf_raster_layer_renderer.dart';
-import 'package:pdfx/pdfx.dart' as pdfx;
+import 'package:flutter/material.dart' hide Page;
+import 'package:drawing_ui/src/services/page_rasterizer.dart';
 
 /// Generates thumbnail images for pages.
 ///
-/// A thumbnail is a scaled-down render of the page with the same painters as
-/// the canvas: [PageBackgroundRaster] (`PageBackgroundPatternPainter`, and
-/// through it `TemplatePatternPainter` / `CoverRenderer`) for the background,
-/// and `ElementSceneRenderer` / `StickyNotePainter` (via
-/// [PdfRasterLayerRenderer]) for the layer content. There is no second,
+/// A thumbnail is a scaled-down [PageRasterizer] render: the same painters as
+/// the canvas for the background and the layer content. There is no second,
 /// simplified renderer here.
 class ThumbnailGenerator {
   /// Default thumbnail width in pixels.
@@ -22,9 +15,6 @@ class ThumbnailGenerator {
 
   /// Default thumbnail height in pixels.
   static const double defaultHeight = 200;
-
-  /// Shared canvas element painter (stroke renderer, sticky notes).
-  static final PdfRasterLayerRenderer _layerRenderer = PdfRasterLayerRenderer();
 
   /// Generates a cache key for a page.
   ///
@@ -47,140 +37,17 @@ class ThumbnailGenerator {
     Color backgroundColor = Colors.white,
     PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
   }) async {
-    final images = ImageCacheManager();
-    ui.Image? pdfImage;
-    ui.Image? coverImage;
     try {
-      // Async work first, so the recording below is synchronous.
-      if (page.background.type == BackgroundType.pdf) {
-        pdfImage = await _loadPdfBackground(page, pdfPaths);
-      }
-      coverImage = await PageBackgroundRaster.prepare(page.background);
-      final visibleLayers = [
-        for (final layer in page.layers)
-          if (layer.isVisible) layer,
-      ];
-      await Future.wait([
-        for (final layer in visibleLayers)
-          for (final img in layer.images) images.loadImage(img.filePath),
-      ]);
-
-      final recorder = ui.PictureRecorder();
-      final canvas = Canvas(recorder);
-
-      canvas.drawRect(
-        Rect.fromLTWH(0, 0, width, height),
-        Paint()..color = backgroundColor,
+      return await PageRasterizer.renderPng(
+        page,
+        width: width.toInt(),
+        height: height.toInt(),
+        backgroundColor: backgroundColor,
+        pdfPaths: pdfPaths,
       );
-
-      // Scale the page to fit and center it.
-      final scaleX = width / page.size.width;
-      final scaleY = height / page.size.height;
-      final scale = scaleX < scaleY ? scaleX : scaleY;
-      final offsetX = (width - page.size.width * scale) / 2;
-      final offsetY = (height - page.size.height * scale) / 2;
-
-      canvas.save();
-      canvas.translate(offsetX, offsetY);
-      canvas.scale(scale);
-
-      final pageSize = Size(page.size.width, page.size.height);
-      PageBackgroundRaster.paint(canvas, page.background, pageSize, coverImage);
-      if (pdfImage != null) {
-        canvas.drawImageRect(
-          pdfImage,
-          Rect.fromLTWH(
-              0, 0, pdfImage.width.toDouble(), pdfImage.height.toDouble()),
-          Offset.zero & pageSize,
-          Paint()..filterQuality = FilterQuality.high,
-        );
-      }
-
-      // Layer content exactly as the canvas paints it: each layer in its own
-      // compositing layer (blend modes such as the highlighter's multiply
-      // only mix with that layer's ink), elements in z-order, sticky notes
-      // on top.
-      final pageRect = Offset.zero & pageSize;
-      for (final layer in visibleLayers) {
-        canvas.saveLayer(pageRect, Paint());
-        _layerRenderer.paintElements(canvas, layer, images);
-        _layerRenderer.paintStickyNotes(canvas, layer.stickyNotes);
-        canvas.restore();
-      }
-
-      canvas.restore();
-
-      final picture = recorder.endRecording();
-      final image = await picture.toImage(width.toInt(), height.toInt());
-      picture.dispose();
-      try {
-        final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-        return byteData?.buffer.asUint8List();
-      } finally {
-        image.dispose();
-      }
     } catch (_) {
       // Return null on any error (e.g., invalid dimensions, rendering issues)
       return null;
-    } finally {
-      images.dispose();
-      pdfImage?.dispose();
-      coverImage?.dispose();
-    }
-  }
-
-  /// Decodes the PDF page behind [page], from in-memory `pdfData` or the
-  /// lazy-loaded `pdfFilePath`. Null when missing or unreadable.
-  static Future<ui.Image?> _loadPdfBackground(
-    Page page,
-    PdfPathResolver pdfPaths,
-  ) async {
-    final background = page.background;
-    if (background.pdfPageIndex == null) return null;
-    try {
-      var bytes = background.pdfData;
-      if (bytes == null && background.pdfFilePath != null) {
-        bytes = await _renderPdfPageFromFile(
-          pdfPaths.resolve(background.pdfFilePath!),
-          background.pdfPageIndex!,
-        );
-      }
-      if (bytes == null) return null;
-      final codec = await ui.instantiateImageCodec(bytes);
-      return (await codec.getNextFrame()).image;
-    } catch (_) {
-      return null;
-    }
-  }
-
-  /// Renders a single PDF page from file path, returning PNG bytes.
-  static Future<Uint8List?> _renderPdfPageFromFile(
-    String filePath,
-    int pageIndex,
-  ) async {
-    final file = File(filePath);
-    if (!await file.exists()) return null;
-
-    pdfx.PdfDocument? document;
-    pdfx.PdfPage? pdfPage;
-    try {
-      document = await pdfx.PdfDocument.openFile(filePath);
-      pdfPage = await document.getPage(pageIndex);
-
-      final pageImage = await pdfPage.render(
-        width: pdfPage.width * 0.5,
-        height: pdfPage.height * 0.5,
-        format: pdfx.PdfPageImageFormat.png,
-      );
-
-      return pageImage?.bytes;
-    } finally {
-      try {
-        await pdfPage?.close();
-      } catch (_) {}
-      try {
-        await document?.close();
-      } catch (_) {}
     }
   }
 }
