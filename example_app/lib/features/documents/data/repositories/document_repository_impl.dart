@@ -132,14 +132,17 @@ class DocumentRepositoryImpl
       _guard('permanently delete', () => _localDatasource.deleteDocument(id));
 
   @override
-  Future<Either<Failure, DocumentInfo>> duplicateDocument(String id) async {
+  Future<Either<Failure, DocumentInfo>> duplicateDocument(
+    String id, {
+    required String Function(String title) copyTitle,
+  }) async {
     // Document row and content are copied in one transaction.
     final result = await _guard('duplicate document', () async {
       final original = await _localDatasource.getDocument(id);
       final now = DateTime.now();
       final duplicate = original.copyWith(
         id: _uuid.v4(),
-        title: '${original.title} (kopya)',
+        title: copyTitle(original.title),
         createdAt: now,
         updatedAt: now,
         isFavorite: false, // Don't copy favorite status

@@ -488,175 +488,129 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get editorToolFountainPen => 'Dolma Kalem';
-
-  @override
-  String get editorToolPencil => 'Kurşun Kalem';
-
-  @override
-  String get editorToolHardPencil => 'Sert Kalem';
-
-  @override
-  String get editorToolBallpointPen => 'Tükenmez Kalem';
-
-  @override
-  String get editorToolGelPen => 'Jel Kalem';
-
-  @override
-  String get editorToolDashedPen => 'Kesik Çizgi';
-
-  @override
-  String get editorToolHighlighter => 'Fosforlu Kalem';
-
-  @override
-  String get editorToolBrushPen => 'Fırça Kalem';
-
-  @override
-  String get editorToolNeonHighlighter => 'Neon Fosforlu';
-
-  @override
-  String get editorToolRulerPen => 'Cetvelli Kalem';
-
-  @override
-  String get editorToolPixelEraser => 'Silgi';
-
-  @override
-  String get editorToolStrokeEraser => 'Çizgi Silgisi';
-
-  @override
-  String get editorToolLassoEraser => 'Kement Silgisi';
-
-  @override
-  String get editorToolShapes => 'Şekiller';
-
-  @override
-  String get editorToolText => 'Metin';
-
-  @override
-  String get editorToolSticker => 'Çıkartma';
-
-  @override
-  String get editorToolImage => 'Resim';
-
-  @override
-  String get editorToolSelection => 'Seçim';
-
-  @override
-  String get editorToolPanZoom => 'Kaydır/Yakınlaştır';
-
-  @override
-  String get editorToolLaserPointer => 'Lazer İşaretçi';
-
-  @override
-  String get editorToolStickyNote => 'Yapışkan Not';
-
-  @override
-  String get editorToolToolbarSettings => 'Araç Çubuğu Ayarları';
-
-  @override
-  String get editorToolPenGroup => 'Kalem';
-
-  @override
-  String get editorToolbarHome => 'Ana Sayfa';
-
-  @override
-  String get editorToolbarPages => 'Sayfa Paneli';
-
-  @override
-  String get editorToolbarRuler => 'Cetvel';
-
-  @override
-  String get editorToolbarAudio => 'Ses Kaydı';
-
-  @override
-  String get editorToolbarReaderMode => 'Okuyucu Modu';
-
-  @override
-  String get editorToolbarEditMode => 'Düzenleme Modu';
-
-  @override
-  String get editorToolbarMore => 'Daha Fazla';
-
-  @override
-  String get editorToolbarLayers => 'Katmanlar';
-
-  @override
-  String get editorToolbarAddPage => 'Sayfa Ekle';
-
-  @override
-  String get editorToolbarExport => 'Dışa Aktar';
-
-  @override
-  String get editorToolbarAi => 'Yapay Zeka';
-
-  @override
-  String get editorToolbarUntitled => 'İsimsiz Not';
-
-  @override
-  String get editorToolbarMoreColors => 'Daha Fazla Renk';
-
-  @override
-  String get editorToolbarColorSetHighlighter => 'Vurgulayıcı';
-
-  @override
-  String get editorToolbarColorSetPastel => 'Pastel';
-
-  @override
-  String editorToolbarSelectedColor(String hex) {
-    return 'Seçili renk $hex';
+  String libraryPageCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sayfa',
+    );
+    return '$_temp0';
   }
 
   @override
-  String editorToolbarColor(String hex) {
-    return 'Renk $hex';
+  String libraryDocumentCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count belge',
+    );
+    return '$_temp0';
   }
 
   @override
-  String editorToolbarThickness(String value) {
-    return 'Kalınlık $value';
+  String libraryDaysLeft(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days gün',
+    );
+    return '$_temp0';
   }
 
   @override
-  String get editorToolbarMoreTools => 'Daha fazla araç';
+  String get libraryRemoveFavoriteBadge => 'Favorilerden çıkar';
 
   @override
-  String get editorToolbarReadOnlyActive => 'Salt okunur mod aktif';
+  String get libraryRemoveFromFavorites => 'Favorilerden Kaldır';
 
   @override
-  String get editorToolbarReadOnly => 'Salt okunur';
+  String get libraryAddToFavorites => 'Favorilere Ekle';
 
   @override
-  String get editorToolbarUndo => 'Geri al';
+  String get libraryMoveToTrash => 'Çöpe Taşı';
 
   @override
-  String get editorToolbarRedo => 'İleri al';
+  String get libraryDocumentDuplicated => 'Belge çoğaltıldı';
 
   @override
-  String get editorToolbarRecordingInProgress => 'Kayıt devam ediyor…';
+  String get libraryDocumentMoved => 'Belge taşındı';
 
   @override
-  String get editorToolbarRecord => 'Kaydet';
+  String get libraryDocumentRestored => 'Belge geri yüklendi';
 
   @override
-  String get editorToolbarMicPermissionRequired =>
-      'Mikrofon izni gerekli. Lütfen ayarlardan izin verin.';
+  String get libraryDeleteDocumentForeverMessage =>
+      'Bu belge kalıcı olarak silinecek. Bu işlem geri alınamaz!';
 
   @override
-  String get editorToolbarShowRecordings => 'Kayıtları göster';
+  String get libraryDocumentNameLabel => 'Belge Adı';
 
   @override
-  String get editorToolbarSettingsTabTools => 'Araçlar';
+  String get libraryChangeColor => 'Renk Değiştir';
 
   @override
-  String get editorToolbarSettingsTabExtraTools => 'Ek Araçlar';
+  String get libraryFolderMoved => 'Klasör taşındı';
 
   @override
-  String get editorToolbarSettingsToolsHint => 'Araçları sıralayın ve gizleyin';
+  String get libraryFolderColorChanged => 'Klasör rengi değiştirildi';
 
   @override
-  String get editorToolbarSettingsExtraToolsHint =>
-      'Ek araçları sıralayın ve gizleyin';
+  String get libraryDeleteFolderTitle => 'Klasörü Sil';
 
   @override
-  String get editorToolbarSettingsReset => 'Varsayılana Sıfırla';
+  String libraryDeleteFolderNonEmptyMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Bu klasörde $count belge var. Klasörü silmek belgelerini de siler. Devam etmek istiyor musunuz?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get libraryDeleteFolderMessage =>
+      'Bu klasörü silmek istediğinize emin misiniz?';
+
+  @override
+  String get libraryFolderDeleted => 'Klasör silindi';
+
+  @override
+  String get libraryRenameFolderTitle => 'Klasörü Yeniden Adlandır';
+
+  @override
+  String get libraryFolderNameLabel => 'Klasör adı';
+
+  @override
+  String libraryFolderRenamed(String name) {
+    return 'Klasör \"$name\" olarak yeniden adlandırıldı';
+  }
+
+  @override
+  String libraryPageNumber(int page) {
+    return 'Sayfa $page';
+  }
+
+  @override
+  String libraryTrashedPageTitle(String document, int page) {
+    return '$document — Sayfa $page';
+  }
+
+  @override
+  String get librarySourceDocumentMissing => 'Kaynak belge bulunamadı';
+
+  @override
+  String get libraryPageRestored => 'Sayfa geri yüklendi';
+
+  @override
+  String get libraryPageRestoreFailed => 'Sayfa geri yüklenemedi';
+
+  @override
+  String get libraryDeletePageForeverMessage =>
+      'Bu sayfa kalıcı olarak silinecek. Bu işlem geri alınamaz!';
+
+  @override
+  String libraryCopyTitle(String title) {
+    return '$title (kopya)';
+  }
 }

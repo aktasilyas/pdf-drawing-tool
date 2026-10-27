@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/documents/presentation/widgets/library_tile_parts.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// Flat list row: 36x48 thumbnail, title + meta, trailing favorite star and
 /// caret (or the selection checkbox while selecting).
@@ -95,7 +96,7 @@ class LibraryListRow extends StatelessWidget {
                     Semantics(
                       container: true,
                       button: true,
-                      label: 'Favorilerden çıkar',
+                      label: context.l10n.libraryRemoveFavoriteBadge,
                       onTap: onFavoriteTap,
                       excludeSemantics: true,
                       child: GestureDetector(

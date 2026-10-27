@@ -1,6 +1,7 @@
 import 'package:drawing_core/drawing_core.dart' show Page, PdfPathResolver;
 import 'package:drawing_ui/drawing_ui.dart';
 import 'package:drawing_ui/src/panels/png_export_action.dart';
+import 'package:drawing_ui/src/services/export_errors.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -30,6 +31,6 @@ void main() {
     expect(rendered, same(page));
     expect(infinite, isTrue);
     expect(progress.state.status, ExportProgressStatus.error);
-    expect(progress.state.errorMessage, contains('PNG'));
+    expect(progress.state.errorMessage, exportFailedMessage);
   });
 }

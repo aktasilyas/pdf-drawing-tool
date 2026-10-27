@@ -1,3 +1,4 @@
+import 'package:example_app/core/utils/logger.dart';
 import 'dart:convert';
 import 'dart:ui' as ui;
 
@@ -46,7 +47,7 @@ class CanvasCaptureService {
       final bytes = byteData.buffer.asUint8List();
       return base64Encode(bytes);
     } catch (e) {
-      debugPrint('CanvasCaptureService error: $e');
+      logger.e('CanvasCaptureService error: $e');
       return null;
     }
   }

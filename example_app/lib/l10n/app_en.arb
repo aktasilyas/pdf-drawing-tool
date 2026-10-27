@@ -274,6 +274,94 @@
       }
     }
   },
+  "libraryPageCount": "{count, plural, =1{1 page} other{{count} pages}}",
+  "@libraryPageCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "libraryDocumentCount": "{count, plural, =1{1 document} other{{count} documents}}",
+  "@libraryDocumentCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "libraryDaysLeft": "{days, plural, =1{1 day} other{{days} days}}",
+  "@libraryDaysLeft": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "libraryRemoveFavoriteBadge": "Remove from favorites",
+  "libraryRemoveFromFavorites": "Remove from favorites",
+  "libraryAddToFavorites": "Add to favorites",
+  "libraryMoveToTrash": "Move to trash",
+  "libraryDocumentDuplicated": "Notebook duplicated",
+  "libraryDocumentMoved": "Notebook moved",
+  "libraryDocumentRestored": "Notebook restored",
+  "libraryDeleteDocumentForeverMessage": "This notebook will be deleted permanently. This can't be undone.",
+  "libraryDocumentNameLabel": "Notebook name",
+  "libraryChangeColor": "Change color",
+  "libraryFolderMoved": "Folder moved",
+  "libraryFolderColorChanged": "Folder color changed",
+  "libraryDeleteFolderTitle": "Delete folder",
+  "libraryDeleteFolderNonEmptyMessage": "{count, plural, =1{This folder contains 1 document. Deleting the folder also deletes that document. Continue?} other{This folder contains {count} documents. Deleting it also deletes them. Continue?}}",
+  "@libraryDeleteFolderNonEmptyMessage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "libraryDeleteFolderMessage": "Delete this folder?",
+  "libraryFolderDeleted": "Folder deleted",
+  "libraryRenameFolderTitle": "Rename folder",
+  "libraryFolderNameLabel": "Folder name",
+  "libraryFolderRenamed": "Folder renamed to \"{name}\"",
+  "@libraryFolderRenamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryPageNumber": "Page {page}",
+  "@libraryPageNumber": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "libraryTrashedPageTitle": "{document} — Page {page}",
+  "@libraryTrashedPageTitle": {
+    "placeholders": {
+      "document": {
+        "type": "String"
+      },
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "librarySourceDocumentMissing": "The original notebook no longer exists",
+  "libraryPageRestored": "Page restored",
+  "libraryPageRestoreFailed": "Couldn't restore the page",
+  "libraryDeletePageForeverMessage": "This page will be deleted permanently. This can't be undone.",
+  "libraryCopyTitle": "{title} (copy)",
+  "@libraryCopyTitle": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "editorToolFountainPen": "Fountain pen",
   "editorToolPencil": "Pencil",
   "editorToolHardPencil": "Hard pencil",

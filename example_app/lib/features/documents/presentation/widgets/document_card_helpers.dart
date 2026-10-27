@@ -1,12 +1,14 @@
 /// ElyaNotes Document Card Helper Widgets
 ///
-/// Doküman kartı için yardımcı widget'lar (gün rozeti, kağıt rengi, tarih).
+/// Helpers for the document card (days-left badge, paper color, date).
 library;
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/documents/domain/entities/paper_color.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// Days left badge for trashed documents and pages.
 ///
@@ -31,7 +33,7 @@ class DocumentDaysLeftBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadius.xs),
       ),
       child: Text(
-        '$clampedDays gün',
+        context.l10n.libraryDaysLeft(clampedDays),
         style: AppTypography.labelMedium.copyWith(
           color: urgent ? palette.onDanger : palette.textMuted,
         ),
@@ -67,26 +69,13 @@ class DocumentPaperColors {
   }
 }
 
-/// Date formatter for document card
+/// Date formatter for document card.
 class DocumentDateFormatter {
   DocumentDateFormatter._();
 
-  static const _months = [
-    'Oca',
-    'Şub',
-    'Mar',
-    'Nis',
-    'May',
-    'Haz',
-    'Tem',
-    'Ağu',
-    'Eyl',
-    'Eki',
-    'Kas',
-    'Ara'
-  ];
-
-  static String format(DateTime date) {
-    return '${date.day} ${_months[date.month - 1]} ${date.year}';
-  }
+  /// Medium date in the format of [localeName] (tr: "21 Eki 2026",
+  /// en: "Oct 21, 2026"). The locale's date symbols must be loaded, which
+  /// `GlobalMaterialLocalizations` does in the app.
+  static String format(DateTime date, String localeName) =>
+      DateFormat.yMMMd(localeName).format(date);
 }

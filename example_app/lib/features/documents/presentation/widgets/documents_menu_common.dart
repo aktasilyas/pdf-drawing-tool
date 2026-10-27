@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// Shows a themed modal bottom sheet for library menus.
 void showMenuSheet(
@@ -72,14 +73,14 @@ Future<bool?> showDeleteConfirmDialog(
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(ctx, false),
-          child: const Text('İptal'),
+          child: Text(ctx.l10n.commonCancel),
         ),
         FilledButton(
           onPressed: () => Navigator.pop(ctx, true),
           style: FilledButton.styleFrom(
             backgroundColor: Theme.of(ctx).colorScheme.error,
           ),
-          child: const Text('Kalıcı Sil'),
+          child: Text(ctx.l10n.libraryDeleteForever),
         ),
       ],
     ),

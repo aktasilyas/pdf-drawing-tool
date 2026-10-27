@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:drawing_ui/src/utils/drawing_log.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
 
@@ -157,7 +157,7 @@ class DocumentNotifier extends StateNotifier<DrawingDocument> {
     final pageIndex = pages.indexWhere((p) => p.id == pageId);
 
     if (pageIndex == -1) {
-      debugPrint('WARNING: Page not found: $pageId');
+      DrawingLog.w('Page not found: $pageId');
       return;
     }
 

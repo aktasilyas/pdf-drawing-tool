@@ -9,6 +9,7 @@ import 'package:example_app/features/documents/presentation/providers/folders_pr
 import 'package:example_app/features/documents/presentation/widgets/folder_color_picker.dart';
 import 'package:example_app/features/documents/presentation/widgets/menu_tile.dart';
 import 'package:example_app/features/documents/presentation/widgets/move_to_folder_dialog.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// Shows context menu for a folder.
 void showFolderMenu(
@@ -18,6 +19,7 @@ void showFolderMenu(
   required VoidCallback? onDeleted,
 }) {
   final surfaceColor = context.palette.surface;
+  final l10n = context.l10n;
 
   showModalBottomSheet(
     context: context,
@@ -33,7 +35,7 @@ void showFolderMenu(
           const SizedBox(height: AppSpacing.md),
           MenuTile(
             icon: Icons.edit_outlined,
-            label: 'Yeniden Adlandır',
+            label: l10n.commonRename,
             onTap: () {
               Navigator.pop(ctx);
               _showRenameFolderDialog(context, ref, folder);
@@ -42,7 +44,7 @@ void showFolderMenu(
           _softDivider(context),
           MenuTile(
             icon: Icons.color_lens_outlined,
-            label: 'Renk Değiştir',
+            label: l10n.libraryChangeColor,
             onTap: () {
               Navigator.pop(ctx);
               _showColorPicker(context, ref, folder);
@@ -51,7 +53,7 @@ void showFolderMenu(
           _softDivider(context),
           MenuTile(
             icon: Icons.drive_file_move_outlined,
-            label: 'Taşı',
+            label: l10n.commonMove,
             onTap: () async {
               Navigator.pop(ctx);
               final messenger = ScaffoldMessenger.of(context);
@@ -65,8 +67,8 @@ void showFolderMenu(
                 ref.invalidate(foldersProvider);
                 ref.invalidate(documentsProvider);
                 messenger.showSnackBar(
-                  const SnackBar(
-                    content: Text('Klasör taşındı'),
+                  SnackBar(
+                    content: Text(l10n.libraryFolderMoved),
                     behavior: SnackBarBehavior.floating,
                   ),
                 );
@@ -76,8 +78,9 @@ void showFolderMenu(
           _softDivider(context),
           MenuTile(
             icon: folder.isFavorite ? Icons.star : Icons.star_outline,
-            label:
-                folder.isFavorite ? 'Favorilerden Kaldır' : 'Favorilere Ekle',
+            label: folder.isFavorite
+                ? l10n.libraryRemoveFromFavorites
+                : l10n.libraryAddToFavorites,
             onTap: () {
               Navigator.pop(ctx);
               ref
@@ -110,8 +113,8 @@ Future<void> _showColorPicker(
     // Failures are shown by LibraryErrorListener.
     if (success && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Klasör rengi değiştirildi'),
+        SnackBar(
+          content: Text(context.l10n.libraryFolderColorChanged),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -127,10 +130,11 @@ Widget _buildDeleteFolderTile(
 ) {
   final surfaceColor = context.palette.surface;
   final textPrimary = context.palette.textPrimary;
+  final l10n = context.l10n;
 
   return MenuTile(
     icon: Icons.delete_outline,
-    label: 'Sil',
+    label: l10n.commonDelete,
     isDestructive: true,
     onTap: () async {
       Navigator.pop(context);
@@ -138,24 +142,22 @@ Widget _buildDeleteFolderTile(
         context: context,
         builder: (ctx) => AlertDialog(
           backgroundColor: surfaceColor,
-          title: Text('Klasörü Sil',
+          title: Text(l10n.libraryDeleteFolderTitle,
               style: AppTypography.titleLarge.copyWith(color: textPrimary)),
           content: Text(
             folder.documentCount > 0
-                ? 'Bu klasörde ${folder.documentCount} belge var. '
-                    'Klasörü silmek belgelerini de siler. '
-                    'Devam etmek istiyor musunuz?'
-                : 'Bu klasörü silmek istediğinize emin misiniz?',
+                ? l10n.libraryDeleteFolderNonEmptyMessage(folder.documentCount)
+                : l10n.libraryDeleteFolderMessage,
             style: AppTypography.bodyMedium.copyWith(color: textPrimary),
           ),
           actions: [
             AppButton(
-              label: 'İptal',
+              label: l10n.commonCancel,
               variant: AppButtonVariant.text,
               onPressed: () => Navigator.pop(ctx, false),
             ),
             AppButton(
-              label: 'Sil',
+              label: l10n.commonDelete,
               variant: AppButtonVariant.destructive,
               onPressed: () => Navigator.pop(ctx, true),
             ),
@@ -169,8 +171,8 @@ Widget _buildDeleteFolderTile(
         if (success && context.mounted) {
           onDeleted?.call();
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Klasör silindi'),
+            SnackBar(
+              content: Text(l10n.libraryFolderDeleted),
               behavior: SnackBarBehavior.floating,
             ),
           );
@@ -190,6 +192,7 @@ void _showRenameFolderDialog(
   final textSecondary = context.palette.textMuted;
   final outlineColor = context.palette.border;
   final accentColor = context.palette.accent;
+  final l10n = context.l10n;
 
   final controller = TextEditingController(text: folder.name);
 
@@ -197,7 +200,7 @@ void _showRenameFolderDialog(
     context: context,
     builder: (ctx) => AlertDialog(
       backgroundColor: surfaceColor,
-      title: Text('Klasörü Yeniden Adlandır',
+      title: Text(l10n.libraryRenameFolderTitle,
           style: AppTypography.titleLarge.copyWith(color: textPrimary)),
       insetPadding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.xl,
@@ -210,7 +213,7 @@ void _showRenameFolderDialog(
           style: AppTypography.bodyMedium.copyWith(color: textPrimary),
           cursorColor: accentColor,
           decoration: InputDecoration(
-            labelText: 'Klasör Adı',
+            labelText: l10n.libraryFolderNameLabel,
             labelStyle: AppTypography.bodyMedium.copyWith(color: textSecondary),
             floatingLabelStyle:
                 AppTypography.caption.copyWith(color: accentColor),
@@ -228,12 +231,12 @@ void _showRenameFolderDialog(
       ),
       actions: [
         AppButton(
-          label: 'İptal',
+          label: l10n.commonCancel,
           variant: AppButtonVariant.text,
           onPressed: () => Navigator.pop(ctx),
         ),
         AppButton(
-          label: 'Kaydet',
+          label: l10n.commonSave,
           onPressed: () async {
             final newName = controller.text.trim();
             if (newName.isNotEmpty && newName != folder.name) {
@@ -244,7 +247,7 @@ void _showRenameFolderDialog(
                   await folderController.renameFolder(folder.id, newName);
               // Failures are shown by LibraryErrorListener.
               if (success && context.mounted) {
-                final message = 'Klasör "$newName" olarak yeniden adlandırıldı';
+                final message = l10n.libraryFolderRenamed(newName);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(message),

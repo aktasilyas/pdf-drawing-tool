@@ -7,6 +7,7 @@ import 'package:example_app/features/documents/presentation/providers/documents_
 import 'package:example_app/features/documents/presentation/widgets/folder_tile_art.dart';
 import 'package:example_app/features/documents/presentation/widgets/library_list_row.dart';
 import 'package:example_app/features/documents/presentation/widgets/library_tile_parts.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// List tile for a folder row.
 class FolderListTile extends ConsumerWidget {
@@ -34,7 +35,7 @@ class FolderListTile extends ConsumerWidget {
         ),
       ),
       title: folder.name,
-      meta: LibraryMeta.folder(folder),
+      meta: LibraryMeta.folder(folder, context.l10n),
       onTap: onTap,
       onLongPress: onLongPress,
       isSelected: isSelected,

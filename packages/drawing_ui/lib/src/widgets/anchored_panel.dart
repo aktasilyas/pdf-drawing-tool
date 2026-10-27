@@ -1,3 +1,4 @@
+import 'package:drawing_ui/src/utils/drawing_log.dart';
 import 'package:flutter/material.dart';
 
 /// Alignment hint for anchored panels
@@ -33,7 +34,7 @@ class AnchoredPanelController {
     final renderBox =
         anchorKey.currentContext?.findRenderObject() as RenderBox?;
     if (renderBox == null) {
-      debugPrint('WARNING: Could not find anchor RenderBox');
+      DrawingLog.w('Could not find anchor RenderBox');
       return;
     }
 

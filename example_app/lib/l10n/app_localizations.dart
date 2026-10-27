@@ -920,335 +920,179 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 document will be moved to the trash.} other{{count} documents will be moved to the trash.}}'**
   String libraryTrashDocumentsMessage(int count);
 
-  /// No description provided for @editorToolFountainPen.
+  /// No description provided for @libraryPageCount.
   ///
   /// In en, this message translates to:
-  /// **'Fountain pen'**
-  String get editorToolFountainPen;
+  /// **'{count, plural, =1{1 page} other{{count} pages}}'**
+  String libraryPageCount(int count);
 
-  /// No description provided for @editorToolPencil.
+  /// No description provided for @libraryDocumentCount.
   ///
   /// In en, this message translates to:
-  /// **'Pencil'**
-  String get editorToolPencil;
+  /// **'{count, plural, =1{1 document} other{{count} documents}}'**
+  String libraryDocumentCount(int count);
 
-  /// No description provided for @editorToolHardPencil.
+  /// No description provided for @libraryDaysLeft.
   ///
   /// In en, this message translates to:
-  /// **'Hard pencil'**
-  String get editorToolHardPencil;
+  /// **'{days, plural, =1{1 day} other{{days} days}}'**
+  String libraryDaysLeft(int days);
 
-  /// No description provided for @editorToolBallpointPen.
+  /// No description provided for @libraryRemoveFavoriteBadge.
   ///
   /// In en, this message translates to:
-  /// **'Ballpoint pen'**
-  String get editorToolBallpointPen;
+  /// **'Remove from favorites'**
+  String get libraryRemoveFavoriteBadge;
 
-  /// No description provided for @editorToolGelPen.
+  /// No description provided for @libraryRemoveFromFavorites.
   ///
   /// In en, this message translates to:
-  /// **'Gel pen'**
-  String get editorToolGelPen;
+  /// **'Remove from favorites'**
+  String get libraryRemoveFromFavorites;
 
-  /// No description provided for @editorToolDashedPen.
+  /// No description provided for @libraryAddToFavorites.
   ///
   /// In en, this message translates to:
-  /// **'Dashed pen'**
-  String get editorToolDashedPen;
+  /// **'Add to favorites'**
+  String get libraryAddToFavorites;
 
-  /// No description provided for @editorToolHighlighter.
+  /// No description provided for @libraryMoveToTrash.
   ///
   /// In en, this message translates to:
-  /// **'Highlighter'**
-  String get editorToolHighlighter;
+  /// **'Move to trash'**
+  String get libraryMoveToTrash;
 
-  /// No description provided for @editorToolBrushPen.
+  /// No description provided for @libraryDocumentDuplicated.
   ///
   /// In en, this message translates to:
-  /// **'Brush pen'**
-  String get editorToolBrushPen;
+  /// **'Notebook duplicated'**
+  String get libraryDocumentDuplicated;
 
-  /// No description provided for @editorToolNeonHighlighter.
+  /// No description provided for @libraryDocumentMoved.
   ///
   /// In en, this message translates to:
-  /// **'Neon highlighter'**
-  String get editorToolNeonHighlighter;
+  /// **'Notebook moved'**
+  String get libraryDocumentMoved;
 
-  /// No description provided for @editorToolRulerPen.
+  /// No description provided for @libraryDocumentRestored.
   ///
   /// In en, this message translates to:
-  /// **'Ruler pen'**
-  String get editorToolRulerPen;
+  /// **'Notebook restored'**
+  String get libraryDocumentRestored;
 
-  /// No description provided for @editorToolPixelEraser.
+  /// No description provided for @libraryDeleteDocumentForeverMessage.
   ///
   /// In en, this message translates to:
-  /// **'Eraser'**
-  String get editorToolPixelEraser;
+  /// **'This notebook will be deleted permanently. This can\'t be undone.'**
+  String get libraryDeleteDocumentForeverMessage;
 
-  /// No description provided for @editorToolStrokeEraser.
+  /// No description provided for @libraryDocumentNameLabel.
   ///
   /// In en, this message translates to:
-  /// **'Stroke eraser'**
-  String get editorToolStrokeEraser;
+  /// **'Notebook name'**
+  String get libraryDocumentNameLabel;
 
-  /// No description provided for @editorToolLassoEraser.
+  /// No description provided for @libraryChangeColor.
   ///
   /// In en, this message translates to:
-  /// **'Lasso eraser'**
-  String get editorToolLassoEraser;
+  /// **'Change color'**
+  String get libraryChangeColor;
 
-  /// No description provided for @editorToolShapes.
+  /// No description provided for @libraryFolderMoved.
   ///
   /// In en, this message translates to:
-  /// **'Shapes'**
-  String get editorToolShapes;
+  /// **'Folder moved'**
+  String get libraryFolderMoved;
 
-  /// No description provided for @editorToolText.
+  /// No description provided for @libraryFolderColorChanged.
   ///
   /// In en, this message translates to:
-  /// **'Text'**
-  String get editorToolText;
+  /// **'Folder color changed'**
+  String get libraryFolderColorChanged;
 
-  /// No description provided for @editorToolSticker.
+  /// No description provided for @libraryDeleteFolderTitle.
   ///
   /// In en, this message translates to:
-  /// **'Sticker'**
-  String get editorToolSticker;
+  /// **'Delete folder'**
+  String get libraryDeleteFolderTitle;
 
-  /// No description provided for @editorToolImage.
+  /// No description provided for @libraryDeleteFolderNonEmptyMessage.
   ///
   /// In en, this message translates to:
-  /// **'Image'**
-  String get editorToolImage;
+  /// **'{count, plural, =1{This folder contains 1 document. Deleting the folder also deletes that document. Continue?} other{This folder contains {count} documents. Deleting it also deletes them. Continue?}}'**
+  String libraryDeleteFolderNonEmptyMessage(int count);
 
-  /// No description provided for @editorToolSelection.
+  /// No description provided for @libraryDeleteFolderMessage.
   ///
   /// In en, this message translates to:
-  /// **'Select'**
-  String get editorToolSelection;
+  /// **'Delete this folder?'**
+  String get libraryDeleteFolderMessage;
 
-  /// No description provided for @editorToolPanZoom.
+  /// No description provided for @libraryFolderDeleted.
   ///
   /// In en, this message translates to:
-  /// **'Pan & zoom'**
-  String get editorToolPanZoom;
+  /// **'Folder deleted'**
+  String get libraryFolderDeleted;
 
-  /// No description provided for @editorToolLaserPointer.
+  /// No description provided for @libraryRenameFolderTitle.
   ///
   /// In en, this message translates to:
-  /// **'Laser pointer'**
-  String get editorToolLaserPointer;
+  /// **'Rename folder'**
+  String get libraryRenameFolderTitle;
 
-  /// No description provided for @editorToolStickyNote.
+  /// No description provided for @libraryFolderNameLabel.
   ///
   /// In en, this message translates to:
-  /// **'Sticky note'**
-  String get editorToolStickyNote;
+  /// **'Folder name'**
+  String get libraryFolderNameLabel;
 
-  /// No description provided for @editorToolToolbarSettings.
+  /// No description provided for @libraryFolderRenamed.
   ///
   /// In en, this message translates to:
-  /// **'Toolbar settings'**
-  String get editorToolToolbarSettings;
+  /// **'Folder renamed to \"{name}\"'**
+  String libraryFolderRenamed(String name);
 
-  /// No description provided for @editorToolPenGroup.
+  /// No description provided for @libraryPageNumber.
   ///
   /// In en, this message translates to:
-  /// **'Pen'**
-  String get editorToolPenGroup;
+  /// **'Page {page}'**
+  String libraryPageNumber(int page);
 
-  /// No description provided for @editorToolbarHome.
+  /// No description provided for @libraryTrashedPageTitle.
   ///
   /// In en, this message translates to:
-  /// **'Home'**
-  String get editorToolbarHome;
+  /// **'{document} — Page {page}'**
+  String libraryTrashedPageTitle(String document, int page);
 
-  /// No description provided for @editorToolbarPages.
+  /// No description provided for @librarySourceDocumentMissing.
   ///
   /// In en, this message translates to:
-  /// **'Pages'**
-  String get editorToolbarPages;
+  /// **'The original notebook no longer exists'**
+  String get librarySourceDocumentMissing;
 
-  /// No description provided for @editorToolbarRuler.
+  /// No description provided for @libraryPageRestored.
   ///
   /// In en, this message translates to:
-  /// **'Ruler'**
-  String get editorToolbarRuler;
+  /// **'Page restored'**
+  String get libraryPageRestored;
 
-  /// No description provided for @editorToolbarAudio.
+  /// No description provided for @libraryPageRestoreFailed.
   ///
   /// In en, this message translates to:
-  /// **'Audio recording'**
-  String get editorToolbarAudio;
+  /// **'Couldn\'t restore the page'**
+  String get libraryPageRestoreFailed;
 
-  /// No description provided for @editorToolbarReaderMode.
+  /// No description provided for @libraryDeletePageForeverMessage.
   ///
   /// In en, this message translates to:
-  /// **'Reader mode'**
-  String get editorToolbarReaderMode;
+  /// **'This page will be deleted permanently. This can\'t be undone.'**
+  String get libraryDeletePageForeverMessage;
 
-  /// No description provided for @editorToolbarEditMode.
+  /// No description provided for @libraryCopyTitle.
   ///
   /// In en, this message translates to:
-  /// **'Edit mode'**
-  String get editorToolbarEditMode;
-
-  /// No description provided for @editorToolbarMore.
-  ///
-  /// In en, this message translates to:
-  /// **'More'**
-  String get editorToolbarMore;
-
-  /// No description provided for @editorToolbarLayers.
-  ///
-  /// In en, this message translates to:
-  /// **'Layers'**
-  String get editorToolbarLayers;
-
-  /// No description provided for @editorToolbarAddPage.
-  ///
-  /// In en, this message translates to:
-  /// **'Add page'**
-  String get editorToolbarAddPage;
-
-  /// No description provided for @editorToolbarExport.
-  ///
-  /// In en, this message translates to:
-  /// **'Export'**
-  String get editorToolbarExport;
-
-  /// No description provided for @editorToolbarAi.
-  ///
-  /// In en, this message translates to:
-  /// **'AI assistant'**
-  String get editorToolbarAi;
-
-  /// No description provided for @editorToolbarUntitled.
-  ///
-  /// In en, this message translates to:
-  /// **'Untitled note'**
-  String get editorToolbarUntitled;
-
-  /// No description provided for @editorToolbarMoreColors.
-  ///
-  /// In en, this message translates to:
-  /// **'More colors'**
-  String get editorToolbarMoreColors;
-
-  /// No description provided for @editorToolbarColorSetHighlighter.
-  ///
-  /// In en, this message translates to:
-  /// **'Highlighter'**
-  String get editorToolbarColorSetHighlighter;
-
-  /// No description provided for @editorToolbarColorSetPastel.
-  ///
-  /// In en, this message translates to:
-  /// **'Pastel'**
-  String get editorToolbarColorSetPastel;
-
-  /// No description provided for @editorToolbarSelectedColor.
-  ///
-  /// In en, this message translates to:
-  /// **'Selected color {hex}'**
-  String editorToolbarSelectedColor(String hex);
-
-  /// No description provided for @editorToolbarColor.
-  ///
-  /// In en, this message translates to:
-  /// **'Color {hex}'**
-  String editorToolbarColor(String hex);
-
-  /// No description provided for @editorToolbarThickness.
-  ///
-  /// In en, this message translates to:
-  /// **'Thickness {value}'**
-  String editorToolbarThickness(String value);
-
-  /// No description provided for @editorToolbarMoreTools.
-  ///
-  /// In en, this message translates to:
-  /// **'More tools'**
-  String get editorToolbarMoreTools;
-
-  /// No description provided for @editorToolbarReadOnlyActive.
-  ///
-  /// In en, this message translates to:
-  /// **'Read-only mode on'**
-  String get editorToolbarReadOnlyActive;
-
-  /// No description provided for @editorToolbarReadOnly.
-  ///
-  /// In en, this message translates to:
-  /// **'Read-only'**
-  String get editorToolbarReadOnly;
-
-  /// No description provided for @editorToolbarUndo.
-  ///
-  /// In en, this message translates to:
-  /// **'Undo'**
-  String get editorToolbarUndo;
-
-  /// No description provided for @editorToolbarRedo.
-  ///
-  /// In en, this message translates to:
-  /// **'Redo'**
-  String get editorToolbarRedo;
-
-  /// No description provided for @editorToolbarRecordingInProgress.
-  ///
-  /// In en, this message translates to:
-  /// **'Recording…'**
-  String get editorToolbarRecordingInProgress;
-
-  /// No description provided for @editorToolbarRecord.
-  ///
-  /// In en, this message translates to:
-  /// **'Start recording'**
-  String get editorToolbarRecord;
-
-  /// No description provided for @editorToolbarMicPermissionRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Microphone access is required. Please allow it in Settings.'**
-  String get editorToolbarMicPermissionRequired;
-
-  /// No description provided for @editorToolbarShowRecordings.
-  ///
-  /// In en, this message translates to:
-  /// **'Show recordings'**
-  String get editorToolbarShowRecordings;
-
-  /// No description provided for @editorToolbarSettingsTabTools.
-  ///
-  /// In en, this message translates to:
-  /// **'Tools'**
-  String get editorToolbarSettingsTabTools;
-
-  /// No description provided for @editorToolbarSettingsTabExtraTools.
-  ///
-  /// In en, this message translates to:
-  /// **'Extra tools'**
-  String get editorToolbarSettingsTabExtraTools;
-
-  /// No description provided for @editorToolbarSettingsToolsHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Reorder and hide tools'**
-  String get editorToolbarSettingsToolsHint;
-
-  /// No description provided for @editorToolbarSettingsExtraToolsHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Reorder and hide extra tools'**
-  String get editorToolbarSettingsExtraToolsHint;
-
-  /// No description provided for @editorToolbarSettingsReset.
-  ///
-  /// In en, this message translates to:
-  /// **'Reset to default'**
-  String get editorToolbarSettingsReset;
+  /// **'{title} (copy)'**
+  String libraryCopyTitle(String title);
 }
 
 class _AppLocalizationsDelegate

@@ -499,175 +499,134 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get editorToolFountainPen => 'Fountain pen';
-
-  @override
-  String get editorToolPencil => 'Pencil';
-
-  @override
-  String get editorToolHardPencil => 'Hard pencil';
-
-  @override
-  String get editorToolBallpointPen => 'Ballpoint pen';
-
-  @override
-  String get editorToolGelPen => 'Gel pen';
-
-  @override
-  String get editorToolDashedPen => 'Dashed pen';
-
-  @override
-  String get editorToolHighlighter => 'Highlighter';
-
-  @override
-  String get editorToolBrushPen => 'Brush pen';
-
-  @override
-  String get editorToolNeonHighlighter => 'Neon highlighter';
-
-  @override
-  String get editorToolRulerPen => 'Ruler pen';
-
-  @override
-  String get editorToolPixelEraser => 'Eraser';
-
-  @override
-  String get editorToolStrokeEraser => 'Stroke eraser';
-
-  @override
-  String get editorToolLassoEraser => 'Lasso eraser';
-
-  @override
-  String get editorToolShapes => 'Shapes';
-
-  @override
-  String get editorToolText => 'Text';
-
-  @override
-  String get editorToolSticker => 'Sticker';
-
-  @override
-  String get editorToolImage => 'Image';
-
-  @override
-  String get editorToolSelection => 'Select';
-
-  @override
-  String get editorToolPanZoom => 'Pan & zoom';
-
-  @override
-  String get editorToolLaserPointer => 'Laser pointer';
-
-  @override
-  String get editorToolStickyNote => 'Sticky note';
-
-  @override
-  String get editorToolToolbarSettings => 'Toolbar settings';
-
-  @override
-  String get editorToolPenGroup => 'Pen';
-
-  @override
-  String get editorToolbarHome => 'Home';
-
-  @override
-  String get editorToolbarPages => 'Pages';
-
-  @override
-  String get editorToolbarRuler => 'Ruler';
-
-  @override
-  String get editorToolbarAudio => 'Audio recording';
-
-  @override
-  String get editorToolbarReaderMode => 'Reader mode';
-
-  @override
-  String get editorToolbarEditMode => 'Edit mode';
-
-  @override
-  String get editorToolbarMore => 'More';
-
-  @override
-  String get editorToolbarLayers => 'Layers';
-
-  @override
-  String get editorToolbarAddPage => 'Add page';
-
-  @override
-  String get editorToolbarExport => 'Export';
-
-  @override
-  String get editorToolbarAi => 'AI assistant';
-
-  @override
-  String get editorToolbarUntitled => 'Untitled note';
-
-  @override
-  String get editorToolbarMoreColors => 'More colors';
-
-  @override
-  String get editorToolbarColorSetHighlighter => 'Highlighter';
-
-  @override
-  String get editorToolbarColorSetPastel => 'Pastel';
-
-  @override
-  String editorToolbarSelectedColor(String hex) {
-    return 'Selected color $hex';
+  String libraryPageCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pages',
+      one: '1 page',
+    );
+    return '$_temp0';
   }
 
   @override
-  String editorToolbarColor(String hex) {
-    return 'Color $hex';
+  String libraryDocumentCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count documents',
+      one: '1 document',
+    );
+    return '$_temp0';
   }
 
   @override
-  String editorToolbarThickness(String value) {
-    return 'Thickness $value';
+  String libraryDaysLeft(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days',
+      one: '1 day',
+    );
+    return '$_temp0';
   }
 
   @override
-  String get editorToolbarMoreTools => 'More tools';
+  String get libraryRemoveFavoriteBadge => 'Remove from favorites';
 
   @override
-  String get editorToolbarReadOnlyActive => 'Read-only mode on';
+  String get libraryRemoveFromFavorites => 'Remove from favorites';
 
   @override
-  String get editorToolbarReadOnly => 'Read-only';
+  String get libraryAddToFavorites => 'Add to favorites';
 
   @override
-  String get editorToolbarUndo => 'Undo';
+  String get libraryMoveToTrash => 'Move to trash';
 
   @override
-  String get editorToolbarRedo => 'Redo';
+  String get libraryDocumentDuplicated => 'Notebook duplicated';
 
   @override
-  String get editorToolbarRecordingInProgress => 'Recording…';
+  String get libraryDocumentMoved => 'Notebook moved';
 
   @override
-  String get editorToolbarRecord => 'Start recording';
+  String get libraryDocumentRestored => 'Notebook restored';
 
   @override
-  String get editorToolbarMicPermissionRequired =>
-      'Microphone access is required. Please allow it in Settings.';
+  String get libraryDeleteDocumentForeverMessage =>
+      'This notebook will be deleted permanently. This can\'t be undone.';
 
   @override
-  String get editorToolbarShowRecordings => 'Show recordings';
+  String get libraryDocumentNameLabel => 'Notebook name';
 
   @override
-  String get editorToolbarSettingsTabTools => 'Tools';
+  String get libraryChangeColor => 'Change color';
 
   @override
-  String get editorToolbarSettingsTabExtraTools => 'Extra tools';
+  String get libraryFolderMoved => 'Folder moved';
 
   @override
-  String get editorToolbarSettingsToolsHint => 'Reorder and hide tools';
+  String get libraryFolderColorChanged => 'Folder color changed';
 
   @override
-  String get editorToolbarSettingsExtraToolsHint =>
-      'Reorder and hide extra tools';
+  String get libraryDeleteFolderTitle => 'Delete folder';
 
   @override
-  String get editorToolbarSettingsReset => 'Reset to default';
+  String libraryDeleteFolderNonEmptyMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'This folder contains $count documents. Deleting it also deletes them. Continue?',
+      one:
+          'This folder contains 1 document. Deleting the folder also deletes that document. Continue?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get libraryDeleteFolderMessage => 'Delete this folder?';
+
+  @override
+  String get libraryFolderDeleted => 'Folder deleted';
+
+  @override
+  String get libraryRenameFolderTitle => 'Rename folder';
+
+  @override
+  String get libraryFolderNameLabel => 'Folder name';
+
+  @override
+  String libraryFolderRenamed(String name) {
+    return 'Folder renamed to \"$name\"';
+  }
+
+  @override
+  String libraryPageNumber(int page) {
+    return 'Page $page';
+  }
+
+  @override
+  String libraryTrashedPageTitle(String document, int page) {
+    return '$document — Page $page';
+  }
+
+  @override
+  String get librarySourceDocumentMissing =>
+      'The original notebook no longer exists';
+
+  @override
+  String get libraryPageRestored => 'Page restored';
+
+  @override
+  String get libraryPageRestoreFailed => 'Couldn\'t restore the page';
+
+  @override
+  String get libraryDeletePageForeverMessage =>
+      'This page will be deleted permanently. This can\'t be undone.';
+
+  @override
+  String libraryCopyTitle(String title) {
+    return '$title (copy)';
+  }
 }

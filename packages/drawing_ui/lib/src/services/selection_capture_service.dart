@@ -7,6 +7,7 @@ import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
 import 'package:pasteboard/pasteboard.dart';
 
 import 'package:drawing_ui/src/canvas/image_painter.dart';
+import 'package:drawing_ui/src/utils/drawing_log.dart';
 import 'package:drawing_ui/src/canvas/page_background_raster.dart';
 import 'package:drawing_ui/src/rendering/element_scene_renderer.dart';
 import 'package:drawing_ui/src/rendering/flutter_stroke_renderer.dart';
@@ -55,7 +56,8 @@ class SelectionCaptureService {
       } finally {
         image.dispose();
       }
-    } catch (_) {
+    } catch (e) {
+      DrawingLog.e('SelectionCaptureService: captureSelection failed: $e');
       // Callers report a null result to the user.
       return null;
     }
@@ -67,8 +69,8 @@ class SelectionCaptureService {
   /// The page [background] (white when null) is drawn behind the selected
   /// strokes, shapes, images and texts; unselected elements are left out. A
   /// lasso selection clips to its path, any other to the padded bounds. For a
-  /// PDF page, [pdfImageBytes] is the encoded page image. The caller disposes
-  /// the result.
+  /// PDF page, [pdfImageBytes] is the encoded page image. Returns null for an
+  /// empty selection with no area. The caller disposes the result.
   static Future<ui.Image?> renderSelection({
     required Selection selection,
     required Layer layer,
@@ -79,6 +81,10 @@ class SelectionCaptureService {
     double padding = 16.0,
   }) async {
     final bounds = selection.bounds;
+    // Nothing selected and no area: nothing to capture (Selection.empty()).
+    if (selection.isEmpty && (bounds.width <= 0 || bounds.height <= 0)) {
+      return null;
+    }
     final padded = Rect.fromLTRB(
       bounds.left - padding,
       bounds.top - padding,
@@ -145,7 +151,8 @@ class SelectionCaptureService {
         return result['isSuccess'] == true;
       }
       return result != null;
-    } catch (_) {
+    } catch (e) {
+      DrawingLog.e('SelectionCaptureService: saveToGallery failed: $e');
       return false;
     }
   }
@@ -155,7 +162,8 @@ class SelectionCaptureService {
     try {
       await Pasteboard.writeImage(bytes);
       return true;
-    } catch (_) {
+    } catch (e) {
+      DrawingLog.e('SelectionCaptureService: copyToClipboard failed: $e');
       return false;
     }
   }
@@ -212,7 +220,8 @@ class SelectionCaptureService {
     try {
       final codec = await ui.instantiateImageCodec(bytes);
       return (await codec.getNextFrame()).image;
-    } catch (_) {
+    } catch (e) {
+      DrawingLog.e('SelectionCaptureService: decode PDF image failed: $e');
       return null;
     }
   }

@@ -1,5 +1,4 @@
 /// Export options panel shown as a popover below the export toolbar button.
-import 'dart:developer' as developer;
 import 'dart:io';
 
 import 'package:drawing_core/drawing_core.dart'
@@ -9,22 +8,48 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Page;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/src/panels/export_file_name.dart';
+import 'package:drawing_ui/src/panels/export_options.dart';
+import 'package:drawing_ui/src/panels/export_options_section.dart';
+import 'package:drawing_ui/src/panels/export_strings.dart';
 import 'package:drawing_ui/src/panels/page_options_widgets.dart';
 import 'package:drawing_ui/src/panels/png_export_action.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
+import 'package:drawing_ui/src/services/export_errors.dart';
 import 'package:drawing_ui/src/services/pdf_exporter.dart';
 import 'package:drawing_ui/src/services/pdf_share_service.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
+import 'package:drawing_ui/src/utils/drawing_log.dart';
 
 /// Export panel with PDF and PNG export options.
-class ExportPanel extends ConsumerWidget {
-  const ExportPanel({super.key, required this.onClose, this.embedded = false});
+class ExportPanel extends ConsumerStatefulWidget {
+  const ExportPanel({
+    super.key,
+    required this.onClose,
+    this.embedded = false,
+    this.initialOptions = const ExportOptions(),
+  });
 
   final VoidCallback onClose;
   final bool embedded;
 
+  /// Options the panel opens with (goldens render the range state).
+  @visibleForTesting
+  final ExportOptions initialOptions;
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ExportPanel> createState() => _ExportPanelState();
+}
+
+class _ExportPanelState extends ConsumerState<ExportPanel> {
+  late ExportOptions _options = widget.initialOptions;
+
+  VoidCallback get onClose => widget.onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final embedded = widget.embedded;
+    final pageCount = ref.watch(pageCountProvider);
+    final valid = _options.isValid(pageCount);
     final cs = Theme.of(context).colorScheme;
     final isInfinite = ref.watch(isInfiniteCanvasProvider);
 
@@ -32,23 +57,29 @@ class ExportPanel extends ConsumerWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         _PanelHeader(cs: cs),
+        if (!isInfinite)
+          ExportOptionsSection(
+            options: _options,
+            pageCount: pageCount,
+            onChanged: (o) => setState(() => _options = o),
+          ),
         if (isInfinite)
           PageOptionsMenuItem(
             icon: ElyanotesIcons.image,
-            label: 'PNG Olarak Dışa Aktar',
+            label: ExportStrings.exportPng,
             onTap: () => _exportPNG(context, ref),
           )
         else
           PageOptionsMenuItem(
             icon: ElyanotesIcons.pdfFile,
-            label: 'PDF Olarak Dışa Aktar',
-            onTap: () => _exportPDF(context, ref),
+            label: ExportStrings.exportPdf,
+            onTap: valid ? () => _exportPDF(context, ref) : null,
           ),
         if (!isInfinite)
           PageOptionsMenuItem(
             icon: ElyanotesIcons.share,
-            label: 'PDF Paylaş',
-            onTap: () => _exportPDF(context, ref, share: true),
+            label: ExportStrings.sharePdf,
+            onTap: valid ? () => _exportPDF(context, ref, share: true) : null,
           ),
       ],
     );
@@ -69,7 +100,15 @@ class ExportPanel extends ConsumerWidget {
     final notifier = ref.read(exportProgressProvider.notifier);
     final watermark = ref.read(exportWatermarkProvider);
     final runner = ref.read(pdfExportRunnerProvider);
-    runner.run(notifier, document, addWatermark: watermark, share: share);
+    final currentIndex = ref.read(currentPageIndexProvider);
+    runner.run(
+      notifier,
+      document,
+      addWatermark: watermark,
+      share: share,
+      options: _options,
+      currentPageIndex: currentIndex,
+    );
   }
 
   /// Renders the current page off-screen and saves it as PNG.
@@ -95,10 +134,14 @@ class PDFExportRunner {
     DrawingDocument document, {
     bool addWatermark = false,
     bool share = false,
+    ExportOptions options = const ExportOptions(),
+    int currentPageIndex = 0,
   }) {
     return performPDFExport(
       progress,
       document,
+      options: options,
+      currentPageIndex: currentPageIndex,
       addWatermark: addWatermark,
       share: share,
       shareService: shareService,
@@ -124,18 +167,23 @@ Future<void> performPDFExport(
   bool isInfiniteCanvas = false,
   bool addWatermark = false,
   bool share = false,
+  ExportOptions options = const ExportOptions(),
+  int currentPageIndex = 0,
   PdfShareService shareService = const PdfShareService(),
   PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
+  @visibleForTesting PDFExporter? exporter,
 }) {
   return performPagesPDFExport(
     progress,
-    pages: document.pages,
+    pages: options.select(document.pages, currentPageIndex),
+    includeBackground: options.includeTemplate,
     title: document.title,
     isInfiniteCanvas: isInfiniteCanvas,
     addWatermark: addWatermark,
     share: share,
     shareService: shareService,
     pdfPaths: pdfPaths,
+    exporter: exporter,
   );
 }
 
@@ -150,19 +198,22 @@ Future<void> performPagesPDFExport(
   bool isInfiniteCanvas = false,
   bool addWatermark = false,
   bool share = false,
+  bool includeBackground = true,
   PdfShareService shareService = const PdfShareService(),
   PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
+  @visibleForTesting PDFExporter? exporter,
 }) async {
   progress.start(pages.length);
 
   try {
-    final exporter = PDFExporter(pdfPaths: pdfPaths);
+    exporter ??= PDFExporter(pdfPaths: pdfPaths);
     final result = await exporter.exportPages(
       pages: pages,
       metadata: PDFDocumentMetadata(title: title),
       options: PDFExportOptions(
         isInfiniteCanvas: isInfiniteCanvas,
         addWatermark: addWatermark,
+        includeBackground: includeBackground,
       ),
       onProgress: progress.updateProgress,
       isCancelled: () => progress.isCancelRequested,
@@ -174,7 +225,7 @@ Future<void> performPagesPDFExport(
     }
 
     if (!result.isSuccess) {
-      progress.setError(result.errorMessage ?? 'PDF oluşturulamadı');
+      progress.setError(result.errorMessage ?? exportFailedMessage);
       return;
     }
 
@@ -215,12 +266,10 @@ Future<void> performPagesPDFExport(
       progress.dismiss();
     }
   } catch (e) {
-    developer.log('PDF export failed', name: _logName, error: e);
-    progress.setError('PDF dışa aktarılamadı: $e');
+    DrawingLog.e('PDF export failed', e);
+    progress.setError(friendlyExportError(e));
   }
 }
-
-const _logName = 'drawing_ui.export';
 
 class _PanelHeader extends StatelessWidget {
   const _PanelHeader({required this.cs});
@@ -238,7 +287,7 @@ class _PanelHeader extends StatelessWidget {
       ),
       child: Align(
         alignment: Alignment.centerLeft,
-        child: Text('Dışa Aktar',
+        child: Text(ExportStrings.title,
             style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,

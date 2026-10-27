@@ -1,8 +1,8 @@
+import 'package:drawing_ui/src/utils/drawing_log.dart';
 import 'dart:io';
 import 'dart:math' show Random;
 
 import 'package:drawing_core/drawing_core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdfx/pdfx.dart';
 
@@ -106,7 +106,7 @@ Future<List<Page>> buildLazyPdfPages(
 
       pages.add(page);
     } catch (e) {
-      debugPrint('Warning: Could not load PDF page $pageNumber: $e');
+      DrawingLog.w('Could not load PDF page $pageNumber: $e');
       // Skip the broken page and continue.
     } finally {
       try {
