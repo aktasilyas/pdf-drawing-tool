@@ -9,6 +9,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/src/panels/export_file_name.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
+import 'package:drawing_ui/src/services/export_errors.dart';
 import 'package:drawing_ui/src/services/page_png_exporter.dart';
 import 'package:drawing_ui/src/utils/drawing_log.dart';
 
@@ -78,6 +79,6 @@ Future<void> performPNGExport(
     }
   } catch (e) {
     DrawingLog.e('PNG export failed', e);
-    progress.setError('PNG dışa aktarılamadı: $e');
+    progress.setError(friendlyExportError(e));
   }
 }

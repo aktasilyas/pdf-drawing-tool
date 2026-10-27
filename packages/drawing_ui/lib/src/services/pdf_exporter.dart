@@ -4,6 +4,9 @@ import 'dart:ui' as ui;
 import 'package:drawing_core/drawing_core.dart';
 import 'package:pdf/pdf.dart';
 
+import 'package:drawing_ui/src/utils/drawing_log.dart';
+
+import 'export_errors.dart';
 import 'pdf_background_rasterizer.dart';
 import 'pdf_compressed_image.dart';
 import 'pdf_content_painter.dart';
@@ -64,7 +67,8 @@ class PDFExporter {
       final bytes = await doc.save();
       return PDFExportResult.success(bytes);
     } catch (e) {
-      return PDFExportResult.error(e.toString());
+      DrawingLog.e('PDF export failed', e);
+      return PDFExportResult.error(friendlyExportError(e));
     }
   }
 

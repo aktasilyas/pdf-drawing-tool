@@ -14,6 +14,7 @@ import 'package:drawing_ui/src/panels/export_strings.dart';
 import 'package:drawing_ui/src/panels/page_options_widgets.dart';
 import 'package:drawing_ui/src/panels/png_export_action.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
+import 'package:drawing_ui/src/services/export_errors.dart';
 import 'package:drawing_ui/src/services/pdf_exporter.dart';
 import 'package:drawing_ui/src/services/pdf_share_service.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
@@ -224,7 +225,7 @@ Future<void> performPagesPDFExport(
     }
 
     if (!result.isSuccess) {
-      progress.setError(result.errorMessage ?? 'PDF oluşturulamadı');
+      progress.setError(result.errorMessage ?? exportFailedMessage);
       return;
     }
 
@@ -266,7 +267,7 @@ Future<void> performPagesPDFExport(
     }
   } catch (e) {
     DrawingLog.e('PDF export failed', e);
-    progress.setError('PDF dışa aktarılamadı: $e');
+    progress.setError(friendlyExportError(e));
   }
 }
 
