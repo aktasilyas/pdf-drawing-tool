@@ -7,23 +7,29 @@ void main() {
   final navigated = <int>[];
   var reverted = 0;
 
-  Future<void> pump(WidgetTester t,
-      {bool preSwitch = false, Widget? addPreview, bool fwd = true}) async {
-    await t.pumpWidget(MaterialApp(
-      home: SizedBox(
-        width: 400,
-        height: 600,
-        child: PageSlideTransition(
-          key: key,
-          canSwipeForward: fwd,
-          addPagePreview: addPreview,
-          onSwipeNavigate: navigated.add,
-          onDragDirectionDetermined: (_) => preSwitch,
-          onDragReverted: () => reverted++,
-          child: const ColoredBox(color: Colors.white),
+  Future<void> pump(
+    WidgetTester t, {
+    bool preSwitch = false,
+    Widget? addPreview,
+    bool fwd = true,
+  }) async {
+    await t.pumpWidget(
+      MaterialApp(
+        home: SizedBox(
+          width: 400,
+          height: 600,
+          child: PageSlideTransition(
+            key: key,
+            canSwipeForward: fwd,
+            addPagePreview: addPreview,
+            onSwipeNavigate: navigated.add,
+            onDragDirectionDetermined: (_) => preSwitch,
+            onDragReverted: () => reverted++,
+            child: const ColoredBox(color: Colors.white),
+          ),
         ),
       ),
-    ));
+    );
   }
 
   Future<void> drag(WidgetTester t, double dx, double velocity) async {
@@ -53,6 +59,28 @@ void main() {
     await pump(t);
     await drag(t, -30, 0);
     expect(navigated, isEmpty);
+    expect(reverted, 0);
+  });
+
+  testWidgets('forward drag with canSwipeForward:false does not navigate', (
+    t,
+  ) async {
+    await pump(t, fwd: false);
+    await drag(t, -250, 0);
+    expect(navigated, isEmpty);
+    expect(reverted, 0);
+  });
+
+  testWidgets('add-page preview is absent during backward drag', (t) async {
+    await pump(t, addPreview: const Text('add page'));
+    final s = key.currentState!;
+    await t.runAsync(s.beginDrag);
+    await t.pump();
+    s.updateDrag(100);
+    await t.pump();
+    expect(find.text('add page'), findsNothing);
+    s.endDrag(0);
+    await t.pumpAndSettle();
   });
 
   testWidgets('short pre-switched drag calls onDragReverted', (t) async {
