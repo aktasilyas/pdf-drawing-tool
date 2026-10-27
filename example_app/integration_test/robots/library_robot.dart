@@ -5,6 +5,7 @@ import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/documents/presentation/widgets/library_tile_parts.dart';
 import 'package:example_app/features/documents/presentation/widgets/manage_folder_list_item.dart';
 import 'package:example_app/features/documents/presentation/widgets/sidebar_item.dart';
+import 'package:example_app/features/documents/presentation/widgets/template_preview_section.dart';
 
 import '../helpers/pump_helpers.dart';
 
@@ -71,7 +72,10 @@ class LibraryRobot {
 
   /// New (+) button > "Not Defteri" > template screen: set the title, then
   /// "Olustur". The app opens the new notebook in the editor.
-  Future<void> createNotebook(String title) async {
+  ///
+  /// With [cover] false the "Kapak" switch is turned off, so the notebook
+  /// starts with a single writable page instead of cover + page.
+  Future<void> createNotebook(String title, {bool cover = true}) async {
     await tester.tapAndWait(_newButton);
     await tester.tapAndWait(find.text('Not Defteri'));
     await tester.pumpUntilFound(find.text('Yeni not olustur'));
@@ -82,6 +86,14 @@ class LibraryRobot {
     await tester.pumpUntilFound(field);
     await tester.enterText(field.first, title);
     await tester.pumpFor(const Duration(milliseconds: 300));
+    if (!cover) {
+      final coverSwitch = find.descendant(
+        of: find.byType(TemplatePreviewSection),
+        matching: find.byType(Switch),
+      ).first;
+      await tester.ensureVisible(coverSwitch);
+      await tester.tapAndWait(coverSwitch);
+    }
     await tester.tapAndWait(find.text('Olustur'));
   }
 
