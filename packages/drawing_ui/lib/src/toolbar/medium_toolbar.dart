@@ -9,6 +9,7 @@ import 'package:drawing_ui/src/toolbar/tool_button.dart';
 import 'package:drawing_ui/src/toolbar/tool_groups.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_logic.dart';
 import 'package:drawing_ui/src/toolbar/elyanotes_nav_button.dart';
+import 'package:drawing_ui/src/toolbar/toolbar_nav_left.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_nav_sections.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_overflow_menu.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_widgets.dart';
