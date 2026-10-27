@@ -104,4 +104,3 @@ class ShapesSettingsNotifier extends StateNotifier<ShapesSettingsState> {
     state = state.copyWith(fillColor: color);
   }
 }
-

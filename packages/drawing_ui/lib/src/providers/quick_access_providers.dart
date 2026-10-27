@@ -21,4 +21,3 @@ final quickColorsProvider = StateProvider<List<Color>>((ref) {
 final quickThicknessProvider = StateProvider<List<double>>((ref) {
   return const [1.0, 2.5, 5.0];
 });
-

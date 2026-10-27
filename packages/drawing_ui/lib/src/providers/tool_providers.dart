@@ -48,4 +48,3 @@ final previousToolProvider = StateProvider<ToolType?>((ref) => null);
 final activePanelProvider = StateProvider<ToolType?>((ref) {
   return null;
 });
-

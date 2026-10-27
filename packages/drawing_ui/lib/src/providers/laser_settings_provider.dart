@@ -179,4 +179,3 @@ class LaserSettingsNotifier extends StateNotifier<LaserSettings> {
     _save();
   }
 }
-
