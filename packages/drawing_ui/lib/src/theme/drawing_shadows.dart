@@ -66,7 +66,7 @@ abstract class DrawingShadows {
 
   /// Floating element shadow — floating_pen_box, floating_undo_redo,
   /// floating_recording_bar, floating_export_progress,
-  /// floating_quick_colors, page_navigator, text_style_popup,
+  /// page_navigator, text_style_popup,
   /// paste_context_menu, ruler_overlay.
   static List<BoxShadow> floating(Brightness brightness) {
     if (brightness == Brightness.light) {
@@ -93,7 +93,7 @@ abstract class DrawingShadows {
     ];
   }
 
-  /// Selection highlight shadow — color_chip selected, pen_preset_slot.
+  /// Selection highlight shadow — color_chip selected.
   static List<BoxShadow> selection(
     Brightness brightness, [
     Color? tintColor,
