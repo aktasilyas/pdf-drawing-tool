@@ -106,7 +106,7 @@ Future<List<Page>> buildLazyPdfPages(
 
       pages.add(page);
     } catch (e) {
-      DrawingLog.w('Warning: Could not load PDF page $pageNumber: $e');
+      DrawingLog.w('Could not load PDF page $pageNumber: $e');
       // Skip the broken page and continue.
     } finally {
       try {

@@ -223,7 +223,7 @@ class PDFPageRenderer {
 
       return pageImage?.bytes;
     } catch (e) {
-      DrawingLog.e('ERROR: PDF render error - $e');
+      DrawingLog.e('PDF render error - $e');
       return null;
     }
   }

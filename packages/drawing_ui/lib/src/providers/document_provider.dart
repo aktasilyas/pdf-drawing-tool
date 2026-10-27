@@ -157,7 +157,7 @@ class DocumentNotifier extends StateNotifier<DrawingDocument> {
     final pageIndex = pages.indexWhere((p) => p.id == pageId);
 
     if (pageIndex == -1) {
-      DrawingLog.w('WARNING: Page not found: $pageId');
+      DrawingLog.w('Page not found: $pageId');
       return;
     }
 

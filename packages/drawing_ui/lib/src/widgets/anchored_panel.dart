@@ -34,7 +34,7 @@ class AnchoredPanelController {
     final renderBox =
         anchorKey.currentContext?.findRenderObject() as RenderBox?;
     if (renderBox == null) {
-      DrawingLog.w('WARNING: Could not find anchor RenderBox');
+      DrawingLog.w('Could not find anchor RenderBox');
       return;
     }
 

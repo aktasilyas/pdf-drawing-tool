@@ -55,7 +55,7 @@ class AnchorPositionCalculator {
         anchorKey.currentContext?.findRenderObject() as RenderBox?;
 
     if (renderBox == null) {
-      DrawingLog.w('WARNING: Anchor renderBox is null');
+      DrawingLog.w('Anchor renderBox is null');
       return null;
     }
 

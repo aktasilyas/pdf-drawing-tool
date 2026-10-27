@@ -1,5 +1,4 @@
 /// Export options panel shown as a popover below the export toolbar button.
-import 'dart:developer' as developer;
 import 'dart:io';
 
 import 'package:drawing_core/drawing_core.dart'
@@ -15,6 +14,7 @@ import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/services/pdf_exporter.dart';
 import 'package:drawing_ui/src/services/pdf_share_service.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
+import 'package:drawing_ui/src/utils/drawing_log.dart';
 
 /// Export panel with PDF and PNG export options.
 class ExportPanel extends ConsumerWidget {
@@ -215,12 +215,10 @@ Future<void> performPagesPDFExport(
       progress.dismiss();
     }
   } catch (e) {
-    developer.log('PDF export failed', name: _logName, error: e);
+    DrawingLog.e('PDF export failed', e);
     progress.setError('PDF dışa aktarılamadı: $e');
   }
 }
-
-const _logName = 'drawing_ui.export';
 
 class _PanelHeader extends StatelessWidget {
   const _PanelHeader({required this.cs});
