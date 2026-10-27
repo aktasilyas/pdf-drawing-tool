@@ -2,6 +2,7 @@ import 'package:test/test.dart';
 import 'package:drawing_core/drawing_core.dart';
 
 void main() {
+  lassoPrefilterTests();
   group('LassoSelectionTool', () {
     late LassoSelectionTool tool;
 
@@ -285,6 +286,82 @@ void main() {
       test('returns lasso type', () {
         expect(tool.selectionType, equals(SelectionType.lasso));
       });
+    });
+  });
+}
+
+DrawingPoint _pt(double x, double y) => DrawingPoint(x: x, y: y);
+
+Stroke _stroke(String id, List<DrawingPoint> pts) => Stroke(
+    id: id, points: pts, style: StrokeStyle.pen(), createdAt: DateTime(2024));
+
+LassoSelectionTool _lasso(List<DrawingPoint> path) {
+  final t = LassoSelectionTool()..startSelection(path.first);
+  path.skip(1).forEach(t.updateSelection);
+  return t;
+}
+
+void lassoPrefilterTests() {
+  group('LassoSelectionTool bbox prefilter', () {
+    final square = [_pt(0, 0), _pt(100, 0), _pt(100, 100), _pt(0, 100)];
+
+    test('bbox overlaps lasso but no point inside -> not selected', () {
+      // L-shaped lasso; stroke sits in the notch with points outside.
+      final l = [
+        _pt(0, 0),
+        _pt(100, 0),
+        _pt(100, 30),
+        _pt(30, 30),
+        _pt(30, 100),
+        _pt(0, 100)
+      ];
+      final s = _stroke('s', [_pt(60, 60), _pt(90, 90)]);
+      final sel = _lasso(l).endSelection([s]);
+      expect(sel!.selectedStrokeIds, isEmpty);
+    });
+
+    test('stroke with one point inside is selected', () {
+      final s = _stroke('s', [_pt(50, 50), _pt(500, 500)]);
+      expect(_lasso(square).endSelection([s])!.selectedStrokeIds, ['s']);
+    });
+
+    test('line endpoint inside selects the shape', () {
+      final line = Shape.create(
+        type: ShapeType.line,
+        startPoint: _pt(50, 50),
+        endPoint: _pt(500, 500),
+        style: StrokeStyle.pen(),
+      );
+      expect(
+          _lasso(square).endSelection([], [line])!.selectedShapeIds, [line.id]);
+    });
+
+    test('stroke bounds are cached and do not affect equality', () {
+      final a = _stroke('s', [_pt(1, 2), _pt(3, 4)]);
+      final b = _stroke('s', [_pt(1, 2), _pt(3, 4)]);
+      expect(identical(a.bounds, a.bounds), isTrue);
+      expect(a, equals(b));
+      expect(a.hashCode, b.hashCode);
+      expect(a.addPoint(_pt(10, 10)).bounds!.right, 10);
+    });
+
+    test('2000 strokes x 200 points, lasso encloses 10, is fast', () {
+      final strokes = <Stroke>[];
+      for (var i = 0; i < 2000; i++) {
+        final ox = (i % 50) * 200.0 + 1000;
+        final oy = (i ~/ 50) * 200.0 + 1000;
+        strokes.add(_stroke('s$i',
+            [for (var k = 0; k < 200; k++) _pt(ox + k % 100, oy + k % 50)]));
+      }
+      for (var i = 0; i < 10; i++) {
+        strokes[i] = _stroke('in$i',
+            [for (var k = 0; k < 200; k++) _pt(10.0 + i, 10.0 + k % 50)]);
+      }
+      final sw = Stopwatch()..start();
+      final sel = _lasso(square).endSelection(strokes);
+      sw.stop();
+      expect(sel!.selectedStrokeIds.length, 10);
+      expect(sw.elapsedMilliseconds, lessThan(100));
     });
   });
 }

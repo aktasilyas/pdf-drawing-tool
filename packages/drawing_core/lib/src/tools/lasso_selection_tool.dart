@@ -1,11 +1,11 @@
 import 'dart:math';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_core/src/tools/lasso_geometry.dart';
 
 /// Lasso (free-form) selection tool.
 ///
-/// Allows users to draw a free-form path to select strokes and shapes.
-/// Uses ray casting algorithm for point-in-polygon testing.
-///
+/// Draw a free-form path to select strokes and shapes.
+/// Point-in-polygon maths lives in `LassoGeometry`.
 /// A stroke is considered selected if any of its points
 /// fall within the lasso polygon.
 /// A shape is considered selected if its center point
@@ -43,7 +43,6 @@ class LassoSelectionTool implements SelectionTool {
     }
 
     _isSelecting = false;
-
     // Close the path by adding first point at end
     final closedPath = List<DrawingPoint>.from(_path);
     if (closedPath.isNotEmpty && closedPath.first != closedPath.last) {
@@ -51,7 +50,7 @@ class LassoSelectionTool implements SelectionTool {
     }
 
     // Minimum size check - prevent accidental tiny selections (e.g. taps)
-    final pathBounds = _calculateLassoPathBounds(closedPath);
+    final pathBounds = LassoGeometry.pathBounds(closedPath);
     if (pathBounds.width < 20 || pathBounds.height < 20) {
       _path.clear();
       return null;
@@ -86,7 +85,7 @@ class LassoSelectionTool implements SelectionTool {
             texts,
             selectedTextIds,
           )
-        : _calculateLassoPathBounds(closedPath);
+        : LassoGeometry.pathBounds(closedPath);
 
     final selection = Selection.create(
       type: SelectionType.lasso,
@@ -120,8 +119,14 @@ class LassoSelectionTool implements SelectionTool {
     List<DrawingPoint> polygon,
   ) {
     final selectedIds = <String>[];
+    final lassoBounds = LassoGeometry.pathBounds(polygon);
 
     for (final stroke in strokes) {
+      final bounds = stroke.bounds;
+      if (bounds == null ||
+          !LassoGeometry.boundsIntersect(bounds, lassoBounds)) {
+        continue;
+      }
       if (_isStrokeInLasso(stroke, polygon)) {
         selectedIds.add(stroke.id);
       }
@@ -136,11 +141,13 @@ class LassoSelectionTool implements SelectionTool {
     List<DrawingPoint> polygon,
   ) {
     final selectedIds = <String>[];
+    final lassoBounds = LassoGeometry.pathBounds(polygon);
     for (final text in texts) {
       final bounds = text.bounds;
+      if (!LassoGeometry.boundsIntersect(bounds, lassoBounds)) continue;
       final cx = (bounds.left + bounds.right) / 2;
       final cy = (bounds.top + bounds.bottom) / 2;
-      if (_isPointInPolygon(cx, cy, polygon)) {
+      if (LassoGeometry.isPointInPolygon(cx, cy, polygon)) {
         selectedIds.add(text.id);
       }
     }
@@ -153,10 +160,12 @@ class LassoSelectionTool implements SelectionTool {
     List<DrawingPoint> polygon,
   ) {
     final selectedIds = <String>[];
+    final lassoBounds = LassoGeometry.pathBounds(polygon);
     for (final image in images) {
+      if (!LassoGeometry.boundsIntersect(image.bounds, lassoBounds)) continue;
       final cx = image.x + image.width / 2;
       final cy = image.y + image.height / 2;
-      if (_isPointInPolygon(cx, cy, polygon)) {
+      if (LassoGeometry.isPointInPolygon(cx, cy, polygon)) {
         selectedIds.add(image.id);
       }
     }
@@ -169,8 +178,10 @@ class LassoSelectionTool implements SelectionTool {
     List<DrawingPoint> polygon,
   ) {
     final selectedIds = <String>[];
+    final lassoBounds = LassoGeometry.pathBounds(polygon);
 
     for (final shape in shapes) {
+      if (!LassoGeometry.boundsIntersect(shape.bounds, lassoBounds)) continue;
       if (_isShapeInLasso(shape, polygon)) {
         selectedIds.add(shape.id);
       }
@@ -182,7 +193,7 @@ class LassoSelectionTool implements SelectionTool {
   /// Checks if a stroke has any point inside the lasso polygon.
   bool _isStrokeInLasso(Stroke stroke, List<DrawingPoint> polygon) {
     for (final point in stroke.points) {
-      if (_isPointInPolygon(point.x, point.y, polygon)) {
+      if (LassoGeometry.isPointInPolygon(point.x, point.y, polygon)) {
         return true;
       }
     }
@@ -192,46 +203,19 @@ class LassoSelectionTool implements SelectionTool {
   /// Checks if a shape's center is inside the lasso polygon.
   bool _isShapeInLasso(Shape shape, List<DrawingPoint> polygon) {
     // Check center point
-    if (_isPointInPolygon(shape.centerX, shape.centerY, polygon)) {
+    if (LassoGeometry.isPointInPolygon(shape.centerX, shape.centerY, polygon)) {
       return true;
     }
     // Also check start and end points for lines/arrows
     if (shape.type == ShapeType.line || shape.type == ShapeType.arrow) {
-      if (_isPointInPolygon(shape.startPoint.x, shape.startPoint.y, polygon) ||
-          _isPointInPolygon(shape.endPoint.x, shape.endPoint.y, polygon)) {
+      if (LassoGeometry.isPointInPolygon(
+              shape.startPoint.x, shape.startPoint.y, polygon) ||
+          LassoGeometry.isPointInPolygon(
+              shape.endPoint.x, shape.endPoint.y, polygon)) {
         return true;
       }
     }
     return false;
-  }
-
-  /// Ray casting algorithm for point-in-polygon test.
-  ///
-  /// Casts a ray from the point to infinity and counts
-  /// how many times it crosses the polygon edges.
-  /// If odd, the point is inside; if even, outside.
-  bool _isPointInPolygon(double x, double y, List<DrawingPoint> polygon) {
-    if (polygon.length < 3) return false;
-
-    bool inside = false;
-    int j = polygon.length - 1;
-
-    for (int i = 0; i < polygon.length; i++) {
-      final xi = polygon[i].x;
-      final yi = polygon[i].y;
-      final xj = polygon[j].x;
-      final yj = polygon[j].y;
-
-      // Check if the ray crosses this edge
-      if (((yi > y) != (yj > y)) &&
-          (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
-        inside = !inside;
-      }
-
-      j = i;
-    }
-
-    return inside;
   }
 
   /// Calculates the bounding box of selected strokes, shapes, images, and texts.
@@ -245,6 +229,11 @@ class LassoSelectionTool implements SelectionTool {
     List<TextElement> texts = const [],
     List<String> selectedTextIds = const [],
   ]) {
+    final strokeIds = selectedStrokeIds.toSet();
+    final shapeIds = selectedShapeIds.toSet();
+    final imageIds = selectedImageIds.toSet();
+    final textIds = selectedTextIds.toSet();
+
     double minX = double.infinity;
     double minY = double.infinity;
     double maxX = double.negativeInfinity;
@@ -252,7 +241,7 @@ class LassoSelectionTool implements SelectionTool {
 
     // Add stroke bounds
     for (final stroke in strokes) {
-      if (!selectedStrokeIds.contains(stroke.id)) continue;
+      if (!strokeIds.contains(stroke.id)) continue;
 
       final bounds = stroke.bounds;
       if (bounds == null) continue;
@@ -265,7 +254,7 @@ class LassoSelectionTool implements SelectionTool {
 
     // Add shape bounds
     for (final shape in shapes) {
-      if (!selectedShapeIds.contains(shape.id)) continue;
+      if (!shapeIds.contains(shape.id)) continue;
 
       final bounds = shape.bounds;
       minX = min(minX, bounds.left);
@@ -276,7 +265,7 @@ class LassoSelectionTool implements SelectionTool {
 
     // Add image bounds
     for (final image in images) {
-      if (!selectedImageIds.contains(image.id)) continue;
+      if (!imageIds.contains(image.id)) continue;
 
       final bounds = image.bounds;
       minX = min(minX, bounds.left);
@@ -287,7 +276,7 @@ class LassoSelectionTool implements SelectionTool {
 
     // Add text bounds
     for (final text in texts) {
-      if (!selectedTextIds.contains(text.id)) continue;
+      if (!textIds.contains(text.id)) continue;
 
       final bounds = text.bounds;
       minX = min(minX, bounds.left);
@@ -299,30 +288,6 @@ class LassoSelectionTool implements SelectionTool {
     // Handle case where no valid bounds found
     if (minX == double.infinity) {
       return BoundingBox.zero();
-    }
-
-    return BoundingBox(
-      left: minX,
-      top: minY,
-      right: maxX,
-      bottom: maxY,
-    );
-  }
-
-  /// Calculates bounding box from the lasso path points.
-  BoundingBox _calculateLassoPathBounds(List<DrawingPoint> path) {
-    if (path.isEmpty) return BoundingBox.zero();
-
-    double minX = double.infinity;
-    double minY = double.infinity;
-    double maxX = double.negativeInfinity;
-    double maxY = double.negativeInfinity;
-
-    for (final point in path) {
-      minX = min(minX, point.x);
-      minY = min(minY, point.y);
-      maxX = max(maxX, point.x);
-      maxY = max(maxY, point.y);
     }
 
     return BoundingBox(
