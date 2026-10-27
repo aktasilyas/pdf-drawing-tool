@@ -84,14 +84,7 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
   void _addPageFromTemplate(String templateId) {
     final t = TemplateRegistry.getById(templateId);
     if (t == null) return;
-    _insertNewPage(PageBackground(
-      type: BackgroundType.template,
-      color: t.defaultBackgroundColor,
-      templatePattern: t.pattern,
-      templateSpacingMm: t.spacingMm,
-      templateLineWidth: t.lineWidth,
-      lineColor: t.defaultLineColor,
-    ));
+    _insertNewPage(PageBackground.fromTemplate(t));
     widget.onClose();
   }
 
@@ -106,13 +99,10 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
     final result = await TemplatePicker.show(navCtx);
     if (result == null) return;
     final t = result.template;
-    final bg = PageBackground(
-      type: BackgroundType.template,
-      color: result.backgroundColor?.toARGB32() ?? t.defaultBackgroundColor,
-      templatePattern: t.pattern,
-      templateSpacingMm: t.spacingMm,
-      templateLineWidth: t.lineWidth,
-      lineColor: result.lineColor?.toARGB32() ?? t.defaultLineColor,
+    final bg = PageBackground.fromTemplate(
+      t,
+      color: result.backgroundColor?.toARGB32(),
+      lineColor: result.lineColor?.toARGB32(),
     );
     final idx = _resolveInsertionIndex(curIdx, doc.pages.length);
     final np = List<Page>.from(doc.pages)

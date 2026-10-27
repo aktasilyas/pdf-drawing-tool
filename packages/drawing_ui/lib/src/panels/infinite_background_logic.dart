@@ -97,6 +97,7 @@ abstract final class InfiniteBackgroundBuilder {
       templatePattern: current.templatePattern,
       templateSpacingMm: current.templateSpacingMm,
       templateLineWidth: current.templateLineWidth,
+      templateExtraData: current.templateExtraData,
     );
   }
 }

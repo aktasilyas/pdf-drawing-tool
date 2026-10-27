@@ -112,14 +112,7 @@ class LoadDocumentUseCase {
 
     // Use template-based background for ALL patterns
     // This ensures all 16 patterns render correctly
-    return PageBackground(
-      type: BackgroundType.template,
-      color: bgColor,
-      lineColor: template.defaultLineColor,
-      templatePattern: template.pattern,
-      templateSpacingMm: template.spacingMm,
-      templateLineWidth: template.lineWidth,
-    );
+    return PageBackground.fromTemplate(template, color: bgColor);
   }
 
   /// Convert cover ID to PageBackground

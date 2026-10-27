@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
-import 'package:drawing_ui/src/canvas/page_background_painter.dart';
+import 'package:drawing_ui/src/canvas/page_background_view.dart';
 import 'package:drawing_ui/src/canvas/canvas_color_scheme.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 

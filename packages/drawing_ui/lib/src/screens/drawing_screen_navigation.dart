@@ -91,14 +91,7 @@ mixin DrawingScreenNavigation on ConsumerState<DrawingScreen> {
       case core.BackgroundType.pdf:
       case core.BackgroundType.cover:
         final t = core.TemplateRegistry.getById('thin_lined')!;
-        return core.PageBackground(
-          type: core.BackgroundType.template,
-          color: t.defaultBackgroundColor,
-          templatePattern: t.pattern,
-          templateSpacingMm: t.spacingMm,
-          templateLineWidth: t.lineWidth,
-          lineColor: t.defaultLineColor,
-        );
+        return core.PageBackground.fromTemplate(t);
     }
   }
 
