@@ -66,9 +66,10 @@ void main() {
   });
 
   test('covers render through the cover painter, not a flat color', () async {
-    final cover = CoverRegistry.all.firstWhere(
-      (c) => c.style == CoverStyle.gradient || c.style == CoverStyle.pattern,
-    );
+    // A gradient cover paints its own colors over the base color (a pattern
+    // cover's white-on-dark dots would vanish on the white base used here).
+    const gradient = CoverStyle.gradient;
+    final cover = CoverRegistry.all.firstWhere((c) => c.style == gradient);
     final bg = PageBackground(
       type: BackgroundType.cover,
       coverId: cover.id,
