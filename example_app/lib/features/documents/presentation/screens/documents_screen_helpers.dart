@@ -208,10 +208,6 @@ String getSectionTitle(
       return 'Tüm Notlar';
     case SidebarSection.favorites:
       return 'Favoriler';
-    case SidebarSection.shared:
-      return 'Paylaşılan';
-    case SidebarSection.store:
-      return 'Mağaza';
     case SidebarSection.trash:
       return 'Son Silinenler';
     case SidebarSection.folder:

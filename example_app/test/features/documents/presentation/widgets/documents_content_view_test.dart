@@ -13,52 +13,6 @@ import 'package:example_app/features/documents/presentation/widgets/documents_si
 
 void main() {
   group('DocumentsContentView', () {
-    testWidgets('should_render_for_shared_section', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            theme: AppTheme.light,
-            home: Scaffold(
-              body: DocumentsContentView(
-                section: SidebarSection.shared,
-                folderId: null,
-                onFolderTap: (_) {},
-                onDocumentTap: (_) {},
-                onFolderMore: (_) {},
-                onDocumentMore: (_) {},
-              ),
-            ),
-          ),
-        ),
-      );
-
-      expect(find.byType(DocumentsContentView), findsOneWidget);
-    });
-
-    testWidgets('should_render_for_store_section', (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          child: MaterialApp(
-            theme: AppTheme.light,
-            home: Scaffold(
-              body: DocumentsContentView(
-                section: SidebarSection.store,
-                folderId: null,
-                onFolderTap: (_) {},
-                onDocumentTap: (_) {},
-                onFolderMore: (_) {},
-                onDocumentMore: (_) {},
-              ),
-            ),
-          ),
-        ),
-      );
-
-      expect(find.byType(DocumentsContentView), findsOneWidget);
-      // Coming soon state should be displayed
-      expect(find.text('Yakında'), findsOneWidget);
-    });
-
     testWidgets('should_accept_folder_id_parameter', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
@@ -91,7 +45,7 @@ void main() {
             theme: AppTheme.light,
             home: Scaffold(
               body: DocumentsContentView(
-                section: SidebarSection.shared,
+                section: SidebarSection.folder,
                 folderId: null,
                 onFolderTap: (_) => folderTapped = true,
                 onDocumentTap: (_) => documentTapped = true,

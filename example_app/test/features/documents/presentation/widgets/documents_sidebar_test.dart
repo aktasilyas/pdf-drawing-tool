@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:example_app/core/config/feature_flags.dart';
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/documents_sidebar.dart';
@@ -20,13 +21,17 @@ void main() {
     WidgetTester tester, {
     ValueChanged<SidebarSection>? onSectionChanged,
     SidebarSection selected = SidebarSection.documents,
+    FeatureFlags flags = FeatureFlags.allOff,
   }) async {
     tester.view.physicalSize = const Size(600, 900);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [foldersProvider.overrideWith((ref) => libraryFolders)],
+        overrides: [
+          foldersProvider.overrideWith((ref) => libraryFolders),
+          featureFlagsProvider.overrideWithValue(flags),
+        ],
         child: MaterialApp(
           theme: AppTheme.light,
           home: Scaffold(
@@ -76,5 +81,20 @@ void main() {
       ),
     );
     expect(size.height, greaterThanOrEqualTo(48));
+  });
+
+  // Regression guard: the sidebar has no flag-dependent rows; it must not
+  // show unshipped Shared/Store placeholders in any flag combination.
+  group('frozen-feature sections (#249)', () {
+    for (final flags in [FeatureFlags.allOff, FeatureFlags.allOn]) {
+      testWidgets('no Paylaşılan / Mağaza placeholder rows with $flags',
+          (tester) async {
+        await pump(tester, flags: flags);
+        expect(find.text('Paylaşılan'), findsNothing);
+        expect(find.text('Mağaza'), findsNothing);
+        expect(find.text('Yakında'), findsNothing);
+      });
+    }
+
   });
 }
