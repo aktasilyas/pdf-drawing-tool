@@ -50,6 +50,10 @@ class ExportOptions {
         if (pages.isEmpty) return const [];
         return [pages[currentIndex.clamp(0, pages.length - 1)]];
       case ExportPageScope.range:
+        assert(
+          isValid(pages.length),
+          'Range $from-$to is outside ${pages.length} pages',
+        );
         return pages.sublist(from - 1, to);
     }
   }

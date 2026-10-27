@@ -11,6 +11,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/src/panels/export_file_name.dart';
 import 'package:drawing_ui/src/panels/export_options.dart';
 import 'package:drawing_ui/src/panels/export_options_section.dart';
+import 'package:drawing_ui/src/panels/export_strings.dart';
 import 'package:drawing_ui/src/panels/page_options_widgets.dart';
 import 'package:drawing_ui/src/panels/png_export_action.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
@@ -64,19 +65,19 @@ class _ExportPanelState extends ConsumerState<ExportPanel> {
         if (isInfinite)
           PageOptionsMenuItem(
             icon: ElyanotesIcons.image,
-            label: 'PNG Olarak Dışa Aktar',
+            label: ExportStrings.exportPng,
             onTap: () => _exportPNG(context, ref),
           )
         else
           PageOptionsMenuItem(
             icon: ElyanotesIcons.pdfFile,
-            label: 'PDF Olarak Dışa Aktar',
+            label: ExportStrings.exportPdf,
             onTap: valid ? () => _exportPDF(context, ref) : null,
           ),
         if (!isInfinite)
           PageOptionsMenuItem(
             icon: ElyanotesIcons.share,
-            label: 'PDF Paylaş',
+            label: ExportStrings.sharePdf,
             onTap: valid ? () => _exportPDF(context, ref, share: true) : null,
           ),
       ],
@@ -169,6 +170,7 @@ Future<void> performPDFExport(
   int currentPageIndex = 0,
   PdfShareService shareService = const PdfShareService(),
   PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
+  @visibleForTesting PDFExporter? exporter,
 }) {
   return performPagesPDFExport(
     progress,
@@ -180,6 +182,7 @@ Future<void> performPDFExport(
     share: share,
     shareService: shareService,
     pdfPaths: pdfPaths,
+    exporter: exporter,
   );
 }
 
@@ -197,11 +200,12 @@ Future<void> performPagesPDFExport(
   bool includeBackground = true,
   PdfShareService shareService = const PdfShareService(),
   PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
+  @visibleForTesting PDFExporter? exporter,
 }) async {
   progress.start(pages.length);
 
   try {
-    final exporter = PDFExporter(pdfPaths: pdfPaths);
+    exporter ??= PDFExporter(pdfPaths: pdfPaths);
     final result = await exporter.exportPages(
       pages: pages,
       metadata: PDFDocumentMetadata(title: title),
@@ -284,7 +288,7 @@ class _PanelHeader extends StatelessWidget {
       ),
       child: Align(
         alignment: Alignment.centerLeft,
-        child: Text('Dışa Aktar',
+        child: Text(ExportStrings.title,
             style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,

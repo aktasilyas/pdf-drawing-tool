@@ -7,6 +7,10 @@ abstract final class ExportStrings {
   static const from = 'Başlangıç';
   static const to = 'Bitiş';
   static const includeTemplate = 'Sayfa şablonunu dahil et';
+  static const title = 'Dışa Aktar';
+  static const exportPng = 'PNG Olarak Dışa Aktar';
+  static const exportPdf = 'PDF Olarak Dışa Aktar';
+  static const sharePdf = 'PDF Paylaş';
   static String invalidRange(int count) =>
       'Sayfa aralığı 1 ile $count arasında olmalı.';
 }
