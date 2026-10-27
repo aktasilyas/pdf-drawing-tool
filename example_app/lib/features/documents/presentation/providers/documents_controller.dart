@@ -255,7 +255,8 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
       return await result.fold(
         (failure) {
           state = AsyncError(failure, StackTrace.current);
-          reportLibraryFailure(ref, failure, LibraryAction.deleteDocumentForever);
+          reportLibraryFailure(
+              ref, failure, LibraryAction.deleteDocumentForever);
           return false;
         },
         (_) {

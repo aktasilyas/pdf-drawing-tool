@@ -59,8 +59,7 @@ final libraryErrorProvider = StateProvider<LibraryError?>((ref) => null);
 /// Logs [failure] and publishes it for the library error snackbar.
 void reportLibraryFailure(Ref ref, Failure failure, LibraryAction action) {
   logger.w('${action.name}: ${failure.message}');
-  ref.read(libraryErrorProvider.notifier).state =
-      LibraryError(failure, action);
+  ref.read(libraryErrorProvider.notifier).state = LibraryError(failure, action);
 }
 
 /// [reportLibraryFailure] for an unexpected exception.

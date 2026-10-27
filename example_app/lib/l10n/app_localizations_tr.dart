@@ -164,96 +164,75 @@ class AppLocalizationsTr extends AppLocalizations {
   String get settingsEmailCopied => 'E-posta adresi kopyalandı';
 
   @override
-  String get libraryErrorCreateDocument =>
-      'Belge oluşturulamadı';
+  String get libraryErrorCreateDocument => 'Belge oluşturulamadı';
 
   @override
-  String get libraryErrorImportDocument =>
-      'Belge içe aktarılamadı';
+  String get libraryErrorImportDocument => 'Belge içe aktarılamadı';
 
   @override
-  String get libraryErrorMoveDocument =>
-      'Belge taşınamadı';
+  String get libraryErrorMoveDocument => 'Belge taşınamadı';
 
   @override
-  String get libraryErrorToggleFavorite =>
-      'Favori durumu değiştirilemedi';
+  String get libraryErrorToggleFavorite => 'Favori durumu değiştirilemedi';
 
   @override
-  String get libraryErrorTrashDocument =>
-      'Belge çöpe taşınamadı';
+  String get libraryErrorTrashDocument => 'Belge çöpe taşınamadı';
 
   @override
-  String get libraryErrorDeleteDocument =>
-      'Belge silinemedi';
+  String get libraryErrorDeleteDocument => 'Belge silinemedi';
 
   @override
-  String get libraryErrorRenameDocument =>
-      'Belge adı değiştirilemedi';
+  String get libraryErrorRenameDocument => 'Belge adı değiştirilemedi';
 
   @override
-  String get libraryErrorRestoreDocument =>
-      'Belge geri yüklenemedi';
+  String get libraryErrorRestoreDocument => 'Belge geri yüklenemedi';
 
   @override
-  String get libraryErrorDuplicateDocument =>
-      'Belge çoğaltılamadı';
+  String get libraryErrorDuplicateDocument => 'Belge çoğaltılamadı';
 
   @override
   String get libraryErrorDeleteDocumentForever =>
       'Belge kalıcı olarak silinemedi';
 
   @override
-  String get libraryErrorTrashDocuments =>
-      'Belgeler çöpe taşınamadı';
+  String get libraryErrorTrashDocuments => 'Belgeler çöpe taşınamadı';
 
   @override
   String get libraryErrorDeleteDocumentsForever =>
       'Belgeler kalıcı olarak silinemedi';
 
   @override
-  String get libraryErrorDuplicateDocuments =>
-      'Belgeler çoğaltılamadı';
+  String get libraryErrorDuplicateDocuments => 'Belgeler çoğaltılamadı';
 
   @override
-  String get libraryErrorMoveDocuments =>
-      'Belgeler taşınamadı';
+  String get libraryErrorMoveDocuments => 'Belgeler taşınamadı';
 
   @override
-  String get libraryErrorTrashPage =>
-      'Sayfa çöpe taşınamadı';
+  String get libraryErrorTrashPage => 'Sayfa çöpe taşınamadı';
 
   @override
-  String get libraryErrorDeletePageForever =>
-      'Sayfa kalıcı olarak silinemedi';
+  String get libraryErrorDeletePageForever => 'Sayfa kalıcı olarak silinemedi';
 
   @override
-  String get libraryErrorEmptyTrash =>
-      'Çöp kutusu boşaltılamadı';
+  String get libraryErrorEmptyTrash => 'Çöp kutusu boşaltılamadı';
 
   @override
-  String get libraryErrorCreateFolder =>
-      'Klasör oluşturulamadı';
+  String get libraryErrorCreateFolder => 'Klasör oluşturulamadı';
 
   @override
-  String get libraryErrorRenameFolder =>
-      'Klasör adı değiştirilemedi';
+  String get libraryErrorRenameFolder => 'Klasör adı değiştirilemedi';
 
   @override
-  String get libraryErrorRecolorFolder =>
-      'Klasör rengi değiştirilemedi';
+  String get libraryErrorRecolorFolder => 'Klasör rengi değiştirilemedi';
 
   @override
-  String get libraryErrorSaveFolderOrder =>
-      'Sıralama kaydedilemedi';
+  String get libraryErrorSaveFolderOrder => 'Sıralama kaydedilemedi';
 
   @override
-  String get libraryErrorMoveFolder =>
-      'Klasör taşınamadı';
+  String get libraryErrorMoveFolder => 'Klasör taşınamadı';
 
   @override
-  String get libraryErrorDeleteFolder =>
-      'Klasör silinemedi';
+  String get libraryErrorDeleteFolder => 'Klasör silinemedi';
 
   @override
   String get libraryRuleFolderDepth =>
@@ -280,42 +259,32 @@ class AppLocalizationsTr extends AppLocalizations {
       'Klasör sınırına ulaştınız. Premium\'a geçin.';
 
   @override
-  String get librarySortByDate =>
-      'Tarihe göre';
+  String get librarySortByDate => 'Tarihe göre';
 
   @override
-  String get librarySortByName =>
-      'İsme göre';
+  String get librarySortByName => 'İsme göre';
 
   @override
-  String get librarySortBySize =>
-      'Boyuta göre';
+  String get librarySortBySize => 'Boyuta göre';
 
   @override
-  String get librarySectionAll =>
-      'Tüm Notlar';
+  String get librarySectionAll => 'Tüm Notlar';
 
   @override
-  String get librarySectionFavorites =>
-      'Favoriler';
+  String get librarySectionFavorites => 'Favoriler';
 
   @override
-  String get librarySectionTrash =>
-      'Son Silinenler';
+  String get librarySectionTrash => 'Son Silinenler';
 
   @override
-  String get libraryFolderFallback =>
-      'Klasör';
+  String get libraryFolderFallback => 'Klasör';
 
   @override
-  String get libraryPaperSquare =>
-      'Kare';
+  String get libraryPaperSquare => 'Kare';
 
   @override
-  String get libraryPaperWide =>
-      'Geniş';
+  String get libraryPaperWide => 'Geniş';
 
   @override
-  String get libraryPaperCustom =>
-      'Özel';
+  String get libraryPaperCustom => 'Özel';
 }
