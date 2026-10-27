@@ -379,18 +379,39 @@ void main() {
     });
 
     group('findStrokesInRect', () {
-      test('returns empty list (stub implementation)', () {
-        final layer = Layer(
+      late Layer layer;
+
+      setUp(() {
+        layer = Layer(
           id: 'id',
           name: 'name',
           strokes: [testStroke1, testStroke2],
         );
+      });
 
+      test('returns strokes fully inside the rect', () {
         final rect = BoundingBox(left: 0, top: 0, right: 100, bottom: 100);
-        final found = layer.findStrokesInRect(rect);
+        expect(layer.findStrokesInRect(rect), [testStroke1, testStroke2]);
+      });
 
-        // Stub always returns empty list
-        expect(found, isEmpty);
+      test('returns strokes partially overlapping the rect', () {
+        final rect = BoundingBox(left: 5, top: 5, right: 25, bottom: 25);
+        expect(layer.findStrokesInRect(rect), [testStroke1, testStroke2]);
+      });
+
+      test('returns only the intersecting strokes', () {
+        final rect = BoundingBox(left: 15, top: 15, right: 35, bottom: 35);
+        expect(layer.findStrokesInRect(rect), [testStroke2]);
+      });
+
+      test('returns empty list when rect is outside every stroke', () {
+        final rect = BoundingBox(left: 100, top: 100, right: 200, bottom: 200);
+        expect(layer.findStrokesInRect(rect), isEmpty);
+      });
+
+      test('returns empty list for an empty layer', () {
+        final rect = BoundingBox(left: 0, top: 0, right: 100, bottom: 100);
+        expect(Layer.empty('Empty').findStrokesInRect(rect), isEmpty);
       });
     });
 

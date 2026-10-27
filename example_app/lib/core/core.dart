@@ -40,9 +40,6 @@ export 'routing/route_names.dart';
 // Session
 export 'session/active_editor_leave_provider.dart';
 
-// Network
-export 'network/network_info.dart';
-
 // DI - export only the locator, not config
 export 'di/injection.dart' show getIt, configureDependencies;
 
