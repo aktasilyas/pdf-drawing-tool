@@ -82,5 +82,10 @@ void main() {
 
     expect(loaded.read(currentToolProvider), ToolType.strokeEraser);
     expect(loaded.read(activeEraserModeProvider), EraserMode.stroke);
+    expect(loaded.read(eraserSettingsProvider).mode, EraserMode.stroke);
+
+    // The eraser button remembers the stroke eraser after a pen.
+    loaded.read(currentToolProvider.notifier).selectTool(ToolType.ballpointPen);
+    expect(loaded.read(activeEraserModeProvider), EraserMode.stroke);
   });
 }

@@ -31,6 +31,9 @@ class CurrentToolNotifier extends StateNotifier<ToolType> {
   final SharedPreferences? _prefs;
   final void Function(EraserMode mode)? _onEraserSelected;
 
+  /// The tool saved in [prefs] (ballpoint pen when none).
+  static ToolType loadSaved(SharedPreferences? prefs) => _load(prefs);
+
   static ToolType _load(SharedPreferences? prefs) {
     if (prefs == null) return ToolType.ballpointPen;
     final name = prefs.getString(_currentToolKey);

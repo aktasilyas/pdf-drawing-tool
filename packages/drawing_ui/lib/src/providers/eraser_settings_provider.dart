@@ -153,7 +153,15 @@ class EraserSettingsNotifier extends StateNotifier<EraserSettings> {
 
   final SharedPreferences? _prefs;
 
+  /// Stored settings; a saved eraser tool decides the mode, so prefs from
+  /// older versions with a mismatched tool and mode load consistently.
   static EraserSettings _load(SharedPreferences? prefs) {
+    final settings = _loadStored(prefs);
+    final toolMode = eraserModeForTool(CurrentToolNotifier.loadSaved(prefs));
+    return toolMode == null ? settings : settings.copyWith(mode: toolMode);
+  }
+
+  static EraserSettings _loadStored(SharedPreferences? prefs) {
     if (prefs == null) return _defaultEraserSettings;
     final source = prefs.getString(_eraserSettingsKey);
     if (source != null) {
