@@ -25,9 +25,19 @@ cd example_app && flutter run   # v1.0 scope: all feature flags off, no config n
 # frozen features on (FF_* flags); .env must hold SUPABASE_URL, SUPABASE_ANON_KEY, REVENUECAT_*_KEY
 cd example_app && flutter run --dart-define-from-file=config/flags_all_on.json --dart-define-from-file=.env
 flutter test path/to/file_test.dart                 # single test
-cd example_app && flutter test integration_test   # needs a device/emulator; CI: .github/workflows/e2e.yml
+cd example_app && flutter test integration_test   # whole e2e suite; needs a device/emulator (adb devices)
+cd example_app && flutter test integration_test/settings_test.dart   # one e2e flow
+cd example_app && ../scripts/e2e-run.sh phone-b   # one CI shard: phone-a | phone-b | tablet | all
 dart run build_runner build --delete-conflicting-outputs   # example_app codegen
 ```
+E2E in CI (`.github/workflows/e2e.yml`, Android API 34, flags off): PRs touching
+`example_app/lib` or `integration_test`, nightly, or dispatched on a branch
+(`gh api -X POST repos/aktasilyas/pdf-drawing-tool/actions/workflows/e2e.yml/dispatches -f ref=<branch>`).
+Phone shards `phone-a`/`phone-b` (Pixel 6) and a `tablet` smoke subset (Pixel Tablet)
+run in parallel; a new `*_test.dart` joins `phone-b` automatically. Failures show
+as annotations on the `android-emulator (<shard>)` check run. Robots live in
+`integration_test/robots/`; new settings/library finders should not depend on
+Turkish labels once a screen is localized.
 No Flutter SDK in the session (engine download blocked)? Regenerate goldens in CI on a
 pushed `claude/*` branch, then `git fetch` + `git merge` the branch and Read the PNGs
 (details in the `design-loop` skill):
