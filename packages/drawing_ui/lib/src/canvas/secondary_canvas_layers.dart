@@ -8,7 +8,7 @@ import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_ui/src/canvas/canvas_color_scheme.dart';
 import 'package:drawing_ui/src/canvas/image_painter.dart';
 import 'package:drawing_ui/src/canvas/interleaved_object_painter.dart';
-import 'package:drawing_ui/src/canvas/page_background_painter.dart';
+import 'package:drawing_ui/src/canvas/page_background_view.dart';
 import 'package:drawing_ui/src/canvas/stroke_painter.dart';
 import 'package:drawing_ui/src/canvas/shape_painter.dart';
 import 'package:drawing_ui/src/canvas/sticky_note_painter.dart';
