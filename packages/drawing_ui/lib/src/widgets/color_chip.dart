@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 
+/// Screen-reader label for a colour swatch: 'Renk #RRGGBB'.
+String colorSemanticsLabel(Color color) {
+  final rgb = color.toARGB32() & 0xFFFFFF;
+  return 'Renk #${rgb.toRadixString(16).padLeft(6, '0').toUpperCase()}';
+}
+
 /// A single color selection chip.
 ///
 /// Displays a colored circle that can be tapped to select a color.
@@ -37,7 +43,11 @@ class ColorChip extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final chipSize = size ?? theme.colorChipSize;
 
-    return GestureDetector(
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: colorSemanticsLabel(color),
+      child: GestureDetector(
       onTap: onTap,
       child: Stack(
         children: [
@@ -96,6 +106,7 @@ class ColorChip extends StatelessWidget {
                 : null,
           ),
         ],
+      ),
       ),
     );
   }

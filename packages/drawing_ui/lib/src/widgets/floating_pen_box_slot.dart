@@ -3,6 +3,7 @@ import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/chrome_tokens.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
+import 'package:drawing_ui/src/widgets/color_chip.dart' show colorSemanticsLabel;
 import 'package:drawing_ui/src/widgets/pen_icon_widget.dart';
 
 /// One preset pen in the `FloatingPenBox`.
@@ -72,8 +73,14 @@ class FloatingPenBoxSlot extends StatelessWidget {
     final isColumn = boxAxis == Axis.vertical;
     final slide = isSelected ? _selectedOffset : _restingOffset;
     const centred = (_slotBreadth - _penSize) / 2;
+    final label =
+        '${preset.toolType.displayName}, ${colorSemanticsLabel(preset.color)}';
 
-    return GestureDetector(
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: label,
+      child: GestureDetector(
       onTap: onTap,
       onDoubleTap: onDoubleTap,
       behavior: HitTestBehavior.opaque,
@@ -108,7 +115,10 @@ class FloatingPenBoxSlot extends StatelessWidget {
                 right: ChromeSpacing.xxs,
                 top: isColumn ? ChromeSpacing.xxs : null,
                 bottom: isColumn ? null : ChromeSpacing.xxs,
-                child: GestureDetector(
+                child: Semantics(
+                  button: true,
+                  label: 'Kalemi kaldır',
+                  child: GestureDetector(
                   onTap: onDelete,
                   child: Container(
                     width: _badgeSize,
@@ -125,9 +135,11 @@ class FloatingPenBoxSlot extends StatelessWidget {
                     ),
                   ),
                 ),
+                ),
               ),
           ],
         ),
+      ),
       ),
     );
   }

@@ -145,7 +145,7 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return GestureDetector(
+    final thumbnail = GestureDetector(
       onTap: widget.onTap,
       onLongPress: widget.onLongPress,
       child: Container(
@@ -205,6 +205,15 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
           ),
         ),
       ),
+    );
+    // Hosts that handle taps themselves (the sidebar) label the cell.
+    if (widget.onTap == null && widget.onLongPress == null) return thumbnail;
+    return Semantics(
+      button: true,
+      selected: widget.isSelected,
+      label: 'Sayfa ${widget.page.index + 1}',
+      excludeSemantics: true,
+      child: thumbnail,
     );
   }
 

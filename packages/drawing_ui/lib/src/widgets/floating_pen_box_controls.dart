@@ -28,7 +28,11 @@ class FloatingPenBoxCollapsed extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return GestureDetector(
+    return Semantics(
+      button: true,
+      label: 'Kalem kutusu, $count kalem',
+      excludeSemantics: true,
+      child: GestureDetector(
       onTap: onExpand,
       child: SizedBox(
         width: _size,
@@ -66,6 +70,7 @@ class FloatingPenBoxCollapsed extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }
@@ -105,20 +110,29 @@ class FloatingPenBoxControls extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final isColumn = boxAxis == Axis.vertical;
 
-    final editButton = GestureDetector(
-      onTap: onToggleEditMode,
-      child: PhosphorIcon(
-        isEditMode ? ElyanotesIcons.check : ElyanotesIcons.editPencil,
-        size: _editIconSize,
-        color: isEditMode ? colorScheme.primary : colorScheme.onSurfaceVariant,
+    final editButton = Semantics(
+      button: true,
+      label: isEditMode ? 'Düzenlemeyi bitir' : 'Kalem kutusunu düzenle',
+      child: GestureDetector(
+        onTap: onToggleEditMode,
+        child: PhosphorIcon(
+          isEditMode ? ElyanotesIcons.check : ElyanotesIcons.editPencil,
+          size: _editIconSize,
+          color:
+              isEditMode ? colorScheme.primary : colorScheme.onSurfaceVariant,
+        ),
       ),
     );
-    final collapseButton = GestureDetector(
-      onTap: onCollapse,
-      child: PhosphorIcon(
-        isColumn ? ElyanotesIcons.caretUp : ElyanotesIcons.chevronLeft,
-        size: ChromeIconSizes.sm,
-        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+    final collapseButton = Semantics(
+      button: true,
+      label: 'Kalem kutusunu daralt',
+      child: GestureDetector(
+        onTap: onCollapse,
+        child: PhosphorIcon(
+          isColumn ? ElyanotesIcons.caretUp : ElyanotesIcons.chevronLeft,
+          size: ChromeIconSizes.sm,
+          color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+        ),
       ),
     );
 

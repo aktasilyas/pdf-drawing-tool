@@ -67,7 +67,12 @@ class _CoverCard extends StatelessWidget {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
 
-    return GestureDetector(
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: cover.name,
+      excludeSemantics: true,
+      child: GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
@@ -159,6 +164,7 @@ class _CoverCard extends StatelessWidget {
               ),
           ],
         ),
+      ),
       ),
     );
   }
