@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:example_app/features/settings/settings.dart';
 
+import '../helpers/l10n.dart';
 import '../helpers/pump_helpers.dart';
 
 /// Page object for the Settings screen (all feature flags off).
@@ -165,13 +166,18 @@ class SettingsRobot {
   /// "Geri bildirim gönder" copies the contact address; returns what the
   /// clipboard holds afterwards.
   ///
-  /// The clipboard is read until it holds text (up to 5 s): on Android 13+
-  /// the system clipboard preview can briefly take focus right after a copy
-  /// (seen on the tablet emulator), and reads made without focus return null.
+  /// Waits for the "copied" toast, then reads the clipboard until it holds
+  /// text (up to 5 s); the tablet emulator intermittently returned null here.
   Future<String?> copyFeedbackAddress() async {
     await Clipboard.setData(const ClipboardData(text: ''));
     await _reveal(_tile(_feedbackIcon));
     await tester.tapAndWait(_tile(_feedbackIcon));
+    // The toast is shown only after Clipboard.setData completes, so this
+    // tells a missed tap apart from a clipboard read that returns nothing.
+    await tester.pumpUntilFound(
+      find.text(tester.l10n.settingsEmailCopied),
+      timeout: const Duration(seconds: 5),
+    );
     String? text;
     for (var i = 0; i < 50; i++) {
       text = (await Clipboard.getData(Clipboard.kTextPlain))?.text;
