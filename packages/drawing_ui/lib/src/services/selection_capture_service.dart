@@ -67,8 +67,8 @@ class SelectionCaptureService {
   /// The page [background] (white when null) is drawn behind the selected
   /// strokes, shapes, images and texts; unselected elements are left out. A
   /// lasso selection clips to its path, any other to the padded bounds. For a
-  /// PDF page, [pdfImageBytes] is the encoded page image. The caller disposes
-  /// the result.
+  /// PDF page, [pdfImageBytes] is the encoded page image. Returns null for an
+  /// empty selection with no area. The caller disposes the result.
   static Future<ui.Image?> renderSelection({
     required Selection selection,
     required Layer layer,
@@ -79,6 +79,10 @@ class SelectionCaptureService {
     double padding = 16.0,
   }) async {
     final bounds = selection.bounds;
+    // Nothing selected and no area: nothing to capture (Selection.empty()).
+    if (selection.isEmpty && (bounds.width <= 0 || bounds.height <= 0)) {
+      return null;
+    }
     final padded = Rect.fromLTRB(
       bounds.left - padding,
       bounds.top - padding,
