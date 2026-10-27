@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/drawing_ui.dart';
 
 import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// Canvas theme setting with SegmentedButton for Açık/Koyu/Sistem.
 class CanvasThemeSetting extends ConsumerWidget {
@@ -13,6 +14,7 @@ class CanvasThemeSetting extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = context.l10n;
     final mode = ref.watch(canvasDarkModeProvider);
     final palette = context.palette;
     final textColor = palette.textPrimary;
@@ -40,29 +42,33 @@ class CanvasThemeSetting extends ConsumerWidget {
                     size: AppIconSize.sm, color: iconColor),
               ),
               const SizedBox(width: AppSpacing.md),
-              Text('Canvas Teması',
-                  style: AppTypography.titleMedium.copyWith(color: textColor)),
+              Expanded(
+                child: Text(
+                  l10n.settingsCanvasTheme,
+                  style: AppTypography.titleMedium.copyWith(color: textColor),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: AppSpacing.md),
           SizedBox(
             width: double.infinity,
             child: SegmentedButton<CanvasDarkMode>(
-              segments: const [
+              segments: [
                 ButtonSegment(
                   value: CanvasDarkMode.off,
-                  label: Text('Açık'),
-                  icon: Icon(Icons.light_mode_outlined),
+                  label: Text(l10n.settingsThemeLight),
+                  icon: const Icon(Icons.light_mode_outlined),
                 ),
                 ButtonSegment(
                   value: CanvasDarkMode.on,
-                  label: Text('Koyu'),
-                  icon: Icon(Icons.dark_mode_outlined),
+                  label: Text(l10n.settingsThemeDark),
+                  icon: const Icon(Icons.dark_mode_outlined),
                 ),
                 ButtonSegment(
                   value: CanvasDarkMode.followSystem,
-                  label: Text('Sistem'),
-                  icon: Icon(Icons.settings_suggest_outlined),
+                  label: Text(l10n.settingsThemeSystem),
+                  icon: const Icon(Icons.settings_suggest_outlined),
                 ),
               ],
               selected: {mode},

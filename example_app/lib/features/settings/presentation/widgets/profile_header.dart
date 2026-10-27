@@ -74,7 +74,7 @@ class ProfileHeader extends StatelessWidget {
                           borderRadius: BorderRadius.circular(AppRadius.full),
                         ),
                         child: Text(
-                          'PRO',
+                          'PRO', // l10n-ignore
                           style: AppTypography.caption.copyWith(
                             color: AppColors.onPrimary,
                             fontWeight: FontWeight.bold,

@@ -25,6 +25,7 @@ import 'package:example_app/features/settings/presentation/widgets/settings_dial
 import 'package:example_app/features/settings/presentation/widgets/settings_header.dart';
 import 'package:example_app/features/settings/presentation/widgets/settings_section.dart';
 import 'package:example_app/features/settings/presentation/widgets/settings_tile.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key, this.aboutSection = const AboutSection()});
@@ -36,6 +37,7 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final cloud = ref.watch(featureFlagsProvider).cloudSync;
     final user = cloud ? ref.watch(currentUserProvider) : null;
+    final l10n = context.l10n;
     final isTablet = Responsive.isTablet(context);
     const gap = SizedBox(height: AppSpacing.sectionSpacing);
     void editName() => SettingsDialogs.showEditNameDialog(context, ref);
@@ -51,7 +53,9 @@ class SettingsScreen extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
               children: [
                 SettingsHeader(
-                  userName: cloud ? _userName(user) : null,
+                  userName: cloud
+                      ? _userName(user, l10n.settingsUserFallbackName)
+                      : null,
                   onNameTap: editName,
                 ),
                 gap,
@@ -61,9 +65,9 @@ class SettingsScreen extends ConsumerWidget {
                   _AccountSection(user: user),
                   gap,
                 ],
-                const SettingsSection(
-                  title: 'GİZLİLİK',
-                  children: [CrashReportingSetting()],
+                SettingsSection(
+                  title: l10n.settingsSectionPrivacy,
+                  children: const [CrashReportingSetting()],
                 ),
                 gap,
                 aboutSection,
@@ -80,12 +84,12 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  static String _userName(User? user) {
+  static String _userName(User? user, String fallback) {
     final metadataName = user?.userMetadata?['name'];
     if (metadataName is String) return metadataName;
     final email = user?.email;
     if (email != null) return email.split('@').first;
-    return 'Kullanıcı';
+    return fallback;
   }
 }
 
@@ -97,7 +101,7 @@ class _LogoutButton extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: AppButton(
-        label: 'Çıkış Yap',
+        label: context.l10n.settingsLogout,
         variant: AppButtonVariant.destructive,
         isExpanded: true,
         onPressed: () => SettingsDialogs.handleLogout(context, ref),
@@ -113,19 +117,20 @@ class _AppearanceSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final AppSettings settings = ref.watch(settingsProvider);
     final pinFavorites = ref.watch(pinFavoritesProvider);
+    final l10n = context.l10n;
     return SettingsSection(
-      title: 'GÖRÜNÜM',
+      title: l10n.settingsSectionAppearance,
       children: [
         SettingsTile(
           icon: Icons.palette_outlined,
-          title: 'Tema',
-          subtitle: SettingsDialogs.getThemeText(settings.themeMode),
+          title: l10n.settingsTheme,
+          subtitle: SettingsDialogs.getThemeText(l10n, settings.themeMode),
           onTap: () => SettingsDialogs.showThemeDialog(context, ref, settings),
         ),
         const CanvasThemeSetting(),
         SettingsTile(
           icon: Icons.star_outline,
-          title: 'Favorileri üste sabitle',
+          title: l10n.settingsPinFavorites,
           showArrow: false,
           onTap: () => ref.read(pinFavoritesProvider.notifier).toggle(),
           trailing: Switch(
@@ -146,17 +151,18 @@ class _AccountSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return SettingsSection(
-      title: 'HESAP',
+      title: l10n.settingsSectionAccount,
       children: [
         SettingsTile(
           icon: Icons.lock_outline,
-          title: 'Şifre değiştir',
+          title: l10n.settingsChangePassword,
           onTap: () => SettingsDialogs.showChangePasswordDialog(context),
         ),
         SettingsTile(
           icon: Icons.person_outline,
-          title: 'Hesap bilgileri',
+          title: l10n.settingsAccountInfo,
           onTap: () => SettingsDialogs.showAccountInfo(context, user),
         ),
       ],

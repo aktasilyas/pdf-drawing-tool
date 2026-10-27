@@ -11,17 +11,18 @@ import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:example_app/features/settings/presentation/providers/settings_provider.dart';
 import 'package:example_app/features/settings/domain/entities/app_settings.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// Helper class containing all settings screen dialogs.
 abstract class SettingsDialogs {
-  static String getThemeText(AppThemeMode mode) {
+  static String getThemeText(AppLocalizations l10n, AppThemeMode mode) {
     switch (mode) {
       case AppThemeMode.light:
-        return 'Açık';
+        return l10n.settingsThemeLight;
       case AppThemeMode.dark:
-        return 'Koyu';
+        return l10n.settingsThemeDark;
       case AppThemeMode.system:
-        return 'Sistem';
+        return l10n.settingsThemeSystem;
     }
   }
 
@@ -30,6 +31,7 @@ abstract class SettingsDialogs {
     final surfaceColor = context.palette.surface;
     final textPrimary = context.palette.textPrimary;
     final textSecondary = context.palette.textMuted;
+    final l10n = context.l10n;
 
     showDialog(
       context: context,
@@ -37,14 +39,14 @@ abstract class SettingsDialogs {
         backgroundColor: surfaceColor,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.modal)),
-        title: Text('Tema Seçin',
+        title: Text(l10n.settingsThemeDialogTitle,
             style: AppTypography.titleLarge.copyWith(color: textPrimary)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: AppThemeMode.values.map((mode) {
             final isSelected = settings.themeMode == mode;
             return ListTile(
-              title: Text(getThemeText(mode),
+              title: Text(getThemeText(l10n, mode),
                   style: TextStyle(color: textPrimary)),
               leading: Icon(
                 isSelected
@@ -66,6 +68,7 @@ abstract class SettingsDialogs {
   static void showEditNameDialog(BuildContext context, WidgetRef ref) {
     final surfaceColor = context.palette.surface;
     final textPrimary = context.palette.textPrimary;
+    final l10n = context.l10n;
 
     final controller = TextEditingController();
     showDialog(
@@ -74,16 +77,19 @@ abstract class SettingsDialogs {
         backgroundColor: surfaceColor,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.modal)),
-        title: Text('İsim Düzenle',
+        title: Text(l10n.settingsEditName,
             style: AppTypography.titleLarge.copyWith(color: textPrimary)),
-        content: AppTextField(label: 'Adınız', controller: controller),
+        content: AppTextField(
+          label: l10n.settingsNameLabel,
+          controller: controller,
+        ),
         actions: [
           AppButton(
-              label: 'İptal',
+              label: l10n.commonCancel,
               variant: AppButtonVariant.text,
               onPressed: () => Navigator.pop(ctx)),
           AppButton(
-              label: 'Kaydet',
+              label: l10n.commonSave,
               onPressed: () {
                 // TODO: Supabase user metadata güncelle
                 Navigator.pop(ctx);
@@ -94,13 +100,14 @@ abstract class SettingsDialogs {
   }
 
   static void showChangePasswordDialog(BuildContext context) {
-    AppToast.info(context, 'Şifre değiştirme özelliği yakında');
+    AppToast.info(context, context.l10n.settingsChangePasswordSoon);
   }
 
   static void showAccountInfo(BuildContext context, User? user) {
     final surfaceColor = context.palette.surface;
     final textPrimary = context.palette.textPrimary;
     final textSecondary = context.palette.textMuted;
+    final l10n = context.l10n;
 
     showDialog(
       context: context,
@@ -108,22 +115,22 @@ abstract class SettingsDialogs {
         backgroundColor: surfaceColor,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppRadius.modal)),
-        title: Text('Hesap Bilgileri',
+        title: Text(l10n.settingsAccountInfoTitle,
             style: AppTypography.titleLarge.copyWith(color: textPrimary)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Email: ${user?.email ?? "-"}',
+            Text(l10n.settingsAccountEmail(user?.email ?? '-'),
                 style: AppTypography.bodyMedium.copyWith(color: textPrimary)),
             const SizedBox(height: AppSpacing.sm),
-            Text('ID: ${user?.id ?? "-"}',
+            Text(l10n.settingsAccountId(user?.id ?? '-'),
                 style: AppTypography.caption.copyWith(color: textSecondary)),
           ],
         ),
         actions: [
           AppButton(
-              label: 'Kapat',
+              label: l10n.commonClose,
               variant: AppButtonVariant.text,
               onPressed: () => Navigator.pop(ctx)),
         ],
@@ -132,11 +139,13 @@ abstract class SettingsDialogs {
   }
 
   static Future<void> handleLogout(BuildContext context, WidgetRef ref) async {
+    final l10n = context.l10n;
     final result = await AppConfirmDialog.show(
       context: context,
-      title: 'Çıkış Yap',
-      message: 'Hesabınızdan çıkış yapmak istediğinize emin misiniz?',
-      confirmLabel: 'Çıkış Yap',
+      title: l10n.settingsLogout,
+      message: l10n.settingsLogoutConfirm,
+      confirmLabel: l10n.settingsLogout,
+      cancelLabel: l10n.commonCancel,
       isDestructive: true,
     );
     if (result == true && context.mounted) {

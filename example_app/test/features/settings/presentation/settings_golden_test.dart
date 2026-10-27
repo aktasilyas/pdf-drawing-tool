@@ -12,6 +12,7 @@ import 'package:example_app/features/settings/presentation/widgets/about_section
 import 'package:example_app/features/sync/presentation/providers/sync_provider.dart';
 
 import '../../../helpers/font_loader.dart';
+import '../../../helpers/l10n.dart';
 
 const _tablet = Size(1180, 820);
 const _phone = Size(390, 844);
@@ -46,7 +47,7 @@ void main() {
           sharedPreferencesProvider.overrideWithValue(prefs),
           drawing_ui.sharedPreferencesProvider.overrideWithValue(prefs),
         ],
-        child: MaterialApp(
+        child: localizedApp(
           theme: dark ? AppTheme.dark : AppTheme.light,
           debugShowCheckedModeBanner: false,
           home: home,

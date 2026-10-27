@@ -10,6 +10,7 @@ import 'package:example_app/features/settings/domain/entities/app_about_info.dar
 import 'package:example_app/features/settings/presentation/screens/privacy_policy_screen.dart';
 import 'package:example_app/features/settings/presentation/widgets/settings_section.dart';
 import 'package:example_app/features/settings/presentation/widgets/settings_tile.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 class AboutSection extends StatelessWidget {
   const AboutSection({
@@ -24,38 +25,39 @@ class AboutSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final version = AppAboutInfo.formatVersion(buildName, buildNumber);
     final palette = context.palette;
     final muted = AppTypography.bodyMedium.copyWith(color: palette.textMuted);
     return SettingsSection(
-      title: 'HAKKINDA',
+      title: l10n.settingsSectionAbout,
       children: [
         const _AppIdentity(),
         SettingsTile(
           icon: Icons.info_outline,
-          title: 'Sürüm',
+          title: l10n.settingsVersion,
           showArrow: false,
           trailing: Text(version ?? '—', style: muted),
         ),
         SettingsTile(
           icon: Icons.privacy_tip_outlined,
-          title: 'Gizlilik politikası',
+          title: l10n.settingsPrivacyPolicy,
           onTap: () => _openPrivacyPolicy(context),
         ),
         SettingsTile(
           icon: Icons.description_outlined,
-          title: 'Açık kaynak lisansları',
+          title: l10n.settingsLicenses,
           onTap: () => _openLicenses(context, version),
         ),
         SettingsTile(
           icon: Icons.mail_outline,
-          title: 'Geri bildirim gönder',
+          title: l10n.settingsFeedback,
           subtitle: AppAboutInfo.contactEmail,
           trailing: Icon(
             Icons.copy_outlined,
             size: AppIconSize.sm,
             color: palette.textMuted,
-            semanticLabel: 'Kopyala',
+            semanticLabel: l10n.settingsCopy,
           ),
           onTap: () => _copyContactEmail(context),
         ),
@@ -82,7 +84,7 @@ class AboutSection extends StatelessWidget {
     const data = ClipboardData(text: AppAboutInfo.contactEmail);
     await Clipboard.setData(data);
     if (context.mounted) {
-      AppToast.success(context, 'E-posta adresi kopyalandı');
+      AppToast.success(context, context.l10n.settingsEmailCopied);
     }
   }
 }

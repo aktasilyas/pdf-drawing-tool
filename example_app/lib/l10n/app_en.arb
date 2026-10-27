@@ -1,0 +1,114 @@
+{
+  "@@locale": "en",
+  "commonCancel": "Cancel",
+  "commonSave": "Save",
+  "commonClose": "Close",
+  "commonBack": "Back",
+  "@commonBack": {
+    "description": "Tooltip of the back arrow in app bars."
+  },
+  "settingsTitle": "Settings",
+  "@settingsTitle": {
+    "description": "Settings screen title."
+  },
+  "settingsSectionAppearance": "APPEARANCE",
+  "@settingsSectionAppearance": {
+    "description": "Section header; stored uppercase because Dart toUpperCase is not locale-aware."
+  },
+  "settingsSectionAccount": "ACCOUNT",
+  "@settingsSectionAccount": {
+    "description": "Section header; stored uppercase."
+  },
+  "settingsSectionPrivacy": "PRIVACY",
+  "@settingsSectionPrivacy": {
+    "description": "Section header; stored uppercase."
+  },
+  "settingsSectionAbout": "ABOUT",
+  "@settingsSectionAbout": {
+    "description": "Section header; stored uppercase."
+  },
+  "settingsTheme": "Theme",
+  "@settingsTheme": {
+    "description": "App theme tile title."
+  },
+  "settingsThemeLight": "Light",
+  "@settingsThemeLight": {
+    "description": "Light theme option."
+  },
+  "settingsThemeDark": "Dark",
+  "@settingsThemeDark": {
+    "description": "Dark theme option."
+  },
+  "settingsThemeSystem": "System",
+  "@settingsThemeSystem": {
+    "description": "Follow the system theme option."
+  },
+  "settingsThemeDialogTitle": "Choose theme",
+  "settingsCanvasTheme": "Canvas theme",
+  "@settingsCanvasTheme": {
+    "description": "Title of the canvas (drawing surface) theme setting."
+  },
+  "settingsPinFavorites": "Pin favorites to top",
+  "settingsChangePassword": "Change password",
+  "settingsChangePasswordSoon": "Changing the password is coming soon",
+  "settingsAccountInfo": "Account info",
+  "@settingsAccountInfo": {
+    "description": "Tile title that opens the account info dialog."
+  },
+  "settingsAccountInfoTitle": "Account Info",
+  "@settingsAccountInfoTitle": {
+    "description": "Title of the account info dialog."
+  },
+  "settingsAccountEmail": "Email: {email}",
+  "@settingsAccountEmail": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsAccountId": "ID: {id}",
+  "@settingsAccountId": {
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsUserFallbackName": "User",
+  "@settingsUserFallbackName": {
+    "description": "Display name when the signed-in user has no name or email."
+  },
+  "settingsEditName": "Edit Name",
+  "@settingsEditName": {
+    "description": "Title of the edit name dialog."
+  },
+  "settingsEditNameHint": "Edit name",
+  "@settingsEditNameHint": {
+    "description": "Screen reader hint of the tappable user name."
+  },
+  "settingsNameLabel": "Your name",
+  "@settingsNameLabel": {
+    "description": "Label of the name text field."
+  },
+  "settingsLogout": "Log Out",
+  "@settingsLogout": {
+    "description": "Log out button and dialog title."
+  },
+  "settingsLogoutConfirm": "Are you sure you want to log out of your account?",
+  "settingsCrashReports": "Send crash reports",
+  "settingsCrashReportsSubtitle": "Anonymous error reports; note content is never sent",
+  "settingsVersion": "Version",
+  "settingsPrivacyPolicy": "Privacy policy",
+  "@settingsPrivacyPolicy": {
+    "description": "Tile title and privacy policy screen title."
+  },
+  "settingsPrivacyPolicyLoadError": "Could not open the privacy policy",
+  "settingsLicenses": "Open source licenses",
+  "settingsFeedback": "Send feedback",
+  "settingsCopy": "Copy",
+  "@settingsCopy": {
+    "description": "Screen reader label of the copy icon."
+  },
+  "settingsEmailCopied": "Email address copied"
+}

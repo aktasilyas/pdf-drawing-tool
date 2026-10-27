@@ -7,6 +7,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/settings/domain/entities/app_about_info.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 class PrivacyPolicyScreen extends StatefulWidget {
   const PrivacyPolicyScreen({super.key});
@@ -38,11 +39,11 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
         leading: AppIconButton(
           icon: Icons.arrow_back,
           variant: AppIconButtonVariant.ghost,
-          tooltip: 'Geri',
+          tooltip: context.l10n.commonBack,
           onPressed: () => Navigator.of(context).maybePop(),
         ),
         title: Text(
-          'Gizlilik politikası',
+          context.l10n.settingsPrivacyPolicy,
           style: AppTypography.titleLarge.copyWith(color: palette.textPrimary),
         ),
       ),
@@ -50,9 +51,9 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
         future: _policy,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return const AppEmptyState(
+            return AppEmptyState(
               icon: Icons.error_outline,
-              title: 'Gizlilik politikası açılamadı',
+              title: context.l10n.settingsPrivacyPolicyLoadError,
             );
           }
           final text = snapshot.data;
