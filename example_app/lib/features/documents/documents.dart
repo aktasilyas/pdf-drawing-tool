@@ -47,6 +47,7 @@ export 'data/repositories/folder_repository_impl.dart';
 export 'data/repositories/page_trash_repository_impl.dart';
 
 // Presentation - Providers
+export 'presentation/providers/document_menu_actions.dart';
 export 'presentation/providers/documents_provider.dart';
 export 'presentation/providers/folders_provider.dart';
 export 'presentation/providers/incoming_pdf_provider.dart';
@@ -75,6 +76,8 @@ export 'presentation/widgets/documents_error_views.dart';
 export 'presentation/widgets/documents_header.dart';
 export 'presentation/widgets/documents_list_view.dart';
 export 'presentation/widgets/documents_menus.dart';
+export 'presentation/widgets/rename_document_dialog.dart';
+export 'presentation/widgets/trashed_page_menu.dart';
 export 'presentation/widgets/documents_sidebar.dart';
 export 'presentation/widgets/empty_state.dart';
 export 'presentation/widgets/folder_card.dart';
