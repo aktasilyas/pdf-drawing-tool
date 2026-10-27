@@ -16,7 +16,7 @@ import 'pdf_raster_layer_renderer.dart';
 /// painters as the canvas, picker previews and thumbnails) at the export DPI
 /// and embedded as one opaque full-page image. Identical backgrounds of the
 /// same size share one embedded image within an export ([imageFor] caches by
-/// `(background, width, height, dpi)`; call [clear] between exports).
+/// `(background, width, height, dpi)`). Use one instance per export.
 ///
 /// Legacy `blank` / `grid` / `lined` / `dotted` backgrounds stay on the
 /// vector path in `PdfContentPainter`; PDF backgrounds are embedded

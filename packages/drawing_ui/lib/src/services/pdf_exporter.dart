@@ -33,7 +33,6 @@ class PDFExporter {
 
   final _contentPainter = PdfContentPainter();
   final _rasterRenderer = PdfRasterLayerRenderer();
-  final _backgrounds = PdfBackgroundRasterizer();
 
   static double _scaleFromDpi(int dpi) => dpi / 72.0;
 
@@ -49,17 +48,17 @@ class PDFExporter {
     try {
       final doc = PdfDocument();
       final sources = PdfSourcePool(_openSource);
-      _backgrounds.clear();
+      // Per export, so concurrent exports never share or evict images.
+      final backgrounds = PdfBackgroundRasterizer();
       try {
         for (int i = 0; i < pages.length; i++) {
           if (isCancelled?.call() == true) return PDFExportResult.cancelled();
           final page = pages[i];
           if (page.size.width <= 0 || page.size.height <= 0) continue;
-          await _exportPage(doc, page, options, sources);
+          await _exportPage(doc, page, options, sources, backgrounds);
           onProgress?.call(i + 1, pages.length);
         }
       } finally {
-        _backgrounds.clear();
         await sources.closeAll();
       }
       final bytes = await doc.save();
@@ -74,6 +73,7 @@ class PDFExporter {
     Page page,
     PDFExportOptions options,
     PdfSourcePool sources,
+    PdfBackgroundRasterizer backgrounds,
   ) async {
     double pdfW, pdfH;
     if (options.isInfiniteCanvas) {
@@ -89,7 +89,8 @@ class PDFExporter {
     final g = pdfPage.getGraphics();
 
     if (options.includeBackground) {
-      await _paintBackground(g, doc, page.background, pdfW, pdfH, options);
+      await _paintBackground(
+          g, doc, page.background, pdfW, pdfH, options, backgrounds);
     }
     if (page.background.type == BackgroundType.pdf) {
       await _embedPdfBackground(g, doc, page, pdfW, pdfH, options, sources);
@@ -113,10 +114,11 @@ class PDFExporter {
     double w,
     double h,
     PDFExportOptions options,
+    PdfBackgroundRasterizer backgrounds,
   ) async {
     if (PdfBackgroundRasterizer.handles(bg)) {
       final img =
-          await _backgrounds.imageFor(doc, bg, w, h, options.quality.dpi);
+          await backgrounds.imageFor(doc, bg, w, h, options.quality.dpi);
       if (img != null) {
         g.drawImage(img, 0, 0, w, h);
         return;
