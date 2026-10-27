@@ -48,12 +48,52 @@ mixin _DocumentLayerOps on _DocumentV2Ops {
     }
   }
 
+  /// Returns a new [DrawingDocument] whose current-page layers are [layers],
+  /// with [activeLayerIndex] set explicitly (clamped to the valid range).
+  ///
+  /// Hides the V1 / V2 branching for layer structure commands.
+  DrawingDocument withLayers(
+    List<Layer> layers, {
+    required int activeLayerIndex,
+  }) {
+    final active = layers.isEmpty
+        ? 0
+        : activeLayerIndex.clamp(0, layers.length - 1).toInt();
+
+    if (isMultiPage) {
+      final current = currentPage;
+      if (current == null) return _self;
+
+      final newPages = List<Page>.from(pages);
+      newPages[currentPageIndex] =
+          current.copyWith(layers: List<Layer>.from(layers));
+
+      // copyWith keeps every other document field.
+      return _self.copyWith(
+        pages: newPages,
+        activeLayerIndex: active,
+        updatedAt: DateTime.now(),
+      );
+    }
+    return DrawingDocument(
+      id: id,
+      title: title,
+      layers: List<Layer>.from(layers),
+      activeLayerIndex: active,
+      createdAt: createdAt,
+      updatedAt: DateTime.now(),
+      width: width,
+      height: height,
+      documentType: documentType,
+    );
+  }
+
   /// Returns a new [DrawingDocument] with the layer at [index] removed.
   ///
   /// If removing would leave no layers, returns unchanged.
   DrawingDocument removeLayer(int index) {
     if (index < 0 || index >= layers.length || layers.length <= 1) {
-      return copyWith(updatedAt: DateTime.now());
+      return _self.copyWith(updatedAt: DateTime.now());
     }
 
     if (isMultiPage) {
@@ -118,7 +158,7 @@ mixin _DocumentLayerOps on _DocumentV2Ops {
   /// If index is invalid, returns unchanged.
   DrawingDocument updateLayer(int index, Layer layer) {
     if (index < 0 || index >= layers.length) {
-      return copyWith(updatedAt: DateTime.now());
+      return _self.copyWith(updatedAt: DateTime.now());
     }
 
     if (isMultiPage) {

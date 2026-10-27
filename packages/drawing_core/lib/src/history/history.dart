@@ -10,6 +10,7 @@ export 'drawing_command.dart';
 export 'erase_points_command.dart';
 export 'erase_strokes_command.dart';
 export 'history_manager.dart';
+export 'layer_commands.dart';
 export 'move_selection_command.dart';
 export 'remove_shape_command.dart';
 export 'remove_stroke_command.dart';

@@ -97,6 +97,7 @@ export 'src/history/drawing_command.dart';
 export 'src/history/erase_points_command.dart';
 export 'src/history/erase_strokes_command.dart';
 export 'src/history/history_manager.dart';
+export 'src/history/layer_commands.dart';
 export 'src/history/move_selection_command.dart';
 export 'src/history/remove_shape_command.dart';
 export 'src/history/remove_stroke_command.dart';

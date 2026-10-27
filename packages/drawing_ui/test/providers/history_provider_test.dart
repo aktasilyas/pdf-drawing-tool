@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/providers/document_provider.dart';
 import 'package:drawing_ui/src/providers/history_provider.dart';
+import 'package:drawing_ui/src/providers/layer_actions.dart';
 
 void main() {
   // ===========================================================================
@@ -249,7 +250,7 @@ void main() {
 
     test('addStroke with specific layer index', () {
       // Add layer
-      container.read(documentProvider.notifier).addLayer('Layer 2');
+      container.read(layerActionsProvider).add('Layer 2');
 
       // Add stroke to layer 1
       final stroke = Stroke.create(style: StrokeStyle.pen())
