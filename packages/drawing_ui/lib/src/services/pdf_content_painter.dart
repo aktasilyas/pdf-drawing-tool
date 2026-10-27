@@ -32,7 +32,10 @@ class PdfContentPainter {
       style.glowRadius == 0.0 &&
       !style.isEraser;
 
-  /// Paints background color and pattern onto the PDF page.
+  /// Paints the background color and legacy vector pattern (grid, lined,
+  /// dotted) onto the PDF page. Templates and covers are rasterized with the
+  /// canvas painters by `PdfBackgroundRasterizer`; here they only get their
+  /// base color (fallback when that raster fails).
   void paintBackground(PdfGraphics g, PageBackground bg, double w, double h) {
     final color = _argbToPdfColor(bg.color);
     g.setFillColor(color);
@@ -47,6 +50,7 @@ class PdfContentPainter {
       case BackgroundType.blank:
       case BackgroundType.cover:
       case BackgroundType.pdf:
+      case BackgroundType.template:
         break;
       case BackgroundType.grid:
         _drawGrid(g, w, h, pdfLineColor, bg.gridSpacing ?? 25.0, lineWidth);
@@ -54,11 +58,6 @@ class PdfContentPainter {
         _drawLines(g, w, h, pdfLineColor, bg.lineSpacing ?? 25.0, lineWidth);
       case BackgroundType.dotted:
         _drawDots(g, w, h, bg.gridSpacing ?? 20.0, pdfLineColor);
-      case BackgroundType.template:
-        if (bg.templatePattern != null) {
-          final sp = (bg.templateSpacingMm ?? 8.0) * 3.78;
-          _drawGrid(g, w, h, pdfLineColor, sp, lineWidth);
-        }
     }
   }
 
