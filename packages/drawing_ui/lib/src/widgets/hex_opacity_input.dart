@@ -92,7 +92,7 @@ class _HexOpacityInputState extends State<HexOpacityInput> {
         // Hex input
         Expanded(
           child: Container(
-            height: 36,
+            height: 48,
             padding: const EdgeInsets.symmetric(horizontal: 8),
             decoration: BoxDecoration(
               color: const Color(0xFF2D2D2D),
@@ -141,7 +141,7 @@ class _HexOpacityInputState extends State<HexOpacityInput> {
           // Opacity input
           SizedBox(
             width: 60,
-            height: 36,
+            height: 48,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               decoration: BoxDecoration(

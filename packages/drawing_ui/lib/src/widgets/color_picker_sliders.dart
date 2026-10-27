@@ -1,6 +1,63 @@
 /// Hue and opacity sliders for the colour picker.
 import 'package:flutter/material.dart';
 
+const double _kTrackHeight = 24;
+const double _kTouchHeight = 48;
+
+/// Draws [background] as a 24dp track and overlays an invisible slider whose
+/// touch area is 48dp tall.
+class _SliderTrack extends StatelessWidget {
+  const _SliderTrack({
+    required this.background,
+    required this.value,
+    required this.max,
+    required this.onChanged,
+  });
+
+  final Widget background;
+  final double value;
+  final double max;
+  final ValueChanged<double> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: _kTouchHeight,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            height: _kTrackHeight,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: const Color(0xFF424242)),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(3),
+              child: background,
+            ),
+          ),
+          SliderTheme(
+            data: SliderThemeData(
+              trackHeight: _kTrackHeight,
+              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12),
+              overlayShape: const RoundSliderOverlayShape(overlayRadius: 20),
+              trackShape: const RectangularSliderTrackShape(),
+            ),
+            child: Slider(
+              value: value,
+              max: max,
+              onChanged: onChanged,
+              activeColor: Colors.transparent,
+              inactiveColor: Colors.transparent,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// Hue Slider - Rainbow gradient
 class HueSlider extends StatelessWidget {
   const HueSlider({
@@ -14,51 +71,20 @@ class HueSlider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 24,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: const Color(0xFF424242)),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(3),
-        child: Stack(
-          children: [
-            // Rainbow gradient background
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    const HSVColor.fromAHSV(1.0, 0, 1.0, 1.0).toColor(),
-                    const HSVColor.fromAHSV(1.0, 60, 1.0, 1.0).toColor(),
-                    const HSVColor.fromAHSV(1.0, 120, 1.0, 1.0).toColor(),
-                    const HSVColor.fromAHSV(1.0, 180, 1.0, 1.0).toColor(),
-                    const HSVColor.fromAHSV(1.0, 240, 1.0, 1.0).toColor(),
-                    const HSVColor.fromAHSV(1.0, 300, 1.0, 1.0).toColor(),
-                    const HSVColor.fromAHSV(1.0, 360, 1.0, 1.0).toColor(),
-                  ],
-                ),
-              ),
-            ),
-            // Slider
-            SliderTheme(
-              data: SliderThemeData(
-                trackHeight: 24,
-                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12),
-                overlayShape: const RoundSliderOverlayShape(overlayRadius: 20),
-                trackShape: const RectangularSliderTrackShape(),
-              ),
-              child: Slider(
-                value: hue,
-                min: 0,
-                max: 360,
-                onChanged: onChanged,
-                activeColor: Colors.transparent,
-                inactiveColor: Colors.transparent,
-              ),
-            ),
-          ],
+    return _SliderTrack(
+      value: hue,
+      max: 360,
+      onChanged: onChanged,
+      background: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              for (var h = 0; h <= 360; h += 60)
+                HSVColor.fromAHSV(1.0, h.toDouble(), 1.0, 1.0).toColor(),
+            ],
+          ),
         ),
+        child: const SizedBox.expand(),
       ),
     );
   }
@@ -79,49 +105,25 @@ class OpacitySlider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 24,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: const Color(0xFF424242)),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(3),
-        child: Stack(
-          children: [
-            // Checkerboard
-            CustomPaint(
-              size: const Size(double.infinity, 24),
-              painter: const CheckerboardPainter(),
-            ),
-            // Color gradient
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    color.withValues(alpha: 0),
-                    color.withValues(alpha: 1),
-                  ],
-                ),
+    return _SliderTrack(
+      value: opacity,
+      max: 1,
+      onChanged: onChanged,
+      background: Stack(
+        fit: StackFit.expand,
+        children: [
+          const CustomPaint(painter: CheckerboardPainter()),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  color.withValues(alpha: 0),
+                  color.withValues(alpha: 1),
+                ],
               ),
             ),
-            // Slider
-            SliderTheme(
-              data: SliderThemeData(
-                trackHeight: 24,
-                thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12),
-                overlayShape: const RoundSliderOverlayShape(overlayRadius: 20),
-                trackShape: const RectangularSliderTrackShape(),
-              ),
-              child: Slider(
-                value: opacity,
-                onChanged: onChanged,
-                activeColor: Colors.transparent,
-                inactiveColor: Colors.transparent,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

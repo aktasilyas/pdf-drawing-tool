@@ -93,6 +93,39 @@ void main() {
     expect(hue, closeTo(180, 20));
   });
 
+  testWidgets('OpacitySlider tap reports alpha', (t) async {
+    double? v;
+    await t.pumpWidget(_wrap(OpacitySlider(
+      color: Colors.red,
+      opacity: 0,
+      onChanged: (x) => v = x,
+    )));
+    await t.tapAt(t.getCenter(find.byType(OpacitySlider)));
+    expect(v, closeTo(0.5, 0.1));
+  });
+
+  testWidgets('sliders and text fields have >= 48dp touch targets', (t) async {
+    await t.pumpWidget(_wrap(Column(children: [
+      HueSlider(hue: 0, onChanged: (_) {}),
+      OpacitySlider(color: Colors.red, opacity: 1, onChanged: (_) {}),
+      HexOpacityInput(
+        color: Colors.red,
+        opacity: 1,
+        showOpacity: true,
+        onColorChanged: (_) {},
+        onSave: () {},
+      ),
+    ])));
+    expect(t.getSize(find.byType(HueSlider)).height, greaterThanOrEqualTo(48));
+    expect(
+        t.getSize(find.byType(OpacitySlider)).height, greaterThanOrEqualTo(48));
+    for (final f in find.byType(TextField).evaluate()) {
+      final box = find.ancestor(
+          of: find.byWidget(f.widget), matching: find.byType(Container));
+      expect(t.getSize(box.first).height, greaterThanOrEqualTo(48));
+    }
+  });
+
   testWidgets('RecentColorsRow tap selects and targets are >= 48dp', (t) async {
     Color? picked;
     await t.pumpWidget(_wrap(RecentColorsRow(
