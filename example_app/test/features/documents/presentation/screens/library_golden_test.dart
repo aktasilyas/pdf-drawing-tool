@@ -10,6 +10,7 @@ import 'package:example_app/features/documents/presentation/screens/documents_sc
 
 import '../../../../helpers/font_loader.dart';
 import 'library_fixtures.dart';
+import '../../../../helpers/l10n.dart';
 
 typedef _Case = ({
   String name,
@@ -70,7 +71,7 @@ void main() {
       await tester.pumpWidget(
         ProviderScope(
           overrides: libraryOverrides(empty: c.empty, selection: c.selection),
-          child: MaterialApp(
+          child: localizedApp(
             theme: c.dark ? AppTheme.dark : AppTheme.light,
             debugShowCheckedModeBanner: false,
             home: const DocumentsScreen(),

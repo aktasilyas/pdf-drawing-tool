@@ -10,13 +10,14 @@ import 'package:example_app/features/documents/presentation/widgets/documents_co
 import 'package:example_app/features/documents/presentation/widgets/documents_empty_states.dart';
 import 'package:example_app/features/documents/presentation/widgets/documents_error_views.dart';
 import 'package:example_app/features/documents/presentation/widgets/documents_sidebar.dart';
+import '../../../../helpers/l10n.dart';
 
 void main() {
   group('DocumentsContentView', () {
     testWidgets('should_accept_folder_id_parameter', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
-          child: MaterialApp(
+          child: localizedApp(
             theme: AppTheme.light,
             home: Scaffold(
               body: DocumentsContentView(
@@ -41,7 +42,7 @@ void main() {
 
       await tester.pumpWidget(
         ProviderScope(
-          child: MaterialApp(
+          child: localizedApp(
             theme: AppTheme.light,
             home: Scaffold(
               body: DocumentsContentView(
@@ -68,7 +69,7 @@ void main() {
     Widget buildFavorites(List<Override> overrides) {
       return ProviderScope(
         overrides: overrides,
-        child: MaterialApp(
+        child: localizedApp(
           theme: AppTheme.light,
           home: Scaffold(
             body: DocumentsContentView(

@@ -21,6 +21,44 @@ class AppLocalizationsTr extends AppLocalizations {
   String get commonBack => 'Geri';
 
   @override
+  String get commonConfirm => 'Onayla';
+
+  @override
+  String get commonCreate => 'Oluştur';
+
+  @override
+  String get commonDelete => 'Sil';
+
+  @override
+  String get commonDone => 'Bitti';
+
+  @override
+  String get commonOk => 'Tamam';
+
+  @override
+  String get commonRetry => 'Tekrar dene';
+
+  @override
+  String get commonRename => 'Yeniden Adlandır';
+
+  @override
+  String get commonMove => 'Taşı';
+
+  @override
+  String get commonDuplicate => 'Çoğalt';
+
+  @override
+  String get commonRestore => 'Kurtar';
+
+  @override
+  String get commonMenu => 'Menü';
+
+  @override
+  String commonErrorDetail(String error) {
+    return 'Hata: $error';
+  }
+
+  @override
   String get settingsTitle => 'Ayarlar';
 
   @override
@@ -124,4 +162,129 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get settingsEmailCopied => 'E-posta adresi kopyalandı';
+
+  @override
+  String get libraryErrorCreateDocument => 'Belge oluşturulamadı';
+
+  @override
+  String get libraryErrorImportDocument => 'Belge içe aktarılamadı';
+
+  @override
+  String get libraryErrorMoveDocument => 'Belge taşınamadı';
+
+  @override
+  String get libraryErrorToggleFavorite => 'Favori durumu değiştirilemedi';
+
+  @override
+  String get libraryErrorTrashDocument => 'Belge çöpe taşınamadı';
+
+  @override
+  String get libraryErrorDeleteDocument => 'Belge silinemedi';
+
+  @override
+  String get libraryErrorRenameDocument => 'Belge adı değiştirilemedi';
+
+  @override
+  String get libraryErrorRestoreDocument => 'Belge geri yüklenemedi';
+
+  @override
+  String get libraryErrorDuplicateDocument => 'Belge çoğaltılamadı';
+
+  @override
+  String get libraryErrorDeleteDocumentForever =>
+      'Belge kalıcı olarak silinemedi';
+
+  @override
+  String get libraryErrorTrashDocuments => 'Belgeler çöpe taşınamadı';
+
+  @override
+  String get libraryErrorDeleteDocumentsForever =>
+      'Belgeler kalıcı olarak silinemedi';
+
+  @override
+  String get libraryErrorDuplicateDocuments => 'Belgeler çoğaltılamadı';
+
+  @override
+  String get libraryErrorMoveDocuments => 'Belgeler taşınamadı';
+
+  @override
+  String get libraryErrorTrashPage => 'Sayfa çöpe taşınamadı';
+
+  @override
+  String get libraryErrorDeletePageForever => 'Sayfa kalıcı olarak silinemedi';
+
+  @override
+  String get libraryErrorEmptyTrash => 'Çöp kutusu boşaltılamadı';
+
+  @override
+  String get libraryErrorCreateFolder => 'Klasör oluşturulamadı';
+
+  @override
+  String get libraryErrorRenameFolder => 'Klasör adı değiştirilemedi';
+
+  @override
+  String get libraryErrorRecolorFolder => 'Klasör rengi değiştirilemedi';
+
+  @override
+  String get libraryErrorSaveFolderOrder => 'Sıralama kaydedilemedi';
+
+  @override
+  String get libraryErrorMoveFolder => 'Klasör taşınamadı';
+
+  @override
+  String get libraryErrorDeleteFolder => 'Klasör silinemedi';
+
+  @override
+  String get libraryRuleFolderDepth =>
+      'Alt klasörlerin altına klasör oluşturulamaz';
+
+  @override
+  String get libraryRuleFolderIntoOwnSubfolder =>
+      'Klasör kendi alt klasörüne taşınamaz';
+
+  @override
+  String get libraryRuleFolderMoveDepth =>
+      'Alt klasörlerin altına klasör taşınamaz';
+
+  @override
+  String get libraryRuleFolderWithSubfoldersMove =>
+      'Alt klasörleri olan bir klasör başka klasörün altına taşınamaz';
+
+  @override
+  String get libraryRuleDocumentLimit =>
+      'Ücretsiz sınıra ulaştınız. Premium\'a geçin.';
+
+  @override
+  String get libraryRuleFolderLimit =>
+      'Klasör sınırına ulaştınız. Premium\'a geçin.';
+
+  @override
+  String get librarySortByDate => 'Tarihe göre';
+
+  @override
+  String get librarySortByName => 'İsme göre';
+
+  @override
+  String get librarySortBySize => 'Boyuta göre';
+
+  @override
+  String get librarySectionAll => 'Tüm Notlar';
+
+  @override
+  String get librarySectionFavorites => 'Favoriler';
+
+  @override
+  String get librarySectionTrash => 'Son Silinenler';
+
+  @override
+  String get libraryFolderFallback => 'Klasör';
+
+  @override
+  String get libraryPaperSquare => 'Kare';
+
+  @override
+  String get libraryPaperWide => 'Geniş';
+
+  @override
+  String get libraryPaperCustom => 'Özel';
 }

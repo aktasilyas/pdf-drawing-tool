@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/premium/premium.dart';
 import 'package:example_app/features/documents/domain/entities/folder.dart';
+import 'package:example_app/features/documents/domain/entities/library_rule.dart';
 import 'package:example_app/features/documents/domain/repositories/folder_repository.dart';
 
 @injectable
@@ -34,11 +35,7 @@ class CreateFolderUseCase {
             (folders) {
               if (folders.length >= FreeTierLimits.maxFolders) {
                 return Future.value(
-                  const Left(
-                    ValidationFailure(
-                      'Klasör sınırına ulaştınız. Premium\'a geçin.',
-                    ),
-                  ),
+                  Left(LibraryRuleFailure(LibraryRule.folderLimit)),
                 );
               }
               return _folderRepository.createFolder(

@@ -6,11 +6,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:example_app/core/theme/index.dart';
 
 import '../../../../helpers/font_loader.dart';
+import '../../../../helpers/l10n.dart';
 
 Widget _sheet(ThemeData theme, double width) {
   const gap = 16.0;
   final height = width * 4 / 3;
-  return MaterialApp(
+  return localizedApp(
     theme: theme,
     debugShowCheckedModeBanner: false,
     home: Builder(builder: (context) {
@@ -52,7 +53,7 @@ void main() {
       tester.view.physicalSize = const Size(512, 704);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.reset);
-      await tester.pumpWidget(MaterialApp(
+      await tester.pumpWidget(localizedApp(
         theme: AppTheme.light,
         debugShowCheckedModeBanner: false,
         home: Builder(

@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/buttons/index.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 import 'app_modal.dart';
 
@@ -32,8 +33,8 @@ class AppConfirmDialog {
     required BuildContext context,
     required String title,
     required String message,
-    String confirmLabel = 'Onayla',
-    String cancelLabel = 'İptal',
+    String? confirmLabel,
+    String? cancelLabel,
     bool isDestructive = false,
   }) {
     return AppModal.show<bool>(
@@ -42,13 +43,13 @@ class AppConfirmDialog {
       content: _ConfirmDialogContent(message: message),
       actions: [
         AppButton(
-          label: cancelLabel,
+          label: cancelLabel ?? context.l10n.commonCancel,
           onPressed: () => Navigator.of(context).pop(false),
           variant: AppButtonVariant.outline,
           size: AppButtonSize.medium,
         ),
         AppButton(
-          label: confirmLabel,
+          label: confirmLabel ?? context.l10n.commonConfirm,
           onPressed: () => Navigator.of(context).pop(true),
           variant: isDestructive
               ? AppButtonVariant.destructive

@@ -7,6 +7,25 @@
   "@commonBack": {
     "description": "Tooltip of the back arrow in app bars."
   },
+  "commonConfirm": "Confirm",
+  "commonCreate": "Create",
+  "commonDelete": "Delete",
+  "commonDone": "Done",
+  "commonOk": "OK",
+  "commonRetry": "Try again",
+  "commonRename": "Rename",
+  "commonMove": "Move",
+  "commonDuplicate": "Duplicate",
+  "commonRestore": "Restore",
+  "commonMenu": "Menu",
+  "commonErrorDetail": "Error: {error}",
+  "@commonErrorDetail": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "settingsTitle": "Settings",
   "@settingsTitle": {
     "description": "Settings screen title."
@@ -110,5 +129,44 @@
   "@settingsCopy": {
     "description": "Screen reader label of the copy icon."
   },
-  "settingsEmailCopied": "Email address copied"
+  "settingsEmailCopied": "Email address copied",
+  "libraryErrorCreateDocument": "Couldn't create the notebook",
+  "libraryErrorImportDocument": "Couldn't import the document",
+  "libraryErrorMoveDocument": "Couldn't move the notebook",
+  "libraryErrorToggleFavorite": "Couldn't update favorites",
+  "libraryErrorTrashDocument": "Couldn't move the notebook to the trash",
+  "libraryErrorDeleteDocument": "Couldn't delete the notebook",
+  "libraryErrorRenameDocument": "Couldn't rename the notebook",
+  "libraryErrorRestoreDocument": "Couldn't restore the notebook",
+  "libraryErrorDuplicateDocument": "Couldn't duplicate the notebook",
+  "libraryErrorDeleteDocumentForever": "Couldn't delete the notebook permanently",
+  "libraryErrorTrashDocuments": "Couldn't move the notebooks to the trash",
+  "libraryErrorDeleteDocumentsForever": "Couldn't delete the notebooks permanently",
+  "libraryErrorDuplicateDocuments": "Couldn't duplicate the notebooks",
+  "libraryErrorMoveDocuments": "Couldn't move the notebooks",
+  "libraryErrorTrashPage": "Couldn't move the page to the trash",
+  "libraryErrorDeletePageForever": "Couldn't delete the page permanently",
+  "libraryErrorEmptyTrash": "Couldn't empty the trash",
+  "libraryErrorCreateFolder": "Couldn't create the folder",
+  "libraryErrorRenameFolder": "Couldn't rename the folder",
+  "libraryErrorRecolorFolder": "Couldn't change the folder color",
+  "libraryErrorSaveFolderOrder": "Couldn't save the order",
+  "libraryErrorMoveFolder": "Couldn't move the folder",
+  "libraryErrorDeleteFolder": "Couldn't delete the folder",
+  "libraryRuleFolderDepth": "Folders can only be one level deep",
+  "libraryRuleFolderIntoOwnSubfolder": "A folder can't be moved into its own subfolder",
+  "libraryRuleFolderMoveDepth": "A folder can't be moved into a subfolder",
+  "libraryRuleFolderWithSubfoldersMove": "A folder with subfolders can't be moved into another folder",
+  "libraryRuleDocumentLimit": "You've reached the free limit. Upgrade to Premium.",
+  "libraryRuleFolderLimit": "You've reached the folder limit. Upgrade to Premium.",
+  "librarySortByDate": "By date",
+  "librarySortByName": "By name",
+  "librarySortBySize": "By size",
+  "librarySectionAll": "All notes",
+  "librarySectionFavorites": "Favorites",
+  "librarySectionTrash": "Recently deleted",
+  "libraryFolderFallback": "Folder",
+  "libraryPaperSquare": "Square",
+  "libraryPaperWide": "Widescreen",
+  "libraryPaperCustom": "Custom"
 }

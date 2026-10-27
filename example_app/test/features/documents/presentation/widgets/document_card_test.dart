@@ -5,6 +5,7 @@ import 'package:drawing_ui/drawing_ui.dart' show ElyanotesIcons;
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/documents/documents.dart';
 import 'package:example_app/features/documents/presentation/widgets/library_grid_metrics.dart';
+import '../../../../helpers/l10n.dart';
 
 void main() {
   group('DocumentCard', () {
@@ -20,7 +21,7 @@ void main() {
 
     Widget host(Widget body) {
       return ProviderScope(
-        child: MaterialApp(
+        child: localizedApp(
           theme: AppTheme.light,
           home: Scaffold(body: body),
         ),
@@ -130,7 +131,7 @@ void main() {
       await tester.pumpWidget(
         UncontrolledProviderScope(
           container: container,
-          child: MaterialApp(
+          child: localizedApp(
             theme: AppTheme.light,
             home: Scaffold(
               body: DocumentCard(document: testDocument, onTap: () {}),
@@ -195,7 +196,7 @@ void main() {
 
       await tester.pumpWidget(
         ProviderScope(
-          child: MaterialApp(
+          child: localizedApp(
             theme: AppTheme.light,
             builder: (context, child) => MediaQuery(
               data: MediaQuery.of(context).copyWith(textScaler: scaler),

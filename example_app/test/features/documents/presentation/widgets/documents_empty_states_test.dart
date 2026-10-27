@@ -5,12 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:example_app/features/documents/presentation/widgets/documents_empty_states.dart';
+import '../../../../helpers/l10n.dart';
 
 void main() {
   group('DocumentsEmptyState', () {
     Future<void> pump(WidgetTester tester, {VoidCallback? onCreateNew}) {
       return tester.pumpWidget(
-        MaterialApp(
+        localizedApp(
           theme: AppTheme.light,
           home: Scaffold(
             body: DocumentsEmptyState(onCreateNew: onCreateNew),
@@ -54,7 +55,7 @@ void main() {
   group('FavoritesEmptyState', () {
     testWidgets('should_render_without_error', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        localizedApp(
           theme: AppTheme.light,
           home: const Scaffold(
             body: FavoritesEmptyState(),
@@ -70,7 +71,7 @@ void main() {
   group('FolderEmptyState', () {
     testWidgets('should_render_without_error', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        localizedApp(
           theme: AppTheme.light,
           home: const Scaffold(
             body: FolderEmptyState(),
@@ -86,7 +87,7 @@ void main() {
   group('TrashEmptyState', () {
     testWidgets('should_render_without_error', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        localizedApp(
           theme: AppTheme.light,
           home: const Scaffold(
             body: TrashEmptyState(),
@@ -103,7 +104,7 @@ void main() {
     testWidgets('should_render_without_error', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
-          child: MaterialApp(
+          child: localizedApp(
             theme: AppTheme.light,
             home: const Scaffold(
               body: DocumentsEmptySearchResult(query: 'test'),

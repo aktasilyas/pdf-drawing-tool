@@ -5,9 +5,10 @@ import 'package:drawing_ui/drawing_ui.dart';
 
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/documents/presentation/widgets/cover_grid.dart';
+import '../../../../helpers/l10n.dart';
 
 Widget _host(ValueChanged<Cover> onSelected, {ThemeData? theme}) {
-  return MaterialApp(
+  return localizedApp(
     theme: theme ?? AppTheme.light,
     home: Scaffold(
       body: SizedBox(

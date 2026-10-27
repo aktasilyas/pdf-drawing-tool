@@ -2,12 +2,15 @@ import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/routing/route_names.dart';
 import 'package:example_app/features/auth/presentation/providers/auth_provider.dart';
 import 'package:example_app/features/auth/presentation/screens/login_screen.dart';
+import 'package:example_app/l10n/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
+
+import '../../../../helpers/l10n.dart';
 
 void main() {
   late GoRouter router;
@@ -48,6 +51,9 @@ void main() {
         authControllerProvider.overrideWith((ref) => fakeAuthController),
       ],
       child: MaterialApp.router(
+        locale: testLocale,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         theme: AppTheme.light,
         routerConfig: router,
       ),

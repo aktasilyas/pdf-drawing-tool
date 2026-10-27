@@ -30,7 +30,7 @@ mixin DocumentsBulkOperations on StateNotifier<AsyncValue<void>> {
       state = AsyncError(e, StackTrace.current);
       // Earlier items may have succeeded: refresh the lists either way.
       invalidateTrashMove(ref);
-      reportLibraryError(ref, e, 'Belgeler çöpe taşınamadı');
+      reportLibraryError(ref, e, LibraryAction.trashDocuments);
       rethrow;
     }
   }
@@ -52,7 +52,7 @@ mixin DocumentsBulkOperations on StateNotifier<AsyncValue<void>> {
       state = AsyncError(e, StackTrace.current);
       // Earlier items may have succeeded: refresh the lists either way.
       invalidateDocumentLists(ref, trash: true, documentCount: true);
-      reportLibraryError(ref, e, 'Belgeler kalıcı olarak silinemedi');
+      reportLibraryError(ref, e, LibraryAction.deleteDocumentsForever);
       rethrow;
     }
   }
@@ -80,7 +80,7 @@ mixin DocumentsBulkOperations on StateNotifier<AsyncValue<void>> {
       state = AsyncError(e, StackTrace.current);
       // Earlier items may have succeeded: refresh the lists either way.
       invalidateAllDocumentLists(ref);
-      reportLibraryError(ref, e, 'Belgeler çoğaltılamadı');
+      reportLibraryError(ref, e, LibraryAction.duplicateDocuments);
       rethrow;
     }
   }
@@ -98,7 +98,7 @@ mixin DocumentsBulkOperations on StateNotifier<AsyncValue<void>> {
         final failure = result.fold((f) => f, (_) => null);
         if (failure != null) {
           state = AsyncError(failure, StackTrace.current);
-          reportLibraryFailure(ref, failure, 'Belgeler taşınamadı');
+          reportLibraryFailure(ref, failure, LibraryAction.moveDocuments);
           invalidateAllDocumentLists(ref);
           return false;
         }
@@ -108,7 +108,7 @@ mixin DocumentsBulkOperations on StateNotifier<AsyncValue<void>> {
       return true;
     } catch (e) {
       state = AsyncError(e, StackTrace.current);
-      reportLibraryError(ref, e, 'Belgeler taşınamadı');
+      reportLibraryError(ref, e, LibraryAction.moveDocuments);
       return false;
     }
   }

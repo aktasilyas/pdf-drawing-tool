@@ -11,6 +11,7 @@ import 'package:example_app/features/documents/documents.dart';
 import '../providers/documents_controller_harness.dart'
     show MockDocumentRepository, testDocument;
 import '../screens/library_fixtures.dart';
+import '../../../../helpers/l10n.dart';
 
 class MockFolderRepository extends Mock implements FolderRepository {}
 
@@ -67,7 +68,7 @@ void main() {
           documentRepositoryProvider.overrideWithValue(documents),
           foldersProvider.overrideWith((ref) => libraryFolders),
         ],
-        child: MaterialApp(
+        child: localizedApp(
           theme: AppTheme.light,
           home: Scaffold(
             body: Builder(

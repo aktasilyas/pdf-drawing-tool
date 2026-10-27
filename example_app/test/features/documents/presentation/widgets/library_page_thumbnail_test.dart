@@ -5,6 +5,7 @@ import 'package:drawing_ui/drawing_ui.dart' show CoverGeometry;
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
 import 'package:example_app/features/documents/presentation/widgets/library_page_thumbnail.dart';
+import '../../../../helpers/l10n.dart';
 
 DocumentInfo _doc({bool isPortrait = true}) => DocumentInfo(
       id: 'd',
@@ -18,7 +19,7 @@ DocumentInfo _doc({bool isPortrait = true}) => DocumentInfo(
 
 Future<void> _pump(WidgetTester tester, DocumentInfo doc) {
   return tester.pumpWidget(
-    MaterialApp(
+    localizedApp(
       theme: AppTheme.light,
       home: Align(
         alignment: Alignment.topLeft,

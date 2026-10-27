@@ -9,6 +9,7 @@ import 'package:example_app/features/documents/presentation/screens/documents_sc
 
 import '../../../../helpers/font_loader.dart';
 import 'library_fixtures.dart';
+import '../../../../helpers/l10n.dart';
 
 void main() {
   setUpAll(() async {
@@ -26,7 +27,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: libraryOverrides(),
-        child: MaterialApp(
+        child: localizedApp(
           theme: AppTheme.light,
           home: const DocumentsScreen(),
         ),

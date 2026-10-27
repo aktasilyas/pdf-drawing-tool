@@ -8,6 +8,7 @@ import 'package:example_app/features/documents/domain/entities/sort_option.dart'
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/documents_header.dart';
 import 'package:example_app/features/documents/presentation/widgets/selection_mode_header.dart';
+import '../../../../helpers/l10n.dart';
 
 void main() {
   group('DocumentsHeader', () {
@@ -19,7 +20,7 @@ void main() {
     }) {
       return ProviderScope(
         overrides: overrides,
-        child: MaterialApp(
+        child: localizedApp(
           theme: AppTheme.light,
           home: Scaffold(
             body: DocumentsHeader(
