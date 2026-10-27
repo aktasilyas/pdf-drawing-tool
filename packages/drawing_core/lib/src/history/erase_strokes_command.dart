@@ -1,4 +1,5 @@
 import 'package:drawing_core/src/internal.dart';
+import 'package:drawing_core/src/history/ordered_restore.dart';
 
 /// Birden fazla stroke'u tek seferde silme komutu.
 ///
