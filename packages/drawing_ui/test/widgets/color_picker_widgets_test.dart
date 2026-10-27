@@ -2,50 +2,121 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:drawing_ui/drawing_ui.dart';
 
+Widget _wrap(Widget child) => MaterialApp(
+    home: Scaffold(body: Center(child: SizedBox(width: 300, child: child))));
+
 void main() {
-  testWidgets('color picker widgets build', (tester) async {
-    final hsv = HSVColor.fromColor(Colors.red);
+  group('parseHexColor', () {
+    test('accepts #RRGGBB and RRGGBB', () {
+      expect(parseHexColor('#FF0000'), const Color(0xFFFF0000));
+      expect(parseHexColor('00ff00'), const Color(0xFF00FF00));
+    });
+    test('rejects invalid text', () {
+      expect(parseHexColor(''), isNull);
+      expect(parseHexColor('#12345'), isNull);
+      expect(parseHexColor('GGGGGG'), isNull);
+      expect(parseHexColor('##12345'), isNull);
+    });
+  });
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: Column(
-            children: [
-              HSVPickerBox(
-                hsvColor: hsv,
-                onColorChanged: (_) {},
-              ),
-              HueSlider(
-                hue: hsv.hue,
-                onChanged: (_) {},
-              ),
-              OpacitySlider(
-                color: Colors.blue,
-                opacity: 0.5,
-                onChanged: (_) {},
-              ),
-              HexOpacityInput(
-                color: Colors.green,
-                opacity: 0.75,
-                showOpacity: true,
-                onColorChanged: (_) {},
-                onSave: () {},
-              ),
-              RecentColorsRow(
-                colors: const [Colors.red, Colors.green, Colors.blue],
-                selectedColor: Colors.red,
-                onColorSelected: (_) {},
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+  group('HexOpacityInput', () {
+    Future<List<Color>> pump(WidgetTester t) async {
+      final changes = <Color>[];
+      await t.pumpWidget(_wrap(HexOpacityInput(
+        color: const Color(0xFF112233),
+        opacity: 1,
+        showOpacity: true,
+        onColorChanged: changes.add,
+        onSave: () {},
+      )));
+      return changes;
+    }
 
-    expect(find.byType(HSVPickerBox), findsOneWidget);
-    expect(find.byType(HueSlider), findsOneWidget);
-    expect(find.byType(OpacitySlider), findsOneWidget);
-    expect(find.byType(HexOpacityInput), findsOneWidget);
-    expect(find.byType(RecentColorsRow), findsOneWidget);
+    testWidgets('submitting #RRGGBB reports the colour', (t) async {
+      final changes = await pump(t);
+      await t.enterText(find.byType(TextField).first, '#FF0000');
+      await t.testTextInput.receiveAction(TextInputAction.done);
+      expect(changes, [const Color(0xFFFF0000)]);
+    });
+
+    testWidgets('submitting RRGGBB reports the colour', (t) async {
+      final changes = await pump(t);
+      await t.enterText(find.byType(TextField).first, '00FF00');
+      await t.testTextInput.receiveAction(TextInputAction.done);
+      expect(changes, [const Color(0xFF00FF00)]);
+    });
+
+    testWidgets('invalid hex does not change the colour', (t) async {
+      final changes = await pump(t);
+      await t.enterText(find.byType(TextField).first, '12G');
+      await t.testTextInput.receiveAction(TextInputAction.done);
+      await t.enterText(find.byType(TextField).first, '12345');
+      await t.testTextInput.receiveAction(TextInputAction.done);
+      expect(changes, isEmpty);
+    });
+
+    testWidgets('opacity above 100 clamps to fully opaque', (t) async {
+      final changes = await pump(t);
+      await t.enterText(find.byType(TextField).last, '250');
+      await t.testTextInput.receiveAction(TextInputAction.done);
+      expect(changes.single.a, 1.0);
+    });
+
+    testWidgets('opacity 50 reports half alpha', (t) async {
+      final changes = await pump(t);
+      await t.enterText(find.byType(TextField).last, '50');
+      await t.testTextInput.receiveAction(TextInputAction.done);
+      expect(changes.single.a, closeTo(0.5, 0.01));
+    });
+  });
+
+  testWidgets('HSVPickerBox reports saturation/value from the drag', (t) async {
+    final changes = <HSVColor>[];
+    await t.pumpWidget(_wrap(HSVPickerBox(
+      hsvColor: const HSVColor.fromAHSV(1, 120, 0, 0),
+      onColorChanged: changes.add,
+    )));
+    final rect = t.getRect(find.byType(HSVPickerBox));
+    await t.tapAt(rect.topRight - const Offset(1, -1));
+    expect(changes.last.saturation, greaterThan(0.9));
+    expect(changes.last.value, greaterThan(0.9));
+    expect(changes.last.hue, 120);
+    await t.tapAt(rect.bottomLeft + const Offset(1, -1));
+    expect(changes.last.saturation, lessThan(0.1));
+    expect(changes.last.value, lessThan(0.1));
+  });
+
+  testWidgets('HueSlider dragging reports a hue', (t) async {
+    double? hue;
+    await t.pumpWidget(_wrap(HueSlider(hue: 0, onChanged: (v) => hue = v)));
+    await t.tapAt(t.getCenter(find.byType(HueSlider)));
+    expect(hue, closeTo(180, 20));
+  });
+
+  testWidgets('RecentColorsRow tap selects and targets are >= 48dp', (t) async {
+    Color? picked;
+    await t.pumpWidget(_wrap(RecentColorsRow(
+      colors: const [Color(0xFFFF0000), Color(0xFF0000FF)],
+      selectedColor: const Color(0xFFFF0000),
+      onColorSelected: (c) => picked = c,
+    )));
+    final target = find.byType(GestureDetector).last;
+    expect(t.getSize(target).width, greaterThanOrEqualTo(48));
+    expect(t.getSize(target).height, greaterThanOrEqualTo(48));
+    await t.tap(target);
+    expect(picked, const Color(0xFF0000FF));
+  });
+
+  test('painters repaint only when fields change', () {
+    const a = HSVBoxPainter(hue: 1, saturation: .5, value: .5);
+    expect(
+        a.shouldRepaint(const HSVBoxPainter(hue: 1, saturation: .5, value: .5)),
+        isFalse);
+    expect(
+        a.shouldRepaint(const HSVBoxPainter(hue: 2, saturation: .5, value: .5)),
+        isTrue);
+    expect(
+        const CheckerboardPainter().shouldRepaint(const CheckerboardPainter()),
+        isFalse);
   });
 }
