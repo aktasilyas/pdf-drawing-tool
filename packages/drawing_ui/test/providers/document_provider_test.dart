@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/providers/document_provider.dart';
+import 'package:drawing_ui/src/providers/layer_actions.dart';
 
 void main() {
   // ===========================================================================
@@ -140,26 +141,26 @@ void main() {
     });
 
     test('addLayer increases layer count', () {
-      container.read(documentProvider.notifier).addLayer('Katman 2');
+      container.read(layerActionsProvider).add('Katman 2');
 
       expect(container.read(layerCountProvider), 2);
     });
 
     test('removeLayer decreases layer count', () {
-      container.read(documentProvider.notifier).addLayer('Katman 2');
-      container.read(documentProvider.notifier).removeLayer(1);
+      container.read(layerActionsProvider).add('Katman 2');
+      container.read(layerActionsProvider).remove(1);
 
       expect(container.read(layerCountProvider), 1);
     });
 
     test('removeLayer does nothing if only one layer', () {
-      container.read(documentProvider.notifier).removeLayer(0);
+      container.read(layerActionsProvider).remove(0);
 
       expect(container.read(layerCountProvider), 1);
     });
 
     test('setActiveLayer changes active layer', () {
-      container.read(documentProvider.notifier).addLayer('Katman 2');
+      container.read(layerActionsProvider).add('Katman 2');
       container.read(documentProvider.notifier).setActiveLayer(1);
 
       expect(container.read(activeLayerIndexProvider), 1);
@@ -241,7 +242,7 @@ void main() {
 
       expect(container.read(layerCountProvider), 1);
 
-      container.read(documentProvider.notifier).addLayer('Test');
+      container.read(layerActionsProvider).add('Test');
       expect(container.read(layerCountProvider), 2);
 
       container.dispose();
@@ -252,7 +253,7 @@ void main() {
 
       expect(container.read(activeLayerIndexProvider), 0);
 
-      container.read(documentProvider.notifier).addLayer('Test');
+      container.read(layerActionsProvider).add('Test');
       container.read(documentProvider.notifier).setActiveLayer(1);
       expect(container.read(activeLayerIndexProvider), 1);
 
@@ -273,7 +274,7 @@ void main() {
       container.read(documentProvider.notifier).addStroke(stroke1);
 
       // Add new layer and switch to it
-      container.read(documentProvider.notifier).addLayer('Layer 2');
+      container.read(layerActionsProvider).add('Layer 2');
       container.read(documentProvider.notifier).setActiveLayer(1);
 
       // Add stroke to layer 1
@@ -305,7 +306,7 @@ void main() {
           );
 
       // Add new layer and add strokes
-      container.read(documentProvider.notifier).addLayer('Layer 2');
+      container.read(layerActionsProvider).add('Layer 2');
       container.read(documentProvider.notifier).setActiveLayer(1);
       container.read(documentProvider.notifier).addStroke(
             Stroke.create(style: StrokeStyle.pen()),
