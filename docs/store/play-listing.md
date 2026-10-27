@@ -143,5 +143,8 @@ treatment is an open BRIEF question, so this waits for the owner.
   `./gradlew :app:processReleaseMainManifest :app:processDebugMainManifest`, then
   `./scripts/check-android-manifest.sh` from the repo root. Re-check the listing and the Data safety
   answers whenever a frozen feature (AI chat, cloud sync, premium, audio) is turned on for a release.
-- The privacy policy needs a public URL and contact email (see `privacy-policy.md`).
+- Privacy policy public URL (Play Console field): https://aktasilyas.github.io/pdf-drawing-tool/privacy/
+  (published from `privacy-policy.md` by `.github/workflows/pages.yml`; one-time owner step: Settings -> Pages ->
+  Source: GitHub Actions, then run the workflow once). Contact email: see `privacy-policy.md`.
+  In the app, Settings -> About -> Privacy policy shows the bundled Turkish copy of the same text.
 - Turkish strings use Title Case pen names as decided on #45 (Dolma Kalem, Fosforlu Kalem).
