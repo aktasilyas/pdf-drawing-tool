@@ -11,6 +11,7 @@ import '../golden/helpers/chrome_theme.dart';
 
 class _Runner extends PDFExportRunner {
   final runs = <ExportOptions>[];
+  final currentIndexes = <int>[];
 
   @override
   Future<void> run(
@@ -22,6 +23,7 @@ class _Runner extends PDFExportRunner {
     int currentPageIndex = 0,
   }) async {
     runs.add(options);
+    currentIndexes.add(currentPageIndex);
   }
 }
 
@@ -95,5 +97,83 @@ void main() {
     await tester.pump();
     expect(runner.runs.single.includeTemplate, isFalse);
     expect(runner.runs.single.scope, ExportPageScope.range);
+  });
+
+  testWidgets('Bu sayfa exports the current page only', (tester) async {
+    tester.view.physicalSize = const Size(800, 1600);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+    final runner = _Runner();
+    await tester.pumpWidget(ProviderScope(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+        pdfExportRunnerProvider.overrideWithValue(runner),
+        isInfiniteCanvasProvider.overrideWith((ref) => false),
+        pageCountProvider.overrideWithValue(5),
+        currentPageIndexProvider.overrideWithValue(2),
+      ],
+      child: MaterialApp(
+        theme: chromeTheme(Brightness.light),
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: ExportPanel(onClose: () {}, embedded: true),
+          ),
+        ),
+      ),
+    ));
+
+    // Every option is a >= 48dp touch target.
+    for (final finder in [
+      find.byType(SegmentedButton<ExportPageScope>),
+      find.byType(SwitchListTile),
+    ]) {
+      expect(tester.getSize(finder).height, greaterThanOrEqualTo(48));
+    }
+
+    await tester.tap(find.text('Bu sayfa'));
+    await tester.pump();
+    await tester.tap(find.text('PDF Olarak Dışa Aktar'));
+    await tester.pump();
+    expect(runner.runs.single.scope, ExportPageScope.current);
+    expect(runner.currentIndexes.single, 2);
+    final pages = [for (var i = 0; i < 5; i++) Page.create(index: i)];
+    expect(runner.runs.single.select(pages, 2).single.id, pages[2].id);
+  });
+
+  testWidgets('switching scope keeps a valid range', (tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
+    await tester.pumpWidget(ProviderScope(
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+        isInfiniteCanvasProvider.overrideWith((ref) => false),
+        pageCountProvider.overrideWithValue(5),
+      ],
+      child: MaterialApp(
+        theme: chromeTheme(Brightness.light),
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: ExportPanel(
+              onClose: () {},
+              embedded: true,
+              initialOptions: const ExportOptions(
+                  scope: ExportPageScope.range, from: 2, to: 3),
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text('Tümü'));
+    await tester.pump();
+    await tester.tap(find.text('Aralık'));
+    await tester.pump();
+    final to = tester.widget<TextField>(find.descendant(
+        of: find.byKey(const ValueKey('export-range-to')),
+        matching: find.byType(TextField)));
+    expect(to.controller!.text, '3');
   });
 }

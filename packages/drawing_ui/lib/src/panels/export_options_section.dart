@@ -39,9 +39,16 @@ class ExportOptionsSection extends StatelessWidget {
                   value: ExportPageScope.range,
                   label: Text(ExportStrings.scopeRange)),
             ],
+            // Padded tap target: each segment is at least 48dp tall.
+            style: SegmentedButton.styleFrom(
+              tapTargetSize: MaterialTapTargetSize.padded,
+            ),
             selected: {options.scope},
-            onSelectionChanged: (s) =>
-                onChanged(options.copyWith(scope: s.first, to: pageCount)),
+            onSelectionChanged: (s) => onChanged(options.copyWith(
+              scope: s.first,
+              // Keep the user's range; only fix a "to" that is out of bounds.
+              to: options.to < 1 || options.to > pageCount ? pageCount : null,
+            )),
           ),
           if (options.scope == ExportPageScope.range) ...[
             const SizedBox(height: ChromeSpacing.sm),

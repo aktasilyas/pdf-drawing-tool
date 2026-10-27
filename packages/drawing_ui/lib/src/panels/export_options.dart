@@ -8,13 +8,14 @@ class ExportOptions {
   const ExportOptions({
     this.scope = ExportPageScope.all,
     this.from = 1,
-    this.to = 1,
+    this.to = 0,
     this.includeTemplate = true,
   });
 
   final ExportPageScope scope;
 
   /// 1-based inclusive range, only used when [scope] is [ExportPageScope.range].
+  /// [to] is 0 until a range is chosen; the panel then fills in the last page.
   final int from;
   final int to;
 
