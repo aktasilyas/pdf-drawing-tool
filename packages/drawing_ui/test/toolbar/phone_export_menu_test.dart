@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'package:drawing_core/drawing_core.dart' show DrawingDocument;
 import 'package:drawing_ui/drawing_ui.dart';
+import 'package:drawing_ui/src/panels/export_options.dart';
 import 'package:drawing_ui/src/panels/export_panel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,6 +22,8 @@ class _RecordingRunner extends PDFExportRunner {
     DrawingDocument document, {
     bool addWatermark = false,
     bool share = false,
+    ExportOptions options = const ExportOptions(),
+    int currentPageIndex = 0,
   }) async {
     exported.add(document);
     shared.add(share);
