@@ -14,6 +14,13 @@ import 'package:drawing_ui/src/services/page_png_exporter.dart';
 
 const _logName = 'drawing_ui.export';
 
+/// Signature of [PagePngExporter.export]; replaced in tests.
+typedef PngExportRenderer = Future<Uint8List> Function(
+  Page page, {
+  required bool infiniteCanvas,
+  PdfPathResolver pdfPaths,
+});
+
 /// Exports the current page of the open document as PNG (see
 /// [performPNGExport]).
 void exportCurrentPageAsPNG(WidgetRef ref) {
@@ -76,10 +83,3 @@ Future<void> performPNGExport(
     progress.setError('PNG dışa aktarılamadı: $e');
   }
 }
-
-/// Signature of [PagePngExporter.export]; replaced in tests.
-typedef PngExportRenderer = Future<Uint8List> Function(
-  Page page, {
-  required bool infiniteCanvas,
-  PdfPathResolver pdfPaths,
-});

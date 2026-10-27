@@ -77,6 +77,8 @@ abstract final class PageRasterizer {
       canvas.clipRect(Offset.zero & area.size);
 
       // Paper fills the whole region (an infinite canvas grows past the page).
+      // Its pattern starts at the region's corner, as in the PDF export of an
+      // infinite canvas; on a paged document the region is the page rect.
       PageBackgroundRaster.paint(
           canvas, page.background, area.size, coverImage);
 
