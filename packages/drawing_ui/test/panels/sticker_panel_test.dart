@@ -1,0 +1,90 @@
+import 'package:drawing_ui/drawing_ui.dart';
+import 'package:drawing_ui/src/panels/sticker_panel_parts.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import 'helpers/panel_harness.dart';
+
+/// Past the double-tap timeout, so a single tap on a cell is delivered.
+const _tapDelay = Duration(milliseconds: 500);
+
+void _openSticker(ProviderContainer c) =>
+    c.read(activePanelProvider.notifier).state = ToolType.sticker;
+
+void main() {
+  const panel = StickerPanel();
+
+  testWidgets('switching categories changes the grid', (tester) async {
+    await pumpPanel(tester, panel);
+    expect(find.text('😀'), findsOneWidget);
+    expect(find.text('🐶'), findsNothing);
+
+    await tester.tap(find.text('Hayvanlar'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('🐶'), findsOneWidget);
+    expect(find.text('😀'), findsNothing);
+  });
+
+  testWidgets('insert is disabled until a sticker is selected', (tester) async {
+    final c = await pumpPanel(tester, panel, setup: _openSticker);
+    await tester.tap(find.text('Çıkartma Ekle'));
+    await tester.pump();
+
+    expect(c.read(stickerPlacementProvider).isPlacing, isFalse);
+    expect(c.read(activePanelProvider), ToolType.sticker);
+  });
+
+  testWidgets('selected sticker + insert starts placement and closes panel',
+      (tester) async {
+    final c = await pumpPanel(tester, panel, setup: _openSticker);
+    await tester.tap(find.text('😃'));
+    await tester.pump(_tapDelay);
+    final cell = tester.widget<StickerCell>(
+      find.ancestor(of: find.text('😃'), matching: find.byType(StickerCell)),
+    );
+    expect(cell.selected, isTrue);
+
+    await tester.tap(find.text('Çıkartma Ekle'));
+    await tester.pump();
+
+    expect(c.read(stickerPlacementProvider).selectedEmoji, '😃');
+    expect(c.read(activePanelProvider), isNull);
+  });
+
+  testWidgets('double-tapping a sticker starts placement', (tester) async {
+    final c = await pumpPanel(tester, panel, setup: _openSticker);
+    await tester.tap(find.text('Yiyecek'));
+    await tester.pumpAndSettle();
+
+    final pizza = find.text('🍕');
+    await tester.tap(pizza);
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tap(pizza);
+    await tester.pumpAndSettle();
+
+    expect(c.read(stickerPlacementProvider).selectedEmoji, '🍕');
+    expect(c.read(activePanelProvider), isNull);
+  });
+
+  testWidgets('cells and the insert button are 48dp touch targets',
+      (tester) async {
+    await pumpPanel(tester, panel);
+    expectMinTapTarget(tester, find.byType(StickerCell));
+    expectMinTapTarget(tester, find.byType(StickerActionButton));
+  });
+
+  testWidgets('cells stay 48dp in a 300dp panel', (tester) async {
+    await pumpPanel(
+      tester,
+      const Center(child: SizedBox(width: 300, child: panel)),
+    );
+    expectMinTapTarget(tester, find.byType(StickerCell));
+  });
+
+  testWidgets('no overflow with textScaler 1.3', (tester) async {
+    await pumpPanel(tester, panel, textScale: 1.3);
+    expect(tester.takeException(), isNull);
+  });
+}
