@@ -6,5 +6,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 final isInfiniteCanvasProvider = StateProvider<bool>((ref) => true);
 
 /// GlobalKey for the RepaintBoundary wrapping the canvas.
-/// Used to capture screenshots for PNG/PDF export.
+/// Used to capture what is on screen (AI chat). Export renders pages
+/// off-screen instead.
 final canvasBoundaryKeyProvider = Provider<GlobalKey>((ref) => GlobalKey());
