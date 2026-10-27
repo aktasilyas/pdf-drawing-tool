@@ -12,6 +12,9 @@ class MockPageTrashRepository extends Mock implements PageTrashRepository {}
 
 const failure = CacheFailure('boom');
 
+/// Localized-copy stand-in passed to the duplicate calls.
+String copyTitle(String title) => '$title (copy)';
+
 final testDocument = DocumentInfo(
   id: 'doc-1',
   title: 'Notes',
@@ -38,6 +41,7 @@ void registerDocumentsFallbacks() {
   registerFallbackValue(DocumentType.notebook);
   registerFallbackValue(<String, dynamic>{});
   registerFallbackValue(DateTime(2026));
+  registerFallbackValue(copyTitle);
 }
 
 /// A [ProviderContainer] with mocked repositories that counts how often each

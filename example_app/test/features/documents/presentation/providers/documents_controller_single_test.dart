@@ -120,25 +120,36 @@ void main() {
 
   group('duplicateDocument', () {
     test('success refreshes every list', () async {
-      when(() => h.repo.duplicateDocument('doc-1'))
-          .thenAnswer((_) async => Right(testDocument));
-      final rebuilt = await run((c) => c.duplicateDocument('doc-1'));
+      when(() => h.repo.duplicateDocument(
+            'doc-1',
+            copyTitle: any(named: 'copyTitle'),
+          )).thenAnswer((_) async => Right(testDocument));
+      final rebuilt =
+          await run((c) => c.duplicateDocument('doc-1', copyTitle: copyTitle));
       expect(result, isTrue);
       expect(rebuilt, allLists);
     });
 
     test('failure returns false and exposes the failure', () async {
-      when(() => h.repo.duplicateDocument('doc-1'))
-          .thenAnswer((_) async => const Left(failure));
-      final rebuilt = await run((c) => c.duplicateDocument('doc-1'));
+      when(() => h.repo.duplicateDocument(
+            'doc-1',
+            copyTitle: any(named: 'copyTitle'),
+          )).thenAnswer((_) async => const Left(failure));
+      final rebuilt =
+          await run((c) => c.duplicateDocument('doc-1', copyTitle: copyTitle));
       expect(result, isFalse);
       expect(rebuilt, isEmpty);
       expect(h.state.error, failure);
     });
 
     test('a thrown error returns false', () async {
-      when(() => h.repo.duplicateDocument('doc-1')).thenThrow(StateError('x'));
-      expect(await h.controller.duplicateDocument('doc-1'), isFalse);
+      when(() => h.repo.duplicateDocument(
+            'doc-1',
+            copyTitle: any(named: 'copyTitle'),
+          )).thenThrow(StateError('x'));
+      expect(
+          await h.controller.duplicateDocument('doc-1', copyTitle: copyTitle),
+          isFalse);
       expect(h.state.error, isA<StateError>());
     });
   });

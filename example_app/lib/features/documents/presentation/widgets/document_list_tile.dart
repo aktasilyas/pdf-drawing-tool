@@ -8,6 +8,7 @@ import 'package:example_app/features/documents/presentation/providers/documents_
 import 'package:example_app/features/documents/presentation/widgets/library_list_row.dart';
 import 'package:example_app/features/documents/presentation/widgets/library_page_thumbnail.dart';
 import 'package:example_app/features/documents/presentation/widgets/library_tile_parts.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// List tile for a document row.
 class DocumentListTile extends ConsumerWidget {
@@ -31,7 +32,7 @@ class DocumentListTile extends ConsumerWidget {
     return LibraryListRow(
       thumbnail: _thumbnail(),
       title: document.title,
-      meta: LibraryMeta.document(document),
+      meta: LibraryMeta.document(document, context.l10n),
       onTap: onTap,
       onLongPress: onLongPress,
       isSelected: isSelected,

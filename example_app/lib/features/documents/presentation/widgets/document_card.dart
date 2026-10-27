@@ -16,6 +16,7 @@ import 'package:example_app/features/documents/presentation/widgets/document_car
 import 'package:example_app/features/documents/presentation/widgets/library_page_thumbnail.dart';
 import 'package:example_app/features/documents/presentation/widgets/library_tile_frame.dart';
 import 'package:example_app/features/documents/presentation/widgets/library_tile_parts.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 class DocumentCard extends ConsumerWidget {
   final DocumentInfo document;
@@ -45,7 +46,7 @@ class DocumentCard extends ConsumerWidget {
       cover: _buildCover(),
       info: LibraryTileInfo(
         title: document.title,
-        meta: LibraryMeta.document(document),
+        meta: LibraryMeta.document(document, context.l10n),
         onTap: isSelectionMode ? onTap : onMorePressed,
         showCaret: onMorePressed != null && !isSelectionMode,
       ),

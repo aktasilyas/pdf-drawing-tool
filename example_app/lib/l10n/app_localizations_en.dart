@@ -497,4 +497,136 @@ class AppLocalizationsEn extends AppLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String libraryPageCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pages',
+      one: '1 page',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String libraryDocumentCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count documents',
+      one: '1 document',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String libraryDaysLeft(int days) {
+    String _temp0 = intl.Intl.pluralLogic(
+      days,
+      locale: localeName,
+      other: '$days days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get libraryRemoveFavoriteBadge => 'Remove from favorites';
+
+  @override
+  String get libraryRemoveFromFavorites => 'Remove from favorites';
+
+  @override
+  String get libraryAddToFavorites => 'Add to favorites';
+
+  @override
+  String get libraryMoveToTrash => 'Move to trash';
+
+  @override
+  String get libraryDocumentDuplicated => 'Notebook duplicated';
+
+  @override
+  String get libraryDocumentMoved => 'Notebook moved';
+
+  @override
+  String get libraryDocumentRestored => 'Notebook restored';
+
+  @override
+  String get libraryDeleteDocumentForeverMessage =>
+      'This notebook will be deleted permanently. This can\'t be undone.';
+
+  @override
+  String get libraryDocumentNameLabel => 'Notebook name';
+
+  @override
+  String get libraryChangeColor => 'Change color';
+
+  @override
+  String get libraryFolderMoved => 'Folder moved';
+
+  @override
+  String get libraryFolderColorChanged => 'Folder color changed';
+
+  @override
+  String get libraryDeleteFolderTitle => 'Delete folder';
+
+  @override
+  String libraryDeleteFolderNonEmptyMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'This folder contains $count documents. Deleting it also deletes them. Continue?',
+      one:
+          'This folder contains 1 document. Deleting the folder also deletes that document. Continue?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get libraryDeleteFolderMessage => 'Delete this folder?';
+
+  @override
+  String get libraryFolderDeleted => 'Folder deleted';
+
+  @override
+  String get libraryRenameFolderTitle => 'Rename folder';
+
+  @override
+  String get libraryFolderNameLabel => 'Folder name';
+
+  @override
+  String libraryFolderRenamed(String name) {
+    return 'Folder renamed to \"$name\"';
+  }
+
+  @override
+  String libraryPageNumber(int page) {
+    return 'Page $page';
+  }
+
+  @override
+  String libraryTrashedPageTitle(String document, int page) {
+    return '$document — Page $page';
+  }
+
+  @override
+  String get librarySourceDocumentMissing =>
+      'The original notebook no longer exists';
+
+  @override
+  String get libraryPageRestored => 'Page restored';
+
+  @override
+  String get libraryPageRestoreFailed => 'Couldn\'t restore the page';
+
+  @override
+  String get libraryDeletePageForeverMessage =>
+      'This page will be deleted permanently. This can\'t be undone.';
+
+  @override
+  String libraryCopyTitle(String title) {
+    return '$title (copy)';
+  }
 }

@@ -10,6 +10,7 @@ import 'package:example_app/features/documents/presentation/widgets/menu_tile.da
 import 'package:example_app/features/documents/presentation/widgets/move_to_folder_dialog.dart';
 import 'package:example_app/features/documents/presentation/widgets/rename_document_dialog.dart';
 import 'package:example_app/features/premium/premium.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// Menu for a regular (non-trash) document.
 void showNormalDocumentMenu(
@@ -19,10 +20,11 @@ void showNormalDocumentMenu(
 ) {
   showMenuSheet(context, (ctx) {
     final actions = ref.read(documentMenuActionsProvider);
+    final l10n = context.l10n;
     return [
       MenuTile(
         icon: Icons.edit_outlined,
-        label: 'Yeniden Adlandır',
+        label: l10n.commonRename,
         onTap: () {
           Navigator.pop(ctx);
           showRenameDocumentDialog(context, ref, document);
@@ -31,10 +33,13 @@ void showNormalDocumentMenu(
       softDivider(context),
       MenuTile(
         icon: Icons.content_copy,
-        label: 'Çoğalt',
+        label: l10n.commonDuplicate,
         onTap: () async {
           Navigator.pop(ctx);
-          final outcome = await actions.duplicate(document);
+          final outcome = await actions.duplicate(
+            document,
+            copyTitle: l10n.libraryCopyTitle,
+          );
           if (!context.mounted) return;
           final blocked = outcome.blockedBy;
           if (blocked != null) {
@@ -42,7 +47,7 @@ void showNormalDocumentMenu(
               context,
               access: blocked,
               featureIcon: Icons.note_add_outlined,
-              featureTitle: 'Belge Limitine Ulaştınız',
+              featureTitle: l10n.libraryDocumentLimitReached,
               onUpgrade: () {
                 Navigator.pop(context);
                 GoRouter.of(context).push(RouteNames.paywall);
@@ -50,14 +55,14 @@ void showNormalDocumentMenu(
             );
           } else if (outcome.duplicated) {
             // Failures are shown by LibraryErrorListener.
-            showMenuSnackBar(context, 'Belge çoğaltıldı');
+            showMenuSnackBar(context, l10n.libraryDocumentDuplicated);
           }
         },
       ),
       softDivider(context),
       MenuTile(
         icon: Icons.drive_file_move_outlined,
-        label: 'Taşı',
+        label: l10n.commonMove,
         onTap: () async {
           Navigator.pop(ctx);
           final messenger = ScaffoldMessenger.of(context);
@@ -68,8 +73,8 @@ void showNormalDocumentMenu(
           if (moved == true) {
             actions.onMoved();
             messenger.showSnackBar(
-              const SnackBar(
-                content: Text('Belge taşındı'),
+              SnackBar(
+                content: Text(l10n.libraryDocumentMoved),
                 behavior: SnackBarBehavior.floating,
               ),
             );
@@ -79,7 +84,9 @@ void showNormalDocumentMenu(
       softDivider(context),
       MenuTile(
         icon: document.isFavorite ? Icons.star : Icons.star_outline,
-        label: document.isFavorite ? 'Favorilerden Kaldır' : 'Favorilere Ekle',
+        label: document.isFavorite
+            ? l10n.libraryRemoveFromFavorites
+            : l10n.libraryAddToFavorites,
         onTap: () {
           Navigator.pop(ctx);
           actions.toggleFavorite(document);
@@ -88,7 +95,7 @@ void showNormalDocumentMenu(
       softDivider(context),
       MenuTile(
         icon: Icons.delete_outline,
-        label: 'Çöpe Taşı',
+        label: l10n.libraryMoveToTrash,
         isDestructive: true,
         onTap: () {
           Navigator.pop(ctx);

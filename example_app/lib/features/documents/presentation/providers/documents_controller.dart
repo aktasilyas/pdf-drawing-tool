@@ -227,9 +227,15 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
   }
 
   // Single document duplicate
-  Future<bool> duplicateDocument(String id) async {
+  Future<bool> duplicateDocument(
+    String id, {
+    required String Function(String title) copyTitle,
+  }) async {
     try {
-      final result = await repository.duplicateDocument(id);
+      final result = await repository.duplicateDocument(
+        id,
+        copyTitle: copyTitle,
+      );
       return await result.fold(
         (failure) {
           state = AsyncError(failure, StackTrace.current);
