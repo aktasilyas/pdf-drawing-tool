@@ -287,4 +287,203 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get libraryPaperCustom => 'Özel';
+
+  @override
+  String get libraryBreadcrumbRoot => 'Belgelerim';
+
+  @override
+  String get libraryFolders => 'Klasörler';
+
+  @override
+  String get libraryDocuments => 'Belgeler';
+
+  @override
+  String get libraryManage => 'Yönet';
+
+  @override
+  String get libraryNewFolder => 'Yeni Klasör';
+
+  @override
+  String get libraryNoFolders => 'Klasör yok';
+
+  @override
+  String get librarySidebarCollapse => 'Daralt';
+
+  @override
+  String get libraryOpenSidebar => 'Kenar çubuğunu aç';
+
+  @override
+  String get librarySearchHint => 'Ara...';
+
+  @override
+  String get libraryListView => 'Liste görünümü';
+
+  @override
+  String get libraryGridView => 'Grid görünümü';
+
+  @override
+  String get librarySelectMode => 'Seçim modu';
+
+  @override
+  String get libraryNewDocument => 'Yeni Belge';
+
+  @override
+  String get libraryNewDocumentLocked => 'Belge limiti doldu';
+
+  @override
+  String get libraryNew => 'Yeni';
+
+  @override
+  String get libraryTrashInfo =>
+      'Silinen notlar 30 gün sonra kalıcı olarak silinir';
+
+  @override
+  String get libraryEmptyTrash => 'Çöpü Boşalt';
+
+  @override
+  String get libraryEmptyTrashConfirmMessage =>
+      'Çöp kutusundaki tüm belgeler ve sayfalar kalıcı olarak silinecek. Bu işlem geri alınamaz!';
+
+  @override
+  String get libraryEmptyTrashConfirm => 'Boşalt';
+
+  @override
+  String get libraryTrashEmptied => 'Çöp kutusu boşaltıldı';
+
+  @override
+  String get libraryOpenFailed => 'Belge açılamadı';
+
+  @override
+  String get libraryTrashCountsTowardsLimit =>
+      'Çöp kutusundaki belgeler limite dahildir. Yer açmak için kalıcı olarak silin veya';
+
+  @override
+  String libraryRemainingDocuments(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count belge hakkınız kaldı',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get librarySortTitle => 'Sıralama';
+
+  @override
+  String get librarySortNewestFirst => 'Yeniden eskiye';
+
+  @override
+  String get librarySortOldestFirst => 'Eskiden yeniye';
+
+  @override
+  String get libraryEmptyTitle => 'Henüz not yok';
+
+  @override
+  String get libraryEmptyMessage =>
+      'Yeni bir defter oluşturun ya da bir PDF içe aktarın.';
+
+  @override
+  String get libraryEmptyAction => 'Yeni not';
+
+  @override
+  String get libraryEmptyFavoritesTitle => 'Favori not yok';
+
+  @override
+  String get libraryEmptyFavoritesMessage =>
+      'Notlarınızı favorilere eklemek için yıldız ikonuna tıklayın';
+
+  @override
+  String get libraryEmptyFolderTitle => 'Bu klasör boş';
+
+  @override
+  String get libraryEmptyFolderMessage =>
+      'Notlarınızı buraya taşıyın veya yeni not oluşturun';
+
+  @override
+  String get libraryTrashEmptyTitle => 'Çöp kutusu boş';
+
+  @override
+  String get libraryTrashEmptyMessage => 'Silinen notlar burada görünecek';
+
+  @override
+  String get libraryNoResultsTitle => 'Sonuç bulunamadı';
+
+  @override
+  String libraryNoResultsMessage(String query) {
+    return '\"$query\" için eşleşen not bulunamadı';
+  }
+
+  @override
+  String get libraryClearSearch => 'Aramayı temizle';
+
+  @override
+  String librarySelectedCount(int count) {
+    return '$count seçildi';
+  }
+
+  @override
+  String get librarySelectAll => 'Tümü';
+
+  @override
+  String get libraryDeleteForever => 'Kalıcı Sil';
+
+  @override
+  String get libraryDeleteForeverTitle => 'Kalıcı Olarak Sil';
+
+  @override
+  String get libraryDeleteDocumentsTitle => 'Belgeleri Sil';
+
+  @override
+  String get libraryDocumentLimitReached => 'Belge Limitine Ulaştınız';
+
+  @override
+  String libraryDocumentsCopied(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count belge kopyalandı',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String libraryDocumentsTrashed(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count belge çöpe taşındı',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String libraryDocumentsDeleted(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count belge silindi',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String libraryDeleteDocumentsForeverMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count belge kalıcı olarak silinecek. Bu işlem geri alınamaz!',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String libraryTrashDocumentsMessage(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count belge çöp kutusuna taşınacak.',
+    );
+    return '$_temp0';
+  }
 }

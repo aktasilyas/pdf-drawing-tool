@@ -625,6 +625,300 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Custom'**
   String get libraryPaperCustom;
+
+  /// No description provided for @libraryBreadcrumbRoot.
+  ///
+  /// In en, this message translates to:
+  /// **'Library'**
+  String get libraryBreadcrumbRoot;
+
+  /// No description provided for @libraryFolders.
+  ///
+  /// In en, this message translates to:
+  /// **'Folders'**
+  String get libraryFolders;
+
+  /// No description provided for @libraryDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents'**
+  String get libraryDocuments;
+
+  /// No description provided for @libraryManage.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage'**
+  String get libraryManage;
+
+  /// No description provided for @libraryNewFolder.
+  ///
+  /// In en, this message translates to:
+  /// **'New folder'**
+  String get libraryNewFolder;
+
+  /// No description provided for @libraryNoFolders.
+  ///
+  /// In en, this message translates to:
+  /// **'No folders'**
+  String get libraryNoFolders;
+
+  /// No description provided for @librarySidebarCollapse.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse'**
+  String get librarySidebarCollapse;
+
+  /// No description provided for @libraryOpenSidebar.
+  ///
+  /// In en, this message translates to:
+  /// **'Open sidebar'**
+  String get libraryOpenSidebar;
+
+  /// No description provided for @librarySearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search...'**
+  String get librarySearchHint;
+
+  /// No description provided for @libraryListView.
+  ///
+  /// In en, this message translates to:
+  /// **'List view'**
+  String get libraryListView;
+
+  /// No description provided for @libraryGridView.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid view'**
+  String get libraryGridView;
+
+  /// No description provided for @librarySelectMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get librarySelectMode;
+
+  /// No description provided for @libraryNewDocument.
+  ///
+  /// In en, this message translates to:
+  /// **'New document'**
+  String get libraryNewDocument;
+
+  /// No description provided for @libraryNewDocumentLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Document limit reached'**
+  String get libraryNewDocumentLocked;
+
+  /// No description provided for @libraryNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New'**
+  String get libraryNew;
+
+  /// No description provided for @libraryTrashInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted notes are permanently removed after 30 days'**
+  String get libraryTrashInfo;
+
+  /// No description provided for @libraryEmptyTrash.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty trash'**
+  String get libraryEmptyTrash;
+
+  /// No description provided for @libraryEmptyTrashConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything in the trash will be deleted permanently. This can\'t be undone.'**
+  String get libraryEmptyTrashConfirmMessage;
+
+  /// No description provided for @libraryEmptyTrashConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Empty'**
+  String get libraryEmptyTrashConfirm;
+
+  /// No description provided for @libraryTrashEmptied.
+  ///
+  /// In en, this message translates to:
+  /// **'Trash emptied'**
+  String get libraryTrashEmptied;
+
+  /// No description provided for @libraryOpenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open the notebook'**
+  String get libraryOpenFailed;
+
+  /// No description provided for @libraryTrashCountsTowardsLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes in the trash count towards the limit. Delete them permanently to free up space, or'**
+  String get libraryTrashCountsTowardsLimit;
+
+  /// No description provided for @libraryRemainingDocuments.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 document left} other{{count} documents left}}'**
+  String libraryRemainingDocuments(int count);
+
+  /// No description provided for @librarySortTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sort'**
+  String get librarySortTitle;
+
+  /// No description provided for @librarySortNewestFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Newest first'**
+  String get librarySortNewestFirst;
+
+  /// No description provided for @librarySortOldestFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Oldest first'**
+  String get librarySortOldestFirst;
+
+  /// No description provided for @libraryEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No notes yet'**
+  String get libraryEmptyTitle;
+
+  /// No description provided for @libraryEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a notebook or import a PDF.'**
+  String get libraryEmptyMessage;
+
+  /// No description provided for @libraryEmptyAction.
+  ///
+  /// In en, this message translates to:
+  /// **'New note'**
+  String get libraryEmptyAction;
+
+  /// No description provided for @libraryEmptyFavoritesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No favorite notes'**
+  String get libraryEmptyFavoritesTitle;
+
+  /// No description provided for @libraryEmptyFavoritesMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the star icon to add notes to your favorites'**
+  String get libraryEmptyFavoritesMessage;
+
+  /// No description provided for @libraryEmptyFolderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This folder is empty'**
+  String get libraryEmptyFolderTitle;
+
+  /// No description provided for @libraryEmptyFolderMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Move notes here or create a new one'**
+  String get libraryEmptyFolderMessage;
+
+  /// No description provided for @libraryTrashEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Trash is empty'**
+  String get libraryTrashEmptyTitle;
+
+  /// No description provided for @libraryTrashEmptyMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted notes will appear here'**
+  String get libraryTrashEmptyMessage;
+
+  /// No description provided for @libraryNoResultsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No results'**
+  String get libraryNoResultsTitle;
+
+  /// No description provided for @libraryNoResultsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No notes match \"{query}\"'**
+  String libraryNoResultsMessage(String query);
+
+  /// No description provided for @libraryClearSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear search'**
+  String get libraryClearSearch;
+
+  /// No description provided for @librarySelectedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String librarySelectedCount(int count);
+
+  /// No description provided for @librarySelectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get librarySelectAll;
+
+  /// No description provided for @libraryDeleteForever.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete permanently'**
+  String get libraryDeleteForever;
+
+  /// No description provided for @libraryDeleteForeverTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete permanently?'**
+  String get libraryDeleteForeverTitle;
+
+  /// No description provided for @libraryDeleteDocumentsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete notes'**
+  String get libraryDeleteDocumentsTitle;
+
+  /// No description provided for @libraryDocumentLimitReached.
+  ///
+  /// In en, this message translates to:
+  /// **'Document limit reached'**
+  String get libraryDocumentLimitReached;
+
+  /// No description provided for @libraryDocumentsCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 document duplicated} other{{count} documents duplicated}}'**
+  String libraryDocumentsCopied(int count);
+
+  /// No description provided for @libraryDocumentsTrashed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 document moved to the trash} other{{count} documents moved to the trash}}'**
+  String libraryDocumentsTrashed(int count);
+
+  /// No description provided for @libraryDocumentsDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 document deleted} other{{count} documents deleted}}'**
+  String libraryDocumentsDeleted(int count);
+
+  /// No description provided for @libraryDeleteDocumentsForeverMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 document will be deleted permanently. This can\'t be undone.} other{{count} documents will be deleted permanently. This can\'t be undone.}}'**
+  String libraryDeleteDocumentsForeverMessage(int count);
+
+  /// No description provided for @libraryTrashDocumentsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 document will be moved to the trash.} other{{count} documents will be moved to the trash.}}'**
+  String libraryTrashDocumentsMessage(int count);
 }
 
 class _AppLocalizationsDelegate

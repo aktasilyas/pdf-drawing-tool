@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/index.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// Error state view for documents feature.
 ///
-/// Shows a "Tekrar dene" button when [onRetry] is provided.
+/// Shows a "Try again" button when [onRetry] is provided.
 class DocumentsErrorView extends StatelessWidget {
   const DocumentsErrorView({super.key, required this.error, this.onRetry});
   final Object error;
@@ -24,11 +25,11 @@ class DocumentsErrorView extends StatelessWidget {
             color: context.palette.danger,
           ),
           const SizedBox(height: AppSpacing.lg),
-          Text('Hata: $error'),
+          Text(context.l10n.commonErrorDetail('$error')),
           if (onRetry != null) ...[
             const SizedBox(height: AppSpacing.lg),
             AppButton(
-              label: 'Tekrar dene',
+              label: context.l10n.commonRetry,
               variant: AppButtonVariant.outline,
               size: AppButtonSize.large,
               onPressed: onRetry,
@@ -57,7 +58,7 @@ class DocumentsEmptyFolderView extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.lg),
           Text(
-            'Bu klasör boş',
+            context.l10n.libraryEmptyFolderTitle,
             style: Theme.of(context).textTheme.titleMedium,
           ),
         ],
