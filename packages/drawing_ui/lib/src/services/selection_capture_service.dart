@@ -7,6 +7,7 @@ import 'package:image_gallery_saver_plus/image_gallery_saver_plus.dart';
 import 'package:pasteboard/pasteboard.dart';
 
 import 'package:drawing_ui/src/canvas/image_painter.dart';
+import 'package:drawing_ui/src/utils/drawing_log.dart';
 import 'package:drawing_ui/src/canvas/page_background_raster.dart';
 import 'package:drawing_ui/src/rendering/element_scene_renderer.dart';
 import 'package:drawing_ui/src/rendering/flutter_stroke_renderer.dart';
@@ -55,7 +56,8 @@ class SelectionCaptureService {
       } finally {
         image.dispose();
       }
-    } catch (_) {
+    } catch (e) {
+      DrawingLog.e('SelectionCaptureService: captureSelection failed: $e');
       // Callers report a null result to the user.
       return null;
     }
@@ -149,7 +151,8 @@ class SelectionCaptureService {
         return result['isSuccess'] == true;
       }
       return result != null;
-    } catch (_) {
+    } catch (e) {
+      DrawingLog.e('SelectionCaptureService: saveToGallery failed: $e');
       return false;
     }
   }
@@ -159,7 +162,8 @@ class SelectionCaptureService {
     try {
       await Pasteboard.writeImage(bytes);
       return true;
-    } catch (_) {
+    } catch (e) {
+      DrawingLog.e('SelectionCaptureService: copyToClipboard failed: $e');
       return false;
     }
   }
@@ -216,7 +220,8 @@ class SelectionCaptureService {
     try {
       final codec = await ui.instantiateImageCodec(bytes);
       return (await codec.getNextFrame()).image;
-    } catch (_) {
+    } catch (e) {
+      DrawingLog.e('SelectionCaptureService: decode PDF image failed: $e');
       return null;
     }
   }

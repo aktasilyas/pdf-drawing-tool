@@ -1,7 +1,6 @@
 /// PNG export of the current page.
 library;
 
-import 'dart:developer' as developer;
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -11,8 +10,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/src/panels/export_file_name.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/services/page_png_exporter.dart';
-
-const _logName = 'drawing_ui.export';
+import 'package:drawing_ui/src/utils/drawing_log.dart';
 
 /// Signature of [PagePngExporter.export]; replaced in tests.
 typedef PngExportRenderer = Future<Uint8List> Function(
@@ -79,7 +77,7 @@ Future<void> performPNGExport(
       progress.dismiss();
     }
   } catch (e) {
-    developer.log('PNG export failed', name: _logName, error: e);
+    DrawingLog.e('PNG export failed', e);
     progress.setError('PNG dışa aktarılamadı: $e');
   }
 }

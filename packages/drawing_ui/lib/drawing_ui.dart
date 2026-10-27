@@ -112,6 +112,7 @@ export 'src/widgets/reorderable_tool_list.dart';
 // Utils
 export 'src/utils/pen_type_mapper.dart';
 export 'src/utils/anchor_position_calculator.dart';
+export 'src/utils/drawing_log.dart';
 
 // Re-export flutter_pen_toolbar for convenience
 export 'package:flutter_pen_toolbar/flutter_pen_toolbar.dart';

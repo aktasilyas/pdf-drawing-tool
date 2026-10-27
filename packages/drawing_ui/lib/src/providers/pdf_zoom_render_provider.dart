@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:drawing_ui/src/utils/drawing_log.dart';
 import 'package:drawing_ui/src/providers/pdf_page_cache.dart';
 
 /// Zoom'a göre kalite hesapla
@@ -97,7 +98,7 @@ class ZoomBasedRenderNotifier extends StateNotifier<double> {
 
       state = quality;
     } catch (e) {
-      debugPrint('PDF render error: $e');
+      DrawingLog.e('PDF render error: $e');
     } finally {
       slots.release(qualityKey);
     }

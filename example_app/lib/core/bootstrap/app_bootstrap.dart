@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:drawing_ui/drawing_ui.dart' show DrawingLog, DrawingLogLevel;
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -53,6 +54,7 @@ class AppBootstrap {
   /// are reported to it (not logged; the caller logs) and rethrown.
   Future<AppBootstrapResult> run() async {
     env.validateFor(flags);
+    DrawingLog.sink = _routeDrawingLog;
 
     final prefs = await SharedPreferences.getInstance();
     final crashReporter = _crashReporter ?? await _selectReporter(prefs);
@@ -130,4 +132,23 @@ Future<void> _defaultInitRevenueCat(AppEnv env) async {
     await Purchases.setLogLevel(LogLevel.debug);
   }
   logger.i('RevenueCat initialized');
+}
+
+/// Routes drawing_ui diagnostics into the app logger.
+void _routeDrawingLog(
+  DrawingLogLevel level,
+  String message,
+  Object? error,
+  StackTrace? stackTrace,
+) {
+  switch (level) {
+    case DrawingLogLevel.debug:
+      logger.d(message, error: error, stackTrace: stackTrace);
+    case DrawingLogLevel.info:
+      logger.i(message, error: error, stackTrace: stackTrace);
+    case DrawingLogLevel.warning:
+      logger.w(message, error: error, stackTrace: stackTrace);
+    case DrawingLogLevel.error:
+      logger.e(message, error: error, stackTrace: stackTrace);
+  }
 }
