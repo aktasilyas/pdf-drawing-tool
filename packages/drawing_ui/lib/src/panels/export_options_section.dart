@@ -27,6 +27,8 @@ class ExportOptionsSection extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           SegmentedButton<ExportPageScope>(
+            // Full width, like the range fields and the switch row.
+            expandedInsets: EdgeInsets.zero,
             showSelectedIcon: false,
             segments: const [
               ButtonSegment(
@@ -83,6 +85,7 @@ class ExportOptionsSection extends StatelessWidget {
                 ),
               ),
           ],
+          const SizedBox(height: ChromeSpacing.sm),
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
             title: const Text(ExportStrings.includeTemplate),
@@ -109,8 +112,11 @@ class _NumberField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return TextFormField(
       initialValue: '$value',
+      style: theme.textTheme.bodyLarge
+          ?.copyWith(color: theme.colorScheme.onSurface),
       keyboardType: TextInputType.number,
       // Not dense: the field stays a >= 48dp touch target.
       decoration: InputDecoration(labelText: label),

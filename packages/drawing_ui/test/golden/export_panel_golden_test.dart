@@ -104,6 +104,8 @@ Future<void> _tests() async {
         brightness: light, width: _phoneWidth, prefs: prefs, options: _range),
     'phone_dark': () => _scenario(
         brightness: dark, width: _phoneWidth, prefs: prefs, options: _current),
+    'phone_dark_range': () => _scenario(
+        brightness: dark, width: _phoneWidth, prefs: prefs, options: _range),
     'phone_light_invalid_text130': () => _scenario(
         brightness: light,
         width: _phoneWidth,
