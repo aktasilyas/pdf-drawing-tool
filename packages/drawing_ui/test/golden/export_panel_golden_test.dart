@@ -99,10 +99,7 @@ Future<void> _tests() async {
     'tablet_light_range': () => _scenario(
         brightness: light, width: _tabletWidth, prefs: prefs, options: _range),
     'tablet_dark_invalid': () => _scenario(
-        brightness: dark,
-        width: _tabletWidth,
-        prefs: prefs,
-        options: _invalid),
+        brightness: dark, width: _tabletWidth, prefs: prefs, options: _invalid),
     'phone_light': () => _scenario(
         brightness: light, width: _phoneWidth, prefs: prefs, options: _range),
     'phone_dark': () => _scenario(
