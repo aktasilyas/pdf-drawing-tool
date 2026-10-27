@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'package:drawing_core/drawing_core.dart' show DrawingDocument;
 import 'package:drawing_ui/drawing_ui.dart';
 import 'package:drawing_ui/src/panels/export_panel.dart';
-import 'package:drawing_ui/src/services/pdf_share_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';

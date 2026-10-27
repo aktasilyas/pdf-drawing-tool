@@ -57,9 +57,15 @@ Future<void> resetAppState() async {
 ///
 /// Returns once the widget tree is pumped; the caller waits for the splash
 /// screen (see `LibraryRobot.waitForLibrary`).
-Future<void> launchApp(WidgetTester tester) async {
+///
+/// [overrides] go after the app's own overrides, e.g. to stub a platform
+/// service such as the share sheet.
+Future<void> launchApp(
+  WidgetTester tester, {
+  List<Override> overrides = const [],
+}) async {
   await resetAppState();
-  await _bootApp(tester);
+  await _bootApp(tester, overrides);
 }
 
 /// Simulates killing and reopening the app: unmounts the tree, closes the
@@ -69,21 +75,24 @@ Future<void> relaunchApp(WidgetTester tester) async {
   await tester.pumpWidget(const SizedBox.shrink());
   await tester.pump();
   await _closeDatabase();
-  await _bootApp(tester);
+  await _bootApp(tester, const []);
 }
 
-Future<void> _bootApp(WidgetTester tester) async {
+Future<void> _bootApp(WidgetTester tester, List<Override> overrides) async {
   const flags = FeatureFlags.allOff;
   final result = await AppBootstrap(flags: flags, isRelease: false).run();
 
   await tester.pumpWidget(
     ProviderScope(
-      overrides: buildAppOverrides(
-        flags: flags,
-        prefs: result.prefs,
-        crashReporter: result.crashReporter,
-        pdfPaths: getIt<PdfPathResolver>(),
-      ),
+      overrides: [
+        ...buildAppOverrides(
+          flags: flags,
+          prefs: result.prefs,
+          crashReporter: result.crashReporter,
+          pdfPaths: getIt<PdfPathResolver>(),
+        ),
+        ...overrides,
+      ],
       child: const ElyaNotesApp(),
     ),
   );

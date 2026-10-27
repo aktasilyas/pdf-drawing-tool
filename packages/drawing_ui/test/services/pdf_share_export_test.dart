@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'package:drawing_core/drawing_core.dart' show Page;
 import 'package:drawing_ui/drawing_ui.dart';
 import 'package:drawing_ui/src/panels/export_panel.dart';
-import 'package:drawing_ui/src/services/pdf_share_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _FakeShare extends PdfShareService {
