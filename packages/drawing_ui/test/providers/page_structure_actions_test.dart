@@ -324,8 +324,8 @@ void main() {
 
     test('undo removes the copy', () {
       load(2, current: 1);
-      final change = actions()
-          .insertCopy(0, container.read(documentProvider).pages[0]);
+      final change =
+          actions().insertCopy(0, container.read(documentProvider).pages[0]);
 
       actions().undo(change);
       expect(docIds(), ['p0', 'p1']);

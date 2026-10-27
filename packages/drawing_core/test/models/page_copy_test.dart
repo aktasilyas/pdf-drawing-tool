@@ -93,7 +93,8 @@ void main() {
       final from = original.layers.single;
       final to = copy.layers.single;
 
-      expect(to.strokes.map((s) => s.points), from.strokes.map((s) => s.points));
+      expect(
+          to.strokes.map((s) => s.points), from.strokes.map((s) => s.points));
       expect(to.texts.single.text, 'hi');
       expect(to.images.single.filePath, 'a.png');
       expect(to.stickyNotes.single.strokes, hasLength(1));
