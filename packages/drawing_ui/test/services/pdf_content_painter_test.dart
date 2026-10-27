@@ -91,4 +91,46 @@ void main() {
       expect(content, isNot(contains('/BM')));
     });
   });
+
+  group('PdfContentPainter dot strokes', () {
+    Stroke dot(StrokeStyle style) => Stroke.create(
+          style: style,
+          points: [
+            DrawingPoint(x: 100, y: 50, pressure: 0.8, timestamp: 0),
+          ],
+        );
+
+    for (final pen in PenType.values) {
+      test('single-point ${pen.name} stroke is filled', () async {
+        final style = pen.toStrokeStyle(color: 0xFF000000);
+        final content = await _export(dot(style));
+        expect(content, contains(RegExp(r'\bf\b')),
+            reason: 'a dot must produce a fill op');
+      });
+    }
+
+    test('stroked (non-outline) dot is a filled circle of the stroke width',
+        () async {
+      final style = StrokeStyle.pen(thickness: 6).copyWith(
+        pressureSensitive: false,
+        dynamics: StrokeDynamics.none,
+      );
+      expect(VariableWidthStrokeRenderer.usesOutline(style), isFalse);
+      final content = await _export(dot(style));
+      expect(content, contains(RegExp(r'\bf\b')));
+      expect(content, isNot(contains(RegExp(r' S\b'))));
+      // Circle spans x in [97, 103] around the dot centre at x = 100.
+      final xs = RegExp(r'(-?[\d.]+) (-?[\d.]+) (?:m|c|l)\b')
+          .allMatches(content)
+          .map((m) => double.parse(m.group(1)!));
+      expect(xs.reduce(math.max), closeTo(103, 0.5));
+      expect(xs.reduce(math.min), closeTo(97, 0.5));
+    });
+
+    test('highlighter dot keeps the multiply blend', () async {
+      final style = PenType.highlighter.toStrokeStyle(color: 0xFFFFEB3B);
+      final content = await _export(dot(style));
+      expect(content, contains('/BM/Multiply'));
+    });
+  });
 }

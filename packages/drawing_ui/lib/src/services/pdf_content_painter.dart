@@ -98,12 +98,16 @@ class PdfContentPainter {
   }
 
   void _paintStroke(PdfGraphics g, Stroke stroke, double w, double h) {
-    if (stroke.points.length < 2) return;
+    if (stroke.points.isEmpty) return;
     final style = stroke.style;
 
     // Same routing predicate as the on-screen renderers.
     if (VariableWidthStrokeRenderer.usesOutline(style)) {
       _paintOutlineStroke(g, stroke, w, h);
+      return;
+    }
+    if (stroke.points.length == 1) {
+      _paintDot(g, stroke, h);
       return;
     }
 
@@ -138,6 +142,23 @@ class PdfContentPainter {
 
     _buildStrokePath(g, points, h);
     g.strokePath();
+    g.restoreContext();
+  }
+
+  /// A single-point stroke (tap) as a filled circle of the stroke width.
+  void _paintDot(PdfGraphics g, Stroke stroke, double h) {
+    final style = stroke.style;
+    final p = stroke.points.first;
+    g.saveContext();
+    final alpha = style.opacity * _vectorHelper.extractAlpha(style.color);
+    final blend = _pdfBlendMode(style.blendMode);
+    if (alpha < 1.0 || blend != null) {
+      g.setGraphicState(PdfGraphicState(fillOpacity: alpha, blendMode: blend));
+    }
+    g.setFillColor(_vectorHelper.convertColor(style.color));
+    g.drawEllipse(
+        p.x, _flipY(p.y, h), style.thickness / 2, style.thickness / 2);
+    g.fillPath();
     g.restoreContext();
   }
 
