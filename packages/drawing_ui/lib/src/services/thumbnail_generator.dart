@@ -1,24 +1,33 @@
 import 'dart:io';
-import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'dart:typed_data';
 import 'package:flutter/material.dart' hide Page;
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:drawing_core/drawing_core.dart';
-import 'package:drawing_ui/src/painters/cover/cover_renderer.dart';
+import 'package:drawing_ui/src/canvas/image_painter.dart';
+import 'package:drawing_ui/src/canvas/page_background_painter.dart';
 import 'package:drawing_ui/src/painters/cover/cover_texture_store.dart';
+import 'package:drawing_ui/src/services/pdf_raster_layer_renderer.dart';
 import 'package:pdfx/pdfx.dart' as pdfx;
 
 /// Generates thumbnail images for pages.
 ///
-/// Uses Flutter's rendering system to convert page content into PNG thumbnails.
-/// Thumbnails are scaled proportionally to fit the specified dimensions.
+/// A thumbnail is a scaled-down render of the page with the same painters as
+/// the canvas: [PageBackgroundPatternPainter] (and through it
+/// `TemplatePatternPainter` / `CoverRenderer`) for the background, and
+/// `ElementSceneRenderer` / `StickyNotePainter` (via
+/// [PdfRasterLayerRenderer]) for the layer content. There is no second,
+/// simplified renderer here.
 class ThumbnailGenerator {
   /// Default thumbnail width in pixels.
   static const double defaultWidth = 150;
 
   /// Default thumbnail height in pixels.
   static const double defaultHeight = 200;
+
+  /// Shared canvas element painter (stroke renderer, sticky notes).
+  static final PdfRasterLayerRenderer _layerRenderer =
+      PdfRasterLayerRenderer();
 
   /// Generates a cache key for a page.
   ///
@@ -41,269 +50,160 @@ class ThumbnailGenerator {
     Color backgroundColor = Colors.white,
     PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
   }) async {
+    final images = ImageCacheManager();
+    ui.Image? pdfImage;
+    ui.Image? coverImage;
     try {
+      // Async work first, so the recording below is synchronous.
+      if (page.background.type == BackgroundType.pdf) {
+        pdfImage = await _loadPdfBackground(page, pdfPaths);
+      }
+      coverImage = await _loadCoverImage(page.background);
+      if (_isMaterialCover(page.background)) {
+        await CoverTextureStore.ensureLoaded();
+      }
+      final visibleLayers = [
+        for (final layer in page.layers)
+          if (layer.isVisible) layer,
+      ];
+      await Future.wait([
+        for (final layer in visibleLayers)
+          for (final img in layer.images) images.loadImage(img.filePath),
+      ]);
+
       final recorder = ui.PictureRecorder();
       final canvas = Canvas(recorder);
 
-      // Draw background
       canvas.drawRect(
         Rect.fromLTWH(0, 0, width, height),
         Paint()..color = backgroundColor,
       );
 
-      // Calculate scale to fit page within thumbnail
+      // Scale the page to fit and center it.
       final scaleX = width / page.size.width;
       final scaleY = height / page.size.height;
       final scale = scaleX < scaleY ? scaleX : scaleY;
-
-      // Center the content
-      final scaledWidth = page.size.width * scale;
-      final scaledHeight = page.size.height * scale;
-      final offsetX = (width - scaledWidth) / 2;
-      final offsetY = (height - scaledHeight) / 2;
+      final offsetX = (width - page.size.width * scale) / 2;
+      final offsetY = (height - page.size.height * scale) / 2;
 
       canvas.save();
       canvas.translate(offsetX, offsetY);
       canvas.scale(scale);
 
-      // CRITICAL: Render page background (cover color, template pattern, etc.)
-      await _renderPageBackground(canvas, page);
-
-      // CRITICAL: Render PDF background if exists
-      if (page.background.type == BackgroundType.pdf) {
-        await _renderPdfBackground(canvas, page, pdfPaths);
+      final pageSize = Size(page.size.width, page.size.height);
+      _paintBackground(canvas, page.background, pageSize, coverImage);
+      if (pdfImage != null) {
+        canvas.drawImageRect(
+          pdfImage,
+          Rect.fromLTWH(
+              0, 0, pdfImage.width.toDouble(), pdfImage.height.toDouble()),
+          Offset.zero & pageSize,
+          Paint()..filterQuality = FilterQuality.high,
+        );
       }
 
-      // Render all layers
-      for (final layer in page.layers) {
-        _renderStrokes(canvas, layer.strokes);
-        _renderShapes(canvas, layer.shapes);
-        _renderTexts(canvas, layer.texts);
+      // Layer content exactly as the canvas paints it: each layer in its own
+      // compositing layer (blend modes such as the highlighter's multiply
+      // only mix with that layer's ink), elements in z-order, sticky notes
+      // on top.
+      final pageRect = Offset.zero & pageSize;
+      for (final layer in visibleLayers) {
+        canvas.saveLayer(pageRect, Paint());
+        _layerRenderer.paintElements(canvas, layer, images);
+        _layerRenderer.paintStickyNotes(canvas, layer.stickyNotes);
+        canvas.restore();
       }
 
       canvas.restore();
 
-      // Convert to PNG
       final picture = recorder.endRecording();
       final image = await picture.toImage(width.toInt(), height.toInt());
-      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-
-      return byteData?.buffer.asUint8List();
+      picture.dispose();
+      try {
+        final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+        return byteData?.buffer.asUint8List();
+      } finally {
+        image.dispose();
+      }
     } catch (e) {
       // Return null on any error (e.g., invalid dimensions, rendering issues)
+      return null;
+    } finally {
+      images.dispose();
+      pdfImage?.dispose();
+      coverImage?.dispose();
+    }
+  }
+
+  /// Base color, then the image cover (if any), then the canvas background
+  /// painter (grid / lines / dots / templates / material and other covers).
+  static void _paintBackground(
+    Canvas canvas,
+    PageBackground background,
+    Size size,
+    ui.Image? coverImage,
+  ) {
+    canvas.drawRect(
+      Offset.zero & size,
+      Paint()..color = Color(background.color),
+    );
+    if (coverImage != null) {
+      canvas.drawImageRect(
+        coverImage,
+        Rect.fromLTWH(
+            0, 0, coverImage.width.toDouble(), coverImage.height.toDouble()),
+        Offset.zero & size,
+        Paint()..filterQuality = FilterQuality.medium,
+      );
+    }
+    PageBackgroundPatternPainter(background: background).paint(canvas, size);
+  }
+
+  static bool _isMaterialCover(PageBackground background) {
+    if (background.type != BackgroundType.cover) return false;
+    final id = background.coverId;
+    return id != null && CoverRegistry.byId(id)?.style == CoverStyle.material;
+  }
+
+  /// Loads the asset of an image cover; null for every other background or
+  /// when the asset cannot be loaded (the base color stays visible).
+  static Future<ui.Image?> _loadCoverImage(PageBackground background) async {
+    if (background.type != BackgroundType.cover) return null;
+    final id = background.coverId;
+    final cover = id == null ? null : CoverRegistry.byId(id);
+    if (cover?.style != CoverStyle.image || cover?.imagePath == null) {
+      return null;
+    }
+    try {
+      final data = await rootBundle.load(cover!.imagePath!);
+      final codec = await ui.instantiateImageCodec(data.buffer.asUint8List());
+      return (await codec.getNextFrame()).image;
+    } catch (_) {
       return null;
     }
   }
 
-  /// Renders page background (cover color, template patterns, etc.)
-  static Future<void> _renderPageBackground(Canvas canvas, Page page) async {
-    final background = page.background;
-    final pageSize = Size(page.size.width, page.size.height);
-
-    // 1. Draw base background color
-    final bgColor = Color(background.color);
-    canvas.drawRect(
-      Rect.fromLTWH(0, 0, pageSize.width, pageSize.height),
-      Paint()..color = bgColor,
-    );
-
-    // 2. Draw pattern/grid/lines for template types
-    final lineColor = background.lineColor ?? 0xFFE0E0E0;
-    final linePaint = Paint()
-      ..color = Color(lineColor)
-      ..strokeWidth = background.templateLineWidth ?? 0.5
-      ..isAntiAlias = true;
-
-    switch (background.type) {
-      case BackgroundType.blank:
-        break;
-
-      case BackgroundType.grid:
-        final spacing = background.gridSpacing ?? 25.0;
-        _drawGrid(canvas, pageSize, linePaint, spacing);
-        break;
-
-      case BackgroundType.lined:
-        final spacing = background.lineSpacing ?? 25.0;
-        _drawLines(canvas, pageSize, linePaint, spacing);
-        break;
-
-      case BackgroundType.dotted:
-        final spacing = background.gridSpacing ?? 20.0;
-        _drawDots(canvas, pageSize, spacing, Color(lineColor));
-        break;
-
-      case BackgroundType.template:
-        if (background.templatePattern != null) {
-          _drawTemplatePattern(
-            canvas,
-            pageSize,
-            background.templatePattern!,
-            background.templateSpacingMm ?? 8.0,
-            background.templateLineWidth ?? 0.5,
-            Color(lineColor),
-          );
-        }
-        break;
-
-      case BackgroundType.pdf:
-        break;
-
-      case BackgroundType.cover:
-        await _renderCover(canvas, pageSize, background.coverId);
-        break;
-    }
-  }
-
-  /// Draws a cover: material covers paint synchronously through
-  /// [CoverRenderer]; image covers load their asset.
-  static Future<void> _renderCover(
-    Canvas canvas,
-    Size size,
-    String? coverId,
-  ) async {
-    if (coverId == null) return;
-    final cover = CoverRegistry.byId(coverId);
-    if (cover == null) return;
-    if (cover.style == CoverStyle.material) {
-      await CoverTextureStore.ensureLoaded();
-      CoverRenderer.paint(canvas, size, cover);
-      return;
-    }
-    if (cover.style != CoverStyle.image || cover.imagePath == null) {
-      return;
-    }
-    try {
-      final data = await rootBundle.load(cover.imagePath!);
-      final codec = await ui.instantiateImageCodec(
-        data.buffer.asUint8List(),
-      );
-      final frame = await codec.getNextFrame();
-      final img = frame.image;
-      canvas.drawImageRect(
-        img,
-        Rect.fromLTWH(0, 0, img.width.toDouble(), img.height.toDouble()),
-        Rect.fromLTWH(0, 0, size.width, size.height),
-        Paint()..filterQuality = FilterQuality.medium,
-      );
-    } catch (_) {
-      // Asset yüklenemezse primaryColor fallback zaten çizildi
-    }
-  }
-
-  /// Draw grid pattern
-  static void _drawGrid(Canvas canvas, Size size, Paint paint, double spacing) {
-    // Vertical lines
-    for (double x = spacing; x < size.width; x += spacing) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-    }
-    // Horizontal lines
-    for (double y = spacing; y < size.height; y += spacing) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-    }
-  }
-
-  /// Draw lined pattern
-  static void _drawLines(
-      Canvas canvas, Size size, Paint paint, double spacing) {
-    final topMargin = spacing * 2;
-    for (double y = topMargin; y < size.height; y += spacing) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-    }
-  }
-
-  /// Draw dotted pattern
-  static void _drawDots(Canvas canvas, Size size, double spacing, Color color) {
-    final dotPaint = Paint()
-      ..color = color
-      ..style = PaintingStyle.fill;
-    const dotRadius = 1.0;
-
-    for (double x = spacing; x < size.width; x += spacing) {
-      for (double y = spacing; y < size.height; y += spacing) {
-        canvas.drawCircle(Offset(x, y), dotRadius, dotPaint);
-      }
-    }
-  }
-
-  /// Draw template pattern (simplified for thumbnail)
-  static void _drawTemplatePattern(
-    Canvas canvas,
-    Size size,
-    TemplatePattern pattern,
-    double spacingMm,
-    double lineWidth,
-    Color lineColor,
-  ) {
-    final paint = Paint()
-      ..color = lineColor
-      ..strokeWidth = lineWidth
-      ..isAntiAlias = true;
-
-    // Convert mm to pixels (assuming 96 DPI, 1mm ≈ 3.78 pixels)
-    final spacingPx = spacingMm * 3.78;
-
-    switch (pattern) {
-      case TemplatePattern.blank:
-        break;
-      case TemplatePattern.smallGrid:
-      case TemplatePattern.mediumGrid:
-      case TemplatePattern.largeGrid:
-        _drawGrid(canvas, size, paint, spacingPx);
-        break;
-      case TemplatePattern.thinLines:
-      case TemplatePattern.mediumLines:
-      case TemplatePattern.thickLines:
-        _drawLines(canvas, size, paint, spacingPx);
-        break;
-      case TemplatePattern.smallDots:
-      case TemplatePattern.mediumDots:
-      case TemplatePattern.largeDots:
-        _drawDots(canvas, size, spacingPx, lineColor);
-        break;
-      default:
-        // For other patterns, draw a simple grid as fallback
-        _drawGrid(canvas, size, paint, spacingPx);
-        break;
-    }
-  }
-
-  /// Renders PDF background on canvas.
-  ///
-  /// Supports both in-memory [pdfData] and lazy-loaded PDFs via [pdfFilePath].
-  static Future<void> _renderPdfBackground(
-    Canvas canvas,
+  /// Decodes the PDF page behind [page], from in-memory `pdfData` or the
+  /// lazy-loaded `pdfFilePath`. Null when missing or unreadable.
+  static Future<ui.Image?> _loadPdfBackground(
     Page page,
     PdfPathResolver pdfPaths,
   ) async {
-    if (page.background.pdfPageIndex == null) return;
-
+    final background = page.background;
+    if (background.pdfPageIndex == null) return null;
     try {
-      Uint8List? bytes = page.background.pdfData;
-
-      // Lazy-loaded PDF: render from file path
-      if (bytes == null && page.background.pdfFilePath != null) {
+      var bytes = background.pdfData;
+      if (bytes == null && background.pdfFilePath != null) {
         bytes = await _renderPdfPageFromFile(
-          pdfPaths.resolve(page.background.pdfFilePath!),
-          page.background.pdfPageIndex!,
+          pdfPaths.resolve(background.pdfFilePath!),
+          background.pdfPageIndex!,
         );
       }
-
-      if (bytes == null) return;
-
+      if (bytes == null) return null;
       final codec = await ui.instantiateImageCodec(bytes);
-      final frame = await codec.getNextFrame();
-      final pdfImage = frame.image;
-
-      canvas.drawImageRect(
-        pdfImage,
-        Rect.fromLTWH(
-            0, 0, pdfImage.width.toDouble(), pdfImage.height.toDouble()),
-        Rect.fromLTWH(0, 0, page.size.width, page.size.height),
-        Paint()..filterQuality = FilterQuality.high,
-      );
-    } catch (e) {
-      // PDF render error - continue silently
+      return (await codec.getNextFrame()).image;
+    } catch (_) {
+      return null;
     }
   }
 
@@ -335,173 +235,6 @@ class ThumbnailGenerator {
       try {
         await document?.close();
       } catch (_) {}
-    }
-  }
-
-  /// Renders strokes on the canvas.
-  static void _renderStrokes(Canvas canvas, List<Stroke> strokes) {
-    for (final stroke in strokes) {
-      if (stroke.points.length < 2) {
-        // Skip strokes with less than 2 points (can't draw a line)
-        continue;
-      }
-
-      final paint = Paint()
-        ..color = Color(stroke.style.color)
-        ..strokeWidth = stroke.style.thickness
-        ..strokeCap = StrokeCap.round
-        ..strokeJoin = StrokeJoin.round
-        ..style = PaintingStyle.stroke;
-
-      final path = Path();
-      path.moveTo(stroke.points.first.x, stroke.points.first.y);
-
-      for (int i = 1; i < stroke.points.length; i++) {
-        path.lineTo(stroke.points[i].x, stroke.points[i].y);
-      }
-
-      canvas.drawPath(path, paint);
-    }
-  }
-
-  /// Renders shapes on the canvas.
-  static void _renderShapes(Canvas canvas, List<Shape> shapes) {
-    for (final shape in shapes) {
-      final strokePaint = Paint()
-        ..color = Color(shape.style.color)
-        ..strokeWidth = shape.style.thickness
-        ..style = PaintingStyle.stroke;
-
-      Paint? fillPaint;
-      if (shape.isFilled && shape.fillColor != null) {
-        fillPaint = Paint()
-          ..color = Color(shape.fillColor!)
-          ..style = PaintingStyle.fill;
-      }
-
-      final start = shape.startPoint;
-      final end = shape.endPoint;
-
-      switch (shape.type) {
-        case ShapeType.line:
-          canvas.drawLine(
-            Offset(start.x, start.y),
-            Offset(end.x, end.y),
-            strokePaint,
-          );
-          break;
-
-        case ShapeType.arrow:
-          _drawArrow(canvas, start, end, strokePaint);
-          break;
-
-        case ShapeType.rectangle:
-          final rect = Rect.fromPoints(
-            Offset(start.x, start.y),
-            Offset(end.x, end.y),
-          );
-          if (fillPaint != null) {
-            canvas.drawRect(rect, fillPaint);
-          }
-          canvas.drawRect(rect, strokePaint);
-          break;
-
-        case ShapeType.ellipse:
-          final rect = Rect.fromPoints(
-            Offset(start.x, start.y),
-            Offset(end.x, end.y),
-          );
-          if (fillPaint != null) {
-            canvas.drawOval(rect, fillPaint);
-          }
-          canvas.drawOval(rect, strokePaint);
-          break;
-
-        case ShapeType.triangle:
-        case ShapeType.diamond:
-        default:
-          // For now, draw a simple line as placeholder
-          canvas.drawLine(
-            Offset(start.x, start.y),
-            Offset(end.x, end.y),
-            strokePaint,
-          );
-          break;
-      }
-    }
-  }
-
-  /// Draws an arrow from start to end point.
-  static void _drawArrow(
-    Canvas canvas,
-    DrawingPoint start,
-    DrawingPoint end,
-    Paint paint,
-  ) {
-    // Draw line
-    canvas.drawLine(
-      Offset(start.x, start.y),
-      Offset(end.x, end.y),
-      paint,
-    );
-
-    // Calculate arrow head
-    final dx = end.x - start.x;
-    final dy = end.y - start.y;
-    final angle = math.atan2(dy, dx);
-    final arrowLength = paint.strokeWidth * 3;
-    final arrowAngle = 0.5;
-
-    final arrowPoint1 = Offset(
-      end.x - arrowLength * math.cos(angle - arrowAngle),
-      end.y - arrowLength * math.sin(angle - arrowAngle),
-    );
-    final arrowPoint2 = Offset(
-      end.x - arrowLength * math.cos(angle + arrowAngle),
-      end.y - arrowLength * math.sin(angle + arrowAngle),
-    );
-
-    canvas.drawLine(Offset(end.x, end.y), arrowPoint1, paint);
-    canvas.drawLine(Offset(end.x, end.y), arrowPoint2, paint);
-  }
-
-  /// Renders text elements on the canvas.
-  static void _renderTexts(Canvas canvas, List<TextElement> texts) {
-    for (final textElement in texts) {
-      final textStyle = TextStyle(
-        color: Color(textElement.color),
-        fontSize: textElement.fontSize,
-        fontWeight: textElement.isBold ? FontWeight.bold : FontWeight.normal,
-        fontStyle: textElement.isItalic ? FontStyle.italic : FontStyle.normal,
-        decoration: textElement.isUnderline
-            ? TextDecoration.underline
-            : TextDecoration.none,
-      );
-
-      final textSpan = TextSpan(
-        text: textElement.text,
-        style: textStyle,
-      );
-
-      final textPainter = TextPainter(
-        text: textSpan,
-        textDirection: TextDirection.ltr,
-      );
-
-      textPainter.layout();
-      canvas.save();
-      if (textElement.rotation != 0.0) {
-        final cx = textElement.x + textPainter.width / 2;
-        final cy = textElement.y + textPainter.height / 2;
-        canvas.translate(cx, cy);
-        canvas.rotate(textElement.rotation);
-        canvas.translate(-cx, -cy);
-      }
-      textPainter.paint(
-        canvas,
-        Offset(textElement.x, textElement.y),
-      );
-      canvas.restore();
     }
   }
 }

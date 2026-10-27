@@ -28,7 +28,7 @@ annotate() { # $1=title $2=logfile
 benchmarks() { # $1=title $2=logfile: surface benchmark lines from a passing run
   local lines
   # The test reporter may prefix a line with progress output; keep from the label on.
-  lines=$(grep -oE '(committed (build|raster)|active stroke|active-length|pen-up|\[content-bench\])[ :].*' "$2" \
+  lines=$(grep -oE '(committed (build|raster)|active stroke|active-length|pen-up|thumbnail|\[content-bench\])[ :].*' "$2" \
     | grep -E '[0-9] ms|tiles: [0-9]' || true)
   [ -z "$lines" ] && return 0
   echo "$lines"
