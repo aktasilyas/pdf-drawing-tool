@@ -1,7 +1,24 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/src/providers/pdf_path_provider.dart';
 import 'package:drawing_ui/src/services/pdf_import_service.dart';
-import 'package:drawing_ui/src/services/pdf_export_service.dart';
+
+/// State of a PDF export.
+enum PDFExportState {
+  /// Idle, ready to start export.
+  idle,
+
+  /// Preparing pages for export.
+  preparing,
+
+  /// Exporting pages to PDF.
+  exporting,
+
+  /// Export completed successfully.
+  completed,
+
+  /// Export failed with error.
+  error,
+}
 
 /// PDF Import state model.
 class PDFImportStateModel {
@@ -146,19 +163,6 @@ class PDFExportStateNotifier extends StateNotifier<PDFExportStateModel> {
 /// Provider for PDF import service.
 final pdfImportServiceProvider = Provider<PDFImportService>((ref) {
   final service = PDFImportService(
-    pdfPaths: ref.watch(pdfPathResolverProvider),
-  );
-
-  ref.onDispose(() {
-    service.dispose();
-  });
-
-  return service;
-});
-
-/// Provider for PDF export service.
-final pdfExportServiceProvider = Provider<PDFExportService>((ref) {
-  final service = PDFExportService(
     pdfPaths: ref.watch(pdfPathResolverProvider),
   );
 

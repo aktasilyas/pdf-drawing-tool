@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/src/providers/pdf_provider.dart';
 import 'package:drawing_ui/src/services/pdf_import_service.dart';
-import 'package:drawing_ui/src/services/pdf_export_service.dart';
 
 void main() {
   group('PDFProvider', () {
@@ -144,23 +143,6 @@ void main() {
 
       test('should dispose import service', () {
         final service = container.read(pdfImportServiceProvider);
-
-        container.dispose();
-
-        expect(service.isDisposed, true);
-      });
-    });
-
-    group('Export Service Integration', () {
-      test('should provide export service instance', () {
-        final service = container.read(pdfExportServiceProvider);
-
-        expect(service, isNotNull);
-        expect(service.state, PDFExportState.idle);
-      });
-
-      test('should dispose export service', () {
-        final service = container.read(pdfExportServiceProvider);
 
         container.dispose();
 

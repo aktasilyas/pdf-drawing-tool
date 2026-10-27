@@ -45,29 +45,6 @@ void main() {
     });
 
     group('PDF Export Flow', () {
-      test('should have complete export configuration', () {
-        final config = ExportConfiguration(
-          exportMode: PDFExportMode.vector,
-          quality: PDFExportQuality.high,
-          includeBackground: true,
-        );
-
-        expect(config.exportMode, PDFExportMode.vector);
-        expect(config.quality, PDFExportQuality.high);
-      });
-
-      test('should convert to export options', () {
-        final config = ExportConfiguration(
-          exportMode: PDFExportMode.hybrid,
-          quality: PDFExportQuality.print,
-        );
-
-        final options = config.toExportOptions();
-
-        expect(options.exportMode, PDFExportMode.hybrid);
-        expect(options.quality, PDFExportQuality.print);
-      });
-
       test('should validate exportable pages', () {
         final page = Page.create(index: 0).addStroke(
           Stroke(
@@ -83,39 +60,6 @@ void main() {
 
         // Page with valid dimensions is exportable
         expect(page.size.width > 0 && page.size.height > 0, true);
-      });
-    });
-
-    group('Import/Export Round-Trip', () {
-      test('should preserve page structure in export', () {
-        final doc = DrawingDocument.multiPage(
-          id: 'd1',
-          title: 'Export Test',
-          pages: [
-            Page.create(index: 0),
-            Page.create(index: 1),
-          ],
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        );
-
-        final exportService = PDFExportService();
-
-        // Create metadata
-        final metadata = exportService.createMetadata(doc);
-
-        expect(metadata.title, 'Export Test');
-        expect(metadata.creator, 'Elyanotes');
-
-        exportService.dispose();
-      });
-
-      test('should handle empty document export gracefully', () {
-        final exportService = PDFExportService();
-
-        expect(exportService.validatePages([]), false);
-
-        exportService.dispose();
       });
     });
 
@@ -184,51 +128,6 @@ void main() {
       });
     });
 
-    group('Raster Rendering', () {
-      test('should detect complex pages', () {
-        final renderer = RasterPDFRenderer();
-
-        var page = Page.create(index: 0);
-
-        for (int i = 0; i < 2000; i++) {
-          page = page.addStroke(
-            Stroke(
-              id: 's$i',
-              points: [
-                DrawingPoint(x: 0, y: 0),
-                DrawingPoint(x: 100, y: 100),
-              ],
-              style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
-              createdAt: DateTime.now(),
-            ),
-          );
-        }
-
-        expect(renderer.isPageComplex(page), true);
-      });
-
-      test('should recommend appropriate DPI', () {
-        final renderer = RasterPDFRenderer();
-
-        final simplePage = Page.create(index: 0);
-        final dpi = renderer.recommendDPI(simplePage);
-
-        expect(dpi, greaterThanOrEqualTo(150));
-      });
-
-      test('should calculate memory requirements', () {
-        final renderer = RasterPDFRenderer();
-
-        final memory = renderer.estimateMemoryUsage(
-          width: 595,
-          height: 842,
-          dpi: 300,
-        );
-
-        expect(memory, greaterThan(0));
-      });
-    });
-
     group('Page Conversion', () {
       test('should convert PDF dimensions to page size', () {
         final converter = PDFToPageConverter();
@@ -285,15 +184,6 @@ void main() {
         importService.dispose();
       });
 
-      test('should coordinate export service components', () {
-        final exportService = PDFExportService();
-
-        expect(exportService.state, PDFExportState.idle);
-        expect(exportService.isExporting, false);
-
-        exportService.dispose();
-      });
-
       test('should track progress during operations', () {
         final importService = PDFImportService();
 
@@ -322,30 +212,19 @@ void main() {
 
         importService.dispose();
       });
-
-      test('should handle export service errors', () {
-        final exportService = PDFExportService();
-
-        expect(
-          exportService.validatePages([]),
-          false,
-        );
-
-        exportService.dispose();
-      });
     });
 
     group('Performance Integration', () {
       test('should handle multiple concurrent operations', () {
-        final importService = PDFImportService();
-        final exportService = PDFExportService();
+        final first = PDFImportService();
+        final second = PDFImportService();
 
-        // Both services should be independent
-        expect(importService.state, PDFImportState.idle);
-        expect(exportService.state, PDFExportState.idle);
+        // Services should be independent
+        expect(first.state, PDFImportState.idle);
+        expect(second.state, PDFImportState.idle);
 
-        importService.dispose();
-        exportService.dispose();
+        first.dispose();
+        second.dispose();
       });
 
       test('should manage memory across services', () {
@@ -356,44 +235,6 @@ void main() {
 
         // Note: MemoryBudget doesn't expose usedBytes/availableBytes getters
         // Verify allocation works without throwing
-      });
-    });
-
-    group('Complete Workflow', () {
-      test('should execute full multi-page to PDF export flow', () {
-        // 1. Create multi-page document
-        final doc = DrawingDocument.multiPage(
-          id: 'd1',
-          title: 'Complete Workflow',
-          pages: [
-            Page.create(index: 0).addStroke(
-              Stroke(
-                id: 's1',
-                points: [
-                  DrawingPoint(x: 0, y: 0),
-                  DrawingPoint(x: 100, y: 100),
-                ],
-                style: StrokeStyle(color: 0xFF000000, thickness: 2.0),
-                createdAt: DateTime.now(),
-              ),
-            ),
-            Page.create(index: 1),
-          ],
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-        );
-
-        // 2. Setup export
-        final exportService = PDFExportService();
-
-        // 3. Validate
-        expect(exportService.validatePages(doc.pages), true);
-
-        // 4. Create metadata
-        final metadata = exportService.createMetadata(doc);
-        expect(metadata.title, 'Complete Workflow');
-
-        exportService.dispose();
       });
     });
   });
