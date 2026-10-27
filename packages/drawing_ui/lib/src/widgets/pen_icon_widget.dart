@@ -10,12 +10,12 @@ import 'package:drawing_ui/src/utils/pen_type_mapper.dart';
 ///
 /// Controls the direction the pen tip points:
 /// - [vertical]: Tip points UP (for popup/settings panels)
-/// - [horizontal]: Tip points RIGHT (for PenBox, toward canvas)
+/// - [horizontal]: Tip points RIGHT (for the floating pen box, toward canvas)
 enum PenOrientation {
   /// Tip points UP - used in popup/settings panels.
   vertical,
 
-  /// Tip points RIGHT - used in PenBox (toward canvas).
+  /// Tip points RIGHT - used in the floating pen box (toward canvas).
   horizontal,
 }
 
@@ -43,7 +43,7 @@ class PenIconWidget extends StatelessWidget {
   /// The orientation of the pen icon.
   ///
   /// - [PenOrientation.vertical]: Tip points UP (default, for popups)
-  /// - [PenOrientation.horizontal]: Tip points RIGHT (for PenBox)
+  /// - [PenOrientation.horizontal]: Tip points RIGHT (for the floating pen box)
   final PenOrientation orientation;
 
   const PenIconWidget({

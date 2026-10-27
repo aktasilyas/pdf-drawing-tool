@@ -78,9 +78,6 @@ export 'src/toolbar/toolbar_nav_sections.dart';
 // Note: drawing_toolbar.dart and right_action_buttons.dart deprecated
 // Actions moved to TopNavigationBar
 
-// Note: PenBox sidebar removed - pen presets managed via panel "Add to Pen Box" button
-// Keeping pen_box files for potential future use, but not exported in public API
-
 // Panels
 export 'src/panels/tool_panel.dart';
 export 'src/panels/pen_settings_panel.dart';

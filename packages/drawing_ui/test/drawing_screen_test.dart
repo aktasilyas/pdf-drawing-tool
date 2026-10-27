@@ -19,7 +19,7 @@ void main() {
       expect(find.byType(TopNavigationBar), findsOneWidget);
       expect(find.byType(ToolBar), findsOneWidget);
 
-      // MockCanvas should be present (full width, no PenBox sidebar)
+      // MockCanvas should be present
       expect(find.byType(MockCanvas), findsOneWidget);
 
       // AI button should be present
@@ -111,8 +111,6 @@ void main() {
         ),
       );
 
-      // Note: PenBox sidebar removed - pen presets managed via panel
-      // Test passes as long as DrawingScreen renders without PenBox
       expect(find.byType(MockCanvas), findsOneWidget);
     });
 
