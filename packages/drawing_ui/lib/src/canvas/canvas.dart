@@ -17,6 +17,7 @@ export 'tiled_element_painter.dart';
 export 'active_layer_content.dart';
 export 'element_preview_painter.dart';
 export 'page_background_painter.dart';
+export 'page_background_view.dart';
 export 'selected_elements_painter.dart';
 export 'sticky_note_handles_painter.dart';
 export 'sticky_note_painter.dart';

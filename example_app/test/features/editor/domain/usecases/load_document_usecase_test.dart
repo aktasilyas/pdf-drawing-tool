@@ -67,6 +67,20 @@ void main() {
       }
     }
 
+    test('engineer_pad template keeps its extraData on the new page', () async {
+      when(() => mockRepository.getDocument(testDocId)).thenAnswer(
+        (_) async => Right(testDocInfo.copyWith(templateId: 'engineer_pad')),
+      );
+      when(() => mockRepository.getDrawingDocument(testDocId))
+          .thenAnswer((_) async => const Right(null));
+
+      final result = await useCase(testDocId);
+
+      final document = result.getOrElse(() => throw Exception());
+      expect(document.pages.last.background.templateExtraData,
+          {'showMarginLeft': true, 'marginMm': 25});
+    });
+
     test('should return deserialized document when content exists', () async {
       // Arrange
       final testContent = DrawingDocument.multiPage(

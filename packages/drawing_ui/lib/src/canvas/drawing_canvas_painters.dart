@@ -71,12 +71,9 @@ class DynamicBackgroundPainter extends CustomPainter {
       case BackgroundType.template:
         // Use TemplatePatternPainter for accurate template rendering
         if (background.templatePattern != null) {
-          final templatePainter = TemplatePatternPainter(
-            pattern: background.templatePattern!,
-            spacingMm: background.templateSpacingMm ?? 8.0,
-            lineWidth: background.templateLineWidth ?? 0.5,
+          final templatePainter = TemplatePatternPainter.fromBackground(
+            background, // Fill is already painted above
             lineColor: lineColor,
-            backgroundColor: Colors.transparent, // Already painted above
             pageSize: size,
           );
           templatePainter.paint(canvas, size);

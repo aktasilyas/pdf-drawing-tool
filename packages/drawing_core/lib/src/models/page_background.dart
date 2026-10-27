@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:typed_data';
+import 'package:drawing_core/src/models/json_value_equality.dart';
+import 'package:drawing_core/src/models/template.dart';
 import 'package:drawing_core/src/models/template_pattern.dart';
 
 /// Sayfa arka plan türleri
@@ -35,6 +37,9 @@ class PageBackground {
   /// Template line width (for template-based backgrounds)
   final double? templateLineWidth;
 
+  /// Template-specific extra data (JSON-safe), e.g. margins, zones, ratios.
+  final Map<String, dynamic>? templateExtraData;
+
   /// Cover ID for cover-based backgrounds
   final String? coverId;
 
@@ -56,6 +61,7 @@ class PageBackground {
     this.templatePattern,
     this.templateSpacingMm,
     this.templateLineWidth,
+    this.templateExtraData,
     this.coverId,
     this.pdfData,
     this.pdfPageIndex,
@@ -85,6 +91,26 @@ class PageBackground {
     gridSpacing: 20,
     lineColor: 0xFFCCCCCC,
   );
+
+  /// Template-based background carrying all template geometry and extraData.
+  factory PageBackground.fromTemplate(
+    Template t, {
+    int? color,
+    int? lineColor,
+  }) {
+    return PageBackground(
+      type: BackgroundType.template,
+      color: color ?? t.defaultBackgroundColor,
+      lineColor: lineColor ?? t.defaultLineColor,
+      templatePattern: t.pattern,
+      templateSpacingMm: t.spacingMm,
+      templateLineWidth: t.lineWidth,
+      templateExtraData: _freeze(t.extraData),
+    );
+  }
+
+  static Map<String, dynamic>? _freeze(Map? m) =>
+      m == null ? null : Map<String, dynamic>.unmodifiable(m);
 
   /// Create PDF background
   factory PageBackground.pdf({
@@ -121,6 +147,7 @@ class PageBackground {
     TemplatePattern? templatePattern,
     double? templateSpacingMm,
     double? templateLineWidth,
+    Map<String, dynamic>? templateExtraData,
     String? coverId,
     Uint8List? pdfData,
     int? pdfPageIndex,
@@ -135,6 +162,7 @@ class PageBackground {
       templatePattern: templatePattern ?? this.templatePattern,
       templateSpacingMm: templateSpacingMm ?? this.templateSpacingMm,
       templateLineWidth: templateLineWidth ?? this.templateLineWidth,
+      templateExtraData: templateExtraData ?? this.templateExtraData,
       coverId: coverId ?? this.coverId,
       pdfData: pdfData ?? this.pdfData,
       pdfPageIndex: pdfPageIndex ?? this.pdfPageIndex,
@@ -160,6 +188,8 @@ class PageBackground {
       if (templatePattern != null) 'templatePattern': templatePattern!.name,
       if (templateSpacingMm != null) 'templateSpacingMm': templateSpacingMm,
       if (templateLineWidth != null) 'templateLineWidth': templateLineWidth,
+      if (templateExtraData != null && templateExtraData!.isNotEmpty)
+        'templateExtraData': templateExtraData,
       if (coverId != null) 'coverId': coverId,
       if (pdfPageIndex != null) 'pdfPageIndex': pdfPageIndex,
       if (pdfFilePath != null) 'pdfFilePath': pdfFilePath,
@@ -222,10 +252,47 @@ class PageBackground {
       templatePattern: templatePattern,
       templateSpacingMm: parseDouble(json['templateSpacingMm']),
       templateLineWidth: parseDouble(json['templateLineWidth']),
+      templateExtraData: _freeze(json['templateExtraData'] as Map?),
       coverId: json['coverId'] as String?,
       pdfPageIndex: parseInt(json['pdfPageIndex']),
       pdfFilePath: json['pdfFilePath'] as String?,
       pdfData: pdfData, // Decoded from base64 or null for lazy loading
     );
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is PageBackground &&
+        other.type == type &&
+        other.color == color &&
+        other.gridSpacing == gridSpacing &&
+        other.lineSpacing == lineSpacing &&
+        other.lineColor == lineColor &&
+        other.templatePattern == templatePattern &&
+        other.templateSpacingMm == templateSpacingMm &&
+        other.templateLineWidth == templateLineWidth &&
+        jsonDeepEquals(other.templateExtraData, templateExtraData) &&
+        other.coverId == coverId &&
+        identical(other.pdfData, pdfData) &&
+        other.pdfPageIndex == pdfPageIndex &&
+        other.pdfFilePath == pdfFilePath;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+        type,
+        color,
+        gridSpacing,
+        lineSpacing,
+        lineColor,
+        templatePattern,
+        templateSpacingMm,
+        templateLineWidth,
+        jsonDeepHash(templateExtraData),
+        coverId,
+        pdfData == null ? null : identityHashCode(pdfData),
+        pdfPageIndex,
+        pdfFilePath,
+      );
 }
