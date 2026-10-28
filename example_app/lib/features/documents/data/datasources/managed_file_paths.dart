@@ -40,3 +40,20 @@ Set<String> managedFilePathsOfPage(Map<String, dynamic> page) {
   }
   return paths;
 }
+
+final RegExp _managedRef = RegExp(
+  '(?:^|[/\\\\"])'
+  '(${PdfPathResolver.pdfDir}|${PdfPathResolver.imagesDir})'
+  '[/\\\\]+([^/\\\\"]+)',
+);
+
+/// Managed files mentioned anywhere in [text] (raw page or content JSON), as
+/// `'<dir>/<name>'` keys. Matches relative, absolute Unix and JSON-escaped
+/// Windows paths: the parent-directory rule of `PdfPathResolver.resolve`.
+/// Over-matching only keeps files, so it errs on the safe side.
+Set<String> managedFileRefsIn(String text) {
+  return {
+    for (final match in _managedRef.allMatches(text))
+      '${match.group(1)}/${match.group(2)}',
+  };
+}

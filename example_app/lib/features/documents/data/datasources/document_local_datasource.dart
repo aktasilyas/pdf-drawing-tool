@@ -8,6 +8,7 @@ import 'package:example_app/features/documents/data/datasources/document_content
 import 'package:example_app/features/documents/data/datasources/document_row_mapper.dart';
 import 'package:example_app/features/documents/data/datasources/image_background_loader.dart';
 import 'package:example_app/features/documents/data/datasources/managed_file_cleanup.dart';
+import 'package:example_app/features/documents/data/datasources/managed_file_sweep.dart';
 import 'package:example_app/features/documents/data/models/document_model.dart';
 
 abstract class DocumentLocalDatasource {
@@ -36,6 +37,10 @@ abstract class DocumentLocalDatasource {
   /// Deletes the managed files (copied PDFs, imported images) among [paths]
   /// that no document content or trashed page references any more.
   Future<void> deleteUnreferencedFiles(Iterable<String> paths);
+
+  /// Deletes managed files that nothing references and that last changed
+  /// before [olderThan]; returns how many. 0 without a documents root.
+  Future<int> sweepOrphanedFiles({required DateTime olderThan});
 }
 
 /// Drift-backed document metadata and content storage.
@@ -45,6 +50,8 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
   final DocumentContentCodec _codec;
   final PdfPathResolver _pdfPaths;
   final ManagedFileCleanup _cleanup;
+  late final OrphanFileSweeper _sweeper =
+      OrphanFileSweeper(_db, _cleanup, _pdfPaths);
 
   /// Content writes land in call order per document (a stale autosave never
   /// overwrites a newer save).
@@ -155,6 +162,17 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
       throw CacheException('Failed to check file references: $e');
     }
     await _cleanup.deleteFiles(orphans);
+  }
+
+  @override
+  Future<int> sweepOrphanedFiles({required DateTime olderThan}) async {
+    final root = _pdfPaths.documentsRoot;
+    if (root == null || root.isEmpty) return 0;
+    try {
+      return await _sweeper.sweep(olderThan: olderThan);
+    } catch (e) {
+      throw CacheException('Failed to sweep orphaned files: $e');
+    }
   }
 
   @override

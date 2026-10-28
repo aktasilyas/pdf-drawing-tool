@@ -131,6 +131,14 @@ void _registerRepositories() {
 }
 
 void _registerUseCases() {
+  // Maintenance
+  getIt.registerLazySingleton(
+    () => SweepOrphanedFilesUseCase(
+      getIt<DocumentRepository>(),
+      PrefsMaintenanceSchedule(getIt<SharedPreferences>()),
+    ),
+  );
+
   // Editor use cases
   getIt.registerFactory(() => LoadDocumentUseCase(getIt()));
   getIt.registerFactory(() => SaveDocumentUseCase(getIt()));

@@ -46,8 +46,13 @@ class ManagedFileCleanup {
   }
 
   /// Whether any remaining document content or trashed page mentions [path].
-  Future<bool> _isReferenced(String path) async {
-    final needle = json.encode(path);
+  Future<bool> _isReferenced(String path) => _anyRowContains(json.encode(path));
+
+  /// Whether any document content or trashed page mentions the file [name]
+  /// anywhere (SQL `LIKE`; wildcards in [name] only widen the match).
+  Future<bool> isMentioned(String name) => _anyRowContains(name);
+
+  Future<bool> _anyRowContains(String needle) async {
     final content = await (_db.select(_db.documentContents)
           ..where((t) => t.data.contains(needle))
           ..limit(1))
