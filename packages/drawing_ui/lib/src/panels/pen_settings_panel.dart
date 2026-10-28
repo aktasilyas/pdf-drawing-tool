@@ -60,7 +60,8 @@ class PenSettingsPanel extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ChromePanelHeader(
-            title: active.penType == null ? str.tools.penGroup : active.label(str),
+            title:
+                active.penType == null ? str.tools.penGroup : active.label(str),
             onClose: () => ref.read(activePanelProvider.notifier).state = null,
           ),
           PenTypePicker(

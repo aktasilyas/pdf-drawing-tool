@@ -64,9 +64,7 @@ SelectionActionConfig buildSelectionActionConfig(
           icon: ElyanotesIcons.camera,
           kind: SelectionActionKind.screenshot,
           isEnabled: cacheManager != null,
-          onExecute: cacheManager != null
-              ? onScreenshot
-              : null,
+          onExecute: cacheManager != null ? onScreenshot : null,
         ),
       ],
       topRowActions: const [],
@@ -125,9 +123,7 @@ SelectionActionConfig buildSelectionActionConfig(
       icon: ElyanotesIcons.camera,
       kind: SelectionActionKind.screenshot,
       isEnabled: cacheManager != null,
-      onExecute: cacheManager != null
-          ? onScreenshot
-          : null,
+      onExecute: cacheManager != null ? onScreenshot : null,
     ),
     SelectionAction(
       id: 'cut',
@@ -208,9 +204,7 @@ SelectionActionConfig buildSelectionActionConfig(
       icon: ElyanotesIcons.camera,
       kind: SelectionActionKind.takeScreenshot,
       isEnabled: cacheManager != null,
-      onExecute: cacheManager != null
-          ? onScreenshot
-          : null,
+      onExecute: cacheManager != null ? onScreenshot : null,
     ),
     SelectionAction(
       id: 'overflow_delete',

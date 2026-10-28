@@ -39,9 +39,8 @@ Future<BuildContext> _pump(WidgetTester tester, {DrawingStrings? scope}) async {
     }),
   );
   await tester.pumpWidget(MaterialApp(
-    home: scope == null
-        ? body
-        : DrawingStringsScope(strings: scope, child: body),
+    home:
+        scope == null ? body : DrawingStringsScope(strings: scope, child: body),
   ));
   return ctx;
 }
