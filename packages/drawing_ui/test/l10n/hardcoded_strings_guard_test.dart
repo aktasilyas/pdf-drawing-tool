@@ -4,48 +4,27 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../helpers/hardcoded_strings.dart';
 
-/// Files and directories (relative to `packages/drawing_ui`) whose
-/// user-facing copy must come from `DrawingStrings`. Later l10n slices add
-/// their entries here.
-const migrated = [
-  'lib/src/toolbar',
-  'lib/src/models/tool_type.dart',
-  'lib/src/widgets/floating_undo_redo.dart',
-  'lib/src/widgets/reorderable_tool_list.dart',
-  'lib/src/panels/toolbar_settings_panel.dart',
-  'lib/src/panels/pen_settings_panel.dart',
-  'lib/src/panels/pen_type_picker.dart',
-  'lib/src/panels/highlighter_settings_panel.dart',
-  'lib/src/panels/eraser_settings_panel.dart',
-  'lib/src/panels/eraser_settings_widgets.dart',
-  'lib/src/panels/shapes_settings_panel.dart',
-  'lib/src/panels/lasso_selection_panel.dart',
-  'lib/src/panels/laser_pointer_panel.dart',
-  'lib/src/panels/text_settings_panel.dart',
-  'lib/src/panels/sticky_note_panel.dart',
-  'lib/src/panels/sticker_panel.dart',
-  'lib/src/panels/sticker_catalog.dart',
-  'lib/src/widgets/color_picker_info_bar.dart',
-  'lib/src/widgets/color_picker_actions.dart',
-  'lib/src/widgets/compact_toggle.dart',
-  'lib/src/widgets/text_context_menu.dart',
-  'lib/src/widgets/paste_context_menu.dart',
-  'lib/src/providers/selection_actions_provider.dart',
-  'lib/src/providers/selection_capture_actions.dart',
-  'lib/src/panels/chrome_panel_parts.dart',
-  'lib/src/widgets/selection_toolbar.dart',
-  'lib/src/widgets/selection_toolbar_buttons.dart',
-  'lib/src/widgets/selection_overflow_menu.dart',
-  'lib/src/widgets/compact_color_picker.dart',
-  'lib/src/widgets/screenshot_preview_dialog.dart',
-  'lib/src/widgets/color_presets.dart',
-  'lib/src/widgets/selection_screenshot_feedback.dart',
-  'lib/src/panels/sticker_panel_parts.dart',
-  'lib/src/panels/sticker_panel_actions.dart',
+/// The Turkish defaults live here by design.
+const excludedDir = 'lib/src/l10n/';
+
+/// Frozen features (AI chat, audio recording) stay out of the v1.0 l10n
+/// work until they are unfrozen.
+const frozen = [
+  'lib/src/panels/ai_assistant_panel.dart',
+  'lib/src/panels/audio_recording_dropdown.dart',
+  'lib/src/providers/audio_recording_provider.dart',
+  'lib/src/screens/audio_recording_list_item.dart',
+  'lib/src/screens/audio_recordings_list.dart',
+  'lib/src/screens/audio_rename_dialog.dart',
+  'lib/src/widgets/floating_recording_bar.dart',
 ];
 
-/// The Turkish defaults live here by design.
-const excluded = 'lib/src/l10n/';
+String _normalized(String path) => path.replaceAll(r'\', '/');
+
+bool _isExcluded(File file) {
+  final path = _normalized(file.path);
+  return path.startsWith(excludedDir) || frozen.contains(path);
+}
 
 List<int> _lines(String source) =>
     findHardcodedStrings(source).map((f) => f.line).toList();
@@ -79,25 +58,28 @@ Text('PRO'), // l10n-ignore
     });
   });
 
-  group('migrated files', () {
-    for (final path in migrated) {
-      test('$path has no hardcoded user-facing strings', () {
-        final files = _dartFiles(path).where(
-          (f) => !f.path.replaceAll(r'\', '/').contains(excluded),
-        );
-        expect(files, isNotEmpty);
-        final offences = <String>[];
-        for (final file in files) {
-          for (final f in findHardcodedStrings(file.readAsStringSync())) {
-            offences.add('${file.path}:${f.line} "${f.literal}"');
-          }
+  group('lib/src', () {
+    test('excluded paths still exist', () {
+      expect(Directory(excludedDir).existsSync(), isTrue, reason: excludedDir);
+      for (final path in frozen) {
+        expect(File(path).existsSync(), isTrue, reason: '$path is gone');
+      }
+    });
+
+    test('has no hardcoded user-facing strings', () {
+      final files = _dartFiles('lib/src').where((f) => !_isExcluded(f));
+      expect(files, isNotEmpty);
+      final offences = <String>[];
+      for (final file in files) {
+        for (final f in findHardcodedStrings(file.readAsStringSync())) {
+          offences.add('${_normalized(file.path)}:${f.line} "${f.literal}"');
         }
-        expect(
-          offences,
-          isEmpty,
-          reason: 'Move to lib/src/l10n/ or add // l10n-ignore',
-        );
-      });
-    }
+      }
+      expect(
+        offences,
+        isEmpty,
+        reason: 'Move to lib/src/l10n/ or add // l10n-ignore',
+      );
+    });
   });
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 
@@ -100,12 +101,13 @@ class ScrollDirectionItem extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final direction = ref.watch(scrollDirectionProvider);
     final isHorizontal = direction == Axis.horizontal;
+    final pages = context.drawingStrings.pages;
     return PageOptionsToggleItem(
       icon: isHorizontal
           ? ElyanotesIcons.scrollDirection
           : ElyanotesIcons.scrollDirectionVertical,
-      label: 'Kaydırma yönü',
-      subtitle: isHorizontal ? 'Yatay' : 'Dikey',
+      label: pages.scrollDirection,
+      subtitle: isHorizontal ? pages.scrollHorizontal : pages.scrollVertical,
       value: isHorizontal,
       onChanged: (v) => ref.read(scrollDirectionProvider.notifier).state =
           v ? Axis.horizontal : Axis.vertical,

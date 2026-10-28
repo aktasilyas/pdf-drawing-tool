@@ -4,29 +4,28 @@ import 'package:drawing_ui/src/services/export_errors.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  group('friendlyExportError', () {
-    test('maps ENOSPC to the storage-full message', () {
+  group('exportFailureFor', () {
+    test('maps ENOSPC to storageFull', () {
       final error = FileSystemException(
         'Cannot write',
         '/x.pdf',
         const OSError('No space left on device', 28),
       );
-      expect(friendlyExportError(error), exportStorageFullMessage);
+      expect(exportFailureFor(error), ExportFailure.storageFull);
     });
 
-    test('maps other file system errors to the cannot-write message', () {
+    test('maps other file system errors to cannotWrite', () {
       final error = FileSystemException(
         'Cannot write',
         '/x.pdf',
         const OSError('Permission denied', 13),
       );
-      expect(friendlyExportError(error), exportCannotWriteMessage);
+      expect(exportFailureFor(error), ExportFailure.cannotWrite);
     });
 
-    test('maps anything else to the generic message without raw text', () {
-      final message = friendlyExportError(Exception('secret internals'));
-      expect(message, exportFailedMessage);
-      expect(message, isNot(contains('secret')));
+    test('maps anything else to failed', () {
+      expect(exportFailureFor(Exception('secret internals')),
+          ExportFailure.failed);
     });
   });
 }

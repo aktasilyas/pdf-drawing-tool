@@ -22,7 +22,7 @@ Future<List<int>> _export(Layer layer) async {
       quality: PDFExportQuality.low,
     ),
   );
-  expect(result.isSuccess, isTrue, reason: result.errorMessage);
+  expect(result.isSuccess, isTrue, reason: result.failure?.name);
   return result.pdfBytes;
 }
 

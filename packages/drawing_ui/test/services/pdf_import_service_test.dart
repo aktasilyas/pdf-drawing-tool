@@ -40,7 +40,7 @@ void main() {
 
       test('should have no error initially', () {
         expect(service.hasError, false);
-        expect(service.errorMessage, isNull);
+        expect(service.failure, isNull);
       });
     });
 
@@ -231,15 +231,20 @@ void main() {
 
         expect(result.isSuccess, true);
         expect(result.pages, pages);
-        expect(result.errorMessage, isNull);
+        expect(result.failure, isNull);
       });
 
       test('should create error result', () {
-        final result = PDFImportServiceResult.error('Failed to load PDF');
+        final result = PDFImportServiceResult.error(
+          const PdfImportFailure(PdfImportError.openFailed),
+        );
 
         expect(result.isSuccess, false);
         expect(result.pages, isEmpty);
-        expect(result.errorMessage, 'Failed to load PDF');
+        expect(
+          result.failure,
+          const PdfImportFailure(PdfImportError.openFailed),
+        );
       });
 
       test('should create cancelled result', () {
@@ -247,7 +252,7 @@ void main() {
 
         expect(result.isSuccess, false);
         expect(result.pages, isEmpty);
-        expect(result.errorMessage, isNull);
+        expect(result.failure, isNull);
       });
     });
 

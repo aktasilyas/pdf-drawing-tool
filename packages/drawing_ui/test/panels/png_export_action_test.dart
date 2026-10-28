@@ -16,6 +16,7 @@ void main() {
     await performPNGExport(
       progress,
       page,
+      strings: const ExportStringsTr(),
       title: 'Notlar',
       infiniteCanvas: true,
       render: (
@@ -31,6 +32,6 @@ void main() {
     expect(rendered, same(page));
     expect(infinite, isTrue);
     expect(progress.state.status, ExportProgressStatus.error);
-    expect(progress.state.errorMessage, exportFailedMessage);
+    expect(progress.state.failure, ExportFailure.failed);
   });
 }

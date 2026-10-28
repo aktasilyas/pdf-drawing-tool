@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'package:drawing_ui/src/widgets/template_preview_widget.dart';
 
@@ -85,7 +86,7 @@ class TemplateCard extends StatelessWidget {
                       const BorderRadius.vertical(bottom: Radius.circular(7)),
                 ),
                 child: Text(
-                  template.name,
+                  context.drawingStrings.templates.templateName(template),
                   style: theme.textTheme.labelSmall?.copyWith(
                     fontSize: 10,
                     color: cs.onSurface,

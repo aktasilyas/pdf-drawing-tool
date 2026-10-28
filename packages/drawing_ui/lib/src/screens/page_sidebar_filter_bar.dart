@@ -2,6 +2,7 @@
 /// recordings (docs/specs/52-editor-chrome.md, section 4 "Page sidebar").
 import 'package:flutter/material.dart';
 
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/chrome_palette.dart';
 import 'package:drawing_ui/src/theme/chrome_tokens.dart';
@@ -27,6 +28,7 @@ class PageSidebarFilterBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = ChromePalette.of(context);
+    final strings = context.drawingStrings.pageList;
     return DecoratedBox(
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: palette.border, width: 0.5)),
@@ -46,20 +48,20 @@ class PageSidebarFilterBar extends StatelessWidget {
                   SidebarFilter.allPages,
                   ElyanotesIcons.gridOn,
                   ElyanotesIcons.gridOnActive,
-                  'Tüm sayfalar',
+                  strings.filterAllPages,
                 ),
                 _tab(
                   SidebarFilter.bookmarked,
                   ElyanotesIcons.bookmark,
                   ElyanotesIcons.bookmarkFilled,
-                  'Yer imleri',
+                  strings.filterBookmarks,
                 ),
                 if (showRecordings)
                   _tab(
                     SidebarFilter.recordings,
                     ElyanotesIcons.waveform,
                     ElyanotesIcons.waveformActive,
-                    'Ses kayıtları',
+                    strings.filterRecordings,
                   ),
               ],
             ),

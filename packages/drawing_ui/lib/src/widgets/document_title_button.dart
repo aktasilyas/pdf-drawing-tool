@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/panels/document_options_panel.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/toolbar/chrome_icon_button.dart';
@@ -69,13 +70,16 @@ class _DocumentTitleButtonState extends ConsumerState<DocumentTitleButton> {
   Widget build(BuildContext context) {
     final palette = ChromePalette.of(context);
     final textTheme = Theme.of(context).textTheme;
-    final label = widget.title ?? 'İsimsiz Not';
+    final strings = context.drawingStrings;
+    final title = widget.title;
+    final label =
+        (title == null || title.isEmpty) ? strings.toolbar.untitled : title;
     final fill = _pressed
         ? palette.textPrimary.withValues(alpha: ChromeIconButton.pressedAlpha)
         : palette.textPrimary.withValues(alpha: 0);
 
     return Tooltip(
-      message: 'Doküman Seçenekleri',
+      message: strings.pages.documentOptions,
       child: Semantics(
         label: label,
         button: true,

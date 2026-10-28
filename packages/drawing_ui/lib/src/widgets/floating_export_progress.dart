@@ -3,6 +3,9 @@ import 'package:drawing_ui/src/theme/chrome_roles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 
+import 'package:drawing_ui/src/l10n/l10n.dart';
+import 'package:drawing_ui/src/services/export_errors.dart';
+
 import '../providers/export_progress_provider.dart';
 import '../theme/drawing_shadows.dart';
 import '../theme/elyanotes_icons.dart';
@@ -111,13 +114,19 @@ class _ExportingBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final textTheme = Theme.of(context).textTheme;
+    final s = context.drawingStrings.export;
     final pct = (state.progress * 100).round();
-    final estimate = state.estimatedTimeRemaining;
-    final detail = StringBuffer('%$pct');
+    final remaining = state.remaining;
+    final detail = StringBuffer(s.percent(pct));
     if (state.totalPages > 0) {
       detail.write(' \u00b7 ${state.currentPage}/${state.totalPages}');
     }
-    if (estimate.isNotEmpty) detail.write(' \u00b7 $estimate');
+    if (remaining != null) {
+      final text = remaining.inSeconds < 60
+          ? s.remainingSeconds(remaining.inSeconds)
+          : s.remainingMinutes(remaining.inMinutes);
+      detail.write(' \u00b7 $text');
+    }
 
     return Row(
       children: [
@@ -135,7 +144,7 @@ class _ExportingBody extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'PDF Dışa Aktarılıyor...',
+                s.exporting,
                 style: textTheme.titleSmall?.copyWith(
                   fontSize: 13,
                   color: cs.onSurface,
@@ -182,7 +191,8 @@ class _CompletedBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final sizeText = state.fileSize != null ? ' (${state.fileSize})' : '';
+    final s = context.drawingStrings.export;
+    final size = state.fileSize;
 
     return Row(
       children: [
@@ -194,7 +204,7 @@ class _CompletedBody extends StatelessWidget {
         const SizedBox(width: 10),
         Expanded(
           child: Text(
-            'PDF Kaydedildi$sizeText',
+            size != null ? s.savedWithSize(size) : s.saved,
             style: textTheme.titleSmall?.copyWith(
               fontSize: 13,
               color: cs.onSurface,
@@ -214,6 +224,7 @@ class _ErrorBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final strings = context.drawingStrings;
     return Row(
       children: [
         PhosphorIcon(
@@ -224,7 +235,7 @@ class _ErrorBody extends StatelessWidget {
         const SizedBox(width: 10),
         Expanded(
           child: Text(
-            state.errorMessage ?? 'PDF dışa aktarılamadı',
+            (state.failure ?? ExportFailure.failed).message(strings),
             style: textTheme.titleSmall?.copyWith(
               fontSize: 13,
               color: cs.error,
@@ -245,6 +256,7 @@ class _CancelledBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final s = context.drawingStrings.export;
     return Row(
       children: [
         PhosphorIcon(
@@ -255,7 +267,7 @@ class _CancelledBody extends StatelessWidget {
         const SizedBox(width: 10),
         Expanded(
           child: Text(
-            'İptal edildi',
+            s.cancelled,
             style: textTheme.titleSmall?.copyWith(
               fontSize: 13,
               color: cs.onSurfaceVariant,

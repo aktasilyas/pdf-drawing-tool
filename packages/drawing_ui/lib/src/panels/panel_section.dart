@@ -60,7 +60,7 @@ class PanelSection extends StatelessWidget {
                         size: 10, color: colorScheme.tertiary),
                     const SizedBox(width: ChromeSpacing.xxs),
                     Text(
-                      'PRO',
+                      'PRO', // l10n-ignore
                       style: textTheme.labelSmall?.copyWith(
                         fontSize: 9,
                         fontWeight: FontWeight.w700,
@@ -122,7 +122,7 @@ class _LockedSectionOverlay extends StatelessWidget {
                         color: colorScheme.tertiary, size: 24),
                     const SizedBox(height: ChromeSpacing.xs),
                     Text(
-                      'Premium',
+                      'Premium', // l10n-ignore
                       style: Theme.of(context).textTheme.labelMedium?.copyWith(
                             color: colorScheme.tertiary,
                           ),

@@ -6,6 +6,7 @@ import 'package:vector_math/vector_math_64.dart';
 
 import 'package:drawing_ui/src/rendering/variable_width_renderer.dart';
 
+import 'pdf_background_patterns.dart';
 import 'pdf_vector_shapes.dart';
 import 'vector_pdf_renderer.dart';
 
@@ -53,11 +54,11 @@ class PdfContentPainter {
       case BackgroundType.template:
         break;
       case BackgroundType.grid:
-        _drawGrid(g, w, h, pdfLineColor, bg.gridSpacing ?? 25.0, lineWidth);
+        drawPdfGrid(g, w, h, pdfLineColor, bg.gridSpacing ?? 25.0, lineWidth);
       case BackgroundType.lined:
-        _drawLines(g, w, h, pdfLineColor, bg.lineSpacing ?? 25.0, lineWidth);
+        drawPdfLines(g, w, h, pdfLineColor, bg.lineSpacing ?? 25.0, lineWidth);
       case BackgroundType.dotted:
-        _drawDots(g, w, h, bg.gridSpacing ?? 20.0, pdfLineColor);
+        drawPdfDots(g, w, h, bg.gridSpacing ?? 20.0, pdfLineColor);
     }
   }
 
@@ -252,40 +253,6 @@ class PdfContentPainter {
       );
       g.restoreContext();
     } catch (_) {}
-  }
-
-  void _drawGrid(PdfGraphics g, double w, double h, PdfColor color,
-      double spacing, double lineWidth) {
-    g.setStrokeColor(color);
-    g.setLineWidth(lineWidth);
-    for (double x = spacing; x < w; x += spacing) {
-      g.drawLine(x, 0, x, h);
-    }
-    for (double y = spacing; y < h; y += spacing) {
-      g.drawLine(0, h - y, w, h - y);
-    }
-    g.strokePath();
-  }
-
-  void _drawLines(PdfGraphics g, double w, double h, PdfColor color,
-      double spacing, double lineWidth) {
-    g.setStrokeColor(color);
-    g.setLineWidth(lineWidth);
-    for (double y = spacing * 2; y < h; y += spacing) {
-      g.drawLine(0, h - y, w, h - y);
-    }
-    g.strokePath();
-  }
-
-  void _drawDots(
-      PdfGraphics g, double w, double h, double spacing, PdfColor color) {
-    g.setFillColor(color);
-    for (double x = spacing; x < w; x += spacing) {
-      for (double y = spacing; y < h; y += spacing) {
-        g.drawEllipse(x, h - y, 1.0, 1.0);
-      }
-    }
-    g.fillPath();
   }
 
   double _flipY(double y, double h) => h - y;

@@ -629,6 +629,257 @@
   "libraryPaperColorBlue": "Blue paper",
   "libraryPaperColorYellow": "Yellow paper",
   "librarySelectColor": "Choose a color",
+  "editorPageRename": "Rename",
+  "editorPageMoveDocumentToTrash": "Move to trash",
+  "editorPageDocumentOptions": "Document options",
+  "editorPagePageNumber": "Page {number}",
+  "@editorPagePageNumber": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "editorPageBookmarkPage": "Bookmark page",
+  "editorPageRemoveBookmark": "Remove bookmark",
+  "editorPageCopyPage": "Copy page",
+  "editorPagePastePage": "Paste page",
+  "editorPageDuplicatePage": "Duplicate page",
+  "editorPageChangeTemplate": "Change template",
+  "editorPageGoToPageMenu": "Go to page",
+  "editorPageExportPagePdf": "Export page as PDF",
+  "editorPageClearPageMenu": "Clear page",
+  "editorPageMovePageToTrash": "Move to trash",
+  "editorPageSettings": "Settings",
+  "editorPageEditToolbar": "Edit toolbar",
+  "editorPageScrollDirection": "Scroll direction",
+  "editorPageScrollHorizontal": "Horizontal",
+  "editorPageScrollVertical": "Vertical",
+  "editorPagePageCopied": "Page copied",
+  "editorPagePagePasted": "Page pasted",
+  "editorPagePageDuplicated": "Page duplicated",
+  "editorPageLastPageCannotDelete": "The last page can't be deleted",
+  "editorPagePageDeleted": "Page deleted",
+  "editorPageClearPageQuestion": "Clear page {page}?\nYou can undo this.",
+  "@editorPageClearPageQuestion": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "editorPagePageAdded": "Page added",
+  "editorPagePageMoved": "Page moved",
+  "editorPageGoToPage": "Go to page",
+  "editorPageGo": "Go",
+  "editorPageListPageOf": "Page {page} of {count}",
+  "@editorPageListPageOf": {
+    "placeholders": {
+      "page": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "editorPageListPageRangeOf": "Pages {first}–{last} of {count}",
+  "@editorPageListPageRangeOf": {
+    "placeholders": {
+      "first": {
+        "type": "int"
+      },
+      "last": {
+        "type": "int"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "editorPageListPreviousPage": "Previous page",
+  "editorPageListNextPage": "Next page",
+  "editorPageListGoToPageHint": "{pageLabel}, tap to go to a page",
+  "@editorPageListGoToPageHint": {
+    "placeholders": {
+      "pageLabel": {
+        "type": "String"
+      }
+    }
+  },
+  "editorPageListAddPage": "Add page",
+  "editorPageListAddBookmark": "Add bookmark",
+  "editorPageListNoBookmarks": "No bookmarks yet",
+  "editorPageListNoBookmarksHint": "Tap the bookmark icon on a thumbnail to bookmark that page.",
+  "editorPageListFilterAllPages": "All pages",
+  "editorPageListFilterBookmarks": "Bookmarks",
+  "editorPageListFilterRecordings": "Recordings",
+  "editorPageListPageOptions": "Page options",
+  "editorPageListThumbnailFailed": "Preview\nunavailable",
+  "editorPageListDropToAddPage": "Drag and drop\nto add a new page",
+  "editorPageListPositionBefore": "Before",
+  "editorPageListPositionAfter": "After",
+  "editorPageListLastPage": "Last page",
+  "editorPageListMoreTemplates": "More templates",
+  "editorPageListTakePhoto": "Take photo",
+  "editorPageListImportFile": "Import",
+  "editorExportScopeAll": "All",
+  "editorExportScopeCurrent": "This page",
+  "editorExportScopeRange": "Range",
+  "editorExportFrom": "From",
+  "editorExportTo": "To",
+  "editorExportIncludeTemplate": "Include page template",
+  "editorExportExportPng": "Export as PNG",
+  "editorExportExportPdf": "Export as PDF",
+  "editorExportSharePdf": "Share PDF",
+  "editorExportInvalidRange": "The page range must be between 1 and {count}.",
+  "@editorExportInvalidRange": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "editorExportSavePdfDialog": "Save PDF",
+  "editorExportSavePngDialog": "Save PNG",
+  "editorExportFallbackFileName": "document",
+  "editorExportPageFileName": "{title}_page{page}",
+  "@editorExportPageFileName": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "page": {
+        "type": "int"
+      }
+    }
+  },
+  "editorExportExporting": "Exporting PDF…",
+  "editorExportPercent": "{percent}%",
+  "@editorExportPercent": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "editorExportRemainingSeconds": "~{seconds} s",
+  "@editorExportRemainingSeconds": {
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "editorExportRemainingMinutes": "~{minutes} min",
+  "@editorExportRemainingMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "editorExportSaved": "PDF saved",
+  "editorExportSavedWithSize": "PDF saved ({size})",
+  "@editorExportSavedWithSize": {
+    "placeholders": {
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "editorExportCancelled": "Cancelled",
+  "editorTemplateAllCategories": "All",
+  "editorTemplateCoverTab": "Cover",
+  "editorTemplatePaperTab": "Paper",
+  "editorTemplateApply": "Apply",
+  "editorTemplatePortrait": "Portrait",
+  "editorTemplateLandscape": "Landscape",
+  "editorTemplatePaperSquare": "Square",
+  "editorTemplatePaperWidescreen": "Widescreen (16:9)",
+  "editorTemplateCustom": "Custom",
+  "editorTemplateColorWhite": "White",
+  "editorTemplateColorCream": "Cream",
+  "editorTemplateColorBlack": "Black",
+  "editorTemplateColorYellow": "Yellow",
+  "editorTemplateTemplatesHeader": "Templates",
+  "editorTemplateBackground": "Background",
+  "editorTemplateBackgroundPattern": "Background pattern",
+  "editorTemplatePatternPlain": "Plain",
+  "editorTemplatePatternDotted": "Dotted",
+  "editorTemplatePatternGrid": "Grid",
+  "editorTemplateBackgroundColor": "Background color",
+  "editorErrorExportStorageFull": "Not enough storage to export. Free up space and try again.",
+  "editorErrorExportCannotWrite": "Couldn't write the file. Try again.",
+  "editorErrorExportFailed": "Export failed. Try again.",
+  "editorErrorExportNoPages": "There are no pages to export",
+  "editorErrorPdfPasswordProtected": "This PDF is password-protected. Remove the password and try again.",
+  "editorErrorPdfFileAccess": "Couldn't access the PDF file.",
+  "editorErrorPdfOpenFailed": "Couldn't open the PDF. The file may be damaged.",
+  "editorErrorPdfPagesUnreadable": "Couldn't read the PDF pages. The file may be damaged.",
+  "editorErrorPdfTooManyPages": "This PDF has too many pages ({count}). Up to {max} pages are supported.",
+  "@editorErrorPdfTooManyPages": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "editorErrorPdfPagePlaceholder": "PDF page",
+  "editorErrorPdfSourceMissing": "Source PDF not found",
+  "editorErrorPdfLoadFailed": "Couldn't load PDF",
+  "editorCanvasAddLayer": "Add layer",
+  "editorCanvasDefaultLayerName": "Layer {number}",
+  "@editorCanvasDefaultLayerName": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "editorCanvasDeleteLayer": "Delete layer",
+  "editorCanvasDuplicateLayer": "Duplicate layer",
+  "editorCanvasHideLayer": "Hide",
+  "editorCanvasShowLayer": "Show",
+  "editorCanvasLockLayer": "Lock",
+  "editorCanvasUnlockLayer": "Unlock",
+  "editorCanvasZoomLock": "Zoom lock",
+  "editorCanvasZoomLevel": "Zoom {percent}%, favorite levels",
+  "@editorCanvasZoomLevel": {
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
+  },
+  "editorCanvasFavoriteZoom": "Favorite zoom",
+  "editorCanvasPenBox": "{count, plural, =1{Pen box, 1 pen} other{Pen box, {count} pens}}",
+  "@editorCanvasPenBox": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "editorCanvasFinishEditing": "Done editing",
+  "editorCanvasEditPenBox": "Edit pen box",
+  "editorCanvasCollapsePenBox": "Collapse pen box",
+  "editorCanvasRemovePen": "Remove pen",
+  "editorCanvasAddImage": "Add image",
+  "editorCanvasAddImageHint": "Add an image from the gallery or camera",
+  "editorCanvasFromGallery": "Choose from gallery",
+  "editorCanvasFromGalleryHint": "Pick an image from your albums",
+  "editorCanvasTakePhoto": "Take photo",
+  "editorCanvasTakePhotoHint": "Take a new photo with the camera",
+  "editorCanvasTapToPlace": "Tap to place",
+  "editorCanvasTapToPlaceImage": "Tap to place the image",
+  "editorCanvasAddColor": "Add color",
+  "editorCanvasTextStyleTitle": "Text style",
+  "editorCanvasEmojiSize": "Emoji size",
+  "editorCanvasTextPreviewSample": "Hello",
   "libraryManageFolders": "Manage folders",
   "libraryNoFoldersYet": "No folders yet",
   "libraryNoFoldersHint": "Tap the button below to create a folder",

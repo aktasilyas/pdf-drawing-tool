@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
+import 'package:drawing_ui/src/l10n/drawing_strings_scope.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 
@@ -25,6 +26,7 @@ class LayerFooter extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final textTheme = Theme.of(context).textTheme;
     final canDelete = layerCount > 1;
+    final s = context.drawingStrings;
     final border = BorderSide(color: cs.outlineVariant, width: _line);
     const touch = BoxConstraints(
       minWidth: ChromeSizes.minTouchTarget,
@@ -79,7 +81,7 @@ class LayerFooter extends ConsumerWidget {
                   ? cs.error
                   : cs.onSurfaceVariant.withValues(alpha: 0.3),
             ),
-            tooltip: 'Katmani Sil',
+            tooltip: s.canvas.deleteLayer,
             constraints: touch,
           ),
           const SizedBox(width: ChromeSpacing.lg),
@@ -92,7 +94,7 @@ class LayerFooter extends ConsumerWidget {
               size: ChromeIconSizes.md,
               color: cs.onSurface,
             ),
-            tooltip: 'Katmani Kopyala',
+            tooltip: s.canvas.duplicateLayer,
             constraints: touch,
           ),
         ]),

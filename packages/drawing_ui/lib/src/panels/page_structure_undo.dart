@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 
-/// Shows [message] with a 'Geri al' action that reverts [change].
+/// Shows [message] with an [undoLabel] action that reverts [change].
 ///
 /// Same pattern as the page delete SnackBar: a new page change replaces the
 /// previous SnackBar, which makes the previous change final.
@@ -11,8 +12,9 @@ void showPageUndoSnackBar(
   ScaffoldMessengerState? messenger,
   PageStructureActions actions,
   PageStructureChange? change,
-  String message,
-) {
+  String message, {
+  required String undoLabel,
+}) {
   if (messenger == null || change == null) return;
   messenger
     ..hideCurrentSnackBar()
@@ -20,7 +22,7 @@ void showPageUndoSnackBar(
       SnackBar(
         content: Text(message),
         action: SnackBarAction(
-          label: 'Geri al',
+          label: undoLabel,
           onPressed: () => actions.undo(change),
         ),
       ),
@@ -30,11 +32,13 @@ void showPageUndoSnackBar(
 /// Moves the page at [from] to [to] and offers undo.
 void movePageWithUndo(WidgetRef ref, BuildContext context, int from, int to) {
   final actions = ref.read(pageStructureActionsProvider);
+  final strings = context.drawingStrings;
   final change = actions.movePage(from, to);
   showPageUndoSnackBar(
     ScaffoldMessenger.maybeOf(context),
     actions,
     change,
-    'Sayfa taşındı',
+    strings.pages.pageMoved,
+    undoLabel: strings.toolbar.undo,
   );
 }

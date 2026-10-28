@@ -79,7 +79,7 @@ void main() {
       final growth = ProcessInfo.maxRss - before;
 
       expect(result, isNotNull);
-      expect(result!.isSuccess, isTrue, reason: result.errorMessage);
+      expect(result!.isSuccess, isTrue, reason: result.failure?.name);
 
       final mb = (result.fileSizeBytes / (1024 * 1024)).toStringAsFixed(1);
       final growthMb = (growth / (1024 * 1024)).toStringAsFixed(1);

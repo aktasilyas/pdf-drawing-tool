@@ -23,7 +23,7 @@ void main() {
     test('initial state is empty document', () {
       final document = container.read(documentProvider);
       expect(document.isEmpty, true);
-      expect(document.title, 'İsimsiz Not');
+      expect(document.title, '');
     });
 
     test('addStroke adds stroke to active layer', () {
@@ -95,7 +95,7 @@ void main() {
       container.read(documentProvider.notifier).newDocument();
 
       final document = container.read(documentProvider);
-      expect(document.title, 'İsimsiz Not');
+      expect(document.title, '');
     });
 
     test('updateTitle changes document title', () {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_core/drawing_core.dart' show Layer;
+import 'package:drawing_ui/src/l10n/drawing_strings_scope.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 
@@ -108,7 +109,9 @@ class _LayerRowState extends ConsumerState<LayerRow> {
                 ? PhosphorIconsLight.eye
                 : PhosphorIconsLight.eyeSlash,
             color: layer.isVisible ? cs.onSurface : cs.onSurfaceVariant,
-            tooltip: layer.isVisible ? 'Gizle' : 'Goster',
+            tooltip: layer.isVisible
+                ? context.drawingStrings.canvas.hideLayer
+                : context.drawingStrings.canvas.showLayer,
           ),
           _IconToggle(
             key: ValueKey('layer-lock-${layer.id}'),
@@ -118,7 +121,9 @@ class _LayerRowState extends ConsumerState<LayerRow> {
             icon:
                 layer.isLocked ? ElyanotesIcons.lock : ElyanotesIcons.lockOpen,
             color: layer.isLocked ? cs.primary : cs.onSurfaceVariant,
-            tooltip: layer.isLocked ? 'Kilidi Ac' : 'Kilitle',
+            tooltip: layer.isLocked
+                ? context.drawingStrings.canvas.unlockLayer
+                : context.drawingStrings.canvas.lockLayer,
           ),
         ]),
       ),

@@ -6,6 +6,7 @@ import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_ui/src/canvas/canvas_color_scheme.dart';
 import 'package:drawing_ui/src/canvas/image_painter.dart';
 import 'package:drawing_ui/src/canvas/secondary_canvas_layers.dart';
+import 'package:drawing_ui/src/l10n/drawing_strings_scope.dart';
 import 'package:drawing_ui/src/providers/canvas_transform_provider.dart';
 import 'package:drawing_ui/src/providers/page_provider.dart';
 import 'package:drawing_ui/src/rendering/rendering.dart';
@@ -283,7 +284,7 @@ class _LastPagePlaceholder extends StatelessWidget {
             PhosphorIcon(ElyanotesIcons.page,
                 size: 40, color: cs.outlineVariant),
             const SizedBox(height: 8),
-            Text('Son sayfa',
+            Text(context.drawingStrings.pageList.lastPage,
                 style: textTheme.bodySmall
                     ?.copyWith(fontSize: 13, color: cs.onSurfaceVariant)),
           ],

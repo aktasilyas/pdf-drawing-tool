@@ -37,7 +37,7 @@ void main() {
       pages: [for (var i = 0; i < 20; i++) _page(i, _cornell)],
       options: _lowDpi,
     );
-    expect(result.isSuccess, isTrue, reason: result.errorMessage);
+    expect(result.isSuccess, isTrue, reason: result.failure?.name);
     final images = _images(result.pdfBytes);
     expect(images, hasLength(1));
     // Opaque paper: no soft mask, Flate-compressed.
@@ -59,7 +59,7 @@ void main() {
       ],
       options: _lowDpi,
     );
-    expect(result.isSuccess, isTrue, reason: result.errorMessage);
+    expect(result.isSuccess, isTrue, reason: result.failure?.name);
     expect(_images(result.pdfBytes), hasLength(2));
   });
 
@@ -71,7 +71,7 @@ void main() {
         includeBackground: false,
       ),
     );
-    expect(result.isSuccess, isTrue, reason: result.errorMessage);
+    expect(result.isSuccess, isTrue, reason: result.failure?.name);
     expect(_images(result.pdfBytes), isEmpty);
   });
 
@@ -83,7 +83,7 @@ void main() {
       ],
       options: _lowDpi,
     );
-    expect(result.isSuccess, isTrue, reason: result.errorMessage);
+    expect(result.isSuccess, isTrue, reason: result.failure?.name);
     expect(_images(result.pdfBytes), isEmpty);
   });
 }

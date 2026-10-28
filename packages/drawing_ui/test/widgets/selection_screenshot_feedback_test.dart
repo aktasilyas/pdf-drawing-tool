@@ -11,20 +11,8 @@ class _EnSelection extends SelectionStringsTr {
   String get screenshotSaved => 'Screenshot saved';
 }
 
-class _EnStrings implements DrawingStrings {
+class _EnStrings extends DrawingStringsTr {
   const _EnStrings();
-
-  @override
-  ToolStrings get tools => const ToolStringsTr();
-
-  @override
-  ToolbarStrings get toolbar => const ToolbarStringsTr();
-
-  @override
-  PanelStrings get panels => const PanelStringsTr();
-
-  @override
-  CatalogStrings get catalog => const CatalogStringsTr();
 
   @override
   SelectionStrings get selection => const _EnSelection();

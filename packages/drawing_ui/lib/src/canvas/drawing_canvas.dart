@@ -18,6 +18,8 @@ import 'package:drawing_ui/src/canvas/canvas_color_scheme.dart';
 import 'package:drawing_ui/src/canvas/drawing_canvas_gesture_handlers.dart';
 import 'package:drawing_ui/src/canvas/laser_controller.dart';
 import 'package:drawing_ui/src/canvas/laser_overlay_widget.dart';
+import 'package:drawing_ui/src/utils/drawing_log.dart';
+import 'package:drawing_ui/src/l10n/drawing_strings_scope.dart';
 import 'package:drawing_ui/src/rendering/rendering.dart';
 import 'package:drawing_ui/src/models/tool_type.dart';
 import 'package:drawing_ui/src/providers/document_provider.dart';
