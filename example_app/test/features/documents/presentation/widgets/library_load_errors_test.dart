@@ -65,8 +65,7 @@ void main() {
     expectPlainError(l10n.libraryLoadFailed);
   });
 
-  testWidgets('folders load failure shows the folders message',
-      (tester) async {
+  testWidgets('folders load failure shows the folders message', (tester) async {
     await tester.pumpWidget(
       contentView(SidebarSection.documents, [
         foldersProvider.overrideWith(
