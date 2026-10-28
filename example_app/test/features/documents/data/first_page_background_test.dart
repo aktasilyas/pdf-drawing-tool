@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:dartz/dartz.dart' show right;
@@ -109,6 +110,49 @@ void main() {
       final bg = result.getOrElse(() => throw StateError('left'));
       expect(bg!.pdfFilePath, 'pdfs/a.pdf');
       expect(bg.pdfPageIndex, 2);
+    });
+
+    test('an image page gets its bytes loaded from the stored file', () async {
+      final dir = Directory.systemTemp.createTempSync('elya_first_bg_');
+      addTearDown(() => dir.deleteSync(recursive: true));
+      Directory('${dir.path}/elyanotes_images').createSync();
+      File('${dir.path}/elyanotes_images/a.png')
+          .writeAsBytesSync([9, 8, 7, 6]);
+      final rooted = LibraryFixture(null, PdfPathResolver(dir.path));
+      addTearDown(rooted.close);
+      final doc = (await rooted.documents
+              .createDocument(title: 'Img', templateId: 'blank'))
+          .getOrElse(() => throw StateError('create failed'));
+      await rooted.documents.saveDocumentContent(
+        id: doc.id,
+        content: _withFirstBackground(
+          PageBackground(
+            type: BackgroundType.pdf,
+            pdfPageIndex: 1,
+            imageFilePath: 'elyanotes_images/a.png',
+          ),
+        ),
+      );
+
+      final result = await rooted.documents.getFirstPageBackground(doc.id);
+
+      final bg = result.getOrElse(() => throw StateError('left'));
+      expect(bg!.pdfData, [9, 8, 7, 6]);
+      expect(bg.imageFilePath, 'elyanotes_images/a.png');
+    });
+
+    test('a missing image file gives a background without bytes', () async {
+      final id = await createWith(_withFirstBackground(
+        PageBackground(
+          type: BackgroundType.pdf,
+          pdfPageIndex: 1,
+          imageFilePath: 'elyanotes_images/gone.png',
+        ),
+      ));
+      final result = await fx.documents.getFirstPageBackground(id);
+      final bg = result.getOrElse(() => throw StateError('left'));
+      expect(bg!.pdfData, isNull);
+      expect(bg.imageFilePath, 'elyanotes_images/gone.png');
     });
 
     test('a document without content gives Right(null)', () async {

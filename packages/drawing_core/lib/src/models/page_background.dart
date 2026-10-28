@@ -1,7 +1,6 @@
-import 'dart:convert';
-import 'dart:developer' as developer;
 import 'dart:typed_data';
 import 'package:drawing_core/src/models/json_value_equality.dart';
+import 'package:drawing_core/src/models/page_background_json.dart';
 import 'package:drawing_core/src/models/template.dart';
 import 'package:drawing_core/src/models/template_pattern.dart';
 
@@ -52,6 +51,11 @@ class PageBackground {
   /// PDF file path for lazy loading (stored on device)
   final String? pdfFilePath;
 
+  /// Image file reference for image pages (container-relative, e.g.
+  /// `elyanotes_images/<name>`). When set, the image bytes live in that file
+  /// and are not serialized; [pdfData] is only an in-memory cache.
+  final String? imageFilePath;
+
   const PageBackground({
     required this.type,
     this.color = 0xFFFFFFFF, // White default
@@ -66,7 +70,15 @@ class PageBackground {
     this.pdfData,
     this.pdfPageIndex,
     this.pdfFilePath,
+    this.imageFilePath,
   });
+
+  /// Whether this is an image page: it has an [imageFilePath], or it is a
+  /// legacy PDF-typed page that carries inline image bytes without a
+  /// [pdfFilePath].
+  bool get isImage =>
+      imageFilePath != null ||
+      (type == BackgroundType.pdf && pdfFilePath == null && pdfData != null);
 
   /// Blank white background
   static const blank = PageBackground(type: BackgroundType.blank);
@@ -109,8 +121,7 @@ class PageBackground {
     );
   }
 
-  static Map<String, dynamic>? _freeze(Map? m) =>
-      m == null ? null : Map<String, dynamic>.unmodifiable(m);
+  static Map<String, dynamic>? _freeze(Map? m) => freezeTemplateExtraData(m);
 
   /// Create PDF background
   factory PageBackground.pdf({
@@ -152,6 +163,7 @@ class PageBackground {
     Uint8List? pdfData,
     int? pdfPageIndex,
     String? pdfFilePath,
+    String? imageFilePath,
   }) {
     return PageBackground(
       type: type ?? this.type,
@@ -167,98 +179,18 @@ class PageBackground {
       pdfData: pdfData ?? this.pdfData,
       pdfPageIndex: pdfPageIndex ?? this.pdfPageIndex,
       pdfFilePath: pdfFilePath ?? this.pdfFilePath,
+      imageFilePath: imageFilePath ?? this.imageFilePath,
     );
   }
 
-  /// JSON serialization
-  /// Note: For PDFs with pdfFilePath, pdfData is NOT serialized (lazy loading)
-  /// For images (no pdfFilePath), pdfData IS serialized (base64)
-  Map<String, dynamic> toJson() {
-    // Determine if we should serialize pdfData:
-    // - If pdfFilePath exists: NO (lazy loading for PDFs)
-    // - If pdfFilePath is null but pdfData exists: YES (images stored in memory)
-    final shouldSerializePdfData = pdfFilePath == null && pdfData != null;
+  /// JSON serialization (see `page_background_json.dart`).
+  ///
+  /// For PDFs with `pdfFilePath` and image pages with `imageFilePath`, the
+  /// bytes are NOT serialized; only the file reference is.
+  Map<String, dynamic> toJson() => pageBackgroundToJson(this);
 
-    return {
-      'type': type.name,
-      'color': color,
-      if (gridSpacing != null) 'gridSpacing': gridSpacing,
-      if (lineSpacing != null) 'lineSpacing': lineSpacing,
-      if (lineColor != null) 'lineColor': lineColor,
-      if (templatePattern != null) 'templatePattern': templatePattern!.name,
-      if (templateSpacingMm != null) 'templateSpacingMm': templateSpacingMm,
-      if (templateLineWidth != null) 'templateLineWidth': templateLineWidth,
-      if (templateExtraData != null && templateExtraData!.isNotEmpty)
-        'templateExtraData': templateExtraData,
-      if (coverId != null) 'coverId': coverId,
-      if (pdfPageIndex != null) 'pdfPageIndex': pdfPageIndex,
-      if (pdfFilePath != null) 'pdfFilePath': pdfFilePath,
-      if (shouldSerializePdfData) 'pdfDataBase64': base64Encode(pdfData!),
-    };
-  }
-
-  factory PageBackground.fromJson(Map<String, dynamic> json) {
-    // Helper to parse int safely
-    int? parseInt(dynamic value) {
-      if (value == null) return null;
-      if (value is int) return value;
-      if (value is String) return int.parse(value);
-      if (value is num) return value.toInt();
-      return null;
-    }
-
-    // Helper to parse double safely
-    double? parseDouble(dynamic value) {
-      if (value == null) return null;
-      if (value is double) return value;
-      if (value is String) return double.parse(value);
-      if (value is num) return value.toDouble();
-      return null;
-    }
-
-    // Decode pdfData from base64 if present (for images)
-    Uint8List? pdfData;
-    if (json['pdfDataBase64'] != null) {
-      try {
-        pdfData = base64Decode(json['pdfDataBase64'] as String);
-      } catch (e) {
-        developer.log('Failed to decode pdfDataBase64: $e',
-            name: 'PageBackground');
-      }
-    }
-
-    // Parse template pattern
-    TemplatePattern? templatePattern;
-    if (json['templatePattern'] != null) {
-      try {
-        templatePattern = TemplatePattern.values.firstWhere(
-          (p) => p.name == json['templatePattern'],
-        );
-      } catch (e) {
-        developer.log('Unknown template pattern: ${json['templatePattern']}',
-            name: 'PageBackground');
-      }
-    }
-
-    return PageBackground(
-      type: BackgroundType.values.firstWhere(
-        (t) => t.name == json['type'],
-        orElse: () => BackgroundType.blank,
-      ),
-      color: parseInt(json['color']) ?? 0xFFFFFFFF,
-      gridSpacing: parseDouble(json['gridSpacing']),
-      lineSpacing: parseDouble(json['lineSpacing']),
-      lineColor: parseInt(json['lineColor']),
-      templatePattern: templatePattern,
-      templateSpacingMm: parseDouble(json['templateSpacingMm']),
-      templateLineWidth: parseDouble(json['templateLineWidth']),
-      templateExtraData: _freeze(json['templateExtraData'] as Map?),
-      coverId: json['coverId'] as String?,
-      pdfPageIndex: parseInt(json['pdfPageIndex']),
-      pdfFilePath: json['pdfFilePath'] as String?,
-      pdfData: pdfData, // Decoded from base64 or null for lazy loading
-    );
-  }
+  factory PageBackground.fromJson(Map<String, dynamic> json) =>
+      pageBackgroundFromJson(json);
 
   @override
   bool operator ==(Object other) {
@@ -276,7 +208,8 @@ class PageBackground {
         other.coverId == coverId &&
         identical(other.pdfData, pdfData) &&
         other.pdfPageIndex == pdfPageIndex &&
-        other.pdfFilePath == pdfFilePath;
+        other.pdfFilePath == pdfFilePath &&
+        other.imageFilePath == imageFilePath;
   }
 
   @override
@@ -294,5 +227,6 @@ class PageBackground {
         pdfData == null ? null : identityHashCode(pdfData),
         pdfPageIndex,
         pdfFilePath,
+        imageFilePath,
       );
 }

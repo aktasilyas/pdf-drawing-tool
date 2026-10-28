@@ -210,7 +210,8 @@ abstract final class PageRasterizer {
       page.background.pdfPageIndex != null;
 
   /// Decodes the PDF page behind [page], from in-memory `pdfData` or the
-  /// lazy-loaded `pdfFilePath`. Null, and logged, when missing or unreadable.
+  /// lazy-loaded `pdfFilePath`, or the image file behind `imageFilePath`.
+  /// Null, and logged, when missing or unreadable.
   static Future<ui.Image?> _loadPdfBackground(
     Page page,
     PdfPathResolver pdfPaths,
@@ -226,6 +227,10 @@ abstract final class PageRasterizer {
           background.pdfPageIndex!,
           renderScale,
         );
+      }
+      if (bytes == null && background.imageFilePath != null) {
+        final file = File(pdfPaths.resolve(background.imageFilePath!));
+        if (await file.exists()) bytes = await file.readAsBytes();
       }
       if (bytes == null) {
         DrawingLog.w(
