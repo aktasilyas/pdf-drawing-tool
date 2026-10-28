@@ -146,4 +146,28 @@ void main() {
 
     expect(file.existsSync(), isFalse);
   });
+
+  test('an image element pointing outside the app is never deleted',
+      () async {
+    final outside = File('${dir.path}/user_photo.png')..writeAsStringSync('x');
+    final a = await create('A');
+    await save(a.id, [
+      {
+        'id': 'o',
+        'index': 0,
+        'background': {'type': 'blank'},
+        'layers': [
+          {
+            'images': [
+              {'id': 'img', 'filePath': outside.path},
+            ],
+          },
+        ],
+      },
+    ]);
+
+    await fx.documents.permanentlyDelete(a.id);
+
+    expect(outside.existsSync(), isTrue);
+  });
 }

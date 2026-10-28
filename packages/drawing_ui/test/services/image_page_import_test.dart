@@ -91,4 +91,24 @@ void main() {
       expect(stored(), isEmpty);
     });
   });
+
+  testWidgets('discardImportedImagePage removes the stored file',
+      (tester) async {
+    await tester.runAsync(() async {
+      final source = File('${root.path}/picked.png')
+        ..writeAsBytesSync(await _png(2, 2));
+      final paths = PdfPathResolver(root.path);
+      final page = await importImagePage(
+        source.path,
+        documentsRoot: root.path,
+        paths: paths,
+      );
+      expect(stored(), hasLength(1));
+
+      await discardImportedImagePage(page, paths: paths);
+
+      expect(stored(), isEmpty);
+      expect(source.existsSync(), isTrue);
+    });
+  });
 }

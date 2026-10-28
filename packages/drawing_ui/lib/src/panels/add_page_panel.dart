@@ -148,7 +148,10 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
         documentsRoot: appDir.path,
         paths: paths,
       );
-      if (!mounted) return;
+      if (!mounted) {
+        await discardImportedImagePage(image, paths: paths);
+        return;
+      }
       _insertNewPage(image.background, strings: strings, size: image.size);
     } on ImagePageImportException {
       messenger?.showSnackBar(

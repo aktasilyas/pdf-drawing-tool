@@ -77,4 +77,31 @@ void main() {
       isEmpty,
     );
   });
+
+  test('image paths outside elyanotes_images are never collected', () {
+    final page = {
+      'background': {'imageFilePath': '/storage/emulated/0/DCIM/bg.jpg'},
+      'layers': [
+        {
+          'images': [
+            {'filePath': '/storage/emulated/0/Download/photo.png'},
+            {'filePath': 'elyanotes_images/../secret.png'},
+            {'filePath': '/data/app/elyanotes_images/kept.png'},
+          ],
+        },
+      ],
+    };
+    expect(
+      managedFilePathsOfPage(page),
+      {'/data/app/elyanotes_images/kept.png'},
+    );
+  });
+
+  test('isManagedImagePath accepts only files directly in the images dir', () {
+    expect(isManagedImagePath('elyanotes_images/a.png'), isTrue);
+    expect(isManagedImagePath(r'C:\x\elyanotes_images\a.png'), isTrue);
+    expect(isManagedImagePath('elyanotes_images/'), isFalse);
+    expect(isManagedImagePath('a.png'), isFalse);
+    expect(isManagedImagePath('/home/u/Pictures/a.png'), isFalse);
+  });
 }

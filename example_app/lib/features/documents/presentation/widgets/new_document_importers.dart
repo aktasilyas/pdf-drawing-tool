@@ -7,6 +7,7 @@ import 'package:drawing_ui/drawing_ui.dart'
         ImagePage,
         ImagePageImportError,
         ImagePageImportException,
+        discardImportedImagePage,
         importImagePage,
         pdfPathResolverProvider;
 import 'package:file_picker/file_picker.dart';
@@ -135,7 +136,10 @@ Future<void> importImage(BuildContext context) async {
     );
 
     // 5. Doküman oluştur
-    if (!context.mounted) return;
+    if (!context.mounted) {
+      await discardImportedImagePage(imagePage, paths: paths);
+      return;
+    }
     final container = ProviderScope.containerOf(context);
     final controller = container.read(documentsControllerProvider.notifier);
     final folderId = container.read(currentFolderIdProvider);
@@ -152,6 +156,9 @@ Future<void> importImage(BuildContext context) async {
       pages: [page.toJson()],
       pageCount: 1,
     );
+    if (documentId == null) {
+      await discardImportedImagePage(imagePage, paths: paths);
+    }
 
     // Refresh providers to update folder counts and document lists
     if (documentId != null) {

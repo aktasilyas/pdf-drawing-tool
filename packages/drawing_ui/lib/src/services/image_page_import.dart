@@ -78,3 +78,20 @@ Future<ImagePage> importImagePage(
     size: PageSize(width: width.toDouble(), height: height.toDouble()),
   );
 }
+
+/// Deletes the file [importImagePage] stored for [page] when the page is not
+/// used after all (the editor closed, the document could not be created).
+/// Best effort; never throws.
+Future<void> discardImportedImagePage(
+  ImagePage page, {
+  PdfPathResolver paths = PdfPathResolver.passthrough,
+}) async {
+  final stored = page.background.imageFilePath;
+  if (stored == null) return;
+  try {
+    final file = File(paths.resolve(stored));
+    if (await file.exists()) await file.delete();
+  } catch (_) {
+    // A leftover file only costs disk space.
+  }
+}
