@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 
 /// A toggle option row for panels.
@@ -80,38 +81,45 @@ class PanelActionButton extends StatelessWidget {
             ? colorScheme.error
             : colorScheme.onSurface;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(10),
-        child: Container(
-          constraints: const BoxConstraints(
-            minHeight: ChromeSizes.minTouchTarget,
-          ),
-          padding: const EdgeInsets.symmetric(
-            horizontal: ChromeSpacing.lg,
-            vertical: ChromeSpacing.md,
-          ),
-          decoration: BoxDecoration(
-            color: bgColor,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (icon != null) ...[
-                Icon(icon, size: 18, color: fgColor),
-                const SizedBox(width: ChromeSpacing.sm),
+    return Semantics(
+      container: true,
+      button: true,
+      label: label,
+      excludeSemantics: true,
+      onTap: onPressed,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(10),
+          child: Container(
+            constraints: const BoxConstraints(
+              minHeight: ChromeSizes.minTouchTarget,
+            ),
+            padding: const EdgeInsets.symmetric(
+              horizontal: ChromeSpacing.lg,
+              vertical: ChromeSpacing.md,
+            ),
+            decoration: BoxDecoration(
+              color: bgColor,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (icon != null) ...[
+                  Icon(icon, size: 18, color: fgColor),
+                  const SizedBox(width: ChromeSpacing.sm),
+                ],
+                Text(
+                  label,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: fgColor,
+                      ),
+                ),
               ],
-              Text(
-                label,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                      color: fgColor,
-                    ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -119,7 +127,8 @@ class PanelActionButton extends StatelessWidget {
   }
 }
 
-/// Reusable panel close button: a 32dp circular X inside a 48dp target.
+/// Reusable panel close button: a 32dp circular X inside a 48dp target,
+/// announced with the localized "close" label.
 ///
 /// Used in tool settings panels (pen, highlighter, eraser, etc.)
 /// to provide an explicit close action.
@@ -130,25 +139,32 @@ class PanelCloseButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return SizedBox.square(
-      dimension: ChromeSizes.minTouchTarget,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          customBorder: const CircleBorder(),
-          child: Center(
-            child: Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: cs.controlSurface,
-                shape: BoxShape.circle,
-              ),
-              child: PhosphorIcon(
-                ElyanotesIcons.close,
-                size: ElyanotesIcons.panelSize,
-                color: cs.onSurfaceVariant,
+    return Semantics(
+      container: true,
+      button: true,
+      label: context.drawingStrings.panels.close,
+      excludeSemantics: true,
+      onTap: onTap,
+      child: SizedBox.square(
+        dimension: ChromeSizes.minTouchTarget,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            customBorder: const CircleBorder(),
+            child: Center(
+              child: Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: cs.controlSurface,
+                  shape: BoxShape.circle,
+                ),
+                child: PhosphorIcon(
+                  ElyanotesIcons.close,
+                  size: ElyanotesIcons.panelSize,
+                  color: cs.onSurfaceVariant,
+                ),
               ),
             ),
           ),

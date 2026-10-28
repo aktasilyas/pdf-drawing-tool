@@ -49,13 +49,20 @@ class ColorPickerActions extends StatelessWidget {
 
   Widget _button(String label, TextStyle? style, VoidCallback onTap) {
     return Expanded(
-      child: GestureDetector(
+      child: Semantics(
+        container: true,
+        button: true,
+        label: label,
+        excludeSemantics: true,
         onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: ConstrainedBox(
-          constraints:
-              const BoxConstraints(minHeight: ChromeSizes.minTouchTarget),
-          child: Center(child: Text(label, style: style)),
+        child: GestureDetector(
+          onTap: onTap,
+          behavior: HitTestBehavior.opaque,
+          child: ConstrainedBox(
+            constraints:
+                const BoxConstraints(minHeight: ChromeSizes.minTouchTarget),
+            child: Center(child: Text(label, style: style)),
+          ),
         ),
       ),
     );
