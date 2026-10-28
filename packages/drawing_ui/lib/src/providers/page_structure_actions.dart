@@ -110,22 +110,24 @@ class PageStructureActions {
   Future<bool> undo(PageStructureChange change) async {
     final pages = _revertablePages(change);
     if (pages == null) return false;
+    final doc = _ref.read(documentProvider);
     final insertedId = change.insertedPageId;
     final inserted = insertedId == null ? null : pages[insertedId];
     final trash = _ref.read(pageTrashCallbackProvider);
+    final trashIndex = inserted == null ? -1 : doc.pages.indexOf(inserted);
+
+    // Revert first (synchronously) so the page is never in the document and
+    // the trash at the same time, whatever happens during the trash call.
+    _apply(doc.replacePages(
+      [for (final id in change.previousOrder) pages[id]!],
+      currentPageId: change.previousCurrentId,
+    ));
+
     if (inserted != null &&
         trash != null &&
         _inkCount(inserted) > change.insertedPageInk) {
-      final index = _ref.read(documentProvider).pages.indexOf(inserted);
-      await trash(index, inserted);
+      await trash(trashIndex, inserted);
     }
-    // Re-validate: the document may have changed while the trash call ran.
-    final fresh = _revertablePages(change);
-    if (fresh == null) return false;
-    _apply(_ref.read(documentProvider).replacePages(
-      [for (final id in change.previousOrder) fresh[id]!],
-      currentPageId: change.previousCurrentId,
-    ));
     return true;
   }
 
