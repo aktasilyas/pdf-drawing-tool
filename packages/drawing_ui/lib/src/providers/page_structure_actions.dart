@@ -38,8 +38,8 @@ class PageStructureChange {
     required this.documentId,
     required this.previousOrder,
     required this.previousCurrentId,
-    this.insertedPageId,
-    this.insertedPageInk = 0,
+    this.insertedPageIds = const [],
+    this.insertedPageInk = const {},
   });
 
   /// Id of the document the change was made in.
@@ -51,12 +51,12 @@ class PageStructureChange {
   /// Id of the current page before the change.
   final String previousCurrentId;
 
-  /// Id of the page the change inserted, if any.
-  final String? insertedPageId;
+  /// Ids of the pages the change inserted (empty for a move).
+  final List<String> insertedPageIds;
 
-  /// Strokes, shapes and texts the inserted page held when it was inserted
-  /// (a duplicate or pasted page starts with some).
-  final int insertedPageInk;
+  /// Strokes, shapes and texts each inserted page held when it was inserted
+  /// (a duplicate or pasted page starts with some), by page id.
+  final Map<String, int> insertedPageInk;
 }
 
 int _inkCount(Page p) => p.strokeCount + p.shapeCount + p.textCount;
@@ -82,15 +82,22 @@ class PageStructureActions {
   }
 
   /// Inserts [page] at [index] (clamped) and makes it the current page.
-  PageStructureChange insertPage(int index, Page page) {
+  PageStructureChange insertPage(int index, Page page) =>
+      insertPages(index, [page])!;
+
+  /// Inserts [pages] in order at [index] (clamped) into the latest document
+  /// and makes the first one current. One [undo] removes all of them.
+  /// Returns null when [pages] is empty.
+  PageStructureChange? insertPages(int index, List<Page> pages) {
+    if (pages.isEmpty) return null;
     final doc = _ref.read(documentProvider);
     final change = _changeFrom(
       doc,
-      insertedPageId: page.id,
-      insertedPageInk: _inkCount(page),
+      insertedPages: pages,
     );
-    final inserted = doc.insertPageAt(index, page);
-    _apply(inserted.replacePages(inserted.pages, currentPageId: page.id));
+    final at = index.clamp(0, doc.pages.length);
+    final list = List<Page>.from(doc.pages)..insertAll(at, pages);
+    _apply(doc.replacePages(list, currentPageId: pages.first.id));
     return change;
   }
 
@@ -111,22 +118,24 @@ class PageStructureActions {
     final pages = _revertablePages(change);
     if (pages == null) return false;
     final doc = _ref.read(documentProvider);
-    final insertedId = change.insertedPageId;
-    final inserted = insertedId == null ? null : pages[insertedId];
     final trash = _ref.read(pageTrashCallbackProvider);
-    final trashIndex = inserted == null ? -1 : doc.pages.indexOf(inserted);
+    // Inserted pages that gained content since the insert, with their index.
+    final withInk = [
+      for (final id in change.insertedPageIds)
+        if (trash != null &&
+            _inkCount(pages[id]!) > (change.insertedPageInk[id] ?? 0))
+          (doc.pages.indexOf(pages[id]!), pages[id]!),
+    ];
 
-    // Revert first (synchronously) so the page is never in the document and
-    // the trash at the same time, whatever happens during the trash call.
+    // Revert first (synchronously) so a page is never in the document and
+    // the trash at the same time, whatever happens during the trash calls.
     _apply(doc.replacePages(
       [for (final id in change.previousOrder) pages[id]!],
       currentPageId: change.previousCurrentId,
     ));
 
-    if (inserted != null &&
-        trash != null &&
-        _inkCount(inserted) > change.insertedPageInk) {
-      await trash(trashIndex, inserted);
+    for (final (index, page) in withInk) {
+      await trash!(index, page);
     }
     return true;
   }
@@ -138,7 +147,7 @@ class PageStructureActions {
     final byId = {for (final p in doc.pages) p.id: p};
     final expected = {
       ...change.previousOrder,
-      if (change.insertedPageId != null) change.insertedPageId!,
+      ...change.insertedPageIds,
     };
     if (byId.length != expected.length || !expected.every(byId.containsKey)) {
       return null;
@@ -200,15 +209,14 @@ class PageStructureActions {
 
   PageStructureChange _changeFrom(
     DrawingDocument doc, {
-    String? insertedPageId,
-    int insertedPageInk = 0,
+    List<Page> insertedPages = const [],
   }) =>
       PageStructureChange(
         documentId: doc.id,
         previousOrder: [for (final p in doc.pages) p.id],
         previousCurrentId: doc.pages[doc.currentPageIndex].id,
-        insertedPageId: insertedPageId,
-        insertedPageInk: insertedPageInk,
+        insertedPageIds: [for (final p in insertedPages) p.id],
+        insertedPageInk: {for (final p in insertedPages) p.id: _inkCount(p)},
       );
 
   void _apply(DrawingDocument doc) {
