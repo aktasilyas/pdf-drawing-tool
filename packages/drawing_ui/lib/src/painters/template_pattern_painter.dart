@@ -2,7 +2,11 @@ import 'package:flutter/foundation.dart' show mapEquals;
 import 'package:flutter/material.dart';
 import 'package:drawing_core/drawing_core.dart';
 
+import 'template_accent_paints.dart';
 import 'template_basic_painters.dart';
+import 'template_journal_painters.dart';
+import 'template_list_painters.dart';
+import 'template_structural_helpers.dart';
 import 'template_paints.dart';
 import 'template_planner_painters.dart';
 import 'template_writing_painters.dart';
@@ -13,9 +17,12 @@ import 'template_table_painters.dart';
 /// Tema renklerini dışarıdan alır, hardcoded renk kullanmaz.
 class TemplatePatternPainter extends CustomPainter
     with
+        TemplateStructuralHelpers,
         TemplateBasicPainters,
         TemplateWritingPainters,
         TemplatePlannerPainters,
+        TemplateListPainters,
+        TemplateJournalPainters,
         TemplateCreativePainters,
         TemplateTablePainters {
   final TemplatePattern pattern;
@@ -43,6 +50,13 @@ class TemplatePatternPainter extends CustomPainter
     lineColor: lineColor,
     lineWidth: lineWidth,
     backgroundColor: backgroundColor,
+  );
+
+  /// Planner/creative paints, built once per painter instance.
+  @override
+  late final TemplateAccentPaints accent = TemplateAccentPaints(
+    lineColor: lineColor,
+    lineWidth: lineWidth,
   );
 
   TemplatePatternPainter({
