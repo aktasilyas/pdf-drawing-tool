@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:drawing_core/drawing_core.dart'
-    show DrawingDocument, PdfPathResolver;
+    show DrawingDocument, PageBackground, PdfPathResolver;
 import 'package:drift/drift.dart';
 import 'package:injectable/injectable.dart';
 import 'package:example_app/core/core.dart';
@@ -25,6 +25,10 @@ abstract class DocumentLocalDatasource {
   /// Content of [id] as a model (decoded off the UI isolate when large), or
   /// null when there is none yet.
   Future<DrawingDocument?> getDrawingDocument(String id);
+
+  /// Background of the first page of [id], or null when there is no content
+  /// or no page. Does not build the page and stroke models.
+  Future<PageBackground?> getFirstPageBackground(String id);
 
   /// Whether a content row exists for [id] (without decoding it).
   Future<bool> hasDocumentContent(String id);
@@ -202,20 +206,36 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
 
   @override
   Future<DrawingDocument?> getDrawingDocument(String id) async {
-    final String data;
-    try {
-      final row = await (_db.select(_db.documentContents)
-            ..where((t) => t.documentId.equals(id)))
-          .getSingleOrNull();
-      if (row == null) return null;
-      data = row.data;
-    } catch (e) {
-      throw CacheException('Failed to get document content: $e');
-    }
+    final data = await _contentData(id);
+    if (data == null) return null;
     try {
       return await _codec.decodeDocument(data);
     } catch (e) {
       throw CacheException('Document corrupted: $e');
+    }
+  }
+
+  @override
+  Future<PageBackground?> getFirstPageBackground(String id) async {
+    final data = await _contentData(id);
+    if (data == null) return null;
+    try {
+      final json = await _codec.decodeFirstPageBackground(data);
+      return json == null ? null : PageBackground.fromJson(json);
+    } catch (e) {
+      throw CacheException('Document corrupted: $e');
+    }
+  }
+
+  /// Raw content JSON of [id], or null when no content row exists.
+  Future<String?> _contentData(String id) async {
+    try {
+      final row = await (_db.select(_db.documentContents)
+            ..where((t) => t.documentId.equals(id)))
+          .getSingleOrNull();
+      return row?.data;
+    } catch (e) {
+      throw CacheException('Failed to get document content: $e');
     }
   }
 

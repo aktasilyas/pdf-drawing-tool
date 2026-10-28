@@ -9,9 +9,13 @@ import 'package:drawing_core/drawing_core.dart' as core;
 import 'package:drawing_ui/drawing_ui.dart';
 
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
-import 'package:example_app/features/editor/presentation/providers/editor_provider.dart';
+import 'package:example_app/features/documents/presentation/providers/document_preview_provider.dart';
 
-/// Document preview widget for PDF and Image documents
+/// Document preview widget for PDF and Image documents.
+///
+/// Shows the first page background. It comes from
+/// [documentPreviewBackgroundProvider], so a rebuild does no storage work;
+/// a missing or corrupt document leaves the plain paper of the tile.
 class DocumentPreview extends ConsumerWidget {
   final DocumentInfo document;
 
@@ -19,45 +23,27 @@ class DocumentPreview extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return FutureBuilder<core.DrawingDocument?>(
-      future: _loadDocument(ref),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const _LoadingIndicator();
-        }
-        if (!snapshot.hasData || snapshot.data == null) {
-          return const SizedBox.shrink();
-        }
-        final doc = snapshot.data!;
-        if (doc.pages.isEmpty) return const SizedBox.shrink();
-        final firstPage = doc.pages.first;
-
-        // Embedded image data (image imports)
-        if (firstPage.background.pdfData != null) {
-          return _ImagePreview(data: firstPage.background.pdfData!);
-        }
-
-        // Lazy-loaded PDF (render thumbnail from file path)
-        if (firstPage.background.pdfFilePath != null &&
-            firstPage.background.pdfPageIndex != null) {
-          final cacheKey = '${firstPage.background.pdfFilePath}'
-              '|${firstPage.background.pdfPageIndex}';
-          return _PdfThumbnail(cacheKey: cacheKey);
-        }
-
-        return const SizedBox.shrink();
-      },
+    final background = ref.watch(
+      documentPreviewBackgroundProvider(
+        (id: document.id, updatedAt: document.updatedAt),
+      ),
+    );
+    return background.when(
+      loading: () => const _LoadingIndicator(),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (bg) => bg == null ? const SizedBox.shrink() : _preview(bg),
     );
   }
 
-  Future<core.DrawingDocument?> _loadDocument(WidgetRef ref) async {
-    try {
-      final loadUseCase = ref.read(loadDocumentUseCaseProvider);
-      final result = await loadUseCase(document.id);
-      return await result.fold((_) => null, (doc) => doc);
-    } catch (_) {
-      return null;
+  Widget _preview(core.PageBackground bg) {
+    // Embedded image data (image imports)
+    if (bg.pdfData != null) return _ImagePreview(data: bg.pdfData!);
+
+    // Lazy-loaded PDF (render thumbnail from file path)
+    if (bg.pdfFilePath != null && bg.pdfPageIndex != null) {
+      return _PdfThumbnail(cacheKey: '${bg.pdfFilePath}|${bg.pdfPageIndex}');
     }
+    return const SizedBox.shrink();
   }
 }
 

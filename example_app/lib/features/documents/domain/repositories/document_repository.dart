@@ -104,6 +104,11 @@ abstract class DocumentRepository {
   /// documents are parsed off the UI isolate.
   Future<Either<Failure, DrawingDocument?>> getDrawingDocument(String id);
 
+  /// Background of the first page of [id] (for library thumbnails), or null
+  /// when nothing is stored yet. Cheaper than [getDrawingDocument]: page and
+  /// stroke models are not built.
+  Future<Either<Failure, PageBackground?>> getFirstPageBackground(String id);
+
   /// Save document content (drawing data as JSON)
   Future<Either<Failure, void>> saveDocumentContent({
     required String id,

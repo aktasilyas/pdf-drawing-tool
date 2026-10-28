@@ -160,4 +160,18 @@ mixin DocumentQueries {
       return Left(CacheFailure('Failed to get trash: $e'));
     }
   }
+
+  /// First page background of [id] for library thumbnails; null when no
+  /// content is stored yet.
+  Future<Either<Failure, PageBackground?>> getFirstPageBackground(
+    String id,
+  ) async {
+    try {
+      return Right(await localDatasource.getFirstPageBackground(id));
+    } on CacheException catch (e) {
+      return Left(CacheFailure(e.message));
+    } catch (e) {
+      return Left(CacheFailure('Failed to get first page background: $e'));
+    }
+  }
 }
