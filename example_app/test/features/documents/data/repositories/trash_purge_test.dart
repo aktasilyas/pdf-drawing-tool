@@ -245,13 +245,14 @@ void main() {
   });
 
   group('corrupt content', () {
-    Future<void> corrupt(String id) => fx.db.into(fx.db.documentContents).insert(
-          DocumentContentsCompanion.insert(
-            documentId: id,
-            data: '{not json',
-            updatedAt: now,
-          ),
-        );
+    Future<void> corrupt(String id) =>
+        fx.db.into(fx.db.documentContents).insert(
+              DocumentContentsCompanion.insert(
+                documentId: id,
+                data: '{not json',
+                updatedAt: now,
+              ),
+            );
 
     test('deleteDocument removes a document whose content cannot decode',
         () async {
@@ -267,7 +268,9 @@ void main() {
     });
 
     test('emptyTrash deletes all three with one corrupt', () async {
-      final ids = [for (final t in ['A', 'B', 'C']) (await create(t)).id];
+      final ids = [
+        for (final t in ['A', 'B', 'C']) (await create(t)).id
+      ];
       await corrupt(ids[1]);
       for (final id in ids) {
         await trashAt(id, old);
@@ -280,7 +283,9 @@ void main() {
     });
 
     test('purgeExpiredTrash deletes all three with one corrupt', () async {
-      final ids = [for (final t in ['A', 'B', 'C']) (await create(t)).id];
+      final ids = [
+        for (final t in ['A', 'B', 'C']) (await create(t)).id
+      ];
       await corrupt(ids[0]);
       for (final id in ids) {
         await trashAt(id, old);
