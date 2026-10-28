@@ -273,6 +273,9 @@ void main() {
       }
 
       expect(renderer.maxActive, lessThanOrEqualTo(2));
+      // Current behaviour: the loop awaits each render, so renders are
+      // serial and the limit of 2 is never reached.
+      expect(renderer.maxActive, 1);
       expect(renderer.rendered, ['p0', 'p1', 'p2', 'p3', 'p4', 'p5']);
       expect(queue.completedCount, 6);
     });
@@ -322,6 +325,8 @@ void main() {
       await _flush();
       expect(queue.inProgressCount, 0);
       expect(renderer.rendered, ['k']);
+      // Current behaviour: the stale render still marks itself completed.
+      expect(queue.isCompleted('k'), isTrue);
     });
   });
 }
