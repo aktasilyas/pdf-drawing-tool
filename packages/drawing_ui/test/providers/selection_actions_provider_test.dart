@@ -115,11 +115,20 @@ void main() {
       selectedShapeIds: [shape.id],
       bounds: const BoundingBox(left: 0, top: 0, right: 10, bottom: 10),
     );
+    container.read(selectionProvider.notifier).setSelection(selection);
+    expect(
+      find(buildSelectionActionConfig(ref, selection), 'color').colorIndicator,
+      0xFF000000,
+    );
     final before = container.read(undoCountProvider);
     changeColor(ref, selection, 0xFFFF0000);
     expect(container.read(undoCountProvider) - before, 1);
     expect(container.read(documentProvider).layers[0].shapes.single.style.color,
         0xFFFF0000);
+    expect(
+      find(buildSelectionActionConfig(ref, selection), 'color').colorIndicator,
+      0xFFFF0000,
+    );
     container.read(historyManagerProvider.notifier).undo();
     expect(container.read(documentProvider).layers[0].shapes.single.style.color,
         0xFF000000);
