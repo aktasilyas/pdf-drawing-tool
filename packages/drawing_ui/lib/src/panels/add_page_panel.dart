@@ -11,6 +11,7 @@ import 'package:drawing_ui/src/panels/add_page_panel_sections.dart';
 import 'package:drawing_ui/src/panels/add_page_panel_widgets.dart';
 import 'package:drawing_ui/src/panels/page_structure_undo.dart';
 import 'package:drawing_ui/src/services/image_page_import.dart';
+import 'package:drawing_ui/src/services/new_page_size.dart';
 import 'package:drawing_ui/src/widgets/template_picker/template_picker.dart';
 
 /// Quick-access template IDs shown in the horizontal thumbnail strip.
@@ -72,7 +73,7 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
       messenger: ScaffoldMessenger.maybeOf(context),
       strings: strings,
       index: _resolveInsertionIndex(currentIndex, doc.pages.length),
-      size: size ?? doc.settings.defaultPageSize,
+      size: size ?? resolveNewPageSize(doc, currentIndex),
       background: background,
     );
   }
@@ -125,7 +126,7 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
       messenger: messenger,
       strings: strings,
       index: _resolveInsertionIndex(curIdx, doc.pages.length),
-      size: doc.settings.defaultPageSize,
+      size: resolveNewPageSize(doc, curIdx),
       background: PageBackground.fromTemplate(
         t,
         color: result.backgroundColor?.toARGB32(),
@@ -178,7 +179,7 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
 
     final imported = await importer(
       insertIndex: insertIdx,
-      defaultPageSize: doc.settings.defaultPageSize,
+      defaultPageSize: resolveNewPageSize(doc, curIdx),
       pdfPaths: ref.read(pdfPathResolverProvider),
       onImageError: () => messenger?.showSnackBar(
         SnackBar(content: Text(strings.errors.imageReadFailed)),

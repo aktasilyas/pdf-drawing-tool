@@ -16,6 +16,7 @@ import 'package:drawing_ui/src/screens/drawing_screen_navigation.dart';
 import 'package:drawing_ui/src/screens/drawing_screen_overlays.dart';
 import 'package:drawing_ui/src/screens/drawing_screen_toolbar_actions.dart';
 import 'package:drawing_ui/src/screens/drawing_screen_viewport_sync.dart';
+import 'package:drawing_ui/src/services/new_page_size.dart';
 
 /// The main drawing screen that combines all UI components.
 class DrawingScreen extends ConsumerStatefulWidget {
@@ -279,7 +280,10 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen>
       background: resolveNewPageBackground(),
       colorScheme: ref.read(canvasColorSchemeProvider),
       canvasMode: widget.canvasMode ?? const core.CanvasMode(isInfinite: true),
-      pageSize: ref.read(documentProvider).settings.defaultPageSize,
+      pageSize: resolveNewPageSize(
+        ref.read(documentProvider),
+        ref.read(currentPageIndexProvider),
+      ),
     );
   }
 }

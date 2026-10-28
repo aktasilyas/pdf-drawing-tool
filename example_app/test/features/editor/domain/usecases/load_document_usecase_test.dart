@@ -67,6 +67,30 @@ void main() {
       }
     }
 
+    for (final (label, w, h) in [
+      ('A4 portrait', 210.0, 297.0),
+      ('A4 landscape', 297.0, 210.0),
+    ]) {
+      test('new $label notebook stores its page size as the default',
+          () async {
+        when(() => mockRepository.getDocument(testDocId)).thenAnswer(
+          (_) async => Right(
+            testDocInfo.copyWith(paperWidthMm: w, paperHeightMm: h),
+          ),
+        );
+        when(() => mockRepository.getDrawingDocument(testDocId))
+            .thenAnswer((_) async => const Right(null));
+
+        final result = await useCase(testDocId);
+
+        final document = result.getOrElse(() => throw Exception());
+        final pageSize = document.pages.last.size;
+        expect(pageSize.height, 1024);
+        expect(pageSize.isLandscape, w > h);
+        expect(document.settings.defaultPageSize, pageSize);
+      });
+    }
+
     test('engineer_pad template keeps its extraData on the new page', () async {
       when(() => mockRepository.getDocument(testDocId)).thenAnswer(
         (_) async => Right(testDocInfo.copyWith(templateId: 'engineer_pad')),
