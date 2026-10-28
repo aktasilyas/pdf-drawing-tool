@@ -138,8 +138,7 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
     final strings = context.drawingStrings;
     final messenger = ScaffoldMessenger.maybeOf(context);
     final paths = ref.read(pdfPathResolverProvider);
-    final picked =
-        await ImagePicker().pickImage(source: source, imageQuality: 85);
+    final picked = await pickImagePagePhoto(ImagePicker(), source);
     if (picked == null) return;
     try {
       final appDir = await getApplicationDocumentsDirectory();
@@ -147,16 +146,17 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
         picked.path,
         documentsRoot: appDir.path,
         paths: paths,
+        maxDimension: maxImagePageEdge,
       );
       if (!mounted) {
         await discardImportedImagePage(image, paths: paths);
         return;
       }
       _insertNewPage(image.background, strings: strings, size: image.size);
-    } on ImagePageImportException {
-      messenger?.showSnackBar(
-        SnackBar(content: Text(strings.errors.imageReadFailed)),
-      );
+    } on ImagePageImportException catch (e) {
+      messenger?.showSnackBar(SnackBar(
+        content: Text(imagePageImportMessage(strings.errors, e.error)),
+      ));
     }
     if (mounted) widget.onClose();
   }
@@ -180,8 +180,8 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
       insertIndex: insertIdx,
       defaultPageSize: doc.settings.defaultPageSize,
       pdfPaths: ref.read(pdfPathResolverProvider),
-      onImageError: () => messenger?.showSnackBar(
-        SnackBar(content: Text(strings.errors.imageReadFailed)),
+      onImageError: (e) => messenger?.showSnackBar(
+        SnackBar(content: Text(imagePageImportMessage(strings.errors, e))),
       ),
       onError: (failure) => messenger?.showSnackBar(
         SnackBar(content: Text(failure.message(strings))),
