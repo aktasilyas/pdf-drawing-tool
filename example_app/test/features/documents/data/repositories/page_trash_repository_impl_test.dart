@@ -261,8 +261,8 @@ void main() {
     test('permanent delete removes it by id', () async {
       await addCorrupt('bad', now);
 
-      expect((await fx.pageTrash.permanentlyDeletePage('bad')).isRight(),
-          isTrue);
+      expect(
+          (await fx.pageTrash.permanentlyDeletePage('bad')).isRight(), isTrue);
       expect(await fx.trashDs.getUnreadableTrashedPages(), isEmpty);
     });
   });
