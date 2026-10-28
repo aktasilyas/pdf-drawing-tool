@@ -3,8 +3,9 @@
 Issue: #391. Size S.
 
 ## Reference check
-GoodNotes, Flexcil and StarNote surface the platform's "not enough storage"
-condition as its own message rather than a generic import error → same.
+Not verified against GoodNotes/Flexcil/StarNote in this run: this is error
+copy, not a product or UX decision. Export already reports a full disk as its
+own message (`ExportFailure.storageFull`); import now does the same.
 
 ## Steps
 1. `storage_errors.dart` (drawing_ui services): `isStorageFullError` — errno
