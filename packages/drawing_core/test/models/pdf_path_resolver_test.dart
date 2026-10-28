@@ -36,6 +36,61 @@ void main() {
     });
   });
 
+  group('PdfPathResolver images', () {
+    const root = '/data/user/0/new.pkg/app_flutter';
+
+    test('toStored stores direct children of elyanotes_images', () {
+      expect(
+        resolver.toStored('$root/elyanotes_images/a.png'),
+        'elyanotes_images/a.png',
+      );
+    });
+
+    test('toStored leaves nested and outside paths unchanged', () {
+      expect(
+        resolver.toStored('$root/elyanotes_images/x/a.png'),
+        '$root/elyanotes_images/x/a.png',
+      );
+      expect(
+        resolver.toStored('/tmp/elyanotes_images/a.png'),
+        '/tmp/elyanotes_images/a.png',
+      );
+    });
+
+    test('resolve joins a relative image path to the root', () {
+      expect(
+        resolver.resolve('elyanotes_images/a.png'),
+        '$root/elyanotes_images/a.png',
+      );
+    });
+
+    test('resolve re-roots a legacy absolute image path', () {
+      expect(
+        resolver
+            .resolve('/data/user/0/old.pkg/app_flutter/elyanotes_images/a.png'),
+        '$root/elyanotes_images/a.png',
+      );
+    });
+
+    test('resolve re-roots a legacy Windows image path', () {
+      expect(
+        resolver.resolve(r'C:\Old\Docs\elyanotes_images\a.png'),
+        '$root/elyanotes_images/a.png',
+      );
+    });
+
+    test('passthrough leaves image paths unchanged', () {
+      expect(
+        PdfPathResolver.passthrough.resolve('elyanotes_images/a.png'),
+        'elyanotes_images/a.png',
+      );
+      expect(
+        PdfPathResolver.passthrough.toStored('/x/elyanotes_images/a.png'),
+        '/x/elyanotes_images/a.png',
+      );
+    });
+  });
+
   group('PdfPathResolver.resolve', () {
     test('joins a relative path to the root', () {
       expect(

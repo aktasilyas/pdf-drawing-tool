@@ -68,8 +68,9 @@ class PdfContentPainter {
     PdfDocument doc,
     Layer layer,
     double w,
-    double h,
-  ) async {
+    double h, {
+    PdfPathResolver paths = PdfPathResolver.passthrough,
+  }) async {
     final strokeMap = {for (final s in layer.strokes) s.id: s};
     final shapeMap = {for (final s in layer.shapes) s.id: s};
     final imageMap = {for (final i in layer.images) i.id: i};
@@ -81,7 +82,7 @@ class PdfContentPainter {
         } else if (shapeMap.containsKey(id)) {
           _shapeRenderer.paintShape(g, shapeMap[id]!, w, h);
         } else if (imageMap.containsKey(id)) {
-          await _paintImage(g, doc, imageMap[id]!, w, h);
+          await _paintImage(g, doc, imageMap[id]!, w, h, paths);
         }
       }
     } else {
@@ -92,7 +93,7 @@ class PdfContentPainter {
         _shapeRenderer.paintShape(g, shape, w, h);
       }
       for (final image in layer.images) {
-        await _paintImage(g, doc, image, w, h);
+        await _paintImage(g, doc, image, w, h, paths);
       }
     }
   }
@@ -227,9 +228,10 @@ class PdfContentPainter {
     ImageElement img,
     double w,
     double h,
+    PdfPathResolver paths,
   ) async {
     try {
-      final file = File(img.filePath);
+      final file = File(paths.resolve(img.filePath));
       if (!await file.exists()) return;
       final bytes = await file.readAsBytes();
       final pdfImg = PdfImage.file(doc, bytes: bytes);

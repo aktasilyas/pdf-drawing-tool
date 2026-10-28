@@ -109,8 +109,8 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
         width: widget.width,
         height: widget.height,
         backgroundColor: widget.backgroundColor,
-        // Only PDF pages need the resolver (and a ProviderScope).
-        pdfPaths: widget.page.background.type == BackgroundType.pdf
+        // Only PDF and image pages need the resolver (and a ProviderScope).
+        pdfPaths: _needsResolver(widget.page)
             ? ref.read(pdfPathResolverProvider)
             : PdfPathResolver.passthrough,
       );
@@ -273,3 +273,7 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
     );
   }
 }
+
+bool _needsResolver(Page page) =>
+    page.background.type == BackgroundType.pdf ||
+    page.layers.any((layer) => layer.images.isNotEmpty);
