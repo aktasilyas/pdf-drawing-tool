@@ -109,8 +109,8 @@ void main() {
       expect(strings.toolbar.color('#123456'), contains('#123456'));
       expect(strings.toolbar.thickness('2.5'), contains('2.5'));
       expect(strings.pages.pageNumber(7), contains('7'));
-      expect(strings.pageList.pageOf(3, 9),
-          allOf(contains('3'), contains('9')));
+      expect(
+          strings.pageList.pageOf(3, 9), allOf(contains('3'), contains('9')));
       expect(strings.export.invalidRange(12), contains('12'));
       expect(strings.export.pageFileName('Notes', 4),
           allOf(contains('Notes'), contains('4')));
