@@ -14,7 +14,7 @@ class Page {
   final Uint8List? thumbnail;
   final DateTime createdAt;
   final DateTime updatedAt;
-  final bool isCover; // Flag for cover pages (drawings not saved)
+  final bool isCover; // Cover page; its content is saved like any page
   final bool isBookmarked;
 
   const Page({
@@ -50,7 +50,7 @@ class Page {
     );
   }
 
-  /// Factory for creating a cover page (drawings not saved)
+  /// Factory for creating a cover page (the notebook's first page)
   factory Page.createCover({
     required int index,
     PageSize? size,
@@ -107,23 +107,6 @@ class Page {
       updatedAt: updatedAt ?? DateTime.now(),
       isCover: isCover ?? this.isCover,
       isBookmarked: isBookmarked ?? this.isBookmarked,
-    );
-  }
-
-  /// Returns a clean version of this page with all strokes removed
-  /// (Used for cover pages before saving)
-  Page clearDrawings() {
-    final cleanLayers = layers.map((layer) {
-      return layer.copyWith(
-        strokes: [],
-        shapes: [],
-        texts: [],
-      );
-    }).toList();
-
-    return copyWith(
-      layers: cleanLayers,
-      updatedAt: DateTime.now(),
     );
   }
 
