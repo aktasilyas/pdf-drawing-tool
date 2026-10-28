@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 import 'package:example_app/core/core.dart'
     show CacheException, CacheFailure, Failure, LocalTransactionRunner;
 import 'package:example_app/features/documents/data/datasources/document_local_datasource.dart';
+import 'package:example_app/features/documents/data/datasources/managed_file_paths.dart';
 import 'package:example_app/features/documents/data/datasources/trashed_page_local_datasource.dart';
 import 'package:example_app/features/documents/data/models/trashed_page_model.dart';
 import 'package:example_app/features/documents/domain/entities/trashed_page.dart';
@@ -148,7 +149,7 @@ class PageTrashRepositoryImpl implements PageTrashRepository {
   }
 
   /// Deletes the trash rows of [pages] in one transaction, then the copied
-  /// PDF files nothing references any more.
+  /// files (PDFs, images) nothing references any more.
   Future<void> _remove(List<TrashedPageModel> pages) async {
     if (pages.isEmpty) return;
     await _runner.run(() async {
@@ -156,17 +157,9 @@ class PageTrashRepositoryImpl implements PageTrashRepository {
         await _trashDatasource.removeTrashedPage(page.id);
       }
     });
-    await _documentDatasource.deleteUnreferencedPdfs([
-      for (final page in pages)
-        if (_pdfPathOf(page) case final String path) path,
-    ]);
-  }
-
-  static String? _pdfPathOf(TrashedPageModel page) {
-    final background = page.pageData['background'];
-    if (background is! Map) return null;
-    final path = background['pdfFilePath'];
-    return path is String ? path : null;
+    await _documentDatasource.deleteUnreferencedFiles({
+      for (final page in pages) ...managedFilePathsOfPage(page.pageData),
+    });
   }
 
   Future<void> _updatePageCount(String documentId, int newCount) async {

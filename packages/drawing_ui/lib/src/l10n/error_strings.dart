@@ -20,6 +20,10 @@ abstract class ErrorStrings {
   String get pdfLoadFailed;
   String pdfPagesSkipped(int count);
 
+  /// A picked image could not be read or decoded. Non-abstract so existing
+  /// subclasses keep compiling; they fall back to this English copy.
+  String get imageReadFailed => "Couldn't read the image file";
+
   /// Every getter by name, for drift tests.
   Map<String, String> toMap() => {
         'exportStorageFull': exportStorageFull,
@@ -35,6 +39,7 @@ abstract class ErrorStrings {
         'pdfSourceMissing': pdfSourceMissing,
         'pdfLoadFailed': pdfLoadFailed,
         'pdfPagesSkipped': pdfPagesSkipped(2),
+        'imageReadFailed': imageReadFailed,
       };
 }
 
@@ -84,4 +89,7 @@ class ErrorStringsTr extends ErrorStrings {
 
   @override
   String pdfPagesSkipped(int count) => '$count sayfa okunamadı ve atlandı';
+
+  @override
+  String get imageReadFailed => 'Resim dosyası okunamadı';
 }

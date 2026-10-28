@@ -1,10 +1,8 @@
-import 'dart:io';
-import 'dart:ui' as ui;
-
 import 'package:drawing_core/drawing_core.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'package:drawing_ui/src/services/image_page_import.dart';
 import 'package:drawing_ui/src/services/pdf_import_service.dart';
 
 /// Opens a file picker for PDF/image files, then converts the selected file
@@ -17,6 +15,7 @@ Future<List<Page>> pickAndImportFile({
   required PageSize defaultPageSize,
   void Function(PdfImportFailure failure)? onError,
   void Function(int count)? onPagesSkipped,
+  void Function()? onImageError,
   PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
 }) async {
   final result = await FilePicker.platform.pickFiles(
@@ -38,7 +37,12 @@ Future<List<Page>> pickAndImportFile({
       createService: () => PDFImportService(pdfPaths: pdfPaths),
     );
   }
-  return _importImage(filePath, insertIndex);
+  return importImageAsPage(
+    filePath,
+    insertIndex,
+    pdfPaths: pdfPaths,
+    onImageError: onImageError,
+  );
 }
 
 /// Imports the PDF at [path] as pages numbered from [insertIndex].
@@ -78,32 +82,33 @@ Future<List<Page>> importPdfAsPages(
   }
 }
 
-Future<List<Page>> _importImage(String path, int insertIndex) async {
+/// Imports the image at [path] as one page. Failures go to [onImageError]
+/// and give an empty list. [documentsRoot] defaults to the app documents
+/// directory.
+Future<List<Page>> importImageAsPage(
+  String path,
+  int insertIndex, {
+  PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
+  void Function()? onImageError,
+  String? documentsRoot,
+}) async {
   try {
-    final appDir = await getApplicationDocumentsDirectory();
-    final dir = Directory('${appDir.path}/elyanotes_images');
-    if (!dir.existsSync()) dir.createSync(recursive: true);
-    final dest = '${dir.path}/${DateTime.now().microsecondsSinceEpoch}'
-        '.${path.split('.').last}';
-    await File(path).copy(dest);
-    final bytes = await File(dest).readAsBytes();
-    final codec = await ui.instantiateImageCodec(bytes);
-    final frame = await codec.getNextFrame();
-    final w = frame.image.width.toDouble();
-    final h = frame.image.height.toDouble();
-    frame.image.dispose();
+    final root =
+        documentsRoot ?? (await getApplicationDocumentsDirectory()).path;
+    final image = await importImagePage(
+      path,
+      documentsRoot: root,
+      paths: pdfPaths,
+    );
     return [
       Page.create(
         index: insertIndex,
-        size: PageSize(width: w, height: h),
-        background: PageBackground(
-          type: BackgroundType.pdf,
-          pdfData: bytes,
-          pdfPageIndex: 1,
-        ),
+        size: image.size,
+        background: image.background,
       ),
     ];
   } catch (_) {
+    onImageError?.call();
     return [];
   }
 }
