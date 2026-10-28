@@ -110,23 +110,6 @@ class Page {
     );
   }
 
-  /// Returns a clean version of this page with all strokes removed
-  /// (Used for cover pages before saving)
-  Page clearDrawings() {
-    final cleanLayers = layers.map((layer) {
-      return layer.copyWith(
-        strokes: [],
-        shapes: [],
-        texts: [],
-      );
-    }).toList();
-
-    return copyWith(
-      layers: cleanLayers,
-      updatedAt: DateTime.now(),
-    );
-  }
-
   /// Add stroke to active layer
   Page addStroke(Stroke stroke) {
     final updatedLayers = List<Layer>.from(layers);
