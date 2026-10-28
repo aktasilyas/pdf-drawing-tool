@@ -1,15 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'package:drawing_ui/src/widgets/template_preview_widget.dart';
 
 /// Paper color presets for the dropdown.
-const paperColorPresets = <String, Color>{
-  'Beyaz': Color(0xFFFFFFFF),
-  'Krem': Color(0xFFFFFDE7),
-  'Siyah': Color(0xFF303030),
-};
+enum PaperColorPreset {
+  white(Color(0xFFFFFFFF)),
+  cream(Color(0xFFFFFDE7)),
+  black(Color(0xFF303030));
+
+  const PaperColorPreset(this.color);
+  final Color color;
+}
+
+/// Localized name of a paper colour preset.
+String paperColorPresetLabel(TemplateStrings s, PaperColorPreset preset) =>
+    switch (preset) {
+      PaperColorPreset.white => s.colorWhite,
+      PaperColorPreset.cream => s.colorCream,
+      PaperColorPreset.black => s.colorBlack,
+    };
 
 /// Template picker sonucu
 class TemplatePickerResult {
@@ -67,7 +79,7 @@ class TemplatePickerPreviewPanel extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        Text(template.name,
+        Text(context.drawingStrings.templates.templateName(template),
             style: theme.textTheme.titleSmall
                 ?.copyWith(fontWeight: FontWeight.w600, color: cs.onSurface),
             textAlign: TextAlign.center),
@@ -99,12 +111,14 @@ class PaperColorDropdown extends StatelessWidget {
     final radius = BorderRadius.circular(8);
 
     // Build effective presets — add current color if not in defaults
-    final effectivePresets = Map<String, Color>.of(paperColorPresets);
-    final isCustom = !effectivePresets.values.any(
-      (c) => c == selectedColor,
-    );
+    final s = context.drawingStrings.templates;
+    final effectivePresets = <(String, Color)>[
+      for (final p in PaperColorPreset.values)
+        (paperColorPresetLabel(s, p), p.color),
+    ];
+    final isCustom = !effectivePresets.any((e) => e.$2 == selectedColor);
     if (isCustom) {
-      effectivePresets['Özel'] = selectedColor;
+      effectivePresets.add((s.custom, selectedColor));
     }
 
     return Container(
@@ -123,22 +137,22 @@ class PaperColorDropdown extends StatelessWidget {
               size: 14, color: cs.onSurfaceVariant),
           style: TextStyle(fontSize: 12, color: cs.onSurface),
           dropdownColor: cs.surfaceContainerHighest,
-          items: effectivePresets.entries.map((e) {
+          items: effectivePresets.map((e) {
             return DropdownMenuItem(
-              value: e.value,
+              value: e.$2,
               child: Row(mainAxisSize: MainAxisSize.min, children: [
                 Container(
                   width: 14,
                   height: 14,
                   decoration: BoxDecoration(
-                    color: e.value,
+                    color: e.$2,
                     shape: BoxShape.circle,
                     border:
                         Border.all(color: cs.outline.withValues(alpha: 0.5)),
                   ),
                 ),
                 const SizedBox(width: 6),
-                Text(e.key),
+                Text(e.$1),
               ]),
             );
           }).toList(),

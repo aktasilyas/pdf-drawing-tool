@@ -2,43 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 
 import 'package:drawing_ui/src/providers/providers.dart';
-import 'package:drawing_ui/src/services/page_rotation_service.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
-
-/// Shows a dialog letting the user choose a rotation angle.
-Future<RotationAngle?> showRotatePageDialog(BuildContext context) {
-  return showDialog<RotationAngle>(
-    context: context,
-    builder: (ctx) {
-      final cs = Theme.of(ctx).colorScheme;
-      return SimpleDialog(
-        title: const Text('Sayfayı Döndür'),
-        children: [
-          _rotateOption(ctx, cs, ElyanotesIcons.rotateCW, 'Saat yönünde (90°)',
-              RotationAngle.cw90),
-          _rotateOption(ctx, cs, ElyanotesIcons.rotateCCW,
-              'Saat yönünün tersine (90°)', RotationAngle.ccw90),
-          _rotateOption(
-              ctx, cs, ElyanotesIcons.rotateHalf, '180°', RotationAngle.half),
-        ],
-      );
-    },
-  );
-}
-
-Widget _rotateOption(BuildContext ctx, ColorScheme cs, IconData icon,
-    String label, RotationAngle angle) {
-  return SimpleDialogOption(
-    onPressed: () => Navigator.pop(ctx, angle),
-    child: Row(
-      children: [
-        PhosphorIcon(icon, size: 22, color: cs.onSurface),
-        const SizedBox(width: ChromeSpacing.lg),
-        Text(label),
-      ],
-    ),
-  );
-}
 
 // ═══════════════════════════════════════════
 // Extracted helpers (shared with page_options_panel.dart)

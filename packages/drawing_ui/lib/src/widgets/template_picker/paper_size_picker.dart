@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 
 /// Kagit boyutu secici - dropdown style
@@ -30,7 +31,7 @@ class PaperSizePicker extends StatelessWidget {
     PaperSizePreset.widescreen,
   ];
 
-  String _getPresetName(PaperSizePreset preset) {
+  String _getPresetName(TemplateStrings s, PaperSizePreset preset) {
     switch (preset) {
       case PaperSizePreset.a4:
         return 'A4';
@@ -43,17 +44,18 @@ class PaperSizePicker extends StatelessWidget {
       case PaperSizePreset.legal:
         return 'Legal';
       case PaperSizePreset.square:
-        return 'Kare';
+        return s.paperSquare;
       case PaperSizePreset.widescreen:
-        return 'Geniş (16:9)';
+        return s.paperWidescreen;
       case PaperSizePreset.custom:
-        return 'Özel';
+        return s.custom;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final s = context.drawingStrings.templates;
     final hPad = dense ? 8.0 : 12.0;
     final fontSize = dense ? 12.0 : 14.0;
     final iconSize = dense ? 14.0 : 18.0;
@@ -84,7 +86,7 @@ class PaperSizePicker extends StatelessWidget {
               items: _presets.map((preset) {
                 return DropdownMenuItem(
                   value: preset,
-                  child: Text(_getPresetName(preset)),
+                  child: Text(_getPresetName(s, preset)),
                 );
               }).toList(),
               onChanged: (preset) {
@@ -112,9 +114,9 @@ class PaperSizePicker extends StatelessWidget {
                     size: iconSize, color: cs.onSurfaceVariant),
                 style: TextStyle(fontSize: fontSize, color: cs.onSurface),
                 dropdownColor: cs.surfaceContainerHighest,
-                items: const [
-                  DropdownMenuItem(value: false, child: Text('Dikey')),
-                  DropdownMenuItem(value: true, child: Text('Yatay')),
+                items: [
+                  DropdownMenuItem(value: false, child: Text(s.portrait)),
+                  DropdownMenuItem(value: true, child: Text(s.landscape)),
                 ],
                 onChanged: (isLandscape) {
                   if (isLandscape == null) return;

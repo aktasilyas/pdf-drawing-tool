@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/panels/add_page_import_helper.dart';
@@ -150,14 +151,16 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
     final curIdx = ref.read(currentPageIndexProvider);
     final insertIdx = _resolveInsertionIndex(curIdx, doc.pages.length);
     final messenger = ScaffoldMessenger.maybeOf(context);
+    final strings = context.drawingStrings;
     widget.onClose();
 
     final imported = await pickAndImportFile(
       insertIndex: insertIdx,
       defaultPageSize: doc.settings.defaultPageSize,
       pdfPaths: ref.read(pdfPathResolverProvider),
-      onError: (message) =>
-          messenger?.showSnackBar(SnackBar(content: Text(message))),
+      onError: (failure) => messenger?.showSnackBar(
+        SnackBar(content: Text(failure.message(strings))),
+      ),
     );
     if (imported.isEmpty) return;
 

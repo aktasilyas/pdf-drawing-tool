@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:drawing_ui/src/l10n/drawing_strings_scope.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 
 /// Shape options for thickness preview.
@@ -161,7 +162,7 @@ class StabilizationSlider extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              'Stabilization',
+              context.drawingStrings.panels.stabilization,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),

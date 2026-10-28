@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
+import 'package:drawing_ui/src/l10n/drawing_strings_scope.dart';
 import 'package:drawing_ui/src/theme/chrome_tokens.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 
@@ -30,7 +31,7 @@ class FloatingPenBoxCollapsed extends StatelessWidget {
 
     return Semantics(
       button: true,
-      label: 'Kalem kutusu, $count kalem',
+      label: context.drawingStrings.canvas.penBox(count),
       excludeSemantics: true,
       child: GestureDetector(
         onTap: onExpand,
@@ -112,7 +113,9 @@ class FloatingPenBoxControls extends StatelessWidget {
 
     final editButton = Semantics(
       button: true,
-      label: isEditMode ? 'Düzenlemeyi bitir' : 'Kalem kutusunu düzenle',
+      label: isEditMode
+          ? context.drawingStrings.canvas.finishEditing
+          : context.drawingStrings.canvas.editPenBox,
       child: GestureDetector(
         onTap: onToggleEditMode,
         child: PhosphorIcon(
@@ -125,7 +128,7 @@ class FloatingPenBoxControls extends StatelessWidget {
     );
     final collapseButton = Semantics(
       button: true,
-      label: 'Kalem kutusunu daralt',
+      label: context.drawingStrings.canvas.collapsePenBox,
       child: GestureDetector(
         onTap: onCollapse,
         child: PhosphorIcon(

@@ -127,7 +127,7 @@ class _StickyNoteContextMenu extends StatelessWidget {
                           PhosphorIcon(ElyanotesIcons.trash,
                               size: 16, color: Colors.red),
                           const SizedBox(width: 4),
-                          Text('Sil',
+                          Text(context.drawingStrings.selection.delete,
                               style: Theme.of(context)
                                   .textTheme
                                   .bodySmall

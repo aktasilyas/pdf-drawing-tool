@@ -80,7 +80,10 @@ mixin _PdfBackground on DrawingCanvasGestureHandlers<DrawingCanvas> {
               return _buildPdfPlaceholder(page);
             },
             loading: () => _buildPdfLoading(page),
-            error: (e, st) => _buildPdfError(page, e.toString()),
+            error: (e, st) {
+              DrawingLog.e('PDF page failed to load', e, st);
+              return _buildPdfError(page);
+            },
           );
         },
       );
@@ -120,7 +123,7 @@ mixin _PdfBackground on DrawingCanvasGestureHandlers<DrawingCanvas> {
   }
 
   /// PDF hata widget'ı
-  Widget _buildPdfError(core.Page page, String error) {
+  Widget _buildPdfError(core.Page page) {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Container(
@@ -148,19 +151,10 @@ mixin _PdfBackground on DrawingCanvasGestureHandlers<DrawingCanvas> {
                   size: 40, color: colorScheme.error),
               const SizedBox(height: 8),
               Text(
-                'PDF Yüklenemedi',
+                context.drawingStrings.errors.pdfLoadFailed,
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: colorScheme.onErrorContainer),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                error,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    fontSize: 10, color: colorScheme.onErrorContainer),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),

@@ -2,11 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
+import 'pdf_import_failure.dart';
 import 'pdf_loader.dart';
-
-/// Shown when a PDF needs a password to open.
-const pdfPasswordProtectedMessage =
-    'Bu PDF parola korumalı. Parolayı kaldırıp tekrar deneyin.';
 
 /// Bytes read from each end of the file by [pdfFileLooksEncrypted].
 const _sniffBytes = 64 * 1024;
@@ -36,10 +33,10 @@ Future<bool> pdfFileLooksEncrypted(String path) async {
   }
 }
 
-/// Maps an import failure to a message that is safe to show to the user.
-String friendlyPdfImportError(Object error) {
+/// Maps an import error to a typed failure that is safe to show to the user.
+PdfImportFailure pdfImportFailureFor(Object error) {
   if (error is ArgumentError || error is StateError) {
-    return error.toString();
+    return const PdfImportFailure(PdfImportError.openFailed);
   }
   final text = error is PDFLoaderException
       ? '${error.message} ${error.cause}'.toLowerCase()
@@ -47,10 +44,10 @@ String friendlyPdfImportError(Object error) {
   if (text.contains('password') ||
       text.contains('encrypt') ||
       text.contains('parola')) {
-    return pdfPasswordProtectedMessage;
+    return const PdfImportFailure(PdfImportError.passwordProtected);
   }
   if (error is FileSystemException) {
-    return 'PDF dosyasına erişilemedi.';
+    return const PdfImportFailure(PdfImportError.fileAccess);
   }
-  return 'PDF açılamadı. Dosya bozuk olabilir.';
+  return const PdfImportFailure(PdfImportError.openFailed);
 }

@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/src/providers/pdf_provider.dart';
+import 'package:drawing_ui/src/services/export_errors.dart';
 import 'package:drawing_ui/src/services/pdf_import_service.dart';
 
 void main() {
@@ -54,11 +55,14 @@ void main() {
       test('should set import error', () {
         final notifier = container.read(pdfImportStateProvider.notifier);
 
-        notifier.setError('Import failed');
+        notifier.setError(const PdfImportFailure(PdfImportError.openFailed));
 
         final state = container.read(pdfImportStateProvider);
         expect(state.hasError, true);
-        expect(state.errorMessage, 'Import failed');
+        expect(
+          state.failure,
+          const PdfImportFailure(PdfImportError.openFailed),
+        );
       });
 
       test('should reset import state', () {
@@ -113,11 +117,11 @@ void main() {
       test('should set export error', () {
         final notifier = container.read(pdfExportStateProvider.notifier);
 
-        notifier.setError('Export failed');
+        notifier.setError(ExportFailure.failed);
 
         final state = container.read(pdfExportStateProvider);
         expect(state.hasError, true);
-        expect(state.errorMessage, 'Export failed');
+        expect(state.failure, ExportFailure.failed);
       });
 
       test('should reset export state', () {
@@ -163,25 +167,6 @@ void main() {
         expect(isExporting, false);
       });
 
-      test('should get import progress message', () {
-        final notifier = container.read(pdfImportStateProvider.notifier);
-
-        notifier.updateState(PDFImportState.loadingPDF);
-
-        final message = container.read(importProgressMessageProvider);
-
-        expect(message, contains('Loading'));
-      });
-
-      test('should get export progress message', () {
-        final notifier = container.read(pdfExportStateProvider.notifier);
-
-        notifier.updateState(PDFExportState.exporting);
-
-        final message = container.read(exportProgressMessageProvider);
-
-        expect(message, contains('Exporting'));
-      });
     });
 
     group('State Notifications', () {

@@ -19,8 +19,8 @@ void main() {
       expect(find.byType(TopNavigationBar), findsOneWidget);
       expect(find.byType(ToolBar), findsOneWidget);
 
-      // MockCanvas should be present
-      expect(find.byType(MockCanvas), findsOneWidget);
+      // DrawingCanvas should be present
+      expect(find.byType(DrawingCanvas), findsOneWidget);
 
       // AI button should be present
       expect(find.byIcon(Icons.auto_awesome), findsOneWidget);
@@ -111,7 +111,7 @@ void main() {
         ),
       );
 
-      expect(find.byType(MockCanvas), findsOneWidget);
+      expect(find.byType(DrawingCanvas), findsOneWidget);
     });
 
     testWidgets('eraser tool opens eraser panel on long press', (tester) async {
@@ -295,9 +295,9 @@ void main() {
     testWidgets(
       'canvas displays current tool',
       (tester) async {
-        // Skip: MockCanvas replaced with real DrawingCanvas which doesn't display tool text
+        // Skip: the canvas does not display tool text
       },
-      skip: true, // UI redesign - MockCanvas replaced with DrawingCanvas
+      skip: true, // UI redesign
     );
 
     testWidgets('canvas has grid pattern', (tester) async {

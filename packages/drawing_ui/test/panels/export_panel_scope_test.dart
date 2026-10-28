@@ -21,6 +21,7 @@ class _Runner extends PDFExportRunner {
   Future<void> run(
     ExportProgressNotifier progress,
     DrawingDocument document, {
+    required ExportStrings strings,
     bool addWatermark = false,
     bool share = false,
     ExportOptions options = const ExportOptions(),
@@ -137,7 +138,7 @@ void main() {
             options: any(named: 'options'),
             onProgress: any(named: 'onProgress'),
             isCancelled: any(named: 'isCancelled'),
-          )).thenAnswer((_) async => PDFExportResult.error('stub'));
+          )).thenAnswer((_) async => PDFExportResult.error(ExportFailure.failed));
       final doc = DrawingDocument.multiPage(
         id: 'd',
         title: 'T',
@@ -148,6 +149,7 @@ void main() {
       await performPDFExport(
         ExportProgressNotifier(),
         doc,
+        strings: _s,
         options: options,
         currentPageIndex: 1,
         exporter: exporter,

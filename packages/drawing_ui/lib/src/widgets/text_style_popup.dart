@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/l10n/drawing_strings_scope.dart';
 import 'package:drawing_ui/src/theme/drawing_shadows.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'unified_color_picker.dart';
@@ -62,6 +63,7 @@ class _TextStylePopupState extends State<TextStylePopup> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final s = context.drawingStrings;
     // Calculate screen position
     final screenX = widget.textElement.x * widget.zoom + widget.canvasOffset.dx;
     final screenY = widget.textElement.y * widget.zoom + widget.canvasOffset.dy;
@@ -96,7 +98,9 @@ class _TextStylePopupState extends State<TextStylePopup> {
                   child: Row(
                     children: [
                       Text(
-                        widget.stickerMode ? 'Emoji Boyutu' : 'Metin Stili',
+                        widget.stickerMode
+                            ? s.canvas.emojiSize
+                            : s.canvas.textStyleTitle,
                         style: textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: cs.onSurface,
@@ -121,7 +125,7 @@ class _TextStylePopupState extends State<TextStylePopup> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Renk',
+                          s.panels.textColor,
                           style: textTheme.bodySmall
                               ?.copyWith(color: cs.onSurfaceVariant),
                         ),
@@ -148,7 +152,7 @@ class _TextStylePopupState extends State<TextStylePopup> {
                       Row(
                         children: [
                           Text(
-                            'Boyut',
+                            s.panels.size,
                             style: textTheme.bodySmall
                                 ?.copyWith(color: cs.onSurfaceVariant),
                           ),
@@ -191,7 +195,7 @@ class _TextStylePopupState extends State<TextStylePopup> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Stil',
+                          s.panels.textStyle,
                           style: textTheme.bodySmall
                               ?.copyWith(color: cs.onSurfaceVariant),
                         ),
@@ -200,7 +204,7 @@ class _TextStylePopupState extends State<TextStylePopup> {
                           children: [
                             _StyleButton(
                               icon: Icons.format_bold,
-                              label: 'B',
+                              label: 'B', // l10n-ignore
                               isSelected: _isBold,
                               onTap: () {
                                 setState(() => _isBold = !_isBold);
@@ -210,7 +214,7 @@ class _TextStylePopupState extends State<TextStylePopup> {
                             const SizedBox(width: 8),
                             _StyleButton(
                               icon: Icons.format_italic,
-                              label: 'I',
+                              label: 'I', // l10n-ignore
                               isSelected: _isItalic,
                               fontStyle: FontStyle.italic,
                               onTap: () {
@@ -221,7 +225,7 @@ class _TextStylePopupState extends State<TextStylePopup> {
                             const SizedBox(width: 8),
                             _StyleButton(
                               icon: Icons.format_underlined,
-                              label: 'U',
+                              label: 'U', // l10n-ignore
                               isSelected: _isUnderline,
                               decoration: TextDecoration.underline,
                               onTap: () {

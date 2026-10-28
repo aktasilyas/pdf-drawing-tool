@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:drawing_ui/src/l10n/drawing_strings_scope.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/toolbar/chrome_icon_button.dart';
 import 'package:drawing_ui/src/widgets/color_presets.dart';
@@ -60,7 +61,7 @@ class ColorPickerStrip extends StatelessWidget {
         ChromeIconButton(
           icon: ElyanotesIcons.plus,
           iconSize: ChromeIconSizes.md,
-          tooltip: 'Renk ekle',
+          tooltip: context.drawingStrings.canvas.addColor,
           onPressed: () => _showColorPalette(context),
         ),
       ],
@@ -142,7 +143,7 @@ class _ColorSwatch extends StatelessWidget {
     return Semantics(
       button: true,
       selected: isSelected,
-      label: 'Renk',
+      label: context.drawingStrings.selection.color,
       excludeSemantics: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,

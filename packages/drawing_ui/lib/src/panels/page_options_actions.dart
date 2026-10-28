@@ -2,6 +2,7 @@ import 'package:drawing_core/drawing_core.dart';
 import 'package:flutter/material.dart' hide Page;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 
 import 'export_panel.dart' show performPagesPDFExport;
@@ -79,11 +80,14 @@ mixin PageOptionsActions<T extends ConsumerStatefulWidget> on ConsumerState<T> {
     final doc = ref.read(documentProvider);
     final pageIndex = targetPageIndex;
     final notifier = ref.read(exportProgressProvider.notifier);
+    final strings = context.drawingStrings.export;
     onPanelClose();
+    final title = doc.title.isEmpty ? strings.fallbackFileName : doc.title;
     performPagesPDFExport(
       notifier,
+      strings: strings,
       pages: [doc.pages[pageIndex]],
-      title: '${doc.title}_sayfa${pageIndex + 1}',
+      title: strings.pageFileName(title, pageIndex + 1),
       pdfPaths: ref.read(pdfPathResolverProvider),
     );
   }
