@@ -129,36 +129,45 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
     );
   }
 
+  /// "New folder" on the left, Done or Cancel/Move on the right; stacks
+  /// vertically (right-aligned) when long copy does not fit on one line.
   Widget _buildActions() {
     final l10n = context.l10n;
+    final trailing = _isFolderMode
+        ? AppButton(
+            label: l10n.commonDone,
+            onPressed: () => Navigator.pop(context, true))
+        : Row(mainAxisSize: MainAxisSize.min, children: [
+            AppButton(
+                label: l10n.commonCancel,
+                variant: AppButtonVariant.text,
+                onPressed: () => Navigator.pop(context)),
+            const SizedBox(width: AppSpacing.sm),
+            AppButton(
+                label: l10n.commonMove,
+                onPressed: _isMovingFolder || _selectedFolderId != null
+                    ? _handleMove
+                    : null),
+          ]);
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.md),
-      child: Row(children: [
-        if (!_isCreatingFolder)
-          AppButton(
-              label: l10n.libraryNewFolder,
-              leadingIcon: Icons.create_new_folder,
-              variant: AppButtonVariant.text,
-              size: AppButtonSize.small,
-              onPressed: () => setState(() => _isCreatingFolder = true)),
-        const Spacer(),
-        if (_isFolderMode)
-          AppButton(
-              label: l10n.commonDone,
-              onPressed: () => Navigator.pop(context, true))
-        else ...[
-          AppButton(
-              label: l10n.commonCancel,
-              variant: AppButtonVariant.text,
-              onPressed: () => Navigator.pop(context)),
-          const SizedBox(width: AppSpacing.sm),
-          AppButton(
-              label: l10n.commonMove,
-              onPressed: _isMovingFolder || _selectedFolderId != null
-                  ? _handleMove
-                  : null),
+      child: OverflowBar(
+        alignment: _isCreatingFolder
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.spaceBetween,
+        overflowAlignment: OverflowBarAlignment.end,
+        overflowSpacing: AppSpacing.sm,
+        children: [
+          if (!_isCreatingFolder)
+            AppButton(
+                label: l10n.libraryNewFolder,
+                leadingIcon: Icons.create_new_folder,
+                variant: AppButtonVariant.text,
+                size: AppButtonSize.small,
+                onPressed: () => setState(() => _isCreatingFolder = true)),
+          trailing,
         ],
-      ]),
+      ),
     );
   }
 
