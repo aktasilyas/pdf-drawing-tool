@@ -1368,6 +1368,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editorPagePageMoved => 'Page moved';
 
   @override
+  String get editorPageBackgroundReplaced => 'Page background replaced';
+
+  @override
   String get editorPageGoToPage => 'Go to page';
 
   @override

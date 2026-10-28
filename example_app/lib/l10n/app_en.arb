@@ -684,6 +684,7 @@
   },
   "editorPagePageAdded": "Page added",
   "editorPagePageMoved": "Page moved",
+  "editorPageBackgroundReplaced": "Page background replaced",
   "editorPageGoToPage": "Go to page",
   "editorPageGo": "Go",
   "editorPageListPageOf": "Page {page} of {count}",

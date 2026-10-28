@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart' show mapEquals;
 import 'package:flutter/material.dart' hide Page;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/widgets/template_picker/template_picker.dart';
 
@@ -15,15 +16,26 @@ mixin PageOptionsTemplateActions<T extends ConsumerStatefulWidget>
   /// Page the panel operates on.
   int get targetPageIndex;
 
+  /// Opens the template picker for the target page and applies the result
+  /// to that page only. Confirming the picker unchanged is a no-op, so a PDF
+  /// or cover background is replaced only by an explicit new choice, which
+  /// can then be undone from the SnackBar.
   Future<void> changeTemplate(BuildContext context) async {
     final docNotifier = ref.read(documentProvider.notifier);
     final pageManager = ref.read(pageManagerProvider.notifier);
-    final page = ref.read(currentPageProvider);
-    final currentIdx = ref.read(currentPageIndexProvider);
     final doc = ref.read(documentProvider);
+    final targetIdx = targetPageIndex;
+    if (targetIdx < 0 || targetIdx >= doc.pages.length) return;
+    final page = doc.pages[targetIdx];
+    final currentIdx = ref.read(currentPageIndexProvider);
     final navContext = Navigator.of(context, rootNavigator: true).context;
+    // The popover context goes away on close, so grab these first.
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final strings = context.drawingStrings;
+    // Outlives the panel, so the SnackBar undo can still read providers.
+    final container = ProviderScope.containerOf(context, listen: false);
 
-    // Resolve current template from page background
+    // Resolve the target page's template, color and paper size.
     final bg = page.background;
     final currentTemplate = bg.templatePattern != null
         ? TemplateRegistry.getByPattern(bg.templatePattern!).firstOrNull
@@ -56,46 +68,89 @@ mixin PageOptionsTemplateActions<T extends ConsumerStatefulWidget>
           pageManager, currentIdx);
     }
 
-    // Apply template/paper change only if something changed
     final t = result.template;
     final newBgColor =
         result.backgroundColor?.toARGB32() ?? t.defaultBackgroundColor;
     final newLineColor = result.lineColor?.toARGB32() ?? t.defaultLineColor;
-    final templateChanged = t.pattern != bg.templatePattern ||
-        newBgColor != bg.color ||
-        newLineColor != bg.lineColor ||
-        !mapEquals(t.extraData, bg.templateExtraData);
+    final templateChanged = bg.templatePattern != null
+        ? t.pattern != bg.templatePattern ||
+            newBgColor != bg.color ||
+            newLineColor != bg.lineColor ||
+            !mapEquals(t.extraData, bg.templateExtraData)
+        // No template to compare with (PDF, cover, legacy): only a choice
+        // that differs from what the picker opened with counts.
+        : t != (currentTemplate ?? TemplateRegistry.blank) ||
+            newBgColor != bg.color;
+    // Compare with the size the picker opened with, so a page whose size is
+    // not a preset (e.g. an imported PDF page) is not resized to one.
+    final sizeChanged = result.paperSize != currentPaperSize;
+    if (!templateChanged && !sizeChanged) return;
 
-    // Apply paper size change (orientation / format)
     final newPageSize = result.paperSize.toPageSize();
-    final sizeChanged = newPageSize != page.size;
+    final newBg = PageBackground.fromTemplate(
+      t,
+      color: newBgColor,
+      lineColor: newLineColor,
+    );
+    // The cover follows the paper size; remember it for undo.
+    final previousCoverSize = docNotifier.currentDocument.pages
+        .where((p) => p.isCover && p.id != page.id)
+        .firstOrNull
+        ?.size;
+    _updatePage(
+      container,
+      page.id,
+      background: templateChanged ? newBg : null,
+      size: sizeChanged ? newPageSize : null,
+      coverSize: sizeChanged ? newPageSize : null,
+    );
 
-    if (templateChanged || sizeChanged) {
-      var updated = page;
-      if (templateChanged) {
-        final newBg = PageBackground.fromTemplate(
-          t,
-          color: newBgColor,
-          lineColor: newLineColor,
+    if (templateChanged && _isContentBackground(bg)) {
+      messenger
+        ?..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(strings.pages.backgroundReplaced),
+            action: SnackBarAction(
+              label: strings.toolbar.undo,
+              onPressed: () => _updatePage(
+                container,
+                page.id,
+                background: bg,
+                size: sizeChanged ? page.size : null,
+                coverSize: sizeChanged ? previousCoverSize : null,
+              ),
+            ),
+          ),
         );
-        updated = updated.copyWith(background: newBg);
-        docNotifier.updatePageBackground(page.id, newBg);
-      }
-      if (sizeChanged) {
-        updated = updated.copyWith(size: newPageSize);
-        final freshDoc = docNotifier.currentDocument;
-        final pages = List<Page>.from(freshDoc.pages);
-        final idx = pages.indexWhere((p) => p.id == page.id);
-        if (idx >= 0) {
-          pages[idx] = pages[idx].copyWith(size: newPageSize);
-        }
-        docNotifier.updateDocument(freshDoc.copyWith(pages: pages));
-      }
-      pageManager.updateCurrentPage(updated);
     }
+  }
 
-    // Always sync cover page size with paper orientation
-    _syncCoverSize(newPageSize, docNotifier);
+  /// Sets [background] and/or [size] of the page with [pageId] and, when
+  /// [coverSize] is set, the size of the cover page. The page manager keeps
+  /// its current page (the document's index is not kept in sync with
+  /// navigation, so it must not be used here).
+  void _updatePage(
+    ProviderContainer container,
+    String pageId, {
+    PageBackground? background,
+    PageSize? size,
+    PageSize? coverSize,
+  }) {
+    final docNotifier = container.read(documentProvider.notifier);
+    final freshDoc = docNotifier.currentDocument;
+    final idx = freshDoc.pages.indexWhere((p) => p.id == pageId);
+    if (idx < 0) return;
+    var updated = freshDoc.pages[idx];
+    if (background != null) updated = updated.copyWith(background: background);
+    if (size != null) updated = updated.copyWith(size: size);
+    final pages = List<Page>.from(freshDoc.pages)..[idx] = updated;
+    docNotifier.updateDocument(freshDoc.copyWith(pages: pages));
+    if (coverSize != null) _syncCoverSize(coverSize, docNotifier);
+    container.read(pageManagerProvider.notifier).initializeFromDocument(
+          docNotifier.currentDocument.pages,
+          currentIndex: container.read(currentPageIndexProvider),
+        );
   }
 
   /// Ensures the cover page matches the current paper size/orientation.
@@ -150,6 +205,11 @@ mixin PageOptionsTemplateActions<T extends ConsumerStatefulWidget>
     }
   }
 }
+
+/// PDF (also imported images) and cover backgrounds hold content that a
+/// template cannot recreate.
+bool _isContentBackground(PageBackground bg) =>
+    bg.type == BackgroundType.pdf || bg.type == BackgroundType.cover;
 
 /// Resolve PageSize (px) → PaperSize (mm) by matching known presets.
 PaperSize _resolvePaperSize(PageSize pageSize) {
