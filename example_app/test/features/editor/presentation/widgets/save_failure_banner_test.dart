@@ -9,6 +9,8 @@ import 'package:example_app/core/core.dart';
 import 'package:example_app/features/editor/editor.dart';
 import 'package:example_app/features/editor/presentation/widgets/save_failure_banner.dart';
 
+import '../../../../helpers/l10n.dart';
+
 class _MockSave extends Mock implements SaveDocumentUseCase {}
 
 void main() {
@@ -38,7 +40,7 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: MaterialApp(
+        child: localizedApp(
           theme: AppTheme.light,
           home: MediaQuery.withClampedTextScaling(
             minScaleFactor: textScale,

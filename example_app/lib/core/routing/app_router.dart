@@ -22,6 +22,7 @@ import 'package:example_app/features/documents/presentation/screens/template_sel
 import 'package:example_app/features/editor/presentation/screens/editor_screen.dart';
 import 'package:example_app/features/premium/presentation/screens/paywall_placeholder_screen.dart';
 import 'package:example_app/features/settings/settings.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// Auth routes that only exist when Supabase is initialized (cloud sync or AI).
 const _authPaths = {
@@ -82,8 +83,9 @@ GoRouter buildAppRouter(
         GoRoute(
           path: RouteNames.forgotPassword,
           name: 'forgotPassword',
-          builder: (context, state) =>
-              const _PlaceholderScreen(title: 'Forgot Password'),
+          builder: (context, state) => _PlaceholderScreen(
+            titleOf: (l) => l.routerForgotPasswordTitle,
+          ),
         ),
       ],
       // Document routes
@@ -130,7 +132,8 @@ GoRouter buildAppRouter(
       GoRoute(
         path: RouteNames.profile,
         name: 'profile',
-        builder: (context, state) => const _PlaceholderScreen(title: 'Profile'),
+        builder: (context, state) =>
+            _PlaceholderScreen(titleOf: (l) => l.routerProfileTitle),
       ),
 
       if (flags.premium) ...[
@@ -144,8 +147,9 @@ GoRouter buildAppRouter(
         GoRoute(
           path: RouteNames.subscription,
           name: 'subscription',
-          builder: (context, state) =>
-              const _PlaceholderScreen(title: 'Subscription'),
+          builder: (context, state) => _PlaceholderScreen(
+            titleOf: (l) => l.routerSubscriptionTitle,
+          ),
         ),
       ],
     ],
@@ -191,12 +195,13 @@ class _RedirectToLibraryState extends State<_RedirectToLibrary> {
 
 /// Temporary placeholder screen for routes not yet implemented
 class _PlaceholderScreen extends StatelessWidget {
-  final String title;
+  final String Function(AppLocalizations l10n) titleOf;
 
-  const _PlaceholderScreen({required this.title});
+  const _PlaceholderScreen({required this.titleOf});
 
   @override
   Widget build(BuildContext context) {
+    final title = titleOf(context.l10n);
     return Scaffold(
       appBar: AppBar(title: Text(title)),
       body: Center(
@@ -210,9 +215,9 @@ class _PlaceholderScreen extends StatelessWidget {
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Bu ekran henüz yapım aşamasında',
-              style: TextStyle(color: Colors.grey),
+            Text(
+              context.l10n.commonUnderConstruction,
+              style: const TextStyle(color: Colors.grey),
             ),
           ],
         ),

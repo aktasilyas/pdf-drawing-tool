@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/buttons/index.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// Minimal app shown when startup failed. It depends on nothing that startup
 /// sets up (no DI, no providers, no stored settings).
@@ -11,6 +12,7 @@ class StartupErrorApp extends StatelessWidget {
     this.retrying = false,
     this.details,
     this.themeMode,
+    this.locale,
     super.key,
   });
 
@@ -24,10 +26,16 @@ class StartupErrorApp extends StatelessWidget {
   /// `null` follows the system: the stored theme setting may be unreadable.
   final ThemeMode? themeMode;
 
+  /// `null` follows the device locale; tests pin it.
+  final Locale? locale;
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'ElyaNotes',
+      title: 'ElyaNotes', // l10n-ignore
+      locale: locale,
+      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
@@ -80,7 +88,7 @@ class StartupErrorScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.xl),
                   Text(
-                    'Uygulama başlatılamadı',
+                    context.l10n.startupErrorTitle,
                     style: AppTypography.headlineSmall.copyWith(
                       color: p.textPrimary,
                     ),
@@ -88,9 +96,7 @@ class StartupErrorScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.md),
                   Text(
-                    'Notlarınız güvende, hiçbir şey silinmedi. '
-                    'Veriler açılırken bir sorun oluştu. Tekrar deneyin; '
-                    'sorun sürerse uygulamayı kapatıp yeniden açın.',
+                    context.l10n.startupErrorMessage,
                     style: AppTypography.bodyMedium.copyWith(
                       color: p.textMuted,
                     ),
@@ -98,7 +104,7 @@ class StartupErrorScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.xl),
                   AppButton(
-                    label: 'Tekrar dene',
+                    label: context.l10n.commonRetry,
                     leadingIcon: Icons.refresh,
                     size: AppButtonSize.large,
                     isLoading: retrying,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/index.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// Full-screen error shown when the editor cannot load a document.
 ///
@@ -35,7 +36,7 @@ class EditorLoadErrorView extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.lg),
               Text(
-                'Belge açılamadı',
+                context.l10n.editorLoadErrorTitle,
                 textAlign: TextAlign.center,
                 style: AppTypography.headlineSmall.copyWith(
                   color: palette.textPrimary,
@@ -43,25 +44,26 @@ class EditorLoadErrorView extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                'Belge bulunamadı ya da okunamadı.',
+                context.l10n.editorLoadErrorMessage,
                 textAlign: TextAlign.center,
                 style: AppTypography.bodyMedium.copyWith(
                   color: palette.textMuted,
                 ),
               ),
               const SizedBox(height: AppSpacing.xl),
-              Row(
-                mainAxisSize: MainAxisSize.min,
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: AppSpacing.md,
+                runSpacing: AppSpacing.md,
                 children: [
                   AppButton(
-                    label: 'Geri dön',
+                    label: context.l10n.editorLoadErrorBack,
                     variant: AppButtonVariant.outline,
                     size: AppButtonSize.large,
                     onPressed: onBack,
                   ),
-                  const SizedBox(width: AppSpacing.md),
                   AppButton(
-                    label: 'Tekrar dene',
+                    label: context.l10n.commonRetry,
                     variant: AppButtonVariant.primary,
                     size: AppButtonSize.large,
                     onPressed: onRetry,
