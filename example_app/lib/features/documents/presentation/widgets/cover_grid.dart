@@ -71,8 +71,17 @@ class _CoverGridItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
+    final name = context.drawingStrings.templates.coverName(cover);
 
-    return GestureDetector(
+    // One labeled, selectable button per tile: the preview's own title text
+    // and the caption below are excluded so TalkBack reads the name once.
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: name,
+      excludeSemantics: true,
+      onTap: onTap,
+      child: GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Column(
@@ -143,7 +152,7 @@ class _CoverGridItem extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            context.drawingStrings.templates.coverName(cover),
+            name,
             style: AppTypography.caption.copyWith(
               color: isSelected ? palette.accent : palette.textMuted,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
@@ -153,6 +162,7 @@ class _CoverGridItem extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
         ],
+      ),
       ),
     );
   }

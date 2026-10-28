@@ -35,7 +35,13 @@ class SidebarItem extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-      child: Material(
+      // Merged into one node: the label (plus e.g. a folder's count) is read
+      // together with the button role and the selected state.
+      child: MergeSemantics(
+        child: Semantics(
+          button: true,
+          selected: isSelected,
+          child: Material(
         color: isSelected ? palette.accentContainer : Colors.transparent,
         borderRadius: radius,
         child: InkWell(
@@ -75,6 +81,8 @@ class SidebarItem extends StatelessWidget {
               ],
             ),
           ),
+        ),
+      ),
         ),
       ),
     );

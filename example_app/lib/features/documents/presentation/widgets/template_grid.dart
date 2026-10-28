@@ -117,8 +117,17 @@ class TemplateGridItem extends StatelessWidget {
     final l10n = context.l10n;
     final outlineColor = context.palette.border;
     final textSecondary = context.palette.textMuted;
+    final name = localizedName(l10n, tr: template.name, en: template.nameEn);
 
-    return GestureDetector(
+    // One labeled, selectable button per tile; children are excluded so the
+    // name is read once.
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: name,
+      excludeSemantics: true,
+      onTap: onTap,
+      child: GestureDetector(
       onTap: onTap,
       child: Column(
         children: [
@@ -185,7 +194,7 @@ class TemplateGridItem extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xxs),
           Text(
-            localizedName(l10n, tr: template.name, en: template.nameEn),
+            name,
             style: AppTypography.caption.copyWith(
               color: isSelected ? AppColors.primary : textSecondary,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
@@ -196,6 +205,7 @@ class TemplateGridItem extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
         ],
+      ),
       ),
     );
   }
