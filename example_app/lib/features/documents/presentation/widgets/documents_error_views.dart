@@ -7,8 +7,21 @@ import 'package:example_app/l10n/l10n.dart';
 ///
 /// Shows a "Try again" button when [onRetry] is provided.
 class DocumentsErrorView extends StatelessWidget {
-  const DocumentsErrorView({super.key, required this.error, this.onRetry});
+  const DocumentsErrorView({
+    super.key,
+    required this.error,
+    this.onRetry,
+    this.message,
+  });
+
+  /// Key of the retry button (for tests).
+  static const retryKey = Key('documentsErrorRetry');
+
   final Object error;
+
+  /// Plain-language text shown instead of the raw [error] detail. When null
+  /// the generic "error: detail" copy is used.
+  final String? message;
 
   /// Re-runs the failed load (typically `ref.invalidate(provider)`).
   final VoidCallback? onRetry;
@@ -25,10 +38,11 @@ class DocumentsErrorView extends StatelessWidget {
             color: context.palette.danger,
           ),
           const SizedBox(height: AppSpacing.lg),
-          Text(context.l10n.commonErrorDetail('$error')),
+          Text(message ?? context.l10n.commonErrorDetail('$error')),
           if (onRetry != null) ...[
             const SizedBox(height: AppSpacing.lg),
             AppButton(
+              key: retryKey,
               label: context.l10n.commonRetry,
               variant: AppButtonVariant.outline,
               size: AppButtonSize.large,
