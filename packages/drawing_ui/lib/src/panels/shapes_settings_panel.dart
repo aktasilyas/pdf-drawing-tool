@@ -47,7 +47,7 @@ class ShapesSettingsPanel extends ConsumerWidget {
                 ref.read(shapesSettingsProvider.notifier).setStrokeThickness(v),
           ),
           const ChromeHairline(),
-          const ChromeSectionLabel(c.strokeColor),
+          ChromeSectionLabel(c.strokeColor),
           ColorPickerStrip(
             selectedColor: settings.strokeColor,
             onColorSelected: (c) =>
