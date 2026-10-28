@@ -47,11 +47,14 @@ void main() {
     when(() => repo.getRecent(limit: any(named: 'limit')))
         .thenAnswer((_) async => const Right([]));
     when(() => repo.getTrash()).thenAnswer((_) async => const Right([]));
-    when(() => pageTrash.documentExists(any())).thenAnswer((_) async => true);
+    when(() => pageTrash.documentExists(any()))
+        .thenAnswer((_) async => const Right(true));
     when(() => pageTrash.restorePageFromTrash(any()))
-        .thenAnswer((_) async => true);
-    when(() => pageTrash.permanentlyDeletePage(any())).thenAnswer((_) async {});
-    when(() => pageTrash.getTrashedPages()).thenAnswer((_) async => []);
+        .thenAnswer((_) async => const Right(true));
+    when(() => pageTrash.permanentlyDeletePage(any()))
+        .thenAnswer((_) async => const Right(null));
+    when(() => pageTrash.getTrashedPages())
+        .thenAnswer((_) async => const Right([]));
   });
 
   Future<void> open(
@@ -198,7 +201,7 @@ void main() {
 
     testWidgets('restore reports a missing source document', (tester) async {
       when(() => pageTrash.documentExists(any()))
-          .thenAnswer((_) async => false);
+          .thenAnswer((_) async => const Right(false));
       await open(tester, (c, r) => showTrashedPageMenu(c, r, trashedPage));
       await tester.tap(find.text('Kurtar'));
       await tester.pumpAndSettle();

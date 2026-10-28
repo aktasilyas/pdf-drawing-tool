@@ -60,11 +60,14 @@ void main() {
     when(() => repo.getRecent(limit: any(named: 'limit')))
         .thenAnswer((_) async => const Right([]));
     when(() => repo.getTrash()).thenAnswer((_) async => const Right([]));
-    when(() => pageTrash.documentExists(any())).thenAnswer((_) async => true);
+    when(() => pageTrash.documentExists(any()))
+        .thenAnswer((_) async => const Right(true));
     when(() => pageTrash.restorePageFromTrash(any()))
-        .thenAnswer((_) async => true);
-    when(() => pageTrash.permanentlyDeletePage(any())).thenAnswer((_) async {});
-    when(() => pageTrash.getTrashedPages()).thenAnswer((_) async => []);
+        .thenAnswer((_) async => const Right(true));
+    when(() => pageTrash.permanentlyDeletePage(any()))
+        .thenAnswer((_) async => const Right(null));
+    when(() => pageTrash.getTrashedPages())
+        .thenAnswer((_) async => const Right([]));
   });
 
   group('rename', () {
@@ -144,7 +147,7 @@ void main() {
 
     test('does nothing when the source document is gone', () async {
       when(() => pageTrash.documentExists(any()))
-          .thenAnswer((_) async => false);
+          .thenAnswer((_) async => const Right(false));
       final actions = build().read(documentMenuActionsProvider);
       expect(
         await actions.restorePage(trashedPage),
@@ -155,7 +158,7 @@ void main() {
 
     test('reports a failed restore', () async {
       when(() => pageTrash.restorePageFromTrash(any()))
-          .thenAnswer((_) async => false);
+          .thenAnswer((_) async => const Right(false));
       final actions = build().read(documentMenuActionsProvider);
       expect(
         await actions.restorePage(trashedPage),

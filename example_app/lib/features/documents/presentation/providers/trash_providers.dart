@@ -23,7 +23,11 @@ final pageTrashRepositoryProvider = Provider<PageTrashRepository>((ref) {
 // Trashed pages
 final trashedPagesProvider = FutureProvider<List<TrashedPage>>((ref) async {
   final repo = ref.watch(pageTrashRepositoryProvider);
-  return repo.getTrashedPages();
+  final result = await repo.getTrashedPages();
+  return result.fold(
+    (failure) => throw Exception(failure.message),
+    (pages) => pages,
+  );
 });
 
 /// Union type for trash items (documents + pages), sorted by deletedAt desc.

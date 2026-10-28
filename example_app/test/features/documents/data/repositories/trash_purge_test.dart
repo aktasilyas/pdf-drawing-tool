@@ -1,8 +1,10 @@
 import 'dart:io';
 
+import 'package:dartz/dartz.dart';
 import 'package:drawing_core/drawing_core.dart' show PdfPathResolver;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:example_app/features/documents/documents.dart';
+import 'package:example_app/features/documents/domain/entities/trashed_page.dart';
 import '../../../../helpers/library_fixture.dart';
 
 /// Trash retention, permanent delete and "empty trash" against real Drift.
@@ -25,6 +27,10 @@ void main() {
   Future<DocumentInfo> create(String title) async =>
       (await fx.documents.createDocument(title: title, templateId: 'blank'))
           .getOrElse(() => throw StateError('create failed'));
+
+  Future<List<TrashedPage>> trashedPages() async =>
+      (await fx.pageTrash.getTrashedPages())
+          .getOrElse(() => throw StateError('trash failed'));
 
   Future<void> trashAt(String id, DateTime? deletedAt) async {
     final doc = await fx.documentDs.getDocument(id);
@@ -123,7 +129,7 @@ void main() {
 
       await purge(now);
 
-      final left = await fx.pageTrash.getTrashedPages();
+      final left = await trashedPages();
       expect(left.map((p) => p.id), ['new']);
     });
   });
@@ -144,7 +150,7 @@ void main() {
       expect(r.isRight(), isTrue);
       expect(await fx.documentDs.hasDocumentContent(a.id), isFalse);
       expect((await fx.documentDs.getAllDocuments()).map((d) => d.id), [b.id]);
-      expect((await fx.pageTrash.getTrashedPages()).map((p) => p.id), ['tb']);
+      expect((await trashedPages()).map((p) => p.id), ['tb']);
     });
 
     test('deletes the copied PDF unless another document uses it', () async {
@@ -212,18 +218,19 @@ void main() {
           {'id': 'p0', 'index': 0},
         ],
       });
-      final id = await fx.pageTrash.movePageToTrash(
+      final id = (await fx.pageTrash.movePageToTrash(
         documentId: a.id,
         documentTitle: a.title,
         pageIndex: 0,
         pageData: {'id': 'gone'},
-      );
+      ))
+          .getOrElse(() => throw StateError('trash failed'));
       await fx.documents.permanentlyDelete(a.id);
 
-      expect(await fx.pageTrash.documentExists(a.id), isFalse);
-      expect(await fx.pageTrash.restorePageFromTrash(id), isFalse);
+      expect(await fx.pageTrash.documentExists(a.id), const Right(false));
+      expect(await fx.pageTrash.restorePageFromTrash(id), const Right(false));
       expect(await fx.documentDs.getAllDocuments(), isEmpty);
-      expect(await fx.pageTrash.getTrashedPages(), isEmpty);
+      expect(await trashedPages(), isEmpty);
     });
   });
 
@@ -238,8 +245,8 @@ void main() {
     final pages = await fx.pageTrash.emptyTrash();
 
     expect(docs.getOrElse(() => -1), 1);
-    expect(pages, 1);
+    expect(pages, const Right(1));
     expect((await fx.documentDs.getAllDocuments()).map((d) => d.id), [live.id]);
-    expect(await fx.pageTrash.getTrashedPages(), isEmpty);
+    expect(await trashedPages(), isEmpty);
   });
 }

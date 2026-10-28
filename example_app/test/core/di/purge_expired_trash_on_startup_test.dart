@@ -20,7 +20,7 @@ void main() {
     when(() => docs.purgeExpiredTrash(now: any(named: 'now')))
         .thenAnswer((_) async => const Right(1));
     when(() => pages.purgeExpired(now: any(named: 'now')))
-        .thenAnswer((_) async => 2);
+        .thenAnswer((_) async => const Right(2));
 
     await purgeExpiredTrashOnStartup(
       PurgeExpiredTrashUseCase(docs, pages),

@@ -28,6 +28,10 @@ abstract class DocumentLocalDatasource {
 
   /// Whether a content row exists for [id] (without decoding it).
   Future<bool> hasDocumentContent(String id);
+
+  /// Deletes the copied PDF files among [paths] that no document content or
+  /// trashed page references any more.
+  Future<void> deleteUnreferencedPdfs(Iterable<String> paths);
 }
 
 /// Drift-backed document metadata and content storage.
@@ -169,6 +173,21 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
           ..limit(1))
         .get();
     return pages.isNotEmpty;
+  }
+
+  @override
+  Future<void> deleteUnreferencedPdfs(Iterable<String> paths) async {
+    final orphans = <String>[];
+    try {
+      for (final path in paths.toSet()) {
+        if (!await _isPdfReferenced(path)) orphans.add(path);
+      }
+    } catch (e) {
+      throw CacheException('Failed to check PDF references: $e');
+    }
+    for (final path in orphans) {
+      await _deleteFile(path);
+    }
   }
 
   Future<void> _deleteFile(String path) async {

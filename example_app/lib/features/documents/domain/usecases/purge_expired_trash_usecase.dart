@@ -14,11 +14,10 @@ class PurgeExpiredTrashUseCase {
   /// Returns the number of purged documents and pages.
   Future<Either<Failure, int>> call(DateTime now) async {
     final documents = await _documents.purgeExpiredTrash(now: now);
-    try {
-      final pages = await _pages.purgeExpired(now: now);
-      return documents.map((count) => count + pages);
-    } catch (e) {
-      return Left(CacheFailure('Failed to purge trashed pages: $e'));
-    }
+    final pages = await _pages.purgeExpired(now: now);
+    return documents.fold(
+      (failure) => Left(failure),
+      (docCount) => pages.map((pageCount) => docCount + pageCount),
+    );
   }
 }

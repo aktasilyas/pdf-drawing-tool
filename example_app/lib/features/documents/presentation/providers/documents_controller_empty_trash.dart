@@ -22,7 +22,11 @@ mixin DocumentsEmptyTrashOperation on StateNotifier<AsyncValue<void>> {
         success = false;
         reportLibraryFailure(ref, failure, LibraryAction.emptyTrash);
       }, (_) {});
-      await ref.read(pageTrashRepositoryProvider).emptyTrash();
+      final pages = await ref.read(pageTrashRepositoryProvider).emptyTrash();
+      pages.fold((failure) {
+        success = false;
+        reportLibraryFailure(ref, failure, LibraryAction.emptyTrash);
+      }, (_) {});
     } catch (e) {
       success = false;
       reportLibraryError(ref, e, LibraryAction.emptyTrash);
