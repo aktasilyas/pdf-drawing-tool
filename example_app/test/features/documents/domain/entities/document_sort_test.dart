@@ -50,6 +50,21 @@ void main() {
       expect(_sorted(docs, SortOption.size, asc), ['Beta', 'Gama', 'Alfa']);
     });
 
+    test('name sort is case-insensitive in Turkish order (#406)', () {
+      final named = [
+        for (final title in ['beta', 'Alfa', 'Çay', 'Zeytin', 'Şehir'])
+          _doc(title, 1, 1),
+      ];
+      expect(
+        _sorted(named, SortOption.name, asc),
+        ['Alfa', 'beta', 'Çay', 'Şehir', 'Zeytin'],
+      );
+      expect(
+        _sorted(named, SortOption.name, desc),
+        ['Zeytin', 'Şehir', 'Çay', 'beta', 'Alfa'],
+      );
+    });
+
     test('without pinning, favourites keep their sorted position', () {
       expect(_sorted(docs, SortOption.name, asc), ['Alfa', 'Beta', 'Gama']);
     });

@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
+import 'package:example_app/features/documents/domain/entities/library_text.dart';
 import 'package:example_app/features/documents/data/datasources/document_local_datasource.dart';
 import 'package:example_app/features/documents/data/models/document_model.dart';
 
@@ -103,17 +104,18 @@ mixin DocumentQueries {
   Future<Either<Failure, List<DocumentInfo>>> search(String query) async {
     try {
       final documents = await localDatasource.getAllDocuments();
-      final lowerQuery = query.toLowerCase();
+      final foldedQuery = foldForSearch(query);
       final results = documents
           .where((doc) =>
-              !doc.isInTrash && doc.title.toLowerCase().contains(lowerQuery))
+              !doc.isInTrash &&
+              foldForSearch(doc.title).contains(foldedQuery))
           .map((model) => model.toEntity())
           .toList();
 
       // Sort by relevance (exact match first, then by updated date)
       results.sort((a, b) {
-        final aExact = a.title.toLowerCase() == lowerQuery;
-        final bExact = b.title.toLowerCase() == lowerQuery;
+        final aExact = foldForSearch(a.title) == foldedQuery;
+        final bExact = foldForSearch(b.title) == foldedQuery;
         if (aExact && !bExact) return -1;
         if (!aExact && bExact) return 1;
         return b.updatedAt.compareTo(a.updatedAt);
