@@ -54,7 +54,7 @@ mixin _CanvasOverlays
             ref.read(textToolProvider.notifier).updateText(updatedText);
           },
           onEditingComplete: () => finishTextEditing(),
-          onCancel: () => cancelTextEditing(),
+          onCancel: () => handleTextEmptied(),
         ),
 
       // ───────────────────────────────────────────────────────────────────

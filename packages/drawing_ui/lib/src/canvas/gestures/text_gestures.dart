@@ -74,7 +74,7 @@ mixin _TextGestures<T extends ConsumerStatefulWidget>
     final currentText = textToolState.activeText;
 
     if (currentText == null || currentText.text.trim().isEmpty) {
-      ref.read(textToolProvider.notifier).cancelEditing();
+      handleTextEmptied();
       return;
     }
 
@@ -103,8 +103,26 @@ mixin _TextGestures<T extends ConsumerStatefulWidget>
     }
   }
 
-  void cancelTextEditing() {
+  /// Ends editing whose content is empty or whitespace only.
+  ///
+  /// A new text creates nothing. An existing text is removed with one
+  /// [core.RemoveTextCommand], so undo brings the original text back.
+  void handleTextEmptied() {
+    final textToolState = ref.read(textToolProvider);
+    final currentText = textToolState.activeText;
     ref.read(textToolProvider.notifier).cancelEditing();
+    if (currentText == null || textToolState.isNewText) return;
+
+    final document = ref.read(documentProvider);
+    final exists =
+        ref.read(activeLayerTextsProvider).any((t) => t.id == currentText.id);
+    if (!exists) return;
+    ref.read(historyManagerProvider.notifier).execute(
+          core.RemoveTextCommand(
+            layerIndex: document.activeLayerIndex,
+            textId: currentText.id,
+          ),
+        );
   }
 
   // ─────────────────────────────────────────────────────────────────────────
