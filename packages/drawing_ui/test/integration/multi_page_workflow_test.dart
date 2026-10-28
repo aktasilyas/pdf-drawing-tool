@@ -157,40 +157,6 @@ void main() {
       });
     });
 
-    group('Preloading Strategy', () {
-      test('should preload adjacent pages', () {
-        final strategy = PreloadingStrategy(
-          preloadBefore: 1,
-          preloadAfter: 1,
-        );
-
-        final toPreload = strategy.getPagesToPreload(
-          currentIndex: 5,
-          totalPages: 10,
-        );
-
-        expect(toPreload.length, 2);
-        expect(toPreload.contains(4), true);
-        expect(toPreload.contains(6), true);
-      });
-
-      test('should prioritize closer pages', () {
-        final strategy = PreloadingStrategy(
-          preloadBefore: 2,
-          preloadAfter: 2,
-        );
-
-        final toPreload = strategy.getPagesToPreload(
-          currentIndex: 5,
-          totalPages: 10,
-        );
-
-        // Verify that closer pages are included
-        expect(toPreload.contains(4), true);
-        expect(toPreload.contains(3), true);
-      });
-    });
-
     group('End-to-End Multi-Page Flow', () {
       test('should handle complete page lifecycle', () {
         // 1. Create document

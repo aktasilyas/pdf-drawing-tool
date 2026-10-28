@@ -3,9 +3,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdfx/pdfx.dart';
 import 'package:drawing_ui/src/utils/drawing_log.dart';
+import 'package:drawing_ui/src/providers/pdf_adjacent_prefetch.dart';
 import 'package:drawing_ui/src/providers/pdf_page_cache.dart';
 import 'package:drawing_ui/src/providers/pdf_path_provider.dart';
 
+export 'package:drawing_ui/src/providers/pdf_adjacent_prefetch.dart';
 export 'package:drawing_ui/src/providers/pdf_page_cache.dart';
 export 'package:drawing_ui/src/providers/pdf_zoom_render_provider.dart';
 
@@ -160,10 +162,21 @@ final pdfPageRenderProvider =
 // PAGE CHANGE HANDLER
 // =============================================================================
 
-/// Sayfa değiştiğinde: önce görünen sayfa, sonra adjacent prefetch.
+/// Prefetches the pages around the visible PDF page after a page change
+/// (see [PdfAdjacentPrefetcher]).
+final pdfAdjacentPrefetchProvider = Provider<PdfAdjacentPrefetcher>(
+  (ref) => createPdfAdjacentPrefetcher(
+    ref,
+    (key) => ref.read(pdfPageRenderProvider(key)),
+  ),
+);
+
+/// On a page change: renders the visible page now, then prefetches its
+/// neighbours after [PdfAdjacentPrefetcher.delay].
 ///
 /// [pdfPageIndex] is the 1-based PDF page number from
-/// `page.background.pdfPageIndex`, NOT the document page index.
+/// `page.background.pdfPageIndex`, NOT the document page index. [ref] is only
+/// used synchronously; the delayed prefetch runs on the provider's own ref.
 void prefetchOnPageChange(WidgetRef ref, int pdfPageIndex) {
   final pdfFilePath = ref.read(currentPdfFilePathProvider);
   final totalPages = ref.read(totalPdfPagesProvider);
@@ -172,78 +185,16 @@ void prefetchOnPageChange(WidgetRef ref, int pdfPageIndex) {
 
   ref.read(visiblePdfPageProvider.notifier).state = pdfPageIndex - 1;
 
-  final currentPage = pdfPageIndex; // already 1-based
-  final currentKey = '$pdfFilePath|$currentPage';
-
-  final cache = ref.read(pdfPageCacheProvider);
-
-  // 1. Görünen sayfa cache'de yoksa render et
-  if (!cache.containsKey(currentKey)) {
+  // 1. The visible page first, unless it is cached.
+  final currentKey = '$pdfFilePath|$pdfPageIndex';
+  if (!ref.read(pdfPageCacheProvider).containsKey(currentKey)) {
     ref.read(pdfPageRenderProvider(currentKey));
   }
 
-  // 2. Görünen sayfa renderı bittikten SONRA adjacent prefetch (500ms gecikme)
-  Future.delayed(const Duration(milliseconds: 500), () {
-    _prefetchAdjacent(ref, currentPage, pdfFilePath, totalPages);
-  });
+  // 2. Its neighbours once it had a head start.
+  ref.read(pdfAdjacentPrefetchProvider).schedule(
+        pdfFilePath: pdfFilePath,
+        page: pdfPageIndex,
+        totalPages: totalPages,
+      );
 }
-
-/// Adjacent sayfaları arka planda prefetch et (±2 sayfa)
-void _prefetchAdjacent(
-    WidgetRef ref, int currentPage, String pdfFilePath, int totalPages) {
-  final cache = ref.read(pdfPageCacheProvider);
-  final slots = ref.read(pdfRenderSlotsProvider);
-
-  // Sadece ±2 sayfa prefetch et
-  final offsets = [1, -1, 2, -2];
-
-  for (final offset in offsets) {
-    final targetPage = currentPage + offset;
-    if (targetPage >= 1 && targetPage <= totalPages) {
-      final targetKey = '$pdfFilePath|$targetPage';
-
-      // Cache'de yoksa ve şu an render edilmiyorsa prefetch et
-      if (!cache.containsKey(targetKey) && !slots.isBusy(targetKey)) {
-        ref.read(pdfPageRenderProvider(targetKey));
-      }
-    }
-  }
-}
-
-// =============================================================================
-// LEGACY SUPPORT
-// =============================================================================
-
-final pdfRenderQueueProvider = Provider<_LegacyQueue>((ref) => _LegacyQueue());
-
-class _LegacyQueue {
-  void onVisiblePageChanged(int index, String path, int total) {}
-  void clear() {}
-}
-
-// Legacy - kullanılmıyor ama import hataları önlemek için
-class BulkPrefetchRequest {
-  final String pdfFilePath;
-  final List<int> pageNumbers;
-  final int awaitFirstN;
-
-  const BulkPrefetchRequest({
-    required this.pdfFilePath,
-    required this.pageNumbers,
-    this.awaitFirstN = 0,
-  });
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is BulkPrefetchRequest && pdfFilePath == other.pdfFilePath;
-
-  @override
-  int get hashCode => pdfFilePath.hashCode;
-}
-
-final pdfBulkPrefetchProvider =
-    FutureProvider.family<void, BulkPrefetchRequest>((ref, request) async {
-  // DEVRE DIŞI
-  return;
-});
