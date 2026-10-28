@@ -1,3 +1,4 @@
+import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/drawing_ui.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -28,6 +29,32 @@ void main() {
       }
     });
 
+    test('every panel string is non-empty in $code', () {
+      final map = strings.panels.toMap();
+      expect(map.keys, isNotEmpty);
+      for (final entry in map.entries) {
+        expect(entry.value.trim(), isNotEmpty, reason: '${entry.key} ($code)');
+      }
+    });
+
+    test('every catalog string is non-empty in $code', () {
+      final map = strings.catalog.toMap();
+      expect(map.keys, isNotEmpty);
+      for (final entry in map.entries) {
+        expect(entry.value.trim(), isNotEmpty, reason: '${entry.key} ($code)');
+      }
+      final shapes = [for (final t in ShapeType.values) t.label(strings)];
+      expect(shapes.toSet(), hasLength(shapes.length), reason: code);
+    });
+
+    test('every selection string is non-empty in $code', () {
+      final map = strings.selection.toMap();
+      expect(map.keys, isNotEmpty);
+      for (final entry in map.entries) {
+        expect(entry.value.trim(), isNotEmpty, reason: '${entry.key} ($code)');
+      }
+    });
+
     test('parameterized strings carry their argument in $code', () {
       expect(strings.toolbar.selectedColor('#123456'), contains('#123456'));
       expect(strings.toolbar.color('#123456'), contains('#123456'));
@@ -39,18 +66,32 @@ void main() {
     final tr = AppDrawingStrings(lookupAppLocalizations(const Locale('tr')));
     expect(tr.tools.toMap(), fallback.tools.toMap());
     expect(tr.toolbar.toMap(), fallback.toolbar.toMap());
+    expect(tr.panels.toMap(), fallback.panels.toMap());
+    expect(tr.catalog.toMap(), fallback.catalog.toMap());
+    expect(tr.selection.toMap(), fallback.selection.toMap());
   });
 
   test('every en string is translated (differs from tr)', () {
     final en = AppDrawingStrings(lookupAppLocalizations(const Locale('en')));
     final tr = AppDrawingStrings(lookupAppLocalizations(const Locale('tr')));
-    // Same word in both languages.
-    const sameInBoth = {'colorSetPastel'};
-    final enMap = {...en.tools.toMap(), ...en.toolbar.toMap()};
-    final trMap = {...tr.tools.toMap(), ...tr.toolbar.toMap()};
-    for (final key in enMap.keys.where((k) => !sameInBoth.contains(k))) {
-      expect(enMap[key], isNot(trMap[key]), reason: key);
+    // Same word in both languages, per group.
+    void check(
+      String group,
+      Map<String, String> enMap,
+      Map<String, String> trMap, [
+      Set<String> sameInBoth = const {},
+    ]) {
+      for (final key in enMap.keys.where((k) => !sameInBoth.contains(k))) {
+        expect(enMap[key], isNot(trMap[key]), reason: '$group.$key');
+      }
     }
+
+    check('tools', en.tools.toMap(), tr.tools.toMap());
+    check('toolbar', en.toolbar.toMap(), tr.toolbar.toMap(),
+        {'colorSetPastel', 'colorSetNeon'});
+    check('panels', en.panels.toMap(), tr.panels.toMap());
+    check('catalog', en.catalog.toMap(), tr.catalog.toMap(), {'stickerEmoji'});
+    check('selection', en.selection.toMap(), tr.selection.toMap());
   });
 
   test('equality follows the locale', () {

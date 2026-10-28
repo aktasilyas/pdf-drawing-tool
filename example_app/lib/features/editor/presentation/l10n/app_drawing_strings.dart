@@ -1,4 +1,7 @@
 import 'package:drawing_ui/drawing_ui.dart';
+import 'package:example_app/features/editor/presentation/l10n/app_catalog_strings.dart';
+import 'package:example_app/features/editor/presentation/l10n/app_panel_strings.dart';
+import 'package:example_app/features/editor/presentation/l10n/app_selection_strings.dart';
 import 'package:example_app/features/editor/presentation/l10n/app_tool_strings.dart';
 import 'package:example_app/features/editor/presentation/l10n/app_toolbar_strings.dart';
 import 'package:example_app/l10n/l10n.dart';
@@ -11,7 +14,10 @@ class AppDrawingStrings implements DrawingStrings {
   AppDrawingStrings(AppLocalizations l10n)
       : _locale = l10n.localeName,
         tools = AppToolStrings(l10n),
-        toolbar = AppToolbarStrings(l10n);
+        toolbar = AppToolbarStrings(l10n),
+        panels = AppPanelStrings(l10n),
+        catalog = AppCatalogStrings(l10n),
+        selection = AppSelectionStrings(l10n);
 
   final String _locale;
 
@@ -20,6 +26,15 @@ class AppDrawingStrings implements DrawingStrings {
 
   @override
   final ToolbarStrings toolbar;
+
+  @override
+  final PanelStrings panels;
+
+  @override
+  final CatalogStrings catalog;
+
+  @override
+  final SelectionStrings selection;
 
   @override
   bool operator ==(Object other) =>

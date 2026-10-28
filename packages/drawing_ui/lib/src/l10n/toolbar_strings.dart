@@ -20,6 +20,8 @@ abstract class ToolbarStrings {
   String get moreColors;
   String get colorSetHighlighter;
   String get colorSetPastel;
+  String get colorSetBasic;
+  String get colorSetNeon;
   String selectedColor(String hex);
   String color(String hex);
   String thickness(String value);
@@ -55,6 +57,8 @@ abstract class ToolbarStrings {
         'moreColors': moreColors,
         'colorSetHighlighter': colorSetHighlighter,
         'colorSetPastel': colorSetPastel,
+        'colorSetBasic': colorSetBasic,
+        'colorSetNeon': colorSetNeon,
         'selectedColor': selectedColor('#000000'),
         'color': color('#000000'),
         'thickness': thickness('2.0'),
@@ -109,6 +113,10 @@ class ToolbarStringsTr extends ToolbarStrings {
   String get colorSetHighlighter => 'Vurgulayıcı';
   @override
   String get colorSetPastel => 'Pastel';
+  @override
+  String get colorSetBasic => 'Temel';
+  @override
+  String get colorSetNeon => 'Neon';
   @override
   String selectedColor(String hex) => 'Seçili renk $hex';
   @override

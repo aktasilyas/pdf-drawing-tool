@@ -1,3 +1,4 @@
+import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/drawing_ui.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -17,6 +18,15 @@ class _EnStrings implements DrawingStrings {
 
   @override
   ToolbarStrings get toolbar => const ToolbarStringsTr();
+
+  @override
+  PanelStrings get panels => const PanelStringsTr();
+
+  @override
+  CatalogStrings get catalog => const CatalogStringsTr();
+
+  @override
+  SelectionStrings get selection => const SelectionStringsTr();
 }
 
 Future<DrawingStrings> _pump(
@@ -70,6 +80,40 @@ void main() {
       final map = strings.toolbar.toMap();
       expect(map, isNotEmpty);
       expect(map.values, everyElement(isNotEmpty));
+    });
+
+    test('panel strings map has no empty value', () {
+      final map = strings.panels.toMap();
+      expect(map, isNotEmpty);
+      expect(map.values, everyElement(isNotEmpty));
+    });
+
+    test('catalog strings map has no empty value', () {
+      final map = strings.catalog.toMap();
+      expect(map, isNotEmpty);
+      expect(map.values, everyElement(isNotEmpty));
+    });
+
+    test('selection strings map has no empty value', () {
+      final map = strings.selection.toMap();
+      expect(map, isNotEmpty);
+      expect(map.values, everyElement(isNotEmpty));
+    });
+
+    test('toolbar color set names are present', () {
+      final map = strings.toolbar.toMap();
+      expect(map['colorSetBasic'], 'Temel');
+      expect(map['colorSetNeon'], 'Neon');
+    });
+
+    test('duplicate keeps its Turkish characters', () {
+      expect(strings.selection.duplicate, 'Çoğalt');
+    });
+
+    test('every ShapeType label is non-empty and distinct', () {
+      final labels = [for (final t in ShapeType.values) t.label(strings)];
+      expect(labels, everyElement(isNotEmpty));
+      expect(labels.toSet().length, labels.length);
     });
 
     test('parameterized strings include their argument', () {
