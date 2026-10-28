@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/widgets/reorderable_tool_list.dart';
 
 /// Panel for customizing toolbar appearance and tool order.
 ///
-/// Two tabs: "Araçlar" (reorderable drawing tools) and
-/// "Ek Araçlar" (reorderable extra tools like ruler, audio).
+/// Two tabs: tools (reorderable drawing tools) and
+/// extra tools (reorderable extras like ruler, audio).
 class ToolbarSettingsPanel extends ConsumerStatefulWidget {
   const ToolbarSettingsPanel({super.key});
 
@@ -78,7 +79,7 @@ class _ToolbarSettingsPanelState extends ConsumerState<ToolbarSettingsPanel>
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              'Araç Çubuğu Ayarları',
+              context.drawingStrings.tools.toolbarSettings,
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     fontSize: 13,
                     color: cs.onSurface,
@@ -115,9 +116,12 @@ class _ToolbarSettingsPanelState extends ConsumerState<ToolbarSettingsPanel>
       indicatorWeight: 2,
       dividerHeight: 0.5,
       dividerColor: cs.outlineVariant.withValues(alpha: 0.5),
-      tabs: const [
-        Tab(height: 36, text: 'Araçlar'),
-        Tab(height: 36, text: 'Ek Araçlar'),
+      tabs: [
+        Tab(height: 36, text: context.drawingStrings.toolbar.settingsTabTools),
+        Tab(
+          height: 36,
+          text: context.drawingStrings.toolbar.settingsTabExtraTools,
+        ),
       ],
     );
   }
@@ -143,7 +147,7 @@ class _ToolbarSettingsPanelState extends ConsumerState<ToolbarSettingsPanel>
             children: [
               Flexible(
                 child: Text(
-                  'Araçları sıralayın ve gizleyin',
+                  context.drawingStrings.toolbar.settingsToolsHint,
                   style: Theme.of(context)
                       .textTheme
                       .labelSmall
@@ -177,7 +181,7 @@ class _ToolbarSettingsPanelState extends ConsumerState<ToolbarSettingsPanel>
             children: [
               Flexible(
                 child: Text(
-                  'Ek araçları sıralayın ve gizleyin',
+                  context.drawingStrings.toolbar.settingsExtraToolsHint,
                   style: Theme.of(context)
                       .textTheme
                       .labelSmall
@@ -212,7 +216,7 @@ class _ToolbarSettingsPanelState extends ConsumerState<ToolbarSettingsPanel>
           },
           icon: PhosphorIcon(ElyanotesIcons.rotate, size: 13),
           label: Text(
-            'Varsayılana Sıfırla',
+            context.drawingStrings.toolbar.settingsReset,
             style: Theme.of(context).textTheme.bodySmall,
           ),
           style: OutlinedButton.styleFrom(

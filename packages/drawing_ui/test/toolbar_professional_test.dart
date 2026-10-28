@@ -333,7 +333,8 @@ void main() {
       final semanticsWithLabel = find.byWidgetPredicate(
         (widget) =>
             widget is Semantics &&
-            widget.properties.label == ToolType.highlighter.displayName,
+            widget.properties.label ==
+                ToolType.highlighter.label(const DrawingStringsTr()),
       );
       expect(semanticsWithLabel, findsOneWidget);
     });
@@ -618,7 +619,7 @@ void main() {
   group('ToolType Integration', () {
     test('should_have_display_names_for_all_tool_types', () {
       for (final toolType in ToolType.values) {
-        expect(toolType.displayName, isNotEmpty);
+        expect(toolType.label(const DrawingStringsTr()), isNotEmpty);
       }
     });
 

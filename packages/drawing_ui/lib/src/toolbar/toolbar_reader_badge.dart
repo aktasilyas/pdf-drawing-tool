@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 
-/// "Salt okunur" badge shown next to the title in reader mode.
+/// Read-only badge shown next to the title in reader mode.
 class ToolbarReaderBadge extends StatelessWidget {
   const ToolbarReaderBadge({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final s = context.drawingStrings.toolbar;
     final palette = ChromePalette.of(context);
     final textTheme = Theme.of(context).textTheme;
     return Semantics(
-      label: 'Salt okunur mod aktif',
+      label: s.readOnlyActive,
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: ChromeSpacing.sm,
@@ -32,7 +34,7 @@ class ToolbarReaderBadge extends StatelessWidget {
             ),
             const SizedBox(width: ChromeSpacing.xs),
             Text(
-              'Salt okunur',
+              s.readOnly,
               style: textTheme.labelSmall?.copyWith(color: palette.accent),
             ),
           ],

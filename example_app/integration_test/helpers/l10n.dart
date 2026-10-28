@@ -1,3 +1,5 @@
+import 'package:drawing_ui/drawing_ui.dart'
+    show DrawingStrings, DrawingStringsContext;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -10,4 +12,9 @@ extension AppL10nTester on WidgetTester {
   /// the library has loaded); throws before the first `Scaffold` exists.
   AppLocalizations get l10n =>
       AppLocalizations.of(element(find.byType(Scaffold).first));
+
+  /// Editor strings in effect for the visible screen (same [Scaffold] rule as
+  /// [l10n]).
+  DrawingStrings get drawingStrings =>
+      element(find.byType(Scaffold).first).drawingStrings;
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:drawing_ui/src/theme/chrome_roles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'package:drawing_ui/src/models/toolbar_config.dart';
 import 'package:drawing_ui/src/models/tool_type.dart';
@@ -42,11 +43,11 @@ class ReorderableToolList extends ConsumerWidget {
     return result;
   }
 
-  static String _labelFor(ToolConfig tool) {
-    if (penTools.contains(tool.toolType)) return 'Kalem';
-    if (highlighterTools.contains(tool.toolType)) return 'Fosforlu Kalem';
-    if (eraserTools.contains(tool.toolType)) return 'Silgi';
-    return tool.toolType.displayName;
+  static String _labelFor(ToolConfig tool, DrawingStrings s) {
+    if (penTools.contains(tool.toolType)) return s.tools.penGroup;
+    if (highlighterTools.contains(tool.toolType)) return s.tools.highlighter;
+    if (eraserTools.contains(tool.toolType)) return s.tools.pixelEraser;
+    return tool.toolType.label(s);
   }
 
   /// Returns all group members for a tool (or just itself if ungrouped).
@@ -92,7 +93,7 @@ class ReorderableToolList extends ConsumerWidget {
           key: ValueKey(toolConfig.toolType),
           index: index,
           icon: ElyanotesIcons.iconForTool(toolConfig.toolType),
-          label: _labelFor(toolConfig),
+          label: _labelFor(toolConfig, context.drawingStrings),
           isVisible: toolConfig.isVisible,
           onVisibilityToggle: () async {
             // Toggle all members of the group together
@@ -118,13 +119,22 @@ class ReorderableToolList extends ConsumerWidget {
 class ReorderableExtraToolList extends ConsumerWidget {
   const ReorderableExtraToolList({super.key});
 
-  static const _extraToolMeta = <String, ({IconData icon, String label})>{
-    'ruler': (icon: ElyanotesIcons.ruler, label: 'Cetvel'),
-    'audio': (icon: ElyanotesIcons.microphone, label: 'Ses Kaydı'),
+  static const _extraToolIcons = <String, IconData>{
+    'ruler': ElyanotesIcons.ruler,
+    'audio': ElyanotesIcons.microphone,
   };
+
+  static String? _extraToolLabel(DrawingStrings strings, String key) {
+    return switch (key) {
+      'ruler' => strings.toolbar.ruler,
+      'audio' => strings.toolbar.audio,
+      _ => null,
+    };
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final strings = context.drawingStrings;
     final config = ref.watch(toolbarConfigProvider);
     final sorted = config.sortedExtraTools;
 
@@ -139,12 +149,11 @@ class ReorderableExtraToolList extends ConsumerWidget {
       },
       itemBuilder: (context, index) {
         final extra = sorted[index];
-        final meta = _extraToolMeta[extra.key];
         return _CompactToolItem(
           key: ValueKey(extra.key),
           index: index,
-          icon: meta?.icon ?? ElyanotesIcons.settings,
-          label: meta?.label ?? extra.key,
+          icon: _extraToolIcons[extra.key] ?? ElyanotesIcons.settings,
+          label: _extraToolLabel(strings, extra.key) ?? extra.key,
           isVisible: extra.isVisible,
           onVisibilityToggle: () async {
             await ref

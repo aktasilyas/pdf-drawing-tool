@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/theme/chrome_roles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
@@ -14,6 +15,7 @@ class FloatingUndoRedo extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final canUndo = ref.watch(canUndoProvider);
     final canRedo = ref.watch(canRedoProvider);
+    final s = context.drawingStrings.toolbar;
     final colorScheme = Theme.of(context).colorScheme;
 
     return Positioned(
@@ -38,7 +40,7 @@ class FloatingUndoRedo extends ConsumerWidget {
           children: [
             _UndoRedoButton(
               icon: ElyanotesIcons.undo,
-              tooltip: 'Geri al',
+              tooltip: s.undo,
               enabled: canUndo,
               onPressed: () => ref.read(historyManagerProvider.notifier).undo(),
               isFirst: true,
@@ -50,7 +52,7 @@ class FloatingUndoRedo extends ConsumerWidget {
             ),
             _UndoRedoButton(
               icon: ElyanotesIcons.redo,
-              tooltip: 'İleri al',
+              tooltip: s.redo,
               enabled: canRedo,
               onPressed: () => ref.read(historyManagerProvider.notifier).redo(),
               isFirst: false,

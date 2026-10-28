@@ -11,6 +11,7 @@ import 'package:example_app/features/documents/presentation/widgets/library_head
 import 'package:example_app/features/documents/presentation/widgets/pdf_file_importer.dart';
 
 import '../fixtures/pdf_fixtures.dart';
+import '../helpers/l10n.dart';
 import '../helpers/pump_helpers.dart';
 
 /// Stands in for the OS share sheet: writes what would be shared to a file
@@ -69,11 +70,14 @@ class PdfRobot {
   /// Editor: "Dışa Aktar" (toolbar button, or the "Daha Fazla" menu on
   /// phones) > "PDF Paylaş".
   Future<void> shareAsPdf() async {
-    final button = find.byTooltip('Dışa Aktar').hitTestable();
+    final s = tester.drawingStrings.toolbar;
+    final button = find.byTooltip(s.export).hitTestable();
     if (button.evaluate().isNotEmpty) {
       await tester.tapAndWait(button);
     } else {
-      await tester.tapAndWait(find.byTooltip('Daha Fazla').hitTestable());
+      await tester.tapAndWait(find.byTooltip(s.more).hitTestable());
+      // The "More" menu is the page options panel, still Turkish until
+      // editor slice 3c (#327).
       final item = find.text('Dışa Aktar');
       await tester.pumpUntilFound(item);
       await tester.ensureVisible(item.first);

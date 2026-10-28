@@ -615,6 +615,179 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String get editorToolFountainPen => 'Dolma Kalem';
+
+  @override
+  String get editorToolPencil => 'Kurşun Kalem';
+
+  @override
+  String get editorToolHardPencil => 'Sert Kalem';
+
+  @override
+  String get editorToolBallpointPen => 'Tükenmez Kalem';
+
+  @override
+  String get editorToolGelPen => 'Jel Kalem';
+
+  @override
+  String get editorToolDashedPen => 'Kesik Çizgi';
+
+  @override
+  String get editorToolHighlighter => 'Fosforlu Kalem';
+
+  @override
+  String get editorToolBrushPen => 'Fırça Kalem';
+
+  @override
+  String get editorToolNeonHighlighter => 'Neon Fosforlu';
+
+  @override
+  String get editorToolRulerPen => 'Cetvelli Kalem';
+
+  @override
+  String get editorToolPixelEraser => 'Silgi';
+
+  @override
+  String get editorToolStrokeEraser => 'Çizgi Silgisi';
+
+  @override
+  String get editorToolLassoEraser => 'Kement Silgisi';
+
+  @override
+  String get editorToolShapes => 'Şekiller';
+
+  @override
+  String get editorToolText => 'Metin';
+
+  @override
+  String get editorToolSticker => 'Çıkartma';
+
+  @override
+  String get editorToolImage => 'Resim';
+
+  @override
+  String get editorToolSelection => 'Seçim';
+
+  @override
+  String get editorToolPanZoom => 'Kaydır/Yakınlaştır';
+
+  @override
+  String get editorToolLaserPointer => 'Lazer İşaretçi';
+
+  @override
+  String get editorToolStickyNote => 'Yapışkan Not';
+
+  @override
+  String get editorToolToolbarSettings => 'Araç Çubuğu Ayarları';
+
+  @override
+  String get editorToolPenGroup => 'Kalem';
+
+  @override
+  String get editorToolbarHome => 'Ana Sayfa';
+
+  @override
+  String get editorToolbarPages => 'Sayfa Paneli';
+
+  @override
+  String get editorToolbarRuler => 'Cetvel';
+
+  @override
+  String get editorToolbarAudio => 'Ses Kaydı';
+
+  @override
+  String get editorToolbarReaderMode => 'Okuyucu Modu';
+
+  @override
+  String get editorToolbarEditMode => 'Düzenleme Modu';
+
+  @override
+  String get editorToolbarMore => 'Daha Fazla';
+
+  @override
+  String get editorToolbarLayers => 'Katmanlar';
+
+  @override
+  String get editorToolbarAddPage => 'Sayfa Ekle';
+
+  @override
+  String get editorToolbarExport => 'Dışa Aktar';
+
+  @override
+  String get editorToolbarAi => 'Yapay Zeka';
+
+  @override
+  String get editorToolbarUntitled => 'İsimsiz Not';
+
+  @override
+  String get editorToolbarMoreColors => 'Daha Fazla Renk';
+
+  @override
+  String get editorToolbarColorSetHighlighter => 'Vurgulayıcı';
+
+  @override
+  String get editorToolbarColorSetPastel => 'Pastel';
+
+  @override
+  String editorToolbarSelectedColor(String hex) {
+    return 'Seçili renk $hex';
+  }
+
+  @override
+  String editorToolbarColor(String hex) {
+    return 'Renk $hex';
+  }
+
+  @override
+  String editorToolbarThickness(String value) {
+    return 'Kalınlık $value';
+  }
+
+  @override
+  String get editorToolbarMoreTools => 'Daha fazla araç';
+
+  @override
+  String get editorToolbarReadOnlyActive => 'Salt okunur mod aktif';
+
+  @override
+  String get editorToolbarReadOnly => 'Salt okunur';
+
+  @override
+  String get editorToolbarUndo => 'Geri al';
+
+  @override
+  String get editorToolbarRedo => 'İleri al';
+
+  @override
+  String get editorToolbarRecordingInProgress => 'Kayıt devam ediyor…';
+
+  @override
+  String get editorToolbarRecord => 'Kaydet';
+
+  @override
+  String get editorToolbarMicPermissionRequired =>
+      'Mikrofon izni gerekli. Lütfen ayarlardan izin verin.';
+
+  @override
+  String get editorToolbarShowRecordings => 'Kayıtları göster';
+
+  @override
+  String get editorToolbarSettingsTabTools => 'Araçlar';
+
+  @override
+  String get editorToolbarSettingsTabExtraTools => 'Ek Araçlar';
+
+  @override
+  String get editorToolbarSettingsToolsHint => 'Araçları sıralayın ve gizleyin';
+
+  @override
+  String get editorToolbarSettingsExtraToolsHint =>
+      'Ek araçları sıralayın ve gizleyin';
+
+  @override
+  String get editorToolbarSettingsReset => 'Varsayılana Sıfırla';
+
+  @override
   String get libraryNewNotebook => 'Not Defteri';
 
   @override

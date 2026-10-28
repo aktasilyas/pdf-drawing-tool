@@ -362,6 +362,82 @@
       }
     }
   },
+  "editorToolFountainPen": "Fountain pen",
+  "editorToolPencil": "Pencil",
+  "editorToolHardPencil": "Hard pencil",
+  "editorToolBallpointPen": "Ballpoint pen",
+  "editorToolGelPen": "Gel pen",
+  "editorToolDashedPen": "Dashed pen",
+  "editorToolHighlighter": "Highlighter",
+  "editorToolBrushPen": "Brush pen",
+  "editorToolNeonHighlighter": "Neon highlighter",
+  "editorToolRulerPen": "Ruler pen",
+  "editorToolPixelEraser": "Eraser",
+  "editorToolStrokeEraser": "Stroke eraser",
+  "editorToolLassoEraser": "Lasso eraser",
+  "editorToolShapes": "Shapes",
+  "editorToolText": "Text",
+  "editorToolSticker": "Sticker",
+  "editorToolImage": "Image",
+  "editorToolSelection": "Select",
+  "editorToolPanZoom": "Pan & zoom",
+  "editorToolLaserPointer": "Laser pointer",
+  "editorToolStickyNote": "Sticky note",
+  "editorToolToolbarSettings": "Toolbar settings",
+  "editorToolPenGroup": "Pen",
+  "editorToolbarHome": "Home",
+  "editorToolbarPages": "Pages",
+  "editorToolbarRuler": "Ruler",
+  "editorToolbarAudio": "Audio recording",
+  "editorToolbarReaderMode": "Reader mode",
+  "editorToolbarEditMode": "Edit mode",
+  "editorToolbarMore": "More",
+  "editorToolbarLayers": "Layers",
+  "editorToolbarAddPage": "Add page",
+  "editorToolbarExport": "Export",
+  "editorToolbarAi": "AI assistant",
+  "editorToolbarUntitled": "Untitled note",
+  "editorToolbarMoreColors": "More colors",
+  "editorToolbarColorSetHighlighter": "Highlighter",
+  "editorToolbarColorSetPastel": "Pastel",
+  "editorToolbarSelectedColor": "Selected color {hex}",
+  "@editorToolbarSelectedColor": {
+    "placeholders": {
+      "hex": {
+        "type": "String"
+      }
+    }
+  },
+  "editorToolbarColor": "Color {hex}",
+  "@editorToolbarColor": {
+    "placeholders": {
+      "hex": {
+        "type": "String"
+      }
+    }
+  },
+  "editorToolbarThickness": "Thickness {value}",
+  "@editorToolbarThickness": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "editorToolbarMoreTools": "More tools",
+  "editorToolbarReadOnlyActive": "Read-only mode on",
+  "editorToolbarReadOnly": "Read-only",
+  "editorToolbarUndo": "Undo",
+  "editorToolbarRedo": "Redo",
+  "editorToolbarRecordingInProgress": "Recording…",
+  "editorToolbarRecord": "Start recording",
+  "editorToolbarMicPermissionRequired": "Microphone access is required. Please allow it in Settings.",
+  "editorToolbarShowRecordings": "Show recordings",
+  "editorToolbarSettingsTabTools": "Tools",
+  "editorToolbarSettingsTabExtraTools": "Extra tools",
+  "editorToolbarSettingsToolsHint": "Reorder and hide tools",
+  "editorToolbarSettingsExtraToolsHint": "Reorder and hide extra tools",
+  "editorToolbarSettingsReset": "Reset to default",
   "libraryNewNotebook": "Notebook",
   "libraryNewWhiteboard": "Whiteboard",
   "libraryNewQuickNote": "Quick note",

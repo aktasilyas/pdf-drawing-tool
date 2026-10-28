@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/toolbar/elyanotes_nav_button.dart';
@@ -29,9 +30,6 @@ class PhoneNavRow extends ConsumerWidget {
   /// Row height (one 48dp touch target).
   static const double height = ChromeSizes.minTouchTarget;
 
-  /// Shown when the document has no title.
-  static const String untitled = 'İsimsiz Not';
-
   final String? documentTitle;
   final VoidCallback? onHomePressed;
   final VoidCallback? onRenameDocument;
@@ -41,6 +39,7 @@ class PhoneNavRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final s = context.drawingStrings.toolbar;
     final isReaderMode = ref.watch(readerModeProvider);
     final isInfinite = ref.watch(isInfiniteCanvasProvider);
     final pageCount = ref.watch(pageCountProvider);
@@ -56,17 +55,17 @@ class PhoneNavRow extends ConsumerWidget {
         children: [
           ElyanotesNavButton(
             icon: ElyanotesIcons.home,
-            tooltip: 'Ana Sayfa',
+            tooltip: s.home,
             onPressed: onHomePressed ?? () {},
           ),
           const SizedBox(width: ChromeSpacing.xs),
-          Expanded(child: _Title(documentTitle ?? untitled)),
+          Expanded(child: _Title(documentTitle ?? s.untitled)),
           if (pageCount > 1)
             ElyanotesNavButton(
               icon: isSidebarOpen
                   ? ElyanotesIcons.sidebarActive
                   : ElyanotesIcons.sidebar,
-              tooltip: 'Sayfa Paneli',
+              tooltip: s.pages,
               onPressed: onSidebarToggle ?? () {},
               isActive: isSidebarOpen,
             ),
@@ -75,7 +74,7 @@ class PhoneNavRow extends ConsumerWidget {
               icon: rulerVisible
                   ? ElyanotesIcons.rulerActive
                   : ElyanotesIcons.ruler,
-              tooltip: 'Cetvel',
+              tooltip: s.ruler,
               onPressed: () =>
                   ref.read(rulerVisibleProvider.notifier).state = !rulerVisible,
               isActive: rulerVisible,
@@ -83,7 +82,7 @@ class PhoneNavRow extends ConsumerWidget {
           if (!isReaderMode && !isInfinite && audioEnabled)
             ElyanotesNavButton(
               icon: ElyanotesIcons.microphone,
-              tooltip: 'Ses Kaydi',
+              tooltip: s.audio,
               onPressed: () =>
                   showAudioMenu(context, ref, onSidebarToggle, isSidebarOpen),
             ),
@@ -91,14 +90,14 @@ class PhoneNavRow extends ConsumerWidget {
             icon: isReaderMode
                 ? ElyanotesIcons.readerModeActive
                 : ElyanotesIcons.readerMode,
-            tooltip: isReaderMode ? 'Duzenleme Modu' : 'Okuyucu Modu',
+            tooltip: isReaderMode ? s.editMode : s.readerMode,
             onPressed: () =>
                 ref.read(readerModeProvider.notifier).state = !isReaderMode,
             isActive: isReaderMode,
           ),
           ElyanotesNavButton(
             icon: ElyanotesIcons.more,
-            tooltip: 'Daha Fazla',
+            tooltip: s.more,
             onPressed: () => isInfinite
                 ? showInfiniteBackgroundMenu(context)
                 : showMoreMenu(
