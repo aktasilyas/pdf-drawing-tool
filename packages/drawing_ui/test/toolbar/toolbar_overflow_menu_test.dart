@@ -53,11 +53,14 @@ void main() {
           ChromePalette.of(tester.element(find.byType(ToolbarOverflowMenu)));
       final panel = tester.widget<Material>(find
           .ancestor(
-              of: find.text(ToolType.shapes.displayName),
+              of: find.text(ToolType.shapes.label(const DrawingStringsTr())),
               matching: find.byType(Material))
           .first);
       expect(panel.color, palette.surfaceElevated);
-      expect(find.text(ToolType.shapes.displayName), findsOneWidget);
+      expect(
+        find.text(ToolType.shapes.label(const DrawingStringsTr())),
+        findsOneWidget,
+      );
     });
 
     testWidgets('golden (${brightness.name})', (tester) async {

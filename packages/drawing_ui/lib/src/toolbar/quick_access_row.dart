@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
@@ -59,6 +60,7 @@ class QuickColorChips extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final s = context.drawingStrings.toolbar;
     final colorScheme = Theme.of(context).colorScheme;
     final isHighlighter = currentTool == ToolType.highlighter ||
         currentTool == ToolType.neonHighlighter;
@@ -86,9 +88,9 @@ class QuickColorChips extends ConsumerWidget {
         Padding(
           padding: const EdgeInsets.only(left: 4),
           child: Tooltip(
-            message: 'Daha Fazla Renk',
+            message: s.moreColors,
             child: Semantics(
-              label: 'Daha Fazla Renk',
+              label: s.moreColors,
               button: true,
               child: GestureDetector(
                 onTap: () => _showColorPalette(context, ref, selectedColor),
@@ -107,7 +109,7 @@ class QuickColorChips extends ConsumerWidget {
                     ElyanotesIcons.more,
                     size: 14,
                     color: colorScheme.onSurfaceVariant,
-                    semanticLabel: 'Daha Fazla Renk',
+                    semanticLabel: s.moreColors,
                   ),
                 ),
               ),
@@ -139,6 +141,7 @@ class QuickColorChips extends ConsumerWidget {
 
   void _showColorPalette(
       BuildContext context, WidgetRef ref, Color selectedColor) {
+    final s = context.drawingStrings.toolbar;
     final isHighlighter = currentTool == ToolType.highlighter ||
         currentTool == ToolType.neonHighlighter;
     showModalBottomSheet(
@@ -153,8 +156,8 @@ class QuickColorChips extends ConsumerWidget {
         },
         colorSets: isHighlighter
             ? {
-                'Vurgulayıcı': ColorSets.highlighter,
-                'Pastel': ColorSets.pastel,
+                s.colorSetHighlighter: ColorSets.highlighter,
+                s.colorSetPastel: ColorSets.pastel,
               }
             : ColorSets.all,
       ),
@@ -194,10 +197,11 @@ class _QuickColorChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = context.drawingStrings.toolbar;
     final colorScheme = Theme.of(context).colorScheme;
     final label = isSelected
-        ? 'Seçili renk ${_colorHex(color)}'
-        : 'Renk ${_colorHex(color)}';
+        ? s.selectedColor(_colorHex(color))
+        : s.color(_colorHex(color));
 
     return Tooltip(
       message: label,

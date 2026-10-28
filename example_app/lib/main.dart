@@ -7,6 +7,7 @@ import 'package:example_app/core/bootstrap/app_overrides.dart';
 import 'package:example_app/core/bootstrap/startup_gate.dart';
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/documents.dart';
+import 'package:example_app/features/editor/editor.dart';
 import 'package:example_app/features/settings/settings.dart';
 import 'package:example_app/l10n/l10n.dart';
 
@@ -79,17 +80,21 @@ class ElyaNotesApp extends ConsumerWidget {
         );
         // In landscape, remove all system padding so content fills
         // the entire screen including the notch/cutout area.
-        if (MediaQuery.of(context).orientation == Orientation.landscape) {
-          return MediaQuery.removePadding(
-            context: context,
-            removeLeft: true,
-            removeRight: true,
-            removeTop: true,
-            removeBottom: true,
-            child: content,
-          );
-        }
-        return content;
+        final isLandscape =
+            MediaQuery.of(context).orientation == Orientation.landscape;
+        // Editor copy for drawing_ui follows the app locale.
+        return AppDrawingStringsScope(
+          child: isLandscape
+              ? MediaQuery.removePadding(
+                  context: context,
+                  removeLeft: true,
+                  removeRight: true,
+                  removeTop: true,
+                  removeBottom: true,
+                  child: content,
+                )
+              : content,
+        );
       },
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,

@@ -7,6 +7,9 @@
 /// - Tool settings panels for various tools
 library drawing_ui;
 
+// Localization
+export 'src/l10n/l10n.dart';
+
 // Models
 export 'src/models/tool_type.dart';
 
@@ -73,6 +76,7 @@ export 'src/toolbar/compact_bottom_bar.dart';
 export 'src/toolbar/compact_tool_panel_sheet.dart';
 export 'src/toolbar/tool_groups.dart';
 export 'src/toolbar/toolbar_logic.dart';
+export 'src/toolbar/toolbar_nav_left.dart';
 export 'src/toolbar/toolbar_nav_sections.dart';
 
 // Note: drawing_toolbar.dart and right_action_buttons.dart deprecated

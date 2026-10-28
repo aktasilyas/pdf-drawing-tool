@@ -3,6 +3,7 @@ import 'package:drawing_ui/drawing_ui.dart'
         DrawingCanvas,
         DrawingScreen,
         ToolType,
+        ToolTypeLabel,
         activeLayerStrokesProvider,
         canvasTransformProvider,
         currentPageProvider,
@@ -11,6 +12,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../helpers/l10n.dart';
 import '../helpers/pump_helpers.dart';
 
 /// Toolbar groups: one button per group, the variants live in its panel.
@@ -38,7 +40,8 @@ class EditorRobot {
   final WidgetTester tester;
 
   /// Home button of the phone, medium and full toolbar layouts.
-  Finder get _homeButton => find.byTooltip('Ana Sayfa');
+  Finder get _homeButton =>
+      find.byTooltip(tester.drawingStrings.toolbar.home);
 
   Finder get _canvas => find.byType(DrawingCanvas).first;
 
@@ -83,7 +86,8 @@ class EditorRobot {
       !(_erasers.contains(current) && _erasers.contains(tool)),
       'use selectEraserType to switch between eraser types',
     );
-    final button = find.byTooltip(tool.displayName).hitTestable();
+    final button =
+        find.byTooltip(tool.label(tester.drawingStrings)).hitTestable();
     if (button.evaluate().isNotEmpty && !_sameGroup(current, tool)) {
       await tester.tap(button.first);
     } else {
@@ -107,7 +111,7 @@ class EditorRobot {
     }
     if (currentTool == type) return;
     await tester.tapAndWait(
-      find.byTooltip(currentTool.displayName).hitTestable(),
+      find.byTooltip(currentTool.label(tester.drawingStrings)).hitTestable(),
     );
     final option = find.byTooltip(_eraserPanelLabels[type]!).hitTestable();
     await tester.tapAndWait(option);
@@ -175,11 +179,15 @@ class EditorRobot {
       swipe(Offset(0.5, fy - 0.05), Offset(0.5, fy + 0.05));
 
   Future<void> undo() async {
-    await tester.tapAndWait(find.byTooltip('Geri al').hitTestable());
+    await tester.tapAndWait(
+      find.byTooltip(tester.drawingStrings.toolbar.undo).hitTestable(),
+    );
   }
 
   Future<void> redo() async {
-    await tester.tapAndWait(find.byTooltip('İleri al').hitTestable());
+    await tester.tapAndWait(
+      find.byTooltip(tester.drawingStrings.toolbar.redo).hitTestable(),
+    );
   }
 
   /// Waits until the page holds exactly the stroke ids in [expected]

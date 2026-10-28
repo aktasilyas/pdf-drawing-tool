@@ -21,7 +21,10 @@ void main() {
     });
 
     test('has a display name and an icon', () {
-      expect(ToolType.fountainPen.displayName, isNotEmpty);
+      expect(
+        ToolType.fountainPen.label(const DrawingStringsTr()),
+        isNotEmpty,
+      );
       expect(ElyanotesIcons.iconForTool(ToolType.fountainPen), isNotNull);
     });
   });

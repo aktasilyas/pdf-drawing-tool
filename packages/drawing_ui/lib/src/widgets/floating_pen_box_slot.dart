@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/chrome_tokens.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
@@ -75,7 +76,7 @@ class FloatingPenBoxSlot extends StatelessWidget {
     final slide = isSelected ? _selectedOffset : _restingOffset;
     const centred = (_slotBreadth - _penSize) / 2;
     final label =
-        '${preset.toolType.displayName}, ${colorSemanticsLabel(preset.color)}';
+        '${preset.toolType.label(context.drawingStrings)}, ${colorSemanticsLabel(preset.color)}';
 
     return Semantics(
       button: true,

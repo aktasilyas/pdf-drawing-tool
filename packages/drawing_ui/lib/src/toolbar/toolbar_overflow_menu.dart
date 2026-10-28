@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
@@ -38,7 +39,7 @@ class ToolbarOverflowMenu extends ConsumerWidget {
             ? theme.toolbarIconSelectedColor
             : theme.toolbarIconColor,
       ),
-      tooltip: 'Daha fazla arac',
+      tooltip: context.drawingStrings.toolbar.moreTools,
       padding: EdgeInsets.zero,
       constraints: const BoxConstraints(
         minWidth: 48,
@@ -79,7 +80,7 @@ class ToolbarOverflowMenu extends ConsumerWidget {
               ),
               const SizedBox(width: ChromeSpacing.md),
               Text(
-                tool.displayName,
+                tool.label(context.drawingStrings),
                 style: TextStyle(
                   color: isSelected ? palette.accent : palette.textPrimary,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,

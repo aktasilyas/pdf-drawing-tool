@@ -74,56 +74,6 @@ enum ToolType {
   /// Toolbar settings - configure toolbar layout and tools.
   toolbarSettings;
 
-  /// Human-readable display name for the tool.
-  String get displayName {
-    switch (this) {
-      case ToolType.fountainPen:
-        return 'Dolma Kalem';
-      case ToolType.pencil:
-        return 'Kurşun Kalem';
-      case ToolType.hardPencil:
-        return 'Sert Kalem';
-      case ToolType.ballpointPen:
-        return 'Tükenmez Kalem';
-      case ToolType.gelPen:
-        return 'Jel Kalem';
-      case ToolType.dashedPen:
-        return 'Kesik Çizgi';
-      case ToolType.highlighter:
-        return 'Fosforlu Kalem';
-      case ToolType.brushPen:
-        return 'Fırça Kalem';
-      case ToolType.neonHighlighter:
-        return 'Neon Fosforlu';
-      case ToolType.rulerPen:
-        return 'Cetvelli Kalem';
-      case ToolType.pixelEraser:
-        return 'Silgi';
-      case ToolType.strokeEraser:
-        return 'Çizgi Silgisi';
-      case ToolType.lassoEraser:
-        return 'Kement Silgisi';
-      case ToolType.shapes:
-        return 'Şekiller';
-      case ToolType.text:
-        return 'Metin';
-      case ToolType.sticker:
-        return 'Çıkartma';
-      case ToolType.image:
-        return 'Resim';
-      case ToolType.selection:
-        return 'Seçim';
-      case ToolType.panZoom:
-        return 'Kaydır/Yakınlaştır';
-      case ToolType.laserPointer:
-        return 'Lazer İşaretçi';
-      case ToolType.stickyNote:
-        return 'Yapışkan Not';
-      case ToolType.toolbarSettings:
-        return 'Araç Çubuğu Ayarları';
-    }
-  }
-
   /// Maps ToolType to PenType for pen tools.
   /// Returns null for non-pen tools.
   PenType? get penType {

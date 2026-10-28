@@ -3,6 +3,7 @@ import 'package:drawing_ui/drawing_ui.dart'
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../helpers/l10n.dart';
 import '../helpers/pump_helpers.dart';
 import 'editor_robot.dart';
 
@@ -54,7 +55,9 @@ class PagesRobot {
   /// the current one and becomes current.
   Future<void> addPage() async {
     final before = pageIds().length;
-    await tester.tapAndWait(find.byTooltip('Daha Fazla').hitTestable());
+    await tester.tapAndWait(
+      find.byTooltip(tester.drawingStrings.toolbar.more).hitTestable(),
+    );
     await _tapVisible(find.text('Sayfa Ekle'));
     await _tapVisible(find.text('Boş'));
     await tester.pumpUntilTrue(
@@ -68,7 +71,9 @@ class PagesRobot {
   /// No-op when the sidebar is already open.
   Future<void> openSidebar() async {
     if (pageCells.evaluate().isNotEmpty) return;
-    await tester.tapAndWait(find.byTooltip('Sayfa Paneli').hitTestable());
+    await tester.tapAndWait(
+      find.byTooltip(tester.drawingStrings.toolbar.pages).hitTestable(),
+    );
     await tester.pumpUntilFound(pageCells);
     await tester.pumpFor(const Duration(milliseconds: 300));
   }
