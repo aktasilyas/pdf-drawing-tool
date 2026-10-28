@@ -126,17 +126,20 @@ void main() {
       when(() => h.repo
               .duplicateDocument(any(), copyTitle: any(named: 'copyTitle')))
           .thenAnswer((_) async => Right(testDocument));
-      when(() => h.repo
-              .duplicateDocument('b', copyTitle: any(named: 'copyTitle')))
+      when(() =>
+              h.repo.duplicateDocument('b', copyTitle: any(named: 'copyTitle')))
           .thenAnswer((_) async => const Left(failure));
       late BulkResult result;
       final rebuilt = await h.rebuiltBy(() async {
-        result = await h.controller.duplicateDocuments(abc, copyTitle: copyTitle);
+        result =
+            await h.controller.duplicateDocuments(abc, copyTitle: copyTitle);
       });
-      verify(() => h.repo
-          .duplicateDocument('a', copyTitle: any(named: 'copyTitle'))).called(1);
-      verify(() => h.repo
-          .duplicateDocument('c', copyTitle: any(named: 'copyTitle'))).called(1);
+      verify(() =>
+              h.repo.duplicateDocument('a', copyTitle: any(named: 'copyTitle')))
+          .called(1);
+      verify(() =>
+              h.repo.duplicateDocument('c', copyTitle: any(named: 'copyTitle')))
+          .called(1);
       expect(result.succeeded, ['a', 'c']);
       expect(result.failed, ['b']);
       expect(rebuilt, allLists);
