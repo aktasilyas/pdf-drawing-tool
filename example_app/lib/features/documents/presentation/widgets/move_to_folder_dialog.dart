@@ -132,33 +132,34 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
   Widget _buildActions() {
     final l10n = context.l10n;
     return Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Row(children: [
-          if (!_isCreatingFolder)
-            AppButton(
-                label: l10n.libraryNewFolder,
-                leadingIcon: Icons.create_new_folder,
-                variant: AppButtonVariant.text,
-                size: AppButtonSize.small,
-                onPressed: () => setState(() => _isCreatingFolder = true)),
-          const Spacer(),
-          if (_isFolderMode)
-            AppButton(
-                label: l10n.commonDone, onPressed: () => Navigator.pop(context, true))
-          else ...[
-            AppButton(
-                label: l10n.commonCancel,
-                variant: AppButtonVariant.text,
-                onPressed: () => Navigator.pop(context)),
-            const SizedBox(width: AppSpacing.sm),
-            AppButton(
-                label: l10n.commonMove,
-                onPressed: _isMovingFolder || _selectedFolderId != null
-                    ? _handleMove
-                    : null),
-          ],
-        ]),
-      );
+      padding: const EdgeInsets.all(AppSpacing.md),
+      child: Row(children: [
+        if (!_isCreatingFolder)
+          AppButton(
+              label: l10n.libraryNewFolder,
+              leadingIcon: Icons.create_new_folder,
+              variant: AppButtonVariant.text,
+              size: AppButtonSize.small,
+              onPressed: () => setState(() => _isCreatingFolder = true)),
+        const Spacer(),
+        if (_isFolderMode)
+          AppButton(
+              label: l10n.commonDone,
+              onPressed: () => Navigator.pop(context, true))
+        else ...[
+          AppButton(
+              label: l10n.commonCancel,
+              variant: AppButtonVariant.text,
+              onPressed: () => Navigator.pop(context)),
+          const SizedBox(width: AppSpacing.sm),
+          AppButton(
+              label: l10n.commonMove,
+              onPressed: _isMovingFolder || _selectedFolderId != null
+                  ? _handleMove
+                  : null),
+        ],
+      ]),
+    );
   }
 
   Future<void> _handleCreateFolder(String name, int colorValue) async {

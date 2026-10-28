@@ -2323,6 +2323,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose a color'**
   String get librarySelectColor;
+
+  /// No description provided for @libraryManageFolders.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage folders'**
+  String get libraryManageFolders;
+
+  /// No description provided for @libraryNoFoldersYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No folders yet'**
+  String get libraryNoFoldersYet;
+
+  /// No description provided for @libraryNoFoldersHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the button below to create a folder'**
+  String get libraryNoFoldersHint;
+
+  /// No description provided for @libraryNoFoldersStartHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a folder to get started'**
+  String get libraryNoFoldersStartHint;
+
+  /// No description provided for @libraryFolderOrderSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Order saved'**
+  String get libraryFolderOrderSaved;
+
+  /// No description provided for @libraryAddSubfolder.
+  ///
+  /// In en, this message translates to:
+  /// **'Add subfolder'**
+  String get libraryAddSubfolder;
+
+  /// No description provided for @libraryAddSubfolderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New folder in {parent}'**
+  String libraryAddSubfolderTitle(String parent);
+
+  /// No description provided for @libraryDeleteFolderConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete the folder \"{name}\"?\nIts notes will be moved to the trash.'**
+  String libraryDeleteFolderConfirm(String name);
+
+  /// No description provided for @libraryFolderManagement.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder management'**
+  String get libraryFolderManagement;
+
+  /// No description provided for @libraryMoveFolderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Move folder'**
+  String get libraryMoveFolderTitle;
+
+  /// No description provided for @libraryMoveToFolderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to folder'**
+  String get libraryMoveToFolderTitle;
+
+  /// No description provided for @libraryFoldersLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load folders: {error}'**
+  String libraryFoldersLoadFailed(String error);
+
+  /// No description provided for @libraryFolderNameEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder name can\'t be empty'**
+  String get libraryFolderNameEmpty;
+
+  /// No description provided for @libraryFolderCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Folder \"{name}\" created'**
+  String libraryFolderCreated(String name);
+
+  /// No description provided for @libraryRootFolders.
+  ///
+  /// In en, this message translates to:
+  /// **'Top-level folders'**
+  String get libraryRootFolders;
+
+  /// No description provided for @libraryNoFolderRoot.
+  ///
+  /// In en, this message translates to:
+  /// **'Documents (no folder)'**
+  String get libraryNoFolderRoot;
+
+  /// No description provided for @libraryFolderNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a folder name'**
+  String get libraryFolderNameHint;
+
+  /// No description provided for @libraryColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Color'**
+  String get libraryColor;
 }
 
 class _AppLocalizationsDelegate
