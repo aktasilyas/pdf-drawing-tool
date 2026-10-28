@@ -2492,6 +2492,12 @@ abstract class AppLocalizations {
   /// **'Page moved'**
   String get editorPagePageMoved;
 
+  /// No description provided for @editorPageBackgroundReplaced.
+  ///
+  /// In en, this message translates to:
+  /// **'Page background replaced'**
+  String get editorPageBackgroundReplaced;
+
   /// No description provided for @editorPageGoToPage.
   ///
   /// In en, this message translates to:

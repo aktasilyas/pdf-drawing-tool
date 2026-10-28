@@ -89,6 +89,9 @@ class AppPageStrings extends PageStrings {
   String get pageMoved => _l10n.editorPagePageMoved;
 
   @override
+  String get backgroundReplaced => _l10n.editorPageBackgroundReplaced;
+
+  @override
   String get goToPage => _l10n.editorPageGoToPage;
 
   @override
