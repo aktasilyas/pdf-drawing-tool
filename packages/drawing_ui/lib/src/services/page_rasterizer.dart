@@ -66,7 +66,10 @@ abstract final class PageRasterizer {
   }) async {
     final pageSize = Size(page.size.width, page.size.height);
     final area = region ?? Offset.zero & pageSize;
-    final images = ImageCacheManager(paths: pdfPaths);
+    final images = ImageCacheManager(
+      paths: pdfPaths,
+      byteBudget: ImageCacheManager.unboundedBudget,
+    );
     ui.Image? pdfImage;
     ui.Image? coverImage;
     try {
