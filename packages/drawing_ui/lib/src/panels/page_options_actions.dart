@@ -78,12 +78,18 @@ mixin PageOptionsActions<T extends ConsumerStatefulWidget> on ConsumerState<T> {
   void _insertCopy(BuildContext context, Page source, String message) {
     // The popover context goes away on close, so grab these first.
     final messenger = ScaffoldMessenger.maybeOf(context);
-    final undoLabel = context.drawingStrings.toolbar.undo;
+    final strings = context.drawingStrings;
     final actions = ref.read(pageStructureActionsProvider);
     final change = actions.insertCopy(targetPageIndex, source);
     onPanelClose();
-    showPageUndoSnackBar(messenger, actions, change, message,
-        undoLabel: undoLabel);
+    showPageUndoSnackBar(
+      messenger,
+      actions,
+      change,
+      message,
+      undoLabel: strings.toolbar.undo,
+      undoFailedMessage: strings.pages.cannotUndo,
+    );
   }
 
   void exportPageAsPdf() {

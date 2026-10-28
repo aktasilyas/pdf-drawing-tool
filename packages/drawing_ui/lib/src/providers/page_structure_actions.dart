@@ -39,6 +39,7 @@ class PageStructureChange {
     required this.previousOrder,
     required this.previousCurrentId,
     this.insertedPageId,
+    this.insertedPageInk = 0,
   });
 
   /// Id of the document the change was made in.
@@ -52,7 +53,13 @@ class PageStructureChange {
 
   /// Id of the page the change inserted, if any.
   final String? insertedPageId;
+
+  /// Strokes, shapes and texts the inserted page held when it was inserted
+  /// (a duplicate or pasted page starts with some).
+  final int insertedPageInk;
 }
+
+int _inkCount(Page p) => p.strokeCount + p.shapeCount + p.textCount;
 
 /// Page structure changes (insert, move, delete, restore).
 ///
@@ -77,7 +84,11 @@ class PageStructureActions {
   /// Inserts [page] at [index] (clamped) and makes it the current page.
   PageStructureChange insertPage(int index, Page page) {
     final doc = _ref.read(documentProvider);
-    final change = _changeFrom(doc, insertedPageId: page.id);
+    final change = _changeFrom(
+      doc,
+      insertedPageId: page.id,
+      insertedPageInk: _inkCount(page),
+    );
     final inserted = doc.insertPageAt(index, page);
     _apply(inserted.replacePages(inserted.pages, currentPageId: page.id));
     return change;
@@ -91,24 +102,46 @@ class PageStructureActions {
   /// Reverts an insert or a move: restores the previous page order and
   /// current page, keeping the pages' current content.
   ///
+  /// An inserted page that gained content since the insert is moved to the
+  /// page trash (when the host app has one) instead of being dropped.
+  ///
   /// Returns false (and changes nothing) when another document is loaded or
   /// the set of pages changed in some other way since.
-  bool undo(PageStructureChange change) {
+  Future<bool> undo(PageStructureChange change) async {
+    final pages = _revertablePages(change);
+    if (pages == null) return false;
+    final insertedId = change.insertedPageId;
+    final inserted = insertedId == null ? null : pages[insertedId];
+    final trash = _ref.read(pageTrashCallbackProvider);
+    if (inserted != null &&
+        trash != null &&
+        _inkCount(inserted) > change.insertedPageInk) {
+      final index = _ref.read(documentProvider).pages.indexOf(inserted);
+      await trash(index, inserted);
+    }
+    // Re-validate: the document may have changed while the trash call ran.
+    final fresh = _revertablePages(change);
+    if (fresh == null) return false;
+    _apply(_ref.read(documentProvider).replacePages(
+      [for (final id in change.previousOrder) fresh[id]!],
+      currentPageId: change.previousCurrentId,
+    ));
+    return true;
+  }
+
+  /// Pages by id when [change] can still be reverted, else null.
+  Map<String, Page>? _revertablePages(PageStructureChange change) {
     final doc = _ref.read(documentProvider);
-    if (doc.id != change.documentId) return false;
+    if (doc.id != change.documentId) return null;
     final byId = {for (final p in doc.pages) p.id: p};
     final expected = {
       ...change.previousOrder,
       if (change.insertedPageId != null) change.insertedPageId!,
     };
     if (byId.length != expected.length || !expected.every(byId.containsKey)) {
-      return false;
+      return null;
     }
-    _apply(doc.replacePages(
-      [for (final id in change.previousOrder) byId[id]!],
-      currentPageId: change.previousCurrentId,
-    ));
-    return true;
+    return byId;
   }
 
   /// Deletes the page at [index]. Returns null when it is the last page.
@@ -166,12 +199,14 @@ class PageStructureActions {
   PageStructureChange _changeFrom(
     DrawingDocument doc, {
     String? insertedPageId,
+    int insertedPageInk = 0,
   }) =>
       PageStructureChange(
         documentId: doc.id,
         previousOrder: [for (final p in doc.pages) p.id],
         previousCurrentId: doc.pages[doc.currentPageIndex].id,
         insertedPageId: insertedPageId,
+        insertedPageInk: insertedPageInk,
       );
 
   void _apply(DrawingDocument doc) {

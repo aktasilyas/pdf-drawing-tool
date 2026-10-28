@@ -32,6 +32,7 @@ abstract class PageStrings {
   String clearPageQuestion(int page);
   String get pageAdded;
   String get pageMoved;
+  String get cannotUndo;
   String get goToPage;
   String get go;
 
@@ -64,6 +65,7 @@ abstract class PageStrings {
         'clearPageQuestion': clearPageQuestion(1),
         'pageAdded': pageAdded,
         'pageMoved': pageMoved,
+        'cannotUndo': cannotUndo,
         'goToPage': goToPage,
         'go': go,
       };
@@ -154,6 +156,9 @@ class PageStringsTr extends PageStrings {
 
   @override
   String get pageMoved => 'Sayfa taşındı';
+
+  @override
+  String get cannotUndo => 'Geri alınamadı';
 
   @override
   String get goToPage => 'Sayfaya Git';

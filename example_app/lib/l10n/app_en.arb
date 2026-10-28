@@ -683,6 +683,7 @@
     }
   },
   "editorPagePageAdded": "Page added",
+  "editorPageCannotUndo": "Can't undo",
   "editorPagePageMoved": "Page moved",
   "editorPageGoToPage": "Go to page",
   "editorPageGo": "Go",
