@@ -65,6 +65,41 @@ void main() {
     expect(doc.layers[0].strokes.first.points.last.x, 50);
   });
 
+  test('pasted text keeps width, height and rotation; image keeps rotation',
+      () {
+    final data = SelectionClipboardData(
+      strokes: const [],
+      shapes: const [],
+      texts: [
+        TextElement.create(
+          text: 'a',
+          x: 0,
+          y: 0,
+          width: 120,
+          height: 60,
+          rotation: 0.5,
+        ),
+      ],
+      images: [
+        ImageElement.create(
+          filePath: 'p.png',
+          x: 0,
+          y: 0,
+          width: 50,
+          height: 40,
+          rotation: 0.3,
+        ),
+      ],
+      originalBounds: const BoundingBox(left: 0, top: 0, right: 10, bottom: 10),
+    );
+    final doc = buildPasteCommand(data, 0, 5, 5)!
+        .execute(DrawingDocument.emptyMultiPage('Test'));
+    final text = doc.layers[0].texts.single;
+    expect([text.width, text.height, text.rotation], [120, 60, 0.5]);
+    expect(text.x, 5);
+    expect(doc.layers[0].images.single.rotation, 0.3);
+  });
+
   test('an empty clipboard builds no command', () {
     final empty = SelectionClipboardData(
       strokes: const [],
