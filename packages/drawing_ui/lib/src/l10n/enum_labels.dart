@@ -1,6 +1,7 @@
-import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/l10n/drawing_strings.dart';
 import 'package:drawing_ui/src/models/selection_action_kind.dart';
+import 'package:drawing_ui/src/providers/shapes_settings_provider.dart'
+    show ShapeType;
 
 /// Localized names for [SelectionActionKind].
 extension SelectionActionKindLabel on SelectionActionKind {

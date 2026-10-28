@@ -1,4 +1,3 @@
-import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/drawing_ui.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
