@@ -532,5 +532,21 @@
   "editorSelectionScreenshotSaveFailed": "Couldn't save the screenshot",
   "editorSelectionContextEdit": "Edit",
   "editorSelectionContextStyle": "Style",
-  "editorSelectionContextMove": "Move"
+  "editorSelectionContextMove": "Move",
+  "editorDocumentNameLabel": "Document name",
+  "editorMoveToTrashTitle": "Move to trash",
+  "editorMoveToTrashMessage": "This document will be moved to the trash. You can restore it later.",
+  "editorLoadErrorTitle": "Couldn't open the document",
+  "editorLoadErrorMessage": "The document wasn't found or couldn't be read.",
+  "editorLoadErrorBack": "Go back",
+  "editorSaveFailedMessage": "Couldn't save. Your changes haven't been saved yet.",
+  "startupErrorTitle": "The app couldn't start",
+  "startupErrorMessage": "Your notes are safe, nothing was deleted. Something went wrong while opening your data. Try again; if the problem persists, close the app and reopen it.",
+  "commonPasswordLabel": "Password",
+  "commonSelectItemTitle": "Select an item",
+  "commonSelectItemDescription": "Select an item on the left to see its details",
+  "commonUnderConstruction": "This screen is still under construction",
+  "routerForgotPasswordTitle": "Forgot password",
+  "routerProfileTitle": "Profile",
+  "routerSubscriptionTitle": "Subscription"
 }

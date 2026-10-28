@@ -804,293 +804,56 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editorToolbarSettingsReset => 'Reset to default';
 
   @override
-  String get editorToolbarColorSetBasic => 'Basic';
+  String get editorDocumentNameLabel => 'Document name';
 
   @override
-  String get editorToolbarColorSetNeon => 'Neon';
+  String get editorMoveToTrashTitle => 'Move to trash';
 
   @override
-  String get editorPanelClose => 'Close';
+  String get editorMoveToTrashMessage =>
+      'This document will be moved to the trash. You can restore it later.';
 
   @override
-  String get editorPanelThickness => 'Thickness';
+  String get editorLoadErrorTitle => 'Couldn\'t open the document';
 
   @override
-  String get editorPanelPressureSensitivity => 'Pressure sensitivity';
+  String get editorLoadErrorMessage =>
+      'The document wasn\'t found or couldn\'t be read.';
 
   @override
-  String get editorPanelStabilization => 'Stroke stabilization';
+  String get editorLoadErrorBack => 'Go back';
 
   @override
-  String get editorPanelPenType => 'Pen type';
+  String get editorSaveFailedMessage =>
+      'Couldn\'t save. Your changes haven\'t been saved yet.';
 
   @override
-  String get editorPanelGlow => 'Glow';
+  String get startupErrorTitle => 'The app couldn\'t start';
 
   @override
-  String get editorPanelStraightLine => 'Straight line';
+  String get startupErrorMessage =>
+      'Your notes are safe, nothing was deleted. Something went wrong while opening your data. Try again; if the problem persists, close the app and reopen it.';
 
   @override
-  String get editorPanelSize => 'Size';
+  String get commonPasswordLabel => 'Password';
 
   @override
-  String get editorPanelEraserPixel => 'Pixel eraser';
+  String get commonSelectItemTitle => 'Select an item';
 
   @override
-  String get editorPanelEraserPressure => 'Pressure sensitivity';
+  String get commonSelectItemDescription =>
+      'Select an item on the left to see its details';
 
   @override
-  String get editorPanelEraserHighlighterOnly => 'Erase highlighter only';
+  String get commonUnderConstruction =>
+      'This screen is still under construction';
 
   @override
-  String get editorPanelEraserAutoLift => 'Auto-deselect';
+  String get routerForgotPasswordTitle => 'Forgot password';
 
   @override
-  String get editorPanelClearPage => 'Clear page';
+  String get routerProfileTitle => 'Profile';
 
   @override
-  String get editorPanelClearPageTitle => 'Clear page?';
-
-  @override
-  String get editorPanelClearPageMessage =>
-      'This erases everything on this page. This can\'t be undone.';
-
-  @override
-  String get editorPanelCancel => 'Cancel';
-
-  @override
-  String get editorPanelClearPageConfirm => 'Clear';
-
-  @override
-  String get editorPanelLaserDot => 'Laser dot';
-
-  @override
-  String get editorPanelLaserLine => 'Laser line';
-
-  @override
-  String get editorPanelLaserHollow => 'Hollow laser line';
-
-  @override
-  String get editorPanelLaserRainbow => 'Rainbow laser';
-
-  @override
-  String get editorPanelLaserDuration => 'Duration';
-
-  @override
-  String get editorPanelTextTitle => 'Text tool';
-
-  @override
-  String get editorPanelTextHint => 'Tap the canvas to add a text box.';
-
-  @override
-  String get editorPanelTextColor => 'Color';
-
-  @override
-  String get editorPanelTextStyle => 'Style';
-
-  @override
-  String get editorPanelAddNote => 'Add note';
-
-  @override
-  String get editorPanelColorHex => 'Hex';
-
-  @override
-  String get editorPanelColorRed => 'Red';
-
-  @override
-  String get editorPanelColorGreen => 'Green';
-
-  @override
-  String get editorPanelColorBlue => 'Blue';
-
-  @override
-  String get editorPanelColorCancel => 'Cancel';
-
-  @override
-  String get editorPanelColorDone => 'Done';
-
-  @override
-  String get editorPanelColorSwatches => 'Swatches';
-
-  @override
-  String get editorPanelColorSpectrum => 'Spectrum';
-
-  @override
-  String get editorCatalogShapesTitle => 'Shape';
-
-  @override
-  String get editorCatalogStrokeWidth => 'Stroke width';
-
-  @override
-  String get editorCatalogStrokeColor => 'Stroke color';
-
-  @override
-  String get editorCatalogFillShape => 'Fill shape';
-
-  @override
-  String get editorCatalogFillColor => 'Fill color';
-
-  @override
-  String get editorCatalogShapeLine => 'Line';
-
-  @override
-  String get editorCatalogShapeArrow => 'Arrow';
-
-  @override
-  String get editorCatalogShapeRectangle => 'Rectangle';
-
-  @override
-  String get editorCatalogShapeEllipse => 'Ellipse';
-
-  @override
-  String get editorCatalogShapeTriangle => 'Triangle';
-
-  @override
-  String get editorCatalogShapeDiamond => 'Diamond';
-
-  @override
-  String get editorCatalogShapeStar => 'Star';
-
-  @override
-  String get editorCatalogShapePentagon => 'Pentagon';
-
-  @override
-  String get editorCatalogShapeHexagon => 'Hexagon';
-
-  @override
-  String get editorCatalogShapePlus => 'Plus';
-
-  @override
-  String get editorCatalogStickersTitle => 'Stickers';
-
-  @override
-  String get editorCatalogAddSticker => 'Add sticker';
-
-  @override
-  String get editorCatalogStickerEmoji => 'Emoji';
-
-  @override
-  String get editorCatalogStickerAnimals => 'Animals';
-
-  @override
-  String get editorCatalogStickerFood => 'Food';
-
-  @override
-  String get editorCatalogStickerTravel => 'Travel';
-
-  @override
-  String get editorCatalogStickerObjects => 'Objects';
-
-  @override
-  String get editorCatalogStickerSymbols => 'Symbols';
-
-  @override
-  String get editorCatalogStickerHands => 'Hands';
-
-  @override
-  String get editorCatalogStickerNature => 'Nature';
-
-  @override
-  String get editorSelectionLassoFreeform => 'Freeform';
-
-  @override
-  String get editorSelectionLassoRectangle => 'Rectangle';
-
-  @override
-  String get editorSelectionLassoSelectable => 'Selectable';
-
-  @override
-  String get editorSelectionTypeHandwriting => 'Handwriting';
-
-  @override
-  String get editorSelectionTypeShape => 'Shapes';
-
-  @override
-  String get editorSelectionTypeImage => 'Images';
-
-  @override
-  String get editorSelectionTypeHighlighter => 'Highlighter';
-
-  @override
-  String get editorSelectionTypeText => 'Text';
-
-  @override
-  String get editorSelectionTypeTape => 'Tape';
-
-  @override
-  String get editorSelectionTypeLink => 'Links';
-
-  @override
-  String get editorSelectionTypeLabel => 'Labels';
-
-  @override
-  String get editorSelectionAi => 'AI assistant';
-
-  @override
-  String get editorSelectionColor => 'Color';
-
-  @override
-  String get editorSelectionScreenshot => 'Screenshot';
-
-  @override
-  String get editorSelectionCut => 'Cut';
-
-  @override
-  String get editorSelectionDuplicate => 'Duplicate';
-
-  @override
-  String get editorSelectionDelete => 'Delete';
-
-  @override
-  String get editorSelectionBringToFront => 'Bring to front';
-
-  @override
-  String get editorSelectionSendToBack => 'Send to back';
-
-  @override
-  String get editorSelectionCopy => 'Copy';
-
-  @override
-  String get editorSelectionPaste => 'Paste';
-
-  @override
-  String get editorSelectionAskAi => 'Ask AI';
-
-  @override
-  String get editorSelectionTakeScreenshot => 'Take screenshot';
-
-  @override
-  String get editorSelectionMore => 'More';
-
-  @override
-  String get editorSelectionSave => 'Save';
-
-  @override
-  String get editorSelectionScreenshotCaptureFailed =>
-      'Couldn\'t create the screenshot';
-
-  @override
-  String get editorSelectionScreenshotSavedAndCopied =>
-      'Screenshot saved to the gallery and copied to the clipboard';
-
-  @override
-  String get editorSelectionScreenshotSaved =>
-      'Screenshot saved to the gallery';
-
-  @override
-  String get editorSelectionScreenshotCopied =>
-      'Screenshot copied to the clipboard';
-
-  @override
-  String get editorSelectionScreenshotSaveFailed =>
-      'Couldn\'t save the screenshot';
-
-  @override
-  String get editorSelectionContextEdit => 'Edit';
-
-  @override
-  String get editorSelectionContextStyle => 'Style';
-
-  @override
-  String get editorSelectionContextMove => 'Move';
+  String get routerSubscriptionTitle => 'Subscription';
 }

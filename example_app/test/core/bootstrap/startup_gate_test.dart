@@ -28,6 +28,13 @@ StartupFailure _failure() =>
     StartupFailure(StateError('database is locked'), StackTrace.empty);
 
 void main() {
+  // The error screen follows the device locale; pin Turkish for the copy.
+  setUp(() {
+    final binding = TestWidgetsFlutterBinding.ensureInitialized();
+    binding.platformDispatcher.localesTestValue = const [Locale('tr')];
+    addTearDown(binding.platformDispatcher.clearAllTestValues);
+  });
+
   group('attemptStartup', () {
     test('returns the result on success', () async {
       final result = await _okResult();

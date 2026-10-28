@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:example_app/core/utils/responsive.dart';
 import 'package:example_app/core/widgets/feedback/index.dart';
 import 'package:example_app/core/widgets/layout/index.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// ElyaNotes master-detail layout komponenti.
 ///
@@ -53,7 +54,7 @@ class MasterDetailLayout extends StatelessWidget {
     if (isPhone) {
       return _buildPhoneLayout();
     } else {
-      return _buildTabletLayout();
+      return _buildTabletLayout(context);
     }
   }
 
@@ -66,7 +67,7 @@ class MasterDetailLayout extends StatelessWidget {
     }
   }
 
-  Widget _buildTabletLayout() {
+  Widget _buildTabletLayout(BuildContext context) {
     return Row(
       children: [
         // Master panel
@@ -78,18 +79,18 @@ class MasterDetailLayout extends StatelessWidget {
         const AppDivider(),
         // Detail panel
         Expanded(
-          child: detail ?? _buildEmptyDetail(),
+          child: detail ?? _buildEmptyDetail(context),
         ),
       ],
     );
   }
 
-  Widget _buildEmptyDetail() {
+  Widget _buildEmptyDetail(BuildContext context) {
     return emptyDetail ??
-        const AppEmptyState(
+        AppEmptyState(
           icon: Icons.touch_app_outlined,
-          title: 'Bir öğe seçin',
-          description: 'Detayları görmek için sol taraftan bir öğe seçin',
+          title: context.l10n.commonSelectItemTitle,
+          description: context.l10n.commonSelectItemDescription,
         );
   }
 }

@@ -41,11 +41,11 @@ List<Override> premiumRecordingOverrides() => [
                 currentUsage: usedMinutes,
                 maxUsage: 5,
                 message:
-                    'Ücretsiz planda toplam 5 dakika ses kaydı yapabilirsiniz. '
-                    "Premium'a geçerek sınırsız kayıt yapın.",
+                    'Ücretsiz planda toplam 5 dakika ses kaydı yapabilirsiniz. ' // l10n-ignore: frozen audio feature
+                    "Premium'a geçerek sınırsız kayıt yapın.", // l10n-ignore
               ),
               featureIcon: Icons.mic_outlined,
-              featureTitle: 'Ses Kaydı Limitine Ulaştınız',
+              featureTitle: 'Ses Kaydı Limitine Ulaştınız', // l10n-ignore
               onUpgrade: () {
                 Navigator.pop(sheetCtx);
                 GoRouter.of(sheetCtx).push(RouteNames.paywall);
