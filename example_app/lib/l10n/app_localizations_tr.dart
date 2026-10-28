@@ -703,4 +703,10 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get libraryNoteTitleHint => 'Not Başlığı';
+
+  @override
+  String get libraryTemplateCategoryAll => 'Hepsi';
+
+  @override
+  String get libraryNoTemplatesInCategory => 'Bu kategoride şablon yok';
 }

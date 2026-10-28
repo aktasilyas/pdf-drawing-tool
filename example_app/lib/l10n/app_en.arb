@@ -428,5 +428,7 @@
   "libraryCover": "Cover",
   "libraryPaper": "Paper",
   "libraryTitle": "Title",
-  "libraryNoteTitleHint": "Note title"
+  "libraryNoteTitleHint": "Note title",
+  "libraryTemplateCategoryAll": "All",
+  "libraryNoTemplatesInCategory": "No templates in this category"
 }

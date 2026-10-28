@@ -1249,6 +1249,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Note title'**
   String get libraryNoteTitleHint;
+
+  /// No description provided for @libraryTemplateCategoryAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get libraryTemplateCategoryAll;
+
+  /// No description provided for @libraryNoTemplatesInCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'No templates in this category'**
+  String get libraryNoTemplatesInCategory;
 }
 
 class _AppLocalizationsDelegate

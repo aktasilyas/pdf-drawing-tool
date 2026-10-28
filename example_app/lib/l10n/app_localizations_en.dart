@@ -718,4 +718,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get libraryNoteTitleHint => 'Note title';
+
+  @override
+  String get libraryTemplateCategoryAll => 'All';
+
+  @override
+  String get libraryNoTemplatesInCategory => 'No templates in this category';
 }

@@ -232,5 +232,7 @@
   "libraryCover": "Kapak",
   "libraryPaper": "Kağıt",
   "libraryTitle": "Başlık",
-  "libraryNoteTitleHint": "Not Başlığı"
+  "libraryNoteTitleHint": "Not Başlığı",
+  "libraryTemplateCategoryAll": "Hepsi",
+  "libraryNoTemplatesInCategory": "Bu kategoride şablon yok"
 }

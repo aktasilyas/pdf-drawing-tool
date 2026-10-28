@@ -26,8 +26,6 @@ const pendingL10n = <String>{
   '$_documents/widgets/move_to_folder_create_form.dart',
   '$_documents/widgets/move_to_folder_dialog.dart',
   '$_documents/widgets/move_to_folder_list.dart',
-  '$_documents/widgets/template_category_tabs.dart',
-  '$_documents/widgets/template_grid.dart',
 };
 
 List<int> _lines(String source) =>
