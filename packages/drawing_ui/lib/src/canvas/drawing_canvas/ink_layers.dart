@@ -72,7 +72,7 @@ mixin _CanvasInkLayers
               Consumer(
                 builder: (context, ref, _) {
                   final liveNote = ref.watch(
-                    stickyNotePlacementProvider.select((s) => s.selectedNote),
+                    stickyNotePlacementProvider.select((s) => s.dragPreview),
                   );
                   return RepaintBoundary(
                     child: CustomPaint(

@@ -44,6 +44,7 @@ class _StickyNoteResizeHandlesState
       onPanStart: _onPanStart,
       onPanUpdate: _onPanUpdate,
       onPanEnd: _onPanEnd,
+      onPanCancel: _onPanCancel,
       child: CustomPaint(
         painter: StickyNoteHandlesPainter(
           note: widget.note,
@@ -179,18 +180,18 @@ class _StickyNoteResizeHandlesState
         final resized = _originalNote!.copyWith(width: newW, height: newH);
         ref
             .read(stickyNotePlacementProvider.notifier)
-            .updateSelectedNote(resized);
+            .updateDragPreview(resized);
         break;
 
       case _DragMode.move:
         final delta = pos - _lastDragPos!;
         _lastDragPos = pos;
-        final cur = ref.read(stickyNotePlacementProvider).selectedNote ??
+        final cur = ref.read(stickyNotePlacementProvider).dragPreview ??
             _originalNote!;
         final moved = cur.copyWith(x: cur.x + delta.dx, y: cur.y + delta.dy);
         ref
             .read(stickyNotePlacementProvider.notifier)
-            .updateSelectedNote(_clampToPage(moved));
+            .updateDragPreview(_clampToPage(moved));
         break;
     }
   }
@@ -201,7 +202,7 @@ class _StickyNoteResizeHandlesState
       return;
     }
 
-    final current = ref.read(stickyNotePlacementProvider).selectedNote;
+    final current = ref.read(stickyNotePlacementProvider).dragPreview;
     if (current != null && current.id == _originalNote!.id) {
       final o = _originalNote!;
       final changed = current.x != o.x ||
@@ -218,6 +219,12 @@ class _StickyNoteResizeHandlesState
         ref.read(historyManagerProvider.notifier).execute(command);
       }
     }
+    ref.read(stickyNotePlacementProvider.notifier).clearDragPreview();
+    _reset();
+  }
+
+  void _onPanCancel() {
+    ref.read(stickyNotePlacementProvider.notifier).clearDragPreview();
     _reset();
   }
 

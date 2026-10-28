@@ -115,9 +115,12 @@ void main() {
     container
         .read(currentToolProvider.notifier)
         .selectTool(ToolType.stickyNote);
-    container
-        .read(stickyNotePlacementProvider.notifier)
-        .selectNote(StickyNote.create(x: 10, y: 10));
+    // The selection resolves the note from the document, so add it first.
+    final note = StickyNote.create(x: 10, y: 10);
+    container.read(historyManagerProvider.notifier).execute(
+          AddStickyNoteCommand(layerIndex: 0, stickyNote: note),
+        );
+    container.read(stickyNotePlacementProvider.notifier).selectNote(note);
     container.read(stickyNotePlacementProvider.notifier).showContextMenu();
     await tester.pump();
     expectTree(tester, 'sticky_note');

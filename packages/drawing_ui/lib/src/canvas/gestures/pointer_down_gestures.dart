@@ -108,12 +108,12 @@ mixin _PointerDownGestures<T extends ConsumerStatefulWidget>
 
     // If a sticky note is selected and we're not on stickyNote tool,
     // minimize and deselect if tapping OUTSIDE the note (allow drawing inside).
-    if (stickyNoteState.selectedNote != null &&
-        toolType != ToolType.stickyNote) {
+    final selectedNote = ref.read(selectedStickyNoteProvider);
+    if (selectedNote != null && toolType != ToolType.stickyNote) {
       final transform = ref.read(canvasTransformProvider);
       final cp = transform.screenToCanvas(event.localPosition);
-      if (!stickyNoteState.selectedNote!.containsPoint(cp.dx, cp.dy, 0)) {
-        _minimizeAndDeselectNote(stickyNoteState.selectedNote!);
+      if (!selectedNote.containsPoint(cp.dx, cp.dy, 0)) {
+        _minimizeAndDeselectNote(selectedNote);
       }
     }
 
