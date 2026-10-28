@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:drawing_core/drawing_core.dart' show PdfPathResolver;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:example_app/core/bootstrap/app_bootstrap.dart';
 import 'package:example_app/core/bootstrap/app_overrides.dart';
+import 'package:example_app/core/bootstrap/orphan_file_sweep_startup.dart';
 import 'package:example_app/core/bootstrap/startup_gate.dart';
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/documents.dart';
@@ -41,6 +44,14 @@ Future<void> main() async {
       ),
     ),
   );
+
+  // Housekeeping after the first frame; never blocks or fails the app.
+  if (initial is StartupSuccess) {
+    unawaited(sweepOrphanedFilesAfterFirstFrame(
+      getIt<SweepOrphanedFilesUseCase>(),
+      firstFrame: WidgetsBinding.instance.waitUntilFirstFrameRasterized,
+    ));
+  }
 }
 
 /// Main application widget for ElyaNotes.

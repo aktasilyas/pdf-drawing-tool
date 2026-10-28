@@ -4,7 +4,7 @@ import 'package:example_app/features/documents/data/datasources/document_local_d
 import 'package:example_app/features/documents/domain/repositories/document_repository.dart'
     show trashRetention;
 
-/// Bulk trash removal of [DocumentRepositoryImpl] (empty and retention purge).
+/// Bulk trash removal and orphaned-file sweep of [DocumentRepositoryImpl].
 mixin DocumentTrashPurge {
   DocumentLocalDatasource get localDatasource;
 
@@ -46,6 +46,22 @@ mixin DocumentTrashPurge {
       }
       return purged;
     });
+  }
+
+  /// Not run in [guard]'s transaction: the sweep reads row by row and does
+  /// file I/O, and must never hold back editor autosaves.
+  Future<Either<Failure, int>> sweepOrphanedFiles({
+    required DateTime olderThan,
+  }) async {
+    try {
+      return Right(
+        await localDatasource.sweepOrphanedFiles(olderThan: olderThan),
+      );
+    } on CacheException catch (e) {
+      return Left(CacheFailure(e.message));
+    } catch (e) {
+      return Left(CacheFailure('Failed to sweep orphaned files: $e'));
+    }
   }
 
   /// Deletes [id]; a failure is logged so one bad document never stops a bulk run.
