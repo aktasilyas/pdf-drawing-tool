@@ -99,7 +99,8 @@ void main() {
     expect(saved.isRight(), isTrue);
 
     final loaded = await LoadDocumentUseCase(repository)('doc');
-    final page = loaded.getOrElse(() => throw StateError('load failed')).pages[0];
+    final page =
+        loaded.getOrElse(() => throw StateError('load failed')).pages[0];
 
     expect(page.isCover, isTrue);
     final layer = page.layers.single;
