@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/documents.dart';
 import 'package:example_app/features/editor/domain/usecases/document_json_slicer.dart';
+import 'package:example_app/features/editor/domain/usecases/page_json_cache.dart';
 import 'package:drawing_core/drawing_core.dart';
 
 @injectable
@@ -11,10 +12,15 @@ class SaveDocumentUseCase {
 
   final DocumentJsonSlicer _slicer;
 
+  /// Encoded page JSON of the editor session this instance lives in.
+  final PageJsonCache _pageCache;
+
   SaveDocumentUseCase(
     this._repository, {
     DocumentJsonSlicer slicer = const DocumentJsonSlicer(),
-  }) : _slicer = slicer;
+    PageJsonCache? pageCache,
+  })  : _slicer = slicer,
+        _pageCache = pageCache ?? PageJsonCache();
 
   /// Saves run strictly one after another: slicing yields to the event loop,
   /// so a slow save of an older large document must not reach the datasource
@@ -29,9 +35,12 @@ class SaveDocumentUseCase {
 
   Future<Either<Failure, void>> _save(DrawingDocument document) async {
     try {
-      // 1. Clean cover pages (remove drawings from cover pages)
+      _pageCache.retainFor(document.id);
+
+      // 1. Clean cover pages (remove drawings from cover pages). A cover
+      // without drawings keeps its identity so its cached JSON stays valid.
       final cleanedPages = document.pages.map((page) {
-        if (page.isCover) {
+        if (page.isCover && !page.isEmpty) {
           return page.clearDrawings();
         }
         return page;
@@ -45,7 +54,7 @@ class SaveDocumentUseCase {
 
       // 2. Serialize document to JSON
       // Large documents are converted page by page, yielding to frames.
-      final content = await _slicer.toJson(cleanedDocument);
+      final content = await _slicer.toJson(cleanedDocument, cache: _pageCache);
 
       // 3. Extract coverId from cover page for metadata sync
       final coverPage = document.pages.where((p) => p.isCover).firstOrNull;

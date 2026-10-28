@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:isolate';
 
 import 'package:drawing_core/drawing_core.dart';
+import 'package:example_app/features/documents/domain/entities/encoded_json.dart';
 
 /// JSON codec for document content rows, built so large notebooks do not
 /// block UI frames. Small payloads are handled in one go.
@@ -49,10 +50,16 @@ class DocumentContentCodec {
   /// Same output as `jsonEncode(content)`.
   Future<String> encode(Map<String, dynamic> content) async {
     final limit = encodeSliceWeight;
-    if (limit == null || contentWeight(content) < limit) {
+    if (limit == null ||
+        (!_hasEncodedPages(content) && contentWeight(content) < limit)) {
       return jsonEncode(content);
     }
     return _encodeInSlices(content);
+  }
+
+  static bool _hasEncodedPages(Map<String, dynamic> content) {
+    final pages = content['pages'];
+    return pages is List && pages.any((p) => p is EncodedJson);
   }
 
   Future<String> _encodeInSlices(Map<String, dynamic> content) async {
@@ -72,7 +79,8 @@ class DocumentContentCodec {
       out.write('[');
       for (var i = 0; i < pages.length; i++) {
         if (i > 0) out.write(',');
-        out.write(jsonEncode(pages[i]));
+        final page = pages[i];
+        out.write(page is EncodedJson ? page.text : jsonEncode(page));
         if (slice.elapsed >= sliceBudget) {
           // A timer, not a microtask, so frames can run in between.
           await Future<void>.delayed(Duration.zero);

@@ -1,6 +1,7 @@
 // Domain
 export 'domain/usecases/document_json_slicer.dart';
 export 'domain/usecases/load_document_usecase.dart';
+export 'domain/usecases/page_json_cache.dart';
 export 'domain/usecases/save_document_usecase.dart';
 
 // Presentation

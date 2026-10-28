@@ -46,6 +46,30 @@ void main() {
       expect(await codec.encode(large), jsonEncode(large));
     });
 
+    test('EncodedJson pages encode exactly like plain maps', () async {
+      const codec = DocumentContentCodec();
+      for (final plain in [small, large]) {
+        final pages = plain['pages'] as List;
+        final pre = {
+          ...plain,
+          'pages': [for (final p in pages) EncodedJson(jsonEncode(p))],
+        };
+        expect(await codec.encode(pre), jsonEncode(plain));
+      }
+    });
+
+    test('jsonEncode of a map holding EncodedJson matches plain output', () {
+      final page = (small['pages'] as List).first;
+      expect(
+        jsonEncode({
+          'pages': [EncodedJson(jsonEncode(page))],
+        }),
+        jsonEncode({
+          'pages': [page],
+        }),
+      );
+    });
+
     test('sliced encode yields between pages and keeps the output', () async {
       const codec = DocumentContentCodec(sliceBudget: Duration.zero);
       var ticks = 0;
