@@ -4,6 +4,7 @@ import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
 import 'package:example_app/features/documents/domain/entities/document_sort.dart';
 import 'package:example_app/features/documents/domain/entities/folder.dart';
+import 'package:example_app/features/documents/domain/entities/library_text.dart';
 import 'package:example_app/features/documents/domain/entities/trashed_page.dart';
 import 'package:example_app/features/documents/domain/entities/view_mode.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
@@ -125,17 +126,14 @@ class _DocumentsWithFolders extends ConsumerWidget {
             final filteredDocs = searchQuery.isEmpty
                 ? documents
                 : documents
-                    .where((doc) => doc.title
-                        .toLowerCase()
-                        .contains(searchQuery.toLowerCase()))
+                    .where((doc) => matchesSearch(doc.title, searchQuery))
                     .toList();
             // Filter folders by parent
             var filteredFolders =
                 folders.where((f) => f.parentId == parentFolderId).toList();
             if (searchQuery.isNotEmpty) {
               filteredFolders = filteredFolders
-                  .where((f) =>
-                      f.name.toLowerCase().contains(searchQuery.toLowerCase()))
+                  .where((f) => matchesSearch(f.name, searchQuery))
                   .toList();
             }
             // Empty states

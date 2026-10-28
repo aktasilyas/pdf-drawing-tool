@@ -230,6 +230,29 @@ void main() {
           (documents) => expect(documents.length, 2),
         );
       });
+
+      test('folds I/İ the Turkish way (#406)', () async {
+        DocumentModel model(String id, String title) => DocumentModel(
+              id: id,
+              title: title,
+              templateId: 'blank',
+              createdAt: DateTime(2024, 1, 1),
+              updatedAt: DateTime(2024, 1, 1),
+            );
+        when(() => mockDatasource.getAllDocuments()).thenAnswer(
+          (_) async => [model('a', 'İş Notları'), model('b', 'IŞIK')],
+        );
+
+        Future<List<String>> ids(String query) async =>
+            (await repository.search(query)).fold(
+              (_) => fail('Should return documents'),
+              (documents) => [for (final d in documents) d.id],
+            );
+
+        expect(await ids('iş'), ['a']);
+        expect(await ids('ışık'), ['b']);
+        expect(await ids('IŞIK'), ['b']);
+      });
     });
 
     group('moveToTrash', () {

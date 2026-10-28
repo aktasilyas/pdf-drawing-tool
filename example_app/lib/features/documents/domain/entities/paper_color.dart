@@ -7,6 +7,8 @@
 /// in `PaperColorL10n` (presentation/l10n/library_labels.dart).
 library;
 
+import 'package:example_app/features/documents/domain/entities/library_text.dart';
+
 enum PaperColor {
   white(0xFFFFFFFF, 'Beyaz kağıt'),
   black(0xFF1A1A1A, 'Siyah kağıt'),
@@ -70,8 +72,7 @@ enum PaperColor {
 
   /// Lower-case (Turkish-aware for I/İ), trimmed, diacritics folded.
   static String _fold(String value) {
-    final lower =
-        value.trim().replaceAll('I', 'ı').replaceAll('İ', 'i').toLowerCase();
+    final lower = foldForSearch(value);
     final buffer = StringBuffer();
     for (final rune in lower.runes) {
       final char = String.fromCharCode(rune);
