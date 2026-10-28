@@ -1,6 +1,6 @@
 import 'package:drawing_core/drawing_core.dart' show TemplateRegistry;
 import 'package:drawing_ui/drawing_ui.dart'
-    show currentPageIndexProvider, documentProvider;
+    show PageOptionsPanel, currentPageIndexProvider, documentProvider;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -64,7 +64,12 @@ class PagesRobot {
     final s = tester.drawingStrings;
     final before = pageIds().length;
     await tester.tapAndWait(find.byTooltip(s.toolbar.more).hitTestable());
-    await _tapVisible(find.text(s.toolbar.addPage));
+    // The phone drawer keeps its own "add page" cell mounted off-screen,
+    // and in English both read "Add page": look inside the menu only.
+    await _tapVisible(find.descendant(
+      of: find.byType(PageOptionsPanel),
+      matching: find.text(s.toolbar.addPage),
+    ));
     await _tapVisible(
       find.text(s.templates.templateName(TemplateRegistry.blank)),
     );
