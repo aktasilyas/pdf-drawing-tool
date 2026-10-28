@@ -92,6 +92,9 @@ class AppPageStrings extends PageStrings {
   String get cannotUndo => _l10n.editorPageCannotUndo;
 
   @override
+  String get backgroundReplaced => _l10n.editorPageBackgroundReplaced;
+
+  @override
   String get goToPage => _l10n.editorPageGoToPage;
 
   @override

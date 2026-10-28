@@ -441,6 +441,7 @@
   "editorPagePageAdded": "Sayfa eklendi",
   "editorPageCannotUndo": "Geri alınamadı",
   "editorPagePageMoved": "Sayfa taşındı",
+  "editorPageBackgroundReplaced": "Sayfa arka planı değiştirildi",
   "editorPageGoToPage": "Sayfaya Git",
   "editorPageGo": "Git",
   "editorPageListPageOf": "Sayfa {page} / {count}",

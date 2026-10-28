@@ -54,8 +54,8 @@ class PageStructureChange {
   /// Ids of the pages the change inserted (empty for a move).
   final List<String> insertedPageIds;
 
-  /// Strokes, shapes and texts each inserted page held when it was inserted
-  /// (a duplicate or pasted page starts with some), by page id.
+  /// Strokes, shapes and texts each inserted page held when it was inserted,
+  /// by page id (a duplicate or pasted page starts with some).
   final Map<String, int> insertedPageInk;
 }
 
@@ -93,7 +93,8 @@ class PageStructureActions {
     final doc = _ref.read(documentProvider);
     final change = _changeFrom(
       doc,
-      insertedPages: pages,
+      insertedPageIds: [for (final p in pages) p.id],
+      insertedPageInk: {for (final p in pages) p.id: _inkCount(p)},
     );
     final at = index.clamp(0, doc.pages.length);
     final list = List<Page>.from(doc.pages)..insertAll(at, pages);
@@ -119,23 +120,25 @@ class PageStructureActions {
     if (pages == null) return false;
     final doc = _ref.read(documentProvider);
     final trash = _ref.read(pageTrashCallbackProvider);
-    // Inserted pages that gained content since the insert, with their index.
-    final withInk = [
+    // Inserted pages that gained content since the insert, with their index
+    // before the revert.
+    final gained = [
       for (final id in change.insertedPageIds)
-        if (trash != null &&
-            _inkCount(pages[id]!) > (change.insertedPageInk[id] ?? 0))
-          (doc.pages.indexOf(pages[id]!), pages[id]!),
+        if (_inkCount(pages[id]!) > (change.insertedPageInk[id] ?? 0))
+          (index: doc.pages.indexOf(pages[id]!), page: pages[id]!),
     ];
 
-    // Revert first (synchronously) so a page is never in the document and
-    // the trash at the same time, whatever happens during the trash calls.
+    // Revert first (synchronously) so the page is never in the document and
+    // the trash at the same time, whatever happens during the trash call.
     _apply(doc.replacePages(
       [for (final id in change.previousOrder) pages[id]!],
       currentPageId: change.previousCurrentId,
     ));
 
-    for (final (index, page) in withInk) {
-      await trash!(index, page);
+    if (trash != null) {
+      for (final g in gained) {
+        await trash(g.index, g.page);
+      }
     }
     return true;
   }
@@ -209,14 +212,15 @@ class PageStructureActions {
 
   PageStructureChange _changeFrom(
     DrawingDocument doc, {
-    List<Page> insertedPages = const [],
+    List<String> insertedPageIds = const [],
+    Map<String, int> insertedPageInk = const {},
   }) =>
       PageStructureChange(
         documentId: doc.id,
         previousOrder: [for (final p in doc.pages) p.id],
         previousCurrentId: doc.pages[doc.currentPageIndex].id,
-        insertedPageIds: [for (final p in insertedPages) p.id],
-        insertedPageInk: {for (final p in insertedPages) p.id: _inkCount(p)},
+        insertedPageIds: insertedPageIds,
+        insertedPageInk: insertedPageInk,
       );
 
   void _apply(DrawingDocument doc) {
