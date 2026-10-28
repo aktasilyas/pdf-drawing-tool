@@ -16,8 +16,10 @@ Future<String> storeImportedImage(
   final dir = Directory('$documentsRoot/${PdfPathResolver.imagesDir}');
   await dir.create(recursive: true);
 
-  final dot = sourcePath.lastIndexOf('.');
-  final ext = dot < 0 ? 'jpg' : sourcePath.substring(dot + 1);
+  final name = sourcePath.split(RegExp(r'[\\/]')).last;
+  final dot = name.lastIndexOf('.');
+  final ext =
+      dot < 0 || dot == name.length - 1 ? 'jpg' : name.substring(dot + 1);
   final dest = '${dir.path}/${DateTime.now().microsecondsSinceEpoch}.$ext';
   try {
     await File(sourcePath).copy(dest);

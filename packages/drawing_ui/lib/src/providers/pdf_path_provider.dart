@@ -3,7 +3,8 @@ import 'dart:io';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Resolves stored (container-relative or legacy absolute) PDF paths to the
+/// Resolves stored (container-relative or legacy absolute) PDF and
+/// inserted-image paths to the
 /// file to open. The host app overrides this with the app documents root;
 /// the default leaves paths unchanged.
 final pdfPathResolverProvider =
