@@ -1,5 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
 import 'package:drawing_core/drawing_core.dart'
     show DrawingDocument, PageBackground, PdfPathResolver;
 import 'package:drift/drift.dart';
@@ -8,6 +6,8 @@ import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/data/datasources/document_content_codec.dart';
 import 'package:example_app/features/documents/data/datasources/document_content_write_queue.dart';
 import 'package:example_app/features/documents/data/datasources/document_row_mapper.dart';
+import 'package:example_app/features/documents/data/datasources/image_background_loader.dart';
+import 'package:example_app/features/documents/data/datasources/managed_file_cleanup.dart';
 import 'package:example_app/features/documents/data/models/document_model.dart';
 
 abstract class DocumentLocalDatasource {
@@ -33,9 +33,9 @@ abstract class DocumentLocalDatasource {
   /// Whether a content row exists for [id] (without decoding it).
   Future<bool> hasDocumentContent(String id);
 
-  /// Deletes the copied PDF files among [paths] that no document content or
-  /// trashed page references any more.
-  Future<void> deleteUnreferencedPdfs(Iterable<String> paths);
+  /// Deletes the managed files (copied PDFs, imported images) among [paths]
+  /// that no document content or trashed page references any more.
+  Future<void> deleteUnreferencedFiles(Iterable<String> paths);
 }
 
 /// Drift-backed document metadata and content storage.
@@ -44,6 +44,7 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
   final AppDatabase _db;
   final DocumentContentCodec _codec;
   final PdfPathResolver _pdfPaths;
+  final ManagedFileCleanup _cleanup;
 
   /// Content writes land in call order per document (a stale autosave never
   /// overwrites a newer save).
@@ -54,7 +55,8 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
     DocumentContentCodec codec = const DocumentContentCodec(),
     PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
   })  : _codec = codec,
-        _pdfPaths = pdfPaths;
+        _pdfPaths = pdfPaths,
+        _cleanup = ManagedFileCleanup(_db, codec, pdfPaths);
 
   /// Root level (folderId null) or a single folder.
   SimpleSelectStatement<$DocumentsTable, DocumentRow> _folderQuery(
@@ -128,7 +130,7 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
   Future<void> deleteDocument(String id) async {
     try {
       final orphans = await _db.transaction(() async {
-        final paths = await _pdfPathsOf(id);
+        final paths = await _cleanup.pathsOfDocument(id);
         await (_db.delete(_db.trashedPages)
               ..where((t) => t.sourceDocumentId.equals(id)))
             .go();
@@ -136,78 +138,23 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
               ..where((t) => t.documentId.equals(id)))
             .go();
         await (_db.delete(_db.documents)..where((t) => t.id.equals(id))).go();
-        return [
-          for (final path in paths)
-            if (!await _isPdfReferenced(path)) path,
-        ];
+        return _cleanup.unreferenced(paths);
       });
-      for (final path in orphans) {
-        await _deleteFile(path);
-      }
+      await _cleanup.deleteFiles(orphans);
     } catch (e) {
       throw CacheException('Failed to delete document: $e');
     }
   }
 
-  /// Copied PDF files the stored pages of [id] point to.
-  Future<Set<String>> _pdfPathsOf(String id) async {
-    final row = await (_db.select(_db.documentContents)
-          ..where((t) => t.documentId.equals(id)))
-        .getSingleOrNull();
-    if (row == null) return {};
-    final Object? pages;
-    try {
-      pages = (await _codec.decode(row.data))['pages'];
-    } catch (e) {
-      // Undecodable content must not block deletion; only PDF cleanup is lost.
-      logger.w('Skipping PDF cleanup, content of $id is corrupt: $e');
-      return {};
-    }
-    if (pages is! List) return {};
-    return {
-      for (final page in pages)
-        if (page is Map && page['background'] is Map)
-          if ((page['background'] as Map)['pdfFilePath'] case final String p) p,
-    };
-  }
-
-  /// Whether any remaining document content or trashed page mentions [path].
-  Future<bool> _isPdfReferenced(String path) async {
-    final needle = json.encode(path);
-    final content = await (_db.select(_db.documentContents)
-          ..where((t) => t.data.contains(needle))
-          ..limit(1))
-        .get();
-    if (content.isNotEmpty) return true;
-    final pages = await (_db.select(_db.trashedPages)
-          ..where((t) => t.pageData.contains(needle))
-          ..limit(1))
-        .get();
-    return pages.isNotEmpty;
-  }
-
   @override
-  Future<void> deleteUnreferencedPdfs(Iterable<String> paths) async {
-    final orphans = <String>[];
+  Future<void> deleteUnreferencedFiles(Iterable<String> paths) async {
+    final List<String> orphans;
     try {
-      for (final path in paths.toSet()) {
-        if (!await _isPdfReferenced(path)) orphans.add(path);
-      }
+      orphans = await _cleanup.unreferenced(paths);
     } catch (e) {
-      throw CacheException('Failed to check PDF references: $e');
+      throw CacheException('Failed to check file references: $e');
     }
-    for (final path in orphans) {
-      await _deleteFile(path);
-    }
-  }
-
-  Future<void> _deleteFile(String path) async {
-    try {
-      final file = File(_pdfPaths.resolve(path));
-      if (await file.exists()) await file.delete();
-    } catch (e) {
-      logger.w('Could not delete PDF copy $path: $e');
-    }
+    await _cleanup.deleteFiles(orphans);
   }
 
   @override
@@ -235,7 +182,8 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
     final data = await _contentData(id);
     if (data == null) return null;
     try {
-      return await _codec.decodeDocument(data);
+      final doc = await _codec.decodeDocument(data);
+      return await loadImageBackgrounds(doc, _pdfPaths);
     } catch (e) {
       throw CacheException('Document corrupted: $e');
     }
@@ -247,7 +195,11 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
     if (data == null) return null;
     try {
       final json = await _codec.decodeFirstPageBackground(data);
-      return json == null ? null : PageBackground.fromJson(json);
+      if (json == null) return null;
+      return await loadImageBackground(
+        PageBackground.fromJson(json),
+        _pdfPaths,
+      );
     } catch (e) {
       throw CacheException('Document corrupted: $e');
     }

@@ -1831,9 +1831,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get libraryMoveToFolderTitle => 'Klasöre Taşı';
 
   @override
-  String libraryFoldersLoadFailed(String error) {
-    return 'Klasörler yüklenemedi: $error';
-  }
+  String get libraryFoldersLoadFailed => 'Klasörler yüklenemedi';
 
   @override
   String get libraryFolderNameEmpty => 'Klasör adı boş olamaz';

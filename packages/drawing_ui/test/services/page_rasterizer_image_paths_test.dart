@@ -96,4 +96,26 @@ void main() {
       expect(await _centreIsRed(result.bytes, 400, 400), isFalse);
     });
   });
+
+  testWidgets('PageRasterizer draws an image page from imageFilePath alone',
+      (tester) async {
+    await tester.runAsync(() async {
+      await writeImage();
+      final page = Page.create(
+        index: 0,
+        size: PageSize.a4Portrait,
+        background: const PageBackground(
+          type: BackgroundType.pdf,
+          pdfPageIndex: 1,
+          imageFilePath: 'elyanotes_images/a.png',
+        ),
+      );
+      final result = await PagePngExporter.export(
+        page,
+        infiniteCanvas: false,
+        pdfPaths: PdfPathResolver(root.path),
+      );
+      expect(await _centreIsRed(result.bytes, 400, 400), isTrue);
+    });
+  });
 }
