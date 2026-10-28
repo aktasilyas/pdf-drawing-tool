@@ -802,4 +802,295 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get editorToolbarSettingsReset => 'Reset to default';
+
+  @override
+  String get editorToolbarColorSetBasic => 'Basic';
+
+  @override
+  String get editorToolbarColorSetNeon => 'Neon';
+
+  @override
+  String get editorPanelClose => 'Close';
+
+  @override
+  String get editorPanelThickness => 'Thickness';
+
+  @override
+  String get editorPanelPressureSensitivity => 'Pressure sensitivity';
+
+  @override
+  String get editorPanelStabilization => 'Stroke stabilization';
+
+  @override
+  String get editorPanelPenType => 'Pen type';
+
+  @override
+  String get editorPanelGlow => 'Glow';
+
+  @override
+  String get editorPanelStraightLine => 'Straight line';
+
+  @override
+  String get editorPanelSize => 'Size';
+
+  @override
+  String get editorPanelEraserPixel => 'Pixel eraser';
+
+  @override
+  String get editorPanelEraserPressure => 'Pressure sensitivity';
+
+  @override
+  String get editorPanelEraserHighlighterOnly => 'Erase highlighter only';
+
+  @override
+  String get editorPanelEraserAutoLift => 'Auto-deselect';
+
+  @override
+  String get editorPanelClearPage => 'Clear page';
+
+  @override
+  String get editorPanelClearPageTitle => 'Clear page?';
+
+  @override
+  String get editorPanelClearPageMessage =>
+      'This erases everything on this page. This can\'t be undone.';
+
+  @override
+  String get editorPanelCancel => 'Cancel';
+
+  @override
+  String get editorPanelClearPageConfirm => 'Clear';
+
+  @override
+  String get editorPanelLaserDot => 'Laser dot';
+
+  @override
+  String get editorPanelLaserLine => 'Laser line';
+
+  @override
+  String get editorPanelLaserHollow => 'Hollow laser line';
+
+  @override
+  String get editorPanelLaserRainbow => 'Rainbow laser';
+
+  @override
+  String get editorPanelLaserDuration => 'Duration';
+
+  @override
+  String get editorPanelTextTitle => 'Text tool';
+
+  @override
+  String get editorPanelTextHint => 'Tap the canvas to add a text box.';
+
+  @override
+  String get editorPanelTextColor => 'Color';
+
+  @override
+  String get editorPanelTextStyle => 'Style';
+
+  @override
+  String get editorPanelAddNote => 'Add note';
+
+  @override
+  String get editorPanelColorHex => 'Hex';
+
+  @override
+  String get editorPanelColorRed => 'Red';
+
+  @override
+  String get editorPanelColorGreen => 'Green';
+
+  @override
+  String get editorPanelColorBlue => 'Blue';
+
+  @override
+  String get editorPanelColorCancel => 'Cancel';
+
+  @override
+  String get editorPanelColorDone => 'Done';
+
+  @override
+  String get editorPanelColorSwatches => 'Swatches';
+
+  @override
+  String get editorPanelColorSpectrum => 'Spectrum';
+
+  @override
+  String get editorCatalogShapesTitle => 'Shape';
+
+  @override
+  String get editorCatalogStrokeWidth => 'Stroke width';
+
+  @override
+  String get editorCatalogStrokeColor => 'Stroke color';
+
+  @override
+  String get editorCatalogFillShape => 'Fill shape';
+
+  @override
+  String get editorCatalogFillColor => 'Fill color';
+
+  @override
+  String get editorCatalogShapeLine => 'Line';
+
+  @override
+  String get editorCatalogShapeArrow => 'Arrow';
+
+  @override
+  String get editorCatalogShapeRectangle => 'Rectangle';
+
+  @override
+  String get editorCatalogShapeEllipse => 'Ellipse';
+
+  @override
+  String get editorCatalogShapeTriangle => 'Triangle';
+
+  @override
+  String get editorCatalogShapeDiamond => 'Diamond';
+
+  @override
+  String get editorCatalogShapeStar => 'Star';
+
+  @override
+  String get editorCatalogShapePentagon => 'Pentagon';
+
+  @override
+  String get editorCatalogShapeHexagon => 'Hexagon';
+
+  @override
+  String get editorCatalogShapePlus => 'Plus';
+
+  @override
+  String get editorCatalogStickersTitle => 'Stickers';
+
+  @override
+  String get editorCatalogAddSticker => 'Add sticker';
+
+  @override
+  String get editorCatalogStickerEmoji => 'Emoji';
+
+  @override
+  String get editorCatalogStickerAnimals => 'Animals';
+
+  @override
+  String get editorCatalogStickerFood => 'Food';
+
+  @override
+  String get editorCatalogStickerTravel => 'Travel';
+
+  @override
+  String get editorCatalogStickerObjects => 'Objects';
+
+  @override
+  String get editorCatalogStickerSymbols => 'Symbols';
+
+  @override
+  String get editorCatalogStickerHands => 'Hands';
+
+  @override
+  String get editorCatalogStickerNature => 'Nature';
+
+  @override
+  String get editorSelectionLassoFreeform => 'Freeform';
+
+  @override
+  String get editorSelectionLassoRectangle => 'Rectangle';
+
+  @override
+  String get editorSelectionLassoSelectable => 'Selectable';
+
+  @override
+  String get editorSelectionTypeHandwriting => 'Handwriting';
+
+  @override
+  String get editorSelectionTypeShape => 'Shapes';
+
+  @override
+  String get editorSelectionTypeImage => 'Images';
+
+  @override
+  String get editorSelectionTypeHighlighter => 'Highlighter';
+
+  @override
+  String get editorSelectionTypeText => 'Text';
+
+  @override
+  String get editorSelectionTypeTape => 'Tape';
+
+  @override
+  String get editorSelectionTypeLink => 'Links';
+
+  @override
+  String get editorSelectionTypeLabel => 'Labels';
+
+  @override
+  String get editorSelectionAi => 'AI assistant';
+
+  @override
+  String get editorSelectionColor => 'Color';
+
+  @override
+  String get editorSelectionScreenshot => 'Screenshot';
+
+  @override
+  String get editorSelectionCut => 'Cut';
+
+  @override
+  String get editorSelectionDuplicate => 'Duplicate';
+
+  @override
+  String get editorSelectionDelete => 'Delete';
+
+  @override
+  String get editorSelectionBringToFront => 'Bring to front';
+
+  @override
+  String get editorSelectionSendToBack => 'Send to back';
+
+  @override
+  String get editorSelectionCopy => 'Copy';
+
+  @override
+  String get editorSelectionPaste => 'Paste';
+
+  @override
+  String get editorSelectionAskAi => 'Ask AI';
+
+  @override
+  String get editorSelectionTakeScreenshot => 'Take screenshot';
+
+  @override
+  String get editorSelectionMore => 'More';
+
+  @override
+  String get editorSelectionSave => 'Save';
+
+  @override
+  String get editorSelectionScreenshotCaptureFailed =>
+      'Couldn\'t create the screenshot';
+
+  @override
+  String get editorSelectionScreenshotSavedAndCopied =>
+      'Screenshot saved to the gallery and copied to the clipboard';
+
+  @override
+  String get editorSelectionScreenshotSaved =>
+      'Screenshot saved to the gallery';
+
+  @override
+  String get editorSelectionScreenshotCopied =>
+      'Screenshot copied to the clipboard';
+
+  @override
+  String get editorSelectionScreenshotSaveFailed =>
+      'Couldn\'t save the screenshot';
+
+  @override
+  String get editorSelectionContextEdit => 'Edit';
+
+  @override
+  String get editorSelectionContextStyle => 'Style';
+
+  @override
+  String get editorSelectionContextMove => 'Move';
 }
