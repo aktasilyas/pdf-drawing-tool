@@ -1667,6 +1667,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get editorErrorPdfFileAccess => 'PDF dosyasına erişilemedi.';
 
   @override
+  String get editorErrorPdfStorageFull =>
+      'PDF içe aktarmak için yeterli depolama alanı yok. Yer açıp tekrar deneyin.';
+
+  @override
   String get editorErrorPdfOpenFailed => 'PDF açılamadı. Dosya bozuk olabilir.';
 
   @override

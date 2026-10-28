@@ -1687,6 +1687,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editorErrorPdfFileAccess => 'Couldn\'t access the PDF file.';
 
   @override
+  String get editorErrorPdfStorageFull =>
+      'Not enough storage to import the PDF. Free up space and try again.';
+
+  @override
   String get editorErrorPdfOpenFailed =>
       'Couldn\'t open the PDF. The file may be damaged.';
 

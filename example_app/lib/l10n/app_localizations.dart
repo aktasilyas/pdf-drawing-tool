@@ -3074,6 +3074,12 @@ abstract class AppLocalizations {
   /// **'Couldn\'t access the PDF file.'**
   String get editorErrorPdfFileAccess;
 
+  /// No description provided for @editorErrorPdfStorageFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough storage to import the PDF. Free up space and try again.'**
+  String get editorErrorPdfStorageFull;
+
   /// No description provided for @editorErrorPdfOpenFailed.
   ///
   /// In en, this message translates to:
