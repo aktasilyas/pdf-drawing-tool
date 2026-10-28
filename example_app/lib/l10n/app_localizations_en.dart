@@ -802,4 +802,58 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get editorToolbarSettingsReset => 'Reset to default';
+
+  @override
+  String get editorDocumentNameLabel => 'Document name';
+
+  @override
+  String get editorMoveToTrashTitle => 'Move to trash';
+
+  @override
+  String get editorMoveToTrashMessage =>
+      'This document will be moved to the trash. You can restore it later.';
+
+  @override
+  String get editorLoadErrorTitle => 'Couldn\'t open the document';
+
+  @override
+  String get editorLoadErrorMessage =>
+      'The document wasn\'t found or couldn\'t be read.';
+
+  @override
+  String get editorLoadErrorBack => 'Go back';
+
+  @override
+  String get editorSaveFailedMessage =>
+      'Couldn\'t save. Your changes haven\'t been saved yet.';
+
+  @override
+  String get startupErrorTitle => 'The app couldn\'t start';
+
+  @override
+  String get startupErrorMessage =>
+      'Your notes are safe, nothing was deleted. Something went wrong while opening your data. Try again; if the problem persists, close the app and reopen it.';
+
+  @override
+  String get commonPasswordLabel => 'Password';
+
+  @override
+  String get commonSelectItemTitle => 'Select an item';
+
+  @override
+  String get commonSelectItemDescription =>
+      'Select an item on the left to see its details';
+
+  @override
+  String get commonUnderConstruction =>
+      'This screen is still under construction';
+
+  @override
+  String get routerForgotPasswordTitle => 'Forgot password';
+
+  @override
+  String get routerProfileTitle => 'Profile';
+
+  @override
+  String get routerSubscriptionTitle => 'Subscription';
 }

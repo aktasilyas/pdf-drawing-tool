@@ -28,7 +28,11 @@ void main() {
       addTearDown(tester.view.reset);
 
       await tester.pumpWidget(
-        StartupErrorApp(onRetry: () {}, themeMode: mode),
+        StartupErrorApp(
+          onRetry: () {},
+          themeMode: mode,
+          locale: const Locale('tr'),
+        ),
       );
       await tester.pumpAndSettle();
 

@@ -1423,6 +1423,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reset to default'**
   String get editorToolbarSettingsReset;
+
+  /// No description provided for @editorDocumentNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Document name'**
+  String get editorDocumentNameLabel;
+
+  /// No description provided for @editorMoveToTrashTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to trash'**
+  String get editorMoveToTrashTitle;
+
+  /// No description provided for @editorMoveToTrashMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This document will be moved to the trash. You can restore it later.'**
+  String get editorMoveToTrashMessage;
+
+  /// No description provided for @editorLoadErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open the document'**
+  String get editorLoadErrorTitle;
+
+  /// No description provided for @editorLoadErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The document wasn\'t found or couldn\'t be read.'**
+  String get editorLoadErrorMessage;
+
+  /// No description provided for @editorLoadErrorBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Go back'**
+  String get editorLoadErrorBack;
+
+  /// No description provided for @editorSaveFailedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save. Your changes haven\'t been saved yet.'**
+  String get editorSaveFailedMessage;
+
+  /// No description provided for @startupErrorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'The app couldn\'t start'**
+  String get startupErrorTitle;
+
+  /// No description provided for @startupErrorMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Your notes are safe, nothing was deleted. Something went wrong while opening your data. Try again; if the problem persists, close the app and reopen it.'**
+  String get startupErrorMessage;
+
+  /// No description provided for @commonPasswordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get commonPasswordLabel;
+
+  /// No description provided for @commonSelectItemTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select an item'**
+  String get commonSelectItemTitle;
+
+  /// No description provided for @commonSelectItemDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Select an item on the left to see its details'**
+  String get commonSelectItemDescription;
+
+  /// No description provided for @commonUnderConstruction.
+  ///
+  /// In en, this message translates to:
+  /// **'This screen is still under construction'**
+  String get commonUnderConstruction;
+
+  /// No description provided for @routerForgotPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password'**
+  String get routerForgotPasswordTitle;
+
+  /// No description provided for @routerProfileTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get routerProfileTitle;
+
+  /// No description provided for @routerSubscriptionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription'**
+  String get routerSubscriptionTitle;
 }
 
 class _AppLocalizationsDelegate
