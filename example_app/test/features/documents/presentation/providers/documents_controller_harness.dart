@@ -71,7 +71,7 @@ class DocumentsHarness {
     });
     when(() => pageTrash.getTrashedPages()).thenAnswer((_) async {
       _hit('trashedPages');
-      return [];
+      return const Right([]);
     });
     container = ProviderContainer(overrides: [
       documentRepositoryProvider.overrideWithValue(repo),

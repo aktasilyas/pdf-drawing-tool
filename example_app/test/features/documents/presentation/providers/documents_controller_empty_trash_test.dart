@@ -16,7 +16,8 @@ void main() {
   test('emptyTrash deletes documents and pages and refreshes the trash',
       () async {
     when(() => h.repo.emptyTrash()).thenAnswer((_) async => const Right(2));
-    when(() => h.pageTrash.emptyTrash()).thenAnswer((_) async => 3);
+    when(() => h.pageTrash.emptyTrash())
+        .thenAnswer((_) async => const Right(3));
     late bool ok;
     final rebuilt = await h.rebuiltBy(() async {
       ok = await h.controller.emptyTrash();
@@ -30,7 +31,16 @@ void main() {
   test('emptyTrash reports a failure and returns false', () async {
     when(() => h.repo.emptyTrash())
         .thenAnswer((_) async => const Left(failure));
-    when(() => h.pageTrash.emptyTrash()).thenAnswer((_) async => 0);
+    when(() => h.pageTrash.emptyTrash())
+        .thenAnswer((_) async => const Right(0));
+    expect(await h.controller.emptyTrash(), isFalse);
+    expect(h.container.read(libraryErrorProvider), isNotNull);
+  });
+
+  test('emptyTrash reports a page trash failure and returns false', () async {
+    when(() => h.repo.emptyTrash()).thenAnswer((_) async => const Right(1));
+    when(() => h.pageTrash.emptyTrash())
+        .thenAnswer((_) async => const Left(failure));
     expect(await h.controller.emptyTrash(), isFalse);
     expect(h.container.read(libraryErrorProvider), isNotNull);
   });

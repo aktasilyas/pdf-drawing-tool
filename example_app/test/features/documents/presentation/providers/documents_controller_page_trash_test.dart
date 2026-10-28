@@ -1,3 +1,4 @@
+import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -17,7 +18,7 @@ void main() {
           documentTitle: any(named: 'documentTitle'),
           pageIndex: any(named: 'pageIndex'),
           pageData: any(named: 'pageData'),
-        )).thenAnswer((_) async => 'trashed-1');
+        )).thenAnswer((_) async => const Right('trashed-1'));
     String? trashId;
     final rebuilt = await h.rebuiltBy(() async {
       trashId = await h.controller.movePageToTrash(
@@ -57,7 +58,7 @@ void main() {
     for (final restored in [true, false]) {
       test('returns $restored and refreshes page trash + documents', () async {
         when(() => h.pageTrash.restorePageFromTrash('t1'))
-            .thenAnswer((_) async => restored);
+            .thenAnswer((_) async => Right(restored));
         late bool result;
         final rebuilt = await h.rebuiltBy(() async {
           result = await h.controller.restorePageFromTrash('t1');
@@ -70,7 +71,7 @@ void main() {
 
   test('permanentlyDeletePage removes it and refreshes page trash', () async {
     when(() => h.pageTrash.permanentlyDeletePage('t1'))
-        .thenAnswer((_) async {});
+        .thenAnswer((_) async => const Right(null));
     final rebuilt = await h.rebuiltBy(() async {
       await h.controller.permanentlyDeletePage('t1');
     });
@@ -80,7 +81,7 @@ void main() {
 
   test('trashedPageDocumentExists forwards to the repository', () async {
     when(() => h.pageTrash.documentExists('doc-1'))
-        .thenAnswer((_) async => true);
+        .thenAnswer((_) async => const Right(true));
     late bool exists;
     final rebuilt = await h.rebuiltBy(() async {
       exists = await h.controller.trashedPageDocumentExists('doc-1');

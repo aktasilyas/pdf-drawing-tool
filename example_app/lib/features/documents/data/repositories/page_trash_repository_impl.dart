@@ -1,6 +1,8 @@
 import 'dart:math';
+import 'package:dartz/dartz.dart';
+import 'package:uuid/uuid.dart';
 import 'package:example_app/core/core.dart'
-    show CacheException, LocalTransactionRunner;
+    show CacheException, CacheFailure, Failure, LocalTransactionRunner;
 import 'package:example_app/features/documents/data/datasources/document_local_datasource.dart';
 import 'package:example_app/features/documents/data/datasources/trashed_page_local_datasource.dart';
 import 'package:example_app/features/documents/data/models/trashed_page_model.dart';
@@ -13,113 +15,158 @@ class PageTrashRepositoryImpl implements PageTrashRepository {
   final TrashedPageLocalDatasource _trashDatasource;
   final DocumentLocalDatasource _documentDatasource;
   final LocalTransactionRunner _runner;
+  final Uuid _uuid;
 
   PageTrashRepositoryImpl(
     this._trashDatasource,
     this._documentDatasource,
-    this._runner,
-  );
+    this._runner, [
+    Uuid? uuid,
+  ]) : _uuid = uuid ?? const Uuid();
 
-  @override
-  Future<List<TrashedPage>> getTrashedPages() async {
-    final models = await _trashDatasource.getTrashedPages();
-    final entities = models.map((m) => m.toEntity()).toList();
-    entities.sort((a, b) => b.deletedAt.compareTo(a.deletedAt));
-    return entities;
+  /// Runs [action] and maps errors to a [Failure].
+  Future<Either<Failure, T>> _guard<T>(
+    String what,
+    Future<T> Function() action,
+  ) async {
+    try {
+      return Right(await action());
+    } on CacheException catch (e) {
+      return Left(CacheFailure(e.message));
+    } catch (e) {
+      return Left(CacheFailure('Failed to $what: $e'));
+    }
   }
 
   @override
-  Future<String> movePageToTrash({
+  Future<Either<Failure, List<TrashedPage>>> getTrashedPages() {
+    return _guard('get trashed pages', () async {
+      final models = await _trashDatasource.getTrashedPages();
+      final entities = models.map((m) => m.toEntity()).toList();
+      entities.sort((a, b) => b.deletedAt.compareTo(a.deletedAt));
+      return entities;
+    });
+  }
+
+  @override
+  Future<Either<Failure, String>> movePageToTrash({
     required String documentId,
     required String documentTitle,
     required int pageIndex,
     required Map<String, dynamic> pageData,
-  }) async {
-    final now = DateTime.now();
-    final pageId = pageData['id'] as String? ?? 'unknown';
-    final trashId = 'trashed_page_${now.millisecondsSinceEpoch}';
-    final model = TrashedPageModel(
-      id: trashId,
-      pageId: pageId,
-      sourceDocumentId: documentId,
-      sourceDocumentTitle: documentTitle,
-      originalPageIndex: pageIndex,
-      deletedAt: now,
-      pageData: pageData,
+  }) {
+    return _guard('move page to trash', () async {
+      final model = TrashedPageModel(
+        id: 'trashed_page_${_uuid.v4()}',
+        pageId: pageData['id'] as String? ?? 'unknown',
+        sourceDocumentId: documentId,
+        sourceDocumentTitle: documentTitle,
+        originalPageIndex: pageIndex,
+        deletedAt: DateTime.now(),
+        pageData: pageData,
+      );
+      await _trashDatasource.addTrashedPage(model);
+      return model.id;
+    });
+  }
+
+  @override
+  Future<Either<Failure, bool>> restorePageFromTrash(String trashedPageId) {
+    // Content, page count and trash row change together or not at all.
+    return _guard(
+      'restore page',
+      () => _runner.run(() => _restore(trashedPageId)),
     );
-    await _trashDatasource.addTrashedPage(model);
-    return trashId;
   }
 
-  @override
-  Future<bool> restorePageFromTrash(String trashedPageId) async {
-    try {
-      // Content, page count and trash row change together or not at all.
-      return await _runner.run(() async {
-        final model = await _trashDatasource.getTrashedPage(trashedPageId);
-        if (model == null) return false;
+  Future<bool> _restore(String trashedPageId) async {
+    final model = await _trashDatasource.getTrashedPage(trashedPageId);
+    if (model == null) return false;
 
-        final content = await _documentDatasource
-            .getDocumentContent(model.sourceDocumentId);
-        if (content == null) return false;
+    final content =
+        await _documentDatasource.getDocumentContent(model.sourceDocumentId);
+    if (content == null) return false;
 
-        final pages = (content['pages'] as List).cast<Map<String, dynamic>>();
+    final pages = (content['pages'] as List).cast<Map<String, dynamic>>();
 
-        // Insert page at clamped original position
-        final insertIndex = min(model.originalPageIndex, pages.length);
-        pages.insert(insertIndex, model.pageData);
-
-        // Re-index pages
-        for (int i = 0; i < pages.length; i++) {
-          pages[i]['index'] = i;
-        }
-        content['pages'] = pages;
-
-        await _documentDatasource.saveDocumentContent(
-          model.sourceDocumentId,
-          content,
-        );
-        await _updatePageCount(model.sourceDocumentId, pages.length);
-        await _trashDatasource.removeTrashedPage(trashedPageId);
-        return true;
-      });
-    } on CacheException {
-      return false;
+    // Insert page at clamped original position, then re-index.
+    final insertIndex = min(model.originalPageIndex, pages.length);
+    pages.insert(insertIndex, model.pageData);
+    for (int i = 0; i < pages.length; i++) {
+      pages[i]['index'] = i;
     }
-  }
+    content['pages'] = pages;
 
-  @override
-  Future<void> permanentlyDeletePage(String trashedPageId) async {
+    await _documentDatasource.saveDocumentContent(
+      model.sourceDocumentId,
+      content,
+    );
+    await _updatePageCount(model.sourceDocumentId, pages.length);
     await _trashDatasource.removeTrashedPage(trashedPageId);
+    return true;
   }
 
   @override
-  Future<int> emptyTrash() async {
-    final pages = await _trashDatasource.getTrashedPages();
-    for (final page in pages) {
-      await _trashDatasource.removeTrashedPage(page.id);
-    }
-    return pages.length;
+  Future<Either<Failure, void>> permanentlyDeletePage(String trashedPageId) {
+    return _guard('delete page', () async {
+      final page = await _trashDatasource.getTrashedPage(trashedPageId);
+      if (page == null) return;
+      await _remove([page]);
+    });
   }
 
   @override
-  Future<int> purgeExpired({
+  Future<Either<Failure, int>> emptyTrash() {
+    return _guard('empty page trash', () async {
+      final pages = await _trashDatasource.getTrashedPages();
+      await _remove(pages);
+      return pages.length;
+    });
+  }
+
+  @override
+  Future<Either<Failure, int>> purgeExpired({
     required DateTime now,
     Duration retention = trashRetention,
-  }) async {
-    final cutoff = now.subtract(retention);
-    final expired = (await _trashDatasource.getTrashedPages())
-        .where((p) => p.deletedAt.isBefore(cutoff))
-        .toList();
-    for (final page in expired) {
-      await _trashDatasource.removeTrashedPage(page.id);
-    }
-    return expired.length;
+  }) {
+    return _guard('purge trashed pages', () async {
+      final cutoff = now.subtract(retention);
+      final expired = (await _trashDatasource.getTrashedPages())
+          .where((p) => p.deletedAt.isBefore(cutoff))
+          .toList();
+      await _remove(expired);
+      return expired.length;
+    });
   }
 
   @override
-  Future<bool> documentExists(String documentId) {
-    return _documentDatasource.hasDocumentContent(documentId);
+  Future<Either<Failure, bool>> documentExists(String documentId) {
+    return _guard(
+      'check document',
+      () => _documentDatasource.hasDocumentContent(documentId),
+    );
+  }
+
+  /// Deletes the trash rows of [pages] in one transaction, then the copied
+  /// PDF files nothing references any more.
+  Future<void> _remove(List<TrashedPageModel> pages) async {
+    if (pages.isEmpty) return;
+    await _runner.run(() async {
+      for (final page in pages) {
+        await _trashDatasource.removeTrashedPage(page.id);
+      }
+    });
+    await _documentDatasource.deleteUnreferencedPdfs([
+      for (final page in pages)
+        if (_pdfPathOf(page) case final String path) path,
+    ]);
+  }
+
+  static String? _pdfPathOf(TrashedPageModel page) {
+    final background = page.pageData['background'];
+    if (background is! Map) return null;
+    final path = background['pdfFilePath'];
+    return path is String ? path : null;
   }
 
   Future<void> _updatePageCount(String documentId, int newCount) async {
