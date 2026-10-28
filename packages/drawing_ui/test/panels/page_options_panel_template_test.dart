@@ -7,10 +7,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final _blank = core.TemplateRegistry.blank;
-final _grid = core.TemplateRegistry.basicTemplates
-    .firstWhere((t) => t.name == 'Kareli');
-final _dotted = core.TemplateRegistry.basicTemplates
-    .firstWhere((t) => t.name == 'Noktalı');
+final _grid =
+    core.TemplateRegistry.basicTemplates.firstWhere((t) => t.name == 'Kareli');
+final _dotted =
+    core.TemplateRegistry.basicTemplates.firstWhere((t) => t.name == 'Noktalı');
 
 const _oddSize = core.PageSize(width: 700, height: 900);
 final _pdfBg = core.PageBackground(
