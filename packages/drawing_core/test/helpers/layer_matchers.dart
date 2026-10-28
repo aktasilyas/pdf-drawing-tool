@@ -23,6 +23,8 @@ void expectLayerClose(Layer actual, Layer expected) {
     for (var p = 0; p < e.points.length; p++) {
       _expectPointClose(a.points[p], e.points[p], '${e.id}[$p]');
       expect(a.points[p].pressure, e.points[p].pressure);
+      expect(a.points[p].tilt, e.points[p].tilt);
+      expect(a.points[p].timestamp, e.points[p].timestamp);
     }
   }
 
