@@ -73,33 +73,37 @@ class PageTrashRepositoryImpl implements PageTrashRepository {
   @override
   Future<Either<Failure, bool>> restorePageFromTrash(String trashedPageId) {
     // Content, page count and trash row change together or not at all.
-    return _guard('restore page', () => _runner.run(() async {
-          final model = await _trashDatasource.getTrashedPage(trashedPageId);
-          if (model == null) return false;
+    return _guard(
+      'restore page',
+      () => _runner.run(() => _restore(trashedPageId)),
+    );
+  }
 
-          final content = await _documentDatasource
-              .getDocumentContent(model.sourceDocumentId);
-          if (content == null) return false;
+  Future<bool> _restore(String trashedPageId) async {
+    final model = await _trashDatasource.getTrashedPage(trashedPageId);
+    if (model == null) return false;
 
-          final pages =
-              (content['pages'] as List).cast<Map<String, dynamic>>();
+    final content =
+        await _documentDatasource.getDocumentContent(model.sourceDocumentId);
+    if (content == null) return false;
 
-          // Insert page at clamped original position, then re-index.
-          final insertIndex = min(model.originalPageIndex, pages.length);
-          pages.insert(insertIndex, model.pageData);
-          for (int i = 0; i < pages.length; i++) {
-            pages[i]['index'] = i;
-          }
-          content['pages'] = pages;
+    final pages = (content['pages'] as List).cast<Map<String, dynamic>>();
 
-          await _documentDatasource.saveDocumentContent(
-            model.sourceDocumentId,
-            content,
-          );
-          await _updatePageCount(model.sourceDocumentId, pages.length);
-          await _trashDatasource.removeTrashedPage(trashedPageId);
-          return true;
-        }));
+    // Insert page at clamped original position, then re-index.
+    final insertIndex = min(model.originalPageIndex, pages.length);
+    pages.insert(insertIndex, model.pageData);
+    for (int i = 0; i < pages.length; i++) {
+      pages[i]['index'] = i;
+    }
+    content['pages'] = pages;
+
+    await _documentDatasource.saveDocumentContent(
+      model.sourceDocumentId,
+      content,
+    );
+    await _updatePageCount(model.sourceDocumentId, pages.length);
+    await _trashDatasource.removeTrashedPage(trashedPageId);
+    return true;
   }
 
   @override
