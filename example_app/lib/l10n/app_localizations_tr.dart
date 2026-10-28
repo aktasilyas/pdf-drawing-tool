@@ -788,6 +788,295 @@ class AppLocalizationsTr extends AppLocalizations {
   String get editorToolbarSettingsReset => 'Varsayılana Sıfırla';
 
   @override
+  String get editorToolbarColorSetBasic => 'Temel';
+
+  @override
+  String get editorToolbarColorSetNeon => 'Neon';
+
+  @override
+  String get editorPanelClose => 'Kapat';
+
+  @override
+  String get editorPanelThickness => 'Kalınlık';
+
+  @override
+  String get editorPanelPressureSensitivity => 'Basınç Duyarlılığı';
+
+  @override
+  String get editorPanelStabilization => 'Çizgi Stabilizasyonu';
+
+  @override
+  String get editorPanelPenType => 'Kalem türü';
+
+  @override
+  String get editorPanelGlow => 'Parlaklık';
+
+  @override
+  String get editorPanelStraightLine => 'Düz çizgi';
+
+  @override
+  String get editorPanelSize => 'Boyut';
+
+  @override
+  String get editorPanelEraserPixel => 'Piksel Silgi';
+
+  @override
+  String get editorPanelEraserPressure => 'Basınç hassasiyeti';
+
+  @override
+  String get editorPanelEraserHighlighterOnly => 'Sadece vurgulayıcı sil';
+
+  @override
+  String get editorPanelEraserAutoLift => 'Otomatik kaldır';
+
+  @override
+  String get editorPanelClearPage => 'Sayfayı Temizle';
+
+  @override
+  String get editorPanelClearPageTitle => 'Sayfayı Temizle?';
+
+  @override
+  String get editorPanelClearPageMessage =>
+      'Bu sayfa içeriğini tamamen silecek. Bu işlem geri alınamaz.';
+
+  @override
+  String get editorPanelCancel => 'İptal';
+
+  @override
+  String get editorPanelClearPageConfirm => 'Temizle';
+
+  @override
+  String get editorPanelLaserDot => 'Lazer Nokta';
+
+  @override
+  String get editorPanelLaserLine => 'Lazer Çizgi';
+
+  @override
+  String get editorPanelLaserHollow => 'Lazer Çizgi (Boş)';
+
+  @override
+  String get editorPanelLaserRainbow => 'Lazer Gökkuşağı';
+
+  @override
+  String get editorPanelLaserDuration => 'Süre';
+
+  @override
+  String get editorPanelTextTitle => 'Metin Aracı';
+
+  @override
+  String get editorPanelTextHint => 'Tuvale dokunarak metin kutusu ekleyin.';
+
+  @override
+  String get editorPanelTextColor => 'Renk';
+
+  @override
+  String get editorPanelTextStyle => 'Stil';
+
+  @override
+  String get editorPanelAddNote => 'Not Ekle';
+
+  @override
+  String get editorPanelColorHex => 'Altıgen';
+
+  @override
+  String get editorPanelColorRed => 'Kırmızı';
+
+  @override
+  String get editorPanelColorGreen => 'Yeşil';
+
+  @override
+  String get editorPanelColorBlue => 'Mavi';
+
+  @override
+  String get editorPanelColorCancel => 'İptal et';
+
+  @override
+  String get editorPanelColorDone => 'Bitti';
+
+  @override
+  String get editorPanelColorSwatches => 'Kartelalar';
+
+  @override
+  String get editorPanelColorSpectrum => 'Spektrum';
+
+  @override
+  String get editorCatalogShapesTitle => 'Şekil';
+
+  @override
+  String get editorCatalogStrokeWidth => 'Kontur Kalınlığı';
+
+  @override
+  String get editorCatalogStrokeColor => 'Kontur Rengi';
+
+  @override
+  String get editorCatalogFillShape => 'Şekil dolgusu';
+
+  @override
+  String get editorCatalogFillColor => 'Dolgu Rengi';
+
+  @override
+  String get editorCatalogShapeLine => 'Çizgi';
+
+  @override
+  String get editorCatalogShapeArrow => 'Ok';
+
+  @override
+  String get editorCatalogShapeRectangle => 'Dikdörtgen';
+
+  @override
+  String get editorCatalogShapeEllipse => 'Elips';
+
+  @override
+  String get editorCatalogShapeTriangle => 'Üçgen';
+
+  @override
+  String get editorCatalogShapeDiamond => 'Eşkenar dörtgen';
+
+  @override
+  String get editorCatalogShapeStar => 'Yıldız';
+
+  @override
+  String get editorCatalogShapePentagon => 'Beşgen';
+
+  @override
+  String get editorCatalogShapeHexagon => 'Altıgen';
+
+  @override
+  String get editorCatalogShapePlus => 'Artı';
+
+  @override
+  String get editorCatalogStickersTitle => 'Çıkartmalar';
+
+  @override
+  String get editorCatalogAddSticker => 'Çıkartma Ekle';
+
+  @override
+  String get editorCatalogStickerEmoji => 'Emoji';
+
+  @override
+  String get editorCatalogStickerAnimals => 'Hayvanlar';
+
+  @override
+  String get editorCatalogStickerFood => 'Yiyecek';
+
+  @override
+  String get editorCatalogStickerTravel => 'Seyahat';
+
+  @override
+  String get editorCatalogStickerObjects => 'Nesneler';
+
+  @override
+  String get editorCatalogStickerSymbols => 'Semboller';
+
+  @override
+  String get editorCatalogStickerHands => 'Eller';
+
+  @override
+  String get editorCatalogStickerNature => 'Doğa';
+
+  @override
+  String get editorSelectionLassoFreeform => 'Serbest Seçim';
+
+  @override
+  String get editorSelectionLassoRectangle => 'Dikdörtgen Seçim';
+
+  @override
+  String get editorSelectionLassoSelectable => 'Seçilebilir';
+
+  @override
+  String get editorSelectionTypeHandwriting => 'El yazısı';
+
+  @override
+  String get editorSelectionTypeShape => 'Şekil';
+
+  @override
+  String get editorSelectionTypeImage => 'Resim';
+
+  @override
+  String get editorSelectionTypeHighlighter => 'Vurgulayıcı';
+
+  @override
+  String get editorSelectionTypeText => 'Metin';
+
+  @override
+  String get editorSelectionTypeTape => 'Bant';
+
+  @override
+  String get editorSelectionTypeLink => 'Link';
+
+  @override
+  String get editorSelectionTypeLabel => 'Etiket';
+
+  @override
+  String get editorSelectionAi => 'AI Asistan';
+
+  @override
+  String get editorSelectionColor => 'Renk';
+
+  @override
+  String get editorSelectionScreenshot => 'Ekran Resmi';
+
+  @override
+  String get editorSelectionCut => 'Kes';
+
+  @override
+  String get editorSelectionDuplicate => 'Çoğalt';
+
+  @override
+  String get editorSelectionDelete => 'Sil';
+
+  @override
+  String get editorSelectionBringToFront => 'Öne Getir';
+
+  @override
+  String get editorSelectionSendToBack => 'Arkaya Gönder';
+
+  @override
+  String get editorSelectionCopy => 'Kopyala';
+
+  @override
+  String get editorSelectionPaste => 'Yapıştır';
+
+  @override
+  String get editorSelectionAskAi => 'Yapay zekaya sor';
+
+  @override
+  String get editorSelectionTakeScreenshot => 'Ekran Resmi Çek';
+
+  @override
+  String get editorSelectionMore => 'Daha fazla';
+
+  @override
+  String get editorSelectionSave => 'Kaydet';
+
+  @override
+  String get editorSelectionScreenshotCaptureFailed =>
+      'Ekran resmi oluşturulamadı';
+
+  @override
+  String get editorSelectionScreenshotSavedAndCopied =>
+      'Ekran resmi galeriye kaydedildi ve panoya kopyalandı';
+
+  @override
+  String get editorSelectionScreenshotSaved =>
+      'Ekran resmi galeriye kaydedildi';
+
+  @override
+  String get editorSelectionScreenshotCopied => 'Ekran resmi panoya kopyalandı';
+
+  @override
+  String get editorSelectionScreenshotSaveFailed => 'Ekran resmi kaydedilemedi';
+
+  @override
+  String get editorSelectionContextEdit => 'Düzenle';
+
+  @override
+  String get editorSelectionContextStyle => 'Stil';
+
+  @override
+  String get editorSelectionContextMove => 'Taşı';
+
+  @override
   String get editorDocumentNameLabel => 'Belge Adı';
 
   @override
