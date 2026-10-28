@@ -150,6 +150,8 @@ class SelectionModeHeader extends ConsumerWidget {
   bool _keepOnlyFailedSelected(WidgetRef ref, BulkResult result) {
     if (!result.hasFailures) return false;
     ref.read(selectedDocumentsProvider.notifier).state = result.failed.toSet();
+    // Bulk document actions ignore folders; drop them so the retry acts on
+    // exactly the failed documents.
     ref.read(selectedFoldersProvider.notifier).state = {};
     return true;
   }

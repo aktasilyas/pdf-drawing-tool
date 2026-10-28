@@ -72,6 +72,7 @@ mixin DocumentsBulkOperations on StateNotifier<AsyncValue<void>> {
       if (failure == null) {
         succeeded.add(id);
       } else {
+        logger.w('${action.name} $id: ${failure.message}');
         failed.add(id);
         firstFailure ??= failure;
       }
