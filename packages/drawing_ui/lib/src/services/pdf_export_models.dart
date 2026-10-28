@@ -86,14 +86,26 @@ class PDFExportResult {
   final List<int> pdfBytes;
   final ExportFailure? failure;
 
+  /// 1-based positions, in the exported page list, of pages written without
+  /// their PDF background because it could not be loaded.
+  final List<int> missingBackgroundPages;
+
   const PDFExportResult({
     required this.isSuccess,
     required this.pdfBytes,
     this.failure,
+    this.missingBackgroundPages = const [],
   });
 
-  factory PDFExportResult.success(List<int> bytes) =>
-      PDFExportResult(isSuccess: true, pdfBytes: bytes);
+  factory PDFExportResult.success(
+    List<int> bytes, {
+    List<int> missingBackgroundPages = const [],
+  }) =>
+      PDFExportResult(
+        isSuccess: true,
+        pdfBytes: bytes,
+        missingBackgroundPages: List.unmodifiable(missingBackgroundPages),
+      );
 
   factory PDFExportResult.error(ExportFailure failure) => PDFExportResult(
         isSuccess: false,

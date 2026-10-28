@@ -76,13 +76,15 @@ Future<File> newImportedPdfFile([
 }
 
 /// Builds lazy pages (size + file path only, no rendering) for
-/// [pageNumbers] of [document]. Pages that cannot be read are skipped.
+/// [pageNumbers] of [document]. Pages that cannot be read are skipped and
+/// reported to [onPageSkipped] with their 1-based number.
 /// [onPageProcessed] runs after every page, skipped or not.
 Future<List<Page>> buildLazyPdfPages(
   PdfDocument document,
   List<int> pageNumbers, {
   required String pdfFilePath,
   required void Function() onPageProcessed,
+  void Function(int pageNumber)? onPageSkipped,
 }) async {
   final pages = <Page>[];
 
@@ -108,6 +110,7 @@ Future<List<Page>> buildLazyPdfPages(
     } catch (e) {
       DrawingLog.w('Could not load PDF page $pageNumber: $e');
       // Skip the broken page and continue.
+      onPageSkipped?.call(pageNumber);
     } finally {
       try {
         await pdfPage?.close();
@@ -121,6 +124,7 @@ Future<List<Page>> buildLazyPdfPages(
 }
 
 /// Renders [pageNumbers] of [document] now (legacy immediate mode).
+/// Pages that cannot be converted are reported to [onPageSkipped].
 /// [onPageProcessed] runs after every page.
 Future<List<Page>> convertPdfPagesImmediately(
   PdfDocument document,
@@ -129,6 +133,7 @@ Future<List<Page>> convertPdfPagesImmediately(
   required PDFRenderOptions renderOptions,
   required bool embedImages,
   required void Function() onPageProcessed,
+  void Function(int pageNumber)? onPageSkipped,
 }) async {
   final pages = <Page>[];
 
@@ -145,6 +150,8 @@ Future<List<Page>> convertPdfPagesImmediately(
 
     if (page != null) {
       pages.add(page);
+    } else {
+      onPageSkipped?.call(pageNumber);
     }
 
     onPageProcessed();

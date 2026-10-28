@@ -2,7 +2,6 @@
 library;
 
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:drawing_core/drawing_core.dart' show Page, PdfPathResolver;
 import 'package:file_picker/file_picker.dart';
@@ -12,10 +11,11 @@ import 'package:drawing_ui/src/panels/export_file_name.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/services/export_errors.dart';
 import 'package:drawing_ui/src/services/page_png_exporter.dart';
+import 'package:drawing_ui/src/services/page_rasterizer.dart';
 import 'package:drawing_ui/src/utils/drawing_log.dart';
 
 /// Signature of [PagePngExporter.export]; replaced in tests.
-typedef PngExportRenderer = Future<Uint8List> Function(
+typedef PngExportRenderer = Future<PageRasterPng> Function(
   Page page, {
   required bool infiniteCanvas,
   PdfPathResolver pdfPaths,
@@ -58,11 +58,12 @@ Future<void> performPNGExport(
   progress.start(1);
 
   try {
-    final bytes = await render(
+    final rendered = await render(
       page,
       infiniteCanvas: infiniteCanvas,
       pdfPaths: pdfPaths,
     );
+    final bytes = rendered.bytes;
     final filename = buildExportFilename(
       title,
       fallback: strings.fallbackFileName,
@@ -82,7 +83,10 @@ Future<void> performPNGExport(
         await file.writeAsBytes(bytes);
       }
       final sizeMB = (bytes.length / (1024 * 1024)).toStringAsFixed(1);
-      progress.complete('$sizeMB MB');
+      progress.complete(
+        '$sizeMB MB',
+        pagesMissingBackground: rendered.pdfBackgroundMissing ? 1 : 0,
+      );
     } else {
       progress.dismiss();
     }

@@ -5,6 +5,7 @@ import 'package:phosphor_icons/phosphor_icons.dart';
 
 import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/services/export_errors.dart';
+import 'package:drawing_ui/src/widgets/export_saved_body.dart';
 
 import '../providers/export_progress_provider.dart';
 import '../theme/drawing_shadows.dart';
@@ -76,7 +77,7 @@ class _ExportProgressContent extends ConsumerWidget {
   Widget _buildBody(ColorScheme cs) {
     return switch (state.status) {
       ExportProgressStatus.exporting => _ExportingBody(state: state, cs: cs),
-      ExportProgressStatus.completed => _CompletedBody(state: state, cs: cs),
+      ExportProgressStatus.completed => ExportSavedBody(state: state, cs: cs),
       ExportProgressStatus.error => _ErrorBody(state: state, cs: cs),
       ExportProgressStatus.cancelled => _CancelledBody(cs: cs),
       ExportProgressStatus.idle => const SizedBox.shrink(),
@@ -177,39 +178,6 @@ class _ExportingBody extends ConsumerWidget {
             ),
             onPressed: () =>
                 ref.read(exportProgressProvider.notifier).requestCancel(),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _CompletedBody extends StatelessWidget {
-  const _CompletedBody({required this.state, required this.cs});
-  final ExportProgressState state;
-  final ColorScheme cs;
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final s = context.drawingStrings.export;
-    final size = state.fileSize;
-
-    return Row(
-      children: [
-        PhosphorIcon(
-          ElyanotesIcons.checkCircle,
-          size: 18,
-          color: Colors.green,
-        ),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Text(
-            size != null ? s.savedWithSize(size) : s.saved,
-            style: textTheme.titleSmall?.copyWith(
-              fontSize: 13,
-              color: cs.onSurface,
-            ),
           ),
         ),
       ],

@@ -1,6 +1,4 @@
 import 'dart:math' as math;
-import 'dart:typed_data';
-
 import 'package:drawing_core/drawing_core.dart';
 import 'package:flutter/material.dart' hide Page;
 
@@ -44,14 +42,15 @@ abstract final class PagePngExporter {
     );
   }
 
-  /// Renders [page] to PNG bytes. Throws if rendering fails.
-  static Future<Uint8List> export(
+  /// Renders [page] to PNG bytes, flagging a PDF background that could not be
+  /// loaded. Throws if rendering fails.
+  static Future<PageRasterPng> export(
     Page page, {
     required bool infiniteCanvas,
     PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
   }) {
     final l = layout(page, infiniteCanvas: infiniteCanvas);
-    return PageRasterizer.renderPng(
+    return PageRasterizer.renderPngWithStatus(
       page,
       width: l.width,
       height: l.height,

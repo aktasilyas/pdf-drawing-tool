@@ -16,6 +16,10 @@ class ExportProgressState {
   final ExportFailure? failure;
   final String? fileSize;
 
+  /// Pages of a completed export that went out without their PDF background
+  /// because it could not be loaded.
+  final int pagesMissingBackground;
+
   const ExportProgressState({
     this.status = ExportProgressStatus.idle,
     this.progress = 0.0,
@@ -24,6 +28,7 @@ class ExportProgressState {
     this.startTime,
     this.failure,
     this.fileSize,
+    this.pagesMissingBackground = 0,
   });
 
   ExportProgressState copyWith({
@@ -34,6 +39,7 @@ class ExportProgressState {
     DateTime? startTime,
     ExportFailure? failure,
     String? fileSize,
+    int? pagesMissingBackground,
   }) {
     return ExportProgressState(
       status: status ?? this.status,
@@ -43,6 +49,8 @@ class ExportProgressState {
       startTime: startTime ?? this.startTime,
       failure: failure ?? this.failure,
       fileSize: fileSize ?? this.fileSize,
+      pagesMissingBackground:
+          pagesMissingBackground ?? this.pagesMissingBackground,
     );
   }
 
@@ -98,14 +106,21 @@ class ExportProgressNotifier extends StateNotifier<ExportProgressState> {
     );
   }
 
-  void complete(String fileSize) {
+  /// Marks the export as saved. [pagesMissingBackground] pages went out
+  /// without their PDF background; the overlay then stays up longer so the
+  /// warning can be read.
+  void complete(String fileSize, {int pagesMissingBackground = 0}) {
     state = state.copyWith(
       status: ExportProgressStatus.completed,
       progress: 1.0,
       fileSize: fileSize,
+      pagesMissingBackground: pagesMissingBackground,
     );
     _autoDismissTimer?.cancel();
-    _autoDismissTimer = Timer(const Duration(seconds: 3), dismiss);
+    _autoDismissTimer = Timer(
+      Duration(seconds: pagesMissingBackground > 0 ? 6 : 3),
+      dismiss,
+    );
   }
 
   void setError(ExportFailure failure) {

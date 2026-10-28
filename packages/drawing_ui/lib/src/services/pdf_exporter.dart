@@ -53,26 +53,34 @@ class PDFExporter {
       final sources = PdfSourcePool(_openSource);
       // Per export, so concurrent exports never share or evict images.
       final backgrounds = PdfBackgroundRasterizer();
+      final missing = <int>[];
       try {
         for (int i = 0; i < pages.length; i++) {
           if (isCancelled?.call() == true) return PDFExportResult.cancelled();
           final page = pages[i];
           if (page.size.width <= 0 || page.size.height <= 0) continue;
-          await _exportPage(doc, page, options, sources, backgrounds);
+          final pdfDrawn =
+              await _exportPage(doc, page, options, sources, backgrounds);
+          if (!pdfDrawn) missing.add(i + 1);
           onProgress?.call(i + 1, pages.length);
         }
       } finally {
         await sources.closeAll();
       }
+      if (missing.isNotEmpty) {
+        DrawingLog.w('PDF export: pages $missing without their PDF background');
+      }
       final bytes = await doc.save();
-      return PDFExportResult.success(bytes);
+      return PDFExportResult.success(bytes, missingBackgroundPages: missing);
     } catch (e) {
       DrawingLog.e('PDF export failed', e);
       return PDFExportResult.error(exportFailureFor(e));
     }
   }
 
-  Future<void> _exportPage(
+  /// Draws [page] into [doc]. False when the page has a PDF background that
+  /// could not be loaded and was left out.
+  Future<bool> _exportPage(
     PdfDocument doc,
     Page page,
     PDFExportOptions options,
@@ -96,8 +104,10 @@ class PDFExporter {
       await _paintBackground(
           g, doc, page.background, pdfW, pdfH, options, backgrounds);
     }
+    var pdfDrawn = true;
     if (page.background.type == BackgroundType.pdf) {
-      await _embedPdfBackground(g, doc, page, pdfW, pdfH, options, sources);
+      pdfDrawn =
+          await _embedPdfBackground(g, doc, page, pdfW, pdfH, options, sources);
     }
     for (final layer in page.layers) {
       if (!layer.isVisible) continue;
@@ -107,6 +117,7 @@ class PDFExporter {
     if (options.addWatermark) {
       _drawWatermark(g, doc, pdfW, pdfH);
     }
+    return pdfDrawn;
   }
 
   /// Templates and covers go through the canvas painters as one cached
@@ -191,7 +202,9 @@ class PDFExporter {
     g.drawImage(addCompressedRgbaImage(doc, raw), 0, 0, w, h);
   }
 
-  Future<void> _embedPdfBackground(
+  /// Embeds the PDF page behind [page]. False when it should be there but
+  /// could not be loaded.
+  Future<bool> _embedPdfBackground(
     PdfGraphics g,
     PdfDocument doc,
     Page page,
@@ -200,7 +213,7 @@ class PDFExporter {
     PDFExportOptions options,
     PdfSourcePool sources,
   ) async {
-    if (page.background.pdfPageIndex == null) return;
+    if (page.background.pdfPageIndex == null) return true;
 
     // Try rendering from file as JPEG — stores compressed (~200KB) instead
     // of uncompressed RGB+alpha (~8.7MB), preventing OOM on multi-page docs.
@@ -214,16 +227,17 @@ class PDFExporter {
       if (jpegBytes != null) {
         final img = PdfImage.jpeg(doc, image: jpegBytes);
         g.drawImage(img, 0, 0, w, h);
-        return;
+        return true;
       }
     }
 
     // Fallback: decode pre-rendered PNG data to raw RGBA.
     final pngData = page.background.pdfData;
-    if (pngData == null) return;
+    if (pngData == null) return false;
     final raw = await _decodeToRawRgba(pngData);
-    if (raw == null) return;
+    if (raw == null) return false;
     g.drawImage(addCompressedRgbaImage(doc, raw), 0, 0, w, h);
+    return true;
   }
 
   Future<Uint8List?> _renderPdfPageAsJpeg(

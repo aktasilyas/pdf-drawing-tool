@@ -26,6 +26,7 @@ abstract class ExportStrings {
   String get saved;
   String savedWithSize(String size);
   String get cancelled;
+  String pagesWithoutPdfBackground(int count);
 
   /// Every getter by name, for drift tests.
   Map<String, String> toMap() => {
@@ -50,6 +51,7 @@ abstract class ExportStrings {
         'saved': saved,
         'savedWithSize': savedWithSize('Notes'),
         'cancelled': cancelled,
+        'pagesWithoutPdfBackground': pagesWithoutPdfBackground(2),
       };
 }
 
@@ -120,4 +122,8 @@ class ExportStringsTr extends ExportStrings {
 
   @override
   String get cancelled => 'İptal edildi';
+
+  @override
+  String pagesWithoutPdfBackground(int count) =>
+      '$count sayfa PDF arka planı olmadan dışa aktarıldı';
 }

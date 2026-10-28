@@ -9,6 +9,11 @@ import 'package:pdfx/pdfx.dart' as pdfx;
 import 'package:drawing_ui/src/canvas/image_painter.dart';
 import 'package:drawing_ui/src/canvas/page_background_raster.dart';
 import 'package:drawing_ui/src/services/pdf_raster_layer_renderer.dart';
+import 'package:drawing_ui/src/utils/drawing_log.dart';
+
+/// PNG bytes of a rendered page, and whether its PDF background was meant to
+/// be drawn but could not be loaded.
+typedef PageRasterPng = ({Uint8List bytes, bool pdfBackgroundMissing});
 
 /// Renders a page off-screen with the same painters as the canvas.
 ///
@@ -27,7 +32,8 @@ abstract final class PageRasterizer {
   /// [backgroundColor]. The caller disposes the returned image.
   ///
   /// [pdfRenderScale] is the resolution of the decoded PDF background relative
-  /// to PDF points. Throws if rendering fails.
+  /// to PDF points. A PDF background that cannot be loaded is logged and left
+  /// out. Throws if rendering fails.
   static Future<ui.Image> render(
     Page page, {
     required int width,
@@ -36,6 +42,27 @@ abstract final class PageRasterizer {
     Color backgroundColor = Colors.white,
     PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
     double pdfRenderScale = 0.5,
+  }) async {
+    final result = await _render(
+      page,
+      width: width,
+      height: height,
+      region: region,
+      backgroundColor: backgroundColor,
+      pdfPaths: pdfPaths,
+      pdfRenderScale: pdfRenderScale,
+    );
+    return result.image;
+  }
+
+  static Future<({ui.Image image, bool pdfBackgroundMissing})> _render(
+    Page page, {
+    required int width,
+    required int height,
+    required Rect? region,
+    required Color backgroundColor,
+    required PdfPathResolver pdfPaths,
+    required double pdfRenderScale,
   }) async {
     final pageSize = Size(page.size.width, page.size.height);
     final area = region ?? Offset.zero & pageSize;
@@ -107,7 +134,11 @@ abstract final class PageRasterizer {
 
       final picture = recorder.endRecording();
       try {
-        return await picture.toImage(width, height);
+        final image = await picture.toImage(width, height);
+        return (
+          image: image,
+          pdfBackgroundMissing: pdfImage == null && _expectsPdf(page),
+        );
       } finally {
         picture.dispose();
       }
@@ -128,7 +159,7 @@ abstract final class PageRasterizer {
     PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
     double pdfRenderScale = 0.5,
   }) async {
-    final image = await render(
+    final result = await renderPngWithStatus(
       page,
       width: width,
       height: height,
@@ -137,17 +168,49 @@ abstract final class PageRasterizer {
       pdfPaths: pdfPaths,
       pdfRenderScale: pdfRenderScale,
     );
+    return result.bytes;
+  }
+
+  /// [renderPng] that also reports whether the page's PDF background could
+  /// not be loaded, so an export can tell the user.
+  static Future<PageRasterPng> renderPngWithStatus(
+    Page page, {
+    required int width,
+    required int height,
+    Rect? region,
+    Color backgroundColor = Colors.white,
+    PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
+    double pdfRenderScale = 0.5,
+  }) async {
+    final result = await _render(
+      page,
+      width: width,
+      height: height,
+      region: region,
+      backgroundColor: backgroundColor,
+      pdfPaths: pdfPaths,
+      pdfRenderScale: pdfRenderScale,
+    );
+    final image = result.image;
     try {
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
       if (byteData == null) throw StateError('PNG encoding failed');
-      return byteData.buffer.asUint8List();
+      return (
+        bytes: byteData.buffer.asUint8List(),
+        pdfBackgroundMissing: result.pdfBackgroundMissing,
+      );
     } finally {
       image.dispose();
     }
   }
 
+  /// Whether [page] has a PDF page behind it that should be drawn.
+  static bool _expectsPdf(Page page) =>
+      page.background.type == BackgroundType.pdf &&
+      page.background.pdfPageIndex != null;
+
   /// Decodes the PDF page behind [page], from in-memory `pdfData` or the
-  /// lazy-loaded `pdfFilePath`. Null when missing or unreadable.
+  /// lazy-loaded `pdfFilePath`. Null, and logged, when missing or unreadable.
   static Future<ui.Image?> _loadPdfBackground(
     Page page,
     PdfPathResolver pdfPaths,
@@ -164,10 +227,22 @@ abstract final class PageRasterizer {
           renderScale,
         );
       }
-      if (bytes == null) return null;
+      if (bytes == null) {
+        DrawingLog.w(
+          'PDF background missing for page ${page.id} '
+          '(PDF page ${background.pdfPageIndex}, ${background.pdfFilePath})',
+        );
+        return null;
+      }
       final codec = await ui.instantiateImageCodec(bytes);
       return (await codec.getNextFrame()).image;
-    } catch (_) {
+    } catch (e, st) {
+      DrawingLog.w(
+        'PDF background unreadable for page ${page.id} '
+        '(PDF page ${background.pdfPageIndex})',
+        e,
+        st,
+      );
       return null;
     }
   }

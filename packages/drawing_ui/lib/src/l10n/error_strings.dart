@@ -1,4 +1,5 @@
-/// User-facing copy of export and PDF import failures and PDF page placeholders.
+/// User-facing copy of export and PDF import failures and warnings and PDF
+/// page placeholders.
 ///
 /// Every getter and method must also be listed in [toMap]; the drift tests
 /// rely on it. Parameterized strings are called with a fixed sample there.
@@ -17,6 +18,7 @@ abstract class ErrorStrings {
   String get pdfPagePlaceholder;
   String get pdfSourceMissing;
   String get pdfLoadFailed;
+  String pdfPagesSkipped(int count);
 
   /// Every getter by name, for drift tests.
   Map<String, String> toMap() => {
@@ -32,6 +34,7 @@ abstract class ErrorStrings {
         'pdfPagePlaceholder': pdfPagePlaceholder,
         'pdfSourceMissing': pdfSourceMissing,
         'pdfLoadFailed': pdfLoadFailed,
+        'pdfPagesSkipped': pdfPagesSkipped(2),
       };
 }
 
@@ -78,4 +81,7 @@ class ErrorStringsTr extends ErrorStrings {
 
   @override
   String get pdfLoadFailed => 'PDF Yüklenemedi';
+
+  @override
+  String pdfPagesSkipped(int count) => '$count sayfa okunamadı ve atlandı';
 }

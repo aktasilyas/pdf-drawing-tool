@@ -1514,6 +1514,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editorExportCancelled => 'Cancelled';
 
   @override
+  String editorExportPagesWithoutPdfBackground(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pages were exported without their PDF background',
+      one: '1 page was exported without its PDF background',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get editorTemplateAllCategories => 'All';
 
   @override
@@ -1696,6 +1707,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get editorErrorPdfLoadFailed => 'Couldn\'t load PDF';
+
+  @override
+  String editorErrorPdfPagesSkipped(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pages could not be read and were skipped',
+      one: '1 page could not be read and was skipped',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get editorCanvasAddLayer => 'Add layer';
