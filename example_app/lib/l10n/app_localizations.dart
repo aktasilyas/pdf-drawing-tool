@@ -1093,6 +1093,336 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{title} (copy)'**
   String libraryCopyTitle(String title);
+
+  /// No description provided for @editorToolFountainPen.
+  ///
+  /// In en, this message translates to:
+  /// **'Fountain pen'**
+  String get editorToolFountainPen;
+
+  /// No description provided for @editorToolPencil.
+  ///
+  /// In en, this message translates to:
+  /// **'Pencil'**
+  String get editorToolPencil;
+
+  /// No description provided for @editorToolHardPencil.
+  ///
+  /// In en, this message translates to:
+  /// **'Hard pencil'**
+  String get editorToolHardPencil;
+
+  /// No description provided for @editorToolBallpointPen.
+  ///
+  /// In en, this message translates to:
+  /// **'Ballpoint pen'**
+  String get editorToolBallpointPen;
+
+  /// No description provided for @editorToolGelPen.
+  ///
+  /// In en, this message translates to:
+  /// **'Gel pen'**
+  String get editorToolGelPen;
+
+  /// No description provided for @editorToolDashedPen.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashed pen'**
+  String get editorToolDashedPen;
+
+  /// No description provided for @editorToolHighlighter.
+  ///
+  /// In en, this message translates to:
+  /// **'Highlighter'**
+  String get editorToolHighlighter;
+
+  /// No description provided for @editorToolBrushPen.
+  ///
+  /// In en, this message translates to:
+  /// **'Brush pen'**
+  String get editorToolBrushPen;
+
+  /// No description provided for @editorToolNeonHighlighter.
+  ///
+  /// In en, this message translates to:
+  /// **'Neon highlighter'**
+  String get editorToolNeonHighlighter;
+
+  /// No description provided for @editorToolRulerPen.
+  ///
+  /// In en, this message translates to:
+  /// **'Ruler pen'**
+  String get editorToolRulerPen;
+
+  /// No description provided for @editorToolPixelEraser.
+  ///
+  /// In en, this message translates to:
+  /// **'Eraser'**
+  String get editorToolPixelEraser;
+
+  /// No description provided for @editorToolStrokeEraser.
+  ///
+  /// In en, this message translates to:
+  /// **'Stroke eraser'**
+  String get editorToolStrokeEraser;
+
+  /// No description provided for @editorToolLassoEraser.
+  ///
+  /// In en, this message translates to:
+  /// **'Lasso eraser'**
+  String get editorToolLassoEraser;
+
+  /// No description provided for @editorToolShapes.
+  ///
+  /// In en, this message translates to:
+  /// **'Shapes'**
+  String get editorToolShapes;
+
+  /// No description provided for @editorToolText.
+  ///
+  /// In en, this message translates to:
+  /// **'Text'**
+  String get editorToolText;
+
+  /// No description provided for @editorToolSticker.
+  ///
+  /// In en, this message translates to:
+  /// **'Sticker'**
+  String get editorToolSticker;
+
+  /// No description provided for @editorToolImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Image'**
+  String get editorToolImage;
+
+  /// No description provided for @editorToolSelection.
+  ///
+  /// In en, this message translates to:
+  /// **'Select'**
+  String get editorToolSelection;
+
+  /// No description provided for @editorToolPanZoom.
+  ///
+  /// In en, this message translates to:
+  /// **'Pan & zoom'**
+  String get editorToolPanZoom;
+
+  /// No description provided for @editorToolLaserPointer.
+  ///
+  /// In en, this message translates to:
+  /// **'Laser pointer'**
+  String get editorToolLaserPointer;
+
+  /// No description provided for @editorToolStickyNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Sticky note'**
+  String get editorToolStickyNote;
+
+  /// No description provided for @editorToolToolbarSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Toolbar settings'**
+  String get editorToolToolbarSettings;
+
+  /// No description provided for @editorToolPenGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Pen'**
+  String get editorToolPenGroup;
+
+  /// No description provided for @editorToolbarHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get editorToolbarHome;
+
+  /// No description provided for @editorToolbarPages.
+  ///
+  /// In en, this message translates to:
+  /// **'Pages'**
+  String get editorToolbarPages;
+
+  /// No description provided for @editorToolbarRuler.
+  ///
+  /// In en, this message translates to:
+  /// **'Ruler'**
+  String get editorToolbarRuler;
+
+  /// No description provided for @editorToolbarAudio.
+  ///
+  /// In en, this message translates to:
+  /// **'Audio recording'**
+  String get editorToolbarAudio;
+
+  /// No description provided for @editorToolbarReaderMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Reader mode'**
+  String get editorToolbarReaderMode;
+
+  /// No description provided for @editorToolbarEditMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit mode'**
+  String get editorToolbarEditMode;
+
+  /// No description provided for @editorToolbarMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get editorToolbarMore;
+
+  /// No description provided for @editorToolbarLayers.
+  ///
+  /// In en, this message translates to:
+  /// **'Layers'**
+  String get editorToolbarLayers;
+
+  /// No description provided for @editorToolbarAddPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Add page'**
+  String get editorToolbarAddPage;
+
+  /// No description provided for @editorToolbarExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Export'**
+  String get editorToolbarExport;
+
+  /// No description provided for @editorToolbarAi.
+  ///
+  /// In en, this message translates to:
+  /// **'AI assistant'**
+  String get editorToolbarAi;
+
+  /// No description provided for @editorToolbarUntitled.
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled note'**
+  String get editorToolbarUntitled;
+
+  /// No description provided for @editorToolbarMoreColors.
+  ///
+  /// In en, this message translates to:
+  /// **'More colors'**
+  String get editorToolbarMoreColors;
+
+  /// No description provided for @editorToolbarColorSetHighlighter.
+  ///
+  /// In en, this message translates to:
+  /// **'Highlighter'**
+  String get editorToolbarColorSetHighlighter;
+
+  /// No description provided for @editorToolbarColorSetPastel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pastel'**
+  String get editorToolbarColorSetPastel;
+
+  /// No description provided for @editorToolbarSelectedColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected color {hex}'**
+  String editorToolbarSelectedColor(String hex);
+
+  /// No description provided for @editorToolbarColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Color {hex}'**
+  String editorToolbarColor(String hex);
+
+  /// No description provided for @editorToolbarThickness.
+  ///
+  /// In en, this message translates to:
+  /// **'Thickness {value}'**
+  String editorToolbarThickness(String value);
+
+  /// No description provided for @editorToolbarMoreTools.
+  ///
+  /// In en, this message translates to:
+  /// **'More tools'**
+  String get editorToolbarMoreTools;
+
+  /// No description provided for @editorToolbarReadOnlyActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only mode on'**
+  String get editorToolbarReadOnlyActive;
+
+  /// No description provided for @editorToolbarReadOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Read-only'**
+  String get editorToolbarReadOnly;
+
+  /// No description provided for @editorToolbarUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get editorToolbarUndo;
+
+  /// No description provided for @editorToolbarRedo.
+  ///
+  /// In en, this message translates to:
+  /// **'Redo'**
+  String get editorToolbarRedo;
+
+  /// No description provided for @editorToolbarRecordingInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording…'**
+  String get editorToolbarRecordingInProgress;
+
+  /// No description provided for @editorToolbarRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Start recording'**
+  String get editorToolbarRecord;
+
+  /// No description provided for @editorToolbarMicPermissionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Microphone access is required. Please allow it in Settings.'**
+  String get editorToolbarMicPermissionRequired;
+
+  /// No description provided for @editorToolbarShowRecordings.
+  ///
+  /// In en, this message translates to:
+  /// **'Show recordings'**
+  String get editorToolbarShowRecordings;
+
+  /// No description provided for @editorToolbarSettingsTabTools.
+  ///
+  /// In en, this message translates to:
+  /// **'Tools'**
+  String get editorToolbarSettingsTabTools;
+
+  /// No description provided for @editorToolbarSettingsTabExtraTools.
+  ///
+  /// In en, this message translates to:
+  /// **'Extra tools'**
+  String get editorToolbarSettingsTabExtraTools;
+
+  /// No description provided for @editorToolbarSettingsToolsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Reorder and hide tools'**
+  String get editorToolbarSettingsToolsHint;
+
+  /// No description provided for @editorToolbarSettingsExtraToolsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Reorder and hide extra tools'**
+  String get editorToolbarSettingsExtraToolsHint;
+
+  /// No description provided for @editorToolbarSettingsReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset to default'**
+  String get editorToolbarSettingsReset;
 }
 
 class _AppLocalizationsDelegate

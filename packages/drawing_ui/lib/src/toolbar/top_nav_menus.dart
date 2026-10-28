@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/panels/add_page_panel.dart';
 import 'package:drawing_ui/src/panels/export_panel.dart';
 import 'package:drawing_ui/src/panels/infinite_background_panel.dart';
@@ -180,6 +181,8 @@ void showAudioMenu(
   VoidCallback? onSidebarToggle,
   bool isSidebarOpen,
 ) {
+  // Read before any await: the tap handler below is async.
+  final s = context.drawingStrings.toolbar;
   final colorScheme = Theme.of(context).colorScheme;
   final isActive = ref.read(isRecordingProvider);
 
@@ -205,7 +208,7 @@ void showAudioMenu(
                 ElyanotesIcons.recordCircle,
                 color: colorScheme.onSurface,
               ),
-              title: const Text('Kayit devam ediyor...'),
+              title: Text(s.recordingInProgress),
               enabled: false,
             )
           else
@@ -214,7 +217,7 @@ void showAudioMenu(
                 ElyanotesIcons.recordCircle,
                 color: colorScheme.onSurface,
               ),
-              title: const Text('Kaydet'),
+              title: Text(s.record),
               onTap: () async {
                 final service = ref.read(audioRecordingServiceProvider);
                 final hasPerms = await service.hasPermission();
@@ -222,9 +225,8 @@ void showAudioMenu(
                   if (ctx.mounted) {
                     Navigator.pop(ctx);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Mikrofon izni gerekli. '
-                            'Lütfen ayarlardan izin verin.'),
+                      SnackBar(
+                        content: Text(s.micPermissionRequired),
                       ),
                     );
                   }
@@ -241,7 +243,7 @@ void showAudioMenu(
               ElyanotesIcons.waveform,
               color: colorScheme.onSurface,
             ),
-            title: const Text('Kayitlari goster'),
+            title: Text(s.showRecordings),
             onTap: () {
               Navigator.pop(ctx);
               ref.read(sidebarFilterProvider.notifier).state =

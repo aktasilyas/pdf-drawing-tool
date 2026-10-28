@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/panels/add_page_panel.dart';
 import 'package:drawing_ui/src/panels/audio_recording_dropdown.dart';
 import 'package:drawing_ui/src/panels/export_panel.dart';
@@ -10,81 +11,7 @@ import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/screens/layers_list.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/toolbar/elyanotes_nav_button.dart';
-import 'package:drawing_ui/src/toolbar/toolbar_reader_badge.dart';
-import 'package:drawing_ui/src/widgets/document_title_button.dart';
 import 'package:drawing_ui/src/widgets/popover_panel.dart';
-
-/// Left navigation section: Home, Sidebar toggle, document title, reader badge.
-class ToolbarNavLeft extends StatelessWidget {
-  const ToolbarNavLeft({
-    super.key,
-    this.documentTitle,
-    this.onHomePressed,
-    this.onRenameDocument,
-    this.onDeleteDocument,
-    this.onSidebarToggle,
-    this.isSidebarOpen = false,
-    this.isReaderMode = false,
-    this.pageCount = 1,
-    this.showTitle = true,
-    this.titleMaxWidth = 160,
-    this.showReaderBadge = true,
-  });
-
-  final String? documentTitle;
-  final VoidCallback? onHomePressed;
-  final VoidCallback? onRenameDocument;
-  final VoidCallback? onDeleteDocument;
-  final VoidCallback? onSidebarToggle;
-  final bool isSidebarOpen;
-  final bool isReaderMode;
-  final int pageCount;
-
-  /// When false, hides the title (MediumToolbar moves it to "more").
-  final bool showTitle;
-
-  /// Maximum width of the document title pill.
-  final double titleMaxWidth;
-
-  /// Whether reader mode shows the "Salt okunur" badge.
-  final bool showReaderBadge;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ElyanotesNavButton(
-          icon: ElyanotesIcons.home,
-          tooltip: 'Ana Sayfa',
-          onPressed: onHomePressed ?? () {},
-        ),
-        if (pageCount > 1)
-          ElyanotesNavButton(
-            icon: isSidebarOpen
-                ? ElyanotesIcons.sidebarActive
-                : ElyanotesIcons.sidebar,
-            tooltip: 'Sayfa Paneli',
-            onPressed: onSidebarToggle ?? () {},
-            isActive: isSidebarOpen,
-          ),
-        if (showTitle) ...[
-          const SizedBox(width: ChromeSpacing.xs),
-          DocumentTitleButton(
-            title: documentTitle,
-            onRename: onRenameDocument ?? () {},
-            onDelete: onDeleteDocument ?? () {},
-            maxWidth: titleMaxWidth,
-          ),
-        ],
-        if (isReaderMode && showReaderBadge) ...[
-          const SizedBox(width: ChromeSpacing.sm),
-          const ToolbarReaderBadge(),
-        ],
-      ],
-    );
-  }
-}
 
 enum _NavPanel { addPage, audioRecording, layers, export, more }
 
@@ -224,6 +151,7 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
 
   @override
   Widget build(BuildContext context) {
+    final s = context.drawingStrings.toolbar;
     final rulerVisible = ref.watch(rulerVisibleProvider);
     final toolbarConfig = ref.watch(toolbarConfigProvider);
     final rulerEnabled = toolbarConfig.extraToolVisible('ruler');
@@ -237,7 +165,7 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
           icon: widget.isReaderMode
               ? ElyanotesIcons.readerModeActive
               : ElyanotesIcons.readerMode,
-          tooltip: widget.isReaderMode ? 'Duzenleme Modu' : 'Okuyucu Modu',
+          tooltip: widget.isReaderMode ? s.editMode : s.readerMode,
           onPressed: widget.onReaderToggle ?? () {},
           isActive: widget.isReaderMode,
         ),
@@ -246,7 +174,7 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
             icon: rulerVisible
                 ? ElyanotesIcons.rulerActive
                 : ElyanotesIcons.ruler,
-            tooltip: 'Cetvel',
+            tooltip: s.ruler,
             onPressed: () =>
                 ref.read(rulerVisibleProvider.notifier).state = !rulerVisible,
             isActive: rulerVisible,
@@ -255,7 +183,7 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
           ElyanotesNavButton(
             key: _layersKey,
             icon: ElyanotesIcons.layers,
-            tooltip: 'Katmanlar',
+            tooltip: s.layers,
             onPressed: () => _togglePanel(_NavPanel.layers),
             isActive: _activePanel == _NavPanel.layers,
           ),
@@ -265,7 +193,7 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
           ElyanotesNavButton(
             key: _addPageKey,
             icon: ElyanotesIcons.pageAdd,
-            tooltip: 'Sayfa Ekle',
+            tooltip: s.addPage,
             onPressed: () => _togglePanel(_NavPanel.addPage),
             isActive: _activePanel == _NavPanel.addPage,
           ),
@@ -275,7 +203,7 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
           ElyanotesNavButton(
             key: _micKey,
             icon: ElyanotesIcons.microphone,
-            tooltip: 'Ses Kaydi',
+            tooltip: s.audio,
             onPressed: () => _togglePanel(_NavPanel.audioRecording),
             isActive: _activePanel == _NavPanel.audioRecording,
           ),
@@ -283,14 +211,14 @@ class _ToolbarNavRightState extends ConsumerState<ToolbarNavRight> {
           ElyanotesNavButton(
             key: _exportKey,
             icon: ElyanotesIcons.exportIcon,
-            tooltip: 'Dışa Aktar',
+            tooltip: s.export,
             onPressed: () => _togglePanel(_NavPanel.export),
             isActive: _activePanel == _NavPanel.export,
           ),
         ElyanotesNavButton(
           key: _moreKey,
           icon: ElyanotesIcons.more,
-          tooltip: 'Daha Fazla',
+          tooltip: s.more,
           onPressed: () => _togglePanel(_NavPanel.more),
           isActive: _activePanel == _NavPanel.more,
         ),

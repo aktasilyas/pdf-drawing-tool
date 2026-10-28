@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
@@ -8,6 +9,7 @@ import 'package:drawing_ui/src/toolbar/tool_button.dart';
 import 'package:drawing_ui/src/toolbar/tool_groups.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_logic.dart';
 import 'package:drawing_ui/src/toolbar/elyanotes_nav_button.dart';
+import 'package:drawing_ui/src/toolbar/toolbar_nav_left.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_nav_sections.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_overflow_menu.dart';
 import 'package:drawing_ui/src/toolbar/toolbar_widgets.dart';
@@ -178,7 +180,7 @@ class _ToolBarState extends ConsumerState<ToolBar> {
                           if (hasAI)
                             ElyanotesNavButton(
                               icon: ElyanotesIcons.sparkle,
-                              tooltip: 'Yapay Zeka',
+                              tooltip: context.drawingStrings.toolbar.ai,
                               onPressed: widget.onAIPressed!,
                             ),
                           ToolbarUndoRedoButtons(
