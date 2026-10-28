@@ -613,4 +613,62 @@ class AppLocalizationsTr extends AppLocalizations {
   String libraryCopyTitle(String title) {
     return '$title (kopya)';
   }
+
+  @override
+  String get libraryNewNotebook => 'Not Defteri';
+
+  @override
+  String get libraryNewWhiteboard => 'Beyaz Tahta';
+
+  @override
+  String get libraryNewQuickNote => 'Hızlı Not';
+
+  @override
+  String get libraryImportPdf => 'PDF İçe Aktar';
+
+  @override
+  String get libraryImportImage => 'Resim İçe Aktar';
+
+  @override
+  String libraryQuickNoteTitle(String date) {
+    return 'Hızlı Not - $date';
+  }
+
+  @override
+  String libraryWhiteboardTitle(String date) {
+    return 'Beyaz Tahta - $date';
+  }
+
+  @override
+  String get libraryPdfReadFailed => 'PDF dosyası okunamadı';
+
+  @override
+  String get libraryImageReadFailed => 'Resim dosyası okunamadı';
+
+  @override
+  String get libraryImageLoading => 'Resim yükleniyor...';
+
+  @override
+  String get libraryImageTooLarge =>
+      'Resim çok büyük! Maksimum boyut: 4096x4096';
+
+  @override
+  String get libraryPdfTooLarge =>
+      'PDF dosyası çok büyük! Maksimum boyut: 200MB';
+
+  @override
+  String get libraryPdfOpening => 'PDF açılıyor...';
+
+  @override
+  String get libraryPdfImportFailed => 'PDF import başarısız';
+
+  @override
+  String libraryOpening(String title) {
+    return '$title açılıyor';
+  }
+
+  @override
+  String libraryOpeningWithPages(String title, String pages) {
+    return '$title açılıyor ($pages)';
+  }
 }

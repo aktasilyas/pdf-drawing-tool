@@ -629,4 +629,61 @@ class AppLocalizationsEn extends AppLocalizations {
   String libraryCopyTitle(String title) {
     return '$title (copy)';
   }
+
+  @override
+  String get libraryNewNotebook => 'Notebook';
+
+  @override
+  String get libraryNewWhiteboard => 'Whiteboard';
+
+  @override
+  String get libraryNewQuickNote => 'Quick note';
+
+  @override
+  String get libraryImportPdf => 'Import PDF';
+
+  @override
+  String get libraryImportImage => 'Import image';
+
+  @override
+  String libraryQuickNoteTitle(String date) {
+    return 'Quick note - $date';
+  }
+
+  @override
+  String libraryWhiteboardTitle(String date) {
+    return 'Whiteboard - $date';
+  }
+
+  @override
+  String get libraryPdfReadFailed => 'Couldn\'t read the PDF file';
+
+  @override
+  String get libraryImageReadFailed => 'Couldn\'t read the image file';
+
+  @override
+  String get libraryImageLoading => 'Loading image...';
+
+  @override
+  String get libraryImageTooLarge =>
+      'Image is too large. Maximum size: 4096x4096';
+
+  @override
+  String get libraryPdfTooLarge => 'PDF is too large. Maximum size: 200 MB';
+
+  @override
+  String get libraryPdfOpening => 'Opening PDF...';
+
+  @override
+  String get libraryPdfImportFailed => 'Couldn\'t import the PDF';
+
+  @override
+  String libraryOpening(String title) {
+    return 'Opening $title';
+  }
+
+  @override
+  String libraryOpeningWithPages(String title, String pages) {
+    return 'Opening $title ($pages)';
+  }
 }

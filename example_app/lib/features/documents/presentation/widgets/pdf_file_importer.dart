@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:drawing_core/drawing_core.dart' as drawing_core;
 import 'package:drawing_ui/drawing_ui.dart';
 import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/l10n/l10n.dart';
 import 'package:example_app/core/routing/route_names.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
@@ -23,13 +24,14 @@ Future<void> importPdfFile(
   required String name,
   required int size,
 }) async {
+  final l10n = context.l10n;
   // Dosya boyutu kontrolü (max 200MB)
   const maxFileSizeBytes = 200 * 1024 * 1024;
   if (size > maxFileSizeBytes) {
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: const Text('PDF dosyası çok büyük! Maksimum boyut: 200MB'),
+        content: Text(l10n.libraryPdfTooLarge),
         backgroundColor: Theme.of(context).colorScheme.error,
         behavior: SnackBarBehavior.floating,
       ),
@@ -53,7 +55,7 @@ Future<void> importPdfFile(
           ),
           const SizedBox(width: AppSpacing.lg),
           Text(
-            'PDF açılıyor...',
+            l10n.libraryPdfOpening,
             style: TextStyle(color: Theme.of(ctx).colorScheme.onSurface),
           ),
         ],
@@ -90,7 +92,8 @@ Future<void> importPdfFile(
     if (!importResult.isSuccess) {
       messenger.showSnackBar(
         SnackBar(
-          content: Text(importResult.errorMessage ?? 'PDF import başarısız'),
+          content:
+              Text(importResult.errorMessage ?? l10n.libraryPdfImportFailed),
           backgroundColor: Theme.of(context).colorScheme.error,
           behavior: SnackBarBehavior.floating,
         ),
@@ -146,7 +149,12 @@ Future<void> importPdfFile(
 
       messenger.showSnackBar(
         SnackBar(
-          content: Text('$title açılıyor (${importResult.pages.length} sayfa)'),
+          content: Text(
+            l10n.libraryOpeningWithPages(
+              title,
+              l10n.libraryPageCount(importResult.pages.length),
+            ),
+          ),
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 2),
         ),

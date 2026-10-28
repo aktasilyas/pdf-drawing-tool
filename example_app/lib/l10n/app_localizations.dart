@@ -1093,6 +1093,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{title} (copy)'**
   String libraryCopyTitle(String title);
+
+  /// No description provided for @libraryNewNotebook.
+  ///
+  /// In en, this message translates to:
+  /// **'Notebook'**
+  String get libraryNewNotebook;
+
+  /// No description provided for @libraryNewWhiteboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Whiteboard'**
+  String get libraryNewWhiteboard;
+
+  /// No description provided for @libraryNewQuickNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick note'**
+  String get libraryNewQuickNote;
+
+  /// No description provided for @libraryImportPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Import PDF'**
+  String get libraryImportPdf;
+
+  /// No description provided for @libraryImportImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Import image'**
+  String get libraryImportImage;
+
+  /// No description provided for @libraryQuickNoteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick note - {date}'**
+  String libraryQuickNoteTitle(String date);
+
+  /// No description provided for @libraryWhiteboardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Whiteboard - {date}'**
+  String libraryWhiteboardTitle(String date);
+
+  /// No description provided for @libraryPdfReadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t read the PDF file'**
+  String get libraryPdfReadFailed;
+
+  /// No description provided for @libraryImageReadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t read the image file'**
+  String get libraryImageReadFailed;
+
+  /// No description provided for @libraryImageLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading image...'**
+  String get libraryImageLoading;
+
+  /// No description provided for @libraryImageTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Image is too large. Maximum size: 4096x4096'**
+  String get libraryImageTooLarge;
+
+  /// No description provided for @libraryPdfTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF is too large. Maximum size: 200 MB'**
+  String get libraryPdfTooLarge;
+
+  /// No description provided for @libraryPdfOpening.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening PDF...'**
+  String get libraryPdfOpening;
+
+  /// No description provided for @libraryPdfImportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t import the PDF'**
+  String get libraryPdfImportFailed;
+
+  /// No description provided for @libraryOpening.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening {title}'**
+  String libraryOpening(String title);
+
+  /// No description provided for @libraryOpeningWithPages.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening {title} ({pages})'**
+  String libraryOpeningWithPages(String title, String pages);
 }
 
 class _AppLocalizationsDelegate

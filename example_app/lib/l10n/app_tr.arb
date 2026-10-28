@@ -165,5 +165,52 @@
   "libraryPageRestored": "Sayfa geri yüklendi",
   "libraryPageRestoreFailed": "Sayfa geri yüklenemedi",
   "libraryDeletePageForeverMessage": "Bu sayfa kalıcı olarak silinecek. Bu işlem geri alınamaz!",
-  "libraryCopyTitle": "{title} (kopya)"
+  "libraryCopyTitle": "{title} (kopya)",
+  "libraryNewNotebook": "Not Defteri",
+  "libraryNewWhiteboard": "Beyaz Tahta",
+  "libraryNewQuickNote": "Hızlı Not",
+  "libraryImportPdf": "PDF İçe Aktar",
+  "libraryImportImage": "Resim İçe Aktar",
+  "libraryQuickNoteTitle": "Hızlı Not - {date}",
+  "@libraryQuickNoteTitle": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryWhiteboardTitle": "Beyaz Tahta - {date}",
+  "@libraryWhiteboardTitle": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryPdfReadFailed": "PDF dosyası okunamadı",
+  "libraryImageReadFailed": "Resim dosyası okunamadı",
+  "libraryImageLoading": "Resim yükleniyor...",
+  "libraryImageTooLarge": "Resim çok büyük! Maksimum boyut: 4096x4096",
+  "libraryPdfTooLarge": "PDF dosyası çok büyük! Maksimum boyut: 200MB",
+  "libraryPdfOpening": "PDF açılıyor...",
+  "libraryPdfImportFailed": "PDF import başarısız",
+  "libraryOpening": "{title} açılıyor",
+  "@libraryOpening": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryOpeningWithPages": "{title} açılıyor ({pages})",
+  "@libraryOpeningWithPages": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "pages": {
+        "type": "String"
+      }
+    }
+  }
 }

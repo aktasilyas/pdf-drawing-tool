@@ -11,6 +11,7 @@ import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/documents/domain/entities/trashed_page.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/screens/documents_screen.dart';
+import 'package:example_app/features/documents/presentation/widgets/library_header_parts.dart';
 import 'package:example_app/l10n/l10n.dart';
 
 import '../../../../helpers/a11y.dart';
@@ -127,6 +128,15 @@ void main() {
       await t.pumpAndSettle();
       expect(find.text(l10n.libraryEmptyTrashConfirmMessage), findsOneWidget);
       expectNoOverflow(t, 'empty-trash dialog');
+    });
+
+    testWidgets('$tag: new-document menu', (t) async {
+      final l10n = await pump(t, locale);
+      await t.tap(find.byType(LibraryNewButton));
+      await t.pumpAndSettle();
+      expect(find.text(l10n.libraryNewNotebook), findsOneWidget);
+      expect(find.text(l10n.libraryImportImage), findsOneWidget);
+      expectNoOverflow(t, 'new-document menu');
     });
 
     testWidgets('$tag: item menu sheet', (t) async {
