@@ -138,6 +138,9 @@ class DuplicateSelectionCommand implements DrawingCommand {
         isItalic: text.isItalic,
         isUnderline: text.isUnderline,
         alignment: text.alignment,
+        width: text.width,
+        height: text.height,
+        rotation: text.rotation,
       );
       newTextIds.add(newText.id);
       layer = layer.addText(newText);

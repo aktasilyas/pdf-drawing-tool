@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/panels/add_page_import_helper.dart';
 import 'package:drawing_ui/src/services/pdf_import_service.dart';
@@ -91,5 +93,26 @@ void main() {
     expect(pages, isEmpty);
     expect(failure?.error, PdfImportError.pagesUnreadable);
     expect(calls, 0);
+  });
+
+  testWidgets('an unreadable image reports onImageError and gives no pages',
+      (tester) async {
+    final dir = Directory.systemTemp.createTempSync('add_page_img_test');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    final garbage = File('${dir.path}/bad.png')..writeAsBytesSync([1, 2, 3]);
+    var reported = 0;
+
+    final pages = (await tester.runAsync(
+      () => importImageAsPage(
+        garbage.path,
+        0,
+        documentsRoot: dir.path,
+        onImageError: () => reported++,
+      ),
+    ))!;
+
+    expect(pages, isEmpty);
+    expect(reported, 1);
+    expect(Directory('${dir.path}/elyanotes_images').existsSync(), isFalse);
   });
 }

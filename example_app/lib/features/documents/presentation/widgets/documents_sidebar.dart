@@ -6,9 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/core/utils/logger.dart';
 import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/documents/presentation/l10n/library_labels.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
+import 'package:example_app/features/documents/presentation/widgets/folders_load_error_row.dart';
 import 'package:example_app/features/documents/presentation/widgets/sidebar_item.dart';
 import 'package:example_app/features/documents/presentation/widgets/folder_tile_art.dart';
 import 'package:example_app/l10n/l10n.dart';
@@ -80,7 +82,7 @@ class DocumentsSidebar extends ConsumerWidget {
           _buildFoldersHeader(context),
           Expanded(
             child: SingleChildScrollView(
-              child: _buildFoldersList(context, foldersAsync),
+              child: _buildFoldersList(context, ref, foldersAsync),
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -202,8 +204,8 @@ class DocumentsSidebar extends ConsumerWidget {
     );
   }
 
-  Widget _buildFoldersList(
-      BuildContext context, AsyncValue<List<dynamic>> foldersAsync) {
+  Widget _buildFoldersList(BuildContext context, WidgetRef ref,
+      AsyncValue<List<dynamic>> foldersAsync) {
     return foldersAsync.when(
       data: (folders) {
         final rootFolders = folders.where((f) => f.parentId == null).toList();
@@ -235,7 +237,12 @@ class DocumentsSidebar extends ConsumerWidget {
               child: CircularProgressIndicator(strokeWidth: 2)),
         ),
       ),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (e, st) {
+        logger.w('Folders failed to load', error: e, stackTrace: st);
+        return FoldersLoadErrorRow(
+          onRetry: () => ref.invalidate(foldersProvider),
+        );
+      },
     );
   }
 

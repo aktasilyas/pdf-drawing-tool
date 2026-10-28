@@ -1859,9 +1859,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get libraryMoveToFolderTitle => 'Move to folder';
 
   @override
-  String libraryFoldersLoadFailed(String error) {
-    return 'Couldn\'t load folders: $error';
-  }
+  String get libraryFoldersLoadFailed => 'Couldn\'t load folders';
 
   @override
   String get libraryFolderNameEmpty => 'Folder name can\'t be empty';

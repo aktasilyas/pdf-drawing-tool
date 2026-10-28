@@ -1,6 +1,3 @@
-import 'dart:io';
-import 'dart:ui' as ui;
-
 import 'package:drawing_core/drawing_core.dart';
 import 'package:flutter/material.dart' hide Page;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,6 +10,7 @@ import 'package:drawing_ui/src/panels/add_page_import_helper.dart';
 import 'package:drawing_ui/src/panels/add_page_panel_sections.dart';
 import 'package:drawing_ui/src/panels/add_page_panel_widgets.dart';
 import 'package:drawing_ui/src/panels/page_structure_undo.dart';
+import 'package:drawing_ui/src/services/image_page_import.dart';
 import 'package:drawing_ui/src/widgets/template_picker/template_picker.dart';
 
 /// Quick-access template IDs shown in the horizontal thumbnail strip.
@@ -138,26 +136,28 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
 
   Future<void> _addImagePage(ImageSource source) async {
     final strings = context.drawingStrings;
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final paths = ref.read(pdfPathResolverProvider);
     final picked =
         await ImagePicker().pickImage(source: source, imageQuality: 85);
     if (picked == null) return;
-    final appDir = await getApplicationDocumentsDirectory();
-    final dir = Directory('${appDir.path}/elyanotes_images');
-    if (!dir.existsSync()) dir.createSync(recursive: true);
-    final dest = '${dir.path}/${DateTime.now().microsecondsSinceEpoch}'
-        '.${picked.path.split('.').last}';
-    await File(picked.path).copy(dest);
-    final bytes = await File(dest).readAsBytes();
-    final codec = await ui.instantiateImageCodec(bytes);
-    final frame = await codec.getNextFrame();
-    if (!mounted) return;
-    _insertNewPage(
-      PageBackground(type: BackgroundType.pdf, pdfData: bytes, pdfPageIndex: 1),
-      strings: strings,
-      size: PageSize(
-          width: frame.image.width.toDouble(),
-          height: frame.image.height.toDouble()),
-    );
+    try {
+      final appDir = await getApplicationDocumentsDirectory();
+      final image = await importImagePage(
+        picked.path,
+        documentsRoot: appDir.path,
+        paths: paths,
+      );
+      if (!mounted) {
+        await discardImportedImagePage(image, paths: paths);
+        return;
+      }
+      _insertNewPage(image.background, strings: strings, size: image.size);
+    } on ImagePageImportException {
+      messenger?.showSnackBar(
+        SnackBar(content: Text(strings.errors.imageReadFailed)),
+      );
+    }
     if (mounted) widget.onClose();
   }
 
@@ -175,6 +175,9 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
       insertIndex: insertIdx,
       defaultPageSize: doc.settings.defaultPageSize,
       pdfPaths: ref.read(pdfPathResolverProvider),
+      onImageError: () => messenger?.showSnackBar(
+        SnackBar(content: Text(strings.errors.imageReadFailed)),
+      ),
       onError: (failure) => messenger?.showSnackBar(
         SnackBar(content: Text(failure.message(strings))),
       ),

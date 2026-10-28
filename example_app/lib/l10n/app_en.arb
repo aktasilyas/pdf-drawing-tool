@@ -962,14 +962,7 @@
   "libraryFolderManagement": "Folder management",
   "libraryMoveFolderTitle": "Move folder",
   "libraryMoveToFolderTitle": "Move to folder",
-  "libraryFoldersLoadFailed": "Couldn't load folders: {error}",
-  "@libraryFoldersLoadFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
+  "libraryFoldersLoadFailed": "Couldn't load folders",
   "libraryFolderNameEmpty": "Folder name can't be empty",
   "libraryFolderCreated": "Folder \"{name}\" created",
   "@libraryFolderCreated": {

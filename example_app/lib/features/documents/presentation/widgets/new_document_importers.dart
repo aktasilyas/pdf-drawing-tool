@@ -2,7 +2,16 @@ import 'package:flutter/material.dart' hide Page;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:drawing_core/drawing_core.dart' as drawing_core;
+import 'package:drawing_ui/drawing_ui.dart'
+    show
+        ImagePage,
+        ImagePageImportError,
+        ImagePageImportException,
+        discardImportedImagePage,
+        importImagePage,
+        pdfPathResolverProvider;
 import 'package:file_picker/file_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/l10n/l10n.dart';
 import 'package:example_app/core/utils/logger.dart';
@@ -11,7 +20,6 @@ import 'package:example_app/features/documents/presentation/providers/documents_
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/pdf_file_importer.dart';
 import 'package:example_app/features/premium/premium.dart';
-import 'dart:ui' as ui;
 
 /// PDF içe aktarma işlemini yönetir
 Future<void> importPdf(BuildContext context) async {
@@ -49,17 +57,18 @@ Future<void> importPdf(BuildContext context) async {
 /// Resim içe aktarma işlemini yönetir
 Future<void> importImage(BuildContext context) async {
   final l10n = context.l10n;
-  // 1. Resim seç
+  // 1. Resim seç (yalnızca yol; bayt okuma importImagePage'de)
   final result = await FilePicker.platform.pickFiles(
     type: FileType.image,
     allowMultiple: false,
-    withData: true,
+    withData: false,
   );
 
   if (result == null || result.files.isEmpty) return;
 
   final file = result.files.first;
-  if (file.bytes == null) {
+  final filePath = file.path;
+  if (filePath == null || filePath.isEmpty) {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.libraryImageReadFailed)),
@@ -86,19 +95,29 @@ Future<void> importImage(BuildContext context) async {
   );
 
   try {
-    // 3. Resim boyutunu al
-    final codec = await ui.instantiateImageCodec(file.bytes!);
-    final frame = await codec.getNextFrame();
-    final image = frame.image;
-    final imageWidth = image.width.toDouble();
-    final imageHeight = image.height.toDouble();
-
-    // Boyut kontrolü
-    if (imageWidth > 4096 || imageHeight > 4096) {
+    // 3. Doğrula, uygulama klasörüne kopyala, dosya referansı al
+    final paths = ProviderScope.containerOf(context, listen: false)
+        .read(pdfPathResolverProvider);
+    final ImagePage imagePage;
+    try {
+      imagePage = await importImagePage(
+        filePath,
+        documentsRoot: paths.documentsRoot ??
+            (await getApplicationDocumentsDirectory()).path,
+        paths: paths,
+        maxDimension: 4096,
+      );
+    } on ImagePageImportException catch (e) {
       if (context.mounted) {
-        Navigator.pop(context);
+        Navigator.of(context, rootNavigator: true).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.libraryImageTooLarge)),
+          SnackBar(
+            content: Text(
+              e.error == ImagePageImportError.tooLarge
+                  ? l10n.libraryImageTooLarge
+                  : l10n.libraryImageReadFailed,
+            ),
+          ),
         );
       }
       return;
@@ -109,20 +128,18 @@ Future<void> importImage(BuildContext context) async {
     final page = drawing_core.Page(
       id: 'page_${now.millisecondsSinceEpoch}_0',
       index: 0,
-      size: drawing_core.PageSize(width: imageWidth, height: imageHeight),
-      background: drawing_core.PageBackground(
-        type: drawing_core.BackgroundType.pdf,
-        color: 0xFFFFFFFF,
-        pdfData: file.bytes,
-        pdfPageIndex: 1,
-      ),
+      size: imagePage.size,
+      background: imagePage.background.copyWith(color: 0xFFFFFFFF),
       layers: [drawing_core.Layer.empty('Layer 1')],
       createdAt: now,
       updatedAt: now,
     );
 
     // 5. Doküman oluştur
-    if (!context.mounted) return;
+    if (!context.mounted) {
+      await discardImportedImagePage(imagePage, paths: paths);
+      return;
+    }
     final container = ProviderScope.containerOf(context);
     final controller = container.read(documentsControllerProvider.notifier);
     final folderId = container.read(currentFolderIdProvider);
@@ -139,6 +156,9 @@ Future<void> importImage(BuildContext context) async {
       pages: [page.toJson()],
       pageCount: 1,
     );
+    if (documentId == null) {
+      await discardImportedImagePage(imagePage, paths: paths);
+    }
 
     // Refresh providers to update folder counts and document lists
     if (documentId != null) {
