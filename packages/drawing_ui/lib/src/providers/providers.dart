@@ -29,19 +29,17 @@ export 'pdf_render_provider.dart'
         pdfThumbnailCacheProvider,
         renderThumbnail,
         pdfPageRenderProvider,
-        pdfBulkPrefetchProvider,
-        BulkPrefetchRequest,
         prefetchOnPageChange,
+        pdfAdjacentPrefetchProvider,
+        PdfAdjacentPrefetcher,
         visiblePdfPageProvider,
         currentPdfFilePathProvider,
         totalPdfPagesProvider,
         clearPdfCacheProvider,
         pdfCacheSizeProvider,
         pdfCacheSizeMBProvider,
-        pdfCacheCountProvider,
-        pdfRenderQueueProvider;
+        pdfCacheCountProvider;
 
-export 'pdf_prefetch_provider.dart';
 export 'canvas_dark_mode_provider.dart';
 export 'reader_mode_provider.dart';
 export 'sticker_provider.dart';

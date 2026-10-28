@@ -53,15 +53,6 @@ mixin DrawingScreenViewportSync on ConsumerState<DrawingScreen> {
   }
 
   void handleDocumentPageChange(core.DrawingDocument current) {
-    final hasPdfPages = current.pages.any((p) =>
-        p.background.type == core.BackgroundType.pdf &&
-        p.background.pdfFilePath != null);
-    if (hasPdfPages) {
-      ref.read(pdfPrefetchManagerProvider).prefetchAround(
-            currentPageIndex: current.currentPageIndex,
-            allPages: current.pages,
-          );
-    }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) recalculateCanvasTransform();
     });
