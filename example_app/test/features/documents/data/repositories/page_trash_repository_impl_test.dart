@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:example_app/core/core.dart';
+import 'package:example_app/core/core.dart' show Failure;
 import 'package:example_app/features/documents/documents.dart';
 import 'package:example_app/features/documents/domain/entities/trashed_page.dart';
 import '../../../../helpers/library_fixture.dart';
