@@ -2870,6 +2870,168 @@ abstract class AppLocalizations {
   /// **'Background color'**
   String get editorTemplateBackgroundColor;
 
+  /// No description provided for @editorCoverSolidNavy.
+  ///
+  /// In en, this message translates to:
+  /// **'Navy'**
+  String get editorCoverSolidNavy;
+
+  /// No description provided for @editorCoverSolidBurgundy.
+  ///
+  /// In en, this message translates to:
+  /// **'Burgundy'**
+  String get editorCoverSolidBurgundy;
+
+  /// No description provided for @editorCoverMinimalGray.
+  ///
+  /// In en, this message translates to:
+  /// **'Gray Frame'**
+  String get editorCoverMinimalGray;
+
+  /// No description provided for @editorCoverPatternDots.
+  ///
+  /// In en, this message translates to:
+  /// **'Dotted'**
+  String get editorCoverPatternDots;
+
+  /// No description provided for @editorCoverPatternLines.
+  ///
+  /// In en, this message translates to:
+  /// **'Lined'**
+  String get editorCoverPatternLines;
+
+  /// No description provided for @editorCoverGradientSunset.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunset'**
+  String get editorCoverGradientSunset;
+
+  /// No description provided for @editorCoverGradientOcean.
+  ///
+  /// In en, this message translates to:
+  /// **'Ocean'**
+  String get editorCoverGradientOcean;
+
+  /// No description provided for @editorCoverGradientForest.
+  ///
+  /// In en, this message translates to:
+  /// **'Forest'**
+  String get editorCoverGradientForest;
+
+  /// No description provided for @editorCoverGradientPurple.
+  ///
+  /// In en, this message translates to:
+  /// **'Lavender'**
+  String get editorCoverGradientPurple;
+
+  /// No description provided for @editorCoverImgKraft.
+  ///
+  /// In en, this message translates to:
+  /// **'Kraft'**
+  String get editorCoverImgKraft;
+
+  /// No description provided for @editorCoverImgGeometric.
+  ///
+  /// In en, this message translates to:
+  /// **'Geometric'**
+  String get editorCoverImgGeometric;
+
+  /// No description provided for @editorCoverImgTerrazzo.
+  ///
+  /// In en, this message translates to:
+  /// **'Terrazzo'**
+  String get editorCoverImgTerrazzo;
+
+  /// No description provided for @editorCoverImgDinosaur.
+  ///
+  /// In en, this message translates to:
+  /// **'Dinosaur'**
+  String get editorCoverImgDinosaur;
+
+  /// No description provided for @editorCoverImgSpace.
+  ///
+  /// In en, this message translates to:
+  /// **'Space'**
+  String get editorCoverImgSpace;
+
+  /// No description provided for @editorCoverImgFloral.
+  ///
+  /// In en, this message translates to:
+  /// **'Floral'**
+  String get editorCoverImgFloral;
+
+  /// No description provided for @editorCoverImgNavyGold.
+  ///
+  /// In en, this message translates to:
+  /// **'Navy Gold'**
+  String get editorCoverImgNavyGold;
+
+  /// No description provided for @editorCoverImgLeather.
+  ///
+  /// In en, this message translates to:
+  /// **'Leather'**
+  String get editorCoverImgLeather;
+
+  /// No description provided for @editorCoverLinenSage.
+  ///
+  /// In en, this message translates to:
+  /// **'Sage Linen'**
+  String get editorCoverLinenSage;
+
+  /// No description provided for @editorCoverLinenSand.
+  ///
+  /// In en, this message translates to:
+  /// **'Sand Linen'**
+  String get editorCoverLinenSand;
+
+  /// No description provided for @editorCoverLinenSlate.
+  ///
+  /// In en, this message translates to:
+  /// **'Slate Linen'**
+  String get editorCoverLinenSlate;
+
+  /// No description provided for @editorCoverLeatherOxblood.
+  ///
+  /// In en, this message translates to:
+  /// **'Oxblood Leather'**
+  String get editorCoverLeatherOxblood;
+
+  /// No description provided for @editorCoverLeatherCognac.
+  ///
+  /// In en, this message translates to:
+  /// **'Cognac Leather'**
+  String get editorCoverLeatherCognac;
+
+  /// No description provided for @editorCoverLeatherNavy.
+  ///
+  /// In en, this message translates to:
+  /// **'Navy Leather'**
+  String get editorCoverLeatherNavy;
+
+  /// No description provided for @editorCoverKraftNatural.
+  ///
+  /// In en, this message translates to:
+  /// **'Natural Kraft'**
+  String get editorCoverKraftNatural;
+
+  /// No description provided for @editorCoverKraftCharcoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Charcoal Kraft'**
+  String get editorCoverKraftCharcoal;
+
+  /// No description provided for @editorCoverFeltMustard.
+  ///
+  /// In en, this message translates to:
+  /// **'Mustard Felt'**
+  String get editorCoverFeltMustard;
+
+  /// No description provided for @editorCoverFeltDustyRose.
+  ///
+  /// In en, this message translates to:
+  /// **'Dusty Rose Felt'**
+  String get editorCoverFeltDustyRose;
+
   /// No description provided for @editorErrorExportStorageFull.
   ///
   /// In en, this message translates to:

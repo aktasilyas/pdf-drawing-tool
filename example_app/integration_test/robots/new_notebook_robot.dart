@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:drawing_core/drawing_core.dart' show Cover, Template;
+import 'package:drawing_ui/drawing_ui.dart' show CoverPreviewWidget;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -49,9 +50,12 @@ class NewNotebookRobot {
     final cards = find.byType(TemplatePreviewCard);
     await tester.pumpUntilFound(cards);
     await tester.tapAndWait(cards.first);
+    // By cover id, not label: cover names follow the device locale.
     await tester.tapAndWait(find.descendant(
       of: find.byType(CoverGridView),
-      matching: find.text(cover.name),
+      matching: find.byWidgetPredicate(
+        (w) => w is CoverPreviewWidget && w.cover.id == cover.id,
+      ),
     ));
     await tester.tapAndWait(cards.last);
     final templateItem = find.byWidgetPredicate(

@@ -76,6 +76,40 @@ class AppTemplateStrings extends TemplateStrings {
   String categoryName(TemplateCategory category) =>
       _isTurkish ? category.displayName : category.displayNameEn;
 
+  // Keyed by the persisted cover id (CoverRegistry.all); a test fails when
+  // a registry cover has no case here.
+  @override
+  String coverName(Cover cover) => switch (cover.id) {
+        'solid_navy' => _l10n.editorCoverSolidNavy,
+        'solid_burgundy' => _l10n.editorCoverSolidBurgundy,
+        'minimal_gray' => _l10n.editorCoverMinimalGray,
+        'pattern_dots' => _l10n.editorCoverPatternDots,
+        'pattern_lines' => _l10n.editorCoverPatternLines,
+        'gradient_sunset' => _l10n.editorCoverGradientSunset,
+        'gradient_ocean' => _l10n.editorCoverGradientOcean,
+        'gradient_forest' => _l10n.editorCoverGradientForest,
+        'gradient_purple' => _l10n.editorCoverGradientPurple,
+        'img_kraft' => _l10n.editorCoverImgKraft,
+        'img_geometric' => _l10n.editorCoverImgGeometric,
+        'img_terrazzo' => _l10n.editorCoverImgTerrazzo,
+        'img_dinosaur' => _l10n.editorCoverImgDinosaur,
+        'img_space' => _l10n.editorCoverImgSpace,
+        'img_floral' => _l10n.editorCoverImgFloral,
+        'img_navy_gold' => _l10n.editorCoverImgNavyGold,
+        'img_leather' => _l10n.editorCoverImgLeather,
+        'linen_sage' => _l10n.editorCoverLinenSage,
+        'linen_sand' => _l10n.editorCoverLinenSand,
+        'linen_slate' => _l10n.editorCoverLinenSlate,
+        'leather_oxblood' => _l10n.editorCoverLeatherOxblood,
+        'leather_cognac' => _l10n.editorCoverLeatherCognac,
+        'leather_navy' => _l10n.editorCoverLeatherNavy,
+        'kraft_natural' => _l10n.editorCoverKraftNatural,
+        'kraft_charcoal' => _l10n.editorCoverKraftCharcoal,
+        'felt_mustard' => _l10n.editorCoverFeltMustard,
+        'felt_dusty_rose' => _l10n.editorCoverFeltDustyRose,
+        _ => cover.name,
+      };
+
   // Same rule as the library's `localizedName`; the editor must not import
   // documents/presentation.
   bool get _isTurkish => _l10n.localeName.startsWith('tr');

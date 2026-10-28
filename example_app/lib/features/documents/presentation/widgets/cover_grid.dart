@@ -143,7 +143,7 @@ class _CoverGridItem extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            cover.name,
+            context.drawingStrings.templates.coverName(cover),
             style: AppTypography.caption.copyWith(
               color: isSelected ? palette.accent : palette.textMuted,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,

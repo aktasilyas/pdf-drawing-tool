@@ -34,6 +34,10 @@ abstract class TemplateStrings {
   /// Display name of a template category in the active language.
   String categoryName(TemplateCategory category);
 
+  /// Display name of a notebook cover in the active language, keyed by the
+  /// persisted [Cover.id]; unknown ids fall back to [Cover.name].
+  String coverName(Cover cover);
+
   /// Every getter by name, for drift tests.
   Map<String, String> toMap() => {
         'allCategories': allCategories,
@@ -58,6 +62,7 @@ abstract class TemplateStrings {
         'backgroundColor': backgroundColor,
         'templateName': templateName(TemplateRegistry.blank),
         'categoryName': categoryName(TemplateCategory.basic),
+        'coverName': coverName(CoverRegistry.defaultCover),
       };
 }
 
@@ -130,4 +135,22 @@ class TemplateStringsTr extends TemplateStrings {
 
   @override
   String categoryName(TemplateCategory category) => category.displayName;
+
+  // Legacy registry covers already carry Turkish names; the family covers
+  // carry English ones in drawing_core.
+  static const _familyCoverNames = {
+    'linen_sage': 'Adaçayı Keten',
+    'linen_sand': 'Kum Keten',
+    'linen_slate': 'Arduvaz Keten',
+    'leather_oxblood': 'Vişne Deri',
+    'leather_cognac': 'Konyak Deri',
+    'leather_navy': 'Lacivert Deri',
+    'kraft_natural': 'Doğal Kraft',
+    'kraft_charcoal': 'Füme Kraft',
+    'felt_mustard': 'Hardal Keçe',
+    'felt_dusty_rose': 'Gül Kurusu Keçe',
+  };
+
+  @override
+  String coverName(Cover cover) => _familyCoverNames[cover.id] ?? cover.name;
 }
