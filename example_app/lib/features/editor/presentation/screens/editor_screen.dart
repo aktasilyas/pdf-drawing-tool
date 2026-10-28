@@ -156,6 +156,7 @@ class EditorScreen extends ConsumerWidget {
     ref.invalidate(documentProvider);
     ref.invalidate(pageManagerProvider);
     ref.invalidate(autoSaveProvider);
+    ref.invalidate(saveDocumentUseCaseProvider);
     ref.invalidate(hasUnsavedChangesProvider);
     ref.invalidate(saveFailureProvider);
     ref.invalidate(pageTrashCallbackProvider);

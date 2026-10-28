@@ -1,4 +1,5 @@
 import 'package:drawing_core/drawing_core.dart';
+import 'package:example_app/features/editor/domain/usecases/page_json_cache.dart';
 
 /// Builds `document.toJson()` without one long UI-isolate stall.
 ///
@@ -20,7 +21,17 @@ class DocumentJsonSlicer {
   final int sliceWeight;
   final Duration sliceBudget;
 
-  Future<Map<String, dynamic>> toJson(DrawingDocument document) async {
+  /// With a [cache], multi-page documents always go page by page and the
+  /// `pages` entry holds already-encoded `EncodedJson` text per page
+  /// (unchanged pages are not converted or encoded again). Without one the
+  /// result is the plain map `toJson()` returns.
+  Future<Map<String, dynamic>> toJson(
+    DrawingDocument document, {
+    PageJsonCache? cache,
+  }) async {
+    if (cache != null && document.isMultiPage && document.pages.isNotEmpty) {
+      return _toCachedJson(document, cache);
+    }
     if (!document.isMultiPage || weightOf(document) < sliceWeight) {
       return document.toJson();
     }
@@ -38,6 +49,28 @@ class DocumentJsonSlicer {
       }
     }
     json['pages'] = pageJson;
+    return json;
+  }
+
+  Future<Map<String, dynamic>> _toCachedJson(
+    DrawingDocument document,
+    PageJsonCache cache,
+  ) async {
+    final pages = document.pages;
+    // Keeps toJson()'s key order without converting a real page.
+    final json = document
+        .copyWith(pages: [pages.first.copyWith(layers: const [])]).toJson();
+    final encoded = <Object>[];
+    final slice = Stopwatch()..start();
+    for (final page in pages) {
+      encoded.add(cache.encode(page));
+      if (slice.elapsed >= sliceBudget) {
+        // A timer, not a microtask, so frames can run in between.
+        await Future<void>.delayed(Duration.zero);
+        slice.reset();
+      }
+    }
+    json['pages'] = encoded;
     return json;
   }
 
