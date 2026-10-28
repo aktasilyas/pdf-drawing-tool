@@ -5,9 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/core/utils/logger.dart';
 import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/documents/domain/entities/folder.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
+import 'package:example_app/features/documents/presentation/widgets/documents_error_views.dart';
 import 'package:example_app/features/documents/presentation/providers/move_to_folder_actions.dart';
 import 'package:example_app/features/documents/presentation/widgets/move_to_folder_create_form.dart';
 import 'package:example_app/features/documents/presentation/widgets/move_to_folder_list.dart';
@@ -68,7 +70,7 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
                   data: (folders) => _buildFolderList(folders),
                   loading: () =>
                       const Center(child: CircularProgressIndicator()),
-                  error: (e, _) => _buildError(e),
+                  error: (e, st) => _buildError(e, st),
                 ),
               ),
               const AppDivider(),
@@ -114,18 +116,15 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
         onSelected: (id) => setState(() => _selectedFolderId = id),
       );
 
-  Widget _buildError(Object error) {
-    final textSecondary = context.palette.textMuted;
-    return Center(
-      child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(mainAxisSize: MainAxisSize.min, children: [
-            const Icon(Icons.error_outline,
-                size: AppIconSize.emptyState, color: AppColors.error),
-            const SizedBox(height: AppSpacing.lg),
-            Text(context.l10n.libraryFoldersLoadFailed('$error'),
-                style: AppTypography.bodyMedium.copyWith(color: textSecondary)),
-          ])),
+  Widget _buildError(Object error, StackTrace stackTrace) {
+    logger.w('Folders failed to load', error: error, stackTrace: stackTrace);
+    return Padding(
+      padding: const EdgeInsets.all(AppSpacing.lg),
+      child: DocumentsErrorView(
+        error: error,
+        message: context.l10n.libraryFoldersLoadFailed,
+        onRetry: () => ref.invalidate(foldersProvider),
+      ),
     );
   }
 

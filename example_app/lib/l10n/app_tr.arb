@@ -583,7 +583,7 @@
   "libraryFolderManagement": "Klasör Yönetimi",
   "libraryMoveFolderTitle": "Klasörü Taşı",
   "libraryMoveToFolderTitle": "Klasöre Taşı",
-  "libraryFoldersLoadFailed": "Klasörler yüklenemedi: {error}",
+  "libraryFoldersLoadFailed": "Klasörler yüklenemedi",
   "libraryFolderNameEmpty": "Klasör adı boş olamaz",
   "libraryFolderCreated": "Klasör \"{name}\" oluşturuldu",
   "libraryRootFolders": "Ana Klasörler",
