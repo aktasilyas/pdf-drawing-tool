@@ -87,8 +87,7 @@ class OrphanFileSweeper {
     }
 
     final trashed = _db.trashedPages;
-    final trashedIds = await (_db.selectOnly(trashed)
-          ..addColumns([trashed.id]))
+    final trashedIds = await (_db.selectOnly(trashed)..addColumns([trashed.id]))
         .map((row) => row.read(trashed.id)!)
         .get();
     for (final id in trashedIds) {

@@ -63,8 +63,11 @@ void main() {
         ],
       };
 
-  Future<void> saveWithImage(String id, String path) =>
-      saveRaw(id, json.encode({'pages': [elementPage(path)]}));
+  Future<void> saveWithImage(String id, String path) => saveRaw(
+      id,
+      json.encode({
+        'pages': [elementPage(path)]
+      }));
 
   test('deletes unreferenced images and PDFs and returns the count', () async {
     final img = file('elyanotes_images/orphan.png');
@@ -132,8 +135,7 @@ void main() {
     expect(img.existsSync(), isTrue);
   });
 
-  test('keeps files referenced by legacy absolute and Windows paths',
-      () async {
+  test('keeps files referenced by legacy absolute and Windows paths', () async {
     final unix = file('elyanotes_images/unix.png');
     final win = file('pdfs/win.pdf');
     final doc = await create('A');
@@ -170,8 +172,7 @@ void main() {
     expect(img.existsSync(), isTrue);
   });
 
-  test('never touches other directories, subdirectories or symlinks',
-      () async {
+  test('never touches other directories, subdirectories or symlinks', () async {
     final root = file('root.png');
     final other = file('somewhere_else.png');
     Directory('${dir.path}/pdfs/sub').createSync();
