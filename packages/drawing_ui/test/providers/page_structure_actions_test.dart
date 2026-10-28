@@ -279,8 +279,7 @@ void main() {
     test('undo sends a page that gained ink to the page trash', () async {
       load(2, current: 0);
       final trashed = <Page>[];
-      container.read(pageTrashCallbackProvider.notifier).state =
-          (i, p) async {
+      container.read(pageTrashCallbackProvider.notifier).state = (i, p) async {
         trashed.add(p);
         return 't1';
       };
