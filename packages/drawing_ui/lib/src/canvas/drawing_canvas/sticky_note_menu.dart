@@ -13,7 +13,10 @@ mixin _StickyNoteMenu on DrawingCanvasGestureHandlers<DrawingCanvas> {
   }
 
   void _handleStickyNoteColorChange(core.StickyNote note, int color) {
-    final updated = note.copyWith(color: color);
+    // Start from the document's current note (erase/undo may have changed it).
+    final current = ref.read(selectedStickyNoteProvider);
+    if (current == null || current.id != note.id) return;
+    final updated = current.copyWith(color: color);
     final document = ref.read(documentProvider);
     final command = core.UpdateStickyNoteCommand(
       layerIndex: document.activeLayerIndex,
@@ -28,10 +31,10 @@ mixin _StickyNoteMenu on DrawingCanvasGestureHandlers<DrawingCanvas> {
     return Builder(
       builder: (context) {
         final noteState = ref.watch(stickyNotePlacementProvider);
-        if (!noteState.showMenu || noteState.selectedNote == null) {
+        final sn = ref.watch(selectedStickyNoteProvider);
+        if (!noteState.showMenu || sn == null) {
           return const SizedBox.shrink();
         }
-        final sn = noteState.selectedNote!;
         final centerX =
             (sn.x + sn.width / 2) * transform.zoom + transform.offset.dx;
         final screenY = sn.y * transform.zoom + transform.offset.dy - 50;

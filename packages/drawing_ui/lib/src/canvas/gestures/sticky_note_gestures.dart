@@ -57,14 +57,6 @@ mixin _StickyNoteGestures<T extends ConsumerStatefulWidget>
       newNote: updated,
     );
     ref.read(historyManagerProvider.notifier).execute(command);
-
-    // Sync the selected note so overrideNote renders the updated version
-    final placement = ref.read(stickyNotePlacementProvider);
-    if (placement.selectedNote?.id == note.id) {
-      ref
-          .read(stickyNotePlacementProvider.notifier)
-          .updateSelectedNote(updated);
-    }
   }
 
   /// Converts a shape to relative coordinates and adds it to the sticky note.
@@ -98,21 +90,19 @@ mixin _StickyNoteGestures<T extends ConsumerStatefulWidget>
       newNote: updated,
     );
     ref.read(historyManagerProvider.notifier).execute(command);
-
-    // Sync the selected note so overrideNote renders the updated version
-    final placement = ref.read(stickyNotePlacementProvider);
-    if (placement.selectedNote?.id == note.id) {
-      ref
-          .read(stickyNotePlacementProvider.notifier)
-          .updateSelectedNote(updated);
-    }
   }
 
   /// Minimizes (if not already) and deselects a sticky note.
+  ///
+  /// Starts from the document's current version of the note, so erasures or
+  /// undo/redo since it was selected are kept.
   void _minimizeAndDeselectNote(core.StickyNote note) {
-    if (!note.minimized) {
-      final document = ref.read(documentProvider);
-      final updated = note.copyWith(minimized: true);
+    final document = ref.read(documentProvider);
+    final current = document.layers.isEmpty
+        ? null
+        : document.layers[document.activeLayerIndex].getStickyNoteById(note.id);
+    if (current != null && !current.minimized) {
+      final updated = current.copyWith(minimized: true);
       final command = core.UpdateStickyNoteCommand(
         layerIndex: document.activeLayerIndex,
         newNote: updated,
@@ -128,19 +118,17 @@ mixin _StickyNoteGestures<T extends ConsumerStatefulWidget>
     final canvasPoint =
         (event.localPosition - transform.offset) / transform.zoom;
     final currentNoteState = ref.read(stickyNotePlacementProvider);
+    final selected = ref.read(selectedStickyNoteProvider);
 
     // If a selected (non-minimized) note is showing resize handles,
     // check if tap is inside the note → let handles handle it.
     // If outside → minimize and deselect, then check other notes.
-    if (currentNoteState.selectedNote != null &&
-        !currentNoteState.showMenu &&
-        !currentNoteState.selectedNote!.minimized) {
-      if (currentNoteState.selectedNote!
-          .containsPoint(canvasPoint.dx, canvasPoint.dy, 0)) {
+    if (selected != null && !currentNoteState.showMenu && !selected.minimized) {
+      if (selected.containsPoint(canvasPoint.dx, canvasPoint.dy, 0)) {
         return; // Inside note → resize handles handle it
       }
       // Outside note → minimize and deselect
-      _minimizeAndDeselectNote(currentNoteState.selectedNote!);
+      _minimizeAndDeselectNote(selected);
     }
 
     final notes = ref.read(activeLayerStickyNotesProvider);
