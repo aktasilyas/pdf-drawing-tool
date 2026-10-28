@@ -1774,4 +1774,43 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get libraryColor => 'Color';
+
+  @override
+  String get libraryFolderColorEmerald => 'Emerald';
+
+  @override
+  String get libraryFolderColorPurple => 'Purple';
+
+  @override
+  String get libraryFolderColorPink => 'Pink';
+
+  @override
+  String get libraryFolderColorRed => 'Red';
+
+  @override
+  String get libraryFolderColorOrange => 'Orange';
+
+  @override
+  String get libraryFolderColorAmber => 'Amber';
+
+  @override
+  String get libraryFolderColorGreen => 'Green';
+
+  @override
+  String get libraryFolderColorTeal => 'Teal';
+
+  @override
+  String get libraryFolderColorCyan => 'Cyan';
+
+  @override
+  String get libraryFolderColorBlue => 'Blue';
+
+  @override
+  String get libraryFolderColorGray => 'Gray';
+
+  @override
+  String get libraryFolderColorStone => 'Stone';
+
+  @override
+  String get libraryColorSwatchSelected => 'Selected';
 }

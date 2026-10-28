@@ -6,6 +6,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/features/documents/presentation/widgets/folder_color_names.dart';
 import 'package:example_app/l10n/l10n.dart';
 
 /// Folder color picker dialog
@@ -34,11 +35,13 @@ class FolderColorPicker extends StatelessWidget {
           spacing: AppSpacing.md,
           runSpacing: AppSpacing.md,
           alignment: WrapAlignment.center,
-          children: AppColors.folderColors.map((color) {
+          children: AppColors.folderColors.indexed.map((entry) {
+            final color = entry.$2;
             final colorValue = color.toARGB32();
             final isSelected = colorValue == currentColor;
             return _ColorItem(
               color: color,
+              label: folderColorName(l10n, entry.$1),
               isSelected: isSelected,
               onTap: () => Navigator.of(context).pop(colorValue),
             );
@@ -58,48 +61,57 @@ class FolderColorPicker extends StatelessWidget {
 /// Individual color item in the picker
 class _ColorItem extends StatelessWidget {
   final Color color;
+  final String label;
   final bool isSelected;
   final VoidCallback onTap;
 
   const _ColorItem({
     required this.color,
+    required this.label,
     required this.isSelected,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return Semantics(
+      label: label,
+      button: true,
+      selected: isSelected,
+      excludeSemantics: true,
       onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        width: 48,
-        height: 48,
-        decoration: BoxDecoration(
-          color: color,
-          shape: BoxShape.circle,
-          border: Border.all(
-            color:
-                isSelected ? context.palette.textPrimary : Colors.transparent,
-            width: 3,
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+            border: Border.all(
+              color:
+                  isSelected ? context.palette.textPrimary : Colors.transparent,
+              width: 3,
+            ),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: color.withValues(alpha: 0.4),
+                      blurRadius: 8,
+                      spreadRadius: 2,
+                    ),
+                  ]
+                : null,
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: color.withValues(alpha: 0.4),
-                    blurRadius: 8,
-                    spreadRadius: 2,
-                  ),
-                ]
+          child: isSelected
+              ? const Icon(
+                  Icons.check,
+                  color: AppColors.onPrimary,
+                  size: AppIconSize.md,
+                )
               : null,
         ),
-        child: isSelected
-            ? const Icon(
-                Icons.check,
-                color: AppColors.onPrimary,
-                size: AppIconSize.md,
-              )
-            : null,
       ),
     );
   }

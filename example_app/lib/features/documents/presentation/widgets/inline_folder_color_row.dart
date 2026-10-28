@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/features/documents/presentation/widgets/folder_color_names.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// Horizontal row of folder colour swatches used by the inline
 /// "new folder" section of the move-to-folder dialog.
@@ -22,40 +24,51 @@ class InlineFolderColorRow extends StatelessWidget {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
-        children: AppColors.folderColors.map((color) {
+        children: AppColors.folderColors.indexed.map((entry) {
+          final color = entry.$2;
           final isSelected = color.toARGB32() == selectedColorValue;
-          return Padding(
-            padding: const EdgeInsets.only(right: AppSpacing.sm),
+          return Semantics(
+            label: folderColorName(context.l10n, entry.$1),
+            button: true,
+            selected: isSelected,
+            excludeSemantics: true,
+            onTap: () => onChanged(color.toARGB32()),
             child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
               onTap: () => onChanged(color.toARGB32()),
               child: Container(
-                width: 32,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: color,
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color:
-                        isSelected ? AppColors.onPrimary : Colors.transparent,
-                    width: 2.5,
+                width: AppSpacing.minTouchTarget,
+                height: AppSpacing.minTouchTarget,
+                alignment: Alignment.center,
+                child: Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: color,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color:
+                          isSelected ? AppColors.onPrimary : Colors.transparent,
+                      width: 2.5,
+                    ),
+                    boxShadow: isSelected
+                        ? [
+                            BoxShadow(
+                              color: color.withValues(alpha: 0.5),
+                              blurRadius: 6,
+                              spreadRadius: 1,
+                            ),
+                          ]
+                        : null,
                   ),
-                  boxShadow: isSelected
-                      ? [
-                          BoxShadow(
-                            color: color.withValues(alpha: 0.5),
-                            blurRadius: 6,
-                            spreadRadius: 1,
-                          ),
-                        ]
+                  child: isSelected
+                      ? const Icon(
+                          Icons.check,
+                          color: AppColors.onPrimary,
+                          size: AppIconSize.xs,
+                        )
                       : null,
                 ),
-                child: isSelected
-                    ? const Icon(
-                        Icons.check,
-                        color: AppColors.onPrimary,
-                        size: AppIconSize.xs,
-                      )
-                    : null,
               ),
             ),
           );

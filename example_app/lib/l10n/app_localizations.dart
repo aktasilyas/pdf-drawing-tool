@@ -3217,6 +3217,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Color'**
   String get libraryColor;
+
+  /// No description provided for @libraryFolderColorEmerald.
+  ///
+  /// In en, this message translates to:
+  /// **'Emerald'**
+  String get libraryFolderColorEmerald;
+
+  /// No description provided for @libraryFolderColorPurple.
+  ///
+  /// In en, this message translates to:
+  /// **'Purple'**
+  String get libraryFolderColorPurple;
+
+  /// No description provided for @libraryFolderColorPink.
+  ///
+  /// In en, this message translates to:
+  /// **'Pink'**
+  String get libraryFolderColorPink;
+
+  /// No description provided for @libraryFolderColorRed.
+  ///
+  /// In en, this message translates to:
+  /// **'Red'**
+  String get libraryFolderColorRed;
+
+  /// No description provided for @libraryFolderColorOrange.
+  ///
+  /// In en, this message translates to:
+  /// **'Orange'**
+  String get libraryFolderColorOrange;
+
+  /// No description provided for @libraryFolderColorAmber.
+  ///
+  /// In en, this message translates to:
+  /// **'Amber'**
+  String get libraryFolderColorAmber;
+
+  /// No description provided for @libraryFolderColorGreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Green'**
+  String get libraryFolderColorGreen;
+
+  /// No description provided for @libraryFolderColorTeal.
+  ///
+  /// In en, this message translates to:
+  /// **'Teal'**
+  String get libraryFolderColorTeal;
+
+  /// No description provided for @libraryFolderColorCyan.
+  ///
+  /// In en, this message translates to:
+  /// **'Cyan'**
+  String get libraryFolderColorCyan;
+
+  /// No description provided for @libraryFolderColorBlue.
+  ///
+  /// In en, this message translates to:
+  /// **'Blue'**
+  String get libraryFolderColorBlue;
+
+  /// No description provided for @libraryFolderColorGray.
+  ///
+  /// In en, this message translates to:
+  /// **'Gray'**
+  String get libraryFolderColorGray;
+
+  /// No description provided for @libraryFolderColorStone.
+  ///
+  /// In en, this message translates to:
+  /// **'Stone'**
+  String get libraryFolderColorStone;
+
+  /// No description provided for @libraryColorSwatchSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected'**
+  String get libraryColorSwatchSelected;
 }
 
 class _AppLocalizationsDelegate
