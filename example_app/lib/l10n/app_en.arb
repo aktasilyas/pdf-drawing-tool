@@ -964,6 +964,8 @@
   "libraryMoveFolderTitle": "Move folder",
   "libraryMoveToFolderTitle": "Move to folder",
   "libraryFoldersLoadFailed": "Couldn't load folders",
+  "libraryLoadFailed": "Couldn't load your notes",
+  "libraryTrashLoadFailed": "Couldn't load the trash",
   "libraryFolderNameEmpty": "Folder name can't be empty",
   "libraryFolderCreated": "Folder \"{name}\" created",
   "@libraryFolderCreated": {

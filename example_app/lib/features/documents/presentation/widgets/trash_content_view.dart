@@ -7,6 +7,7 @@ import 'package:example_app/features/documents/presentation/widgets/document_car
 import 'package:example_app/features/documents/presentation/widgets/documents_empty_states.dart';
 import 'package:example_app/features/documents/presentation/widgets/documents_error_views.dart';
 import 'package:example_app/features/documents/presentation/widgets/trashed_page_card.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// Renders combined trash items (documents + pages) in a grid.
 class TrashContentView extends ConsumerWidget {
@@ -27,8 +28,11 @@ class TrashContentView extends ConsumerWidget {
 
     return itemsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => DocumentsErrorView(
-        error: error,
+      error: (error, st) => libraryLoadErrorView(
+        'Trash',
+        error,
+        st,
+        message: context.l10n.libraryTrashLoadFailed,
         onRetry: () => ref.invalidate(trashItemsProvider),
       ),
       data: (items) {
