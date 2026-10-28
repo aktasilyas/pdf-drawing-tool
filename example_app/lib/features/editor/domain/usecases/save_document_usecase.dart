@@ -37,30 +37,19 @@ class SaveDocumentUseCase {
     try {
       _pageCache.retainFor(document.id);
 
-      // 1. Clean cover pages (remove drawings from cover pages). A cover
-      // without drawings keeps its identity so its cached JSON stays valid.
-      final cleanedPages = document.pages.map((page) {
-        if (page.isCover && !page.isEmpty) {
-          return page.clearDrawings();
-        }
-        return page;
-      }).toList();
+      // Cover pages are saved like any other page: ink, shapes and text
+      // written on a cover are user content (#423).
+      final updated = document.copyWith(updatedAt: DateTime.now());
 
-      // Create cleaned document
-      final cleanedDocument = document.copyWith(
-        pages: cleanedPages,
-        updatedAt: DateTime.now(),
-      );
-
-      // 2. Serialize document to JSON
+      // 1. Serialize document to JSON
       // Large documents are converted page by page, yielding to frames.
-      final content = await _slicer.toJson(cleanedDocument, cache: _pageCache);
+      final content = await _slicer.toJson(updated, cache: _pageCache);
 
-      // 3. Extract coverId from cover page for metadata sync
+      // 2. Extract coverId from cover page for metadata sync
       final coverPage = document.pages.where((p) => p.isCover).firstOrNull;
       final coverId = coverPage?.background.coverId;
 
-      // 4. Save to DB
+      // 3. Save to DB
       final result = await _repository.saveDocumentContent(
         id: document.id,
         content: content,

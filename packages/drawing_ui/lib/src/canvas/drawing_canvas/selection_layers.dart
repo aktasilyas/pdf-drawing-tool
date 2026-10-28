@@ -76,7 +76,7 @@ mixin _CanvasSelectionLayers
     return Builder(
       builder: (context) {
         final noteState = ref.watch(stickyNotePlacementProvider);
-        final selected = noteState.selectedNote;
+        final selected = ref.watch(selectedStickyNoteProvider);
         if (selected == null || noteState.isMoving || selected.minimized) {
           return const SizedBox.shrink();
         }
