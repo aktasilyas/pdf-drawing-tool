@@ -1,5 +1,14 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:drawing_core/drawing_core.dart'
-    show TemplateCategory, TemplateCategoryExtension, TemplateRegistry;
+    show
+        Cover,
+        CoverRegistry,
+        CoverStyle,
+        TemplateCategory,
+        TemplateCategoryExtension,
+        TemplateRegistry;
 import 'package:drawing_ui/drawing_ui.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -174,6 +183,67 @@ void main() {
         TemplateCategory.basic.displayNameEn);
     expect(tr.templates.categoryName(TemplateCategory.basic),
         TemplateCategory.basic.displayName);
+  });
+
+  group('cover names', () {
+    final en = AppDrawingStrings(lookupAppLocalizations(const Locale('en')));
+    final tr = AppDrawingStrings(lookupAppLocalizations(const Locale('tr')));
+
+    Map<String, dynamic> arb(String code) =>
+        jsonDecode(File('lib/l10n/app_$code.arb').readAsStringSync())
+            as Map<String, dynamic>;
+
+    String keyFor(Cover cover) => 'editorCover${cover.id.split('_').map(
+          (w) => '${w[0].toUpperCase()}${w.substring(1)}',
+        ).join()}';
+
+    test('every registry cover has an ARB key that coverName reads', () {
+      final enArb = arb('en');
+      final trArb = arb('tr');
+      for (final cover in CoverRegistry.all) {
+        final key = keyFor(cover);
+        expect(enArb[key], isA<String>(), reason: '$key missing in en');
+        expect(trArb[key], isA<String>(), reason: '$key missing in tr');
+        expect(en.templates.coverName(cover), enArb[key], reason: cover.id);
+        expect(tr.templates.coverName(cover), trArb[key], reason: cover.id);
+      }
+    });
+
+    test('tr cover names equal the drawing_ui Turkish default', () {
+      for (final cover in CoverRegistry.all) {
+        expect(tr.templates.coverName(cover),
+            fallback.templates.coverName(cover),
+            reason: cover.id);
+      }
+    });
+
+    test('existing Turkish registry names are unchanged', () {
+      final legacy = CoverRegistry.all
+          .where((c) => !CoverRegistry.family.any((f) => f.id == c.id));
+      expect(legacy, isNotEmpty);
+      for (final cover in legacy) {
+        expect(tr.templates.coverName(cover), cover.name, reason: cover.id);
+      }
+    });
+
+    test('family covers are translated', () {
+      for (final cover in CoverRegistry.family) {
+        expect(en.templates.coverName(cover), cover.name, reason: cover.id);
+        expect(tr.templates.coverName(cover), isNot(cover.name),
+            reason: cover.id);
+      }
+    });
+
+    test('unknown ids fall back to Cover.name', () {
+      const unknown = Cover(
+        id: 'unknown_cover',
+        name: 'Mystery',
+        style: CoverStyle.solid,
+        primaryColor: 0xFF000000,
+      );
+      expect(en.templates.coverName(unknown), 'Mystery');
+      expect(tr.templates.coverName(unknown), 'Mystery');
+    });
   });
 
   test('equality follows the locale', () {

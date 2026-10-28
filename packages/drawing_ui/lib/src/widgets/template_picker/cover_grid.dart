@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'package:drawing_ui/src/widgets/cover_preview_widget.dart';
 
@@ -66,11 +67,12 @@ class _CoverCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+    final name = context.drawingStrings.templates.coverName(cover);
 
     return Semantics(
       button: true,
       selected: isSelected,
-      label: cover.name,
+      label: name,
       excludeSemantics: true,
       child: GestureDetector(
         onTap: onTap,
@@ -137,7 +139,7 @@ class _CoverCard extends StatelessWidget {
                         const BorderRadius.vertical(bottom: Radius.circular(7)),
                   ),
                   child: Text(
-                    cover.name,
+                    name,
                     style: theme.textTheme.labelSmall?.copyWith(
                       fontSize: 10,
                       color: cs.onSurface,
