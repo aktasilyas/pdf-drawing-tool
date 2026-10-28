@@ -211,8 +211,8 @@ void main() {
 
     test('tr cover names equal the drawing_ui Turkish default', () {
       for (final cover in CoverRegistry.all) {
-        expect(tr.templates.coverName(cover),
-            fallback.templates.coverName(cover),
+        expect(
+            tr.templates.coverName(cover), fallback.templates.coverName(cover),
             reason: cover.id);
       }
     });

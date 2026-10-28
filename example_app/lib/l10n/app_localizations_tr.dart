@@ -1555,6 +1555,87 @@ class AppLocalizationsTr extends AppLocalizations {
   String get editorTemplateBackgroundColor => 'Arka Plan Rengi';
 
   @override
+  String get editorCoverSolidNavy => 'Lacivert';
+
+  @override
+  String get editorCoverSolidBurgundy => 'Bordo';
+
+  @override
+  String get editorCoverMinimalGray => 'Gri Çerçeve';
+
+  @override
+  String get editorCoverPatternDots => 'Noktalı';
+
+  @override
+  String get editorCoverPatternLines => 'Çizgili';
+
+  @override
+  String get editorCoverGradientSunset => 'Gün Batımı';
+
+  @override
+  String get editorCoverGradientOcean => 'Okyanus';
+
+  @override
+  String get editorCoverGradientForest => 'Orman';
+
+  @override
+  String get editorCoverGradientPurple => 'Lavanta';
+
+  @override
+  String get editorCoverImgKraft => 'Kraft';
+
+  @override
+  String get editorCoverImgGeometric => 'Geometrik';
+
+  @override
+  String get editorCoverImgTerrazzo => 'Terrazzo';
+
+  @override
+  String get editorCoverImgDinosaur => 'Dinozor';
+
+  @override
+  String get editorCoverImgSpace => 'Uzay';
+
+  @override
+  String get editorCoverImgFloral => 'Çiçekli';
+
+  @override
+  String get editorCoverImgNavyGold => 'Lacivert Gold';
+
+  @override
+  String get editorCoverImgLeather => 'Deri';
+
+  @override
+  String get editorCoverLinenSage => 'Adaçayı Keten';
+
+  @override
+  String get editorCoverLinenSand => 'Kum Keten';
+
+  @override
+  String get editorCoverLinenSlate => 'Arduvaz Keten';
+
+  @override
+  String get editorCoverLeatherOxblood => 'Vişne Deri';
+
+  @override
+  String get editorCoverLeatherCognac => 'Konyak Deri';
+
+  @override
+  String get editorCoverLeatherNavy => 'Lacivert Deri';
+
+  @override
+  String get editorCoverKraftNatural => 'Doğal Kraft';
+
+  @override
+  String get editorCoverKraftCharcoal => 'Füme Kraft';
+
+  @override
+  String get editorCoverFeltMustard => 'Hardal Keçe';
+
+  @override
+  String get editorCoverFeltDustyRose => 'Gül Kurusu Keçe';
+
+  @override
   String get editorErrorExportStorageFull =>
       'Dışa aktarma için yeterli depolama alanı yok. Yer açıp tekrar deneyin.';
 

@@ -1574,6 +1574,87 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editorTemplateBackgroundColor => 'Background color';
 
   @override
+  String get editorCoverSolidNavy => 'Navy';
+
+  @override
+  String get editorCoverSolidBurgundy => 'Burgundy';
+
+  @override
+  String get editorCoverMinimalGray => 'Gray Frame';
+
+  @override
+  String get editorCoverPatternDots => 'Dotted';
+
+  @override
+  String get editorCoverPatternLines => 'Lined';
+
+  @override
+  String get editorCoverGradientSunset => 'Sunset';
+
+  @override
+  String get editorCoverGradientOcean => 'Ocean';
+
+  @override
+  String get editorCoverGradientForest => 'Forest';
+
+  @override
+  String get editorCoverGradientPurple => 'Lavender';
+
+  @override
+  String get editorCoverImgKraft => 'Kraft';
+
+  @override
+  String get editorCoverImgGeometric => 'Geometric';
+
+  @override
+  String get editorCoverImgTerrazzo => 'Terrazzo';
+
+  @override
+  String get editorCoverImgDinosaur => 'Dinosaur';
+
+  @override
+  String get editorCoverImgSpace => 'Space';
+
+  @override
+  String get editorCoverImgFloral => 'Floral';
+
+  @override
+  String get editorCoverImgNavyGold => 'Navy Gold';
+
+  @override
+  String get editorCoverImgLeather => 'Leather';
+
+  @override
+  String get editorCoverLinenSage => 'Sage Linen';
+
+  @override
+  String get editorCoverLinenSand => 'Sand Linen';
+
+  @override
+  String get editorCoverLinenSlate => 'Slate Linen';
+
+  @override
+  String get editorCoverLeatherOxblood => 'Oxblood Leather';
+
+  @override
+  String get editorCoverLeatherCognac => 'Cognac Leather';
+
+  @override
+  String get editorCoverLeatherNavy => 'Navy Leather';
+
+  @override
+  String get editorCoverKraftNatural => 'Natural Kraft';
+
+  @override
+  String get editorCoverKraftCharcoal => 'Charcoal Kraft';
+
+  @override
+  String get editorCoverFeltMustard => 'Mustard Felt';
+
+  @override
+  String get editorCoverFeltDustyRose => 'Dusty Rose Felt';
+
+  @override
   String get editorErrorExportStorageFull =>
       'Not enough storage to export. Free up space and try again.';
 

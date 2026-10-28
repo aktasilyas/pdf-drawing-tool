@@ -80,8 +80,7 @@ void main() {
       expect(find.text(CoverFamily.linenSage.name), findsNothing);
     });
 
-    testWidgets('label and semantics follow the strings scope',
-        (tester) async {
+    testWidgets('label and semantics follow the strings scope', (tester) async {
       phone(tester);
       final handle = tester.ensureSemantics();
       await tester.pumpWidget(_host(strings: const _EnStrings()));

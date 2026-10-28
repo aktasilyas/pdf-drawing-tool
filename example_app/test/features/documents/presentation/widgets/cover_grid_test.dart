@@ -102,7 +102,8 @@ void main() {
     setView(tester, const Size(1200, 1600));
     Cover? picked;
     await tester.pumpWidget(_host((c) => picked = c));
-    await tester.tap(find.text(_coverName(testLocale, CoverFamily.feltMustard)));
+    await tester
+        .tap(find.text(_coverName(testLocale, CoverFamily.feltMustard)));
     expect(picked?.id, 'felt_mustard');
   });
 
