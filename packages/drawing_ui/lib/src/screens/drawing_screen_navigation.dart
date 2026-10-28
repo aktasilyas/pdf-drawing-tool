@@ -116,6 +116,7 @@ mixin DrawingScreenNavigation on ConsumerState<DrawingScreen> {
       change,
       strings.pages.pageAdded,
       undoLabel: strings.toolbar.undo,
+      undoFailedMessage: strings.pages.cannotUndo,
     );
   }
 

@@ -236,11 +236,11 @@ void main() {
       expect(container.read(pageManagerProvider).currentIndex, 1);
     });
 
-    test('undo restores the page list and current page', () {
+    test('undo restores the page list and current page', () async {
       load(3, current: 2);
       final change = actions().insertPage(3, page('new', 0));
 
-      expect(actions().undo(change), isTrue);
+      expect(await actions().undo(change), isTrue);
       final doc = container.read(documentProvider);
       expect(docIds(), ['p0', 'p1', 'p2']);
       expect(managerIds(), docIds());
@@ -248,7 +248,7 @@ void main() {
       expect(doc.pages.map((p) => p.index), [0, 1, 2]);
     });
 
-    test('undo keeps strokes drawn on other pages since the insert', () {
+    test('undo keeps strokes drawn on other pages since the insert', () async {
       load(2, current: 0);
       final change = actions().insertPage(1, page('new', 0));
       container.read(historyManagerProvider.notifier).execute(
@@ -256,18 +256,20 @@ void main() {
             pageId: 'p0',
           );
 
-      actions().undo(change);
+      await actions().undo(change);
       expect(docIds(), ['p0', 'p1']);
       expect(container.read(documentProvider).pages[0].strokeCount, 1);
     });
 
-    test('history entry on the removed page is a no-op on undo', () {
+    test('history entry on the removed page is a no-op on undo', () async {
       load(2, current: 0);
+      container.read(pageTrashCallbackProvider.notifier).state =
+          (i, p) async => 't1';
       final change = actions().insertPage(1, page('new', 0));
       container.read(historyManagerProvider.notifier).execute(
             AddStrokeCommand(layerIndex: 0, stroke: stroke('s1')),
           );
-      actions().undo(change);
+      await actions().undo(change);
       final before = container.read(documentProvider);
 
       container.read(historyManagerProvider.notifier).undo();
@@ -276,16 +278,184 @@ void main() {
           before.pages[0].strokeCount);
     });
 
+    test('undo sends a page that gained ink to the page trash', () async {
+      load(2, current: 0);
+      final trashed = <Page>[];
+      container.read(pageTrashCallbackProvider.notifier).state = (i, p) async {
+        trashed.add(p);
+        return 't1';
+      };
+      final change = actions().insertPage(1, page('new', 0));
+      final doc = container.read(documentProvider);
+      container.read(documentProvider.notifier).updateDocument(
+            doc.replacePages([
+              doc.pages[0],
+              doc.pages[1].addStroke(stroke('s1')),
+              doc.pages[2],
+            ]),
+          );
+
+      expect(await actions().undo(change), isTrue);
+      expect(docIds(), ['p0', 'p1']);
+      expect(trashed.single.id, 'new');
+      expect(trashed.single.strokeCount, 1);
+    });
+
+    Future<PageStructureChange> insertWithInk() async {
+      load(2, current: 0);
+      final change = actions().insertPage(1, page('new', 0));
+      final doc = container.read(documentProvider);
+      container.read(documentProvider.notifier).updateDocument(
+            doc.replacePages([
+              doc.pages[0],
+              doc.pages[1].addStroke(stroke('s1')),
+              doc.pages[2],
+            ]),
+          );
+      return change;
+    }
+
+    test('undo keeps the page when it gained ink and there is no trash',
+        () async {
+      final change = await insertWithInk();
+
+      expect(await actions().undo(change), isFalse);
+      expect(docIds(), ['p0', 'new', 'p1']);
+    });
+
+    test('undo keeps the page when the trash cannot store it', () async {
+      final change = await insertWithInk();
+      container.read(pageTrashCallbackProvider.notifier).state =
+          (i, p) async => null;
+
+      expect(await actions().undo(change), isFalse);
+      expect(docIds(), ['p0', 'new', 'p1']);
+    });
+
+    test('undo keeps the page when the trash throws', () async {
+      final change = await insertWithInk();
+      container.read(pageTrashCallbackProvider.notifier).state =
+          (i, p) async => throw StateError('db');
+
+      expect(await actions().undo(change), isFalse);
+      expect(docIds(), ['p0', 'new', 'p1']);
+    });
+
+    test('undo discards the trash entry when the document changed meanwhile',
+        () async {
+      final change = await insertWithInk();
+      final discarded = <String>[];
+      container.read(pageTrashDiscardCallbackProvider.notifier).state =
+          (id) async => discarded.add(id);
+      container.read(pageTrashCallbackProvider.notifier).state = (i, p) async {
+        final d = container.read(documentProvider);
+        container
+            .read(documentProvider.notifier)
+            .updateDocument(d.removePage(0));
+        return 't1';
+      };
+
+      expect(await actions().undo(change), isFalse);
+      expect(discarded, ['t1']);
+    });
+
+    test('undo of an untouched page does not use the trash', () async {
+      load(2, current: 0);
+      var calls = 0;
+      container.read(pageTrashCallbackProvider.notifier).state = (i, p) async {
+        calls++;
+        return 't1';
+      };
+      final change = actions().insertPage(1, page('new', 0));
+
+      expect(await actions().undo(change), isTrue);
+      expect(calls, 0);
+      expect(docIds(), ['p0', 'p1']);
+    });
+
+    test('undo of an untouched duplicate does not use the trash', () async {
+      load(2, current: 0);
+      var calls = 0;
+      container.read(pageTrashCallbackProvider.notifier).state = (i, p) async {
+        calls++;
+        return 't1';
+      };
+      final withInk = container.read(documentProvider).pages[0].addStroke(
+            stroke('s1'),
+          );
+      final change = actions().insertCopy(0, withInk);
+
+      expect(await actions().undo(change), isTrue);
+      expect(calls, 0);
+      expect(docIds(), ['p0', 'p1']);
+    });
+
+    /// Replaces page 1 (the inserted one) with [edit] of it.
+    void editInserted(Layer Function(Layer) edit) {
+      final doc = container.read(documentProvider);
+      final inserted = doc.pages[1];
+      container.read(documentProvider.notifier).updateDocument(
+            doc.replacePages([
+              doc.pages[0],
+              inserted.copyWith(layers: [edit(inserted.layers.first)]),
+              doc.pages[2],
+            ]),
+          );
+    }
+
+    test('undo sends an inserted page that got an image to the trash',
+        () async {
+      load(2, current: 0);
+      final trashed = <Page>[];
+      container.read(pageTrashCallbackProvider.notifier).state = (i, p) async {
+        trashed.add(p);
+        return 't1';
+      };
+      final change = actions().insertPage(1, page('new', 0));
+      editInserted((l) => l.addImage(const ImageElement(
+            id: 'img',
+            filePath: 'a.png',
+            x: 0,
+            y: 0,
+            width: 10,
+            height: 10,
+          )));
+
+      expect(await actions().undo(change), isTrue);
+      expect(docIds(), ['p0', 'p1']);
+      expect(trashed.single.id, 'new');
+    });
+
+    test('undo sends an erased-and-redrawn duplicate to the trash', () async {
+      load(2, current: 0);
+      final trashed = <Page>[];
+      container.read(pageTrashCallbackProvider.notifier).state = (i, p) async {
+        trashed.add(p);
+        return 't1';
+      };
+      final withInk = container.read(documentProvider).pages[0].addStroke(
+            stroke('s1'),
+          );
+      final change = actions().insertCopy(0, withInk);
+      editInserted(
+          (l) => l.removeStroke(l.strokes.single.id).addStroke(stroke('s2')));
+
+      expect(await actions().undo(change), isTrue);
+      expect(docIds(), ['p0', 'p1']);
+      expect(trashed.single.strokeCount, 1);
+      expect(trashed.single.layers.first.strokes.single.id, 's2');
+    });
+
     test('undo is a no-op after another page change', () async {
       load(3);
       final change = actions().insertPage(1, page('new', 0));
       await actions().deletePage(2);
 
-      expect(actions().undo(change), isFalse);
+      expect(await actions().undo(change), isFalse);
       expect(docIds(), ['p0', 'new', 'p2']);
     });
 
-    test('undo is a no-op when another document is loaded', () {
+    test('undo is a no-op when another document is loaded', () async {
       load(2);
       final change = actions().insertPage(1, page('new', 0));
       container.read(documentProvider.notifier).updateDocument(
@@ -298,7 +468,7 @@ void main() {
             ),
           );
 
-      expect(actions().undo(change), isFalse);
+      expect(await actions().undo(change), isFalse);
       expect(docIds(), ['x0']);
     });
   });
@@ -322,12 +492,12 @@ void main() {
       expect(managerIds(), docIds());
     });
 
-    test('undo removes the copy', () {
+    test('undo removes the copy', () async {
       load(2, current: 1);
       final change =
           actions().insertCopy(0, container.read(documentProvider).pages[0]);
 
-      actions().undo(change);
+      await actions().undo(change);
       expect(docIds(), ['p0', 'p1']);
       expect(container.read(documentProvider).currentPageIndex, 1);
     });
@@ -339,12 +509,12 @@ void main() {
       expect(actions().movePage(1, 1), isNull);
     });
 
-    test('undo restores the previous order and current page', () {
+    test('undo restores the previous order and current page', () async {
       load(4, current: 1);
       final change = actions().movePage(3, 0)!;
       expect(docIds(), ['p3', 'p0', 'p1', 'p2']);
 
-      expect(actions().undo(change), isTrue);
+      expect(await actions().undo(change), isTrue);
       expect(docIds(), ['p0', 'p1', 'p2', 'p3']);
       expect(managerIds(), docIds());
       expect(container.read(documentProvider).currentPageIndex, 1);

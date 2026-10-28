@@ -95,6 +95,7 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
       change,
       strings.pages.pageAdded,
       undoLabel: strings.toolbar.undo,
+      undoFailedMessage: strings.pages.cannotUndo,
     );
   }
 
@@ -208,6 +209,7 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
       change,
       strings.pages.pageAdded,
       undoLabel: strings.toolbar.undo,
+      undoFailedMessage: strings.pages.cannotUndo,
     );
   }
 

@@ -1365,6 +1365,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editorPagePageAdded => 'Page added';
 
   @override
+  String get editorPageCannotUndo => 'Can\'t undo';
+
+  @override
   String get editorPagePageMoved => 'Page moved';
 
   @override

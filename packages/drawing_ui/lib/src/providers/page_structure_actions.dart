@@ -39,6 +39,7 @@ class PageStructureChange {
     required this.previousOrder,
     required this.previousCurrentId,
     this.insertedPageIds = const [],
+    this.insertedPageLayers = const {},
   });
 
   /// Id of the document the change was made in.
@@ -52,6 +53,23 @@ class PageStructureChange {
 
   /// Ids of the pages the change inserted (empty for a move).
   final List<String> insertedPageIds;
+
+  /// The layers each inserted page held when it was inserted, by page id
+  /// (a duplicate or pasted page starts with content).
+  final Map<String, List<Layer>> insertedPageLayers;
+}
+
+/// Whether [page] was edited since [snapshot] was taken.
+///
+/// Layers are immutable, so any edit (stroke, erase, shape, text, image,
+/// sticky note, move) replaces at least one [Layer] instance. A page with no
+/// snapshot counts as changed, so its content is never dropped.
+bool _changedSince(Page page, List<Layer>? snapshot) {
+  if (snapshot == null || snapshot.length != page.layers.length) return true;
+  for (var i = 0; i < snapshot.length; i++) {
+    if (!identical(snapshot[i], page.layers[i])) return true;
+  }
+  return false;
 }
 
 /// Page structure changes (insert, move, delete, restore).
@@ -84,8 +102,11 @@ class PageStructureActions {
   PageStructureChange? insertPages(int index, List<Page> pages) {
     if (pages.isEmpty) return null;
     final doc = _ref.read(documentProvider);
-    final change =
-        _changeFrom(doc, insertedPageIds: [for (final p in pages) p.id]);
+    final change = _changeFrom(
+      doc,
+      insertedPageIds: [for (final p in pages) p.id],
+      insertedPageLayers: {for (final p in pages) p.id: p.layers},
+    );
     final at = index.clamp(0, doc.pages.length);
     final list = List<Page>.from(doc.pages)..insertAll(at, pages);
     _apply(doc.replacePages(list, currentPageId: pages.first.id));
@@ -100,24 +121,76 @@ class PageStructureActions {
   /// Reverts an insert or a move: restores the previous page order and
   /// current page, keeping the pages' current content.
   ///
-  /// Returns false (and changes nothing) when another document is loaded or
-  /// the set of pages changed in some other way since.
-  bool undo(PageStructureChange change) {
+  /// An inserted page that was edited in any way since the insert is moved
+  /// to the page trash first; content is never dropped.
+  ///
+  /// Returns false (and changes nothing) when another document is loaded, the
+  /// set of pages changed in some other way since, or a page with new content
+  /// could not be stored in the trash (no trash, it returned null or threw).
+  Future<bool> undo(PageStructureChange change) async {
+    final pages = _revertablePages(change);
+    if (pages == null) return false;
     final doc = _ref.read(documentProvider);
-    if (doc.id != change.documentId) return false;
+    // Inserted pages edited since the insert, with their index.
+    final gained = [
+      for (final id in change.insertedPageIds)
+        if (_changedSince(pages[id]!, change.insertedPageLayers[id]))
+          (index: doc.pages.indexOf(pages[id]!), page: pages[id]!),
+    ];
+
+    final trashIds = <String>[];
+    if (gained.isNotEmpty) {
+      final trash = _ref.read(pageTrashCallbackProvider);
+      if (trash == null) return false;
+      try {
+        for (final g in gained) {
+          final id = await trash(g.index, g.page);
+          if (id == null) {
+            await _discardTrash(trashIds);
+            return false;
+          }
+          trashIds.add(id);
+        }
+      } catch (_) {
+        await _discardTrash(trashIds);
+        return false;
+      }
+    }
+
+    // The document may have changed while the trash calls ran.
+    final fresh = _revertablePages(change);
+    if (fresh == null) {
+      await _discardTrash(trashIds);
+      return false;
+    }
+    _apply(_ref.read(documentProvider).replacePages(
+      [for (final id in change.previousOrder) fresh[id]!],
+      currentPageId: change.previousCurrentId,
+    ));
+    return true;
+  }
+
+  Future<void> _discardTrash(List<String> trashIds) async {
+    final discard = _ref.read(pageTrashDiscardCallbackProvider);
+    if (discard == null) return;
+    for (final id in trashIds) {
+      await discard(id);
+    }
+  }
+
+  /// Pages by id when [change] can still be reverted, else null.
+  Map<String, Page>? _revertablePages(PageStructureChange change) {
+    final doc = _ref.read(documentProvider);
+    if (doc.id != change.documentId) return null;
     final byId = {for (final p in doc.pages) p.id: p};
     final expected = {
       ...change.previousOrder,
       ...change.insertedPageIds,
     };
     if (byId.length != expected.length || !expected.every(byId.containsKey)) {
-      return false;
+      return null;
     }
-    _apply(doc.replacePages(
-      [for (final id in change.previousOrder) byId[id]!],
-      currentPageId: change.previousCurrentId,
-    ));
-    return true;
+    return byId;
   }
 
   /// Deletes the page at [index]. Returns null when it is the last page.
@@ -175,12 +248,14 @@ class PageStructureActions {
   PageStructureChange _changeFrom(
     DrawingDocument doc, {
     List<String> insertedPageIds = const [],
+    Map<String, List<Layer>> insertedPageLayers = const {},
   }) =>
       PageStructureChange(
         documentId: doc.id,
         previousOrder: [for (final p in doc.pages) p.id],
         previousCurrentId: doc.pages[doc.currentPageIndex].id,
         insertedPageIds: insertedPageIds,
+        insertedPageLayers: insertedPageLayers,
       );
 
   void _apply(DrawingDocument doc) {

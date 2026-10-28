@@ -439,6 +439,7 @@
   "editorPagePageDeleted": "Sayfa silindi",
   "editorPageClearPageQuestion": "Sayfa {page} temizlensin mi?\nBu işlem geri alınabilir.",
   "editorPagePageAdded": "Sayfa eklendi",
+  "editorPageCannotUndo": "Geri alınamadı",
   "editorPagePageMoved": "Sayfa taşındı",
   "editorPageBackgroundReplaced": "Sayfa arka planı değiştirildi",
   "editorPageGoToPage": "Sayfaya Git",

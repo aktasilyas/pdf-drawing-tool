@@ -14,6 +14,7 @@ void showPageUndoSnackBar(
   PageStructureChange? change,
   String message, {
   required String undoLabel,
+  required String undoFailedMessage,
 }) {
   if (messenger == null || change == null) return;
   messenger
@@ -23,7 +24,14 @@ void showPageUndoSnackBar(
         content: Text(message),
         action: SnackBarAction(
           label: undoLabel,
-          onPressed: () => actions.undo(change),
+          onPressed: () async {
+            final undone = await actions.undo(change);
+            if (!undone) {
+              messenger
+                ..hideCurrentSnackBar()
+                ..showSnackBar(SnackBar(content: Text(undoFailedMessage)));
+            }
+          },
         ),
       ),
     );
@@ -40,5 +48,6 @@ void movePageWithUndo(WidgetRef ref, BuildContext context, int from, int to) {
     change,
     strings.pages.pageMoved,
     undoLabel: strings.toolbar.undo,
+    undoFailedMessage: strings.pages.cannotUndo,
   );
 }

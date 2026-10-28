@@ -32,6 +32,7 @@ abstract class PageStrings {
   String clearPageQuestion(int page);
   String get pageAdded;
   String get pageMoved;
+  String get cannotUndo;
 
   /// SnackBar after a template replaced a PDF or cover background.
   String get backgroundReplaced;
@@ -67,6 +68,7 @@ abstract class PageStrings {
         'clearPageQuestion': clearPageQuestion(1),
         'pageAdded': pageAdded,
         'pageMoved': pageMoved,
+        'cannotUndo': cannotUndo,
         'backgroundReplaced': backgroundReplaced,
         'goToPage': goToPage,
         'go': go,
@@ -158,6 +160,9 @@ class PageStringsTr extends PageStrings {
 
   @override
   String get pageMoved => 'Sayfa taşındı';
+
+  @override
+  String get cannotUndo => 'Geri alınamadı';
 
   @override
   String get backgroundReplaced => 'Sayfa arka planı değiştirildi';
