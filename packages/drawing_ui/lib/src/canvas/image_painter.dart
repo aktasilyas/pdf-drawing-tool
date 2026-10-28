@@ -120,6 +120,7 @@ class ImageCacheManager extends ChangeNotifier {
   ImageCacheManager({
     this.paths = PdfPathResolver.passthrough,
     this.byteBudget = defaultByteBudget,
+    this.protectWindow = const Duration(seconds: 2),
   });
 
   /// Resolves stored image paths to absolute file paths.
@@ -131,12 +132,23 @@ class ImageCacheManager extends ChangeNotifier {
   /// Default decoded-bytes budget of the cache (RGBA, 4 bytes per pixel).
   static const int defaultByteBudget = 96 * 1024 * 1024;
 
+  /// Budget for one-shot offline renderers, which must keep every image
+  /// alive until their synchronous paint.
+  static const int unboundedBudget = 1 << 40;
+
+  /// Images read through [get] within this window are never evicted, so a
+  /// visible set larger than the budget cannot evict-and-reload in a loop
+  /// (the cache then temporarily exceeds the budget).
+  final Duration protectWindow;
+
   /// Decoded-bytes budget; least recently used images are evicted beyond it.
   final int byteBudget;
 
   // Insertion order doubles as LRU order: the first key is the oldest.
   final Map<String, ui.Image> _cache = {};
   final Set<String> _loading = {};
+  final Map<String, int> _touchedMs = {};
+  final Stopwatch _clock = Stopwatch()..start();
   int _bytes = 0;
 
   /// Decoded bytes currently held.
@@ -147,6 +159,7 @@ class ImageCacheManager extends ChangeNotifier {
     final image = _cache.remove(filePath);
     if (image == null) return null;
     _cache[filePath] = image; // mark as most recently used
+    _touchedMs[filePath] = _clock.elapsedMilliseconds;
     return image;
   }
 
@@ -193,10 +206,17 @@ class ImageCacheManager extends ChangeNotifier {
     _cache.remove(filePath)?.dispose();
     _cache[filePath] = image;
     _recount();
-    // Evict oldest first, but always keep the image just inserted.
-    while (_bytes > byteBudget && _cache.length > 1) {
-      final oldest = _cache.keys.first;
-      _cache.remove(oldest)!.dispose();
+    // Evict oldest first, skipping the new image and recently painted ones.
+    final now = _clock.elapsedMilliseconds;
+    for (final key in _cache.keys.toList()) {
+      if (_bytes <= byteBudget) break;
+      if (key == filePath) continue;
+      final touched = _touchedMs[key];
+      if (touched != null && now - touched < protectWindow.inMilliseconds) {
+        continue;
+      }
+      _cache.remove(key)!.dispose();
+      _touchedMs.remove(key);
       _recount();
     }
   }

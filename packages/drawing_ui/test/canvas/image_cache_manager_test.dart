@@ -73,16 +73,50 @@ Future<ui.Image> _solid(int w, int h) async {
 }
 
 void budgetTests() {
+  testWidgets('recently painted images are not evicted', (tester) async {
+    await tester.runAsync(() async {
+      final cache = ImageCacheManager(byteBudget: 50000);
+      addTearDown(cache.dispose);
+      cache.debugPut('a', await _solid(100, 100));
+      cache.get('a');
+      cache.debugPut('b', await _solid(100, 100));
+      expect(cache.get('a'), isNotNull);
+      expect(cache.get('b'), isNotNull);
+    });
+  });
+
+  testWidgets('unbounded budget keeps every image', (tester) async {
+    await tester.runAsync(() async {
+      final cache = ImageCacheManager(
+        byteBudget: ImageCacheManager.unboundedBudget,
+        protectWindow: Duration.zero,
+      );
+      addTearDown(cache.dispose);
+      for (var i = 0; i < 5; i++) {
+        cache.debugPut('k$i', await _solid(1000, 1000));
+      }
+      for (var i = 0; i < 5; i++) {
+        expect(cache.get('k$i'), isNotNull);
+      }
+    });
+  });
+
   testWidgets('stays within the byte budget and evicts least recently used',
       (tester) async {
     await tester.runAsync(() async {
       // Each 100x100 image is 40,000 bytes; budget fits two.
-      final cache = ImageCacheManager(byteBudget: 80000);
+      final cache = ImageCacheManager(
+        byteBudget: 80000,
+        protectWindow: Duration.zero,
+      );
       addTearDown(cache.dispose);
       cache.debugPut('a', await _solid(100, 100));
       cache.debugPut('b', await _solid(100, 100));
       cache.get('a'); // 'b' is now the oldest
+      final evicted = cache.get('b')!;
+      cache.get('a');
       cache.debugPut('c', await _solid(100, 100));
+      expect(evicted.debugDisposed, isTrue);
       expect(cache.cachedBytes, lessThanOrEqualTo(80000));
       expect(cache.get('b'), isNull);
       expect(cache.get('a'), isNotNull);

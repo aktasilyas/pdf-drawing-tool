@@ -38,7 +38,10 @@ class PdfRasterLayerRenderer {
     double scale, {
     PdfPathResolver paths = PdfPathResolver.passthrough,
   }) async {
-    final cache = ImageCacheManager(paths: paths);
+    final cache = ImageCacheManager(
+      paths: paths,
+      byteBudget: ImageCacheManager.unboundedBudget,
+    );
     try {
       await Future.wait([
         for (final img in layer.images) cache.loadImage(img.filePath),
