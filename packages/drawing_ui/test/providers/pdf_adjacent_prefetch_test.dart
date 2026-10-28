@@ -131,6 +131,9 @@ void main() {
 /// Puts a rendered page into the page cache, as a finished render would.
 void addToPdfPageCacheForTest(ProviderContainer container, String key) {
   container.read(pdfPageCacheProvider.notifier).update(
-        (cache) => {...cache, key: Uint8List.fromList([0])},
+        (cache) => {
+          ...cache,
+          key: Uint8List.fromList([0])
+        },
       );
 }
