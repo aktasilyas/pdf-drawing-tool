@@ -1,3 +1,4 @@
+import 'package:drawing_ui/src/l10n/drawing_strings_scope.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
@@ -65,14 +66,14 @@ class TextContextMenu extends ConsumerWidget {
                 if (onEdit != null) ...[
                   _MenuButton(
                     icon: ElyanotesIcons.editPencil,
-                    tooltip: 'Düzenle',
+                    tooltip: context.drawingStrings.selection.contextEdit,
                     onTap: onEdit!,
                   ),
                   _MenuDivider(color: colorScheme.outlineVariant),
                 ],
                 _MenuButton(
                   icon: ElyanotesIcons.trash,
-                  tooltip: 'Sil',
+                  tooltip: context.drawingStrings.selection.delete,
                   onTap: onDelete,
                   color: colorScheme.error,
                 ),
@@ -80,20 +81,20 @@ class TextContextMenu extends ConsumerWidget {
                   _MenuDivider(color: colorScheme.outlineVariant),
                   _MenuButton(
                     icon: ElyanotesIcons.palette,
-                    tooltip: 'Stil',
+                    tooltip: context.drawingStrings.selection.contextStyle,
                     onTap: onStyle!,
                   ),
                 ],
                 _MenuDivider(color: colorScheme.outlineVariant),
                 _MenuButton(
                   icon: ElyanotesIcons.copy,
-                  tooltip: 'Kopyala',
+                  tooltip: context.drawingStrings.selection.copy,
                   onTap: onDuplicate,
                 ),
                 _MenuDivider(color: colorScheme.outlineVariant),
                 _MenuButton(
                   icon: ElyanotesIcons.move,
-                  tooltip: 'Taşı',
+                  tooltip: context.drawingStrings.selection.contextMove,
                   onTap: onMove,
                   color: colorScheme.primary,
                 ),

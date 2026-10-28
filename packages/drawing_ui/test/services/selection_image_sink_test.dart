@@ -33,7 +33,7 @@ void main() {
     final result = await saveSelectionImage(sink, bytes);
     expect(result, SelectionImageSaveResult.copied);
     verify(() => sink.copyToClipboard(bytes)).called(1);
-    expect(selectionImageSaveMessage(result), 'Ekran resmi panoya kopyalandı');
+    expect(screenshotOutcomeFor(result), SelectionScreenshotOutcome.copied);
   });
 
   test('gallery only', () async {
@@ -46,7 +46,7 @@ void main() {
     stub(gallery: false, clipboard: false);
     final result = await saveSelectionImage(sink, bytes);
     expect(result, SelectionImageSaveResult.failed);
-    expect(selectionImageSaveMessage(result), 'Ekran resmi kaydedilemedi');
+    expect(screenshotOutcomeFor(result), SelectionScreenshotOutcome.saveFailed);
   });
 
   test('the default sink is the platform one', () {

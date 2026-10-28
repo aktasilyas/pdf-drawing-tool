@@ -7,28 +7,25 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('sticker catalog', () {
     test('has eight categories of 24 stickers each', () {
-      expect(stickerCategories, hasLength(8));
-      for (final category in stickerCategories) {
+      expect(StickerCategory.values, hasLength(8));
+      for (final category in StickerCategory.values) {
         final stickers = stickersForCategory(category);
-        expect(stickers, hasLength(24), reason: category);
-        expect(stickers.every((s) => s.isNotEmpty), isTrue, reason: category);
+        expect(stickers, hasLength(24), reason: category.name);
+        expect(stickers.every((s) => s.isNotEmpty), isTrue,
+            reason: category.name);
       }
     });
 
     test('keeps multi-codepoint emoji intact', () {
-      expect(stickersForCategory('Emoji').first, '😀');
-      expect(stickersForCategory('Semboller'), contains('🏳️‍🌈'));
-      expect(stickersForCategory('Doğa').last, '🍃');
-    });
-
-    test('unknown category gets a placeholder', () {
-      expect(stickersForCategory('nope'), ['❓']);
+      expect(stickersForCategory(StickerCategory.emoji).first, '😀');
+      expect(stickersForCategory(StickerCategory.symbols), contains('🏳️‍🌈'));
+      expect(stickersForCategory(StickerCategory.nature).last, '🍃');
     });
 
     test('stickerAt is null outside the category', () {
-      expect(stickerAt('Hayvanlar', 0), '🐶');
-      expect(stickerAt('Hayvanlar', -1), isNull);
-      expect(stickerAt('Hayvanlar', 24), isNull);
+      expect(stickerAt(StickerCategory.animals, 0), '🐶');
+      expect(stickerAt(StickerCategory.animals, -1), isNull);
+      expect(stickerAt(StickerCategory.animals, 24), isNull);
     });
   });
 
@@ -51,13 +48,13 @@ void main() {
     });
 
     test('placeSelected places the sticker at the index', () {
-      expect(actions().placeSelected('Yiyecek', 1), isTrue);
+      expect(actions().placeSelected(StickerCategory.food, 1), isTrue);
       expect(container.read(stickerPlacementProvider).selectedEmoji, '🍊');
       expect(container.read(activePanelProvider), isNull);
     });
 
     test('placeSelected with nothing selected does nothing', () {
-      expect(actions().placeSelected('Yiyecek', -1), isFalse);
+      expect(actions().placeSelected(StickerCategory.food, -1), isFalse);
       expect(container.read(stickerPlacementProvider).selectedEmoji, isNull);
       expect(container.read(activePanelProvider), ToolType.sticker);
     });

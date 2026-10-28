@@ -53,6 +53,12 @@ class AppToolbarStrings extends ToolbarStrings {
   String get colorSetPastel => _l10n.editorToolbarColorSetPastel;
 
   @override
+  String get colorSetBasic => _l10n.editorToolbarColorSetBasic;
+
+  @override
+  String get colorSetNeon => _l10n.editorToolbarColorSetNeon;
+
+  @override
   String selectedColor(String hex) => _l10n.editorToolbarSelectedColor(hex);
 
   @override

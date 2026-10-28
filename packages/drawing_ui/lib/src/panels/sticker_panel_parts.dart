@@ -66,7 +66,7 @@ class StickerGrid extends StatelessWidget {
     this.onStickerDoubleTap,
   });
 
-  final String category;
+  final StickerCategory category;
   final int selectedIndex;
   final ValueChanged<int> onStickerSelected;
   final ValueChanged<String>? onStickerDoubleTap;

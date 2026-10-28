@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
+import 'package:drawing_ui/src/models/selection_action_kind.dart';
 
 /// A single action that can be performed on a selection.
 class SelectionAction {
@@ -9,8 +10,8 @@ class SelectionAction {
   /// Icon to display.
   final PhosphorIconData icon;
 
-  /// Display label (Turkish).
-  final String label;
+  /// Semantic kind; the localized label is derived from it in the UI.
+  final SelectionActionKind kind;
 
   /// Whether this is a destructive action (shown in red).
   final bool isDestructive;
@@ -27,7 +28,7 @@ class SelectionAction {
   const SelectionAction({
     required this.id,
     required this.icon,
-    required this.label,
+    required this.kind,
     this.isDestructive = false,
     this.isEnabled = true,
     this.onExecute,

@@ -2,16 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/panels/chrome_panel_parts.dart';
 import 'package:drawing_ui/src/panels/selection_preview_painter.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/toolbar/chrome_icon_button.dart';
 
-String _titleForMode(LassoMode mode) {
+String _titleForMode(LassoMode mode, DrawingStrings s) {
   return switch (mode) {
-    LassoMode.freeform => 'Serbest Seçim',
-    LassoMode.rectangle => 'Dikdörtgen Seçim',
+    LassoMode.freeform => s.selection.lassoFreeform,
+    LassoMode.rectangle => s.selection.lassoRectangle,
   };
 }
 
@@ -33,7 +34,7 @@ class LassoSelectionPanel extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ChromePanelHeader(
-            title: _titleForMode(settings.mode),
+            title: _titleForMode(settings.mode, context.drawingStrings),
             onClose: () => ref.read(activePanelProvider.notifier).state = null,
           ),
           SelectionPreview(mode: settings.mode),
@@ -50,7 +51,7 @@ class LassoSelectionPanel extends ConsumerWidget {
             },
           ),
           const ChromeHairline(),
-          const ChromeSectionLabel('Seçilebilir'),
+          ChromeSectionLabel(context.drawingStrings.selection.lassoSelectable),
           _SelectableTypesGrid(
             selectableTypes: settings.selectableTypes,
             onTypeChanged: (type, value) {
@@ -88,7 +89,7 @@ class _SelectionTypeSelector extends StatelessWidget {
           icon: _iconFor(mode, false),
           selectedIcon: _iconFor(mode, true),
           iconSize: ChromeIconSizes.md,
-          tooltip: _titleForMode(mode),
+          tooltip: _titleForMode(mode, context.drawingStrings),
           selected: mode == selectedMode,
           onPressed: () => onModeSelected(mode),
         );
@@ -122,15 +123,20 @@ class _SelectableTypesGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final s = context.drawingStrings.selection;
     final types = [
-      (SelectableType.handwriting, 'El yazısı', ElyanotesIcons.pencil),
-      (SelectableType.shape, 'Şekil', ElyanotesIcons.shapes),
-      (SelectableType.imageSticker, 'Resim', ElyanotesIcons.image),
-      (SelectableType.highlighter, 'Vurgulayıcı', ElyanotesIcons.highlighter),
-      (SelectableType.textBox, 'Metin', ElyanotesIcons.textT),
-      (SelectableType.tape, 'Bant', ElyanotesIcons.ruler),
-      (SelectableType.link, 'Link', ElyanotesIcons.link),
-      (SelectableType.label, 'Etiket', ElyanotesIcons.tag),
+      (SelectableType.handwriting, s.typeHandwriting, ElyanotesIcons.pencil),
+      (SelectableType.shape, s.typeShape, ElyanotesIcons.shapes),
+      (SelectableType.imageSticker, s.typeImage, ElyanotesIcons.image),
+      (
+        SelectableType.highlighter,
+        s.typeHighlighter,
+        ElyanotesIcons.highlighter
+      ),
+      (SelectableType.textBox, s.typeText, ElyanotesIcons.textT),
+      (SelectableType.tape, s.typeTape, ElyanotesIcons.ruler),
+      (SelectableType.link, s.typeLink, ElyanotesIcons.link),
+      (SelectableType.label, s.typeLabel, ElyanotesIcons.tag),
     ];
 
     return Wrap(

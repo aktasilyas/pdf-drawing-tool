@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/panels/chrome_panel_parts.dart';
 import 'package:drawing_ui/src/panels/eraser_preview_painter.dart';
@@ -29,6 +30,7 @@ class EraserSettingsPanel extends ConsumerWidget {
     final mode = ref.watch(activeEraserModeProvider);
     final showSizeSlider = mode != EraserMode.lasso;
     final palette = ChromePalette.of(context);
+    final str = context.drawingStrings;
 
     return Padding(
       padding: const EdgeInsets.all(ChromeSpacing.lg),
@@ -37,7 +39,7 @@ class EraserSettingsPanel extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ChromePanelHeader(
-            title: _titleForMode(active),
+            title: eraserTypeLabel(active, str),
             onClose: () => ref.read(activePanelProvider.notifier).state = null,
           ),
           EraserPreview(mode: mode, size: settings.size),
@@ -51,7 +53,7 @@ class EraserSettingsPanel extends ConsumerWidget {
           const ChromeHairline(),
           if (showSizeSlider)
             GoodNotesSlider(
-              label: 'Boyut',
+              label: str.panels.size,
               value: settings.size.clamp(5.0, 100.0),
               min: 5.0,
               max: 100.0,
@@ -61,21 +63,21 @@ class EraserSettingsPanel extends ConsumerWidget {
                   ref.read(eraserSettingsProvider.notifier).setSize(v),
             ),
           CompactToggle(
-            label: 'Basınç hassasiyeti',
+            label: str.panels.eraserPressure,
             value: settings.pressureSensitive,
             onChanged: (v) => ref
                 .read(eraserSettingsProvider.notifier)
                 .setPressureSensitive(v),
           ),
           CompactToggle(
-            label: 'Sadece vurgulayıcı sil',
+            label: str.panels.eraserHighlighterOnly,
             value: settings.eraseOnlyHighlighter,
             onChanged: (v) => ref
                 .read(eraserSettingsProvider.notifier)
                 .setEraseOnlyHighlighter(v),
           ),
           CompactToggle(
-            label: 'Otomatik kaldır',
+            label: str.panels.eraserAutoLift,
             value: settings.autoLift,
             onChanged: (v) =>
                 ref.read(eraserSettingsProvider.notifier).setAutoLift(v),
@@ -87,15 +89,6 @@ class EraserSettingsPanel extends ConsumerWidget {
         ],
       ),
     );
-  }
-
-  String _titleForMode(ToolType tool) {
-    return switch (tool) {
-      ToolType.pixelEraser => 'Piksel Silgi',
-      ToolType.strokeEraser => 'Çizgi Silgisi',
-      ToolType.lassoEraser => 'Kement Silgisi',
-      _ => 'Silgi',
-    };
   }
 
   void _showClearConfirmation(BuildContext context, WidgetRef ref) {
@@ -111,34 +104,36 @@ class EraserSettingsPanel extends ConsumerWidget {
     showDialog(
       context: context,
       useRootNavigator: true,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: palette.surfaceElevated,
-        title: Text(
-          'Sayfayı Temizle?',
-          style: textTheme.bodyMedium?.copyWith(color: palette.textPrimary),
-        ),
-        content: Text(
-          'Bu sayfa içeriğini tamamen silecek. '
-          'Bu işlem geri alınamaz.',
-          style: textTheme.bodyMedium?.copyWith(color: palette.textMuted),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('İptal'),
+      builder: (ctx) {
+        final p = ctx.drawingStrings.panels;
+        return AlertDialog(
+          backgroundColor: palette.surfaceElevated,
+          title: Text(
+            p.clearPageTitle,
+            style: textTheme.bodyMedium?.copyWith(color: palette.textPrimary),
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              historyManager.execute(
-                core.ClearLayerCommand(layerIndex: document.activeLayerIndex),
-              );
-            },
-            style: TextButton.styleFrom(foregroundColor: palette.danger),
-            child: const Text('Temizle'),
+          content: Text(
+            p.clearPageMessage,
+            style: textTheme.bodyMedium?.copyWith(color: palette.textMuted),
           ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(p.cancel),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(ctx);
+                historyManager.execute(
+                  core.ClearLayerCommand(layerIndex: document.activeLayerIndex),
+                );
+              },
+              style: TextButton.styleFrom(foregroundColor: palette.danger),
+              child: Text(p.clearPageConfirm),
+            ),
+          ],
+        );
+      },
     );
   }
 }

@@ -1424,6 +1424,576 @@ abstract class AppLocalizations {
   /// **'Reset to default'**
   String get editorToolbarSettingsReset;
 
+  /// No description provided for @editorToolbarColorSetBasic.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic'**
+  String get editorToolbarColorSetBasic;
+
+  /// No description provided for @editorToolbarColorSetNeon.
+  ///
+  /// In en, this message translates to:
+  /// **'Neon'**
+  String get editorToolbarColorSetNeon;
+
+  /// No description provided for @editorPanelClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get editorPanelClose;
+
+  /// No description provided for @editorPanelThickness.
+  ///
+  /// In en, this message translates to:
+  /// **'Thickness'**
+  String get editorPanelThickness;
+
+  /// No description provided for @editorPanelPressureSensitivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Pressure sensitivity'**
+  String get editorPanelPressureSensitivity;
+
+  /// No description provided for @editorPanelStabilization.
+  ///
+  /// In en, this message translates to:
+  /// **'Stroke stabilization'**
+  String get editorPanelStabilization;
+
+  /// No description provided for @editorPanelPenType.
+  ///
+  /// In en, this message translates to:
+  /// **'Pen type'**
+  String get editorPanelPenType;
+
+  /// No description provided for @editorPanelGlow.
+  ///
+  /// In en, this message translates to:
+  /// **'Glow'**
+  String get editorPanelGlow;
+
+  /// No description provided for @editorPanelStraightLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Straight line'**
+  String get editorPanelStraightLine;
+
+  /// No description provided for @editorPanelSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Size'**
+  String get editorPanelSize;
+
+  /// No description provided for @editorPanelEraserPixel.
+  ///
+  /// In en, this message translates to:
+  /// **'Pixel eraser'**
+  String get editorPanelEraserPixel;
+
+  /// No description provided for @editorPanelEraserPressure.
+  ///
+  /// In en, this message translates to:
+  /// **'Pressure sensitivity'**
+  String get editorPanelEraserPressure;
+
+  /// No description provided for @editorPanelEraserHighlighterOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Erase highlighter only'**
+  String get editorPanelEraserHighlighterOnly;
+
+  /// No description provided for @editorPanelEraserAutoLift.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-deselect'**
+  String get editorPanelEraserAutoLift;
+
+  /// No description provided for @editorPanelClearPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear page'**
+  String get editorPanelClearPage;
+
+  /// No description provided for @editorPanelClearPageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear page?'**
+  String get editorPanelClearPageTitle;
+
+  /// No description provided for @editorPanelClearPageMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This erases everything on this page. This can\'t be undone.'**
+  String get editorPanelClearPageMessage;
+
+  /// No description provided for @editorPanelCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get editorPanelCancel;
+
+  /// No description provided for @editorPanelClearPageConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get editorPanelClearPageConfirm;
+
+  /// No description provided for @editorPanelLaserDot.
+  ///
+  /// In en, this message translates to:
+  /// **'Laser dot'**
+  String get editorPanelLaserDot;
+
+  /// No description provided for @editorPanelLaserLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Laser line'**
+  String get editorPanelLaserLine;
+
+  /// No description provided for @editorPanelLaserHollow.
+  ///
+  /// In en, this message translates to:
+  /// **'Hollow laser line'**
+  String get editorPanelLaserHollow;
+
+  /// No description provided for @editorPanelLaserRainbow.
+  ///
+  /// In en, this message translates to:
+  /// **'Rainbow laser'**
+  String get editorPanelLaserRainbow;
+
+  /// No description provided for @editorPanelLaserDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Duration'**
+  String get editorPanelLaserDuration;
+
+  /// No description provided for @editorPanelTextTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Text tool'**
+  String get editorPanelTextTitle;
+
+  /// No description provided for @editorPanelTextHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the canvas to add a text box.'**
+  String get editorPanelTextHint;
+
+  /// No description provided for @editorPanelTextColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Color'**
+  String get editorPanelTextColor;
+
+  /// No description provided for @editorPanelTextStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Style'**
+  String get editorPanelTextStyle;
+
+  /// No description provided for @editorPanelAddNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Add note'**
+  String get editorPanelAddNote;
+
+  /// No description provided for @editorPanelColorHex.
+  ///
+  /// In en, this message translates to:
+  /// **'Hex'**
+  String get editorPanelColorHex;
+
+  /// No description provided for @editorPanelColorRed.
+  ///
+  /// In en, this message translates to:
+  /// **'Red'**
+  String get editorPanelColorRed;
+
+  /// No description provided for @editorPanelColorGreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Green'**
+  String get editorPanelColorGreen;
+
+  /// No description provided for @editorPanelColorBlue.
+  ///
+  /// In en, this message translates to:
+  /// **'Blue'**
+  String get editorPanelColorBlue;
+
+  /// No description provided for @editorPanelColorCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get editorPanelColorCancel;
+
+  /// No description provided for @editorPanelColorDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get editorPanelColorDone;
+
+  /// No description provided for @editorPanelColorSwatches.
+  ///
+  /// In en, this message translates to:
+  /// **'Swatches'**
+  String get editorPanelColorSwatches;
+
+  /// No description provided for @editorPanelColorSpectrum.
+  ///
+  /// In en, this message translates to:
+  /// **'Spectrum'**
+  String get editorPanelColorSpectrum;
+
+  /// No description provided for @editorCatalogShapesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shape'**
+  String get editorCatalogShapesTitle;
+
+  /// No description provided for @editorCatalogStrokeWidth.
+  ///
+  /// In en, this message translates to:
+  /// **'Stroke width'**
+  String get editorCatalogStrokeWidth;
+
+  /// No description provided for @editorCatalogStrokeColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Stroke color'**
+  String get editorCatalogStrokeColor;
+
+  /// No description provided for @editorCatalogFillShape.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill shape'**
+  String get editorCatalogFillShape;
+
+  /// No description provided for @editorCatalogFillColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill color'**
+  String get editorCatalogFillColor;
+
+  /// No description provided for @editorCatalogShapeLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Line'**
+  String get editorCatalogShapeLine;
+
+  /// No description provided for @editorCatalogShapeArrow.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrow'**
+  String get editorCatalogShapeArrow;
+
+  /// No description provided for @editorCatalogShapeRectangle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rectangle'**
+  String get editorCatalogShapeRectangle;
+
+  /// No description provided for @editorCatalogShapeEllipse.
+  ///
+  /// In en, this message translates to:
+  /// **'Ellipse'**
+  String get editorCatalogShapeEllipse;
+
+  /// No description provided for @editorCatalogShapeTriangle.
+  ///
+  /// In en, this message translates to:
+  /// **'Triangle'**
+  String get editorCatalogShapeTriangle;
+
+  /// No description provided for @editorCatalogShapeDiamond.
+  ///
+  /// In en, this message translates to:
+  /// **'Diamond'**
+  String get editorCatalogShapeDiamond;
+
+  /// No description provided for @editorCatalogShapeStar.
+  ///
+  /// In en, this message translates to:
+  /// **'Star'**
+  String get editorCatalogShapeStar;
+
+  /// No description provided for @editorCatalogShapePentagon.
+  ///
+  /// In en, this message translates to:
+  /// **'Pentagon'**
+  String get editorCatalogShapePentagon;
+
+  /// No description provided for @editorCatalogShapeHexagon.
+  ///
+  /// In en, this message translates to:
+  /// **'Hexagon'**
+  String get editorCatalogShapeHexagon;
+
+  /// No description provided for @editorCatalogShapePlus.
+  ///
+  /// In en, this message translates to:
+  /// **'Plus'**
+  String get editorCatalogShapePlus;
+
+  /// No description provided for @editorCatalogStickersTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Stickers'**
+  String get editorCatalogStickersTitle;
+
+  /// No description provided for @editorCatalogAddSticker.
+  ///
+  /// In en, this message translates to:
+  /// **'Add sticker'**
+  String get editorCatalogAddSticker;
+
+  /// No description provided for @editorCatalogStickerEmoji.
+  ///
+  /// In en, this message translates to:
+  /// **'Emoji'**
+  String get editorCatalogStickerEmoji;
+
+  /// No description provided for @editorCatalogStickerAnimals.
+  ///
+  /// In en, this message translates to:
+  /// **'Animals'**
+  String get editorCatalogStickerAnimals;
+
+  /// No description provided for @editorCatalogStickerFood.
+  ///
+  /// In en, this message translates to:
+  /// **'Food'**
+  String get editorCatalogStickerFood;
+
+  /// No description provided for @editorCatalogStickerTravel.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel'**
+  String get editorCatalogStickerTravel;
+
+  /// No description provided for @editorCatalogStickerObjects.
+  ///
+  /// In en, this message translates to:
+  /// **'Objects'**
+  String get editorCatalogStickerObjects;
+
+  /// No description provided for @editorCatalogStickerSymbols.
+  ///
+  /// In en, this message translates to:
+  /// **'Symbols'**
+  String get editorCatalogStickerSymbols;
+
+  /// No description provided for @editorCatalogStickerHands.
+  ///
+  /// In en, this message translates to:
+  /// **'Hands'**
+  String get editorCatalogStickerHands;
+
+  /// No description provided for @editorCatalogStickerNature.
+  ///
+  /// In en, this message translates to:
+  /// **'Nature'**
+  String get editorCatalogStickerNature;
+
+  /// No description provided for @editorSelectionLassoFreeform.
+  ///
+  /// In en, this message translates to:
+  /// **'Freeform'**
+  String get editorSelectionLassoFreeform;
+
+  /// No description provided for @editorSelectionLassoRectangle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rectangle'**
+  String get editorSelectionLassoRectangle;
+
+  /// No description provided for @editorSelectionLassoSelectable.
+  ///
+  /// In en, this message translates to:
+  /// **'Selectable'**
+  String get editorSelectionLassoSelectable;
+
+  /// No description provided for @editorSelectionTypeHandwriting.
+  ///
+  /// In en, this message translates to:
+  /// **'Handwriting'**
+  String get editorSelectionTypeHandwriting;
+
+  /// No description provided for @editorSelectionTypeShape.
+  ///
+  /// In en, this message translates to:
+  /// **'Shapes'**
+  String get editorSelectionTypeShape;
+
+  /// No description provided for @editorSelectionTypeImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Images'**
+  String get editorSelectionTypeImage;
+
+  /// No description provided for @editorSelectionTypeHighlighter.
+  ///
+  /// In en, this message translates to:
+  /// **'Highlighter'**
+  String get editorSelectionTypeHighlighter;
+
+  /// No description provided for @editorSelectionTypeText.
+  ///
+  /// In en, this message translates to:
+  /// **'Text'**
+  String get editorSelectionTypeText;
+
+  /// No description provided for @editorSelectionTypeTape.
+  ///
+  /// In en, this message translates to:
+  /// **'Tape'**
+  String get editorSelectionTypeTape;
+
+  /// No description provided for @editorSelectionTypeLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Links'**
+  String get editorSelectionTypeLink;
+
+  /// No description provided for @editorSelectionTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Labels'**
+  String get editorSelectionTypeLabel;
+
+  /// No description provided for @editorSelectionAi.
+  ///
+  /// In en, this message translates to:
+  /// **'AI assistant'**
+  String get editorSelectionAi;
+
+  /// No description provided for @editorSelectionColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Color'**
+  String get editorSelectionColor;
+
+  /// No description provided for @editorSelectionScreenshot.
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshot'**
+  String get editorSelectionScreenshot;
+
+  /// No description provided for @editorSelectionCut.
+  ///
+  /// In en, this message translates to:
+  /// **'Cut'**
+  String get editorSelectionCut;
+
+  /// No description provided for @editorSelectionDuplicate.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate'**
+  String get editorSelectionDuplicate;
+
+  /// No description provided for @editorSelectionDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get editorSelectionDelete;
+
+  /// No description provided for @editorSelectionBringToFront.
+  ///
+  /// In en, this message translates to:
+  /// **'Bring to front'**
+  String get editorSelectionBringToFront;
+
+  /// No description provided for @editorSelectionSendToBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Send to back'**
+  String get editorSelectionSendToBack;
+
+  /// No description provided for @editorSelectionCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get editorSelectionCopy;
+
+  /// No description provided for @editorSelectionPaste.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste'**
+  String get editorSelectionPaste;
+
+  /// No description provided for @editorSelectionAskAi.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask AI'**
+  String get editorSelectionAskAi;
+
+  /// No description provided for @editorSelectionTakeScreenshot.
+  ///
+  /// In en, this message translates to:
+  /// **'Take screenshot'**
+  String get editorSelectionTakeScreenshot;
+
+  /// No description provided for @editorSelectionMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get editorSelectionMore;
+
+  /// No description provided for @editorSelectionSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get editorSelectionSave;
+
+  /// No description provided for @editorSelectionScreenshotCaptureFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t create the screenshot'**
+  String get editorSelectionScreenshotCaptureFailed;
+
+  /// No description provided for @editorSelectionScreenshotSavedAndCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshot saved to the gallery and copied to the clipboard'**
+  String get editorSelectionScreenshotSavedAndCopied;
+
+  /// No description provided for @editorSelectionScreenshotSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshot saved to the gallery'**
+  String get editorSelectionScreenshotSaved;
+
+  /// No description provided for @editorSelectionScreenshotCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Screenshot copied to the clipboard'**
+  String get editorSelectionScreenshotCopied;
+
+  /// No description provided for @editorSelectionScreenshotSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save the screenshot'**
+  String get editorSelectionScreenshotSaveFailed;
+
+  /// No description provided for @editorSelectionContextEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit'**
+  String get editorSelectionContextEdit;
+
+  /// No description provided for @editorSelectionContextStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Style'**
+  String get editorSelectionContextStyle;
+
+  /// No description provided for @editorSelectionContextMove.
+  ///
+  /// In en, this message translates to:
+  /// **'Move'**
+  String get editorSelectionContextMove;
+
   /// No description provided for @editorDocumentNameLabel.
   ///
   /// In en, this message translates to:

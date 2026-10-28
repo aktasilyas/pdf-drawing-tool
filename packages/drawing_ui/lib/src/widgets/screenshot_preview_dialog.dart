@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:drawing_ui/src/l10n/drawing_strings_scope.dart';
 
 /// Dialog that shows a screenshot preview before saving.
 ///
@@ -23,7 +24,7 @@ class ScreenshotPreviewDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              'Ekran Resmi',
+              context.drawingStrings.selection.screenshot,
               style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 16),
@@ -51,7 +52,7 @@ class ScreenshotPreviewDialog extends StatelessWidget {
                 TextButton(
                   onPressed: () => Navigator.of(context).pop(false),
                   child: Text(
-                    'İptal',
+                    context.drawingStrings.panels.cancel,
                     style: Theme.of(context)
                         .textTheme
                         .bodySmall
@@ -61,7 +62,7 @@ class ScreenshotPreviewDialog extends StatelessWidget {
                 const SizedBox(width: 12),
                 FilledButton(
                   onPressed: () => Navigator.of(context).pop(true),
-                  child: const Text('Kaydet'),
+                  child: Text(context.drawingStrings.selection.save),
                 ),
               ],
             ),

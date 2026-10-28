@@ -1,5 +1,10 @@
+export 'catalog_strings.dart';
 export 'drawing_strings.dart';
 export 'drawing_strings_scope.dart';
+export 'enum_labels.dart';
+export 'panel_strings.dart';
+export 'selection_strings.dart';
+export 'sticker_category_label.dart';
 export 'tool_strings.dart';
 export 'tool_type_label.dart';
 export 'toolbar_strings.dart';

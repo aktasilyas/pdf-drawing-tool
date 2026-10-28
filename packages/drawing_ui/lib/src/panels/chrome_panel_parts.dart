@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/toolbar/chrome_icon_button.dart';
 
@@ -40,7 +41,7 @@ class ChromePanelHeader extends StatelessWidget {
           ChromeIconButton(
             icon: ElyanotesIcons.close,
             iconSize: ChromeIconSizes.md,
-            tooltip: 'Kapat',
+            tooltip: context.drawingStrings.panels.close,
             onPressed: onClose,
           ),
         ],

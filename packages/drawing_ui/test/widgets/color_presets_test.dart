@@ -7,6 +7,5 @@ void main() {
     expect(ColorPresets.quickAccess, isNotEmpty);
     expect(ColorPresets.classicLight.first, equals(const Color(0xFF000000)));
     expect(ColorSets.basic.length, equals(ColorPresets.classicLight.length));
-    expect(ColorSets.all.containsKey('Temel'), isTrue);
   });
 }

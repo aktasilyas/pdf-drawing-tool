@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/panels/chrome_panel_parts.dart';
 import 'package:drawing_ui/src/providers/drawing_providers.dart';
 import 'package:drawing_ui/src/providers/document_provider.dart';
@@ -21,6 +22,7 @@ class StickyNotePanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final palette = ChromePalette.of(context);
+    final str = context.drawingStrings;
     return Padding(
       padding: const EdgeInsets.all(ChromeSpacing.lg),
       child: Column(
@@ -28,12 +30,12 @@ class StickyNotePanel extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ChromePanelHeader(
-            title: 'Yapışkan Not',
+            title: str.tools.stickyNote,
             onClose: () => ref.read(activePanelProvider.notifier).state = null,
           ),
           Semantics(
             button: true,
-            label: 'Not Ekle',
+            label: str.panels.addNote,
             excludeSemantics: true,
             onTap: () => _addStickyNote(context, ref),
             child: GestureDetector(
@@ -63,7 +65,7 @@ class StickyNotePanel extends ConsumerWidget {
                     ),
                     const SizedBox(width: ChromeSpacing.sm),
                     Text(
-                      'Not Ekle',
+                      str.panels.addNote,
                       style: Theme.of(context).textTheme.labelLarge?.copyWith(
                             color: palette.textPrimary,
                           ),

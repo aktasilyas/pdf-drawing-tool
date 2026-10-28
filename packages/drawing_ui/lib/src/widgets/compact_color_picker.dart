@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/providers/recent_colors_provider.dart';
 import 'package:drawing_ui/src/theme/chrome_roles.dart';
 import 'package:drawing_ui/src/theme/chrome_tokens.dart';
@@ -148,6 +149,7 @@ class _CompactColorPickerState extends ConsumerState<CompactColorPicker>
 
   Widget _buildTabBar(ColorScheme cs) {
     final textTheme = Theme.of(context).textTheme;
+    final p = context.drawingStrings.panels;
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         ChromeSpacing.lg,
@@ -173,7 +175,7 @@ class _CompactColorPickerState extends ConsumerState<CompactColorPicker>
           dividerHeight: 0,
           labelStyle: textTheme.titleSmall?.copyWith(fontSize: 13),
           unselectedLabelStyle: textTheme.bodySmall?.copyWith(fontSize: 13),
-          tabs: const [Tab(text: 'Kartelalar'), Tab(text: 'Spektrum')],
+          tabs: [Tab(text: p.colorSwatches), Tab(text: p.colorSpectrum)],
         ),
       ),
     );

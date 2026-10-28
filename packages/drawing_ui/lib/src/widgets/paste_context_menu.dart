@@ -1,3 +1,4 @@
+import 'package:drawing_ui/src/l10n/drawing_strings_scope.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
@@ -55,7 +56,7 @@ class PasteContextMenu extends ConsumerWidget {
                       size: 18, color: cs.onSurface),
                   const SizedBox(width: 6),
                   Text(
-                    'Yapıştır',
+                    context.drawingStrings.selection.paste,
                     style: textTheme.bodyMedium?.copyWith(
                       color: cs.onSurface,
                     ),

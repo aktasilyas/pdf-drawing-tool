@@ -24,13 +24,35 @@ Uint8List? _pdfBytesFor(WidgetRef ref, PageBackground? background) {
   return null;
 }
 
-Future<void> screenshotSelection(
+/// Result of a screenshot attempt; the UI maps it to localized feedback.
+enum SelectionScreenshotOutcome {
+  captureFailed,
+  savedAndCopied,
+  saved,
+  copied,
+  saveFailed,
+}
+
+/// Maps a [SelectionImageSaveResult] to a [SelectionScreenshotOutcome].
+SelectionScreenshotOutcome screenshotOutcomeFor(
+        SelectionImageSaveResult result) =>
+    switch (result) {
+      SelectionImageSaveResult.savedAndCopied =>
+        SelectionScreenshotOutcome.savedAndCopied,
+      SelectionImageSaveResult.saved => SelectionScreenshotOutcome.saved,
+      SelectionImageSaveResult.copied => SelectionScreenshotOutcome.copied,
+      SelectionImageSaveResult.failed => SelectionScreenshotOutcome.saveFailed,
+    };
+
+/// Captures [selection], previews it and saves it. Returns the outcome, or
+/// null when cancelled or the context is gone. Shows no feedback itself.
+Future<SelectionScreenshotOutcome?> screenshotSelection(
   WidgetRef ref,
   Selection selection,
   ImageCacheManager? cacheManager,
   BuildContext? context,
 ) async {
-  if (cacheManager == null) return;
+  if (cacheManager == null) return null;
 
   try {
     final document = ref.read(documentProvider);
@@ -56,23 +78,22 @@ Future<void> screenshotSelection(
       pageSize: pageSz,
     );
     if (bytes == null) {
-      showSnackBar(context, 'Ekran resmi oluşturulamadı');
-      return;
+      return SelectionScreenshotOutcome.captureFailed;
     }
 
-    if (context == null || !context.mounted) return;
+    if (context == null || !context.mounted) return null;
 
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => ScreenshotPreviewDialog(bytes: bytes),
     );
-    if (confirmed != true) return;
+    if (confirmed != true) return null;
 
     final result = await saveSelectionImage(sink, bytes);
-    showSnackBar(context, selectionImageSaveMessage(result));
+    return screenshotOutcomeFor(result);
   } catch (e) {
     DrawingLog.e('Screenshot selection failed: $e');
-    showSnackBar(context, 'Ekran resmi oluşturulamadı');
+    return SelectionScreenshotOutcome.captureFailed;
   }
 }
 
@@ -123,21 +144,4 @@ Future<void> captureAndOpenAI(
   }
 
   aiCallback();
-}
-
-/// Snackbar text for a [SelectionImageSaveResult].
-String selectionImageSaveMessage(SelectionImageSaveResult result) =>
-    switch (result) {
-      SelectionImageSaveResult.savedAndCopied =>
-        'Ekran resmi galeriye kaydedildi ve panoya kopyalandı',
-      SelectionImageSaveResult.saved => 'Ekran resmi galeriye kaydedildi',
-      SelectionImageSaveResult.copied => 'Ekran resmi panoya kopyalandı',
-      SelectionImageSaveResult.failed => 'Ekran resmi kaydedilemedi',
-    };
-
-void showSnackBar(BuildContext? context, String message) {
-  if (context == null || !context.mounted) return;
-  ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-    SnackBar(content: Text(message)),
-  );
 }

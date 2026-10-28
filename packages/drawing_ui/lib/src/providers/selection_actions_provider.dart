@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/canvas/image_painter.dart';
 import 'package:drawing_ui/src/models/selection_action.dart';
+import 'package:drawing_ui/src/models/selection_action_kind.dart';
+import 'package:drawing_ui/src/widgets/selection_screenshot_feedback.dart';
 import 'package:drawing_ui/src/providers/ai_callback_provider.dart';
 import 'package:drawing_ui/src/providers/document_provider.dart';
 import 'package:drawing_ui/src/providers/feature_toggles_provider.dart';
@@ -32,6 +34,16 @@ SelectionActionConfig buildSelectionActionConfig(
       ref.read(onAIPressedCallbackProvider) ??
       (context != null ? () => openAIPanel(context) : null);
 
+  void onScreenshot() {
+    screenshotSelection(ref, selection, cacheManager, context).then(
+      (outcome) {
+        if (outcome != null) {
+          showSelectionScreenshotFeedback(context, outcome);
+        }
+      },
+    );
+  }
+
   // Empty selection: only AI + Screenshot actions
   if (selection.isEmpty) {
     return SelectionActionConfig(
@@ -40,7 +52,7 @@ SelectionActionConfig buildSelectionActionConfig(
           SelectionAction(
             id: 'ai',
             icon: ElyanotesIcons.sparkle,
-            label: 'AI Asistan',
+            kind: SelectionActionKind.ai,
             isEnabled: resolvedAICallback != null,
             onExecute: resolvedAICallback != null
                 ? () => captureAndOpenAI(
@@ -50,11 +62,9 @@ SelectionActionConfig buildSelectionActionConfig(
         SelectionAction(
           id: 'screenshot',
           icon: ElyanotesIcons.camera,
-          label: 'Ekran Resmi',
+          kind: SelectionActionKind.screenshot,
           isEnabled: cacheManager != null,
-          onExecute: cacheManager != null
-              ? () => screenshotSelection(ref, selection, cacheManager, context)
-              : null,
+          onExecute: cacheManager != null ? onScreenshot : null,
         ),
       ],
       topRowActions: const [],
@@ -94,7 +104,7 @@ SelectionActionConfig buildSelectionActionConfig(
       SelectionAction(
         id: 'ai',
         icon: ElyanotesIcons.sparkle,
-        label: 'AI Asistan',
+        kind: SelectionActionKind.ai,
         isEnabled: resolvedAICallback != null,
         onExecute: resolvedAICallback != null
             ? () => captureAndOpenAI(
@@ -104,35 +114,33 @@ SelectionActionConfig buildSelectionActionConfig(
     SelectionAction(
       id: 'color',
       icon: ElyanotesIcons.palette,
-      label: 'Renk',
+      kind: SelectionActionKind.color,
       colorIndicator: selectedColor,
       onExecute: () {},
     ),
     SelectionAction(
       id: 'screenshot',
       icon: ElyanotesIcons.camera,
-      label: 'Ekran Resmi',
+      kind: SelectionActionKind.screenshot,
       isEnabled: cacheManager != null,
-      onExecute: cacheManager != null
-          ? () => screenshotSelection(ref, selection, cacheManager, context)
-          : null,
+      onExecute: cacheManager != null ? onScreenshot : null,
     ),
     SelectionAction(
       id: 'cut',
       icon: ElyanotesIcons.scissors,
-      label: 'Kes',
+      kind: SelectionActionKind.cut,
       onExecute: () => cutToClipboard(ref, selection),
     ),
     SelectionAction(
       id: 'duplicate',
       icon: ElyanotesIcons.duplicate,
-      label: 'Cogalt',
+      kind: SelectionActionKind.duplicate,
       onExecute: () => duplicateSelection(ref, selection),
     ),
     SelectionAction(
       id: 'delete',
       icon: ElyanotesIcons.trash,
-      label: 'Sil',
+      kind: SelectionActionKind.delete,
       isDestructive: true,
       onExecute: () => deleteSelection(ref, selection),
     ),
@@ -143,19 +151,19 @@ SelectionActionConfig buildSelectionActionConfig(
     SelectionAction(
       id: 'overflow_cut',
       icon: ElyanotesIcons.scissors,
-      label: 'Kes',
+      kind: SelectionActionKind.cut,
       onExecute: () => cutToClipboard(ref, selection),
     ),
     SelectionAction(
       id: 'overflow_front',
       icon: ElyanotesIcons.bringToFront,
-      label: 'Öne Getir',
+      kind: SelectionActionKind.bringToFront,
       onExecute: () => bringToFront(ref, selection),
     ),
     SelectionAction(
       id: 'overflow_back',
       icon: ElyanotesIcons.sendToBack,
-      label: 'Arkaya Gönder',
+      kind: SelectionActionKind.sendToBack,
       onExecute: () => sendToBack(ref, selection),
     ),
   ];
@@ -165,26 +173,26 @@ SelectionActionConfig buildSelectionActionConfig(
     SelectionAction(
       id: 'overflow_copy',
       icon: ElyanotesIcons.copy,
-      label: 'Kopyala',
+      kind: SelectionActionKind.copy,
       onExecute: () => copyToClipboard(ref, selection),
     ),
     SelectionAction(
       id: 'overflow_duplicate',
       icon: ElyanotesIcons.duplicate,
-      label: 'Çoğalt',
+      kind: SelectionActionKind.duplicate,
       onExecute: () => duplicateSelection(ref, selection),
     ),
     SelectionAction(
       id: 'overflow_paste',
       icon: ElyanotesIcons.paste,
-      label: 'Yapıştır',
+      kind: SelectionActionKind.paste,
       isEnabled: hasClipboard,
       onExecute: hasClipboard ? () => pasteFromClipboard(ref) : null,
     ),
     SelectionAction(
       id: 'overflow_ai',
       icon: ElyanotesIcons.sparkle,
-      label: 'Yapay zekaya sor',
+      kind: SelectionActionKind.askAi,
       isEnabled: resolvedAICallback != null,
       onExecute: resolvedAICallback != null
           ? () =>
@@ -194,16 +202,14 @@ SelectionActionConfig buildSelectionActionConfig(
     SelectionAction(
       id: 'overflow_screenshot',
       icon: ElyanotesIcons.camera,
-      label: 'Ekran Resmi Çek',
+      kind: SelectionActionKind.takeScreenshot,
       isEnabled: cacheManager != null,
-      onExecute: cacheManager != null
-          ? () => screenshotSelection(ref, selection, cacheManager, context)
-          : null,
+      onExecute: cacheManager != null ? onScreenshot : null,
     ),
     SelectionAction(
       id: 'overflow_delete',
       icon: ElyanotesIcons.trash,
-      label: 'Sil',
+      kind: SelectionActionKind.delete,
       isDestructive: true,
       onExecute: () => deleteSelection(ref, selection),
     ),

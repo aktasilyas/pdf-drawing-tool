@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/panels/chrome_panel_parts.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
@@ -22,6 +23,7 @@ class HighlighterSettingsPanel extends ConsumerWidget {
     final currentTool = ref.watch(currentToolProvider);
     final isNeon = currentTool == ToolType.neonHighlighter;
     final palette = ChromePalette.of(context);
+    final str = context.drawingStrings;
     final notifier = ref.read(highlighterSettingsProvider.notifier);
     final minTh = isNeon ? 8.0 : 10.0;
     final maxTh = isNeon ? 30.0 : 40.0;
@@ -34,7 +36,7 @@ class HighlighterSettingsPanel extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ChromePanelHeader(
-            title: isNeon ? 'Neon Fosforlu' : 'Fosforlu Kalem',
+            title: isNeon ? str.tools.neonHighlighter : str.tools.highlighter,
             onClose: () => ref.read(activePanelProvider.notifier).state = null,
           ),
           _HighlighterStrokePreview(
@@ -50,7 +52,7 @@ class HighlighterSettingsPanel extends ConsumerWidget {
           ),
           const ChromeHairline(),
           GoodNotesSlider(
-            label: 'Kalınlık',
+            label: str.panels.thickness,
             value: thickness,
             min: minTh,
             max: maxTh,
@@ -60,7 +62,7 @@ class HighlighterSettingsPanel extends ConsumerWidget {
           ),
           if (isNeon)
             GoodNotesSlider(
-              label: 'Parlaklık',
+              label: str.panels.glow,
               value: settings.glowIntensity,
               min: 0.1,
               max: 1.0,
@@ -69,7 +71,7 @@ class HighlighterSettingsPanel extends ConsumerWidget {
               onChanged: notifier.setGlowIntensity,
             ),
           CompactToggle(
-            label: 'Düz çizgi',
+            label: str.panels.straightLine,
             value: settings.straightLineMode,
             onChanged: notifier.setStraightLineMode,
           ),
@@ -203,7 +205,7 @@ class _HighlighterTypeSelector extends StatelessWidget {
               ? PhosphorIconsLight.lightning
               : ElyanotesIcons.highlighter,
           iconSize: ChromeIconSizes.md,
-          tooltip: isNeon ? 'Neon Fosforlu' : 'Fosforlu Kalem',
+          tooltip: t.label(context.drawingStrings),
           selected: t == selectedType,
           onPressed: () => onTypeSelected(t),
         );

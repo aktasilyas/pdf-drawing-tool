@@ -19,7 +19,7 @@ class StickerPanelActions {
 
   /// Places the sticker at [index] of [category]. Does nothing and returns
   /// `false` when nothing valid is selected.
-  bool placeSelected(String category, int index) {
+  bool placeSelected(StickerCategory category, int index) {
     final emoji = stickerAt(category, index);
     if (emoji == null) return false;
     place(emoji);
