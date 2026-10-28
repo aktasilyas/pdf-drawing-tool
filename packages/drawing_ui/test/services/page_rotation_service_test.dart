@@ -157,8 +157,8 @@ void main() {
 
   group('boxed elements', () {
     test('text box center moves and 90° swaps its dimensions', () {
-      final text = TextElement.create(
-          text: 'hi', x: 100, y: 50, width: 200, height: 40);
+      final text =
+          TextElement.create(text: 'hi', x: 100, y: 50, width: 200, height: 40);
       final r = PageRotationService.rotatePage(
           _page(texts: [text]), RotationAngle.cw90);
       final t = r.layers.single.texts.single;
@@ -227,8 +227,7 @@ void main() {
             ),
           ],
           texts: [
-            TextElement.create(
-                text: 't', x: 40, y: 60, width: 120, height: 30),
+            TextElement.create(text: 't', x: 40, y: 60, width: 120, height: 30),
           ],
           images: [
             ImageElement.create(

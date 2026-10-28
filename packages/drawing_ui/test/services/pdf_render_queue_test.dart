@@ -316,8 +316,7 @@ void main() {
       expect(queue.isCompleted('done'), isFalse);
     });
 
-    test('an in-flight render finishing after reset does not crash',
-        () async {
+    test('an in-flight render finishing after reset does not crash', () async {
       final gate = renderer.hold('k');
       queue.enqueue(_req('k'));
       queue.reset();
