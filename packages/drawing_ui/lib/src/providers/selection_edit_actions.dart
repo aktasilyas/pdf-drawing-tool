@@ -106,12 +106,16 @@ void sendToBack(WidgetRef ref, Selection selection) {
 }
 
 void changeColor(WidgetRef ref, Selection selection, int color) {
-  if (selection.selectedStrokeIds.isEmpty && selection.selectedTextIds.isEmpty)
+  if (selection.selectedStrokeIds.isEmpty &&
+      selection.selectedShapeIds.isEmpty &&
+      selection.selectedTextIds.isEmpty) {
     return;
+  }
   final document = ref.read(documentProvider);
   final command = ChangeSelectionStyleCommand(
     layerIndex: document.activeLayerIndex,
     strokeIds: selection.selectedStrokeIds,
+    shapeIds: selection.selectedShapeIds,
     textIds: selection.selectedTextIds,
     newColor: color,
   );

@@ -51,6 +51,10 @@ class _SelectionToolbarState extends ConsumerState<SelectionToolbar> {
       final s = layer.getStrokeById(id);
       if (s != null) return s.style.color;
     }
+    for (final id in widget.selection.selectedShapeIds) {
+      final i = layer.shapes.indexWhere((s) => s.id == id);
+      if (i != -1) return layer.shapes[i].style.color;
+    }
     for (final id in widget.selection.selectedTextIds) {
       final t = layer.getTextById(id);
       if (t != null) return t.color;

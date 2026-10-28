@@ -6,6 +6,7 @@ import 'package:drawing_ui/src/providers/document_provider.dart';
 import 'package:drawing_ui/src/providers/feature_toggles_provider.dart';
 import 'package:drawing_ui/src/providers/history_provider.dart';
 import 'package:drawing_ui/src/providers/selection_actions_provider.dart';
+import 'package:drawing_ui/src/providers/selection_edit_actions.dart';
 import 'package:drawing_ui/src/providers/selection_capture_actions.dart';
 import 'package:drawing_ui/src/providers/selection_clipboard_provider.dart';
 import 'package:drawing_ui/src/providers/selection_provider.dart';
@@ -94,6 +95,34 @@ void main() {
     expect(strokeIds(), hasLength(5));
     expect(container.read(selectionProvider), isNull);
     expectUndoRestores(['a', 'b', 'c']);
+  });
+
+  testWidgets('color change on a shape-only selection is one undo step',
+      (tester) async {
+    await setUpRef(tester);
+    final shape = Shape.create(
+      type: ShapeType.rectangle,
+      startPoint: DrawingPoint(x: 0, y: 0),
+      endPoint: DrawingPoint(x: 10, y: 10),
+      style: StrokeStyle.pen(color: 0xFF000000),
+    );
+    container.read(historyManagerProvider.notifier).execute(
+          AddShapeCommand(layerIndex: 0, shape: shape),
+        );
+    final selection = Selection.create(
+      type: SelectionType.rectangle,
+      selectedStrokeIds: const [],
+      selectedShapeIds: [shape.id],
+      bounds: const BoundingBox(left: 0, top: 0, right: 10, bottom: 10),
+    );
+    final before = container.read(undoCountProvider);
+    changeColor(ref, selection, 0xFFFF0000);
+    expect(container.read(undoCountProvider) - before, 1);
+    expect(container.read(documentProvider).layers[0].shapes.single.style.color,
+        0xFFFF0000);
+    container.read(historyManagerProvider.notifier).undo();
+    expect(container.read(documentProvider).layers[0].shapes.single.style.color,
+        0xFF000000);
   });
 
   testWidgets('copy fills the clipboard without touching history',
