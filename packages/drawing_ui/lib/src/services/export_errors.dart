@@ -3,6 +3,10 @@ import 'dart:io';
 /// POSIX errno for "No space left on device".
 const _enospc = 28;
 
+/// Why an export failed. Widgets map it to copy through
+/// `ExportFailureLabel.message`; services never carry user-facing text.
+enum ExportFailure { storageFull, cannotWrite, failed, noPages }
+
 /// Shown when an export fails because the device storage is full.
 const exportStorageFullMessage =
     'Dışa aktarma için yeterli depolama alanı yok. Yer açıp tekrar deneyin.';

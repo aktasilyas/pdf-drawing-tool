@@ -7,10 +7,10 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Page;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/panels/export_file_name.dart';
 import 'package:drawing_ui/src/panels/export_options.dart';
 import 'package:drawing_ui/src/panels/export_options_section.dart';
-import 'package:drawing_ui/src/panels/export_strings.dart';
 import 'package:drawing_ui/src/panels/page_options_widgets.dart';
 import 'package:drawing_ui/src/panels/png_export_action.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
@@ -52,6 +52,7 @@ class _ExportPanelState extends ConsumerState<ExportPanel> {
     final valid = _options.isValid(pageCount);
     final cs = Theme.of(context).colorScheme;
     final isInfinite = ref.watch(isInfiniteCanvasProvider);
+    final s = context.drawingStrings.export;
 
     Widget content = Column(
       mainAxisSize: MainAxisSize.min,
@@ -66,19 +67,19 @@ class _ExportPanelState extends ConsumerState<ExportPanel> {
         if (isInfinite)
           PageOptionsMenuItem(
             icon: ElyanotesIcons.image,
-            label: ExportStrings.exportPng,
+            label: s.exportPng,
             onTap: () => _exportPNG(context, ref),
           )
         else
           PageOptionsMenuItem(
             icon: ElyanotesIcons.pdfFile,
-            label: ExportStrings.exportPdf,
+            label: s.exportPdf,
             onTap: valid ? () => _exportPDF(context, ref) : null,
           ),
         if (!isInfinite)
           PageOptionsMenuItem(
             icon: ElyanotesIcons.share,
-            label: ExportStrings.sharePdf,
+            label: s.sharePdf,
             onTap: valid ? () => _exportPDF(context, ref, share: true) : null,
           ),
       ],
@@ -287,7 +288,7 @@ class _PanelHeader extends StatelessWidget {
       ),
       child: Align(
         alignment: Alignment.centerLeft,
-        child: Text(ExportStrings.title,
+        child: Text(context.drawingStrings.toolbar.export,
             style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,

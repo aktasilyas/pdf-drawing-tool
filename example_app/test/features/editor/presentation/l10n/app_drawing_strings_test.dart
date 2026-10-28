@@ -1,3 +1,5 @@
+import 'package:drawing_core/drawing_core.dart'
+    show TemplateCategory, TemplateRegistry;
 import 'package:drawing_ui/drawing_ui.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -54,10 +56,67 @@ void main() {
       }
     });
 
+    test('every page string is non-empty in $code', () {
+      final map = strings.pages.toMap();
+      expect(map.keys, isNotEmpty);
+      for (final entry in map.entries) {
+        expect(entry.value.trim(), isNotEmpty, reason: '${entry.key} ($code)');
+      }
+    });
+
+    test('every page list string is non-empty in $code', () {
+      final map = strings.pageList.toMap();
+      expect(map.keys, isNotEmpty);
+      for (final entry in map.entries) {
+        expect(entry.value.trim(), isNotEmpty, reason: '${entry.key} ($code)');
+      }
+    });
+
+    test('every export string is non-empty in $code', () {
+      final map = strings.export.toMap();
+      expect(map.keys, isNotEmpty);
+      for (final entry in map.entries) {
+        expect(entry.value.trim(), isNotEmpty, reason: '${entry.key} ($code)');
+      }
+    });
+
+    test('every template string is non-empty in $code', () {
+      final map = strings.templates.toMap();
+      expect(map.keys, isNotEmpty);
+      for (final entry in map.entries) {
+        expect(entry.value.trim(), isNotEmpty, reason: '${entry.key} ($code)');
+      }
+    });
+
+    test('every error string is non-empty in $code', () {
+      final map = strings.errors.toMap();
+      expect(map.keys, isNotEmpty);
+      for (final entry in map.entries) {
+        expect(entry.value.trim(), isNotEmpty, reason: '${entry.key} ($code)');
+      }
+    });
+
+    test('every canvas string is non-empty in $code', () {
+      final map = strings.canvas.toMap();
+      expect(map.keys, isNotEmpty);
+      for (final entry in map.entries) {
+        expect(entry.value.trim(), isNotEmpty, reason: '${entry.key} ($code)');
+      }
+    });
+
     test('parameterized strings carry their argument in $code', () {
       expect(strings.toolbar.selectedColor('#123456'), contains('#123456'));
       expect(strings.toolbar.color('#123456'), contains('#123456'));
       expect(strings.toolbar.thickness('2.5'), contains('2.5'));
+      expect(strings.pages.pageNumber(7), contains('7'));
+      expect(strings.pageList.pageOf(3, 9),
+          allOf(contains('3'), contains('9')));
+      expect(strings.export.invalidRange(12), contains('12'));
+      expect(strings.export.pageFileName('Notes', 4),
+          allOf(contains('Notes'), contains('4')));
+      expect(strings.errors.pdfTooManyPages(600, 500),
+          allOf(contains('600'), contains('500')));
+      expect(strings.canvas.penBox(5), contains('5'));
     });
   }
 
@@ -68,6 +127,12 @@ void main() {
     expect(tr.panels.toMap(), fallback.panels.toMap());
     expect(tr.catalog.toMap(), fallback.catalog.toMap());
     expect(tr.selection.toMap(), fallback.selection.toMap());
+    expect(tr.pages.toMap(), fallback.pages.toMap());
+    expect(tr.pageList.toMap(), fallback.pageList.toMap());
+    expect(tr.export.toMap(), fallback.export.toMap());
+    expect(tr.templates.toMap(), fallback.templates.toMap());
+    expect(tr.errors.toMap(), fallback.errors.toMap());
+    expect(tr.canvas.toMap(), fallback.canvas.toMap());
   });
 
   test('every en string is translated (differs from tr)', () {
@@ -91,6 +156,24 @@ void main() {
     check('panels', en.panels.toMap(), tr.panels.toMap());
     check('catalog', en.catalog.toMap(), tr.catalog.toMap(), {'stickerEmoji'});
     check('selection', en.selection.toMap(), tr.selection.toMap());
+    check('pages', en.pages.toMap(), tr.pages.toMap());
+    check('pageList', en.pageList.toMap(), tr.pageList.toMap());
+    check('export', en.export.toMap(), tr.export.toMap());
+    check('templates', en.templates.toMap(), tr.templates.toMap());
+    check('errors', en.errors.toMap(), tr.errors.toMap());
+    check('canvas', en.canvas.toMap(), tr.canvas.toMap());
+  });
+
+  test('template and category names follow the locale', () {
+    final en = AppDrawingStrings(lookupAppLocalizations(const Locale('en')));
+    final tr = AppDrawingStrings(lookupAppLocalizations(const Locale('tr')));
+    final blank = TemplateRegistry.blank;
+    expect(en.templates.templateName(blank), blank.nameEn);
+    expect(tr.templates.templateName(blank), blank.name);
+    expect(en.templates.categoryName(TemplateCategory.basic),
+        TemplateCategory.basic.displayNameEn);
+    expect(tr.templates.categoryName(TemplateCategory.basic),
+        TemplateCategory.basic.displayName);
   });
 
   test('equality follows the locale', () {

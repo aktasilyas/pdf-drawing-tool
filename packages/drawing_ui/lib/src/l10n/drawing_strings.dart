@@ -1,6 +1,12 @@
+import 'package:drawing_ui/src/l10n/canvas_strings.dart';
 import 'package:drawing_ui/src/l10n/catalog_strings.dart';
+import 'package:drawing_ui/src/l10n/error_strings.dart';
+import 'package:drawing_ui/src/l10n/export_strings.dart';
+import 'package:drawing_ui/src/l10n/page_list_strings.dart';
+import 'package:drawing_ui/src/l10n/page_strings.dart';
 import 'package:drawing_ui/src/l10n/panel_strings.dart';
 import 'package:drawing_ui/src/l10n/selection_strings.dart';
+import 'package:drawing_ui/src/l10n/template_strings.dart';
 import 'package:drawing_ui/src/l10n/tool_strings.dart';
 import 'package:drawing_ui/src/l10n/toolbar_strings.dart';
 
@@ -14,6 +20,12 @@ abstract interface class DrawingStrings {
   PanelStrings get panels;
   CatalogStrings get catalog;
   SelectionStrings get selection;
+  PageStrings get pages;
+  PageListStrings get pageList;
+  ExportStrings get export;
+  TemplateStrings get templates;
+  ErrorStrings get errors;
+  CanvasStrings get canvas;
 }
 
 /// Turkish copy, the built-in default.
@@ -34,4 +46,22 @@ class DrawingStringsTr implements DrawingStrings {
 
   @override
   SelectionStrings get selection => const SelectionStringsTr();
+
+  @override
+  PageStrings get pages => const PageStringsTr();
+
+  @override
+  PageListStrings get pageList => const PageListStringsTr();
+
+  @override
+  ExportStrings get export => const ExportStringsTr();
+
+  @override
+  TemplateStrings get templates => const TemplateStringsTr();
+
+  @override
+  ErrorStrings get errors => const ErrorStringsTr();
+
+  @override
+  CanvasStrings get canvas => const CanvasStringsTr();
 }

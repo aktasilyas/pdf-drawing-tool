@@ -2,7 +2,6 @@ import 'package:drawing_core/drawing_core.dart' show DrawingDocument, Page;
 import 'package:drawing_ui/drawing_ui.dart';
 import 'package:drawing_ui/src/panels/export_options.dart';
 import 'package:drawing_ui/src/panels/export_panel.dart';
-import 'package:drawing_ui/src/panels/export_strings.dart';
 import 'package:drawing_ui/src/panels/page_options_rows.dart';
 import 'package:flutter/material.dart' hide Page;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,6 +10,8 @@ import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../golden/helpers/chrome_theme.dart';
+
+const _s = ExportStringsTr();
 
 class _Runner extends PDFExportRunner {
   final runs = <ExportOptions>[];
@@ -68,7 +69,7 @@ void main() {
   }
 
   Future<void> enterRange(WidgetTester tester, String from, String to) async {
-    await tester.tap(find.text(ExportStrings.scopeRange));
+    await tester.tap(find.text(_s.scopeRange));
     await tester.pump();
     await tester.enterText(
         find.byKey(const ValueKey('export-range-from')), from);
@@ -78,7 +79,7 @@ void main() {
 
   VoidCallback? exportAction(WidgetTester tester) => tester
       .widget<PageOptionsMenuItem>(
-          find.widgetWithText(PageOptionsMenuItem, ExportStrings.exportPdf))
+          find.widgetWithText(PageOptionsMenuItem, _s.exportPdf))
       .onTap;
 
   testWidgets('Range 2-4 reaches the runner and selects pages 2, 3, 4',
@@ -87,7 +88,7 @@ void main() {
     await enterRange(tester, '2', '4');
     expect(find.textContaining('arasında olmalı'), findsNothing);
 
-    await tester.tap(find.text(ExportStrings.exportPdf));
+    await tester.tap(find.text(_s.exportPdf));
     await tester.pump();
 
     final o = runner.runs.single;
@@ -100,9 +101,9 @@ void main() {
 
   testWidgets('Current page selects exactly the current page', (tester) async {
     final runner = await pump(tester);
-    await tester.tap(find.text(ExportStrings.scopeCurrent));
+    await tester.tap(find.text(_s.scopeCurrent));
     await tester.pump();
-    await tester.tap(find.text(ExportStrings.exportPdf));
+    await tester.tap(find.text(_s.exportPdf));
     await tester.pump();
 
     final o = runner.runs.single;
@@ -120,8 +121,8 @@ void main() {
 
       expect(find.textContaining('arasında olmalı'), findsOneWidget);
       expect(exportAction(tester), isNull);
-      await tester.tap(find.text(ExportStrings.exportPdf));
-      await tester.tap(find.text(ExportStrings.sharePdf));
+      await tester.tap(find.text(_s.exportPdf));
+      await tester.tap(find.text(_s.sharePdf));
       await tester.pump();
       expect(runner.runs, isEmpty);
     });
