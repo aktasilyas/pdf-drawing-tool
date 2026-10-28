@@ -33,14 +33,13 @@ void main() {
     test('uses settings.defaultPageSize when it is not the A4 fallback', () {
       final doc = _doc(
         [_page('p', _a5)],
-        settings: DocumentSettings.defaults()
-            .copyWith(defaultPageSize: _landscape),
+        settings:
+            DocumentSettings.defaults().copyWith(defaultPageSize: _landscape),
       );
       expect(resolveNewPageSize(doc, 0), _landscape);
     });
 
-    test('legacy A4 settings: takes the size of the current template page',
-        () {
+    test('legacy A4 settings: takes the size of the current template page', () {
       final doc = _doc([_page('a', _landscape), _page('b', _a5)]);
       expect(resolveNewPageSize(doc, 0), _landscape);
       expect(resolveNewPageSize(doc, 1), _a5);
@@ -68,8 +67,7 @@ void main() {
       expect(resolveNewPageSize(doc, 0), PageSize.a4Portrait);
     });
 
-    test('out-of-range current index falls back to the last template page',
-        () {
+    test('out-of-range current index falls back to the last template page', () {
       final doc = _doc([_page('a', _landscape)]);
       expect(resolveNewPageSize(doc, 5), _landscape);
       expect(resolveNewPageSize(doc, -1), _landscape);

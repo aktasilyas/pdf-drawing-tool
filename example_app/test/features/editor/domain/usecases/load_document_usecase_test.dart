@@ -71,8 +71,7 @@ void main() {
       ('A4 portrait', 210.0, 297.0),
       ('A4 landscape', 297.0, 210.0),
     ]) {
-      test('new $label notebook stores its page size as the default',
-          () async {
+      test('new $label notebook stores its page size as the default', () async {
         when(() => mockRepository.getDocument(testDocId)).thenAnswer(
           (_) async => Right(
             testDocInfo.copyWith(paperWidthMm: w, paperHeightMm: h),

@@ -36,7 +36,8 @@ Future<ProviderContainer> _pumpPanel(
   final container = ProviderContainer(
     overrides: [
       sharedPreferencesProvider.overrideWithValue(prefs),
-      if (importer != null) pageFileImporterProvider.overrideWithValue(importer),
+      if (importer != null)
+        pageFileImporterProvider.overrideWithValue(importer),
     ],
   );
   addTearDown(container.dispose);
@@ -74,8 +75,8 @@ Future<ProviderContainer> _pumpPanel(
 void main() {
   for (final entry in {
     'legacy A4 settings': null,
-    'notebook paper settings': core.DocumentSettings.defaults()
-        .copyWith(defaultPageSize: _landscape),
+    'notebook paper settings':
+        core.DocumentSettings.defaults().copyWith(defaultPageSize: _landscape),
   }.entries) {
     testWidgets(
         'template page added to a landscape notebook (${entry.key}) '
