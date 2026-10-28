@@ -1,5 +1,5 @@
 import 'package:drawing_core/drawing_core.dart'
-    show TemplateCategory, TemplateRegistry;
+    show TemplateCategory, TemplateCategoryExtension, TemplateRegistry;
 import 'package:drawing_ui/drawing_ui.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';

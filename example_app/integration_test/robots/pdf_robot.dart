@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:drawing_ui/drawing_ui.dart'
     show PDFLoader, PdfShareOutcome, PdfShareService;
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
