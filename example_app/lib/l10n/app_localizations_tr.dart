@@ -1348,6 +1348,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get editorPagePageMoved => 'Sayfa taşındı';
 
   @override
+  String get editorPageBackgroundReplaced => 'Sayfa arka planı değiştirildi';
+
+  @override
   String get editorPageGoToPage => 'Sayfaya Git';
 
   @override

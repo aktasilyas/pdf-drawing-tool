@@ -440,6 +440,7 @@
   "editorPageClearPageQuestion": "Sayfa {page} temizlensin mi?\nBu işlem geri alınabilir.",
   "editorPagePageAdded": "Sayfa eklendi",
   "editorPagePageMoved": "Sayfa taşındı",
+  "editorPageBackgroundReplaced": "Sayfa arka planı değiştirildi",
   "editorPageGoToPage": "Sayfaya Git",
   "editorPageGo": "Git",
   "editorPageListPageOf": "Sayfa {page} / {count}",
