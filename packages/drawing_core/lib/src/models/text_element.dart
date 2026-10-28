@@ -1,6 +1,10 @@
 import 'dart:math' as math;
 
-import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_core/src/models/bounding_box.dart';
+import 'package:drawing_core/src/models/element_ids.dart';
+
+part 'text_element_bounds.dart';
+part 'text_element_json.dart';
 
 /// Text alignment options.
 enum TextAlignment {
@@ -133,75 +137,7 @@ class TextElement {
   bool get isNotEmpty => text.isNotEmpty;
 
   /// Bounding box (tahmini - gerçek boyut render'da hesaplanır)
-  BoundingBox get bounds {
-    final lineHeight = fontSize * 1.2;
-    final lines = text.split('\n');
-
-    double maxLineWidth = 0;
-    for (final line in lines) {
-      final runes = line.runes.toList();
-      final hasEmoji = runes.any((r) => r > 0xFF);
-      if (hasEmoji) {
-        maxLineWidth =
-            math.max(maxLineWidth, _countVisibleGlyphs(runes) * fontSize);
-      } else {
-        maxLineWidth = math.max(maxLineWidth, runes.length * fontSize * 0.6);
-      }
-    }
-
-    final w = width ?? maxLineWidth;
-    final h = height ?? (lines.length * lineHeight);
-
-    if (rotation == 0.0) {
-      return BoundingBox(left: x, top: y, right: x + w, bottom: y + h);
-    }
-    // Rotated bounding box
-    final cx = x + w / 2;
-    final cy = y + h / 2;
-    final cosR = math.cos(rotation);
-    final sinR = math.sin(rotation);
-    // Rotate four corners and find axis-aligned envelope
-    double minX = double.infinity, maxX = double.negativeInfinity;
-    double minY = double.infinity, maxY = double.negativeInfinity;
-    for (final corner in [
-      (x, y),
-      (x + w, y),
-      (x + w, y + h),
-      (x, y + h),
-    ]) {
-      final dx = corner.$1 - cx;
-      final dy = corner.$2 - cy;
-      final rx = cx + dx * cosR - dy * sinR;
-      final ry = cy + dx * sinR + dy * cosR;
-      if (rx < minX) minX = rx;
-      if (rx > maxX) maxX = rx;
-      if (ry < minY) minY = ry;
-      if (ry > maxY) maxY = ry;
-    }
-    return BoundingBox(left: minX, top: minY, right: maxX, bottom: maxY);
-  }
-
-  /// Counts visible glyphs by collapsing ZWJ sequences and skipping
-  /// invisible modifiers (variation selectors, skin tones, etc.).
-  static int _countVisibleGlyphs(List<int> runes) {
-    int count = 0;
-    bool joinedToPrev = false;
-    for (final rune in runes) {
-      if (rune == 0x200D) {
-        joinedToPrev = true;
-        continue;
-      } // ZWJ
-      if (_isInvisibleModifier(rune)) continue;
-      if (!joinedToPrev) count++;
-      joinedToPrev = false;
-    }
-    return math.max(count, 1);
-  }
-
-  static bool _isInvisibleModifier(int rune) =>
-      (rune >= 0xFE00 && rune <= 0xFE0F) || // Variation selectors
-      (rune >= 0x1F3FB && rune <= 0x1F3FF) || // Skin tone modifiers
-      rune == 0x20E3; // Combining enclosing keycap
+  BoundingBox get bounds => _estimateTextBounds(this);
 
   /// Hit test - nokta text üzerinde mi?
   bool containsPoint(double px, double py, double tolerance) {
@@ -248,60 +184,11 @@ class TextElement {
   }
 
   /// JSON serialization
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'text': text,
-        'x': x,
-        'y': y,
-        'fontSize': fontSize,
-        'color': color,
-        'fontFamily': fontFamily,
-        'isBold': isBold,
-        'isItalic': isItalic,
-        'isUnderline': isUnderline,
-        'alignment': alignment.name,
-        'width': width,
-        'height': height,
-        'rotation': rotation,
-      };
+  Map<String, dynamic> toJson() => _textElementToJson(this);
 
-  factory TextElement.fromJson(Map<String, dynamic> json) {
-    // Safe number parsing
-    double parseDouble(dynamic value, double defaultValue) {
-      if (value == null) return defaultValue;
-      if (value is double) return value;
-      if (value is int) return value.toDouble();
-      if (value is String) return double.tryParse(value) ?? defaultValue;
-      if (value is num) return value.toDouble();
-      return defaultValue;
-    }
-
-    int parseInt(dynamic value, int defaultValue) {
-      if (value == null) return defaultValue;
-      if (value is int) return value;
-      if (value is double) return value.toInt();
-      if (value is String) return int.tryParse(value) ?? defaultValue;
-      if (value is num) return value.toInt();
-      return defaultValue;
-    }
-
-    return TextElement(
-      id: json['id'],
-      text: json['text'],
-      x: parseDouble(json['x'], 0.0),
-      y: parseDouble(json['y'], 0.0),
-      fontSize: parseDouble(json['fontSize'], 16.0),
-      color: parseInt(json['color'], 0xFF000000),
-      fontFamily: json['fontFamily'] ?? 'Roboto',
-      isBold: json['isBold'] ?? false,
-      isItalic: json['isItalic'] ?? false,
-      isUnderline: json['isUnderline'] ?? false,
-      alignment: TextAlignment.values.byName(json['alignment'] ?? 'left'),
-      width: json['width'] != null ? parseDouble(json['width'], 0.0) : null,
-      height: json['height'] != null ? parseDouble(json['height'], 0.0) : null,
-      rotation: parseDouble(json['rotation'], 0.0),
-    );
-  }
+  /// JSON deserialization
+  factory TextElement.fromJson(Map<String, dynamic> json) =>
+      _textElementFromJson(json);
 
   @override
   bool operator ==(Object other) {
