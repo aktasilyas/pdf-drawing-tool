@@ -100,8 +100,8 @@ class PageOptionsMenuItem extends StatelessWidget {
         child: SizedBox(
           height: ChromeSizes.minTouchTarget,
           child: Padding(
-            padding:
-                EdgeInsets.symmetric(horizontal: compact ? ChromeSpacing.lg : 20),
+            padding: EdgeInsets.symmetric(
+                horizontal: compact ? ChromeSpacing.lg : 20),
             child: Row(
               children: [
                 Container(
