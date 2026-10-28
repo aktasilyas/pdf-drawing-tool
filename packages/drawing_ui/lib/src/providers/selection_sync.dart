@@ -49,8 +49,8 @@ Selection? reconcileSelection({
 
   final nowBounds = selectedElementBounds(after, live);
   if (nowBounds == null) return null;
-  final unchanged = live.count == selection.count &&
-      _sameElements(before, after, selection);
+  final unchanged =
+      live.count == selection.count && _sameElements(before, after, selection);
   if (unchanged) return selection;
   return live.copyWith(bounds: nowBounds);
 }
