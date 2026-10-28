@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/drawing_shadows.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
@@ -64,15 +65,17 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
     final scrollDir = ref.watch(scrollDirectionProvider);
     final isDual = ref.watch(dualPageModeProvider);
     final cs = Theme.of(context).colorScheme;
+    final strings = context.drawingStrings;
     ref.listen<int>(currentPageIndexProvider, (_, __) => _showBar());
     if (pageCount <= 1) return const SizedBox.shrink();
 
-    // Dual mode label: "Sayfa X-Y / N", single: "Sayfa X / N"
+    // Dual mode label: "Pages X-Y of N", single: "Page X of N"
     final String pageLabel;
     if (isDual && currentIndex + 1 < pageCount) {
-      pageLabel = 'Sayfa ${currentIndex + 1}-${currentIndex + 2} / $pageCount';
+      pageLabel = strings.pageList
+          .pageRangeOf(currentIndex + 1, currentIndex + 2, pageCount);
     } else {
-      pageLabel = 'Sayfa ${currentIndex + 1} / $pageCount';
+      pageLabel = strings.pageList.pageOf(currentIndex + 1, pageCount);
     }
 
     // In dual mode: can go next if there are 2+ pages beyond current
@@ -100,7 +103,7 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
                   icon: scrollDir == Axis.horizontal
                       ? ElyanotesIcons.chevronLeft
                       : ElyanotesIcons.caretUp,
-                  tooltip: 'Önceki Sayfa',
+                  tooltip: strings.pageList.previousPage,
                   onTap: canPrev
                       ? () {
                           _navigateTo(
@@ -111,9 +114,9 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
                         }
                       : null),
               Tooltip(
-                message: 'Sayfaya Git',
+                message: strings.pages.goToPage,
                 child: Semantics(
-                  label: '$pageLabel, Sayfaya gitmek için dokunun',
+                  label: strings.pageList.goToPageHint(pageLabel),
                   button: true,
                   child: GestureDetector(
                     behavior: HitTestBehavior.opaque,
@@ -136,7 +139,7 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
                   icon: scrollDir == Axis.horizontal
                       ? ElyanotesIcons.chevronRight
                       : ElyanotesIcons.caretDown,
-                  tooltip: 'Sonraki Sayfa',
+                  tooltip: strings.pageList.nextPage,
                   onTap: effectiveCanNext
                       ? () {
                           _navigateTo(
@@ -164,10 +167,11 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
 
   void _showGoToPageDialog(BuildContext context, WidgetRef ref, int pageCount) {
     final controller = TextEditingController();
+    final strings = context.drawingStrings;
     showDialog(
         context: context,
         builder: (ctx) => AlertDialog(
-              title: const Text('Sayfaya Git'),
+              title: Text(strings.pages.goToPage),
               content: TextField(
                 controller: controller,
                 keyboardType: TextInputType.number,
@@ -182,7 +186,7 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
               actions: [
                 TextButton(
                     onPressed: () => Navigator.pop(ctx),
-                    child: Text('İptal',
+                    child: Text(strings.panels.cancel,
                         style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(
                             color:
                                 Theme.of(ctx).colorScheme.onSurfaceVariant))),
@@ -190,7 +194,7 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
                     onPressed: () {
                       _goTo(controller.text, pageCount, ref, ctx);
                     },
-                    child: const Text('Git')),
+                    child: Text(strings.pages.go)),
               ],
             ));
   }

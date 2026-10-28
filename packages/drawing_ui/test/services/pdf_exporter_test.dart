@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:drawing_ui/src/services/pdf_exporter.dart';
+import 'package:drawing_ui/src/services/export_errors.dart';
 
 void main() {
   group('PDFExporter', () {
@@ -86,15 +87,15 @@ void main() {
 
         expect(result.isSuccess, true);
         expect(result.pdfBytes, bytes);
-        expect(result.errorMessage, isNull);
+        expect(result.failure, isNull);
       });
 
       test('should create error result', () {
-        final result = PDFExportResult.error('Export failed');
+        final result = PDFExportResult.error(ExportFailure.failed);
 
         expect(result.isSuccess, false);
         expect(result.pdfBytes, isEmpty);
-        expect(result.errorMessage, 'Export failed');
+        expect(result.failure, ExportFailure.failed);
       });
 
       test('should provide file size', () {

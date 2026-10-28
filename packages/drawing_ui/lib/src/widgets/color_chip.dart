@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
+import 'package:drawing_ui/src/l10n/drawing_strings_scope.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 
-/// Screen-reader label for a colour swatch: 'Renk #RRGGBB'.
-String colorSemanticsLabel(Color color) {
+/// Hex code of a colour without alpha: '#RRGGBB'. Callers wrap it with
+/// `toolbar.color(hex)` for the screen-reader label.
+String colorHex(Color color) {
   final rgb = color.toARGB32() & 0xFFFFFF;
-  return 'Renk #${rgb.toRadixString(16).padLeft(6, '0').toUpperCase()}';
+  return '#${rgb.toRadixString(16).padLeft(6, '0').toUpperCase()}';
 }
 
 /// A single color selection chip.
@@ -46,7 +48,7 @@ class ColorChip extends StatelessWidget {
     return Semantics(
       button: true,
       selected: isSelected,
-      label: colorSemanticsLabel(color),
+      label: context.drawingStrings.toolbar.color(colorHex(color)),
       child: GestureDetector(
         onTap: onTap,
         child: Stack(

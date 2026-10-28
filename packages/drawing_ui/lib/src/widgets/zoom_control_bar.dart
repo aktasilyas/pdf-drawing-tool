@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
+import 'package:drawing_ui/src/l10n/drawing_strings_scope.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'package:drawing_ui/src/widgets/zoom_control_bar_parts.dart';
@@ -145,7 +146,7 @@ class _ZoomControlBarState extends ConsumerState<ZoomControlBar>
           ZoomBarIconButton(
             icon:
                 isLocked ? ElyanotesIcons.lockFilled : ElyanotesIcons.lockOpen,
-            label: 'Yakınlaştırma kilidi',
+            label: context.drawingStrings.canvas.zoomLock,
             isActive: isLocked,
             onTap: () => _onIconTap(
               () => ref.read(zoomLockedProvider.notifier).state = !isLocked,
@@ -154,7 +155,7 @@ class _ZoomControlBarState extends ConsumerState<ZoomControlBar>
           Semantics(
             button: true,
             expanded: _isDropdownOpen,
-            label: 'Yakınlaştırma $percentage%, favori düzeyler',
+            label: context.drawingStrings.canvas.zoomLevel(percentage),
             excludeSemantics: true,
             child: GestureDetector(
               onTap: _toggleDropdown,
@@ -187,7 +188,7 @@ class _ZoomControlBarState extends ConsumerState<ZoomControlBar>
           ),
           ZoomBarIconButton(
             icon: isFavorite ? ElyanotesIcons.starFilled : ElyanotesIcons.star,
-            label: 'Favori yakınlaştırma',
+            label: context.drawingStrings.canvas.favoriteZoom,
             isActive: isFavorite,
             onTap: () => _onIconTap(
               () => ref

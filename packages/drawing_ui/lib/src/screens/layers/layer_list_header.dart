@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
+import 'package:drawing_ui/src/l10n/drawing_strings_scope.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 
@@ -16,6 +17,7 @@ class LayerListHeader extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final textTheme = Theme.of(context).textTheme;
     final layerCount = ref.watch(allLayersProvider).length;
+    final s = context.drawingStrings;
     return Container(
       height: ChromeSizes.minTouchTarget + _line,
       padding: const EdgeInsets.symmetric(horizontal: ChromeSpacing.md),
@@ -26,7 +28,7 @@ class LayerListHeader extends ConsumerWidget {
       child: Row(children: [
         Expanded(
           child: Text(
-            'Katmanlar',
+            s.toolbar.layers,
             style: textTheme.titleSmall
                 ?.copyWith(fontSize: 13, color: cs.onSurface),
           ),
@@ -35,15 +37,16 @@ class LayerListHeader extends ConsumerWidget {
           height: ChromeSizes.minTouchTarget,
           child: TextButton.icon(
             key: const ValueKey('layer-add'),
-            onPressed: () =>
-                ref.read(layerActionsProvider).add('Katman ${layerCount + 1}'),
+            onPressed: () => ref
+                .read(layerActionsProvider)
+                .add(s.canvas.defaultLayerName(layerCount + 1)),
             icon: PhosphorIcon(
               ElyanotesIcons.plus,
               size: ChromeIconSizes.md,
               color: cs.primary,
             ),
             label: Text(
-              'Katman Ekle',
+              s.canvas.addLayer,
               style: textTheme.bodySmall?.copyWith(color: cs.primary),
             ),
             style: TextButton.styleFrom(

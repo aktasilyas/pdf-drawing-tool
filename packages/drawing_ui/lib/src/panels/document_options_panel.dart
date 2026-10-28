@@ -2,7 +2,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:drawing_ui/src/panels/export_panel.dart';
+import 'package:drawing_ui/src/l10n/l10n.dart';
+import 'package:drawing_ui/src/panels/pdf_export_action.dart';
 import 'package:drawing_ui/src/panels/page_options_widgets.dart';
 import 'package:drawing_ui/src/panels/png_export_action.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
@@ -26,13 +27,14 @@ class DocumentOptionsPanel extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
 
     final isInfinite = ref.watch(isInfiniteCanvasProvider);
+    final s = context.drawingStrings;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         PageOptionsMenuItem(
           icon: ElyanotesIcons.editPencil,
-          label: 'Yeniden Adlandır',
+          label: s.pages.rename,
           onTap: () {
             onClose();
             onRename();
@@ -41,16 +43,16 @@ class DocumentOptionsPanel extends ConsumerWidget {
         if (isInfinite)
           PageOptionsMenuItem(
             icon: ElyanotesIcons.image,
-            label: 'PNG Olarak Dışa Aktar',
+            label: s.export.exportPng,
             onTap: () {
               onClose();
-              exportCurrentPageAsPNG(ref);
+              exportCurrentPageAsPNG(ref, strings: s.export);
             },
           )
         else
           PageOptionsMenuItem(
             icon: ElyanotesIcons.pdfFile,
-            label: 'PDF Olarak Dışa Aktar',
+            label: s.export.exportPdf,
             onTap: () {
               onClose();
               final document = ref.read(documentProvider);
@@ -58,6 +60,7 @@ class DocumentOptionsPanel extends ConsumerWidget {
               performPDFExport(
                 notifier,
                 document,
+                strings: s.export,
                 pdfPaths: ref.read(pdfPathResolverProvider),
               );
             },
@@ -65,7 +68,7 @@ class DocumentOptionsPanel extends ConsumerWidget {
         pageOptionsDivider(cs),
         PageOptionsMenuItem(
           icon: ElyanotesIcons.trash,
-          label: 'Çöpe Taşı',
+          label: s.pages.moveDocumentToTrash,
           isDestructive: true,
           onTap: () {
             onClose();

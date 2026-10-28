@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_ui/src/providers/pdf_path_provider.dart';
+import 'package:drawing_ui/src/services/export_errors.dart';
 import 'package:drawing_ui/src/services/pdf_import_service.dart';
 
 /// State of a PDF export.
@@ -24,12 +25,12 @@ enum PDFExportState {
 class PDFImportStateModel {
   final PDFImportState state;
   final double progress;
-  final String? errorMessage;
+  final PdfImportFailure? failure;
 
   const PDFImportStateModel({
     required this.state,
     required this.progress,
-    this.errorMessage,
+    this.failure,
   });
 
   bool get isLoading =>
@@ -44,12 +45,12 @@ class PDFImportStateModel {
   PDFImportStateModel copyWith({
     PDFImportState? state,
     double? progress,
-    String? errorMessage,
+    PdfImportFailure? failure,
   }) {
     return PDFImportStateModel(
       state: state ?? this.state,
       progress: progress ?? this.progress,
-      errorMessage: errorMessage ?? this.errorMessage,
+      failure: failure ?? this.failure,
     );
   }
 }
@@ -58,12 +59,12 @@ class PDFImportStateModel {
 class PDFExportStateModel {
   final PDFExportState state;
   final double progress;
-  final String? errorMessage;
+  final ExportFailure? failure;
 
   const PDFExportStateModel({
     required this.state,
     required this.progress,
-    this.errorMessage,
+    this.failure,
   });
 
   bool get isExporting =>
@@ -76,12 +77,12 @@ class PDFExportStateModel {
   PDFExportStateModel copyWith({
     PDFExportState? state,
     double? progress,
-    String? errorMessage,
+    ExportFailure? failure,
   }) {
     return PDFExportStateModel(
       state: state ?? this.state,
       progress: progress ?? this.progress,
-      errorMessage: errorMessage ?? this.errorMessage,
+      failure: failure ?? this.failure,
     );
   }
 }
@@ -108,10 +109,10 @@ class PDFImportStateNotifier extends StateNotifier<PDFImportStateModel> {
     state = state.copyWith(progress: progress);
   }
 
-  void setError(String message) {
+  void setError(PdfImportFailure failure) {
     state = state.copyWith(
       state: PDFImportState.error,
-      errorMessage: message,
+      failure: failure,
     );
   }
 
@@ -145,10 +146,10 @@ class PDFExportStateNotifier extends StateNotifier<PDFExportStateModel> {
     state = state.copyWith(progress: progress);
   }
 
-  void setError(String message) {
+  void setError(ExportFailure failure) {
     state = state.copyWith(
       state: PDFExportState.error,
-      errorMessage: message,
+      failure: failure,
     );
   }
 
@@ -183,42 +184,4 @@ final isImportingProvider = Provider<bool>((ref) {
 final isExportingProvider = Provider<bool>((ref) {
   final state = ref.watch(pdfExportStateProvider);
   return state.isExporting;
-});
-
-/// Provider for import progress message.
-final importProgressMessageProvider = Provider<String>((ref) {
-  final state = ref.watch(pdfImportStateProvider);
-
-  switch (state.state) {
-    case PDFImportState.idle:
-      return 'Ready to import';
-    case PDFImportState.loadingPDF:
-      return 'Loading PDF...';
-    case PDFImportState.renderingPages:
-      return 'Rendering pages...';
-    case PDFImportState.convertingPages:
-      return 'Converting pages (${state.progressPercentage}%)...';
-    case PDFImportState.completed:
-      return 'Import completed';
-    case PDFImportState.error:
-      return 'Error: ${state.errorMessage ?? "Unknown error"}';
-  }
-});
-
-/// Provider for export progress message.
-final exportProgressMessageProvider = Provider<String>((ref) {
-  final state = ref.watch(pdfExportStateProvider);
-
-  switch (state.state) {
-    case PDFExportState.idle:
-      return 'Ready to export';
-    case PDFExportState.preparing:
-      return 'Preparing export...';
-    case PDFExportState.exporting:
-      return 'Exporting (${state.progressPercentage}%)...';
-    case PDFExportState.completed:
-      return 'Export completed';
-    case PDFExportState.error:
-      return 'Error: ${state.errorMessage ?? "Unknown error"}';
-  }
 });

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:drawing_core/drawing_core.dart' show PdfPathResolver;
 import 'package:flutter/foundation.dart';
 import 'pdf_import_errors.dart';
+import 'pdf_import_failure.dart';
 import 'pdf_import_models.dart';
 import 'pdf_import_pages.dart';
 import 'pdf_import_storage.dart';
@@ -11,10 +12,8 @@ import 'pdf_page_renderer.dart';
 import 'pdf_to_page_converter.dart';
 
 export 'pdf_import_errors.dart';
+export 'pdf_import_failure.dart';
 export 'pdf_import_models.dart';
-
-const _unreadablePagesMessage =
-    'PDF sayfaları okunamadı. Dosya bozuk olabilir.';
 
 /// Service for orchestrating PDF import workflow.
 class PDFImportService {
@@ -26,7 +25,7 @@ class PDFImportService {
   final PdfPathResolver _pdfPaths;
 
   PDFImportState _state = PDFImportState.idle;
-  String? _errorMessage;
+  PdfImportFailure? _failure;
   double _currentProgress = 0.0;
   int _totalPages = 0;
   int _processedPages = 0;
@@ -65,8 +64,8 @@ class PDFImportService {
   /// Whether service has an error.
   bool get hasError => _state == PDFImportState.error;
 
-  /// Current error message.
-  String? get errorMessage => _errorMessage;
+  /// Why the last import failed, if it did.
+  PdfImportFailure? get failure => _failure;
 
   /// Current progress (0.0 to 1.0).
   double get currentProgress => _currentProgress;
@@ -163,18 +162,19 @@ class PDFImportService {
         isFailure: (result) => !result.isSuccess,
       );
       // Pages unreadable after open: a locked file on some platforms.
-      if (result.errorMessage != _unreadablePagesMessage ||
+      if (result.failure?.error != PdfImportError.pagesUnreadable ||
           !await pdfFileLooksEncrypted(filePath)) {
         return result;
       }
-      _setError(pdfPasswordProtectedMessage);
-      return PDFImportServiceResult.error(pdfPasswordProtectedMessage);
+      const locked = PdfImportFailure(PdfImportError.passwordProtected);
+      _setError(locked);
+      return PDFImportServiceResult.error(locked);
     } catch (e) {
-      final message = await pdfFileLooksEncrypted(filePath)
-          ? pdfPasswordProtectedMessage
-          : friendlyPdfImportError(e);
-      _setError(message);
-      return PDFImportServiceResult.error(message);
+      final failure = await pdfFileLooksEncrypted(filePath)
+          ? const PdfImportFailure(PdfImportError.passwordProtected)
+          : pdfImportFailureFor(e);
+      _setError(failure);
+      return PDFImportServiceResult.error(failure);
     }
   }
 
@@ -235,9 +235,9 @@ class PDFImportService {
       _updateState(PDFImportState.completed);
       return PDFImportServiceResult.success(pages);
     } catch (e) {
-      final message = friendlyPdfImportError(e);
-      _setError(message);
-      return PDFImportServiceResult.error(message);
+      final failure = pdfImportFailureFor(e);
+      _setError(failure);
+      return PDFImportServiceResult.error(failure);
     }
   }
 
@@ -261,8 +261,11 @@ class PDFImportService {
     if (pageNumbers.length > maxPageCount) {
       await _loader.disposeDocument(document);
       return PDFImportServiceResult.error(
-        'PDF çok fazla sayfa içeriyor (${pageNumbers.length}). '
-        'Maksimum $maxPageCount sayfa destekleniyor.',
+        PdfImportFailure(
+          PdfImportError.tooManyPages,
+          pageCount: pageNumbers.length,
+          maxPages: maxPageCount,
+        ),
       );
     }
 
@@ -282,7 +285,9 @@ class PDFImportService {
     await _loader.disposeDocument(document);
 
     if (pages.isEmpty) {
-      return PDFImportServiceResult.error(_unreadablePagesMessage);
+      return PDFImportServiceResult.error(
+        const PdfImportFailure(PdfImportError.pagesUnreadable),
+      );
     }
 
     _updateState(PDFImportState.completed);
@@ -313,8 +318,8 @@ class PDFImportService {
   }
 
   /// Sets error state.
-  void _setError(String message) {
-    _errorMessage = message;
+  void _setError(PdfImportFailure failure) {
+    _failure = failure;
     _updateState(PDFImportState.error);
   }
 

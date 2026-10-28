@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:drawing_ui/src/services/export_errors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Status of an ongoing PDF export operation.
@@ -12,7 +13,7 @@ class ExportProgressState {
   final int currentPage;
   final int totalPages;
   final DateTime? startTime;
-  final String? errorMessage;
+  final ExportFailure? failure;
   final String? fileSize;
 
   const ExportProgressState({
@@ -21,7 +22,7 @@ class ExportProgressState {
     this.currentPage = 0,
     this.totalPages = 0,
     this.startTime,
-    this.errorMessage,
+    this.failure,
     this.fileSize,
   });
 
@@ -31,7 +32,7 @@ class ExportProgressState {
     int? currentPage,
     int? totalPages,
     DateTime? startTime,
-    String? errorMessage,
+    ExportFailure? failure,
     String? fileSize,
   }) {
     return ExportProgressState(
@@ -40,20 +41,19 @@ class ExportProgressState {
       currentPage: currentPage ?? this.currentPage,
       totalPages: totalPages ?? this.totalPages,
       startTime: startTime ?? this.startTime,
-      errorMessage: errorMessage ?? this.errorMessage,
+      failure: failure ?? this.failure,
       fileSize: fileSize ?? this.fileSize,
     );
   }
 
-  /// Estimated remaining time based on elapsed time and progress.
-  String get estimatedTimeRemaining {
-    if (startTime == null || currentPage <= 0) return '';
+  /// Estimated remaining time based on elapsed time and progress, or null
+  /// when it cannot be estimated (or is under a second).
+  Duration? get remaining {
+    if (startTime == null || currentPage <= 0) return null;
     final elapsed = DateTime.now().difference(startTime!);
-    final remaining = elapsed * ((totalPages - currentPage) / currentPage);
-    final seconds = remaining.inSeconds;
-    if (seconds <= 0) return '';
-    if (seconds < 60) return '~$seconds sn';
-    return '~${remaining.inMinutes} dk';
+    final left = elapsed * ((totalPages - currentPage) / currentPage);
+    if (left.inSeconds <= 0) return null;
+    return left;
   }
 }
 
@@ -108,10 +108,10 @@ class ExportProgressNotifier extends StateNotifier<ExportProgressState> {
     _autoDismissTimer = Timer(const Duration(seconds: 3), dismiss);
   }
 
-  void setError(String message) {
+  void setError(ExportFailure failure) {
     state = state.copyWith(
       status: ExportProgressStatus.error,
-      errorMessage: message,
+      failure: failure,
     );
   }
 

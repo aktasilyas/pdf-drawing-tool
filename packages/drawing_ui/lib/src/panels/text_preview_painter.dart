@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:drawing_ui/src/l10n/drawing_strings_scope.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 
 // ---------------------------------------------------------------------------
@@ -39,7 +40,7 @@ class TextPreview extends StatelessWidget {
         painter: _NotebookLinesPainter(lineColor: palette.border),
         child: Center(
           child: Text(
-            'Merhaba',
+            context.drawingStrings.canvas.textPreviewSample,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   fontSize: previewSize,
                   fontWeight: isBold ? FontWeight.bold : FontWeight.normal,

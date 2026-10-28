@@ -6,7 +6,6 @@ export 'laser_controller.dart';
 export 'laser_overlay_widget.dart';
 export 'laser_painter.dart';
 export 'laser_stroke.dart';
-export 'mock_canvas.dart';
 export 'selection_painter.dart';
 export 'shape_painter.dart';
 export 'active_stroke_layer.dart';

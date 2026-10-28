@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/panels/export_options.dart';
-import 'package:drawing_ui/src/panels/export_strings.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 
 /// Page scope, range and template switch shown above the export actions.
@@ -20,6 +20,7 @@ class ExportOptionsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final valid = options.isValid(pageCount);
+    final s = context.drawingStrings.export;
     return Padding(
       padding: const EdgeInsets.all(ChromeSpacing.md),
       child: Column(
@@ -30,16 +31,13 @@ class ExportOptionsSection extends StatelessWidget {
             // Full width, like the range fields and the switch row.
             expandedInsets: EdgeInsets.zero,
             showSelectedIcon: false,
-            segments: const [
+            segments: [
               ButtonSegment(
-                  value: ExportPageScope.all,
-                  label: Text(ExportStrings.scopeAll)),
+                  value: ExportPageScope.all, label: Text(s.scopeAll)),
               ButtonSegment(
-                  value: ExportPageScope.current,
-                  label: Text(ExportStrings.scopeCurrent)),
+                  value: ExportPageScope.current, label: Text(s.scopeCurrent)),
               ButtonSegment(
-                  value: ExportPageScope.range,
-                  label: Text(ExportStrings.scopeRange)),
+                  value: ExportPageScope.range, label: Text(s.scopeRange)),
             ],
             // Padded tap target: each segment is at least 48dp tall.
             style: SegmentedButton.styleFrom(
@@ -59,7 +57,7 @@ class ExportOptionsSection extends StatelessWidget {
                 Expanded(
                   child: _NumberField(
                     key: const ValueKey('export-range-from'),
-                    label: ExportStrings.from,
+                    label: s.from,
                     value: options.from,
                     onChanged: (v) => onChanged(options.copyWith(from: v)),
                   ),
@@ -68,7 +66,7 @@ class ExportOptionsSection extends StatelessWidget {
                 Expanded(
                   child: _NumberField(
                     key: const ValueKey('export-range-to'),
-                    label: ExportStrings.to,
+                    label: s.to,
                     value: options.to,
                     onChanged: (v) => onChanged(options.copyWith(to: v)),
                   ),
@@ -79,7 +77,7 @@ class ExportOptionsSection extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(top: ChromeSpacing.xs),
                 child: Text(
-                  ExportStrings.invalidRange(pageCount),
+                  s.invalidRange(pageCount),
                   style: theme.textTheme.bodySmall
                       ?.copyWith(color: theme.colorScheme.error),
                 ),
@@ -88,7 +86,7 @@ class ExportOptionsSection extends StatelessWidget {
           const SizedBox(height: ChromeSpacing.sm),
           SwitchListTile(
             contentPadding: EdgeInsets.zero,
-            title: const Text(ExportStrings.includeTemplate),
+            title: Text(s.includeTemplate),
             value: options.includeTemplate,
             onChanged: (v) => onChanged(options.copyWith(includeTemplate: v)),
           ),

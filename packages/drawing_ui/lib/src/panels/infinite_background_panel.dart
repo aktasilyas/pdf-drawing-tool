@@ -2,6 +2,7 @@ import 'package:flutter/material.dart' hide Page;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'infinite_background_sections.dart';
 import 'page_options_widgets.dart';
@@ -55,7 +56,7 @@ class _Header extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(20, 14, 8, 10),
       child: Row(children: [
         Expanded(
-            child: Text('Arka Plan',
+            child: Text(context.drawingStrings.templates.background,
                 style: textTheme.titleMedium?.copyWith(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,

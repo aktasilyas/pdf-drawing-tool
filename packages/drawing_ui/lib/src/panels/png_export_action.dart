@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:drawing_core/drawing_core.dart' show Page, PdfPathResolver;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/panels/export_file_name.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/services/export_errors.dart';
@@ -22,17 +23,21 @@ typedef PngExportRenderer = Future<Uint8List> Function(
 
 /// Exports the current page of the open document as PNG (see
 /// [performPNGExport]).
-void exportCurrentPageAsPNG(WidgetRef ref) {
+void exportCurrentPageAsPNG(
+  WidgetRef ref, {
+  required ExportStrings strings,
+}) {
   final document = ref.read(documentProvider);
   final page = document.currentPage;
   final progress = ref.read(exportProgressProvider.notifier);
   if (page == null) {
-    progress.setError('Dışa aktarılacak sayfa yok');
+    progress.setError(ExportFailure.noPages);
     return;
   }
   performPNGExport(
     progress,
     page,
+    strings: strings,
     title: document.title,
     infiniteCanvas: ref.read(isInfiniteCanvasProvider),
     pdfPaths: ref.read(pdfPathResolverProvider),
@@ -44,6 +49,7 @@ void exportCurrentPageAsPNG(WidgetRef ref) {
 Future<void> performPNGExport(
   ExportProgressNotifier progress,
   Page page, {
+  required ExportStrings strings,
   required String title,
   required bool infiniteCanvas,
   PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
@@ -57,10 +63,13 @@ Future<void> performPNGExport(
       infiniteCanvas: infiniteCanvas,
       pdfPaths: pdfPaths,
     );
-    final filename = buildExportFilename(title);
+    final filename = buildExportFilename(
+      title,
+      fallback: strings.fallbackFileName,
+    );
 
     final savedPath = await FilePicker.platform.saveFile(
-      dialogTitle: 'PNG Kaydet',
+      dialogTitle: strings.savePngDialog,
       fileName: '$filename.png',
       type: FileType.custom,
       allowedExtensions: ['png'],
@@ -79,6 +88,6 @@ Future<void> performPNGExport(
     }
   } catch (e) {
     DrawingLog.e('PNG export failed', e);
-    progress.setError(friendlyExportError(e));
+    progress.setError(exportFailureFor(e));
   }
 }

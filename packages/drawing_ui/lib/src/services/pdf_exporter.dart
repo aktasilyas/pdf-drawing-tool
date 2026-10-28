@@ -46,7 +46,7 @@ class PDFExporter {
     void Function(int current, int total)? onProgress,
     bool Function()? isCancelled,
   }) async {
-    if (pages.isEmpty) return PDFExportResult.error('Sayfa bulunamadı');
+    if (pages.isEmpty) return PDFExportResult.error(ExportFailure.noPages);
 
     try {
       final doc = PdfDocument();
@@ -68,7 +68,7 @@ class PDFExporter {
       return PDFExportResult.success(bytes);
     } catch (e) {
       DrawingLog.e('PDF export failed', e);
-      return PDFExportResult.error(friendlyExportError(e));
+      return PDFExportResult.error(exportFailureFor(e));
     }
   }
 

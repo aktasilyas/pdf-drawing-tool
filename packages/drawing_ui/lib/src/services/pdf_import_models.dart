@@ -1,5 +1,6 @@
 import 'package:drawing_core/drawing_core.dart';
 
+import 'pdf_import_failure.dart';
 import 'pdf_page_renderer.dart';
 
 /// State of the PDF import process.
@@ -136,13 +137,13 @@ class PDFImportServiceResult {
   /// Imported pages.
   final List<Page> pages;
 
-  /// Error message if import failed.
-  final String? errorMessage;
+  /// Why the import failed, if it did.
+  final PdfImportFailure? failure;
 
   const PDFImportServiceResult({
     required this.isSuccess,
     required this.pages,
-    this.errorMessage,
+    this.failure,
   });
 
   /// Creates a successful result.
@@ -154,11 +155,11 @@ class PDFImportServiceResult {
   }
 
   /// Creates an error result.
-  factory PDFImportServiceResult.error(String message) {
+  factory PDFImportServiceResult.error(PdfImportFailure failure) {
     return PDFImportServiceResult(
       isSuccess: false,
       pages: const [],
-      errorMessage: message,
+      failure: failure,
     );
   }
 

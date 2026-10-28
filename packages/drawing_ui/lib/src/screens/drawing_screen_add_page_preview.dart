@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/canvas/page_background_view.dart';
 import 'package:drawing_ui/src/canvas/canvas_color_scheme.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
@@ -73,7 +74,7 @@ class AddPagePreview extends StatelessWidget {
               child: Column(mainAxisSize: MainAxisSize.min, children: [
                 const Icon(Icons.add_rounded, color: Colors.white, size: 32),
                 const SizedBox(height: 6),
-                Text('Yeni sayfa eklemek için\nsürükleyip bırakın',
+                Text(context.drawingStrings.pageList.dropToAddPage,
                     textAlign: TextAlign.center,
                     style: materialTheme.textTheme.bodySmall
                         ?.copyWith(fontSize: 13, color: Colors.white)),

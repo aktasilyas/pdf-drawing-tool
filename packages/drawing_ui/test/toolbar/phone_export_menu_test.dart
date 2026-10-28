@@ -20,6 +20,7 @@ class _RecordingRunner extends PDFExportRunner {
   Future<void> run(
     ExportProgressNotifier progress,
     DrawingDocument document, {
+    required ExportStrings strings,
     bool addWatermark = false,
     bool share = false,
     ExportOptions options = const ExportOptions(),

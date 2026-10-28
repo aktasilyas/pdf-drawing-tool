@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:drawing_ui/src/l10n/drawing_strings_scope.dart';
 import 'package:drawing_ui/src/theme/chrome_roles.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
@@ -200,7 +201,7 @@ class _MoreButton extends StatelessWidget {
             ),
             const SizedBox(width: 3),
             Text(
-              'Daha fazla',
+              context.drawingStrings.selection.more,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
                     fontSize: 10,
                     color: colorScheme.primary,

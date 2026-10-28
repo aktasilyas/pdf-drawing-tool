@@ -2323,6 +2323,792 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Choose a color'**
   String get librarySelectColor;
+
+  /// No description provided for @editorPageRename.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename'**
+  String get editorPageRename;
+
+  /// No description provided for @editorPageMoveDocumentToTrash.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to trash'**
+  String get editorPageMoveDocumentToTrash;
+
+  /// No description provided for @editorPageDocumentOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Document options'**
+  String get editorPageDocumentOptions;
+
+  /// No description provided for @editorPagePageNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {number}'**
+  String editorPagePageNumber(int number);
+
+  /// No description provided for @editorPageBookmarkPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmark page'**
+  String get editorPageBookmarkPage;
+
+  /// No description provided for @editorPageRemoveBookmark.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove bookmark'**
+  String get editorPageRemoveBookmark;
+
+  /// No description provided for @editorPageCopyPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy page'**
+  String get editorPageCopyPage;
+
+  /// No description provided for @editorPagePastePage.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste page'**
+  String get editorPagePastePage;
+
+  /// No description provided for @editorPageDuplicatePage.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate page'**
+  String get editorPageDuplicatePage;
+
+  /// No description provided for @editorPageChangeTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Change template'**
+  String get editorPageChangeTemplate;
+
+  /// No description provided for @editorPageGoToPageMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to page'**
+  String get editorPageGoToPageMenu;
+
+  /// No description provided for @editorPageExportPagePdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Export page as PDF'**
+  String get editorPageExportPagePdf;
+
+  /// No description provided for @editorPageClearPageMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear page'**
+  String get editorPageClearPageMenu;
+
+  /// No description provided for @editorPageMovePageToTrash.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to trash'**
+  String get editorPageMovePageToTrash;
+
+  /// No description provided for @editorPageSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get editorPageSettings;
+
+  /// No description provided for @editorPageEditToolbar.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit toolbar'**
+  String get editorPageEditToolbar;
+
+  /// No description provided for @editorPageScrollDirection.
+  ///
+  /// In en, this message translates to:
+  /// **'Scroll direction'**
+  String get editorPageScrollDirection;
+
+  /// No description provided for @editorPageScrollHorizontal.
+  ///
+  /// In en, this message translates to:
+  /// **'Horizontal'**
+  String get editorPageScrollHorizontal;
+
+  /// No description provided for @editorPageScrollVertical.
+  ///
+  /// In en, this message translates to:
+  /// **'Vertical'**
+  String get editorPageScrollVertical;
+
+  /// No description provided for @editorPagePageCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Page copied'**
+  String get editorPagePageCopied;
+
+  /// No description provided for @editorPagePagePasted.
+  ///
+  /// In en, this message translates to:
+  /// **'Page pasted'**
+  String get editorPagePagePasted;
+
+  /// No description provided for @editorPagePageDuplicated.
+  ///
+  /// In en, this message translates to:
+  /// **'Page duplicated'**
+  String get editorPagePageDuplicated;
+
+  /// No description provided for @editorPageLastPageCannotDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'The last page can\'t be deleted'**
+  String get editorPageLastPageCannotDelete;
+
+  /// No description provided for @editorPagePageDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Page deleted'**
+  String get editorPagePageDeleted;
+
+  /// No description provided for @editorPageClearPageQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear page {page}?\nYou can undo this.'**
+  String editorPageClearPageQuestion(int page);
+
+  /// No description provided for @editorPagePageAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'Page added'**
+  String get editorPagePageAdded;
+
+  /// No description provided for @editorPagePageMoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Page moved'**
+  String get editorPagePageMoved;
+
+  /// No description provided for @editorPageGoToPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to page'**
+  String get editorPageGoToPage;
+
+  /// No description provided for @editorPageGo.
+  ///
+  /// In en, this message translates to:
+  /// **'Go'**
+  String get editorPageGo;
+
+  /// No description provided for @editorPageListPageOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {page} of {count}'**
+  String editorPageListPageOf(int page, int count);
+
+  /// No description provided for @editorPageListPageRangeOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Pages {first}–{last} of {count}'**
+  String editorPageListPageRangeOf(int first, int last, int count);
+
+  /// No description provided for @editorPageListPreviousPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous page'**
+  String get editorPageListPreviousPage;
+
+  /// No description provided for @editorPageListNextPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Next page'**
+  String get editorPageListNextPage;
+
+  /// No description provided for @editorPageListGoToPageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'{pageLabel}, tap to go to a page'**
+  String editorPageListGoToPageHint(String pageLabel);
+
+  /// No description provided for @editorPageListAddPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Add page'**
+  String get editorPageListAddPage;
+
+  /// No description provided for @editorPageListAddBookmark.
+  ///
+  /// In en, this message translates to:
+  /// **'Add bookmark'**
+  String get editorPageListAddBookmark;
+
+  /// No description provided for @editorPageListNoBookmarks.
+  ///
+  /// In en, this message translates to:
+  /// **'No bookmarks yet'**
+  String get editorPageListNoBookmarks;
+
+  /// No description provided for @editorPageListNoBookmarksHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the bookmark icon on a thumbnail to bookmark that page.'**
+  String get editorPageListNoBookmarksHint;
+
+  /// No description provided for @editorPageListFilterAllPages.
+  ///
+  /// In en, this message translates to:
+  /// **'All pages'**
+  String get editorPageListFilterAllPages;
+
+  /// No description provided for @editorPageListFilterBookmarks.
+  ///
+  /// In en, this message translates to:
+  /// **'Bookmarks'**
+  String get editorPageListFilterBookmarks;
+
+  /// No description provided for @editorPageListFilterRecordings.
+  ///
+  /// In en, this message translates to:
+  /// **'Recordings'**
+  String get editorPageListFilterRecordings;
+
+  /// No description provided for @editorPageListPageOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Page options'**
+  String get editorPageListPageOptions;
+
+  /// No description provided for @editorPageListThumbnailFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview\nunavailable'**
+  String get editorPageListThumbnailFailed;
+
+  /// No description provided for @editorPageListDropToAddPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag and drop\nto add a new page'**
+  String get editorPageListDropToAddPage;
+
+  /// No description provided for @editorPageListPositionBefore.
+  ///
+  /// In en, this message translates to:
+  /// **'Before'**
+  String get editorPageListPositionBefore;
+
+  /// No description provided for @editorPageListPositionAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'After'**
+  String get editorPageListPositionAfter;
+
+  /// No description provided for @editorPageListLastPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Last page'**
+  String get editorPageListLastPage;
+
+  /// No description provided for @editorPageListMoreTemplates.
+  ///
+  /// In en, this message translates to:
+  /// **'More templates'**
+  String get editorPageListMoreTemplates;
+
+  /// No description provided for @editorPageListTakePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take photo'**
+  String get editorPageListTakePhoto;
+
+  /// No description provided for @editorPageListImportFile.
+  ///
+  /// In en, this message translates to:
+  /// **'Import'**
+  String get editorPageListImportFile;
+
+  /// No description provided for @editorExportScopeAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get editorExportScopeAll;
+
+  /// No description provided for @editorExportScopeCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'This page'**
+  String get editorExportScopeCurrent;
+
+  /// No description provided for @editorExportScopeRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Range'**
+  String get editorExportScopeRange;
+
+  /// No description provided for @editorExportFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get editorExportFrom;
+
+  /// No description provided for @editorExportTo.
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get editorExportTo;
+
+  /// No description provided for @editorExportIncludeTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Include page template'**
+  String get editorExportIncludeTemplate;
+
+  /// No description provided for @editorExportExportPng.
+  ///
+  /// In en, this message translates to:
+  /// **'Export as PNG'**
+  String get editorExportExportPng;
+
+  /// No description provided for @editorExportExportPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Export as PDF'**
+  String get editorExportExportPdf;
+
+  /// No description provided for @editorExportSharePdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Share PDF'**
+  String get editorExportSharePdf;
+
+  /// No description provided for @editorExportInvalidRange.
+  ///
+  /// In en, this message translates to:
+  /// **'The page range must be between 1 and {count}.'**
+  String editorExportInvalidRange(int count);
+
+  /// No description provided for @editorExportSavePdfDialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Save PDF'**
+  String get editorExportSavePdfDialog;
+
+  /// No description provided for @editorExportSavePngDialog.
+  ///
+  /// In en, this message translates to:
+  /// **'Save PNG'**
+  String get editorExportSavePngDialog;
+
+  /// No description provided for @editorExportFallbackFileName.
+  ///
+  /// In en, this message translates to:
+  /// **'document'**
+  String get editorExportFallbackFileName;
+
+  /// No description provided for @editorExportPageFileName.
+  ///
+  /// In en, this message translates to:
+  /// **'{title}_page{page}'**
+  String editorExportPageFileName(String title, int page);
+
+  /// No description provided for @editorExportExporting.
+  ///
+  /// In en, this message translates to:
+  /// **'Exporting PDF…'**
+  String get editorExportExporting;
+
+  /// No description provided for @editorExportPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}%'**
+  String editorExportPercent(int percent);
+
+  /// No description provided for @editorExportRemainingSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'~{seconds} s'**
+  String editorExportRemainingSeconds(int seconds);
+
+  /// No description provided for @editorExportRemainingMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'~{minutes} min'**
+  String editorExportRemainingMinutes(int minutes);
+
+  /// No description provided for @editorExportSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF saved'**
+  String get editorExportSaved;
+
+  /// No description provided for @editorExportSavedWithSize.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF saved ({size})'**
+  String editorExportSavedWithSize(String size);
+
+  /// No description provided for @editorExportCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get editorExportCancelled;
+
+  /// No description provided for @editorTemplateAllCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get editorTemplateAllCategories;
+
+  /// No description provided for @editorTemplateCoverTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover'**
+  String get editorTemplateCoverTab;
+
+  /// No description provided for @editorTemplatePaperTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Paper'**
+  String get editorTemplatePaperTab;
+
+  /// No description provided for @editorTemplateApply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get editorTemplateApply;
+
+  /// No description provided for @editorTemplatePortrait.
+  ///
+  /// In en, this message translates to:
+  /// **'Portrait'**
+  String get editorTemplatePortrait;
+
+  /// No description provided for @editorTemplateLandscape.
+  ///
+  /// In en, this message translates to:
+  /// **'Landscape'**
+  String get editorTemplateLandscape;
+
+  /// No description provided for @editorTemplatePaperSquare.
+  ///
+  /// In en, this message translates to:
+  /// **'Square'**
+  String get editorTemplatePaperSquare;
+
+  /// No description provided for @editorTemplatePaperWidescreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Widescreen (16:9)'**
+  String get editorTemplatePaperWidescreen;
+
+  /// No description provided for @editorTemplateCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get editorTemplateCustom;
+
+  /// No description provided for @editorTemplateColorWhite.
+  ///
+  /// In en, this message translates to:
+  /// **'White'**
+  String get editorTemplateColorWhite;
+
+  /// No description provided for @editorTemplateColorCream.
+  ///
+  /// In en, this message translates to:
+  /// **'Cream'**
+  String get editorTemplateColorCream;
+
+  /// No description provided for @editorTemplateColorBlack.
+  ///
+  /// In en, this message translates to:
+  /// **'Black'**
+  String get editorTemplateColorBlack;
+
+  /// No description provided for @editorTemplateColorYellow.
+  ///
+  /// In en, this message translates to:
+  /// **'Yellow'**
+  String get editorTemplateColorYellow;
+
+  /// No description provided for @editorTemplateTemplatesHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Templates'**
+  String get editorTemplateTemplatesHeader;
+
+  /// No description provided for @editorTemplateBackground.
+  ///
+  /// In en, this message translates to:
+  /// **'Background'**
+  String get editorTemplateBackground;
+
+  /// No description provided for @editorTemplateBackgroundPattern.
+  ///
+  /// In en, this message translates to:
+  /// **'Background pattern'**
+  String get editorTemplateBackgroundPattern;
+
+  /// No description provided for @editorTemplatePatternPlain.
+  ///
+  /// In en, this message translates to:
+  /// **'Plain'**
+  String get editorTemplatePatternPlain;
+
+  /// No description provided for @editorTemplatePatternDotted.
+  ///
+  /// In en, this message translates to:
+  /// **'Dotted'**
+  String get editorTemplatePatternDotted;
+
+  /// No description provided for @editorTemplatePatternGrid.
+  ///
+  /// In en, this message translates to:
+  /// **'Grid'**
+  String get editorTemplatePatternGrid;
+
+  /// No description provided for @editorTemplateBackgroundColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Background color'**
+  String get editorTemplateBackgroundColor;
+
+  /// No description provided for @editorErrorExportStorageFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough storage to export. Free up space and try again.'**
+  String get editorErrorExportStorageFull;
+
+  /// No description provided for @editorErrorExportCannotWrite.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t write the file. Try again.'**
+  String get editorErrorExportCannotWrite;
+
+  /// No description provided for @editorErrorExportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Export failed. Try again.'**
+  String get editorErrorExportFailed;
+
+  /// No description provided for @editorErrorExportNoPages.
+  ///
+  /// In en, this message translates to:
+  /// **'There are no pages to export'**
+  String get editorErrorExportNoPages;
+
+  /// No description provided for @editorErrorPdfPasswordProtected.
+  ///
+  /// In en, this message translates to:
+  /// **'This PDF is password-protected. Remove the password and try again.'**
+  String get editorErrorPdfPasswordProtected;
+
+  /// No description provided for @editorErrorPdfFileAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t access the PDF file.'**
+  String get editorErrorPdfFileAccess;
+
+  /// No description provided for @editorErrorPdfOpenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open the PDF. The file may be damaged.'**
+  String get editorErrorPdfOpenFailed;
+
+  /// No description provided for @editorErrorPdfPagesUnreadable.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t read the PDF pages. The file may be damaged.'**
+  String get editorErrorPdfPagesUnreadable;
+
+  /// No description provided for @editorErrorPdfTooManyPages.
+  ///
+  /// In en, this message translates to:
+  /// **'This PDF has too many pages ({count}). Up to {max} pages are supported.'**
+  String editorErrorPdfTooManyPages(int count, int max);
+
+  /// No description provided for @editorErrorPdfPagePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF page'**
+  String get editorErrorPdfPagePlaceholder;
+
+  /// No description provided for @editorErrorPdfSourceMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Source PDF not found'**
+  String get editorErrorPdfSourceMissing;
+
+  /// No description provided for @editorErrorPdfLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load PDF'**
+  String get editorErrorPdfLoadFailed;
+
+  /// No description provided for @editorCanvasAddLayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Add layer'**
+  String get editorCanvasAddLayer;
+
+  /// No description provided for @editorCanvasDefaultLayerName.
+  ///
+  /// In en, this message translates to:
+  /// **'Layer {number}'**
+  String editorCanvasDefaultLayerName(int number);
+
+  /// No description provided for @editorCanvasDeleteLayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete layer'**
+  String get editorCanvasDeleteLayer;
+
+  /// No description provided for @editorCanvasDuplicateLayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Duplicate layer'**
+  String get editorCanvasDuplicateLayer;
+
+  /// No description provided for @editorCanvasHideLayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide'**
+  String get editorCanvasHideLayer;
+
+  /// No description provided for @editorCanvasShowLayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get editorCanvasShowLayer;
+
+  /// No description provided for @editorCanvasLockLayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock'**
+  String get editorCanvasLockLayer;
+
+  /// No description provided for @editorCanvasUnlockLayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock'**
+  String get editorCanvasUnlockLayer;
+
+  /// No description provided for @editorCanvasZoomLock.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom lock'**
+  String get editorCanvasZoomLock;
+
+  /// No description provided for @editorCanvasZoomLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'Zoom {percent}%, favorite levels'**
+  String editorCanvasZoomLevel(int percent);
+
+  /// No description provided for @editorCanvasFavoriteZoom.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorite zoom'**
+  String get editorCanvasFavoriteZoom;
+
+  /// No description provided for @editorCanvasPenBox.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Pen box, 1 pen} other{Pen box, {count} pens}}'**
+  String editorCanvasPenBox(int count);
+
+  /// No description provided for @editorCanvasFinishEditing.
+  ///
+  /// In en, this message translates to:
+  /// **'Done editing'**
+  String get editorCanvasFinishEditing;
+
+  /// No description provided for @editorCanvasEditPenBox.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit pen box'**
+  String get editorCanvasEditPenBox;
+
+  /// No description provided for @editorCanvasCollapsePenBox.
+  ///
+  /// In en, this message translates to:
+  /// **'Collapse pen box'**
+  String get editorCanvasCollapsePenBox;
+
+  /// No description provided for @editorCanvasRemovePen.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove pen'**
+  String get editorCanvasRemovePen;
+
+  /// No description provided for @editorCanvasAddImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Add image'**
+  String get editorCanvasAddImage;
+
+  /// No description provided for @editorCanvasAddImageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add an image from the gallery or camera'**
+  String get editorCanvasAddImageHint;
+
+  /// No description provided for @editorCanvasFromGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from gallery'**
+  String get editorCanvasFromGallery;
+
+  /// No description provided for @editorCanvasFromGalleryHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick an image from your albums'**
+  String get editorCanvasFromGalleryHint;
+
+  /// No description provided for @editorCanvasTakePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take photo'**
+  String get editorCanvasTakePhoto;
+
+  /// No description provided for @editorCanvasTakePhotoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Take a new photo with the camera'**
+  String get editorCanvasTakePhotoHint;
+
+  /// No description provided for @editorCanvasTapToPlace.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to place'**
+  String get editorCanvasTapToPlace;
+
+  /// No description provided for @editorCanvasTapToPlaceImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to place the image'**
+  String get editorCanvasTapToPlaceImage;
+
+  /// No description provided for @editorCanvasAddColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Add color'**
+  String get editorCanvasAddColor;
+
+  /// No description provided for @editorCanvasTextStyleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Text style'**
+  String get editorCanvasTextStyleTitle;
+
+  /// No description provided for @editorCanvasEmojiSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Emoji size'**
+  String get editorCanvasEmojiSize;
+
+  /// No description provided for @editorCanvasTextPreviewSample.
+  ///
+  /// In en, this message translates to:
+  /// **'Hello'**
+  String get editorCanvasTextPreviewSample;
 }
 
 class _AppLocalizationsDelegate

@@ -29,6 +29,7 @@ void main() {
     final progress = ExportProgressNotifier();
     await performPagesPDFExport(
       progress,
+      strings: const ExportStringsTr(),
       pages: [Page.create(index: 0)],
       title: 'Notlar',
       share: true,

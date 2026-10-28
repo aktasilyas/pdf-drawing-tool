@@ -26,10 +26,10 @@ Widget _app(Widget child, {ProviderContainer? container}) {
 }
 
 void main() {
-  group('colorSemanticsLabel', () {
+  group('colorHex', () {
     test('formats RGB hex without alpha', () {
-      expect(colorSemanticsLabel(const Color(0x801565C0)), 'Renk #1565C0');
-      expect(colorSemanticsLabel(const Color(0xFF000000)), 'Renk #000000');
+      expect(colorHex(const Color(0x801565C0)), '#1565C0');
+      expect(colorHex(const Color(0xFF000000)), '#000000');
     });
   });
 

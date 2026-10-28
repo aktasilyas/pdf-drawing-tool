@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:drawing_ui/src/l10n/drawing_strings_scope.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/providers/drawing_providers.dart';
 import 'package:drawing_ui/src/providers/image_provider.dart';
@@ -18,6 +19,7 @@ class ImagePanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cs = Theme.of(context).colorScheme;
+    final c = context.drawingStrings.canvas;
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Column(
@@ -25,7 +27,7 @@ class ImagePanel extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Resim Ekle',
+            c.addImage,
             style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
@@ -34,7 +36,7 @@ class ImagePanel extends ConsumerWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            'Galeriden veya kamerayla resim ekleyin',
+            c.addImageHint,
             style: TextStyle(
               fontSize: 11,
               color: cs.onSurfaceVariant,
@@ -43,15 +45,15 @@ class ImagePanel extends ConsumerWidget {
           const SizedBox(height: 12),
           _ImageSourceTile(
             icon: ElyanotesIcons.images,
-            label: 'Galeriden Se\u00e7',
-            subtitle: 'Alb\u00fcmden bir resim se\u00e7in',
+            label: c.fromGallery,
+            subtitle: c.fromGalleryHint,
             onTap: () => _pickImage(context, ref, ImageSource.gallery),
           ),
           const SizedBox(height: 8),
           _ImageSourceTile(
             icon: ElyanotesIcons.camera,
-            label: 'Foto\u011fraf \u00c7ek',
-            subtitle: 'Kamera ile yeni foto\u011fraf \u00e7ekin',
+            label: c.takePhoto,
+            subtitle: c.takePhotoHint,
             onTap: () => _pickImage(context, ref, ImageSource.camera),
           ),
         ],

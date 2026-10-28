@@ -19,7 +19,6 @@ export 'floating_recording_bar.dart';
 export 'goodnotes_slider.dart';
 export 'floating_undo_redo.dart';
 export 'page_indicator_bar.dart';
-export 'page_navigator.dart';
 export 'page_thumbnail.dart';
 export 'panel_arrow.dart';
 export 'panel_overlay.dart';

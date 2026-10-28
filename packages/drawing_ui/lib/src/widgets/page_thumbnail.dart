@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart' hide Page;
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/theme/chrome_roles.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
@@ -210,7 +211,7 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
     return Semantics(
       button: true,
       selected: widget.isSelected,
-      label: 'Sayfa ${widget.page.index + 1}',
+      label: context.drawingStrings.pages.pageNumber(widget.page.index + 1),
       excludeSemantics: true,
       child: thumbnail,
     );
@@ -245,7 +246,7 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Failed to\ngenerate',
+              context.drawingStrings.pageList.thumbnailFailed,
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurfaceVariant,

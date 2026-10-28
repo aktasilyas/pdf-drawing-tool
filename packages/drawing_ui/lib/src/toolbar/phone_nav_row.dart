@@ -40,6 +40,7 @@ class PhoneNavRow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final s = context.drawingStrings.toolbar;
+    final title = documentTitle ?? '';
     final isReaderMode = ref.watch(readerModeProvider);
     final isInfinite = ref.watch(isInfiniteCanvasProvider);
     final pageCount = ref.watch(pageCountProvider);
@@ -59,7 +60,7 @@ class PhoneNavRow extends ConsumerWidget {
             onPressed: onHomePressed ?? () {},
           ),
           const SizedBox(width: ChromeSpacing.xs),
-          Expanded(child: _Title(documentTitle ?? s.untitled)),
+          Expanded(child: _Title(title.isEmpty ? s.untitled : title)),
           if (pageCount > 1)
             ElyanotesNavButton(
               icon: isSidebarOpen
