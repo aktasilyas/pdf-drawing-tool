@@ -29,12 +29,21 @@ class RenderRequest implements Comparable<RenderRequest> {
   final DateTime requestedAt;
   final bool isLowRes;
 
+  /// Creation order; breaks ties between requests with the same priority
+  /// and timestamp so the queue never treats two of them as duplicates.
+  final int _sequence;
+
+  static int _nextSequence = 0;
+
+  /// [requestedAt] defaults to now; tests may pin it.
   RenderRequest({
     required this.cacheKey,
     required this.pageIndex,
     required this.priority,
     this.isLowRes = false,
-  }) : requestedAt = DateTime.now();
+    DateTime? requestedAt,
+  })  : requestedAt = requestedAt ?? DateTime.now(),
+        _sequence = _nextSequence++;
 
   @override
   int compareTo(RenderRequest other) {
@@ -43,7 +52,12 @@ class RenderRequest implements Comparable<RenderRequest> {
     if (priorityCompare != 0) return priorityCompare;
 
     // Aynı priority ise zamana göre (FIFO)
-    return requestedAt.compareTo(other.requestedAt);
+    final timeCompare = requestedAt.compareTo(other.requestedAt);
+    if (timeCompare != 0) return timeCompare;
+
+    // SplayTreeSet treats compareTo == 0 as a duplicate and drops it, so
+    // requests created in the same clock tick must still be ordered.
+    return _sequence.compareTo(other._sequence);
   }
 
   @override
