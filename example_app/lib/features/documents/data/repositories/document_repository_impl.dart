@@ -152,7 +152,10 @@ class DocumentRepositoryImpl
       final created = await _localDatasource.createDocument(duplicate);
       final content = await _localDatasource.getDocumentContent(id);
       if (content != null) {
-        await _localDatasource.saveDocumentContent(created.id, content);
+        // The content carries its own id; it must follow the copy's row id,
+        // or edits to the copy would be saved over the original.
+        await _localDatasource.saveDocumentContent(
+            created.id, {...content, 'id': created.id});
       }
       return created;
     });
