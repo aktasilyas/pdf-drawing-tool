@@ -117,16 +117,51 @@ class ImageElementPainter extends CustomPainter {
 /// change of the documents directory.
 class ImageCacheManager extends ChangeNotifier {
   /// Creates a cache that opens files through [paths].
-  ImageCacheManager({this.paths = PdfPathResolver.passthrough});
+  ImageCacheManager({
+    this.paths = PdfPathResolver.passthrough,
+    this.byteBudget = defaultByteBudget,
+    this.protectWindow = const Duration(seconds: 2),
+  });
 
   /// Resolves stored image paths to absolute file paths.
   final PdfPathResolver paths;
 
+  /// Longest edge, in pixels, an image is decoded at.
+  static const int maxDecodeEdge = 2048;
+
+  /// Default decoded-bytes budget of the cache (RGBA, 4 bytes per pixel).
+  static const int defaultByteBudget = 96 * 1024 * 1024;
+
+  /// Budget for one-shot offline renderers, which must keep every image
+  /// alive until their synchronous paint.
+  static const int unboundedBudget = 1 << 40;
+
+  /// Images read through [get] within this window are never evicted, so a
+  /// visible set larger than the budget cannot evict-and-reload in a loop
+  /// (the cache then temporarily exceeds the budget).
+  final Duration protectWindow;
+
+  /// Decoded-bytes budget; least recently used images are evicted beyond it.
+  final int byteBudget;
+
+  // Insertion order doubles as LRU order: the first key is the oldest.
   final Map<String, ui.Image> _cache = {};
   final Set<String> _loading = {};
+  final Map<String, int> _touchedMs = {};
+  final Stopwatch _clock = Stopwatch()..start();
+  int _bytes = 0;
 
-  /// Get a cached image, or null if not yet loaded.
-  ui.Image? get(String filePath) => _cache[filePath];
+  /// Decoded bytes currently held.
+  int get cachedBytes => _bytes;
+
+  /// Get a cached image, or null if not yet loaded (or evicted).
+  ui.Image? get(String filePath) {
+    final image = _cache.remove(filePath);
+    if (image == null) return null;
+    _cache[filePath] = image; // mark as most recently used
+    _touchedMs[filePath] = _clock.elapsedMilliseconds;
+    return image;
+  }
 
   /// Load an image from file path if not already cached or loading.
   /// Notifies listeners when loading completes (triggers repaint).
@@ -142,9 +177,23 @@ class ImageCacheManager extends ChangeNotifier {
       }
 
       final bytes = await file.readAsBytes();
-      final codec = await ui.instantiateImageCodec(bytes);
+      final buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
+      final codec = await ui.instantiateImageCodecWithSize(
+        buffer,
+        getTargetSize: (w, h) {
+          final long = w >= h ? w : h;
+          if (long <= maxDecodeEdge)
+            return ui.TargetImageSize(width: w, height: h);
+          final scale = maxDecodeEdge / long;
+          return ui.TargetImageSize(
+            width: (w * scale).round(),
+            height: (h * scale).round(),
+          );
+        },
+      );
       final frame = await codec.getNextFrame();
-      _cache[filePath] = frame.image;
+      codec.dispose();
+      _insert(filePath, frame.image);
       notifyListeners();
     } catch (_) {
       // Silently fail - placeholder will continue to show
@@ -153,10 +202,37 @@ class ImageCacheManager extends ChangeNotifier {
     }
   }
 
+  void _insert(String filePath, ui.Image image) {
+    _cache.remove(filePath)?.dispose();
+    _cache[filePath] = image;
+    _recount();
+    // Evict oldest first, skipping the new image and recently painted ones.
+    final now = _clock.elapsedMilliseconds;
+    for (final key in _cache.keys.toList()) {
+      if (_bytes <= byteBudget) break;
+      if (key == filePath) continue;
+      final touched = _touchedMs[key];
+      if (touched != null && now - touched < protectWindow.inMilliseconds) {
+        continue;
+      }
+      _cache.remove(key)!.dispose();
+      _touchedMs.remove(key);
+      _recount();
+    }
+  }
+
+  void _recount() {
+    var total = 0;
+    for (final i in _cache.values) {
+      total += i.width * i.height * 4;
+    }
+    _bytes = total;
+  }
+
   /// Stores [image] for [filePath] as if it had just loaded, and notifies.
   @visibleForTesting
   void debugPut(String filePath, ui.Image image) {
-    _cache[filePath] = image;
+    _insert(filePath, image);
     notifyListeners();
   }
 
@@ -166,6 +242,7 @@ class ImageCacheManager extends ChangeNotifier {
       image.dispose();
     }
     _cache.clear();
+    _bytes = 0;
     super.dispose();
   }
 }

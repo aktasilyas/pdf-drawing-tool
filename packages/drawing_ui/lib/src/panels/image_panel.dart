@@ -9,6 +9,10 @@ import 'package:drawing_ui/src/providers/image_provider.dart';
 import 'package:drawing_ui/src/providers/pdf_path_provider.dart';
 import 'package:drawing_ui/src/services/image_import_storage.dart';
 
+/// Longest edge (px) of an inserted photo; the picker downscales to this
+/// before the file is stored, keeping aspect ratio and EXIF orientation.
+const double maxStoredImageEdge = 2560;
+
 /// Settings panel for the image insertion tool.
 ///
 /// Displays options to add images from album or camera.
@@ -67,7 +71,12 @@ class ImagePanel extends ConsumerWidget {
     ImageSource source,
   ) async {
     final picker = ImagePicker();
-    final picked = await picker.pickImage(source: source, imageQuality: 85);
+    final picked = await picker.pickImage(
+      source: source,
+      imageQuality: 85,
+      maxWidth: maxStoredImageEdge,
+      maxHeight: maxStoredImageEdge,
+    );
     if (picked == null) return;
 
     // Copy into the app container; persist the container-relative path.
