@@ -1,5 +1,6 @@
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/services/pdf_raster_layer_renderer.dart';
+import 'package:flutter/painting.dart' show Offset;
 import 'package:flutter_test/flutter_test.dart';
 
 const _w = 200.0;
@@ -112,6 +113,38 @@ void main() {
           id: 'n', x: 40, y: 20, width: 100, height: 80, color: 0xFF00FF00);
       final img = await _render(Layer.empty('l').addStickyNote(note));
       _expectRgba(_px(img, 110, 85), 0x00, 0xFF, 0x00);
+    });
+  });
+
+  group('PdfRasterLayerRenderer origin', () {
+    // Infinite canvas: content at negative page coordinates is shifted by
+    // the export origin into the image.
+    final note = StickyNote(
+        id: 'n', x: -150, y: 10, width: 100, height: 80, color: 0xFF00FF00);
+
+    test('renderLayer translates content by origin', () async {
+      final img = (await PdfRasterLayerRenderer().renderLayer(
+        Layer.empty('l').addStickyNote(note),
+        _w,
+        _h,
+        1,
+        origin: const Offset(170, 0),
+      ))!;
+      // Note spans x 20..120 after the shift.
+      _expectRgba(_px(img, 70, 50), 0x00, 0xFF, 0x00);
+      expect(_px(img, 150, 50)[3], 0, reason: 'right of the note is empty');
+    });
+
+    test('renderStickyNotes translates notes by origin', () async {
+      final img = (await PdfRasterLayerRenderer()
+          .renderStickyNotes([note], _w, _h, 1, origin: const Offset(170, 0)))!;
+      _expectRgba(_px(img, 70, 50), 0x00, 0xFF, 0x00);
+    });
+
+    test('without origin the note stays outside the image', () async {
+      final img = (await PdfRasterLayerRenderer()
+          .renderStickyNotes([note], _w, _h, 1))!;
+      expect(_px(img, 70, 50)[3], 0);
     });
   });
 }

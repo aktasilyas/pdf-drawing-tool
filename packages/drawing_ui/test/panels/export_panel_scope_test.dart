@@ -16,12 +16,14 @@ const _s = ExportStringsTr();
 class _Runner extends PDFExportRunner {
   final runs = <ExportOptions>[];
   final currentIndexes = <int>[];
+  final infinite = <bool>[];
 
   @override
   Future<void> run(
     ExportProgressNotifier progress,
     DrawingDocument document, {
     required ExportStrings strings,
+    bool isInfiniteCanvas = false,
     bool addWatermark = false,
     bool share = false,
     ExportOptions options = const ExportOptions(),
@@ -29,6 +31,7 @@ class _Runner extends PDFExportRunner {
   }) async {
     runs.add(options);
     currentIndexes.add(currentPageIndex);
+    infinite.add(isInfiniteCanvas);
   }
 }
 
@@ -110,6 +113,8 @@ void main() {
     final o = runner.runs.single;
     expect(o.scope, ExportPageScope.current);
     expect(runner.currentIndexes.single, 3);
+    expect(runner.infinite.single, isFalse,
+        reason: 'the canvas mode must reach the runner');
     expect(o.select(pages, runner.currentIndexes.single).map((p) => p.id),
         [pages[3].id]);
   });
@@ -130,7 +135,8 @@ void main() {
   }
 
   group('performPDFExport maps options to the exporter', () {
-    Future<PDFExportOptions> exportWith(ExportOptions options) async {
+    Future<PDFExportOptions> exportWith(ExportOptions options,
+        {bool infinite = false}) async {
       final exporter = _MockExporter();
       when(() => exporter.exportPages(
                 pages: any(named: 'pages'),
@@ -151,6 +157,7 @@ void main() {
         ExportProgressNotifier(),
         doc,
         strings: _s,
+        isInfiniteCanvas: infinite,
         options: options,
         currentPageIndex: 1,
         exporter: exporter,
@@ -173,6 +180,13 @@ void main() {
     test('template on keeps includeBackground true', () async {
       final o = await exportWith(const ExportOptions());
       expect(o.includeBackground, isTrue);
+    });
+
+    test('canvas mode becomes isInfiniteCanvas', () async {
+      expect(
+          (await exportWith(const ExportOptions())).isInfiniteCanvas, isFalse);
+      final o = await exportWith(const ExportOptions(), infinite: true);
+      expect(o.isInfiniteCanvas, isTrue);
     });
   });
 }

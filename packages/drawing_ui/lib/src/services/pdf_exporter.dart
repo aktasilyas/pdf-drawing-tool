@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:drawing_core/drawing_core.dart';
 import 'package:pdf/pdf.dart';
+import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'package:drawing_ui/src/utils/drawing_log.dart';
 
@@ -87,14 +88,16 @@ class PDFExporter {
     PdfSourcePool sources,
     PdfBackgroundRasterizer backgrounds,
   ) async {
-    double pdfW, pdfH;
+    // An infinite canvas exports the page rect grown to its content; page
+    // content is shifted by the bounds offset so negative coordinates land
+    // inside the media box (as in `PagePngExporter`).
+    double pdfW = page.size.width, pdfH = page.size.height;
+    var origin = ui.Offset.zero;
     if (options.isInfiniteCanvas) {
       final bounds = infiniteCanvasExportBounds(page);
       pdfW = bounds.width;
       pdfH = bounds.height;
-    } else {
-      pdfW = page.size.width;
-      pdfH = page.size.height;
+      origin = ui.Offset(bounds.offsetX, bounds.offsetY);
     }
 
     final pdfPage = PdfPage(doc, pageFormat: PdfPageFormat(pdfW, pdfH));
@@ -111,7 +114,7 @@ class PDFExporter {
     }
     for (final layer in page.layers) {
       if (!layer.isVisible) continue;
-      await _renderLayer(g, doc, layer, pdfW, pdfH, options);
+      await _renderLayer(g, doc, layer, pdfW, pdfH, options, origin);
     }
 
     if (options.addWatermark) {
@@ -169,6 +172,7 @@ class PDFExporter {
     double w,
     double h,
     PDFExportOptions options,
+    ui.Offset origin,
   ) async {
     final hasOpacity = layer.opacity < 1.0;
     if (hasOpacity) {
@@ -177,17 +181,25 @@ class PDFExporter {
     }
     final scale = _scaleFromDpi(options.quality.dpi);
     if (_contentPainter.isLayerVectorizable(layer)) {
+      // Vector ops are written in page coordinates (y flipped against [h]);
+      // shift them by the origin in PDF space (y up).
+      final shifted = origin != ui.Offset.zero;
+      if (shifted) {
+        g.saveContext();
+        g.setTransform(Matrix4.translationValues(origin.dx, -origin.dy, 0));
+      }
       await _contentPainter.paintLayerContent(g, doc, layer, w, h,
           paths: pdfPaths);
+      if (shifted) g.restoreContext();
       // Sticky notes sit above the layer's elements, as on the canvas.
       if (layer.stickyNotes.isNotEmpty) {
-        final notes = await _rasterRenderer.renderStickyNotes(
-            layer.stickyNotes, w, h, scale);
+        final notes = await _rasterRenderer
+            .renderStickyNotes(layer.stickyNotes, w, h, scale, origin: origin);
         _drawRaw(g, doc, notes, w, h);
       }
     } else {
       final raw = await _rasterRenderer.renderLayer(layer, w, h, scale,
-          paths: pdfPaths);
+          paths: pdfPaths, origin: origin);
       _drawRaw(g, doc, raw, w, h);
     }
     if (hasOpacity) g.restoreContext();
