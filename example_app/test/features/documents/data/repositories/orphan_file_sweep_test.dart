@@ -172,6 +172,15 @@ void main() {
     expect(img.existsSync(), isTrue);
   });
 
+  test('keeps files whose names JSON would escape', () async {
+    final quoted = file('elyanotes_images/a"b.png');
+    final slashed = file(r'elyanotes_images/a\b.png');
+
+    expect(await sweep(), 0);
+    expect(quoted.existsSync(), isTrue);
+    expect(slashed.existsSync(), isTrue);
+  });
+
   test('never touches other directories, subdirectories or symlinks', () async {
     final root = file('root.png');
     final other = file('somewhere_else.png');

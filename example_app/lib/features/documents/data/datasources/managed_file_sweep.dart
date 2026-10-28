@@ -60,7 +60,11 @@ class OrphanFileSweeper {
               !stat.modified.isBefore(olderThan)) {
             continue;
           }
-          keys.add('$dir/${entity.uri.pathSegments.last}');
+          final name = entity.uri.pathSegments.last;
+          // JSON escapes `"` and `\`, so a reference to such a name could not
+          // be recognised: never delete it.
+          if (name.contains('"') || name.contains(r'\')) continue;
+          keys.add('$dir/$name');
         } catch (e) {
           logger.w('Could not inspect ${entity.path}: $e');
         }
