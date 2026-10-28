@@ -787,6 +787,7 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get editorToolbarSettingsReset => 'Varsayılana Sıfırla';
 
+  @override
   String get editorDocumentNameLabel => 'Belge Adı';
 
   @override
