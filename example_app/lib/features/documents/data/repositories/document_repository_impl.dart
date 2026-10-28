@@ -9,10 +9,11 @@ import 'package:example_app/features/documents/data/datasources/document_local_d
 import 'package:example_app/features/documents/data/datasources/folder_local_datasource.dart';
 import 'package:example_app/features/documents/data/models/document_model.dart';
 import 'package:example_app/features/documents/data/repositories/document_queries.dart';
+import 'package:example_app/features/documents/data/repositories/document_trash_purge.dart';
 
 @Injectable(as: DocumentRepository)
 class DocumentRepositoryImpl
-    with DocumentQueries
+    with DocumentQueries, DocumentTrashPurge
     implements DocumentRepository {
   final DocumentLocalDatasource _localDatasource;
   final FolderLocalDatasource _folderDatasource;
@@ -74,7 +75,8 @@ class DocumentRepositoryImpl
   }
 
   /// Runs [action] in one transaction and maps errors to a [Failure].
-  Future<Either<Failure, T>> _guard<T>(
+  @override
+  Future<Either<Failure, T>> guard<T>(
     String what,
     Future<T> Function() action,
   ) async {
@@ -93,7 +95,7 @@ class DocumentRepositoryImpl
     String what,
     DocumentModel Function(DocumentModel doc) change,
   ) {
-    return _guard(what, () async {
+    return guard(what, () async {
       final document = await _localDatasource.getDocument(id);
       return _localDatasource.updateDocument(change(document));
     });
@@ -125,11 +127,11 @@ class DocumentRepositoryImpl
 
   @override
   Future<Either<Failure, void>> deleteDocument(String id) =>
-      _guard('delete document', () => _localDatasource.deleteDocument(id));
+      guard('delete document', () => _localDatasource.deleteDocument(id));
 
   @override
   Future<Either<Failure, void>> permanentlyDelete(String id) =>
-      _guard('permanently delete', () => _localDatasource.deleteDocument(id));
+      guard('permanently delete', () => _localDatasource.deleteDocument(id));
 
   @override
   Future<Either<Failure, DocumentInfo>> duplicateDocument(
@@ -137,7 +139,7 @@ class DocumentRepositoryImpl
     required String Function(String title) copyTitle,
   }) async {
     // Document row and content are copied in one transaction.
-    final result = await _guard('duplicate document', () async {
+    final result = await guard('duplicate document', () async {
       final original = await _localDatasource.getDocument(id);
       final now = DateTime.now();
       final duplicate = original.copyWith(
@@ -195,46 +197,8 @@ class DocumentRepositoryImpl
       doc.copyWith(isInTrash: true, deletedAt: now, updatedAt: now);
 
   @override
-  Future<Either<Failure, int>> emptyTrash() {
-    return _guard('empty trash', () async {
-      final trashed =
-          (await _localDatasource.getAllDocuments()).where((d) => d.isInTrash);
-      var count = 0;
-      for (final doc in trashed) {
-        await _localDatasource.deleteDocument(doc.id);
-        count++;
-      }
-      return count;
-    });
-  }
-
-  @override
-  Future<Either<Failure, int>> purgeExpiredTrash({
-    required DateTime now,
-    Duration retention = trashRetention,
-  }) {
-    final cutoff = now.subtract(retention);
-    return _guard('purge expired trash', () async {
-      var purged = 0;
-      final trashed =
-          (await _localDatasource.getAllDocuments()).where((d) => d.isInTrash);
-      for (final doc in trashed) {
-        final deletedAt = doc.deletedAt;
-        if (deletedAt == null) {
-          // Legacy row: start its retention period now, never purge at once.
-          await _localDatasource.updateDocument(doc.copyWith(deletedAt: now));
-        } else if (deletedAt.isBefore(cutoff)) {
-          await _localDatasource.deleteDocument(doc.id);
-          purged++;
-        }
-      }
-      return purged;
-    });
-  }
-
-  @override
   Future<Either<Failure, void>> restoreFromTrash(String id) {
-    return _guard('restore from trash', () async {
+    return guard('restore from trash', () async {
       final document = await _localDatasource.getDocument(id);
 
       // Check if the original folder still exists
@@ -291,7 +255,7 @@ class DocumentRepositoryImpl
     String? title,
   }) {
     // Content and metadata are written atomically.
-    return _guard('save document content', () async {
+    return guard('save document content', () async {
       await _localDatasource.saveDocumentContent(id, content);
       if (pageCount == null &&
           updatedAt == null &&

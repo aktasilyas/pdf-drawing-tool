@@ -8,6 +8,7 @@ import 'package:example_app/features/documents/domain/repositories/folder_reposi
 import 'package:example_app/features/documents/data/datasources/folder_local_datasource.dart';
 import 'package:example_app/features/documents/data/datasources/document_local_datasource.dart';
 import 'package:example_app/features/documents/data/models/folder_model.dart';
+import 'package:example_app/features/documents/data/repositories/folder_tree.dart';
 
 @Injectable(as: FolderRepository)
 class FolderRepositoryImpl implements FolderRepository {
@@ -40,7 +41,7 @@ class FolderRepositoryImpl implements FolderRepository {
       final entities = targetFolders.map((model) {
         final folderIds = {
           model.id,
-          ..._getDescendantIds(model.id, allFolders)
+          ...FolderTree.descendantIds(model.id, allFolders)
         };
         final docCount = nonTrashedDocs
             .where((doc) => folderIds.contains(doc.folderId))
@@ -48,12 +49,7 @@ class FolderRepositoryImpl implements FolderRepository {
         return model.copyWith(documentCount: docCount).toEntity();
       }).toList();
 
-      // Sort by sortOrder first, then by name
-      entities.sort((a, b) {
-        final orderCompare = a.sortOrder.compareTo(b.sortOrder);
-        if (orderCompare != 0) return orderCompare;
-        return a.name.compareTo(b.name);
-      });
+      FolderTree.sort(entities);
 
       return Right(entities);
     } on CacheException catch (e) {
@@ -238,12 +234,7 @@ class FolderRepositoryImpl implements FolderRepository {
     return _localDatasource.watchFolders(parentId: parentId).map((folders) {
       final entities = folders.map((model) => model.toEntity()).toList();
 
-      // Sort by sortOrder first, then by name
-      entities.sort((a, b) {
-        final orderCompare = a.sortOrder.compareTo(b.sortOrder);
-        if (orderCompare != 0) return orderCompare;
-        return a.name.compareTo(b.name);
-      });
+      FolderTree.sort(entities);
 
       return entities;
     });
@@ -267,17 +258,6 @@ class FolderRepositoryImpl implements FolderRepository {
     } catch (e) {
       return Left(CacheFailure('Failed to get folder path: $e'));
     }
-  }
-
-  /// Returns all descendant folder IDs for recursive document counting.
-  Set<String> _getDescendantIds(String folderId, List<FolderModel> allFolders) {
-    final descendants = <String>{};
-    final children = allFolders.where((f) => f.parentId == folderId);
-    for (final child in children) {
-      descendants.add(child.id);
-      descendants.addAll(_getDescendantIds(child.id, allFolders));
-    }
-    return descendants;
   }
 
   Future<bool> _checkCircularReference(

@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:uuid/uuid.dart';
+import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/documents.dart';
 import '../../../../helpers/pass_through_runner.dart';
 
@@ -38,6 +39,17 @@ void main() {
   });
 
   group('FolderRepositoryImpl', () {
+    test('getFolders returns Left(CacheFailure) when the datasource throws',
+        () async {
+      when(() => mockFolderDatasource.getFolders())
+          .thenThrow(Exception('db down'));
+
+      final result = await repository.getFolders();
+
+      expect(result.isLeft(), true);
+      result.fold((f) => expect(f, isA<CacheFailure>()), (_) => fail('Right'));
+    });
+
     final testModel = FolderModel(
       id: 'folder-1',
       name: 'Test Folder',
