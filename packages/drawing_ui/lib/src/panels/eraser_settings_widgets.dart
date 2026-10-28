@@ -1,8 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/toolbar/chrome_icon_button.dart';
+
+/// Display name of an eraser tool; any other tool falls back to the generic
+/// eraser name.
+String eraserTypeLabel(ToolType type, DrawingStrings s) {
+  return switch (type) {
+    ToolType.pixelEraser => s.panels.eraserPixel,
+    ToolType.strokeEraser => s.tools.strokeEraser,
+    ToolType.lassoEraser => s.tools.lassoEraser,
+    _ => s.tools.pixelEraser,
+  };
+}
 
 /// Eraser type selector (pixel / stroke / lasso) built from
 /// [ChromeIconButton]s.
@@ -32,21 +44,12 @@ class EraserTypeSelector extends StatelessWidget {
           icon: _iconFor(t),
           selectedIcon: _selectedIconFor(t),
           iconSize: ChromeIconSizes.md,
-          tooltip: _labelFor(t),
+          tooltip: eraserTypeLabel(t, context.drawingStrings),
           selected: t == selectedType,
           onPressed: () => onTypeSelected(t),
         );
       }).toList(),
     );
-  }
-
-  static String _labelFor(ToolType type) {
-    return switch (type) {
-      ToolType.pixelEraser => 'Piksel Silgi',
-      ToolType.strokeEraser => 'Çizgi Silgisi',
-      ToolType.lassoEraser => 'Kement Silgisi',
-      _ => 'Silgi',
-    };
   }
 
   static IconData _iconFor(ToolType type) {
@@ -100,7 +103,7 @@ class ClearPageButton extends StatelessWidget {
               const SizedBox(width: ChromeSpacing.sm),
               Flexible(
                 child: Text(
-                  'Sayfayı Temizle',
+                  context.drawingStrings.panels.clearPage,
                   style: Theme.of(context).textTheme.labelLarge?.copyWith(
                         color: palette.danger,
                       ),

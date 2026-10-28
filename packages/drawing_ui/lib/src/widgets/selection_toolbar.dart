@@ -1,3 +1,4 @@
+import 'package:drawing_ui/src/l10n/drawing_strings_scope.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
@@ -125,7 +126,7 @@ class _SelectionToolbarState extends ConsumerState<SelectionToolbar> {
               key: _moreKey,
               child: SelectionToolbarIconButton(
                 icon: ElyanotesIcons.more,
-                tooltip: 'Daha fazla',
+                tooltip: context.drawingStrings.selection.more,
                 onTap: () => _toggleOverflow(config),
                 isActive: _isOverflowOpen,
               ),

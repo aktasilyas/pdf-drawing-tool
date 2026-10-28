@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/theme/chrome_tokens.dart';
 
 /// Cancel / Done buttons at the bottom of the picker; each is at least
@@ -22,6 +23,7 @@ class ColorPickerActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final p = context.drawingStrings.panels;
     final style = Theme.of(context).textTheme.bodyMedium?.copyWith(
           fontSize: 15,
           color: textColor,
@@ -34,10 +36,10 @@ class ColorPickerActions extends StatelessWidget {
         ChromeSpacing.sm,
       ),
       child: Row(children: [
-        _button('İptal et', style, onCancel),
+        _button(p.colorCancel, style, onCancel),
         Container(width: 1, height: 20, color: dividerColor),
         _button(
-          'Bitti',
+          p.colorDone,
           style?.copyWith(fontWeight: FontWeight.w600, color: primaryColor),
           onDone,
         ),

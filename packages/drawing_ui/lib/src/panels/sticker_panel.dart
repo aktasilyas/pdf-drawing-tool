@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/panels/sticker_catalog.dart';
 import 'package:drawing_ui/src/panels/sticker_panel_actions.dart';
 import 'package:drawing_ui/src/panels/sticker_panel_parts.dart';
@@ -8,7 +9,7 @@ import 'package:drawing_ui/src/theme/theme.dart';
 /// Settings panel for the sticker tool.
 ///
 /// Displays sticker categories and a grid of stickers. Tapping a sticker
-/// selects it; "Çıkartma Ekle" (or a double tap) enters placement mode -
+/// selects it; the add button (or a double tap) enters placement mode -
 /// tap the canvas to place it.
 class StickerPanel extends ConsumerStatefulWidget {
   const StickerPanel({super.key});
@@ -26,7 +27,7 @@ class _StickerPanelState extends ConsumerState<StickerPanel>
   void initState() {
     super.initState();
     _tabController = TabController(
-      length: stickerCategories.length,
+      length: StickerCategory.values.length,
       vsync: this,
     );
   }
@@ -39,6 +40,7 @@ class _StickerPanelState extends ConsumerState<StickerPanel>
 
   @override
   Widget build(BuildContext context) {
+    final s = context.drawingStrings;
     final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final actions = ref.read(stickerPanelActionsProvider);
@@ -49,7 +51,7 @@ class _StickerPanelState extends ConsumerState<StickerPanel>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Çıkartmalar',
+            s.catalog.stickersTitle,
             style: textTheme.bodyMedium?.copyWith(
               fontSize: 15,
               fontWeight: FontWeight.w600,
@@ -73,7 +75,10 @@ class _StickerPanelState extends ConsumerState<StickerPanel>
               ),
               indicatorWeight: 2,
               dividerHeight: 0,
-              tabs: [for (final cat in stickerCategories) Tab(text: cat)],
+              tabs: [
+                for (final cat in StickerCategory.values)
+                  Tab(text: cat.label(s)),
+              ],
             ),
           ),
           const SizedBox(height: 10),
@@ -84,7 +89,7 @@ class _StickerPanelState extends ConsumerState<StickerPanel>
             child: TabBarView(
               controller: _tabController,
               children: [
-                for (final category in stickerCategories)
+                for (final category in StickerCategory.values)
                   StickerGrid(
                     category: category,
                     selectedIndex: _selectedStickerIndex,
@@ -100,11 +105,11 @@ class _StickerPanelState extends ConsumerState<StickerPanel>
 
           // Insert button
           StickerActionButton(
-            label: 'Çıkartma Ekle',
+            label: s.catalog.addSticker,
             icon: ElyanotesIcons.plus,
             enabled: _selectedStickerIndex >= 0,
             onPressed: () => actions.placeSelected(
-              stickerCategories[_tabController.index],
+              StickerCategory.values[_tabController.index],
               _selectedStickerIndex,
             ),
           ),

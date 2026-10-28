@@ -1,3 +1,5 @@
+import 'package:drawing_ui/src/l10n/drawing_strings_scope.dart';
+import 'package:drawing_ui/src/l10n/enum_labels.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_ui/src/models/selection_action.dart';
@@ -128,7 +130,7 @@ class _TopRowButton extends StatelessWidget {
                 ),
               ),
               Text(
-                action.label,
+                action.kind.label(context.drawingStrings),
                 style: textTheme.labelSmall?.copyWith(color: color),
                 textAlign: TextAlign.center,
               ),
@@ -168,7 +170,7 @@ class _OverflowListItem extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  action.label,
+                  action.kind.label(context.drawingStrings),
                   style: textTheme.bodyMedium
                       ?.copyWith(fontSize: 15, color: color),
                   overflow: TextOverflow.ellipsis,

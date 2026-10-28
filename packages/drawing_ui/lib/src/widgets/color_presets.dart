@@ -102,10 +102,4 @@ class ColorSets {
     Color(0xFFFFFF00),
     Color(0xFFFF00FF),
   ];
-
-  static Map<String, List<Color>> get all => {
-        'Temel': basic,
-        'Pastel': pastel,
-        'Neon': neon,
-      };
 }

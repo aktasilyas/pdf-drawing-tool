@@ -159,7 +159,11 @@ class QuickColorChips extends ConsumerWidget {
                 s.colorSetHighlighter: ColorSets.highlighter,
                 s.colorSetPastel: ColorSets.pastel,
               }
-            : ColorSets.all,
+            : {
+                s.colorSetBasic: ColorSets.basic,
+                s.colorSetPastel: ColorSets.pastel,
+                s.colorSetNeon: ColorSets.neon,
+              },
       ),
     );
   }

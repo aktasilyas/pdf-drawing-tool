@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/panels/chrome_panel_parts.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
@@ -17,6 +18,7 @@ class ShapesSettingsPanel extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(shapesSettingsProvider);
     final palette = ChromePalette.of(context);
+    final c = context.drawingStrings.catalog;
 
     return Padding(
       padding: const EdgeInsets.all(ChromeSpacing.lg),
@@ -25,7 +27,7 @@ class ShapesSettingsPanel extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ChromePanelHeader(
-            title: 'Şekil',
+            title: c.shapesTitle,
             onClose: () => ref.read(activePanelProvider.notifier).state = null,
           ),
           _ShapeGrid(
@@ -35,7 +37,7 @@ class ShapesSettingsPanel extends ConsumerWidget {
           ),
           const ChromeHairline(),
           GoodNotesSlider(
-            label: 'Kontur Kalınlığı',
+            label: c.strokeWidth,
             activeColor: palette.accent,
             value: settings.strokeThickness,
             min: 0.1,
@@ -45,7 +47,7 @@ class ShapesSettingsPanel extends ConsumerWidget {
                 ref.read(shapesSettingsProvider.notifier).setStrokeThickness(v),
           ),
           const ChromeHairline(),
-          const ChromeSectionLabel('Kontur Rengi'),
+          const ChromeSectionLabel(c.strokeColor),
           ColorPickerStrip(
             selectedColor: settings.strokeColor,
             onColorSelected: (c) =>
@@ -53,14 +55,14 @@ class ShapesSettingsPanel extends ConsumerWidget {
           ),
           const ChromeHairline(),
           CompactToggle(
-            label: 'Şekil dolgusu',
+            label: c.fillShape,
             value: settings.fillEnabled,
             onChanged: (v) =>
                 ref.read(shapesSettingsProvider.notifier).setFillEnabled(v),
           ),
           if (settings.fillEnabled) ...[
             const SizedBox(height: ChromeSpacing.sm),
-            const ChromeSectionLabel('Dolgu Rengi'),
+            ChromeSectionLabel(c.fillColor),
             ColorPickerStrip(
               selectedColor: settings.fillColor,
               onColorSelected: (c) =>
@@ -118,7 +120,7 @@ class _ShapeOption extends StatelessWidget {
     return Semantics(
       button: true,
       selected: isSelected,
-      label: shape.name,
+      label: shape.label(context.drawingStrings),
       excludeSemantics: true,
       onTap: onTap,
       child: GestureDetector(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/panels/chrome_panel_parts.dart';
 import 'package:drawing_ui/src/panels/laser_preview_painter.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
@@ -10,12 +11,13 @@ import 'package:drawing_ui/src/widgets/color_picker_strip.dart';
 import 'package:drawing_ui/src/widgets/goodnotes_slider.dart';
 
 /// Returns display title based on current mode + line style.
-String _titleFor(LaserMode mode, LaserLineStyle style) {
-  if (mode == LaserMode.dot) return 'Lazer Nokta';
+String _titleFor(LaserMode mode, LaserLineStyle style, DrawingStrings s) {
+  final p = s.panels;
+  if (mode == LaserMode.dot) return p.laserDot;
   return switch (style) {
-    LaserLineStyle.solid => 'Lazer Çizgi',
-    LaserLineStyle.hollow => 'Lazer Çizgi (Boş)',
-    LaserLineStyle.rainbow => 'Lazer Gökkuşağı',
+    LaserLineStyle.solid => p.laserLine,
+    LaserLineStyle.hollow => p.laserHollow,
+    LaserLineStyle.rainbow => p.laserRainbow,
   };
 }
 
@@ -28,6 +30,7 @@ class LaserPointerPanel extends ConsumerWidget {
     final settings = ref.watch(laserSettingsProvider);
     final notifier = ref.read(laserSettingsProvider.notifier);
     final palette = ChromePalette.of(context);
+    final str = context.drawingStrings;
 
     return Padding(
       padding: const EdgeInsets.all(ChromeSpacing.lg),
@@ -36,7 +39,7 @@ class LaserPointerPanel extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ChromePanelHeader(
-            title: _titleFor(settings.mode, settings.lineStyle),
+            title: _titleFor(settings.mode, settings.lineStyle, str),
             onClose: () => ref.read(activePanelProvider.notifier).state = null,
           ),
           LaserPreview(
@@ -57,7 +60,7 @@ class LaserPointerPanel extends ConsumerWidget {
           ),
           const ChromeHairline(),
           GoodNotesSlider(
-            label: 'Kalınlık',
+            label: str.panels.thickness,
             value: settings.thickness.clamp(0.5, 5.0),
             min: 0.5,
             max: 5.0,
@@ -66,7 +69,7 @@ class LaserPointerPanel extends ConsumerWidget {
             onChanged: notifier.setThickness,
           ),
           GoodNotesSlider(
-            label: 'Süre',
+            label: str.panels.laserDuration,
             value: settings.duration.clamp(0.5, 5.0),
             min: 0.5,
             max: 5.0,
@@ -104,6 +107,7 @@ class _LaserTypeSelector extends StatelessWidget {
   final void Function(LaserMode mode, LaserLineStyle style) onSelected;
 
   Widget _button({
+    required DrawingStrings strings,
     required String keyName,
     required IconData icon,
     required bool selected,
@@ -114,7 +118,7 @@ class _LaserTypeSelector extends StatelessWidget {
       key: ValueKey('laser-type-$keyName'),
       icon: icon,
       iconSize: ChromeIconSizes.md,
-      tooltip: _titleFor(targetMode, targetStyle),
+      tooltip: _titleFor(targetMode, targetStyle, strings),
       selected: selected,
       onPressed: () => onSelected(targetMode, targetStyle),
     );
@@ -123,10 +127,12 @@ class _LaserTypeSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isLine = mode == LaserMode.line;
+    final strings = context.drawingStrings;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         _button(
+          strings: strings,
           keyName: 'solid',
           icon: PhosphorIconsLight.lineSegment,
           selected: isLine && lineStyle == LaserLineStyle.solid,
@@ -134,6 +140,7 @@ class _LaserTypeSelector extends StatelessWidget {
           targetStyle: LaserLineStyle.solid,
         ),
         _button(
+          strings: strings,
           keyName: 'hollow',
           icon: PhosphorIconsLight.lineSegments,
           selected: isLine && lineStyle == LaserLineStyle.hollow,
@@ -141,6 +148,7 @@ class _LaserTypeSelector extends StatelessWidget {
           targetStyle: LaserLineStyle.hollow,
         ),
         _button(
+          strings: strings,
           keyName: 'rainbow',
           icon: PhosphorIconsLight.rainbow,
           selected: isLine && lineStyle == LaserLineStyle.rainbow,
@@ -148,6 +156,7 @@ class _LaserTypeSelector extends StatelessWidget {
           targetStyle: LaserLineStyle.rainbow,
         ),
         _button(
+          strings: strings,
           keyName: 'dot',
           icon: ElyanotesIcons.circle,
           selected: mode == LaserMode.dot,

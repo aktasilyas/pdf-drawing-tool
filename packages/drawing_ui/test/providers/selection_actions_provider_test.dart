@@ -1,11 +1,15 @@
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/l10n/drawing_strings.dart';
+import 'package:drawing_ui/src/l10n/enum_labels.dart';
 import 'package:drawing_ui/src/models/selection_action.dart';
 import 'package:drawing_ui/src/providers/document_provider.dart';
 import 'package:drawing_ui/src/providers/feature_toggles_provider.dart';
 import 'package:drawing_ui/src/providers/history_provider.dart';
 import 'package:drawing_ui/src/providers/selection_actions_provider.dart';
+import 'package:drawing_ui/src/providers/selection_capture_actions.dart';
 import 'package:drawing_ui/src/providers/selection_clipboard_provider.dart';
 import 'package:drawing_ui/src/providers/selection_provider.dart';
+import 'package:drawing_ui/src/services/selection_image_sink.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -139,5 +143,39 @@ void main() {
     final empty =
         buildSelectionActionConfig(ref, Selection.empty(), onAIPressed: () {});
     expect(empty.toolbarActions.map((a) => a.id), isNot(contains('ai')));
+  });
+
+  testWidgets('every action has a kind with a non-empty Turkish label',
+      (tester) async {
+    await setUpRef(tester);
+    const strings = DrawingStringsTr();
+    for (final selection in [_select(['a']), Selection.empty()]) {
+      final c = buildSelectionActionConfig(ref, selection, onAIPressed: () {});
+      for (final a in [
+        ...c.toolbarActions,
+        ...c.topRowActions,
+        ...c.overflowActions,
+      ]) {
+        expect(a.kind.label(strings), isNotEmpty, reason: a.id);
+      }
+    }
+    final c = buildSelectionActionConfig(ref, _select(['a']));
+    expect(find(c, 'duplicate').kind.label(strings), 'Çoğalt');
+    expect(find(c, 'overflow_duplicate').kind.label(strings), 'Çoğalt');
+  });
+
+  test('screenshotOutcomeFor covers every save result', () {
+    expect(
+      {
+        for (final r in SelectionImageSaveResult.values) r: screenshotOutcomeFor(r),
+      },
+      {
+        SelectionImageSaveResult.savedAndCopied:
+            SelectionScreenshotOutcome.savedAndCopied,
+        SelectionImageSaveResult.saved: SelectionScreenshotOutcome.saved,
+        SelectionImageSaveResult.copied: SelectionScreenshotOutcome.copied,
+        SelectionImageSaveResult.failed: SelectionScreenshotOutcome.saveFailed,
+      },
+    );
   });
 }

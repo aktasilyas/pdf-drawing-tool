@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/panels/chrome_panel_parts.dart';
 import 'package:drawing_ui/src/panels/text_preview_painter.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
@@ -19,6 +20,7 @@ class TextSettingsPanel extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(textSettingsProvider);
     final palette = ChromePalette.of(context);
+    final p = context.drawingStrings.panels;
 
     return Padding(
       padding: const EdgeInsets.all(ChromeSpacing.lg),
@@ -27,11 +29,11 @@ class TextSettingsPanel extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ChromePanelHeader(
-            title: 'Metin Aracı',
+            title: p.textTitle,
             onClose: () => ref.read(activePanelProvider.notifier).state = null,
           ),
           Text(
-            'Tuvale dokunarak metin kutusu ekleyin.',
+            p.textHint,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: palette.textMuted,
                 ),
@@ -46,7 +48,7 @@ class TextSettingsPanel extends ConsumerWidget {
           ),
           const ChromeHairline(),
           GoodNotesSlider(
-            label: 'Boyut',
+            label: p.size,
             value: settings.fontSize.clamp(8.0, 72.0),
             min: 8.0,
             max: 72.0,
@@ -57,7 +59,7 @@ class TextSettingsPanel extends ConsumerWidget {
                 ref.read(textSettingsProvider.notifier).setFontSize(v),
           ),
           const ChromeHairline(),
-          const ChromeSectionLabel('Renk'),
+          ChromeSectionLabel(p.textColor),
           ColorPickerStrip(
             selectedColor: Color(settings.color),
             onColorSelected: (color) => ref
@@ -65,7 +67,7 @@ class TextSettingsPanel extends ConsumerWidget {
                 .setColor(color.toARGB32()),
           ),
           const ChromeHairline(),
-          const ChromeSectionLabel('Stil'),
+          ChromeSectionLabel(p.textStyle),
           _StyleButtonRow(
             isBold: settings.isBold,
             isItalic: settings.isItalic,
@@ -110,7 +112,7 @@ class _StyleButtonRow extends StatelessWidget {
       children: [
         _StyleToggle(
           key: const ValueKey('text-style-bold'),
-          label: 'B',
+          label: 'B', // l10n-ignore
           isSelected: isBold,
           fontWeight: FontWeight.bold,
           onTap: onBoldToggled,
@@ -118,7 +120,7 @@ class _StyleButtonRow extends StatelessWidget {
         const SizedBox(width: ChromeSpacing.xs),
         _StyleToggle(
           key: const ValueKey('text-style-italic'),
-          label: 'I',
+          label: 'I', // l10n-ignore
           isSelected: isItalic,
           fontStyle: FontStyle.italic,
           onTap: onItalicToggled,
@@ -126,7 +128,7 @@ class _StyleButtonRow extends StatelessWidget {
         const SizedBox(width: ChromeSpacing.xs),
         _StyleToggle(
           key: const ValueKey('text-style-underline'),
-          label: 'U',
+          label: 'U', // l10n-ignore
           isSelected: isUnderline,
           decoration: TextDecoration.underline,
           onTap: onUnderlineToggled,

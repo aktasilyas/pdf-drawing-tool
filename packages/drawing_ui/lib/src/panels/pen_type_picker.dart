@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/panels/pen_type_tile.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
@@ -25,11 +26,11 @@ class PenTypePicker extends ConsumerWidget {
   final EdgeInsets? padding;
 
   static const _pens = [
-    (ToolType.fountainPen, 'Dolma Kalem'),
-    (ToolType.ballpointPen, 'Tükenmez Kalem'),
-    (ToolType.brushPen, 'Fırça Kalem'),
-    (ToolType.highlighter, 'Fosforlu Kalem'),
-    (ToolType.pencil, 'Kurşun Kalem'),
+    ToolType.fountainPen,
+    ToolType.ballpointPen,
+    ToolType.brushPen,
+    ToolType.highlighter,
+    ToolType.pencil,
   ];
 
   @override
@@ -40,9 +41,11 @@ class PenTypePicker extends ConsumerWidget {
     final insets = padding ??
         EdgeInsets.symmetric(horizontal: tablet ? _kMd : _kLg, vertical: _kMd);
 
-    Widget tile(ToolType tool, String label) => PenTypeTile(
+    final strings = context.drawingStrings;
+
+    Widget tile(ToolType tool) => PenTypeTile(
           tool: tool,
-          label: label,
+          label: tool.label(strings),
           selected: tool == current,
           onTap: () {
             ref.read(currentToolProvider.notifier).selectTool(tool);
@@ -54,7 +57,7 @@ class PenTypePicker extends ConsumerWidget {
 
     return Semantics(
       container: true,
-      label: 'Kalem türü',
+      label: strings.panels.penType,
       child: Padding(
         padding: insets,
         child: LayoutBuilder(
@@ -72,9 +75,9 @@ class PenTypePicker extends ConsumerWidget {
                     tablet
                         ? SizedBox(
                             width: _kTabletTileWidth,
-                            child: tile(tiles[i].$1, tiles[i].$2),
+                            child: tile(tiles[i]),
                           )
-                        : Expanded(child: tile(tiles[i].$1, tiles[i].$2)),
+                        : Expanded(child: tile(tiles[i])),
                   ],
                 ],
               );
@@ -88,7 +91,7 @@ class PenTypePicker extends ConsumerWidget {
                     if (i > 0) gap(),
                     SizedBox(
                       width: _kMinTileWidth,
-                      child: tile(tiles[i].$1, tiles[i].$2),
+                      child: tile(tiles[i]),
                     ),
                   ],
                 ],

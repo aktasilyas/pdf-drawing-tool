@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/theme/chrome_tokens.dart';
 import 'package:drawing_ui/src/widgets/color_picker_logic.dart';
 
@@ -13,6 +14,7 @@ class ColorPickerInfoBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final p = context.drawingStrings.panels;
     final rgb = ColorPickerLogic.rgb(color);
     final hex = '#${ColorPickerLogic.hex(color)}';
 
@@ -32,10 +34,10 @@ class ColorPickerInfoBar extends StatelessWidget {
           ),
         ),
         const SizedBox(width: ChromeSpacing.sm),
-        _InfoColumn('Altıgen', hex, cs, textTheme),
-        _InfoColumn('Kırmızı', '${rgb.r}', cs, textTheme),
-        _InfoColumn('Yeşil', '${rgb.g}', cs, textTheme),
-        _InfoColumn('Mavi', '${rgb.b}', cs, textTheme),
+        _InfoColumn(p.colorHex, hex, cs, textTheme),
+        _InfoColumn(p.colorRed, '${rgb.r}', cs, textTheme),
+        _InfoColumn(p.colorGreen, '${rgb.g}', cs, textTheme),
+        _InfoColumn(p.colorBlue, '${rgb.b}', cs, textTheme),
       ]),
     );
   }

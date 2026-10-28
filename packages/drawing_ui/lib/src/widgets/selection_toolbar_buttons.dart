@@ -1,3 +1,5 @@
+import 'package:drawing_ui/src/l10n/drawing_strings_scope.dart';
+import 'package:drawing_ui/src/l10n/enum_labels.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_ui/src/models/selection_action.dart';
@@ -36,7 +38,7 @@ class SelectionToolbarButton extends StatelessWidget {
         : PhosphorIcon(action.icon, size: 20, color: color);
 
     return Tooltip(
-      message: action.label,
+      message: action.kind.label(context.drawingStrings),
       child: GestureDetector(
         onTap: enabled ? onTap : null,
         behavior: HitTestBehavior.opaque,

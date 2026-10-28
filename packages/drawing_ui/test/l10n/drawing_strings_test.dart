@@ -1,5 +1,6 @@
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/drawing_ui.dart';
+import 'package:drawing_ui/src/panels/sticker_catalog.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -112,6 +113,12 @@ void main() {
 
     test('every ShapeType label is non-empty and distinct', () {
       final labels = [for (final t in ShapeType.values) t.label(strings)];
+      expect(labels, everyElement(isNotEmpty));
+      expect(labels.toSet().length, labels.length);
+    });
+
+    test('every StickerCategory label is non-empty and distinct', () {
+      final labels = [for (final c in StickerCategory.values) c.label(strings)];
       expect(labels, everyElement(isNotEmpty));
       expect(labels.toSet().length, labels.length);
     });

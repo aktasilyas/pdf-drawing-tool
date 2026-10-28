@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/models/models.dart';
 import 'package:drawing_ui/src/panels/chrome_panel_parts.dart';
 import 'package:drawing_ui/src/panels/pen_type_picker.dart';
@@ -49,6 +50,7 @@ class PenSettingsPanel extends ConsumerWidget {
     final active = _penTools.contains(currentTool) ? currentTool : toolType;
     final s = ref.watch(penSettingsProvider(active));
     final palette = ChromePalette.of(context);
+    final str = context.drawingStrings;
     final notifier = ref.read(penSettingsProvider(active).notifier);
 
     return Padding(
@@ -58,7 +60,7 @@ class PenSettingsPanel extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ChromePanelHeader(
-            title: active.penType?.config.displayNameTr ?? 'Kalem',
+            title: active.penType == null ? str.tools.penGroup : active.label(str),
             onClose: () => ref.read(activePanelProvider.notifier).state = null,
           ),
           PenTypePicker(
@@ -72,7 +74,7 @@ class PenSettingsPanel extends ConsumerWidget {
           ),
           const ChromeHairline(),
           GoodNotesSlider(
-            label: 'Kalınlık',
+            label: str.panels.thickness,
             value: s.thickness.clamp(_minTh(active), _maxTh(active)),
             min: _minTh(active),
             max: _maxTh(active),
@@ -83,7 +85,7 @@ class PenSettingsPanel extends ConsumerWidget {
             onChanged: notifier.setThickness,
           ),
           GoodNotesSlider(
-            label: 'Basınç Duyarlılığı',
+            label: str.panels.pressureSensitivity,
             value: s.pressureSensitivity,
             min: 0,
             max: 1,
@@ -93,7 +95,7 @@ class PenSettingsPanel extends ConsumerWidget {
             onChanged: notifier.setPressureSensitivity,
           ),
           GoodNotesSlider(
-            label: 'Çizgi Stabilizasyonu',
+            label: str.panels.stabilization,
             value: s.stabilization,
             min: 0,
             max: 1,
