@@ -35,44 +35,53 @@ class SidebarItem extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-      child: Material(
-        color: isSelected ? palette.accentContainer : Colors.transparent,
-        borderRadius: radius,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: radius,
-          splashFactory: NoSplash.splashFactory,
-          highlightColor: palette.textPrimary.withValues(alpha: 0.06),
-          child: Container(
-            height: AppSpacing.minTouchTarget,
-            padding: EdgeInsets.only(
-              left: AppSpacing.md + (isSubfolder ? AppSpacing.lg : 0),
-              right: AppSpacing.md,
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  isSelected ? selectedIcon : icon,
-                  size: AppIconSize.md,
-                  color: effectiveIconColor,
+      // Merged into one node: the label (plus e.g. a folder's count) is read
+      // together with the button role and the selected state.
+      child: MergeSemantics(
+        child: Semantics(
+          button: true,
+          selected: isSelected,
+          child: Material(
+            color: isSelected ? palette.accentContainer : Colors.transparent,
+            borderRadius: radius,
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: radius,
+              splashFactory: NoSplash.splashFactory,
+              highlightColor: palette.textPrimary.withValues(alpha: 0.06),
+              child: Container(
+                height: AppSpacing.minTouchTarget,
+                padding: EdgeInsets.only(
+                  left: AppSpacing.md + (isSubfolder ? AppSpacing.lg : 0),
+                  right: AppSpacing.md,
                 ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Text(
-                    label,
-                    style: AppTypography.labelLarge.copyWith(
-                      color: isSelected ? palette.accent : palette.textPrimary,
-                      fontWeight: isSelected ? FontWeight.w600 : null,
+                child: Row(
+                  children: [
+                    Icon(
+                      isSelected ? selectedIcon : icon,
+                      size: AppIconSize.md,
+                      color: effectiveIconColor,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Text(
+                        label,
+                        style: AppTypography.labelLarge.copyWith(
+                          color:
+                              isSelected ? palette.accent : palette.textPrimary,
+                          fontWeight: isSelected ? FontWeight.w600 : null,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (trailing != null) ...[
+                      const SizedBox(width: AppSpacing.xs),
+                      trailing!,
+                    ],
+                  ],
                 ),
-                if (trailing != null) ...[
-                  const SizedBox(width: AppSpacing.xs),
-                  trailing!,
-                ],
-              ],
+              ),
             ),
           ),
         ),
