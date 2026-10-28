@@ -1,3 +1,4 @@
+import 'package:drawing_core/drawing_core.dart' show TemplateRegistry;
 import 'package:drawing_ui/drawing_ui.dart'
     show currentPageIndexProvider, documentProvider;
 import 'package:flutter/material.dart';
@@ -7,19 +8,17 @@ import '../helpers/l10n.dart';
 import '../helpers/pump_helpers.dart';
 import 'editor_robot.dart';
 
-/// Page object for page management in the editor: the "Daha Fazla" menu,
-/// the add-page sheet and the page sidebar (a drawer on phones).
+/// Page object for page management in the editor: the "more" menu, the
+/// add-page sheet and the page sidebar (a drawer on phones).
 ///
-/// Sidebar cells are found by their semantics labels ("Sayfa 2",
-/// "Yer imi ekle"). The phone drawer stays mounted off-screen while closed,
+/// Sidebar cells are found by their localized semantics labels (page number,
+/// "add bookmark"). The phone drawer stays mounted off-screen while closed,
 /// so every sidebar finder is restricted to hit-testable widgets.
 class PagesRobot {
   PagesRobot(this.tester) : _editor = EditorRobot(tester);
 
   final WidgetTester tester;
   final EditorRobot _editor;
-
-  static final _pageLabel = RegExp(r'^Sayfa \d+$');
 
   Finder _semantics(bool Function(String label) test) => find
       .byWidgetPredicate(
@@ -28,10 +27,18 @@ class PagesRobot {
       .hitTestable();
 
   /// Sidebar cell of the 1-based page [number].
-  Finder pageCell(int number) => _semantics((l) => l == 'Sayfa $number');
+  Finder pageCell(int number) {
+    final label = tester.drawingStrings.pages.pageNumber(number);
+    return _semantics((l) => l == label);
+  }
 
   /// All page cells currently visible in the sidebar.
-  Finder get pageCells => _semantics(_pageLabel.hasMatch);
+  Finder get pageCells {
+    // The localized label of page 0 with the digit swapped for a pattern.
+    final template = tester.drawingStrings.pages.pageNumber(0);
+    final pattern = RegExp.escape(template).replaceFirst('0', r'\d+');
+    return _semantics(RegExp('^$pattern\$').hasMatch);
+  }
 
   List<String> pageIds() =>
       [for (final p in _editor.read(documentProvider).pages) p.id];
@@ -51,15 +58,16 @@ class PagesRobot {
     await tester.tapAndWait(finder.first.hitTestable());
   }
 
-  /// "Daha Fazla" > "Sayfa Ekle" > blank template. The new page goes after
-  /// the current one and becomes current.
+  /// "More" > "Add page" > blank template. The new page goes after the
+  /// current one and becomes current.
   Future<void> addPage() async {
+    final s = tester.drawingStrings;
     final before = pageIds().length;
-    await tester.tapAndWait(
-      find.byTooltip(tester.drawingStrings.toolbar.more).hitTestable(),
+    await tester.tapAndWait(find.byTooltip(s.toolbar.more).hitTestable());
+    await _tapVisible(find.text(s.toolbar.addPage));
+    await _tapVisible(
+      find.text(s.templates.templateName(TemplateRegistry.blank)),
     );
-    await _tapVisible(find.text('Sayfa Ekle'));
-    await _tapVisible(find.text('Boş'));
     await tester.pumpUntilTrue(
       () => pageIds().length == before + 1,
       reason: 'page not added (${pageIds().length} pages)',
@@ -67,7 +75,7 @@ class PagesRobot {
     await tester.pumpFor(const Duration(milliseconds: 500));
   }
 
-  /// Opens the page sidebar ("Sayfa Paneli", shown from two pages on).
+  /// Opens the page sidebar (the "pages" button, shown from two pages on).
   /// No-op when the sidebar is already open.
   Future<void> openSidebar() async {
     if (pageCells.evaluate().isNotEmpty) return;
@@ -95,33 +103,39 @@ class PagesRobot {
     await tester.pumpFor(const Duration(milliseconds: 600));
   }
 
-  /// Cell "..." of page [number] > "Çöpe taşı". The delete needs no
-  /// confirmation and shows a "Sayfa silindi" SnackBar with "Geri al".
+  /// Cell "..." of page [number] > "Move to trash". The delete needs no
+  /// confirmation and shows a "page deleted" SnackBar with "Undo".
   Future<void> deletePage(int number) async {
-    final more = find.byTooltip('Sayfa seçenekleri').hitTestable();
+    final s = tester.drawingStrings;
+    final more = find.byTooltip(s.pageList.pageOptions).hitTestable();
     await tester.pumpUntilFound(more);
     await tester.tapAndWait(more.at(number - 1));
-    await _tapVisible(find.text('Çöpe taşı'));
-    await tester.pumpUntilFound(find.text('Sayfa silindi'));
+    await _tapVisible(find.text(s.pages.movePageToTrash));
+    await tester.pumpUntilFound(find.text(s.pages.pageDeleted));
   }
 
-  /// "Geri al" on the delete SnackBar.
+  /// "Undo" on the delete SnackBar.
   Future<void> undoDelete() async {
-    await tester.tapAndWait(find.widgetWithText(SnackBarAction, 'Geri al'));
+    await tester.tapAndWait(
+      find.widgetWithText(SnackBarAction, tester.drawingStrings.toolbar.undo),
+    );
   }
 
   /// Bookmark toggle on the current page's cell (the only cell that shows
   /// an empty toggle).
   Future<void> bookmarkCurrentPage() async {
-    await tester.tapAndWait(_semantics((l) => l == 'Yer imi ekle'));
+    final label = tester.drawingStrings.pageList.addBookmark;
+    await tester.tapAndWait(_semantics((l) => l == label));
   }
 
   /// Sidebar filter tabs.
   Future<void> showBookmarks() async {
-    await tester.tapAndWait(find.byTooltip('Yer imleri').hitTestable());
+    final label = tester.drawingStrings.pageList.filterBookmarks;
+    await tester.tapAndWait(find.byTooltip(label).hitTestable());
   }
 
   Future<void> showAllPages() async {
-    await tester.tapAndWait(find.byTooltip('Tüm sayfalar').hitTestable());
+    final label = tester.drawingStrings.pageList.filterAllPages;
+    await tester.tapAndWait(find.byTooltip(label).hitTestable());
   }
 }

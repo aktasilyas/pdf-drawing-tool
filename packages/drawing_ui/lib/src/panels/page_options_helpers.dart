@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 
@@ -46,6 +47,7 @@ void showGoToPageDialog({
   required PageManagerNotifier pageManager,
 }) {
   final controller = TextEditingController();
+  final strings = context.drawingStrings;
   void goTo(String value, BuildContext ctx) {
     final page = int.tryParse(value);
     if (page != null && page >= 1 && page <= pageCount) {
@@ -57,7 +59,7 @@ void showGoToPageDialog({
   showDialog(
     context: context,
     builder: (ctx) => AlertDialog(
-      title: const Text('Sayfaya Git'),
+      title: Text(strings.pages.goToPage),
       content: TextField(
         controller: controller,
         keyboardType: TextInputType.number,
@@ -67,10 +69,11 @@ void showGoToPageDialog({
       ),
       actions: [
         TextButton(
-            onPressed: () => Navigator.pop(ctx), child: const Text('İptal')),
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(strings.panels.cancel)),
         FilledButton(
             onPressed: () => goTo(controller.text, ctx),
-            child: const Text('Git')),
+            child: Text(strings.pages.go)),
       ],
     ),
   );

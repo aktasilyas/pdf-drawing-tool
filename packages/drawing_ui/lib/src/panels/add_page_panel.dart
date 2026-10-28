@@ -6,14 +6,12 @@ import 'package:flutter/material.dart' hide Page;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:phosphor_icons/phosphor_icons.dart';
 
 import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
-import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/panels/add_page_import_helper.dart';
+import 'package:drawing_ui/src/panels/add_page_panel_sections.dart';
 import 'package:drawing_ui/src/panels/add_page_panel_widgets.dart';
-import 'package:drawing_ui/src/panels/page_options_widgets.dart';
 import 'package:drawing_ui/src/panels/page_structure_undo.dart';
 import 'package:drawing_ui/src/widgets/template_picker/template_picker.dart';
 
@@ -64,12 +62,17 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
       };
 
   /// Inserts a new page with the given background at the selected position.
-  void _insertNewPage(PageBackground background, {PageSize? size}) {
+  void _insertNewPage(
+    PageBackground background, {
+    required DrawingStrings strings,
+    PageSize? size,
+  }) {
     final doc = ref.read(documentProvider);
     final currentIndex = ref.read(currentPageIndexProvider);
     _insertPage(
       actions: ref.read(pageStructureActionsProvider),
       messenger: ScaffoldMessenger.maybeOf(context),
+      strings: strings,
       index: _resolveInsertionIndex(currentIndex, doc.pages.length),
       size: size ?? doc.settings.defaultPageSize,
       background: background,
@@ -81,19 +84,29 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
   static void _insertPage({
     required PageStructureActions actions,
     required ScaffoldMessengerState? messenger,
+    required DrawingStrings strings,
     required int index,
     required PageSize size,
     required PageBackground background,
   }) {
     final page = Page.create(index: index, size: size, background: background);
     final change = actions.insertPage(index, page);
-    showPageUndoSnackBar(messenger, actions, change, 'Sayfa eklendi');
+    showPageUndoSnackBar(
+      messenger,
+      actions,
+      change,
+      strings.pages.pageAdded,
+      undoLabel: strings.toolbar.undo,
+    );
   }
 
   void _addPageFromTemplate(String templateId) {
     final t = TemplateRegistry.getById(templateId);
     if (t == null) return;
-    _insertNewPage(PageBackground.fromTemplate(t));
+    _insertNewPage(
+      PageBackground.fromTemplate(t),
+      strings: context.drawingStrings,
+    );
     widget.onClose();
   }
 
@@ -104,6 +117,7 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
     final doc = ref.read(documentProvider);
     final curIdx = ref.read(currentPageIndexProvider);
     final navCtx = Navigator.of(context, rootNavigator: true).context;
+    final strings = context.drawingStrings;
     widget.onClose();
     final result = await TemplatePicker.show(navCtx);
     if (result == null) return;
@@ -111,6 +125,7 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
     _insertPage(
       actions: actions,
       messenger: messenger,
+      strings: strings,
       index: _resolveInsertionIndex(curIdx, doc.pages.length),
       size: doc.settings.defaultPageSize,
       background: PageBackground.fromTemplate(
@@ -122,6 +137,7 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
   }
 
   Future<void> _addImagePage(ImageSource source) async {
+    final strings = context.drawingStrings;
     final picked =
         await ImagePicker().pickImage(source: source, imageQuality: 85);
     if (picked == null) return;
@@ -137,6 +153,7 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
     if (!mounted) return;
     _insertNewPage(
       PageBackground(type: BackgroundType.pdf, pdfData: bytes, pdfPageIndex: 1),
+      strings: strings,
       size: PageSize(
           width: frame.image.width.toDouble(),
           height: frame.image.height.toDouble()),
@@ -194,9 +211,18 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
                   onChanged: (pos) => setState(() => _selectedPosition = pos),
                 ),
                 _divider(cs),
-                _buildTemplateSection(cs),
+                AddPageTemplateSection(
+                  templates: _quickTemplates,
+                  selectedId: _selectedTemplateId,
+                  onSelect: _addPageFromTemplate,
+                ),
                 _divider(cs),
-                _buildActionItems(cs),
+                AddPageActionItems(
+                  onMoreTemplates: _openTemplatePicker,
+                  onImage: () => _addImagePage(ImageSource.gallery),
+                  onCamera: () => _addImagePage(ImageSource.camera),
+                  onImport: _handleImport,
+                ),
                 const SizedBox(height: 8),
               ],
             ),
@@ -214,83 +240,6 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
       elevation: 8,
       shadowColor: cs.shadow.withValues(alpha: 0.26),
       child: SizedBox(width: 320, child: content),
-    );
-  }
-
-  Widget _buildTemplateSection(ColorScheme cs) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 20, bottom: 8),
-            child: Text(
-              'Şablonlar',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: cs.onSurfaceVariant,
-              ),
-            ),
-          ),
-          SizedBox(
-            height: 120,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: _quickTemplates.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 12),
-              itemBuilder: (_, index) {
-                final t = _quickTemplates[index];
-                return QuickTemplateThumbnail(
-                  template: t,
-                  isSelected: t.id == _selectedTemplateId,
-                  onTap: () => _addPageFromTemplate(t.id),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActionItems(ColorScheme cs) {
-    final chevron = PhosphorIcon(
-      ElyanotesIcons.chevronRight,
-      size: 18,
-      color: cs.onSurfaceVariant,
-    );
-
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        PageOptionsMenuItem(
-          icon: ElyanotesIcons.template,
-          label: 'Daha Fazla Şablon',
-          trailing: chevron,
-          onTap: _openTemplatePicker,
-        ),
-        PageOptionsMenuItem(
-          icon: ElyanotesIcons.image,
-          label: 'Resim',
-          trailing: chevron,
-          onTap: () => _addImagePage(ImageSource.gallery),
-        ),
-        PageOptionsMenuItem(
-          icon: ElyanotesIcons.camera,
-          label: 'Fotoğraf çek',
-          trailing: chevron,
-          onTap: () => _addImagePage(ImageSource.camera),
-        ),
-        PageOptionsMenuItem(
-          icon: ElyanotesIcons.uploadFile,
-          label: 'İçe aktar',
-          trailing: chevron,
-          onTap: _handleImport,
-        ),
-      ],
     );
   }
 

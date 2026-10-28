@@ -48,21 +48,29 @@ mixin PageOptionsActions<T extends ConsumerStatefulWidget> on ConsumerState<T> {
     final doc = ref.read(documentProvider);
     final original = doc.pages[targetPageIndex];
     ref.read(copiedPageProvider.notifier).state = original;
+    final messenger = ScaffoldMessenger.of(context);
+    final message = context.drawingStrings.pages.pageCopied;
     onPanelClose();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Sayfa kopyalandı')),
-    );
+    messenger.showSnackBar(SnackBar(content: Text(message)));
   }
 
   void pastePage(BuildContext context) {
     final copied = ref.read(copiedPageProvider);
     if (copied == null) return;
-    _insertCopy(context, copied, 'Sayfa yapıştırıldı');
+    _insertCopy(
+      context,
+      copied,
+      context.drawingStrings.pages.pagePasted,
+    );
   }
 
   void duplicatePage(BuildContext context) {
     final doc = ref.read(documentProvider);
-    _insertCopy(context, doc.pages[targetPageIndex], 'Sayfa çoğaltıldı');
+    _insertCopy(
+      context,
+      doc.pages[targetPageIndex],
+      context.drawingStrings.pages.pageDuplicated,
+    );
   }
 
   /// Inserts a copy of [source] (fresh ids) after the target page and offers
@@ -70,10 +78,12 @@ mixin PageOptionsActions<T extends ConsumerStatefulWidget> on ConsumerState<T> {
   void _insertCopy(BuildContext context, Page source, String message) {
     // The popover context goes away on close, so grab these first.
     final messenger = ScaffoldMessenger.maybeOf(context);
+    final undoLabel = context.drawingStrings.toolbar.undo;
     final actions = ref.read(pageStructureActionsProvider);
     final change = actions.insertCopy(targetPageIndex, source);
     onPanelClose();
-    showPageUndoSnackBar(messenger, actions, change, message);
+    showPageUndoSnackBar(messenger, actions, change, message,
+        undoLabel: undoLabel);
   }
 
   void exportPageAsPdf() {
@@ -96,11 +106,12 @@ mixin PageOptionsActions<T extends ConsumerStatefulWidget> on ConsumerState<T> {
   Future<void> deletePage(BuildContext context) async {
     // The popover context goes away on close, so grab these first.
     final messenger = ScaffoldMessenger.of(context);
+    final strings = context.drawingStrings;
     final index = targetPageIndex;
     if (ref.read(pageCountProvider) <= 1) {
       onPanelClose();
       messenger.showSnackBar(
-        const SnackBar(content: Text('Son sayfa silinemez')),
+        SnackBar(content: Text(strings.pages.lastPageCannotDelete)),
       );
       return;
     }
@@ -116,9 +127,9 @@ mixin PageOptionsActions<T extends ConsumerStatefulWidget> on ConsumerState<T> {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-          content: const Text('Sayfa silindi'),
+          content: Text(strings.pages.pageDeleted),
           action: SnackBarAction(
-            label: 'Geri al',
+            label: strings.toolbar.undo,
             onPressed: () => actions.restorePage(deleted),
           ),
         ),
@@ -130,19 +141,18 @@ mixin PageOptionsActions<T extends ConsumerStatefulWidget> on ConsumerState<T> {
     final doc = ref.read(documentProvider);
     final historyManager = ref.read(historyManagerProvider.notifier);
     final navContext = Navigator.of(context, rootNavigator: true).context;
+    final strings = context.drawingStrings;
     onPanelClose();
 
     showDialog(
       context: navContext,
       builder: (ctx) => AlertDialog(
-        title: const Text('Sayfayı Temizle'),
-        content: Text(
-          'Sayfa ${pageIndex + 1} temizlensin mi?\nBu işlem geri alınabilir.',
-        ),
+        title: Text(strings.panels.clearPage),
+        content: Text(strings.pages.clearPageQuestion(pageIndex + 1)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('İptal'),
+            child: Text(strings.panels.cancel),
           ),
           TextButton(
             onPressed: () {
@@ -154,7 +164,7 @@ mixin PageOptionsActions<T extends ConsumerStatefulWidget> on ConsumerState<T> {
             },
             style: TextButton.styleFrom(
                 foregroundColor: Theme.of(ctx).colorScheme.error),
-            child: const Text('Temizle'),
+            child: Text(strings.panels.clearPageConfirm),
           ),
         ],
       ),

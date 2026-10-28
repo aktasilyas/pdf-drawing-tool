@@ -6,6 +6,7 @@ import 'package:path/path.dart' as p;
 
 import 'fixtures/pdf_fixtures.dart';
 import 'helpers/app_harness.dart';
+import 'helpers/l10n.dart';
 import 'helpers/pump_helpers.dart';
 import 'robots/editor_robot.dart';
 import 'robots/library_robot.dart';
@@ -32,11 +33,12 @@ void main() {
       // Corrupted and password-protected files: friendly error (#186),
       // nothing added to the library.
       await pdf.importFixture(PdfFixture.corrupt);
-      await pdf.expectError('Dosya bozuk olabilir');
+      final s = tester.drawingStrings.errors;
+      await pdf.expectAnyError([s.pdfOpenFailed, s.pdfPagesUnreadable]);
       library.expectEmptyState();
 
       await pdf.importFixture(PdfFixture.locked);
-      await pdf.expectError('parola korumalı');
+      await pdf.expectError(s.pdfPasswordProtected);
       library.expectEmptyState();
 
       // A normal 3-page PDF opens in the editor with one page per PDF page.
@@ -64,7 +66,7 @@ void main() {
       await editor.drawStroke(0.3);
       expect(editor.strokeIds(), hasLength(1));
 
-      // Export through "PDF Paylaş"; the stubbed share sheet keeps the file.
+      // Export through "Share PDF"; the stubbed share sheet keeps the file.
       await pdf.shareAsPdf();
       await tester.pumpUntilTrue(
         () => share.shared.isNotEmpty,

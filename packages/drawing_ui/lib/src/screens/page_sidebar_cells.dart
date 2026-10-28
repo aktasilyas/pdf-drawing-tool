@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/panels/panels.dart';
 import 'package:drawing_ui/src/theme/chrome_palette.dart';
 import 'package:drawing_ui/src/theme/chrome_tokens.dart';
@@ -48,13 +49,14 @@ class _AddPageCellState extends State<AddPageCell> {
   Widget build(BuildContext context) {
     final palette = ChromePalette.of(context);
     final textTheme = Theme.of(context).textTheme;
+    final strings = context.drawingStrings.pageList;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Expanded(
           child: Semantics(
             button: true,
-            label: 'Sayfa ekle',
+            label: strings.addPage,
             excludeSemantics: true,
             child: GestureDetector(
               key: _anchorKey,
@@ -74,7 +76,7 @@ class _AddPageCellState extends State<AddPageCell> {
                       ),
                       const SizedBox(height: ChromeSpacing.xs),
                       Text(
-                        'Sayfa ekle',
+                        strings.addPage,
                         style: textTheme.labelMedium?.copyWith(
                           color: palette.textMuted,
                         ),
@@ -150,6 +152,7 @@ class EmptyBookmarksState extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = ChromePalette.of(context);
     final textTheme = Theme.of(context).textTheme;
+    final strings = context.drawingStrings.pageList;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(ChromeSpacing.xl),
@@ -163,7 +166,7 @@ class EmptyBookmarksState extends StatelessWidget {
             ),
             const SizedBox(height: ChromeSpacing.sm),
             Text(
-              'Henüz yer imi yok',
+              strings.noBookmarks,
               textAlign: TextAlign.center,
               style: textTheme.titleSmall?.copyWith(
                 color: palette.textPrimary,
@@ -172,8 +175,7 @@ class EmptyBookmarksState extends StatelessWidget {
             ),
             const SizedBox(height: ChromeSpacing.xs),
             Text(
-              'Bir sayfayı işaretlemek için küçük resmindeki yer imi '
-              'simgesine dokunun.',
+              strings.noBookmarksHint,
               textAlign: TextAlign.center,
               style: textTheme.bodySmall?.copyWith(
                 color: palette.textMuted,

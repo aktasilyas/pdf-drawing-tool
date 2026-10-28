@@ -61,30 +61,38 @@ class PdfRobot {
   }
 
   /// Waits for an error SnackBar containing [message], then for it to go.
-  Future<void> expectError(String message) async {
-    final snack = find.textContaining(message);
+  Future<void> expectError(String message) => expectAnyError([message]);
+
+  /// Like [expectError] for failures that may show either of [messages]
+  /// (a damaged file fails at open or at the first page read).
+  Future<void> expectAnyError(List<String> messages) async {
+    bool shows(Widget w) {
+      if (w is! Text) return false;
+      final text = w.data ?? w.textSpan?.toPlainText() ?? '';
+      return messages.any(text.contains);
+    }
+
+    final snack = find.byWidgetPredicate(shows);
     await tester.pumpUntilFound(snack);
     await tester.pumpUntilGone(snack, timeout: const Duration(seconds: 15));
   }
 
-  /// Editor: "Dışa Aktar" (toolbar button, or the "Daha Fazla" menu on
-  /// phones) > "PDF Paylaş".
+  /// Editor: "Export" (toolbar button, or the "More" menu on phones) >
+  /// "Share PDF".
   Future<void> shareAsPdf() async {
-    final s = tester.drawingStrings.toolbar;
-    final button = find.byTooltip(s.export).hitTestable();
+    final s = tester.drawingStrings;
+    final button = find.byTooltip(s.toolbar.export).hitTestable();
     if (button.evaluate().isNotEmpty) {
       await tester.tapAndWait(button);
     } else {
-      await tester.tapAndWait(find.byTooltip(s.more).hitTestable());
-      // The "More" menu is the page options panel, still Turkish until
-      // editor slice 3c (#327).
-      final item = find.text('Dışa Aktar');
+      await tester.tapAndWait(find.byTooltip(s.toolbar.more).hitTestable());
+      final item = find.text(s.toolbar.export);
       await tester.pumpUntilFound(item);
       await tester.ensureVisible(item.first);
       await tester.pumpFor(const Duration(milliseconds: 300));
       await tester.tapAndWait(item.first.hitTestable());
     }
-    await tester.tapAndWait(find.text('PDF Paylaş').hitTestable());
+    await tester.tapAndWait(find.text(s.export.sharePdf).hitTestable());
   }
 
   /// Page count of the PDF file at [file], read with the app's own loader.
