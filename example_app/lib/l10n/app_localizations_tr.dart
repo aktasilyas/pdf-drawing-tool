@@ -1129,432 +1129,131 @@ class AppLocalizationsTr extends AppLocalizations {
   String get routerSubscriptionTitle => 'Abonelik';
 
   @override
-  String get editorPageRename => 'Yeniden Adlandır';
+  String get libraryNewNotebook => 'Not Defteri';
 
   @override
-  String get editorPageMoveDocumentToTrash => 'Çöpe Taşı';
+  String get libraryNewWhiteboard => 'Beyaz Tahta';
 
   @override
-  String get editorPageDocumentOptions => 'Doküman Seçenekleri';
+  String get libraryNewQuickNote => 'Hızlı Not';
 
   @override
-  String editorPagePageNumber(int number) {
-    return 'Sayfa $number';
+  String get libraryImportPdf => 'PDF İçe Aktar';
+
+  @override
+  String get libraryImportImage => 'Resim İçe Aktar';
+
+  @override
+  String libraryQuickNoteTitle(String date) {
+    return 'Hızlı Not - $date';
   }
 
   @override
-  String get editorPageBookmarkPage => 'Yer imi koy';
-
-  @override
-  String get editorPageRemoveBookmark => 'Yer imini kaldır';
-
-  @override
-  String get editorPageCopyPage => 'Sayfayı kopyala';
-
-  @override
-  String get editorPagePastePage => 'Sayfayı yapıştır';
-
-  @override
-  String get editorPageDuplicatePage => 'Sayfayı çoğalt';
-
-  @override
-  String get editorPageChangeTemplate => 'Şablonu değiştir';
-
-  @override
-  String get editorPageGoToPageMenu => 'Sayfaya git';
-
-  @override
-  String get editorPageExportPagePdf => 'PDF olarak dışa aktar';
-
-  @override
-  String get editorPageClearPageMenu => 'Sayfayı temizle';
-
-  @override
-  String get editorPageMovePageToTrash => 'Çöpe taşı';
-
-  @override
-  String get editorPageSettings => 'Ayarlar';
-
-  @override
-  String get editorPageEditToolbar => 'Araç Çubuğunu Düzenle';
-
-  @override
-  String get editorPageScrollDirection => 'Kaydırma yönü';
-
-  @override
-  String get editorPageScrollHorizontal => 'Yatay';
-
-  @override
-  String get editorPageScrollVertical => 'Dikey';
-
-  @override
-  String get editorPagePageCopied => 'Sayfa kopyalandı';
-
-  @override
-  String get editorPagePagePasted => 'Sayfa yapıştırıldı';
-
-  @override
-  String get editorPagePageDuplicated => 'Sayfa çoğaltıldı';
-
-  @override
-  String get editorPageLastPageCannotDelete => 'Son sayfa silinemez';
-
-  @override
-  String get editorPagePageDeleted => 'Sayfa silindi';
-
-  @override
-  String editorPageClearPageQuestion(int page) {
-    return 'Sayfa $page temizlensin mi?\nBu işlem geri alınabilir.';
+  String libraryWhiteboardTitle(String date) {
+    return 'Beyaz Tahta - $date';
   }
 
   @override
-  String get editorPagePageAdded => 'Sayfa eklendi';
+  String get libraryPdfReadFailed => 'PDF dosyası okunamadı';
 
   @override
-  String get editorPagePageMoved => 'Sayfa taşındı';
+  String get libraryImageReadFailed => 'Resim dosyası okunamadı';
 
   @override
-  String get editorPageGoToPage => 'Sayfaya Git';
+  String get libraryImageLoading => 'Resim yükleniyor...';
 
   @override
-  String get editorPageGo => 'Git';
+  String get libraryImageTooLarge =>
+      'Resim çok büyük! Maksimum boyut: 4096x4096';
 
   @override
-  String editorPageListPageOf(int page, int count) {
-    return 'Sayfa $page / $count';
+  String get libraryPdfTooLarge =>
+      'PDF dosyası çok büyük! Maksimum boyut: 200MB';
+
+  @override
+  String get libraryPdfOpening => 'PDF açılıyor...';
+
+  @override
+  String get libraryPdfImportFailed => 'PDF import başarısız';
+
+  @override
+  String libraryOpening(String title) {
+    return '$title açılıyor';
   }
 
   @override
-  String editorPageListPageRangeOf(int first, int last, int count) {
-    return 'Sayfa $first-$last / $count';
+  String libraryOpeningWithPages(String title, String pages) {
+    return '$title açılıyor ($pages)';
   }
 
   @override
-  String get editorPageListPreviousPage => 'Önceki Sayfa';
+  String get libraryFormat => 'Format';
 
   @override
-  String get editorPageListNextPage => 'Sonraki Sayfa';
+  String get libraryOrientation => 'Yön';
 
   @override
-  String editorPageListGoToPageHint(String pageLabel) {
-    return '$pageLabel, Sayfaya gitmek için dokunun';
+  String get libraryPortrait => 'Dikey';
+
+  @override
+  String get libraryLandscape => 'Yatay';
+
+  @override
+  String get librarySize => 'Boyut';
+
+  @override
+  String libraryFormatSummary(String orientation, String size) {
+    return '$orientation, $size';
   }
 
   @override
-  String get editorPageListAddPage => 'Sayfa ekle';
+  String get libraryCover => 'Kapak';
 
   @override
-  String get editorPageListAddBookmark => 'Yer imi ekle';
+  String get libraryPaper => 'Kağıt';
 
   @override
-  String get editorPageListNoBookmarks => 'Henüz yer imi yok';
+  String get libraryTitle => 'Başlık';
 
   @override
-  String get editorPageListNoBookmarksHint =>
-      'Bir sayfayı işaretlemek için küçük resmindeki yer imi simgesine dokunun.';
+  String get libraryNoteTitleHint => 'Not Başlığı';
 
   @override
-  String get editorPageListFilterAllPages => 'Tüm sayfalar';
+  String get libraryTemplateCategoryAll => 'Hepsi';
 
   @override
-  String get editorPageListFilterBookmarks => 'Yer imleri';
+  String get libraryNoTemplatesInCategory => 'Bu kategoride şablon yok';
 
   @override
-  String get editorPageListFilterRecordings => 'Ses kayıtları';
+  String get libraryCreateNoteTitle => 'Yeni not oluştur';
 
   @override
-  String get editorPageListPageOptions => 'Sayfa seçenekleri';
+  String get libraryTemplate => 'Şablon';
 
   @override
-  String get editorPageListThumbnailFailed => 'Önizleme\noluşturulamadı';
+  String get libraryUntitledNote => 'İsimsiz Not';
 
   @override
-  String get editorPageListDropToAddPage =>
-      'Yeni sayfa eklemek için\nsürükleyip bırakın';
+  String get libraryPaperColorWhite => 'Beyaz kağıt';
 
   @override
-  String get editorPageListPositionBefore => 'Önce';
+  String get libraryPaperColorBlack => 'Siyah kağıt';
 
   @override
-  String get editorPageListPositionAfter => 'Sonra';
+  String get libraryPaperColorCream => 'Krem kağıt';
 
   @override
-  String get editorPageListLastPage => 'Son sayfa';
+  String get libraryPaperColorGray => 'Gri kağıt';
 
   @override
-  String get editorPageListMoreTemplates => 'Daha Fazla Şablon';
+  String get libraryPaperColorGreen => 'Yeşil kağıt';
 
   @override
-  String get editorPageListTakePhoto => 'Fotoğraf çek';
+  String get libraryPaperColorBlue => 'Mavi kağıt';
 
   @override
-  String get editorPageListImportFile => 'İçe aktar';
+  String get libraryPaperColorYellow => 'Sarı kağıt';
 
   @override
-  String get editorExportScopeAll => 'Tümü';
-
-  @override
-  String get editorExportScopeCurrent => 'Bu sayfa';
-
-  @override
-  String get editorExportScopeRange => 'Aralık';
-
-  @override
-  String get editorExportFrom => 'Başlangıç';
-
-  @override
-  String get editorExportTo => 'Bitiş';
-
-  @override
-  String get editorExportIncludeTemplate => 'Sayfa şablonunu dahil et';
-
-  @override
-  String get editorExportExportPng => 'PNG Olarak Dışa Aktar';
-
-  @override
-  String get editorExportExportPdf => 'PDF Olarak Dışa Aktar';
-
-  @override
-  String get editorExportSharePdf => 'PDF Paylaş';
-
-  @override
-  String editorExportInvalidRange(int count) {
-    return 'Sayfa aralığı 1 ile $count arasında olmalı.';
-  }
-
-  @override
-  String get editorExportSavePdfDialog => 'PDF Kaydet';
-
-  @override
-  String get editorExportSavePngDialog => 'PNG Kaydet';
-
-  @override
-  String get editorExportFallbackFileName => 'doküman';
-
-  @override
-  String editorExportPageFileName(String title, int page) {
-    return '${title}_sayfa$page';
-  }
-
-  @override
-  String get editorExportExporting => 'PDF Dışa Aktarılıyor...';
-
-  @override
-  String editorExportPercent(int percent) {
-    return '%$percent';
-  }
-
-  @override
-  String editorExportRemainingSeconds(int seconds) {
-    return '~$seconds sn';
-  }
-
-  @override
-  String editorExportRemainingMinutes(int minutes) {
-    return '~$minutes dk';
-  }
-
-  @override
-  String get editorExportSaved => 'PDF Kaydedildi';
-
-  @override
-  String editorExportSavedWithSize(String size) {
-    return 'PDF Kaydedildi ($size)';
-  }
-
-  @override
-  String get editorExportCancelled => 'İptal edildi';
-
-  @override
-  String get editorTemplateAllCategories => 'Tümü';
-
-  @override
-  String get editorTemplateCoverTab => 'Kapak';
-
-  @override
-  String get editorTemplatePaperTab => 'Kâğıt';
-
-  @override
-  String get editorTemplateApply => 'Uygula';
-
-  @override
-  String get editorTemplatePortrait => 'Dikey';
-
-  @override
-  String get editorTemplateLandscape => 'Yatay';
-
-  @override
-  String get editorTemplatePaperSquare => 'Kare';
-
-  @override
-  String get editorTemplatePaperWidescreen => 'Geniş (16:9)';
-
-  @override
-  String get editorTemplateCustom => 'Özel';
-
-  @override
-  String get editorTemplateColorWhite => 'Beyaz';
-
-  @override
-  String get editorTemplateColorCream => 'Krem';
-
-  @override
-  String get editorTemplateColorBlack => 'Siyah';
-
-  @override
-  String get editorTemplateColorYellow => 'Sarı';
-
-  @override
-  String get editorTemplateTemplatesHeader => 'Şablonlar';
-
-  @override
-  String get editorTemplateBackground => 'Arka Plan';
-
-  @override
-  String get editorTemplateBackgroundPattern => 'Arka Plan Deseni';
-
-  @override
-  String get editorTemplatePatternPlain => 'Düz';
-
-  @override
-  String get editorTemplatePatternDotted => 'Noktalı';
-
-  @override
-  String get editorTemplatePatternGrid => 'Izgara';
-
-  @override
-  String get editorTemplateBackgroundColor => 'Arka Plan Rengi';
-
-  @override
-  String get editorErrorExportStorageFull =>
-      'Dışa aktarma için yeterli depolama alanı yok. Yer açıp tekrar deneyin.';
-
-  @override
-  String get editorErrorExportCannotWrite =>
-      'Dosya yazılamadı. Tekrar deneyin.';
-
-  @override
-  String get editorErrorExportFailed => 'Dışa aktarılamadı. Tekrar deneyin.';
-
-  @override
-  String get editorErrorExportNoPages => 'Dışa aktarılacak sayfa yok';
-
-  @override
-  String get editorErrorPdfPasswordProtected =>
-      'Bu PDF parola korumalı. Parolayı kaldırıp tekrar deneyin.';
-
-  @override
-  String get editorErrorPdfFileAccess => 'PDF dosyasına erişilemedi.';
-
-  @override
-  String get editorErrorPdfOpenFailed => 'PDF açılamadı. Dosya bozuk olabilir.';
-
-  @override
-  String get editorErrorPdfPagesUnreadable =>
-      'PDF sayfaları okunamadı. Dosya bozuk olabilir.';
-
-  @override
-  String editorErrorPdfTooManyPages(int count, int max) {
-    return 'PDF çok fazla sayfa içeriyor ($count). Maksimum $max sayfa destekleniyor.';
-  }
-
-  @override
-  String get editorErrorPdfPagePlaceholder => 'PDF Sayfası';
-
-  @override
-  String get editorErrorPdfSourceMissing => 'Kaynak PDF bulunamadı';
-
-  @override
-  String get editorErrorPdfLoadFailed => 'PDF Yüklenemedi';
-
-  @override
-  String get editorCanvasAddLayer => 'Katman Ekle';
-
-  @override
-  String editorCanvasDefaultLayerName(int number) {
-    return 'Katman $number';
-  }
-
-  @override
-  String get editorCanvasDeleteLayer => 'Katmanı Sil';
-
-  @override
-  String get editorCanvasDuplicateLayer => 'Katmanı Kopyala';
-
-  @override
-  String get editorCanvasHideLayer => 'Gizle';
-
-  @override
-  String get editorCanvasShowLayer => 'Göster';
-
-  @override
-  String get editorCanvasLockLayer => 'Kilitle';
-
-  @override
-  String get editorCanvasUnlockLayer => 'Kilidi Aç';
-
-  @override
-  String get editorCanvasZoomLock => 'Yakınlaştırma kilidi';
-
-  @override
-  String editorCanvasZoomLevel(int percent) {
-    return 'Yakınlaştırma $percent%, favori düzeyler';
-  }
-
-  @override
-  String get editorCanvasFavoriteZoom => 'Favori yakınlaştırma';
-
-  @override
-  String editorCanvasPenBox(int count) {
-    return 'Kalem kutusu, $count kalem';
-  }
-
-  @override
-  String get editorCanvasFinishEditing => 'Düzenlemeyi bitir';
-
-  @override
-  String get editorCanvasEditPenBox => 'Kalem kutusunu düzenle';
-
-  @override
-  String get editorCanvasCollapsePenBox => 'Kalem kutusunu daralt';
-
-  @override
-  String get editorCanvasRemovePen => 'Kalemi kaldır';
-
-  @override
-  String get editorCanvasAddImage => 'Resim Ekle';
-
-  @override
-  String get editorCanvasAddImageHint =>
-      'Galeriden veya kamerayla resim ekleyin';
-
-  @override
-  String get editorCanvasFromGallery => 'Galeriden Seç';
-
-  @override
-  String get editorCanvasFromGalleryHint => 'Albümden bir resim seçin';
-
-  @override
-  String get editorCanvasTakePhoto => 'Fotoğraf Çek';
-
-  @override
-  String get editorCanvasTakePhotoHint => 'Kamera ile yeni fotoğraf çekin';
-
-  @override
-  String get editorCanvasTapToPlace => 'Yerleştirmek için dokunun';
-
-  @override
-  String get editorCanvasTapToPlaceImage => 'Resmi yerleştirmek için dokunun';
-
-  @override
-  String get editorCanvasAddColor => 'Renk ekle';
-
-  @override
-  String get editorCanvasTextStyleTitle => 'Metin Stili';
-
-  @override
-  String get editorCanvasEmojiSize => 'Emoji Boyutu';
-
-  @override
-  String get editorCanvasTextPreviewSample => 'Merhaba';
+  String get librarySelectColor => 'Renk Seç';
 }

@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/documents.dart';
+import 'package:example_app/features/documents/domain/entities/paper_color.dart';
 import 'package:example_app/features/documents/domain/entities/sort_option.dart';
 import 'package:example_app/features/documents/presentation/l10n/library_labels.dart';
 import 'package:example_app/l10n/l10n.dart';
@@ -60,6 +61,22 @@ void main() {
         PaperSizePreset.values.map((p) => p.label(l10n)),
         code,
         'PaperSizePreset',
+      );
+    });
+
+    test('every PaperColor is labelled in $code', () {
+      expectDistinctNonEmpty(
+        PaperColor.values.map((c) => c.label(l10n)),
+        code,
+        'PaperColor',
+      );
+    });
+
+    test('every NewDocumentOption is labelled in $code', () {
+      expectDistinctNonEmpty(
+        NewDocumentOption.values.map((o) => o.label(l10n)),
+        code,
+        'NewDocumentOption',
       );
     });
 

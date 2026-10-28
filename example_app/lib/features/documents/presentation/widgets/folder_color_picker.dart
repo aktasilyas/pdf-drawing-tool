@@ -6,6 +6,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// Folder color picker dialog
 class FolderColorPicker extends StatelessWidget {
@@ -18,10 +19,11 @@ class FolderColorPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return AlertDialog(
       backgroundColor: context.palette.surface,
       title: Text(
-        'Renk Seç',
+        l10n.librarySelectColor,
         style: AppTypography.titleLarge.copyWith(
           color: context.palette.textPrimary,
         ),
@@ -46,7 +48,7 @@ class FolderColorPicker extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('İptal'),
+          child: Text(l10n.commonCancel),
         ),
       ],
     );

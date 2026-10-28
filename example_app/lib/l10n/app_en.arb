@@ -549,6 +549,86 @@
   "routerForgotPasswordTitle": "Forgot password",
   "routerProfileTitle": "Profile",
   "routerSubscriptionTitle": "Subscription",
+  "libraryNewNotebook": "Notebook",
+  "libraryNewWhiteboard": "Whiteboard",
+  "libraryNewQuickNote": "Quick note",
+  "libraryImportPdf": "Import PDF",
+  "libraryImportImage": "Import image",
+  "libraryQuickNoteTitle": "Quick note - {date}",
+  "@libraryQuickNoteTitle": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryWhiteboardTitle": "Whiteboard - {date}",
+  "@libraryWhiteboardTitle": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryPdfReadFailed": "Couldn't read the PDF file",
+  "libraryImageReadFailed": "Couldn't read the image file",
+  "libraryImageLoading": "Loading image...",
+  "libraryImageTooLarge": "Image is too large. Maximum size: 4096x4096",
+  "libraryPdfTooLarge": "PDF is too large. Maximum size: 200 MB",
+  "libraryPdfOpening": "Opening PDF...",
+  "libraryPdfImportFailed": "Couldn't import the PDF",
+  "libraryOpening": "Opening {title}",
+  "@libraryOpening": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryOpeningWithPages": "Opening {title} ({pages})",
+  "@libraryOpeningWithPages": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "pages": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryFormat": "Format",
+  "libraryOrientation": "Orientation",
+  "libraryPortrait": "Portrait",
+  "libraryLandscape": "Landscape",
+  "librarySize": "Size",
+  "libraryFormatSummary": "{orientation}, {size}",
+  "@libraryFormatSummary": {
+    "placeholders": {
+      "orientation": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryCover": "Cover",
+  "libraryPaper": "Paper",
+  "libraryTitle": "Title",
+  "libraryNoteTitleHint": "Note title",
+  "libraryTemplateCategoryAll": "All",
+  "libraryNoTemplatesInCategory": "No templates in this category",
+  "libraryCreateNoteTitle": "Create new note",
+  "libraryTemplate": "Template",
+  "libraryUntitledNote": "Untitled note",
+  "libraryPaperColorWhite": "White paper",
+  "libraryPaperColorBlack": "Black paper",
+  "libraryPaperColorCream": "Cream paper",
+  "libraryPaperColorGray": "Gray paper",
+  "libraryPaperColorGreen": "Green paper",
+  "libraryPaperColorBlue": "Blue paper",
+  "libraryPaperColorYellow": "Yellow paper",
+  "librarySelectColor": "Choose a color",
   "editorPageRename": "Rename",
   "editorPageMoveDocumentToTrash": "Move to trash",
   "editorPageDocumentOptions": "Document options",

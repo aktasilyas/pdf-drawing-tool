@@ -1149,439 +1149,130 @@ class AppLocalizationsEn extends AppLocalizations {
   String get routerSubscriptionTitle => 'Subscription';
 
   @override
-  String get editorPageRename => 'Rename';
+  String get libraryNewNotebook => 'Notebook';
 
   @override
-  String get editorPageMoveDocumentToTrash => 'Move to trash';
+  String get libraryNewWhiteboard => 'Whiteboard';
 
   @override
-  String get editorPageDocumentOptions => 'Document options';
+  String get libraryNewQuickNote => 'Quick note';
 
   @override
-  String editorPagePageNumber(int number) {
-    return 'Page $number';
+  String get libraryImportPdf => 'Import PDF';
+
+  @override
+  String get libraryImportImage => 'Import image';
+
+  @override
+  String libraryQuickNoteTitle(String date) {
+    return 'Quick note - $date';
   }
 
   @override
-  String get editorPageBookmarkPage => 'Bookmark page';
-
-  @override
-  String get editorPageRemoveBookmark => 'Remove bookmark';
-
-  @override
-  String get editorPageCopyPage => 'Copy page';
-
-  @override
-  String get editorPagePastePage => 'Paste page';
-
-  @override
-  String get editorPageDuplicatePage => 'Duplicate page';
-
-  @override
-  String get editorPageChangeTemplate => 'Change template';
-
-  @override
-  String get editorPageGoToPageMenu => 'Go to page';
-
-  @override
-  String get editorPageExportPagePdf => 'Export page as PDF';
-
-  @override
-  String get editorPageClearPageMenu => 'Clear page';
-
-  @override
-  String get editorPageMovePageToTrash => 'Move to trash';
-
-  @override
-  String get editorPageSettings => 'Settings';
-
-  @override
-  String get editorPageEditToolbar => 'Edit toolbar';
-
-  @override
-  String get editorPageScrollDirection => 'Scroll direction';
-
-  @override
-  String get editorPageScrollHorizontal => 'Horizontal';
-
-  @override
-  String get editorPageScrollVertical => 'Vertical';
-
-  @override
-  String get editorPagePageCopied => 'Page copied';
-
-  @override
-  String get editorPagePagePasted => 'Page pasted';
-
-  @override
-  String get editorPagePageDuplicated => 'Page duplicated';
-
-  @override
-  String get editorPageLastPageCannotDelete =>
-      'The last page can\'t be deleted';
-
-  @override
-  String get editorPagePageDeleted => 'Page deleted';
-
-  @override
-  String editorPageClearPageQuestion(int page) {
-    return 'Clear page $page?\nYou can undo this.';
+  String libraryWhiteboardTitle(String date) {
+    return 'Whiteboard - $date';
   }
 
   @override
-  String get editorPagePageAdded => 'Page added';
+  String get libraryPdfReadFailed => 'Couldn\'t read the PDF file';
 
   @override
-  String get editorPagePageMoved => 'Page moved';
+  String get libraryImageReadFailed => 'Couldn\'t read the image file';
 
   @override
-  String get editorPageGoToPage => 'Go to page';
+  String get libraryImageLoading => 'Loading image...';
 
   @override
-  String get editorPageGo => 'Go';
+  String get libraryImageTooLarge =>
+      'Image is too large. Maximum size: 4096x4096';
 
   @override
-  String editorPageListPageOf(int page, int count) {
-    return 'Page $page of $count';
+  String get libraryPdfTooLarge => 'PDF is too large. Maximum size: 200 MB';
+
+  @override
+  String get libraryPdfOpening => 'Opening PDF...';
+
+  @override
+  String get libraryPdfImportFailed => 'Couldn\'t import the PDF';
+
+  @override
+  String libraryOpening(String title) {
+    return 'Opening $title';
   }
 
   @override
-  String editorPageListPageRangeOf(int first, int last, int count) {
-    return 'Pages $first–$last of $count';
+  String libraryOpeningWithPages(String title, String pages) {
+    return 'Opening $title ($pages)';
   }
 
   @override
-  String get editorPageListPreviousPage => 'Previous page';
+  String get libraryFormat => 'Format';
 
   @override
-  String get editorPageListNextPage => 'Next page';
+  String get libraryOrientation => 'Orientation';
 
   @override
-  String editorPageListGoToPageHint(String pageLabel) {
-    return '$pageLabel, tap to go to a page';
+  String get libraryPortrait => 'Portrait';
+
+  @override
+  String get libraryLandscape => 'Landscape';
+
+  @override
+  String get librarySize => 'Size';
+
+  @override
+  String libraryFormatSummary(String orientation, String size) {
+    return '$orientation, $size';
   }
 
   @override
-  String get editorPageListAddPage => 'Add page';
+  String get libraryCover => 'Cover';
 
   @override
-  String get editorPageListAddBookmark => 'Add bookmark';
+  String get libraryPaper => 'Paper';
 
   @override
-  String get editorPageListNoBookmarks => 'No bookmarks yet';
+  String get libraryTitle => 'Title';
 
   @override
-  String get editorPageListNoBookmarksHint =>
-      'Tap the bookmark icon on a thumbnail to bookmark that page.';
+  String get libraryNoteTitleHint => 'Note title';
 
   @override
-  String get editorPageListFilterAllPages => 'All pages';
+  String get libraryTemplateCategoryAll => 'All';
 
   @override
-  String get editorPageListFilterBookmarks => 'Bookmarks';
+  String get libraryNoTemplatesInCategory => 'No templates in this category';
 
   @override
-  String get editorPageListFilterRecordings => 'Recordings';
+  String get libraryCreateNoteTitle => 'Create new note';
 
   @override
-  String get editorPageListPageOptions => 'Page options';
+  String get libraryTemplate => 'Template';
 
   @override
-  String get editorPageListThumbnailFailed => 'Preview\nunavailable';
+  String get libraryUntitledNote => 'Untitled note';
 
   @override
-  String get editorPageListDropToAddPage => 'Drag and drop\nto add a new page';
+  String get libraryPaperColorWhite => 'White paper';
 
   @override
-  String get editorPageListPositionBefore => 'Before';
+  String get libraryPaperColorBlack => 'Black paper';
 
   @override
-  String get editorPageListPositionAfter => 'After';
+  String get libraryPaperColorCream => 'Cream paper';
 
   @override
-  String get editorPageListLastPage => 'Last page';
+  String get libraryPaperColorGray => 'Gray paper';
 
   @override
-  String get editorPageListMoreTemplates => 'More templates';
+  String get libraryPaperColorGreen => 'Green paper';
 
   @override
-  String get editorPageListTakePhoto => 'Take photo';
+  String get libraryPaperColorBlue => 'Blue paper';
 
   @override
-  String get editorPageListImportFile => 'Import';
+  String get libraryPaperColorYellow => 'Yellow paper';
 
   @override
-  String get editorExportScopeAll => 'All';
-
-  @override
-  String get editorExportScopeCurrent => 'This page';
-
-  @override
-  String get editorExportScopeRange => 'Range';
-
-  @override
-  String get editorExportFrom => 'From';
-
-  @override
-  String get editorExportTo => 'To';
-
-  @override
-  String get editorExportIncludeTemplate => 'Include page template';
-
-  @override
-  String get editorExportExportPng => 'Export as PNG';
-
-  @override
-  String get editorExportExportPdf => 'Export as PDF';
-
-  @override
-  String get editorExportSharePdf => 'Share PDF';
-
-  @override
-  String editorExportInvalidRange(int count) {
-    return 'The page range must be between 1 and $count.';
-  }
-
-  @override
-  String get editorExportSavePdfDialog => 'Save PDF';
-
-  @override
-  String get editorExportSavePngDialog => 'Save PNG';
-
-  @override
-  String get editorExportFallbackFileName => 'document';
-
-  @override
-  String editorExportPageFileName(String title, int page) {
-    return '${title}_page$page';
-  }
-
-  @override
-  String get editorExportExporting => 'Exporting PDF…';
-
-  @override
-  String editorExportPercent(int percent) {
-    return '$percent%';
-  }
-
-  @override
-  String editorExportRemainingSeconds(int seconds) {
-    return '~$seconds s';
-  }
-
-  @override
-  String editorExportRemainingMinutes(int minutes) {
-    return '~$minutes min';
-  }
-
-  @override
-  String get editorExportSaved => 'PDF saved';
-
-  @override
-  String editorExportSavedWithSize(String size) {
-    return 'PDF saved ($size)';
-  }
-
-  @override
-  String get editorExportCancelled => 'Cancelled';
-
-  @override
-  String get editorTemplateAllCategories => 'All';
-
-  @override
-  String get editorTemplateCoverTab => 'Cover';
-
-  @override
-  String get editorTemplatePaperTab => 'Paper';
-
-  @override
-  String get editorTemplateApply => 'Apply';
-
-  @override
-  String get editorTemplatePortrait => 'Portrait';
-
-  @override
-  String get editorTemplateLandscape => 'Landscape';
-
-  @override
-  String get editorTemplatePaperSquare => 'Square';
-
-  @override
-  String get editorTemplatePaperWidescreen => 'Widescreen (16:9)';
-
-  @override
-  String get editorTemplateCustom => 'Custom';
-
-  @override
-  String get editorTemplateColorWhite => 'White';
-
-  @override
-  String get editorTemplateColorCream => 'Cream';
-
-  @override
-  String get editorTemplateColorBlack => 'Black';
-
-  @override
-  String get editorTemplateColorYellow => 'Yellow';
-
-  @override
-  String get editorTemplateTemplatesHeader => 'Templates';
-
-  @override
-  String get editorTemplateBackground => 'Background';
-
-  @override
-  String get editorTemplateBackgroundPattern => 'Background pattern';
-
-  @override
-  String get editorTemplatePatternPlain => 'Plain';
-
-  @override
-  String get editorTemplatePatternDotted => 'Dotted';
-
-  @override
-  String get editorTemplatePatternGrid => 'Grid';
-
-  @override
-  String get editorTemplateBackgroundColor => 'Background color';
-
-  @override
-  String get editorErrorExportStorageFull =>
-      'Not enough storage to export. Free up space and try again.';
-
-  @override
-  String get editorErrorExportCannotWrite =>
-      'Couldn\'t write the file. Try again.';
-
-  @override
-  String get editorErrorExportFailed => 'Export failed. Try again.';
-
-  @override
-  String get editorErrorExportNoPages => 'There are no pages to export';
-
-  @override
-  String get editorErrorPdfPasswordProtected =>
-      'This PDF is password-protected. Remove the password and try again.';
-
-  @override
-  String get editorErrorPdfFileAccess => 'Couldn\'t access the PDF file.';
-
-  @override
-  String get editorErrorPdfOpenFailed =>
-      'Couldn\'t open the PDF. The file may be damaged.';
-
-  @override
-  String get editorErrorPdfPagesUnreadable =>
-      'Couldn\'t read the PDF pages. The file may be damaged.';
-
-  @override
-  String editorErrorPdfTooManyPages(int count, int max) {
-    return 'This PDF has too many pages ($count). Up to $max pages are supported.';
-  }
-
-  @override
-  String get editorErrorPdfPagePlaceholder => 'PDF page';
-
-  @override
-  String get editorErrorPdfSourceMissing => 'Source PDF not found';
-
-  @override
-  String get editorErrorPdfLoadFailed => 'Couldn\'t load PDF';
-
-  @override
-  String get editorCanvasAddLayer => 'Add layer';
-
-  @override
-  String editorCanvasDefaultLayerName(int number) {
-    return 'Layer $number';
-  }
-
-  @override
-  String get editorCanvasDeleteLayer => 'Delete layer';
-
-  @override
-  String get editorCanvasDuplicateLayer => 'Duplicate layer';
-
-  @override
-  String get editorCanvasHideLayer => 'Hide';
-
-  @override
-  String get editorCanvasShowLayer => 'Show';
-
-  @override
-  String get editorCanvasLockLayer => 'Lock';
-
-  @override
-  String get editorCanvasUnlockLayer => 'Unlock';
-
-  @override
-  String get editorCanvasZoomLock => 'Zoom lock';
-
-  @override
-  String editorCanvasZoomLevel(int percent) {
-    return 'Zoom $percent%, favorite levels';
-  }
-
-  @override
-  String get editorCanvasFavoriteZoom => 'Favorite zoom';
-
-  @override
-  String editorCanvasPenBox(int count) {
-    String _temp0 = intl.Intl.pluralLogic(
-      count,
-      locale: localeName,
-      other: 'Pen box, $count pens',
-      one: 'Pen box, 1 pen',
-    );
-    return '$_temp0';
-  }
-
-  @override
-  String get editorCanvasFinishEditing => 'Done editing';
-
-  @override
-  String get editorCanvasEditPenBox => 'Edit pen box';
-
-  @override
-  String get editorCanvasCollapsePenBox => 'Collapse pen box';
-
-  @override
-  String get editorCanvasRemovePen => 'Remove pen';
-
-  @override
-  String get editorCanvasAddImage => 'Add image';
-
-  @override
-  String get editorCanvasAddImageHint =>
-      'Add an image from the gallery or camera';
-
-  @override
-  String get editorCanvasFromGallery => 'Choose from gallery';
-
-  @override
-  String get editorCanvasFromGalleryHint => 'Pick an image from your albums';
-
-  @override
-  String get editorCanvasTakePhoto => 'Take photo';
-
-  @override
-  String get editorCanvasTakePhotoHint => 'Take a new photo with the camera';
-
-  @override
-  String get editorCanvasTapToPlace => 'Tap to place';
-
-  @override
-  String get editorCanvasTapToPlaceImage => 'Tap to place the image';
-
-  @override
-  String get editorCanvasAddColor => 'Add color';
-
-  @override
-  String get editorCanvasTextStyleTitle => 'Text style';
-
-  @override
-  String get editorCanvasEmojiSize => 'Emoji size';
-
-  @override
-  String get editorCanvasTextPreviewSample => 'Hello';
+  String get librarySelectColor => 'Choose a color';
 }

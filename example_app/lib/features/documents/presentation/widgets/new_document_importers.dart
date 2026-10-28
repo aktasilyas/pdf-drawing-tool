@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:drawing_core/drawing_core.dart' as drawing_core;
 import 'package:file_picker/file_picker.dart';
 import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/l10n/l10n.dart';
+import 'package:example_app/core/utils/logger.dart';
 import 'package:example_app/core/routing/route_names.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
@@ -15,6 +17,7 @@ import 'dart:ui' as ui;
 Future<void> importPdf(BuildContext context) async {
   // Unified document limit is already checked in showNewDocumentDropdown.
 
+  final l10n = context.l10n;
   // PDF dosyası seç (withData: false - RAM'e yüklemeden sadece yol al)
   final result = await FilePicker.platform.pickFiles(
     type: FileType.custom,
@@ -29,7 +32,7 @@ Future<void> importPdf(BuildContext context) async {
   if (filePath == null || filePath.isEmpty) {
     if (!context.mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('PDF dosyası okunamadı')),
+      SnackBar(content: Text(l10n.libraryPdfReadFailed)),
     );
     return;
   }
@@ -45,6 +48,7 @@ Future<void> importPdf(BuildContext context) async {
 
 /// Resim içe aktarma işlemini yönetir
 Future<void> importImage(BuildContext context) async {
+  final l10n = context.l10n;
   // 1. Resim seç
   final result = await FilePicker.platform.pickFiles(
     type: FileType.image,
@@ -58,7 +62,7 @@ Future<void> importImage(BuildContext context) async {
   if (file.bytes == null) {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Resim dosyası okunamadı')),
+        SnackBar(content: Text(l10n.libraryImageReadFailed)),
       );
     }
     return;
@@ -69,13 +73,13 @@ Future<void> importImage(BuildContext context) async {
   showDialog(
     context: context,
     barrierDismissible: false,
-    builder: (_) => const AlertDialog(
+    builder: (_) => AlertDialog(
       content: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          CircularProgressIndicator(),
-          SizedBox(width: AppSpacing.lg),
-          Text('Resim yükleniyor...'),
+          const CircularProgressIndicator(),
+          const SizedBox(width: AppSpacing.lg),
+          Text(l10n.libraryImageLoading),
         ],
       ),
     ),
@@ -94,9 +98,7 @@ Future<void> importImage(BuildContext context) async {
       if (context.mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Resim çok büyük! Maksimum boyut: 4096x4096'),
-          ),
+          SnackBar(content: Text(l10n.libraryImageTooLarge)),
         );
       }
       return;
@@ -153,7 +155,7 @@ Future<void> importImage(BuildContext context) async {
     if (documentId != null && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('$title açılıyor'),
+          content: Text(l10n.libraryOpening(title)),
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 2),
         ),
@@ -161,7 +163,8 @@ Future<void> importImage(BuildContext context) async {
 
       context.push(RouteNames.editorPath(documentId));
     }
-  } catch (e) {
+  } catch (e, st) {
+    logger.e('Image import failed', error: e, stackTrace: st);
     // Loading dialog'u kapat (eğer açıksa)
     if (context.mounted) {
       Navigator.of(context, rootNavigator: true).pop();
@@ -169,7 +172,7 @@ Future<void> importImage(BuildContext context) async {
       // Hata mesajı göster
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Hata: ${e.toString()}'),
+          content: Text(l10n.commonErrorDetail('$e')),
           backgroundColor: Theme.of(context).colorScheme.error,
           behavior: SnackBarBehavior.floating,
         ),

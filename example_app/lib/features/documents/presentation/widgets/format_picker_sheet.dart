@@ -6,11 +6,13 @@ import 'package:drawing_core/drawing_core.dart';
 
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/index.dart';
+import 'package:example_app/features/documents/presentation/l10n/library_labels.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// Paper format picker bottom sheet.
 ///
 /// StatefulWidget that holds orientation + size in local state,
-/// submitting both on "Tamam" button press.
+/// submitting both on the confirm button press.
 class FormatPickerSheet extends StatefulWidget {
   final PaperSize currentSize;
 
@@ -93,10 +95,10 @@ class _FormatPickerSheetState extends State<FormatPickerSheet> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text('Format', style: AppTypography.titleMedium),
+        Text(context.l10n.libraryFormat, style: AppTypography.titleMedium),
         Text(
-          '${_currentSelection.widthMm.toInt()} x '
-          '${_currentSelection.heightMm.toInt()} mm',
+          '${_currentSelection.widthMm.toInt()} x ' // l10n-ignore
+          '${_currentSelection.heightMm.toInt()} mm', // l10n-ignore
           style: AppTypography.caption.copyWith(color: textSecondary),
         ),
       ],
@@ -108,21 +110,21 @@ class _FormatPickerSheetState extends State<FormatPickerSheet> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Yön',
+          context.l10n.libraryOrientation,
           style: AppTypography.labelMedium.copyWith(color: textSecondary),
         ),
         const SizedBox(height: AppSpacing.sm),
         Row(
           children: [
             AppChip(
-              label: 'Dikey',
+              label: context.l10n.libraryPortrait,
               icon: Icons.crop_portrait,
               isSelected: !_isLandscape,
               onTap: () => setState(() => _isLandscape = false),
             ),
             const SizedBox(width: AppSpacing.sm),
             AppChip(
-              label: 'Yatay',
+              label: context.l10n.libraryLandscape,
               icon: Icons.crop_landscape,
               isSelected: _isLandscape,
               onTap: () => setState(() => _isLandscape = true),
@@ -138,7 +140,7 @@ class _FormatPickerSheetState extends State<FormatPickerSheet> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Boyut',
+          context.l10n.librarySize,
           style: AppTypography.labelMedium.copyWith(color: textSecondary),
         ),
         const SizedBox(height: AppSpacing.sm),
@@ -154,7 +156,7 @@ class _FormatPickerSheetState extends State<FormatPickerSheet> {
             PaperSizePreset.square,
           ].map((preset) {
             return AppChip(
-              label: _getPresetName(preset),
+              label: preset.label(context.l10n),
               isSelected: _selectedPreset == preset,
               onTap: () => setState(() => _selectedPreset = preset),
             );
@@ -168,30 +170,9 @@ class _FormatPickerSheetState extends State<FormatPickerSheet> {
     return SizedBox(
       width: double.infinity,
       child: AppButton(
-        label: 'Tamam',
+        label: context.l10n.commonOk,
         onPressed: () => Navigator.pop(context, _currentSelection),
       ),
     );
-  }
-
-  String _getPresetName(PaperSizePreset preset) {
-    switch (preset) {
-      case PaperSizePreset.a4:
-        return 'A4';
-      case PaperSizePreset.a5:
-        return 'A5';
-      case PaperSizePreset.a6:
-        return 'A6';
-      case PaperSizePreset.letter:
-        return 'Letter';
-      case PaperSizePreset.legal:
-        return 'Legal';
-      case PaperSizePreset.square:
-        return 'Kare';
-      case PaperSizePreset.widescreen:
-        return 'Geniş';
-      case PaperSizePreset.custom:
-        return 'Özel';
-    }
   }
 }

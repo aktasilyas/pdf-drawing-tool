@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:example_app/core/widgets/index.dart';
+import 'package:example_app/features/documents/presentation/screens/template_selection_screen.dart';
 import 'package:example_app/features/documents/presentation/widgets/library_header_parts.dart';
 import 'package:example_app/features/documents/presentation/widgets/library_tile_frame.dart';
 import 'package:example_app/features/documents/presentation/widgets/library_tile_parts.dart';
@@ -84,15 +85,15 @@ class LibraryRobot {
     );
   }
 
-  /// New (+) button > "Not Defteri" > template screen: set the title, then
-  /// "Olustur". The app opens the new notebook in the editor.
+  /// New (+) button > "Notebook" > template screen: set the title, then
+  /// "Create". The app opens the new notebook in the editor.
   ///
-  /// With [cover] false the "Kapak" switch is turned off, so the notebook
+  /// With [cover] false the cover switch is turned off, so the notebook
   /// starts with a single writable page instead of cover + page.
   Future<void> createNotebook(String title, {bool cover = true}) async {
     await tester.tapAndWait(_newButton);
-    await tester.tapAndWait(find.text('Not Defteri'));
-    await tester.pumpUntilFound(find.text('Yeni not olustur'));
+    await tester.tapAndWait(find.text(_l10n.libraryNewNotebook));
+    await tester.pumpUntilFound(find.byType(TemplateSelectionScreen));
     final field = find.descendant(
       of: find.byType(AppTextField),
       matching: find.byType(TextFormField),
@@ -101,14 +102,18 @@ class LibraryRobot {
     await tester.enterText(field.first, title);
     await tester.pumpFor(const Duration(milliseconds: 300));
     if (!cover) {
-      final coverSwitch = find.descendant(
-        of: find.byType(TemplatePreviewSection),
-        matching: find.byType(Switch),
-      ).first;
+      final coverSwitch = find
+          .descendant(
+            of: find.byType(TemplatePreviewSection),
+            matching: find.byType(Switch),
+          )
+          .first;
       await tester.ensureVisible(coverSwitch);
       await tester.tapAndWait(coverSwitch);
     }
-    await tester.tapAndWait(find.text('Olustur'));
+    await tester.tapAndWait(
+      find.widgetWithText(AppButton, _l10n.commonCreate),
+    );
   }
 
   /// Cover of the grid tile titled [title]; tapping it opens the item.
