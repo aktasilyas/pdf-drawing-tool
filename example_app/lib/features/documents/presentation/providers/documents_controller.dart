@@ -74,6 +74,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
   }) async {
     state = const AsyncValue.loading();
 
+    String? createdId;
     try {
       // 1. Create the document with a blank template.
       final result = await repository.createDocument(
@@ -92,6 +93,7 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
           return null;
         },
         (document) async {
+          createdId = document.id;
           // 2. Save the V2 content with the imported pages.
           final content = buildImportedDocumentContent(
             document: document,
@@ -105,6 +107,10 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
             pageCount: pageCount,
           );
 
+          if (saveResult.isLeft()) {
+            // Never leave an empty ghost notebook behind.
+            await _discardHalfImported(document.id);
+          }
           return saveResult.fold(
             (failure) {
               state = AsyncValue.error(failure, StackTrace.current);
@@ -120,9 +126,20 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
         },
       );
     } catch (e) {
+      final id = createdId;
+      if (id != null) await _discardHalfImported(id);
       state = AsyncValue.error(e, StackTrace.current);
       reportLibraryError(ref, e, LibraryAction.importDocument);
       return null;
+    }
+  }
+
+  /// Best-effort removal of a document row whose imported content was not saved.
+  Future<void> _discardHalfImported(String id) async {
+    try {
+      await repository.permanentlyDelete(id);
+    } catch (_) {
+      // Nothing more to do; the original failure is reported by the caller.
     }
   }
 

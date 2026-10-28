@@ -122,11 +122,23 @@ void main() {
     test('returns null when saving content fails', () async {
       stubCreate(() async => Right(testDocument));
       stubSave(() async => const Left(failure));
+      when(() => h.repo.permanentlyDelete(any()))
+          .thenAnswer((_) async => const Right(null));
       final rebuilt = await h.rebuiltBy(() async {
         expect(await run(), isNull);
       });
       expect(rebuilt, isEmpty);
       expect(h.state.error, failure);
+      verify(() => h.repo.permanentlyDelete('doc-1')).called(1);
+    });
+
+    test('deletes the document row when saving content throws', () async {
+      stubCreate(() async => Right(testDocument));
+      stubSave(() async => throw StateError('disk full'));
+      when(() => h.repo.permanentlyDelete(any()))
+          .thenAnswer((_) async => const Right(null));
+      expect(await run(), isNull);
+      verify(() => h.repo.permanentlyDelete('doc-1')).called(1);
     });
 
     test('returns null when the repository throws', () async {
