@@ -46,7 +46,12 @@ final selectionProvider =
     if (previous != next) notifier.clearSelection();
   }
 
-  ref.listen<String>(currentPageProvider.select((p) => p.id), clearOnChange);
+  // Listen to the notifiers themselves (not the derived currentPageProvider)
+  // so the selection is cleared synchronously with the page switch.
+  ref.listen<String>(
+    pageManagerProvider.select((m) => m.currentPage.id),
+    clearOnChange,
+  );
   ref.listen<String?>(
     documentProvider.select((d) => d.currentPage?.id),
     clearOnChange,
