@@ -23,6 +23,35 @@ void main() {
     expect(list.toSet(), hasLength(list.length), reason: '$what ($locale)');
   }
 
+  group('LibraryError bulk counts', () {
+    const failure = CacheFailure('disk');
+
+    test('appends "N of M failed" in en and tr', () {
+      final error = LibraryError(
+        failure,
+        LibraryAction.trashDocuments,
+        failedCount: 1,
+        totalCount: 3,
+      );
+      expect(
+        error.message(lookupAppLocalizations(const Locale('en'))),
+        "Couldn't move the notebooks to the trash (1 of 3 failed)",
+      );
+      expect(
+        error.message(lookupAppLocalizations(const Locale('tr'))),
+        'Belgeler çöpe taşınamadı (3 belgeden 1 tanesi başarısız)',
+      );
+    });
+
+    test('single actions keep the plain message', () {
+      final l10n = lookupAppLocalizations(const Locale('en'));
+      expect(
+        LibraryError(failure, LibraryAction.trashDocuments).message(l10n),
+        LibraryAction.trashDocuments.failureMessage(l10n),
+      );
+    });
+  });
+
   for (final locale in locales) {
     final l10n = lookupAppLocalizations(locale);
     final code = locale.languageCode;

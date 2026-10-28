@@ -1,6 +1,9 @@
+import 'package:dartz/dartz.dart' show Either;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/domain/repositories/document_repository.dart';
+import 'package:example_app/features/documents/presentation/providers/bulk_result.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_invalidation.dart';
 import 'package:example_app/features/documents/presentation/providers/library_error.dart';
 
@@ -12,83 +15,82 @@ mixin DocumentsBulkOperations on StateNotifier<AsyncValue<void>> {
   @protected
   Ref get ref;
 
-  // Bulk move to trash (soft delete)
-  Future<void> moveDocumentsToTrash(List<String> ids) async {
-    state = const AsyncLoading();
-    try {
-      for (final id in ids) {
-        final result = await repository.moveToTrash(id);
-        result.fold(
-          (failure) => throw Exception(failure.message),
-          (_) {},
-        );
-      }
-      // Invalidate documents, trash, and folders
-      invalidateTrashMove(ref);
-      state = const AsyncData(null);
-    } catch (e) {
-      state = AsyncError(e, StackTrace.current);
-      // Earlier items may have succeeded: refresh the lists either way.
-      invalidateTrashMove(ref);
-      reportLibraryError(ref, e, LibraryAction.trashDocuments);
-      rethrow;
-    }
-  }
+  /// Moves every id to the trash (soft delete); failed ids do not stop
+  /// the rest and are returned in [BulkResult.failed].
+  Future<BulkResult> moveDocumentsToTrash(List<String> ids) => _runBulk(
+        ids,
+        repository.moveToTrash,
+        action: LibraryAction.trashDocuments,
+        refresh: () => invalidateTrashMove(ref),
+      );
 
-  // Bulk permanent delete (hard delete) - for trash only
-  Future<void> permanentlyDeleteDocuments(List<String> ids) async {
-    state = const AsyncLoading();
-    try {
-      for (final id in ids) {
-        final result = await repository.permanentlyDelete(id);
-        result.fold(
-          (failure) => throw Exception(failure.message),
-          (_) {},
-        );
-      }
-      invalidateDocumentLists(ref, trash: true, documentCount: true);
-      state = const AsyncData(null);
-    } catch (e) {
-      state = AsyncError(e, StackTrace.current);
-      // Earlier items may have succeeded: refresh the lists either way.
-      invalidateDocumentLists(ref, trash: true, documentCount: true);
-      reportLibraryError(ref, e, LibraryAction.deleteDocumentsForever);
-      rethrow;
-    }
-  }
+  /// Permanently deletes every id (trash only); see [moveDocumentsToTrash].
+  Future<BulkResult> permanentlyDeleteDocuments(List<String> ids) => _runBulk(
+        ids,
+        repository.permanentlyDelete,
+        action: LibraryAction.deleteDocumentsForever,
+        refresh: () =>
+            invalidateDocumentLists(ref, trash: true, documentCount: true),
+      );
 
   // Legacy method - kept for backward compatibility but deprecated
   @Deprecated('Use moveDocumentsToTrash or permanentlyDeleteDocuments instead')
-  Future<void> deleteDocuments(List<String> ids) async {
-    return moveDocumentsToTrash(ids);
-  }
+  Future<BulkResult> deleteDocuments(List<String> ids) =>
+      moveDocumentsToTrash(ids);
 
-  // Bulk duplicate documents
-  Future<void> duplicateDocuments(
+  /// Duplicates every id; see [moveDocumentsToTrash].
+  Future<BulkResult> duplicateDocuments(
     List<String> ids, {
     required String Function(String title) copyTitle,
+  }) =>
+      _runBulk(
+        ids,
+        (id) => repository.duplicateDocument(id, copyTitle: copyTitle),
+        action: LibraryAction.duplicateDocuments,
+        refresh: () => invalidateAllDocumentLists(ref),
+      );
+
+  /// Applies [operation] to every id, refreshes the lists once and reports
+  /// the first failure with the failed/total counts.
+  Future<BulkResult> _runBulk<T>(
+    List<String> ids,
+    Future<Either<Failure, T>> Function(String id) operation, {
+    required LibraryAction action,
+    required void Function() refresh,
   }) async {
     state = const AsyncLoading();
-    try {
-      for (final id in ids) {
-        final result = await repository.duplicateDocument(
-          id,
-          copyTitle: copyTitle,
-        );
-        result.fold(
-          (failure) => throw Exception(failure.message),
-          (_) {},
-        );
+    final succeeded = <String>[];
+    final failed = <String>[];
+    Failure? firstFailure;
+    for (final id in ids) {
+      Failure? failure;
+      try {
+        failure = (await operation(id)).fold((f) => f, (_) => null);
+      } catch (e) {
+        failure = UnknownFailure(e.toString());
       }
-      invalidateAllDocumentLists(ref);
-      state = const AsyncData(null);
-    } catch (e) {
-      state = AsyncError(e, StackTrace.current);
-      // Earlier items may have succeeded: refresh the lists either way.
-      invalidateAllDocumentLists(ref);
-      reportLibraryError(ref, e, LibraryAction.duplicateDocuments);
-      rethrow;
+      if (failure == null) {
+        succeeded.add(id);
+      } else {
+        failed.add(id);
+        firstFailure ??= failure;
+      }
     }
+    // Successful ids changed the lists even when others failed.
+    refresh();
+    if (firstFailure == null) {
+      state = const AsyncData(null);
+    } else {
+      state = AsyncError(firstFailure, StackTrace.current);
+      reportLibraryFailure(
+        ref,
+        firstFailure,
+        action,
+        failedCount: failed.length,
+        totalCount: ids.length,
+      );
+    }
+    return BulkResult(succeeded: succeeded, failed: failed);
   }
 
   // Move documents to folder (bulk)

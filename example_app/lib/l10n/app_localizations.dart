@@ -476,6 +476,12 @@ abstract class AppLocalizations {
   /// **'Couldn\'t move the notebooks'**
   String get libraryErrorMoveDocuments;
 
+  /// No description provided for @libraryErrorBulkPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'{message} ({failed} of {total} failed)'**
+  String libraryErrorBulkPartial(String message, int failed, int total);
+
   /// No description provided for @libraryErrorTrashPage.
   ///
   /// In en, this message translates to:

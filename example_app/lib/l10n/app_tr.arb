@@ -63,6 +63,7 @@
   "libraryErrorDeleteDocumentsForever": "Belgeler kalıcı olarak silinemedi",
   "libraryErrorDuplicateDocuments": "Belgeler çoğaltılamadı",
   "libraryErrorMoveDocuments": "Belgeler taşınamadı",
+  "libraryErrorBulkPartial": "{message} ({total} belgeden {failed} tanesi başarısız)",
   "libraryErrorTrashPage": "Sayfa çöpe taşınamadı",
   "libraryErrorDeletePageForever": "Sayfa kalıcı olarak silinemedi",
   "libraryErrorEmptyTrash": "Çöp kutusu boşaltılamadı",

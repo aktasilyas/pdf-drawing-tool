@@ -208,6 +208,11 @@ class AppLocalizationsTr extends AppLocalizations {
   String get libraryErrorMoveDocuments => 'Belgeler taşınamadı';
 
   @override
+  String libraryErrorBulkPartial(String message, int failed, int total) {
+    return '$message ($total belgeden $failed tanesi başarısız)';
+  }
+
+  @override
   String get libraryErrorTrashPage => 'Sayfa çöpe taşınamadı';
 
   @override
