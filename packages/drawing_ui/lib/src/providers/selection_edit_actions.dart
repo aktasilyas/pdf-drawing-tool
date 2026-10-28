@@ -89,7 +89,9 @@ void copyToClipboard(WidgetRef ref, Selection selection) {
   );
 }
 
-void cutToClipboard(WidgetRef ref, Selection selection) {
+void cutToClipboard(WidgetRef ref, Selection current) {
+  final selection = _live(ref, current);
+  if (selection == null) return;
   copyToClipboard(ref, selection);
   deleteSelection(ref, selection);
 }
