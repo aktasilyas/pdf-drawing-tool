@@ -49,6 +49,7 @@ export 'data/repositories/page_trash_repository_impl.dart';
 
 // Presentation - Providers
 export 'presentation/providers/document_menu_actions.dart';
+export 'presentation/providers/document_preview_provider.dart';
 export 'presentation/providers/documents_provider.dart';
 export 'presentation/providers/folders_provider.dart';
 export 'presentation/providers/incoming_pdf_provider.dart';

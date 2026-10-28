@@ -113,6 +113,37 @@ class DocumentContentCodec {
     );
   }
 
+  /// Background JSON of the first page of V2 content, or null when the
+  /// content has no pages (V1, empty or unexpected shapes). Skips building
+  /// the page and stroke models; a large payload is decoded on a background
+  /// isolate and only the background map comes back. Throws on invalid JSON.
+  Future<Map<String, dynamic>?> decodeFirstPageBackground(String data) async {
+    final limit = decodeOffloadLength;
+    if (limit == null || data.length < limit) {
+      return _firstPageBackground(jsonDecode(data));
+    }
+    return Isolate.run(
+      () => _firstPageBackground(jsonDecode(data)),
+      debugName: 'document-first-background-decode',
+    );
+  }
+
+  static Map<String, dynamic>? _firstPageBackground(Object? json) {
+    if (json is! Map) return null;
+    final version = switch (json['version']) {
+      final num v => v.toInt(),
+      final String v => int.tryParse(v),
+      _ => null,
+    };
+    if (version == null || version < 2) return null;
+    final pages = json['pages'];
+    if (pages is! List || pages.isEmpty) return null;
+    final first = pages.first;
+    if (first is! Map) return null;
+    final background = first['background'];
+    return background is Map<String, dynamic> ? background : null;
+  }
+
   /// Cheap size estimate: one per page and stroke plus every stroke point.
   /// Walks the map without allocating; unknown shapes count as zero.
   static int contentWeight(Map<String, dynamic> content) {
