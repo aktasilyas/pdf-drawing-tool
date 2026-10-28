@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:drawing_ui/drawing_ui.dart';
+import 'package:drawing_ui/src/widgets/compact_visibility_switch.dart';
 
 void main() {
   late SharedPreferences prefs;
@@ -74,5 +75,49 @@ void main() {
       findsOneWidget,
     );
     expect(find.byIcon(ElyanotesIcons.rotate), findsOneWidget);
+  });
+
+  testWidgets('no overflow at text scale 1.3 in the 340dp panel',
+      (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+        child: const MaterialApp(
+          home: MediaQuery(
+            data: MediaQueryData(
+              size: Size(390, 844),
+              textScaler: TextScaler.linear(1.3),
+            ),
+            child: Scaffold(
+              body: Align(
+                alignment: Alignment.topLeft,
+                child: ToolbarSettingsPanel(),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(tester.getSize(find.byType(ToolbarSettingsPanel)).width, 340);
+
+    await tester.tap(find.text('Ek Araçlar'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('tapping the switch area toggles tool visibility',
+      (tester) async {
+    await tester.pumpWidget(createTestWidget());
+    await tester.pumpAndSettle();
+
+    bool firstValue() => tester.widget<Switch>(find.byType(Switch).first).value;
+    final before = firstValue();
+    // Tap the edge of the 48dp hit area, outside the scaled switch.
+    final area = tester.getRect(find.byType(CompactVisibilitySwitch).first);
+    await tester.tapAt(area.topLeft + const Offset(2, 2));
+    await tester.pumpAndSettle();
+    expect(firstValue(), !before);
   });
 }
