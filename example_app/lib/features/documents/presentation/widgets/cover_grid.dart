@@ -82,87 +82,89 @@ class _CoverGridItem extends StatelessWidget {
       excludeSemantics: true,
       onTap: onTap,
       child: GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: Column(
-        children: [
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(AppRadius.sm),
-                border: Border.all(
-                  color: isSelected ? palette.accent : palette.border,
-                  width: isSelected ? 2 : 1,
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Column(
+          children: [
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(AppRadius.sm),
+                  border: Border.all(
+                    color: isSelected ? palette.accent : palette.border,
+                    width: isSelected ? 2 : 1,
+                  ),
                 ),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(AppRadius.sm - 1),
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    CoverPreviewWidget(
-                      cover: cover,
-                      title: title.isEmpty ? context.l10n.libraryTitle : title,
-                      showBorder: false,
-                    ),
-                    // Premium badge
-                    if (cover.isPremium)
-                      Positioned(
-                        top: AppSpacing.xs,
-                        right: AppSpacing.xs,
-                        child: Container(
-                          padding: const EdgeInsets.all(AppSpacing.xxs),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .surfaceContainerHighest
-                                .withValues(alpha: 0.85),
-                            borderRadius: BorderRadius.circular(AppRadius.xs),
-                          ),
-                          child: Icon(
-                            Icons.lock,
-                            size: AppIconSize.xs,
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(AppRadius.sm - 1),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      CoverPreviewWidget(
+                        cover: cover,
+                        title:
+                            title.isEmpty ? context.l10n.libraryTitle : title,
+                        showBorder: false,
+                      ),
+                      // Premium badge
+                      if (cover.isPremium)
+                        Positioned(
+                          top: AppSpacing.xs,
+                          right: AppSpacing.xs,
+                          child: Container(
+                            padding: const EdgeInsets.all(AppSpacing.xxs),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainerHighest
+                                  .withValues(alpha: 0.85),
+                              borderRadius: BorderRadius.circular(AppRadius.xs),
+                            ),
+                            child: Icon(
+                              Icons.lock,
+                              size: AppIconSize.xs,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
                           ),
                         ),
-                      ),
-                    // Selection indicator
-                    if (isSelected)
-                      Positioned(
-                        left: AppSpacing.sm,
-                        bottom: AppSpacing.sm,
-                        child: Container(
-                          padding: const EdgeInsets.all(AppSpacing.xxs),
-                          decoration: BoxDecoration(
-                            color: palette.accent,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.check,
-                            size: AppIconSize.xs,
-                            color: palette.onAccent,
+                      // Selection indicator
+                      if (isSelected)
+                        Positioned(
+                          left: AppSpacing.sm,
+                          bottom: AppSpacing.sm,
+                          child: Container(
+                            padding: const EdgeInsets.all(AppSpacing.xxs),
+                            decoration: BoxDecoration(
+                              color: palette.accent,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.check,
+                              size: AppIconSize.xs,
+                              color: palette.onAccent,
+                            ),
                           ),
                         ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            name,
-            style: AppTypography.caption.copyWith(
-              color: isSelected ? palette.accent : palette.textMuted,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              name,
+              style: AppTypography.caption.copyWith(
+                color: isSelected ? palette.accent : palette.textMuted,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
-      ),
+          ],
+        ),
       ),
     );
   }
