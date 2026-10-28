@@ -789,6 +789,14 @@
     }
   },
   "editorExportCancelled": "Cancelled",
+  "editorExportPagesWithoutPdfBackground": "{count, plural, =1{1 page was exported without its PDF background} other{{count} pages were exported without their PDF background}}",
+  "@editorExportPagesWithoutPdfBackground": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "editorTemplateAllCategories": "All",
   "editorTemplateCoverTab": "Cover",
   "editorTemplatePaperTab": "Paper",
@@ -831,6 +839,14 @@
   "editorErrorPdfPagePlaceholder": "PDF page",
   "editorErrorPdfSourceMissing": "Source PDF not found",
   "editorErrorPdfLoadFailed": "Couldn't load PDF",
+  "editorErrorPdfPagesSkipped": "{count, plural, =1{1 page could not be read and was skipped} other{{count} pages could not be read and were skipped}}",
+  "@editorErrorPdfPagesSkipped": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "editorCanvasAddLayer": "Add layer",
   "editorCanvasDefaultLayerName": "Layer {number}",
   "@editorCanvasDefaultLayerName": {

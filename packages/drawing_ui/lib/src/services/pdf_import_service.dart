@@ -177,6 +177,7 @@ class PDFImportService with PdfImportCalculations {
 
       // Convert pages (with immediate rendering)
       _updateState(PDFImportState.convertingPages);
+      final skipped = <int>[];
       final pages = await convertPdfPagesImmediately(
         document,
         pageNumbers,
@@ -184,13 +185,12 @@ class PDFImportService with PdfImportCalculations {
         renderOptions: config.renderOptions ?? defaultRenderOptions,
         embedImages: config.embedImages,
         onPageProcessed: _onPageProcessed,
+        onPageSkipped: skipped.add,
       );
-
-      // Cleanup
       await _loader.disposeDocument(document);
 
       _updateState(PDFImportState.completed);
-      return PDFImportServiceResult.success(pages);
+      return PDFImportServiceResult.success(pages, skippedPages: skipped);
     } catch (e) {
       final failure = pdfImportFailureFor(e);
       _setError(failure);
@@ -232,13 +232,14 @@ class PDFImportService with PdfImportCalculations {
 
     // Read page sizes only (no rendering).
     _updateState(PDFImportState.convertingPages);
+    final skipped = <int>[];
     final pages = await buildLazyPdfPages(
       document,
       pageNumbers,
       pdfFilePath: _pdfPaths.toStored(absolutePath),
       onPageProcessed: _onPageProcessed,
+      onPageSkipped: skipped.add,
     );
-
     await _loader.disposeDocument(document);
 
     if (pages.isEmpty) {
@@ -248,7 +249,7 @@ class PDFImportService with PdfImportCalculations {
     }
 
     _updateState(PDFImportState.completed);
-    return PDFImportServiceResult.success(pages);
+    return PDFImportServiceResult.success(pages, skippedPages: skipped);
   }
 
   /// Counts one processed page and publishes the new progress.

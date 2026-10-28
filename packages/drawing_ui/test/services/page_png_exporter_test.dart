@@ -84,7 +84,8 @@ void main() {
   testRender('the image is the page at 2x with ink at the expected pixel',
       () async {
     final page = _a4With(_dot(300, 400));
-    final png = await PagePngExporter.export(page, infiniteCanvas: false);
+    final png =
+        (await PagePngExporter.export(page, infiniteCanvas: false)).bytes;
     final img = await _decode(png);
     expect(img.width, 1190);
     expect(img.height, 1684);
@@ -98,7 +99,8 @@ void main() {
   testRender('an infinite canvas exports ink outside the page', () async {
     final page = _a4With(_dot(-300, 100));
     final l = PagePngExporter.layout(page, infiniteCanvas: true);
-    final png = await PagePngExporter.export(page, infiniteCanvas: true);
+    final png =
+        (await PagePngExporter.export(page, infiniteCanvas: true)).bytes;
     final img = await _decode(png);
     expect(img.width, l.width);
     expect(img.height, l.height);

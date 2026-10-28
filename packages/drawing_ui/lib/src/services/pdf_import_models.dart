@@ -140,19 +140,31 @@ class PDFImportServiceResult {
   /// Why the import failed, if it did.
   final PdfImportFailure? failure;
 
+  /// 1-based numbers of the PDF pages that could not be read and are missing
+  /// from [pages]. Empty when every page was imported.
+  final List<int> skippedPages;
+
   const PDFImportServiceResult({
     required this.isSuccess,
     required this.pages,
     this.failure,
+    this.skippedPages = const [],
   });
 
-  /// Creates a successful result.
-  factory PDFImportServiceResult.success(List<Page> pages) {
+  /// Creates a successful result; [skippedPages] lists unreadable pages.
+  factory PDFImportServiceResult.success(
+    List<Page> pages, {
+    List<int> skippedPages = const [],
+  }) {
     return PDFImportServiceResult(
       isSuccess: true,
       pages: pages,
+      skippedPages: List.unmodifiable(skippedPages),
     );
   }
+
+  /// Whether some pages could not be read and were left out.
+  bool get hasSkippedPages => skippedPages.isNotEmpty;
 
   /// Creates an error result.
   factory PDFImportServiceResult.error(PdfImportFailure failure) {

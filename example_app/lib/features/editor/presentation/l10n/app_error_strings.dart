@@ -43,4 +43,7 @@ class AppErrorStrings extends ErrorStrings {
 
   @override
   String get pdfLoadFailed => _l10n.editorErrorPdfLoadFailed;
+
+  @override
+  String pdfPagesSkipped(int count) => _l10n.editorErrorPdfPagesSkipped(count);
 }

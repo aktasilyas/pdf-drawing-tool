@@ -72,4 +72,8 @@ class AppExportStrings extends ExportStrings {
 
   @override
   String get cancelled => _l10n.editorExportCancelled;
+
+  @override
+  String pagesWithoutPdfBackground(int count) =>
+      _l10n.editorExportPagesWithoutPdfBackground(count);
 }

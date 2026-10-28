@@ -9,6 +9,7 @@ import 'package:example_app/core/routing/route_names.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/pdf_import_commit.dart';
+import 'package:example_app/features/documents/presentation/widgets/pdf_import_feedback.dart';
 import 'package:example_app/features/premium/premium.dart';
 
 /// Title for a document created from a PDF file name: only a trailing `.pdf`
@@ -150,17 +151,12 @@ Future<void> importPdfFile(
         }
       }
 
-      messenger.showSnackBar(
-        SnackBar(
-          content: Text(
-            l10n.libraryOpeningWithPages(
-              title,
-              l10n.libraryPageCount(importResult.pages.length),
-            ),
-          ),
-          behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 2),
-        ),
+      showPdfImportOpened(
+        messenger,
+        title: title,
+        result: importResult,
+        l10n: l10n,
+        errors: strings.errors,
       );
 
       router.push(RouteNames.editorPath(documentId));

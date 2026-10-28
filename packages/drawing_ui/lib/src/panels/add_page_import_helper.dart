@@ -10,11 +10,13 @@ import 'package:drawing_ui/src/services/pdf_import_service.dart';
 /// Opens a file picker for PDF/image files, then converts the selected file
 /// into one or more [Page] objects ready to insert into a document.
 ///
-/// Returns an empty list if the user cancels or an error occurs.
+/// Returns an empty list if the user cancels or an error occurs. When some
+/// PDF pages could not be read, [onPagesSkipped] gets their count.
 Future<List<Page>> pickAndImportFile({
   required int insertIndex,
   required PageSize defaultPageSize,
   void Function(PdfImportFailure failure)? onError,
+  void Function(int count)? onPagesSkipped,
   PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
 }) async {
   final result = await FilePicker.platform.pickFiles(
@@ -28,20 +30,31 @@ Future<List<Page>> pickAndImportFile({
 
   final ext = filePath.split('.').last.toLowerCase();
   if (ext == 'pdf') {
-    return _importPdf(filePath, insertIndex, onError, pdfPaths);
+    return importPdfAsPages(
+      filePath,
+      insertIndex,
+      onError: onError,
+      onPagesSkipped: onPagesSkipped,
+      createService: () => PDFImportService(pdfPaths: pdfPaths),
+    );
   }
   return _importImage(filePath, insertIndex);
 }
 
-Future<List<Page>> _importPdf(
+/// Imports the PDF at [path] as pages numbered from [insertIndex].
+///
+/// Failures go to [onError] and give an empty list. Pages that could not be
+/// read are left out and their count goes to [onPagesSkipped].
+Future<List<Page>> importPdfAsPages(
   String path,
-  int insertIndex,
+  int insertIndex, {
   void Function(PdfImportFailure failure)? onError,
-  PdfPathResolver pdfPaths,
-) async {
+  void Function(int count)? onPagesSkipped,
+  PDFImportService Function()? createService,
+}) async {
   PDFImportService? svc;
   try {
-    svc = PDFImportService(pdfPaths: pdfPaths);
+    svc = createService?.call() ?? PDFImportService();
     final r = await svc.importFromFile(
       filePath: path,
       config: PDFImportConfig.all(),
@@ -52,6 +65,7 @@ Future<List<Page>> _importPdf(
       );
       return [];
     }
+    if (r.hasSkippedPages) onPagesSkipped?.call(r.skippedPages.length);
     return [
       for (int i = 0; i < r.pages.length; i++)
         r.pages[i].copyWith(index: insertIndex + i),

@@ -178,6 +178,9 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
       onError: (failure) => messenger?.showSnackBar(
         SnackBar(content: Text(failure.message(strings))),
       ),
+      onPagesSkipped: (count) => messenger?.showSnackBar(
+        SnackBar(content: Text(strings.errors.pdfPagesSkipped(count))),
+      ),
     );
     if (imported.isEmpty) return;
 

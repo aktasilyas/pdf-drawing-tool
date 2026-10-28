@@ -1495,6 +1495,16 @@ class AppLocalizationsTr extends AppLocalizations {
   String get editorExportCancelled => 'İptal edildi';
 
   @override
+  String editorExportPagesWithoutPdfBackground(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sayfa PDF arka planı olmadan dışa aktarıldı',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get editorTemplateAllCategories => 'Tümü';
 
   @override
@@ -1595,6 +1605,16 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get editorErrorPdfLoadFailed => 'PDF Yüklenemedi';
+
+  @override
+  String editorErrorPdfPagesSkipped(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count sayfa okunamadı ve atlandı',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get editorCanvasAddLayer => 'Katman Ekle';

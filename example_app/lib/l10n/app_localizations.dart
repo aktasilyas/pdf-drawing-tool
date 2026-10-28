@@ -2750,6 +2750,12 @@ abstract class AppLocalizations {
   /// **'Cancelled'**
   String get editorExportCancelled;
 
+  /// No description provided for @editorExportPagesWithoutPdfBackground.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 page was exported without its PDF background} other{{count} pages were exported without their PDF background}}'**
+  String editorExportPagesWithoutPdfBackground(int count);
+
   /// No description provided for @editorTemplateAllCategories.
   ///
   /// In en, this message translates to:
@@ -2941,6 +2947,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn\'t load PDF'**
   String get editorErrorPdfLoadFailed;
+
+  /// No description provided for @editorErrorPdfPagesSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 page could not be read and was skipped} other{{count} pages could not be read and were skipped}}'**
+  String editorErrorPdfPagesSkipped(int count);
 
   /// No description provided for @editorCanvasAddLayer.
   ///

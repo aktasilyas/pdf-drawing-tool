@@ -131,6 +131,7 @@ Future<void> performPagesPDFExport(
       return;
     }
 
+    final missing = result.missingBackgroundPages.length;
     // doc.save() already returns a Uint8List; only copy a foreign List<int>.
     final raw = result.pdfBytes;
     final bytes = raw is Uint8List ? raw : Uint8List.fromList(raw);
@@ -143,7 +144,10 @@ Future<void> performPagesPDFExport(
       final outcome =
           await shareService.sharePdf(bytes, fileName: '$filename.pdf');
       if (outcome == PdfShareOutcome.shared) {
-        progress.complete(result.fileSizeFormatted);
+        progress.complete(
+          result.fileSizeFormatted,
+          pagesMissingBackground: missing,
+        );
       } else {
         progress.dismiss();
       }
@@ -165,7 +169,10 @@ Future<void> performPagesPDFExport(
       if (!await file.exists() || await file.length() == 0) {
         await file.writeAsBytes(bytes);
       }
-      progress.complete(result.fileSizeFormatted);
+      progress.complete(
+        result.fileSizeFormatted,
+        pagesMissingBackground: missing,
+      );
     } else {
       // User cancelled file picker
       progress.dismiss();
