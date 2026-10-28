@@ -111,36 +111,60 @@ class PageStructureActions {
   /// current page, keeping the pages' current content.
   ///
   /// An inserted page that gained content since the insert is moved to the
-  /// page trash (when the host app has one) instead of being dropped.
+  /// page trash first; ink is never dropped.
   ///
-  /// Returns false (and changes nothing) when another document is loaded or
-  /// the set of pages changed in some other way since.
+  /// Returns false (and changes nothing) when another document is loaded, the
+  /// set of pages changed in some other way since, or a page with new content
+  /// could not be stored in the trash (no trash, it returned null or threw).
   Future<bool> undo(PageStructureChange change) async {
     final pages = _revertablePages(change);
     if (pages == null) return false;
     final doc = _ref.read(documentProvider);
-    final trash = _ref.read(pageTrashCallbackProvider);
-    // Inserted pages that gained content since the insert, with their index
-    // before the revert.
+    // Inserted pages that gained content since the insert, with their index.
     final gained = [
       for (final id in change.insertedPageIds)
         if (_inkCount(pages[id]!) > (change.insertedPageInk[id] ?? 0))
           (index: doc.pages.indexOf(pages[id]!), page: pages[id]!),
     ];
 
-    // Revert first (synchronously) so the page is never in the document and
-    // the trash at the same time, whatever happens during the trash call.
-    _apply(doc.replacePages(
-      [for (final id in change.previousOrder) pages[id]!],
-      currentPageId: change.previousCurrentId,
-    ));
-
-    if (trash != null) {
-      for (final g in gained) {
-        await trash(g.index, g.page);
+    final trashIds = <String>[];
+    if (gained.isNotEmpty) {
+      final trash = _ref.read(pageTrashCallbackProvider);
+      if (trash == null) return false;
+      try {
+        for (final g in gained) {
+          final id = await trash(g.index, g.page);
+          if (id == null) {
+            await _discardTrash(trashIds);
+            return false;
+          }
+          trashIds.add(id);
+        }
+      } catch (_) {
+        await _discardTrash(trashIds);
+        return false;
       }
     }
+
+    // The document may have changed while the trash calls ran.
+    final fresh = _revertablePages(change);
+    if (fresh == null) {
+      await _discardTrash(trashIds);
+      return false;
+    }
+    _apply(_ref.read(documentProvider).replacePages(
+      [for (final id in change.previousOrder) fresh[id]!],
+      currentPageId: change.previousCurrentId,
+    ));
     return true;
+  }
+
+  Future<void> _discardTrash(List<String> trashIds) async {
+    final discard = _ref.read(pageTrashDiscardCallbackProvider);
+    if (discard == null) return;
+    for (final id in trashIds) {
+      await discard(id);
+    }
   }
 
   /// Pages by id when [change] can still be reverted, else null.

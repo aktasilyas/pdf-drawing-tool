@@ -263,6 +263,8 @@ void main() {
 
     test('history entry on the removed page is a no-op on undo', () async {
       load(2, current: 0);
+      container.read(pageTrashCallbackProvider.notifier).state =
+          (i, p) async => 't1';
       final change = actions().insertPage(1, page('new', 0));
       container.read(historyManagerProvider.notifier).execute(
             AddStrokeCommand(layerIndex: 0, stroke: stroke('s1')),
@@ -297,6 +299,64 @@ void main() {
       expect(docIds(), ['p0', 'p1']);
       expect(trashed.single.id, 'new');
       expect(trashed.single.strokeCount, 1);
+    });
+
+    Future<PageStructureChange> insertWithInk() async {
+      load(2, current: 0);
+      final change = actions().insertPage(1, page('new', 0));
+      final doc = container.read(documentProvider);
+      container.read(documentProvider.notifier).updateDocument(
+            doc.replacePages([
+              doc.pages[0],
+              doc.pages[1].addStroke(stroke('s1')),
+              doc.pages[2],
+            ]),
+          );
+      return change;
+    }
+
+    test('undo keeps the page when it gained ink and there is no trash',
+        () async {
+      final change = await insertWithInk();
+
+      expect(await actions().undo(change), isFalse);
+      expect(docIds(), ['p0', 'new', 'p1']);
+    });
+
+    test('undo keeps the page when the trash cannot store it', () async {
+      final change = await insertWithInk();
+      container.read(pageTrashCallbackProvider.notifier).state =
+          (i, p) async => null;
+
+      expect(await actions().undo(change), isFalse);
+      expect(docIds(), ['p0', 'new', 'p1']);
+    });
+
+    test('undo keeps the page when the trash throws', () async {
+      final change = await insertWithInk();
+      container.read(pageTrashCallbackProvider.notifier).state =
+          (i, p) async => throw StateError('db');
+
+      expect(await actions().undo(change), isFalse);
+      expect(docIds(), ['p0', 'new', 'p1']);
+    });
+
+    test('undo discards the trash entry when the document changed meanwhile',
+        () async {
+      final change = await insertWithInk();
+      final discarded = <String>[];
+      container.read(pageTrashDiscardCallbackProvider.notifier).state =
+          (id) async => discarded.add(id);
+      container.read(pageTrashCallbackProvider.notifier).state = (i, p) async {
+        final d = container.read(documentProvider);
+        container
+            .read(documentProvider.notifier)
+            .updateDocument(d.removePage(0));
+        return 't1';
+      };
+
+      expect(await actions().undo(change), isFalse);
+      expect(discarded, ['t1']);
     });
 
     test('undo of an untouched page does not use the trash', () async {
