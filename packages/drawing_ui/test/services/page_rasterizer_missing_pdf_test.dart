@@ -28,8 +28,8 @@ void main() {
 
   setUp(() {
     logs = [];
-    DrawingLog.sink = (level, message, error, stackTrace) =>
-        logs.add((level, message));
+    DrawingLog.sink =
+        (level, message, error, stackTrace) => logs.add((level, message));
   });
 
   tearDown(() => DrawingLog.sink = null);

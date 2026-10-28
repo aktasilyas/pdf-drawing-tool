@@ -41,8 +41,8 @@ void main() {
   });
 
   test('only the pages without their PDF are reported', () async {
-    final result = await PDFExporter(sourceOpener: (_) async => null)
-        .exportPages(
+    final result =
+        await PDFExporter(sourceOpener: (_) async => null).exportPages(
       pages: [
         Page.create(index: 0, size: PageSize.a4Portrait),
         _pdfPage(1, 'pdfs/gone.pdf'),
