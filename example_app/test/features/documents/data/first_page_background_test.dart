@@ -116,8 +116,7 @@ void main() {
       final dir = Directory.systemTemp.createTempSync('elya_first_bg_');
       addTearDown(() => dir.deleteSync(recursive: true));
       Directory('${dir.path}/elyanotes_images').createSync();
-      File('${dir.path}/elyanotes_images/a.png')
-          .writeAsBytesSync([9, 8, 7, 6]);
+      File('${dir.path}/elyanotes_images/a.png').writeAsBytesSync([9, 8, 7, 6]);
       final rooted = LibraryFixture(null, PdfPathResolver(dir.path));
       addTearDown(rooted.close);
       final doc = (await rooted.documents

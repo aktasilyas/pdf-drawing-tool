@@ -62,8 +62,8 @@ void main() {
 
     test('backgrounds without an image file are returned as is', () async {
       final pdf = PageBackground.pdfLazy(pageIndex: 1, pdfFilePath: 'x.pdf');
-      expect(await loadImageBackground(pdf, PdfPathResolver(dir.path)),
-          same(pdf));
+      expect(
+          await loadImageBackground(pdf, PdfPathResolver(dir.path)), same(pdf));
       expect(
         await loadImageBackground(
             PageBackground.blank, PdfPathResolver(dir.path)),

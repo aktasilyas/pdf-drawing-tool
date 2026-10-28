@@ -95,8 +95,7 @@ void main() {
     expect(shared.existsSync(), isFalse);
   });
 
-  test('a file used by a trashed page of another document survives',
-      () async {
+  test('a file used by a trashed page of another document survives', () async {
     final file = imageFile('t.png');
     final a = await create('A');
     final b = await create('B');
@@ -147,8 +146,7 @@ void main() {
     expect(file.existsSync(), isFalse);
   });
 
-  test('an image element pointing outside the app is never deleted',
-      () async {
+  test('an image element pointing outside the app is never deleted', () async {
     final outside = File('${dir.path}/user_photo.png')..writeAsStringSync('x');
     final a = await create('A');
     await save(a.id, [

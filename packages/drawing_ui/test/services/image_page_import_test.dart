@@ -60,8 +60,8 @@ void main() {
 
       await expectLater(
         importImagePage(source.path, documentsRoot: root.path),
-        throwsA(isA<ImagePageImportException>().having(
-            (e) => e.error, 'error', ImagePageImportError.unreadable)),
+        throwsA(isA<ImagePageImportException>()
+            .having((e) => e.error, 'error', ImagePageImportError.unreadable)),
       );
       expect(stored(), isEmpty);
     });
@@ -85,8 +85,8 @@ void main() {
 
       await expectLater(
         importImagePage(source.path, documentsRoot: root.path, maxDimension: 1),
-        throwsA(isA<ImagePageImportException>().having(
-            (e) => e.error, 'error', ImagePageImportError.tooLarge)),
+        throwsA(isA<ImagePageImportException>()
+            .having((e) => e.error, 'error', ImagePageImportError.tooLarge)),
       );
       expect(stored(), isEmpty);
     });
