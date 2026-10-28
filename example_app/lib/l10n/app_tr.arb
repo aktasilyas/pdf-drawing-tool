@@ -234,5 +234,8 @@
   "libraryTitle": "Başlık",
   "libraryNoteTitleHint": "Not Başlığı",
   "libraryTemplateCategoryAll": "Hepsi",
-  "libraryNoTemplatesInCategory": "Bu kategoride şablon yok"
+  "libraryNoTemplatesInCategory": "Bu kategoride şablon yok",
+  "libraryCreateNoteTitle": "Yeni not oluştur",
+  "libraryTemplate": "Şablon",
+  "libraryUntitledNote": "İsimsiz Not"
 }

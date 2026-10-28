@@ -709,4 +709,13 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get libraryNoTemplatesInCategory => 'Bu kategoride şablon yok';
+
+  @override
+  String get libraryCreateNoteTitle => 'Yeni not oluştur';
+
+  @override
+  String get libraryTemplate => 'Şablon';
+
+  @override
+  String get libraryUntitledNote => 'İsimsiz Not';
 }

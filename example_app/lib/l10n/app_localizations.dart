@@ -1261,6 +1261,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No templates in this category'**
   String get libraryNoTemplatesInCategory;
+
+  /// No description provided for @libraryCreateNoteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create new note'**
+  String get libraryCreateNoteTitle;
+
+  /// No description provided for @libraryTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Template'**
+  String get libraryTemplate;
+
+  /// No description provided for @libraryUntitledNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled note'**
+  String get libraryUntitledNote;
 }
 
 class _AppLocalizationsDelegate

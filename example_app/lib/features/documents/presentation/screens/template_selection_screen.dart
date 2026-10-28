@@ -16,6 +16,7 @@ import 'package:example_app/features/documents/presentation/widgets/template_cat
 import 'package:example_app/features/documents/presentation/widgets/template_grid.dart';
 import 'package:example_app/features/documents/presentation/widgets/cover_grid.dart';
 import 'package:example_app/features/documents/presentation/widgets/template_preview_section.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 class TemplateSelectionScreen extends ConsumerStatefulWidget {
   const TemplateSelectionScreen({super.key});
@@ -47,6 +48,7 @@ class _TemplateSelectionScreenState
     final backgroundColor = context.palette.background;
     final surfaceColor = context.palette.surface;
     final textPrimary = context.palette.textPrimary;
+    final l10n = context.l10n;
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -54,12 +56,12 @@ class _TemplateSelectionScreenState
         backgroundColor: surfaceColor,
         elevation: 0,
         leading: AppButton(
-          label: 'Iptal',
+          label: l10n.commonCancel,
           variant: AppButtonVariant.text,
           onPressed: () => context.pop(),
         ),
-        leadingWidth: 80,
-        title: Text('Yeni not olustur',
+        leadingWidth: 104,
+        title: Text(l10n.libraryCreateNoteTitle,
             style: AppTypography.titleMedium.copyWith(
               color: textPrimary,
               fontWeight: FontWeight.w600,
@@ -69,7 +71,7 @@ class _TemplateSelectionScreenState
           Padding(
             padding: const EdgeInsets.only(right: AppSpacing.sm),
             child: AppButton(
-              label: 'Olustur',
+              label: l10n.commonCreate,
               size: AppButtonSize.small,
               onPressed: _template != null ? _createDocument : null,
             ),
@@ -133,7 +135,9 @@ class _TemplateSelectionScreenState
       child: Row(
         children: [
           Text(
-            _isSelectingCover ? 'Kapak' : 'Sablon',
+            _isSelectingCover
+                ? context.l10n.libraryCover
+                : context.l10n.libraryTemplate,
             style:
                 AppTypography.titleMedium.copyWith(fontWeight: FontWeight.w600),
           ),
@@ -151,9 +155,10 @@ class _TemplateSelectionScreenState
   Future<void> _createDocument() async {
     if (_template == null) return;
 
+    final untitled = context.l10n.libraryUntitledNote;
     final controller = ref.read(documentsControllerProvider.notifier);
     final folderId = ref.read(currentFolderIdProvider);
-    final docTitle = _title.trim().isEmpty ? 'Isimsiz Not' : _title.trim();
+    final docTitle = _title.trim().isEmpty ? untitled : _title.trim();
 
     final documentId = await controller.createDocument(
       title: docTitle,

@@ -724,4 +724,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get libraryNoTemplatesInCategory => 'No templates in this category';
+
+  @override
+  String get libraryCreateNoteTitle => 'Create new note';
+
+  @override
+  String get libraryTemplate => 'Template';
+
+  @override
+  String get libraryUntitledNote => 'Untitled note';
 }
