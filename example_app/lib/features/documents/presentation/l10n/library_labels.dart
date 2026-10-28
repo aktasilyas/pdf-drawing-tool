@@ -4,9 +4,11 @@ library;
 
 import 'package:drawing_core/drawing_core.dart';
 import 'package:example_app/features/documents/domain/entities/library_rule.dart';
+import 'package:example_app/features/documents/domain/entities/paper_color.dart';
 import 'package:example_app/features/documents/domain/entities/sort_option.dart';
 import 'package:example_app/features/documents/presentation/providers/library_error.dart';
 import 'package:example_app/features/documents/presentation/widgets/documents_sidebar.dart';
+import 'package:example_app/features/documents/presentation/widgets/new_document_dialog.dart';
 import 'package:example_app/l10n/l10n.dart';
 
 /// Picks the Turkish or English variant of drawing_core content that ships
@@ -82,6 +84,29 @@ extension PaperSizePresetL10n on PaperSizePreset {
         PaperSizePreset.square => l.libraryPaperSquare,
         PaperSizePreset.widescreen => l.libraryPaperWide,
         PaperSizePreset.custom => l.libraryPaperCustom,
+      };
+}
+
+extension NewDocumentOptionL10n on NewDocumentOption {
+  String label(AppLocalizations l) => switch (this) {
+        NewDocumentOption.notebook => l.libraryNewNotebook,
+        NewDocumentOption.whiteboard => l.libraryNewWhiteboard,
+        NewDocumentOption.quickNote => l.libraryNewQuickNote,
+        NewDocumentOption.importPdf => l.libraryImportPdf,
+        NewDocumentOption.importImage => l.libraryImportImage,
+      };
+}
+
+extension PaperColorL10n on PaperColor {
+  /// Display name; [PaperColor.storageKey] is the persisted value, not copy.
+  String label(AppLocalizations l) => switch (this) {
+        PaperColor.white => l.libraryPaperColorWhite,
+        PaperColor.black => l.libraryPaperColorBlack,
+        PaperColor.cream => l.libraryPaperColorCream,
+        PaperColor.gray => l.libraryPaperColorGray,
+        PaperColor.green => l.libraryPaperColorGreen,
+        PaperColor.blue => l.libraryPaperColorBlue,
+        PaperColor.yellow => l.libraryPaperColorYellow,
       };
 }
 

@@ -236,5 +236,85 @@
   "commonUnderConstruction": "Bu ekran henüz yapım aşamasında",
   "routerForgotPasswordTitle": "Şifremi unuttum",
   "routerProfileTitle": "Profil",
-  "routerSubscriptionTitle": "Abonelik"
+  "routerSubscriptionTitle": "Abonelik",
+  "libraryNewNotebook": "Not Defteri",
+  "libraryNewWhiteboard": "Beyaz Tahta",
+  "libraryNewQuickNote": "Hızlı Not",
+  "libraryImportPdf": "PDF İçe Aktar",
+  "libraryImportImage": "Resim İçe Aktar",
+  "libraryQuickNoteTitle": "Hızlı Not - {date}",
+  "@libraryQuickNoteTitle": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryWhiteboardTitle": "Beyaz Tahta - {date}",
+  "@libraryWhiteboardTitle": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryPdfReadFailed": "PDF dosyası okunamadı",
+  "libraryImageReadFailed": "Resim dosyası okunamadı",
+  "libraryImageLoading": "Resim yükleniyor...",
+  "libraryImageTooLarge": "Resim çok büyük! Maksimum boyut: 4096x4096",
+  "libraryPdfTooLarge": "PDF dosyası çok büyük! Maksimum boyut: 200MB",
+  "libraryPdfOpening": "PDF açılıyor...",
+  "libraryPdfImportFailed": "PDF import başarısız",
+  "libraryOpening": "{title} açılıyor",
+  "@libraryOpening": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryOpeningWithPages": "{title} açılıyor ({pages})",
+  "@libraryOpeningWithPages": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "pages": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryFormat": "Format",
+  "libraryOrientation": "Yön",
+  "libraryPortrait": "Dikey",
+  "libraryLandscape": "Yatay",
+  "librarySize": "Boyut",
+  "libraryFormatSummary": "{orientation}, {size}",
+  "@libraryFormatSummary": {
+    "placeholders": {
+      "orientation": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryCover": "Kapak",
+  "libraryPaper": "Kağıt",
+  "libraryTitle": "Başlık",
+  "libraryNoteTitleHint": "Not Başlığı",
+  "libraryTemplateCategoryAll": "Hepsi",
+  "libraryNoTemplatesInCategory": "Bu kategoride şablon yok",
+  "libraryCreateNoteTitle": "Yeni not oluştur",
+  "libraryTemplate": "Şablon",
+  "libraryUntitledNote": "İsimsiz Not",
+  "libraryPaperColorWhite": "Beyaz kağıt",
+  "libraryPaperColorBlack": "Siyah kağıt",
+  "libraryPaperColorCream": "Krem kağıt",
+  "libraryPaperColorGray": "Gri kağıt",
+  "libraryPaperColorGreen": "Yeşil kağıt",
+  "libraryPaperColorBlue": "Mavi kağıt",
+  "libraryPaperColorYellow": "Sarı kağıt",
+  "librarySelectColor": "Renk Seç"
 }

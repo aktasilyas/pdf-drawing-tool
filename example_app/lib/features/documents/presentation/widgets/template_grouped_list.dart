@@ -6,7 +6,9 @@ import 'package:drawing_core/drawing_core.dart';
 
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/utils/responsive.dart';
+import 'package:example_app/features/documents/presentation/l10n/library_labels.dart';
 import 'package:example_app/features/documents/presentation/widgets/template_grid.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// All templates grouped by category with collapsible sections.
 class TemplateGroupedList extends StatefulWidget {
@@ -112,6 +114,7 @@ class _CategoryHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final textPrimary = context.palette.textPrimary;
     final textSecondary = context.palette.textMuted;
 
@@ -135,7 +138,11 @@ class _CategoryHeader extends StatelessWidget {
             ),
             const SizedBox(width: AppSpacing.xs),
             Text(
-              category.displayName,
+              localizedName(
+                l10n,
+                tr: category.displayName,
+                en: category.displayNameEn,
+              ),
               style: AppTypography.labelLarge.copyWith(
                 color: textPrimary,
                 fontWeight: FontWeight.w600,

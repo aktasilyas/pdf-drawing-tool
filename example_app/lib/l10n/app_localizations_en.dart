@@ -856,4 +856,132 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get routerSubscriptionTitle => 'Subscription';
+
+  @override
+  String get libraryNewNotebook => 'Notebook';
+
+  @override
+  String get libraryNewWhiteboard => 'Whiteboard';
+
+  @override
+  String get libraryNewQuickNote => 'Quick note';
+
+  @override
+  String get libraryImportPdf => 'Import PDF';
+
+  @override
+  String get libraryImportImage => 'Import image';
+
+  @override
+  String libraryQuickNoteTitle(String date) {
+    return 'Quick note - $date';
+  }
+
+  @override
+  String libraryWhiteboardTitle(String date) {
+    return 'Whiteboard - $date';
+  }
+
+  @override
+  String get libraryPdfReadFailed => 'Couldn\'t read the PDF file';
+
+  @override
+  String get libraryImageReadFailed => 'Couldn\'t read the image file';
+
+  @override
+  String get libraryImageLoading => 'Loading image...';
+
+  @override
+  String get libraryImageTooLarge =>
+      'Image is too large. Maximum size: 4096x4096';
+
+  @override
+  String get libraryPdfTooLarge => 'PDF is too large. Maximum size: 200 MB';
+
+  @override
+  String get libraryPdfOpening => 'Opening PDF...';
+
+  @override
+  String get libraryPdfImportFailed => 'Couldn\'t import the PDF';
+
+  @override
+  String libraryOpening(String title) {
+    return 'Opening $title';
+  }
+
+  @override
+  String libraryOpeningWithPages(String title, String pages) {
+    return 'Opening $title ($pages)';
+  }
+
+  @override
+  String get libraryFormat => 'Format';
+
+  @override
+  String get libraryOrientation => 'Orientation';
+
+  @override
+  String get libraryPortrait => 'Portrait';
+
+  @override
+  String get libraryLandscape => 'Landscape';
+
+  @override
+  String get librarySize => 'Size';
+
+  @override
+  String libraryFormatSummary(String orientation, String size) {
+    return '$orientation, $size';
+  }
+
+  @override
+  String get libraryCover => 'Cover';
+
+  @override
+  String get libraryPaper => 'Paper';
+
+  @override
+  String get libraryTitle => 'Title';
+
+  @override
+  String get libraryNoteTitleHint => 'Note title';
+
+  @override
+  String get libraryTemplateCategoryAll => 'All';
+
+  @override
+  String get libraryNoTemplatesInCategory => 'No templates in this category';
+
+  @override
+  String get libraryCreateNoteTitle => 'Create new note';
+
+  @override
+  String get libraryTemplate => 'Template';
+
+  @override
+  String get libraryUntitledNote => 'Untitled note';
+
+  @override
+  String get libraryPaperColorWhite => 'White paper';
+
+  @override
+  String get libraryPaperColorBlack => 'Black paper';
+
+  @override
+  String get libraryPaperColorCream => 'Cream paper';
+
+  @override
+  String get libraryPaperColorGray => 'Gray paper';
+
+  @override
+  String get libraryPaperColorGreen => 'Green paper';
+
+  @override
+  String get libraryPaperColorBlue => 'Blue paper';
+
+  @override
+  String get libraryPaperColorYellow => 'Yellow paper';
+
+  @override
+  String get librarySelectColor => 'Choose a color';
 }

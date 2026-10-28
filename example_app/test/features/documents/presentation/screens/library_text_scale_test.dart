@@ -1,5 +1,6 @@
 import 'package:drawing_ui/drawing_ui.dart'
     show CoverTextureStore, ElyanotesIcons;
+import 'package:drawing_core/drawing_core.dart' show PaperSize;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,6 +12,8 @@ import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/documents/domain/entities/trashed_page.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/screens/documents_screen.dart';
+import 'package:example_app/features/documents/presentation/widgets/format_picker_sheet.dart';
+import 'package:example_app/features/documents/presentation/widgets/library_header_parts.dart';
 import 'package:example_app/l10n/l10n.dart';
 
 import '../../../../helpers/a11y.dart';
@@ -127,6 +130,41 @@ void main() {
       await t.pumpAndSettle();
       expect(find.text(l10n.libraryEmptyTrashConfirmMessage), findsOneWidget);
       expectNoOverflow(t, 'empty-trash dialog');
+    });
+
+    testWidgets('$tag: new-document menu', (t) async {
+      final l10n = await pump(t, locale);
+      await t.tap(find.byType(LibraryNewButton));
+      await t.pumpAndSettle();
+      expect(find.text(l10n.libraryNewNotebook), findsOneWidget);
+      expect(find.text(l10n.libraryImportImage), findsOneWidget);
+      expectNoOverflow(t, 'new-document menu');
+    });
+
+    testWidgets('$tag: format sheet', (t) async {
+      useTextScale(t, 1.3);
+      t.view.physicalSize = _phone;
+      t.view.devicePixelRatio = 1;
+      addTearDown(t.view.reset);
+      await t.pumpWidget(
+        localizedApp(
+          theme: AppTheme.light,
+          locale: locale,
+          home: Builder(
+            builder: (context) => TextButton(
+              onPressed: () => FormatPickerSheet.show(context, PaperSize.a4),
+              child: const Text('open'), // l10n-ignore
+            ),
+          ),
+        ),
+      );
+      await t.tap(find.text('open'));
+      await t.pumpAndSettle();
+      final l10n =
+          AppLocalizations.of(t.element(find.byType(FormatPickerSheet)));
+      expect(find.text(l10n.libraryOrientation), findsOneWidget);
+      expect(find.text(l10n.libraryPortrait), findsOneWidget);
+      expectNoOverflow(t, 'format sheet');
     });
 
     testWidgets('$tag: item menu sheet', (t) async {

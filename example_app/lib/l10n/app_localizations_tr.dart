@@ -838,4 +838,133 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get routerSubscriptionTitle => 'Abonelik';
+
+  @override
+  String get libraryNewNotebook => 'Not Defteri';
+
+  @override
+  String get libraryNewWhiteboard => 'Beyaz Tahta';
+
+  @override
+  String get libraryNewQuickNote => 'Hızlı Not';
+
+  @override
+  String get libraryImportPdf => 'PDF İçe Aktar';
+
+  @override
+  String get libraryImportImage => 'Resim İçe Aktar';
+
+  @override
+  String libraryQuickNoteTitle(String date) {
+    return 'Hızlı Not - $date';
+  }
+
+  @override
+  String libraryWhiteboardTitle(String date) {
+    return 'Beyaz Tahta - $date';
+  }
+
+  @override
+  String get libraryPdfReadFailed => 'PDF dosyası okunamadı';
+
+  @override
+  String get libraryImageReadFailed => 'Resim dosyası okunamadı';
+
+  @override
+  String get libraryImageLoading => 'Resim yükleniyor...';
+
+  @override
+  String get libraryImageTooLarge =>
+      'Resim çok büyük! Maksimum boyut: 4096x4096';
+
+  @override
+  String get libraryPdfTooLarge =>
+      'PDF dosyası çok büyük! Maksimum boyut: 200MB';
+
+  @override
+  String get libraryPdfOpening => 'PDF açılıyor...';
+
+  @override
+  String get libraryPdfImportFailed => 'PDF import başarısız';
+
+  @override
+  String libraryOpening(String title) {
+    return '$title açılıyor';
+  }
+
+  @override
+  String libraryOpeningWithPages(String title, String pages) {
+    return '$title açılıyor ($pages)';
+  }
+
+  @override
+  String get libraryFormat => 'Format';
+
+  @override
+  String get libraryOrientation => 'Yön';
+
+  @override
+  String get libraryPortrait => 'Dikey';
+
+  @override
+  String get libraryLandscape => 'Yatay';
+
+  @override
+  String get librarySize => 'Boyut';
+
+  @override
+  String libraryFormatSummary(String orientation, String size) {
+    return '$orientation, $size';
+  }
+
+  @override
+  String get libraryCover => 'Kapak';
+
+  @override
+  String get libraryPaper => 'Kağıt';
+
+  @override
+  String get libraryTitle => 'Başlık';
+
+  @override
+  String get libraryNoteTitleHint => 'Not Başlığı';
+
+  @override
+  String get libraryTemplateCategoryAll => 'Hepsi';
+
+  @override
+  String get libraryNoTemplatesInCategory => 'Bu kategoride şablon yok';
+
+  @override
+  String get libraryCreateNoteTitle => 'Yeni not oluştur';
+
+  @override
+  String get libraryTemplate => 'Şablon';
+
+  @override
+  String get libraryUntitledNote => 'İsimsiz Not';
+
+  @override
+  String get libraryPaperColorWhite => 'Beyaz kağıt';
+
+  @override
+  String get libraryPaperColorBlack => 'Siyah kağıt';
+
+  @override
+  String get libraryPaperColorCream => 'Krem kağıt';
+
+  @override
+  String get libraryPaperColorGray => 'Gri kağıt';
+
+  @override
+  String get libraryPaperColorGreen => 'Yeşil kağıt';
+
+  @override
+  String get libraryPaperColorBlue => 'Mavi kağıt';
+
+  @override
+  String get libraryPaperColorYellow => 'Sarı kağıt';
+
+  @override
+  String get librarySelectColor => 'Renk Seç';
 }

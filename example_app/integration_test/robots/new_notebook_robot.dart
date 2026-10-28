@@ -10,11 +10,13 @@ import 'package:example_app/core/routing/route_names.dart';
 import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/screens/documents_screen.dart';
+import 'package:example_app/features/documents/presentation/screens/template_selection_screen.dart';
 import 'package:example_app/features/documents/presentation/widgets/cover_grid.dart';
 import 'package:example_app/features/documents/presentation/widgets/library_header_parts.dart';
 import 'package:example_app/features/documents/presentation/widgets/template_grid.dart';
 import 'package:example_app/features/documents/presentation/widgets/template_preview_card.dart';
 
+import '../helpers/l10n.dart';
 import '../helpers/pump_helpers.dart';
 
 /// Creates notebooks with a chosen cover and paper template.
@@ -30,15 +32,17 @@ class NewNotebookRobot {
 
   Finder get _library => find.byType(DocumentsScreen);
 
-  /// New (+) > "Not Defteri" > pick [cover] on the cover tab and [template]
-  /// on the paper tab > set [title] > "Olustur". Opens the editor.
+  /// New (+) > "Notebook" > pick [cover] on the cover tab and [template]
+  /// on the paper tab > set [title] > "Create". Opens the editor.
   Future<void> createThroughUi(
     String title, {
     required Cover cover,
     required Template template,
   }) async {
     await tester.tapAndWait(find.byType(LibraryNewButton));
-    await tester.tapAndWait(find.text('Not Defteri'));
+    final l10n = tester.l10n;
+    await tester.tapAndWait(find.text(l10n.libraryNewNotebook));
+    await tester.pumpUntilFound(find.byType(TemplateSelectionScreen));
 
     // Preview cards: cover first (the cover switch is on by default), paper
     // last. Tapping one switches the grid below it.
@@ -64,7 +68,9 @@ class NewNotebookRobot {
     );
     await tester.enterText(field.first, title);
     await tester.pumpFor(const Duration(milliseconds: 300));
-    await tester.tapAndWait(find.text('Olustur'));
+    await tester.tapAndWait(
+      find.widgetWithText(AppButton, l10n.commonCreate),
+    );
   }
 
   /// Creates a notebook from the library screen without the picker and

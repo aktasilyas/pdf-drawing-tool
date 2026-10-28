@@ -7,6 +7,7 @@ import 'package:drawing_ui/drawing_ui.dart';
 
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/utils/responsive.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// Cover grid widget
 class CoverGridView extends StatelessWidget {
@@ -92,7 +93,7 @@ class _CoverGridItem extends StatelessWidget {
                   children: [
                     CoverPreviewWidget(
                       cover: cover,
-                      title: title.isEmpty ? 'Baslik' : title,
+                      title: title.isEmpty ? context.l10n.libraryTitle : title,
                       showBorder: false,
                     ),
                     // Premium badge

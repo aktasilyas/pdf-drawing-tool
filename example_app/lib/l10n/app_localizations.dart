@@ -1519,6 +1519,240 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Subscription'**
   String get routerSubscriptionTitle;
+
+  /// No description provided for @libraryNewNotebook.
+  ///
+  /// In en, this message translates to:
+  /// **'Notebook'**
+  String get libraryNewNotebook;
+
+  /// No description provided for @libraryNewWhiteboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Whiteboard'**
+  String get libraryNewWhiteboard;
+
+  /// No description provided for @libraryNewQuickNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick note'**
+  String get libraryNewQuickNote;
+
+  /// No description provided for @libraryImportPdf.
+  ///
+  /// In en, this message translates to:
+  /// **'Import PDF'**
+  String get libraryImportPdf;
+
+  /// No description provided for @libraryImportImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Import image'**
+  String get libraryImportImage;
+
+  /// No description provided for @libraryQuickNoteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick note - {date}'**
+  String libraryQuickNoteTitle(String date);
+
+  /// No description provided for @libraryWhiteboardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Whiteboard - {date}'**
+  String libraryWhiteboardTitle(String date);
+
+  /// No description provided for @libraryPdfReadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t read the PDF file'**
+  String get libraryPdfReadFailed;
+
+  /// No description provided for @libraryImageReadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t read the image file'**
+  String get libraryImageReadFailed;
+
+  /// No description provided for @libraryImageLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading image...'**
+  String get libraryImageLoading;
+
+  /// No description provided for @libraryImageTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Image is too large. Maximum size: 4096x4096'**
+  String get libraryImageTooLarge;
+
+  /// No description provided for @libraryPdfTooLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF is too large. Maximum size: 200 MB'**
+  String get libraryPdfTooLarge;
+
+  /// No description provided for @libraryPdfOpening.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening PDF...'**
+  String get libraryPdfOpening;
+
+  /// No description provided for @libraryPdfImportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t import the PDF'**
+  String get libraryPdfImportFailed;
+
+  /// No description provided for @libraryOpening.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening {title}'**
+  String libraryOpening(String title);
+
+  /// No description provided for @libraryOpeningWithPages.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening {title} ({pages})'**
+  String libraryOpeningWithPages(String title, String pages);
+
+  /// No description provided for @libraryFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Format'**
+  String get libraryFormat;
+
+  /// No description provided for @libraryOrientation.
+  ///
+  /// In en, this message translates to:
+  /// **'Orientation'**
+  String get libraryOrientation;
+
+  /// No description provided for @libraryPortrait.
+  ///
+  /// In en, this message translates to:
+  /// **'Portrait'**
+  String get libraryPortrait;
+
+  /// No description provided for @libraryLandscape.
+  ///
+  /// In en, this message translates to:
+  /// **'Landscape'**
+  String get libraryLandscape;
+
+  /// No description provided for @librarySize.
+  ///
+  /// In en, this message translates to:
+  /// **'Size'**
+  String get librarySize;
+
+  /// No description provided for @libraryFormatSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{orientation}, {size}'**
+  String libraryFormatSummary(String orientation, String size);
+
+  /// No description provided for @libraryCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover'**
+  String get libraryCover;
+
+  /// No description provided for @libraryPaper.
+  ///
+  /// In en, this message translates to:
+  /// **'Paper'**
+  String get libraryPaper;
+
+  /// No description provided for @libraryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get libraryTitle;
+
+  /// No description provided for @libraryNoteTitleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Note title'**
+  String get libraryNoteTitleHint;
+
+  /// No description provided for @libraryTemplateCategoryAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get libraryTemplateCategoryAll;
+
+  /// No description provided for @libraryNoTemplatesInCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'No templates in this category'**
+  String get libraryNoTemplatesInCategory;
+
+  /// No description provided for @libraryCreateNoteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create new note'**
+  String get libraryCreateNoteTitle;
+
+  /// No description provided for @libraryTemplate.
+  ///
+  /// In en, this message translates to:
+  /// **'Template'**
+  String get libraryTemplate;
+
+  /// No description provided for @libraryUntitledNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Untitled note'**
+  String get libraryUntitledNote;
+
+  /// No description provided for @libraryPaperColorWhite.
+  ///
+  /// In en, this message translates to:
+  /// **'White paper'**
+  String get libraryPaperColorWhite;
+
+  /// No description provided for @libraryPaperColorBlack.
+  ///
+  /// In en, this message translates to:
+  /// **'Black paper'**
+  String get libraryPaperColorBlack;
+
+  /// No description provided for @libraryPaperColorCream.
+  ///
+  /// In en, this message translates to:
+  /// **'Cream paper'**
+  String get libraryPaperColorCream;
+
+  /// No description provided for @libraryPaperColorGray.
+  ///
+  /// In en, this message translates to:
+  /// **'Gray paper'**
+  String get libraryPaperColorGray;
+
+  /// No description provided for @libraryPaperColorGreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Green paper'**
+  String get libraryPaperColorGreen;
+
+  /// No description provided for @libraryPaperColorBlue.
+  ///
+  /// In en, this message translates to:
+  /// **'Blue paper'**
+  String get libraryPaperColorBlue;
+
+  /// No description provided for @libraryPaperColorYellow.
+  ///
+  /// In en, this message translates to:
+  /// **'Yellow paper'**
+  String get libraryPaperColorYellow;
+
+  /// No description provided for @librarySelectColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a color'**
+  String get librarySelectColor;
 }
 
 class _AppLocalizationsDelegate

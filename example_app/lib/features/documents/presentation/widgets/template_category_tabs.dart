@@ -6,6 +6,8 @@ import 'package:drawing_core/drawing_core.dart';
 
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/index.dart';
+import 'package:example_app/features/documents/presentation/l10n/library_labels.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// TemplateCategory.iconName → IconData mapping
 IconData categoryIcon(String iconName) {
@@ -31,7 +33,7 @@ IconData categoryIcon(String iconName) {
   }
 }
 
-/// Template category tabs widget — null = "Hepsi" (All)
+/// Template category tabs widget — null = "All"
 class TemplateCategoryTabs extends StatelessWidget {
   final TemplateCategory? selectedCategory;
   final ValueChanged<TemplateCategory?> onCategorySelected;
@@ -44,6 +46,7 @@ class TemplateCategoryTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return SizedBox(
       height: 40,
       child: ListView(
@@ -53,7 +56,7 @@ class TemplateCategoryTabs extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(right: AppSpacing.sm),
             child: AppChip(
-              label: 'Hepsi',
+              label: l10n.libraryTemplateCategoryAll,
               icon: Icons.apps_outlined,
               isSelected: selectedCategory == null,
               onTap: () => onCategorySelected(null),
@@ -64,7 +67,11 @@ class TemplateCategoryTabs extends StatelessWidget {
             return Padding(
               padding: const EdgeInsets.only(right: AppSpacing.sm),
               child: AppChip(
-                label: category.displayName,
+                label: localizedName(
+                  l10n,
+                  tr: category.displayName,
+                  en: category.displayNameEn,
+                ),
                 icon: categoryIcon(category.iconName),
                 isSelected: isSelected,
                 onTap: () => onCategorySelected(category),

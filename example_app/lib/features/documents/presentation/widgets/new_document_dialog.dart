@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:drawing_core/drawing_core.dart' as drawing_core;
 import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/features/documents/domain/entities/paper_color.dart';
+import 'package:example_app/features/documents/presentation/l10n/library_labels.dart';
+import 'package:example_app/l10n/l10n.dart';
 import 'package:example_app/core/routing/route_names.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
@@ -26,6 +29,7 @@ void showNewDocumentDropdown(BuildContext context, GlobalKey buttonKey) async {
   if (!await ensureDocumentQuota(context)) return;
   if (!context.mounted) return;
 
+  final l10n = context.l10n;
   final RenderBox button =
       buttonKey.currentContext!.findRenderObject() as RenderBox;
   final RenderBox overlay =
@@ -45,17 +49,24 @@ void showNewDocumentDropdown(BuildContext context, GlobalKey buttonKey) async {
       borderRadius: BorderRadius.circular(AppRadius.card),
     ),
     items: [
+      _buildMenuItem(l10n, NewDocumentOption.notebook, Icons.book_outlined),
       _buildMenuItem(
-          NewDocumentOption.notebook, Icons.book_outlined, 'Not Defteri'),
-      _buildMenuItem(NewDocumentOption.whiteboard,
-          Icons.space_dashboard_outlined, 'Beyaz Tahta'),
-      _buildMenuItem(
-          NewDocumentOption.quickNote, Icons.note_outlined, 'Hızlı Not'),
+        l10n,
+        NewDocumentOption.whiteboard,
+        Icons.space_dashboard_outlined,
+      ),
+      _buildMenuItem(l10n, NewDocumentOption.quickNote, Icons.note_outlined),
       const PopupMenuDivider(height: 1),
-      _buildMenuItem(NewDocumentOption.importPdf, Icons.picture_as_pdf_outlined,
-          'PDF İçe Aktar'),
-      _buildMenuItem(NewDocumentOption.importImage, Icons.image_outlined,
-          'Resim İçe Aktar'),
+      _buildMenuItem(
+        l10n,
+        NewDocumentOption.importPdf,
+        Icons.picture_as_pdf_outlined,
+      ),
+      _buildMenuItem(
+        l10n,
+        NewDocumentOption.importImage,
+        Icons.image_outlined,
+      ),
     ],
   ).then((value) {
     if (value == null) return;
@@ -65,10 +76,11 @@ void showNewDocumentDropdown(BuildContext context, GlobalKey buttonKey) async {
 }
 
 PopupMenuItem<NewDocumentOption> _buildMenuItem(
+  AppLocalizations l10n,
   NewDocumentOption option,
   IconData icon,
-  String label,
 ) {
+  final label = option.label(l10n);
   return PopupMenuItem<NewDocumentOption>(
     value: option,
     padding: const EdgeInsets.symmetric(
@@ -127,6 +139,7 @@ void _handleNewDocumentOption(
 
 void _createQuickNote(BuildContext context) async {
   if (!context.mounted) return;
+  final l10n = context.l10n;
 
   final container = ProviderScope.containerOf(context);
   final controller = container.read(documentsControllerProvider.notifier);
@@ -134,10 +147,10 @@ void _createQuickNote(BuildContext context) async {
 
   // Varsayılan ayarlarla hızlı not oluştur (beyaz kağıt + ince çizgili)
   final documentId = await controller.createDocument(
-    title: 'Hızlı Not - ${DateTime.now().toString().substring(0, 16)}',
+    title: l10n.libraryQuickNoteTitle(_nowStamp()),
     templateId: 'thin_lined', // İnce çizgili şablon
     folderId: folderId,
-    paperColor: 'Beyaz kağıt',
+    paperColor: PaperColor.white.storageKey,
     isPortrait: true,
     documentType: drawing_core.DocumentType.quickNote,
   );
@@ -158,6 +171,7 @@ void _createQuickNote(BuildContext context) async {
 
 void _createWhiteboard(BuildContext context) async {
   if (!context.mounted) return;
+  final l10n = context.l10n;
 
   final container = ProviderScope.containerOf(context);
   final controller = container.read(documentsControllerProvider.notifier);
@@ -165,10 +179,10 @@ void _createWhiteboard(BuildContext context) async {
 
   // Beyaz tahta oluştur (infinite canvas + blank background)
   final documentId = await controller.createDocument(
-    title: 'Beyaz Tahta - ${DateTime.now().toString().substring(0, 16)}',
+    title: l10n.libraryWhiteboardTitle(_nowStamp()),
     templateId: 'blank', // Boş arka plan
     folderId: folderId,
-    paperColor: 'Beyaz kağıt',
+    paperColor: PaperColor.white.storageKey,
     isPortrait: true,
     documentType: drawing_core.DocumentType.whiteboard, // Infinite canvas
   );
@@ -186,3 +200,6 @@ void _createWhiteboard(BuildContext context) async {
     context.push(RouteNames.editorPath(documentId));
   }
 }
+
+/// Date part of generated titles (`yyyy-MM-dd HH:mm`), stored with the title.
+String _nowStamp() => DateTime.now().toString().substring(0, 16);

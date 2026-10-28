@@ -10,8 +10,10 @@ import 'package:drawing_ui/drawing_ui.dart';
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/utils/responsive.dart';
 import 'package:example_app/core/widgets/index.dart';
+import 'package:example_app/features/documents/presentation/l10n/library_labels.dart';
 import 'package:example_app/features/documents/presentation/widgets/template_preview_card.dart';
 import 'package:example_app/features/documents/presentation/widgets/format_picker_sheet.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// Preview section with cover/paper cards and settings panel.
 class TemplatePreviewSection extends StatelessWidget {
@@ -72,7 +74,7 @@ class TemplatePreviewSection extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ..._buildPreviewCards(previewW, previewH),
+          ..._buildPreviewCards(context, previewW, previewH),
           const SizedBox(width: AppSpacing.md),
           Flexible(
             child: ConstrainedBox(
@@ -97,7 +99,7 @@ class TemplatePreviewSection extends StatelessWidget {
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: _buildPreviewCards(previewW, previewH),
+            children: _buildPreviewCards(context, previewW, previewH),
           ),
           const SizedBox(height: AppSpacing.sm),
           _buildSettingsPanel(context),
@@ -106,18 +108,23 @@ class TemplatePreviewSection extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildPreviewCards(double previewW, double previewH) {
+  List<Widget> _buildPreviewCards(
+    BuildContext context,
+    double previewW,
+    double previewH,
+  ) {
+    final l10n = context.l10n;
     return [
       if (hasCover) ...[
         TemplatePreviewCard(
-          label: 'Kapak',
+          label: l10n.libraryCover,
           isSelected: isSelectingCover,
           width: previewW,
           height: previewH,
           onTap: () => onSelectingCoverChanged(true),
           child: CoverPreviewWidget(
             cover: cover,
-            title: title.isEmpty ? 'Not Basligi' : title,
+            title: title.isEmpty ? l10n.libraryNoteTitleHint : title,
             showBorder: false,
             borderRadius: BorderRadius.circular(AppRadius.xs),
           ),
@@ -125,7 +132,7 @@ class TemplatePreviewSection extends StatelessWidget {
         const SizedBox(width: AppSpacing.sm),
       ],
       TemplatePreviewCard(
-        label: 'Kagit',
+        label: l10n.libraryPaper,
         isSelected: !isSelectingCover,
         width: previewW,
         height: previewH,
@@ -143,20 +150,21 @@ class TemplatePreviewSection extends StatelessWidget {
 
   Widget _buildSettingsPanel(BuildContext context) {
     final textSecondary = context.palette.textMuted;
+    final l10n = context.l10n;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         AppTextField(
-          hint: 'Baslik',
+          hint: l10n.libraryTitle,
           onChanged: onTitleChanged,
         ),
         const SizedBox(height: AppSpacing.sm),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Kapak', style: AppTypography.caption),
+            Text(l10n.libraryCover, style: AppTypography.caption),
             Transform.scale(
               scale: 0.8,
               child: Switch(
@@ -170,15 +178,19 @@ class TemplatePreviewSection extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Format', style: AppTypography.caption),
+            Text(l10n.libraryFormat, style: AppTypography.caption),
             GestureDetector(
               onTap: () => _showFormatPicker(context),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    '${paperSize.isLandscape ? "Yatay" : "Dikey"}, '
-                    '${_getPresetName(paperSize.preset)}',
+                    l10n.libraryFormatSummary(
+                      paperSize.isLandscape
+                          ? l10n.libraryLandscape
+                          : l10n.libraryPortrait,
+                      paperSize.preset.label(l10n),
+                    ),
                     style: AppTypography.caption.copyWith(color: textSecondary),
                   ),
                   const SizedBox(width: AppSpacing.xxs),
@@ -197,27 +209,6 @@ class TemplatePreviewSection extends StatelessWidget {
     final result = await FormatPickerSheet.show(context, paperSize);
     if (result != null) {
       onPaperSizeChanged(result);
-    }
-  }
-
-  String _getPresetName(PaperSizePreset preset) {
-    switch (preset) {
-      case PaperSizePreset.a4:
-        return 'A4';
-      case PaperSizePreset.a5:
-        return 'A5';
-      case PaperSizePreset.a6:
-        return 'A6';
-      case PaperSizePreset.letter:
-        return 'Letter';
-      case PaperSizePreset.legal:
-        return 'Legal';
-      case PaperSizePreset.square:
-        return 'Kare';
-      case PaperSizePreset.widescreen:
-        return 'Geniş';
-      case PaperSizePreset.custom:
-        return 'Özel';
     }
   }
 }

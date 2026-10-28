@@ -7,7 +7,9 @@ import 'package:drawing_ui/drawing_ui.dart';
 
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/utils/responsive.dart';
+import 'package:example_app/features/documents/presentation/l10n/library_labels.dart';
 import 'package:example_app/features/documents/presentation/widgets/template_grouped_list.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// Template grid — shows single category grid or grouped "all" tree.
 class TemplateGridView extends StatelessWidget {
@@ -83,7 +85,7 @@ class TemplateGridView extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.md),
           Text(
-            'Bu kategoride sablon yok',
+            context.l10n.libraryNoTemplatesInCategory,
             style: TextStyle(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
               fontSize: 14,
@@ -112,6 +114,7 @@ class TemplateGridItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final outlineColor = context.palette.border;
     final textSecondary = context.palette.textMuted;
 
@@ -182,7 +185,7 @@ class TemplateGridItem extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xxs),
           Text(
-            template.name,
+            localizedName(l10n, tr: template.name, en: template.nameEn),
             style: AppTypography.caption.copyWith(
               color: isSelected ? AppColors.primary : textSecondary,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
