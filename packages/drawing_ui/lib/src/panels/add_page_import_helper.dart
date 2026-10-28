@@ -1,9 +1,24 @@
 import 'package:drawing_core/drawing_core.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:drawing_ui/src/services/image_page_import.dart';
 import 'package:drawing_ui/src/services/pdf_import_service.dart';
+
+/// Signature of [pickAndImportFile], so tests can supply a fake importer.
+typedef PageFileImporter = Future<List<Page>> Function({
+  required int insertIndex,
+  required PageSize defaultPageSize,
+  void Function(PdfImportFailure failure)? onError,
+  void Function(int count)? onPagesSkipped,
+  void Function()? onImageError,
+  PdfPathResolver pdfPaths,
+});
+
+/// Importer used by the "Add page" panel; [pickAndImportFile] by default.
+final pageFileImporterProvider =
+    Provider<PageFileImporter>((ref) => pickAndImportFile);
 
 /// Opens a file picker for PDF/image files, then converts the selected file
 /// into one or more [Page] objects ready to insert into a document.

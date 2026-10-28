@@ -38,7 +38,7 @@ class PageStructureChange {
     required this.documentId,
     required this.previousOrder,
     required this.previousCurrentId,
-    this.insertedPageId,
+    this.insertedPageIds = const [],
   });
 
   /// Id of the document the change was made in.
@@ -50,8 +50,8 @@ class PageStructureChange {
   /// Id of the current page before the change.
   final String previousCurrentId;
 
-  /// Id of the page the change inserted, if any.
-  final String? insertedPageId;
+  /// Ids of the pages the change inserted (empty for a move).
+  final List<String> insertedPageIds;
 }
 
 /// Page structure changes (insert, move, delete, restore).
@@ -75,11 +75,20 @@ class PageStructureActions {
   }
 
   /// Inserts [page] at [index] (clamped) and makes it the current page.
-  PageStructureChange insertPage(int index, Page page) {
+  PageStructureChange insertPage(int index, Page page) =>
+      insertPages(index, [page])!;
+
+  /// Inserts [pages] in order at [index] (clamped) into the latest document
+  /// and makes the first one current. One [undo] removes all of them.
+  /// Returns null when [pages] is empty.
+  PageStructureChange? insertPages(int index, List<Page> pages) {
+    if (pages.isEmpty) return null;
     final doc = _ref.read(documentProvider);
-    final change = _changeFrom(doc, insertedPageId: page.id);
-    final inserted = doc.insertPageAt(index, page);
-    _apply(inserted.replacePages(inserted.pages, currentPageId: page.id));
+    final change =
+        _changeFrom(doc, insertedPageIds: [for (final p in pages) p.id]);
+    final at = index.clamp(0, doc.pages.length);
+    final list = List<Page>.from(doc.pages)..insertAll(at, pages);
+    _apply(doc.replacePages(list, currentPageId: pages.first.id));
     return change;
   }
 
@@ -99,7 +108,7 @@ class PageStructureActions {
     final byId = {for (final p in doc.pages) p.id: p};
     final expected = {
       ...change.previousOrder,
-      if (change.insertedPageId != null) change.insertedPageId!,
+      ...change.insertedPageIds,
     };
     if (byId.length != expected.length || !expected.every(byId.containsKey)) {
       return false;
@@ -165,13 +174,13 @@ class PageStructureActions {
 
   PageStructureChange _changeFrom(
     DrawingDocument doc, {
-    String? insertedPageId,
+    List<String> insertedPageIds = const [],
   }) =>
       PageStructureChange(
         documentId: doc.id,
         previousOrder: [for (final p in doc.pages) p.id],
         previousCurrentId: doc.pages[doc.currentPageIndex].id,
-        insertedPageId: insertedPageId,
+        insertedPageIds: insertedPageIds,
       );
 
   void _apply(DrawingDocument doc) {
