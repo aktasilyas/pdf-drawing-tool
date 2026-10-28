@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:drawing_ui/drawing_ui.dart';
 import 'package:drawing_ui/src/panels/add_page_panel_widgets.dart';
+import 'package:drawing_ui/src/widgets/compact_visibility_switch.dart';
 
 void main() {
   late SharedPreferences prefs;
@@ -34,17 +35,41 @@ void main() {
     expect(tester, meetsGuideline(labeledTapTargetGuideline));
   }
 
-  // The panel's tab bar and tool rows are 36dp and out of scope here, so the
-  // whole-tree guideline is not used; the close button is checked directly.
-  testWidgets('toolbar settings panel close button is labeled and 48dp',
+  testWidgets('toolbar settings panel meets tap target guidelines on both tabs',
       (tester) async {
     final handle = tester.ensureSemantics();
     await pump(tester, const ToolbarSettingsPanel());
-    final close = find.byTooltip('Kapat');
-    expect(close, findsOneWidget);
-    final size = tester.getSize(close);
-    expect(size.width, greaterThanOrEqualTo(48));
-    expect(size.height, greaterThanOrEqualTo(48));
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Kapat'), findsOneWidget);
+    expectAccessible(tester);
+
+    await tester.tap(find.text('Ek Araçlar'));
+    await tester.pumpAndSettle();
+    expect(find.text('Cetvel'), findsOneWidget);
+    expectAccessible(tester);
+    handle.dispose();
+  });
+
+  testWidgets('toolbar settings rows have 48dp drag handle and switch',
+      (tester) async {
+    final handle = tester.ensureSemantics();
+    await pump(tester, const ToolbarSettingsPanel());
+    await tester.pumpAndSettle();
+    final dragHandle = find.byType(ReorderableDragStartListener).first;
+    expect(tester.getSize(dragHandle), const Size(48, 48));
+    final toggle = find.byType(CompactVisibilitySwitch).first;
+    expect(tester.getSize(toggle), const Size(48, 48));
+    final widget = tester.widget<CompactVisibilitySwitch>(toggle);
+    expect(widget.label, isNotEmpty);
+    expect(
+      tester.getSemantics(toggle),
+      containsSemantics(
+        label: widget.label,
+        hasToggledState: true,
+        isToggled: widget.value,
+        hasTapAction: true,
+      ),
+    );
     handle.dispose();
   });
 

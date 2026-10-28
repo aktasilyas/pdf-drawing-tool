@@ -8,6 +8,7 @@ import 'package:drawing_ui/src/models/toolbar_config.dart';
 import 'package:drawing_ui/src/models/tool_type.dart';
 import 'package:drawing_ui/src/providers/toolbar_config_provider.dart';
 import 'package:drawing_ui/src/toolbar/tool_groups.dart';
+import 'package:drawing_ui/src/widgets/compact_visibility_switch.dart';
 
 /// A reorderable list of tools for the settings panel.
 class ReorderableToolList extends ConsumerWidget {
@@ -189,7 +190,8 @@ class _CompactToolItem extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return Container(
-      height: 34,
+      // 48dp of content plus the 0.5dp border above and below.
+      height: kMinInteractiveDimension + 1,
       margin: const EdgeInsets.symmetric(vertical: 1, horizontal: 6),
       decoration: BoxDecoration(
         color: isVisible ? cs.surface : cs.mutedControlSurface,
@@ -207,12 +209,14 @@ class _CompactToolItem extends StatelessWidget {
           children: [
             ReorderableDragStartListener(
               index: index,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: PhosphorIcon(
-                  ElyanotesIcons.dragHandle,
-                  color: cs.onSurfaceVariant,
-                  size: 14,
+              child: SizedBox.square(
+                dimension: kMinInteractiveDimension,
+                child: Center(
+                  child: PhosphorIcon(
+                    ElyanotesIcons.dragHandle,
+                    color: cs.onSurfaceVariant,
+                    size: 14,
+                  ),
                 ),
               ),
             ),
@@ -225,24 +229,24 @@ class _CompactToolItem extends StatelessWidget {
             ),
             const SizedBox(width: 6),
             Expanded(
-              child: Text(
-                label,
-                style: textTheme.labelSmall?.copyWith(
-                  color: isVisible
-                      ? cs.onSurface
-                      : cs.onSurfaceVariant.withValues(alpha: 0.6),
-                  decoration: isVisible ? null : TextDecoration.lineThrough,
+              // The switch carries the label for screen readers.
+              child: ExcludeSemantics(
+                child: Text(
+                  label,
+                  style: textTheme.labelSmall?.copyWith(
+                    color: isVisible
+                        ? cs.onSurface
+                        : cs.onSurfaceVariant.withValues(alpha: 0.6),
+                    decoration: isVisible ? null : TextDecoration.lineThrough,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-                overflow: TextOverflow.ellipsis,
               ),
             ),
-            Transform.scale(
-              scale: 0.6,
-              child: Switch(
-                value: isVisible,
-                onChanged: (_) => onVisibilityToggle(),
-                activeThumbColor: cs.primary,
-              ),
+            CompactVisibilitySwitch(
+              label: label,
+              value: isVisible,
+              onToggle: onVisibilityToggle,
             ),
           ],
         ),
