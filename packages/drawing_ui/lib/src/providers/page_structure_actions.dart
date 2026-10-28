@@ -39,7 +39,7 @@ class PageStructureChange {
     required this.previousOrder,
     required this.previousCurrentId,
     this.insertedPageIds = const [],
-    this.insertedPageInk = const {},
+    this.insertedPageLayers = const {},
   });
 
   /// Id of the document the change was made in.
@@ -54,12 +54,23 @@ class PageStructureChange {
   /// Ids of the pages the change inserted (empty for a move).
   final List<String> insertedPageIds;
 
-  /// Strokes, shapes and texts each inserted page held when it was inserted,
-  /// by page id (a duplicate or pasted page starts with some).
-  final Map<String, int> insertedPageInk;
+  /// The layers each inserted page held when it was inserted, by page id
+  /// (a duplicate or pasted page starts with content).
+  final Map<String, List<Layer>> insertedPageLayers;
 }
 
-int _inkCount(Page p) => p.strokeCount + p.shapeCount + p.textCount;
+/// Whether [page] was edited since [snapshot] was taken.
+///
+/// Layers are immutable, so any edit (stroke, erase, shape, text, image,
+/// sticky note, move) replaces at least one [Layer] instance. A page with no
+/// snapshot counts as changed, so its content is never dropped.
+bool _changedSince(Page page, List<Layer>? snapshot) {
+  if (snapshot == null || snapshot.length != page.layers.length) return true;
+  for (var i = 0; i < snapshot.length; i++) {
+    if (!identical(snapshot[i], page.layers[i])) return true;
+  }
+  return false;
+}
 
 /// Page structure changes (insert, move, delete, restore).
 ///
@@ -94,7 +105,7 @@ class PageStructureActions {
     final change = _changeFrom(
       doc,
       insertedPageIds: [for (final p in pages) p.id],
-      insertedPageInk: {for (final p in pages) p.id: _inkCount(p)},
+      insertedPageLayers: {for (final p in pages) p.id: p.layers},
     );
     final at = index.clamp(0, doc.pages.length);
     final list = List<Page>.from(doc.pages)..insertAll(at, pages);
@@ -110,8 +121,8 @@ class PageStructureActions {
   /// Reverts an insert or a move: restores the previous page order and
   /// current page, keeping the pages' current content.
   ///
-  /// An inserted page that gained content since the insert is moved to the
-  /// page trash first; ink is never dropped.
+  /// An inserted page that was edited in any way since the insert is moved
+  /// to the page trash first; content is never dropped.
   ///
   /// Returns false (and changes nothing) when another document is loaded, the
   /// set of pages changed in some other way since, or a page with new content
@@ -120,10 +131,10 @@ class PageStructureActions {
     final pages = _revertablePages(change);
     if (pages == null) return false;
     final doc = _ref.read(documentProvider);
-    // Inserted pages that gained content since the insert, with their index.
+    // Inserted pages edited since the insert, with their index.
     final gained = [
       for (final id in change.insertedPageIds)
-        if (_inkCount(pages[id]!) > (change.insertedPageInk[id] ?? 0))
+        if (_changedSince(pages[id]!, change.insertedPageLayers[id]))
           (index: doc.pages.indexOf(pages[id]!), page: pages[id]!),
     ];
 
@@ -237,14 +248,14 @@ class PageStructureActions {
   PageStructureChange _changeFrom(
     DrawingDocument doc, {
     List<String> insertedPageIds = const [],
-    Map<String, int> insertedPageInk = const {},
+    Map<String, List<Layer>> insertedPageLayers = const {},
   }) =>
       PageStructureChange(
         documentId: doc.id,
         previousOrder: [for (final p in doc.pages) p.id],
         previousCurrentId: doc.pages[doc.currentPageIndex].id,
         insertedPageIds: insertedPageIds,
-        insertedPageInk: insertedPageInk,
+        insertedPageLayers: insertedPageLayers,
       );
 
   void _apply(DrawingDocument doc) {

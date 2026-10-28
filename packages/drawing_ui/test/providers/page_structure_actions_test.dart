@@ -390,6 +390,62 @@ void main() {
       expect(docIds(), ['p0', 'p1']);
     });
 
+    /// Replaces page 1 (the inserted one) with [edit] of it.
+    void editInserted(Layer Function(Layer) edit) {
+      final doc = container.read(documentProvider);
+      final inserted = doc.pages[1];
+      container.read(documentProvider.notifier).updateDocument(
+            doc.replacePages([
+              doc.pages[0],
+              inserted.copyWith(layers: [edit(inserted.layers.first)]),
+              doc.pages[2],
+            ]),
+          );
+    }
+
+    test('undo sends an inserted page that got an image to the trash',
+        () async {
+      load(2, current: 0);
+      final trashed = <Page>[];
+      container.read(pageTrashCallbackProvider.notifier).state = (i, p) async {
+        trashed.add(p);
+        return 't1';
+      };
+      final change = actions().insertPage(1, page('new', 0));
+      editInserted((l) => l.addImage(const ImageElement(
+            id: 'img',
+            filePath: 'a.png',
+            x: 0,
+            y: 0,
+            width: 10,
+            height: 10,
+          )));
+
+      expect(await actions().undo(change), isTrue);
+      expect(docIds(), ['p0', 'p1']);
+      expect(trashed.single.id, 'new');
+    });
+
+    test('undo sends an erased-and-redrawn duplicate to the trash', () async {
+      load(2, current: 0);
+      final trashed = <Page>[];
+      container.read(pageTrashCallbackProvider.notifier).state = (i, p) async {
+        trashed.add(p);
+        return 't1';
+      };
+      final withInk = container.read(documentProvider).pages[0].addStroke(
+            stroke('s1'),
+          );
+      final change = actions().insertCopy(0, withInk);
+      editInserted((l) =>
+          l.removeStroke(l.strokes.single.id).addStroke(stroke('s2')));
+
+      expect(await actions().undo(change), isTrue);
+      expect(docIds(), ['p0', 'p1']);
+      expect(trashed.single.strokeCount, 1);
+      expect(trashed.single.layers.first.strokes.single.id, 's2');
+    });
+
     test('undo is a no-op after another page change', () async {
       load(3);
       final change = actions().insertPage(1, page('new', 0));
