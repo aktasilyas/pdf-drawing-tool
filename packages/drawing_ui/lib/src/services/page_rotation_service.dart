@@ -38,6 +38,7 @@ abstract final class PageRotationService {
       createdAt: page.createdAt,
       updatedAt: DateTime.now(),
       isCover: page.isCover,
+      isBookmarked: page.isBookmarked,
     );
   }
 
