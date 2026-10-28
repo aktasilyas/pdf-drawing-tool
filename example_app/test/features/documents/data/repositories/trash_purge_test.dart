@@ -271,7 +271,7 @@ void main() {
 
       expect(await fx.documentDs.getAllDocuments(), isEmpty);
       expect(await fx.documentDs.hasDocumentContent(d.id), isFalse);
-      expect(await fx.pageTrash.getTrashedPages(), isEmpty);
+      expect(await trashedPages(), isEmpty);
     });
 
     test('emptyTrash deletes all three with one corrupt', () async {
