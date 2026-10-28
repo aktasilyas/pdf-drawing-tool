@@ -1,10 +1,17 @@
+export 'canvas_strings.dart';
 export 'catalog_strings.dart';
 export 'drawing_strings.dart';
 export 'drawing_strings_scope.dart';
 export 'enum_labels.dart';
+export 'error_labels.dart';
+export 'error_strings.dart';
+export 'export_strings.dart';
+export 'page_list_strings.dart';
+export 'page_strings.dart';
 export 'panel_strings.dart';
 export 'selection_strings.dart';
 export 'sticker_category_label.dart';
+export 'template_strings.dart';
 export 'tool_strings.dart';
 export 'tool_type_label.dart';
 export 'toolbar_strings.dart';

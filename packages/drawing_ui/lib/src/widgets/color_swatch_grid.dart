@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:drawing_ui/src/widgets/color_chip.dart'
-    show colorSemanticsLabel;
+import 'package:drawing_ui/src/l10n/drawing_strings_scope.dart';
+import 'package:drawing_ui/src/widgets/color_chip.dart' show colorHex;
 
 /// Samsung Notes-style color swatch grid.
 /// Columns: gray + 9 hue steps. Rows: light → dark.
@@ -69,7 +69,8 @@ class ColorSwatchGrid extends StatelessWidget {
                         return Semantics(
                           button: true,
                           selected: selected,
-                          label: colorSemanticsLabel(color),
+                          label: context.drawingStrings.toolbar
+                              .color(colorHex(color)),
                           child: GestureDetector(
                             onTap: () => onColorSelected(color),
                             child: SizedBox(

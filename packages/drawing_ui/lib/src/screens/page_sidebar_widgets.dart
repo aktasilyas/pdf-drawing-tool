@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
 
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/panels/panels.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/services/thumbnail_cache.dart';
@@ -107,6 +108,7 @@ class _PageGridItemState extends ConsumerState<PageGridItem> {
     final sel = widget.isSelected;
     final bookmarked = widget.page.isBookmarked;
     final label = '${widget.index + 1}';
+    final strings = context.drawingStrings;
     const radius = BorderRadius.all(Radius.circular(ChromeRadius.sm));
     final hairline = Border.all(color: palette.border, width: 0.5);
 
@@ -138,7 +140,7 @@ class _PageGridItemState extends ConsumerState<PageGridItem> {
           child: Semantics(
             button: true,
             selected: sel,
-            label: 'Sayfa $label',
+            label: strings.pages.pageNumber(widget.index + 1),
             child: GestureDetector(
               onTap: _open,
               behavior: HitTestBehavior.opaque,
@@ -187,7 +189,7 @@ class _PageGridItemState extends ConsumerState<PageGridItem> {
               const Spacer(),
               ChromeIconButton(
                 icon: ElyanotesIcons.more,
-                tooltip: 'Sayfa seçenekleri',
+                tooltip: strings.pageList.pageOptions,
                 iconSize: ChromeIconSizes.md,
                 visualKey: _moreKey,
                 onPressed: _toggleMore,
@@ -210,10 +212,13 @@ class _BookmarkToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = ChromePalette.of(context);
+    final strings = context.drawingStrings;
     return Semantics(
       button: true,
       toggled: bookmarked,
-      label: bookmarked ? 'Yer imini kaldır' : 'Yer imi ekle',
+      label: bookmarked
+          ? strings.pages.removeBookmark
+          : strings.pageList.addBookmark,
       excludeSemantics: true,
       child: GestureDetector(
         onTap: onTap,

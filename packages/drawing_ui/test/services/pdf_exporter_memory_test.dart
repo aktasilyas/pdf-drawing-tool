@@ -58,7 +58,7 @@ void main() {
       ],
     );
 
-    expect(result.isSuccess, isTrue, reason: result.errorMessage);
+    expect(result.isSuccess, isTrue, reason: result.failure?.name);
     expect(opens, 2);
     expect(opened['/a.pdf']!.renders, 5);
     expect(opened.values.every((s) => s.closed), isTrue);
@@ -74,7 +74,7 @@ void main() {
       options: const PDFExportOptions(includeBackground: false),
     );
 
-    expect(result.isSuccess, isTrue, reason: result.errorMessage);
+    expect(result.isSuccess, isTrue, reason: result.failure?.name);
     expect(source.renders, 1);
   });
 
@@ -95,7 +95,7 @@ void main() {
       pages: [for (var i = 0; i < 3; i++) _pdfPage(i, 'book.pdf')],
     );
 
-    expect(result.isSuccess, isTrue, reason: result.errorMessage);
+    expect(result.isSuccess, isTrue, reason: result.failure?.name);
     expect(opened, [resolved]);
   });
 
@@ -123,7 +123,7 @@ void main() {
       pages: [page],
       options: const PDFExportOptions(includeBackground: false),
     );
-    expect(result.isSuccess, isTrue, reason: result.errorMessage);
+    expect(result.isSuccess, isTrue, reason: result.failure?.name);
 
     final text = latin1.decode(result.pdfBytes);
     final images = RegExp(r'<<[^>]*/Subtype\s*/Image[^>]*>>')

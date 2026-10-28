@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/l10n/l10n.dart';
 
 /// TemplateCategory.iconName → IconData mapping
 IconData _categoryIcon(String iconName) {
@@ -42,6 +43,7 @@ class CategoryTabs extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final s = context.drawingStrings.templates;
 
     return SizedBox(
       height: 40,
@@ -51,7 +53,7 @@ class CategoryTabs extends StatelessWidget {
         children: [
           if (showAllOption)
             _CategoryChip(
-              label: 'Tümü',
+              label: s.allCategories,
               isSelected: selectedCategory == null,
               onTap: () => onCategorySelected(null),
               colorScheme: colorScheme,
@@ -59,7 +61,7 @@ class CategoryTabs extends StatelessWidget {
           ...TemplateCategory.values.map((category) => Padding(
                 padding: const EdgeInsets.only(left: 8),
                 child: _CategoryChip(
-                  label: category.displayName,
+                  label: s.categoryName(category),
                   icon: _categoryIcon(category.iconName),
                   isSelected: selectedCategory == category,
                   onTap: () => onCategorySelected(category),

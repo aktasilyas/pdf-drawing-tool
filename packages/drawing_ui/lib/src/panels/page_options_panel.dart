@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart' hide Page;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 
@@ -63,6 +64,7 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel>
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final s = context.drawingStrings;
     final int pageIndex =
         widget.pageIndex ?? ref.watch(currentPageIndexProvider);
     final pageCount = ref.watch(pageCountProvider);
@@ -81,7 +83,7 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel>
             pageOptionsDivider(cs, compact: c),
             PageOptionsMenuItem(
               icon: ElyanotesIcons.editPencil,
-              label: 'Yeniden Adlandır',
+              label: s.pages.rename,
               compact: c,
               onTap: () {
                 widget.onClose();
@@ -90,7 +92,7 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel>
             ),
             PageOptionsMenuItem(
               icon: ElyanotesIcons.trash,
-              label: 'Çöpe Taşı',
+              label: s.pages.moveDocumentToTrash,
               isDestructive: true,
               compact: c,
               onTap: () {
@@ -101,18 +103,21 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel>
             if (widget.onExport != null)
               PageOptionsMenuItem(
                 icon: ElyanotesIcons.exportIcon,
-                label: 'Dışa Aktar',
+                label: s.toolbar.export,
                 compact: c,
                 onTap: widget.onExport,
               ),
             pageOptionsThickDivider(cs, compact: c),
           ],
-          PageOptionsHeader(title: 'Sayfa ${pageIndex + 1}', compact: c),
+          PageOptionsHeader(
+            title: s.pages.pageNumber(pageIndex + 1),
+            compact: c,
+          ),
           pageOptionsDivider(cs, compact: c),
           if (widget.onAddPage != null)
             PageOptionsMenuItem(
               icon: ElyanotesIcons.pageAdd,
-              label: 'Sayfa Ekle',
+              label: s.toolbar.addPage,
               compact: c,
               onTap: widget.onAddPage,
             ),
@@ -120,37 +125,37 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel>
             icon: isBookmarked
                 ? ElyanotesIcons.bookmarkFilled
                 : ElyanotesIcons.bookmark,
-            label: isBookmarked ? 'Yer imini kaldır' : 'Yer imi koy',
+            label: isBookmarked ? s.pages.removeBookmark : s.pages.bookmarkPage,
             compact: c,
             onTap: toggleBookmark,
           ),
           PageOptionsMenuItem(
             icon: ElyanotesIcons.copy,
-            label: 'Sayfayı kopyala',
+            label: s.pages.copyPage,
             compact: c,
             onTap: () => copyPage(context),
           ),
           PageOptionsMenuItem(
             icon: ElyanotesIcons.paste,
-            label: 'Sayfayı yapıştır',
+            label: s.pages.pastePage,
             compact: c,
             onTap: hasCopiedPage ? () => pastePage(context) : null,
           ),
           PageOptionsMenuItem(
             icon: ElyanotesIcons.duplicate,
-            label: 'Sayfayı çoğalt',
+            label: s.pages.duplicatePage,
             compact: c,
             onTap: () => duplicatePage(context),
           ),
           PageOptionsMenuItem(
             icon: ElyanotesIcons.template,
-            label: 'Şablonu değiştir',
+            label: s.pages.changeTemplate,
             compact: c,
             onTap: () => changeTemplate(context),
           ),
           PageOptionsMenuItem(
             icon: ElyanotesIcons.goToPage,
-            label: 'Sayfaya git',
+            label: s.pages.goToPageMenu,
             compact: c,
             trailing: pageOptionsChevronTrailing(cs,
                 '${pageIndex + 1} / $pageCount', Theme.of(context).textTheme),
@@ -158,31 +163,31 @@ class _PageOptionsPanelState extends ConsumerState<PageOptionsPanel>
           ),
           PageOptionsMenuItem(
             icon: ElyanotesIcons.pdfFile,
-            label: 'PDF olarak dışa aktar',
+            label: s.pages.exportPagePdf,
             compact: c,
             onTap: exportPageAsPdf,
           ),
           pageOptionsDivider(cs, compact: c),
           PageOptionsMenuItem(
             icon: ElyanotesIcons.pageClear,
-            label: 'Sayfayı temizle',
+            label: s.pages.clearPageMenu,
             isDestructive: true,
             compact: c,
             onTap: () => clearPage(context),
           ),
           PageOptionsMenuItem(
             icon: ElyanotesIcons.trash,
-            label: 'Çöpe taşı',
+            label: s.pages.movePageToTrash,
             isDestructive: true,
             compact: c,
             onTap: () => deletePage(context),
           ),
           pageOptionsThickDivider(cs, compact: c),
-          PageOptionsSectionHeader(title: 'Ayarlar', compact: c),
+          PageOptionsSectionHeader(title: s.pages.settings, compact: c),
           ScrollDirectionItem(onClose: widget.onClose, compact: c),
           PageOptionsMenuItem(
             icon: ElyanotesIcons.sliders,
-            label: 'Araç Çubuğunu Düzenle',
+            label: s.pages.editToolbar,
             compact: c,
             onTap: () {
               widget.onClose();

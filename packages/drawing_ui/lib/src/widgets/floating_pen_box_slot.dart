@@ -4,8 +4,7 @@ import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/chrome_tokens.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
-import 'package:drawing_ui/src/widgets/color_chip.dart'
-    show colorSemanticsLabel;
+import 'package:drawing_ui/src/widgets/color_chip.dart' show colorHex;
 import 'package:drawing_ui/src/widgets/pen_icon_widget.dart';
 
 /// One preset pen in the `FloatingPenBox`.
@@ -75,8 +74,9 @@ class FloatingPenBoxSlot extends StatelessWidget {
     final isColumn = boxAxis == Axis.vertical;
     final slide = isSelected ? _selectedOffset : _restingOffset;
     const centred = (_slotBreadth - _penSize) / 2;
-    final label =
-        '${preset.toolType.label(context.drawingStrings)}, ${colorSemanticsLabel(preset.color)}';
+    final strings = context.drawingStrings;
+    final label = '${preset.toolType.label(strings)}, '
+        '${strings.toolbar.color(colorHex(preset.color))}';
 
     return Semantics(
       button: true,
@@ -120,7 +120,7 @@ class FloatingPenBoxSlot extends StatelessWidget {
                   child: Semantics(
                     container: true,
                     button: true,
-                    label: 'Kalemi kaldır',
+                    label: context.drawingStrings.canvas.removePen,
                     child: GestureDetector(
                       onTap: onDelete,
                       child: Container(

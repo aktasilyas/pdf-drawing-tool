@@ -4,11 +4,17 @@ export 'domain/usecases/load_document_usecase.dart';
 export 'domain/usecases/save_document_usecase.dart';
 
 // Presentation
+export 'presentation/l10n/app_canvas_strings.dart';
 export 'presentation/l10n/app_catalog_strings.dart';
 export 'presentation/l10n/app_drawing_strings.dart';
 export 'presentation/l10n/app_drawing_strings_scope.dart';
+export 'presentation/l10n/app_error_strings.dart';
+export 'presentation/l10n/app_export_strings.dart';
+export 'presentation/l10n/app_page_list_strings.dart';
+export 'presentation/l10n/app_page_strings.dart';
 export 'presentation/l10n/app_panel_strings.dart';
 export 'presentation/l10n/app_selection_strings.dart';
+export 'presentation/l10n/app_template_strings.dart';
 export 'presentation/l10n/app_tool_strings.dart';
 export 'presentation/l10n/app_toolbar_strings.dart';
 export 'presentation/providers/editor_provider.dart';

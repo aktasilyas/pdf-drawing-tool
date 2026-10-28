@@ -66,7 +66,7 @@ abstract class DrawingShadows {
 
   /// Floating element shadow — floating_pen_box, floating_undo_redo,
   /// floating_recording_bar, floating_export_progress,
-  /// page_navigator, text_style_popup,
+  /// text_style_popup,
   /// paste_context_menu, ruler_overlay.
   static List<BoxShadow> floating(Brightness brightness) {
     if (brightness == Brightness.light) {

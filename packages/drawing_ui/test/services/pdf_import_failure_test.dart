@@ -46,23 +46,21 @@ void main() {
     );
   }
 
-  test('password-protected PDF gives a friendly message and no leftover',
+  test('password-protected PDF gives a typed failure and no leftover',
       () async {
     final r = await importWith(
       PlatformException(code: 'pdf', message: 'Password required'),
     );
     expect(r.isSuccess, isFalse);
-    expect(r.errorMessage, contains('parola korumalı'));
-    expect(r.errorMessage, isNot(contains('PlatformException')));
+    expect(r.failure?.error, PdfImportError.passwordProtected);
     expect(stored(), isEmpty);
   });
 
-  test('corrupt PDF gives a friendly message and no leftover', () async {
+  test('corrupt PDF gives a typed failure and no leftover', () async {
     final r = await importWith(
       PlatformException(code: 'pdf', message: 'bad xref'),
     );
-    expect(r.errorMessage, contains('bozuk'));
-    expect(r.errorMessage, isNot(contains('PlatformException')));
+    expect(r.failure?.error, PdfImportError.openFailed);
     expect(stored(), isEmpty);
   });
 
@@ -73,7 +71,7 @@ void main() {
       bytes: encrypted,
     );
     expect(r.isSuccess, isFalse);
-    expect(r.errorMessage, contains('parola korumalı'));
+    expect(r.failure?.error, PdfImportError.passwordProtected);
     expect(stored(), isEmpty);
   });
 

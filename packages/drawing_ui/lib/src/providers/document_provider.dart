@@ -66,7 +66,7 @@ final allLayersProvider = Provider<List<Layer>>((ref) {
 /// - Document lifecycle (new, clear)
 class DocumentNotifier extends StateNotifier<DrawingDocument> {
   /// Creates a new DocumentNotifier with an empty document.
-  DocumentNotifier() : super(DrawingDocument.emptyMultiPage('İsimsiz Not'));
+  DocumentNotifier() : super(DrawingDocument.emptyMultiPage(''));
 
   /// Add stroke to active layer.
   ///
@@ -142,7 +142,7 @@ class DocumentNotifier extends StateNotifier<DrawingDocument> {
   /// Create new document.
   ///
   /// Resets everything to a fresh state.
-  void newDocument({String title = 'İsimsiz Not'}) {
+  void newDocument({String title = ''}) {
     state = DrawingDocument.emptyMultiPage(title);
   }
 

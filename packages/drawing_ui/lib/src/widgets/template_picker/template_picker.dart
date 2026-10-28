@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/widgets/template_picker/category_tabs.dart';
 import 'package:drawing_ui/src/widgets/template_picker/cover_grid.dart';
 import 'package:drawing_ui/src/widgets/template_picker/template_grid.dart';
@@ -155,6 +156,7 @@ class _TemplatePickerState extends State<TemplatePicker>
   }
 
   Widget _buildTabBar(ThemeData theme, ColorScheme cs) {
+    final s = context.drawingStrings.templates;
     return Container(
       decoration: BoxDecoration(
         border: Border(
@@ -170,7 +172,7 @@ class _TemplatePickerState extends State<TemplatePicker>
         unselectedLabelStyle: theme.textTheme.titleSmall,
         indicatorColor: cs.primary,
         indicatorWeight: 2.5,
-        tabs: const [Tab(text: 'Kapak'), Tab(text: 'Kâğıt')],
+        tabs: [Tab(text: s.coverTab), Tab(text: s.paperTab)],
       ),
     );
   }
@@ -245,7 +247,7 @@ class _TemplatePickerState extends State<TemplatePicker>
                         horizontal: 20, vertical: 12),
                     shape: RoundedRectangleBorder(borderRadius: radius),
                   ),
-                  child: Text('İptal',
+                  child: Text(context.drawingStrings.panels.cancel,
                       style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -259,9 +261,9 @@ class _TemplatePickerState extends State<TemplatePicker>
                         horizontal: 24, vertical: 12),
                     shape: RoundedRectangleBorder(borderRadius: radius),
                   ),
-                  child: const Text('Uygula',
-                      style:
-                          TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                  child: Text(context.drawingStrings.templates.apply,
+                      style: const TextStyle(
+                          fontSize: 14, fontWeight: FontWeight.w600)),
                 ),
               ],
             ),

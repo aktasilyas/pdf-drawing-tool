@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/canvas/page_slide_transition.dart';
 import 'package:drawing_ui/src/panels/page_structure_undo.dart';
@@ -108,11 +109,13 @@ mixin DrawingScreenNavigation on ConsumerState<DrawingScreen> {
         background: resolveNewPageBackground(),
       ),
     );
+    final strings = context.drawingStrings;
     showPageUndoSnackBar(
       ScaffoldMessenger.maybeOf(context),
       actions,
       change,
-      'Sayfa eklendi',
+      strings.pages.pageAdded,
+      undoLabel: strings.toolbar.undo,
     );
   }
 

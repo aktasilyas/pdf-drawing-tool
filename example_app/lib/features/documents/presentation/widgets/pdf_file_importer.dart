@@ -66,6 +66,7 @@ Future<void> importPdfFile(
   // Save references before async gap
   final messenger = ScaffoldMessenger.of(context);
   final router = GoRouter.of(context);
+  final strings = context.drawingStrings;
 
   // Track dialog state to prevent double-pop crash
   bool isDialogOpen = true;
@@ -92,8 +93,10 @@ Future<void> importPdfFile(
     if (!importResult.isSuccess) {
       messenger.showSnackBar(
         SnackBar(
-          content:
-              Text(importResult.errorMessage ?? l10n.libraryPdfImportFailed),
+          content: Text(
+            importResult.failure?.message(strings) ??
+                strings.errors.pdfOpenFailed,
+          ),
           backgroundColor: Theme.of(context).colorScheme.error,
           behavior: SnackBarBehavior.floating,
         ),
@@ -169,7 +172,7 @@ Future<void> importPdfFile(
     // Hata mesajı göster
     messenger.showSnackBar(
       SnackBar(
-        content: Text(friendlyPdfImportError(e)),
+        content: Text(pdfImportFailureFor(e).message(strings)),
         backgroundColor: Theme.of(context).colorScheme.error,
         behavior: SnackBarBehavior.floating,
       ),

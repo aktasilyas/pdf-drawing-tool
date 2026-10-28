@@ -2,18 +2,20 @@ import 'package:drawing_core/drawing_core.dart';
 import 'package:flutter/material.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 
+import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'package:drawing_ui/src/widgets/template_preview_widget.dart';
 
 /// Position where the new page should be inserted.
-enum AddPagePosition {
-  before('Önce'),
-  after('Sonra'),
-  lastPage('Son sayfa');
+enum AddPagePosition { before, after, lastPage }
 
-  const AddPagePosition(this.label);
-  final String label;
-}
+/// Localized label of an [AddPagePosition].
+String addPagePositionLabel(PageListStrings strings, AddPagePosition pos) =>
+    switch (pos) {
+      AddPagePosition.before => strings.positionBefore,
+      AddPagePosition.after => strings.positionAfter,
+      AddPagePosition.lastPage => strings.lastPage,
+    };
 
 /// Segmented control for selecting where the new page should be inserted.
 class AddPagePositionSelector extends StatelessWidget {
@@ -29,6 +31,7 @@ class AddPagePositionSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final strings = context.drawingStrings;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -36,7 +39,7 @@ class AddPagePositionSelector extends StatelessWidget {
         segments: AddPagePosition.values
             .map((pos) => ButtonSegment<AddPagePosition>(
                   value: pos,
-                  label: Text(pos.label),
+                  label: Text(addPagePositionLabel(strings.pageList, pos)),
                 ))
             .toList(),
         selected: {selected},
@@ -97,7 +100,7 @@ class QuickTemplateThumbnail extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              template.name,
+              context.drawingStrings.templates.templateName(template),
               style: TextStyle(
                 fontSize: 11,
                 color: isSelected ? cs.primary : cs.onSurfaceVariant,
@@ -129,7 +132,7 @@ class AddPageHeader extends StatelessWidget {
         children: [
           Expanded(
             child: Text(
-              'Sayfa ekle',
+              context.drawingStrings.pageList.addPage,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,

@@ -34,7 +34,7 @@ mixin _PlacementIndicators on DrawingCanvasGestureHandlers<DrawingCanvas> {
                       style: Theme.of(context).textTheme.headlineSmall),
                   const SizedBox(width: 8),
                   Text(
-                    'Yerleştirmek için dokunun',
+                    context.drawingStrings.canvas.tapToPlace,
                     style: Theme.of(context)
                         .textTheme
                         .bodyMedium
@@ -95,7 +95,7 @@ mixin _PlacementIndicators on DrawingCanvasGestureHandlers<DrawingCanvas> {
                       color: Colors.white, size: 18),
                   const SizedBox(width: 8),
                   Text(
-                    'Resmi yerlesirmek icin dokunun',
+                    context.drawingStrings.canvas.tapToPlaceImage,
                     style: Theme.of(context)
                         .textTheme
                         .bodyMedium

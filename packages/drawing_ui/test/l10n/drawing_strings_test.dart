@@ -1,3 +1,5 @@
+import 'package:drawing_core/drawing_core.dart'
+    show TemplateCategory, TemplateCategoryExtension, TemplateRegistry;
 import 'package:drawing_ui/drawing_ui.dart';
 import 'package:drawing_ui/src/panels/sticker_catalog.dart';
 import 'package:flutter/widgets.dart';
@@ -10,23 +12,11 @@ class _EnTools extends ToolStringsTr {
   String get fountainPen => 'Fountain pen';
 }
 
-class _EnStrings implements DrawingStrings {
+class _EnStrings extends DrawingStringsTr {
   const _EnStrings();
 
   @override
   ToolStrings get tools => const _EnTools();
-
-  @override
-  ToolbarStrings get toolbar => const ToolbarStringsTr();
-
-  @override
-  PanelStrings get panels => const PanelStringsTr();
-
-  @override
-  CatalogStrings get catalog => const CatalogStringsTr();
-
-  @override
-  SelectionStrings get selection => const SelectionStringsTr();
 }
 
 Future<DrawingStrings> _pump(
@@ -100,6 +90,42 @@ void main() {
       expect(map.values, everyElement(isNotEmpty));
     });
 
+    test('pages strings map has no empty value', () {
+      final map = strings.pages.toMap();
+      expect(map, isNotEmpty);
+      expect(map.values, everyElement(isNotEmpty));
+    });
+
+    test('pageList strings map has no empty value', () {
+      final map = strings.pageList.toMap();
+      expect(map, isNotEmpty);
+      expect(map.values, everyElement(isNotEmpty));
+    });
+
+    test('export strings map has no empty value', () {
+      final map = strings.export.toMap();
+      expect(map, isNotEmpty);
+      expect(map.values, everyElement(isNotEmpty));
+    });
+
+    test('templates strings map has no empty value', () {
+      final map = strings.templates.toMap();
+      expect(map, isNotEmpty);
+      expect(map.values, everyElement(isNotEmpty));
+    });
+
+    test('errors strings map has no empty value', () {
+      final map = strings.errors.toMap();
+      expect(map, isNotEmpty);
+      expect(map.values, everyElement(isNotEmpty));
+    });
+
+    test('canvas strings map has no empty value', () {
+      final map = strings.canvas.toMap();
+      expect(map, isNotEmpty);
+      expect(map.values, everyElement(isNotEmpty));
+    });
+
     test('toolbar color set names are present', () {
       final map = strings.toolbar.toMap();
       expect(map['colorSetBasic'], 'Temel');
@@ -126,6 +152,22 @@ void main() {
       expect(strings.toolbar.color('#FF0000'), contains('#FF0000'));
       expect(strings.toolbar.selectedColor('#FF0000'), contains('#FF0000'));
       expect(strings.toolbar.thickness('2.0'), contains('2.0'));
+      expect(strings.pages.pageNumber(7), contains('7'));
+      expect(
+          strings.pageList.pageOf(3, 9), allOf(contains('3'), contains('9')));
+      expect(strings.export.invalidRange(12), contains('12'));
+      expect(strings.export.pageFileName('Notes', 4),
+          allOf(contains('Notes'), contains('4')));
+      expect(strings.errors.pdfTooManyPages(600, 500),
+          allOf(contains('600'), contains('500')));
+      expect(strings.canvas.penBox(5), contains('5'));
+    });
+
+    test('template and category names follow the Turkish model fields', () {
+      expect(strings.templates.templateName(TemplateRegistry.blank),
+          TemplateRegistry.blank.name);
+      expect(strings.templates.categoryName(TemplateCategory.basic),
+          TemplateCategory.basic.displayName);
     });
   });
 }

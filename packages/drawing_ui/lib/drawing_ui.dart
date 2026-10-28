@@ -29,9 +29,7 @@ export 'src/screens/drawing_screen_panels.dart';
 export 'src/screens/drawing_screen_layout.dart';
 
 // Canvas
-export 'src/canvas/mock_canvas.dart';
 export 'src/canvas/drawing_canvas.dart';
-export 'src/canvas/pdf_page_placeholder.dart' show PdfBackgroundStrings;
 export 'src/canvas/stroke_painter.dart';
 export 'src/canvas/infinite_background_painter.dart';
 export 'src/canvas/canvas_color_scheme.dart';
@@ -89,12 +87,13 @@ export 'src/panels/highlighter_settings_panel.dart';
 export 'src/panels/eraser_settings_panel.dart';
 export 'src/panels/shapes_settings_panel.dart';
 export 'src/panels/sticker_panel.dart';
+export 'src/panels/export_panel.dart' show ExportPanel;
+export 'src/panels/page_options_panel.dart' show PageOptionsPanel;
 export 'src/panels/sticky_note_panel.dart';
 export 'src/panels/text_settings_panel.dart';
 export 'src/panels/pen_type_picker.dart';
 export 'src/panels/image_panel.dart';
 export 'src/panels/ai_assistant_panel.dart';
-export 'src/panels/toolbar_editor_panel.dart';
 export 'src/panels/toolbar_settings_panel.dart';
 export 'src/panels/lasso_selection_panel.dart';
 export 'src/panels/laser_pointer_panel.dart';

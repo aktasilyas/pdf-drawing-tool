@@ -1,3 +1,4 @@
+import 'package:drawing_ui/src/services/export_errors.dart';
 import 'package:pdf/pdf.dart';
 
 /// PDF export mode.
@@ -83,30 +84,29 @@ class PDFExportOptions {
 class PDFExportResult {
   final bool isSuccess;
   final List<int> pdfBytes;
-  final String? errorMessage;
+  final ExportFailure? failure;
 
   const PDFExportResult({
     required this.isSuccess,
     required this.pdfBytes,
-    this.errorMessage,
+    this.failure,
   });
 
   factory PDFExportResult.success(List<int> bytes) =>
       PDFExportResult(isSuccess: true, pdfBytes: bytes);
 
-  factory PDFExportResult.error(String message) => PDFExportResult(
+  factory PDFExportResult.error(ExportFailure failure) => PDFExportResult(
         isSuccess: false,
         pdfBytes: const [],
-        errorMessage: message,
+        failure: failure,
       );
 
   factory PDFExportResult.cancelled() => PDFExportResult(
         isSuccess: false,
         pdfBytes: const [],
-        errorMessage: null,
       );
 
-  bool get wasCancelled => !isSuccess && errorMessage == null;
+  bool get wasCancelled => !isSuccess && failure == null;
 
   int get fileSizeBytes => pdfBytes.length;
 
