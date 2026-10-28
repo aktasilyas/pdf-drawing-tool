@@ -25,8 +25,8 @@ Layer _layer() => Layer.empty('L')
     ]))
     .addStroke(_stroke('thick', [DrawingPoint(x: 5, y: 40)], thickness: 40))
     .addStroke(_stroke('thin', [DrawingPoint(x: 8, y: 8)], thickness: 0.15))
-    .addStroke(_stroke('other', [DrawingPoint(x: 90, y: 90)],
-        color: 0xFF00FF00))
+    .addStroke(
+        _stroke('other', [DrawingPoint(x: 90, y: 90)], color: 0xFF00FF00))
     .addShape(Shape(
       id: 'r',
       type: ShapeType.rectangle,
@@ -102,16 +102,16 @@ void main() {
     test('execute clamps thickness and font size at the caps', () {
       final layer = _scale(2, 2).execute(doc).layers[0];
 
-      expect(layer.strokes.firstWhere((s) => s.id == 'thick').style.thickness,
-          50);
+      expect(
+          layer.strokes.firstWhere((s) => s.id == 'thick').style.thickness, 50);
       expect(layer.getTextById('big')!.fontSize, 200);
     });
 
     test('execute clamps thickness and font size at the floors', () {
       final layer = _scale(0.5, 0.5).execute(doc).layers[0];
 
-      expect(layer.strokes.firstWhere((s) => s.id == 'thin').style.thickness,
-          0.1);
+      expect(
+          layer.strokes.firstWhere((s) => s.id == 'thin').style.thickness, 0.1);
       expect(layer.getTextById('small')!.fontSize, 4);
     });
 

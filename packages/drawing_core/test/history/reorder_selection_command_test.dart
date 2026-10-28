@@ -157,8 +157,8 @@ void main() {
 
     test('works through HistoryManager undo/redo', () {
       final history = HistoryManager();
-      final executed = history.execute(
-          _mixedCommand(ReorderDirection.bringToFront), doc);
+      final executed =
+          history.execute(_mixedCommand(ReorderDirection.bringToFront), doc);
       final undone = history.undo(executed)!;
       final redone = history.redo(undone)!;
 
