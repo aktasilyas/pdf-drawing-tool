@@ -118,9 +118,12 @@ class _ToolbarSettingsPanelState extends ConsumerState<ToolbarSettingsPanel>
       dividerHeight: 0.5,
       dividerColor: cs.outlineVariant.withValues(alpha: 0.5),
       tabs: [
-        Tab(height: 36, text: context.drawingStrings.toolbar.settingsTabTools),
         Tab(
-          height: 36,
+          height: kMinInteractiveDimension,
+          text: context.drawingStrings.toolbar.settingsTabTools,
+        ),
+        Tab(
+          height: kMinInteractiveDimension,
           text: context.drawingStrings.toolbar.settingsTabExtraTools,
         ),
       ],
@@ -210,7 +213,6 @@ class _ToolbarSettingsPanelState extends ConsumerState<ToolbarSettingsPanel>
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: SizedBox(
         width: double.infinity,
-        height: 34,
         child: OutlinedButton.icon(
           onPressed: () {
             ref.read(toolbarConfigProvider.notifier).resetToDefault();
@@ -227,6 +229,10 @@ class _ToolbarSettingsPanelState extends ConsumerState<ToolbarSettingsPanel>
               borderRadius: BorderRadius.circular(8),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 12),
+            // Keeps the 34dp look while the hit area is padded to 48dp.
+            minimumSize: const Size.fromHeight(34),
+            fixedSize: const Size.fromHeight(34),
+            tapTargetSize: MaterialTapTargetSize.padded,
           ),
         ),
       ),
