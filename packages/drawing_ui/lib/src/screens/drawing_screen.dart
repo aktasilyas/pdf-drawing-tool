@@ -14,6 +14,7 @@ import 'package:drawing_ui/src/services/thumbnail_cache.dart';
 import 'package:drawing_ui/src/screens/drawing_screen_add_page_preview.dart';
 import 'package:drawing_ui/src/screens/drawing_screen_navigation.dart';
 import 'package:drawing_ui/src/screens/drawing_screen_overlays.dart';
+import 'package:drawing_ui/src/screens/drawing_screen_toolbar_actions.dart';
 import 'package:drawing_ui/src/screens/drawing_screen_viewport_sync.dart';
 
 /// The main drawing screen that combines all UI components.
@@ -64,7 +65,10 @@ class DrawingScreen extends ConsumerStatefulWidget {
 }
 
 class _DrawingScreenState extends ConsumerState<DrawingScreen>
-    with DrawingScreenNavigation, DrawingScreenViewportSync {
+    with
+        DrawingScreenNavigation,
+        DrawingScreenViewportSync,
+        DrawingScreenToolbarActions {
   final Map<ToolType, GlobalKey> _toolButtonKeys = {
     for (final tool in ToolType.values) tool: GlobalKey()
   };
@@ -106,7 +110,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen>
         penGroupButtonKey: _penGroupButtonKey,
         highlighterGroupButtonKey: _highlighterGroupButtonKey,
         settingsButtonKey: _settingsButtonKey,
-        onClosePanel: _closePanel,
+        onClosePanel: closePanel,
       );
     });
 
@@ -154,7 +158,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen>
                 children: [
                   AdaptiveToolbar(
                     onAIPressed: aiCallback,
-                    onSettingsPressed: _onSettingsPressed,
+                    onSettingsPressed: onSettingsPressed,
                     settingsButtonKey: _settingsButtonKey,
                     toolButtonKeys: _toolButtonKeys,
                     penGroupButtonKey: _penGroupButtonKey,
@@ -169,8 +173,8 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen>
                         ? (tool) => showToolPanelSheet(
                             context: context, ref: ref, tool: tool)
                         : null,
-                    onUndoPressed: _onUndoPressed,
-                    onRedoPressed: _onRedoPressed,
+                    onUndoPressed: onUndoPressed,
+                    onRedoPressed: onRedoPressed,
                   ),
                   Expanded(
                     child: Row(
@@ -205,7 +209,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen>
                             penBoxPosition: _penBoxPosition,
                             onPenBoxPositionChanged: (p) =>
                                 setState(() => _penBoxPosition = p),
-                            onClosePanel: _closePanel,
+                            onClosePanel: closePanel,
                             pageTransitionKey: pageTransitionKey,
                             onPageChanged: navigateToPage,
                             colorScheme: ref.watch(canvasColorSchemeProvider),
@@ -268,27 +272,6 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen>
       ),
     );
     return CanvasBrightnessSync(child: screen);
-  }
-
-  void _onUndoPressed() {
-    ref.read(historyManagerProvider.notifier).undo();
-  }
-
-  void _onRedoPressed() {
-    ref.read(historyManagerProvider.notifier).redo();
-  }
-
-  void _onSettingsPressed() {
-    final current = ref.read(activePanelProvider);
-    if (current == ToolType.toolbarSettings) {
-      _closePanel();
-    } else {
-      ref.read(activePanelProvider.notifier).state = ToolType.toolbarSettings;
-    }
-  }
-
-  void _closePanel() {
-    ref.read(activePanelProvider.notifier).state = null;
   }
 
   Widget _buildAddPagePreview() {

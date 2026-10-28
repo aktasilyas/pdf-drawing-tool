@@ -152,3 +152,14 @@ Future<List<Page>> convertPdfPagesImmediately(
 
   return pages;
 }
+
+/// Fails fast on a range that can never be valid, whatever the page count,
+/// before any file is written or loaded.
+void checkPdfImportRangeOrder(PDFImportConfig config) {
+  if (config.pageSelection == PDFPageSelection.range &&
+      config.startPage != null &&
+      config.endPage != null &&
+      config.startPage! > config.endPage!) {
+    throw ArgumentError('Invalid import configuration');
+  }
+}

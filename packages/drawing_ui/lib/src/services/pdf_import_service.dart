@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:drawing_core/drawing_core.dart' show PdfPathResolver;
 import 'package:flutter/foundation.dart';
 import 'pdf_import_errors.dart';
+import 'pdf_import_calculations.dart';
 import 'pdf_import_failure.dart';
 import 'pdf_import_models.dart';
 import 'pdf_import_pages.dart';
@@ -16,7 +17,7 @@ export 'pdf_import_failure.dart';
 export 'pdf_import_models.dart';
 
 /// Service for orchestrating PDF import workflow.
-class PDFImportService {
+class PDFImportService with PdfImportCalculations {
   final PDFLoader _loader;
   // ignore: unused_field
   final PDFPageRenderer _renderer;
@@ -31,10 +32,8 @@ class PDFImportService {
   int _processedPages = 0;
   bool _isDisposed = false;
 
-  /// Stream controller for state changes.
   final _stateController = StreamController<PDFImportState>.broadcast();
 
-  /// Stream controller for progress updates.
   final _progressController = StreamController<double>.broadcast();
 
   PDFImportService({
@@ -85,54 +84,12 @@ class PDFImportService {
   /// Whether service is disposed.
   bool get isDisposed => _isDisposed;
 
-  /// Validates page selection.
-  bool validatePageSelection({
-    required List<int> pageNumbers,
-    required int totalPages,
-  }) {
-    return isValidPdfPageSelection(pageNumbers, totalPages: totalPages);
-  }
-
-  /// Generates a page range.
-  List<int> generatePageRange({required int start, required int end}) =>
-      generatePdfPageRange(start: start, end: end);
-
-  /// Calculates progress.
-  double calculateProgress({
-    required int processedPages,
-    required int totalPages,
-  }) {
-    return totalPages == 0 ? 0.0 : processedPages / totalPages;
-  }
-
   /// Checks if can transition to a new state.
   bool canTransitionTo(PDFImportState newState) =>
       _state.canTransitionTo(newState);
 
-  /// Calculates optimal batch size for processing.
-  int calculateOptimalBatchSize({
-    required int totalPages,
-    required int availableMemory,
-  }) {
-    return optimalPdfBatchSize(
-      totalPages: totalPages,
-      availableMemory: availableMemory,
-    );
-  }
-
   /// Maximum number of pages allowed for import.
   static const int maxPageCount = 500;
-
-  /// Fails fast on a range that can never be valid, whatever the page count,
-  /// before any file is written or loaded.
-  void _checkRangeOrder(PDFImportConfig config) {
-    if (config.pageSelection == PDFPageSelection.range &&
-        config.startPage != null &&
-        config.endPage != null &&
-        config.startPage! > config.endPage!) {
-      throw ArgumentError('Invalid import configuration');
-    }
-  }
 
   /// Imports PDF from file path with lazy loading.
   ///
@@ -148,7 +105,7 @@ class PDFImportService {
       throw ArgumentError('File path cannot be empty');
     }
 
-    _checkRangeOrder(config);
+    checkPdfImportRangeOrder(config);
 
     try {
       _updateState(PDFImportState.loadingPDF);
@@ -189,7 +146,7 @@ class PDFImportService {
     bool useLazyLoading = true,
   }) async {
     _checkNotDisposed();
-    _checkRangeOrder(config);
+    checkPdfImportRangeOrder(config);
 
     try {
       // LAZY LOADING MODE: save the PDF to device, don't render pages.
