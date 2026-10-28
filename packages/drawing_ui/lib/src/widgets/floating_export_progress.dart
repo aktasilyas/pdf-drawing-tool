@@ -163,12 +163,13 @@ class _ExportingBody extends ConsumerWidget {
         ),
         const SizedBox(width: 4),
         SizedBox(
-          width: 28,
-          height: 28,
+          width: 48,
+          height: 48,
           child: IconButton(
             padding: EdgeInsets.zero,
             iconSize: 16,
-            splashRadius: 16,
+            splashRadius: 20,
+            tooltip: context.drawingStrings.panels.cancel,
             icon: PhosphorIcon(
               ElyanotesIcons.close,
               size: 16,
