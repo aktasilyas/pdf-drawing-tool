@@ -32,6 +32,8 @@ mixin PageOptionsTemplateActions<T extends ConsumerStatefulWidget>
     // The popover context goes away on close, so grab these first.
     final messenger = ScaffoldMessenger.maybeOf(context);
     final strings = context.drawingStrings;
+    // Outlives the panel, so the SnackBar undo can still read providers.
+    final container = ProviderScope.containerOf(context, listen: false);
 
     // Resolve the target page's template, color and paper size.
     final bg = page.background;
@@ -90,12 +92,17 @@ mixin PageOptionsTemplateActions<T extends ConsumerStatefulWidget>
       color: newBgColor,
       lineColor: newLineColor,
     );
+    // The cover follows the paper size; remember it for undo.
+    final previousCoverSize = docNotifier.currentDocument.pages
+        .where((p) => p.isCover && p.id != page.id)
+        .firstOrNull
+        ?.size;
     _updatePage(
+      container,
       page.id,
       background: templateChanged ? newBg : null,
       size: sizeChanged ? newPageSize : null,
-      docNotifier: docNotifier,
-      pageManager: pageManager,
+      coverSize: sizeChanged ? newPageSize : null,
     );
 
     if (templateChanged && _isContentBackground(bg)) {
@@ -107,12 +114,11 @@ mixin PageOptionsTemplateActions<T extends ConsumerStatefulWidget>
             action: SnackBarAction(
               label: strings.toolbar.undo,
               onPressed: () => _updatePage(
+                container,
                 page.id,
                 background: bg,
                 size: sizeChanged ? page.size : null,
-                syncCoverSize: false,
-                docNotifier: docNotifier,
-                pageManager: pageManager,
+                coverSize: sizeChanged ? previousCoverSize : null,
               ),
             ),
           ),
@@ -120,16 +126,18 @@ mixin PageOptionsTemplateActions<T extends ConsumerStatefulWidget>
     }
   }
 
-  /// Sets [background] and/or [size] of the page with [pageId]; a new size
-  /// is also applied to the cover unless [syncCoverSize] is false.
+  /// Sets [background] and/or [size] of the page with [pageId] and, when
+  /// [coverSize] is set, the size of the cover page. The page manager keeps
+  /// its current page (the document's index is not kept in sync with
+  /// navigation, so it must not be used here).
   void _updatePage(
+    ProviderContainer container,
     String pageId, {
     PageBackground? background,
     PageSize? size,
-    bool syncCoverSize = true,
-    required DocumentNotifier docNotifier,
-    required PageManagerNotifier pageManager,
+    PageSize? coverSize,
   }) {
+    final docNotifier = container.read(documentProvider.notifier);
     final freshDoc = docNotifier.currentDocument;
     final idx = freshDoc.pages.indexWhere((p) => p.id == pageId);
     if (idx < 0) return;
@@ -138,12 +146,11 @@ mixin PageOptionsTemplateActions<T extends ConsumerStatefulWidget>
     if (size != null) updated = updated.copyWith(size: size);
     final pages = List<Page>.from(freshDoc.pages)..[idx] = updated;
     docNotifier.updateDocument(freshDoc.copyWith(pages: pages));
-    if (size != null && syncCoverSize) _syncCoverSize(size, docNotifier);
-    final synced = docNotifier.currentDocument;
-    pageManager.initializeFromDocument(
-      synced.pages,
-      currentIndex: synced.currentPageIndex,
-    );
+    if (coverSize != null) _syncCoverSize(coverSize, docNotifier);
+    container.read(pageManagerProvider.notifier).initializeFromDocument(
+          docNotifier.currentDocument.pages,
+          currentIndex: container.read(currentPageIndexProvider),
+        );
   }
 
   /// Ensures the cover page matches the current paper size/orientation.

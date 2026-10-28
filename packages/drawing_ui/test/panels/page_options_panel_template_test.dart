@@ -25,7 +25,8 @@ final _coverBg = core.PageBackground(
 );
 
 /// Cover, then four pages: blank, blank, PDF (odd size), grid template.
-/// Page index 1 (the first blank page) is current.
+/// Page index 1 (the first blank page) is current in the page manager; the
+/// document's own index is stale (3), as it is after navigating in the app.
 core.DrawingDocument _doc() {
   final pages = <core.Page>[
     core.Page.createCover(
@@ -42,7 +43,7 @@ core.DrawingDocument _doc() {
         index: 4, background: core.PageBackground.fromTemplate(_grid)),
   ];
   return core.DrawingDocument.emptyMultiPage('Test')
-      .copyWith(pages: pages, currentPageIndex: 1);
+      .copyWith(pages: pages, currentPageIndex: 3);
 }
 
 Future<ProviderContainer> _pump(WidgetTester tester, int pageIndex) async {
@@ -60,7 +61,7 @@ Future<ProviderContainer> _pump(WidgetTester tester, int pageIndex) async {
   container.read(documentProvider.notifier).updateDocument(doc);
   container
       .read(pageManagerProvider.notifier)
-      .initializeFromDocument(doc.pages, currentIndex: doc.currentPageIndex);
+      .initializeFromDocument(doc.pages, currentIndex: 1);
 
   await tester.pumpWidget(
     UncontrolledProviderScope(
@@ -128,7 +129,9 @@ void main() {
     final before = _page(container, 1).size;
     await _openPicker(tester);
 
-    final orientation = find.text('Dikey');
+    // The panel below the dialog also shows 'Dikey' (scroll direction).
+    final orientation = find.descendant(
+        of: find.byType(TemplatePicker), matching: find.text('Dikey'));
     await tester.ensureVisible(orientation);
     await tester.tap(orientation);
     await tester.pumpAndSettle();
@@ -141,6 +144,36 @@ void main() {
     expect(_page(container, 1).size.width, before.width);
     expect(_page(container, 1).size.height, before.height);
     expect(_page(container, 4).background.templatePattern, _grid.pattern);
+    expect(container.read(currentPageIndexProvider), 1);
+  });
+
+  testWidgets('undo restores the PDF page size and the cover size',
+      (tester) async {
+    final container = await _pump(tester, 3);
+    final coverBefore = _page(container, 0).size;
+    await _openPicker(tester);
+    await _selectTemplate(tester, 'Noktalı');
+    final orientation = find.descendant(
+        of: find.byType(TemplatePicker), matching: find.text('Dikey'));
+    await tester.ensureVisible(orientation);
+    await tester.tap(orientation);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Yatay').last);
+    await tester.pumpAndSettle();
+    await _apply(tester);
+
+    final cover = _page(container, 0).size;
+    expect(cover.width, greaterThan(cover.height));
+    await tester.tap(find.text('Geri al'));
+    await tester.pumpAndSettle();
+
+    final page = _page(container, 3);
+    expect(page.background.type, core.BackgroundType.pdf);
+    expect(page.size.width, _oddSize.width);
+    expect(page.size.height, _oddSize.height);
+    expect(_page(container, 0).size.width, coverBefore.width);
+    expect(_page(container, 0).size.height, coverBefore.height);
+    expect(container.read(currentPageIndexProvider), 1);
   });
 
   testWidgets('confirming the picker unchanged keeps a PDF page as is',
@@ -186,6 +219,7 @@ void main() {
     expect(page.background.type, core.BackgroundType.pdf);
     expect(page.background.pdfFilePath, '/docs/source.pdf');
     expect(page.background.pdfPageIndex, 3);
+    expect(container.read(currentPageIndexProvider), 1);
   });
 
   testWidgets('a new template on the cover can be undone from the SnackBar',
