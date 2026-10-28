@@ -147,7 +147,14 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
           ..where((t) => t.documentId.equals(id)))
         .getSingleOrNull();
     if (row == null) return {};
-    final pages = (await _codec.decode(row.data))['pages'];
+    final Object? pages;
+    try {
+      pages = (await _codec.decode(row.data))['pages'];
+    } catch (e) {
+      // Undecodable content must not block deletion; only PDF cleanup is lost.
+      logger.w('Skipping PDF cleanup, content of $id is corrupt: $e');
+      return {};
+    }
     if (pages is! List) return {};
     return {
       for (final page in pages)

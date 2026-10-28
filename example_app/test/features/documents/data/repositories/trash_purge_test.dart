@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:drawing_core/drawing_core.dart' show PdfPathResolver;
+import 'package:example_app/core/core.dart' show DocumentContentsCompanion;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:example_app/features/documents/documents.dart';
 import '../../../../helpers/library_fixture.dart';
@@ -241,5 +242,54 @@ void main() {
     expect(pages, 1);
     expect((await fx.documentDs.getAllDocuments()).map((d) => d.id), [live.id]);
     expect(await fx.pageTrash.getTrashedPages(), isEmpty);
+  });
+
+  group('corrupt content', () {
+    Future<void> corrupt(String id) => fx.db.into(fx.db.documentContents).insert(
+          DocumentContentsCompanion.insert(
+            documentId: id,
+            data: '{not json',
+            updatedAt: now,
+          ),
+        );
+
+    test('deleteDocument removes a document whose content cannot decode',
+        () async {
+      final d = await create('Bad');
+      await addPage('tp', d.id, recent);
+      await corrupt(d.id);
+
+      await fx.documentDs.deleteDocument(d.id);
+
+      expect(await fx.documentDs.getAllDocuments(), isEmpty);
+      expect(await fx.documentDs.hasDocumentContent(d.id), isFalse);
+      expect(await fx.pageTrash.getTrashedPages(), isEmpty);
+    });
+
+    test('emptyTrash deletes all three with one corrupt', () async {
+      final ids = [for (final t in ['A', 'B', 'C']) (await create(t)).id];
+      await corrupt(ids[1]);
+      for (final id in ids) {
+        await trashAt(id, old);
+      }
+
+      final r = await fx.documents.emptyTrash();
+
+      expect(r.getOrElse(() => -1), 3);
+      expect(await fx.documentDs.getAllDocuments(), isEmpty);
+    });
+
+    test('purgeExpiredTrash deletes all three with one corrupt', () async {
+      final ids = [for (final t in ['A', 'B', 'C']) (await create(t)).id];
+      await corrupt(ids[0]);
+      for (final id in ids) {
+        await trashAt(id, old);
+      }
+
+      final r = await fx.documents.purgeExpiredTrash(now: now);
+
+      expect(r.getOrElse(() => -1), 3);
+      expect(await fx.documentDs.getAllDocuments(), isEmpty);
+    });
   });
 }
