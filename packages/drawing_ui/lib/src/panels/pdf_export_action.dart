@@ -30,6 +30,7 @@ class PDFExportRunner {
     ExportProgressNotifier progress,
     DrawingDocument document, {
     required ExportStrings strings,
+    bool isInfiniteCanvas = false,
     bool addWatermark = false,
     bool share = false,
     ExportOptions options = const ExportOptions(),
@@ -39,6 +40,7 @@ class PDFExportRunner {
       progress,
       document,
       strings: strings,
+      isInfiniteCanvas: isInfiniteCanvas,
       options: options,
       currentPageIndex: currentPageIndex,
       addWatermark: addWatermark,
