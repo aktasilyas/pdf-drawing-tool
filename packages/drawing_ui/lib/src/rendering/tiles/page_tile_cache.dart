@@ -9,6 +9,7 @@ import 'package:drawing_ui/src/rendering/tiles/element_scene.dart';
 import 'package:drawing_ui/src/rendering/tiles/scene_diff.dart';
 import 'package:drawing_ui/src/rendering/tiles/scene_renderer_factory.dart';
 import 'package:drawing_ui/src/rendering/tiles/tile_builder.dart';
+import 'package:drawing_ui/src/rendering/tiles/tile_compositor.dart';
 import 'package:drawing_ui/src/rendering/tiles/tile_grid.dart';
 import 'package:drawing_ui/src/rendering/tiles/tile_rasterizer.dart';
 import 'package:drawing_ui/src/rendering/tiles/tile_store.dart';
@@ -187,36 +188,17 @@ class PageTileCache extends ChangeNotifier {
   }
 
   void _composite(ElementScene scene, TileGrid grid, List<String> ids) {
-    final appended = [for (final id in ids) scene.byId[id]!];
-    final sub = buildSceneRenderer(
-      subScene(scene, appended, ids),
-      _strokeRenderer,
-      _cacheManager,
+    final built = compositeAppended(
+      scene: scene,
+      grid: grid,
+      ids: ids,
+      store: _store,
+      builder: _builder,
+      strokeRenderer: _strokeRenderer,
+      cacheManager: _cacheManager,
     );
-
-    final keys = <TileKey>{
-      for (final e in appended) ...grid.keysIn(e.bounds),
-    };
-    for (final key in keys) {
-      if (_store.vector.contains(key)) continue;
-      final tile = _store.tiles[key];
-      if (tile == null && !_store.has(key)) continue; // built later
-      final rect = grid.rectOf(key);
-      final hits = appended.where((e) => e.bounds.overlaps(rect)).toList();
-      if (hits.isEmpty) continue;
-      if (hits.any((e) => e.isVectorOnly)) {
-        _store.drop(key);
-        _store.vector.add(key);
-        continue;
-      }
-      final built = _builder.build(
-        key: key,
-        rect: rect,
-        scale: grid.scale,
-        renderer: sub,
-        base: tile,
-      );
-      _put(built, hits.length);
+    for (final (tile, recorded) in built) {
+      _put(tile, recorded);
     }
   }
 
