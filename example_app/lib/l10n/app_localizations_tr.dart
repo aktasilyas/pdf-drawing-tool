@@ -1839,6 +1839,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get libraryFoldersLoadFailed => 'Klasörler yüklenemedi';
 
   @override
+  String get libraryLoadFailed => 'Notlar yüklenemedi';
+
+  @override
+  String get libraryTrashLoadFailed => 'Çöp kutusu yüklenemedi';
+
+  @override
   String get libraryFolderNameEmpty => 'Klasör adı boş olamaz';
 
   @override

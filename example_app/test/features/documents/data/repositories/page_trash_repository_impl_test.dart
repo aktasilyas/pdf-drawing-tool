@@ -114,6 +114,27 @@ void main() {
       expect(await trashedPages(), hasLength(1));
     });
 
+    test('a notebook in the trash is not a restore target', () async {
+      final d = await create('Doc');
+      await fx.documents
+          .saveDocumentContent(id: d.id, content: content(2), pageCount: 2);
+      final id = await trash(d.id, pageIndex: 1);
+      ok(await fx.documents.moveToTrash(d.id));
+
+      expect(await fx.pageTrash.documentExists(d.id), const Right(false));
+      expect(await fx.pageTrash.restorePageFromTrash(id), const Right(false));
+      expect(await trashedPages(), hasLength(1), reason: 'trash row stays');
+      final pages = (await fx.documentDs.getDocumentContent(d.id))!['pages']
+          as List<dynamic>;
+      expect(pages, hasLength(2), reason: 'hidden notebook is untouched');
+
+      // Once the notebook is back, the page can be restored into it.
+      ok(await fx.documents.restoreFromTrash(d.id));
+      expect(await fx.pageTrash.documentExists(d.id), const Right(true));
+      expect(await fx.pageTrash.restorePageFromTrash(id), const Right(true));
+      expect(await trashedPages(), isEmpty);
+    });
+
     test('a failure mid-restore rolls everything back', () async {
       final d = await create('Doc');
       await fx.documents

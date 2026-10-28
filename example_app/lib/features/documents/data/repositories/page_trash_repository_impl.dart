@@ -83,6 +83,10 @@ class PageTrashRepositoryImpl implements PageTrashRepository {
   Future<bool> _restore(String trashedPageId) async {
     final model = await _trashDatasource.getTrashedPage(trashedPageId);
     if (model == null) return false;
+    // Never restore into a notebook that is in the trash (or gone).
+    if (!await _documentDatasource.isLiveDocument(model.sourceDocumentId)) {
+      return false;
+    }
 
     final content =
         await _documentDatasource.getDocumentContent(model.sourceDocumentId);
@@ -144,7 +148,7 @@ class PageTrashRepositoryImpl implements PageTrashRepository {
   Future<Either<Failure, bool>> documentExists(String documentId) {
     return _guard(
       'check document',
-      () => _documentDatasource.hasDocumentContent(documentId),
+      () => _documentDatasource.isLiveDocument(documentId),
     );
   }
 

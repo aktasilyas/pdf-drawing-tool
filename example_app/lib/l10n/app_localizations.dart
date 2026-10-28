@@ -3368,6 +3368,18 @@ abstract class AppLocalizations {
   /// **'Couldn\'t load folders'**
   String get libraryFoldersLoadFailed;
 
+  /// No description provided for @libraryLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load your notes'**
+  String get libraryLoadFailed;
+
+  /// No description provided for @libraryTrashLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load the trash'**
+  String get libraryTrashLoadFailed;
+
   /// No description provided for @libraryFolderNameEmpty.
   ///
   /// In en, this message translates to:

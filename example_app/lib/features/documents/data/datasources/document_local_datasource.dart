@@ -34,6 +34,10 @@ abstract class DocumentLocalDatasource {
   /// Whether a content row exists for [id] (without decoding it).
   Future<bool> hasDocumentContent(String id);
 
+  /// Whether [id] is a live document: its row exists, it is not in the trash
+  /// and it has content. Trashed pages are only restored into such documents.
+  Future<bool> isLiveDocument(String id);
+
   /// Deletes the managed files (copied PDFs, imported images) among [paths]
   /// that no document content or trashed page references any more.
   Future<void> deleteUnreferencedFiles(Iterable<String> paths);
@@ -268,6 +272,20 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
       return row != null;
     } catch (e) {
       throw CacheException('Failed to check document content: $e');
+    }
+  }
+
+  @override
+  Future<bool> isLiveDocument(String id) async {
+    try {
+      final row = await (_db.selectOnly(_db.documents)
+            ..addColumns([_db.documents.id])
+            ..where(_db.documents.id.equals(id) &
+                _db.documents.isInTrash.equals(false)))
+          .getSingleOrNull();
+      return row != null && await hasDocumentContent(id);
+    } catch (e) {
+      throw CacheException('Failed to check document: $e');
     }
   }
 }

@@ -89,6 +89,16 @@ SelectionActionConfig buildSelectionActionConfig(
     }
   }
   if (!foundColor) {
+    for (final id in selection.selectedShapeIds) {
+      final i = layer.shapes.indexWhere((s) => s.id == id);
+      if (i != -1) {
+        selectedColor = layer.shapes[i].style.color;
+        foundColor = true;
+        break;
+      }
+    }
+  }
+  if (!foundColor) {
     for (final id in selection.selectedTextIds) {
       final t = layer.getTextById(id);
       if (t != null) {
