@@ -68,8 +68,12 @@ class PaperSizePicker extends StatelessWidget {
       border: border,
     );
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
+    // Wraps the orientation dropdown onto a second line when long labels
+    // (e.g. English) do not fit next to the size dropdown at phone widths.
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      crossAxisAlignment: WrapCrossAlignment.center,
       children: [
         Container(
           height: h,
@@ -101,7 +105,6 @@ class PaperSizePicker extends StatelessWidget {
           ),
         ),
         if (showLandscapeToggle) ...[
-          const SizedBox(width: 8),
           Container(
             height: h,
             padding: EdgeInsets.symmetric(horizontal: hPad),
