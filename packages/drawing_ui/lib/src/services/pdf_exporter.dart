@@ -193,9 +193,8 @@ class PDFExporter {
       if (shifted) g.restoreContext();
       // Sticky notes sit above the layer's elements, as on the canvas.
       if (layer.stickyNotes.isNotEmpty) {
-        final notes = await _rasterRenderer.renderStickyNotes(
-            layer.stickyNotes, w, h, scale,
-            origin: origin);
+        final notes = await _rasterRenderer
+            .renderStickyNotes(layer.stickyNotes, w, h, scale, origin: origin);
         _drawRaw(g, doc, notes, w, h);
       }
     } else {

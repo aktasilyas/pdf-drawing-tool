@@ -136,9 +136,8 @@ void main() {
     });
 
     test('renderStickyNotes translates notes by origin', () async {
-      final img = (await PdfRasterLayerRenderer().renderStickyNotes(
-          [note], _w, _h, 1,
-          origin: const Offset(170, 0)))!;
+      final img = (await PdfRasterLayerRenderer()
+          .renderStickyNotes([note], _w, _h, 1, origin: const Offset(170, 0)))!;
       _expectRgba(_px(img, 70, 50), 0x00, 0xFF, 0x00);
     });
 

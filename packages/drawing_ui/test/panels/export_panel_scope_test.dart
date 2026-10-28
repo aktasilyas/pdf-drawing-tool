@@ -183,8 +183,8 @@ void main() {
     });
 
     test('canvas mode becomes isInfiniteCanvas', () async {
-      expect((await exportWith(const ExportOptions())).isInfiniteCanvas,
-          isFalse);
+      expect(
+          (await exportWith(const ExportOptions())).isInfiniteCanvas, isFalse);
       final o = await exportWith(const ExportOptions(), infinite: true);
       expect(o.isInfiniteCanvas, isTrue);
     });

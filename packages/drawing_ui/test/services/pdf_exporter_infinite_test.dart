@@ -36,8 +36,8 @@ Future<List<int>> _export({required bool infinite}) async {
 /// (content streams, object streams), so dictionaries and drawing operators
 /// can be searched whether or not they are compressed.
 List<String> _texts(List<int> pdf) {
-  bool isText(List<int> data) => data
-      .every((b) => b == 9 || b == 10 || b == 13 || (b >= 32 && b < 127));
+  bool isText(List<int> data) =>
+      data.every((b) => b == 9 || b == 10 || b == 13 || (b >= 32 && b < 127));
   final raw = latin1.decode(pdf);
   final texts = [raw];
   for (final m in RegExp(r'stream\r?\n').allMatches(raw)) {
@@ -57,8 +57,8 @@ List<String> _texts(List<int> pdf) {
 }
 
 ({double width, double height}) _mediaBox(List<String> texts) {
-  final re = RegExp(
-      r'/MediaBox\s*\[\s*(\S+)\s+(\S+)\s+(\S+)\s+([^\s\]]+)\s*\]');
+  final re =
+      RegExp(r'/MediaBox\s*\[\s*(\S+)\s+(\S+)\s+(\S+)\s+([^\s\]]+)\s*\]');
   for (final t in texts) {
     final m = re.firstMatch(t);
     if (m == null) continue;
