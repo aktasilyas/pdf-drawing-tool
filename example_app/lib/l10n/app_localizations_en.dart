@@ -1861,6 +1861,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get libraryFoldersLoadFailed => 'Couldn\'t load folders';
 
   @override
+  String get libraryLoadFailed => 'Couldn\'t load your notes';
+
+  @override
+  String get libraryTrashLoadFailed => 'Couldn\'t load the trash';
+
+  @override
   String get libraryFolderNameEmpty => 'Folder name can\'t be empty';
 
   @override

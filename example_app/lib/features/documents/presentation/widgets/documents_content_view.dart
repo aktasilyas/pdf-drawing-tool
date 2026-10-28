@@ -14,6 +14,7 @@ import 'package:example_app/features/documents/presentation/widgets/documents_er
 import 'package:example_app/features/documents/presentation/widgets/documents_list_view.dart';
 import 'package:example_app/features/documents/presentation/widgets/documents_sidebar.dart';
 import 'package:example_app/features/documents/presentation/widgets/trash_content_view.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// Routes content based on the selected sidebar section.
 class DocumentsContentView extends ConsumerWidget {
@@ -101,15 +102,21 @@ class _DocumentsWithFolders extends ConsumerWidget {
     final documentsAsync = ref.watch(documentsProvider(parentFolderId));
     return foldersAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => DocumentsErrorView(
-        error: error,
+      error: (error, st) => libraryLoadErrorView(
+        'Folders',
+        error,
+        st,
+        message: context.l10n.libraryFoldersLoadFailed,
         onRetry: () => ref.invalidate(foldersProvider),
       ),
       data: (folders) {
         return documentsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => DocumentsErrorView(
-            error: error,
+          error: (error, st) => libraryLoadErrorView(
+            'Documents',
+            error,
+            st,
+            message: context.l10n.libraryLoadFailed,
             onRetry: () => ref.invalidate(documentsProvider(parentFolderId)),
           ),
           data: (documents) {
@@ -191,15 +198,21 @@ class _FavoritesView extends ConsumerWidget {
 
     return favFoldersAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (error, _) => DocumentsErrorView(
-        error: error,
+      error: (error, st) => libraryLoadErrorView(
+        'Favorite folders',
+        error,
+        st,
+        message: context.l10n.libraryFoldersLoadFailed,
         onRetry: () => ref.invalidate(favoriteFoldersProvider),
       ),
       data: (folders) {
         return favDocsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (error, _) => DocumentsErrorView(
-            error: error,
+          error: (error, st) => libraryLoadErrorView(
+            'Favorite documents',
+            error,
+            st,
+            message: context.l10n.libraryLoadFailed,
             onRetry: () => ref.invalidate(favoriteDocumentsProvider),
           ),
           data: (documents) {

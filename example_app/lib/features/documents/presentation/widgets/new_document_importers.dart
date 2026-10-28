@@ -77,8 +77,19 @@ Future<void> importImage(BuildContext context) async {
     return;
   }
 
-  // 2. Loading göster
   if (!context.mounted) return;
+  await importImageFile(context, path: filePath, name: file.name);
+}
+
+/// Imports the image at [path] as a new one-page notebook named after [name]
+/// and opens it. Failures show localized copy only; the error is logged.
+Future<void> importImageFile(
+  BuildContext context, {
+  required String path,
+  required String name,
+}) async {
+  final l10n = context.l10n;
+  // 2. Loading göster
   showDialog(
     context: context,
     barrierDismissible: false,
@@ -101,7 +112,7 @@ Future<void> importImage(BuildContext context) async {
     final ImagePage imagePage;
     try {
       imagePage = await importImagePage(
-        filePath,
+        path,
         documentsRoot: paths.documentsRoot ??
             (await getApplicationDocumentsDirectory()).path,
         paths: paths,
@@ -144,7 +155,7 @@ Future<void> importImage(BuildContext context) async {
     final controller = container.read(documentsControllerProvider.notifier);
     final folderId = container.read(currentFolderIdProvider);
 
-    final title = file.name.replaceAll(
+    final title = name.replaceAll(
       RegExp(r'\.(png|jpg|jpeg|gif|webp|bmp)$', caseSensitive: false),
       '',
     );
@@ -192,7 +203,7 @@ Future<void> importImage(BuildContext context) async {
       // Hata mesajı göster
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(l10n.commonErrorDetail('$e')),
+          content: Text(l10n.libraryErrorImportDocument),
           backgroundColor: Theme.of(context).colorScheme.error,
           behavior: SnackBarBehavior.floating,
         ),
