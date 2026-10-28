@@ -107,8 +107,7 @@ mixin DocumentQueries {
       final foldedQuery = foldForSearch(query);
       final results = documents
           .where((doc) =>
-              !doc.isInTrash &&
-              foldForSearch(doc.title).contains(foldedQuery))
+              !doc.isInTrash && foldForSearch(doc.title).contains(foldedQuery))
           .map((model) => model.toEntity())
           .toList();
 

@@ -233,9 +233,8 @@ List<String> getCurrentDocumentIds(
     data: (docs) {
       var filtered = docs;
       if (searchQuery.isNotEmpty) {
-        filtered = docs
-            .where((d) => matchesSearch(d.title, searchQuery))
-            .toList();
+        filtered =
+            docs.where((d) => matchesSearch(d.title, searchQuery)).toList();
       }
       return filtered.map((d) => d.id).toList();
     },
@@ -263,9 +262,8 @@ List<String> getCurrentFolderIds(
         return <String>[];
       }
       if (searchQuery.isNotEmpty) {
-        visible = visible
-            .where((f) => matchesSearch(f.name, searchQuery))
-            .toList();
+        visible =
+            visible.where((f) => matchesSearch(f.name, searchQuery)).toList();
       }
       return visible.map((f) => f.id).toList();
     },
