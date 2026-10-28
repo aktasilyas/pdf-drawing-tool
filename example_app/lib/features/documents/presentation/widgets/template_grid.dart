@@ -117,85 +117,96 @@ class TemplateGridItem extends StatelessWidget {
     final l10n = context.l10n;
     final outlineColor = context.palette.border;
     final textSecondary = context.palette.textMuted;
+    final name = localizedName(l10n, tr: template.name, en: template.nameEn);
 
-    return GestureDetector(
+    // One labeled, selectable button per tile; children are excluded so the
+    // name is read once.
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: name,
+      excludeSemantics: true,
       onTap: onTap,
-      child: Column(
-        children: [
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(AppRadius.sm),
-                border: Border.all(
-                  color: isSelected ? AppColors.primary : outlineColor,
-                  width: isSelected ? 2 : 1,
+      child: GestureDetector(
+        onTap: onTap,
+        child: Column(
+          children: [
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(AppRadius.sm),
+                  border: Border.all(
+                    color: isSelected ? AppColors.primary : outlineColor,
+                    width: isSelected ? 2 : 1,
+                  ),
                 ),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(AppRadius.sm - 1),
-                child: Stack(
-                  children: [
-                    TemplatePreviewWidget(
-                      template: template,
-                      backgroundColorOverride: Color(paperColor),
-                      showBorder: false,
-                    ),
-                    if (template.isPremium)
-                      Positioned(
-                        top: AppSpacing.xxs,
-                        right: AppSpacing.xxs,
-                        child: Container(
-                          padding: const EdgeInsets.all(2),
-                          decoration: BoxDecoration(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .surfaceContainerHighest
-                                .withValues(alpha: 0.85),
-                            borderRadius: BorderRadius.circular(3),
-                          ),
-                          child: Icon(
-                            Icons.lock_outline,
-                            size: 10,
-                            color:
-                                Theme.of(context).colorScheme.onSurfaceVariant,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(AppRadius.sm - 1),
+                  child: Stack(
+                    children: [
+                      TemplatePreviewWidget(
+                        template: template,
+                        backgroundColorOverride: Color(paperColor),
+                        showBorder: false,
+                      ),
+                      if (template.isPremium)
+                        Positioned(
+                          top: AppSpacing.xxs,
+                          right: AppSpacing.xxs,
+                          child: Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainerHighest
+                                  .withValues(alpha: 0.85),
+                              borderRadius: BorderRadius.circular(3),
+                            ),
+                            child: Icon(
+                              Icons.lock_outline,
+                              size: 10,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
                           ),
                         ),
-                      ),
-                    if (isSelected)
-                      Positioned(
-                        left: AppSpacing.xs,
-                        bottom: AppSpacing.xs,
-                        child: Container(
-                          padding: const EdgeInsets.all(AppSpacing.xxs),
-                          decoration: const BoxDecoration(
-                            color: AppColors.primary,
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            Icons.check,
-                            size: AppIconSize.xs,
-                            color: AppColors.onPrimary,
+                      if (isSelected)
+                        Positioned(
+                          left: AppSpacing.xs,
+                          bottom: AppSpacing.xs,
+                          child: Container(
+                            padding: const EdgeInsets.all(AppSpacing.xxs),
+                            decoration: const BoxDecoration(
+                              color: AppColors.primary,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.check,
+                              size: AppIconSize.xs,
+                              color: AppColors.onPrimary,
+                            ),
                           ),
                         ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.xxs),
-          Text(
-            localizedName(l10n, tr: template.name, en: template.nameEn),
-            style: AppTypography.caption.copyWith(
-              color: isSelected ? AppColors.primary : textSecondary,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-              fontSize: 10,
+            const SizedBox(height: AppSpacing.xxs),
+            Text(
+              name,
+              style: AppTypography.caption.copyWith(
+                color: isSelected ? AppColors.primary : textSecondary,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                fontSize: 10,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

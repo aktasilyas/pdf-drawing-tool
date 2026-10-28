@@ -30,7 +30,7 @@ class PDFExporter {
     PdfSourceOpener? sourceOpener,
   }) : _openSource = sourceOpener ?? openPdfxSource;
 
-  /// Resolves stored PDF paths of lazy PDF backgrounds to files on disk.
+  /// Resolves stored PDF background and inserted image paths to files on disk.
   final PdfPathResolver pdfPaths;
   final PdfSourceOpener _openSource;
 
@@ -177,7 +177,8 @@ class PDFExporter {
     }
     final scale = _scaleFromDpi(options.quality.dpi);
     if (_contentPainter.isLayerVectorizable(layer)) {
-      await _contentPainter.paintLayerContent(g, doc, layer, w, h);
+      await _contentPainter.paintLayerContent(g, doc, layer, w, h,
+          paths: pdfPaths);
       // Sticky notes sit above the layer's elements, as on the canvas.
       if (layer.stickyNotes.isNotEmpty) {
         final notes = await _rasterRenderer.renderStickyNotes(
@@ -185,7 +186,8 @@ class PDFExporter {
         _drawRaw(g, doc, notes, w, h);
       }
     } else {
-      final raw = await _rasterRenderer.renderLayer(layer, w, h, scale);
+      final raw = await _rasterRenderer.renderLayer(layer, w, h, scale,
+          paths: pdfPaths);
       _drawRaw(g, doc, raw, w, h);
     }
     if (hasOpacity) g.restoreContext();

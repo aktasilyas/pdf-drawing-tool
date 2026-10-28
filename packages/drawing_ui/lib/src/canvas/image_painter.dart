@@ -111,7 +111,17 @@ class ImageElementPainter extends CustomPainter {
 ///
 /// Extends [ChangeNotifier] so painters using this as a repaint listenable
 /// automatically repaint when a new image finishes loading.
+///
+/// Cache keys are the *stored* paths (as persisted in [ImageElement.filePath]);
+/// [paths] turns them into absolute files when loading, so images survive a
+/// change of the documents directory.
 class ImageCacheManager extends ChangeNotifier {
+  /// Creates a cache that opens files through [paths].
+  ImageCacheManager({this.paths = PdfPathResolver.passthrough});
+
+  /// Resolves stored image paths to absolute file paths.
+  final PdfPathResolver paths;
+
   final Map<String, ui.Image> _cache = {};
   final Set<String> _loading = {};
 
@@ -125,7 +135,7 @@ class ImageCacheManager extends ChangeNotifier {
     _loading.add(filePath);
 
     try {
-      final file = File(filePath);
+      final file = File(paths.resolve(filePath));
       if (!file.existsSync()) {
         _loading.remove(filePath);
         return;

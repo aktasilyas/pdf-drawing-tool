@@ -8,6 +8,7 @@ import 'package:drawing_ui/src/canvas/active_stroke_layer.dart';
 import 'package:drawing_ui/src/canvas/drawing_canvas.dart';
 import 'package:drawing_ui/src/canvas/drawing_canvas_painters.dart';
 import 'package:drawing_ui/src/canvas/stroke_painter.dart';
+import 'package:drawing_ui/src/providers/pdf_path_provider.dart';
 
 void main() {
   group('DrawingCanvas', () {
@@ -863,5 +864,21 @@ void main() {
       expect(renderBox.size.width, greaterThan(0));
       expect(renderBox.size.height, greaterThan(0));
     });
+  });
+
+  testWidgets('image cache resolves paths against the provided root (#370)',
+      (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          pdfPathResolverProvider
+              .overrideWithValue(const PdfPathResolver('/new/root')),
+        ],
+        child: const MaterialApp(home: Scaffold(body: DrawingCanvas())),
+      ),
+    );
+
+    final state = tester.state<DrawingCanvasState>(find.byType(DrawingCanvas));
+    expect(state.debugImageCacheManager.paths.documentsRoot, '/new/root');
   });
 }

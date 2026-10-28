@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -176,5 +177,48 @@ void main() {
     expect(thick, greaterThan(thin));
     // No ink outside the stroke's vertical extent (thickness 24 at y 400).
     expect(_inked(r, ui.Rect.fromLTWH(0, 0, r.width.toDouble(), 30)), 0);
+  });
+
+  testRender('captures a relative image from the current documents root',
+      () async {
+    final root = Directory.systemTemp.createTempSync('sel_img_test');
+    final cache = ImageCacheManager(paths: PdfPathResolver(root.path));
+    try {
+      final rec = ui.PictureRecorder();
+      ui.Canvas(rec).drawRect(const ui.Rect.fromLTWH(0, 0, 1, 1),
+          ui.Paint()..color = const ui.Color(0xFFFF0000));
+      final src = await rec.endRecording().toImage(1, 1);
+      final png = (await src.toByteData(format: ui.ImageByteFormat.png))!;
+      src.dispose();
+      Directory('${root.path}/elyanotes_images').createSync();
+      File('${root.path}/elyanotes_images/a.png')
+          .writeAsBytesSync(png.buffer.asUint8List());
+
+      const stored = 'elyanotes_images/a.png';
+      await cache.loadImage(stored);
+      final layer = Layer.empty('l').copyWith(images: [
+        ImageElement(
+            id: 'i', filePath: stored, x: 20, y: 30, width: 60, height: 30),
+      ]);
+      final image = await SelectionCaptureService.renderSelection(
+        selection: Selection.create(
+          type: SelectionType.rectangle,
+          selectedStrokeIds: const [],
+          selectedImageIds: ['i'],
+          bounds: const BoundingBox(left: 20, top: 30, right: 80, bottom: 60),
+        ),
+        layer: layer,
+        cacheManager: cache,
+        pageSize: const ui.Size(595, 842),
+      );
+      final data = (await image!.toByteData())!;
+      final i = ((image.height ~/ 2) * image.width + image.width ~/ 2) * 4;
+      image.dispose();
+      expect(data.getUint8(i), greaterThan(200));
+      expect(data.getUint8(i + 1), lessThan(60));
+    } finally {
+      cache.dispose();
+      root.deleteSync(recursive: true);
+    }
   });
 }

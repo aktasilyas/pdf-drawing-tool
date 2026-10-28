@@ -105,8 +105,10 @@ mixin _CanvasFields on DrawingCanvasGestureHandlers<DrawingCanvas> {
   // INITIALIZATION TRACKING
   // ─────────────────────────────────────────────────────────────────────────
 
-  /// Image cache manager for decoded ui.Image objects.
-  final ImageCacheManager _imageCacheManager = ImageCacheManager();
+  /// Image cache manager for decoded ui.Image objects. Resolves stored
+  /// (container-relative) image paths against the host documents root.
+  late final ImageCacheManager _imageCacheManager =
+      ImageCacheManager(paths: ref.read(pdfPathResolverProvider));
 
   /// Whether canvas has been initialized for limited mode.
   bool _hasInitialized = false;

@@ -31,6 +31,7 @@ import 'package:drawing_ui/src/providers/shape_provider.dart';
 import 'package:drawing_ui/src/providers/text_provider.dart';
 import 'package:drawing_ui/src/providers/page_provider.dart';
 import 'package:drawing_ui/src/providers/drawing_providers.dart';
+import 'package:drawing_ui/src/providers/pdf_path_provider.dart';
 import 'package:drawing_ui/src/providers/pdf_render_provider.dart';
 import 'package:drawing_ui/src/providers/canvas_dark_mode_provider.dart';
 import 'package:drawing_ui/src/providers/sticker_provider.dart';
@@ -137,6 +138,10 @@ class DrawingCanvasState extends DrawingCanvasGestureHandlers<DrawingCanvas>
         _StickyNoteMenu,
         _PlacementIndicators,
         _CanvasOverlays {
+  /// Exposes the image cache for testing.
+  @visibleForTesting
+  ImageCacheManager get debugImageCacheManager => _imageCacheManager;
+
   /// Exposes committed strokes from provider for testing.
   @visibleForTesting
   List<core.Stroke> get committedStrokes =>
