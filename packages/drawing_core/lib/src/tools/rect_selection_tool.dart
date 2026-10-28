@@ -148,10 +148,10 @@ class RectSelectionTool implements SelectionTool {
     List<Stroke> strokes,
     BoundingBox selectionBounds,
   ) {
-    return strokes
-        .where((s) => _isStrokeInRect(s, selectionBounds))
-        .map((s) => s.id)
-        .toList();
+    return [
+      for (final s in strokes)
+        if (_intersects(s.bounds, selectionBounds)) s.id,
+    ];
   }
 
   /// Finds all texts whose bounds intersect with the selection rectangle.
@@ -159,17 +159,10 @@ class RectSelectionTool implements SelectionTool {
     List<TextElement> texts,
     BoundingBox selectionBounds,
   ) {
-    final selectedIds = <String>[];
-    for (final text in texts) {
-      final bounds = text.bounds;
-      if (bounds.left < selectionBounds.right &&
-          bounds.right > selectionBounds.left &&
-          bounds.top < selectionBounds.bottom &&
-          bounds.bottom > selectionBounds.top) {
-        selectedIds.add(text.id);
-      }
-    }
-    return selectedIds;
+    return [
+      for (final t in texts)
+        if (_intersects(t.bounds, selectionBounds)) t.id,
+    ];
   }
 
   /// Finds all images whose bounds intersect with the selection rectangle.
@@ -177,17 +170,10 @@ class RectSelectionTool implements SelectionTool {
     List<ImageElement> images,
     BoundingBox selectionBounds,
   ) {
-    final selectedIds = <String>[];
-    for (final image in images) {
-      final bounds = image.bounds;
-      if (bounds.left < selectionBounds.right &&
-          bounds.right > selectionBounds.left &&
-          bounds.top < selectionBounds.bottom &&
-          bounds.bottom > selectionBounds.top) {
-        selectedIds.add(image.id);
-      }
-    }
-    return selectedIds;
+    return [
+      for (final i in images)
+        if (_intersects(i.bounds, selectionBounds)) i.id,
+    ];
   }
 
   /// Finds all shapes whose bounds intersect with the selection rectangle.
@@ -195,29 +181,15 @@ class RectSelectionTool implements SelectionTool {
     List<Shape> shapes,
     BoundingBox selectionBounds,
   ) {
-    return shapes
-        .where((s) => _isShapeInRect(s, selectionBounds))
-        .map((s) => s.id)
-        .toList();
+    return [
+      for (final s in shapes)
+        if (_intersects(s.bounds, selectionBounds)) s.id,
+    ];
   }
 
-  /// Checks if a stroke's bounding box intersects with the rectangle.
-  bool _isStrokeInRect(Stroke stroke, BoundingBox rect) {
-    final bounds = stroke.bounds;
+  /// Strict AABB intersection test; a null box (empty stroke) never hits.
+  static bool _intersects(BoundingBox? bounds, BoundingBox rect) {
     if (bounds == null) return false;
-
-    // AABB intersection test
-    return bounds.left < rect.right &&
-        bounds.right > rect.left &&
-        bounds.top < rect.bottom &&
-        bounds.bottom > rect.top;
-  }
-
-  /// Checks if a shape's bounding box intersects with the rectangle.
-  bool _isShapeInRect(Shape shape, BoundingBox rect) {
-    final bounds = shape.bounds;
-
-    // AABB intersection test
     return bounds.left < rect.right &&
         bounds.right > rect.left &&
         bounds.top < rect.bottom &&

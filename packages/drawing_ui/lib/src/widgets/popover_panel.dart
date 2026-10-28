@@ -2,16 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:drawing_ui/src/theme/theme.dart';
-
-/// Popover placement direction.
-enum _Placement { below, above, right }
+import 'package:drawing_ui/src/widgets/popover_layout.dart';
 
 /// Controller for showing/hiding popover panels
 /// (docs/specs/52-editor-chrome.md, section 4 "Popover panel").
 ///
-/// Lighter alternative to [AnchoredPanelController]. Opens below the anchor,
-/// flips above it when there is not enough space below, and opens to the
-/// right when neither vertical direction has enough room.
+/// Lighter alternative to [AnchoredPanelController]. Positioning (below,
+/// flipped above, or to the right of the anchor) is [PopoverLayout].
 ///
 /// The panel is short-lived chrome: any pointer-down outside it closes it and
 /// is swallowed, so a pen-down on the page never draws a stroke. Escape closes
@@ -115,15 +112,6 @@ class _PopoverOverlay extends StatefulWidget {
 
 class _PopoverOverlayState extends State<_PopoverOverlay>
     with SingleTickerProviderStateMixin {
-  /// Distance kept from the screen edges.
-  static const double _edge = ChromeSpacing.md;
-
-  /// Gap between anchor and panel.
-  static const double _gap = ChromeSpacing.sm;
-
-  /// Space a vertical placement needs before the panel flips.
-  static const double _minSpace = 360;
-
   static const double _borderWidth = 1;
 
   late final AnimationController _anim;
@@ -193,20 +181,13 @@ class _PopoverOverlayState extends State<_PopoverOverlay>
     return KeyEventResult.ignored;
   }
 
-  _Placement _decidePlacement() {
-    final anchorBottom = widget.anchorPosition.dy + widget.anchorSize.height;
-    final anchorTop = widget.anchorPosition.dy;
-    final spaceBelow = widget.screenSize.height - anchorBottom - _gap - _edge;
-    final spaceAbove = anchorTop - _gap - _edge;
-
-    if (spaceBelow >= _minSpace) return _Placement.below;
-    if (spaceAbove >= _minSpace) return _Placement.above;
-    return _Placement.right;
-  }
-
   @override
   Widget build(BuildContext context) {
-    final placement = _decidePlacement();
+    final layout = PopoverLayout(
+      anchor: widget.anchorPosition & widget.anchorSize,
+      screenSize: widget.screenSize,
+      maxWidth: widget.maxWidth,
+    );
     return Focus(
       focusNode: _focusNode,
       onKeyEvent: _onKey,
@@ -222,56 +203,20 @@ class _PopoverOverlayState extends State<_PopoverOverlay>
               onPointerDown: (_) => _dismiss(),
             ),
           ),
-          if (placement == _Placement.right)
-            _buildHorizontal(context)
-          else
-            _buildVertical(context, placement),
+          Positioned(
+            left: layout.left,
+            top: layout.top,
+            bottom: layout.bottom,
+            child: FadeTransition(
+              opacity: _fade,
+              child: ScaleTransition(
+                scale: _scale,
+                alignment: layout.scaleAlignment,
+                child: _panelBox(context, maxHeight: layout.maxHeight),
+              ),
+            ),
+          ),
         ]),
-      ),
-    );
-  }
-
-  /// Vertical popover (below or above anchor).
-  Widget _buildVertical(BuildContext context, _Placement placement) {
-    final openAbove = placement == _Placement.above;
-    final anchorBottom = widget.anchorPosition.dy + widget.anchorSize.height;
-    final anchorTop = widget.anchorPosition.dy;
-    final cx = widget.anchorPosition.dx + widget.anchorSize.width / 2;
-    final left = (cx - widget.maxWidth / 2).clamp(
-      _edge,
-      widget.screenSize.width - widget.maxWidth - _edge,
-    );
-    final maxPanelHeight = openAbove
-        ? anchorTop - _gap - _edge
-        : widget.screenSize.height - anchorBottom - _gap - _edge;
-
-    final animated = _animatedWrap(
-      _panelBox(context, maxHeight: maxPanelHeight),
-      openAbove ? Alignment.bottomCenter : Alignment.topCenter,
-    );
-
-    return openAbove
-        ? Positioned(
-            bottom: widget.screenSize.height - anchorTop + _gap,
-            left: left,
-            child: animated)
-        : Positioned(top: anchorBottom + _gap, left: left, child: animated);
-  }
-
-  /// Horizontal popover (right of anchor).
-  Widget _buildHorizontal(BuildContext context) {
-    final anchorRight = widget.anchorPosition.dx + widget.anchorSize.width;
-    final anchorCy = widget.anchorPosition.dy + widget.anchorSize.height / 2;
-    final maxHeight = widget.screenSize.height - _edge * 2;
-    final top = (anchorCy - maxHeight / 2)
-        .clamp(_edge, widget.screenSize.height - maxHeight - _edge);
-
-    return Positioned(
-      left: anchorRight + _gap,
-      top: top,
-      child: _animatedWrap(
-        _panelBox(context, maxHeight: maxHeight),
-        Alignment.centerLeft,
       ),
     );
   }
@@ -302,13 +247,4 @@ class _PopoverOverlayState extends State<_PopoverOverlay>
       ),
     );
   }
-
-  Widget _animatedWrap(Widget child, Alignment alignment) => FadeTransition(
-        opacity: _fade,
-        child: ScaleTransition(
-          scale: _scale,
-          alignment: alignment,
-          child: child,
-        ),
-      );
 }
