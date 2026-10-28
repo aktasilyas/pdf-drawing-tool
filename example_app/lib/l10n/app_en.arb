@@ -144,6 +144,20 @@
   "libraryErrorDeleteDocumentsForever": "Couldn't delete the notebooks permanently",
   "libraryErrorDuplicateDocuments": "Couldn't duplicate the notebooks",
   "libraryErrorMoveDocuments": "Couldn't move the notebooks",
+  "libraryErrorBulkPartial": "{message} ({failed} of {total} failed)",
+  "@libraryErrorBulkPartial": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      },
+      "failed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "libraryErrorTrashPage": "Couldn't move the page to the trash",
   "libraryErrorDeletePageForever": "Couldn't delete the page permanently",
   "libraryErrorEmptyTrash": "Couldn't empty the trash",

@@ -1,17 +1,26 @@
+import 'package:dartz/dartz.dart';
 import 'package:drawing_ui/drawing_ui.dart' show ElyanotesIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 
+import 'package:example_app/core/core.dart' show CacheFailure;
 import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/core/widgets/index.dart';
+import 'package:example_app/features/documents/domain/repositories/document_repository.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/selection_mode_header.dart';
 import '../../../../helpers/l10n.dart';
+
+class _MockDocumentRepository extends Mock implements DocumentRepository {}
 
 void main() {
   Future<ProviderContainer> pump(
     WidgetTester tester, {
     Set<String> selected = const {},
+    DocumentRepository? repository,
+    bool isTrashSection = false,
   }) async {
     tester.view.physicalSize = const Size(1000, 800);
     tester.view.devicePixelRatio = 1;
@@ -21,13 +30,16 @@ void main() {
         overrides: [
           selectionModeProvider.overrideWith((ref) => true),
           selectedDocumentsProvider.overrideWith((ref) => selected),
+          if (repository != null)
+            documentRepositoryProvider.overrideWithValue(repository),
         ],
         child: localizedApp(
           theme: AppTheme.light,
-          home: const Scaffold(
+          home: Scaffold(
             body: SelectionModeHeader(
-              allDocumentIds: ['a', 'b', 'c'],
-              allFolderIds: ['f1'],
+              allDocumentIds: const ['a', 'b', 'c'],
+              allFolderIds: const ['f1'],
+              isTrashSection: isTrashSection,
             ),
           ),
         ),
@@ -81,5 +93,50 @@ void main() {
       tester.element(find.byIcon(ElyanotesIcons.libraryTrash)),
     ).color;
     expect(color, AppPalette.light.textDisabled);
+  });
+
+  group('bulk delete forever', () {
+    late _MockDocumentRepository repo;
+
+    setUp(() {
+      repo = _MockDocumentRepository();
+      when(() => repo.permanentlyDelete(any()))
+          .thenAnswer((_) async => const Right(null));
+    });
+
+    Future<ProviderContainer> deleteAll(WidgetTester tester) async {
+      final container = await pump(
+        tester,
+        selected: {'a', 'b', 'c'},
+        repository: repo,
+        isTrashSection: true,
+      );
+      await tester.tap(find.byIcon(ElyanotesIcons.libraryTrash));
+      await tester.pumpAndSettle();
+      await tester.tap(find.widgetWithText(AppButton, 'Sil'));
+      await tester.pumpAndSettle();
+      return container;
+    }
+
+    testWidgets('a partial failure keeps only the failed ids selected',
+        (tester) async {
+      when(() => repo.permanentlyDelete('b'))
+          .thenAnswer((_) async => const Left(CacheFailure('disk')));
+
+      final container = await deleteAll(tester);
+
+      verify(() => repo.permanentlyDelete('a')).called(1);
+      verify(() => repo.permanentlyDelete('c')).called(1);
+      expect(container.read(selectionModeProvider), isTrue);
+      expect(container.read(selectedDocumentsProvider), {'b'});
+    });
+
+    testWidgets('full success exits selection mode', (tester) async {
+      final container = await deleteAll(tester);
+
+      verify(() => repo.permanentlyDelete(any())).called(3);
+      expect(container.read(selectionModeProvider), isFalse);
+      expect(container.read(selectedDocumentsProvider), isEmpty);
+    });
   });
 }

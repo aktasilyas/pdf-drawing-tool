@@ -214,6 +214,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get libraryErrorMoveDocuments => 'Couldn\'t move the notebooks';
 
   @override
+  String libraryErrorBulkPartial(String message, int failed, int total) {
+    return '$message ($failed of $total failed)';
+  }
+
+  @override
   String get libraryErrorTrashPage => 'Couldn\'t move the page to the trash';
 
   @override

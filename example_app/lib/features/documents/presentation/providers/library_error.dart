@@ -37,19 +37,32 @@ enum LibraryAction {
 /// Not `const` and not value-equal on purpose: two identical failures in a
 /// row are two events and must both notify listeners.
 class LibraryError {
-  LibraryError(this.failure, this.action);
+  LibraryError(this.failure, this.action, {this.failedCount, this.totalCount})
+      : assert((failedCount == null) == (totalCount == null));
 
   final Failure failure;
   final LibraryAction action;
 
+  /// For a multi-selection action: how many of [totalCount] items failed.
+  final int? failedCount;
+
+  /// For a multi-selection action: how many items were tried.
+  final int? totalCount;
+
   /// Text shown to the user: the localized rule for [LibraryRuleFailure]
   /// (written for users), the action-specific text for storage/unknown
   /// failures (their messages are English diagnostics, logged instead).
+  /// Multi-selection actions append "N of M failed".
   String message(AppLocalizations l10n) {
     final f = failure;
-    return f is LibraryRuleFailure
+    final text = f is LibraryRuleFailure
         ? f.rule.message(l10n)
         : action.failureMessage(l10n);
+    final failed = failedCount;
+    final total = totalCount;
+    return failed == null || total == null
+        ? text
+        : l10n.libraryErrorBulkPartial(text, failed, total);
   }
 }
 
@@ -57,9 +70,24 @@ class LibraryError {
 final libraryErrorProvider = StateProvider<LibraryError?>((ref) => null);
 
 /// Logs [failure] and publishes it for the library error snackbar.
-void reportLibraryFailure(Ref ref, Failure failure, LibraryAction action) {
-  logger.w('${action.name}: ${failure.message}');
-  ref.read(libraryErrorProvider.notifier).state = LibraryError(failure, action);
+///
+/// Multi-selection actions pass [failedCount] and [totalCount] (both or
+/// neither) so the message reports how many items failed.
+void reportLibraryFailure(
+  Ref ref,
+  Failure failure,
+  LibraryAction action, {
+  int? failedCount,
+  int? totalCount,
+}) {
+  final counts = totalCount == null ? '' : ' ($failedCount/$totalCount)';
+  logger.w('${action.name}$counts: ${failure.message}');
+  ref.read(libraryErrorProvider.notifier).state = LibraryError(
+    failure,
+    action,
+    failedCount: failedCount,
+    totalCount: totalCount,
+  );
 }
 
 /// [reportLibraryFailure] for an unexpected exception.

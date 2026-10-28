@@ -12,6 +12,7 @@ import 'package:go_router/go_router.dart';
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/core/routing/route_names.dart';
+import 'package:example_app/features/documents/presentation/providers/bulk_result.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/move_to_folder_dialog.dart';
@@ -129,21 +130,30 @@ class SelectionModeHeader extends ConsumerWidget {
     }
 
     final controller = ref.read(documentsControllerProvider.notifier);
-    try {
-      await controller.duplicateDocuments(
-        selectedDocs.toList(),
-        copyTitle: context.l10n.libraryCopyTitle,
+    final result = await controller.duplicateDocuments(
+      selectedDocs.toList(),
+      copyTitle: context.l10n.libraryCopyTitle,
+    );
+    if (_keepOnlyFailedSelected(ref, result)) return;
+    _exitSelectionMode(ref);
+    if (context.mounted) {
+      AppToast.success(
+        context,
+        context.l10n.libraryDocumentsCopied(selectedDocs.length),
       );
-      _exitSelectionMode(ref);
-      if (context.mounted) {
-        AppToast.success(
-          context,
-          context.l10n.libraryDocumentsCopied(selectedDocs.length),
-        );
-      }
-    } catch (_) {
-      // Shown by LibraryErrorListener.
     }
+  }
+
+  /// After a partial failure only the failed ids stay selected, so a retry
+  /// does not repeat the items that already succeeded. The failure itself is
+  /// shown by `LibraryErrorListener`. Returns whether anything failed.
+  bool _keepOnlyFailedSelected(WidgetRef ref, BulkResult result) {
+    if (!result.hasFailures) return false;
+    ref.read(selectedDocumentsProvider.notifier).state = result.failed.toSet();
+    // Bulk document actions ignore folders; drop them so the retry acts on
+    // exactly the failed documents.
+    ref.read(selectedFoldersProvider.notifier).state = {};
+    return true;
   }
 
   Future<void> _moveSelected(BuildContext context, WidgetRef ref,
@@ -182,23 +192,19 @@ class SelectionModeHeader extends ConsumerWidget {
 
     if (confirmed == true && context.mounted) {
       final controller = ref.read(documentsControllerProvider.notifier);
-      try {
-        if (isTrashSection) {
-          await controller.permanentlyDeleteDocuments(selectedDocs.toList());
-        } else {
-          await controller.moveDocumentsToTrash(selectedDocs.toList());
-        }
-        _exitSelectionMode(ref);
-        if (context.mounted) {
-          AppToast.success(
-            context,
-            isTrashSection
-                ? context.l10n.libraryDocumentsDeleted(count)
-                : context.l10n.libraryDocumentsTrashed(count),
-          );
-        }
-      } catch (_) {
-        // Shown by LibraryErrorListener.
+      final ids = selectedDocs.toList();
+      final result = isTrashSection
+          ? await controller.permanentlyDeleteDocuments(ids)
+          : await controller.moveDocumentsToTrash(ids);
+      if (_keepOnlyFailedSelected(ref, result)) return;
+      _exitSelectionMode(ref);
+      if (context.mounted) {
+        AppToast.success(
+          context,
+          isTrashSection
+              ? context.l10n.libraryDocumentsDeleted(count)
+              : context.l10n.libraryDocumentsTrashed(count),
+        );
       }
     }
   }
