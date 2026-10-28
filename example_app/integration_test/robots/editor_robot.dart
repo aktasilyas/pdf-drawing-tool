@@ -23,13 +23,6 @@ const _erasers = {
   ToolType.lassoEraser,
 };
 
-/// Eraser type buttons in the eraser panel (`EraserTypeSelector`).
-const _eraserPanelLabels = {
-  ToolType.pixelEraser: 'Piksel Silgi',
-  ToolType.strokeEraser: 'Çizgi Silgisi',
-  ToolType.lassoEraser: 'Kement Silgisi',
-};
-
 /// Page object for the editor screen (drawing_ui toolbar chrome).
 ///
 /// Gestures go through the real canvas; assertions read the editor's
@@ -113,13 +106,16 @@ class EditorRobot {
     await tester.tapAndWait(
       find.byTooltip(currentTool.label(tester.drawingStrings)).hitTestable(),
     );
-    final option = find.byTooltip(_eraserPanelLabels[type]!).hitTestable();
+    final option =
+        find.byKey(ValueKey('eraser-type-${type.name}')).hitTestable();
     await tester.tapAndWait(option);
     await tester.pumpUntilTrue(
       () => currentTool == type,
       reason: 'eraser $type not selected (still $currentTool)',
     );
-    await tester.tapAndWait(find.byTooltip('Kapat').hitTestable());
+    await tester.tapAndWait(
+      find.byTooltip(tester.drawingStrings.panels.close).hitTestable(),
+    );
     // The toolbar button now carries the same tooltip, so wait for the
     // panel's own button (keyed by type) to leave the tree.
     await tester.pumpUntilGone(
