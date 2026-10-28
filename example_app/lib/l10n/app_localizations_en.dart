@@ -803,6 +803,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get editorToolbarSettingsReset => 'Reset to default';
 
+  @override
   String get editorDocumentNameLabel => 'Document name';
 
   @override
