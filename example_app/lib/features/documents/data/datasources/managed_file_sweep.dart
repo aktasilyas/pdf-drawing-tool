@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:drawing_core/drawing_core.dart' show PdfPathResolver;
-import 'package:drift/drift.dart';
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/data/datasources/document_content_codec.dart';
 import 'package:example_app/features/documents/data/datasources/managed_file_cleanup.dart';

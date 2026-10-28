@@ -63,12 +63,6 @@ void main() {
         ],
       };
 
-  Future<void> saveWithImage(String id, String path) => saveRaw(
-      id,
-      json.encode({
-        'pages': [elementPage(path)]
-      }));
-
   test('deletes unreferenced images and PDFs and returns the count', () async {
     final img = file('elyanotes_images/orphan.png');
     final pdf = file('pdfs/orphan.pdf');
