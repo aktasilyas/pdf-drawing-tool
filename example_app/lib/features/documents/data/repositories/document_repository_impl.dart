@@ -154,8 +154,8 @@ class DocumentRepositoryImpl
       if (content != null) {
         // The content carries its own id; it must follow the copy's row id,
         // or edits to the copy would be saved over the original.
-        await _localDatasource.saveDocumentContent(
-            created.id, {...content, 'id': created.id});
+        await _localDatasource
+            .saveDocumentContent(created.id, {...content, 'id': created.id});
       }
       return created;
     });
