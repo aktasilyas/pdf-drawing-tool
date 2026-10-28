@@ -149,7 +149,10 @@ void main() {
       (tester) async {
     await setUpRef(tester);
     const strings = DrawingStringsTr();
-    for (final selection in [_select(['a']), Selection.empty()]) {
+    for (final selection in [
+      _select(['a']),
+      Selection.empty()
+    ]) {
       final c = buildSelectionActionConfig(ref, selection, onAIPressed: () {});
       for (final a in [
         ...c.toolbarActions,
@@ -167,7 +170,8 @@ void main() {
   test('screenshotOutcomeFor covers every save result', () {
     expect(
       {
-        for (final r in SelectionImageSaveResult.values) r: screenshotOutcomeFor(r),
+        for (final r in SelectionImageSaveResult.values)
+          r: screenshotOutcomeFor(r),
       },
       {
         SelectionImageSaveResult.savedAndCopied:

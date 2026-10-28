@@ -46,8 +46,7 @@ void main() {
     stub(gallery: false, clipboard: false);
     final result = await saveSelectionImage(sink, bytes);
     expect(result, SelectionImageSaveResult.failed);
-    expect(
-        screenshotOutcomeFor(result), SelectionScreenshotOutcome.saveFailed);
+    expect(screenshotOutcomeFor(result), SelectionScreenshotOutcome.saveFailed);
   });
 
   test('the default sink is the platform one', () {

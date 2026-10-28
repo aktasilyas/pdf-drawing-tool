@@ -128,7 +128,11 @@ class _SelectableTypesGrid extends StatelessWidget {
       (SelectableType.handwriting, s.typeHandwriting, ElyanotesIcons.pencil),
       (SelectableType.shape, s.typeShape, ElyanotesIcons.shapes),
       (SelectableType.imageSticker, s.typeImage, ElyanotesIcons.image),
-      (SelectableType.highlighter, s.typeHighlighter, ElyanotesIcons.highlighter),
+      (
+        SelectableType.highlighter,
+        s.typeHighlighter,
+        ElyanotesIcons.highlighter
+      ),
       (SelectableType.textBox, s.typeText, ElyanotesIcons.textT),
       (SelectableType.tape, s.typeTape, ElyanotesIcons.ruler),
       (SelectableType.link, s.typeLink, ElyanotesIcons.link),
