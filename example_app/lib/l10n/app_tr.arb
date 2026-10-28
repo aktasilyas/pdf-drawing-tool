@@ -589,5 +589,17 @@
   "libraryRootFolders": "Ana Klasörler",
   "libraryNoFolderRoot": "Belgeler (Klasörsüz)",
   "libraryFolderNameHint": "Klasör adı girin",
-  "libraryColor": "Renk"
+  "libraryColor": "Renk",
+  "libraryFolderColorEmerald": "Zümrüt",
+  "libraryFolderColorPurple": "Mor",
+  "libraryFolderColorPink": "Pembe",
+  "libraryFolderColorRed": "Kırmızı",
+  "libraryFolderColorOrange": "Turuncu",
+  "libraryFolderColorAmber": "Kehribar",
+  "libraryFolderColorGreen": "Yeşil",
+  "libraryFolderColorTeal": "Turkuaz",
+  "libraryFolderColorCyan": "Camgöbeği",
+  "libraryFolderColorBlue": "Mavi",
+  "libraryFolderColorGray": "Gri",
+  "libraryFolderColorStone": "Taş"
 }

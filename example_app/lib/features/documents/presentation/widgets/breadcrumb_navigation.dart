@@ -7,6 +7,7 @@ library;
 import 'package:flutter/material.dart';
 
 import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// Breadcrumb item model
 class BreadcrumbItem {
@@ -123,19 +124,25 @@ class _BackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onPressed,
-        borderRadius: BorderRadius.circular(AppRadius.sm),
-        child: Container(
-          width: AppSpacing.minTouchTarget,
-          height: AppSpacing.minTouchTarget,
-          alignment: Alignment.center,
-          child: Icon(
-            Icons.arrow_back,
-            size: AppIconSize.md,
-            color: context.palette.textMuted,
+    return Semantics(
+      label: context.l10n.commonBack,
+      button: true,
+      excludeSemantics: true,
+      onTap: onPressed,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(AppRadius.sm),
+          child: Container(
+            width: AppSpacing.minTouchTarget,
+            height: AppSpacing.minTouchTarget,
+            alignment: Alignment.center,
+            child: Icon(
+              Icons.arrow_back,
+              size: AppIconSize.md,
+              color: context.palette.textMuted,
+            ),
           ),
         ),
       ),

@@ -968,5 +968,17 @@
   "libraryRootFolders": "Top-level folders",
   "libraryNoFolderRoot": "Documents (no folder)",
   "libraryFolderNameHint": "Enter a folder name",
-  "libraryColor": "Color"
+  "libraryColor": "Color",
+  "libraryFolderColorEmerald": "Emerald",
+  "libraryFolderColorPurple": "Purple",
+  "libraryFolderColorPink": "Pink",
+  "libraryFolderColorRed": "Red",
+  "libraryFolderColorOrange": "Orange",
+  "libraryFolderColorAmber": "Amber",
+  "libraryFolderColorGreen": "Green",
+  "libraryFolderColorTeal": "Teal",
+  "libraryFolderColorCyan": "Cyan",
+  "libraryFolderColorBlue": "Blue",
+  "libraryFolderColorGray": "Gray",
+  "libraryFolderColorStone": "Stone"
 }

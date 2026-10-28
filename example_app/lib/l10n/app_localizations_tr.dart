@@ -1850,4 +1850,40 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get libraryColor => 'Renk';
+
+  @override
+  String get libraryFolderColorEmerald => 'Zümrüt';
+
+  @override
+  String get libraryFolderColorPurple => 'Mor';
+
+  @override
+  String get libraryFolderColorPink => 'Pembe';
+
+  @override
+  String get libraryFolderColorRed => 'Kırmızı';
+
+  @override
+  String get libraryFolderColorOrange => 'Turuncu';
+
+  @override
+  String get libraryFolderColorAmber => 'Kehribar';
+
+  @override
+  String get libraryFolderColorGreen => 'Yeşil';
+
+  @override
+  String get libraryFolderColorTeal => 'Turkuaz';
+
+  @override
+  String get libraryFolderColorCyan => 'Camgöbeği';
+
+  @override
+  String get libraryFolderColorBlue => 'Mavi';
+
+  @override
+  String get libraryFolderColorGray => 'Gri';
+
+  @override
+  String get libraryFolderColorStone => 'Taş';
 }
