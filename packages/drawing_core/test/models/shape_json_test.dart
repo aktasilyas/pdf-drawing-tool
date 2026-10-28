@@ -71,7 +71,15 @@ void main() {
       expect(
         json.keys,
         unorderedEquals(
-          ['id', 'type', 'startPoint', 'endPoint', 'style', 'isFilled', 'fillColor'],
+          [
+            'id',
+            'type',
+            'startPoint',
+            'endPoint',
+            'style',
+            'isFilled',
+            'fillColor'
+          ],
         ),
       );
       expect(json['type'], 'hexagon');
