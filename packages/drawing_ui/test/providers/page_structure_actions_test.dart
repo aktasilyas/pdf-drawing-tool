@@ -437,8 +437,8 @@ void main() {
             stroke('s1'),
           );
       final change = actions().insertCopy(0, withInk);
-      editInserted((l) =>
-          l.removeStroke(l.strokes.single.id).addStroke(stroke('s2')));
+      editInserted(
+          (l) => l.removeStroke(l.strokes.single.id).addStroke(stroke('s2')));
 
       expect(await actions().undo(change), isTrue);
       expect(docIds(), ['p0', 'p1']);
