@@ -79,20 +79,25 @@ void main() {
 
   testWidgets('no overflow at text scale 1.3 in the 340dp panel',
       (tester) async {
+    // A 390x844 phone at 1.3x text: the panel keeps 340dp and its lists
+    // scroll instead of overflowing.
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
     await tester.pumpWidget(
       ProviderScope(
         overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
-        child: const MaterialApp(
-          home: MediaQuery(
-            data: MediaQueryData(
-              size: Size(390, 844),
-              textScaler: TextScaler.linear(1.3),
+        child: MaterialApp(
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              textScaler: const TextScaler.linear(1.3),
             ),
-            child: Scaffold(
-              body: Align(
-                alignment: Alignment.topLeft,
-                child: ToolbarSettingsPanel(),
-              ),
+            child: child!,
+          ),
+          home: const Scaffold(
+            body: Align(
+              alignment: Alignment.topLeft,
+              child: ToolbarSettingsPanel(),
             ),
           ),
         ),
@@ -101,6 +106,12 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
     expect(tester.getSize(find.byType(ToolbarSettingsPanel)).width, 340);
+    expect(
+      MediaQuery.textScalerOf(
+        tester.element(find.byType(ToolbarSettingsPanel)),
+      ).scale(10),
+      closeTo(13, 0.01),
+    );
 
     await tester.tap(find.text('Ek Araçlar'));
     await tester.pumpAndSettle();

@@ -33,6 +33,7 @@ class CompactVisibilitySwitch extends StatelessWidget {
       onTap: onToggle,
       child: InkResponse(
         onTap: onToggle,
+        excludeFromSemantics: true,
         radius: kMinInteractiveDimension / 2,
         child: SizedBox.square(
           dimension: kMinInteractiveDimension,
@@ -41,13 +42,17 @@ class CompactVisibilitySwitch extends StatelessWidget {
           child: OverflowBox(
             maxWidth: double.infinity,
             maxHeight: double.infinity,
-            child: IgnorePointer(
-              child: Transform.scale(
-                scale: _scale,
-                child: Switch(
-                  value: value,
-                  onChanged: (_) => onToggle(),
-                  activeThumbColor: cs.primary,
+            // Only the 48dp square is interactive: one tap target,
+            // one focus stop, one semantics node.
+            child: ExcludeFocus(
+              child: IgnorePointer(
+                child: Transform.scale(
+                  scale: _scale,
+                  child: Switch(
+                    value: value,
+                    onChanged: (_) => onToggle(),
+                    activeThumbColor: cs.primary,
+                  ),
                 ),
               ),
             ),

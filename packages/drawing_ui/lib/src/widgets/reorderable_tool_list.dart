@@ -229,15 +229,18 @@ class _CompactToolItem extends StatelessWidget {
             ),
             const SizedBox(width: 6),
             Expanded(
-              child: Text(
-                label,
-                style: textTheme.labelSmall?.copyWith(
-                  color: isVisible
-                      ? cs.onSurface
-                      : cs.onSurfaceVariant.withValues(alpha: 0.6),
-                  decoration: isVisible ? null : TextDecoration.lineThrough,
+              // The switch carries the label for screen readers.
+              child: ExcludeSemantics(
+                child: Text(
+                  label,
+                  style: textTheme.labelSmall?.copyWith(
+                    color: isVisible
+                        ? cs.onSurface
+                        : cs.onSurfaceVariant.withValues(alpha: 0.6),
+                    decoration: isVisible ? null : TextDecoration.lineThrough,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
-                overflow: TextOverflow.ellipsis,
               ),
             ),
             CompactVisibilitySwitch(
