@@ -408,5 +408,25 @@
         "type": "String"
       }
     }
-  }
+  },
+  "libraryFormat": "Format",
+  "libraryOrientation": "Orientation",
+  "libraryPortrait": "Portrait",
+  "libraryLandscape": "Landscape",
+  "librarySize": "Size",
+  "libraryFormatSummary": "{orientation}, {size}",
+  "@libraryFormatSummary": {
+    "placeholders": {
+      "orientation": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryCover": "Cover",
+  "libraryPaper": "Paper",
+  "libraryTitle": "Title",
+  "libraryNoteTitleHint": "Note title"
 }

@@ -212,5 +212,25 @@
         "type": "String"
       }
     }
-  }
+  },
+  "libraryFormat": "Format",
+  "libraryOrientation": "Yön",
+  "libraryPortrait": "Dikey",
+  "libraryLandscape": "Yatay",
+  "librarySize": "Boyut",
+  "libraryFormatSummary": "{orientation}, {size}",
+  "@libraryFormatSummary": {
+    "placeholders": {
+      "orientation": {
+        "type": "String"
+      },
+      "size": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryCover": "Kapak",
+  "libraryPaper": "Kağıt",
+  "libraryTitle": "Başlık",
+  "libraryNoteTitleHint": "Not Başlığı"
 }

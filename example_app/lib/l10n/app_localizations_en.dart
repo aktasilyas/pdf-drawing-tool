@@ -686,4 +686,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String libraryOpeningWithPages(String title, String pages) {
     return 'Opening $title ($pages)';
   }
+
+  @override
+  String get libraryFormat => 'Format';
+
+  @override
+  String get libraryOrientation => 'Orientation';
+
+  @override
+  String get libraryPortrait => 'Portrait';
+
+  @override
+  String get libraryLandscape => 'Landscape';
+
+  @override
+  String get librarySize => 'Size';
+
+  @override
+  String libraryFormatSummary(String orientation, String size) {
+    return '$orientation, $size';
+  }
+
+  @override
+  String get libraryCover => 'Cover';
+
+  @override
+  String get libraryPaper => 'Paper';
+
+  @override
+  String get libraryTitle => 'Title';
+
+  @override
+  String get libraryNoteTitleHint => 'Note title';
 }

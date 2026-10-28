@@ -671,4 +671,36 @@ class AppLocalizationsTr extends AppLocalizations {
   String libraryOpeningWithPages(String title, String pages) {
     return '$title açılıyor ($pages)';
   }
+
+  @override
+  String get libraryFormat => 'Format';
+
+  @override
+  String get libraryOrientation => 'Yön';
+
+  @override
+  String get libraryPortrait => 'Dikey';
+
+  @override
+  String get libraryLandscape => 'Yatay';
+
+  @override
+  String get librarySize => 'Boyut';
+
+  @override
+  String libraryFormatSummary(String orientation, String size) {
+    return '$orientation, $size';
+  }
+
+  @override
+  String get libraryCover => 'Kapak';
+
+  @override
+  String get libraryPaper => 'Kağıt';
+
+  @override
+  String get libraryTitle => 'Başlık';
+
+  @override
+  String get libraryNoteTitleHint => 'Not Başlığı';
 }

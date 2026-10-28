@@ -1189,6 +1189,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Opening {title} ({pages})'**
   String libraryOpeningWithPages(String title, String pages);
+
+  /// No description provided for @libraryFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Format'**
+  String get libraryFormat;
+
+  /// No description provided for @libraryOrientation.
+  ///
+  /// In en, this message translates to:
+  /// **'Orientation'**
+  String get libraryOrientation;
+
+  /// No description provided for @libraryPortrait.
+  ///
+  /// In en, this message translates to:
+  /// **'Portrait'**
+  String get libraryPortrait;
+
+  /// No description provided for @libraryLandscape.
+  ///
+  /// In en, this message translates to:
+  /// **'Landscape'**
+  String get libraryLandscape;
+
+  /// No description provided for @librarySize.
+  ///
+  /// In en, this message translates to:
+  /// **'Size'**
+  String get librarySize;
+
+  /// No description provided for @libraryFormatSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{orientation}, {size}'**
+  String libraryFormatSummary(String orientation, String size);
+
+  /// No description provided for @libraryCover.
+  ///
+  /// In en, this message translates to:
+  /// **'Cover'**
+  String get libraryCover;
+
+  /// No description provided for @libraryPaper.
+  ///
+  /// In en, this message translates to:
+  /// **'Paper'**
+  String get libraryPaper;
+
+  /// No description provided for @libraryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Title'**
+  String get libraryTitle;
+
+  /// No description provided for @libraryNoteTitleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Note title'**
+  String get libraryNoteTitleHint;
 }
 
 class _AppLocalizationsDelegate
