@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/internal.dart';
+import 'package:drawing_ui/src/providers/selection_sync.dart';
 import 'package:drawing_ui/src/widgets/selection_geometry.dart';
 import 'package:drawing_ui/src/widgets/selection_transform_commands.dart';
 
@@ -192,6 +193,10 @@ class _SelectionHandlesState extends ConsumerState<SelectionHandles> {
   void _commit(SelectionDragMode mode, BoundingBox ob) {
     final ui = ref.read(selectionUiProvider);
     final selection = widget.selection;
+    if (liveSelection(ref.read(documentProvider), selection) == null) {
+      _clearSelection(); // Nothing left to move: record no history entry.
+      return;
+    }
     final command = selectionTransformCommand(
       mode: mode,
       selection: selection,

@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'document_provider.dart';
 import 'page_provider.dart';
+import 'selection_provider.dart';
+import 'selection_sync.dart';
 
 // =============================================================================
 // HISTORY PROVIDER
@@ -161,6 +163,7 @@ class HistoryNotifier extends StateNotifier<HistoryState> {
     if (newDocument != null) {
       _ref.read(documentProvider.notifier).updateDocument(newDocument);
       _syncPageManager(newDocument);
+      _syncSelection(document, newDocument);
       _updateState();
     }
   }
@@ -177,6 +180,7 @@ class HistoryNotifier extends StateNotifier<HistoryState> {
     if (newDocument != null) {
       _ref.read(documentProvider.notifier).updateDocument(newDocument);
       _syncPageManager(newDocument);
+      _syncSelection(document, newDocument);
       _updateState();
     }
   }
@@ -195,6 +199,25 @@ class HistoryNotifier extends StateNotifier<HistoryState> {
           document.pages,
           currentIndex: document.currentPageIndex,
         );
+  }
+
+  /// Re-points the selection at the undone/redone document: bounds follow
+  /// the selected elements, and it is cleared when none of them is left.
+  void _syncSelection(DrawingDocument before, DrawingDocument after) {
+    final selection = _ref.read(selectionProvider);
+    if (selection == null) return;
+    final next = reconcileSelection(
+      before: before,
+      after: after,
+      selection: selection,
+    );
+    if (identical(next, selection)) return;
+    if (next == null) {
+      _ref.read(selectionProvider.notifier).clearSelection();
+    } else {
+      _ref.read(selectionProvider.notifier).setSelection(next);
+      _ref.read(selectionUiProvider.notifier).reset();
+    }
   }
 
   /// Update state from history manager.

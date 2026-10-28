@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/src/providers/document_provider.dart';
+import 'package:drawing_ui/src/providers/page_provider.dart';
 
 /// Manages the current selection state.
 ///
@@ -35,10 +37,21 @@ class SelectionNotifier extends StateNotifier<Selection?> {
 
 /// The current selection state.
 ///
-/// Returns null if nothing is selected.
+/// Returns null if nothing is selected. Any change of the current page
+/// (sidebar, indicator, swipe, undo navigating pages) clears it.
 final selectionProvider =
     StateNotifierProvider<SelectionNotifier, Selection?>((ref) {
-  return SelectionNotifier();
+  final notifier = SelectionNotifier();
+  void clearOnChange(Object? previous, Object? next) {
+    if (previous != next) notifier.clearSelection();
+  }
+
+  ref.listen<String>(currentPageProvider.select((p) => p.id), clearOnChange);
+  ref.listen<String?>(
+    documentProvider.select((d) => d.currentPage?.id),
+    clearOnChange,
+  );
+  return notifier;
 });
 
 /// Whether there is an active selection.
@@ -190,7 +203,14 @@ class SelectionUiNotifier extends StateNotifier<SelectionUiState> {
 }
 
 /// Provider for selection UI state (live move, rotation, scale, context menu).
+///
+/// Resets whenever the selection is cleared, so no menu or live transform
+/// outlives it.
 final selectionUiProvider =
     StateNotifierProvider<SelectionUiNotifier, SelectionUiState>((ref) {
-  return SelectionUiNotifier();
+  final notifier = SelectionUiNotifier();
+  ref.listen<Selection?>(selectionProvider, (previous, next) {
+    if (previous != null && next == null) notifier.reset();
+  });
+  return notifier;
 });

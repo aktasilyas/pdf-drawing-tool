@@ -4,10 +4,25 @@ import 'package:drawing_ui/src/providers/document_provider.dart';
 import 'package:drawing_ui/src/providers/history_provider.dart';
 import 'package:drawing_ui/src/providers/selection_clipboard_provider.dart';
 import 'package:drawing_ui/src/providers/selection_provider.dart';
+import 'package:drawing_ui/src/providers/selection_sync.dart';
 
-// Selection edit actions: each mutating action is exactly one history command.
+// Selection edit actions: each mutating action is exactly one history command,
+// and none at all when the selection no longer points at anything (#432).
 
-void deleteSelection(WidgetRef ref, Selection selection) {
+/// [selection] limited to what still exists; clears the selection and
+/// returns `null` when nothing does.
+Selection? _live(WidgetRef ref, Selection selection) {
+  final live = liveSelection(ref.read(documentProvider), selection);
+  if (live == null) {
+    ref.read(selectionProvider.notifier).clearSelection();
+    ref.read(selectionUiProvider.notifier).reset();
+  }
+  return live;
+}
+
+void deleteSelection(WidgetRef ref, Selection current) {
+  final selection = _live(ref, current);
+  if (selection == null) return;
   final document = ref.read(documentProvider);
   final command = DeleteSelectionCommand(
     layerIndex: document.activeLayerIndex,
@@ -21,7 +36,9 @@ void deleteSelection(WidgetRef ref, Selection selection) {
   ref.read(selectionUiProvider.notifier).reset();
 }
 
-void duplicateSelection(WidgetRef ref, Selection selection) {
+void duplicateSelection(WidgetRef ref, Selection current) {
+  final selection = _live(ref, current);
+  if (selection == null) return;
   final document = ref.read(documentProvider);
   final command = DuplicateSelectionCommand(
     layerIndex: document.activeLayerIndex,
@@ -77,7 +94,9 @@ void cutToClipboard(WidgetRef ref, Selection selection) {
   deleteSelection(ref, selection);
 }
 
-void bringToFront(WidgetRef ref, Selection selection) {
+void bringToFront(WidgetRef ref, Selection current) {
+  final selection = _live(ref, current);
+  if (selection == null) return;
   final document = ref.read(documentProvider);
   final command = ReorderSelectionCommand(
     layerIndex: document.activeLayerIndex,
@@ -91,7 +110,9 @@ void bringToFront(WidgetRef ref, Selection selection) {
   ref.read(selectionUiProvider.notifier).hideContextMenu();
 }
 
-void sendToBack(WidgetRef ref, Selection selection) {
+void sendToBack(WidgetRef ref, Selection current) {
+  final selection = _live(ref, current);
+  if (selection == null) return;
   final document = ref.read(documentProvider);
   final command = ReorderSelectionCommand(
     layerIndex: document.activeLayerIndex,
@@ -105,7 +126,9 @@ void sendToBack(WidgetRef ref, Selection selection) {
   ref.read(selectionUiProvider.notifier).hideContextMenu();
 }
 
-void changeColor(WidgetRef ref, Selection selection, int color) {
+void changeColor(WidgetRef ref, Selection current, int color) {
+  final selection = _live(ref, current);
+  if (selection == null) return;
   if (selection.selectedStrokeIds.isEmpty &&
       selection.selectedShapeIds.isEmpty &&
       selection.selectedTextIds.isEmpty) {
