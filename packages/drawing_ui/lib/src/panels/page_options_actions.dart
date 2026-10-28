@@ -98,6 +98,7 @@ mixin PageOptionsActions<T extends ConsumerStatefulWidget> on ConsumerState<T> {
       strings: strings,
       pages: [doc.pages[pageIndex]],
       title: strings.pageFileName(title, pageIndex + 1),
+      isInfiniteCanvas: ref.read(isInfiniteCanvasProvider),
       pdfPaths: ref.read(pdfPathResolverProvider),
     );
   }

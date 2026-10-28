@@ -2,9 +2,11 @@
 library;
 
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
+import 'package:example_app/features/documents/domain/entities/library_text.dart';
 import 'package:example_app/features/documents/domain/entities/sort_option.dart';
 
 /// Returns a sorted copy of [documents] by [option] in [direction].
+/// Names sort case-insensitively in Turkish alphabetical order.
 ///
 /// With [pinFavorites] (Settings and the sort menu: "Favorileri üste
 /// sabitle") favourites come first; both groups keep the chosen order.
@@ -17,7 +19,7 @@ List<DocumentInfo> sortDocuments(
   int byOption(DocumentInfo a, DocumentInfo b) {
     final result = switch (option) {
       SortOption.date => a.updatedAt.compareTo(b.updatedAt),
-      SortOption.name => a.title.compareTo(b.title),
+      SortOption.name => compareNames(a.title, b.title),
       SortOption.size => a.pageCount.compareTo(b.pageCount),
     };
     return direction == SortDirection.descending ? -result : result;

@@ -100,6 +100,7 @@ class _ExportPanelState extends ConsumerState<ExportPanel> {
       notifier,
       document,
       strings: strings,
+      isInfiniteCanvas: ref.read(isInfiniteCanvasProvider),
       addWatermark: watermark,
       share: share,
       options: _options,

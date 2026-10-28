@@ -83,6 +83,10 @@ class PageTrashRepositoryImpl implements PageTrashRepository {
   Future<bool> _restore(String trashedPageId) async {
     final model = await _trashDatasource.getTrashedPage(trashedPageId);
     if (model == null) return false;
+    // Never restore into a notebook that is in the trash (or gone).
+    if (!await _documentDatasource.isLiveDocument(model.sourceDocumentId)) {
+      return false;
+    }
 
     final content =
         await _documentDatasource.getDocumentContent(model.sourceDocumentId);
@@ -111,8 +115,8 @@ class PageTrashRepositoryImpl implements PageTrashRepository {
   Future<Either<Failure, void>> permanentlyDeletePage(String trashedPageId) {
     return _guard('delete page', () async {
       final page = await _trashDatasource.getTrashedPage(trashedPageId);
-      if (page == null) return;
-      await _remove([page]);
+      // An unreadable row reads as null; deleting by id removes it anyway.
+      await _remove(page == null ? [] : [page], [trashedPageId]);
     });
   }
 
@@ -120,8 +124,9 @@ class PageTrashRepositoryImpl implements PageTrashRepository {
   Future<Either<Failure, int>> emptyTrash() {
     return _guard('empty page trash', () async {
       final pages = await _trashDatasource.getTrashedPages();
-      await _remove(pages);
-      return pages.length;
+      final unreadable = await _trashDatasource.getUnreadableTrashedPages();
+      await _remove(pages, [for (final u in unreadable) u.id]);
+      return pages.length + unreadable.length;
     });
   }
 
@@ -135,8 +140,12 @@ class PageTrashRepositoryImpl implements PageTrashRepository {
       final expired = (await _trashDatasource.getTrashedPages())
           .where((p) => p.deletedAt.isBefore(cutoff))
           .toList();
-      await _remove(expired);
-      return expired.length;
+      final expiredUnreadable = [
+        for (final u in await _trashDatasource.getUnreadableTrashedPages())
+          if (u.deletedAt.isBefore(cutoff)) u.id,
+      ];
+      await _remove(expired, expiredUnreadable);
+      return expired.length + expiredUnreadable.length;
     });
   }
 
@@ -144,17 +153,22 @@ class PageTrashRepositoryImpl implements PageTrashRepository {
   Future<Either<Failure, bool>> documentExists(String documentId) {
     return _guard(
       'check document',
-      () => _documentDatasource.hasDocumentContent(documentId),
+      () => _documentDatasource.isLiveDocument(documentId),
     );
   }
 
   /// Deletes the trash rows of [pages] in one transaction, then the copied
-  /// files (PDFs, images) nothing references any more.
-  Future<void> _remove(List<TrashedPageModel> pages) async {
-    if (pages.isEmpty) return;
+  /// files (PDFs, images) nothing references any more. [unreadableIds] are
+  /// rows that could not be decoded: only the row goes, their files are left
+  /// to the orphan sweep.
+  Future<void> _remove(
+    List<TrashedPageModel> pages, [
+    List<String> unreadableIds = const [],
+  ]) async {
+    if (pages.isEmpty && unreadableIds.isEmpty) return;
     await _runner.run(() async {
-      for (final page in pages) {
-        await _trashDatasource.removeTrashedPage(page.id);
+      for (final id in [for (final p in pages) p.id, ...unreadableIds]) {
+        await _trashDatasource.removeTrashedPage(id);
       }
     });
     await _documentDatasource.deleteUnreferencedFiles({

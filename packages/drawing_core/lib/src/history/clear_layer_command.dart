@@ -18,11 +18,15 @@ class ClearLayerCommand implements DrawingCommand {
     // Store original layer for undo
     _originalLayer = document.layers[layerIndex];
 
-    // Create empty layer with same properties
+    // Empty layer with the same properties: every element type and the
+    // z-order go, so images and sticky notes are cleared too (#424).
     final clearedLayer = _originalLayer!.copyWith(
       strokes: [],
       shapes: [],
       texts: [],
+      images: [],
+      stickyNotes: [],
+      elementOrder: [],
     );
 
     return document.updateLayer(layerIndex, clearedLayer);

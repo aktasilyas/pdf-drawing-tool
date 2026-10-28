@@ -114,6 +114,27 @@ void main() {
       expect(await trashedPages(), hasLength(1));
     });
 
+    test('a notebook in the trash is not a restore target', () async {
+      final d = await create('Doc');
+      await fx.documents
+          .saveDocumentContent(id: d.id, content: content(2), pageCount: 2);
+      final id = await trash(d.id, pageIndex: 1);
+      ok(await fx.documents.moveToTrash(d.id));
+
+      expect(await fx.pageTrash.documentExists(d.id), const Right(false));
+      expect(await fx.pageTrash.restorePageFromTrash(id), const Right(false));
+      expect(await trashedPages(), hasLength(1), reason: 'trash row stays');
+      final pages = (await fx.documentDs.getDocumentContent(d.id))!['pages']
+          as List<dynamic>;
+      expect(pages, hasLength(2), reason: 'hidden notebook is untouched');
+
+      // Once the notebook is back, the page can be restored into it.
+      ok(await fx.documents.restoreFromTrash(d.id));
+      expect(await fx.pageTrash.documentExists(d.id), const Right(true));
+      expect(await fx.pageTrash.restorePageFromTrash(id), const Right(true));
+      expect(await trashedPages(), isEmpty);
+    });
+
     test('a failure mid-restore rolls everything back', () async {
       final d = await create('Doc');
       await fx.documents
@@ -215,6 +236,55 @@ void main() {
       expect((await trashedPages()).map((p) => p.id), ['new']);
       expect(oldPdf.existsSync(), isFalse);
       expect(newPdf.existsSync(), isTrue);
+    });
+  });
+
+  group('unreadable row', () {
+    final now = DateTime(2026, 6, 30, 12);
+
+    Future<void> addCorrupt(String id, DateTime at) {
+      return fx.db.customStatement(
+        'INSERT INTO trashed_pages (id, page_id, source_document_id, '
+        'source_document_title, original_page_index, deleted_at, page_data) '
+        "VALUES (?, 'p', 'd', 'T', 0, ?, '{not json')",
+        [id, at.millisecondsSinceEpoch ~/ 1000],
+      );
+    }
+
+    test('is skipped by the list while valid rows stay', () async {
+      final good = await trash('d');
+      await addCorrupt('bad', now);
+
+      expect((await trashedPages()).map((p) => p.id), [good]);
+    });
+
+    test('emptyTrash removes it with the valid rows', () async {
+      await trash('d');
+      await addCorrupt('bad', now);
+
+      expect(await fx.pageTrash.emptyTrash(), const Right(2));
+      expect(await trashedPages(), isEmpty);
+      expect(await fx.trashDs.getUnreadableTrashedPages(), isEmpty);
+    });
+
+    test('purgeExpired removes an expired one and keeps a recent one',
+        () async {
+      await addCorrupt('old', now.subtract(const Duration(days: 31)));
+      await addCorrupt('new', now.subtract(const Duration(days: 1)));
+      final good = await trash('d');
+
+      expect(await fx.pageTrash.purgeExpired(now: now), const Right(1));
+      expect((await fx.trashDs.getUnreadableTrashedPages()).map((u) => u.id),
+          ['new']);
+      expect((await trashedPages()).map((p) => p.id), [good]);
+    });
+
+    test('permanent delete removes it by id', () async {
+      await addCorrupt('bad', now);
+
+      expect(
+          (await fx.pageTrash.permanentlyDeletePage('bad')).isRight(), isTrue);
+      expect(await fx.trashDs.getUnreadableTrashedPages(), isEmpty);
     });
   });
 }

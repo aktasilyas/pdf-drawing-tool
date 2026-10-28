@@ -31,12 +31,16 @@ class PdfRasterLayerRenderer {
   static const maxRasterPixels = 3000000;
 
   /// Rasterizes all of [layer]: elements in z-order, sticky notes on top.
+  ///
+  /// Content is translated by [origin] (page units) before painting, so an
+  /// infinite canvas can export content at negative coordinates.
   Future<PdfRawImage?> renderLayer(
     Layer layer,
     double w,
     double h,
     double scale, {
     PdfPathResolver paths = PdfPathResolver.passthrough,
+    Offset origin = Offset.zero,
   }) async {
     final cache = ImageCacheManager(
       paths: paths,
@@ -46,7 +50,7 @@ class PdfRasterLayerRenderer {
       await Future.wait([
         for (final img in layer.images) cache.loadImage(img.filePath),
       ]);
-      return await _rasterize(w, h, scale, (canvas) {
+      return await _rasterize(w, h, scale, origin, (canvas) {
         paintElements(canvas, layer, cache);
         paintStickyNotes(canvas, layer.stickyNotes);
       });
@@ -55,14 +59,16 @@ class PdfRasterLayerRenderer {
     }
   }
 
-  /// Rasterizes only [notes] (for layers whose elements export as vectors).
+  /// Rasterizes only [notes] (for layers whose elements export as vectors),
+  /// translated by [origin] like [renderLayer].
   Future<PdfRawImage?> renderStickyNotes(
     List<StickyNote> notes,
     double w,
     double h,
-    double scale,
-  ) {
-    return _rasterize(w, h, scale, (c) => paintStickyNotes(c, notes));
+    double scale, {
+    Offset origin = Offset.zero,
+  }) {
+    return _rasterize(w, h, scale, origin, (c) => paintStickyNotes(c, notes));
   }
 
   /// Paints [layer]'s strokes, shapes, images and texts in screen z-order.
@@ -93,6 +99,7 @@ class PdfRasterLayerRenderer {
     double w,
     double h,
     double scale,
+    Offset origin,
     void Function(Canvas canvas) draw,
   ) async {
     var renderW = (w * scale).toInt();
@@ -110,6 +117,7 @@ class PdfRasterLayerRenderer {
     final canvas = Canvas(recorder);
     // Use actual scale based on (possibly capped) render dimensions.
     canvas.scale(renderW / w, renderH / h);
+    canvas.translate(origin.dx, origin.dy);
     draw(canvas);
 
     final picture = recorder.endRecording();

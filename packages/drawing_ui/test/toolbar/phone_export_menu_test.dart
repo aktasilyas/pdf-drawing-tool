@@ -21,6 +21,7 @@ class _RecordingRunner extends PDFExportRunner {
     ExportProgressNotifier progress,
     DrawingDocument document, {
     required ExportStrings strings,
+    bool isInfiniteCanvas = false,
     bool addWatermark = false,
     bool share = false,
     ExportOptions options = const ExportOptions(),

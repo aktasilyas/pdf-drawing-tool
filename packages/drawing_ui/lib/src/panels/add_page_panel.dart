@@ -162,16 +162,21 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
   }
 
   Future<void> _handleImport() async {
-    final docNotifier = ref.read(documentProvider.notifier);
-    final pageManager = ref.read(pageManagerProvider.notifier);
+    // Capture before close — onClose unmounts the widget. The container
+    // outlives it, so the latest document can be read after the import.
+    final container = ProviderScope.containerOf(context, listen: false);
+    final actions = ref.read(pageStructureActionsProvider);
+    final importer = ref.read(pageFileImporterProvider);
     final doc = ref.read(documentProvider);
     final curIdx = ref.read(currentPageIndexProvider);
+    final anchorId =
+        curIdx >= 0 && curIdx < doc.pages.length ? doc.pages[curIdx].id : null;
     final insertIdx = _resolveInsertionIndex(curIdx, doc.pages.length);
     final messenger = ScaffoldMessenger.maybeOf(context);
     final strings = context.drawingStrings;
     widget.onClose();
 
-    final imported = await pickAndImportFile(
+    final imported = await importer(
       insertIndex: insertIdx,
       defaultPageSize: doc.settings.defaultPageSize,
       pdfPaths: ref.read(pdfPathResolverProvider),
@@ -187,13 +192,23 @@ class _AddPagePanelState extends ConsumerState<AddPagePanel> {
     );
     if (imported.isEmpty) return;
 
-    final newPages = List<Page>.from(doc.pages)..insertAll(insertIdx, imported);
-    for (int i = insertIdx; i < newPages.length; i++) {
-      newPages[i] = newPages[i].copyWith(index: i);
-    }
-    final newDoc = doc.copyWith(pages: newPages, currentPageIndex: insertIdx);
-    docNotifier.updateDocument(newDoc);
-    pageManager.initializeFromDocument(newDoc.pages, currentIndex: insertIdx);
+    // The document may have changed while the import ran (ink, renames,
+    // page changes): insert into its latest state, next to the same page.
+    final fresh = container.read(documentProvider);
+    final anchor = fresh.pages.indexWhere((p) => p.id == anchorId);
+    final freshIdx =
+        anchor >= 0 ? anchor : container.read(currentPageIndexProvider);
+    final change = actions.insertPages(
+      _resolveInsertionIndex(freshIdx, fresh.pages.length),
+      imported,
+    );
+    showPageUndoSnackBar(
+      messenger,
+      actions,
+      change,
+      strings.pages.pageAdded,
+      undoLabel: strings.toolbar.undo,
+    );
   }
 
   @override

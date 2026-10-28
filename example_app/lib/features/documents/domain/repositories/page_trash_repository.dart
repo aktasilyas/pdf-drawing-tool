@@ -35,6 +35,7 @@ abstract class PageTrashRepository {
     Duration retention = trashRetention,
   });
 
-  /// Whether the source document of a trashed page still exists.
+  /// Whether the source document of a trashed page still exists and is not
+  /// in the trash, i.e. whether the page can be restored into it.
   Future<Either<Failure, bool>> documentExists(String documentId);
 }

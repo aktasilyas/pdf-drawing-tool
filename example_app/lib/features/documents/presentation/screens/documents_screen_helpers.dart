@@ -7,6 +7,7 @@ import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/documents/domain/entities/document_info.dart';
 import 'package:example_app/features/documents/domain/entities/folder.dart';
 import 'package:example_app/features/documents/domain/entities/library_rule.dart';
+import 'package:example_app/features/documents/domain/entities/library_text.dart';
 import 'package:example_app/features/documents/presentation/l10n/library_labels.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
@@ -232,10 +233,8 @@ List<String> getCurrentDocumentIds(
     data: (docs) {
       var filtered = docs;
       if (searchQuery.isNotEmpty) {
-        filtered = docs
-            .where((d) =>
-                d.title.toLowerCase().contains(searchQuery.toLowerCase()))
-            .toList();
+        filtered =
+            docs.where((d) => matchesSearch(d.title, searchQuery)).toList();
       }
       return filtered.map((d) => d.id).toList();
     },
@@ -263,10 +262,8 @@ List<String> getCurrentFolderIds(
         return <String>[];
       }
       if (searchQuery.isNotEmpty) {
-        visible = visible
-            .where(
-                (f) => f.name.toLowerCase().contains(searchQuery.toLowerCase()))
-            .toList();
+        visible =
+            visible.where((f) => matchesSearch(f.name, searchQuery)).toList();
       }
       return visible.map((f) => f.id).toList();
     },
