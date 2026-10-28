@@ -166,7 +166,6 @@ void main() {
 
         expect(isExporting, false);
       });
-
     });
 
     group('State Notifications', () {

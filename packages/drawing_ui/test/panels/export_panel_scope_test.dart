@@ -133,12 +133,13 @@ void main() {
     Future<PDFExportOptions> exportWith(ExportOptions options) async {
       final exporter = _MockExporter();
       when(() => exporter.exportPages(
-            pages: any(named: 'pages'),
-            metadata: any(named: 'metadata'),
-            options: any(named: 'options'),
-            onProgress: any(named: 'onProgress'),
-            isCancelled: any(named: 'isCancelled'),
-          )).thenAnswer((_) async => PDFExportResult.error(ExportFailure.failed));
+                pages: any(named: 'pages'),
+                metadata: any(named: 'metadata'),
+                options: any(named: 'options'),
+                onProgress: any(named: 'onProgress'),
+                isCancelled: any(named: 'isCancelled'),
+              ))
+          .thenAnswer((_) async => PDFExportResult.error(ExportFailure.failed));
       final doc = DrawingDocument.multiPage(
         id: 'd',
         title: 'T',

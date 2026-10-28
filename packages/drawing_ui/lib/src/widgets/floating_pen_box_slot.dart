@@ -4,8 +4,7 @@ import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/chrome_tokens.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
-import 'package:drawing_ui/src/widgets/color_chip.dart'
-    show colorHex;
+import 'package:drawing_ui/src/widgets/color_chip.dart' show colorHex;
 import 'package:drawing_ui/src/widgets/pen_icon_widget.dart';
 
 /// One preset pen in the `FloatingPenBox`.
