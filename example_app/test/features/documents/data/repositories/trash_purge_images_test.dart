@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:dartz/dartz.dart';
 import 'package:drawing_core/drawing_core.dart' show PdfPathResolver;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:example_app/features/documents/documents.dart';
