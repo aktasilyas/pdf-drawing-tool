@@ -1,6 +1,6 @@
 /// ElyaNotes Manage Folders Screen
 ///
-/// Klasörleri yönet ekranı - drag-drop sıralama, renk değiştirme, silme.
+/// Folder management: drag-and-drop ordering, recolour, rename, delete.
 library;
 
 import 'package:flutter/material.dart';
@@ -13,6 +13,7 @@ import 'package:example_app/features/documents/domain/entities/folder.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
 import 'package:example_app/features/documents/presentation/widgets/folder_color_picker.dart';
 import 'package:example_app/features/documents/presentation/widgets/manage_folder_list_item.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 class ManageFoldersScreen extends ConsumerStatefulWidget {
   const ManageFoldersScreen({super.key});
@@ -28,6 +29,7 @@ class _ManageFoldersScreenState extends ConsumerState<ManageFoldersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final foldersAsync = ref.watch(foldersProvider);
 
     return Scaffold(
@@ -37,11 +39,11 @@ class _ManageFoldersScreenState extends ConsumerState<ManageFoldersScreen> {
         leading: AppIconButton(
           icon: Icons.arrow_back,
           variant: AppIconButtonVariant.ghost,
-          tooltip: 'Geri',
+          tooltip: l10n.commonBack,
           onPressed: () => context.pop(),
         ),
         title: Text(
-          'Klasörleri Yönet',
+          l10n.libraryManageFolders,
           style: AppTypography.titleLarge.copyWith(
             color: context.palette.textPrimary,
           ),
@@ -51,7 +53,7 @@ class _ManageFoldersScreenState extends ConsumerState<ManageFoldersScreen> {
             AppIconButton(
               icon: Icons.check,
               variant: AppIconButtonVariant.ghost,
-              tooltip: 'Kaydet',
+              tooltip: l10n.commonSave,
               onPressed: _saveOrder,
             ),
         ],
@@ -64,7 +66,7 @@ class _ManageFoldersScreenState extends ConsumerState<ManageFoldersScreen> {
           return _buildContent();
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Hata: $e')),
+        error: (e, _) => Center(child: Text(l10n.commonErrorDetail('$e'))),
       ),
       bottomNavigationBar: _buildBottomBar(),
     );
@@ -85,11 +87,11 @@ class _ManageFoldersScreenState extends ConsumerState<ManageFoldersScreen> {
 
   Widget _buildContent() {
     if (_orderedFolders.isEmpty) {
-      return const AppEmptyState(
+      final l10n = context.l10n;
+      return AppEmptyState(
         icon: Icons.folder_outlined,
-        title: 'Henüz klasör yok',
-        description:
-            'Yeni bir klasör oluşturmak için aşağıdaki butona tıklayın',
+        title: l10n.libraryNoFoldersYet,
+        description: l10n.libraryNoFoldersHint,
       );
     }
 
@@ -152,32 +154,50 @@ class _ManageFoldersScreenState extends ConsumerState<ManageFoldersScreen> {
     // On failure keep _hasChanges so the user can retry.
     if (!saved || !mounted) return;
     setState(() => _hasChanges = false);
-    AppToast.success(context, 'Sıralama kaydedildi');
+    AppToast.success(context, context.l10n.libraryFolderOrderSaved);
   }
 
-  Future<void> _showRenameDialog(Folder folder) async {
-    final controller = TextEditingController(text: folder.name);
-    final result = await showDialog<String>(
+  /// Folder-name dialog shared by rename, subfolder and new-folder flows.
+  /// Returns the trimmed name, or null when cancelled.
+  Future<String?> _promptFolderName({
+    required String title,
+    required String confirmLabel,
+    String initial = '',
+  }) {
+    final l10n = context.l10n;
+    final controller = TextEditingController(text: initial);
+    return showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Klasörü Yeniden Adlandır'),
+        title: Text(title),
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: const InputDecoration(
-            labelText: 'Klasör adı',
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            labelText: l10n.libraryFolderNameLabel,
+            border: const OutlineInputBorder(),
           ),
         ),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx), child: const Text('İptal')),
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(l10n.commonCancel),
+          ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, controller.text.trim()),
-            child: const Text('Kaydet'),
+            child: Text(confirmLabel),
           ),
         ],
       ),
+    );
+  }
+
+  Future<void> _showRenameDialog(Folder folder) async {
+    final l10n = context.l10n;
+    final result = await _promptFolderName(
+      title: l10n.libraryRenameFolderTitle,
+      confirmLabel: l10n.commonSave,
+      initial: folder.name,
     );
     if (result != null && result.isNotEmpty && result != folder.name) {
       await ref
@@ -201,28 +221,10 @@ class _ManageFoldersScreenState extends ConsumerState<ManageFoldersScreen> {
   }
 
   Future<void> _showCreateSubfolderDialog(Folder parent) async {
-    final controller = TextEditingController();
-    final result = await showDialog<String>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('${parent.name} altına klasör ekle'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: const InputDecoration(
-            labelText: 'Klasör adı',
-            border: OutlineInputBorder(),
-          ),
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx), child: const Text('İptal')),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, controller.text.trim()),
-            child: const Text('Oluştur'),
-          ),
-        ],
-      ),
+    final l10n = context.l10n;
+    final result = await _promptFolderName(
+      title: l10n.libraryAddSubfolderTitle(parent.name),
+      confirmLabel: l10n.commonCreate,
     );
     if (result != null && result.isNotEmpty) {
       await ref
@@ -233,12 +235,12 @@ class _ManageFoldersScreenState extends ConsumerState<ManageFoldersScreen> {
   }
 
   Future<void> _showDeleteConfirm(Folder folder) async {
+    final l10n = context.l10n;
     final confirmed = await AppConfirmDialog.show(
       context: context,
-      title: 'Klasörü Sil',
-      message:
-          '"${folder.name}" klasörünü silmek istediğinize emin misiniz?\nİçindeki notlar çöp kutusuna taşınacak.',
-      confirmLabel: 'Sil',
+      title: l10n.libraryDeleteFolderTitle,
+      message: l10n.libraryDeleteFolderConfirm(folder.name),
+      confirmLabel: l10n.commonDelete,
       isDestructive: true,
     );
     if (confirmed == true) {
@@ -247,7 +249,9 @@ class _ManageFoldersScreenState extends ConsumerState<ManageFoldersScreen> {
           .deleteFolder(folder.id);
       ref.invalidate(foldersProvider);
       // Failures are shown by LibraryErrorListener.
-      if (deleted && mounted) AppToast.success(context, 'Klasör silindi');
+      if (deleted && mounted) {
+        AppToast.success(context, context.l10n.libraryFolderDeleted);
+      }
     }
   }
 
@@ -256,7 +260,7 @@ class _ManageFoldersScreenState extends ConsumerState<ManageFoldersScreen> {
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: AppButton(
-          label: 'Yeni Klasör',
+          label: context.l10n.libraryNewFolder,
           leadingIcon: Icons.add,
           variant: AppButtonVariant.outline,
           onPressed: _showCreateFolderDialog,
@@ -266,25 +270,10 @@ class _ManageFoldersScreenState extends ConsumerState<ManageFoldersScreen> {
   }
 
   Future<void> _showCreateFolderDialog() async {
-    final controller = TextEditingController();
-    final result = await showDialog<String>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Yeni Klasör'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: const InputDecoration(
-              labelText: 'Klasör adı', border: OutlineInputBorder()),
-        ),
-        actions: [
-          TextButton(
-              onPressed: () => Navigator.pop(ctx), child: const Text('İptal')),
-          FilledButton(
-              onPressed: () => Navigator.pop(ctx, controller.text.trim()),
-              child: const Text('Oluştur')),
-        ],
-      ),
+    final l10n = context.l10n;
+    final result = await _promptFolderName(
+      title: l10n.libraryNewFolder,
+      confirmLabel: l10n.commonCreate,
     );
     if (result != null && result.isNotEmpty) {
       await ref

@@ -1686,4 +1686,67 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get editorCanvasTextPreviewSample => 'Merhaba';
+
+  @override
+  String get libraryManageFolders => 'Klasörleri Yönet';
+
+  @override
+  String get libraryNoFoldersYet => 'Henüz klasör yok';
+
+  @override
+  String get libraryNoFoldersHint =>
+      'Yeni bir klasör oluşturmak için aşağıdaki butona tıklayın';
+
+  @override
+  String get libraryNoFoldersStartHint => 'Yeni klasör oluşturarak başlayın';
+
+  @override
+  String get libraryFolderOrderSaved => 'Sıralama kaydedildi';
+
+  @override
+  String get libraryAddSubfolder => 'Alt Klasör Ekle';
+
+  @override
+  String libraryAddSubfolderTitle(String parent) {
+    return '$parent altına klasör ekle';
+  }
+
+  @override
+  String libraryDeleteFolderConfirm(String name) {
+    return '\"$name\" klasörünü silmek istediğinize emin misiniz?\nİçindeki notlar çöp kutusuna taşınacak.';
+  }
+
+  @override
+  String get libraryFolderManagement => 'Klasör Yönetimi';
+
+  @override
+  String get libraryMoveFolderTitle => 'Klasörü Taşı';
+
+  @override
+  String get libraryMoveToFolderTitle => 'Klasöre Taşı';
+
+  @override
+  String libraryFoldersLoadFailed(String error) {
+    return 'Klasörler yüklenemedi: $error';
+  }
+
+  @override
+  String get libraryFolderNameEmpty => 'Klasör adı boş olamaz';
+
+  @override
+  String libraryFolderCreated(String name) {
+    return 'Klasör \"$name\" oluşturuldu';
+  }
+
+  @override
+  String get libraryRootFolders => 'Ana Klasörler';
+
+  @override
+  String get libraryNoFolderRoot => 'Belgeler (Klasörsüz)';
+
+  @override
+  String get libraryFolderNameHint => 'Klasör adı girin';
+
+  @override
+  String get libraryColor => 'Renk';
 }

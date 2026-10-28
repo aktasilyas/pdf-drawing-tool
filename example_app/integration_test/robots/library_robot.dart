@@ -192,12 +192,12 @@ class LibraryRobot {
   Future<void> openManageFolders() async {
     await _ensureSidebarVisible();
     await tester.tapAndWait(find.text(_l10n.libraryManage));
-    await tester.pumpUntilFound(find.text('Klasörleri Yönet'));
+    await tester.pumpUntilFound(find.text(_l10n.libraryManageFolders));
   }
 
   /// Leaves the folder management screen.
   Future<void> closeManageFolders() async {
-    await tester.tapAndWait(find.byTooltip('Geri'));
+    await tester.tapAndWait(find.byTooltip(_l10n.commonBack));
     await waitForLibrary();
   }
 
@@ -215,10 +215,10 @@ class LibraryRobot {
     await tester.pumpUntilGone(_dialog);
   }
 
-  /// Manage-folders screen: bottom "Yeni Klasör" button.
+  /// Manage-folders screen: bottom "New folder" button.
   Future<void> createFolder(String name) async {
-    await tester.tapAndWait(find.text('Yeni Klasör').last);
-    await _fillDialogAndConfirm(name, 'Oluştur');
+    await tester.tapAndWait(find.text(_l10n.libraryNewFolder).last);
+    await _fillDialogAndConfirm(name, _l10n.commonCreate);
   }
 
   Future<void> _folderMenuAction(String folder, String action) async {
@@ -233,20 +233,20 @@ class LibraryRobot {
   }
 
   Future<void> renameFolder(String from, String to) async {
-    await _folderMenuAction(from, 'Yeniden Adlandır');
-    await _fillDialogAndConfirm(to, 'Kaydet');
+    await _folderMenuAction(from, _l10n.commonRename);
+    await _fillDialogAndConfirm(to, _l10n.commonSave);
   }
 
   Future<void> addSubfolder(String parent, String name) async {
-    await _folderMenuAction(parent, 'Alt Klasör Ekle');
-    await _fillDialogAndConfirm(name, 'Oluştur');
+    await _folderMenuAction(parent, _l10n.libraryAddSubfolder);
+    await _fillDialogAndConfirm(name, _l10n.commonCreate);
   }
 
   /// Deletes a folder through its menu and the confirm dialog.
   Future<void> deleteFolder(String name) async {
-    await _folderMenuAction(name, 'Sil');
+    await _folderMenuAction(name, _l10n.commonDelete);
     await tester.tapAndWait(
-      find.widgetWithText(AppButton, 'Sil'),
+      find.widgetWithText(AppButton, _l10n.commonDelete),
     );
   }
 

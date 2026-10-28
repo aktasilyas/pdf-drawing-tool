@@ -1,12 +1,13 @@
 /// ElyaNotes Manage Folder List Item
 ///
-/// Klasör yönetimi ekranında kullanılan liste elemanı.
+/// List item of the manage-folders screen.
 library;
 
 import 'package:flutter/material.dart';
 
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/features/documents/domain/entities/folder.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// Folder list item widget for ManageFoldersScreen
 class ManageFolderListItem extends StatelessWidget {
@@ -87,25 +88,25 @@ class ManageFolderListItem extends StatelessWidget {
                 }
               },
               itemBuilder: (ctx) => [
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'rename',
-                  child: Text('Yeniden Adlandır'),
+                  child: Text(ctx.l10n.commonRename),
                 ),
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'color',
-                  child: Text('Renk Değiştir'),
+                  child: Text(ctx.l10n.libraryChangeColor),
                 ),
                 if (onAddSubfolder != null)
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'subfolder',
-                    child: Text('Alt Klasör Ekle'),
+                    child: Text(ctx.l10n.libraryAddSubfolder),
                   ),
                 const PopupMenuDivider(),
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'delete',
                   child: Text(
-                    'Sil',
-                    style: TextStyle(color: AppColors.error),
+                    ctx.l10n.commonDelete,
+                    style: const TextStyle(color: AppColors.error),
                   ),
                 ),
               ],

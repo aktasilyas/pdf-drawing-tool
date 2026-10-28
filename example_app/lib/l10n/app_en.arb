@@ -879,5 +879,51 @@
   "editorCanvasAddColor": "Add color",
   "editorCanvasTextStyleTitle": "Text style",
   "editorCanvasEmojiSize": "Emoji size",
-  "editorCanvasTextPreviewSample": "Hello"
+  "editorCanvasTextPreviewSample": "Hello",
+  "libraryManageFolders": "Manage folders",
+  "libraryNoFoldersYet": "No folders yet",
+  "libraryNoFoldersHint": "Tap the button below to create a folder",
+  "libraryNoFoldersStartHint": "Create a folder to get started",
+  "libraryFolderOrderSaved": "Order saved",
+  "libraryAddSubfolder": "Add subfolder",
+  "libraryAddSubfolderTitle": "New folder in {parent}",
+  "@libraryAddSubfolderTitle": {
+    "placeholders": {
+      "parent": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryDeleteFolderConfirm": "Delete the folder \"{name}\"?\nIts notes will be moved to the trash.",
+  "@libraryDeleteFolderConfirm": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryFolderManagement": "Folder management",
+  "libraryMoveFolderTitle": "Move folder",
+  "libraryMoveToFolderTitle": "Move to folder",
+  "libraryFoldersLoadFailed": "Couldn't load folders: {error}",
+  "@libraryFoldersLoadFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryFolderNameEmpty": "Folder name can't be empty",
+  "libraryFolderCreated": "Folder \"{name}\" created",
+  "@libraryFolderCreated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "libraryRootFolders": "Top-level folders",
+  "libraryNoFolderRoot": "Documents (no folder)",
+  "libraryFolderNameHint": "Enter a folder name",
+  "libraryColor": "Color"
 }

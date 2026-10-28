@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/documents/domain/entities/folder.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// Target list of the move dialog: the root option followed by [folders].
 class MoveToFolderList extends StatelessWidget {
@@ -22,10 +23,11 @@ class MoveToFolderList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (folders.isEmpty && !isMovingFolder) {
-      return const AppEmptyState(
+      final l10n = context.l10n;
+      return AppEmptyState(
           icon: Icons.folder_outlined,
-          title: 'Henüz klasör yok',
-          description: 'Yeni klasör oluşturarak başlayın');
+          title: l10n.libraryNoFoldersYet,
+          description: l10n.libraryNoFoldersStartHint);
     }
     return ListView.builder(
       shrinkWrap: true,
@@ -43,7 +45,10 @@ class MoveToFolderList extends StatelessWidget {
     return ListTile(
       leading: Icon(Icons.home_outlined,
           color: sel ? palette.accent : palette.textMuted),
-      title: Text(isMovingFolder ? 'Ana Klasörler' : 'Belgeler (Klasörsüz)',
+      title: Text(
+          isMovingFolder
+              ? context.l10n.libraryRootFolders
+              : context.l10n.libraryNoFolderRoot,
           style: AppTypography.bodyLarge.copyWith(
               fontWeight: sel ? FontWeight.w600 : FontWeight.normal,
               color: sel ? palette.accent : palette.textPrimary)),
@@ -61,7 +66,7 @@ class MoveToFolderList extends StatelessWidget {
       title: Text(folder.name,
           style: AppTypography.bodyLarge
               .copyWith(color: sel ? palette.accent : palette.textPrimary)),
-      subtitle: Text('${folder.documentCount} belge',
+      subtitle: Text(context.l10n.libraryDocumentCount(folder.documentCount),
           style: AppTypography.caption.copyWith(color: palette.textMuted)),
       trailing: sel ? Icon(Icons.check, color: palette.accent) : null,
       onTap: () => onSelected(folder.id),

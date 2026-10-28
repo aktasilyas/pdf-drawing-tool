@@ -1712,4 +1712,66 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get editorCanvasTextPreviewSample => 'Hello';
+
+  @override
+  String get libraryManageFolders => 'Manage folders';
+
+  @override
+  String get libraryNoFoldersYet => 'No folders yet';
+
+  @override
+  String get libraryNoFoldersHint => 'Tap the button below to create a folder';
+
+  @override
+  String get libraryNoFoldersStartHint => 'Create a folder to get started';
+
+  @override
+  String get libraryFolderOrderSaved => 'Order saved';
+
+  @override
+  String get libraryAddSubfolder => 'Add subfolder';
+
+  @override
+  String libraryAddSubfolderTitle(String parent) {
+    return 'New folder in $parent';
+  }
+
+  @override
+  String libraryDeleteFolderConfirm(String name) {
+    return 'Delete the folder \"$name\"?\nIts notes will be moved to the trash.';
+  }
+
+  @override
+  String get libraryFolderManagement => 'Folder management';
+
+  @override
+  String get libraryMoveFolderTitle => 'Move folder';
+
+  @override
+  String get libraryMoveToFolderTitle => 'Move to folder';
+
+  @override
+  String libraryFoldersLoadFailed(String error) {
+    return 'Couldn\'t load folders: $error';
+  }
+
+  @override
+  String get libraryFolderNameEmpty => 'Folder name can\'t be empty';
+
+  @override
+  String libraryFolderCreated(String name) {
+    return 'Folder \"$name\" created';
+  }
+
+  @override
+  String get libraryRootFolders => 'Top-level folders';
+
+  @override
+  String get libraryNoFolderRoot => 'Documents (no folder)';
+
+  @override
+  String get libraryFolderNameHint => 'Enter a folder name';
+
+  @override
+  String get libraryColor => 'Color';
 }
