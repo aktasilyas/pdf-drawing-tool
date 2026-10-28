@@ -20,8 +20,7 @@ mixin DocumentTrashPurge {
           (await localDatasource.getAllDocuments()).where((d) => d.isInTrash);
       var count = 0;
       for (final doc in trashed) {
-        await localDatasource.deleteDocument(doc.id);
-        count++;
+        if (await _tryDelete(doc.id)) count++;
       }
       return count;
     });
@@ -42,11 +41,21 @@ mixin DocumentTrashPurge {
           // Legacy row: start its retention period now, never purge at once.
           await localDatasource.updateDocument(doc.copyWith(deletedAt: now));
         } else if (deletedAt.isBefore(cutoff)) {
-          await localDatasource.deleteDocument(doc.id);
-          purged++;
+          if (await _tryDelete(doc.id)) purged++;
         }
       }
       return purged;
     });
+  }
+
+  /// Deletes [id]; a failure is logged so one bad document never stops a bulk run.
+  Future<bool> _tryDelete(String id) async {
+    try {
+      await localDatasource.deleteDocument(id);
+      return true;
+    } catch (e) {
+      logger.w('Could not delete trashed document $id: $e');
+      return false;
+    }
   }
 }
