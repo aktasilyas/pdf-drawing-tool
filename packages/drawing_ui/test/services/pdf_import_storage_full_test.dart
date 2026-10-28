@@ -33,8 +33,7 @@ class _NoSpaceSource implements File {
       _real.open(mode: mode);
 
   @override
-  dynamic noSuchMethod(Invocation invocation) =>
-      super.noSuchMethod(invocation);
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
 
 void main() {
