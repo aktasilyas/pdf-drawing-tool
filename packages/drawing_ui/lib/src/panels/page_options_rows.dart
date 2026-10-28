@@ -86,43 +86,53 @@ class PageOptionsMenuItem extends StatelessWidget {
     final circleSize = compact ? 30.0 : 36.0;
     final iconSize = compact ? 18.0 : 20.0;
 
-    return InkWell(
+    // One button node: label read once, disabled rows announced as such.
+    // Compact rows keep their smaller icon and text but a 48dp hit area.
+    return Semantics(
+      container: true,
+      button: true,
+      enabled: !disabled,
+      label: label,
+      excludeSemantics: true,
       onTap: onTap,
-      child: SizedBox(
-        height: compact ? 40 : 48,
-        child: Padding(
-          padding:
-              EdgeInsets.symmetric(horizontal: compact ? ChromeSpacing.lg : 20),
-          child: Row(
-            children: [
-              Container(
-                width: circleSize,
-                height: circleSize,
-                decoration: BoxDecoration(
-                  color: iconBgColor,
-                  shape: BoxShape.circle,
+      child: InkWell(
+        onTap: onTap,
+        child: SizedBox(
+          height: ChromeSizes.minTouchTarget,
+          child: Padding(
+            padding:
+                EdgeInsets.symmetric(horizontal: compact ? ChromeSpacing.lg : 20),
+            child: Row(
+              children: [
+                Container(
+                  width: circleSize,
+                  height: circleSize,
+                  decoration: BoxDecoration(
+                    color: iconBgColor,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: PhosphorIcon(icon, size: iconSize, color: iconColor),
+                  ),
                 ),
-                child: Center(
-                  child: PhosphorIcon(icon, size: iconSize, color: iconColor),
+                const SizedBox(width: ChromeSpacing.md),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: compact
+                        ? Theme.of(context)
+                            .textTheme
+                            .bodySmall
+                            ?.copyWith(fontSize: 13, color: labelColor)
+                        : Theme.of(context)
+                            .textTheme
+                            .bodyMedium
+                            ?.copyWith(fontSize: 15, color: labelColor),
+                  ),
                 ),
-              ),
-              const SizedBox(width: ChromeSpacing.md),
-              Expanded(
-                child: Text(
-                  label,
-                  style: compact
-                      ? Theme.of(context)
-                          .textTheme
-                          .bodySmall
-                          ?.copyWith(fontSize: 13, color: labelColor)
-                      : Theme.of(context)
-                          .textTheme
-                          .bodyMedium
-                          ?.copyWith(fontSize: 15, color: labelColor),
-                ),
-              ),
-              if (trailing != null) trailing!,
-            ],
+                if (trailing != null) trailing!,
+              ],
+            ),
           ),
         ),
       ),
