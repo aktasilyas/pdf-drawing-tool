@@ -16,6 +16,9 @@ DrawingCanvas
                               ActiveLayerContent
                                 RepaintBoundary
                                   CustomPaint
+                            Consumer
+                              RepaintBoundary
+                                CustomPaint
                           RepaintBoundary
                             ActiveStrokeLayer
                               CustomPaint

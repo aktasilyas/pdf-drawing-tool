@@ -202,8 +202,7 @@ mixin _PointerMoveUpGestures<T extends ConsumerStatefulWidget>
     // Check if eraser is active
     final isEraser = ref.read(isEraserToolProvider);
     if (isEraser) {
-      // Cancel eraser session
-      ref.read(eraserToolProvider).endErasing();
+      handleEraserCancel();
     } else {
       drawingController.cancelStroke();
     }

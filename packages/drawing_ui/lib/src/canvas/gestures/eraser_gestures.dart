@@ -99,6 +99,26 @@ mixin _EraserGestures<T extends ConsumerStatefulWidget>
     }
   }
 
+  /// Aborts an eraser gesture (palm rejection, system gesture): drops every
+  /// preview, cursor and pending erasure without touching the document or
+  /// the history.
+  void handleEraserCancel() {
+    ref.read(eraserToolProvider).endErasing();
+    pixelEraseHits.clear();
+    pixelEraseOriginalStrokes.clear();
+    pixelEraseSweep.clear();
+    pixelEraseNoteHits.clear();
+    pixelEraseNoteOriginalStrokes.clear();
+    erasedShapeIds.clear();
+    erasedNoteStrokeIds.clear();
+    erasedNoteShapeIds.clear();
+    ref.read(strokeEraserPreviewProvider.notifier).state = {};
+    ref.read(pixelEraserPreviewProvider.notifier).state = {};
+    ref.read(lassoEraserPointsProvider.notifier).state = [];
+    ref.read(eraserCursorPositionProvider.notifier).state = null;
+    ref.read(eraserCursorPressureProvider.notifier).state = 1.0;
+  }
+
   void handleEraserUp(PointerUpEvent event) {
     final settings = ref.read(eraserSettingsProvider);
     final document = ref.read(documentProvider);
