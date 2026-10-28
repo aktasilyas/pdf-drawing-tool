@@ -17,19 +17,6 @@ const migratedDirs = [
   'lib/core/routing',
 ];
 
-const _documents = 'lib/features/documents/presentation';
-
-/// Files of [migratedDirs] whose literals are not migrated yet (#201 library
-/// slice). Each step of `docs/plans/201-l10n-library.md` removes the files it
-/// migrates; the set must be empty after step 6 and is then deleted.
-const pendingL10n = <String>{
-  '$_documents/screens/manage_folders_screen.dart',
-  '$_documents/widgets/manage_folder_list_item.dart',
-  '$_documents/widgets/move_to_folder_create_form.dart',
-  '$_documents/widgets/move_to_folder_dialog.dart',
-  '$_documents/widgets/move_to_folder_list.dart',
-};
-
 List<int> _lines(String source) =>
     findHardcodedStrings(source).map((f) => f.line).toList();
 
@@ -120,7 +107,6 @@ Text('x' 'y');
         expect(files, isNotEmpty);
         final offences = <String>[];
         for (final file in files) {
-          if (pendingL10n.contains(file.path.replaceAll(r'\', '/'))) continue;
           final source = file.readAsStringSync();
           for (final f in findHardcodedStrings(source)) {
             offences.add('${file.path}:${f.line} "${f.literal}"');
@@ -132,12 +118,6 @@ Text('x' 'y');
           reason: 'Move to lib/l10n/*.arb or add // l10n-ignore',
         );
       });
-    }
-  });
-
-  test('pendingL10n only lists files that still exist', () {
-    for (final path in pendingL10n) {
-      expect(File(path).existsSync(), isTrue, reason: path);
     }
   });
 

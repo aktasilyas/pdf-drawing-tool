@@ -11,6 +11,7 @@ import 'package:example_app/features/documents/presentation/providers/folders_pr
 import 'package:example_app/features/documents/presentation/providers/move_to_folder_actions.dart';
 import 'package:example_app/features/documents/presentation/widgets/move_to_folder_create_form.dart';
 import 'package:example_app/features/documents/presentation/widgets/move_to_folder_list.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// Dialog for moving documents and folders
 class MoveToFolderDialog extends ConsumerStatefulWidget {
@@ -81,24 +82,26 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
 
   Widget _buildHeader(BuildContext context) {
     final textPrimary = context.palette.textPrimary;
-
+    final l10n = context.l10n;
     final title = _isFolderMode
-        ? 'Klasör Yönetimi'
+        ? l10n.libraryFolderManagement
         : _isMovingFolder
-            ? 'Klasörü Taşı'
-            : 'Klasöre Taşı';
+            ? l10n.libraryMoveFolderTitle
+            : l10n.libraryMoveToFolderTitle;
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: Row(children: [
-        Text(title,
-            style: AppTypography.titleLarge
-                .copyWith(color: textPrimary, fontWeight: FontWeight.bold)),
-        const Spacer(),
+        Expanded(
+          child: Text(title,
+              overflow: TextOverflow.ellipsis,
+              style: AppTypography.titleLarge
+                  .copyWith(color: textPrimary, fontWeight: FontWeight.bold)),
+        ),
         AppIconButton(
             icon: Icons.close,
             variant: AppIconButtonVariant.ghost,
             size: AppIconButtonSize.small,
-            tooltip: 'Kapat',
+            tooltip: l10n.commonClose,
             onPressed: () => Navigator.pop(context)),
       ]),
     );
@@ -120,18 +123,20 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
             const Icon(Icons.error_outline,
                 size: AppIconSize.emptyState, color: AppColors.error),
             const SizedBox(height: AppSpacing.lg),
-            Text('Klasörler yüklenemedi: $error',
+            Text(context.l10n.libraryFoldersLoadFailed('$error'),
                 style: AppTypography.bodyMedium.copyWith(color: textSecondary)),
           ])),
     );
   }
 
-  Widget _buildActions() => Padding(
+  Widget _buildActions() {
+    final l10n = context.l10n;
+    return Padding(
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Row(children: [
           if (!_isCreatingFolder)
             AppButton(
-                label: 'Yeni Klasör',
+                label: l10n.libraryNewFolder,
                 leadingIcon: Icons.create_new_folder,
                 variant: AppButtonVariant.text,
                 size: AppButtonSize.small,
@@ -139,26 +144,27 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
           const Spacer(),
           if (_isFolderMode)
             AppButton(
-                label: 'Bitti', onPressed: () => Navigator.pop(context, true))
+                label: l10n.commonDone, onPressed: () => Navigator.pop(context, true))
           else ...[
             AppButton(
-                label: 'İptal',
+                label: l10n.commonCancel,
                 variant: AppButtonVariant.text,
                 onPressed: () => Navigator.pop(context)),
             const SizedBox(width: AppSpacing.sm),
             AppButton(
-                label: 'Taşı',
+                label: l10n.commonMove,
                 onPressed: _isMovingFolder || _selectedFolderId != null
                     ? _handleMove
                     : null),
           ],
         ]),
       );
+  }
 
   Future<void> _handleCreateFolder(String name, int colorValue) async {
     final trimmed = name.trim();
     if (trimmed.isEmpty) {
-      AppToast.error(context, 'Klasör adı boş olamaz');
+      AppToast.error(context, context.l10n.libraryFolderNameEmpty);
       return;
     }
     final id = await ref.read(moveToFolderActionsProvider).createFolder(
@@ -171,7 +177,7 @@ class _MoveToFolderDialogState extends ConsumerState<MoveToFolderDialog> {
         _selectedFolderId = id;
         _isCreatingFolder = false;
       });
-      AppToast.success(context, 'Klasör "$trimmed" oluşturuldu');
+      AppToast.success(context, context.l10n.libraryFolderCreated(trimmed));
     }
     // Failures are shown by LibraryErrorListener.
   }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:example_app/core/theme/index.dart';
 import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/documents/presentation/widgets/inline_folder_color_row.dart';
+import 'package:example_app/l10n/l10n.dart';
 
 /// Inline "new folder" form of the move dialog (name, colour, create).
 class MoveToFolderCreateForm extends StatefulWidget {
@@ -36,6 +37,7 @@ class _MoveToFolderCreateFormState extends State<MoveToFolderCreateForm> {
   @override
   Widget build(BuildContext context) {
     final palette = context.palette;
+    final l10n = context.l10n;
     final outline = OutlineInputBorder(
         borderRadius: BorderRadius.circular(AppRadius.sm),
         borderSide: BorderSide(color: palette.border));
@@ -51,12 +53,12 @@ class _MoveToFolderCreateFormState extends State<MoveToFolderCreateForm> {
               Icon(Icons.create_new_folder,
                   size: AppIconSize.sm, color: palette.textMuted),
               const SizedBox(width: AppSpacing.sm),
-              Text('Yeni Klasör',
+              Text(l10n.libraryNewFolder,
                   style: AppTypography.labelLarge.copyWith(
                       fontWeight: FontWeight.bold, color: palette.textPrimary)),
               const Spacer(),
               AppButton(
-                  label: 'İptal',
+                  label: l10n.commonCancel,
                   variant: AppButtonVariant.text,
                   size: AppButtonSize.small,
                   onPressed: widget.onCancel),
@@ -74,7 +76,7 @@ class _MoveToFolderCreateFormState extends State<MoveToFolderCreateForm> {
                     .copyWith(color: palette.textPrimary),
                 cursorColor: palette.accent,
                 decoration: InputDecoration(
-                  hintText: 'Klasör adı girin',
+                  hintText: l10n.libraryFolderNameHint,
                   hintStyle: AppTypography.bodyMedium
                       .copyWith(color: palette.textMuted),
                   border: outline,
@@ -89,7 +91,7 @@ class _MoveToFolderCreateFormState extends State<MoveToFolderCreateForm> {
               )),
             ]),
             const SizedBox(height: AppSpacing.md),
-            Text('Renk',
+            Text(l10n.libraryColor,
                 style:
                     AppTypography.caption.copyWith(color: palette.textMuted)),
             const SizedBox(height: AppSpacing.xs),
@@ -99,7 +101,7 @@ class _MoveToFolderCreateFormState extends State<MoveToFolderCreateForm> {
             ),
             const SizedBox(height: AppSpacing.md),
             AppButton(
-                label: 'Oluştur',
+                label: l10n.commonCreate,
                 size: AppButtonSize.small,
                 isExpanded: true,
                 onPressed: _submit),
