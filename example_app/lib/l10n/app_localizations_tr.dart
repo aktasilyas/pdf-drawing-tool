@@ -718,4 +718,28 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get libraryUntitledNote => 'İsimsiz Not';
+
+  @override
+  String get libraryPaperColorWhite => 'Beyaz kağıt';
+
+  @override
+  String get libraryPaperColorBlack => 'Siyah kağıt';
+
+  @override
+  String get libraryPaperColorCream => 'Krem kağıt';
+
+  @override
+  String get libraryPaperColorGray => 'Gri kağıt';
+
+  @override
+  String get libraryPaperColorGreen => 'Yeşil kağıt';
+
+  @override
+  String get libraryPaperColorBlue => 'Mavi kağıt';
+
+  @override
+  String get libraryPaperColorYellow => 'Sarı kağıt';
+
+  @override
+  String get librarySelectColor => 'Renk Seç';
 }

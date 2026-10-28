@@ -1279,6 +1279,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Untitled note'**
   String get libraryUntitledNote;
+
+  /// No description provided for @libraryPaperColorWhite.
+  ///
+  /// In en, this message translates to:
+  /// **'White paper'**
+  String get libraryPaperColorWhite;
+
+  /// No description provided for @libraryPaperColorBlack.
+  ///
+  /// In en, this message translates to:
+  /// **'Black paper'**
+  String get libraryPaperColorBlack;
+
+  /// No description provided for @libraryPaperColorCream.
+  ///
+  /// In en, this message translates to:
+  /// **'Cream paper'**
+  String get libraryPaperColorCream;
+
+  /// No description provided for @libraryPaperColorGray.
+  ///
+  /// In en, this message translates to:
+  /// **'Gray paper'**
+  String get libraryPaperColorGray;
+
+  /// No description provided for @libraryPaperColorGreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Green paper'**
+  String get libraryPaperColorGreen;
+
+  /// No description provided for @libraryPaperColorBlue.
+  ///
+  /// In en, this message translates to:
+  /// **'Blue paper'**
+  String get libraryPaperColorBlue;
+
+  /// No description provided for @libraryPaperColorYellow.
+  ///
+  /// In en, this message translates to:
+  /// **'Yellow paper'**
+  String get libraryPaperColorYellow;
+
+  /// No description provided for @librarySelectColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a color'**
+  String get librarySelectColor;
 }
 
 class _AppLocalizationsDelegate

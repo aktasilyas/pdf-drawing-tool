@@ -3,6 +3,8 @@
 /// Documents store [storageKey] (the Turkish label used since the first
 /// release). [tryParse] also accepts the ASCII spellings that the template
 /// screen wrote by mistake, so those records open in their chosen colour.
+/// [storageKey] is stored data, not display copy; labels shown to users live
+/// in `PaperColorL10n` (presentation/l10n/library_labels.dart).
 library;
 
 enum PaperColor {

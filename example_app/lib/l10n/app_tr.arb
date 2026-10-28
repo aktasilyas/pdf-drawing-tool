@@ -237,5 +237,13 @@
   "libraryNoTemplatesInCategory": "Bu kategoride şablon yok",
   "libraryCreateNoteTitle": "Yeni not oluştur",
   "libraryTemplate": "Şablon",
-  "libraryUntitledNote": "İsimsiz Not"
+  "libraryUntitledNote": "İsimsiz Not",
+  "libraryPaperColorWhite": "Beyaz kağıt",
+  "libraryPaperColorBlack": "Siyah kağıt",
+  "libraryPaperColorCream": "Krem kağıt",
+  "libraryPaperColorGray": "Gri kağıt",
+  "libraryPaperColorGreen": "Yeşil kağıt",
+  "libraryPaperColorBlue": "Mavi kağıt",
+  "libraryPaperColorYellow": "Sarı kağıt",
+  "librarySelectColor": "Renk Seç"
 }

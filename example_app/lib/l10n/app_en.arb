@@ -433,5 +433,13 @@
   "libraryNoTemplatesInCategory": "No templates in this category",
   "libraryCreateNoteTitle": "Create new note",
   "libraryTemplate": "Template",
-  "libraryUntitledNote": "Untitled note"
+  "libraryUntitledNote": "Untitled note",
+  "libraryPaperColorWhite": "White paper",
+  "libraryPaperColorBlack": "Black paper",
+  "libraryPaperColorCream": "Cream paper",
+  "libraryPaperColorGray": "Gray paper",
+  "libraryPaperColorGreen": "Green paper",
+  "libraryPaperColorBlue": "Blue paper",
+  "libraryPaperColorYellow": "Yellow paper",
+  "librarySelectColor": "Choose a color"
 }

@@ -733,4 +733,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get libraryUntitledNote => 'Untitled note';
+
+  @override
+  String get libraryPaperColorWhite => 'White paper';
+
+  @override
+  String get libraryPaperColorBlack => 'Black paper';
+
+  @override
+  String get libraryPaperColorCream => 'Cream paper';
+
+  @override
+  String get libraryPaperColorGray => 'Gray paper';
+
+  @override
+  String get libraryPaperColorGreen => 'Green paper';
+
+  @override
+  String get libraryPaperColorBlue => 'Blue paper';
+
+  @override
+  String get libraryPaperColorYellow => 'Yellow paper';
+
+  @override
+  String get librarySelectColor => 'Choose a color';
 }
