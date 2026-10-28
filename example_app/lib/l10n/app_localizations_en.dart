@@ -1810,7 +1810,4 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get libraryFolderColorStone => 'Stone';
-
-  @override
-  String get libraryColorSwatchSelected => 'Selected';
 }

@@ -3289,12 +3289,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Stone'**
   String get libraryFolderColorStone;
-
-  /// No description provided for @libraryColorSwatchSelected.
-  ///
-  /// In en, this message translates to:
-  /// **'Selected'**
-  String get libraryColorSwatchSelected;
 }
 
 class _AppLocalizationsDelegate

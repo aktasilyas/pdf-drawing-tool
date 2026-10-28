@@ -1785,7 +1785,4 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get libraryFolderColorStone => 'Taş';
-
-  @override
-  String get libraryColorSwatchSelected => 'Seçili';
 }

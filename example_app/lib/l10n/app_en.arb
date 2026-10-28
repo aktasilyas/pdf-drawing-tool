@@ -937,6 +937,5 @@
   "libraryFolderColorCyan": "Cyan",
   "libraryFolderColorBlue": "Blue",
   "libraryFolderColorGray": "Gray",
-  "libraryFolderColorStone": "Stone",
-  "libraryColorSwatchSelected": "Selected"
+  "libraryFolderColorStone": "Stone"
 }
