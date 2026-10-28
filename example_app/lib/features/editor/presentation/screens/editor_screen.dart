@@ -51,16 +51,7 @@ class EditorScreen extends ConsumerWidget {
 
           // Set page trash callback for soft-delete support
           ref.read(pageTrashCallbackProvider.notifier).state =
-              (pageIndex, page) {
-            return ref
-                .read(documentsControllerProvider.notifier)
-                .movePageToTrash(
-                  documentId: document.id,
-                  documentTitle: document.title,
-                  pageIndex: pageIndex,
-                  pageData: page.toJson(),
-                );
-          };
+              pageTrashCallbackFor(ref.read, document.id);
 
           // Lets the editor drop a trash entry again (undo of a page delete).
           ref.read(pageTrashDiscardCallbackProvider.notifier).state =
@@ -111,7 +102,8 @@ class EditorScreen extends ConsumerWidget {
               resizeToAvoidBottomInset: false,
               // NO AppBar - DrawingScreen handles everything
               body: EditorBody(
-                documentTitle: document.title,
+                documentTitle:
+                    ref.watch(documentProvider.select((d) => d.title)),
                 canvasMode: canvasMode,
                 onHomePressed: () => _handleBack(context, ref),
                 onRenameDocument: () => _showRenameDialog(context, ref),

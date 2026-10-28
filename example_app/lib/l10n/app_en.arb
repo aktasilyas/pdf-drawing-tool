@@ -144,6 +144,20 @@
   "libraryErrorDeleteDocumentsForever": "Couldn't delete the notebooks permanently",
   "libraryErrorDuplicateDocuments": "Couldn't duplicate the notebooks",
   "libraryErrorMoveDocuments": "Couldn't move the notebooks",
+  "libraryErrorBulkPartial": "{message} ({failed} of {total} failed)",
+  "@libraryErrorBulkPartial": {
+    "placeholders": {
+      "message": {
+        "type": "String"
+      },
+      "failed": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
   "libraryErrorTrashPage": "Couldn't move the page to the trash",
   "libraryErrorDeletePageForever": "Couldn't delete the page permanently",
   "libraryErrorEmptyTrash": "Couldn't empty the trash",
@@ -850,6 +864,7 @@
   "editorErrorExportNoPages": "There are no pages to export",
   "editorErrorPdfPasswordProtected": "This PDF is password-protected. Remove the password and try again.",
   "editorErrorPdfFileAccess": "Couldn't access the PDF file.",
+  "editorErrorPdfStorageFull": "Not enough storage to import the PDF. Free up space and try again.",
   "editorErrorPdfOpenFailed": "Couldn't open the PDF. The file may be damaged.",
   "editorErrorPdfPagesUnreadable": "Couldn't read the PDF pages. The file may be damaged.",
   "editorErrorPdfTooManyPages": "This PDF has too many pages ({count}). Up to {max} pages are supported.",
@@ -948,14 +963,7 @@
   "libraryFolderManagement": "Folder management",
   "libraryMoveFolderTitle": "Move folder",
   "libraryMoveToFolderTitle": "Move to folder",
-  "libraryFoldersLoadFailed": "Couldn't load folders: {error}",
-  "@libraryFoldersLoadFailed": {
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
-  },
+  "libraryFoldersLoadFailed": "Couldn't load folders",
   "libraryFolderNameEmpty": "Folder name can't be empty",
   "libraryFolderCreated": "Folder \"{name}\" created",
   "@libraryFolderCreated": {

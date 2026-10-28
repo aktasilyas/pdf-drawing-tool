@@ -97,6 +97,13 @@ abstract class DocumentRepository {
     Duration retention = trashRetention,
   });
 
+  /// Deletes app-managed files (copied PDFs, images) that no notebook, trashed
+  /// page, thumbnail or chat message references and that last changed before
+  /// [olderThan]. Returns how many files were deleted.
+  Future<Either<Failure, int>> sweepOrphanedFiles({
+    required DateTime olderThan,
+  });
+
   /// Get document content (drawing data as JSON)
   Future<Either<Failure, Map<String, dynamic>?>> getDocumentContent(String id);
 

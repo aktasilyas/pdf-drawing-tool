@@ -14,6 +14,7 @@ export 'domain/entities/view_mode.dart';
 export 'domain/repositories/document_repository.dart';
 export 'domain/repositories/folder_repository.dart';
 export 'domain/repositories/incoming_pdf_source.dart';
+export 'domain/repositories/maintenance_schedule.dart';
 export 'domain/repositories/page_trash_repository.dart';
 
 // Domain - Use Cases
@@ -27,6 +28,7 @@ export 'domain/usecases/create_folder_usecase.dart';
 export 'domain/usecases/get_folders_usecase.dart';
 export 'domain/usecases/delete_folder_usecase.dart';
 export 'domain/usecases/purge_expired_trash_usecase.dart';
+export 'domain/usecases/sweep_orphaned_files_usecase.dart';
 
 // Data - Models
 export 'data/models/document_model.dart';
@@ -41,6 +43,7 @@ export 'data/datasources/document_content_codec.dart';
 export 'data/datasources/document_local_datasource.dart';
 export 'data/datasources/folder_local_datasource.dart';
 export 'data/datasources/method_channel_incoming_pdf_source.dart';
+export 'data/datasources/prefs_maintenance_schedule.dart';
 export 'data/datasources/trashed_page_local_datasource.dart';
 
 // Data - Repositories
@@ -49,6 +52,7 @@ export 'data/repositories/folder_repository_impl.dart';
 export 'data/repositories/page_trash_repository_impl.dart';
 
 // Presentation - Providers
+export 'presentation/providers/bulk_result.dart';
 export 'presentation/providers/document_menu_actions.dart';
 export 'presentation/providers/document_preview_provider.dart';
 export 'presentation/providers/documents_provider.dart';

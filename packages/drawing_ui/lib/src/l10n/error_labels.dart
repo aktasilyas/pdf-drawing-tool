@@ -30,6 +30,8 @@ extension PdfImportFailureLabel on PdfImportFailure {
         return e.pdfPasswordProtected;
       case PdfImportError.fileAccess:
         return e.pdfFileAccess;
+      case PdfImportError.storageFull:
+        return e.pdfStorageFull;
       case PdfImportError.openFailed:
         return e.pdfOpenFailed;
       case PdfImportError.pagesUnreadable:

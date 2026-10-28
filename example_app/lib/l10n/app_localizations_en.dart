@@ -214,6 +214,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get libraryErrorMoveDocuments => 'Couldn\'t move the notebooks';
 
   @override
+  String libraryErrorBulkPartial(String message, int failed, int total) {
+    return '$message ($failed of $total failed)';
+  }
+
+  @override
   String get libraryErrorTrashPage => 'Couldn\'t move the page to the trash';
 
   @override
@@ -1687,6 +1692,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editorErrorPdfFileAccess => 'Couldn\'t access the PDF file.';
 
   @override
+  String get editorErrorPdfStorageFull =>
+      'Not enough storage to import the PDF. Free up space and try again.';
+
+  @override
   String get editorErrorPdfOpenFailed =>
       'Couldn\'t open the PDF. The file may be damaged.';
 
@@ -1854,9 +1863,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get libraryMoveToFolderTitle => 'Move to folder';
 
   @override
-  String libraryFoldersLoadFailed(String error) {
-    return 'Couldn\'t load folders: $error';
-  }
+  String get libraryFoldersLoadFailed => 'Couldn\'t load folders';
 
   @override
   String get libraryFolderNameEmpty => 'Folder name can\'t be empty';

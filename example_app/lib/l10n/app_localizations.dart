@@ -476,6 +476,12 @@ abstract class AppLocalizations {
   /// **'Couldn\'t move the notebooks'**
   String get libraryErrorMoveDocuments;
 
+  /// No description provided for @libraryErrorBulkPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'{message} ({failed} of {total} failed)'**
+  String libraryErrorBulkPartial(String message, int failed, int total);
+
   /// No description provided for @libraryErrorTrashPage.
   ///
   /// In en, this message translates to:
@@ -3074,6 +3080,12 @@ abstract class AppLocalizations {
   /// **'Couldn\'t access the PDF file.'**
   String get editorErrorPdfFileAccess;
 
+  /// No description provided for @editorErrorPdfStorageFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough storage to import the PDF. Free up space and try again.'**
+  String get editorErrorPdfStorageFull;
+
   /// No description provided for @editorErrorPdfOpenFailed.
   ///
   /// In en, this message translates to:
@@ -3353,8 +3365,8 @@ abstract class AppLocalizations {
   /// No description provided for @libraryFoldersLoadFailed.
   ///
   /// In en, this message translates to:
-  /// **'Couldn\'t load folders: {error}'**
-  String libraryFoldersLoadFailed(String error);
+  /// **'Couldn\'t load folders'**
+  String get libraryFoldersLoadFailed;
 
   /// No description provided for @libraryFolderNameEmpty.
   ///

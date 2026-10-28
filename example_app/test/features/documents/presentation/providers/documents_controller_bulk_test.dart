@@ -18,6 +18,7 @@ void main() {
   const ok = Right<Failure, void>(null);
   const ko = Left<Failure, void>(failure);
   const ids = ['a', 'b'];
+  const abc = ['a', 'b', 'c'];
 
   group('moveDocumentsToTrash', () {
     test('trashes every id and refreshes documents, trash, folders', () async {
@@ -29,15 +30,34 @@ void main() {
       verify(() => h.repo.moveToTrash('b')).called(1);
       expect(rebuilt, trashMoveLists);
       expect(h.state, const AsyncData<void>(null));
+      expect(h.container.read(libraryErrorProvider), isNull);
     });
 
-    test('a failure stops, sets the error and rethrows', () async {
-      when(() => h.repo.moveToTrash('a')).thenAnswer((_) async => ko);
-      await expectLater(
-        h.controller.moveDocumentsToTrash(ids),
-        throwsA(isA<Exception>()),
-      );
-      verifyNever(() => h.repo.moveToTrash('b'));
+    test('a failing middle id does not stop the rest', () async {
+      when(() => h.repo.moveToTrash(any())).thenAnswer((_) async => ok);
+      when(() => h.repo.moveToTrash('b')).thenAnswer((_) async => ko);
+      late BulkResult result;
+      final rebuilt = await h.rebuiltBy(() async {
+        result = await h.controller.moveDocumentsToTrash(abc);
+      });
+      verify(() => h.repo.moveToTrash('a')).called(1);
+      verify(() => h.repo.moveToTrash('c')).called(1);
+      expect(result.succeeded, ['a', 'c']);
+      expect(result.failed, ['b']);
+      expect(rebuilt, trashMoveLists);
+      expect(h.state.hasError, isTrue);
+      final reported = h.container.read(libraryErrorProvider);
+      expect(reported?.action, LibraryAction.trashDocuments);
+      expect(reported?.failedCount, 1);
+      expect(reported?.totalCount, 3);
+    });
+
+    test('a throwing repository counts as a failed id', () async {
+      when(() => h.repo.moveToTrash(any())).thenAnswer((_) async => ok);
+      when(() => h.repo.moveToTrash('a')).thenThrow(StateError('disk'));
+      final result = await h.controller.moveDocumentsToTrash(abc);
+      expect(result.succeeded, ['b', 'c']);
+      expect(result.failed, ['a']);
       expect(h.state.hasError, isTrue);
     });
 
@@ -59,15 +79,33 @@ void main() {
       expect(rebuilt, permanentDeleteLists);
     });
 
-    test('a failure sets the error and rethrows', () async {
-      when(() => h.repo.permanentlyDelete(any())).thenAnswer((_) async => ko);
-      await expectLater(
-        h.controller.permanentlyDeleteDocuments(ids),
-        throwsA(isA<Exception>()),
-      );
+    test('a failing middle id does not stop the rest', () async {
+      when(() => h.repo.permanentlyDelete(any())).thenAnswer((_) async => ok);
+      when(() => h.repo.permanentlyDelete('b')).thenAnswer((_) async => ko);
+      late BulkResult result;
+      final rebuilt = await h.rebuiltBy(() async {
+        result = await h.controller.permanentlyDeleteDocuments(abc);
+      });
+      verify(() => h.repo.permanentlyDelete('a')).called(1);
+      verify(() => h.repo.permanentlyDelete('c')).called(1);
+      expect(result.succeeded, ['a', 'c']);
+      expect(result.failed, ['b']);
+      expect(rebuilt, permanentDeleteLists);
       expect(h.state.hasError, isTrue);
       final reported = h.container.read(libraryErrorProvider);
       expect(reported?.action, LibraryAction.deleteDocumentsForever);
+      expect(reported?.failedCount, 1);
+      expect(reported?.totalCount, 3);
+    });
+
+    test('every id failing reports all of them', () async {
+      when(() => h.repo.permanentlyDelete(any())).thenAnswer((_) async => ko);
+      final result = await h.controller.permanentlyDeleteDocuments(ids);
+      expect(result.succeeded, isEmpty);
+      expect(result.failed, ids);
+      final reported = h.container.read(libraryErrorProvider);
+      expect(reported?.failedCount, 2);
+      expect(reported?.totalCount, 2);
     });
   });
 
@@ -84,15 +122,32 @@ void main() {
       expect(rebuilt, allLists);
     });
 
-    test('a failure sets the error and rethrows', () async {
+    test('a failing middle id does not stop the rest', () async {
       when(() => h.repo
               .duplicateDocument(any(), copyTitle: any(named: 'copyTitle')))
+          .thenAnswer((_) async => Right(testDocument));
+      when(() =>
+              h.repo.duplicateDocument('b', copyTitle: any(named: 'copyTitle')))
           .thenAnswer((_) async => const Left(failure));
-      await expectLater(
-        h.controller.duplicateDocuments(ids, copyTitle: copyTitle),
-        throwsA(isA<Exception>()),
-      );
+      late BulkResult result;
+      final rebuilt = await h.rebuiltBy(() async {
+        result =
+            await h.controller.duplicateDocuments(abc, copyTitle: copyTitle);
+      });
+      verify(() =>
+              h.repo.duplicateDocument('a', copyTitle: any(named: 'copyTitle')))
+          .called(1);
+      verify(() =>
+              h.repo.duplicateDocument('c', copyTitle: any(named: 'copyTitle')))
+          .called(1);
+      expect(result.succeeded, ['a', 'c']);
+      expect(result.failed, ['b']);
+      expect(rebuilt, allLists);
       expect(h.state.hasError, isTrue);
+      final reported = h.container.read(libraryErrorProvider);
+      expect(reported?.action, LibraryAction.duplicateDocuments);
+      expect(reported?.failedCount, 1);
+      expect(reported?.totalCount, 3);
     });
   });
 

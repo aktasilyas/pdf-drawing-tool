@@ -8,9 +8,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:example_app/core/theme/index.dart';
+import 'package:example_app/core/utils/logger.dart';
 import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/documents/domain/entities/folder.dart';
 import 'package:example_app/features/documents/presentation/providers/folders_provider.dart';
+import 'package:example_app/features/documents/presentation/widgets/documents_error_views.dart';
 import 'package:example_app/features/documents/presentation/widgets/folder_color_picker.dart';
 import 'package:example_app/features/documents/presentation/widgets/manage_folder_list_item.dart';
 import 'package:example_app/l10n/l10n.dart';
@@ -66,7 +68,14 @@ class _ManageFoldersScreenState extends ConsumerState<ManageFoldersScreen> {
           return _buildContent();
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text(l10n.commonErrorDetail('$e'))),
+        error: (e, st) {
+          logger.w('Folders failed to load', error: e, stackTrace: st);
+          return DocumentsErrorView(
+            error: e,
+            message: l10n.libraryFoldersLoadFailed,
+            onRetry: () => ref.invalidate(foldersProvider),
+          );
+        },
       ),
       bottomNavigationBar: _buildBottomBar(),
     );

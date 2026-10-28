@@ -2,6 +2,9 @@
 enum PdfImportError {
   passwordProtected,
   fileAccess,
+
+  /// The device has no space left for the copy in app storage.
+  storageFull,
   openFailed,
   pagesUnreadable,
   tooManyPages,
