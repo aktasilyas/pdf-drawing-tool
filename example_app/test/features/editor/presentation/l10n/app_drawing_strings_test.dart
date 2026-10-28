@@ -41,20 +41,16 @@ void main() {
     expect(tr.toolbar.toMap(), fallback.toolbar.toMap());
   });
 
-  test('en differs from tr for the navigation keys', () {
+  test('every en string is translated (differs from tr)', () {
     final en = AppDrawingStrings(lookupAppLocalizations(const Locale('en')));
     final tr = AppDrawingStrings(lookupAppLocalizations(const Locale('tr')));
-    for (final key in ['home', 'pages', 'undo', 'redo', 'export', 'more']) {
-      expect(
-        en.toolbar.toMap()[key],
-        isNot(tr.toolbar.toMap()[key]),
-        reason: key,
-      );
+    // Same word in both languages.
+    const sameInBoth = {'colorSetPastel'};
+    final enMap = {...en.tools.toMap(), ...en.toolbar.toMap()};
+    final trMap = {...tr.tools.toMap(), ...tr.toolbar.toMap()};
+    for (final key in enMap.keys.where((k) => !sameInBoth.contains(k))) {
+      expect(enMap[key], isNot(trMap[key]), reason: key);
     }
-    expect(
-      en.tools.toMap()['fountainPen'],
-      isNot(tr.tools.toMap()['fountainPen']),
-    );
   });
 
   test('equality follows the locale', () {
