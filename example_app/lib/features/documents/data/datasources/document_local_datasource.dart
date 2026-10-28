@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:drawing_core/drawing_core.dart'
@@ -7,6 +6,8 @@ import 'package:drift/drift.dart';
 import 'package:injectable/injectable.dart';
 import 'package:example_app/core/core.dart';
 import 'package:example_app/features/documents/data/datasources/document_content_codec.dart';
+import 'package:example_app/features/documents/data/datasources/document_content_write_queue.dart';
+import 'package:example_app/features/documents/data/datasources/document_row_mapper.dart';
 import 'package:example_app/features/documents/data/models/document_model.dart';
 
 abstract class DocumentLocalDatasource {
@@ -36,10 +37,9 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
   final DocumentContentCodec _codec;
   final PdfPathResolver _pdfPaths;
 
-  /// Newest content write per document. Large encodes yield mid-way, so
-  /// writes are chained to land in call order (a stale autosave never
+  /// Content writes land in call order per document (a stale autosave never
   /// overwrites a newer save).
-  final Map<String, Future<void>> _contentWrites = {};
+  final DocumentContentWriteQueue _contentWrites = DocumentContentWriteQueue();
 
   DocumentLocalDatasourceImpl(
     this._db, {
@@ -64,7 +64,7 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
   Future<List<DocumentModel>> getDocuments({String? folderId}) async {
     try {
       final rows = await _folderQuery(folderId).get();
-      return rows.map(_toModel).toList();
+      return rows.map((r) => r.toModel()).toList();
     } catch (e) {
       throw CacheException('Failed to get documents: $e');
     }
@@ -74,7 +74,7 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
   Future<List<DocumentModel>> getAllDocuments() async {
     try {
       final rows = await _db.select(_db.documents).get();
-      return rows.map(_toModel).toList();
+      return rows.map((r) => r.toModel()).toList();
     } catch (e) {
       throw CacheException('Failed to get all documents: $e');
     }
@@ -87,7 +87,7 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
             ..where((t) => t.id.equals(id)))
           .getSingleOrNull();
       if (row == null) throw const CacheException('Document not found');
-      return _toModel(row);
+      return row.toModel();
     } catch (e) {
       throw CacheException('Failed to get document: $e');
     }
@@ -96,7 +96,7 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
   @override
   Future<DocumentModel> createDocument(DocumentModel document) async {
     try {
-      await _db.into(_db.documents).insert(_toCompanion(document));
+      await _db.into(_db.documents).insert(document.toCompanion());
       return document;
     } catch (e) {
       throw CacheException('Failed to create document: $e');
@@ -108,7 +108,7 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
     try {
       final count = await (_db.update(_db.documents)
             ..where((t) => t.id.equals(document.id)))
-          .write(_toCompanion(document));
+          .write(document.toCompanion());
       if (count == 0) throw const CacheException('Document not found');
       return document;
     } catch (e) {
@@ -184,7 +184,7 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
   Stream<List<DocumentModel>> watchDocuments({String? folderId}) {
     return _folderQuery(folderId)
         .watch()
-        .map((rows) => rows.map(_toModel).toList());
+        .map((rows) => rows.map((r) => r.toModel()).toList());
   }
 
   @override
@@ -224,28 +224,10 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
     String id,
     Map<String, dynamic> content,
   ) {
-    final write = _writeContentAfter(_contentWrites[id], id, content);
-    _contentWrites[id] = write;
-    unawaited(
-      write.then<void>((_) {}, onError: (Object _) {}).whenComplete(() {
-        if (identical(_contentWrites[id], write)) _contentWrites.remove(id);
-      }),
-    );
-    return write;
+    return _contentWrites.enqueue(id, () => _writeContent(id, content));
   }
 
-  Future<void> _writeContentAfter(
-    Future<void>? previous,
-    String id,
-    Map<String, dynamic> content,
-  ) async {
-    if (previous != null) {
-      try {
-        await previous;
-      } catch (_) {
-        // Already reported to the caller of that save.
-      }
-    }
+  Future<void> _writeContent(String id, Map<String, dynamic> content) async {
     try {
       final data = await _codec.encode(content);
       await _db.into(_db.documentContents).insertOnConflictUpdate(
@@ -272,48 +254,4 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
       throw CacheException('Failed to check document content: $e');
     }
   }
-
-  DocumentModel _toModel(DocumentRow r) => DocumentModel(
-        id: r.id,
-        title: r.title,
-        folderId: r.folderId,
-        templateId: r.templateId,
-        createdAt: r.createdAt,
-        updatedAt: r.updatedAt,
-        thumbnailPath: r.thumbnailPath,
-        pageCount: r.pageCount,
-        isFavorite: r.isFavorite,
-        isInTrash: r.isInTrash,
-        deletedAt: r.deletedAt,
-        syncState: r.syncState,
-        paperColor: r.paperColor,
-        isPortrait: r.isPortrait,
-        documentType: r.documentType,
-        coverId: r.coverId,
-        hasCover: r.hasCover,
-        paperWidthMm: r.paperWidthMm,
-        paperHeightMm: r.paperHeightMm,
-      );
-
-  DocumentsCompanion _toCompanion(DocumentModel d) => DocumentsCompanion(
-        id: Value(d.id),
-        title: Value(d.title),
-        folderId: Value(d.folderId),
-        templateId: Value(d.templateId),
-        createdAt: Value(d.createdAt),
-        updatedAt: Value(d.updatedAt),
-        thumbnailPath: Value(d.thumbnailPath),
-        pageCount: Value(d.pageCount),
-        isFavorite: Value(d.isFavorite),
-        isInTrash: Value(d.isInTrash),
-        deletedAt: Value(d.deletedAt),
-        syncState: Value(d.syncState),
-        paperColor: Value(d.paperColor),
-        isPortrait: Value(d.isPortrait),
-        documentType: Value(d.documentType),
-        coverId: Value(d.coverId),
-        hasCover: Value(d.hasCover),
-        paperWidthMm: Value(d.paperWidthMm),
-        paperHeightMm: Value(d.paperHeightMm),
-      );
 }
