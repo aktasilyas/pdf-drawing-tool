@@ -100,8 +100,7 @@ mixin _StickyNoteGestures<T extends ConsumerStatefulWidget>
     final document = ref.read(documentProvider);
     final current = document.layers.isEmpty
         ? null
-        : document.layers[document.activeLayerIndex]
-            .getStickyNoteById(note.id);
+        : document.layers[document.activeLayerIndex].getStickyNoteById(note.id);
     if (current != null && !current.minimized) {
       final updated = current.copyWith(minimized: true);
       final command = core.UpdateStickyNoteCommand(
@@ -124,9 +123,7 @@ mixin _StickyNoteGestures<T extends ConsumerStatefulWidget>
     // If a selected (non-minimized) note is showing resize handles,
     // check if tap is inside the note → let handles handle it.
     // If outside → minimize and deselect, then check other notes.
-    if (selected != null &&
-        !currentNoteState.showMenu &&
-        !selected.minimized) {
+    if (selected != null && !currentNoteState.showMenu && !selected.minimized) {
       if (selected.containsPoint(canvasPoint.dx, canvasPoint.dy, 0)) {
         return; // Inside note → resize handles handle it
       }
