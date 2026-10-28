@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -8,6 +6,8 @@ import 'package:drawing_ui/src/l10n/drawing_strings_scope.dart';
 import 'package:drawing_ui/src/theme/theme.dart';
 import 'package:drawing_ui/src/providers/drawing_providers.dart';
 import 'package:drawing_ui/src/providers/image_provider.dart';
+import 'package:drawing_ui/src/providers/pdf_path_provider.dart';
+import 'package:drawing_ui/src/services/image_import_storage.dart';
 
 /// Settings panel for the image insertion tool.
 ///
@@ -70,20 +70,16 @@ class ImagePanel extends ConsumerWidget {
     final picked = await picker.pickImage(source: source, imageQuality: 85);
     if (picked == null) return;
 
-    // Copy to app documents directory for persistence
+    // Copy into the app container; persist the container-relative path.
     final appDir = await getApplicationDocumentsDirectory();
-    final imagesDir = Directory('${appDir.path}/elyanotes_images');
-    if (!imagesDir.existsSync()) {
-      imagesDir.createSync(recursive: true);
-    }
-
-    final ext = picked.path.split('.').last;
-    final fileName = '${DateTime.now().microsecondsSinceEpoch}.$ext';
-    final destPath = '${imagesDir.path}/$fileName';
-    await File(picked.path).copy(destPath);
+    final stored = await storeImportedImage(
+      picked.path,
+      documentsRoot: appDir.path,
+      paths: ref.read(pdfPathResolverProvider),
+    );
 
     // Enter placement mode
-    ref.read(imagePlacementProvider.notifier).selectImagePath(destPath);
+    ref.read(imagePlacementProvider.notifier).selectImagePath(stored);
 
     // Close the panel
     if (context.mounted) {

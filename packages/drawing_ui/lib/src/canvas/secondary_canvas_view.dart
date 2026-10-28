@@ -9,6 +9,7 @@ import 'package:drawing_ui/src/canvas/secondary_canvas_layers.dart';
 import 'package:drawing_ui/src/l10n/drawing_strings_scope.dart';
 import 'package:drawing_ui/src/providers/canvas_transform_provider.dart';
 import 'package:drawing_ui/src/providers/page_provider.dart';
+import 'package:drawing_ui/src/providers/pdf_path_provider.dart';
 import 'package:drawing_ui/src/rendering/rendering.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 
@@ -45,7 +46,8 @@ class SecondaryCanvasView extends ConsumerStatefulWidget {
 
 class _SecondaryCanvasViewState extends ConsumerState<SecondaryCanvasView> {
   final FlutterStrokeRenderer _renderer = FlutterStrokeRenderer();
-  final ImageCacheManager _imageCacheManager = ImageCacheManager();
+  late final ImageCacheManager _imageCacheManager =
+      ImageCacheManager(paths: ref.read(pdfPathResolverProvider));
   Offset? _lastFocalPoint;
   double? _lastScale;
 

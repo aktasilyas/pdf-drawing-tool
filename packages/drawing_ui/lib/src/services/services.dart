@@ -5,6 +5,7 @@ export 'audio_playback_service.dart';
 export 'audio_recording_service.dart';
 export 'background_thumbnail_queue.dart';
 export 'export_errors.dart' show ExportFailure;
+export 'image_import_storage.dart';
 export 'memory_budget.dart';
 export 'page_rotation_service.dart';
 export 'pdf_content_painter.dart';
