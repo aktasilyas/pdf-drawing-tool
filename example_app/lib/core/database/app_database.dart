@@ -10,6 +10,7 @@ import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:sqlite3_flutter_libs/sqlite3_flutter_libs.dart';
+import 'package:example_app/core/database/migrations/migrations.dart';
 
 part 'app_database.g.dart';
 
@@ -246,47 +247,7 @@ class AppDatabase extends _$AppDatabase {
       onCreate: (Migrator m) async {
         await m.createAll();
       },
-      onUpgrade: (Migrator m, int from, int to) async {
-        if (from < 2) {
-          await customStatement(
-            'ALTER TABLE documents ADD COLUMN paper_color TEXT NOT NULL DEFAULT "Sarı kağıt"',
-          );
-          await customStatement(
-            'ALTER TABLE documents ADD COLUMN is_portrait INTEGER NOT NULL DEFAULT 1',
-          );
-        }
-        if (from < 3) {
-          await customStatement(
-            'ALTER TABLE documents ADD COLUMN document_type TEXT NOT NULL DEFAULT "notebook"',
-          );
-        }
-        if (from < 4) {
-          await customStatement(
-            'ALTER TABLE documents ADD COLUMN cover_id TEXT',
-          );
-          await customStatement(
-            'ALTER TABLE documents ADD COLUMN has_cover INTEGER NOT NULL DEFAULT 1',
-          );
-          await customStatement(
-            'ALTER TABLE documents ADD COLUMN paper_width_mm REAL NOT NULL DEFAULT 210.0',
-          );
-          await customStatement(
-            'ALTER TABLE documents ADD COLUMN paper_height_mm REAL NOT NULL DEFAULT 297.0',
-          );
-        }
-        if (from < 5) {
-          await m.createTable(aiConversationsLocal);
-          await m.createTable(aiMessagesLocal);
-        }
-        if (from < 6) {
-          await m.addColumn(documents, documents.deletedAt);
-          await m.addColumn(folders, folders.sortOrder);
-          await m.addColumn(folders, folders.isFavorite);
-          await m.createTable(documentContents);
-          await m.createTable(trashedPages);
-          await m.createIndex(trashedPagesSourceDocumentIdx);
-        }
-      },
+      onUpgrade: (Migrator m, int from, int to) => runMigrations(this, m, from),
     );
   }
 
