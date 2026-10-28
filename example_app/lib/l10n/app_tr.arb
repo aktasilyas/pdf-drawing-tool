@@ -537,6 +537,7 @@
   "editorErrorExportNoPages": "Dışa aktarılacak sayfa yok",
   "editorErrorPdfPasswordProtected": "Bu PDF parola korumalı. Parolayı kaldırıp tekrar deneyin.",
   "editorErrorPdfFileAccess": "PDF dosyasına erişilemedi.",
+  "editorErrorPdfStorageFull": "PDF içe aktarmak için yeterli depolama alanı yok. Yer açıp tekrar deneyin.",
   "editorErrorPdfOpenFailed": "PDF açılamadı. Dosya bozuk olabilir.",
   "editorErrorPdfPagesUnreadable": "PDF sayfaları okunamadı. Dosya bozuk olabilir.",
   "editorErrorPdfTooManyPages": "PDF çok fazla sayfa içeriyor ({count}). Maksimum {max} sayfa destekleniyor.",

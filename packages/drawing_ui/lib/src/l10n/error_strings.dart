@@ -12,6 +12,7 @@ abstract class ErrorStrings {
   String get exportNoPages;
   String get pdfPasswordProtected;
   String get pdfFileAccess;
+  String get pdfStorageFull;
   String get pdfOpenFailed;
   String get pdfPagesUnreadable;
   String pdfTooManyPages(int count, int max);
@@ -32,6 +33,7 @@ abstract class ErrorStrings {
         'exportNoPages': exportNoPages,
         'pdfPasswordProtected': pdfPasswordProtected,
         'pdfFileAccess': pdfFileAccess,
+        'pdfStorageFull': pdfStorageFull,
         'pdfOpenFailed': pdfOpenFailed,
         'pdfPagesUnreadable': pdfPagesUnreadable,
         'pdfTooManyPages': pdfTooManyPages(1, 2),
@@ -66,6 +68,10 @@ class ErrorStringsTr extends ErrorStrings {
 
   @override
   String get pdfFileAccess => 'PDF dosyasına erişilemedi.';
+
+  @override
+  String get pdfStorageFull =>
+      'PDF içe aktarmak için yeterli depolama alanı yok. Yer açıp tekrar deneyin.';
 
   @override
   String get pdfOpenFailed => 'PDF açılamadı. Dosya bozuk olabilir.';

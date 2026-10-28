@@ -4,6 +4,7 @@ import 'dart:math' as math;
 
 import 'pdf_import_failure.dart';
 import 'pdf_loader.dart';
+import 'storage_errors.dart';
 
 /// Bytes read from each end of the file by [pdfFileLooksEncrypted].
 const _sniffBytes = 64 * 1024;
@@ -35,6 +36,11 @@ Future<bool> pdfFileLooksEncrypted(String path) async {
 
 /// Maps an import error to a typed failure that is safe to show to the user.
 PdfImportFailure pdfImportFailureFor(Object error) {
+  // A full disk is checked first: the copy into app storage failed, not
+  // the source file.
+  if (error is FileSystemException && isStorageFullError(error)) {
+    return const PdfImportFailure(PdfImportError.storageFull);
+  }
   if (error is ArgumentError || error is StateError) {
     return const PdfImportFailure(PdfImportError.openFailed);
   }

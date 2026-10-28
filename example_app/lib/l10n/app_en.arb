@@ -850,6 +850,7 @@
   "editorErrorExportNoPages": "There are no pages to export",
   "editorErrorPdfPasswordProtected": "This PDF is password-protected. Remove the password and try again.",
   "editorErrorPdfFileAccess": "Couldn't access the PDF file.",
+  "editorErrorPdfStorageFull": "Not enough storage to import the PDF. Free up space and try again.",
   "editorErrorPdfOpenFailed": "Couldn't open the PDF. The file may be damaged.",
   "editorErrorPdfPagesUnreadable": "Couldn't read the PDF pages. The file may be damaged.",
   "editorErrorPdfTooManyPages": "This PDF has too many pages ({count}). Up to {max} pages are supported.",

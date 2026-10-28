@@ -26,6 +26,9 @@ class AppErrorStrings extends ErrorStrings {
   String get pdfFileAccess => _l10n.editorErrorPdfFileAccess;
 
   @override
+  String get pdfStorageFull => _l10n.editorErrorPdfStorageFull;
+
+  @override
   String get pdfOpenFailed => _l10n.editorErrorPdfOpenFailed;
 
   @override
