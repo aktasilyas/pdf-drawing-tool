@@ -87,14 +87,19 @@ void main() {
     expect(documentNote(note.id).strokes, isEmpty);
     expect(selected()!.strokes, isEmpty, reason: 'drawn note is live');
 
-    // Tap far outside the note with the pen → minimize and deselect.
+    // Tap just right of the note with the pen → minimize and deselect.
     container
         .read(currentToolProvider.notifier)
         .selectTool(ToolType.ballpointPen);
-    gesture(const [Offset(700, 500), Offset(704, 504)]);
+    final outside = container
+        .read(canvasTransformProvider)
+        .canvasToScreen(Offset(note.x + note.width + 20, note.y + 20));
+    expect(selected(), isNotNull, reason: 'still selected before the tap');
+    expect(state.pointerCount, 0);
+    gesture([outside, outside + const Offset(4, 4)]);
 
     final saved = documentNote(note.id);
-    expect(saved.minimized, isTrue);
+    expect(saved.minimized, isTrue, reason: 'tap outside minimizes the note');
     expect(saved.strokes, isEmpty);
     expect(selected(), isNull);
   });
