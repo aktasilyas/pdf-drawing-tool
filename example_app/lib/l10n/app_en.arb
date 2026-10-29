@@ -882,6 +882,20 @@
   },
   "editorErrorPdfPagePlaceholder": "PDF page",
   "editorErrorPdfSourceMissing": "Source PDF not found",
+  "editorErrorPdfLocateSource": "Locate PDF…",
+  "editorPdfRelinkDone": "PDF re-linked",
+  "editorPdfRelinkPageCountMismatch": "This PDF has {found} pages; the notebook needs {required}.",
+  "@editorPdfRelinkPageCountMismatch": {
+    "placeholders": {
+      "found": {
+        "type": "int"
+      },
+      "required": {
+        "type": "int"
+      }
+    }
+  },
+  "editorPdfRelinkFailed": "Couldn't re-link the PDF",
   "editorErrorPdfLoadFailed": "Couldn't load PDF",
   "editorErrorPdfPagesSkipped": "{count, plural, =1{1 page could not be read and was skipped} other{{count} pages could not be read and were skipped}}",
   "@editorErrorPdfPagesSkipped": {

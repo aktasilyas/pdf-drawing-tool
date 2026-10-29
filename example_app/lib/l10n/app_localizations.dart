@@ -3128,6 +3128,30 @@ abstract class AppLocalizations {
   /// **'Source PDF not found'**
   String get editorErrorPdfSourceMissing;
 
+  /// No description provided for @editorErrorPdfLocateSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Locate PDF…'**
+  String get editorErrorPdfLocateSource;
+
+  /// No description provided for @editorPdfRelinkDone.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF re-linked'**
+  String get editorPdfRelinkDone;
+
+  /// No description provided for @editorPdfRelinkPageCountMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'This PDF has {found} pages; the notebook needs {required}.'**
+  String editorPdfRelinkPageCountMismatch(int found, int required);
+
+  /// No description provided for @editorPdfRelinkFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t re-link the PDF'**
+  String get editorPdfRelinkFailed;
+
   /// No description provided for @editorErrorPdfLoadFailed.
   ///
   /// In en, this message translates to:

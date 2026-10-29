@@ -70,4 +70,13 @@ void main() {
     expect(history().canUndo, isFalse);
     expect(history().undoCount, 0);
   });
+
+  test('closing the editor drops the Locate PDF handler', () {
+    startEditorSession(container.read, docA);
+    container.read(pdfSourceRelinkProvider.notifier).state = (_) async => true;
+
+    endEditorSession(container.read);
+
+    expect(container.read(pdfSourceRelinkProvider), isNull);
+  });
 }

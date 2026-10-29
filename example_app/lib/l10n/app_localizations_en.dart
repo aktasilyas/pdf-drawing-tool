@@ -1721,6 +1721,20 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editorErrorPdfSourceMissing => 'Source PDF not found';
 
   @override
+  String get editorErrorPdfLocateSource => 'Locate PDF…';
+
+  @override
+  String get editorPdfRelinkDone => 'PDF re-linked';
+
+  @override
+  String editorPdfRelinkPageCountMismatch(int found, int required) {
+    return 'This PDF has $found pages; the notebook needs $required.';
+  }
+
+  @override
+  String get editorPdfRelinkFailed => 'Couldn\'t re-link the PDF';
+
+  @override
   String get editorErrorPdfLoadFailed => 'Couldn\'t load PDF';
 
   @override

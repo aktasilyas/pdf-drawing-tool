@@ -4,6 +4,7 @@ import 'package:phosphor_icons/phosphor_icons.dart';
 
 import 'package:drawing_ui/src/l10n/drawing_strings_scope.dart';
 import 'package:drawing_ui/src/providers/pdf_path_provider.dart';
+import 'package:drawing_ui/src/providers/pdf_source_relink_provider.dart';
 import 'package:drawing_ui/src/theme/chrome_tokens.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 
@@ -30,6 +31,8 @@ class PdfPagePlaceholder extends ConsumerWidget {
     final path = pdfFilePath;
     final missing = path != null &&
         (ref.watch(pdfSourceMissingProvider(path)).value ?? false);
+    final handler = ref.watch(pdfSourceRelinkProvider);
+    final relink = missing ? handler : null;
     final colorScheme = Theme.of(context).colorScheme;
     final errors = context.drawingStrings.errors;
 
@@ -67,10 +70,37 @@ class PdfPagePlaceholder extends ConsumerWidget {
                     .bodySmall
                     ?.copyWith(color: colorScheme.onSurfaceVariant),
               ),
+              if (relink != null) ...[
+                const SizedBox(height: ChromeSpacing.md),
+                FilledButton.tonal(
+                  key: const Key('pdfLocateSourceButton'),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(0, 48),
+                    foregroundColor: colorScheme.onSecondaryContainer,
+                    backgroundColor: colorScheme.secondaryContainer,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: ChromeSpacing.lg,
+                    ),
+                  ),
+                  onPressed: () => _relink(context, relink, path!),
+                  child: Text(errors.pdfLocateSource),
+                ),
+              ],
             ],
           ),
         ),
       ),
     );
+  }
+
+  /// The widget may unmount while the host picks a file, so the container is
+  /// captured before the await.
+  Future<void> _relink(
+    BuildContext context,
+    PdfSourceRelinkHandler handler,
+    String stored,
+  ) async {
+    final container = ProviderScope.containerOf(context, listen: false);
+    if (await handler(stored)) evictPdfSource(container, stored);
   }
 }

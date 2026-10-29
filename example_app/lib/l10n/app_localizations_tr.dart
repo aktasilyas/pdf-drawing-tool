@@ -1700,6 +1700,20 @@ class AppLocalizationsTr extends AppLocalizations {
   String get editorErrorPdfSourceMissing => 'Kaynak PDF bulunamadı';
 
   @override
+  String get editorErrorPdfLocateSource => 'PDF\'yi bul…';
+
+  @override
+  String get editorPdfRelinkDone => 'PDF yeniden bağlandı';
+
+  @override
+  String editorPdfRelinkPageCountMismatch(int found, int required) {
+    return 'Bu PDF $found sayfa; defter $required sayfa gerektiriyor.';
+  }
+
+  @override
+  String get editorPdfRelinkFailed => 'PDF yeniden bağlanamadı';
+
+  @override
   String get editorErrorPdfLoadFailed => 'PDF Yüklenemedi';
 
   @override
