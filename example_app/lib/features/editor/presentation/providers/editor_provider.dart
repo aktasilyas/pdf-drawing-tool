@@ -54,27 +54,52 @@ class AutoSaveNotifier extends StateNotifier<bool> {
   /// Whether a change is waiting for the debounce timer.
   bool get hasPendingSave => _pending != null;
 
+  /// The save currently writing, if any.
+  Future<void>? _inFlight;
+
   void documentChanged(DrawingDocument document) {
     _latest = document;
     _debounceTimer?.cancel();
     _pending = document;
     _debounceTimer = Timer(debounce, () {
+      final pending = _pending ?? document;
       _pending = null;
-      _save(document);
+      _save(pending);
     });
   }
 
-  /// Saves a pending change right away (app paused, back pressed).
-  /// After a failed save it retries the newest document instead.
-  /// Does nothing when there is nothing left to save.
-  Future<void> flush() {
+  /// A change of view state only (current page, active layer). It is not
+  /// saved on its own, so the notebook's modified date stays (#467), but it
+  /// rides along with an edit that is still waiting to be saved.
+  void viewChanged(DrawingDocument document) {
+    if (_pending != null) _pending = document;
+    if (_latest != null) _latest = document;
+  }
+
+  /// Saves a pending change right away (app paused, back pressed), after
+  /// waiting for a save that is already running. After a failed save it
+  /// retries the newest document instead. Does nothing when there is nothing
+  /// left to save.
+  Future<void> flush() async {
+    for (var running = _inFlight; running != null; running = _inFlight) {
+      await running;
+    }
+    if (!mounted) return;
     final pending = _pending;
     if (pending != null) return saveNow(pending);
     if (_ref.read(saveFailureProvider) != null) return retry();
-    return Future<void>.value();
   }
 
-  Future<void> _save(DrawingDocument document) async {
+  Future<void> _save(DrawingDocument document) {
+    late final Future<void> run;
+    run = _write(document).whenComplete(() {
+      if (identical(_inFlight, run)) _inFlight = null;
+    });
+    _inFlight = run;
+    return run;
+  }
+
+  Future<void> _write(DrawingDocument document) async {
     state = true; // Saving...
     final useCase = _ref.read(saveDocumentUseCaseProvider);
     final result = await useCase(document);
