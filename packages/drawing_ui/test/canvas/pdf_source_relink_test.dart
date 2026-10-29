@@ -1,5 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:drawing_core/drawing_core.dart';
@@ -13,13 +11,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// A valid 1x1 PNG.
-final Uint8List _png = base64Decode(
-  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGA'
-  'hKmMIQAAAABJRU5ErkJggg==',
-);
+/// Stand-in render result; the test only checks that bytes arrive.
+final Uint8List _bytes = Uint8List.fromList([1, 2, 3]);
 
-/// Mirrors the lazy PDF background: cached/rendered bytes, else the placeholder.
+const _rendered = Key('pdfRendered');
+
+/// Mirrors the lazy PDF background: rendered bytes, else the placeholder.
 class _Page extends ConsumerWidget {
   const _Page(this.stored, this.pageNumber);
 
@@ -31,7 +28,9 @@ class _Page extends ConsumerWidget {
     final key = '$stored|$pageNumber';
     final bytes = ref.watch(pdfPageCacheProvider)[key] ??
         ref.watch(pdfPageRenderProvider(key)).value;
-    if (bytes != null) return Image.memory(bytes, width: 200, height: 300);
+    if (bytes != null) {
+      return const SizedBox(key: _rendered, width: 200, height: 300);
+    }
     return PdfPagePlaceholder(width: 200, height: 300, pdfFilePath: stored);
   }
 }
@@ -68,15 +67,7 @@ void main() {
   });
 
   group('re-link', () {
-    late Directory root;
     const stored = 'pdfs/doc.pdf';
-
-    setUp(() {
-      root = Directory.systemTemp.createTempSync('pdf_relink_');
-      Directory('${root.path}/pdfs').createSync();
-    });
-
-    tearDown(() => root.deleteSync(recursive: true));
 
     testWidgets('placeholder is gone and the page renders after re-link',
         (tester) async {
@@ -87,25 +78,27 @@ void main() {
           pdfFilePath: stored,
         ),
       );
+      // Stands in for the file on disk; the handler "puts it back".
+      var fileBack = false;
       var handlerCalls = 0;
 
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            pdfPathResolverProvider
-                .overrideWithValue(PdfPathResolver(root.path)),
             documentProvider.overrideWith(
               (ref) => DocumentNotifier()..updateDocument(document),
             ),
-            // Returns bytes only once the file exists on disk.
+            pdfSourceMissingProvider.overrideWith(
+              (ref, path) async => !fileBack,
+            ),
+            // Returns bytes only once the file is back.
             pdfFileRasterizerProvider.overrideWithValue(
-              (path, page, quality) async =>
-                  File(path).existsSync() ? _png : null,
+              (path, page, quality) async => fileBack ? _bytes : null,
             ),
             pdfSourceRelinkProvider.overrideWith(
               (ref) => (path) async {
                 handlerCalls++;
-                File('${root.path}/$path').writeAsBytesSync([1, 2, 3]);
+                fileBack = true;
                 return true;
               },
             ),
@@ -115,27 +108,21 @@ void main() {
           ),
         ),
       );
-      // Render and existence check are real async work.
-      Future<void> settle() async {
-        await tester.runAsync(
-          () => Future<void>.delayed(const Duration(milliseconds: 100)),
-        );
-        await tester.pump();
-      }
-
-      await settle();
+      await tester.pump();
+      await tester.pump();
 
       expect(find.text('Kaynak PDF bulunamadı'), findsOneWidget);
-      expect(find.byType(Image), findsNothing);
+      expect(find.byKey(_rendered), findsNothing);
 
       await tester.tap(find.byKey(const Key('pdfLocateSourceButton')));
-      await settle();
-      await settle();
+      for (var i = 0; i < 3; i++) {
+        await tester.pump();
+      }
 
       expect(handlerCalls, 1);
       expect(find.byType(PdfPagePlaceholder), findsNothing);
       expect(find.text('Kaynak PDF bulunamadı'), findsNothing);
-      expect(find.byType(Image), findsOneWidget);
+      expect(find.byKey(_rendered), findsOneWidget);
     });
   });
 }
