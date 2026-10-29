@@ -51,6 +51,7 @@ class PDFExportOptions {
   final bool includeBackground;
   final PDFExportMode exportMode;
   final PDFExportQuality quality;
+
   /// Paper size (points) for pages without a PDF or image background: their
   /// page units are scaled so the page width matches it (#454). Null keeps
   /// page units as points.
