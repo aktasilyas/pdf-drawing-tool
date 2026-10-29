@@ -79,4 +79,12 @@ void main() {
 
     expect(format(), isNull);
   });
+
+  test('a repository that throws leaves no paper size', () async {
+    when(() => repo.getDocument(doc.id)).thenThrow(StateError('no DI'));
+
+    await loadExportPaperFormat(container.read, doc.id);
+
+    expect(format(), isNull);
+  });
 }
