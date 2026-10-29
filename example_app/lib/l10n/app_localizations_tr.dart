@@ -1345,6 +1345,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get editorPagePageAdded => 'Sayfa eklendi';
 
   @override
+  String get editorPageCannotUndo => 'Geri alınamadı';
+
+  @override
   String get editorPagePageMoved => 'Sayfa taşındı';
 
   @override

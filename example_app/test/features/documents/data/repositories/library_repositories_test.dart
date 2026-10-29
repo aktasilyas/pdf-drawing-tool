@@ -21,7 +21,8 @@ void main() {
       (await fx.folders.createFolder(name: name, parentId: parentId))
           .getOrElse(() => throw StateError('folder failed'));
 
-  Map<String, dynamic> content(int pages) => {
+  Map<String, dynamic> content(int pages, {String id = 'content-id'}) => {
+        'id': id,
         'pages': [
           for (var i = 0; i < pages; i++) {'id': 'p$i', 'index': i},
         ],
@@ -103,7 +104,8 @@ void main() {
     final copied = (await fx.documents.getDocumentContent(copy.id))
         .toOption()
         .toNullable();
-    expect(copied, content(3));
+    // The copy's content points at the copy, not at the original.
+    expect(copied, content(3, id: copy.id));
     // The original is untouched.
     expect(
         (await fx.documents.getDocumentContent(d.id)).toOption().toNullable(),

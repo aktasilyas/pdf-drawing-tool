@@ -52,4 +52,7 @@ class AppErrorStrings extends ErrorStrings {
 
   @override
   String get imageReadFailed => _l10n.libraryImageReadFailed;
+
+  @override
+  String get imageTooLarge => _l10n.libraryImageTooLarge;
 }

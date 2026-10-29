@@ -6,6 +6,10 @@ import 'package:drawing_core/drawing_core.dart';
 
 import 'package:drawing_ui/src/services/image_import_storage.dart';
 
+/// Longest edge, in pixels, of an image stored as a page (Add page panel,
+/// library import). Pickers downscale to it; larger files are rejected.
+const int maxImagePageEdge = 4096;
+
 /// Why [importImagePage] failed.
 enum ImagePageImportError { unreadable, tooLarge }
 

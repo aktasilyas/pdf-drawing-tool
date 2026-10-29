@@ -2486,6 +2486,12 @@ abstract class AppLocalizations {
   /// **'Page added'**
   String get editorPagePageAdded;
 
+  /// No description provided for @editorPageCannotUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t undo'**
+  String get editorPageCannotUndo;
+
   /// No description provided for @editorPagePageMoved.
   ///
   /// In en, this message translates to:

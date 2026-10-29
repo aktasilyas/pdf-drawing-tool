@@ -1,8 +1,10 @@
 import 'package:drawing_core/drawing_core.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
+import 'package:drawing_ui/src/l10n/error_strings.dart';
 import 'package:drawing_ui/src/services/image_page_import.dart';
 import 'package:drawing_ui/src/services/pdf_import_service.dart';
 
@@ -12,7 +14,7 @@ typedef PageFileImporter = Future<List<Page>> Function({
   required PageSize defaultPageSize,
   void Function(PdfImportFailure failure)? onError,
   void Function(int count)? onPagesSkipped,
-  void Function()? onImageError,
+  void Function(ImagePageImportError error)? onImageError,
   PdfPathResolver pdfPaths,
 });
 
@@ -30,7 +32,7 @@ Future<List<Page>> pickAndImportFile({
   required PageSize defaultPageSize,
   void Function(PdfImportFailure failure)? onError,
   void Function(int count)? onPagesSkipped,
-  void Function()? onImageError,
+  void Function(ImagePageImportError error)? onImageError,
   PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
 }) async {
   final result = await FilePicker.platform.pickFiles(
@@ -98,13 +100,14 @@ Future<List<Page>> importPdfAsPages(
 }
 
 /// Imports the image at [path] as one page. Failures go to [onImageError]
-/// and give an empty list. [documentsRoot] defaults to the app documents
-/// directory.
+/// and give an empty list; an image with an edge above [maxImagePageEdge] is
+/// rejected as [ImagePageImportError.tooLarge]. [documentsRoot] defaults to
+/// the app documents directory.
 Future<List<Page>> importImageAsPage(
   String path,
   int insertIndex, {
   PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
-  void Function()? onImageError,
+  void Function(ImagePageImportError error)? onImageError,
   String? documentsRoot,
 }) async {
   try {
@@ -114,6 +117,7 @@ Future<List<Page>> importImageAsPage(
       path,
       documentsRoot: root,
       paths: pdfPaths,
+      maxDimension: maxImagePageEdge,
     );
     return [
       Page.create(
@@ -122,8 +126,28 @@ Future<List<Page>> importImageAsPage(
         background: image.background,
       ),
     ];
+  } on ImagePageImportException catch (e) {
+    onImageError?.call(e.error);
+    return [];
   } catch (_) {
-    onImageError?.call();
+    onImageError?.call(ImagePageImportError.unreadable);
     return [];
   }
 }
+
+/// Picks a camera or gallery photo for an image page, downscaled by the
+/// picker so neither edge exceeds [maxImagePageEdge].
+Future<XFile?> pickImagePagePhoto(ImagePicker picker, ImageSource source) =>
+    picker.pickImage(
+      source: source,
+      maxWidth: maxImagePageEdge.toDouble(),
+      maxHeight: maxImagePageEdge.toDouble(),
+      imageQuality: 85,
+    );
+
+/// The message for a failed image page import.
+String imagePageImportMessage(ErrorStrings strings, ImagePageImportError e) =>
+    switch (e) {
+      ImagePageImportError.tooLarge => strings.imageTooLarge,
+      ImagePageImportError.unreadable => strings.imageReadFailed,
+    };

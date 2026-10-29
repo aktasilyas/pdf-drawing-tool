@@ -153,6 +153,26 @@ void main() {
       expect(document.title, 'Test Document');
     });
 
+    test('forces the requested row id when the stored content id mismatches',
+        () async {
+      final copied = DrawingDocument.multiPage(
+        id: 'original-id',
+        title: 'Test Document',
+        pages: [Page.create(index: 0)],
+        createdAt: DateTime(2024, 1, 1),
+        updatedAt: DateTime(2024, 1, 1),
+      );
+      when(() => mockRepository.getDocument(testDocId))
+          .thenAnswer((_) async => Right(testDocInfo));
+      when(() => mockRepository.getDrawingDocument(testDocId))
+          .thenAnswer((_) async => Right(copied));
+
+      final result = await useCase(testDocId);
+
+      final document = result.getOrElse(() => throw Exception());
+      expect(document.id, testDocId);
+    });
+
     test('should return failure when document not found', () async {
       // Arrange
       when(() => mockRepository.getDocument(testDocId)).thenAnswer(

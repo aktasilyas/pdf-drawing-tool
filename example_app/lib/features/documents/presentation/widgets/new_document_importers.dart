@@ -9,6 +9,7 @@ import 'package:drawing_ui/drawing_ui.dart'
         ImagePageImportException,
         discardImportedImagePage,
         importImagePage,
+        maxImagePageEdge,
         pdfPathResolverProvider;
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
@@ -116,7 +117,7 @@ Future<void> importImageFile(
         documentsRoot: paths.documentsRoot ??
             (await getApplicationDocumentsDirectory()).path,
         paths: paths,
-        maxDimension: 4096,
+        maxDimension: maxImagePageEdge,
       );
     } on ImagePageImportException catch (e) {
       if (context.mounted) {

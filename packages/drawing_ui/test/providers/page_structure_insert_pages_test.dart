@@ -53,11 +53,11 @@ void main() {
     expect(container.read(pageManagerProvider).currentIndex, 1);
   });
 
-  test('one undo removes every inserted page', () {
+  test('one undo removes every inserted page', () async {
     load(3, current: 2);
     final change = actions().insertPages(3, [page('a', 0), page('b', 0)]);
 
-    expect(actions().undo(change!), isTrue);
+    expect(await actions().undo(change!), isTrue);
     expect(docIds(), ['p0', 'p1', 'p2']);
     final doc = container.read(documentProvider);
     expect(doc.pages[doc.currentPageIndex].id, 'p2');
