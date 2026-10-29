@@ -83,7 +83,7 @@ class _PdfThumbnailState extends ConsumerState<_PdfThumbnail> {
     if (cached != null) {
       return Image.memory(
         cached,
-        fit: BoxFit.cover,
+        fit: BoxFit.contain,
         width: double.infinity,
         height: double.infinity,
         errorBuilder: (_, __, ___) => _buildPdfIcon(context),
@@ -115,7 +115,7 @@ class _ImagePreview extends StatelessWidget {
   Widget build(BuildContext context) {
     return Image.memory(
       data,
-      fit: BoxFit.cover,
+      fit: BoxFit.contain,
       width: double.infinity,
       height: double.infinity,
       errorBuilder: (_, __, ___) => const SizedBox.shrink(),
