@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/src/canvas/pdf_page_placeholder.dart';
 import 'package:drawing_ui/src/providers/pdf_path_provider.dart';
+import 'package:drawing_ui/src/providers/pdf_source_relink_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -17,11 +18,17 @@ void main() {
 
   tearDown(() => root.deleteSync(recursive: true));
 
-  Future<void> pumpPlaceholder(WidgetTester tester, String? stored) async {
+  Future<void> pumpPlaceholder(
+    WidgetTester tester,
+    String? stored, {
+    PdfSourceRelinkHandler? relink,
+  }) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           pdfPathResolverProvider.overrideWithValue(PdfPathResolver(root.path)),
+          if (relink != null)
+            pdfSourceRelinkProvider.overrideWith((ref) => relink),
         ],
         child: MaterialApp(
           home: Scaffold(
@@ -79,5 +86,60 @@ void main() {
     await pumpPlaceholder(tester, null);
 
     expect(find.text('PDF Sayfası'), findsOneWidget);
+  });
+
+  group('locate source button', () {
+    const buttonKey = Key('pdfLocateSourceButton');
+
+    testWidgets('hidden without a handler', (tester) async {
+      await pumpPlaceholder(tester, 'pdfs/gone.pdf');
+
+      expect(find.byKey(buttonKey), findsNothing);
+    });
+
+    testWidgets('shown for a missing file with a handler, at least 48dp',
+        (tester) async {
+      await pumpPlaceholder(
+        tester,
+        'pdfs/gone.pdf',
+        relink: (_) async => false,
+      );
+
+      expect(find.byKey(buttonKey), findsOneWidget);
+      expect(find.text("PDF'yi bul…"), findsOneWidget);
+      expect(
+        tester.getSize(find.byKey(buttonKey)).height,
+        greaterThanOrEqualTo(48),
+      );
+    });
+
+    testWidgets('hidden when the file exists', (tester) async {
+      File('${root.path}/pdfs/here.pdf').writeAsBytesSync([1, 2, 3]);
+
+      await pumpPlaceholder(
+        tester,
+        'pdfs/here.pdf',
+        relink: (_) async => false,
+      );
+
+      expect(find.byKey(buttonKey), findsNothing);
+    });
+
+    testWidgets('tap calls the handler with the stored path', (tester) async {
+      final calls = <String>[];
+      await pumpPlaceholder(
+        tester,
+        'pdfs/gone.pdf',
+        relink: (path) async {
+          calls.add(path);
+          return false;
+        },
+      );
+
+      await tester.tap(find.byKey(buttonKey));
+      await tester.pump();
+
+      expect(calls, ['pdfs/gone.pdf']);
+    });
   });
 }

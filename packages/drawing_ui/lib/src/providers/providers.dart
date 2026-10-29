@@ -14,6 +14,7 @@ export 'history_provider.dart';
 export 'page_provider.dart';
 export 'pdf_path_provider.dart';
 export 'pdf_provider.dart';
+export 'pdf_source_relink_provider.dart';
 export 'pen_settings_provider.dart';
 export 'recent_colors_provider.dart';
 export 'selection_provider.dart';
