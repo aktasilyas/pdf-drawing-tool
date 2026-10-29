@@ -34,9 +34,8 @@ void main() {
     container = ProviderContainer(
       overrides: [saveDocumentUseCaseProvider.overrideWithValue(save)],
     );
-    doc = DrawingDocument.emptyMultiPage('A')
-        .copyWith(id: 'doc_a')
-        .addPage(Page.create(index: 1));
+    final empty = DrawingDocument.emptyMultiPage('A').copyWith(id: 'doc_a');
+    doc = empty.addPage(Page.create(index: 1));
     startEditorSession(container.read, doc);
   });
 
@@ -54,11 +53,11 @@ void main() {
     });
 
     test('a stroke, a title or a new page is content', () {
-      expect(isViewOnlyChange(doc, doc.addStrokeToActiveLayer(_stroke())),
-          isFalse);
+      final drawn = doc.addStrokeToActiveLayer(_stroke());
+      final added = doc.addPage(Page.create(index: 2));
+      expect(isViewOnlyChange(doc, drawn), isFalse);
       expect(isViewOnlyChange(doc, doc.updateTitle('B')), isFalse);
-      expect(isViewOnlyChange(doc, doc.addPage(Page.create(index: 2))),
-          isFalse);
+      expect(isViewOnlyChange(doc, added), isFalse);
     });
 
     test('another document is never view-only', () {

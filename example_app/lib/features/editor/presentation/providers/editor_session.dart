@@ -31,11 +31,11 @@ bool isViewOnlyChange(DrawingDocument previous, DrawingDocument next) {
   if (previous.id != next.id || !previous.isMultiPage || !next.isMultiPage) {
     return false;
   }
-  return previous.copyWith(
-        currentPageIndex: next.currentPageIndex,
-        activeLayerIndex: next.activeLayerIndex,
-      ) ==
-      next;
+  final asNext = previous.copyWith(
+    currentPageIndex: next.currentPageIndex,
+    activeLayerIndex: next.activeLayerIndex,
+  );
+  return asNext == next;
 }
 
 /// The editor's reaction to a change of the open document: an edit is
