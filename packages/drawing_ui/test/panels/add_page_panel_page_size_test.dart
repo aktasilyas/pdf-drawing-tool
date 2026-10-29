@@ -100,7 +100,7 @@ void main() {
       required core.PageSize defaultPageSize,
       void Function(PdfImportFailure failure)? onError,
       void Function(int count)? onPagesSkipped,
-      void Function()? onImageError,
+      void Function(ImagePageImportError error)? onImageError,
       core.PdfPathResolver pdfPaths = core.PdfPathResolver.passthrough,
     }) async {
       received = defaultPageSize;
