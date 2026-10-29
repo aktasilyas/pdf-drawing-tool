@@ -1328,6 +1328,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get editorPagePagePasted => 'Sayfa yapıştırıldı';
 
   @override
+  String get editorPagePasteFilesMissing =>
+      'Yapıştırılamadı: kopyalanan dosyalar artık yok';
+
+  @override
   String get editorPagePageDuplicated => 'Sayfa çoğaltıldı';
 
   @override

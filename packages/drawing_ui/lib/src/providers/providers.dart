@@ -56,6 +56,8 @@ export 'zoom_lock_provider.dart';
 export 'ruler_provider.dart';
 export 'export_progress_provider.dart';
 export 'export_page_format_provider.dart';
+export 'clipboard_file_refs_provider.dart'
+    show clipboardFileRefsProvider, fileRefsOfClipboard;
 export 'copied_page_provider.dart';
 export 'selection_clipboard_provider.dart';
 export 'selection_actions_provider.dart';

@@ -71,6 +71,9 @@ class AppPageStrings extends PageStrings {
   String get pagePasted => _l10n.editorPagePagePasted;
 
   @override
+  String get pasteFilesMissing => _l10n.editorPagePasteFilesMissing;
+
+  @override
   String get pageDuplicated => _l10n.editorPagePageDuplicated;
 
   @override

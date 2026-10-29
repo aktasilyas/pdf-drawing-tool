@@ -1,8 +1,10 @@
 import 'dart:ui' show Offset;
 
+import 'package:flutter/widgets.dart' show BuildContext;
 import 'package:drawing_core/drawing_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:drawing_ui/src/providers/clipboard_file_refs_provider.dart';
 import 'package:drawing_ui/src/providers/document_provider.dart';
 import 'package:drawing_ui/src/providers/history_provider.dart';
 import 'package:drawing_ui/src/providers/selection_clipboard_provider.dart';
@@ -87,9 +89,20 @@ DrawingPoint _moved(DrawingPoint p, double dx, double dy) => DrawingPoint(
     );
 
 /// Pastes the clipboard moved by ([dx], [dy]) as one undo step.
-void pasteClipboard(WidgetRef ref, double dx, double dy) {
+///
+/// Pastes nothing and shows a SnackBar through [context] when a copied image
+/// file no longer exists.
+void pasteClipboard(
+  WidgetRef ref,
+  double dx,
+  double dy, {
+  BuildContext? context,
+}) {
   final clipboard = ref.read(selectionClipboardProvider);
   if (clipboard == null) return;
+  if (!checkPasteFiles(ref, fileRefsOfClipboard(null, clipboard), context)) {
+    return;
+  }
 
   final layerIndex = ref.read(documentProvider).activeLayerIndex;
   final command = buildPasteCommand(clipboard, layerIndex, dx, dy);
@@ -102,16 +115,20 @@ void pasteClipboard(WidgetRef ref, double dx, double dy) {
 }
 
 /// Pastes the clipboard [kPasteOffset] below-right of the copied elements.
-void pasteFromClipboard(WidgetRef ref) =>
-    pasteClipboard(ref, kPasteOffset, kPasteOffset);
+void pasteFromClipboard(WidgetRef ref, {BuildContext? context}) =>
+    pasteClipboard(ref, kPasteOffset, kPasteOffset, context: context);
 
 /// Pastes the clipboard centred at [canvasPoint] (long-press paste menu).
-void pasteFromClipboardAt(WidgetRef ref, Offset canvasPoint) {
+void pasteFromClipboardAt(
+  WidgetRef ref,
+  Offset canvasPoint, {
+  BuildContext? context,
+}) {
   final clipboard = ref.read(selectionClipboardProvider);
   if (clipboard == null) return;
 
   final bounds = clipboard.originalBounds;
   final dx = canvasPoint.dx - (bounds.left + bounds.right) / 2;
   final dy = canvasPoint.dy - (bounds.top + bounds.bottom) / 2;
-  pasteClipboard(ref, dx, dy);
+  pasteClipboard(ref, dx, dy, context: context);
 }

@@ -2456,6 +2456,12 @@ abstract class AppLocalizations {
   /// **'Page pasted'**
   String get editorPagePagePasted;
 
+  /// No description provided for @editorPagePasteFilesMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t paste: the copied files no longer exist'**
+  String get editorPagePasteFilesMissing;
+
   /// No description provided for @editorPagePageDuplicated.
   ///
   /// In en, this message translates to:

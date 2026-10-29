@@ -10,11 +10,17 @@ import 'package:example_app/features/documents/data/datasources/managed_file_pat
 /// Finds and deletes the app-managed files (copied PDFs, imported images)
 /// that no stored document content or trashed page references any more.
 class ManagedFileCleanup {
-  ManagedFileCleanup(this._db, this._codec, this._paths);
+  ManagedFileCleanup(
+    this._db,
+    this._codec,
+    this._paths, [
+    ClipboardFileRefs? clipboard,
+  ]) : _clipboard = clipboard ?? ClipboardFileRefs();
 
   final AppDatabase _db;
   final DocumentContentCodec _codec;
   final PdfPathResolver _paths;
+  final ClipboardFileRefs _clipboard;
 
   /// Managed files the stored pages of document [id] point to.
   Future<Set<String>> pathsOfDocument(String id) async {
@@ -45,8 +51,10 @@ class ManagedFileCleanup {
     ];
   }
 
-  /// Whether any remaining document content or trashed page mentions [path].
-  Future<bool> _isReferenced(String path) => _anyRowContains(json.encode(path));
+  /// Whether a clipboard, any remaining document content or a trashed page
+  /// mentions [path].
+  Future<bool> _isReferenced(String path) async =>
+      _clipboard.contains(path) || await _anyRowContains(json.encode(path));
 
   /// Whether any document content or trashed page mentions the file [name]
   /// anywhere (SQL `LIKE`; wildcards in [name] only widen the match).

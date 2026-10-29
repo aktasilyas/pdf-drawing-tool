@@ -37,7 +37,7 @@ class PasteContextMenu extends ConsumerWidget {
           color: Colors.transparent,
           child: GestureDetector(
             onTap: () {
-              pasteFromClipboardAt(ref, state.canvasPos);
+              pasteFromClipboardAt(ref, state.canvasPos, context: context);
               ref.read(pasteMenuProvider.notifier).state = null;
             },
             child: Container(

@@ -26,6 +26,9 @@ abstract class PageStrings {
   String get scrollVertical;
   String get pageCopied;
   String get pagePasted;
+
+  /// SnackBar when a paste is refused because a copied file is gone.
+  String get pasteFilesMissing;
   String get pageDuplicated;
   String get lastPageCannotDelete;
   String get pageDeleted;
@@ -62,6 +65,7 @@ abstract class PageStrings {
         'scrollVertical': scrollVertical,
         'pageCopied': pageCopied,
         'pagePasted': pagePasted,
+        'pasteFilesMissing': pasteFilesMissing,
         'pageDuplicated': pageDuplicated,
         'lastPageCannotDelete': lastPageCannotDelete,
         'pageDeleted': pageDeleted,
@@ -141,6 +145,10 @@ class PageStringsTr extends PageStrings {
 
   @override
   String get pagePasted => 'Sayfa yapıştırıldı';
+
+  @override
+  String get pasteFilesMissing =>
+      'Yapıştırılamadı: kopyalanan dosyalar artık yok';
 
   @override
   String get pageDuplicated => 'Sayfa çoğaltıldı';
