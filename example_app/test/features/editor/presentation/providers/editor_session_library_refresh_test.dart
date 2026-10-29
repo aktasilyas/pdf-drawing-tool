@@ -34,8 +34,7 @@ void main() {
         .thenAnswer((_) async => Right(List.of(stored)));
     when(() => repo.getRecent(limit: 10))
         .thenAnswer((_) async => Right(byDateDesc()));
-    when(() => repo.getFavorites())
-        .thenAnswer((_) async => Right(favorites()));
+    when(() => repo.getFavorites()).thenAnswer((_) async => Right(favorites()));
     container = ProviderContainer(overrides: [
       documentRepositoryProvider.overrideWithValue(repo),
     ]);
