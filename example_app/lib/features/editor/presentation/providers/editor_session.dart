@@ -12,8 +12,12 @@ typedef ProviderReader = T Function<T>(ProviderListenable<T> provider);
 /// Makes [document] the open document in the drawing providers.
 ///
 /// The undo history is global, so it is emptied here: undo must never apply
-/// the previous notebook's commands to [document] (#149).
+/// the previous notebook's commands to [document] (#149). The canvas
+/// transform is global too: [document] opens at the default view (zoom 1.0,
+/// baseline 1.0, default origin), and a limited-canvas document is fitted to
+/// its page by the caller afterwards (#474).
 void startEditorSession(ProviderReader read, DrawingDocument document) {
+  read(canvasTransformProvider.notifier).resetForNewDocument();
   read(documentProvider.notifier).updateDocument(document);
   read(currentDocumentProvider.notifier).state = document;
   final pageManager = read(pageManagerProvider.notifier);
@@ -98,6 +102,8 @@ void closeEditorSession(
   invalidate(pageTrashCallbackProvider);
   invalidate(pageTrashDiscardCallbackProvider);
   endEditorSession(read);
+  // Reset, not invalidate: a pinch still in flight holds the notifier.
+  read(canvasTransformProvider.notifier).resetForNewDocument();
   read(visiblePdfPageProvider.notifier).state = null;
   read(currentPdfFilePathProvider.notifier).state = null;
   read(totalPdfPagesProvider.notifier).state = 0;
