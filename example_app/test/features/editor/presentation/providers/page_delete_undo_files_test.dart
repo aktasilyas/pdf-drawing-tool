@@ -28,10 +28,10 @@ void main() {
       pageTrashRepositoryProvider.overrideWithValue(fx.pageTrash),
       documentRepositoryProvider.overrideWithValue(fx.documents),
     ]);
-    documentId = (await fx.documents
-            .createDocument(title: 'A', templateId: 'blank'))
-        .getOrElse(() => throw StateError('create failed'))
-        .id;
+    documentId =
+        (await fx.documents.createDocument(title: 'A', templateId: 'blank'))
+            .getOrElse(() => throw StateError('create failed'))
+            .id;
     // Autosave already ran: the stored content no longer has the image page.
     await fx.documents.saveDocumentContent(
       id: documentId,
