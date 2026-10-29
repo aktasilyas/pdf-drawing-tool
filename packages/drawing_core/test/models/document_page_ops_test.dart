@@ -111,5 +111,45 @@ void main() {
       expect(ids(doc), ['p0', 'p2', 'p3']);
       expect(indexes(doc), [0, 1, 2]);
     });
+
+    group('active layer reset', () {
+      Page layered(String id, int index, int layers) => Page(
+            id: id,
+            index: index,
+            size: PageSize.a4Portrait,
+            layers: [for (var i = 0; i < layers; i++) Layer.empty('L$i')],
+            createdAt: DateTime(2024),
+            updatedAt: DateTime(2024),
+          );
+
+      DrawingDocument twoPages() => DrawingDocument.multiPage(
+            id: 'd',
+            title: 't',
+            pages: [layered('a', 0, 2), layered('b', 1, 1)],
+            currentPageIndex: 0,
+            activeLayerIndex: 1,
+            createdAt: DateTime(2024),
+            updatedAt: DateTime(2024),
+          );
+
+      test('removePage of the current page resets activeLayerIndex', () {
+        final doc = twoPages().removePage(0);
+        expect(doc.currentPage?.id, 'b');
+        expect(doc.activeLayerIndex, 0);
+        expect(doc.activeLayer, isNotNull);
+      });
+
+      test('removePage of another page keeps activeLayerIndex', () {
+        final doc = twoPages().removePage(1);
+        expect(doc.activeLayerIndex, 1);
+      });
+
+      test('replacePages with missing current id resets to a valid layer', () {
+        final doc = twoPages()
+            .replacePages([layered('b', 0, 1)], currentPageId: 'gone');
+        expect(doc.activeLayerIndex, 0);
+        expect(doc.activeLayer, isNotNull);
+      });
+    });
   });
 }

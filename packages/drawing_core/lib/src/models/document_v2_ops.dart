@@ -49,12 +49,17 @@ mixin _DocumentV2Ops on _DocumentViews {
       newCurrentIndex = currentPageIndex - 1;
     }
 
+    // The active layer belongs to the old current page; reset it when the
+    // current page identity changes (the current page itself was removed).
+    final sameCurrent =
+        newPages[newCurrentIndex].id == pages[currentPageIndex].id;
+
     return DrawingDocument.multiPage(
       id: id,
       title: title,
       pages: newPages,
       currentPageIndex: newCurrentIndex,
-      activeLayerIndex: activeLayerIndex,
+      activeLayerIndex: sameCurrent ? activeLayerIndex : 0,
       settings: settings,
       createdAt: createdAt,
       updatedAt: DateTime.now(),

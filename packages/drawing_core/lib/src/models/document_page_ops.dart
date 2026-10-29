@@ -44,12 +44,18 @@ extension DocumentPageOps on DrawingDocument {
         : renumbered
             .indexWhere((p) => p.id == currentId)
             .clamp(0, list.length - 1);
+    // Keep the active layer only while the current page is unchanged.
+    final sameCurrent = renumbered[current].id == pages[currentPageIndex].id;
+    final layer =
+        sameCurrent && activeLayerIndex < renumbered[current].layers.length
+            ? activeLayerIndex
+            : 0;
     return DrawingDocument.multiPage(
       id: id,
       title: title,
       pages: renumbered,
       currentPageIndex: current,
-      activeLayerIndex: activeLayerIndex,
+      activeLayerIndex: layer,
       settings: settings,
       createdAt: createdAt,
       updatedAt: DateTime.now(),
