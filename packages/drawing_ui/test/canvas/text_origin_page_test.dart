@@ -102,6 +102,7 @@ void main() {
     // Committing a new text switches to the selection tool.
     container.read(currentToolProvider.notifier).selectTool(ToolType.text);
     container.read(selectionProvider.notifier).clearSelection();
+    container.read(selectionUiProvider.notifier).reset();
     final undoBefore = container.read(historyManagerProvider).undoCount;
 
     tap(const Offset(105, 105));
