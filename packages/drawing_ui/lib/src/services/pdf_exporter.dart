@@ -55,14 +55,16 @@ class PDFExporter {
       // Per export, so concurrent exports never share or evict images.
       final backgrounds = PdfBackgroundRasterizer();
       final missing = <int>[];
+      final missingImages = <int>[];
       try {
         for (int i = 0; i < pages.length; i++) {
           if (isCancelled?.call() == true) return PDFExportResult.cancelled();
           final page = pages[i];
           if (page.size.width <= 0 || page.size.height <= 0) continue;
-          final pdfDrawn =
+          final drawn =
               await _exportPage(doc, page, options, sources, backgrounds);
-          if (!pdfDrawn) missing.add(i + 1);
+          if (!drawn.pdf) missing.add(i + 1);
+          if (!drawn.images) missingImages.add(i + 1);
           onProgress?.call(i + 1, pages.length);
         }
       } finally {
@@ -71,17 +73,25 @@ class PDFExporter {
       if (missing.isNotEmpty) {
         DrawingLog.w('PDF export: pages $missing without their PDF background');
       }
+      if (missingImages.isNotEmpty) {
+        DrawingLog.w('PDF export: pages $missingImages without some images');
+      }
       final bytes = await doc.save();
-      return PDFExportResult.success(bytes, missingBackgroundPages: missing);
+      return PDFExportResult.success(
+        bytes,
+        missingBackgroundPages: missing,
+        missingImagePages: missingImages,
+      );
     } catch (e) {
       DrawingLog.e('PDF export failed', e);
       return PDFExportResult.error(exportFailureFor(e));
     }
   }
 
-  /// Draws [page] into [doc]. False when the page has a PDF background that
-  /// could not be loaded and was left out.
-  Future<bool> _exportPage(
+  /// Draws [page] into [doc]. `pdf` is false when the page has a PDF
+  /// background that could not be loaded; `images` is false when an image
+  /// element in a visible layer could not be read. Both are left out.
+  Future<({bool pdf, bool images})> _exportPage(
     PdfDocument doc,
     Page page,
     PDFExportOptions options,
@@ -112,15 +122,18 @@ class PDFExporter {
       pdfDrawn =
           await _embedPdfBackground(g, doc, page, pdfW, pdfH, options, sources);
     }
+    var imagesDrawn = true;
+    void onMissingImage(ImageElement _) => imagesDrawn = false;
     for (final layer in page.layers) {
       if (!layer.isVisible) continue;
-      await _renderLayer(g, doc, layer, pdfW, pdfH, options, origin);
+      await _renderLayer(g, doc, layer, pdfW, pdfH, options, origin,
+          onMissingImage: onMissingImage);
     }
 
     if (options.addWatermark) {
       _drawWatermark(g, doc, pdfW, pdfH);
     }
-    return pdfDrawn;
+    return (pdf: pdfDrawn, images: imagesDrawn);
   }
 
   /// Templates and covers go through the canvas painters as one cached
@@ -172,8 +185,9 @@ class PDFExporter {
     double w,
     double h,
     PDFExportOptions options,
-    ui.Offset origin,
-  ) async {
+    ui.Offset origin, {
+    void Function(ImageElement image)? onMissingImage,
+  }) async {
     final hasOpacity = layer.opacity < 1.0;
     if (hasOpacity) {
       g.saveContext();
@@ -189,7 +203,7 @@ class PDFExporter {
         g.setTransform(Matrix4.translationValues(origin.dx, -origin.dy, 0));
       }
       await _contentPainter.paintLayerContent(g, doc, layer, w, h,
-          paths: pdfPaths);
+          paths: pdfPaths, onMissingImage: onMissingImage);
       if (shifted) g.restoreContext();
       // Sticky notes sit above the layer's elements, as on the canvas.
       if (layer.stickyNotes.isNotEmpty) {
@@ -199,7 +213,7 @@ class PDFExporter {
       }
     } else {
       final raw = await _rasterRenderer.renderLayer(layer, w, h, scale,
-          paths: pdfPaths, origin: origin);
+          paths: pdfPaths, origin: origin, onMissingImage: onMissingImage);
       _drawRaw(g, doc, raw, w, h);
     }
     if (hasOpacity) g.restoreContext();

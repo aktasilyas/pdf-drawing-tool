@@ -1536,6 +1536,17 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String editorExportPagesWithoutImages(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Some images on $count pages could not be read and were left out',
+      one: 'Some images on 1 page could not be read and were left out',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get editorTemplateAllCategories => 'All';
 
   @override

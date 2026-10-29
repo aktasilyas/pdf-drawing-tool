@@ -813,6 +813,14 @@
       }
     }
   },
+  "editorExportPagesWithoutImages": "{count, plural, =1{Some images on 1 page could not be read and were left out} other{Some images on {count} pages could not be read and were left out}}",
+  "@editorExportPagesWithoutImages": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "editorTemplateAllCategories": "All",
   "editorTemplateCoverTab": "Cover",
   "editorTemplatePaperTab": "Paper",

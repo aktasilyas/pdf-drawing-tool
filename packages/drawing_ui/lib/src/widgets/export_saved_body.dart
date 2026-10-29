@@ -7,7 +7,7 @@ import 'package:drawing_ui/src/theme/chrome_tokens.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 
 /// "Saved" line of the export progress overlay, plus a warning when some
-/// pages were exported without their PDF background.
+/// pages were exported without their PDF background or inserted images.
 class ExportSavedBody extends StatelessWidget {
   const ExportSavedBody({
     super.key,
@@ -24,6 +24,7 @@ class ExportSavedBody extends StatelessWidget {
     final s = context.drawingStrings.export;
     final size = state.fileSize;
     final missing = state.pagesMissingBackground;
+    final missingImages = state.pagesMissingImages;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -49,30 +50,36 @@ class ExportSavedBody extends StatelessWidget {
           ],
         ),
         if (missing > 0)
-          Padding(
-            padding: const EdgeInsets.only(top: ChromeSpacing.sm),
-            child: Row(
-              children: [
-                PhosphorIcon(
-                  ElyanotesIcons.warningCircle,
-                  size: 18,
-                  color: cs.error,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    s.pagesWithoutPdfBackground(missing),
-                    style: textTheme.bodySmall?.copyWith(
-                      color: cs.onSurfaceVariant,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
+          _warning(s.pagesWithoutPdfBackground(missing), textTheme),
+        if (missingImages > 0)
+          _warning(s.pagesWithoutImages(missingImages), textTheme),
+      ],
+    );
+  }
+
+  Widget _warning(String text, TextTheme textTheme) {
+    return Padding(
+      padding: const EdgeInsets.only(top: ChromeSpacing.sm),
+      child: Row(
+        children: [
+          PhosphorIcon(
+            ElyanotesIcons.warningCircle,
+            size: 18,
+            color: cs.error,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              text,
+              style: textTheme.bodySmall?.copyWith(
+                color: cs.onSurfaceVariant,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
-      ],
+        ],
+      ),
     );
   }
 }

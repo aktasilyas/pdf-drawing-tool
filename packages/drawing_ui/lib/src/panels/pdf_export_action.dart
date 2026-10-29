@@ -134,6 +134,7 @@ Future<void> performPagesPDFExport(
     }
 
     final missing = result.missingBackgroundPages.length;
+    final missingImages = result.missingImagePages.length;
     // doc.save() already returns a Uint8List; only copy a foreign List<int>.
     final raw = result.pdfBytes;
     final bytes = raw is Uint8List ? raw : Uint8List.fromList(raw);
@@ -149,6 +150,7 @@ Future<void> performPagesPDFExport(
         progress.complete(
           result.fileSizeFormatted,
           pagesMissingBackground: missing,
+          pagesMissingImages: missingImages,
         );
       } else {
         progress.dismiss();
@@ -174,6 +176,7 @@ Future<void> performPagesPDFExport(
       progress.complete(
         result.fileSizeFormatted,
         pagesMissingBackground: missing,
+        pagesMissingImages: missingImages,
       );
     } else {
       // User cancelled file picker
