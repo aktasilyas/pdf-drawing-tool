@@ -62,8 +62,11 @@ class EditorScreen extends ConsumerWidget {
                   .read(documentsControllerProvider.notifier)
                   .permanentlyDeletePage(trashId);
 
-          // PDF export uses the notebook's paper size (#454).
-          unawaited(loadExportPaperFormat(ref.read, document.id));
+          // PDF export uses the notebook's paper size (#454). The root
+          // container outlives this screen; `ref` must not be used after an
+          // await, as the user may already have left.
+          final root = ProviderScope.containerOf(context, listen: false);
+          unawaited(loadExportPaperFormat(root.read, document.id));
 
           // Initialize canvas transform for limited mode (notebook/notepad)
           final canvasMode = document.canvasMode;

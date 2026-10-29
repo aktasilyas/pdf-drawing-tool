@@ -1,9 +1,6 @@
-import 'package:dartz/dartz.dart' show Either;
 import 'package:drawing_ui/drawing_ui.dart';
 
-import 'package:example_app/core/errors/failures.dart';
 import 'package:example_app/core/utils/logger.dart';
-import 'package:example_app/features/documents/domain/entities/document_info.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/editor/presentation/providers/editor_session.dart';
 
@@ -18,20 +15,19 @@ Future<void> loadExportPaperFormat(
   ProviderReader read,
   String documentId,
 ) async {
-  read(exportPageFormatProvider.notifier).state = null;
-  final Either<Failure, DocumentInfo> result;
   try {
-    result = await read(documentRepositoryProvider).getDocument(documentId);
+    read(exportPageFormatProvider.notifier).state = null;
+    final result =
+        await read(documentRepositoryProvider).getDocument(documentId);
+    result.fold(
+      (failure) => logger.w('No PDF paper size: ${failure.message}'),
+      (info) {
+        if (read(documentProvider).id != documentId) return;
+        read(exportPageFormatProvider.notifier).state =
+            PDFPageFormat.millimeters(info.paperWidthMm, info.paperHeightMm);
+      },
+    );
   } catch (e) {
-    logger.w('No paper size for PDF export: $e');
-    return;
+    logger.w('No PDF paper size: $e');
   }
-  result.fold(
-    (failure) => logger.w('No paper size for PDF export: ${failure.message}'),
-    (info) {
-      if (read(documentProvider).id != documentId) return;
-      read(exportPageFormatProvider.notifier).state =
-          PDFPageFormat.millimeters(info.paperWidthMm, info.paperHeightMm);
-    },
-  );
 }
