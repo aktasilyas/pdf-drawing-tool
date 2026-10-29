@@ -246,8 +246,7 @@ class PDFExporter {
     // Try rendering from file as JPEG — stores compressed (~200KB) instead
     // of uncompressed RGB+alpha (~8.7MB), preventing OOM on multi-page docs.
     if (page.background.pdfFilePath != null) {
-      final jpegBytes = await _renderPdfPageAsJpeg(
-        sources,
+      final jpegBytes = await sources.renderJpeg(
         pdfPaths.resolve(page.background.pdfFilePath!),
         page.background.pdfPageIndex!,
         _scaleFromDpi(options.quality.dpi),
@@ -266,17 +265,6 @@ class PDFExporter {
     if (raw == null) return false;
     g.drawImage(addCompressedRgbaImage(doc, raw), 0, 0, w, h);
     return true;
-  }
-
-  Future<Uint8List?> _renderPdfPageAsJpeg(
-    PdfSourcePool sources,
-    String path,
-    int index,
-    double renderScale,
-  ) async {
-    final source = await sources.get(path);
-    if (source == null) return null;
-    return source.renderJpeg(index, renderScale);
   }
 
   /// Decodes PNG bytes to raw RGBA using Flutter's native image codec.
