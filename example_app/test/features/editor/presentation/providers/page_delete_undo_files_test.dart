@@ -85,16 +85,39 @@ void main() {
     expect(background.existsSync(), isTrue);
   });
 
-  test('a discard from the undo path keeps the files', () async {
-    final id = await pageTrashCallbackFor(container.read, documentId)(
-      1,
-      container.read(documentProvider).pages[1],
-    );
-    expect(id, isNotNull);
+  test('a failed undo drops its trash entries but keeps the files', () async {
+    final actions = container.read(pageStructureActionsProvider);
+    final image = container.read(documentProvider).pages[1];
+    final change = actions.insertPages(2, [
+      image.copyWith(id: 'ins-a'),
+      image.copyWith(id: 'ins-b'),
+    ])!;
+    // Edit both inserted pages, so undo has to trash them first.
+    final doc = container.read(documentProvider);
+    final edited = [
+      for (final p in doc.pages)
+        if (p.id.startsWith('ins-'))
+          p.copyWith(layers: [Layer.empty('edited')])
+        else
+          p,
+    ];
+    final current = doc.pages[doc.currentPageIndex].id;
+    final notifier = container.read(documentProvider.notifier);
+    notifier.updateDocument(doc.replacePages(edited, currentPageId: current));
+    // The first page reaches the trash, the second fails: undo gives up
+    // and discards the first entry through _discardTrash.
+    final real = pageTrashCallbackFor(container.read, documentId);
+    var calls = 0;
+    container.read(pageTrashCallbackProvider.notifier).state =
+        (index, page) async {
+      calls++;
+      if (calls == 1) return real(index, page);
+      return null;
+    };
 
-    // undo() -> _discardTrash calls the same discard callback.
-    await container.read(pageTrashDiscardCallbackProvider)!(id!);
+    expect(await actions.undo(change), isFalse);
 
+    expect(calls, 2);
     expect(await trashIds(), isEmpty);
     expect(background.existsSync(), isTrue);
   });
