@@ -1,6 +1,11 @@
+import 'dart:io';
+
 import 'package:drift/native.dart';
+import 'package:drift_dev/api/migrations_native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:example_app/core/core.dart';
+
+import '../../drift/generated/schema.dart';
 
 /// Opens an in-memory database that looks like a v5 install.
 NativeDatabase _v5Database() {
@@ -129,5 +134,40 @@ void main() {
     addTearDown(db.close);
     expect(db.schemaVersion, 6);
     expect(await db.select(db.trashedPages).get(), isEmpty);
+  });
+
+  group('schema equals the frozen v6 snapshot', () {
+    test('fresh v6 matches drift_schemas/drift_schema_v6.json', () async {
+      final verifier = SchemaVerifier(GeneratedHelper());
+      final connection = await verifier.startAt(6);
+      final db = AppDatabase(connection);
+      addTearDown(db.close);
+      await verifier.migrateAndValidate(db, 6);
+    });
+
+    test('v5 (v6 schema with the v6 step undone) migrates to v6', () async {
+      final dir = Directory.systemTemp.createTempSync('elyanotes_v5_');
+      addTearDown(() => dir.deleteSync(recursive: true));
+      final file = File('${dir.path}/app.db');
+
+      final seed = AppDatabase(NativeDatabase(file));
+      for (final sql in const [
+        'DROP INDEX trashed_pages_source_document_idx',
+        'DROP TABLE trashed_pages',
+        'DROP TABLE document_contents',
+        'ALTER TABLE folders DROP COLUMN is_favorite',
+        'ALTER TABLE folders DROP COLUMN sort_order',
+        'ALTER TABLE documents DROP COLUMN deleted_at',
+        'PRAGMA user_version = 5',
+      ]) {
+        await seed.customStatement(sql);
+      }
+      await seed.close();
+
+      final db = AppDatabase(NativeDatabase(file));
+      addTearDown(db.close);
+      await db.customSelect('SELECT 1').get(); // forces the upgrade
+      await db.validateDatabaseSchema();
+    });
   });
 }
