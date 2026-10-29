@@ -100,10 +100,9 @@ mixin DocumentsBulkOperations on StateNotifier<AsyncValue<void>> {
     state = const AsyncLoading();
     try {
       for (final id in docIds) {
-        final result = await repository.updateDocument(
-          id: id,
-          folderId: folderId,
-        );
+        // moveDocument keeps the edited date; updateDocument would stamp
+        // every moved notebook with today (#453).
+        final result = await repository.moveDocument(id, folderId);
         final failure = result.fold((f) => f, (_) => null);
         if (failure != null) {
           state = AsyncError(failure, StackTrace.current);
