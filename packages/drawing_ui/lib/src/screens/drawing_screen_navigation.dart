@@ -6,6 +6,7 @@ import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/canvas/page_slide_transition.dart';
 import 'package:drawing_ui/src/panels/page_structure_undo.dart';
 import 'package:drawing_ui/src/screens/drawing_screen.dart';
+import 'package:drawing_ui/src/services/new_page_size.dart';
 
 /// Page navigation, swipe handling and "add page by swiping" for
 /// [DrawingScreen]'s state.
@@ -105,7 +106,10 @@ mixin DrawingScreenNavigation on ConsumerState<DrawingScreen> {
       doc.pages.length,
       core.Page.create(
         index: doc.pages.length,
-        size: doc.settings.defaultPageSize,
+        size: resolveNewPageSize(
+          doc,
+          ref.read(currentPageIndexProvider),
+        ),
         background: resolveNewPageBackground(),
       ),
     );
