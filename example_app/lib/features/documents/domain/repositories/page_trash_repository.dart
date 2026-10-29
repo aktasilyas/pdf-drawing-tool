@@ -26,6 +26,12 @@ abstract class PageTrashRepository {
   /// was the last reference to.
   Future<Either<Failure, void>> permanentlyDeletePage(String trashedPageId);
 
+  /// Drops only the trash entry because its page went back into the open
+  /// document (undo of a page delete). Its files are kept: the restored page
+  /// may not be saved yet, so the stored content cannot vouch for them. Real
+  /// orphans are reclaimed by the startup orphan sweep.
+  Future<Either<Failure, void>> discardTrashedPage(String trashedPageId);
+
   /// Removes every trashed page for good; returns how many.
   Future<Either<Failure, int>> emptyTrash();
 

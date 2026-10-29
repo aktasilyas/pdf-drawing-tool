@@ -145,6 +145,32 @@ void main() {
     expect(file.existsSync(), isFalse);
   });
 
+  test('discarding a trashed page (undo) keeps its files', () async {
+    final bg = imageFile('undo_bg.png');
+    final el = imageFile('undo_el.png');
+    final a = await create('A');
+    // Stored content without the deleted page (autosave already ran).
+    await save(a.id, [
+      {'id': 'keep', 'index': 0},
+    ]);
+    final page = imagePage('undo_bg.png');
+    page['layers'] = elementPage('undo_el.png')['layers'];
+    final id = (await fx.pageTrash.movePageToTrash(
+      documentId: a.id,
+      documentTitle: 'A',
+      pageIndex: 1,
+      pageData: page,
+    ))
+        .getOrElse(() => throw StateError('trash failed'));
+
+    final result = await fx.pageTrash.discardTrashedPage(id);
+
+    expect(result.isRight(), isTrue);
+    expect(await fx.trashDs.getTrashedPage(id), isNull);
+    expect(bg.existsSync(), isTrue);
+    expect(el.existsSync(), isTrue);
+  });
+
   test('an image element pointing outside the app is never deleted', () async {
     final outside = File('${dir.path}/user_photo.png')..writeAsStringSync('x');
     final a = await create('A');

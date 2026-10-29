@@ -53,6 +53,16 @@ void closeEditorSession(
   read(totalPdfPagesProvider.notifier).state = 0;
 }
 
+/// Drops the trash entry of a page whose delete was undone (#460).
+///
+/// The page is back in the document, so this must never be "delete
+/// forever": that would remove the page's image and PDF files once the
+/// stored content no longer references them.
+PageTrashDiscardCallback pageTrashDiscardCallbackFor(ProviderReader read) {
+  return (trashId) =>
+      read(documentsControllerProvider.notifier).discardTrashedPage(trashId);
+}
+
 /// Soft-deletes pages of [documentId] into the page trash.
 ///
 /// The notebook title is read when a page is trashed, not captured at load,
