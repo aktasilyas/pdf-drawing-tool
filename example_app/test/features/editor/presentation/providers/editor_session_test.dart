@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/drawing_ui.dart';
 import 'package:flutter/painting.dart';
@@ -132,6 +134,44 @@ void main() {
       closeEditorSession(container.read, container.invalidate);
 
       expect(container.read(canvasTransformProvider), const CanvasTransform());
+    });
+  });
+
+  group('view modes and PDF render cache (#481)', () {
+    test('reader mode and dual-page mode are off after closing', () {
+      startEditorSession(container.read, docA);
+      container.read(readerModeProvider.notifier).state = true;
+      container.read(dualPageModeProvider.notifier).state = true;
+
+      closeEditorSession(container.read, container.invalidate);
+
+      expect(container.read(readerModeProvider), isFalse);
+      expect(container.read(dualPageModeProvider), isFalse);
+    });
+
+    test('empties the page render cache but keeps thumbnails', () {
+      startEditorSession(container.read, docA);
+      container.read(pdfPageCacheProvider.notifier).state = {
+        'a_1': Uint8List(8),
+      };
+      container.read(pdfThumbnailCacheProvider.notifier).state = {
+        'a_1': Uint8List(4),
+      };
+
+      closeEditorSession(container.read, container.invalidate);
+
+      expect(container.read(pdfPageCacheProvider), isEmpty);
+      expect(container.read(pdfThumbnailCacheProvider), hasLength(1));
+    });
+
+    test('the next notebook opens editable after reader mode was on', () {
+      startEditorSession(container.read, docA);
+      container.read(readerModeProvider.notifier).state = true;
+      closeEditorSession(container.read, container.invalidate);
+
+      startEditorSession(container.read, docB);
+
+      expect(container.read(readerModeProvider), isFalse);
     });
   });
 

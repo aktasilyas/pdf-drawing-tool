@@ -86,6 +86,11 @@ void endEditorSession(ProviderReader read) {
 /// The library lists are non-autoDispose and only refresh on invalidation,
 /// so they are reloaded here to show the saved title, cover, page count and
 /// modified date (and the Recent order) when the library comes back (#464).
+///
+/// Reader mode, dual-page mode and the rendered PDF page cache are global
+/// too: the next notebook must open editable in single-page view, and the
+/// closed notebook's page renders (up to 50 MB) are freed. The thumbnail
+/// cache is kept: library previews use it (#481).
 void closeEditorSession(
   ProviderReader read,
   void Function(ProviderOrFamily provider) invalidate,
@@ -101,6 +106,9 @@ void closeEditorSession(
   invalidate(saveFailureProvider);
   invalidate(pageTrashCallbackProvider);
   invalidate(pageTrashDiscardCallbackProvider);
+  invalidate(readerModeProvider);
+  invalidate(dualPageModeProvider);
+  read(pdfPageCacheProvider.notifier).state = {};
   endEditorSession(read);
   // Reset, not invalidate: a pinch still in flight holds the notifier.
   read(canvasTransformProvider.notifier).resetForNewDocument();
