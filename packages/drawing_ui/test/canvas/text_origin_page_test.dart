@@ -50,6 +50,7 @@ void main() {
 
   void tap(Offset at) {
     state.handlePointerDown(PointerDownEvent(position: at));
+    state.handlePointerUp(PointerUpEvent(position: at));
   }
 
   void type(String value) {
