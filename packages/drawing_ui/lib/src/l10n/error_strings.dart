@@ -1,3 +1,5 @@
+import 'package:drawing_ui/src/services/image_page_import.dart';
+
 /// User-facing copy of export and PDF import failures and warnings and PDF
 /// page placeholders.
 ///
@@ -25,6 +27,11 @@ abstract class ErrorStrings {
   /// subclasses keep compiling; they fall back to this English copy.
   String get imageReadFailed => "Couldn't read the image file";
 
+  /// A picked image is larger than [maxImagePageEdge]. Non-abstract like
+  /// [imageReadFailed].
+  String get imageTooLarge =>
+      'Image is too large. Maximum size: ${maxImagePageEdge}x$maxImagePageEdge';
+
   /// Every getter by name, for drift tests.
   Map<String, String> toMap() => {
         'exportStorageFull': exportStorageFull,
@@ -42,6 +49,7 @@ abstract class ErrorStrings {
         'pdfLoadFailed': pdfLoadFailed,
         'pdfPagesSkipped': pdfPagesSkipped(2),
         'imageReadFailed': imageReadFailed,
+        'imageTooLarge': imageTooLarge,
       };
 }
 
@@ -98,4 +106,8 @@ class ErrorStringsTr extends ErrorStrings {
 
   @override
   String get imageReadFailed => 'Resim dosyası okunamadı';
+
+  @override
+  String get imageTooLarge =>
+      'Resim çok büyük! Maksimum boyut: ${maxImagePageEdge}x$maxImagePageEdge';
 }
