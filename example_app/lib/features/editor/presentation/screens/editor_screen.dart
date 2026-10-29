@@ -150,24 +150,11 @@ class EditorScreen extends ConsumerWidget {
     }
 
     // Invalidate non-autoDispose providers AFTER navigation
-    ref.invalidate(documentProvider);
-    ref.invalidate(pageManagerProvider);
-    ref.invalidate(autoSaveProvider);
-    ref.invalidate(saveDocumentUseCaseProvider);
-    ref.invalidate(hasUnsavedChangesProvider);
-    ref.invalidate(saveFailureProvider);
-    ref.invalidate(pageTrashCallbackProvider);
-    ref.invalidate(pageTrashDiscardCallbackProvider);
-    endEditorSession(ref.read);
+    closeEditorSession(ref.read, ref.invalidate);
     if (ref.read(featureFlagsProvider).aiChat) {
       ref.invalidate(aiChatProvider);
       ref.invalidate(aiSidebarOpenProvider);
     }
-
-    // PDF state'lerini sıfırla
-    ref.read(visiblePdfPageProvider.notifier).state = null;
-    ref.read(currentPdfFilePathProvider.notifier).state = null;
-    ref.read(totalPdfPagesProvider.notifier).state = 0;
     return true;
   }
 
@@ -192,11 +179,18 @@ class EditorScreen extends ConsumerWidget {
       builder: (_) => const MoveToTrashDialog(),
     );
     if (confirmed != true) return;
+    // Write the latest edits first so a restored notebook keeps them, and so
+    // no autosave can fire (and resurrect the document) after the trash.
+    await ref.read(autoSaveProvider.notifier).flush();
     final result = await ref
         .read(documentsControllerProvider.notifier)
         .moveToTrash(documentId);
-    if (result && context.mounted) {
-      context.go('/documents');
+    if (!result) return;
+    if (context.mounted) context.go('/documents');
+    closeEditorSession(ref.read, ref.invalidate);
+    if (ref.read(featureFlagsProvider).aiChat) {
+      ref.invalidate(aiChatProvider);
+      ref.invalidate(aiSidebarOpenProvider);
     }
   }
 }

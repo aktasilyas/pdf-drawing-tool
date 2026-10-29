@@ -20,6 +20,10 @@ class ExportProgressState {
   /// because it could not be loaded.
   final int pagesMissingBackground;
 
+  /// Pages of a completed export that went out without some inserted images
+  /// because their files could not be read.
+  final int pagesMissingImages;
+
   const ExportProgressState({
     this.status = ExportProgressStatus.idle,
     this.progress = 0.0,
@@ -29,6 +33,7 @@ class ExportProgressState {
     this.failure,
     this.fileSize,
     this.pagesMissingBackground = 0,
+    this.pagesMissingImages = 0,
   });
 
   ExportProgressState copyWith({
@@ -40,6 +45,7 @@ class ExportProgressState {
     ExportFailure? failure,
     String? fileSize,
     int? pagesMissingBackground,
+    int? pagesMissingImages,
   }) {
     return ExportProgressState(
       status: status ?? this.status,
@@ -51,6 +57,7 @@ class ExportProgressState {
       fileSize: fileSize ?? this.fileSize,
       pagesMissingBackground:
           pagesMissingBackground ?? this.pagesMissingBackground,
+      pagesMissingImages: pagesMissingImages ?? this.pagesMissingImages,
     );
   }
 
@@ -107,18 +114,25 @@ class ExportProgressNotifier extends StateNotifier<ExportProgressState> {
   }
 
   /// Marks the export as saved. [pagesMissingBackground] pages went out
-  /// without their PDF background; the overlay then stays up longer so the
-  /// warning can be read.
-  void complete(String fileSize, {int pagesMissingBackground = 0}) {
+  /// without their PDF background and [pagesMissingImages] without some
+  /// inserted images; the overlay then stays up longer so the warning can be
+  /// read.
+  void complete(
+    String fileSize, {
+    int pagesMissingBackground = 0,
+    int pagesMissingImages = 0,
+  }) {
     state = state.copyWith(
       status: ExportProgressStatus.completed,
       progress: 1.0,
       fileSize: fileSize,
       pagesMissingBackground: pagesMissingBackground,
+      pagesMissingImages: pagesMissingImages,
     );
+    final warns = pagesMissingBackground > 0 || pagesMissingImages > 0;
     _autoDismissTimer?.cancel();
     _autoDismissTimer = Timer(
-      Duration(seconds: pagesMissingBackground > 0 ? 6 : 3),
+      Duration(seconds: warns ? 6 : 3),
       dismiss,
     );
   }
