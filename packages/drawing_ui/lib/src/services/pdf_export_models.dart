@@ -32,6 +32,12 @@ class PDFPageFormat {
 
   const PDFPageFormat({required this.width, required this.height});
 
+  /// Paper of [widthMm] x [heightMm] millimetres, in points (1/72 inch).
+  factory PDFPageFormat.millimeters(double widthMm, double heightMm) =>
+      PDFPageFormat(width: widthMm * _ptPerMm, height: heightMm * _ptPerMm);
+
+  static const double _ptPerMm = 72 / 25.4;
+
   static const a4 = PDFPageFormat(width: 595, height: 842);
   static const a5 = PDFPageFormat(width: 420, height: 595);
   static const letter = PDFPageFormat(width: 612, height: 792);
@@ -45,6 +51,10 @@ class PDFExportOptions {
   final bool includeBackground;
   final PDFExportMode exportMode;
   final PDFExportQuality quality;
+
+  /// Paper size (points) for pages without a PDF or image background: their
+  /// page units are scaled so the page width matches it (#454). Null keeps
+  /// page units as points.
   final PDFPageFormat? pageFormat;
   final bool isInfiniteCanvas;
 

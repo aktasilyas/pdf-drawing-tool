@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:example_app/core/config/feature_flags.dart';
@@ -8,6 +10,7 @@ import 'package:drawing_ui/drawing_ui.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/ai/presentation/providers/ai_providers.dart';
 import 'package:example_app/features/editor/presentation/providers/editor_provider.dart';
+import 'package:example_app/features/editor/presentation/providers/editor_paper_format.dart';
 import 'package:example_app/features/editor/presentation/providers/editor_session.dart';
 import 'package:example_app/features/editor/presentation/providers/pdf_relink_handler.dart';
 import 'package:example_app/features/editor/presentation/widgets/active_editor_leave_scope.dart';
@@ -61,6 +64,12 @@ class EditorScreen extends ConsumerWidget {
           // "Locate PDF…" on pages whose source PDF went missing (#449).
           ref.read(pdfSourceRelinkProvider.notifier).state =
               pdfRelinkHandlerFor(ref.read, context);
+
+          // PDF export uses the notebook's paper size (#454). The root
+          // container outlives this screen; `ref` must not be used after an
+          // await, as the user may already have left.
+          final root = ProviderScope.containerOf(context, listen: false);
+          unawaited(loadExportPaperFormat(root.read, document.id));
 
           // Initialize canvas transform for limited mode (notebook/notepad)
           final canvasMode = document.canvasMode;

@@ -11,8 +11,8 @@ import 'export_errors.dart';
 import 'pdf_background_rasterizer.dart';
 import 'pdf_compressed_image.dart';
 import 'pdf_content_painter.dart';
-import 'pdf_export_bounds.dart';
 import 'pdf_export_models.dart';
+import 'pdf_export_page_geometry.dart';
 import 'pdf_raster_layer_renderer.dart';
 import 'pdf_source.dart';
 
@@ -98,20 +98,24 @@ class PDFExporter {
     PdfSourcePool sources,
     PdfBackgroundRasterizer backgrounds,
   ) async {
-    // An infinite canvas exports the page rect grown to its content; page
-    // content is shifted by the bounds offset so negative coordinates land
-    // inside the media box (as in `PagePngExporter`).
-    double pdfW = page.size.width, pdfH = page.size.height;
-    var origin = ui.Offset.zero;
-    if (options.isInfiniteCanvas) {
-      final bounds = infiniteCanvasExportBounds(page);
-      pdfW = bounds.width;
-      pdfH = bounds.height;
-      origin = ui.Offset(bounds.offsetX, bounds.offsetY);
-    }
+    // Infinite canvas: page rect grown to its content, content shifted by
+    // the bounds offset (as in `PagePngExporter`). Paper pages: page units
+    // scaled to the notebook's paper size (#454).
+    final geo = pdfPageGeometry(page, options);
+    final pdfW = geo.contentW, pdfH = geo.contentH;
+    final origin = geo.origin;
 
-    final pdfPage = PdfPage(doc, pageFormat: PdfPageFormat(pdfW, pdfH));
+    final pdfPage =
+        PdfPage(doc, pageFormat: PdfPageFormat(geo.mediaW, geo.mediaH));
     final g = pdfPage.getGraphics();
+    final scaled = geo.scale != 1.0;
+    if (scaled) {
+      // One page-level scale: vector ops (y flipped against pdfH) and the
+      // full-page images below all land inside the media box.
+      final s = geo.scale;
+      g.saveContext();
+      g.setTransform(Matrix4(s, 0, 0, 0, 0, s, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1));
+    }
 
     if (options.includeBackground) {
       await _paintBackground(
@@ -129,9 +133,10 @@ class PDFExporter {
       await _renderLayer(g, doc, layer, pdfW, pdfH, options, origin,
           onMissingImage: onMissingImage);
     }
+    if (scaled) g.restoreContext();
 
     if (options.addWatermark) {
-      _drawWatermark(g, doc, pdfW, pdfH);
+      _drawWatermark(g, doc, geo.mediaW, geo.mediaH);
     }
     return (pdf: pdfDrawn, images: imagesDrawn);
   }
@@ -262,7 +267,7 @@ class PDFExporter {
     // Fallback: decode pre-rendered PNG data to raw RGBA.
     final pngData = page.background.pdfData;
     if (pngData == null) return false;
-    final raw = await _decodeToRawRgba(pngData);
+    final raw = await decodePngToRawRgba(pngData);
     if (raw == null) return false;
     g.drawImage(addCompressedRgbaImage(doc, raw), 0, 0, w, h);
     return true;
@@ -277,24 +282,5 @@ class PDFExporter {
     final source = await sources.get(path);
     if (source == null) return null;
     return source.renderJpeg(index, renderScale);
-  }
-
-  /// Decodes PNG bytes to raw RGBA using Flutter's native image codec.
-  Future<PdfRawImage?> _decodeToRawRgba(Uint8List pngBytes) async {
-    final codec = await ui.instantiateImageCodec(pngBytes);
-    final frame = await codec.getNextFrame();
-    final image = frame.image;
-    try {
-      final byteData =
-          await image.toByteData(format: ui.ImageByteFormat.rawRgba);
-      if (byteData == null) return null;
-      return (
-        bytes: byteData.buffer.asUint8List(),
-        width: image.width,
-        height: image.height,
-      );
-    } finally {
-      image.dispose();
-    }
   }
 }

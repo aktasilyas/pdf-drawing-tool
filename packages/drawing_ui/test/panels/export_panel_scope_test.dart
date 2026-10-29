@@ -136,7 +136,7 @@ void main() {
 
   group('performPDFExport maps options to the exporter', () {
     Future<PDFExportOptions> exportWith(ExportOptions options,
-        {bool infinite = false}) async {
+        {bool infinite = false, PDFPageFormat? pageFormat}) async {
       final exporter = _MockExporter();
       when(() => exporter.exportPages(
                 pages: any(named: 'pages'),
@@ -160,6 +160,7 @@ void main() {
         isInfiniteCanvas: infinite,
         options: options,
         currentPageIndex: 1,
+        pageFormat: pageFormat,
         exporter: exporter,
       );
       final captured = verify(() => exporter.exportPages(
@@ -188,5 +189,22 @@ void main() {
       final o = await exportWith(const ExportOptions(), infinite: true);
       expect(o.isInfiniteCanvas, isTrue);
     });
+
+    test('the notebook paper size reaches the exporter (#454)', () async {
+      expect((await exportWith(const ExportOptions())).pageFormat, isNull);
+      final a5 = PDFPageFormat.millimeters(148, 210);
+      final o = await exportWith(const ExportOptions(), pageFormat: a5);
+      expect(o.pageFormat, same(a5));
+    });
+  });
+
+  test('the export runner takes the paper size from its provider', () {
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    expect(container.read(pdfExportRunnerProvider).pageFormat, isNull);
+
+    final a4 = PDFPageFormat.millimeters(210, 297);
+    container.read(exportPageFormatProvider.notifier).state = a4;
+    expect(container.read(pdfExportRunnerProvider).pageFormat, same(a4));
   });
 }

@@ -18,6 +18,7 @@ export 'presentation/l10n/app_selection_strings.dart';
 export 'presentation/l10n/app_template_strings.dart';
 export 'presentation/l10n/app_tool_strings.dart';
 export 'presentation/l10n/app_toolbar_strings.dart';
+export 'presentation/providers/editor_paper_format.dart';
 export 'presentation/providers/editor_provider.dart';
 export 'presentation/providers/editor_session.dart';
 export 'presentation/providers/pdf_relink_handler.dart';
