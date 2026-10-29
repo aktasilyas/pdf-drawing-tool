@@ -29,6 +29,30 @@ void endEditorSession(ProviderReader read) {
   read(historyManagerProvider.notifier).clearHistory();
 }
 
+/// Resets every provider that holds state of the open document.
+///
+/// Shared by all ways of leaving the editor (back, move to trash) so a later
+/// reopen of the same notebook starts a fresh session. [invalidate] is
+/// `ref.invalidate` or `ProviderContainer.invalidate`. Invalidating
+/// [autoSaveProvider] drops any pending autosave timer.
+void closeEditorSession(
+  ProviderReader read,
+  void Function(ProviderOrFamily provider) invalidate,
+) {
+  invalidate(documentProvider);
+  invalidate(pageManagerProvider);
+  invalidate(autoSaveProvider);
+  invalidate(saveDocumentUseCaseProvider);
+  invalidate(hasUnsavedChangesProvider);
+  invalidate(saveFailureProvider);
+  invalidate(pageTrashCallbackProvider);
+  invalidate(pageTrashDiscardCallbackProvider);
+  endEditorSession(read);
+  read(visiblePdfPageProvider.notifier).state = null;
+  read(currentPdfFilePathProvider.notifier).state = null;
+  read(totalPdfPagesProvider.notifier).state = 0;
+}
+
 /// Soft-deletes pages of [documentId] into the page trash.
 ///
 /// The notebook title is read when a page is trashed, not captured at load,

@@ -95,4 +95,16 @@ void main() {
 
     await tester.pump(const Duration(seconds: 3));
   });
+
+  testWidgets('closing the editor session cancels a pending autosave',
+      (tester) async {
+    startEditorSession(container.read, doc);
+    notifier().documentChanged(doc);
+    expect(notifier().hasPendingSave, isTrue);
+
+    closeEditorSession(container.read, container.invalidate);
+    await tester.pump(const Duration(seconds: 5));
+
+    verifyNever(() => save(any()));
+  });
 }
