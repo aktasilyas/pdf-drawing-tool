@@ -94,6 +94,14 @@ class PageTrashRepositoryImpl implements PageTrashRepository {
 
     final pages = (content['pages'] as List).cast<Map<String, dynamic>>();
 
+    // The page is already back (e.g. an editor undo re-inserted it while the
+    // trash row stayed): drop the row instead of duplicating the page id.
+    final pageId = model.pageData['id'];
+    if (pageId != null && pages.any((p) => p['id'] == pageId)) {
+      await _trashDatasource.removeTrashedPage(trashedPageId);
+      return true;
+    }
+
     // Insert page at clamped original position, then re-index.
     final insertIndex = min(model.originalPageIndex, pages.length);
     pages.insert(insertIndex, model.pageData);
@@ -101,6 +109,12 @@ class PageTrashRepositoryImpl implements PageTrashRepository {
       pages[i]['index'] = i;
     }
     content['pages'] = pages;
+    // Keep the page the user was on current when the restored page lands
+    // before (or at) it.
+    final current = content['currentPageIndex'];
+    if (current is int && insertIndex <= current) {
+      content['currentPageIndex'] = current + 1;
+    }
 
     await _documentDatasource.saveDocumentContent(
       model.sourceDocumentId,

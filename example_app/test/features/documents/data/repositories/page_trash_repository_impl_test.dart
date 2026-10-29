@@ -92,6 +92,51 @@ void main() {
       expect(await trashedPages(), isEmpty);
     });
 
+    test('a page already back in the notebook is not inserted twice', () async {
+      final d = await create('Doc');
+      await fx.documents
+          .saveDocumentContent(id: d.id, content: content(3), pageCount: 3);
+      // p1 was trashed, then re-inserted by an editor undo; the row stayed.
+      final id = await trash(d.id, pageIndex: 1, pageData: {'id': 'p1'});
+
+      expect(await fx.pageTrash.restorePageFromTrash(id), const Right(true));
+      final pages = (await fx.documentDs.getDocumentContent(d.id))!['pages']
+          as List<dynamic>;
+      expect(pages.map((p) => (p as Map)['id']), ['p0', 'p1', 'p2']);
+      expect((await fx.documentDs.getDocument(d.id)).pageCount, 3);
+      expect(await trashedPages(), isEmpty);
+    });
+
+    test('restoring before the current page keeps that page current', () async {
+      final d = await create('Doc');
+      await fx.documents.saveDocumentContent(
+        id: d.id,
+        content: {...content(3), 'currentPageIndex': 2},
+        pageCount: 3,
+      );
+      final id = await trash(d.id, pageIndex: 1);
+
+      expect(await fx.pageTrash.restorePageFromTrash(id), const Right(true));
+      final stored = (await fx.documentDs.getDocumentContent(d.id))!;
+      final pages = stored['pages'] as List<dynamic>;
+      expect(stored['currentPageIndex'], 3);
+      expect((pages[3] as Map)['id'], 'p2');
+    });
+
+    test('restoring after the current page leaves the index alone', () async {
+      final d = await create('Doc');
+      await fx.documents.saveDocumentContent(
+        id: d.id,
+        content: {...content(3), 'currentPageIndex': 0},
+        pageCount: 3,
+      );
+      final id = await trash(d.id, pageIndex: 2);
+
+      expect(await fx.pageTrash.restorePageFromTrash(id), const Right(true));
+      final stored = (await fx.documentDs.getDocumentContent(d.id))!;
+      expect(stored['currentPageIndex'], 0);
+    });
+
     test('clamps an index past the end to the last position', () async {
       final d = await create('Doc');
       await fx.documents
