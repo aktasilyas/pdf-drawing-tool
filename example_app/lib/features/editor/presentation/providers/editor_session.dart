@@ -101,8 +101,9 @@ void closeEditorSession(
   invalidate(saveFailureProvider);
   invalidate(pageTrashCallbackProvider);
   invalidate(pageTrashDiscardCallbackProvider);
-  invalidate(canvasTransformProvider);
   endEditorSession(read);
+  // Reset, not invalidate: a pinch still in flight holds the notifier.
+  read(canvasTransformProvider.notifier).resetForNewDocument();
   read(visiblePdfPageProvider.notifier).state = null;
   read(currentPdfFilePathProvider.notifier).state = null;
   read(totalPdfPagesProvider.notifier).state = 0;
