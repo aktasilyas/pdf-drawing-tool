@@ -106,6 +106,7 @@ mixin PageOptionsActions<T extends ConsumerStatefulWidget> on ConsumerState<T> {
       title: strings.pageFileName(title, pageIndex + 1),
       isInfiniteCanvas: ref.read(isInfiniteCanvasProvider),
       pdfPaths: ref.read(pdfPathResolverProvider),
+      pageFormat: ref.read(exportPageFormatProvider),
     );
   }
 

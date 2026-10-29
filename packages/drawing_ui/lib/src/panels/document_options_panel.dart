@@ -63,6 +63,7 @@ class DocumentOptionsPanel extends ConsumerWidget {
                 strings: s.export,
                 isInfiniteCanvas: ref.read(isInfiniteCanvasProvider),
                 pdfPaths: ref.read(pdfPathResolverProvider),
+                pageFormat: ref.read(exportPageFormatProvider),
               );
             },
           ),

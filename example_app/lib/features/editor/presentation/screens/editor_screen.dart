@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:example_app/core/config/feature_flags.dart';
@@ -8,6 +10,7 @@ import 'package:drawing_ui/drawing_ui.dart';
 import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/ai/presentation/providers/ai_providers.dart';
 import 'package:example_app/features/editor/presentation/providers/editor_provider.dart';
+import 'package:example_app/features/editor/presentation/providers/editor_paper_format.dart';
 import 'package:example_app/features/editor/presentation/providers/editor_session.dart';
 import 'package:example_app/features/editor/presentation/widgets/active_editor_leave_scope.dart';
 import 'package:example_app/features/editor/presentation/widgets/editor_body.dart';
@@ -58,6 +61,9 @@ class EditorScreen extends ConsumerWidget {
               (trashId) => ref
                   .read(documentsControllerProvider.notifier)
                   .permanentlyDeletePage(trashId);
+
+          // PDF export uses the notebook's paper size (#454).
+          unawaited(loadExportPaperFormat(ref.read, document.id));
 
           // Initialize canvas transform for limited mode (notebook/notepad)
           final canvasMode = document.canvasMode;

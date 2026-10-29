@@ -21,10 +21,14 @@ class PDFExportRunner {
   const PDFExportRunner({
     this.shareService = const PdfShareService(),
     this.pdfPaths = PdfPathResolver.passthrough,
+    this.pageFormat,
   });
 
   final PdfShareService shareService;
   final PdfPathResolver pdfPaths;
+
+  /// Paper size for notebook pages; see [exportPageFormatProvider].
+  final PDFPageFormat? pageFormat;
 
   Future<void> run(
     ExportProgressNotifier progress,
@@ -47,6 +51,7 @@ class PDFExportRunner {
       share: share,
       shareService: shareService,
       pdfPaths: pdfPaths,
+      pageFormat: pageFormat,
     );
   }
 }
@@ -56,6 +61,7 @@ final pdfExportRunnerProvider = Provider<PDFExportRunner>(
   (ref) => PDFExportRunner(
     shareService: ref.watch(pdfShareServiceProvider),
     pdfPaths: ref.watch(pdfPathResolverProvider),
+    pageFormat: ref.watch(exportPageFormatProvider),
   ),
 );
 
@@ -73,6 +79,7 @@ Future<void> performPDFExport(
   int currentPageIndex = 0,
   PdfShareService shareService = const PdfShareService(),
   PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
+  PDFPageFormat? pageFormat,
   @visibleForTesting PDFExporter? exporter,
 }) {
   return performPagesPDFExport(
@@ -86,6 +93,7 @@ Future<void> performPDFExport(
     share: share,
     shareService: shareService,
     pdfPaths: pdfPaths,
+    pageFormat: pageFormat,
     exporter: exporter,
   );
 }
@@ -105,6 +113,7 @@ Future<void> performPagesPDFExport(
   bool includeBackground = true,
   PdfShareService shareService = const PdfShareService(),
   PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
+  PDFPageFormat? pageFormat,
   @visibleForTesting PDFExporter? exporter,
 }) async {
   progress.start(pages.length);
@@ -118,6 +127,7 @@ Future<void> performPagesPDFExport(
         isInfiniteCanvas: isInfiniteCanvas,
         addWatermark: addWatermark,
         includeBackground: includeBackground,
+        pageFormat: pageFormat,
       ),
       onProgress: progress.updateProgress,
       isCancelled: () => progress.isCancelRequested,
