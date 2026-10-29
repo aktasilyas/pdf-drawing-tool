@@ -80,11 +80,11 @@ void main() {
           .thenAnswer((_) async => value);
     }
 
-    test('success refreshes only the documents list', () async {
+    test('success refreshes documents, favorites and recent', () async {
       stubRename(Right(testDocument));
       final rebuilt = await run((c) => c.renameDocument('doc-1', 'New'));
       expect(result, isTrue);
-      expect(rebuilt, {'documents'});
+      expect(rebuilt, {'documents', 'favorites', 'recent'});
     });
 
     test('failure returns false', () async {
