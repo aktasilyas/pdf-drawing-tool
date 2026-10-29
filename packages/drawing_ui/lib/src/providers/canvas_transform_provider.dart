@@ -131,6 +131,11 @@ class CanvasTransformNotifier extends StateNotifier<CanvasTransform> {
     state = state.copyWith(offset: newOffset);
   }
 
+  /// Drops the zoom, pan and fit baseline of the previous document: zoom
+  /// 1.0, baseline 1.0, default origin. A new editor session starts here,
+  /// so no document opens with another one's view (#474).
+  void resetForNewDocument() => state = const CanvasTransform();
+
   /// Reset to baseline zoom (what user sees as "100%").
   void reset() {
     state = CanvasTransform(
