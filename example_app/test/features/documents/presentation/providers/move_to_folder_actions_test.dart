@@ -32,9 +32,8 @@ void main() {
     ]);
     addTearDown(container.dispose);
     actions = container.read(moveToFolderActionsProvider);
-    when(() => docs.updateDocument(
-            id: any(named: 'id'), folderId: any(named: 'folderId')))
-        .thenAnswer((_) async => Right(testDocument));
+    when(() => docs.moveDocument(any(), any()))
+        .thenAnswer((_) async => const Right(null));
     when(() => folders.moveFolder(any(), any()))
         .thenAnswer((_) async => const Right(null));
     when(() => folders.getFolders(parentId: any(named: 'parentId')))
@@ -79,8 +78,8 @@ void main() {
           folderIds: const [],
           targetFolderId: 'f1');
       expect(ok, isTrue);
-      verify(() => docs.updateDocument(id: 'd1', folderId: 'f1')).called(1);
-      verify(() => docs.updateDocument(id: 'd2', folderId: 'f1')).called(1);
+      verify(() => docs.moveDocument('d1', 'f1')).called(1);
+      verify(() => docs.moveDocument('d2', 'f1')).called(1);
       verifyNever(() => folders.moveFolder(any(), any()));
     });
 
@@ -88,7 +87,7 @@ void main() {
       final ok = await actions.move(
           documentIds: const ['d1'], folderIds: const [], targetFolderId: null);
       expect(ok, isTrue);
-      verify(() => docs.updateDocument(id: 'd1', folderId: null)).called(1);
+      verify(() => docs.moveDocument('d1', null)).called(1);
     });
 
     test('moves folders under the target', () async {
@@ -99,8 +98,7 @@ void main() {
     });
 
     test('a failed document move returns false and skips folders', () async {
-      when(() => docs.updateDocument(
-              id: any(named: 'id'), folderId: any(named: 'folderId')))
+      when(() => docs.moveDocument(any(), any()))
           .thenAnswer((_) async => const Left(failure));
       final ok = await actions.move(
           documentIds: const ['d1'],
