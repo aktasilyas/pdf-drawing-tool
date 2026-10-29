@@ -80,7 +80,7 @@ abstract final class PageRasterizer {
       coverImage = await PageBackgroundRaster.prepare(page.background);
       final visibleLayers = [
         for (final layer in page.layers)
-          if (layer.isVisible) layer,
+          if (layer.isVisible && layer.opacity > 0) layer,
       ];
       await Future.wait([
         for (final layer in visibleLayers)
@@ -126,9 +126,13 @@ abstract final class PageRasterizer {
       // Layer content exactly as the canvas paints it: each layer in its own
       // compositing layer (blend modes such as the highlighter's multiply
       // only mix with that layer's ink), elements in z-order, sticky notes
-      // on top.
+      // on top. The layer's opacity applies to the composited layer, as on the
+      // canvas and in the PDF export.
       for (final layer in visibleLayers) {
-        canvas.saveLayer(area, Paint());
+        canvas.saveLayer(
+          area,
+          Paint()..color = Color.fromRGBO(0, 0, 0, layer.opacity),
+        );
         _layerRenderer.paintElements(canvas, layer, images);
         _layerRenderer.paintStickyNotes(canvas, layer.stickyNotes);
         canvas.restore();
