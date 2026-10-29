@@ -79,6 +79,18 @@ void main() {
     expect(rebuilt, pageTrashLists);
   });
 
+  test('discardTrashedPage drops only the row and refreshes page trash',
+      () async {
+    when(() => h.pageTrash.discardTrashedPage('t1'))
+        .thenAnswer((_) async => const Right(null));
+    final rebuilt = await h.rebuiltBy(() async {
+      await h.controller.discardTrashedPage('t1');
+    });
+    verify(() => h.pageTrash.discardTrashedPage('t1')).called(1);
+    verifyNever(() => h.pageTrash.permanentlyDeletePage(any()));
+    expect(rebuilt, pageTrashLists);
+  });
+
   test('trashedPageDocumentExists forwards to the repository', () async {
     when(() => h.pageTrash.documentExists('doc-1'))
         .thenAnswer((_) async => const Right(true));

@@ -55,9 +55,7 @@ class EditorScreen extends ConsumerWidget {
 
           // Lets the editor drop a trash entry again (undo of a page delete).
           ref.read(pageTrashDiscardCallbackProvider.notifier).state =
-              (trashId) => ref
-                  .read(documentsControllerProvider.notifier)
-                  .permanentlyDeletePage(trashId);
+              pageTrashDiscardCallbackFor(ref.read);
 
           // Initialize canvas transform for limited mode (notebook/notepad)
           final canvasMode = document.canvasMode;

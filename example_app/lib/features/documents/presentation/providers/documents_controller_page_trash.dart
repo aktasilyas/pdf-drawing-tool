@@ -68,6 +68,22 @@ mixin DocumentsPageTrashOperations on StateNotifier<AsyncValue<void>> {
     invalidatePageTrash(ref);
   }
 
+  /// Drops the trash entry of a page whose delete was undone in the editor;
+  /// unlike [permanentlyDeletePage] its files are kept.
+  Future<void> discardTrashedPage(String trashedPageId) async {
+    final repo = ref.read(pageTrashRepositoryProvider);
+    try {
+      final result = await repo.discardTrashedPage(trashedPageId);
+      result.fold(
+        (failure) => logger.w('Page trash discard failed: ${failure.message}'),
+        (_) {},
+      );
+    } catch (e) {
+      logger.w('Page trash discard failed: $e');
+    }
+    invalidatePageTrash(ref);
+  }
+
   Future<bool> trashedPageDocumentExists(String documentId) async {
     final repo = ref.read(pageTrashRepositoryProvider);
     final result = await repo.documentExists(documentId);
