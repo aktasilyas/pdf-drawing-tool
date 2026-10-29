@@ -58,8 +58,8 @@ void main() {
     return drawn;
   }
 
-  testWidgets('a failed save does not trash and keeps the Retry banner state',
-      (tester) async {
+  test('a failed save does not trash and keeps the Retry banner state',
+      () async {
     when(() => save(any())).thenAnswer((_) async => const Left(failure));
     draw();
 
@@ -71,7 +71,7 @@ void main() {
     expect(container.read(hasUnsavedChangesProvider), isTrue);
   });
 
-  testWidgets('a successful save is written before the trash', (tester) async {
+  test('a successful save is written before the trash', () async {
     final drawn = draw();
 
     final trashed = await moveOpenDocumentToTrash(container.read, 'doc_a');
@@ -82,11 +82,10 @@ void main() {
       () => repo.moveToTrash('doc_a'),
     ]);
     expect(container.read(saveFailureProvider), isNull);
-    await tester.pump(); // Riverpod's refresh of the invalidated lists.
   });
 
-  testWidgets('Retry after a failure, then delete: the latest edits are saved',
-      (tester) async {
+  test('Retry after a failure, then delete: the latest edits are saved',
+      () async {
     when(() => save(any())).thenAnswer((_) async => const Left(failure));
     final drawn = draw();
     expect(await moveOpenDocumentToTrash(container.read, 'doc_a'), isFalse);
@@ -98,10 +97,9 @@ void main() {
     expect(await moveOpenDocumentToTrash(container.read, 'doc_a'), isTrue);
     verify(() => save(drawn)).called(2);
     verify(() => repo.moveToTrash('doc_a')).called(1);
-    await tester.pump(); // Riverpod's refresh of the invalidated lists.
   });
 
-  testWidgets('a failed trash reports false after the save', (tester) async {
+  test('a failed trash reports false after the save', () async {
     when(() => repo.moveToTrash(any()))
         .thenAnswer((_) async => const Left(failure));
     final drawn = draw();
