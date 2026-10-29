@@ -118,6 +118,8 @@ void main() {
       for (var i = 0; i < 3; i++) {
         await tester.pump();
       }
+      // Lets the button's ink highlight timer finish.
+      await tester.pump(const Duration(milliseconds: 300));
 
       expect(handlerCalls, 1);
       expect(find.byType(PdfPagePlaceholder), findsNothing);
