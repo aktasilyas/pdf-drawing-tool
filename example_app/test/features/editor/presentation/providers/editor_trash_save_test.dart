@@ -82,6 +82,7 @@ void main() {
       () => repo.moveToTrash('doc_a'),
     ]);
     expect(container.read(saveFailureProvider), isNull);
+    await tester.pump(); // Riverpod's refresh of the invalidated lists.
   });
 
   testWidgets('Retry after a failure, then delete: the latest edits are saved',
@@ -97,6 +98,7 @@ void main() {
     expect(await moveOpenDocumentToTrash(container.read, 'doc_a'), isTrue);
     verify(() => save(drawn)).called(2);
     verify(() => repo.moveToTrash('doc_a')).called(1);
+    await tester.pump(); // Riverpod's refresh of the invalidated lists.
   });
 
   testWidgets('a failed trash reports false after the save', (tester) async {
