@@ -80,8 +80,9 @@ class LoadDocumentUseCase {
                   documentType: docInfo.documentType,
                 ));
               }
-              // Library metadata owns the title; content may be stale.
-              final doc = stored.copyWith(title: docInfo.title);
+              // Library metadata owns the title and the id; stored content may
+              // be stale (or carry the source's id, for pre-fix duplicates).
+              final doc = stored.copyWith(id: documentId, title: docInfo.title);
               logger.i('Document loaded: ${doc.id}');
               return Right(doc);
             },
