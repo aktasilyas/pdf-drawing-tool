@@ -184,6 +184,7 @@ class DrawingCanvasState extends DrawingCanvasGestureHandlers<DrawingCanvas>
     ref.listen<core.Page>(currentPageProvider, (previous, current) {
       if (previous != null && previous.id != current.id) {
         _hasInitialized = false;
+        finishTextEditingOnPageChange();
 
         // 🚀 PDF sayfaları için adjacent prefetch tetikle
         if (current.background.type == BackgroundType.pdf &&

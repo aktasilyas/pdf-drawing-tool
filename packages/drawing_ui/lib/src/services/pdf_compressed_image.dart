@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:pdf/pdf.dart';
 // PdfNum/PdfIndirect are not part of the public barrel; needed to write the
@@ -67,4 +68,22 @@ PdfImage _emptyImage(PdfDocument doc, PdfRawImage raw, String colorSpace) {
   im.params['/ColorSpace'] = PdfName(colorSpace);
   im.params['/Filter'] = const PdfName('/FlateDecode');
   return im;
+}
+
+/// Decodes PNG bytes to raw RGBA using Flutter's native image codec.
+Future<PdfRawImage?> decodePngToRawRgba(Uint8List pngBytes) async {
+  final codec = await ui.instantiateImageCodec(pngBytes);
+  final frame = await codec.getNextFrame();
+  final image = frame.image;
+  try {
+    final byteData = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+    if (byteData == null) return null;
+    return (
+      bytes: byteData.buffer.asUint8List(),
+      width: image.width,
+      height: image.height,
+    );
+  } finally {
+    image.dispose();
+  }
 }

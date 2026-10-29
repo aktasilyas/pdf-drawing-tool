@@ -24,9 +24,11 @@ void startEditorSession(ProviderReader read, DrawingDocument document) {
   read(historyManagerProvider.notifier).clearHistory();
 }
 
-/// Drops the undo history of the document that is being closed.
+/// Drops the undo history of the document that is being closed and the
+/// session's "Locate PDF…" handler (it holds the editor's context).
 void endEditorSession(ProviderReader read) {
   read(historyManagerProvider.notifier).clearHistory();
+  read(pdfSourceRelinkProvider.notifier).state = null;
 }
 
 /// Resets every provider that holds state of the open document.

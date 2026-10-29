@@ -20,6 +20,10 @@ abstract class ErrorStrings {
   String pdfTooManyPages(int count, int max);
   String get pdfPagePlaceholder;
   String get pdfSourceMissing;
+
+  /// Label of the action that re-links a missing source PDF. Non-abstract so
+  /// existing subclasses keep compiling; they fall back to this English copy.
+  String get pdfLocateSource => 'Locate PDF…';
   String get pdfLoadFailed;
   String pdfPagesSkipped(int count);
 
@@ -46,6 +50,7 @@ abstract class ErrorStrings {
         'pdfTooManyPages': pdfTooManyPages(1, 2),
         'pdfPagePlaceholder': pdfPagePlaceholder,
         'pdfSourceMissing': pdfSourceMissing,
+        'pdfLocateSource': pdfLocateSource,
         'pdfLoadFailed': pdfLoadFailed,
         'pdfPagesSkipped': pdfPagesSkipped(2),
         'imageReadFailed': imageReadFailed,
@@ -97,6 +102,9 @@ class ErrorStringsTr extends ErrorStrings {
 
   @override
   String get pdfSourceMissing => 'Kaynak PDF bulunamadı';
+
+  @override
+  String get pdfLocateSource => "PDF'yi bul…";
 
   @override
   String get pdfLoadFailed => 'PDF Yüklenemedi';

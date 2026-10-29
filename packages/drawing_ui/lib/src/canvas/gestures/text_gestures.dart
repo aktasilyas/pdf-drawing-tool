@@ -48,7 +48,11 @@ mixin _TextGestures<T extends ConsumerStatefulWidget>
 
     for (final text in texts.reversed) {
       if (text.containsPoint(canvasPoint.dx, canvasPoint.dy, 10)) {
-        ref.read(textToolProvider.notifier).editExistingText(text);
+        ref.read(textToolProvider.notifier).editExistingText(
+              text,
+              pageId: ref.read(currentPageProvider).id,
+              layerIndex: ref.read(documentProvider).activeLayerIndex,
+            );
         return;
       }
     }
@@ -58,6 +62,8 @@ mixin _TextGestures<T extends ConsumerStatefulWidget>
     ref.read(textToolProvider.notifier).startNewText(
           canvasPoint.dx,
           canvasPoint.dy,
+          pageId: ref.read(currentPageProvider).id,
+          layerIndex: ref.read(documentProvider).activeLayerIndex,
           fontSize: textSettings.fontSize,
           color: textSettings.color,
           isBold: textSettings.isBold,
@@ -66,6 +72,8 @@ mixin _TextGestures<T extends ConsumerStatefulWidget>
         );
   }
 
+  /// Commits the text being edited to the page and layer it was started on
+  /// (#462), even when the current page changed in the meantime.
   void finishTextEditing() {
     final textToolState = ref.read(textToolProvider);
 
@@ -81,25 +89,22 @@ mixin _TextGestures<T extends ConsumerStatefulWidget>
     // Now finish editing (this clears the state)
     ref.read(textToolProvider.notifier).finishEditing();
 
-    final document = ref.read(documentProvider);
+    final layerIndex = _originLayerIndex(textToolState);
+    final pageId = textToolState.originPageId;
+    final history = ref.read(historyManagerProvider.notifier);
 
     if (textToolState.isNewText) {
-      // Add new text
-      final command = core.AddTextCommand(
-        layerIndex: document.activeLayerIndex,
-        textElement: currentText,
+      history.execute(
+        core.AddTextCommand(layerIndex: layerIndex, textElement: currentText),
+        pageId: pageId,
       );
-      ref.read(historyManagerProvider.notifier).execute(command);
-
-      // Auto-select into selection system
-      _selectText(currentText);
+      // The selection system works on the current page only.
+      if (_isOnCurrentPage(textToolState)) _selectText(currentText);
     } else {
-      // Update existing text
-      final command = core.UpdateTextCommand(
-        layerIndex: document.activeLayerIndex,
-        newText: currentText,
+      history.execute(
+        core.UpdateTextCommand(layerIndex: layerIndex, newText: currentText),
+        pageId: pageId,
       );
-      ref.read(historyManagerProvider.notifier).execute(command);
     }
   }
 
@@ -113,21 +118,56 @@ mixin _TextGestures<T extends ConsumerStatefulWidget>
     ref.read(textToolProvider.notifier).cancelEditing();
     if (currentText == null || textToolState.isNewText) return;
 
-    final document = ref.read(documentProvider);
     final exists =
-        ref.read(activeLayerTextsProvider).any((t) => t.id == currentText.id);
+        _originLayerTexts(textToolState).any((t) => t.id == currentText.id);
     if (!exists) return;
     ref.read(historyManagerProvider.notifier).execute(
           core.RemoveTextCommand(
-            layerIndex: document.activeLayerIndex,
+            layerIndex: _originLayerIndex(textToolState),
             textId: currentText.id,
           ),
+          pageId: textToolState.originPageId,
         );
+  }
+
+  /// Ends text editing when the current page changes, so the text is
+  /// committed to the page it was started on and the overlay closes (#462).
+  ///
+  /// Deferred to a microtask so the page-index sync between PageManager and
+  /// the document has finished before the commit.
+  void finishTextEditingOnPageChange() {
+    if (!ref.read(textToolProvider).isEditing) return;
+    Future.microtask(() {
+      if (!mounted || !ref.read(textToolProvider).isEditing) return;
+      finishTextEditing();
+    });
   }
 
   // ─────────────────────────────────────────────────────────────────────────
   // TEXT HELPERS
   // ─────────────────────────────────────────────────────────────────────────
+
+  int _originLayerIndex(TextToolState s) =>
+      s.originLayerIndex ?? ref.read(documentProvider).activeLayerIndex;
+
+  bool _isOnCurrentPage(TextToolState s) =>
+      s.originPageId == null ||
+      s.originPageId == ref.read(currentPageProvider).id;
+
+  /// Texts of the layer the edited text was started on.
+  List<core.TextElement> _originLayerTexts(TextToolState s) {
+    final document = ref.read(documentProvider);
+    final pageId = s.originPageId;
+    if (pageId == null || !document.isMultiPage) {
+      return ref.read(activeLayerTextsProvider);
+    }
+    final index = document.pages.indexWhere((p) => p.id == pageId);
+    if (index < 0) return const [];
+    final layers = document.pages[index].layers;
+    final layerIndex = _originLayerIndex(s);
+    if (layerIndex < 0 || layerIndex >= layers.length) return const [];
+    return layers[layerIndex].texts;
+  }
 
   /// Selects a text element into the main selection system.
   void _selectText(core.TextElement text) {
