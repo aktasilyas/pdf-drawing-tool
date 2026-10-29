@@ -70,4 +70,36 @@ void main() {
     expect(history().canUndo, isFalse);
     expect(history().undoCount, 0);
   });
+
+  group('closeEditorSession', () {
+    test('resets history, document state and pdf state', () {
+      startEditorSession(container.read, docA);
+      container.read(historyManagerProvider.notifier).addStroke(_stroke());
+      container.read(hasUnsavedChangesProvider.notifier).state = true;
+      container.read(visiblePdfPageProvider.notifier).state = 3;
+      container.read(totalPdfPagesProvider.notifier).state = 9;
+
+      closeEditorSession(container.read, container.invalidate);
+
+      expect(history().canUndo, isFalse);
+      expect(container.read(documentProvider).id, isNot('doc_a'));
+      expect(container.read(hasUnsavedChangesProvider), isFalse);
+      expect(container.read(saveFailureProvider), isNull);
+      expect(container.read(pageTrashCallbackProvider), isNull);
+      expect(container.read(pageTrashDiscardCallbackProvider), isNull);
+      expect(container.read(visiblePdfPageProvider), isNull);
+      expect(container.read(totalPdfPagesProvider), 0);
+    });
+
+    test('reopening the same document starts a fresh session', () {
+      startEditorSession(container.read, docA);
+      container.read(historyManagerProvider.notifier).addStroke(_stroke());
+
+      closeEditorSession(container.read, container.invalidate);
+      expect(container.read(documentProvider).id, isNot(docA.id));
+
+      startEditorSession(container.read, docA);
+      expect(history().canUndo, isFalse);
+    });
+  });
 }
