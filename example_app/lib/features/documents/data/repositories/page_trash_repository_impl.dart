@@ -112,8 +112,8 @@ class PageTrashRepositoryImpl implements PageTrashRepository {
     // Keep the page the user was on current when the restored page lands
     // before (or at) it.
     final current = content['currentPageIndex'];
-    if (current is int && insertIndex <= current) {
-      content['currentPageIndex'] = current + 1;
+    if (current is num && insertIndex <= current) {
+      content['currentPageIndex'] = current.toInt() + 1;
     }
 
     await _documentDatasource.saveDocumentContent(

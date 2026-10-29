@@ -123,6 +123,23 @@ void main() {
       expect((pages[3] as Map)['id'], 'p2');
     });
 
+    test('restoring at the current position keeps that page current', () async {
+      final d = await create('Doc');
+      await fx.documents.saveDocumentContent(
+        id: d.id,
+        content: {...content(3), 'currentPageIndex': 1},
+        pageCount: 3,
+      );
+      final id = await trash(d.id, pageIndex: 1);
+
+      expect(await fx.pageTrash.restorePageFromTrash(id), const Right(true));
+      final stored = (await fx.documentDs.getDocumentContent(d.id))!;
+      final pages = stored['pages'] as List<dynamic>;
+      expect(stored['currentPageIndex'], 2);
+      expect((pages[2] as Map)['id'], 'p1');
+      expect((pages[1] as Map)['id'], 'gone');
+    });
+
     test('restoring after the current page leaves the index alone', () async {
       final d = await create('Doc');
       await fx.documents.saveDocumentContent(
