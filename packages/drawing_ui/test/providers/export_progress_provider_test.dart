@@ -13,15 +13,28 @@ void main() {
     expect(progress.state.pagesMissingBackground, 2);
   });
 
+  test('complete keeps the count of pages missing images', () {
+    final progress = ExportProgressNotifier();
+    addTearDown(progress.dispose);
+
+    progress.start(3);
+    progress.complete('1.0 MB', pagesMissingImages: 1);
+
+    expect(progress.state.pagesMissingImages, 1);
+    expect(progress.state.pagesMissingBackground, 0);
+  });
+
   test('a new export starts with no missing pages', () {
     final progress = ExportProgressNotifier();
     addTearDown(progress.dispose);
 
     progress.start(1);
-    progress.complete('1.0 MB', pagesMissingBackground: 1);
+    progress.complete('1.0 MB',
+        pagesMissingBackground: 1, pagesMissingImages: 1);
     progress.start(1);
 
     expect(progress.state.pagesMissingBackground, 0);
+    expect(progress.state.pagesMissingImages, 0);
   });
 
   test('complete without missing pages reports none', () {

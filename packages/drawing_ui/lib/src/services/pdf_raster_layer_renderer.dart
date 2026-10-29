@@ -33,7 +33,8 @@ class PdfRasterLayerRenderer {
   /// Rasterizes all of [layer]: elements in z-order, sticky notes on top.
   ///
   /// Content is translated by [origin] (page units) before painting, so an
-  /// infinite canvas can export content at negative coordinates.
+  /// infinite canvas can export content at negative coordinates. Images whose
+  /// file is missing or unreadable are skipped and passed to [onMissingImage].
   Future<PdfRawImage?> renderLayer(
     Layer layer,
     double w,
@@ -41,6 +42,7 @@ class PdfRasterLayerRenderer {
     double scale, {
     PdfPathResolver paths = PdfPathResolver.passthrough,
     Offset origin = Offset.zero,
+    void Function(ImageElement image)? onMissingImage,
   }) async {
     final cache = ImageCacheManager(
       paths: paths,
@@ -50,6 +52,11 @@ class PdfRasterLayerRenderer {
       await Future.wait([
         for (final img in layer.images) cache.loadImage(img.filePath),
       ]);
+      if (onMissingImage != null) {
+        for (final img in layer.images) {
+          if (cache.get(img.filePath) == null) onMissingImage(img);
+        }
+      }
       return await _rasterize(w, h, scale, origin, (canvas) {
         paintElements(canvas, layer, cache);
         paintStickyNotes(canvas, layer.stickyNotes);

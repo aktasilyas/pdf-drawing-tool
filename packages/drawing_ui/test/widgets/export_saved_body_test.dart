@@ -30,6 +30,20 @@ void main() {
     expect(find.text(strings.pagesWithoutPdfBackground(2)), findsOneWidget);
   });
 
+  testWidgets('warns about pages with unreadable images', (tester) async {
+    await _pump(
+      tester,
+      const ExportProgressState(
+        status: ExportProgressStatus.completed,
+        fileSize: '1.0 MB',
+        pagesMissingImages: 3,
+      ),
+    );
+
+    expect(find.text(strings.pagesWithoutImages(3)), findsOneWidget);
+    expect(find.text(strings.pagesWithoutPdfBackground(0)), findsNothing);
+  });
+
   testWidgets('shows only the saved line when nothing is missing',
       (tester) async {
     await _pump(
@@ -43,5 +57,6 @@ void main() {
     expect(find.text(strings.savedWithSize('1.0 MB')), findsOneWidget);
     expect(find.text(strings.pagesWithoutPdfBackground(1)), findsNothing);
     expect(find.text(strings.pagesWithoutPdfBackground(0)), findsNothing);
+    expect(find.text(strings.pagesWithoutImages(0)), findsNothing);
   });
 }

@@ -487,6 +487,7 @@
   "editorExportSavedWithSize": "PDF Kaydedildi ({size})",
   "editorExportCancelled": "İptal edildi",
   "editorExportPagesWithoutPdfBackground": "{count, plural, other{{count} sayfa PDF arka planı olmadan dışa aktarıldı}}",
+  "editorExportPagesWithoutImages": "{count, plural, other{{count} sayfadaki bazı görseller okunamadı ve dışa aktarılmadı}}",
   "editorTemplateAllCategories": "Tümü",
   "editorTemplateCoverTab": "Kapak",
   "editorTemplatePaperTab": "Kâğıt",

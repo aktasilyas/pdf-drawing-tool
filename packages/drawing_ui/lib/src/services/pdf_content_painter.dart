@@ -63,6 +63,9 @@ class PdfContentPainter {
   }
 
   /// Paints all layer content as vector operations using [elementOrder].
+  ///
+  /// Images whose file is missing or unreadable are skipped and passed to
+  /// [onMissingImage].
   Future<void> paintLayerContent(
     PdfGraphics g,
     PdfDocument doc,
@@ -70,7 +73,13 @@ class PdfContentPainter {
     double w,
     double h, {
     PdfPathResolver paths = PdfPathResolver.passthrough,
+    void Function(ImageElement image)? onMissingImage,
   }) async {
+    Future<void> paintImage(ImageElement img) async {
+      final drawn = await _paintImage(g, doc, img, w, h, paths);
+      if (!drawn) onMissingImage?.call(img);
+    }
+
     final strokeMap = {for (final s in layer.strokes) s.id: s};
     final shapeMap = {for (final s in layer.shapes) s.id: s};
     final imageMap = {for (final i in layer.images) i.id: i};
@@ -82,7 +91,7 @@ class PdfContentPainter {
         } else if (shapeMap.containsKey(id)) {
           _shapeRenderer.paintShape(g, shapeMap[id]!, w, h);
         } else if (imageMap.containsKey(id)) {
-          await _paintImage(g, doc, imageMap[id]!, w, h, paths);
+          await paintImage(imageMap[id]!);
         }
       }
     } else {
@@ -93,7 +102,7 @@ class PdfContentPainter {
         _shapeRenderer.paintShape(g, shape, w, h);
       }
       for (final image in layer.images) {
-        await _paintImage(g, doc, image, w, h, paths);
+        await paintImage(image);
       }
     }
   }
@@ -222,7 +231,8 @@ class PdfContentPainter {
     }
   }
 
-  Future<void> _paintImage(
+  /// Draws [img]; false when its file is missing or cannot be decoded.
+  Future<bool> _paintImage(
     PdfGraphics g,
     PdfDocument doc,
     ImageElement img,
@@ -230,31 +240,34 @@ class PdfContentPainter {
     double h,
     PdfPathResolver paths,
   ) async {
+    final PdfImage pdfImg;
     try {
       final file = File(paths.resolve(img.filePath));
-      if (!await file.exists()) return;
-      final bytes = await file.readAsBytes();
-      final pdfImg = PdfImage.file(doc, bytes: bytes);
+      if (!await file.exists()) return false;
+      pdfImg = PdfImage.file(doc, bytes: await file.readAsBytes());
+    } catch (_) {
+      return false;
+    }
 
-      g.saveContext();
-      if (img.rotation != 0.0) {
-        final cx = img.x + img.width / 2;
-        final fcy = _flipY(img.y + img.height / 2, h);
-        final m = Matrix4.identity()
-          ..translateByDouble(cx, fcy, 0, 1)
-          ..rotateZ(-img.rotation)
-          ..translateByDouble(-cx, -fcy, 0, 1);
-        g.setTransform(m);
-      }
-      g.drawImage(
-        pdfImg,
-        img.x,
-        _flipY(img.y + img.height, h),
-        img.width,
-        img.height,
-      );
-      g.restoreContext();
-    } catch (_) {}
+    g.saveContext();
+    if (img.rotation != 0.0) {
+      final cx = img.x + img.width / 2;
+      final fcy = _flipY(img.y + img.height / 2, h);
+      final m = Matrix4.identity()
+        ..translateByDouble(cx, fcy, 0, 1)
+        ..rotateZ(-img.rotation)
+        ..translateByDouble(-cx, -fcy, 0, 1);
+      g.setTransform(m);
+    }
+    g.drawImage(
+      pdfImg,
+      img.x,
+      _flipY(img.y + img.height, h),
+      img.width,
+      img.height,
+    );
+    g.restoreContext();
+    return true;
   }
 
   double _flipY(double y, double h) => h - y;

@@ -2774,6 +2774,12 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{1 page was exported without its PDF background} other{{count} pages were exported without their PDF background}}'**
   String editorExportPagesWithoutPdfBackground(int count);
 
+  /// No description provided for @editorExportPagesWithoutImages.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Some images on 1 page could not be read and were left out} other{Some images on {count} pages could not be read and were left out}}'**
+  String editorExportPagesWithoutImages(int count);
+
   /// No description provided for @editorTemplateAllCategories.
   ///
   /// In en, this message translates to:
