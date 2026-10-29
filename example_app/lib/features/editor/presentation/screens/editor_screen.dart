@@ -90,11 +90,8 @@ class EditorScreen extends ConsumerWidget {
 
         // Listen to document changes for auto-save (NO INVALIDATE HERE!)
         ref.listen<DrawingDocument>(documentProvider, (previous, next) {
-          // Only trigger save if document actually changed (same ID, different content)
-          if (previous != null && previous != next && previous.id == next.id) {
-            ref.read(currentDocumentProvider.notifier).state = next;
-            ref.read(autoSaveProvider.notifier).documentChanged(next);
-            ref.read(hasUnsavedChangesProvider.notifier).state = true;
+          if (previous != null) {
+            onEditorDocumentChanged(ref.read, previous, next);
           }
         });
 
@@ -138,14 +135,10 @@ class EditorScreen extends ConsumerWidget {
   /// Saves and leaves the editor. Returns false when the save failed and the
   /// editor stayed open.
   Future<bool> _handleBack(BuildContext context, WidgetRef ref) async {
-    final currentDoc = ref.read(documentProvider);
-
-    // Always save current state before leaving (cancels any pending timer)
-    await ref.read(autoSaveProvider.notifier).saveNow(currentDoc);
-
-    // Stay in the editor when the save failed: leaving would drop the
-    // unsaved changes. The save failure banner offers Retry.
-    if (ref.read(saveFailureProvider) != null) return false;
+    // Write only pending or failed edits: a notebook that was only read
+    // keeps its modified date (#467). Stay in the editor when the save
+    // failed: leaving would drop the unsaved changes. The banner offers Retry.
+    if (!await saveBeforeLeavingEditor(ref.read)) return false;
 
     // Navigate FIRST - this destroys EditorScreen and auto-disposes
     // documentLoaderProvider (which is autoDispose). We must NOT invalidate

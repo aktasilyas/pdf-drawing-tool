@@ -216,8 +216,13 @@ class DocumentsController extends StateNotifier<AsyncValue<void>>
         return false;
       },
       (_) {
-        // Only invalidate documents list (rename doesn't affect favorites/trash)
-        invalidateDocumentLists(ref, documents: true);
+        // The title shows in every list the notebook can be in (#464).
+        invalidateDocumentLists(
+          ref,
+          documents: true,
+          favorites: true,
+          recent: true,
+        );
         return true;
       },
     );

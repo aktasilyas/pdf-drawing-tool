@@ -8,7 +8,7 @@ import 'package:drawing_ui/drawing_ui.dart'
         canvasTransformProvider,
         currentPageProvider,
         currentToolProvider;
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -173,6 +173,31 @@ class EditorRobot {
   /// crossing a stroke drawn there with [drawStroke].
   Future<void> eraseAcross(double fy) =>
       swipe(Offset(0.5, fy - 0.05), Offset(0.5, fy + 0.05));
+
+  /// Renames the open notebook through the editor's rename dialog: the
+  /// title button's menu when the title is shown, else "More" (phone).
+  Future<void> renameDocument(String to) async {
+    final s = tester.drawingStrings;
+    final titleButton = find.byTooltip(s.pages.documentOptions).hitTestable();
+    await tester.tapAndWait(
+      titleButton.evaluate().isNotEmpty
+          ? titleButton.first
+          : find.byTooltip(s.toolbar.more).hitTestable(),
+    );
+    final item = find.text(s.pages.rename).hitTestable();
+    await tester.pumpUntilFound(item);
+    await tester.tapAndWait(item.first);
+    final dialog = find.byType(AlertDialog);
+    await tester.pumpUntilFound(dialog);
+    await tester.enterText(
+      find.descendant(of: dialog, matching: find.byType(TextField)),
+      to,
+    );
+    await tester.pumpFor(const Duration(milliseconds: 300));
+    final save = find.text(tester.l10n.commonSave);
+    await tester.tapAndWait(find.descendant(of: dialog, matching: save));
+    await tester.pumpUntilGone(dialog);
+  }
 
   Future<void> undo() async {
     await tester.tapAndWait(
