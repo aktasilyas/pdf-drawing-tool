@@ -78,6 +78,9 @@ class LoadDocumentUseCase {
                   createdAt: docInfo.createdAt,
                   updatedAt: docInfo.updatedAt,
                   documentType: docInfo.documentType,
+                  // New pages inherit the notebook's paper size.
+                  settings: DocumentSettings.defaults()
+                      .copyWith(defaultPageSize: pageSize),
                 ));
               }
               // Library metadata owns the title and the id; stored content may
