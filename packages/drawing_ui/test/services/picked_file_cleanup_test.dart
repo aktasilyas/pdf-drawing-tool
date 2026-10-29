@@ -54,8 +54,7 @@ void main() {
       expect(outside.existsSync(), isTrue);
     });
 
-    test('a missing file or unknown cache directory does not throw',
-        () async {
+    test('a missing file or unknown cache directory does not throw', () async {
       await cleanup('${cache.path}/gone.pdf');
       await deletePickedFileCopy(
         '${cache.path}/a.pdf',
