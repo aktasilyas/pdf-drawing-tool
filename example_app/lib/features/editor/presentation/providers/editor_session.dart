@@ -78,10 +78,17 @@ void endEditorSession(ProviderReader read) {
 /// reopen of the same notebook starts a fresh session. [invalidate] is
 /// `ref.invalidate` or `ProviderContainer.invalidate`. Invalidating
 /// [autoSaveProvider] drops any pending autosave timer.
+///
+/// The library lists are non-autoDispose and only refresh on invalidation,
+/// so they are reloaded here to show the saved title, cover, page count and
+/// modified date (and the Recent order) when the library comes back (#464).
 void closeEditorSession(
   ProviderReader read,
   void Function(ProviderOrFamily provider) invalidate,
 ) {
+  invalidate(documentsProvider);
+  invalidate(favoriteDocumentsProvider);
+  invalidate(recentDocumentsProvider);
   invalidate(documentProvider);
   invalidate(pageManagerProvider);
   invalidate(autoSaveProvider);
