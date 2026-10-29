@@ -24,6 +24,47 @@ void startEditorSession(ProviderReader read, DrawingDocument document) {
   read(historyManagerProvider.notifier).clearHistory();
 }
 
+/// Whether [next] differs from [previous] only in view state (current page,
+/// active layer) of the same document. Such a change is not an edit: it must
+/// not rewrite the notebook or bump its modified date (#467).
+bool isViewOnlyChange(DrawingDocument previous, DrawingDocument next) {
+  if (previous.id != next.id || !previous.isMultiPage || !next.isMultiPage) {
+    return false;
+  }
+  final asNext = previous.copyWith(
+    currentPageIndex: next.currentPageIndex,
+    activeLayerIndex: next.activeLayerIndex,
+  );
+  return asNext == next;
+}
+
+/// The editor's reaction to a change of the open document: an edit is
+/// scheduled for autosave and marks the session unsaved; a view-only change
+/// (see [isViewOnlyChange]) is not saved on its own.
+void onEditorDocumentChanged(
+  ProviderReader read,
+  DrawingDocument previous,
+  DrawingDocument next,
+) {
+  if (previous == next || previous.id != next.id) return;
+  read(currentDocumentProvider.notifier).state = next;
+  if (isViewOnlyChange(previous, next)) {
+    read(autoSaveProvider.notifier).viewChanged(next);
+    return;
+  }
+  read(autoSaveProvider.notifier).documentChanged(next);
+  read(hasUnsavedChangesProvider.notifier).state = true;
+}
+
+/// Writes what is left to save before the editor closes: a pending or failed
+/// save, after waiting for one that is running. Nothing is written when the
+/// notebook was only read. Returns false when the save failed; the editor
+/// then stays open and its banner offers Retry.
+Future<bool> saveBeforeLeavingEditor(ProviderReader read) async {
+  await read(autoSaveProvider.notifier).flush();
+  return read(saveFailureProvider) == null;
+}
+
 /// Drops the undo history of the document that is being closed and the
 /// session's "Locate PDF…" handler (it holds the editor's context).
 void endEditorSession(ProviderReader read) {
