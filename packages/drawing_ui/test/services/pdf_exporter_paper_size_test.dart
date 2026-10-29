@@ -73,8 +73,9 @@ void main() {
     final points = [for (final t in texts.skip(1)) ...pdfPathPoints(t)];
     expect(points, isNotEmpty);
     for (final p in points) {
-      expect(p.page.x, closeTo(p.user.x * s, 1e-6), reason: 'x of $p');
-      expect(p.page.y, closeTo(p.user.y * s, 1e-6), reason: 'y of $p');
+      // The PDF writes coordinates with 4 decimals.
+      expect(p.page.x, closeTo(p.user.x * s, 0.01), reason: 'x of $p');
+      expect(p.page.y, closeTo(p.user.y * s, 0.01), reason: 'y of $p');
       expect(p.page.x, inInclusiveRange(0, boxes.single.width));
       expect(p.page.y, inInclusiveRange(0, boxes.single.height));
     }
