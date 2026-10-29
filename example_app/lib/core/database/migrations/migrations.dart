@@ -1,3 +1,13 @@
+// Adding schema v7:
+//  1. Bump `schemaVersion` in app_database.dart and edit the table classes.
+//  2. Dump the new snapshot: `dart run drift_dev schema dump
+//     lib/core/database/app_database.dart drift_schemas/`, then regenerate the
+//     helpers: `dart run drift_dev schema generate drift_schemas/
+//     test/drift/generated`. Never edit a committed snapshot of a shipped version.
+//  3. Add `migrateToV7` below and call it from [runMigrations].
+//  4. Run app_database_migration_test.dart; it fails if a migrated database
+//     differs from the declared schema.
+
 import 'package:drift/drift.dart';
 import 'package:example_app/core/database/app_database.dart';
 

@@ -24,9 +24,11 @@ void startEditorSession(ProviderReader read, DrawingDocument document) {
   read(historyManagerProvider.notifier).clearHistory();
 }
 
-/// Drops the undo history of the document that is being closed.
+/// Drops the undo history of the document that is being closed and the
+/// session's "Locate PDF…" handler (it holds the editor's context).
 void endEditorSession(ProviderReader read) {
   read(historyManagerProvider.notifier).clearHistory();
+  read(pdfSourceRelinkProvider.notifier).state = null;
 }
 
 /// Resets every provider that holds state of the open document.
@@ -51,6 +53,16 @@ void closeEditorSession(
   read(visiblePdfPageProvider.notifier).state = null;
   read(currentPdfFilePathProvider.notifier).state = null;
   read(totalPdfPagesProvider.notifier).state = 0;
+}
+
+/// Drops the trash entry of a page whose delete was undone (#460).
+///
+/// The page is back in the document, so this must never be "delete
+/// forever": that would remove the page's image and PDF files once the
+/// stored content no longer references them.
+PageTrashDiscardCallback pageTrashDiscardCallbackFor(ProviderReader read) {
+  return (trashId) =>
+      read(documentsControllerProvider.notifier).discardTrashedPage(trashId);
 }
 
 /// Soft-deletes pages of [documentId] into the page trash.

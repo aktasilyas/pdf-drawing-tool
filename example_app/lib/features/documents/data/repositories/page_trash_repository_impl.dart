@@ -135,6 +135,14 @@ class PageTrashRepositoryImpl implements PageTrashRepository {
   }
 
   @override
+  Future<Either<Failure, void>> discardTrashedPage(String trashedPageId) {
+    return _guard(
+      'discard trashed page',
+      () => _trashDatasource.removeTrashedPage(trashedPageId),
+    );
+  }
+
+  @override
   Future<Either<Failure, int>> emptyTrash() {
     return _guard('empty page trash', () async {
       final pages = await _trashDatasource.getTrashedPages();

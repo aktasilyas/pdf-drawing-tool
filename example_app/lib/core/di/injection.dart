@@ -139,6 +139,14 @@ void _registerUseCases() {
     ),
   );
 
+  // Re-link a missing source PDF
+  getIt.registerLazySingleton(
+    () => RelinkPdfSourceUseCase(
+      PdfxPageCounter(),
+      LocalPdfSourceFiles(getIt<PdfPathResolver>()),
+    ),
+  );
+
   // Editor use cases
   getIt.registerFactory(() => LoadDocumentUseCase(getIt()));
   getIt.registerFactory(() => SaveDocumentUseCase(getIt()));

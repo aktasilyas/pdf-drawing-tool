@@ -153,21 +153,29 @@ void main() {
 
   group('moveDocumentsToFolder', () {
     test('moves every id and refreshes every list', () async {
-      when(() => h.repo.updateDocument(id: any(named: 'id'), folderId: 'f1'))
-          .thenAnswer((_) async => Right(testDocument));
+      when(() => h.repo.moveDocument(any(), 'f1')).thenAnswer((_) async => ok);
       late bool result;
       final rebuilt = await h.rebuiltBy(() async {
         result = await h.controller.moveDocumentsToFolder(ids, 'f1');
       });
       expect(result, isTrue);
-      verify(() => h.repo.updateDocument(id: 'a', folderId: 'f1')).called(1);
-      verify(() => h.repo.updateDocument(id: 'b', folderId: 'f1')).called(1);
+      verify(() => h.repo.moveDocument('a', 'f1')).called(1);
+      verify(() => h.repo.moveDocument('b', 'f1')).called(1);
       expect(rebuilt, allLists);
     });
 
+    test('moves via moveDocument, not updateDocument (#453)', () async {
+      // updateDocument stamps the edited date; filing must not.
+      when(() => h.repo.moveDocument(any(), any())).thenAnswer((_) async => ok);
+      await h.controller.moveDocumentsToFolder(ids, null);
+      verify(() => h.repo.moveDocument('a', null)).called(1);
+      verify(() => h.repo.moveDocument('b', null)).called(1);
+      verifyNever(() => h.repo.updateDocument(
+          id: any(named: 'id'), folderId: any(named: 'folderId')));
+    });
+
     test('a failure returns false, reports it and refreshes', () async {
-      when(() => h.repo.updateDocument(id: any(named: 'id'), folderId: 'f1'))
-          .thenAnswer((_) async => const Left(failure));
+      when(() => h.repo.moveDocument(any(), 'f1')).thenAnswer((_) async => ko);
       late bool result;
       final rebuilt = await h.rebuiltBy(() async {
         result = await h.controller.moveDocumentsToFolder(ids, 'f1');

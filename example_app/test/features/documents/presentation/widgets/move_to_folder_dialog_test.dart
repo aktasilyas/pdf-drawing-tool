@@ -9,7 +9,7 @@ import 'package:example_app/core/widgets/index.dart';
 import 'package:example_app/features/documents/documents.dart';
 
 import '../providers/documents_controller_harness.dart'
-    show MockDocumentRepository, testDocument;
+    show MockDocumentRepository;
 import '../screens/library_fixtures.dart';
 import '../../../../helpers/l10n.dart';
 
@@ -32,9 +32,8 @@ void main() {
     repository = MockFolderRepository();
     documents = MockDocumentRepository();
     popped = null;
-    when(() => documents.updateDocument(
-            id: any(named: 'id'), folderId: any(named: 'folderId')))
-        .thenAnswer((_) async => Right(testDocument));
+    when(() => documents.moveDocument(any(), any()))
+        .thenAnswer((_) async => const Right<Failure, void>(null));
     when(() => documents.getDocuments(folderId: any(named: 'folderId')))
         .thenAnswer((_) async => const Right([]));
     when(() => documents.getFavorites())
@@ -136,8 +135,7 @@ void main() {
     await tester.tap(find.text('Taşı'));
     await tester.pumpAndSettle();
 
-    verify(() => documents.updateDocument(id: 'doc-1', folderId: 'f-ders'))
-        .called(1);
+    verify(() => documents.moveDocument('doc-1', 'f-ders')).called(1);
     expect(popped, isTrue);
   });
 
@@ -146,15 +144,13 @@ void main() {
     await tester.tap(find.text('İptal'));
     await tester.pumpAndSettle();
 
-    verifyNever(() => documents.updateDocument(
-        id: any(named: 'id'), folderId: any(named: 'folderId')));
+    verifyNever(() => documents.moveDocument(any(), any()));
     expect(popped, isNull);
     expect(find.byType(MoveToFolderDialog), findsNothing);
   });
 
   testWidgets('a failed move keeps the dialog open', (tester) async {
-    when(() => documents.updateDocument(
-            id: any(named: 'id'), folderId: any(named: 'folderId')))
+    when(() => documents.moveDocument(any(), any()))
         .thenAnswer((_) async => const Left(CacheFailure('boom')));
     await pumpDialog(tester, documentIds: const ['doc-1']);
     await tester.tap(find.text('Projeler'));

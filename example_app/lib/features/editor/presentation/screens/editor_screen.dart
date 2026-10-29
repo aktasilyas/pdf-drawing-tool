@@ -9,6 +9,7 @@ import 'package:example_app/features/documents/presentation/providers/documents_
 import 'package:example_app/features/ai/presentation/providers/ai_providers.dart';
 import 'package:example_app/features/editor/presentation/providers/editor_provider.dart';
 import 'package:example_app/features/editor/presentation/providers/editor_session.dart';
+import 'package:example_app/features/editor/presentation/providers/pdf_relink_handler.dart';
 import 'package:example_app/features/editor/presentation/widgets/active_editor_leave_scope.dart';
 import 'package:example_app/features/editor/presentation/widgets/editor_body.dart';
 import 'package:example_app/features/editor/presentation/widgets/editor_dialogs.dart';
@@ -55,9 +56,11 @@ class EditorScreen extends ConsumerWidget {
 
           // Lets the editor drop a trash entry again (undo of a page delete).
           ref.read(pageTrashDiscardCallbackProvider.notifier).state =
-              (trashId) => ref
-                  .read(documentsControllerProvider.notifier)
-                  .permanentlyDeletePage(trashId);
+              pageTrashDiscardCallbackFor(ref.read);
+
+          // "Locate PDF…" on pages whose source PDF went missing (#449).
+          ref.read(pdfSourceRelinkProvider.notifier).state =
+              pdfRelinkHandlerFor(ref.read, context);
 
           // Initialize canvas transform for limited mode (notebook/notepad)
           final canvasMode = document.canvasMode;

@@ -45,6 +45,9 @@ class AppErrorStrings extends ErrorStrings {
   String get pdfSourceMissing => _l10n.editorErrorPdfSourceMissing;
 
   @override
+  String get pdfLocateSource => _l10n.editorErrorPdfLocateSource;
+
+  @override
   String get pdfLoadFailed => _l10n.editorErrorPdfLoadFailed;
 
   @override

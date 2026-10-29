@@ -168,7 +168,9 @@ class DocumentRepositoryImpl
     final result = await _modify(
       id,
       'move document',
-      (doc) => doc.copyWith(updatedAt: DateTime.now()).withFolderId(folderId),
+      // Filing a notebook is not an edit: the edited date, which drives
+      // date sorting and Recent, stays as is (#453).
+      (doc) => doc.withFolderId(folderId),
     );
     return result.map((_) {});
   }
@@ -178,10 +180,8 @@ class DocumentRepositoryImpl
     final result = await _modify(
       id,
       'toggle favorite',
-      (doc) => doc.copyWith(
-        isFavorite: !doc.isFavorite,
-        updatedAt: DateTime.now(),
-      ),
+      // Starring is not an edit either; keep the edited date (#453).
+      (doc) => doc.copyWith(isFavorite: !doc.isFavorite),
     );
     return result.map((_) {});
   }
