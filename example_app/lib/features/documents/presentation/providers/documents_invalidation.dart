@@ -39,9 +39,16 @@ void invalidateDocumentLists(
 }
 
 /// Refreshes the lists a move to or from the trash changes: documents,
-/// trash and folders (for counts).
+/// favorites, recent, trash and folders (for counts).
 void invalidateTrashMove(Ref ref) {
-  invalidateDocumentLists(ref, documents: true, trash: true, folders: true);
+  invalidateDocumentLists(
+    ref,
+    documents: true,
+    favorites: true,
+    recent: true,
+    trash: true,
+    folders: true,
+  );
 }
 
 /// Refreshes the page-trash lists.

@@ -6,14 +6,16 @@ mixin _ScaleGestures<T extends ConsumerStatefulWidget>
         ConsumerState<T>,
         DrawingCanvasHelpers<T>,
         _GestureState<T>,
-        _TextGestures<T> {
+        _PointerKindGate<T>,
+        _TextGestures<T>,
+        _EraserGestures<T> {
   // ─────────────────────────────────────────────────────────────────────────
   // SCALE GESTURE HANDLERS (Two Finger Zoom/Pan)
   // ─────────────────────────────────────────────────────────────────────────
 
   void handleScaleStart(ScaleStartDetails details) {
     // Only handle zoom/pan with 2+ fingers
-    if (details.pointerCount < 2) return;
+    if (details.pointerCount < 2 || isStylusActive) return;
 
     // Show zoom indicator
     ref.read(isZoomingProvider.notifier).state = true;
@@ -25,6 +27,9 @@ mixin _ScaleGestures<T extends ConsumerStatefulWidget>
     if (isLaserDrawing) {
       laserController.cancelStroke();
       isLaserDrawing = false;
+    }
+    if (_eraserSessionActive) {
+      handleEraserCancel();
     }
     if (isSelecting) {
       ref.read(activeSelectionToolProvider).cancelSelection();
@@ -53,7 +58,7 @@ mixin _ScaleGestures<T extends ConsumerStatefulWidget>
 
   void handleScaleUpdate(ScaleUpdateDetails details) {
     // Only handle zoom/pan with 2+ fingers
-    if (details.pointerCount < 2) return;
+    if (details.pointerCount < 2 || isStylusActive) return;
     if (!mounted) return;
 
     final transformNotifier = ref.read(canvasTransformProvider.notifier);

@@ -6,6 +6,7 @@ mixin _PointerMoveUpGestures<T extends ConsumerStatefulWidget>
         ConsumerState<T>,
         DrawingCanvasHelpers<T>,
         _GestureState<T>,
+        _PointerKindGate<T>,
         _RulerSnapping<T>,
         _StickyNoteGestures<T>,
         _TextGestures<T>,
@@ -20,6 +21,8 @@ mixin _PointerMoveUpGestures<T extends ConsumerStatefulWidget>
         _ScaleGestures<T> {
   /// Handles pointer move - adds points to active stroke, erases, updates selection, or shape.
   void handlePointerMove(PointerMoveEvent event) {
+    if (gateOther(event.pointer)) return;
+
     // Only handle with single finger
     if (pointerCount != 1) return;
 
@@ -101,6 +104,8 @@ mixin _PointerMoveUpGestures<T extends ConsumerStatefulWidget>
 
   /// Handles pointer up - finishes stroke, eraser, selection, or shape.
   void handlePointerUp(PointerUpEvent event) {
+    if (gateOther(event.pointer, end: true)) return;
+
     _longPressTimer?.cancel();
     _longPressTimer = null;
 
@@ -158,6 +163,8 @@ mixin _PointerMoveUpGestures<T extends ConsumerStatefulWidget>
 
   /// Handles pointer cancel - cancels the current operation.
   void handlePointerCancel(PointerCancelEvent event) {
+    if (gateOther(event.pointer, end: true)) return;
+
     _longPressTimer?.cancel();
     _longPressTimer = null;
 

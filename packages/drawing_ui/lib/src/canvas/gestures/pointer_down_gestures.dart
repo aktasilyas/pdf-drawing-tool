@@ -6,6 +6,7 @@ mixin _PointerDownGestures<T extends ConsumerStatefulWidget>
         ConsumerState<T>,
         DrawingCanvasHelpers<T>,
         _GestureState<T>,
+        _PointerKindGate<T>,
         _RulerSnapping<T>,
         _StickyNoteGestures<T>,
         _TextGestures<T>,
@@ -24,6 +25,22 @@ mixin _PointerDownGestures<T extends ConsumerStatefulWidget>
 
   /// Handles pointer down - starts a new stroke, eraser, selection, shape, or text.
   void handlePointerDown(PointerDownEvent event) {
+    if (gateDown(event)) return;
+
+    // Count every finger first, even ones that start no tool below
+    // (outside the page, locked layer): a second finger must always be
+    // seen as multi-touch (#487).
+    pointerCount++;
+    countPointer(event.pointer);
+
+    // Only handle with single finger. A second finger turns the gesture
+    // into navigation: an eraser session started by the first one ends
+    // without erasing anything.
+    if (pointerCount != 1) {
+      if (_eraserSessionActive) handleEraserCancel();
+      return;
+    }
+
     // ══════════════════════════════════════════════════════════════
     // Sayfa sınırı kontrolü (LIMITED mod için)
     // ══════════════════════════════════════════════════════════════
@@ -50,11 +67,6 @@ mixin _PointerDownGestures<T extends ConsumerStatefulWidget>
         (activeLayer.isLocked || !activeLayer.isVisible)) {
       return;
     }
-
-    pointerCount++;
-
-    // Only handle with single finger
-    if (pointerCount != 1) return;
 
     // Get current tool type
     final toolType = ref.read(currentToolProvider);

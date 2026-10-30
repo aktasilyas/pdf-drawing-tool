@@ -136,6 +136,13 @@ class AppLocalizationsTr extends AppLocalizations {
       'Hesabınızdan çıkış yapmak istediğinize emin misiniz?';
 
   @override
+  String get settingsDrawWithFinger => 'Parmakla çiz';
+
+  @override
+  String get settingsDrawWithFingerSubtitle =>
+      'Kapalıyken yalnızca kalem çizer; parmak kaydırır ve yakınlaştırır';
+
+  @override
   String get settingsCrashReports => 'Çökme raporlarını gönder';
 
   @override

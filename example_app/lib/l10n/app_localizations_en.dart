@@ -137,6 +137,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Are you sure you want to log out of your account?';
 
   @override
+  String get settingsDrawWithFinger => 'Draw with finger';
+
+  @override
+  String get settingsDrawWithFingerSubtitle =>
+      'When off, only the stylus draws and fingers scroll and zoom';
+
+  @override
   String get settingsCrashReports => 'Send crash reports';
 
   @override

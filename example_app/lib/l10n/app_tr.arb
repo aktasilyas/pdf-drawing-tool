@@ -40,6 +40,8 @@
   "settingsNameLabel": "Adınız",
   "settingsLogout": "Çıkış Yap",
   "settingsLogoutConfirm": "Hesabınızdan çıkış yapmak istediğinize emin misiniz?",
+  "settingsDrawWithFinger": "Parmakla çiz",
+  "settingsDrawWithFingerSubtitle": "Kapalıyken yalnızca kalem çizer; parmak kaydırır ve yakınlaştırır",
   "settingsCrashReports": "Çökme raporlarını gönder",
   "settingsCrashReportsSubtitle": "Anonim hata raporları; not içeriği gönderilmez",
   "settingsVersion": "Sürüm",
