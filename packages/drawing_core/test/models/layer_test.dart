@@ -1421,5 +1421,15 @@ void main() {
         expect(str, contains('textCount: 1'));
       });
     });
+
+    group('duplicate ids', () {
+      test('addStroke ignores an id already on the layer', () {
+        final layer = Layer(id: 'l', name: 'L', strokes: const [])
+            .addStroke(testStroke1)
+            .addStroke(testStroke1);
+        expect(layer.strokes.length, 1);
+        expect(layer.elementOrder, [testStroke1.id]);
+      });
+    });
   });
 }

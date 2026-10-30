@@ -593,7 +593,9 @@ void main() {
         expect(doc.currentPageIndex, 0);
       });
 
-      test('undo/redo of an action on a deleted page is a no-op', () {
+      test('undo/redo discard entries of a deleted page', () {
+        // Previously a no-op that still consumed the entry (dead Undo tap);
+        // now such entries are dropped and the next applicable one is used.
         var doc = manager.execute(
             AddStrokeCommand(layerIndex: 0, stroke: createTestStroke('a')),
             twoPages);
@@ -603,11 +605,37 @@ void main() {
         doc = doc.removePage(1);
         doc = manager.undo(doc)!;
         expect(doc.pages.length, 1);
-        expect(strokes(doc, 0), 1);
-        expect(manager.canRedo, true);
+        expect(strokes(doc, 0), 0, reason: 'skipped b, undid a');
+        expect(manager.undoCount, 0);
+        expect(manager.redoCount, 1);
+        expect(manager.canUndo, false);
 
         doc = manager.redo(doc)!;
         expect(strokes(doc, 0), 1);
+      });
+
+      test('discardMissingPages clears canUndo/canRedo for deleted pages', () {
+        var doc = manager.execute(
+            AddStrokeCommand(layerIndex: 0, stroke: createTestStroke('b')),
+            twoPages.setCurrentPage(1));
+        doc = doc.removePage(1);
+        manager.discardMissingPages(doc);
+        expect(manager.canUndo, false);
+        expect(manager.canRedo, false);
+      });
+
+      test('stroke, delete page, undo, restore, redo never duplicates ids', () {
+        var doc = manager.execute(
+            AddStrokeCommand(layerIndex: 0, stroke: createTestStroke('s')),
+            twoPages.setCurrentPage(1));
+        final withInk = doc.pages[1];
+        doc = doc.removePage(1);
+        expect(manager.undo(doc), doc, reason: 'nothing applicable left');
+        doc = doc.insertPageAt(1, withInk);
+        expect(manager.redo(doc), isNull);
+        final layer = doc.pages[1].layers[0];
+        expect(layer.strokes.map((s) => s.id), ['s']);
+        expect(layer.elementOrder, ['s']);
       });
 
       test('undo of a restoring command does not leak onto another page', () {

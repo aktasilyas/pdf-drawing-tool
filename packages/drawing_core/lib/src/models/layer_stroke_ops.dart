@@ -42,6 +42,7 @@ mixin _LayerStrokeOps {
   ///
   /// The original layer is not modified.
   Layer addStroke(Stroke stroke) {
+    if (elementOrder.contains(stroke.id)) return this as Layer;
     return Layer(
       id: id,
       name: name,
@@ -162,6 +163,7 @@ mixin _LayerStrokeOps {
   ///
   /// The original layer is not modified.
   Layer addShape(Shape shape) {
+    if (elementOrder.contains(shape.id)) return this as Layer;
     return Layer(
       id: id,
       name: name,

@@ -2,6 +2,7 @@ import 'package:drawing_core/drawing_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'document_provider.dart';
+import 'history_provider.dart';
 import 'page_provider.dart';
 import 'page_trash_callback_provider.dart';
 
@@ -221,6 +222,7 @@ class PageStructureActions {
       return null;
     }
     _apply(fresh.removePage(freshIndex));
+    _ref.read(historyManagerProvider.notifier).discardDeletedPages();
     return DeletedPage(
       documentId: fresh.id,
       page: page,

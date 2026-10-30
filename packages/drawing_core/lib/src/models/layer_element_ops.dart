@@ -13,6 +13,7 @@ mixin _LayerElementOps on _LayerStrokeOps {
   ///
   /// The original layer is not modified.
   Layer addText(TextElement text) {
+    if (elementOrder.contains(text.id)) return this as Layer;
     return Layer(
       id: id,
       name: name,
@@ -97,6 +98,7 @@ mixin _LayerElementOps on _LayerStrokeOps {
 
   /// Returns a new [Layer] with the given image element added.
   Layer addImage(ImageElement image) {
+    if (elementOrder.contains(image.id)) return this as Layer;
     return Layer(
       id: id,
       name: name,

@@ -143,17 +143,15 @@ class HistoryManager {
       return null;
     }
 
-    // Pop from undo stack
-    final entry = _undoStack.removeLast();
-
-    // Undo the command on the page it was recorded on
-    final target = _onPage(document, entry.pageId);
-    final newDocument = target == null ? document : entry.command.undo(target);
-
-    // Push to redo stack
-    _redoStack.add(entry);
-
-    return newDocument;
+    // Entries whose page was deleted are discarded, not moved to redo.
+    while (_undoStack.isNotEmpty) {
+      final entry = _undoStack.removeLast();
+      final target = _onPage(document, entry.pageId);
+      if (target == null) continue;
+      _redoStack.add(entry);
+      return entry.command.undo(target);
+    }
+    return document;
   }
 
   /// Redoes the most recently undone command.
@@ -161,24 +159,32 @@ class HistoryManager {
   /// Returns the document with the command re-executed, or null if
   /// there are no commands to redo.
   ///
-  /// The redone command is moved back to the undo stack.
+  /// The redone command is moved back to the undo stack. Entries whose
+  /// page was deleted are discarded.
   DrawingDocument? redo(DrawingDocument document) {
     if (!canRedo) {
       return null;
     }
 
-    // Pop from redo stack
-    final entry = _redoStack.removeLast();
+    while (_redoStack.isNotEmpty) {
+      final entry = _redoStack.removeLast();
+      final target = _onPage(document, entry.pageId);
+      if (target == null) continue;
+      _undoStack.add(entry);
+      return entry.command.execute(target);
+    }
+    return document;
+  }
 
-    // Re-execute the command on the page it was recorded on
-    final target = _onPage(document, entry.pageId);
-    final newDocument =
-        target == null ? document : entry.command.execute(target);
-
-    // Push to undo stack
-    _undoStack.add(entry);
-
-    return newDocument;
+  /// Drops every entry recorded on a page that is not in [document].
+  ///
+  /// Call after a page is deleted so [canUndo] / [canRedo] only report
+  /// steps that change something. A restored page comes back without its
+  /// old history.
+  void discardMissingPages(DrawingDocument document) {
+    bool missing(_Entry e) => _onPage(document, e.pageId) == null;
+    _undoStack.removeWhere(missing);
+    _redoStack.removeWhere(missing);
   }
 
   /// Clears all history.

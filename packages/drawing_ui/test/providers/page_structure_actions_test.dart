@@ -212,16 +212,25 @@ void main() {
       expect(container.read(documentProvider).currentPageIndex, 0);
     });
 
-    test('history of the restored page works again', () async {
+    test('restored page comes back with its ink but without old history',
+        () async {
+      // Architect decision (#582): page deletion stays outside the ink undo
+      // stack, so deleted-page entries are discarded, never replayed.
       load(3, current: 2);
-      container.read(historyManagerProvider.notifier).execute(
-            AddStrokeCommand(layerIndex: 0, stroke: stroke('s1')),
-          );
+      final history = container.read(historyManagerProvider.notifier);
+      history.execute(AddStrokeCommand(layerIndex: 0, stroke: stroke('s1')));
       final deleted = await actions().deletePage(2);
-      await actions().restorePage(deleted!);
+      expect(container.read(historyManagerProvider).canUndo, isFalse);
 
-      container.read(historyManagerProvider.notifier).undo();
-      expect(container.read(documentProvider).pages[2].strokeCount, 0);
+      history.undo();
+      await actions().restorePage(deleted!);
+      history.redo();
+
+      final restored = container.read(documentProvider).pages[2];
+      expect(restored.strokeCount, 1);
+      expect(restored.layers[0].strokes.map((s) => s.id), ['s1']);
+      expect(restored.layers[0].elementOrder, ['s1']);
+      expect(container.read(historyManagerProvider).canRedo, isFalse);
     });
   });
 
