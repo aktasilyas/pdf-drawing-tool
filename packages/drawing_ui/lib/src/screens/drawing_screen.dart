@@ -140,6 +140,8 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen>
     });
 
     listenToDocumentChanges();
+    // Keeps the thumbnails' PDF documents open while the editor is open.
+    ref.watch(pdfThumbnailDocumentsProvider);
 
     final isReaderMode = ref.watch(readerModeProvider);
     final currentPage = ref.watch(currentPageProvider);

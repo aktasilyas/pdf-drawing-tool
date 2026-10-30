@@ -10,6 +10,7 @@ import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 import 'package:drawing_ui/src/services/thumbnail_cache.dart';
 import 'package:drawing_ui/src/services/thumbnail_generator.dart';
 import 'package:drawing_ui/src/providers/pdf_path_provider.dart';
+import 'package:drawing_ui/src/providers/pdf_thumbnail_documents_provider.dart';
 import 'package:drawing_ui/src/widgets/page_thumbnail_parts.dart';
 
 /// A widget that displays a thumbnail preview of a page.
@@ -113,6 +114,10 @@ class _PageThumbnailState extends ConsumerState<PageThumbnail> {
         pdfPaths: _needsResolver(widget.page)
             ? ref.read(pdfPathResolverProvider)
             : PdfPathResolver.passthrough,
+        // PDF pages share the editor's open documents.
+        pdfDocuments: widget.page.background.type == BackgroundType.pdf
+            ? ref.read(pdfThumbnailDocumentsProvider)
+            : null,
       );
 
       if (data != null) {
