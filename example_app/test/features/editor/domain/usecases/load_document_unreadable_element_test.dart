@@ -32,8 +32,8 @@ void main() {
     );
     final content = jsonDecode(jsonEncode(doc.updateLayer(0, layer).toJson()))
         as Map<String, dynamic>;
-    final layerJson = ((content['pages'] as List).first['layers'] as List)
-        .first as Map<String, dynamic>;
+    final layerJson = ((content['pages'] as List).first['layers'] as List).first
+        as Map<String, dynamic>;
     (layerJson['shapes'] as List).add(heart);
     (layerJson['elementOrder'] as List).add('heart-1');
 
@@ -67,8 +67,8 @@ void main() {
     final stored = (await fx.documents.getDocumentContent(documentId))
         .getOrElse(() => throw StateError('read failed'))!;
 
-    final layerJson = ((stored['pages'] as List).first['layers'] as List)
-        .first as Map<String, dynamic>;
+    final layerJson = ((stored['pages'] as List).first['layers'] as List).first
+        as Map<String, dynamic>;
     expect(layerJson['shapes'], contains(heart));
     expect(layerJson['elementOrder'], contains('heart-1'));
   });

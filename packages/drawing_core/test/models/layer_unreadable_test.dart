@@ -16,8 +16,7 @@ Map<String, dynamic> _shape(String id, String type) => {
       'style': _style(),
     };
 
-Map<String, dynamic> _stroke(String? id, {String createdAt = '2026-01-01'}) =>
-    {
+Map<String, dynamic> _stroke(String? id, {String createdAt = '2026-01-01'}) => {
       if (id != null) 'id': id,
       'points': [_point(0, 0), _point(5, 5)],
       'style': _style(),
@@ -100,8 +99,8 @@ void main() {
       expect(layer.strokes.single.id, 'a');
       expect(layer.unreadableElements.single.id, 'bad');
       final out = layer.toJson();
-      expect((out['strokes'] as List).map((s) => (s as Map)['id']),
-          ['a', 'bad']);
+      expect(
+          (out['strokes'] as List).map((s) => (s as Map)['id']), ['a', 'bad']);
     });
 
     test('non-map entries are kept aside too', () {
