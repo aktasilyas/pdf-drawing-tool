@@ -75,7 +75,11 @@ class PDFExporter {
       if (missingImages.isNotEmpty) {
         DrawingLog.w('PDF export: pages $missingImages without some images');
       }
+      // Cancel tapped after the last page was drawn (a one-page export
+      // never reaches the next per-page check) or while saving (#490).
+      if (isCancelled?.call() == true) return PDFExportResult.cancelled();
       final bytes = await doc.save();
+      if (isCancelled?.call() == true) return PDFExportResult.cancelled();
       return PDFExportResult.success(
         bytes,
         missingBackgroundPages: missing,
