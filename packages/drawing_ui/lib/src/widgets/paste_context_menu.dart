@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:phosphor_icons/phosphor_icons.dart';
 import 'package:drawing_ui/src/providers/selection_clipboard_provider.dart';
 import 'package:drawing_ui/src/providers/selection_paste.dart';
+import 'package:drawing_ui/src/theme/chrome_tokens.dart';
 import 'package:drawing_ui/src/theme/drawing_shadows.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 
@@ -17,8 +18,10 @@ class PasteContextMenu extends ConsumerWidget {
     final cs = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     const menuWidth = 120.0;
-    const menuHeight = 40.0;
+    // 48dp: the whole pill is the tap target.
+    const menuHeight = 48.0;
     final screenSize = MediaQuery.of(context).size;
+    final label = context.drawingStrings.selection.paste;
 
     // Center menu horizontally on press point, clamp to screen
     final left = (state.screenPos.dx - menuWidth / 2)
@@ -35,7 +38,8 @@ class PasteContextMenu extends ConsumerWidget {
         onPointerDown: (_) {},
         child: Material(
           color: Colors.transparent,
-          child: GestureDetector(
+          child: _PasteButton(
+            label: label,
             onTap: () {
               pasteFromClipboardAt(ref, state.canvasPos, context: context);
               ref.read(pasteMenuProvider.notifier).state = null;
@@ -45,7 +49,7 @@ class PasteContextMenu extends ConsumerWidget {
               height: menuHeight,
               decoration: BoxDecoration(
                 color: cs.surface,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(ChromeRadius.lg),
                 boxShadow:
                     DrawingShadows.floating(Theme.of(context).brightness),
               ),
@@ -54,9 +58,9 @@ class PasteContextMenu extends ConsumerWidget {
                 children: [
                   PhosphorIcon(ElyanotesIcons.paste,
                       size: 18, color: cs.onSurface),
-                  const SizedBox(width: 6),
+                  const SizedBox(width: ChromeSpacing.sm),
                   Text(
-                    context.drawingStrings.selection.paste,
+                    label,
                     style: textTheme.bodyMedium?.copyWith(
                       color: cs.onSurface,
                     ),
@@ -67,6 +71,30 @@ class PasteContextMenu extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+/// The Paste pill as one labelled button for TalkBack.
+class _PasteButton extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+  final Widget child;
+
+  const _PasteButton({
+    required this.label,
+    required this.onTap,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: label,
+      excludeSemantics: true,
+      onTap: onTap,
+      child: GestureDetector(onTap: onTap, child: child),
     );
   }
 }

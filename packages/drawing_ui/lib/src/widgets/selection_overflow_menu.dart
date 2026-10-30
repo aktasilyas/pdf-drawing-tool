@@ -112,7 +112,9 @@ class _TopRowButton extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final color = enabled ? cs.onSurface : cs.onSurface.withValues(alpha: 0.38);
 
-    return GestureDetector(
+    final label = action.kind.label(context.drawingStrings);
+
+    final content = GestureDetector(
       onTap: enabled ? onTap : null,
       behavior: HitTestBehavior.opaque,
       child: Opacity(
@@ -130,7 +132,7 @@ class _TopRowButton extends StatelessWidget {
                 ),
               ),
               Text(
-                action.kind.label(context.drawingStrings),
+                label,
                 style: textTheme.labelSmall?.copyWith(color: color),
                 textAlign: TextAlign.center,
               ),
@@ -138,6 +140,13 @@ class _TopRowButton extends StatelessWidget {
           ),
         ),
       ),
+    );
+
+    return _ActionSemantics(
+      label: label,
+      enabled: enabled,
+      onTap: onTap,
+      child: content,
     );
   }
 }
@@ -158,7 +167,9 @@ class _OverflowListItem extends StatelessWidget {
         ? (enabled ? cs.error : cs.error.withValues(alpha: 0.38))
         : (enabled ? cs.onSurface : cs.onSurface.withValues(alpha: 0.38));
 
-    return GestureDetector(
+    final label = action.kind.label(context.drawingStrings);
+
+    final content = GestureDetector(
       onTap: enabled ? onTap : null,
       behavior: HitTestBehavior.opaque,
       child: Opacity(
@@ -170,7 +181,7 @@ class _OverflowListItem extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  action.kind.label(context.drawingStrings),
+                  label,
                   style: textTheme.bodyMedium
                       ?.copyWith(fontSize: 15, color: color),
                   overflow: TextOverflow.ellipsis,
@@ -181,6 +192,41 @@ class _OverflowListItem extends StatelessWidget {
           ),
         ),
       ),
+    );
+
+    return _ActionSemantics(
+      label: label,
+      enabled: enabled,
+      onTap: onTap,
+      child: content,
+    );
+  }
+}
+
+/// One TalkBack node per action: a button named by its visible label that
+/// reports when it is disabled (no tap action then).
+class _ActionSemantics extends StatelessWidget {
+  final String label;
+  final bool enabled;
+  final VoidCallback onTap;
+  final Widget child;
+
+  const _ActionSemantics({
+    required this.label,
+    required this.enabled,
+    required this.onTap,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: label,
+      excludeSemantics: true,
+      onTap: enabled ? onTap : null,
+      child: child,
     );
   }
 }
