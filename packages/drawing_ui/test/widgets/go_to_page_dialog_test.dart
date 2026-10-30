@@ -61,7 +61,7 @@ void main() {
       expect(results, [11]);
     });
 
-    for (final input in ['0', '13']) {
+    for (final input in ['0', '13', '99999999999999999999999']) {
       testWidgets('out-of-range $input shows an inline error and stays open',
           (tester) async {
         final results = <int?>[];

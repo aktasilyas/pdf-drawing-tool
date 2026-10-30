@@ -30,26 +30,21 @@ class _GoToPageDialogState extends State<GoToPageDialog> {
   bool _showError = false;
 
   @override
-  void initState() {
-    super.initState();
-    _controller.addListener(_onChanged);
-  }
-
-  @override
   void dispose() {
     _controller.dispose();
     super.dispose();
   }
 
-  void _onChanged() {
+  void _onChanged(String _) {
     // Rebuild for the Go button state; editing clears a shown error.
     setState(() => _showError = false);
   }
 
   void _submit() {
+    if (_controller.text.isEmpty) return;
     final page = int.tryParse(_controller.text);
-    if (page == null) return;
-    if (page < 1 || page > widget.pageCount) {
+    // null: digits too long for an int, also out of range.
+    if (page == null || page < 1 || page > widget.pageCount) {
       setState(() => _showError = true);
       return;
     }
@@ -75,6 +70,7 @@ class _GoToPageDialogState extends State<GoToPageDialog> {
               _showError ? strings.goToPageOutOfRange(widget.pageCount) : null,
           border: const OutlineInputBorder(),
         ),
+        onChanged: _onChanged,
         onSubmitted: (_) => _submit(),
       ),
       actions: [
