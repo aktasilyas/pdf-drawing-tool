@@ -447,6 +447,7 @@
   "editorPageBackgroundReplaced": "Sayfa arka planı değiştirildi",
   "editorPageGoToPage": "Sayfaya Git",
   "editorPageGo": "Git",
+  "editorPageGoToPageOutOfRange": "1 ile {count} arasında bir sayfa girin",
   "editorPageListPageOf": "Sayfa {page} / {count}",
   "editorPageListPageRangeOf": "Sayfa {first}-{last} / {count}",
   "editorPageListPreviousPage": "Önceki Sayfa",

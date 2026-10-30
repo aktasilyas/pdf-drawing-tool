@@ -6,6 +6,7 @@ import 'package:drawing_ui/src/l10n/l10n.dart';
 import 'package:drawing_ui/src/providers/providers.dart';
 import 'package:drawing_ui/src/theme/drawing_shadows.dart';
 import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
+import 'package:drawing_ui/src/widgets/go_to_page_dialog.dart';
 
 /// Compact floating page indicator bar shown below the canvas.
 ///
@@ -165,46 +166,10 @@ class _PageIndicatorBarState extends ConsumerState<PageIndicatorBar>
     _showBar();
   }
 
-  void _showGoToPageDialog(BuildContext context, WidgetRef ref, int pageCount) {
-    final controller = TextEditingController();
-    final strings = context.drawingStrings;
-    showDialog(
-        context: context,
-        builder: (ctx) => AlertDialog(
-              title: Text(strings.pages.goToPage),
-              content: TextField(
-                controller: controller,
-                keyboardType: TextInputType.number,
-                autofocus: true,
-                decoration: InputDecoration(
-                    hintText: '1 - $pageCount',
-                    border: const OutlineInputBorder()),
-                onSubmitted: (v) {
-                  _goTo(v, pageCount, ref, ctx);
-                },
-              ),
-              actions: [
-                TextButton(
-                    onPressed: () => Navigator.pop(ctx),
-                    child: Text(strings.panels.cancel,
-                        style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(
-                            color:
-                                Theme.of(ctx).colorScheme.onSurfaceVariant))),
-                FilledButton(
-                    onPressed: () {
-                      _goTo(controller.text, pageCount, ref, ctx);
-                    },
-                    child: Text(strings.pages.go)),
-              ],
-            ));
-  }
-
-  void _goTo(String value, int pageCount, WidgetRef ref, BuildContext ctx) {
-    final page = int.tryParse(value);
-    if (page != null && page >= 1 && page <= pageCount) {
-      Navigator.pop(ctx);
-      _navigateTo(page - 1, ref);
-    }
+  Future<void> _showGoToPageDialog(
+      BuildContext context, WidgetRef ref, int pageCount) async {
+    final index = await pickGoToPageIndex(context, pageCount: pageCount);
+    if (index != null && mounted) _navigateTo(index, ref);
   }
 }
 

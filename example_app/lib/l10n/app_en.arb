@@ -691,6 +691,14 @@
   "editorPageBackgroundReplaced": "Page background replaced",
   "editorPageGoToPage": "Go to page",
   "editorPageGo": "Go",
+  "editorPageGoToPageOutOfRange": "Enter a page between 1 and {count}",
+  "@editorPageGoToPageOutOfRange": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "editorPageListPageOf": "Page {page} of {count}",
   "@editorPageListPageOf": {
     "placeholders": {

@@ -44,6 +44,9 @@ abstract class PageStrings {
   String get goToPage;
   String get go;
 
+  /// Inline error when the go-to page number is outside 1…[count].
+  String goToPageOutOfRange(int count);
+
   /// Title of the page range sheet for a PDF with [count] pages.
   String pdfRangeTitle(int count);
   String pdfRangeLimitHint(int max);
@@ -91,6 +94,7 @@ abstract class PageStrings {
         'backgroundReplaced': backgroundReplaced,
         'goToPage': goToPage,
         'go': go,
+        'goToPageOutOfRange': goToPageOutOfRange(12),
         'pdfRangeTitle': pdfRangeTitle(640),
         'pdfRangeLimitHint': pdfRangeLimitHint(500),
         'pdfRangeImportFirst': pdfRangeImportFirst(500),
@@ -205,6 +209,10 @@ class PageStringsTr extends PageStrings {
 
   @override
   String get go => 'Git';
+
+  @override
+  String goToPageOutOfRange(int count) =>
+      '1 ile $count arasında bir sayfa girin';
 
   @override
   String pdfRangeTitle(int count) => 'Bu PDF $count sayfa';

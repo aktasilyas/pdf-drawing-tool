@@ -43,4 +43,5 @@ export 'ruler_overlay.dart';
 export 'paste_context_menu.dart';
 export 'sticky_note_context_menu.dart';
 export 'zoom_control_bar.dart';
+export 'go_to_page_dialog.dart';
 export 'pdf_page_range_sheet.dart';
