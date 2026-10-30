@@ -266,8 +266,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen>
                   externalLeftSidebar: widget.externalLeftSidebar,
                   isExternalLeftSidebarOpen: widget.isExternalLeftSidebarOpen,
                   externalLeftSidebarWidth: widget.externalLeftSidebarWidth,
-                  onExternalLeftSidebarClose:
-                      widget.onExternalLeftSidebarClose,
+                  onExternalLeftSidebarClose: widget.onExternalLeftSidebarClose,
                   showPageSidebar: showSidebar,
                   screenWidth: screenWidth,
                   onClosePageSidebar: closeSidebar,
