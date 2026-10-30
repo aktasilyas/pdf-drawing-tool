@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:flutter/material.dart' hide Page;
 import 'package:drawing_ui/src/services/page_rasterizer.dart';
+import 'package:drawing_ui/src/services/pdf_document_pool.dart';
 
 /// Generates thumbnail images for pages.
 ///
@@ -30,13 +31,19 @@ class ThumbnailGenerator {
   ///
   /// The thumbnail is scaled proportionally to fit within [width] x [height],
   /// maintaining the aspect ratio of the page.
+  ///
+  /// A PDF background is decoded at the thumbnail's size. Pass the editor's
+  /// [pdfDocuments] so thumbnails of one PDF share its open document;
+  /// without it the document is opened and closed for this thumbnail.
   static Future<Uint8List?> generate(
     Page page, {
     double width = defaultWidth,
     double height = defaultHeight,
     Color backgroundColor = Colors.white,
     PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
+    PdfDocumentPool? pdfDocuments,
   }) async {
+    final ownPool = pdfDocuments == null ? PdfDocumentPool(maxOpen: 1) : null;
     try {
       return await PageRasterizer.renderPng(
         page,
@@ -44,10 +51,13 @@ class ThumbnailGenerator {
         height: height.toInt(),
         backgroundColor: backgroundColor,
         pdfPaths: pdfPaths,
+        pdfDocuments: pdfDocuments ?? ownPool,
       );
     } catch (_) {
       // Return null on any error (e.g., invalid dimensions, rendering issues)
       return null;
+    } finally {
+      await ownPool?.close();
     }
   }
 }

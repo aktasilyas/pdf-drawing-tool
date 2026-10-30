@@ -1,13 +1,14 @@
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:drawing_core/drawing_core.dart';
 import 'package:flutter/material.dart' hide Page;
-import 'package:pdfx/pdfx.dart' as pdfx;
 
 import 'package:drawing_ui/src/canvas/image_painter.dart';
 import 'package:drawing_ui/src/canvas/page_background_raster.dart';
+import 'package:drawing_ui/src/services/pdf_document_pool.dart';
 import 'package:drawing_ui/src/services/pdf_raster_layer_renderer.dart';
 import 'package:drawing_ui/src/utils/drawing_log.dart';
 
@@ -32,8 +33,10 @@ abstract final class PageRasterizer {
   /// [backgroundColor]. The caller disposes the returned image.
   ///
   /// [pdfRenderScale] is the resolution of the decoded PDF background relative
-  /// to PDF points. A PDF background that cannot be loaded is logged and left
-  /// out. Throws if rendering fails.
+  /// to PDF points. With [pdfDocuments] (thumbnails) the PDF background is
+  /// instead decoded at the output size of the page, through documents kept
+  /// open by the pool. A PDF background that cannot be loaded is logged and
+  /// left out. Throws if rendering fails.
   static Future<ui.Image> render(
     Page page, {
     required int width,
@@ -42,6 +45,7 @@ abstract final class PageRasterizer {
     Color backgroundColor = Colors.white,
     PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
     double pdfRenderScale = 0.5,
+    PdfDocumentPool? pdfDocuments,
   }) async {
     final result = await _render(
       page,
@@ -51,6 +55,7 @@ abstract final class PageRasterizer {
       backgroundColor: backgroundColor,
       pdfPaths: pdfPaths,
       pdfRenderScale: pdfRenderScale,
+      pdfDocuments: pdfDocuments,
     );
     return result.image;
   }
@@ -63,6 +68,7 @@ abstract final class PageRasterizer {
     required Color backgroundColor,
     required PdfPathResolver pdfPaths,
     required double pdfRenderScale,
+    required PdfDocumentPool? pdfDocuments,
   }) async {
     final pageSize = Size(page.size.width, page.size.height);
     final area = region ?? Offset.zero & pageSize;
@@ -70,12 +76,22 @@ abstract final class PageRasterizer {
       paths: pdfPaths,
       byteBudget: ImageCacheManager.unboundedBudget,
     );
+    // Fit the region and center it.
+    final scaleX = width / area.width;
+    final scaleY = height / area.height;
+    final scale = scaleX < scaleY ? scaleX : scaleY;
     ui.Image? pdfImage;
     ui.Image? coverImage;
     try {
       // Async work first, so the recording below is synchronous.
       if (page.background.type == BackgroundType.pdf) {
-        pdfImage = await _loadPdfBackground(page, pdfPaths, pdfRenderScale);
+        pdfImage = await _loadPdfBackground(
+          page,
+          pdfPaths,
+          pdfRenderScale,
+          pdfDocuments,
+          outputSize: pageSize * scale,
+        );
       }
       coverImage = await PageBackgroundRaster.prepare(page.background);
       final visibleLayers = [
@@ -94,10 +110,6 @@ abstract final class PageRasterizer {
         Paint()..color = backgroundColor,
       );
 
-      // Fit the region and center it.
-      final scaleX = width / area.width;
-      final scaleY = height / area.height;
-      final scale = scaleX < scaleY ? scaleX : scaleY;
       canvas.save();
       canvas.translate(
         (width - area.width * scale) / 2,
@@ -165,6 +177,7 @@ abstract final class PageRasterizer {
     Color backgroundColor = Colors.white,
     PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
     double pdfRenderScale = 0.5,
+    PdfDocumentPool? pdfDocuments,
   }) async {
     final result = await renderPngWithStatus(
       page,
@@ -174,6 +187,7 @@ abstract final class PageRasterizer {
       backgroundColor: backgroundColor,
       pdfPaths: pdfPaths,
       pdfRenderScale: pdfRenderScale,
+      pdfDocuments: pdfDocuments,
     );
     return result.bytes;
   }
@@ -188,6 +202,7 @@ abstract final class PageRasterizer {
     Color backgroundColor = Colors.white,
     PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
     double pdfRenderScale = 0.5,
+    PdfDocumentPool? pdfDocuments,
   }) async {
     final result = await _render(
       page,
@@ -197,6 +212,7 @@ abstract final class PageRasterizer {
       backgroundColor: backgroundColor,
       pdfPaths: pdfPaths,
       pdfRenderScale: pdfRenderScale,
+      pdfDocuments: pdfDocuments,
     );
     final image = result.image;
     try {
@@ -219,21 +235,32 @@ abstract final class PageRasterizer {
   /// Decodes the PDF page behind [page], from in-memory `pdfData` or the
   /// lazy-loaded `pdfFilePath`, or the image file behind `imageFilePath`.
   /// Null, and logged, when missing or unreadable.
+  ///
+  /// With [pdfDocuments] the file is rendered at [outputSize] (the page's
+  /// size in the output image) through the pool's open document; otherwise
+  /// it is opened for this render at [renderScale] x its PDF point size.
   static Future<ui.Image?> _loadPdfBackground(
     Page page,
     PdfPathResolver pdfPaths,
     double renderScale,
-  ) async {
+    PdfDocumentPool? pdfDocuments, {
+    required Size outputSize,
+  }) async {
     final background = page.background;
     if (background.pdfPageIndex == null) return null;
     try {
       var bytes = background.pdfData;
       if (bytes == null && background.pdfFilePath != null) {
-        bytes = await _renderPdfPageFromFile(
-          pdfPaths.resolve(background.pdfFilePath!),
-          background.pdfPageIndex!,
-          renderScale,
-        );
+        final path = pdfPaths.resolve(background.pdfFilePath!);
+        bytes = pdfDocuments == null
+            ? await renderPdfPageAtScale(
+                path, background.pdfPageIndex!, renderScale)
+            : await pdfDocuments.renderPage(
+                path,
+                background.pdfPageIndex!,
+                width: thumbnailPdfPixels(outputSize.width),
+                height: thumbnailPdfPixels(outputSize.height),
+              );
       }
       if (bytes == null && background.imageFilePath != null) {
         final file = File(pdfPaths.resolve(background.imageFilePath!));
@@ -259,33 +286,11 @@ abstract final class PageRasterizer {
     }
   }
 
-  /// Renders a single PDF page from file path, returning PNG bytes.
-  static Future<Uint8List?> _renderPdfPageFromFile(
-    String filePath,
-    int pageIndex,
-    double renderScale,
-  ) async {
-    final file = File(filePath);
-    if (!await file.exists()) return null;
+  /// Longest side, in pixels, of a PDF background decoded for a thumbnail.
+  static const int maxThumbnailPdfSide = 2048;
 
-    pdfx.PdfDocument? document;
-    pdfx.PdfPage? pdfPage;
-    try {
-      document = await pdfx.PdfDocument.openFile(filePath);
-      pdfPage = await document.getPage(pageIndex);
-      final pageImage = await pdfPage.render(
-        width: pdfPage.width * renderScale,
-        height: pdfPage.height * renderScale,
-        format: pdfx.PdfPageImageFormat.png,
-      );
-      return pageImage?.bytes;
-    } finally {
-      try {
-        await pdfPage?.close();
-      } catch (_) {}
-      try {
-        await document?.close();
-      } catch (_) {}
-    }
-  }
+  /// Pixel length of a thumbnail's PDF background for [logical] output
+  /// pixels: rounded up, at least 1 and at most [maxThumbnailPdfSide].
+  static int thumbnailPdfPixels(double logical) =>
+      math.min(maxThumbnailPdfSide, math.max(1, logical.ceil()));
 }
