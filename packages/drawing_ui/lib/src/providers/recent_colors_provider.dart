@@ -20,10 +20,7 @@ class RecentColorsNotifier extends StateNotifier<List<Color>> {
     try {
       final stored = prefs.getStringList(_recentColorsKey);
       if (stored == null) return [];
-      return stored
-          .map((s) => Color(int.parse(s)))
-          .take(maxColors)
-          .toList();
+      return stored.map((s) => Color(int.parse(s))).take(maxColors).toList();
     } catch (_) {
       return [];
     }
