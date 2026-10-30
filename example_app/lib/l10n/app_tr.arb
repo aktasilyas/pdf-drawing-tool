@@ -434,6 +434,7 @@
   "editorPageScrollVertical": "Dikey",
   "editorPagePageCopied": "Sayfa kopyalandı",
   "editorPagePagePasted": "Sayfa yapıştırıldı",
+  "editorPagePasteFilesMissing": "Yapıştırılamadı: kopyalanan dosyalar artık yok",
   "editorPagePageDuplicated": "Sayfa çoğaltıldı",
   "editorPageLastPageCannotDelete": "Son sayfa silinemez",
   "editorPagePageDeleted": "Sayfa silindi",

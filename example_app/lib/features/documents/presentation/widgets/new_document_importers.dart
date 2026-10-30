@@ -10,7 +10,8 @@ import 'package:drawing_ui/drawing_ui.dart'
         discardImportedImagePage,
         importImagePage,
         maxImagePageEdge,
-        pdfPathResolverProvider;
+        pdfPathResolverProvider,
+        withPickedFile;
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:example_app/core/theme/index.dart';
@@ -46,13 +47,17 @@ Future<void> importPdf(BuildContext context) async {
     return;
   }
 
-  if (!context.mounted) return;
-  await importPdfFile(
-    context,
-    path: filePath,
-    name: file.name,
-    size: file.size,
-  );
+  // The picker may have copied the file into the app cache: drop that copy
+  // once the import has stored its own (#469).
+  await withPickedFile(filePath, () async {
+    if (!context.mounted) return;
+    await importPdfFile(
+      context,
+      path: filePath,
+      name: file.name,
+      size: file.size,
+    );
+  });
 }
 
 /// Resim içe aktarma işlemini yönetir
@@ -78,8 +83,10 @@ Future<void> importImage(BuildContext context) async {
     return;
   }
 
-  if (!context.mounted) return;
-  await importImageFile(context, path: filePath, name: file.name);
+  await withPickedFile(filePath, () async {
+    if (!context.mounted) return;
+    await importImageFile(context, path: filePath, name: file.name);
+  });
 }
 
 /// Imports the image at [path] as a new one-page notebook named after [name]

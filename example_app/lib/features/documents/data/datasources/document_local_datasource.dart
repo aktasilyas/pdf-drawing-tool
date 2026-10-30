@@ -65,9 +65,10 @@ class DocumentLocalDatasourceImpl implements DocumentLocalDatasource {
     this._db, {
     DocumentContentCodec codec = const DocumentContentCodec(),
     PdfPathResolver pdfPaths = PdfPathResolver.passthrough,
+    ClipboardFileRefs? clipboard,
   })  : _codec = codec,
         _pdfPaths = pdfPaths,
-        _cleanup = ManagedFileCleanup(_db, codec, pdfPaths);
+        _cleanup = ManagedFileCleanup(_db, codec, pdfPaths, clipboard);
 
   /// Root level (folderId null) or a single folder.
   SimpleSelectStatement<$DocumentsTable, DocumentRow> _folderQuery(

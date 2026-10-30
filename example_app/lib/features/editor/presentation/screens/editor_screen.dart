@@ -7,7 +7,6 @@ import 'package:example_app/core/utils/logger.dart';
 import 'package:go_router/go_router.dart';
 import 'package:drawing_core/drawing_core.dart';
 import 'package:drawing_ui/drawing_ui.dart';
-import 'package:example_app/features/documents/presentation/providers/documents_provider.dart';
 import 'package:example_app/features/ai/presentation/providers/ai_providers.dart';
 import 'package:example_app/features/editor/presentation/providers/editor_provider.dart';
 import 'package:example_app/features/editor/presentation/providers/editor_paper_format.dart';
@@ -179,13 +178,8 @@ class EditorScreen extends ConsumerWidget {
       builder: (_) => const MoveToTrashDialog(),
     );
     if (confirmed != true) return;
-    // Write the latest edits first so a restored notebook keeps them, and so
-    // no autosave can fire (and resurrect the document) after the trash.
-    await ref.read(autoSaveProvider.notifier).flush();
-    final result = await ref
-        .read(documentsControllerProvider.notifier)
-        .moveToTrash(documentId);
-    if (!result) return;
+    // Saves first; a failed save keeps the editor open with its Retry banner.
+    if (!await moveOpenDocumentToTrash(ref.read, documentId)) return;
     if (context.mounted) context.go('/documents');
     closeEditorSession(ref.read, ref.invalidate);
     if (ref.read(featureFlagsProvider).aiChat) {

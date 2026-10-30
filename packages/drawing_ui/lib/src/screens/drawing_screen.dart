@@ -80,6 +80,7 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen>
   late final ThumbnailCache _thumbnailCache =
       widget.thumbnailCache ?? ThumbnailCache(maxSize: 20);
   Offset _penBoxPosition = const Offset(12, 12);
+  VoidCallback? _unregisterDrawerBack;
 
   @override
   void didUpdateWidget(DrawingScreen oldWidget) {
@@ -94,9 +95,32 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen>
 
   @override
   void dispose() {
+    _unregisterDrawerBack?.call();
     _panelController.dispose();
     _thumbnailCache.clear();
     super.dispose();
+  }
+
+  /// Lets system Back close the phone drawer before the notebook (#482).
+  void _syncDrawerBack(bool drawerOpen) {
+    if (!drawerOpen) {
+      _unregisterDrawerBack?.call();
+      _unregisterDrawerBack = null;
+    } else if (_unregisterDrawerBack == null) {
+      _unregisterDrawerBack =
+          DismissibleOverlays.instance.register(_closeOpenDrawer);
+    }
+  }
+
+  void _closeOpenDrawer() {
+    _unregisterDrawerBack = null;
+    if (!mounted) return;
+    if (widget.externalLeftSidebar != null &&
+        widget.isExternalLeftSidebarOpen) {
+      widget.onExternalLeftSidebarClose?.call();
+    } else {
+      closeSidebar();
+    }
   }
 
   @override
@@ -139,6 +163,12 @@ class _DrawingScreenState extends ConsumerState<DrawingScreen>
     final showSidebar = isSidebarOpen && ref.watch(pageCountProvider) > 1;
     // Phone drawer: min(280, 85% of the screen).
     final drawerWidth = (screenWidth * 0.85).clamp(0.0, 280.0);
+    _syncDrawerBack(
+      isCompactMode &&
+          (showSidebar ||
+              (widget.externalLeftSidebar != null &&
+                  widget.isExternalLeftSidebarOpen)),
+    );
 
     final scaffoldBgColor = canvasMode.isInfinite
         ? Color(currentPage.background.color)

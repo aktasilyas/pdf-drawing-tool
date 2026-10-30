@@ -671,6 +671,7 @@
   "editorPageScrollVertical": "Vertical",
   "editorPagePageCopied": "Page copied",
   "editorPagePagePasted": "Page pasted",
+  "editorPagePasteFilesMissing": "Can't paste: the copied files no longer exist",
   "editorPagePageDuplicated": "Page duplicated",
   "editorPageLastPageCannotDelete": "The last page can't be deleted",
   "editorPagePageDeleted": "Page deleted",

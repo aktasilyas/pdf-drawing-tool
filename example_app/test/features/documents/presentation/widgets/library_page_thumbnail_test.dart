@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:drawing_core/drawing_core.dart' as core;
 import 'package:drawing_ui/drawing_ui.dart' show CoverGeometry;
 
 import 'package:example_app/core/theme/index.dart';
@@ -64,5 +65,20 @@ void main() {
     expect(page.center.dy, closeTo(board.center.dy, 0.01));
     expect(page.center.dx, closeTo(board.center.dx, 0.01));
     expect(page.height, greaterThan(page.width));
+  });
+
+  test('imported landscape PDF (297x210 mm) gets a tile rect wider than tall',
+      () {
+    const box = Size(151, 201.6);
+    final landscape = _doc(isPortrait: false).copyWith(
+      documentType: core.DocumentType.pdf,
+      paperWidthMm: 297,
+      paperHeightMm: 210,
+    );
+    final page = LibraryPageThumbnail.pageRect(landscape, box);
+    expect(page.width, greaterThan(page.height));
+    expect(page.width / page.height, closeTo(297 / 210, 0.01));
+    expect(page.left, greaterThanOrEqualTo(board.left - 0.01));
+    expect(page.right, lessThanOrEqualTo(board.right + 0.01));
   });
 }

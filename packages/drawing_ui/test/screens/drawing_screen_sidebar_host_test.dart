@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../golden/helpers/sidebar_fixture.dart';
+
 Future<void> _pump(WidgetTester tester, Size size) async {
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1.0;
@@ -47,5 +49,34 @@ void main() {
       tester.widget<AnimatedPositioned>(positioned).duration,
       ChromeDurations.normal,
     );
+  });
+
+  testWidgets('phone: system Back closes the open page drawer (#482)',
+      (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+    addTearDown(DismissibleOverlays.instance.reset);
+    final container = ProviderContainer();
+    addTearDown(container.dispose);
+    container
+        .read(pageManagerProvider.notifier)
+        .initializeFromDocument(sidebarPages(3));
+    container.read(sidebarOpenProvider.notifier).state = true;
+    await tester.pumpWidget(UncontrolledProviderScope(
+      container: container,
+      child: const MaterialApp(home: DrawingScreen()),
+    ));
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(tester.getTopLeft(find.byType(PageSidebar)).dx,
+        greaterThanOrEqualTo(0));
+
+    expect(DismissibleOverlays.instance.dismissTopmost(), isTrue);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(container.read(sidebarOpenProvider), isFalse);
+    expect(tester.getTopLeft(find.byType(PageSidebar)).dx, lessThan(0));
+    expect(DismissibleOverlays.instance.isEmpty, isTrue);
   });
 }

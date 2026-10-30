@@ -36,3 +36,25 @@ Map<String, dynamic> buildImportedDocumentContent({
     'updatedAt': updatedAt.toIso8601String(),
   };
 }
+
+/// Paper metadata of an imported document, taken from its first page.
+typedef ImportedPaper = ({bool isPortrait, double widthMm, double heightMm});
+
+const double _mmPerPoint = 25.4 / 72;
+
+/// Orientation and size (points → mm) of the first imported page; A4 portrait
+/// when [pages] carry no usable size. Width/height are stored short/long, the
+/// way `LibraryPageThumbnail.pageRect` reads them, with orientation in
+/// `isPortrait`.
+ImportedPaper importedPaperFromPages(List<Map<String, dynamic>> pages) {
+  const fallback = (isPortrait: true, widthMm: 210.0, heightMm: 297.0);
+  if (pages.isEmpty) return fallback;
+  final size = pages.first['size'];
+  if (size is! Map) return fallback;
+  final w = size['width'];
+  final h = size['height'];
+  if (w is! num || h is! num || w <= 0 || h <= 0) return fallback;
+  final shortMm = (w < h ? w : h) * _mmPerPoint;
+  final longMm = (w < h ? h : w) * _mmPerPoint;
+  return (isPortrait: w <= h, widthMm: shortMm, heightMm: longMm);
+}

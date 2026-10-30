@@ -69,6 +69,19 @@ Future<bool> saveBeforeLeavingEditor(ProviderReader read) async {
   return read(saveFailureProvider) == null;
 }
 
+/// Moves the open notebook [documentId] to the trash from the editor (#480).
+/// Its edits are saved first, so a restored notebook keeps them and no
+/// autosave can fire (and resurrect it) after the trash. Returns false
+/// without trashing when that save failed (the editor stays open and its
+/// banner offers Retry), and false when the trash itself failed.
+Future<bool> moveOpenDocumentToTrash(
+  ProviderReader read,
+  String documentId,
+) async {
+  if (!await saveBeforeLeavingEditor(read)) return false;
+  return read(documentsControllerProvider.notifier).moveToTrash(documentId);
+}
+
 /// Drops the undo history of the document that is being closed and the
 /// session's "Locate PDF…" handler (it holds the editor's context).
 void endEditorSession(ProviderReader read) {
