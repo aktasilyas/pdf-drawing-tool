@@ -87,8 +87,7 @@ mixin _TextGestures<T extends ConsumerStatefulWidget>
 
   /// Ends editing whose content is empty or whitespace only (see
   /// [TextToolActions.endEmptied]).
-  void handleTextEmptied() =>
-      ref.read(textToolActionsProvider).endEmptied();
+  void handleTextEmptied() => ref.read(textToolActionsProvider).endEmptied();
 
   /// Ends text editing when the current page changes, so the text is
   /// committed to the page it was started on and the overlay closes (#462).
