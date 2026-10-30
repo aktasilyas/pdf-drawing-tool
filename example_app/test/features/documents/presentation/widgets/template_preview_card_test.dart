@@ -75,8 +75,8 @@ void main() {
     final picks = <bool>[];
     await tester.pumpWidget(_host(coverSelected: true, onPick: picks.add));
 
-    tester.semantics.tap(find.bySemanticsLabel('Sheet'));
-    tester.semantics.tap(find.bySemanticsLabel('Front'));
+    tester.semantics.tap(find.semantics.byLabel('Sheet'));
+    tester.semantics.tap(find.semantics.byLabel('Front'));
     expect(picks, [false, true]);
     handle.dispose();
   });

@@ -74,7 +74,7 @@ void main() {
         ),
       );
 
-      tester.semantics.tap(node);
+      tester.semantics.tap(find.semantics.byLabel('EN sem-card'));
       expect(taps, 1);
       handle.dispose();
     });
@@ -157,9 +157,9 @@ void main() {
         onCategorySelected: (c) => picked = c,
       )));
 
-      tester.semantics.tap(find.bySemanticsLabel('EN productivity'));
+      tester.semantics.tap(find.semantics.byLabel('EN productivity'));
       expect(picked, TemplateCategory.productivity);
-      tester.semantics.tap(find.bySemanticsLabel('EN all'));
+      tester.semantics.tap(find.semantics.byLabel('EN all'));
       expect(picked, isNull);
       handle.dispose();
     });
