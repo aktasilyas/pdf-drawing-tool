@@ -25,6 +25,7 @@ export 'package:phosphor_icons/phosphor_icons.dart';
 
 // Screens
 export 'src/screens/drawing_screen.dart';
+export 'src/widgets/dismissible_overlays.dart';
 export 'src/screens/drawing_screen_panels.dart';
 export 'src/screens/drawing_screen_layout.dart';
 

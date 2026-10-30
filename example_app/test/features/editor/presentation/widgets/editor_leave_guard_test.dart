@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:dartz/dartz.dart';
 import 'package:drawing_core/drawing_core.dart';
+import 'package:drawing_ui/drawing_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -19,6 +20,8 @@ void main() {
   setUpAll(() {
     registerFallbackValue(DrawingDocument.emptyMultiPage('fallback'));
   });
+
+  tearDown(DismissibleOverlays.instance.reset);
 
   setUp(() {
     save = _MockSave();
@@ -103,5 +106,32 @@ void main() {
 
     done.complete();
     await tester.pump();
+  });
+
+  group('system back (#482)', () {
+    testWidgets('closes an open overlay and does not leave', (tester) async {
+      await pumpGuard(tester);
+      var closed = 0;
+      DismissibleOverlays.instance.register(() => closed++);
+
+      await tester.binding.handlePopRoute();
+      await tester.pump();
+
+      expect(closed, 1);
+      expect(leaveCalls, 0);
+    });
+
+    testWidgets('leaves once nothing is open', (tester) async {
+      await pumpGuard(tester);
+      DismissibleOverlays.instance.register(() {});
+
+      await tester.binding.handlePopRoute();
+      await tester.pump();
+      expect(leaveCalls, 0);
+
+      await tester.binding.handlePopRoute();
+      await tester.pump();
+      expect(leaveCalls, 1);
+    });
   });
 }
