@@ -49,6 +49,7 @@ extension LibraryActionL10n on LibraryAction {
         LibraryAction.saveFolderOrder => l.libraryErrorSaveFolderOrder,
         LibraryAction.moveFolder => l.libraryErrorMoveFolder,
         LibraryAction.deleteFolder => l.libraryErrorDeleteFolder,
+        LibraryAction.exportDocument => l.libraryErrorExportDocument,
       };
 }
 

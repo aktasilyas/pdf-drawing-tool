@@ -103,6 +103,7 @@ void main() {
         'Çoğalt',
         'Taşı',
         'Favorilere Ekle',
+        'PDF olarak dışa aktar',
         'Çöpe Taşı',
       ]) {
         expect(find.text(label), findsOneWidget);
@@ -160,6 +161,11 @@ void main() {
   });
 
   group('trash document menu', () {
+    testWidgets('does not offer PDF export', (tester) async {
+      await openDocMenu(tester, isTrash: true);
+      expect(find.text('PDF olarak dışa aktar'), findsNothing);
+    });
+
     testWidgets('restore calls the action and confirms', (tester) async {
       await openDocMenu(tester, isTrash: true);
       await tester.tap(find.text('Kurtar'));
