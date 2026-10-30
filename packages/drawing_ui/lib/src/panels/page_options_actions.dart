@@ -171,7 +171,7 @@ mixin PageOptionsActions<T extends ConsumerStatefulWidget> on ConsumerState<T> {
             onPressed: () {
               Navigator.pop(ctx);
               final page = doc.pages[pageIndex];
-              if (page.layers.every((l) => l.isEmpty)) return;
+              if (ClearPageCommand.isNoop(page.layers)) return;
               historyManager.execute(
                 ClearPageCommand(),
                 pageId: page.id,

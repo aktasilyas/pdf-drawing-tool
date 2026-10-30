@@ -7,6 +7,12 @@ import 'package:drawing_core/src/internal.dart';
 class ClearPageCommand implements DrawingCommand {
   ClearPageCommand();
 
+  /// Whether clearing [layers] would change nothing (every layer is empty).
+  ///
+  /// Callers should skip executing the command then, so no history entry
+  /// is created for an already-empty page.
+  static bool isNoop(List<Layer> layers) => layers.every((l) => l.isEmpty);
+
   List<Layer>? _originalLayers;
 
   @override
