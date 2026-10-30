@@ -111,7 +111,8 @@ void main() {
     await tester.pump();
     expect(cache.get(ThumbnailGenerator.getCacheKey(page)), isNotNull);
 
-    page = page.copyWith(updatedAt: page.updatedAt.add(const Duration(seconds: 1)));
+    page = page.copyWith(
+        updatedAt: page.updatedAt.add(const Duration(seconds: 1)));
     await pumpPage();
     await tester.pump();
     expect(find.byType(PdfThumbnailPlaceholder), findsOneWidget);
