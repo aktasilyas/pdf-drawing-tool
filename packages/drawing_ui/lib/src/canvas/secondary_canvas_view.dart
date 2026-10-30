@@ -1,18 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drawing_core/drawing_core.dart' as core;
-import 'package:phosphor_icons/phosphor_icons.dart';
 
 import 'package:drawing_ui/src/canvas/canvas_color_scheme.dart';
 import 'package:drawing_ui/src/canvas/editor_memory_pressure_observer.dart';
 import 'package:drawing_ui/src/canvas/image_painter.dart';
+import 'package:drawing_ui/src/canvas/last_page_placeholder.dart';
 import 'package:drawing_ui/src/canvas/secondary_canvas_layers.dart';
-import 'package:drawing_ui/src/l10n/drawing_strings_scope.dart';
 import 'package:drawing_ui/src/providers/canvas_transform_provider.dart';
 import 'package:drawing_ui/src/providers/page_provider.dart';
 import 'package:drawing_ui/src/providers/pdf_path_provider.dart';
 import 'package:drawing_ui/src/rendering/rendering.dart';
-import 'package:drawing_ui/src/theme/elyanotes_icons.dart';
 
 /// Interactive mirror of the primary canvas for dual-page mode.
 ///
@@ -209,7 +207,7 @@ class _SecondaryCanvasViewState extends ConsumerState<SecondaryCanvasView> {
       final bg = mode.isInfinite
           ? Colors.transparent
           : Color(mode.surroundingAreaColor);
-      return _LastPagePlaceholder(surroundingColor: bg);
+      return LastPagePlaceholder(surroundingColor: bg);
     }
 
     final page = widget.page!;
@@ -275,34 +273,6 @@ class _SecondaryCanvasViewState extends ConsumerState<SecondaryCanvasView> {
           ],
         );
       },
-    );
-  }
-}
-
-/// Placeholder shown when there is no next page in dual-page mode.
-class _LastPagePlaceholder extends StatelessWidget {
-  const _LastPagePlaceholder({required this.surroundingColor});
-  final Color surroundingColor;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-    return Container(
-      color: surroundingColor,
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            PhosphorIcon(ElyanotesIcons.page,
-                size: 40, color: cs.outlineVariant),
-            const SizedBox(height: 8),
-            Text(context.drawingStrings.pageList.lastPage,
-                style: textTheme.bodySmall
-                    ?.copyWith(fontSize: 13, color: cs.onSurfaceVariant)),
-          ],
-        ),
-      ),
     );
   }
 }
