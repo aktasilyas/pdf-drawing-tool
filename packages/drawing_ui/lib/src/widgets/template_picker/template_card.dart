@@ -23,8 +23,9 @@ class TemplateCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
+    final name = context.drawingStrings.templates.templateName(template);
 
-    return GestureDetector(
+    final card = GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
@@ -86,7 +87,7 @@ class TemplateCard extends StatelessWidget {
                       const BorderRadius.vertical(bottom: Radius.circular(7)),
                 ),
                 child: Text(
-                  context.drawingStrings.templates.templateName(template),
+                  name,
                   style: theme.textTheme.labelSmall?.copyWith(
                     fontSize: 10,
                     color: cs.onSurface,
@@ -116,6 +117,15 @@ class TemplateCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+
+    // One node per card: the caption is not read a second time.
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: name,
+      excludeSemantics: true,
+      child: card,
     );
   }
 }

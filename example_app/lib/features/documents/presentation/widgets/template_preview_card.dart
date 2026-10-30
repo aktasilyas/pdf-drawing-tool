@@ -28,8 +28,9 @@ class TemplatePreviewCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final outlineColor = context.palette.border;
     final textSecondary = context.palette.textMuted;
+    final accent = context.palette.accent;
 
-    return GestureDetector(
+    final card = GestureDetector(
       onTap: onTap,
       child: Column(
         children: [
@@ -39,7 +40,7 @@ class TemplatePreviewCard extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(AppRadius.sm),
               border: Border.all(
-                color: isSelected ? AppColors.primary : outlineColor,
+                color: isSelected ? accent : outlineColor,
                 width: isSelected ? 2 : 1,
                 strokeAlign: BorderSide.strokeAlignOutside,
               ),
@@ -53,12 +54,21 @@ class TemplatePreviewCard extends StatelessWidget {
           Text(
             label,
             style: AppTypography.caption.copyWith(
-              color: isSelected ? AppColors.primary : textSecondary,
+              color: isSelected ? accent : textSecondary,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
             ),
           ),
         ],
       ),
+    );
+
+    // Read as one selectable button; the preview inside is decorative.
+    return Semantics(
+      button: true,
+      selected: isSelected,
+      label: label,
+      excludeSemantics: true,
+      child: card,
     );
   }
 }
