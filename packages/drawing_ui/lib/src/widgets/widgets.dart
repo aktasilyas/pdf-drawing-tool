@@ -23,6 +23,7 @@ export 'page_thumbnail.dart';
 export 'panel_arrow.dart';
 export 'panel_overlay.dart';
 export 'pen_icon_widget.dart';
+export 'dismissible_overlays.dart';
 export 'popover_panel.dart';
 export 'reorderable_tool_list.dart';
 export 'selection_actions.dart';

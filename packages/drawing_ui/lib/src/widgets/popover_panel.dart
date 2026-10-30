@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:drawing_ui/src/theme/theme.dart';
+import 'package:drawing_ui/src/widgets/dismissible_overlays.dart';
 import 'package:drawing_ui/src/widgets/popover_layout.dart';
 
 /// Controller for showing/hiding popover panels
@@ -16,6 +17,7 @@ import 'package:drawing_ui/src/widgets/popover_layout.dart';
 class PopoverController {
   OverlayEntry? _overlayEntry;
   GlobalKey<_PopoverOverlayState>? _overlayKey;
+  VoidCallback? _unregisterBack;
 
   /// Entries playing their exit animation, removed once it ends.
   final Set<OverlayEntry> _exiting = {};
@@ -54,12 +56,18 @@ class PopoverController {
       ),
     );
     overlay.insert(_overlayEntry!);
+    _unregisterBack = DismissibleOverlays.instance.register(() {
+      hide();
+      onDismiss?.call();
+    });
   }
 
   /// Hide the popover, playing its exit animation first.
   void hide() {
     final entry = _overlayEntry;
     final state = _overlayKey?.currentState;
+    _unregisterBack?.call();
+    _unregisterBack = null;
     _overlayEntry = null;
     _overlayKey = null;
     if (entry == null) return;
@@ -83,6 +91,8 @@ class PopoverController {
   }
 
   void _removeCurrent() {
+    _unregisterBack?.call();
+    _unregisterBack = null;
     _overlayEntry?.remove();
     _overlayEntry = null;
     _overlayKey = null;

@@ -1,3 +1,4 @@
+import 'package:drawing_ui/drawing_ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -7,8 +8,10 @@ import 'package:example_app/features/editor/presentation/providers/editor_provid
 ///
 /// - App paused, hidden, inactive or detached: flushes any pending autosave
 ///   right away instead of waiting for the debounce timer.
-/// - System back: routed through [onLeave] (the same save-then-leave path as
-///   the in-app Home button) instead of popping the route directly.
+/// - System back: first closes the topmost open popover or phone drawer
+///   ([DismissibleOverlays], #482); with none open it is routed through
+///   [onLeave] (the same save-then-leave path as the in-app Home button)
+///   instead of popping the route directly.
 class EditorLeaveGuard extends ConsumerStatefulWidget {
   const EditorLeaveGuard({
     super.key,
@@ -61,7 +64,9 @@ class _EditorLeaveGuardState extends ConsumerState<EditorLeaveGuard> {
     return PopScope<Object?>(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) _leave();
+        if (didPop) return;
+        if (DismissibleOverlays.instance.dismissTopmost()) return;
+        _leave();
       },
       child: widget.child,
     );
