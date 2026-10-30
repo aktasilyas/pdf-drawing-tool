@@ -56,7 +56,10 @@ class PopoverController {
       ),
     );
     overlay.insert(_overlayEntry!);
-    _unregisterBack = DismissibleOverlays.instance.register(hide);
+    _unregisterBack = DismissibleOverlays.instance.register(() {
+      hide();
+      onDismiss?.call();
+    });
   }
 
   /// Hide the popover, playing its exit animation first.
